@@ -86,7 +86,7 @@ export default function AttendanceDailyList() {
         size="small"
         value={searchName}
         onChange={(e) => setSearchName(e.target.value)}
-        sx={{ width: 300, mb: 1 }}
+        sx={{ mb: 1 }}
       />
       <TableContainer>
         <Table size="small">
