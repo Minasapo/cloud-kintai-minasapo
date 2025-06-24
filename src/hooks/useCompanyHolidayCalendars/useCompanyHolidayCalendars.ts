@@ -44,7 +44,9 @@ export default function useCompanyHolidayCalendars() {
         });
         return res;
       })
-      .catch(setError);
+      .catch((e) => {
+        throw e;
+      });
 
   const updateCompanyHolidayCalendar = async (
     input: UpdateCompanyHolidayCalendarInput
