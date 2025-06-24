@@ -14,7 +14,7 @@ import updateCompanyHolidayCalendarData from "./updateCompanyHolidayCalendarData
 const LOCAL_STORAGE_KEY = "companyHolidayCalendars";
 
 export default function useCompanyHolidayCalendars() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [companyHolidayCalendars, setCompanyHolidayCalendars] = useState<
     CompanyHolidayCalendar[]
@@ -25,6 +25,7 @@ export default function useCompanyHolidayCalendars() {
     if (cached) {
       setCompanyHolidayCalendars(JSON.parse(cached));
     }
+    setLoading(false);
   }, []);
 
   const saveToLocalStorage = (data: CompanyHolidayCalendar[]) => {
@@ -43,9 +44,7 @@ export default function useCompanyHolidayCalendars() {
         });
         return res;
       })
-      .catch((e) => {
-        throw e;
-      });
+      .catch(setError);
 
   const updateCompanyHolidayCalendar = async (
     input: UpdateCompanyHolidayCalendarInput
