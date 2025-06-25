@@ -39,7 +39,7 @@ test-results/
 .flaskenv*
 !.env.project
 
-#amplify-do-not-edit-begin
+# amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
 amplify/logs
@@ -59,4 +59,7 @@ amplify-gradle-config.json
 amplifytools.xcconfig
 .secret-*
 **.sample
-#amplify-do-not-edit-end
+# amplify-do-not-edit-end
+
+playwright-logs/
+playwright-report/
