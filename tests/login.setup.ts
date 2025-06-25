@@ -8,7 +8,9 @@
  * @module login.setup
  */
 
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+
+import { test } from "./console-log-fixture";
 
 const username = process.env.PLAYWRIGHT_LOGIN_EMAIL || "";
 const password = process.env.PLAYWRIGHT_LOGIN_PASSWORD || "";
