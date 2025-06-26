@@ -20,6 +20,14 @@ export const test = base.extend({
       logStream.write(`[${msg.type()}] ${msg.text()}\n`);
     });
     await use(page);
+    if (testInfo.status !== testInfo.expectedStatus) {
+      logStream.write(
+        `\n[TEST FAILED] ${testInfo.error?.message || "Unknown error"}\n`
+      );
+      if (testInfo.error?.stack) {
+        logStream.write(`${testInfo.error.stack}\n`);
+      }
+    }
     logStream.end();
   },
 });
