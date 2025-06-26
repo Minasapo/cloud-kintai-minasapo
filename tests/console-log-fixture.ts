@@ -20,6 +20,7 @@ export const test = base.extend({
       logStream.write(`[${msg.type()}] ${msg.text()}\n`);
     });
     await use(page);
+    // テスト失敗時に追加のエラー情報をログに記録する
     if (testInfo.status !== testInfo.expectedStatus) {
       logStream.write(
         `\n[TEST FAILED] ${testInfo.error?.message || "Unknown error"}\n`
