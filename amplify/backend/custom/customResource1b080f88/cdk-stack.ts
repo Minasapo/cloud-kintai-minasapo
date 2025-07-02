@@ -10,7 +10,7 @@ export class cdkStack extends cdk.Stack {
     scope: Construct,
     id: string,
     props?: cdk.StackProps,
-    amplifyResourceProps?: AmplifyHelpers.AmplifyResourceProps
+    amplifyResourceProps?: AmplifyHelpers.AmplifyResourceProps,
   ) {
     super(scope, id, props);
     /* Do not remove - Amplify CLI automatically injects the current deployment environment in this input parameter */
@@ -26,7 +26,7 @@ export class cdkStack extends cdk.Stack {
       this,
       "keyAdmin",
       // `amplify-backup-${AmplifyHelpers.getProjectInfo().envName}`
-      "amplify-cloud-kintai-user"
+      "amplify-cloud-kintai-user",
     );
 
     const root = new iam.AccountRootPrincipal();
@@ -37,7 +37,7 @@ export class cdkStack extends cdk.Stack {
       assumedBy: new iam.AccountPrincipal(cdk.Stack.of(this).account),
     });
     backupAdmin.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AWSBackupFullAccess")
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AWSBackupFullAccess"),
     );
 
     const { envName } = AmplifyHelpers.getProjectInfo();
@@ -94,7 +94,7 @@ export class cdkStack extends cdk.Stack {
             }),
           ],
         }),
-      }
+      },
     );
 
     const plan = new backup.BackupPlan(this, "amplify-appsync-dyanmodb-plan", {
