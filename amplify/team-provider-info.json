@@ -1,1 +1,49 @@
-{}
+{
+  "main": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-garakufrontend-main-4e854-authRole",
+      "UnauthRoleArn": "arn:aws:iam::345283705227:role/amplify-garakufrontend-main-4e854-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::345283705227:role/amplify-garakufrontend-main-4e854-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-garakufrontend-main-4e854-deployment",
+      "UnauthRoleName": "amplify-garakufrontend-main-4e854-unauthRole",
+      "StackName": "amplify-garakufrontend-main-4e854",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:345283705227:stack/amplify-garakufrontend-main-4e854/193a3640-5d69-11f0-90d7-06ac47e4fb6f",
+      "AmplifyAppId": "d1pzpjy35y3f0g"
+    },
+    "categories": {
+      "auth": {
+        "garakufrontendbfa3456a": {}
+      },
+      "function": {
+        "AdminQueriesf7a7d2e5": {
+          "deploymentBucketName": "amplify-garakufrontend-main-4e854-deployment",
+          "s3Key": "amplify-builds/AdminQueriesf7a7d2e5-61734a67314a6c387948-build.zip"
+        },
+        "garakuSendMail": {
+          "region": "ap-northeast-1",
+          "emailFrom": "noreply@cloudkintai.minasapo.jp",
+          "deploymentBucketName": "amplify-garakufrontend-main-4e854-deployment",
+          "s3Key": "amplify-builds/garakuSendMail-566f4165677a59584a54-build.zip"
+        },
+        "garakufrontendbfa3456a": {}
+      },
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d1pzpjy35y3f0g",
+          "type": "cicd"
+        }
+      },
+      "api": {
+        "AdminQueries": {},
+        "garakufrontend": {}
+      },
+      "custom": {
+        "customResource1b080f88": {}
+      },
+      "storage": {
+        "s381050667": {}
+      }
+    }
+  }
+}
