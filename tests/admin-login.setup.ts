@@ -7,7 +7,9 @@
  * @module admin-login.setup
  */
 
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+
+import { test } from "./console-log-fixture";
 
 const adminUsername = process.env.PLAYWRIGHT_ADMIN_EMAIL || "";
 const adminPassword = process.env.PLAYWRIGHT_ADMIN_PASSWORD || "";

@@ -7,7 +7,9 @@
  * @module lazy-user-login.setup
  */
 
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+
+import { test } from "./console-log-fixture";
 
 const lazyUserEmail = process.env.PLAYWRIGHT_LAZY_USER_EMAIL || "";
 const lazyUserPassword = process.env.PLAYWRIGHT_LAZY_USER_PASSWORD || "";

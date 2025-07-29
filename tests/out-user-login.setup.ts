@@ -7,7 +7,9 @@
  * @module out-user-login.setup
  */
 
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+
+import { test } from "./console-log-fixture";
 
 const outUserEmail = process.env.PLAYWRIGHT_OUT_USER_EMAIL || "";
 const outUserPassword = process.env.PLAYWRIGHT_OUT_USER_PASSWORD || "";

@@ -44,3 +44,15 @@ jobs:
         with:
           name: test-results
           path: test-results
+      - name: Upload playwright-logs artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-logs
+          path: playwright-logs
+      - name: Upload playwright-report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report

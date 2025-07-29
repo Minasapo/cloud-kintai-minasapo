@@ -1,5 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
 import dayjs from "dayjs";
+
+import { test } from "./console-log-fixture";
 
 const basePath = process.env.VITE_BASE_PATH || "http://localhost:5173";
 
