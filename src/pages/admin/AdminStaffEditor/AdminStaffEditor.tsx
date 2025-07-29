@@ -25,7 +25,10 @@ import {
   UseFormRegister,
   UseFormSetValue,
 } from "react-hook-form";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+
+import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
+import { AuthContext } from "@/context/AuthContext";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import Title from "../../../components/Title/Title";
@@ -35,13 +38,11 @@ import removeUserFromGroup from "../../../hooks/common/removeUserFromGroup";
 import updateCognitoUser from "../../../hooks/common/updateCognitoUser";
 import { Staff } from "../../../hooks/useStaffs/common";
 import useStaffs, { StaffRole } from "../../../hooks/useStaffs/useStaffs";
-import { AuthContext } from "@/context/AuthContext";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "../../../lib/reducers/snackbarReducer";
 import { ROLE_OPTIONS } from "../AdminStaff/CreateStaffDialog";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 
 type Inputs = {
   staffId?: Staff["sub"];

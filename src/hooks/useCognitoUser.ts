@@ -65,7 +65,7 @@ export default function useCognitoUser() {
       givenName: user.attributes.given_name,
       familyName: user.attributes.family_name,
       mailAddress: user.attributes.email,
-      owner: !!user.attributes["custom:owner"],
+      owner: user.attributes["custom:owner"] === "1" ? true : false,
       roles: (() => {
         if (userGroups.length === 0) {
           return [StaffRole.GUEST];
