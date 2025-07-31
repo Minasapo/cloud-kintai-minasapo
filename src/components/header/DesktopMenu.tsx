@@ -28,7 +28,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
   const menuList = [
     { label: "勤怠打刻", href: "/register" },
     { label: "勤怠一覧", href: "/attendance/list" },
-    { label: "ドキュメント", href: "/docs" },
+    // { label: "ドキュメント", href: "/docs" },
   ];
 
   const adminMenuList = [
