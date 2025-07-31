@@ -35,8 +35,11 @@ export default function useHolidayCalendar() {
     const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (cached) {
       setHolidayCalendars(JSON.parse(cached));
+      setLoading(false);
+    } else {
+      // ローカルストレージにデータがない場合はバックエンドから取得
+      fetchAllHolidayCalendars();
     }
-    setLoading(false);
   }, []);
 
   /**
