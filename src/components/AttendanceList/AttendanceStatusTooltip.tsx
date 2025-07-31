@@ -27,6 +27,18 @@ export function AttendanceStatusTooltip({
     return <DefaultTooltip />;
   }
 
+  // systemCommentsがある場合の判定
+  const hasSystemComment =
+    Array.isArray(attendance.systemComments) &&
+    attendance.systemComments.length > 0;
+  if (hasSystemComment) {
+    return (
+      <Tooltip title="システムコメントがあります">
+        <ErrorIcon color="error" />
+      </Tooltip>
+    );
+  }
+
   const attendanceState = new AttendanceState(
     staff,
     attendance,

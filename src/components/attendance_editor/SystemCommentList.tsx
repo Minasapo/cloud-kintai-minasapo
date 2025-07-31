@@ -1,3 +1,11 @@
+/**
+ * システムコメント一覧を表示するコンポーネント。
+ * 未確認コメント数のバッジ表示、コメントの確認状態管理、一覧表示ダイアログを提供します。
+ *
+ * @remarks
+ * - MaterialUIを使用しています。
+ * - コメントの確認状態はAttendanceEditContextで管理されます。
+ */
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import DoneIcon from "@mui/icons-material/Done";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
@@ -23,6 +31,11 @@ import { useContext, useState } from "react";
 
 import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
 
+/**
+ * システムコメント一覧ダイアログを表示するReactコンポーネント。
+ *
+ * @returns JSX.Element
+ */
 export function SystemCommentList() {
   const { systemCommentFields, systemCommentReplace } = useContext(
     AttendanceEditContext

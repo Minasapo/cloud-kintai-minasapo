@@ -13,11 +13,6 @@ import AdminStaffAttendanceList from "./pages/admin/AdminStaffAttendanceList/Adm
 import AdminStaffEditor from "./pages/admin/AdminStaffEditor/AdminStaffEditor";
 import JobTerm from "./pages/admin/JobTerm/JobTerm";
 import AttendanceEdit from "./pages/AttendanceEdit/AttendanceEdit";
-import Document from "./pages/Document/Document";
-import DocumentEditor from "./pages/Document/DocumentEditor/DocumentEditor";
-import DocumentPoster from "./pages/Document/DocumentPoster";
-import DocumentView from "./pages/Document/DocumentView/DocumentView";
-import ListDocument from "./pages/Document/ListDocument/ListDocument";
 import List from "./pages/List";
 import Login from "./pages/Login/Login";
 import OfficeLayout from "./pages/office/OfficeLayout";
@@ -61,33 +56,33 @@ const router = createBrowserRouter([
         path: "login",
         element: <Login />,
       },
-      {
-        path: "docs",
-        element: <Document />,
-        children: [
-          {
-            index: true,
-            element: <ListDocument />,
-          },
-          {
-            path: "post",
-            element: <DocumentPoster />,
-          },
-          {
-            path: ":documentId",
-            children: [
-              {
-                index: true,
-                element: <DocumentView />,
-              },
-              {
-                path: "edit",
-                element: <DocumentEditor />,
-              },
-            ],
-          },
-        ],
-      },
+      // {
+      //   path: "docs",
+      //   element: <Document />,
+      //   children: [
+      //     {
+      //       index: true,
+      //       element: <ListDocument />,
+      //     },
+      //     {
+      //       path: "post",
+      //       element: <DocumentPoster />,
+      //     },
+      //     {
+      //       path: ":documentId",
+      //       children: [
+      //         {
+      //           index: true,
+      //           element: <DocumentView />,
+      //         },
+      //         {
+      //           path: "edit",
+      //           element: <DocumentEditor />,
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // },
       {
         path: "profile",
         element: <Profile />,
