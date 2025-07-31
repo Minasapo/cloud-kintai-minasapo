@@ -12,10 +12,17 @@ import {
 import { useState } from "react";
 
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
+
 import useDocuments from "../../../hooks/useDocuments/useDocuments";
 import { FilterGrid } from "./FilterGrid";
 import { SearchGrid } from "./SearchGrid";
 
+/**
+ * ドキュメント一覧ページコンポーネント。
+ * 検索・フィルター・新規作成・ドキュメントリスト表示を行う。
+ *
+ * @deprecated ドキュメントサイトが新設されたため、廃止を検討しています
+ */
 export default function ListDocument() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("すべて");
@@ -100,6 +107,10 @@ export default function ListDocument() {
   );
 }
 
+/**
+ * 新規ドキュメント作成用のグリッドコンポーネント。
+ * プラスアイコンを表示し、クリックで新規作成ページへ遷移する。
+ */
 function AddDocumentGrid() {
   return (
     <Grid item xs={12} md={4}>
