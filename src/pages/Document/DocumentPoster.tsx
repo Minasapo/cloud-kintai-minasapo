@@ -39,6 +39,12 @@ const defaultValues: Inputs = {
   targetRole: [],
 };
 
+/**
+ * ドキュメントの投稿ページコンポーネント。
+ * ドキュメントのタイトル、内容、対象者を入力して投稿する。
+ *
+ * @deprecated ドキュメントサイトが新設されたため、廃止を検討しています
+ */
 export default function DocumentPoster() {
   const dispatch = useAppDispatchV2();
   const navigate = useNavigate();

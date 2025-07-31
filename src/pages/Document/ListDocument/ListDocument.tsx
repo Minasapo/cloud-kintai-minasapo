@@ -20,6 +20,8 @@ import { SearchGrid } from "./SearchGrid";
 /**
  * ドキュメント一覧ページコンポーネント。
  * 検索・フィルター・新規作成・ドキュメントリスト表示を行う。
+ *
+ * @deprecated ドキュメントサイトが新設されたため、廃止を検討しています
  */
 export default function ListDocument() {
   const [searchKeyword, setSearchKeyword] = useState("");

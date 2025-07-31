@@ -62,6 +62,9 @@ async function updateImageUrl(content: string) {
     .catch(() => content);
 }
 
+/**
+ * @deprecated ドキュメントサイトが新設されたため、廃止を検討しています
+ */
 export default function DocumentEditor() {
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();
