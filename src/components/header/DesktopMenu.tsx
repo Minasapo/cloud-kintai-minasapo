@@ -1,10 +1,18 @@
+/**
+ * デスクトップ用のメニューコンポーネント。
+ * ユーザーのロールやメール認証状態に応じて表示するメニュー項目を切り替えます。
+ *
+ * @param pathName 現在のパス名
+ * @returns メニューのReact要素
+ */
+
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { Box, Stack } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 
-import { StaffRole } from "../../hooks/useStaffs/useStaffs";
-import { AuthContext } from "../../context/AuthContext";
 import { AppConfigContext } from "../../context/AppConfigContext";
+import { AuthContext } from "../../context/AuthContext";
+import { StaffRole } from "../../hooks/useStaffs/useStaffs";
 import Link from "../link/Link";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
