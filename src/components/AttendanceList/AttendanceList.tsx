@@ -1,3 +1,8 @@
+/**
+ * スタッフ向けの勤怠一覧ページのコンポーネント。
+ * ユーザーの勤怠情報を取得し、デスクトップ・モバイル両方のリストで表示する。
+ * MaterialUIを使用し、日付選択や合計勤務時間の表示も行う。
+ */
 import {
   Box,
   Breadcrumbs,
@@ -6,9 +11,21 @@ import {
   styled,
   Typography,
 } from "@mui/material";
+/**
+ * MaterialUIのDatePickerコンポーネント。
+ */
 import { DatePicker } from "@mui/x-date-pickers";
+/**
+ * AmplifyのLogger。デバッグ・エラー出力に使用。
+ */
 import { Logger } from "aws-amplify";
+/**
+ * 日付操作ライブラリ。日付のフォーマットや計算に使用。
+ */
 import dayjs from "dayjs";
+/**
+ * ReactのContext, Hooks。
+ */
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -28,6 +45,9 @@ import Title from "../Title/Title";
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";
 
+/**
+ * 勤怠一覧ページの説明文用Typographyコンポーネント。
+ */
 const DescriptionTypography = styled(Typography)(({ theme }) => ({
   padding: "0px 40px",
   [theme.breakpoints.down("md")]: {
@@ -35,24 +55,53 @@ const DescriptionTypography = styled(Typography)(({ theme }) => ({
   },
 }));
 
+/**
+ * 勤怠一覧テーブルのメインコンポーネント。
+ * ユーザーの勤怠データ取得、合計勤務時間計算、リスト表示を行う。
+ * @returns JSX.Element
+ */
 export default function AttendanceTable() {
+  /**
+   * 認証済みユーザー情報。
+   */
   const { cognitoUser } = useContext(AuthContext);
+  /**
+   * 祝日カレンダー情報。
+   */
   const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
+  /**
+   * Reduxのdispatch関数。
+   */
   const dispatch = useAppDispatchV2();
+  /**
+   * ページ遷移用navigate関数。
+   */
   const navigate = useNavigate();
+  /**
+   * 勤怠情報取得用カスタムフック。
+   */
   const {
     attendances,
     getAttendances,
     loading: attendanceLoading,
   } = useAttendances();
 
+  /**
+   * スタッフ情報の状態。
+   */
   const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
 
+  /**
+   * ログ出力用Logger。
+   */
   const logger = new Logger(
     "AttendanceList",
     import.meta.env.DEV ? "DEBUG" : "ERROR"
   );
 
+  /**
+   * ユーザー情報取得・勤怠情報取得の副作用。
+   */
   useEffect(() => {
     if (!cognitoUser) return;
 
@@ -71,6 +120,9 @@ export default function AttendanceTable() {
       });
   }, [cognitoUser]);
 
+  /**
+   * 勤怠データから合計勤務時間（休憩時間を除く）を計算する。
+   */
   const totalTime = useMemo(() => {
     const totalWorkTime = attendances.reduce((acc, attendance) => {
       if (!attendance.startTime || !attendance.endTime) return acc;

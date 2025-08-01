@@ -6,12 +6,13 @@ import {
   Paper,
   Stack,
   TextField,
-  Typography,
 } from "@mui/material";
 import { Storage } from "aws-amplify";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
+import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import Title from "../../../components/Title/Title";
@@ -24,7 +25,6 @@ import {
 } from "../../../lib/reducers/snackbarReducer";
 import { defaultValues, DocumentInputs } from "./common";
 import ContentBlockNoteEditor from "./ContentBlockNoteEditor";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 
 async function updateImageUrl(content: string) {
   // eslint-disable-next-line max-len
@@ -62,6 +62,9 @@ async function updateImageUrl(content: string) {
     .catch(() => content);
 }
 
+/**
+ * @deprecated ドキュメントサイトが新設されたため、廃止を検討しています
+ */
 export default function DocumentEditor() {
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();

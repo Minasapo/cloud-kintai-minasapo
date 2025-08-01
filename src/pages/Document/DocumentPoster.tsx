@@ -8,15 +8,15 @@ import {
   Box,
   Button,
   Container,
-  Link,
   Paper,
   Stack,
   TextField,
-  Typography,
 } from "@mui/material";
 import { Storage } from "aws-amplify";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+
+import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 
 import { useAppDispatchV2 } from "../../app/hooks";
 import Title from "../../components/Title/Title";
@@ -26,7 +26,6 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "../../lib/reducers/snackbarReducer";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 
 type Inputs = {
   title: string | null | undefined;
@@ -40,6 +39,12 @@ const defaultValues: Inputs = {
   targetRole: [],
 };
 
+/**
+ * ドキュメントの投稿ページコンポーネント。
+ * ドキュメントのタイトル、内容、対象者を入力して投稿する。
+ *
+ * @deprecated ドキュメントサイトが新設されたため、廃止を検討しています
+ */
 export default function DocumentPoster() {
   const dispatch = useAppDispatchV2();
   const navigate = useNavigate();

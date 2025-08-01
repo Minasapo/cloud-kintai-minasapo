@@ -14,8 +14,8 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Attendance, CompanyHolidayCalendar, Staff } from "@/API";
-import { AppContext } from "@/context/AppContext";
 import { useAppDispatchV2 } from "@/app/hooks";
+import { AppContext } from "@/context/AppContext";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
@@ -55,6 +55,20 @@ function AttendanceTotalStatus({
       companyHolidayCalendars
     ).get()
   );
+
+  const hasSystemComment = attendances.some(
+    (attendance) =>
+      Array.isArray(attendance.systemComments) &&
+      attendance.systemComments.length > 0
+  );
+
+  if (hasSystemComment) {
+    return (
+      <Tooltip title="システムコメントがあります">
+        <ErrorIcon color="error" />
+      </Tooltip>
+    );
+  }
 
   const validDataCount = judgedStatus.filter(
     (status) => status !== AttendanceStatus.None
