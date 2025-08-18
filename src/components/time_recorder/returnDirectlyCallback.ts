@@ -23,13 +23,15 @@ export function returnDirectlyCallback(
     endTime: string,
     returnDirectlyFlag?: ReturnDirectlyFlag
   ) => Promise<Attendance>,
-  logger: Logger
+  logger: Logger,
+  // optional explicit ISO timestamp to use for work end (allows AppConfig-driven times)
+  endTimeIso?: string
 ) {
   if (!cognitoUser) {
     return;
   }
 
-  const now = new AttendanceDateTime().setWorkEnd().toISOString();
+  const now = endTimeIso ?? new AttendanceDateTime().setWorkEnd().toISOString();
 
   clockOut(cognitoUser.id, today, now, ReturnDirectlyFlag.YES)
     .then((res) => {

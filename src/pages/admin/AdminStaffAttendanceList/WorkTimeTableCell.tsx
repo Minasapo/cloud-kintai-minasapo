@@ -1,19 +1,16 @@
 import { TableCell } from "@mui/material";
 import dayjs from "dayjs";
+import { useContext } from "react";
 
 import { Attendance } from "@/API";
-import { useContext, useEffect, useState } from "react";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 export function WorkTimeTableCell({ attendance }: { attendance: Attendance }) {
   const { getStartTime, getEndTime } = useContext(AppConfigContext);
-  const [defaultStartTime, setDefaultStartTime] = useState<string>("9:00");
-  const [defaultEndTime, setDefaultEndTime] = useState<string>("18:00");
 
-  useEffect(() => {
-    setDefaultStartTime(getStartTime()?.format("H:mm") || "9:00");
-    setDefaultEndTime(getEndTime()?.format("H:mm") || "18:00");
-  }, [getStartTime, getEndTime]);
+  // AppConfigから常に現在の勤務開始/終了時刻を取得して表示に使う
+  const defaultStartTime = getStartTime()?.format("H:mm") ?? "9:00";
+  const defaultEndTime = getEndTime()?.format("H:mm") ?? "18:00";
 
   const { paidHolidayFlag, startTime, endTime } = attendance;
 
