@@ -41,9 +41,14 @@ export default function HourlyPaidHolidayTableRow({
     }
 
     if (hours != null) {
-      // hours が string など数値以外で来る可能性を考慮して Number に変換してから固定小数表示
+      // hours が string など数値以外で来る可能性を考慮して Number に変換してから HH:mm 表記に変換
       const h = Number(hours);
-      return `${isNaN(h) ? String(hours) : h.toFixed(1)} 時間`;
+      if (isNaN(h)) return String(hours);
+      // 小数時間を分に変換（四捨五入）して HH:mm に整形
+      const totalMinutes = Math.round(h * 60);
+      const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+      const mm = String(totalMinutes % 60).padStart(2, "0");
+      return `${hh}:${mm}`;
     }
 
     return "";
