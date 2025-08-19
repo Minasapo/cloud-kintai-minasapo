@@ -2,6 +2,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Button, Stack } from "@mui/material";
 import { useContext } from "react";
 
+import HourlyPaidHolidayTimeItemMobile from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItemMobile";
 import PaidHolidayFlagInputMobile from "@/components/attendance_editor/PaidHolidayFlagInputMobile";
 
 import Title from "../../../components/Title/Title";
@@ -92,11 +93,12 @@ export function MobileEditor() {
                 時間単位休暇の時間帯を追加してください。
               </Stack>
             )}
-            {hourlyPaidHolidayTimeFields.map((item) => (
-              <div key={item.id}>
-                {/* 時間単位休暇の入力欄コンポーネントをここに追加 */}
-                {/* 例: <HourlyPaidHolidayTimeItemMobile ... /> */}
-              </div>
+            {hourlyPaidHolidayTimeFields.map((hourlyPaidHolidayTime, index) => (
+              <HourlyPaidHolidayTimeItemMobile
+                key={hourlyPaidHolidayTime.id}
+                time={hourlyPaidHolidayTime}
+                index={index}
+              />
             ))}
             <Stack>
               <Button
