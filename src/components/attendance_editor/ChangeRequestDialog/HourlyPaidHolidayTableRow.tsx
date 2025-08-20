@@ -20,7 +20,10 @@ export default function HourlyPaidHolidayTableRow({
     if (variant === "after") {
       if (hours == null && !hasTimes) return "変更なし";
     } else {
-      if ((hours == null || hours === 0) && !hasTimes) return "(登録なし)";
+      // hours が null の場合はこれまで通り登録なし表示にする
+      if (hours == null && !hasTimes) return "(登録なし)";
+      // hours が 0 の場合（00:00 表示相当）は "なし" を表示する
+      if (hours === 0 && !hasTimes) return "なし";
     }
 
     if (hasTimes) {
@@ -40,7 +43,7 @@ export default function HourlyPaidHolidayTableRow({
       return list.join(", ");
     }
 
-    if (hours != null) {
+    if (hours != null && hours !== 0) {
       // hours が string など数値以外で来る可能性を考慮して Number に変換してから HH:mm 表記に変換
       const h = Number(hours);
       if (isNaN(h)) return String(hours);
@@ -49,6 +52,8 @@ export default function HourlyPaidHolidayTableRow({
       const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
       const mm = String(totalMinutes % 60).padStart(2, "0");
       return `${hh}:${mm}`;
+    } else {
+      return "なし";
     }
 
     return "";
