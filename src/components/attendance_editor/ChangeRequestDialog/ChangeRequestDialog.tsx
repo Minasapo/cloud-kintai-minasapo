@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
@@ -43,6 +44,7 @@ export default function ChangeRequestDialog({
   staff: StaffType | null | undefined;
 }) {
   const dispatch = useAppDispatchV2();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [changeRequest, setChangeRequest] =
     useState<AttendanceChangeRequest | null>(null);
@@ -160,6 +162,8 @@ export default function ChangeRequestDialog({
                   comment
                 );
                 dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
+                // navigate to staff attendance list
+                navigate(`/admin/staff/${attendance.staffId}/attendance`);
                 handleClose();
               })
               .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E04006)));
