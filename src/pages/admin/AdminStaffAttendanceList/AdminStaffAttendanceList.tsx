@@ -2,6 +2,8 @@ import "./styles.scss";
 
 import EditIcon from "@mui/icons-material/Edit";
 import {
+  Alert,
+  AlertTitle,
   Badge,
   Box,
   Container,
@@ -42,7 +44,6 @@ import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
 import useAttendances from "../../../hooks/useAttendances/useAttendances";
 import { setSnackbarError } from "../../../lib/reducers/snackbarReducer";
-import { ApprovalPendingMessage } from "./ApprovalPendingMessage";
 import { AttendanceGraph } from "./AttendanceGraph";
 import { CreatedAtTableCell } from "./CreatedAtTableCell";
 import { RestTimeTableCell } from "./RestTimeTableCell";
@@ -186,8 +187,6 @@ export default function AdminStaffAttendanceList() {
             1
           )}h)`}
         </Typography>
-        {/* ...existing code... */}
-        <ApprovalPendingMessage attendances={attendances} />
         <Box>
           <DatePicker
             value={dayjs()}
@@ -215,6 +214,12 @@ export default function AdminStaffAttendanceList() {
             <Typography variant="h6" sx={{ mb: 1 }}>
               承認待ち一覧 ({pendingAttendances.length})
             </Typography>
+            <Alert severity="warning">
+              <AlertTitle sx={{ fontWeight: "bold" }}>
+                確認してください
+              </AlertTitle>
+              未承認の変更リクエストがあります
+            </Alert>
             <TableContainer>
               <Table size="small">
                 <TableHead>
