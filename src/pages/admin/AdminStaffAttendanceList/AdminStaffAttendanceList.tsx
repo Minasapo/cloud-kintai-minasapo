@@ -141,6 +141,12 @@ export default function AdminStaffAttendanceList() {
     return new ChangeRequest(attendance.changeRequests).getUnapprovedCount();
   }, []);
 
+  const pendingAttendances = useMemo(() => {
+    return attendances.filter(
+      (a) => new ChangeRequest(a.changeRequests).getUnapprovedCount() > 0
+    );
+  }, [attendances]);
+
   const getTableRowClassNameMemo = useCallback(
     (
       attendance: Attendance,
@@ -180,6 +186,7 @@ export default function AdminStaffAttendanceList() {
             1
           )}h)`}
         </Typography>
+        {/* ...existing code... */}
         <ApprovalPendingMessage attendances={attendances} />
         <Box>
           <DatePicker
@@ -203,7 +210,109 @@ export default function AdminStaffAttendanceList() {
         <Box>
           <AttendanceGraph attendances={attendances} />
         </Box>
+        {pendingAttendances.length > 0 && (
+          <Box sx={{ pb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              承認待ち一覧 ({pendingAttendances.length})
+            </Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell />
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      勤務時間
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      休憩時間(直近)
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      作成日時
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      更新日時
+                    </TableCell>
+                    <TableCell />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {pendingAttendances.map((attendance, index) => (
+                    <TableRow
+                      key={`pending-${index}`}
+                      className={getTableRowClassNameMemo(
+                        attendance,
+                        holidayCalendars,
+                        companyHolidayCalendars
+                      )}
+                    >
+                      <TableCell>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <AttendanceStatusTooltip
+                            staff={staff}
+                            attendance={attendance}
+                            holidayCalendars={holidayCalendars}
+                            companyHolidayCalendars={companyHolidayCalendars}
+                          />
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              handleEdit(
+                                dayjs(attendance.workDate).format(
+                                  AttendanceDate.QueryParamFormat
+                                )
+                              )
+                            }
+                          >
+                            <Badge
+                              badgeContent={getBadgeContent(attendance)}
+                              color="primary"
+                            >
+                              <EditIcon fontSize="small" />
+                            </Badge>
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+
+                      {/* 勤務日 */}
+                      <WorkDateTableCell
+                        workDate={attendance.workDate}
+                        holidayCalendars={holidayCalendars}
+                        companyHolidayCalendars={companyHolidayCalendars}
+                      />
+
+                      {/* 勤務時間 */}
+                      <WorkTimeTableCell attendance={attendance} />
+
+                      {/* 休憩時間(最近) */}
+                      <RestTimeTableCell attendance={attendance} />
+
+                      {/* 摘要 */}
+                      <SummaryTableCell
+                        paidHolidayFlag={attendance.paidHolidayFlag}
+                        substituteHolidayDate={attendance.substituteHolidayDate}
+                        remarks={attendance.remarks}
+                      />
+
+                      {/* 作成日時 */}
+                      <CreatedAtTableCell createdAt={attendance.createdAt} />
+
+                      {/* 更新日時 */}
+                      <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
+
+                      <TableCell sx={{ width: 1 }} />
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
         <Box sx={{ pb: 5 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            勤務一覧
+          </Typography>
           <TableContainer>
             <Table size="small">
               <TableHead>
