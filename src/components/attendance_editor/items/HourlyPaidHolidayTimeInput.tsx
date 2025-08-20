@@ -35,7 +35,7 @@ export default function HourlyPaidHolidayTimeInput({
         control={control}
         render={({ field }) => (
           <TimePicker
-            value={time[fieldKey] ? dayjs(time[fieldKey]) : null}
+            value={field.value ? dayjs(field.value) : null}
             ampm={false}
             viewRenderers={{
               hours: renderTimeViewClock,
@@ -43,6 +43,11 @@ export default function HourlyPaidHolidayTimeInput({
             }}
             slotProps={{ textField: { size: "small", label } }}
             onChange={(newTime) => {
+              if (newTime && !newTime.isValid()) {
+                return;
+              }
+            }}
+            onAccept={(newTime) => {
               if (newTime && !newTime.isValid()) {
                 return;
               }
