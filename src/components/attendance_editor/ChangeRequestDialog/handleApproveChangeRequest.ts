@@ -47,6 +47,17 @@ export default async function handleApproveChangeRequest(
     substituteHolidayDate:
       targetChangeRequest.substituteHolidayDate ??
       attendance.substituteHolidayDate,
+    hourlyPaidHolidayTimes: targetChangeRequest.hourlyPaidHolidayTimes
+      ? targetChangeRequest.hourlyPaidHolidayTimes
+          .filter((item): item is NonNullable<typeof item> => item !== null)
+          .map((item) => ({
+            startTime: item.startTime,
+            endTime: item.endTime,
+          }))
+      : attendance.hourlyPaidHolidayTimes,
+    hourlyPaidHolidayHours:
+      targetChangeRequest.hourlyPaidHolidayHours ??
+      attendance.hourlyPaidHolidayHours,
     changeRequests: changeRequests.map((changeRequest) => ({
       startTime: changeRequest.startTime,
       endTime: changeRequest.endTime,
@@ -60,6 +71,15 @@ export default async function handleApproveChangeRequest(
               endTime: item.endTime,
             }))
         : [],
+      hourlyPaidHolidayTimes: changeRequest.hourlyPaidHolidayTimes
+        ? changeRequest.hourlyPaidHolidayTimes
+            .filter((item): item is NonNullable<typeof item> => item !== null)
+            .map((item) => ({
+              startTime: item.startTime,
+              endTime: item.endTime,
+            }))
+        : [],
+      hourlyPaidHolidayHours: changeRequest.hourlyPaidHolidayHours,
       remarks: changeRequest.remarks,
       paidHolidayFlag: changeRequest.paidHolidayFlag,
       completed: true,

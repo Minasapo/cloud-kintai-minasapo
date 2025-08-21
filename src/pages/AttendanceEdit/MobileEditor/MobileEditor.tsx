@@ -1,6 +1,8 @@
-import { Stack } from "@mui/material";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import { Button, Stack } from "@mui/material";
 import { useContext } from "react";
 
+import HourlyPaidHolidayTimeItemMobile from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItemMobile";
 import PaidHolidayFlagInputMobile from "@/components/attendance_editor/PaidHolidayFlagInputMobile";
 
 import Title from "../../../components/Title/Title";
@@ -43,9 +45,6 @@ export function MobileEditor() {
     hourlyPaidHolidayEnabled,
     hourlyPaidHolidayTimeFields,
     hourlyPaidHolidayTimeAppend,
-    hourlyPaidHolidayTimeRemove,
-    hourlyPaidHolidayTimeUpdate,
-    hourlyPaidHolidayTimeReplace,
   } = useContext(AttendanceEditContext);
 
   if (changeRequests.length > 0) {
@@ -85,6 +84,40 @@ export function MobileEditor() {
         <StaffNameItem />
         {/* 有給休暇 */}
         <PaidHolidayFlagInputMobile control={control} setValue={setValue} />
+        {/* 時間単位休暇 */}
+        {hourlyPaidHolidayEnabled && (
+          <Stack direction="column" spacing={1}>
+            <Label>時間単位休暇({hourlyPaidHolidayTimeFields.length}件)</Label>
+            {hourlyPaidHolidayTimeFields.length === 0 && (
+              <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
+                時間単位休暇の時間帯を追加してください。
+              </Stack>
+            )}
+            {hourlyPaidHolidayTimeFields.map((hourlyPaidHolidayTime, index) => (
+              <HourlyPaidHolidayTimeItemMobile
+                key={hourlyPaidHolidayTime.id}
+                time={hourlyPaidHolidayTime}
+                index={index}
+              />
+            ))}
+            <Stack>
+              <Button
+                variant="outlined"
+                size="medium"
+                startIcon={<AddCircleOutlineOutlinedIcon />}
+                fullWidth
+                onClick={() =>
+                  hourlyPaidHolidayTimeAppend({
+                    startTime: null,
+                    endTime: null,
+                  })
+                }
+              >
+                追加
+              </Button>
+            </Stack>
+          </Stack>
+        )}
         {/* 振替休暇 */}
         <SubstituteHolidayDateInput />
         {/* 直行 */}
@@ -101,38 +134,6 @@ export function MobileEditor() {
           restRemove={restRemove}
           restUpdate={restUpdate}
         />
-        {/* 時間単位休暇 */}
-        {hourlyPaidHolidayEnabled && (
-          <Stack direction="column" spacing={1}>
-            <Label>
-              時間単位休暇（{hourlyPaidHolidayTimeFields.length}件）
-            </Label>
-            {hourlyPaidHolidayTimeFields.length === 0 && (
-              <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
-                時間単位休暇の時間帯を追加してください。
-              </Stack>
-            )}
-            {hourlyPaidHolidayTimeFields.map((item, index) => (
-              <div key={item.id}>
-                {/* 時間単位休暇の入力欄コンポーネントをここに追加 */}
-                {/* 例: <HourlyPaidHolidayTimeItemMobile ... /> */}
-              </div>
-            ))}
-            <Stack>
-              <button
-                type="button"
-                onClick={() =>
-                  hourlyPaidHolidayTimeAppend({
-                    startTime: null,
-                    endTime: null,
-                  })
-                }
-              >
-                追加
-              </button>
-            </Stack>
-          </Stack>
-        )}
         {/* 備考 */}
         <Label>備考</Label>
         <RemarksInput register={register} />

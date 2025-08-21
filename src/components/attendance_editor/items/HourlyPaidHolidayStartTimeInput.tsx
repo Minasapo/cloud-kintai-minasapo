@@ -1,8 +1,8 @@
 import { FieldArrayWithId } from "react-hook-form";
 
-import HourlyPaidHolidayTimeInput from "./HourlyPaidHolidayTimeInput";
-
 import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+
+import HourlyPaidHolidayTimeInput from "./HourlyPaidHolidayTimeInput";
 
 export default function HourlyPaidHolidayStartTimeInput({
   index,

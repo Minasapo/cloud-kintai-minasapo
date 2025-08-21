@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { Staff } from "@/API";
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { AppContext } from "@/context/AppContext";
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
@@ -78,6 +79,7 @@ export default function TimeRecorder(): JSX.Element {
   } = useAttendances();
 
   const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
+  const { getStartTime, getEndTime } = useContext(AppConfigContext);
 
   const [workStatus, setWorkStatus] = useState<WorkStatus | null | undefined>(
     undefined
@@ -107,24 +109,45 @@ export default function TimeRecorder(): JSX.Element {
     [cognitoUser, clockOut, dispatch, staff]
   );
 
-  const handleGoDirectly = useCallback(
-    () =>
-      goDirectlyCallback(cognitoUser, today, staff, dispatch, clockIn, logger),
-    [cognitoUser, staff, dispatch, clockIn]
-  );
+  const handleGoDirectly = useCallback(() => {
+    const configured = getStartTime();
+    const startIso = dayjs()
+      .hour(configured.hour())
+      .minute(configured.minute())
+      .second(0)
+      .millisecond(0)
+      .toISOString();
 
-  const handleReturnDirectly = useCallback(
-    () =>
-      returnDirectlyCallback(
-        cognitoUser,
-        today,
-        staff,
-        dispatch,
-        clockOut,
-        logger
-      ),
-    [cognitoUser, staff, dispatch, clockOut]
-  );
+    goDirectlyCallback(
+      cognitoUser,
+      today,
+      staff,
+      dispatch,
+      clockIn,
+      logger,
+      startIso
+    );
+  }, [cognitoUser, clockIn, dispatch, staff, getStartTime, today, logger]);
+
+  const handleReturnDirectly = useCallback(() => {
+    const configured = getEndTime();
+    const endIso = dayjs()
+      .hour(configured.hour())
+      .minute(configured.minute())
+      .second(0)
+      .millisecond(0)
+      .toISOString();
+
+    returnDirectlyCallback(
+      cognitoUser,
+      today,
+      staff,
+      dispatch,
+      clockOut,
+      logger,
+      endIso
+    );
+  }, [cognitoUser, staff, dispatch, clockOut, getEndTime, today, logger]);
 
   const handleRestStart = useCallback(
     () => restStartCallback(cognitoUser, today, dispatch, restStart, logger),

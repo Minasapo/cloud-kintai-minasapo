@@ -8,6 +8,7 @@ import {
 import dayjs from "dayjs";
 
 import { Attendance } from "../../../../API";
+import HourlyPaidHolidayTableRow from "../HourlyPaidHolidayTableRow";
 import GoDirectlyFlagTableRow from "./GoDirectlyFlagTableRow";
 import PaidHolidayFlagTableRow from "./PaidHolidayFlagTableRow";
 import RemarksTableRow from "./RemarksTableRow";
@@ -30,6 +31,11 @@ export default function BeforeCard({
         <Table>
           <TableBody>
             <PaidHolidayFlagTableRow value={attendance?.paidHolidayFlag} />
+            <HourlyPaidHolidayTableRow
+              hours={attendance?.hourlyPaidHolidayHours}
+              times={attendance?.hourlyPaidHolidayTimes}
+              variant="before"
+            />
             <SubstituteHolidayDateTableRow
               value={attendance?.substituteHolidayDate}
             />

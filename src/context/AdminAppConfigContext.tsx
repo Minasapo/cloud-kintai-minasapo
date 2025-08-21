@@ -1,5 +1,6 @@
 import { createContext } from "react";
-import { CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
+
+import { UpdateAppConfigInput } from "@/API";
 
 type AdminAppConfigContextProps = {
   fetchAllConfigs: () => Promise<void>;

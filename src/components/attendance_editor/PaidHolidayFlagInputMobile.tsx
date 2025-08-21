@@ -1,8 +1,9 @@
-import { Box, Checkbox, Stack } from "@mui/material";
+import { Checkbox, Stack } from "@mui/material";
 import dayjs from "dayjs";
 import { Control, Controller, UseFormSetValue } from "react-hook-form";
 
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { Label } from "@/pages/AttendanceEdit/MobileEditor/Label";
 
 interface PaidHolidayFlagInputProps {
   label?: string;
@@ -53,9 +54,9 @@ export default function PaidHolidayFlagInputMobile({
   };
 
   return (
-    <Stack direction="column" alignItems={"flex-start"}>
-      <Box sx={{ fontWeight: "bold", mb: 1 }}>{label}</Box>
-      <Box>
+    <>
+      <Label variant="body1">{label}</Label>
+      <Stack direction="column" alignItems={"flex-start"}>
         <Controller
           name="paidHolidayFlag"
           control={control}
@@ -68,7 +69,7 @@ export default function PaidHolidayFlagInputMobile({
             />
           )}
         />
-      </Box>
-    </Stack>
+      </Stack>
+    </>
   );
 }

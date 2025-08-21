@@ -23,13 +23,15 @@ export function goDirectlyCallback(
     startTime: string,
     goDirectlyFlag?: GoDirectlyFlag
   ) => Promise<Attendance>,
-  logger: Logger
+  logger: Logger,
+  // optional explicit ISO timestamp to use for work start (allows AppConfig-driven times)
+  startTimeIso?: string
 ) {
   if (!cognitoUser) {
     return;
   }
 
-  const now = new AttendanceDateTime().setWorkStart().toISOString();
+  const now = startTimeIso ?? new AttendanceDateTime().setWorkStart().toISOString();
 
   clockIn(cognitoUser.id, today, now, GoDirectlyFlag.YES)
     .then((res) => {
