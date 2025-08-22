@@ -61,5 +61,10 @@
     {
       "file": ".vscode/copilot-commit-message-instructions.md"
     }
+  ],
+  "github.copilot.chat.pullRequestDescriptionGeneration.instructions": [
+    {
+      "file": ".vscode/copilot-pr-description-instructions.md"
+    }
   ]
 }
