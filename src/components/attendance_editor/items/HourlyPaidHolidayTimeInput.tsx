@@ -20,7 +20,7 @@ export default function HourlyPaidHolidayTimeInput({
   fieldKey,
   label,
 }: HourlyPaidHolidayTimeInputProps) {
-  const { workDate, control, hourlyPaidHolidayTimeUpdate: _hourlyPaidHolidayTimeUpdate } = useContext(
+  const { workDate, control, hourlyPaidHolidayTimeUpdate: _hourlyPaidHolidayTimeUpdate, changeRequests } = useContext(
     AttendanceEditContext
   );
 
@@ -36,6 +36,7 @@ export default function HourlyPaidHolidayTimeInput({
         render={({ field }) => (
           <TimePicker
             value={field.value ? dayjs(field.value) : null}
+            disabled={changeRequests.length > 0}
             ampm={false}
             viewRenderers={{
               hours: renderTimeViewClock,
