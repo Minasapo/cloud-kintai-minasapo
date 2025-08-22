@@ -86,93 +86,107 @@ export default function DesktopList({
       <AttendanceGraph attendances={attendances} />
       {errorAttendances.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            打刻エラー一覧 ({errorAttendances.length})
-          </Typography>
-          <Alert severity="warning">
-            <AlertTitle sx={{ fontWeight: "bold" }}>
-              確認してください
-            </AlertTitle>
-            打刻エラーがあります
-          </Alert>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell />
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>勤務時間</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>
-                    休憩時間(直近)
-                  </TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>作成日時</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>更新日時</TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {errorAttendances.map((attendance, index) => (
-                  <TableRow
-                    key={`error-${index}`}
-                    className={getTableRowClassName(
-                      attendance,
-                      holidayCalendars,
-                      companyHolidayCalendars
-                    )}
-                  >
-                    <TableCell>
-                      <Stack direction="row" spacing={0} alignItems="center">
-                        <AttendanceStatusTooltip
-                          staff={staff}
-                          attendance={attendance}
-                          holidayCalendars={holidayCalendars}
-                          companyHolidayCalendars={companyHolidayCalendars}
-                        />
-                        <IconButton onClick={() => handleEdit(attendance)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Stack>
+          {/* 目立たせるために枠と背景で囲む */}
+          <Box
+            sx={{
+              border: "1px solid",
+              borderColor: "warning.main",
+              borderRadius: 2,
+              p: 2,
+              backgroundColor: "rgba(255,243,205,0.12)",
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              打刻エラー一覧 ({errorAttendances.length})
+            </Typography>
+            <Alert severity="warning">
+              <AlertTitle sx={{ fontWeight: "bold" }}>
+                確認してください
+              </AlertTitle>
+              打刻エラーがあります
+            </Alert>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell />
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      勤務時間
                     </TableCell>
-
-                    {/* 勤務日 */}
-                    <WorkDateTableCell
-                      workDate={attendance.workDate}
-                      holidayCalendars={holidayCalendars}
-                      companyHolidayCalendars={companyHolidayCalendars}
-                    />
-
-                    {/* 勤務時間 */}
-                    <WorkTimeTableCell attendance={attendance} />
-
-                    {/* 休憩時間(最近) */}
-                    <RestTimeTableCell attendance={attendance} />
-
-                    {/* 摘要 */}
-                    <SummaryTableCell
-                      paidHolidayFlag={attendance.paidHolidayFlag}
-                      substituteHolidayDate={attendance.substituteHolidayDate}
-                      remarks={attendance.remarks}
-                    />
-
-                    {/* 作成日時 */}
-                    <CreatedAtTableCell createdAt={attendance.createdAt} />
-
-                    {/* 更新日時 */}
-                    <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
-
-                    <TableCell sx={{ width: 1 }} />
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      休憩時間(直近)
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      作成日時
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      更新日時
+                    </TableCell>
+                    <TableCell />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {errorAttendances.map((attendance, index) => (
+                    <TableRow
+                      key={`error-${index}`}
+                      className={getTableRowClassName(
+                        attendance,
+                        holidayCalendars,
+                        companyHolidayCalendars
+                      )}
+                    >
+                      <TableCell>
+                        <Stack direction="row" spacing={0} alignItems="center">
+                          <AttendanceStatusTooltip
+                            staff={staff}
+                            attendance={attendance}
+                            holidayCalendars={holidayCalendars}
+                            companyHolidayCalendars={companyHolidayCalendars}
+                          />
+                          <IconButton onClick={() => handleEdit(attendance)}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+
+                      {/* 勤務日 */}
+                      <WorkDateTableCell
+                        workDate={attendance.workDate}
+                        holidayCalendars={holidayCalendars}
+                        companyHolidayCalendars={companyHolidayCalendars}
+                      />
+
+                      {/* 勤務時間 */}
+                      <WorkTimeTableCell attendance={attendance} />
+
+                      {/* 休憩時間(最近) */}
+                      <RestTimeTableCell attendance={attendance} />
+
+                      {/* 摘要 */}
+                      <SummaryTableCell
+                        paidHolidayFlag={attendance.paidHolidayFlag}
+                        substituteHolidayDate={attendance.substituteHolidayDate}
+                        remarks={attendance.remarks}
+                      />
+
+                      {/* 作成日時 */}
+                      <CreatedAtTableCell createdAt={attendance.createdAt} />
+
+                      {/* 更新日時 */}
+                      <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
+
+                      <TableCell sx={{ width: 1 }} />
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
         </Box>
       )}
       <TableContainer>
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          勤務一覧
-        </Typography>
         <Table size="small">
           <TableHead>
             <TableRow>
