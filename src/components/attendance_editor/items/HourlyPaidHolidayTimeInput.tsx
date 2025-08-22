@@ -16,13 +16,16 @@ interface HourlyPaidHolidayTimeInputProps {
 
 export default function HourlyPaidHolidayTimeInput({
   index,
-  time,
+  time: _time,
   fieldKey,
   label,
 }: HourlyPaidHolidayTimeInputProps) {
-  const { workDate, control, hourlyPaidHolidayTimeUpdate } = useContext(
-    AttendanceEditContext
-  );
+  const {
+    workDate,
+    control,
+    hourlyPaidHolidayTimeUpdate: _hourlyPaidHolidayTimeUpdate,
+    changeRequests,
+  } = useContext(AttendanceEditContext);
 
   if (!workDate || !control) {
     return null;
@@ -36,6 +39,7 @@ export default function HourlyPaidHolidayTimeInput({
         render={({ field }) => (
           <TimePicker
             value={field.value ? dayjs(field.value) : null}
+            disabled={changeRequests.length > 0}
             ampm={false}
             viewRenderers={{
               hours: renderTimeViewClock,
@@ -43,9 +47,27 @@ export default function HourlyPaidHolidayTimeInput({
             }}
             slotProps={{ textField: { size: "small", label } }}
             onChange={(newTime) => {
-              if (newTime && !newTime.isValid()) {
+              if (!newTime) {
+                // clear value when picker cleared
+                field.onChange(null);
                 return;
               }
+
+              if (!newTime.isValid()) {
+                // don't update form value until the typed value is a valid time
+                return;
+              }
+
+              const formattedTime = newTime
+                .year(workDate.year())
+                .month(workDate.month())
+                .date(workDate.date())
+                .second(0)
+                .millisecond(0)
+                .toISOString();
+
+              // update form value while typing so direct input (text) is reflected
+              field.onChange(formattedTime);
             }}
             onAccept={(newTime) => {
               if (newTime && !newTime.isValid()) {
@@ -63,11 +85,9 @@ export default function HourlyPaidHolidayTimeInput({
                   .toISOString();
               })();
 
+              // update the controller value only; avoid calling the field array
+              // update here to prevent overwriting other fields (eg. startTime)
               field.onChange(formattedTime);
-              hourlyPaidHolidayTimeUpdate(index, {
-                ...time,
-                [fieldKey]: formattedTime,
-              });
             }}
           />
         )}
