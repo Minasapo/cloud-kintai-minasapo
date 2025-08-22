@@ -334,9 +334,6 @@ export default function AdminStaffAttendanceList() {
           </Box>
         )}
         <Box sx={{ pb: 5 }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            勤務一覧
-          </Typography>
           <TableContainer>
             <Table size="small">
               <TableHead>
