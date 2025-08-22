@@ -92,7 +92,7 @@ export function SubstituteHolidayDateInput() {
                     setPendingDate(null);
                   }}
                 >
-                  キャンセル
+                  クリアせず設定
                 </Button>
                 <Button
                   onClick={() => {
@@ -112,7 +112,7 @@ export function SubstituteHolidayDateInput() {
                   }}
                   autoFocus
                 >
-                  クリアする
+                  クリアして設定
                 </Button>
               </DialogActions>
             </Dialog>

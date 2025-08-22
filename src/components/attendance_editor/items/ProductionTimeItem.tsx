@@ -20,11 +20,16 @@ export default function ProductionTimeItem({
         {hourlyPaidHolidayEnabled &&
           hourlyPaidHolidayHours != null &&
           hourlyPaidHolidayHours > 0 && (
-            <Typography variant="body1">{`時間休暇 ${hourlyPaidHolidayHours.toFixed(
-              1
-            )}時間`}</Typography>
+            <Typography variant="body1">{`時間休暇 ${formatHoursToDecimal(
+              hourlyPaidHolidayHours
+            )}`}</Typography>
           )}
       </Box>
     </Stack>
   );
+}
+
+function formatHoursToDecimal(hours: number) {
+  if (hours == null || hours <= 0) return `0.0時間`;
+  return `${hours.toFixed(1)}時間`;
 }

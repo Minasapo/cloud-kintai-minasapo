@@ -164,6 +164,7 @@ export default function DesktopEditor() {
                           endTime: null,
                         })
                       }
+                      disabled={changeRequests.length > 0}
                     >
                       <AddAlarmIcon />
                     </IconButton>
