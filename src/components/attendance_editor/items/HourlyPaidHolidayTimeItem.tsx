@@ -17,8 +17,16 @@ export function calcTotalHourlyPaidHolidayTime(
   if (!startTime) return 0;
 
   const now = dayjs();
-  const diff = dayjs(endTime || now).diff(dayjs(startTime), "hour", true);
-  return diff;
+  const end = dayjs(endTime || now);
+  const start = dayjs(startTime);
+
+  // calculate difference in minutes to avoid floating-point imprecision
+  const diffMinutes = end.diff(start, "minute", true);
+  if (diffMinutes <= 0) return 0;
+
+  // convert to hours (no rounding) so callers can display exact decimal hours
+  const hours = diffMinutes / 60;
+  return hours;
 }
 
 export default function HourlyPaidHolidayTimeItem({
@@ -28,7 +36,7 @@ export default function HourlyPaidHolidayTimeItem({
   time: FieldArrayWithId<AttendanceEditInputs, "hourlyPaidHolidayTimes", "id">;
   index: number;
 }) {
-  const { hourlyPaidHolidayTimeRemove, changeRequests } = useContext(
+  const { hourlyPaidHolidayTimeRemove, changeRequests, watch } = useContext(
     AttendanceEditContext
   );
 
@@ -36,15 +44,31 @@ export default function HourlyPaidHolidayTimeItem({
     useState<number>(0);
 
   useEffect(() => {
-    if (!time.endTime) {
-      setTotalHourlyPaidHolidayTime(0);
-      return;
-    }
+    if (!watch) return;
 
-    setTotalHourlyPaidHolidayTime(
-      calcTotalHourlyPaidHolidayTime(time.startTime, time.endTime)
-    );
-  }, [time]);
+    watch((data) => {
+      const items = data.hourlyPaidHolidayTimes;
+      if (!items) {
+        setTotalHourlyPaidHolidayTime(0);
+        return;
+      }
+
+      const item = items[index];
+      if (!item) {
+        setTotalHourlyPaidHolidayTime(0);
+        return;
+      }
+
+      // if either side missing or both empty, show 0.0時間
+      if (!item.startTime || !item.endTime) {
+        setTotalHourlyPaidHolidayTime(0);
+        return;
+      }
+
+      const diff = calcTotalHourlyPaidHolidayTime(item.startTime, item.endTime);
+      setTotalHourlyPaidHolidayTime(diff);
+    });
+  }, [watch, index]);
 
   return (
     <Box>
@@ -68,10 +92,23 @@ export default function HourlyPaidHolidayTimeItem({
         </Box>
         <Box sx={{ flexGrow: 1 }} textAlign={"right"}>
           <Typography variant="body1">
-            {`${totalHourlyPaidHolidayTime.toFixed(1)} 時間`}
+            {totalHourlyPaidHolidayTime == null
+              ? ""
+              : formatHoursToHourMinute(totalHourlyPaidHolidayTime)}
           </Typography>
         </Box>
       </Stack>
     </Box>
   );
+}
+
+function formatHoursToDecimal(hours: number) {
+  // always show one decimal place (e.g. 0.0, 0.5, 1.3)
+  if (hours == null || hours <= 0) return `0.0時間`;
+  return `${hours.toFixed(1)}時間`;
+}
+
+// keep old name used in component
+function formatHoursToHourMinute(hours: number) {
+  return formatHoursToDecimal(hours);
 }

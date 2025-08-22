@@ -20,9 +20,12 @@ export default function HourlyPaidHolidayTimeInput({
   fieldKey,
   label,
 }: HourlyPaidHolidayTimeInputProps) {
-  const { workDate, control, hourlyPaidHolidayTimeUpdate: _hourlyPaidHolidayTimeUpdate, changeRequests } = useContext(
-    AttendanceEditContext
-  );
+  const {
+    workDate,
+    control,
+    hourlyPaidHolidayTimeUpdate: _hourlyPaidHolidayTimeUpdate,
+    changeRequests,
+  } = useContext(AttendanceEditContext);
 
   if (!workDate || !control) {
     return null;
