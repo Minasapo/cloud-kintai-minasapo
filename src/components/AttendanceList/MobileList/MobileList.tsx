@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceGraph } from "@/pages/admin/AdminStaffAttendanceList/AttendanceGraph";
 
 import {
   Attendance,
@@ -62,6 +63,7 @@ export default function MobileList({
 
   return (
     <MobileBox>
+      <AttendanceGraph attendances={attendances} />
       {errorAttendances.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
           {/* 目立たせるために枠と背景で囲む */}
