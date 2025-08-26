@@ -74,8 +74,6 @@ export default function sendChangeRequestMail(
     },
   };
 
-  console.log("mailParams", mailParams);
-
   try {
     void API.graphql(mailParams);
   } catch {
