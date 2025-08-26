@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { calcTotalHourlyPaidHolidayTime } from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
+// ...existing code... (removed unused calcTotalHourlyPaidHolidayTime import)
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
@@ -75,16 +75,7 @@ export default function AttendanceEdit() {
   const hourlyPaidHolidayEnabled = getHourlyPaidHolidayEnabled();
 
   const onSubmit = async (data: AttendanceEditInputs) => {
-    // 時間単位休暇の合計時間を計算
-    const totalHourlyPaidHolidayHours =
-      data.hourlyPaidHolidayTimes?.reduce((acc, item) => {
-        if (!item || !item.startTime || !item.endTime) return acc;
-        const diff = calcTotalHourlyPaidHolidayTime(
-          item.startTime,
-          item.endTime
-        );
-        return acc + diff;
-      }, 0) ?? 0;
+    // 時間単位休暇の合計時間はサーバでは利用しない（times の配列を送る）
     if (attendance) {
       await updateAttendance({
         id: attendance.id,
@@ -96,7 +87,7 @@ export default function AttendanceEdit() {
             returnDirectlyFlag: data.returnDirectlyFlag,
             remarks: data.remarks,
             paidHolidayFlag: data.paidHolidayFlag,
-            hourlyPaidHolidayHours: totalHourlyPaidHolidayHours,
+            // hourlyPaidHolidayHours is deprecated here; send times array instead
             substituteHolidayDate: data.substituteHolidayDate,
             staffComment: data.staffComment,
             rests: data.rests.map((rest) => ({
@@ -147,7 +138,7 @@ export default function AttendanceEdit() {
             returnDirectlyFlag: data.returnDirectlyFlag,
             remarks: data.remarks,
             paidHolidayFlag: data.paidHolidayFlag,
-            hourlyPaidHolidayHours: totalHourlyPaidHolidayHours,
+            // hourlyPaidHolidayHours is deprecated here; send times array instead
             substituteHolidayDate: data.substituteHolidayDate,
             staffComment: data.staffComment,
             rests: data.rests.map((rest) => ({
