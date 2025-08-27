@@ -17,16 +17,19 @@ export function calcTotalHourlyPaidHolidayTime(
   if (!startTime) return 0;
 
   const now = dayjs();
-  const end = dayjs(endTime || now);
+  // prefer parsing endTime when provided; fall back to now when not
   const start = dayjs(startTime);
+  const end = endTime ? dayjs(endTime) : now;
+
+  // if parsing failed, treat as 0 to avoid NaN propagation
+  if (!start.isValid() || !end.isValid()) return 0;
 
   // calculate difference in minutes to avoid floating-point imprecision
   const diffMinutes = end.diff(start, "minute", true);
-  if (diffMinutes <= 0) return 0;
+  if (!isFinite(diffMinutes) || diffMinutes <= 0) return 0;
 
   // convert to hours (no rounding) so callers can display exact decimal hours
-  const hours = diffMinutes / 60;
-  return hours;
+  return diffMinutes / 60;
 }
 
 export default function HourlyPaidHolidayTimeItem({

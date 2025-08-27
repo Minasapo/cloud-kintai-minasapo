@@ -1,4 +1,3 @@
-import HelpIcon from "@mui/icons-material/Help";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import ViewListIcon from "@mui/icons-material/ViewList";
@@ -17,6 +16,7 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
+
 import { theme } from "../../lib/theme";
 
 export default function MobileMenu({ pathName }: { pathName: string }) {
@@ -57,7 +57,7 @@ export default function MobileMenu({ pathName }: { pathName: string }) {
             <ListItemText primary={"勤怠一覧"} />
           </ListItemButton>
         </ListItem>
-        <ListItem disablePadding>
+        {/* <ListItem disablePadding>
           <ListItemButton
             onClick={() => {
               navigate("/docs");
@@ -68,7 +68,7 @@ export default function MobileMenu({ pathName }: { pathName: string }) {
             </ListItemIcon>
             <ListItemText primary={"ドキュメント"} />
           </ListItemButton>
-        </ListItem>
+        </ListItem> */}
         <Divider />
         <ListItem disablePadding>
           <ListItemButton

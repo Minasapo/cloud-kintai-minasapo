@@ -55,6 +55,7 @@ export default function SnackbarGroup() {
       enqueueSnackbar(snackbar.error, {
         variant: "error",
         className: "snackbar-error",
+        autoHideDuration: null,
         anchorOrigin: {
           vertical: "top",
           horizontal: "right",
