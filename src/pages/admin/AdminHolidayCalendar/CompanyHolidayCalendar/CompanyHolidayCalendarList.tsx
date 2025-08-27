@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { ChangeEvent, useContext, useState } from "react";
+import { useContext } from "react";
 
 import { CompanyHolidayCalendar } from "@/API";
 import { AppContext } from "@/context/AppContext";
@@ -34,7 +34,7 @@ import {
   setSnackbarSuccess,
 } from "../../../../lib/reducers/snackbarReducer";
 import { ExcelFilePicker } from "../HolidayCalendar/ExcelFilePicker";
-import { sortCalendar } from "../HolidayCalendar/HolidayCalendarList";
+import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import AddCompanyHolidayCalendar from "./AddCompanyHolidayCalendar";
 import CompanyHolidayCalendarEdit from "./CompanyHolidayCalendarEdit";
 
@@ -52,59 +52,28 @@ export default function CompanyHolidayCalendarList() {
     bulkCreateCompanyHolidayCalendar,
   } = useContext(AppContext);
 
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(20);
-  const [yearMonthFilter, setYearMonthFilter] = useState<string>("");
-  const [nameFilter, setNameFilter] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<number | "">("");
-  const [selectedMonth, setSelectedMonth] = useState<number | "">("");
-
-  const setYearMonthIfBothSelected = (
-    year: number | "",
-    month: number | ""
-  ) => {
-    if (year !== "" && month !== "") {
-      const mm = String(month).padStart(2, "0");
-      setYearMonthFilter(`${year}-${mm}`);
-      setPage(0);
-    }
-  };
-
-  const currentYear = dayjs().year();
-  const years = Array.from({ length: YEAR_RANGE }).map(
-    (_, i) => currentYear - YEAR_OFFSET + i
-  );
-  const sorted = [...(companyHolidayCalendars || [])].sort(sortCalendar);
-
-  const filtered = sorted.filter((hc) => {
-    if (yearMonthFilter) {
-      const ym = dayjs(hc.holidayDate).format("YYYY-MM");
-      if (ym !== yearMonthFilter) return false;
-    }
-
-    if (nameFilter) {
-      const name = (hc.name || "").toString().toLowerCase();
-      if (!name.includes(nameFilter.toLowerCase())) return false;
-    }
-
-    return true;
+  const {
+    page,
+    rowsPerPage,
+    years,
+    selectedYear,
+    selectedMonth,
+    setSelectedYear,
+    setSelectedMonth,
+    nameFilter,
+    setNameFilter,
+    /* yearMonthFilter intentionally unused */
+    applyYearMonthFilter,
+    filtered,
+    paginated,
+    handleChangePage,
+    handleChangeRowsPerPage,
+    clearFilters,
+  } = useHolidayCalendarList(companyHolidayCalendars, {
+    initialRowsPerPage: 20,
+    yearRange: YEAR_RANGE,
+    yearOffset: YEAR_OFFSET,
   });
-
-  const paginated = filtered.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
-  const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
 
   const handleDelete = async (
     companyHolidayCalendar: CompanyHolidayCalendar
@@ -165,7 +134,7 @@ export default function CompanyHolidayCalendarList() {
                 onChange={(e) => {
                   const y = e.target.value as number;
                   setSelectedYear(y);
-                  setYearMonthIfBothSelected(y, selectedMonth);
+                  applyYearMonthFilter(y, selectedMonth);
                 }}
               >
                 <MenuItem value="">-</MenuItem>
@@ -185,7 +154,7 @@ export default function CompanyHolidayCalendarList() {
                 onChange={(e) => {
                   const m = e.target.value as number;
                   setSelectedMonth(m);
-                  setYearMonthIfBothSelected(selectedYear, m);
+                  applyYearMonthFilter(selectedYear, m);
                 }}
               >
                 <MenuItem value="">-</MenuItem>
@@ -202,18 +171,13 @@ export default function CompanyHolidayCalendarList() {
               value={nameFilter}
               onChange={(e) => {
                 setNameFilter(e.target.value);
-                setPage(0);
               }}
               sx={{ minWidth: 200 }}
             />
             <Button
               size="small"
               onClick={() => {
-                setSelectedYear("");
-                setSelectedMonth("");
-                setYearMonthFilter("");
-                setNameFilter("");
-                setPage(0);
+                clearFilters();
               }}
             >
               クリア

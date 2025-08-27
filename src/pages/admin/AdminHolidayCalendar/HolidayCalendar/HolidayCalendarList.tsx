@@ -20,33 +20,23 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { ChangeEvent, useContext, useState } from "react";
+import { useContext } from "react";
 
 import { AppContext } from "@/context/AppContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 
-import {
-  CompanyHolidayCalendar,
-  DeleteHolidayCalendarInput,
-  HolidayCalendar,
-} from "../../../../API";
+import { DeleteHolidayCalendarInput, HolidayCalendar } from "../../../../API";
 import { useAppDispatchV2 } from "../../../../app/hooks";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "../../../../lib/reducers/snackbarReducer";
+import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import { AddHolidayCalendar } from "./AddHolidayCalendar";
 import { CSVFilePicker } from "./CSVFilePicker";
 import HolidayCalendarEdit from "./HolidayCalendarEdit";
-
-export function sortCalendar(
-  a: HolidayCalendar | CompanyHolidayCalendar,
-  b: HolidayCalendar | CompanyHolidayCalendar
-) {
-  return dayjs(a.holidayDate).isBefore(dayjs(b.holidayDate)) ? 1 : -1;
-}
 
 export default function HolidayCalendarList() {
   const {
@@ -57,64 +47,28 @@ export default function HolidayCalendarList() {
     deleteHolidayCalendar,
   } = useContext(AppContext);
 
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(20);
-  const [yearMonthFilter, setYearMonthFilter] = useState<string>("");
-  const [nameFilter, setNameFilter] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<number | "">("");
-  const [selectedMonth, setSelectedMonth] = useState<number | "">("");
-
-  const YEAR_RANGE = 7;
-  const YEAR_OFFSET = 5;
-  const currentYear = dayjs().year();
-  const years = Array.from({ length: YEAR_RANGE }).map(
-    (_, i) => currentYear - YEAR_OFFSET + i
-  );
-
-  const sorted = [...(holidayCalendars || [])].sort(sortCalendar);
-
-  const filtered = sorted.filter((hc) => {
-    // filter by year-month if set. input type=month returns YYYY-MM
-    if (yearMonthFilter) {
-      const ym = dayjs(hc.holidayDate).format("YYYY-MM");
-      if (ym !== yearMonthFilter) return false;
-    }
-
-    // filter by name (case-insensitive substring)
-    if (nameFilter) {
-      const name = (hc.name || "").toString().toLowerCase();
-      if (!name.includes(nameFilter.toLowerCase())) return false;
-    }
-
-    return true;
+  const {
+    page,
+    rowsPerPage,
+    years,
+    selectedYear,
+    selectedMonth,
+    setSelectedYear,
+    setSelectedMonth,
+    nameFilter,
+    setNameFilter,
+    /* yearMonthFilter intentionally unused */
+    applyYearMonthFilter,
+    filtered,
+    paginated,
+    handleChangePage,
+    handleChangeRowsPerPage,
+    clearFilters,
+  } = useHolidayCalendarList<HolidayCalendar>(holidayCalendars, {
+    initialRowsPerPage: 20,
+    yearRange: 7,
+    yearOffset: 5,
   });
-
-  const paginated = filtered.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
-  const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  // apply year/month filter when both values are present, reset otherwise
-  const applyYearMonthFilter = (year: number | "", month: number | "") => {
-    if (year !== "" && month !== "") {
-      const mm = String(month).padStart(2, "0");
-      setYearMonthFilter(`${year}-${mm}`);
-    } else {
-      setYearMonthFilter("");
-    }
-    setPage(0);
-  };
 
   return (
     <>
@@ -176,18 +130,13 @@ export default function HolidayCalendarList() {
               value={nameFilter}
               onChange={(e) => {
                 setNameFilter(e.target.value);
-                setPage(0);
               }}
               sx={{ minWidth: 200 }}
             />
             <Button
               size="small"
               onClick={() => {
-                setSelectedYear("");
-                setSelectedMonth("");
-                setYearMonthFilter("");
-                setNameFilter("");
-                setPage(0);
+                clearFilters();
               }}
             >
               クリア
