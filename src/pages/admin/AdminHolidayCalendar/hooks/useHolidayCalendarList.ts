@@ -34,9 +34,17 @@ export function useHolidayCalendarList<
   const sorted = [...(items || [])].sort((a, b) => sortCalendar(a, b));
 
   const filtered = sorted.filter((hc) => {
-    if (yearMonthFilter) {
-      const ym = dayjs(hc.holidayDate).format("YYYY-MM");
-      if (ym !== yearMonthFilter) return false;
+    const date = dayjs(hc.holidayDate);
+
+    // Support filtering by year+month, year only, or month only.
+    if (selectedYear !== "" && selectedMonth !== "") {
+      const mm = String(selectedMonth).padStart(2, "0");
+      const ym = `${selectedYear}-${mm}`;
+      if (date.format("YYYY-MM") !== ym) return false;
+    } else if (selectedYear !== "") {
+      if (date.year() !== Number(selectedYear)) return false;
+    } else if (selectedMonth !== "") {
+      if (date.month() + 1 !== Number(selectedMonth)) return false;
     }
 
     if (nameFilter) {
@@ -64,10 +72,16 @@ export function useHolidayCalendarList<
   };
 
   const applyYearMonthFilter = (year: number | "", month: number | "") => {
+    // mirror the selected values to the internal selected state
+    setSelectedYear(year);
+    setSelectedMonth(month);
+
     if (year !== "" && month !== "") {
       const mm = String(month).padStart(2, "0");
       setYearMonthFilter(`${year}-${mm}`);
     } else {
+      // keep yearMonthFilter for backward compatibility but main filtering
+      // uses selectedYear/selectedMonth above
       setYearMonthFilter("");
     }
     setPage(0);
