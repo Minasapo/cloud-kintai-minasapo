@@ -59,6 +59,17 @@ export default function CompanyHolidayCalendarList() {
   const [selectedYear, setSelectedYear] = useState<number | "">("");
   const [selectedMonth, setSelectedMonth] = useState<number | "">("");
 
+  const setYearMonthIfBothSelected = (
+    year: number | "",
+    month: number | ""
+  ) => {
+    if (year !== "" && month !== "") {
+      const mm = String(month).padStart(2, "0");
+      setYearMonthFilter(`${year}-${mm}`);
+      setPage(0);
+    }
+  };
+
   const currentYear = dayjs().year();
   const years = Array.from({ length: YEAR_RANGE }).map(
     (_, i) => currentYear - YEAR_OFFSET + i
@@ -154,11 +165,7 @@ export default function CompanyHolidayCalendarList() {
                 onChange={(e) => {
                   const y = e.target.value as number;
                   setSelectedYear(y);
-                  if (selectedMonth !== "") {
-                    const mm = String(selectedMonth).padStart(2, "0");
-                    setYearMonthFilter(`${y}-${mm}`);
-                    setPage(0);
-                  }
+                  setYearMonthIfBothSelected(y, selectedMonth);
                 }}
               >
                 <MenuItem value="">-</MenuItem>
@@ -178,11 +185,7 @@ export default function CompanyHolidayCalendarList() {
                 onChange={(e) => {
                   const m = e.target.value as number;
                   setSelectedMonth(m);
-                  if (selectedYear !== "") {
-                    const mm = String(m).padStart(2, "0");
-                    setYearMonthFilter(`${selectedYear}-${mm}`);
-                    setPage(0);
-                  }
+                  setYearMonthIfBothSelected(selectedYear, m);
                 }}
               >
                 <MenuItem value="">-</MenuItem>
