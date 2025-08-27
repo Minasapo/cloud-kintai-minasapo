@@ -38,6 +38,9 @@ import { sortCalendar } from "../HolidayCalendar/HolidayCalendarList";
 import AddCompanyHolidayCalendar from "./AddCompanyHolidayCalendar";
 import CompanyHolidayCalendarEdit from "./CompanyHolidayCalendarEdit";
 
+const YEAR_RANGE = 5;
+const YEAR_OFFSET = 4;
+
 export default function CompanyHolidayCalendarList() {
   const dispatch = useAppDispatchV2();
 
@@ -57,7 +60,9 @@ export default function CompanyHolidayCalendarList() {
   const [selectedMonth, setSelectedMonth] = useState<number | "">("");
 
   const currentYear = dayjs().year();
-  const years = Array.from({ length: YEAR_RANGE }).map((_, i) => currentYear - YEAR_OFFSET + i);
+  const years = Array.from({ length: YEAR_RANGE }).map(
+    (_, i) => currentYear - YEAR_OFFSET + i
+  );
   const sorted = [...(companyHolidayCalendars || [])].sort(sortCalendar);
 
   const filtered = sorted.filter((hc) => {
