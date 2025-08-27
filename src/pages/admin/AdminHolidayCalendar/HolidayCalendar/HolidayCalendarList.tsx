@@ -67,7 +67,9 @@ export default function HolidayCalendarList() {
   const YEAR_RANGE = 7;
   const YEAR_OFFSET = 5;
   const currentYear = dayjs().year();
-  const years = Array.from({ length: YEAR_RANGE }).map((_, i) => currentYear - YEAR_OFFSET + i);
+  const years = Array.from({ length: YEAR_RANGE }).map(
+    (_, i) => currentYear - YEAR_OFFSET + i
+  );
 
   const sorted = [...(holidayCalendars || [])].sort(sortCalendar);
 
@@ -103,6 +105,17 @@ export default function HolidayCalendarList() {
     setPage(0);
   };
 
+  // apply year/month filter when both values are present, reset otherwise
+  const applyYearMonthFilter = (year: number | "", month: number | "") => {
+    if (year !== "" && month !== "") {
+      const mm = String(month).padStart(2, "0");
+      setYearMonthFilter(`${year}-${mm}`);
+    } else {
+      setYearMonthFilter("");
+    }
+    setPage(0);
+  };
+
   return (
     <>
       <Stack direction="column" spacing={1}>
@@ -124,14 +137,9 @@ export default function HolidayCalendarList() {
                 value={selectedYear}
                 label="年"
                 onChange={(e) => {
-                  const y = e.target.value as number;
+                  const y = e.target.value as number | "";
                   setSelectedYear(y);
-                  // if month already selected, set yearMonthFilter
-                  if (selectedMonth !== "") {
-                    const mm = String(selectedMonth).padStart(2, "0");
-                    setYearMonthFilter(`${y}-${mm}`);
-                    setPage(0);
-                  }
+                  applyYearMonthFilter(y, selectedMonth);
                 }}
               >
                 <MenuItem value="">-</MenuItem>
@@ -149,13 +157,9 @@ export default function HolidayCalendarList() {
                 value={selectedMonth}
                 label="月"
                 onChange={(e) => {
-                  const m = e.target.value as number;
+                  const m = e.target.value as number | "";
                   setSelectedMonth(m);
-                  if (selectedYear !== "") {
-                    const mm = String(m).padStart(2, "0");
-                    setYearMonthFilter(`${selectedYear}-${mm}`);
-                    setPage(0);
-                  }
+                  applyYearMonthFilter(selectedYear, m);
                 }}
               >
                 <MenuItem value="">-</MenuItem>
