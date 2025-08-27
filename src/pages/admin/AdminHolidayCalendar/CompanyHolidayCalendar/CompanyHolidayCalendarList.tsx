@@ -57,7 +57,7 @@ export default function CompanyHolidayCalendarList() {
   const [selectedMonth, setSelectedMonth] = useState<number | "">("");
 
   const currentYear = dayjs().year();
-  const years = Array.from({ length: 7 }).map((_, i) => currentYear - 5 + i);
+  const years = Array.from({ length: YEAR_RANGE }).map((_, i) => currentYear - YEAR_OFFSET + i);
   const sorted = [...(companyHolidayCalendars || [])].sort(sortCalendar);
 
   const filtered = sorted.filter((hc) => {
