@@ -91,25 +91,38 @@ export default function AttendanceDailyList() {
     Record<string, Error | null>
   >({});
 
+  // 並列リクエスト数を制限するバッチ処理関数
+  async function processInBatches<T>(
+    items: T[],
+    batchSize: number,
+    fn: (item: T) => Promise<void>
+  ) {
+    let idx = 0;
+    while (idx < items.length) {
+      const batch = items.slice(idx, idx + batchSize);
+      await Promise.all(batch.map(fn));
+      idx += batchSize;
+    }
+  }
+
   useEffect(() => {
     // load attendances for visible staff rows
     const staffIds = Array.from(
       new Set((attendanceDailyList || []).map((r) => r.sub))
     );
 
-    staffIds.forEach((staffId) => {
+    // 並列リクエスト数を5件に制限
+    processInBatches(staffIds, 5, async (staffId) => {
       setAttendanceLoadingMap((s) => ({ ...s, [staffId]: true }));
       setAttendanceErrorMap((s) => ({ ...s, [staffId]: null }));
-      fetchAttendances(staffId)
-        .then((res) => {
-          setAttendanceMap((m) => ({ ...m, [staffId]: res }));
-        })
-        .catch((e: Error) => {
-          setAttendanceErrorMap((s) => ({ ...s, [staffId]: e }));
-        })
-        .finally(() => {
-          setAttendanceLoadingMap((s) => ({ ...s, [staffId]: false }));
-        });
+      try {
+        const res = await fetchAttendances(staffId);
+        setAttendanceMap((m) => ({ ...m, [staffId]: res }));
+      } catch (e) {
+        setAttendanceErrorMap((s) => ({ ...s, [staffId]: e as Error }));
+      } finally {
+        setAttendanceLoadingMap((s) => ({ ...s, [staffId]: false }));
+      }
     });
   }, [attendanceDailyList]);
 
@@ -118,6 +131,9 @@ export default function AttendanceDailyList() {
     const changeRequests = row.attendance.changeRequests || [];
     return changeRequests.filter((item) => item && !item.completed).length > 0;
   }, []);
+
+  // stable empty array to avoid creating a new [] on every render when attendanceMap has no data
+  const emptyAttendances = useMemo(() => [] as Attendance[], []);
 
   const pendingList = useMemo(() => {
     if (loading) return [];
@@ -198,7 +214,7 @@ export default function AttendanceDailyList() {
                     >
                       <ActionsTableCell
                         row={row}
-                        attendances={attendanceMap[row.sub] ?? []}
+                        attendances={attendanceMap[row.sub] ?? emptyAttendances}
                         attendanceLoading={!!attendanceLoadingMap[row.sub]}
                         attendanceError={attendanceErrorMap[row.sub] ?? null}
                       />
@@ -239,7 +255,7 @@ export default function AttendanceDailyList() {
               <TableRow key={index} className="attendance-row">
                 <ActionsTableCell
                   row={row}
-                  attendances={attendanceMap[row.sub] ?? []}
+                  attendances={attendanceMap[row.sub] ?? emptyAttendances}
                   attendanceLoading={!!attendanceLoadingMap[row.sub]}
                   attendanceError={attendanceErrorMap[row.sub] ?? null}
                 />
