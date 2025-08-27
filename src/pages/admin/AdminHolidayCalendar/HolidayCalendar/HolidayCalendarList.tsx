@@ -64,8 +64,10 @@ export default function HolidayCalendarList() {
   const [selectedYear, setSelectedYear] = useState<number | "">("");
   const [selectedMonth, setSelectedMonth] = useState<number | "">("");
 
+  const YEAR_RANGE = 7;
+  const YEAR_OFFSET = 5;
   const currentYear = dayjs().year();
-  const years = Array.from({ length: 7 }).map((_, i) => currentYear - 5 + i);
+  const years = Array.from({ length: YEAR_RANGE }).map((_, i) => currentYear - YEAR_OFFSET + i);
 
   const sorted = [...(holidayCalendars || [])].sort(sortCalendar);
 
