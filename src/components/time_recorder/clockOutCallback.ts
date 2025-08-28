@@ -1,3 +1,9 @@
+/**
+ * 勤怠打刻（退勤）時のコールバック関数を提供します。
+ *
+ * @packageDocumentation
+ */
+
 import { Dispatch } from "@reduxjs/toolkit";
 import { Logger } from "aws-amplify";
 
@@ -13,6 +19,16 @@ import {
 } from "../../lib/reducers/snackbarReducer";
 import { getNowISOStringWithZeroSeconds } from "./util";
 
+/**
+ * 退勤打刻時の処理を行うコールバック関数です。
+ *
+ * @param cognitoUser - 現在ログイン中のCognitoユーザー情報
+ * @param today - 本日の日付（YYYY-MM-DD形式）
+ * @param clockOut - 退勤打刻を行う非同期関数
+ * @param dispatch - Reduxのdispatch関数
+ * @param staff - スタッフ情報
+ * @param logger - ログ出力用Loggerインスタンス
+ */
 export function clockOutCallback(
   cognitoUser: CognitoUser | null | undefined,
   today: string,
