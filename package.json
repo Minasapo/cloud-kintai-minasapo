@@ -51,12 +51,23 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "eslint-plugin-simple-import-sort": "^10.0.0"
+  "eslint-plugin-simple-import-sort": "^10.0.0",
+  "jest": "^29.7.0",
+  "ts-jest": "^29.1.0",
+  "jest-environment-jsdom": "^29.7.0",
+  "identity-obj-proxy": "^3.0.0",
+  "@types/jest": "^29.5.14"
   },
   "scripts": {
-    "start": "vite",
-    "build": "vite build",
-    "eslint": "npx eslint ./src/"
+  "start": "vite",
+  "build": "vite build",
+  "eslint": "npx eslint ./src/",
+  "test": "jest --passWithNoTests",
+  "test:unit": "jest --passWithNoTests",
+  "test:watch": "jest --watch",
+  "test:coverage": "jest --coverage",
+  "test:e2e": "npx playwright test",
+  "test:all": "npm run test:unit && npm run test:e2e"
   },
   "eslintConfig": {
     "extends": [
