@@ -41,15 +41,13 @@ export class TimeRecordMailSender extends MailSender {
     return `${familyName || givenName} さん`;
   }
 
-  private getAdminMailAddress() {
-    // TODO: 送信先の管理向けメールアドレスを環境変数に設定
-    //   - docker-compose.yml に設定
-    //   - amplifyコンソールの環境変数に設定
-    const adminMailAddress = import.meta.env.VITE_ADMIN_MAIL_ADDRESS as string;
-    if (!adminMailAddress) {
+  private getAdminAuditMailAddress() {
+    const auditMailAddress = import.meta.env
+      .VITE_ADMIN_AUDIT_MAIL_ADDRESS as string;
+    if (!auditMailAddress) {
       throw new Error(MESSAGE_CODE.E00002);
     }
-    return adminMailAddress;
+    return auditMailAddress;
   }
 
   private getStaffAttendanceUrl() {
@@ -114,7 +112,7 @@ export class TimeRecordMailSender extends MailSender {
       "",
     ].join("\n");
 
-    this.send([this.getAdminMailAddress()], subject, body);
+    this.send([this.getAdminAuditMailAddress()], subject, body);
   }
 
   clockOut() {
@@ -166,6 +164,6 @@ export class TimeRecordMailSender extends MailSender {
       "",
     ].join("\n");
 
-    this.send([this.getAdminMailAddress()], subject, body);
+    this.send([this.getAdminAuditMailAddress()], subject, body);
   }
 }

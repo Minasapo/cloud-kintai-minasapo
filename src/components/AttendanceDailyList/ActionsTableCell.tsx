@@ -22,7 +22,7 @@ import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import * as MESSAGE_CODE from "../../errors";
 import { AttendanceDaily } from "../../hooks/useAttendanceDaily/useAttendanceDaily";
-import useAttendances from "../../hooks/useAttendances/useAttendances";
+// attendances are provided by parent (AttendanceDailyList)
 
 function getBadgeContent(attendances: Attendance[]) {
   const changeRequestCount = attendances.filter((attendance) =>
@@ -96,7 +96,17 @@ function AttendanceTotalStatus({
   );
 }
 
-export function ActionsTableCell({ row }: { row: AttendanceDaily }) {
+export function ActionsTableCell({
+  row,
+  attendances,
+  attendanceLoading,
+  attendanceError,
+}: {
+  row: AttendanceDaily;
+  attendances: Attendance[];
+  attendanceLoading: boolean;
+  attendanceError: Error | null;
+}) {
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();
 
@@ -104,16 +114,8 @@ export function ActionsTableCell({ row }: { row: AttendanceDaily }) {
   const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
   const [staffLoading, setStaffLoading] = useState(true);
 
-  const {
-    attendances,
-    getAttendances,
-    loading: attendanceLoading,
-    error: attendanceError,
-  } = useAttendances();
-
   useEffect(() => {
-    getAttendances(row.sub);
-
+    // still fetch staff info here
     fetchStaff(row.sub)
       .then((res) => {
         setStaff(res);

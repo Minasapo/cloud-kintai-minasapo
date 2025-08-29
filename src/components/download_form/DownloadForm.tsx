@@ -1,34 +1,20 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  CircularProgress,
-  Stack,
-  TextField,
-} from "@mui/material";
+import { Box, Chip, CircularProgress, Stack } from "@mui/material";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
-import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import useCloseDates from "../../hooks/useCloseDates/useCloseDates";
 import useStaffs, { StaffType } from "../../hooks/useStaffs/useStaffs";
-import { calcTotalRestTime } from "../attendance_editor/items/RestTimeItem/RestTimeItem";
-import downloadAttendances from "./downloadAttendances";
+import AggregateExportButton from "./AggregateExportButton";
+import ExportButton from "./ExportButton";
+import StaffSelector from "./StaffSelector";
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
-type Inputs = {
+export type Inputs = {
   startDate: dayjs.Dayjs | undefined;
   endDate: dayjs.Dayjs | undefined;
   staffs: StaffType[];
@@ -49,154 +35,21 @@ export default function DownloadForm() {
     loading: closeDateLoading,
     error: closeDateError,
   } = useCloseDates();
-  const { getHourlyPaidHolidayEnabled } = useContext(AppConfigContext);
 
-  const { control, handleSubmit, setValue } = useForm<Inputs>({
+  const { control, setValue, watch } = useForm<Inputs>({
     mode: "onChange",
     defaultValues,
   });
 
-  const onSubmit = async (data: Inputs) => {
-    const startDate = data.startDate ? data.startDate : dayjs();
-    const endDate = data.endDate ? data.endDate : dayjs();
-
-    const workDates: string[] = [];
-    let date = startDate;
-    while (date.isBefore(endDate) || date.isSame(endDate)) {
-      workDates.push(date.format(AttendanceDate.DataFormat));
-      date = date.add(1, "day");
-    }
-
-    await downloadAttendances(
-      workDates.map((workDate) => ({
-        workDate: {
-          eq: workDate,
-        },
-      }))
-    ).then((res) => {
-      const hourlyPaidHolidayEnabled = getHourlyPaidHolidayEnabled();
-      const exportData = [
-        [
-          "営業日",
-          "従業員コード",
-          "名前",
-          "休憩時間",
-          "出勤打刻",
-          "退勤打刻",
-          "直行",
-          "直帰",
-          "有給休暇",
-          "振替休日",
-          ...(hourlyPaidHolidayEnabled ? ["時間単位休暇(h)"] : []),
-          "摘要",
-        ].join(","),
-        ...selectedStaff
-          .sort((a, b) => {
-            const aSortKey = a.sortKey || "";
-            const bSortKey = b.sortKey || "";
-            return aSortKey.localeCompare(bSortKey);
-          })
-          .map((staff) => {
-            const attendances = res.filter(
-              (attendance) => attendance.staffId === staff.cognitoUserId
-            );
-
-            return [
-              ...workDates.map((workDate) => {
-                const matchAttendance = attendances.find(
-                  (attendance) => attendance.workDate === workDate
-                );
-
-                if (matchAttendance) {
-                  const {
-                    staffId,
-                    startTime,
-                    endTime,
-                    goDirectlyFlag,
-                    returnDirectlyFlag,
-                    paidHolidayFlag,
-                    substituteHolidayDate,
-                    rests,
-                    remarks,
-                    hourlyPaidHolidayHours,
-                  } = matchAttendance;
-
-                  const totalRestTime =
-                    rests?.reduce((acc, rest) => {
-                      if (!rest) return acc;
-
-                      const diff = calcTotalRestTime(
-                        rest.startTime,
-                        rest.endTime
-                      );
-                      return acc + diff;
-                    }, 0) ?? 0;
-
-                  const generateSummary = () => {
-                    const textList = [];
-                    if (substituteHolidayDate) {
-                      const formattedSubstituteHolidayDate = dayjs(
-                        substituteHolidayDate
-                      ).format("M/D");
-                      textList.push(`${formattedSubstituteHolidayDate}分振替`);
-                    }
-                    if (remarks) textList.push(remarks);
-                    return textList.join(" ");
-                  };
-
-                  return [
-                    dayjs(workDate).format(AttendanceDate.DisplayFormat),
-                    staffId,
-                    `${staff.familyName} ${staff.givenName}`,
-                    totalRestTime.toFixed(2),
-                    startTime ? dayjs(startTime).format("HH:mm") : "",
-                    endTime ? dayjs(endTime).format("HH:mm") : "",
-                    goDirectlyFlag ? 1 : 0,
-                    returnDirectlyFlag ? 1 : 0,
-                    paidHolidayFlag ? 1 : 0,
-                    substituteHolidayDate ? 1 : 0,
-                    ...(hourlyPaidHolidayEnabled
-                      ? [hourlyPaidHolidayHours ?? ""]
-                      : []),
-                    generateSummary(),
-                  ].join(",");
-                }
-
-                return [
-                  dayjs(workDate).format(AttendanceDate.DisplayFormat),
-                  staff.cognitoUserId,
-                  `${staff.familyName} ${staff.givenName}`,
-                  "",
-                  "",
-                  "",
-                  "",
-                  "",
-                  "",
-                  "",
-                  ...(hourlyPaidHolidayEnabled ? [""] : []),
-                  "",
-                ].join(",");
-              }),
-            ].join("\n");
-          }),
-      ].join("\n");
-
-      // CSVファイルを作成してダウンロード
-      const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
-      const blob = new Blob([bom, exportData], {
-        type: "text/csv",
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.download = `attendances_${dayjs().format(
-        AttendanceDate.QueryParamFormat
-      )}.csv`;
-      a.href = url;
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    });
-  };
+  // derive workDates from watched start/end date so we can pass to ExportButton
+  const startDate = watch("startDate") ?? dayjs();
+  const endDate = watch("endDate") ?? dayjs();
+  const workDates: string[] = [];
+  let date = startDate;
+  while (date.isBefore(endDate) || date.isSame(endDate)) {
+    workDates.push(date.format(AttendanceDate.DataFormat));
+    date = date.add(1, "day");
+  }
 
   if (staffLoading || closeDateLoading) {
     return <CircularProgress />;
@@ -304,86 +157,27 @@ export default function DownloadForm() {
           </Box>
           <Box>
             <Stack spacing={1}>
-              <Box>
-                <Controller
-                  name="staffs"
+              <Box sx={{ mt: 2 }}>
+                <StaffSelector
                   control={control}
-                  render={({ field }) => (
-                    <Autocomplete
-                      {...field}
-                      value={selectedStaff}
-                      multiple
-                      limitTags={2}
-                      id="multiple-limit-tags"
-                      options={staffs}
-                      disableCloseOnSelect
-                      getOptionLabel={(option) =>
-                        `${option?.familyName || ""} ${option?.givenName || ""}`
-                      }
-                      defaultValue={[]}
-                      renderOption={(props, option, { selected }) => (
-                        <li {...props}>
-                          <Checkbox
-                            icon={icon}
-                            checkedIcon={checkedIcon}
-                            style={{ marginRight: 8 }}
-                            checked={selected}
-                          />
-                          {`${option?.familyName || ""} ${
-                            option?.givenName || ""
-                          }`}
-                        </li>
-                      )}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="対象者リスト"
-                          placeholder="対象者を入力..."
-                          size="small"
-                        />
-                      )}
-                      sx={{ width: "100%", minWidth: 300, maxWidth: 500 }}
-                      onChange={(_, value) => {
-                        setSelectedStaff(value);
-                        setValue("staffs", value);
-                      }}
-                    />
-                  )}
+                  staffs={staffs}
+                  selectedStaff={selectedStaff}
+                  setSelectedStaff={setSelectedStaff}
+                  setValue={setValue}
                 />
               </Box>
-              <Stack direction="row" spacing={1} justifyContent="flex-end">
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    setSelectedStaff(staffs);
-                    setValue("staffs", staffs);
-                  }}
-                  disabled={
-                    staffs.length === 0 ||
-                    selectedStaff.length === staffs.length
-                  }
-                >
-                  全選択
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    setSelectedStaff([]);
-                    setValue("staffs", []);
-                  }}
-                  disabled={selectedStaff.length === 0}
-                >
-                  全解除
-                </Button>
-              </Stack>
             </Stack>
           </Box>
         </Stack>
       </Box>
       <Box>
-        <Button onClick={handleSubmit(onSubmit)}>一括ダウンロード</Button>
+        <Stack direction="row" spacing={1}>
+          <ExportButton workDates={workDates} selectedStaff={selectedStaff} />
+          <AggregateExportButton
+            workDates={workDates}
+            selectedStaff={selectedStaff}
+          />
+        </Stack>
       </Box>
     </Stack>
   );
