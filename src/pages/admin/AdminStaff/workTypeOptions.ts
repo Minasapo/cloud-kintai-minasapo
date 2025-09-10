@@ -8,7 +8,7 @@ const workTypeMap = new Map<string, string>(
 );
 
 export function getWorkTypeLabel(value?: string | null) {
-  if (!value) return "";
+  if (!value) return workTypeMap.get("weekday") || "";
   return workTypeMap.get(value) || "";
 }
 

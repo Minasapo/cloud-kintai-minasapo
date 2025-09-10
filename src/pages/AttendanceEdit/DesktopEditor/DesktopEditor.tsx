@@ -17,11 +17,13 @@ import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectl
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
 } from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
+import QuickInputButtons from "@/components/attendance_editor/QuickInputButtons";
 import GroupContainer from "@/components/ui/GroupContainer/GroupContainer";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 
 import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
 import StaffNameItem from "../../../components/attendance_editor/items/StaffNameItem";
+import WorkTypeItem from "../../../components/attendance_editor/items/WorkTypeItem";
 import Title from "../../../components/Title/Title";
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
@@ -80,6 +82,9 @@ export default function DesktopEditor() {
     changeRequests,
     hourlyPaidHolidayTimeFields,
     hourlyPaidHolidayTimeAppend,
+    restReplace,
+    hourlyPaidHolidayTimeReplace,
+    workDate,
   } = useContext(AttendanceEditContext);
   const { getStartTime } = useAppConfig();
   const { hourlyPaidHolidayEnabled } = useContext(AttendanceEditContext);
@@ -149,10 +154,23 @@ export default function DesktopEditor() {
           </Stack>
           <NoDataAlert />
           <GroupContainer>
+            {setValue && restReplace && hourlyPaidHolidayTimeReplace && (
+              <QuickInputButtons
+                setValue={setValue}
+                restReplace={restReplace}
+                hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
+                workDate={workDate ?? null}
+              />
+            )}
+          </GroupContainer>
+          <GroupContainer>
             <WorkDateItem />
           </GroupContainer>
           <GroupContainer>
-            <StaffNameItem />
+            <Stack spacing={2}>
+              <StaffNameItem />
+              <WorkTypeItem />
+            </Stack>
           </GroupContainer>
           <GroupContainer>
             <WorkTimeInput />

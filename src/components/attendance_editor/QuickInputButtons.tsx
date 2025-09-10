@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
@@ -37,7 +38,10 @@ export default function QuickInputButtons({
     getEndTime,
     getLunchRestStartTime,
     getLunchRestEndTime,
+    getAmHolidayStartTime,
+    getAmHolidayEndTime,
     getPmHolidayStartTime,
+    getPmHolidayEndTime,
     getAmPmHolidayEnabled,
   } = useAppConfig();
 
@@ -45,7 +49,10 @@ export default function QuickInputButtons({
   const defaultEnd = getEndTime().format("HH:mm");
   const defaultLunchStart = getLunchRestStartTime().format("HH:mm");
   const defaultLunchEnd = getLunchRestEndTime().format("HH:mm");
+  const defaultAmStart = getAmHolidayStartTime().format("HH:mm");
+  const defaultAmEnd = getAmHolidayEndTime().format("HH:mm");
   const defaultPmStart = getPmHolidayStartTime().format("HH:mm");
+  const defaultPmEnd = getPmHolidayEndTime().format("HH:mm");
 
   const toISO = (time: string | null) => {
     if (!time) return null;
@@ -87,111 +94,135 @@ export default function QuickInputButtons({
       <Stack direction="row" spacing={1} alignItems="center">
         <Box sx={{ fontWeight: "bold", mr: 1 }}>定型入力</Box>
         <Stack direction="row" spacing={1}>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              askConfirm(
-                "定型入力: 入力内容をクリアします。よろしいですか？",
-                () => {
-                  setValue("startTime", null);
-                  setValue("endTime", null);
-                  restReplace([]);
-                  hourlyPaidHolidayTimeReplace([]);
-                  setValue("paidHolidayFlag", false);
-                  setValue("remarks", "");
-                  setValue("goDirectlyFlag", false);
-                  setValue("returnDirectlyFlag", false);
-                }
-              )
-            }
-          >
-            クリア
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              askConfirm(
-                "定型入力: 「通常勤務」を適用します。よろしいですか？",
-                () => {
-                  setValue("startTime", toISO(defaultStart));
-                  setValue("endTime", toISO(defaultEnd));
-                  restReplace([
-                    {
-                      startTime: toISO(defaultLunchStart),
-                      endTime: toISO(defaultLunchEnd),
-                    },
-                  ]);
-                  hourlyPaidHolidayTimeReplace([]);
-                  setValue("paidHolidayFlag", false);
-                  setValue("remarks", "");
-                }
-              )
-            }
-          >
-            通常勤務
-          </Button>
-          {getAmPmHolidayEnabled() && (
-            <>
+          <Tooltip title="入力内容をすべてクリアします。">
+            <span>
               <Button
                 variant="outlined"
                 onClick={() =>
                   askConfirm(
-                    "定型入力: 「午前半休」を適用します。よろしいですか？",
+                    "定型入力: 入力内容をクリアします。よろしいですか？",
                     () => {
-                      setValue("startTime", toISO(defaultLunchEnd));
-                      setValue("endTime", toISO(defaultEnd));
+                      setValue("startTime", null);
+                      setValue("endTime", null);
                       restReplace([]);
                       hourlyPaidHolidayTimeReplace([]);
                       setValue("paidHolidayFlag", false);
-                      setValue("remarks", "午前半休");
+                      setValue("remarks", "");
+                      setValue("goDirectlyFlag", false);
+                      setValue("returnDirectlyFlag", false);
                     }
                   )
                 }
               >
-                午前半休
+                クリア
               </Button>
+            </span>
+          </Tooltip>
+
+          <Tooltip title="規定の出勤時間と昼休みをセットします。">
+            <span>
               <Button
                 variant="outlined"
                 onClick={() =>
                   askConfirm(
-                    "定型入力: 「午後半休」を適用します。よろしいですか？",
+                    "定型入力: 「通常勤務」を適用します。よろしいですか？",
                     () => {
                       setValue("startTime", toISO(defaultStart));
-                      setValue("endTime", toISO(defaultPmStart));
-                      restReplace([]);
+                      setValue("endTime", toISO(defaultEnd));
+                      restReplace([
+                        {
+                          startTime: toISO(defaultLunchStart),
+                          endTime: toISO(defaultLunchEnd),
+                        },
+                      ]);
                       hourlyPaidHolidayTimeReplace([]);
                       setValue("paidHolidayFlag", false);
-                      setValue("remarks", "午後半休");
+                      setValue("remarks", "");
                     }
                   )
                 }
               >
-                午後半休
+                通常勤務
               </Button>
+            </span>
+          </Tooltip>
+
+          {getAmPmHolidayEnabled() && (
+            <>
+              <Tooltip title="午前を休みにします（午後から出勤）。管理者画面で設定された時間が適用されます。">
+                <span>
+                  <Button
+                    variant="outlined"
+                    onClick={() =>
+                      askConfirm(
+                        "定型入力: 「午前半休」を適用します。よろしいですか？",
+                        () => {
+                          setValue("startTime", toISO(defaultPmStart));
+                          setValue("endTime", toISO(defaultPmEnd));
+                          restReplace([]);
+                          hourlyPaidHolidayTimeReplace([]);
+                          setValue("paidHolidayFlag", false);
+                          setValue("remarks", "午前半休");
+                        }
+                      )
+                    }
+                  >
+                    午前半休
+                  </Button>
+                </span>
+              </Tooltip>
+
+              <Tooltip title="午後を休みにします（午前中出勤）。管理者画面で設定された時間が適用されます。">
+                <span>
+                  <Button
+                    variant="outlined"
+                    onClick={() =>
+                      askConfirm(
+                        "定型入力: 「午後半休」を適用します。よろしいですか？",
+                        () => {
+                          setValue("startTime", toISO(defaultAmStart));
+                          setValue("endTime", toISO(defaultAmEnd));
+                          restReplace([]);
+                          hourlyPaidHolidayTimeReplace([]);
+                          setValue("paidHolidayFlag", false);
+                          setValue("remarks", "午後半休");
+                        }
+                      )
+                    }
+                  >
+                    午後半休
+                  </Button>
+                </span>
+              </Tooltip>
             </>
           )}
-          <Button
-            variant="outlined"
-            onClick={() =>
-              askConfirm(
-                "定型入力: 「有給」を適用します。よろしいですか？",
-                () => {
-                  setValue("startTime", toISO(defaultStart));
-                  setValue("endTime", toISO(defaultEnd));
-                  restReplace([
-                    {
-                      startTime: toISO(defaultLunchStart),
-                      endTime: toISO(defaultLunchEnd),
-                    },
-                  ]);
-                  hourlyPaidHolidayTimeReplace([]);
-                  setValue("paidHolidayFlag", true);
+
+          <Tooltip title="有給休暇(1日)を設定します。勤務時間は、規定の出勤・退勤時刻で打刻されます。">
+            <span>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  askConfirm(
+                    "定型入力: 「有給(1日)」を適用します。よろしいですか？",
+                    () => {
+                      setValue("startTime", toISO(defaultStart));
+                      setValue("endTime", toISO(defaultEnd));
+                      restReplace([
+                        {
+                          startTime: toISO(defaultLunchStart),
+                          endTime: toISO(defaultLunchEnd),
+                        },
+                      ]);
+                      hourlyPaidHolidayTimeReplace([]);
+                      setValue("paidHolidayFlag", true);
+                    }
+                  )
                 }
-              )
-            }
-          >
-            有給休暇(1日)
-          </Button>
+              >
+                有給休暇(1日)
+              </Button>
+            </span>
+          </Tooltip>
         </Stack>
       </Stack>
 
