@@ -16,6 +16,7 @@ import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
 } from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
 import GroupContainer from "@/components/ui/GroupContainer/GroupContainer";
+import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 
 import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
 import StaffNameItem from "../../../components/attendance_editor/items/StaffNameItem";
@@ -78,6 +79,7 @@ export default function DesktopEditor() {
     hourlyPaidHolidayTimeFields,
     hourlyPaidHolidayTimeAppend,
   } = useContext(AttendanceEditContext);
+  const { getStartTime } = useAppConfig();
   const { hourlyPaidHolidayEnabled } = useContext(AttendanceEditContext);
   const [totalProductionTime, setTotalProductionTime] = useState<number>(0);
   const [totalHourlyPaidHolidayTime, setTotalHourlyPaidHolidayTime] =
@@ -139,20 +141,23 @@ export default function DesktopEditor() {
           </GroupContainer>
           <GroupContainer>
             <WorkTimeInput />
+            <GoDirectlyFlagCheckbox
+              name="goDirectlyFlag"
+              control={control}
+              disabled={changeRequests.length > 0}
+              onChangeExtra={(checked: boolean) => {
+                if (checked && setValue) {
+                  setValue("startTime", getStartTime().toISOString());
+                }
+              }}
+            />
+            <ReturnDirectlyFlagInput />
             <RestTimeItem />
             <Divider />
             <ProductionTimeItem
               time={totalProductionTime}
               hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
             />
-          </GroupContainer>
-          <GroupContainer>
-            <GoDirectlyFlagCheckbox
-              name="goDirectlyFlag"
-              control={control}
-              disabled={changeRequests.length > 0}
-            />
-            <ReturnDirectlyFlagInput />
           </GroupContainer>
           <GroupContainer>
             <SubstituteHolidayDateInput />

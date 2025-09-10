@@ -71,6 +71,7 @@ import {
   calcTotalWorkTime,
   WorkTimeItem,
 } from "./items/WorkTimeItem/WorkTimeItem";
+import WorkTypeItem from "./items/WorkTypeItem";
 import { LunchRestTimeNotSetWarning } from "./LunchRestTimeNotSetWarning";
 import QuickInputButtons from "./QuickInputButtons";
 import { SystemCommentList } from "./SystemCommentList";
@@ -96,6 +97,7 @@ export default function AttendanceEditor() {
     getLunchRestStartTime,
     getLunchRestEndTime,
     getHourlyPaidHolidayEnabled,
+    getStartTime,
     loading: appConfigLoading,
   } = useAppConfig();
   const dispatch = useAppDispatchV2();
@@ -177,6 +179,7 @@ export default function AttendanceEditor() {
           updatedAt: res.updatedAt,
           usageStartDate: res.usageStartDate,
           notifications: res.notifications,
+          workType: res.workType,
         })
       )
       .catch((e) => {
@@ -590,10 +593,24 @@ export default function AttendanceEditor() {
             </Box>
           </GroupContainer>
           <GroupContainer>
-            <StaffNameItem />
+            <Stack spacing={2}>
+              <StaffNameItem />
+              <WorkTypeItem />
+            </Stack>
           </GroupContainer>
           <GroupContainer>
             <WorkTimeItem />
+            <GoDirectlyFlagCheckbox
+              name="goDirectlyFlag"
+              control={control}
+              disabled={changeRequests.length > 0}
+              onChangeExtra={(checked) => {
+                if (checked) {
+                  setValue("startTime", getStartTime().toISOString());
+                }
+              }}
+            />
+            <ReturnDirectlyFlagInput />
             <Stack direction="row">
               <Box
                 sx={{ fontWeight: "bold", width: "150px" }}
@@ -641,14 +658,6 @@ export default function AttendanceEditor() {
                 hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
               />
             </Box>
-          </GroupContainer>
-          <GroupContainer>
-            <GoDirectlyFlagCheckbox
-              name="goDirectlyFlag"
-              control={control}
-              disabled={changeRequests.length > 0}
-            />
-            <ReturnDirectlyFlagInput />
           </GroupContainer>
           <GroupContainer>
             <SubstituteHolidayDateInput />
