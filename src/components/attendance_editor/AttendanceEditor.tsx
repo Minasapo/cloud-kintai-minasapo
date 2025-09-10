@@ -72,6 +72,7 @@ import {
   WorkTimeItem,
 } from "./items/WorkTimeItem/WorkTimeItem";
 import { LunchRestTimeNotSetWarning } from "./LunchRestTimeNotSetWarning";
+import QuickInputButtons from "./QuickInputButtons";
 import { SystemCommentList } from "./SystemCommentList";
 
 const SaveButton = styled(Button)(({ theme }) => ({
@@ -571,6 +572,14 @@ export default function AttendanceEditor() {
             <EditAttendanceHistoryList />
             <SystemCommentList />
           </Stack>
+          <GroupContainer>
+            <QuickInputButtons
+              setValue={setValue}
+              restReplace={restReplace}
+              hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
+              workDate={workDate}
+            />
+          </GroupContainer>
           <GroupContainer>
             <Box>
               <WorkDateItem
