@@ -43,6 +43,7 @@ import {
   setSnackbarSuccess,
 } from "../../../lib/reducers/snackbarReducer";
 import { ROLE_OPTIONS } from "../AdminStaff/CreateStaffDialog";
+import WORK_TYPE_OPTIONS from "../AdminStaff/workTypeOptions";
 
 type Inputs = {
   staffId?: Staff["sub"];
@@ -52,6 +53,7 @@ type Inputs = {
   owner: boolean;
   beforeRoles: StaffRole[];
   role: string;
+  workType?: string | null;
   usageStartDate?: Staff["usageStartDate"] | null;
   sortKey: string;
 };
@@ -62,6 +64,7 @@ const defaultValues: Inputs = {
   owner: false,
   beforeRoles: [],
   role: StaffRole.STAFF,
+  workType: undefined,
   sortKey: "1",
 };
 
@@ -146,6 +149,8 @@ export default function AdminStaffEditor() {
           role,
           usageStartDate: usageStartDate?.toISOString() || null,
           sortKey: data.sortKey,
+          // include workType; cast to any because generated UpdateStaffInput may not include it yet
+          ...(data.workType ? { workType: data.workType } : {}),
         })
           .then(() => {
             dispatch(setSnackbarSuccess(MESSAGE_CODE.S05003));
@@ -180,6 +185,10 @@ export default function AdminStaffEditor() {
     setValue("owner", staff.owner || false);
     setValue("beforeRoles", [staff.role]);
     setValue("role", staff.role);
+    setValue(
+      "workType",
+      (staff as unknown as Record<string, unknown>).workType as string | null
+    );
     setValue(
       "usageStartDate",
       staff.usageStartDate ? dayjs(staff.usageStartDate) : null
@@ -292,6 +301,40 @@ export default function AdminStaffEditor() {
                           format="YYYY/M/D"
                           slotProps={{
                             textField: { size: "small" },
+                          }}
+                        />
+                      )}
+                    />
+                  </Typography>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>勤務形態</TableCell>
+                <TableCell>
+                  <Typography variant="body1">
+                    <Controller
+                      name="workType"
+                      control={control}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          value={
+                            WORK_TYPE_OPTIONS.find(
+                              (option) => option.value === field.value
+                            ) ?? null
+                          }
+                          options={WORK_TYPE_OPTIONS}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              size="small"
+                              sx={{ width: 400 }}
+                            />
+                          )}
+                          onChange={(_, data) => {
+                            if (!data) return;
+                            setValue("workType", data.value);
+                            field.onChange(data.value);
                           }}
                         />
                       )}
