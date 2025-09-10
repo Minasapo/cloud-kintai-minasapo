@@ -168,6 +168,7 @@ export const getStaff = /* GraphQL */ `query GetStaff($id: ID!) {
       __typename
     }
     sortKey
+    workType
     createdAt
     updatedAt
     __typename
@@ -197,6 +198,7 @@ export const listStaff = /* GraphQL */ `query ListStaff(
         __typename
       }
       sortKey
+      workType
       createdAt
       updatedAt
       __typename
@@ -239,6 +241,7 @@ export const staffByCognitoUserId = /* GraphQL */ `query StaffByCognitoUserId(
         __typename
       }
       sortKey
+      workType
       createdAt
       updatedAt
       __typename

@@ -21,6 +21,7 @@ type Staff @model @auth(rules: [{ allow: private }]) {
   usageStartDate: String
   notifications: Notification
   sortKey: String
+  workType: String
 }
 
 type Notification {
