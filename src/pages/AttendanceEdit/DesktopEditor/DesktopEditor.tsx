@@ -15,6 +15,7 @@ import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectl
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
 } from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
+import GroupContainer from "@/components/ui/GroupContainer/GroupContainer";
 
 import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
 import StaffNameItem from "../../../components/attendance_editor/items/StaffNameItem";
@@ -130,16 +131,37 @@ export default function DesktopEditor() {
             <ChangeRequestingAlert changeRequests={changeRequests} />
           </Stack>
           <NoDataAlert />
-          <WorkDateItem />
-          <StaffNameItem />
-          <PaidHolidayFlagInput />
-          {/* 時間単位休暇セクション追加 */}
-          {hourlyPaidHolidayEnabled && (
-            <Box>
+          <GroupContainer>
+            <WorkDateItem />
+          </GroupContainer>
+          <GroupContainer>
+            <StaffNameItem />
+          </GroupContainer>
+          <GroupContainer>
+            <WorkTimeInput />
+            <RestTimeItem />
+            <Divider />
+            <ProductionTimeItem
+              time={totalProductionTime}
+              hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
+            />
+          </GroupContainer>
+          <GroupContainer>
+            <GoDirectlyFlagCheckbox
+              name="goDirectlyFlag"
+              control={control}
+              disabled={changeRequests.length > 0}
+            />
+            <ReturnDirectlyFlagInput />
+          </GroupContainer>
+          <GroupContainer>
+            <SubstituteHolidayDateInput />
+            <PaidHolidayFlagInput />
+            {hourlyPaidHolidayEnabled && (
               <Stack direction="row">
-                <Box
-                  sx={{ fontWeight: "bold", width: "150px" }}
-                >{`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}</Box>
+                <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                  {"時間単位休暇"}
+                </Box>
                 <Stack spacing={1} sx={{ flexGrow: 2 }}>
                   {hourlyPaidHolidayTimeFields.length === 0 && (
                     <Box sx={{ color: "text.secondary", fontSize: 14 }}>
@@ -171,24 +193,14 @@ export default function DesktopEditor() {
                   </Box>
                 </Stack>
               </Stack>
-            </Box>
-          )}
-          <SubstituteHolidayDateInput />
-          <GoDirectlyFlagCheckbox
-            name="goDirectlyFlag"
-            control={control}
-            disabled={changeRequests.length > 0}
-          />
-          <ReturnDirectlyFlagInput />
-          <WorkTimeInput />
-          <RestTimeItem />
-          <ProductionTimeItem
-            time={totalProductionTime}
-            hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
-          />
-          <RemarksInput />
-          <Divider />
-          <StaffCommentInput register={register} setValue={setValue} />
+            )}
+          </GroupContainer>
+          <GroupContainer>
+            <RemarksInput />
+          </GroupContainer>
+          <GroupContainer>
+            <StaffCommentInput register={register} setValue={setValue} />
+          </GroupContainer>
           <Box>
             <Stack
               direction="row"
