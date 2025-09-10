@@ -12,6 +12,8 @@ import {
   Stack,
   styled,
   Switch,
+  Tab,
+  Tabs,
   Typography,
 } from "@mui/material";
 import { Logger } from "aws-amplify";
@@ -109,6 +111,7 @@ export default function AttendanceEditor() {
   const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
   const [workDate, setWorkDate] = useState<dayjs.Dayjs | null>(null);
   const [enabledSendMail, setEnabledSendMail] = useState<boolean>(true);
+  const [vacationTab, setVacationTab] = useState<number>(0);
 
   const logger = new Logger(
     "AttendanceEditor",
@@ -494,6 +497,18 @@ export default function AttendanceEditor() {
         .filter((item) => !item.completed)
     : [];
 
+  function TabPanel({
+    children,
+    value,
+    index,
+  }: {
+    children: React.ReactNode;
+    value: number;
+    index: number;
+  }) {
+    return <>{value === index ? <Box sx={{ pt: 2 }}>{children}</Box> : null}</>;
+  }
+
   return (
     <AttendanceEditProvider
       value={{
@@ -660,52 +675,75 @@ export default function AttendanceEditor() {
             </Box>
           </GroupContainer>
           <GroupContainer>
-            <SubstituteHolidayDateInput />
-            <PaidHolidayFlagInputCommon
-              label="有給休暇(1日)"
-              control={control}
-              setValue={setValue}
-              workDate={workDate ? workDate.toISOString() : undefined}
-              setPaidHolidayTimes={true}
-              disabled={changeRequests.length > 0}
-            />
+            <Tabs
+              value={vacationTab}
+              onChange={(_, v) => setVacationTab(v)}
+              aria-label="vacation-tabs"
+              sx={{ borderBottom: 1, borderColor: "divider" }}
+            >
+              <Tab label="代休" />
+              <Tab label="有給(1日)" />
+              {getHourlyPaidHolidayEnabled() && (
+                <Tab
+                  label={`時間単位(${hourlyPaidHolidayTimeFields.length})`}
+                />
+              )}
+            </Tabs>
+
+            <TabPanel value={vacationTab} index={0}>
+              <SubstituteHolidayDateInput />
+            </TabPanel>
+
+            <TabPanel value={vacationTab} index={1}>
+              <PaidHolidayFlagInputCommon
+                label="有給休暇(1日)"
+                control={control}
+                setValue={setValue}
+                workDate={workDate ? workDate.toISOString() : undefined}
+                setPaidHolidayTimes={true}
+                disabled={changeRequests.length > 0}
+              />
+            </TabPanel>
+
             {getHourlyPaidHolidayEnabled() && (
-              <Stack spacing={1}>
-                <Stack direction="row">
-                  <Box
-                    sx={{ fontWeight: "bold", width: "150px" }}
-                  >{`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}</Box>
-                  <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                    {hourlyPaidHolidayTimeFields.length === 0 && (
-                      <Box sx={{ color: "text.secondary", fontSize: 14 }}>
-                        時間単位休暇の時間帯を追加してください。
-                      </Box>
-                    )}
-                    {hourlyPaidHolidayTimeFields.map(
-                      (hourlyPaidHolidayTime, index) => (
-                        <HourlyPaidHolidayTimeItem
-                          key={hourlyPaidHolidayTime.id}
-                          time={hourlyPaidHolidayTime}
-                          index={index}
-                        />
-                      )
-                    )}
-                    <Box>
-                      <IconButton
-                        aria-label="add-hourly-paid-holiday-time"
-                        onClick={() =>
-                          hourlyPaidHolidayTimeAppend({
-                            startTime: null,
-                            endTime: null,
-                          })
-                        }
-                      >
-                        <AddAlarmIcon />
-                      </IconButton>
+              <TabPanel value={vacationTab} index={2}>
+                <Stack spacing={1}>
+                  <Stack direction="row">
+                    <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                      {`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}
                     </Box>
+                    <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                      {hourlyPaidHolidayTimeFields.length === 0 && (
+                        <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                          時間単位休暇の時間帯を追加してください。
+                        </Box>
+                      )}
+                      {hourlyPaidHolidayTimeFields.map(
+                        (hourlyPaidHolidayTime, index) => (
+                          <HourlyPaidHolidayTimeItem
+                            key={hourlyPaidHolidayTime.id}
+                            time={hourlyPaidHolidayTime}
+                            index={index}
+                          />
+                        )
+                      )}
+                      <Box>
+                        <IconButton
+                          aria-label="add-hourly-paid-holiday-time"
+                          onClick={() =>
+                            hourlyPaidHolidayTimeAppend({
+                              startTime: null,
+                              endTime: null,
+                            })
+                          }
+                        >
+                          <AddAlarmIcon />
+                        </IconButton>
+                      </Box>
+                    </Stack>
                   </Stack>
                 </Stack>
-              </Stack>
+              </TabPanel>
             )}
           </GroupContainer>
           <GroupContainer>
