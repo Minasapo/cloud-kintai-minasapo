@@ -596,6 +596,7 @@ export default function AttendanceEditor() {
               restReplace={restReplace}
               hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
               workDate={workDate}
+              visibleMode="admin"
             />
           </GroupContainer>
           <GroupContainer>

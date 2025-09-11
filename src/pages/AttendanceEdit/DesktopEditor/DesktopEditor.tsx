@@ -160,6 +160,7 @@ export default function DesktopEditor() {
                 restReplace={restReplace}
                 hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
                 workDate={workDate ?? null}
+                visibleMode="staff"
               />
             )}
           </GroupContainer>

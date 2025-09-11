@@ -13,7 +13,7 @@ export function StaffNameItem() {
 
   return (
     <>
-      <Label variant="body1">スタッフ</Label>
+      <Label>■ スタッフ</Label>
       <Typography variant="body1">
         {`${staff.familyName} ${staff.givenName}`}
       </Typography>

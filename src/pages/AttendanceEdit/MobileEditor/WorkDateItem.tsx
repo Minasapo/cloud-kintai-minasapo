@@ -11,7 +11,7 @@ export function WorkDateItem() {
 
   return (
     <>
-      <Label variant="body1">勤務日</Label>
+      <Label>■ 勤務日</Label>
       <MoveDateItem workDate={workDate} />
     </>
   );

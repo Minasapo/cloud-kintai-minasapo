@@ -23,7 +23,8 @@ export function GoDirectlyFlagInput() {
       inputComponent={Switch}
       onChangeExtra={(checked: boolean) => {
         if (checked) {
-          setValue("startTime", getStartTime().format("HH:mm"));
+          setValue("goDirectlyFlag", true);
+          setValue("startTime", getStartTime().toISOString());
         }
       }}
     />
