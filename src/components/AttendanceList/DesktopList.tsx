@@ -86,7 +86,6 @@ export default function DesktopList({
       <AttendanceGraph attendances={attendances} />
       {errorAttendances.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
-          {/* 目立たせるために枠と背景で囲む */}
           <Box
             sx={{
               border: "1px solid",
