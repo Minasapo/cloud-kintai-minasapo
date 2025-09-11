@@ -439,6 +439,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {
@@ -530,6 +531,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {
@@ -621,6 +623,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {

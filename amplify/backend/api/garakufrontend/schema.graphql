@@ -71,6 +71,7 @@ type Attendance @model @auth(rules: [{ allow: private }]) {
   hourlyPaidHolidayTimes: [HourlyPaidHolidayTime]
   remarks: String
   paidHolidayFlag: Boolean
+  isDeemedHoliday: Boolean
   hourlyPaidHolidayHours: Int
   substituteHolidayDate: String
   histories: [AttendanceHistory]

@@ -389,6 +389,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {
@@ -483,6 +484,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
       }
       remarks
       paidHolidayFlag
+      isDeemedHoliday
       hourlyPaidHolidayHours
       substituteHolidayDate
       histories {
@@ -590,6 +592,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
       }
       remarks
       paidHolidayFlag
+      isDeemedHoliday
       hourlyPaidHolidayHours
       substituteHolidayDate
       histories {

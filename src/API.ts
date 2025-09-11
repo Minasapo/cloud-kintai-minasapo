@@ -410,6 +410,7 @@ export type CreateAttendanceInput = {
   hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
   remarks?: string | null,
   paidHolidayFlag?: boolean | null,
+  isDeemedHoliday?: boolean | null,
   hourlyPaidHolidayHours?: number | null,
   substituteHolidayDate?: string | null,
   histories?: Array< AttendanceHistoryInput | null > | null,
@@ -477,6 +478,7 @@ export type ModelAttendanceConditionInput = {
   returnDirectlyFlag?: ModelBooleanInput | null,
   remarks?: ModelStringInput | null,
   paidHolidayFlag?: ModelBooleanInput | null,
+  isDeemedHoliday?: ModelBooleanInput | null,
   hourlyPaidHolidayHours?: ModelIntInput | null,
   substituteHolidayDate?: ModelStringInput | null,
   revision?: ModelIntInput | null,
@@ -512,6 +514,7 @@ export type Attendance = {
   hourlyPaidHolidayTimes?:  Array<HourlyPaidHolidayTime | null > | null,
   remarks?: string | null,
   paidHolidayFlag?: boolean | null,
+  isDeemedHoliday?: boolean | null,
   hourlyPaidHolidayHours?: number | null,
   substituteHolidayDate?: string | null,
   histories?:  Array<AttendanceHistory | null > | null,
@@ -589,6 +592,7 @@ export type UpdateAttendanceInput = {
   hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
   remarks?: string | null,
   paidHolidayFlag?: boolean | null,
+  isDeemedHoliday?: boolean | null,
   hourlyPaidHolidayHours?: number | null,
   substituteHolidayDate?: string | null,
   histories?: Array< AttendanceHistoryInput | null > | null,
@@ -823,6 +827,7 @@ export type ModelAttendanceFilterInput = {
   returnDirectlyFlag?: ModelBooleanInput | null,
   remarks?: ModelStringInput | null,
   paidHolidayFlag?: ModelBooleanInput | null,
+  isDeemedHoliday?: ModelBooleanInput | null,
   hourlyPaidHolidayHours?: ModelIntInput | null,
   substituteHolidayDate?: ModelStringInput | null,
   revision?: ModelIntInput | null,
@@ -993,6 +998,7 @@ export type ModelSubscriptionAttendanceFilterInput = {
   returnDirectlyFlag?: ModelSubscriptionBooleanInput | null,
   remarks?: ModelSubscriptionStringInput | null,
   paidHolidayFlag?: ModelSubscriptionBooleanInput | null,
+  isDeemedHoliday?: ModelSubscriptionBooleanInput | null,
   hourlyPaidHolidayHours?: ModelSubscriptionIntInput | null,
   substituteHolidayDate?: ModelSubscriptionStringInput | null,
   revision?: ModelSubscriptionIntInput | null,
@@ -1480,6 +1486,7 @@ export type CreateAttendanceMutation = {
     } | null > | null,
     remarks?: string | null,
     paidHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
     hourlyPaidHolidayHours?: number | null,
     substituteHolidayDate?: string | null,
     histories?:  Array< {
@@ -1571,6 +1578,7 @@ export type UpdateAttendanceMutation = {
     } | null > | null,
     remarks?: string | null,
     paidHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
     hourlyPaidHolidayHours?: number | null,
     substituteHolidayDate?: string | null,
     histories?:  Array< {
@@ -1662,6 +1670,7 @@ export type DeleteAttendanceMutation = {
     } | null > | null,
     remarks?: string | null,
     paidHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
     hourlyPaidHolidayHours?: number | null,
     substituteHolidayDate?: string | null,
     histories?:  Array< {
@@ -2167,6 +2176,7 @@ export type GetAttendanceQuery = {
     } | null > | null,
     remarks?: string | null,
     paidHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
     hourlyPaidHolidayHours?: number | null,
     substituteHolidayDate?: string | null,
     histories?:  Array< {
@@ -2261,6 +2271,7 @@ export type ListAttendancesQuery = {
       } | null > | null,
       remarks?: string | null,
       paidHolidayFlag?: boolean | null,
+      isDeemedHoliday?: boolean | null,
       hourlyPaidHolidayHours?: number | null,
       substituteHolidayDate?: string | null,
       histories?:  Array< {
@@ -2360,6 +2371,7 @@ export type AttendancesByStaffIdQuery = {
       } | null > | null,
       remarks?: string | null,
       paidHolidayFlag?: boolean | null,
+      isDeemedHoliday?: boolean | null,
       hourlyPaidHolidayHours?: number | null,
       substituteHolidayDate?: string | null,
       histories?:  Array< {
@@ -2902,6 +2914,7 @@ export type OnCreateAttendanceSubscription = {
     } | null > | null,
     remarks?: string | null,
     paidHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
     hourlyPaidHolidayHours?: number | null,
     substituteHolidayDate?: string | null,
     histories?:  Array< {
@@ -2992,6 +3005,7 @@ export type OnUpdateAttendanceSubscription = {
     } | null > | null,
     remarks?: string | null,
     paidHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
     hourlyPaidHolidayHours?: number | null,
     substituteHolidayDate?: string | null,
     histories?:  Array< {
@@ -3082,6 +3096,7 @@ export type OnDeleteAttendanceSubscription = {
     } | null > | null,
     remarks?: string | null,
     paidHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
     hourlyPaidHolidayHours?: number | null,
     substituteHolidayDate?: string | null,
     histories?:  Array< {
