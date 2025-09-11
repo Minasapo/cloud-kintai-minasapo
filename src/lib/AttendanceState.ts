@@ -54,9 +54,13 @@ export class AttendanceState {
       return AttendanceStatus.Requesting;
     }
 
-    const isWeekday = new DayOfWeek(this.holidayCalendars).isWeekday(
-      this.attendance.workDate
-    );
+    // Shift の場合は土日関係なく判定する（週末判定を無視して常に平日扱いにする）
+    const isShift = (this.staff.workType || "").toLowerCase() === "shift";
+    const isWeekday = isShift
+      ? true
+      : new DayOfWeek(this.holidayCalendars).isWeekday(
+          this.attendance.workDate
+        );
 
     if (isWeekday) {
       if (this.isToday()) {

@@ -56,6 +56,17 @@ export default function DesktopList({
   companyHolidayCalendars: CompanyHolidayCalendar[];
   navigate: NavigateFunction;
 }) {
+  const getRowClass = (attendance: Attendance) => {
+    // Shift 勤務のスタッフは土日祝の色付けをしない
+    if (staff && (staff.workType === "Shift" || staff.workType === "shift")) {
+      return "table-row--default";
+    }
+    return getTableRowClassName(
+      attendance,
+      holidayCalendars,
+      companyHolidayCalendars
+    );
+  };
   const handleEdit = (attendance: Attendance) => {
     const { workDate } = attendance;
     const formattedWorkDate = dayjs(workDate).format(
@@ -130,11 +141,7 @@ export default function DesktopList({
                   {errorAttendances.map((attendance, index) => (
                     <TableRow
                       key={`error-${index}`}
-                      className={getTableRowClassName(
-                        attendance,
-                        holidayCalendars,
-                        companyHolidayCalendars
-                      )}
+                      className={getRowClass(attendance)}
                     >
                       <TableCell>
                         <Stack direction="row" spacing={0} alignItems="center">
@@ -203,14 +210,7 @@ export default function DesktopList({
           </TableHead>
           <TableBody>
             {attendances.map((attendance, index) => (
-              <TableRow
-                key={index}
-                className={getTableRowClassName(
-                  attendance,
-                  holidayCalendars,
-                  companyHolidayCalendars
-                )}
-              >
+              <TableRow key={index} className={getRowClass(attendance)}>
                 <TableCell>
                   <Stack direction="row" spacing={0} alignItems="center">
                     <AttendanceStatusTooltip

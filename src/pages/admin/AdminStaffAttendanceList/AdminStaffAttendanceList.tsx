@@ -153,13 +153,18 @@ export default function AdminStaffAttendanceList() {
       attendance: Attendance,
       holidayCalendars: HolidayCalendar[],
       companyHolidayCalendars: CompanyHolidayCalendar[]
-    ) =>
-      getTableRowClassName(
+    ) => {
+      // Shift勤務のスタッフは土日祝の色付けをしない
+      if (staff && (staff.workType === "Shift" || staff.workType === "shift")) {
+        return "table-row--default";
+      }
+      return getTableRowClassName(
         attendance,
         holidayCalendars,
         companyHolidayCalendars
-      ),
-    [holidayCalendars, companyHolidayCalendars]
+      );
+    },
+    [staff, holidayCalendars, companyHolidayCalendars]
   );
 
   if (staff === null || !staffId) {
