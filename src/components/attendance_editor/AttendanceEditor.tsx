@@ -24,6 +24,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { SystemCommentInput } from "@/API";
 import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
+import IsDeemedHolidayFlagInput from "@/components/attendance_editor/IsDeemedHolidayFlagInput";
 import PaidHolidayFlagInputCommon from "@/components/attendance_editor/PaidHolidayFlagInput";
 import ReturnDirectlyFlagInput from "@/components/attendance_editor/ReturnDirectlyFlagInput";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
@@ -280,6 +281,7 @@ export default function AttendanceEditor() {
           workDate: data.workDate,
           startTime: data.startTime,
           endTime: data.endTime || null,
+          isDeemedHoliday: data.isDeemedHoliday,
           goDirectlyFlag: data.goDirectlyFlag,
           returnDirectlyFlag: data.returnDirectlyFlag,
           remarks: data.remarks,
@@ -340,6 +342,7 @@ export default function AttendanceEditor() {
           .setDateString(targetWorkDate)
           .toDataFormat(),
         startTime: data.startTime,
+        isDeemedHoliday: data.isDeemedHoliday,
         endTime: data.endTime,
         goDirectlyFlag: data.goDirectlyFlag,
         returnDirectlyFlag: data.returnDirectlyFlag,
@@ -406,6 +409,7 @@ export default function AttendanceEditor() {
 
     setValue("workDate", attendance.workDate);
     setValue("startTime", attendance.startTime);
+    setValue("isDeemedHoliday", attendance.isDeemedHoliday ?? false);
     setValue("endTime", attendance.endTime);
     setValue("remarks", attendance.remarks || "");
     setValue("goDirectlyFlag", attendance.goDirectlyFlag || false);
@@ -689,6 +693,7 @@ export default function AttendanceEditor() {
                   label={`時間単位(${hourlyPaidHolidayTimeFields.length})`}
                 />
               )}
+              <Tab label="休日扱い" />
             </Tabs>
 
             <TabPanel value={vacationTab} index={0}>
@@ -705,7 +710,6 @@ export default function AttendanceEditor() {
                 disabled={changeRequests.length > 0}
               />
             </TabPanel>
-
             {getHourlyPaidHolidayEnabled() && (
               <TabPanel value={vacationTab} index={2}>
                 <Stack spacing={1}>
@@ -746,6 +750,24 @@ export default function AttendanceEditor() {
                 </Stack>
               </TabPanel>
             )}
+
+            <TabPanel
+              value={vacationTab}
+              index={getHourlyPaidHolidayEnabled() ? 3 : 2}
+            >
+              <Box sx={{ mt: 1 }}>
+                <IsDeemedHolidayFlagInput
+                  control={control}
+                  name="isDeemedHoliday"
+                  disabled={!(staff && staff.workType === "shift")}
+                  helperText={
+                    staff && staff.workType === "shift"
+                      ? undefined
+                      : "※シフト勤務のスタッフのみ設定できます"
+                  }
+                />
+              </Box>
+            </TabPanel>
           </GroupContainer>
           <GroupContainer>
             <Box>
