@@ -2,11 +2,11 @@ import { Divider, Typography } from "@mui/material";
 import { useContext } from "react";
 
 import { AttendanceEditContext } from "../../AttendanceEditProvider";
-import StartTimeInput from "../../DesktopEditor/WorkTimeInput/StartTimeInput";
 import { GoDirectlyFlagInput } from "../GoDirectlyFlagInput";
 import { Label } from "../Label";
 import { ReturnDirectlyFlagInput } from "../ReturnDirectlyFlagInput";
 import EndTimeInput from "./EndTimeInput";
+import StartTimeInputMobile from "./StartTimeInputMobile";
 
 export function WorkTimeInput() {
   const { workDate, control, setValue } = useContext(AttendanceEditContext);
@@ -23,7 +23,7 @@ export function WorkTimeInput() {
       </Typography>
       {/* 直行 */}
       <GoDirectlyFlagInput />
-      <StartTimeInput dataTestId="mobile-start-time-input" />
+      <StartTimeInputMobile dataTestId="mobile-start-time-input" />
       <Divider />
       <Typography variant="body1" sx={{ fontWeight: "bold" }}>
         終了時刻

@@ -158,7 +158,7 @@ export function MobileEditor() {
   );
 
   return (
-    <Stack direction="column" spacing={1} sx={{ p: 1 }}>
+    <Stack direction="column" spacing={1} sx={{ p: 1, pb: 10 }}>
       <AttendanceEditBreadcrumb />
       <Title>勤怠編集</Title>
       <Stack direction="column" spacing={2} sx={{ p: 1 }}>

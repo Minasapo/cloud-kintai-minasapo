@@ -1,20 +1,18 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers";
+import { Box, Chip, Stack, TextField } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
-import { Controller } from "react-hook-form";
+import React, { useContext, useEffect, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 import { AttendanceEditContext } from "../../AttendanceEditProvider";
 
-export default function StartTimeInput({
-  dataTestId = "start-time-input",
+export default function StartTimeInputMobile({
+  dataTestId = "mobile-start-time-input",
 }: {
   dataTestId?: string;
 } = {}) {
-  const { workDate, control, setValue, changeRequests } = useContext(
+  const { workDate, setValue, watch, changeRequests } = useContext(
     AttendanceEditContext
   );
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
@@ -32,40 +30,26 @@ export default function StartTimeInput({
     );
   }, [getQuickInputStartTimes]);
 
-  if (!workDate || !control || !setValue) return null;
+  if (!workDate || !setValue) return null;
+
+  const startTime = watch ? watch("startTime") : null;
 
   return (
     <Stack spacing={1}>
-      <Controller
-        name="startTime"
-        control={control}
-        render={({ field }) => (
-          <TimePicker
-            ampm={false}
-            value={field.value ? dayjs(field.value) : null}
-            disabled={changeRequests.length > 0}
-            slotProps={{
-              textField: {
-                size: "small",
-                inputProps: { "data-testid": dataTestId },
-              },
-            }}
-            onChange={(value) => {
-              if (!value || !value.isValid()) {
-                return;
-              }
-
-              const formattedStartTime = value
-                .year(workDate.year())
-                .month(workDate.month())
-                .date(workDate.date())
-                .second(0)
-                .millisecond(0)
-                .toISOString();
-              field.onChange(formattedStartTime);
-            }}
-          />
-        )}
+      <TextField
+        type="time"
+        size="small"
+        inputProps={{ "data-testid": dataTestId }}
+        value={startTime ? dayjs(startTime).format("HH:mm") : ""}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (!v) return setValue("startTime", null, { shouldDirty: true });
+          const iso = dayjs(workDate.format("YYYY-MM-DD") + " " + v)
+            .second(0)
+            .millisecond(0)
+            .toISOString();
+          setValue("startTime", iso, { shouldDirty: true });
+        }}
       />
       <Box>
         <Stack direction="row" spacing={1}>
