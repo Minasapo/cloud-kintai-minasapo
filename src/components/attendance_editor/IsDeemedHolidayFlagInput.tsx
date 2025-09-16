@@ -57,10 +57,10 @@ export default function IsDeemedHolidayFlagInput({
     return (
       <Stack direction="column" spacing={0.5} mb={1}>
         <Typography variant="body2">
-          勤務形態がシフト勤務のスタッフの未設定が可能です。
+          勤務形態がシフト勤務のスタッフのみ設定が可能です。
         </Typography>
         <Typography variant="body2">
-          設定した場合は、土日祝日と同様の扱いとなります。
+          設定した場合は、土日祝日と同様に休日扱いとなります。
         </Typography>
         <Stack direction="row" alignItems="center" spacing={1}>
           <Controller
@@ -87,10 +87,10 @@ export default function IsDeemedHolidayFlagInput({
   return (
     <Stack direction="column" spacing={0.5}>
       <Typography variant="body2">
-        勤務形態がシフト勤務のスタッフの未設定が可能です。
+        勤務形態がシフト勤務のスタッフのみ設定が可能です。
       </Typography>
       <Typography variant="body2">
-        設定した場合は、土日祝日と同様の扱いとなります。
+        設定した場合は、土日祝日と同様に休日扱いとなります。
       </Typography>
       <Stack direction="row" alignItems="center">
         <Controller

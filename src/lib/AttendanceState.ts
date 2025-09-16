@@ -46,7 +46,7 @@ export class AttendanceState {
       return AttendanceStatus.Ok;
     }
 
-    if (this.isHoliday() || this.isCompanyHoliday()) {
+    if (this.isHoliday() || this.isCompanyHoliday() || this.isDeemedHoliday()) {
       return AttendanceStatus.None;
     }
 
@@ -79,6 +79,10 @@ export class AttendanceState {
     }
 
     return AttendanceStatus.Ok;
+  }
+
+  private isDeemedHoliday() {
+    return !!this.attendance.isDeemedHoliday;
   }
 
   private isEnabledStartDate() {

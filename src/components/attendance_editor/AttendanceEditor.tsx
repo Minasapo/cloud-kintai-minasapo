@@ -693,7 +693,7 @@ export default function AttendanceEditor() {
                   label={`時間単位(${hourlyPaidHolidayTimeFields.length})`}
                 />
               )}
-              <Tab label="休日扱い" />
+              <Tab label="指定休日" />
             </Tabs>
 
             <TabPanel value={vacationTab} index={0}>

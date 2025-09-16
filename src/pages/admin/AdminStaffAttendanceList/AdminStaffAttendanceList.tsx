@@ -58,6 +58,7 @@ export function getTableRowClassName(
   companyHolidayCalendars: CompanyHolidayCalendar[]
 ) {
   const { workDate } = attendance;
+
   const today = dayjs().format(AttendanceDate.DataFormat);
   if (workDate === today) {
     return "table-row--today";
@@ -154,6 +155,11 @@ export default function AdminStaffAttendanceList() {
       holidayCalendars: HolidayCalendar[],
       companyHolidayCalendars: CompanyHolidayCalendar[]
     ) => {
+      // 指定休日フラグが立っていれば日曜と同じスタイルにする
+      if (attendance.isDeemedHoliday) {
+        return "table-row--sunday";
+      }
+
       // Shift勤務のスタッフは土日祝の色付けをしない
       if (staff && (staff.workType === "Shift" || staff.workType === "shift")) {
         return "table-row--default";
