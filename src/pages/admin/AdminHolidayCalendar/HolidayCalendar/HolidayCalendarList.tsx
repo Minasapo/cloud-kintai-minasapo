@@ -29,6 +29,7 @@ import HolidayCalendarDelete from "./components/HolidayCalendarDelete";
 import HolidayDateTableCell from "./components/HolidayDateTableCell";
 import HolidayNameTableCell from "./components/HolidayNameTableCell";
 import { CSVFilePicker } from "./CSVFilePicker";
+import HolidayCalendarCopy from "./HolidayCalendarCopy";
 import HolidayCalendarEdit from "./HolidayCalendarEdit";
 
 export default function HolidayCalendarList() {
@@ -156,6 +157,10 @@ export default function HolidayCalendarList() {
                     <HolidayCalendarEdit
                       holidayCalendar={holidayCalendar}
                       updateHolidayCalendar={updateHolidayCalendar}
+                    />
+                    <HolidayCalendarCopy
+                      holidayCalendar={holidayCalendar}
+                      createHolidayCalendar={createHolidayCalendar}
                     />
                     <HolidayCalendarDelete
                       holidayCalendar={holidayCalendar}
