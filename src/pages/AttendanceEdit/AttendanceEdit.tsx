@@ -32,8 +32,13 @@ export default function AttendanceEdit() {
   const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
 
   const { staffs, loading: staffsLoading, error: staffSError } = useStaffs();
-  const { attendance, getAttendance, updateAttendance, createAttendance } =
-    useAttendance();
+  const {
+    attendance,
+    getAttendance,
+    updateAttendance,
+    createAttendance,
+    loading: attendanceLoading,
+  } = useAttendance();
 
   const {
     register,
@@ -239,8 +244,8 @@ export default function AttendanceEdit() {
     return null;
   }
 
-  if (staffsLoading) {
-    return <LinearProgress />;
+  if (staffsLoading || attendanceLoading) {
+    return <LinearProgress data-testid="attendance-loading" />;
   }
 
   if (staffSError) {
@@ -280,11 +285,19 @@ export default function AttendanceEdit() {
         hourlyPaidHolidayEnabled,
       }}
     >
-      <Box sx={{ display: { xs: "block", md: "none" } }}>
-        <MobileEditor />
-      </Box>
-      <Box sx={{ display: { xs: "none", md: "block" } }}>
-        <DesktopEditor />
+      <Box data-testid="attendance-edit-root">
+        <Box
+          sx={{ display: { xs: "block", md: "none" } }}
+          data-testid="attendance-mobile-editor"
+        >
+          <MobileEditor />
+        </Box>
+        <Box
+          sx={{ display: { xs: "none", md: "block" } }}
+          data-testid="attendance-desktop-editor"
+        >
+          <DesktopEditor />
+        </Box>
       </Box>
     </AttendanceEditProvider>
   );

@@ -2,29 +2,39 @@
  * 直行/直帰モードのE2Eテスト。
  * - 直行/直帰モードのUI表示とボタン動作を検証する。
  * - Playwrightを使用。
- * @module playwright/tests/attendance-direct-flow.spec
+ * @module tests/attendance-direct-flow
  */
 
-import type { Page } from "@playwright/test";
-import { expect } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
 
 import { test } from "./console-log-fixture";
 
 const basePath = process.env.VITE_BASE_PATH || "http://localhost:5173";
 
-test.describe.configure({ retries: 0 });
-
-test.use({ storageState: "playwright/.auth/out-user.json" });
-
 async function toggleDirectMode(page: Page) {
   await page.click('[data-testid="direct-mode-switch"]');
 }
 
-test.describe.serial("直行/直帰モード(ON)", () => {
-  test("直行/直帰表示", async ({ page }) => {
-    await page.goto(`${basePath}/`);
+class AttendanceDirectLocator {
+  private locator: Locator;
 
-    await toggleDirectMode(page);
+  constructor(private page: Page) {
+    this.locator = page.getByTestId("direct-mode-switch");
+  }
+
+  directModeSwitch() {
+    return this.locator.click();
+  }
+}
+
+test.describe.serial("直行/直帰モード(ON)", () => {
+  test.use({ storageState: "playwright/.auth/out-user.json" });
+
+  test("直行/直帰", async ({ page }) => {
+    await page.goto("/");
+
+    new AttendanceDirectLocator(page).directModeSwitch();
+    // await toggleDirectMode(page);
 
     await expect(
       page.locator('[data-testid="go-directly-button"]')

@@ -274,6 +274,11 @@ export default function AdminStaffAttendanceList() {
                           holidayCalendars,
                           companyHolidayCalendars
                         )}
+                        data-testid={
+                          index === pendingAttendances.length - 1
+                            ? "last-row-pending"
+                            : undefined
+                        }
                       >
                         <TableCell>
                           <Stack
@@ -296,6 +301,7 @@ export default function AdminStaffAttendanceList() {
                                   )
                                 )
                               }
+                              data-testid="edit-attendance"
                             >
                               <Badge
                                 badgeContent={getBadgeContent(attendance)}
@@ -370,6 +376,9 @@ export default function AdminStaffAttendanceList() {
                       holidayCalendars,
                       companyHolidayCalendars
                     )}
+                    data-testid={
+                      index === attendances.length - 1 ? "last-row" : undefined
+                    }
                   >
                     <TableCell>
                       <Stack direction="row" spacing={1} alignItems="center">
@@ -388,6 +397,7 @@ export default function AdminStaffAttendanceList() {
                               )
                             )
                           }
+                          data-testid="edit-attendance-button"
                         >
                           <Badge
                             badgeContent={getBadgeContent(attendance)}

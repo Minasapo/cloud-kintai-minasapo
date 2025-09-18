@@ -3,6 +3,7 @@
  *
  * - 環境変数 `PLAYWRIGHT_LOGIN_EMAIL` および `PLAYWRIGHT_LOGIN_PASSWORD` を使用してログインします。
  * - ログイン後、認証状態を `playwright/.auth/user.json` に保存します。
+ * - テスト実行時に自動でログイン状態を再現するために利用します。
  *
  * @module login.setup
  */
