@@ -24,16 +24,31 @@ import {
   setSnackbarSuccess,
 } from "../../../../lib/reducers/snackbarReducer";
 
+/**
+ * AddHolidayCalendar コンポーネントのフォーム入力型
+ *
+ * holidayDate: 追加対象の休日の日付（表示/送信に使う文字列）
+ * name: 休日の名称
+ */
 type Inputs = {
   holidayDate: string;
   name: string;
 };
 
+/**
+ * フォームの初期値
+ */
 const defaultValues: Inputs = {
   holidayDate: "",
   name: "",
 };
 
+/**
+ * 会社休日を追加するダイアログを提供するコンポーネント。
+ *
+ * @param createHolidayCalendar - HolidayCalendar を作成する非同期関数。
+ *   引数に CreateHolidayCalendarInput を取り、作成した HolidayCalendar または void を返す Promise を返す。
+ */
 export function AddHolidayCalendar({
   createHolidayCalendar,
 }: {
@@ -55,10 +70,19 @@ export function AddHolidayCalendar({
     defaultValues,
   });
 
+  /**
+   * ダイアログを閉じる（表示フラグを false にする）。
+   */
   const handleClose = () => {
     setOpen(false);
   };
 
+  /**
+   * フォーム送信ハンドラ。
+   * createHolidayCalendar を呼び出し、成功/失敗に応じてスナックバーを表示する。
+   *
+   * @param data - フォーム入力（Inputs）
+   */
   const onSubmit = async (data: Inputs) => {
     const holidayCalenderMessage = new HolidayCalenderMessage();
     await createHolidayCalendar(data)
