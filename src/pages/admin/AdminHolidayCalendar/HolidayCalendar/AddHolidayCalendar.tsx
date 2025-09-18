@@ -92,6 +92,8 @@ export function AddHolidayCalendar({
             holidayCalenderMessage.create(MessageStatus.SUCCESS)
           )
         );
+        // 登録成功後にフォームの入力値を初期化してダイアログを閉じる
+        reset(defaultValues);
         setOpen(false);
       })
       .catch(() =>
