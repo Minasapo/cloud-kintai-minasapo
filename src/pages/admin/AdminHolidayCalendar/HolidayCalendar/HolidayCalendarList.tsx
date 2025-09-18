@@ -1,8 +1,6 @@
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Button,
   FormControl,
-  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -19,22 +17,17 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import dayjs from "dayjs";
 import { useContext } from "react";
 
+import { HolidayCalendar } from "@/API";
 import { AppContext } from "@/context/AppContext";
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";
-import { MessageStatus } from "@/lib/message/Message";
 
-import { DeleteHolidayCalendarInput, HolidayCalendar } from "../../../../API";
-import { useAppDispatchV2 } from "../../../../app/hooks";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "../../../../lib/reducers/snackbarReducer";
 import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import { AddHolidayCalendar } from "./AddHolidayCalendar";
+import CreatedAtTableCell from "./components/CreatedAtTableCell";
+import HolidayCalendarDelete from "./components/HolidayCalendarDelete";
+import HolidayDateTableCell from "./components/HolidayDateTableCell";
+import HolidayNameTableCell from "./components/HolidayNameTableCell";
 import { CSVFilePicker } from "./CSVFilePicker";
 import HolidayCalendarEdit from "./HolidayCalendarEdit";
 
@@ -189,11 +182,13 @@ export default function HolidayCalendarList() {
                 labelDisplayedRows={({ from, to, count }) =>
                   `${from}-${to} / ${count === -1 ? `以上` : `${count}`} 件`
                 }
-                SelectProps={{
-                  inputProps: {
-                    "aria-label": "rows per page",
+                slotProps={{
+                  select: {
+                    inputProps: {
+                      "aria-label": "rows per page",
+                    },
+                    native: false,
                   },
-                  native: false,
                 }}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
@@ -204,78 +199,4 @@ export default function HolidayCalendarList() {
       </TableContainer>
     </>
   );
-}
-
-function HolidayCalendarDelete({
-  holidayCalendar,
-  deleteHolidayCalendar,
-}: {
-  holidayCalendar: HolidayCalendar;
-  deleteHolidayCalendar: (input: DeleteHolidayCalendarInput) => Promise<void>;
-}) {
-  const dispatch = useAppDispatchV2();
-
-  const onSubmit = async () => {
-    const beDeleteDate = dayjs(holidayCalendar.holidayDate).format(
-      AttendanceDate.DisplayFormat
-    );
-    const beDeleteName = holidayCalendar.name;
-    const formattedDeleteMessage = `「${beDeleteDate}(${beDeleteName})」を削除しますか？\nこの操作は取り消せません。`;
-
-    const confirmed = window.confirm(formattedDeleteMessage);
-    if (!confirmed) {
-      return;
-    }
-
-    const holidayCalenderMessage = new HolidayCalenderMessage();
-    await deleteHolidayCalendar({ id: holidayCalendar.id })
-      .then(() => {
-        dispatch(
-          setSnackbarSuccess(
-            holidayCalenderMessage.delete(MessageStatus.SUCCESS)
-          )
-        );
-      })
-      .catch(() => {
-        dispatch(
-          setSnackbarError(holidayCalenderMessage.delete(MessageStatus.ERROR))
-        );
-      });
-  };
-
-  return (
-    <IconButton onClick={onSubmit}>
-      <DeleteIcon fontSize="small" />
-    </IconButton>
-  );
-}
-
-function HolidayDateTableCell({
-  holidayCalendar,
-}: {
-  holidayCalendar: HolidayCalendar;
-}) {
-  const date = dayjs(holidayCalendar.holidayDate);
-  const holidayDate = date.format(AttendanceDate.DisplayFormat);
-
-  return <TableCell>{holidayDate}</TableCell>;
-}
-
-function HolidayNameTableCell({
-  holidayCalendar,
-}: {
-  holidayCalendar: HolidayCalendar;
-}) {
-  return <TableCell>{holidayCalendar.name}</TableCell>;
-}
-
-function CreatedAtTableCell({
-  holidayCalendar,
-}: {
-  holidayCalendar: HolidayCalendar;
-}) {
-  const date = dayjs(holidayCalendar.createdAt);
-  const createdAt = date.format(AttendanceDate.DisplayFormat);
-
-  return <TableCell>{createdAt}</TableCell>;
 }
