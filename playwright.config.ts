@@ -47,7 +47,9 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
       },
-      dependencies: ["setup"],
+      // Run the `setup` project as a dependency only on CI.
+      // In development, avoid automatically running setup to keep iteration fast.
+      dependencies: process.env.CI ? ["setup"] : undefined,
     },
 
     // {
