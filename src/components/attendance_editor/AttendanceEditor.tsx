@@ -759,9 +759,9 @@ export default function AttendanceEditor() {
                 <IsDeemedHolidayFlagInput
                   control={control}
                   name="isDeemedHoliday"
-                  disabled={!(staff && staff.workType === "shift")}
+                  disabled={!(staff?.workType === "shift")}
                   helperText={
-                    staff && staff.workType === "shift"
+                    staff?.workType === "shift"
                       ? undefined
                       : "※シフト勤務のスタッフのみ設定できます"
                   }

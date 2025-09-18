@@ -57,13 +57,12 @@ export default function DesktopList({
   navigate: NavigateFunction;
 }) {
   const getRowClass = (attendance: Attendance) => {
-    // isDeemedHoliday の場合は日曜と同じスタイル
-    if (attendance.isDeemedHoliday) {
+    if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
       return "table-row--sunday";
     }
 
-    // Shift 勤務のスタッフは土日祝の色付けをしない
-    if (staff && (staff.workType === "Shift" || staff.workType === "shift")) {
+    // シフト勤務のスタッフは土日祝の色付けをしない
+    if (staff?.workType === "shift") {
       return "table-row--default";
     }
 

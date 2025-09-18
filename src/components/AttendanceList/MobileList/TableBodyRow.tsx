@@ -50,7 +50,7 @@ export default function TableBodyRow({
   return (
     <TableRow
       className={
-        staff && (staff.workType === "Shift" || staff.workType === "shift")
+        staff?.workType === "shift"
           ? "table-row--default"
           : getTableRowClassName(
               attendance,

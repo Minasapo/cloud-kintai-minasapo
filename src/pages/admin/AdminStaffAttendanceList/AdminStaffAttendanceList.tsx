@@ -156,12 +156,12 @@ export default function AdminStaffAttendanceList() {
       companyHolidayCalendars: CompanyHolidayCalendar[]
     ) => {
       // 指定休日フラグが立っていれば日曜と同じスタイルにする
-      if (attendance.isDeemedHoliday) {
+      if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
         return "table-row--sunday";
       }
 
       // Shift勤務のスタッフは土日祝の色付けをしない
-      if (staff && (staff.workType === "Shift" || staff.workType === "shift")) {
+      if (staff?.workType === "shift") {
         return "table-row--default";
       }
       return getTableRowClassName(
