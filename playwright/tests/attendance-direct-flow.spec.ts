@@ -2,65 +2,72 @@
  * 直行/直帰モードのE2Eテスト。
  * - 直行/直帰モードのUI表示とボタン動作を検証する。
  * - Playwrightを使用。
- * @module playwright/tests/attendance-direct-flow.spec
+ * @module tests/attendance-direct-flow
  */
 
-import type { Page } from "@playwright/test";
-import { expect } from "@playwright/test";
+import { Page } from "@playwright/test";
 
 import { test } from "./console-log-fixture";
+import { AttendanceDirectLocator } from "./locators/AttendanceDirectLocator";
 
-const basePath = process.env.VITE_BASE_PATH || "http://localhost:5173";
-
-test.describe.configure({ retries: 0 });
-
-test.use({ storageState: "playwright/.auth/out-user.json" });
-
-async function toggleDirectMode(page: Page) {
-  await page.click('[data-testid="direct-mode-switch"]');
+async function handleTimeElapsedErrorDialog(page: Page) {
+  try {
+    const dialog = page.getByTestId("time-elapsed-error-dialog");
+    // 最大3秒だけ待って表示されなければ無視
+    await dialog.waitFor({ state: "visible", timeout: 3000 });
+    await page.getByTestId("time-elapsed-error-dialog-later-btn").click();
+    await dialog.waitFor({ state: "hidden", timeout: 3000 });
+  } catch (e) {
+    // ダイアログが表示されなかった場合は何もしない
+  }
 }
 
-test.describe.serial("直行/直帰モード(ON)", () => {
-  test("直行/直帰表示", async ({ page }) => {
-    await page.goto(`${basePath}/`);
+test.describe.serial("出勤・休憩・退勤(直行直帰パターン/スタッフ)", () => {
+  test.use({ storageState: "playwright/.auth/out-user.json" });
 
-    await toggleDirectMode(page);
+  test("直行直帰モードON", async ({ page }) => {
+    await page.goto("/");
 
-    await expect(
-      page.locator('[data-testid="go-directly-button"]')
-    ).toBeVisible();
+    // 過去の勤怠に関するエラーダイアログが出る場合、閉じる
+    await handleTimeElapsedErrorDialog(page);
 
-    await expect(
-      page.locator('[data-testid="return-directly-button"]')
-    ).toBeVisible();
+    await new AttendanceDirectLocator(
+      page,
+      AttendanceDirectLocator.directModeSwitchTestId
+    ).directModeSwitch();
   });
 
   test("直行をクリック", async ({ page }) => {
-    await page.goto(`${basePath}/`);
-    await toggleDirectMode(page);
-    await page.click('[data-testid="go-directly-button"]');
-    await expect(page.locator('[data-testid="work-status-text"]')).toHaveText(
-      "勤務中"
-    );
+    await page.goto("/");
 
-    await expect(page.locator("body")).toContainText("出勤(直行)しました");
+    // 過去の勤怠に関するエラーダイアログが出る場合、閉じる
+    await handleTimeElapsedErrorDialog(page);
+
+    await new AttendanceDirectLocator(
+      page,
+      AttendanceDirectLocator.directModeSwitchTestId
+    ).directModeSwitch();
+
+    await new AttendanceDirectLocator(
+      page,
+      AttendanceDirectLocator.goDirectlyButtonTestId
+    ).click();
   });
 
   test("直帰をクリック", async ({ page }) => {
-    await page.goto(`${basePath}/`);
+    await page.goto("");
 
-    await toggleDirectMode(page);
+    // 過去の勤怠に関するエラーダイアログが出る場合、閉じる
+    await handleTimeElapsedErrorDialog(page);
 
-    await expect(
-      page.locator('[data-testid="return-directly-button"]')
-    ).toBeVisible();
+    await new AttendanceDirectLocator(
+      page,
+      AttendanceDirectLocator.directModeSwitchTestId
+    ).directModeSwitch();
 
-    await page.click('[data-testid="return-directly-button"]');
-
-    await expect(page.locator('[data-testid="work-status-text"]')).toHaveText(
-      "勤務終了"
-    );
-
-    await expect(page.locator("body")).toContainText("退勤(直帰)しました");
+    await new AttendanceDirectLocator(
+      page,
+      AttendanceDirectLocator.returnDirectlyButtonTestId
+    ).click();
   });
 });

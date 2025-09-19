@@ -67,6 +67,7 @@
   "test:watch": "jest --watch",
   "test:coverage": "jest --coverage",
   "test:e2e": "npx playwright test",
+  "test:e2e:setup": "npx playwright test --project=setup",
   "test:all": "npm run test:unit && npm run test:e2e"
   },
   "eslintConfig": {

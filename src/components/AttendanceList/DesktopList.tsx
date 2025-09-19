@@ -56,6 +56,22 @@ export default function DesktopList({
   companyHolidayCalendars: CompanyHolidayCalendar[];
   navigate: NavigateFunction;
 }) {
+  const getRowClass = (attendance: Attendance) => {
+    if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
+      return "table-row--sunday";
+    }
+
+    // シフト勤務のスタッフは土日祝の色付けをしない
+    if (staff?.workType === "shift") {
+      return "table-row--default";
+    }
+
+    return getTableRowClassName(
+      attendance,
+      holidayCalendars,
+      companyHolidayCalendars
+    );
+  };
   const handleEdit = (attendance: Attendance) => {
     const { workDate } = attendance;
     const formattedWorkDate = dayjs(workDate).format(
@@ -86,7 +102,6 @@ export default function DesktopList({
       <AttendanceGraph attendances={attendances} />
       {errorAttendances.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
-          {/* 目立たせるために枠と背景で囲む */}
           <Box
             sx={{
               border: "1px solid",
@@ -131,11 +146,7 @@ export default function DesktopList({
                   {errorAttendances.map((attendance, index) => (
                     <TableRow
                       key={`error-${index}`}
-                      className={getTableRowClassName(
-                        attendance,
-                        holidayCalendars,
-                        companyHolidayCalendars
-                      )}
+                      className={getRowClass(attendance)}
                     >
                       <TableCell>
                         <Stack direction="row" spacing={0} alignItems="center">
@@ -204,14 +215,7 @@ export default function DesktopList({
           </TableHead>
           <TableBody>
             {attendances.map((attendance, index) => (
-              <TableRow
-                key={index}
-                className={getTableRowClassName(
-                  attendance,
-                  holidayCalendars,
-                  companyHolidayCalendars
-                )}
-              >
+              <TableRow key={index} className={getRowClass(attendance)}>
                 <TableCell>
                   <Stack direction="row" spacing={0} alignItems="center">
                     <AttendanceStatusTooltip

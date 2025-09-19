@@ -13,7 +13,7 @@ export default function ProductionTimeItem({
   const { getHourlyPaidHolidayEnabled } = useContext(AppConfigContext);
   const hourlyPaidHolidayEnabled = getHourlyPaidHolidayEnabled();
   return (
-    <Stack direction="row" alignItems={"center"}>
+    <Stack direction="row" alignItems={"top"}>
       <Box sx={{ fontWeight: "bold", width: "150px" }}>実稼働時間</Box>
       <Box sx={{ flexGrow: 2 }} textAlign={"right"}>
         <Typography variant="body1">{`${time.toFixed(1)}時間`}</Typography>

@@ -45,6 +45,7 @@ export type StaffType = {
   usageStartDate?: Staff["usageStartDate"];
   notifications?: Staff["notifications"];
   sortKey?: Staff["sortKey"];
+  workType?: string | null;
 };
 
 export function mappingStaffRole(role: Staff["role"]): StaffRole {
@@ -90,6 +91,9 @@ export default function useStaffs() {
             updatedAt: staff.updatedAt,
             notifications: staff.notifications,
             sortKey: staff.sortKey,
+            workType: (staff as unknown as Record<string, unknown>).workType as
+              | string
+              | null,
           }))
         )
       )
@@ -120,6 +124,7 @@ export default function useStaffs() {
             notifications: staff.notifications,
             sortKey: staff.sortKey,
             usageStartDate: staff.usageStartDate,
+            workType: staff.workType,
           }))
         );
       })
@@ -147,6 +152,7 @@ export default function useStaffs() {
             usageStartDate: staff.usageStartDate,
             notifications: staff.notifications,
             sortKey: staff.sortKey,
+            workType: staff.workType,
           },
         ]);
       })
@@ -175,6 +181,7 @@ export default function useStaffs() {
                 usageStartDate: staff.usageStartDate,
                 notifications: staff.notifications,
                 sortKey: staff.sortKey,
+                workType: staff.workType,
               };
             }
             return s;
@@ -195,27 +202,24 @@ export default function useStaffs() {
       });
 
   const getAllStaffs = async (): Promise<StaffType[]> => {
-    try {
-      const res = await fetchStaffs();
-      return res.map((staff) => ({
-        id: staff.id,
-        cognitoUserId: staff.cognitoUserId,
-        familyName: staff.familyName,
-        givenName: staff.givenName,
-        mailAddress: staff.mailAddress,
-        owner: staff.owner ?? false,
-        role: mappingStaffRole(staff.role),
-        enabled: staff.enabled,
-        status: staff.status,
-        usageStartDate: staff.usageStartDate,
-        createdAt: staff.createdAt,
-        updatedAt: staff.updatedAt,
-        notifications: staff.notifications,
-        sortKey: staff.sortKey,
-      }));
-    } catch (e) {
-      throw e;
-    }
+    const res = await fetchStaffs();
+    return res.map((staff) => ({
+      id: staff.id,
+      cognitoUserId: staff.cognitoUserId,
+      familyName: staff.familyName,
+      givenName: staff.givenName,
+      mailAddress: staff.mailAddress,
+      owner: staff.owner ?? false,
+      role: mappingStaffRole(staff.role),
+      enabled: staff.enabled,
+      status: staff.status,
+      usageStartDate: staff.usageStartDate,
+      createdAt: staff.createdAt,
+      updatedAt: staff.updatedAt,
+      notifications: staff.notifications,
+      sortKey: staff.sortKey,
+      workType: staff.workType,
+    }));
   };
 
   return {
