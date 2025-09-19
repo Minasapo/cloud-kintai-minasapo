@@ -275,12 +275,13 @@ export default function AttendanceEditor() {
       console.log("data", data.systemComments);
 
       if (attendance) {
-        await updateAttendance({
+        // 有給フラグが付いている場合は勤務時間/休憩等は送らない（バックエンド側バリデーション対策）
+        const payload = {
           id: attendance.id,
           staffId: attendance.staffId,
           workDate: data.workDate,
-          startTime: data.startTime,
-          endTime: data.endTime || null,
+          startTime: data.paidHolidayFlag ? null : data.startTime,
+          endTime: data.paidHolidayFlag ? null : data.endTime || null,
           isDeemedHoliday: data.isDeemedHoliday,
           goDirectlyFlag: data.goDirectlyFlag,
           returnDirectlyFlag: data.returnDirectlyFlag,
@@ -288,10 +289,12 @@ export default function AttendanceEditor() {
           revision: data.revision,
           paidHolidayFlag: data.paidHolidayFlag,
           substituteHolidayDate: data.substituteHolidayDate,
-          rests: data.rests.map((rest) => ({
-            startTime: rest.startTime,
-            endTime: rest.endTime,
-          })),
+          rests: data.paidHolidayFlag
+            ? []
+            : data.rests.map((rest) => ({
+                startTime: rest.startTime,
+                endTime: rest.endTime,
+              })),
           systemComments: data.systemComments.map(
             ({ comment, confirmed, createdAt }) => ({
               comment,
@@ -299,21 +302,24 @@ export default function AttendanceEditor() {
               createdAt,
             })
           ),
-          hourlyPaidHolidayTimes:
-            (data.hourlyPaidHolidayTimes
-              ?.map((item) =>
-                item.startTime && item.endTime
-                  ? {
-                      startTime: item.startTime,
-                      endTime: item.endTime,
-                    }
-                  : null
-              )
-              .filter((item) => item !== null) as {
-              startTime: string;
-              endTime: string;
-            }[]) ?? [],
-        })
+          hourlyPaidHolidayTimes: data.paidHolidayFlag
+            ? []
+            : (data.hourlyPaidHolidayTimes
+                ?.map((item) =>
+                  item.startTime && item.endTime
+                    ? {
+                        startTime: item.startTime,
+                        endTime: item.endTime,
+                      }
+                    : null
+                )
+                .filter((item) => item !== null) as {
+                startTime: string;
+                endTime: string;
+              }[]) ?? [],
+        };
+
+        await updateAttendance(payload)
           .then((res) => {
             if (!staff || !res.histories) return;
 
@@ -337,22 +343,25 @@ export default function AttendanceEditor() {
       }
 
       await createAttendance({
+        // 有給の場合は勤務時間/休憩などのフィールドをクリアして送信
         staffId: targetStaffId,
         workDate: new AttendanceDateTime()
           .setDateString(targetWorkDate)
           .toDataFormat(),
-        startTime: data.startTime,
+        startTime: data.paidHolidayFlag ? null : data.startTime,
         isDeemedHoliday: data.isDeemedHoliday,
-        endTime: data.endTime,
+        endTime: data.paidHolidayFlag ? null : data.endTime,
         goDirectlyFlag: data.goDirectlyFlag,
         returnDirectlyFlag: data.returnDirectlyFlag,
         remarks: data.remarks,
         paidHolidayFlag: data.paidHolidayFlag,
         substituteHolidayDate: data.substituteHolidayDate,
-        rests: data.rests.map((rest) => ({
-          startTime: rest.startTime,
-          endTime: rest.endTime,
-        })),
+        rests: data.paidHolidayFlag
+          ? []
+          : data.rests.map((rest) => ({
+              startTime: rest.startTime,
+              endTime: rest.endTime,
+            })),
         systemComments: data.systemComments.map(
           ({ comment, confirmed, createdAt }) => ({
             comment,
@@ -360,20 +369,21 @@ export default function AttendanceEditor() {
             createdAt,
           })
         ),
-        hourlyPaidHolidayTimes:
-          (data.hourlyPaidHolidayTimes
-            ?.map((item) =>
-              item.startTime && item.endTime
-                ? {
-                    startTime: item.startTime,
-                    endTime: item.endTime,
-                  }
-                : null
-            )
-            .filter((item) => item !== null) as {
-            startTime: string;
-            endTime: string;
-          }[]) ?? [],
+        hourlyPaidHolidayTimes: data.paidHolidayFlag
+          ? []
+          : (data.hourlyPaidHolidayTimes
+              ?.map((item) =>
+                item.startTime && item.endTime
+                  ? {
+                      startTime: item.startTime,
+                      endTime: item.endTime,
+                    }
+                  : null
+              )
+              .filter((item) => item !== null) as {
+              startTime: string;
+              endTime: string;
+            }[]) ?? [],
       })
         .then((res) => {
           if (!staff) {
