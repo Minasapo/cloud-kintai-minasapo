@@ -49,11 +49,15 @@ export default function TableBodyRow({
 
   return (
     <TableRow
-      className={getTableRowClassName(
-        attendance,
-        holidayCalendars,
-        companyHolidayCalendars
-      )}
+      className={
+        staff?.workType === "shift"
+          ? "table-row--default"
+          : getTableRowClassName(
+              attendance,
+              holidayCalendars,
+              companyHolidayCalendars
+            )
+      }
     >
       <MuiTableCell>
         <Stack direction="row" spacing={1} alignItems="center">

@@ -58,6 +58,7 @@ export function getTableRowClassName(
   companyHolidayCalendars: CompanyHolidayCalendar[]
 ) {
   const { workDate } = attendance;
+
   const today = dayjs().format(AttendanceDate.DataFormat);
   if (workDate === today) {
     return "table-row--today";
@@ -153,13 +154,23 @@ export default function AdminStaffAttendanceList() {
       attendance: Attendance,
       holidayCalendars: HolidayCalendar[],
       companyHolidayCalendars: CompanyHolidayCalendar[]
-    ) =>
-      getTableRowClassName(
+    ) => {
+      // 指定休日フラグが立っていれば日曜と同じスタイルにする
+      if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
+        return "table-row--sunday";
+      }
+
+      // Shift勤務のスタッフは土日祝の色付けをしない
+      if (staff?.workType === "shift") {
+        return "table-row--default";
+      }
+      return getTableRowClassName(
         attendance,
         holidayCalendars,
         companyHolidayCalendars
-      ),
-    [holidayCalendars, companyHolidayCalendars]
+      );
+    },
+    [staff, holidayCalendars, companyHolidayCalendars]
   );
 
   if (staff === null || !staffId) {
@@ -263,6 +274,11 @@ export default function AdminStaffAttendanceList() {
                           holidayCalendars,
                           companyHolidayCalendars
                         )}
+                        data-testid={
+                          index === pendingAttendances.length - 1
+                            ? "last-row-pending"
+                            : undefined
+                        }
                       >
                         <TableCell>
                           <Stack
@@ -285,6 +301,7 @@ export default function AdminStaffAttendanceList() {
                                   )
                                 )
                               }
+                              data-testid="edit-attendance"
                             >
                               <Badge
                                 badgeContent={getBadgeContent(attendance)}
@@ -359,6 +376,9 @@ export default function AdminStaffAttendanceList() {
                       holidayCalendars,
                       companyHolidayCalendars
                     )}
+                    data-testid={
+                      index === attendances.length - 1 ? "last-row" : undefined
+                    }
                   >
                     <TableCell>
                       <Stack direction="row" spacing={1} alignItems="center">
@@ -377,6 +397,7 @@ export default function AdminStaffAttendanceList() {
                               )
                             )
                           }
+                          data-testid="edit-attendance-button"
                         >
                           <Badge
                             badgeContent={getBadgeContent(attendance)}

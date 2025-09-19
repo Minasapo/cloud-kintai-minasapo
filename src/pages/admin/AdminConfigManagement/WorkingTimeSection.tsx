@@ -34,10 +34,6 @@ const WorkingTimeSection = ({
       <TimePicker
         label="開始時間"
         ampm={false}
-        viewRenderers={{
-          hours: renderTimeViewClock,
-          minutes: renderTimeViewClock,
-        }}
         value={startTime}
         views={["hours", "minutes"]}
         format="HH:mm"
@@ -51,10 +47,6 @@ const WorkingTimeSection = ({
       <TimePicker
         label="終了時間"
         ampm={false}
-        viewRenderers={{
-          hours: renderTimeViewClock,
-          minutes: renderTimeViewClock,
-        }}
         value={endTime}
         views={["hours", "minutes"]}
         format="HH:mm"
@@ -73,10 +65,6 @@ const WorkingTimeSection = ({
       <TimePicker
         label="開始時間"
         ampm={false}
-        viewRenderers={{
-          hours: renderTimeViewClock,
-          minutes: renderTimeViewClock,
-        }}
         value={lunchRestStartTime}
         views={["hours", "minutes"]}
         format="HH:mm"
@@ -90,10 +78,6 @@ const WorkingTimeSection = ({
       <TimePicker
         label="終了時間"
         ampm={false}
-        viewRenderers={{
-          hours: renderTimeViewClock,
-          minutes: renderTimeViewClock,
-        }}
         value={lunchRestEndTime}
         views={["hours", "minutes"]}
         format="HH:mm"

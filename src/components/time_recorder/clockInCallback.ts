@@ -1,3 +1,9 @@
+/**
+ * @file clockInCallback.ts
+ * @description 出勤打刻時のコールバック処理を提供するユーティリティ。
+ * Reduxのdispatchやユーザー情報、スタッフ情報を受け取り、打刻処理・メール送信・スナックバー表示を行う。
+ */
+
 import { Dispatch } from "@reduxjs/toolkit";
 
 import { CognitoUser } from "@/hooks/useCognitoUser";
@@ -11,6 +17,16 @@ import {
 } from "../../lib/reducers/snackbarReducer";
 import { getNowISOStringWithZeroSeconds } from "./util";
 
+/**
+ * 出勤打刻時のコールバック関数。
+ *
+ * @param cognitoUser - 現在のCognitoユーザー情報
+ * @param today - 本日の日付（YYYY-MM-DD形式）
+ * @param clockIn - 出勤打刻を行う非同期関数
+ * @param dispatch - Reduxのdispatch関数
+ * @param staff - スタッフ情報
+ * @param logger - デバッグ用ロガー
+ */
 export function clockInCallback(
   cognitoUser: CognitoUser | null | undefined,
   today: string,
