@@ -40,6 +40,7 @@ export default function StaffUpdateForm(props) {
     owner: false,
     usageStartDate: "",
     sortKey: "",
+    workType: "",
   };
   const [cognitoUserId, setCognitoUserId] = React.useState(
     initialValues.cognitoUserId
@@ -57,6 +58,7 @@ export default function StaffUpdateForm(props) {
     initialValues.usageStartDate
   );
   const [sortKey, setSortKey] = React.useState(initialValues.sortKey);
+  const [workType, setWorkType] = React.useState(initialValues.workType);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = staffRecord
@@ -72,6 +74,7 @@ export default function StaffUpdateForm(props) {
     setOwner(cleanValues.owner);
     setUsageStartDate(cleanValues.usageStartDate);
     setSortKey(cleanValues.sortKey);
+    setWorkType(cleanValues.workType);
     setErrors({});
   };
   const [staffRecord, setStaffRecord] = React.useState(staffModelProp);
@@ -101,6 +104,7 @@ export default function StaffUpdateForm(props) {
     owner: [],
     usageStartDate: [],
     sortKey: [],
+    workType: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -138,6 +142,7 @@ export default function StaffUpdateForm(props) {
           owner: owner ?? null,
           usageStartDate: usageStartDate ?? null,
           sortKey: sortKey ?? null,
+          workType: workType ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -208,6 +213,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.cognitoUserId ?? value;
@@ -241,6 +247,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.familyName ?? value;
@@ -274,6 +281,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.givenName ?? value;
@@ -307,6 +315,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.mailAddress ?? value;
@@ -340,6 +349,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.role ?? value;
@@ -373,6 +383,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.enabled ?? value;
@@ -406,6 +417,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -439,6 +451,7 @@ export default function StaffUpdateForm(props) {
               owner: value,
               usageStartDate,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -472,6 +485,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate: value,
               sortKey,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.usageStartDate ?? value;
@@ -505,6 +519,7 @@ export default function StaffUpdateForm(props) {
               owner,
               usageStartDate,
               sortKey: value,
+              workType,
             };
             const result = onChange(modelFields);
             value = result?.sortKey ?? value;
@@ -518,6 +533,40 @@ export default function StaffUpdateForm(props) {
         errorMessage={errors.sortKey?.errorMessage}
         hasError={errors.sortKey?.hasError}
         {...getOverrideProps(overrides, "sortKey")}
+      ></TextField>
+      <TextField
+        label="Work type"
+        isRequired={false}
+        isReadOnly={false}
+        value={workType}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              cognitoUserId,
+              familyName,
+              givenName,
+              mailAddress,
+              role,
+              enabled,
+              status,
+              owner,
+              usageStartDate,
+              sortKey,
+              workType: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.workType ?? value;
+          }
+          if (errors.workType?.hasError) {
+            runValidationTasks("workType", value);
+          }
+          setWorkType(value);
+        }}
+        onBlur={() => runValidationTasks("workType", workType)}
+        errorMessage={errors.workType?.errorMessage}
+        hasError={errors.workType?.hasError}
+        {...getOverrideProps(overrides, "workType")}
       ></TextField>
       <Flex
         justifyContent="space-between"

@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
 
@@ -40,11 +40,7 @@ export function WorkTimeItem() {
   }
 
   return (
-    <Stack
-      direction="row"
-      alignItems={"center"}
-      sx={{ boxSizing: "border-box" }}
-    >
+    <Stack direction="row" alignItems={"top"} sx={{ boxSizing: "border-box" }}>
       <Box sx={{ fontWeight: "bold", width: "150px" }}>勤務時間</Box>
       <Box sx={{ flexGrow: 1 }}>
         <Stack direction="row" spacing={2} alignItems={"center"}>

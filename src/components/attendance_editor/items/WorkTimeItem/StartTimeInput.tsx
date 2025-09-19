@@ -1,15 +1,9 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { renderTimeViewClock, TimePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
-import { Controller } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+
 import TimeInputBase from "./TimeInputBase";
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
 
 export default function StartTimeInput() {
   const { workDate, control, setValue } = useContext(AttendanceEditContext);

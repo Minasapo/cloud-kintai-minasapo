@@ -36,6 +36,7 @@ export default function AttendanceCreateForm(props) {
     returnDirectlyFlag: false,
     remarks: "",
     paidHolidayFlag: false,
+    isDeemedHoliday: false,
     hourlyPaidHolidayHours: "",
     substituteHolidayDate: "",
     revision: "",
@@ -54,6 +55,9 @@ export default function AttendanceCreateForm(props) {
   const [paidHolidayFlag, setPaidHolidayFlag] = React.useState(
     initialValues.paidHolidayFlag
   );
+  const [isDeemedHoliday, setIsDeemedHoliday] = React.useState(
+    initialValues.isDeemedHoliday
+  );
   const [hourlyPaidHolidayHours, setHourlyPaidHolidayHours] = React.useState(
     initialValues.hourlyPaidHolidayHours
   );
@@ -71,6 +75,7 @@ export default function AttendanceCreateForm(props) {
     setReturnDirectlyFlag(initialValues.returnDirectlyFlag);
     setRemarks(initialValues.remarks);
     setPaidHolidayFlag(initialValues.paidHolidayFlag);
+    setIsDeemedHoliday(initialValues.isDeemedHoliday);
     setHourlyPaidHolidayHours(initialValues.hourlyPaidHolidayHours);
     setSubstituteHolidayDate(initialValues.substituteHolidayDate);
     setRevision(initialValues.revision);
@@ -85,6 +90,7 @@ export default function AttendanceCreateForm(props) {
     returnDirectlyFlag: [],
     remarks: [],
     paidHolidayFlag: [],
+    isDeemedHoliday: [],
     hourlyPaidHolidayHours: [],
     substituteHolidayDate: [],
     revision: [],
@@ -123,6 +129,7 @@ export default function AttendanceCreateForm(props) {
           returnDirectlyFlag,
           remarks,
           paidHolidayFlag,
+          isDeemedHoliday,
           hourlyPaidHolidayHours,
           substituteHolidayDate,
           revision,
@@ -196,6 +203,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision,
@@ -230,6 +238,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision,
@@ -264,6 +273,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision,
@@ -298,6 +308,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision,
@@ -332,6 +343,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision,
@@ -366,6 +378,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag: value,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision,
@@ -402,6 +415,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks: value,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision,
@@ -436,6 +450,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag: value,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision,
@@ -452,6 +467,41 @@ export default function AttendanceCreateForm(props) {
         errorMessage={errors.paidHolidayFlag?.errorMessage}
         hasError={errors.paidHolidayFlag?.hasError}
         {...getOverrideProps(overrides, "paidHolidayFlag")}
+      ></SwitchField>
+      <SwitchField
+        label="Is deemed holiday"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={isDeemedHoliday}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              staffId,
+              workDate,
+              startTime,
+              endTime,
+              goDirectlyFlag,
+              returnDirectlyFlag,
+              remarks,
+              paidHolidayFlag,
+              isDeemedHoliday: value,
+              hourlyPaidHolidayHours,
+              substituteHolidayDate,
+              revision,
+            };
+            const result = onChange(modelFields);
+            value = result?.isDeemedHoliday ?? value;
+          }
+          if (errors.isDeemedHoliday?.hasError) {
+            runValidationTasks("isDeemedHoliday", value);
+          }
+          setIsDeemedHoliday(value);
+        }}
+        onBlur={() => runValidationTasks("isDeemedHoliday", isDeemedHoliday)}
+        errorMessage={errors.isDeemedHoliday?.errorMessage}
+        hasError={errors.isDeemedHoliday?.hasError}
+        {...getOverrideProps(overrides, "isDeemedHoliday")}
       ></SwitchField>
       <TextField
         label="Hourly paid holiday hours"
@@ -474,6 +524,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours: value,
               substituteHolidayDate,
               revision,
@@ -510,6 +561,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate: value,
               revision,
@@ -550,6 +602,7 @@ export default function AttendanceCreateForm(props) {
               returnDirectlyFlag,
               remarks,
               paidHolidayFlag,
+              isDeemedHoliday,
               hourlyPaidHolidayHours,
               substituteHolidayDate,
               revision: value,

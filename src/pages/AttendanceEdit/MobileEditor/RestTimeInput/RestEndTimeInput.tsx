@@ -7,13 +7,11 @@
  */
 
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { renderTimeViewClock, TimePicker } from "@mui/x-date-pickers";
+import { Box, Chip, Stack, TextField } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext } from "react";
 import {
   Control,
-  Controller,
   FieldArrayWithId,
   UseFieldArrayUpdate,
 } from "react-hook-form";
@@ -72,39 +70,24 @@ export default function RestEndTimeInput({
   return (
     <Stack direction="column" spacing={1}>
       <Stack spacing={1}>
-        <Controller
-          name={`rests.${index}.endTime`}
-          control={control}
-          render={({ field }) => (
-            <TimePicker
-              value={rest.endTime ? dayjs(rest.endTime) : null}
-              ampm={false}
-              viewRenderers={{
-                hours: renderTimeViewClock,
-                minutes: renderTimeViewClock,
-              }}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  inputProps: {
-                    "data-testid": `rest-end-time-input-${testIdPrefix}-${index}`,
-                  },
-                },
-              }}
-              onChange={(newEndTime) => {
-                const formattedEndTime = newEndTime
-                  ? newEndTime
-                      .year(workDate.year())
-                      .month(workDate.month())
-                      .date(workDate.date())
-                      .second(0)
-                      .millisecond(0)
-                      .toISOString()
-                  : null;
-                field.onChange(formattedEndTime);
-              }}
-            />
-          )}
+        <TextField
+          type="time"
+          size="small"
+          inputProps={{
+            "data-testid": "rest-end-time-input-" + testIdPrefix + "-" + index,
+          }}
+          value={rest.endTime ? dayjs(rest.endTime).format("HH:mm") : ""}
+          onChange={(e) => {
+            const v = e.target.value;
+            const formattedEndTime = v
+              ? dayjs(workDate.format("YYYY-MM-DD") + " " + v)
+                  .second(0)
+                  .millisecond(0)
+                  .toISOString()
+              : null;
+            // call provided restUpdate to change the array element
+            restUpdate(index, { ...rest, endTime: formattedEndTime });
+          }}
         />
         <Box>
           <DefaultEndTimeChip

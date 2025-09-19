@@ -224,6 +224,7 @@ export const createStaff = /* GraphQL */ `mutation CreateStaff(
       __typename
     }
     sortKey
+    workType
     createdAt
     updatedAt
     __typename
@@ -254,6 +255,7 @@ export const updateStaff = /* GraphQL */ `mutation UpdateStaff(
       __typename
     }
     sortKey
+    workType
     createdAt
     updatedAt
     __typename
@@ -284,6 +286,7 @@ export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
       __typename
     }
     sortKey
+    workType
     createdAt
     updatedAt
     __typename
@@ -473,6 +476,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {
@@ -565,6 +569,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {
@@ -657,6 +662,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {

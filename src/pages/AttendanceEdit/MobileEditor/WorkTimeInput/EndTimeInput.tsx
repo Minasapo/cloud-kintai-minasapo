@@ -1,21 +1,16 @@
-import { Box, Stack } from "@mui/material";
-import { renderTimeViewClock, TimePicker } from "@mui/x-date-pickers";
+import { Box, Stack, TextField } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
-import { Control, Controller, UseFormSetValue } from "react-hook-form";
+import { UseFormSetValue } from "react-hook-form";
 
 import QuickInputChips from "@/components/QuickInputChips";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
+import { AttendanceEditContext } from "../../AttendanceEditProvider";
 import { AttendanceEditInputs } from "../../common";
 
 /**
  * 勤務終了時刻の入力コンポーネント（モバイル用）。
- *
- * @param workDate 勤務日（dayjsオブジェクトまたはnull）
- * @param control react-hook-formのControlオブジェクト
- * @param setValue react-hook-formのsetValue関数
- * @returns 勤務終了時刻入力UI
  */
 export default function EndTimeInput({
   workDate,
@@ -24,17 +19,11 @@ export default function EndTimeInput({
 }: {
   workDate: dayjs.Dayjs | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<AttendanceEditInputs, any>;
+  control: any;
   setValue: UseFormSetValue<AttendanceEditInputs>;
 }) {
-  /**
-   * クイック入力用の終了時刻リストを取得するContext関数
-   */
   const { getQuickInputEndTimes } = useContext(AppConfigContext);
 
-  /**
-   * クイック入力用の終了時刻リストのstate
-   */
   const [quickInputEndTimes, setQuickInputEndTimes] = useState<
     { time: string; enabled: boolean }[]
   >([]);
@@ -51,42 +40,31 @@ export default function EndTimeInput({
     }
   }, [getQuickInputEndTimes]);
 
-  if (!workDate) {
-    return null;
-  }
+  const { watch } = useContext(AttendanceEditContext);
+  if (!workDate) return null;
+
+  const endTime = watch ? watch("endTime") : null;
 
   return (
     <Stack direction="column" spacing={1}>
       <Stack spacing={1}>
-        <Controller
-          name="endTime"
-          control={control}
-          render={({ field }) => (
-            <TimePicker
-              value={field.value ? dayjs(field.value) : null}
-              ampm={false}
-              viewRenderers={{
-                hours: renderTimeViewClock,
-                minutes: renderTimeViewClock,
-              }}
-              slotProps={{
-                textField: { size: "small" },
-              }}
-              onChange={(value) => {
-                field.onChange(
-                  value && value.isValid()
-                    ? value
-                        .year(workDate.year())
-                        .month(workDate.month())
-                        .date(workDate.date())
-                        .second(0)
-                        .millisecond(0)
-                        .toISOString()
-                    : null
-                );
-              }}
-            />
-          )}
+        <TextField
+          type="time"
+          size="small"
+          value={endTime ? dayjs(endTime).format("HH:mm") : ""}
+          onChange={(e) => {
+            const v = e.target.value;
+            setValue(
+              "endTime",
+              v
+                ? dayjs(workDate.format("YYYY-MM-DD") + " " + v)
+                    .second(0)
+                    .millisecond(0)
+                    .toISOString()
+                : null,
+              { shouldDirty: true }
+            );
+          }}
         />
         <Box>
           <QuickInputChips

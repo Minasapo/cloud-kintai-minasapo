@@ -1,6 +1,6 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Box, Chip } from "@mui/material";
-import { renderTimeViewClock, TimePicker } from "@mui/x-date-pickers";
+import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { Controller } from "react-hook-form";
 
@@ -37,10 +37,6 @@ export function CommonRestTimePicker({
           <TimePicker
             value={value ? dayjs(value) : null}
             ampm={false}
-            viewRenderers={{
-              hours: renderTimeViewClock,
-              minutes: renderTimeViewClock,
-            }}
             slotProps={{
               textField: { size: "small" },
             }}

@@ -1,6 +1,12 @@
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Alert, AlertTitle, IconButton, Typography } from "@mui/material";
 
+/**
+ * 勤怠打刻エラーを通知するアラートコンポーネント。
+ * エラーが発生した場合に、勤怠一覧ページへのリンク付きで警告を表示します。
+ *
+ * @returns {JSX.Element} エラーアラートのReact要素
+ */
 export function AttendanceErrorAlert() {
   return (
     <Alert

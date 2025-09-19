@@ -72,7 +72,7 @@ export function GoDirectlyFlagCheckbox({
 
   if (isMobile) {
     return (
-      <>
+      <Stack direction="row" alignItems="center" spacing={1} mb={1}>
         <MobileLabel variant="body1">{displayLabel}</MobileLabel>
         <Controller
           name={name}
@@ -86,7 +86,7 @@ export function GoDirectlyFlagCheckbox({
             />
           )}
         />
-      </>
+      </Stack>
     );
   }
 

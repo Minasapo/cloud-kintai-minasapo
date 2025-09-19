@@ -51,7 +51,7 @@ export default function ReturnDirectlyFlagInputBase({
     );
   } else {
     return (
-      <>
+      <Stack direction="row" alignItems="center">
         <MobileLabel>{label}</MobileLabel>
         <Controller
           name={checkedValueName}
@@ -68,7 +68,7 @@ export default function ReturnDirectlyFlagInputBase({
             />
           )}
         />
-      </>
+      </Stack>
     );
   }
 }

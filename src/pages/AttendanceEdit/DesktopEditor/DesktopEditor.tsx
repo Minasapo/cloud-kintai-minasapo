@@ -8,6 +8,8 @@ import {
   IconButton,
   Stack,
   styled,
+  Tab,
+  Tabs,
 } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 
@@ -15,9 +17,13 @@ import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectl
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
 } from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
+import QuickInputButtons from "@/components/attendance_editor/QuickInputButtons";
+import GroupContainer from "@/components/ui/GroupContainer/GroupContainer";
+import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 
 import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
 import StaffNameItem from "../../../components/attendance_editor/items/StaffNameItem";
+import WorkTypeItem from "../../../components/attendance_editor/items/WorkTypeItem";
 import Title from "../../../components/Title/Title";
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
@@ -76,8 +82,13 @@ export default function DesktopEditor() {
     changeRequests,
     hourlyPaidHolidayTimeFields,
     hourlyPaidHolidayTimeAppend,
+    restReplace,
+    hourlyPaidHolidayTimeReplace,
+    workDate,
   } = useContext(AttendanceEditContext);
+  const { getStartTime } = useAppConfig();
   const { hourlyPaidHolidayEnabled } = useContext(AttendanceEditContext);
+  const [vacationTab, setVacationTab] = useState<number>(0);
   const [totalProductionTime, setTotalProductionTime] = useState<number>(0);
   const [totalHourlyPaidHolidayTime, setTotalHourlyPaidHolidayTime] =
     useState<number>(0);
@@ -119,6 +130,18 @@ export default function DesktopEditor() {
     return null;
   }
 
+  function TabPanel({
+    children,
+    value,
+    index,
+  }: {
+    children: React.ReactNode;
+    value: number;
+    index: number;
+  }) {
+    return <>{value === index ? <Box sx={{ pt: 2 }}>{children}</Box> : null}</>;
+  }
+
   return (
     <DesktopContainer maxWidth="xl">
       <Stack direction="column" spacing={2}>
@@ -130,65 +153,116 @@ export default function DesktopEditor() {
             <ChangeRequestingAlert changeRequests={changeRequests} />
           </Stack>
           <NoDataAlert />
-          <WorkDateItem />
-          <StaffNameItem />
-          <PaidHolidayFlagInput />
-          {/* 時間単位休暇セクション追加 */}
-          {hourlyPaidHolidayEnabled && (
-            <Box>
-              <Stack direction="row">
-                <Box
-                  sx={{ fontWeight: "bold", width: "150px" }}
-                >{`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}</Box>
-                <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                  {hourlyPaidHolidayTimeFields.length === 0 && (
-                    <Box sx={{ color: "text.secondary", fontSize: 14 }}>
-                      時間単位休暇の時間帯を追加してください。
-                    </Box>
-                  )}
-                  {hourlyPaidHolidayTimeFields.map(
-                    (hourlyPaidHolidayTime, index) => (
-                      <HourlyPaidHolidayTimeItem
-                        key={hourlyPaidHolidayTime.id}
-                        time={hourlyPaidHolidayTime}
-                        index={index}
-                      />
-                    )
-                  )}
-                  <Box>
-                    <IconButton
-                      aria-label="add-hourly-paid-holiday-time"
-                      onClick={() =>
-                        hourlyPaidHolidayTimeAppend({
-                          startTime: null,
-                          endTime: null,
-                        })
-                      }
-                      disabled={changeRequests.length > 0}
-                    >
-                      <AddAlarmIcon />
-                    </IconButton>
+          <GroupContainer>
+            {setValue && restReplace && hourlyPaidHolidayTimeReplace && (
+              <QuickInputButtons
+                setValue={setValue}
+                restReplace={restReplace}
+                hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
+                workDate={workDate ?? null}
+                visibleMode="staff"
+              />
+            )}
+          </GroupContainer>
+          <GroupContainer>
+            <WorkDateItem />
+          </GroupContainer>
+          <GroupContainer>
+            <Stack spacing={2}>
+              <StaffNameItem />
+              <WorkTypeItem />
+            </Stack>
+          </GroupContainer>
+          <GroupContainer>
+            <WorkTimeInput />
+            <GoDirectlyFlagCheckbox
+              name="goDirectlyFlag"
+              control={control}
+              disabled={changeRequests.length > 0}
+              onChangeExtra={(checked: boolean) => {
+                if (checked && setValue) {
+                  setValue("startTime", getStartTime().toISOString());
+                }
+              }}
+            />
+            <ReturnDirectlyFlagInput />
+            <RestTimeItem />
+            <Divider />
+            <ProductionTimeItem
+              time={totalProductionTime}
+              hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
+            />
+          </GroupContainer>
+          <GroupContainer>
+            <Tabs
+              value={vacationTab}
+              onChange={(_, v) => setVacationTab(v)}
+              aria-label="vacation-tabs-desktop"
+              sx={{ borderBottom: 1, borderColor: "divider" }}
+            >
+              <Tab label="代休" />
+              <Tab label="有給(1日)" />
+              {hourlyPaidHolidayEnabled && (
+                <Tab
+                  label={`時間単位(${hourlyPaidHolidayTimeFields.length})`}
+                />
+              )}
+            </Tabs>
+
+            <TabPanel value={vacationTab} index={0}>
+              <SubstituteHolidayDateInput />
+            </TabPanel>
+
+            <TabPanel value={vacationTab} index={1}>
+              <PaidHolidayFlagInput />
+            </TabPanel>
+
+            {hourlyPaidHolidayEnabled && (
+              <TabPanel value={vacationTab} index={2}>
+                <Stack direction="row">
+                  <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                    {"時間単位休暇"}
                   </Box>
+                  <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                    {hourlyPaidHolidayTimeFields.length === 0 && (
+                      <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                        時間単位休暇の時間帯を追加してください。
+                      </Box>
+                    )}
+                    {hourlyPaidHolidayTimeFields.map(
+                      (hourlyPaidHolidayTime, index) => (
+                        <HourlyPaidHolidayTimeItem
+                          key={hourlyPaidHolidayTime.id}
+                          time={hourlyPaidHolidayTime}
+                          index={index}
+                        />
+                      )
+                    )}
+                    <Box>
+                      <IconButton
+                        aria-label="add-hourly-paid-holiday-time"
+                        onClick={() =>
+                          hourlyPaidHolidayTimeAppend({
+                            startTime: null,
+                            endTime: null,
+                          })
+                        }
+                        disabled={changeRequests.length > 0}
+                      >
+                        <AddAlarmIcon />
+                      </IconButton>
+                    </Box>
+                  </Stack>
                 </Stack>
-              </Stack>
-            </Box>
-          )}
-          <SubstituteHolidayDateInput />
-          <GoDirectlyFlagCheckbox
-            name="goDirectlyFlag"
-            control={control}
-            disabled={changeRequests.length > 0}
-          />
-          <ReturnDirectlyFlagInput />
-          <WorkTimeInput />
-          <RestTimeItem />
-          <ProductionTimeItem
-            time={totalProductionTime}
-            hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
-          />
-          <RemarksInput />
-          <Divider />
-          <StaffCommentInput register={register} setValue={setValue} />
+              </TabPanel>
+            )}
+          </GroupContainer>
+          <GroupContainer>
+            <RemarksInput />
+          </GroupContainer>
+          <GroupContainer>
+            <StaffCommentInput register={register} setValue={setValue} />
+          </GroupContainer>
           <Box>
             <Stack
               direction="row"

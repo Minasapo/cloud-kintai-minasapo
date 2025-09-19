@@ -1,9 +1,10 @@
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
-import { Box, Chip, Stack } from "@mui/material";
-import { renderTimeViewClock, TimePicker } from "@mui/x-date-pickers";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import { Box, Chip, Stack } from "@mui/material";
+import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { Controller } from "react-hook-form";
+
+import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
 
 interface TimeInputBaseProps<K extends keyof AttendanceEditInputs> {
   name: K;
@@ -34,10 +35,6 @@ export default function TimeInputBase<K extends keyof AttendanceEditInputs>({
             <TimePicker
               ampm={false}
               value={(() => (field.value ? dayjs(field.value) : null))()}
-              viewRenderers={{
-                hours: renderTimeViewClock,
-                minutes: renderTimeViewClock,
-              }}
               slotProps={{
                 textField: { size: "small" },
               }}

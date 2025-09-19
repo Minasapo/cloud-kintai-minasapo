@@ -74,6 +74,7 @@ export default function useAttendance() {
         id: attendance.id,
         startTime,
         goDirectlyFlag: goDirectlyFlag === GoDirectlyFlag.YES,
+        isDeemedHoliday: attendance.isDeemedHoliday,
         revision: attendance.revision,
       }).catch((e: Error) => {
         throw e;
@@ -160,6 +161,7 @@ export default function useAttendance() {
         endTime,
         returnDirectlyFlag: returnDirectlyFlag === ReturnDirectlyFlag.YES,
         rests,
+        isDeemedHoliday: attendance.isDeemedHoliday,
         systemComments,
         revision: attendance.revision,
       }).catch((e: Error) => {
@@ -209,6 +211,7 @@ export default function useAttendance() {
       return updateAttendance({
         id: attendance.id,
         rests,
+        isDeemedHoliday: attendance.isDeemedHoliday,
         revision: attendance.revision,
       }).catch((e: Error) => {
         throw e;
@@ -299,6 +302,7 @@ export default function useAttendance() {
       return updateAttendance({
         id: attendance.id,
         remarks,
+        isDeemedHoliday: attendance.isDeemedHoliday,
         revision: attendance.revision,
       }).catch((e: Error) => {
         throw e;

@@ -209,6 +209,7 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
       __typename
     }
     sortKey
+    workType
     createdAt
     updatedAt
     __typename
@@ -236,6 +237,7 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
       __typename
     }
     sortKey
+    workType
     createdAt
     updatedAt
     __typename
@@ -263,6 +265,7 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
       __typename
     }
     sortKey
+    workType
     createdAt
     updatedAt
     __typename
@@ -436,6 +439,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {
@@ -527,6 +531,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {
@@ -618,6 +623,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
     }
     remarks
     paidHolidayFlag
+    isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
     histories {

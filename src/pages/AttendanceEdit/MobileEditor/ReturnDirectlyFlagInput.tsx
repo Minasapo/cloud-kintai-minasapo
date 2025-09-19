@@ -1,21 +1,32 @@
 import { Switch } from "@mui/material";
-import { Control } from "react-hook-form";
+import { useContext } from "react";
 
 import ReturnDirectlyFlagInputBase from "@/components/common/ReturnDirectlyFlagInputBase";
+import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 
-import { AttendanceEditInputs } from "../common";
+import { AttendanceEditContext } from "../AttendanceEditProvider";
 
-export function ReturnDirectlyFlagInput({
-  control,
-}: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<AttendanceEditInputs, any>;
-}) {
+export function ReturnDirectlyFlagInput() {
+  const context = useContext(AttendanceEditContext);
+  const control = context?.control;
+  const setValue = context?.setValue;
+  const { getEndTime } = useAppConfig();
+
+  if (!control || !setValue) {
+    return null;
+  }
+
   return (
     <ReturnDirectlyFlagInputBase
       control={control}
       inputComponent={Switch}
       layout="inline"
+      onChangeFlag={(checked) => {
+        if (checked) {
+          setValue("returnDirectlyFlag", true);
+          setValue("endTime", getEndTime().toISOString());
+        }
+      }}
     />
   );
 }

@@ -1,5 +1,5 @@
 import { Box, Stack } from "@mui/material";
-import { renderTimeViewClock, TimePicker } from "@mui/x-date-pickers";
+import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -46,10 +46,6 @@ export default function EndTimeInput({
               value={field.value ? dayjs(field.value) : null}
               ampm={false}
               disabled={changeRequests.length > 0}
-              viewRenderers={{
-                hours: renderTimeViewClock,
-                minutes: renderTimeViewClock,
-              }}
               slotProps={{
                 textField: {
                   size: "small",

@@ -19,9 +19,9 @@ import {
 
 import { AttendanceEditContext } from "../../AttendanceEditProvider";
 import { AttendanceEditInputs, RestInputs } from "../../common";
-import RestStartTimeInput from "../../DesktopEditor/RestTimeItem/RestTimeInput/RestStartTimeInput";
 import { Label } from "../Label";
 import RestEndTimeInput from "./RestEndTimeInput";
+import RestStartTimeInput from "./RestStartTimeInputMobile";
 
 type RestTimeInputProps = {
   restFields: FieldArrayWithId<AttendanceEditInputs, "rests", "id">[];

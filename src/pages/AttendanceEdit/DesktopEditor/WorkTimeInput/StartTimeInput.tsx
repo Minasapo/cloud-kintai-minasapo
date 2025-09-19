@@ -1,6 +1,6 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Box, Chip, Stack } from "@mui/material";
-import { renderTimeViewClock, TimePicker } from "@mui/x-date-pickers";
+import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -44,10 +44,6 @@ export default function StartTimeInput({
             ampm={false}
             value={field.value ? dayjs(field.value) : null}
             disabled={changeRequests.length > 0}
-            viewRenderers={{
-              hours: renderTimeViewClock,
-              minutes: renderTimeViewClock,
-            }}
             slotProps={{
               textField: {
                 size: "small",

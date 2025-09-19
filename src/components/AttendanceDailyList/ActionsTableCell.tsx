@@ -150,6 +150,7 @@ export function ActionsTableCell({
         />
         <IconButton
           size="small"
+          data-testid="attendance-open-button"
           onClick={() => {
             const { sub: staffId } = row;
             navigate(`/admin/staff/${staffId}/attendance`);

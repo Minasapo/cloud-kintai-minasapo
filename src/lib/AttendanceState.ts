@@ -46,7 +46,11 @@ export class AttendanceState {
       return AttendanceStatus.Ok;
     }
 
-    if (this.isHoliday() || this.isCompanyHoliday()) {
+    if (
+      (this.staff.workType === "shift" && this.attendance.isDeemedHoliday) ||
+      (this.staff.workType !== "shift" &&
+        (this.isHoliday() || this.isCompanyHoliday()))
+    ) {
       return AttendanceStatus.None;
     }
 
@@ -54,9 +58,13 @@ export class AttendanceState {
       return AttendanceStatus.Requesting;
     }
 
-    const isWeekday = new DayOfWeek(this.holidayCalendars).isWeekday(
-      this.attendance.workDate
-    );
+    // Shift の場合は土日関係なく判定する（週末判定を無視して常に平日扱いにする）
+    const isShift = this.staff.workType === "shift" && !this.isDeemedHoliday();
+    const isWeekday = isShift
+      ? true
+      : new DayOfWeek(this.holidayCalendars).isWeekday(
+          this.attendance.workDate
+        );
 
     if (isWeekday) {
       if (this.isToday()) {
@@ -75,6 +83,10 @@ export class AttendanceState {
     }
 
     return AttendanceStatus.Ok;
+  }
+
+  private isDeemedHoliday() {
+    return !!this.attendance.isDeemedHoliday;
   }
 
   private isEnabledStartDate() {

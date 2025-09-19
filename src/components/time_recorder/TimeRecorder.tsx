@@ -92,11 +92,7 @@ export default function TimeRecorder(): JSX.Element {
 
   const today = useMemo(() => dayjs().format(AttendanceDate.DataFormat), []);
 
-  const logger = useMemo(
-    () => new Logger("TimeRecorder", "DEBUG"),
-    // () => new Logger("TimeRecorder", import.meta.env.DEV ? "DEBUG" : "ERROR"),
-    []
-  );
+  const logger = useMemo(() => new Logger("TimeRecorder", "DEBUG"), []);
 
   const handleClockIn = useCallback(
     () => clockInCallback(cognitoUser, today, clockIn, dispatch, staff, logger),

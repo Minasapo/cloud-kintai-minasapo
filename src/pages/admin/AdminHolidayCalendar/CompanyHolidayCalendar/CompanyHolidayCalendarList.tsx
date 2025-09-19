@@ -36,6 +36,7 @@ import {
 import { ExcelFilePicker } from "../HolidayCalendar/ExcelFilePicker";
 import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import AddCompanyHolidayCalendar from "./AddCompanyHolidayCalendar";
+import CompanyHolidayCalendarCopy from "./CompanyHolidayCalendarCopy";
 import CompanyHolidayCalendarEdit from "./CompanyHolidayCalendarEdit";
 
 const YEAR_RANGE = 5;
@@ -205,6 +206,12 @@ export default function CompanyHolidayCalendarList() {
                       holidayCalendar={holidayCalendar}
                       updateCompanyHolidayCalendar={
                         updateCompanyHolidayCalendar
+                      }
+                    />
+                    <CompanyHolidayCalendarCopy
+                      companyHolidayCalendar={holidayCalendar}
+                      createCompanyHolidayCalendar={
+                        createCompanyHolidayCalendar
                       }
                     />
                     <IconButton onClick={() => handleDelete(holidayCalendar)}>
