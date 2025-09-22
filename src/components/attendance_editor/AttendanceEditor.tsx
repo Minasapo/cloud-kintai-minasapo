@@ -5,6 +5,7 @@ import {
   Box,
   Breadcrumbs,
   Button,
+  Checkbox,
   CircularProgress,
   FormControlLabel,
   IconButton,
@@ -19,7 +20,7 @@ import {
 import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
 
 import { SystemCommentInput } from "@/API";
@@ -272,8 +273,6 @@ export default function AttendanceEditor() {
 
   const onSubmit = useCallback(
     async (data: AttendanceEditInputs) => {
-      console.log("data", data.systemComments);
-
       if (attendance) {
         // 有給フラグが付いている場合は勤務時間/休憩等は送らない（バックエンド側バリデーション対策）
         const payload = {
@@ -288,6 +287,7 @@ export default function AttendanceEditor() {
           remarks: data.remarks,
           revision: data.revision,
           paidHolidayFlag: data.paidHolidayFlag,
+          specialHolidayFlag: data.specialHolidayFlag,
           substituteHolidayDate: data.substituteHolidayDate,
           rests: data.paidHolidayFlag
             ? []
@@ -354,6 +354,7 @@ export default function AttendanceEditor() {
         goDirectlyFlag: data.goDirectlyFlag,
         returnDirectlyFlag: data.returnDirectlyFlag,
         remarks: data.remarks,
+        specialHolidayFlag: data.specialHolidayFlag,
         paidHolidayFlag: data.paidHolidayFlag,
         substituteHolidayDate: data.substituteHolidayDate,
         rests: data.paidHolidayFlag
@@ -420,6 +421,7 @@ export default function AttendanceEditor() {
     setValue("workDate", attendance.workDate);
     setValue("startTime", attendance.startTime);
     setValue("isDeemedHoliday", attendance.isDeemedHoliday ?? false);
+    setValue("specialHolidayFlag", attendance.specialHolidayFlag ?? false);
     setValue("endTime", attendance.endTime);
     setValue("remarks", attendance.remarks || "");
     setValue("goDirectlyFlag", attendance.goDirectlyFlag || false);
@@ -698,6 +700,7 @@ export default function AttendanceEditor() {
             >
               <Tab label="代休" />
               <Tab label="有給(1日)" />
+              <Tab label="特別休暇" />
               {getHourlyPaidHolidayEnabled() && (
                 <Tab
                   label={`時間単位(${hourlyPaidHolidayTimeFields.length})`}
@@ -720,8 +723,31 @@ export default function AttendanceEditor() {
                 disabled={changeRequests.length > 0}
               />
             </TabPanel>
+
+            <TabPanel value={vacationTab} index={2}>
+              <Box sx={{ mt: 1 }}>
+                <Stack direction="row" alignItems={"center"}>
+                  <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                    特別休暇
+                  </Box>
+                  <Box>
+                    <Controller
+                      name="specialHolidayFlag"
+                      control={control}
+                      render={({ field }) => (
+                        <Checkbox
+                          {...field}
+                          checked={field.value || false}
+                          disabled={changeRequests.length > 0}
+                        />
+                      )}
+                    />
+                  </Box>
+                </Stack>
+              </Box>
+            </TabPanel>
             {getHourlyPaidHolidayEnabled() && (
-              <TabPanel value={vacationTab} index={2}>
+              <TabPanel value={vacationTab} index={3}>
                 <Stack spacing={1}>
                   <Stack direction="row">
                     <Box sx={{ fontWeight: "bold", width: "150px" }}>
@@ -763,7 +789,7 @@ export default function AttendanceEditor() {
 
             <TabPanel
               value={vacationTab}
-              index={getHourlyPaidHolidayEnabled() ? 3 : 2}
+              index={getHourlyPaidHolidayEnabled() ? 4 : 3}
             >
               <Box sx={{ mt: 1 }}>
                 <IsDeemedHolidayFlagInput
