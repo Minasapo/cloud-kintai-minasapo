@@ -31,6 +31,7 @@ export declare type AttendanceUpdateFormInputValues = {
     returnDirectlyFlag?: boolean;
     remarks?: string;
     paidHolidayFlag?: boolean;
+    specialHolidayFlag?: boolean;
     isDeemedHoliday?: boolean;
     hourlyPaidHolidayHours?: number;
     substituteHolidayDate?: string;
@@ -45,6 +46,7 @@ export declare type AttendanceUpdateFormValidationValues = {
     returnDirectlyFlag?: ValidationFunction<boolean>;
     remarks?: ValidationFunction<string>;
     paidHolidayFlag?: ValidationFunction<boolean>;
+    specialHolidayFlag?: ValidationFunction<boolean>;
     isDeemedHoliday?: ValidationFunction<boolean>;
     hourlyPaidHolidayHours?: ValidationFunction<number>;
     substituteHolidayDate?: ValidationFunction<string>;
@@ -61,6 +63,7 @@ export declare type AttendanceUpdateFormOverridesProps = {
     returnDirectlyFlag?: PrimitiveOverrideProps<SwitchFieldProps>;
     remarks?: PrimitiveOverrideProps<TextFieldProps>;
     paidHolidayFlag?: PrimitiveOverrideProps<SwitchFieldProps>;
+    specialHolidayFlag?: PrimitiveOverrideProps<SwitchFieldProps>;
     isDeemedHoliday?: PrimitiveOverrideProps<SwitchFieldProps>;
     hourlyPaidHolidayHours?: PrimitiveOverrideProps<TextFieldProps>;
     substituteHolidayDate?: PrimitiveOverrideProps<TextFieldProps>;

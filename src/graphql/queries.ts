@@ -389,6 +389,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -411,6 +412,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -434,6 +436,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -484,6 +487,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       isDeemedHoliday
       hourlyPaidHolidayHours
       substituteHolidayDate
@@ -506,6 +510,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
         }
         remarks
         paidHolidayFlag
+        specialHolidayFlag
         hourlyPaidHolidayHours
         substituteHolidayFlag
         substituteHolidayDate
@@ -529,6 +534,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
         }
         remarks
         paidHolidayFlag
+        specialHolidayFlag
         hourlyPaidHolidayHours
         substituteHolidayFlag
         substituteHolidayDate
@@ -592,6 +598,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       isDeemedHoliday
       hourlyPaidHolidayHours
       substituteHolidayDate
@@ -614,6 +621,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
         }
         remarks
         paidHolidayFlag
+        specialHolidayFlag
         hourlyPaidHolidayHours
         substituteHolidayFlag
         substituteHolidayDate
@@ -637,6 +645,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
         }
         remarks
         paidHolidayFlag
+        specialHolidayFlag
         hourlyPaidHolidayHours
         substituteHolidayFlag
         substituteHolidayDate

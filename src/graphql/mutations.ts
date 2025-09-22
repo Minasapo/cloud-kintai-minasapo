@@ -476,6 +476,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -498,6 +499,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -521,6 +523,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -569,6 +572,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -591,6 +595,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -614,6 +619,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -662,6 +668,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -684,6 +691,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -707,6 +715,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
