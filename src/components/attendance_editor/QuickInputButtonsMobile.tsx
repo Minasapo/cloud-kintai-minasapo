@@ -173,6 +173,12 @@ export default function QuickInputButtonsMobile({
       visible: true,
       action: () => {
         setValue("endTime", toISO(defaultEnd));
+        setValue("rests", [
+          {
+            startTime: toISO(defaultLunchStart),
+            endTime: toISO(defaultLunchEnd),
+          },
+        ]);
       },
     });
   }
