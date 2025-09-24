@@ -164,6 +164,7 @@ type AppConfig @model {
   amHolidayEndTime: String
   pmHolidayStartTime: String
   pmHolidayEndTime: String
+  specialHolidayEnabled: Boolean
   amPmHolidayEnabled: Boolean
   officeMode: Boolean
   hourlyPaidHolidayEnabled: Boolean

@@ -65,6 +65,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -111,6 +112,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -157,6 +159,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled

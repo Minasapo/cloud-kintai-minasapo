@@ -62,6 +62,7 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -113,6 +114,7 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       amHolidayEndTime
       pmHolidayStartTime
       pmHolidayEndTime
+      specialHolidayEnabled
       amPmHolidayEnabled
       officeMode
       hourlyPaidHolidayEnabled
