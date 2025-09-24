@@ -10,7 +10,7 @@ export default function RemarksTableRow({
   return (
     <TableRow>
       <TableCell>備考</TableCell>
-      <TableCell>{value && value !== "" ? value : "(登録なし)"}</TableCell>
+      <TableCell>{value && value !== "" ? value : "変更なし"}</TableCell>
     </TableRow>
   );
 }

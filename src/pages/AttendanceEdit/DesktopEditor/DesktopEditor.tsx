@@ -2,16 +2,20 @@ import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Container,
   Divider,
+  FormControlLabel,
   IconButton,
   Stack,
   styled,
   Tab,
   Tabs,
 } from "@mui/material";
+// ...existing imports above
 import { useContext, useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 
 import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
 import HourlyPaidHolidayTimeItem, {
@@ -30,6 +34,7 @@ import { AttendanceEditContext } from "../AttendanceEditProvider";
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
 import NoDataAlert from "./NoDataAlert";
 import PaidHolidayFlagInput from "./PaidHolidayFlagInput";
+// add Checkbox and FormControlLabel to top-level @mui/material import
 import RemarksInput from "./RemarksInput";
 import { calcTotalRestTime } from "./RestTimeItem/RestTimeInput/RestTimeInput";
 import RestTimeItem from "./RestTimeItem/RestTimeItem";
@@ -202,6 +207,7 @@ export default function DesktopEditor() {
             >
               <Tab label="代休" />
               <Tab label="有給(1日)" />
+              <Tab label="特別休暇" />
               {hourlyPaidHolidayEnabled && (
                 <Tab
                   label={`時間単位(${hourlyPaidHolidayTimeFields.length})`}
@@ -217,8 +223,42 @@ export default function DesktopEditor() {
               <PaidHolidayFlagInput />
             </TabPanel>
 
+            <TabPanel value={vacationTab} index={2}>
+              <Stack direction="row">
+                <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                  {"特別休暇"}
+                </Box>
+                <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                  <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                    有給休暇ではない特別な休暇(忌引きなど)として扱われます。
+                    <br />
+                    使用する際は、事前に勤怠管理者へご相談ください。
+                  </Box>
+                  <Controller
+                    name="specialHolidayFlag"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            {...field}
+                            checked={!!field.value}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) => field.onChange(e.target.checked)}
+                            disabled={changeRequests.length > 0}
+                          />
+                        }
+                        label={""}
+                      />
+                    )}
+                  />
+                </Stack>
+              </Stack>
+            </TabPanel>
+
             {hourlyPaidHolidayEnabled && (
-              <TabPanel value={vacationTab} index={2}>
+              <TabPanel value={vacationTab} index={3}>
                 <Stack direction="row">
                   <Box sx={{ fontWeight: "bold", width: "150px" }}>
                     {"時間単位休暇"}
