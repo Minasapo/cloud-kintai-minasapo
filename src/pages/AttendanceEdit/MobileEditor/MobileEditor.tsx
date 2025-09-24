@@ -1,6 +1,15 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Stack,
+  Tab,
+  Tabs,
+} from "@mui/material";
 import React, { useContext, useState } from "react";
+import { Controller } from "react-hook-form";
 
 import HourlyPaidHolidayTimeItemMobile from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItemMobile";
 import PaidHolidayFlagInputMobile from "@/components/attendance_editor/PaidHolidayFlagInputMobile";
@@ -51,9 +60,6 @@ export function MobileEditor() {
     workDate,
   } = useContext(AttendanceEditContext);
 
-  // タブ用の state とコンポーネントは、以下の guard の後に定義して
-  // control 等の型が絞られていることを保証します。
-
   if (changeRequests.length > 0) {
     return (
       <Stack direction="column" spacing={1} sx={{ p: 1 }}>
@@ -79,7 +85,6 @@ export function MobileEditor() {
     return null;
   }
 
-  // タブ状態（休暇系）
   const [holidayTab, setHolidayTab] = useState<number>(0);
 
   type TabPanelProps = {
@@ -100,6 +105,7 @@ export function MobileEditor() {
         sx={{ mb: 1 }}
       >
         <Tab label="有給休暇" />
+        <Tab label="特別休暇" />
         <Tab label="時間休暇" disabled={!hourlyPaidHolidayEnabled} />
         <Tab label="振替休暇" />
       </Tabs>
@@ -109,6 +115,36 @@ export function MobileEditor() {
       </TabPanel>
 
       <TabPanel value={holidayTab} index={1}>
+        <Stack direction="row">
+          <Box sx={{ fontWeight: "bold", width: "120px" }}>{"特別休暇"}</Box>
+          <Stack spacing={1} sx={{ flexGrow: 2 }}>
+            <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+              有給休暇ではない特別な休暇(忌引きなど)として扱われます。使用する際は、事前に勤怠管理者へご相談ください。
+            </Box>
+            <Controller
+              name="specialHolidayFlag"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      {...field}
+                      checked={!!field.value}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        field.onChange(e.target.checked)
+                      }
+                      disabled={changeRequests.length > 0}
+                    />
+                  }
+                  label={""}
+                />
+              )}
+            />
+          </Stack>
+        </Stack>
+      </TabPanel>
+
+      <TabPanel value={holidayTab} index={2}>
         {!hourlyPaidHolidayEnabled ? (
           <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
             時間単位休暇は無効です。
@@ -151,7 +187,7 @@ export function MobileEditor() {
         )}
       </TabPanel>
 
-      <TabPanel value={holidayTab} index={2}>
+      <TabPanel value={holidayTab} index={3}>
         <SubstituteHolidayDateInput />
       </TabPanel>
     </>
