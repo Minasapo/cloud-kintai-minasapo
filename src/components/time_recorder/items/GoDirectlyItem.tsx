@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { WorkStatus, WorkStatusCodes } from "../common";
 
@@ -20,24 +20,35 @@ const GoDirectlyButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+interface GoDirectlyItemProps {
+  workStatus: WorkStatus | null;
+  onClick: () => void;
+}
+
 export default function GoDirectlyItem({
   workStatus,
   onClick,
-}: {
-  workStatus: WorkStatus | null;
-  onClick: () => void;
-}) {
-  const [disabled, setDisabled] = useState(true);
+}: GoDirectlyItemProps) {
+  const [isPending, setIsPending] = useState(false);
+
+  const isBeforeWork = useMemo(
+    () => workStatus?.code === WorkStatusCodes.BEFORE_WORK,
+    [workStatus]
+  );
+  const disabled = useMemo(
+    () => !isBeforeWork || isPending,
+    [isBeforeWork, isPending]
+  );
 
   useEffect(() => {
-    setDisabled(workStatus?.code !== WorkStatusCodes.BEFORE_WORK);
-  }, [workStatus]);
+    setIsPending(false);
+  }, [isBeforeWork]);
 
   return (
     <GoDirectlyButton
       data-testid="go-directly-button"
       onClick={() => {
-        setDisabled(true);
+        setIsPending(true);
         onClick();
       }}
       disabled={disabled}
