@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { WorkStatus, WorkStatusCodes } from "../common";
 
@@ -21,31 +21,39 @@ const ClockOutButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+type ClockOutItemProps = {
+  workStatus: WorkStatus | null;
+  onClick: () => void;
+};
+
 export default function ClockOutItem({
   workStatus,
   onClick,
-}: {
-  workStatus: WorkStatus | null;
-  onClick: () => void;
-}) {
-  const [disabled, setDisabled] = useState(true);
+}: ClockOutItemProps) {
+  const isWorking = useMemo(
+    () => workStatus?.code === WorkStatusCodes.WORKING,
+    [workStatus]
+  );
+  const [isDisabled, setIsDisabled] = useState(!isWorking);
 
   useEffect(() => {
-    setDisabled(workStatus?.code !== WorkStatusCodes.WORKING);
-  }, [workStatus]);
+    setIsDisabled(!isWorking);
+  }, [isWorking]);
+
+  const handleClick = useCallback(() => {
+    if (isDisabled) return;
+
+    setIsDisabled(true);
+    onClick();
+  }, [isDisabled, onClick]);
 
   return (
     <ClockOutButton
       data-testid="clock-out-button"
-      onClick={() => {
-        setDisabled(true);
-        onClick();
-      }}
+      disabled={isDisabled}
+      onClick={handleClick}
       size="large"
-      variant={
-        workStatus?.code === WorkStatusCodes.WORKING ? "outlined" : "contained"
-      }
-      disabled={disabled}
+      variant={isWorking ? "outlined" : "contained"}
     >
       勤務終了
     </ClockOutButton>
