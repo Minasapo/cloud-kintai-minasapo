@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { WorkStatus, WorkStatusCodes } from "../common";
 
@@ -20,27 +20,34 @@ const ClockInButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export default function ClockInItem({
-  workStatus,
-  onClick,
-}: {
+type ClockInItemProps = {
   workStatus: WorkStatus;
   onClick: () => void;
-}) {
-  const [disabled, setDisabled] = useState(true);
+};
+
+export default function ClockInItem({ workStatus, onClick }: ClockInItemProps) {
+  const isBeforeWork = useMemo(
+    () => workStatus.code === WorkStatusCodes.BEFORE_WORK,
+    [workStatus.code]
+  );
+  const [clicked, setClicked] = useState(false);
 
   useEffect(() => {
-    setDisabled(workStatus.code !== WorkStatusCodes.BEFORE_WORK);
-  }, [workStatus]);
+    if (isBeforeWork) {
+      setClicked(false);
+    }
+  }, [isBeforeWork]);
+
+  const handleClick = useCallback(() => {
+    setClicked(true);
+    onClick();
+  }, [onClick]);
 
   return (
     <ClockInButton
       data-testid="clock-in-button"
-      onClick={() => {
-        setDisabled(true);
-        onClick();
-      }}
-      disabled={disabled}
+      onClick={handleClick}
+      disabled={!isBeforeWork || clicked}
     >
       勤務開始
     </ClockInButton>
