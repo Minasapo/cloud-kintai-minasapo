@@ -7,16 +7,16 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Logger } from "aws-amplify";
 
+import { Attendance, Staff } from "@/API";
+import * as MESSAGE_CODE from "@/errors";
 import { ReturnDirectlyFlag } from "@/hooks/useAttendance/useAttendance";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-
-import { Attendance, Staff } from "../../API";
-import * as MESSAGE_CODE from "../../errors";
-import { TimeRecordMailSender } from "../../lib/mail/TimeRecordMailSender";
+import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../lib/reducers/snackbarReducer";
+} from "@/lib/reducers/snackbarReducer";
+
 import { getNowISOStringWithZeroSeconds } from "./util";
 
 /**
@@ -29,7 +29,7 @@ import { getNowISOStringWithZeroSeconds } from "./util";
  * @param staff - スタッフ情報
  * @param logger - ログ出力用Loggerインスタンス
  */
-export function clockOutCallback(
+export async function clockOutCallback(
   cognitoUser: CognitoUser | null | undefined,
   today: string,
   clockOut: (
@@ -40,19 +40,36 @@ export function clockOutCallback(
   ) => Promise<Attendance>,
   dispatch: Dispatch,
   staff: Staff | null | undefined,
-  logger: Logger
-) {
-  if (!cognitoUser || !staff) {
+  logger: Logger,
+  endTimeIso?: string
+): Promise<void> {
+  if (!cognitoUser) {
+    logger.debug("Skipped clockOutCallback because cognitoUser is missing");
     return;
   }
-  const now = getNowISOStringWithZeroSeconds();
-  clockOut(cognitoUser.id, today, now)
-    .then((res) => {
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S01002));
-      new TimeRecordMailSender(cognitoUser, res, staff).clockOut();
-    })
-    .catch((e) => {
-      logger.debug(e);
-      dispatch(setSnackbarError(MESSAGE_CODE.E01002));
-    });
+
+  if (!staff) {
+    logger.debug("Skipped clockOutCallback because staff is missing");
+    return;
+  }
+
+  const clockOutTime = resolveClockOutTime(endTimeIso);
+
+  try {
+    const attendance = await clockOut(cognitoUser.id, today, clockOutTime);
+
+    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01002));
+    new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
+  } catch (error) {
+    logger.error("Failed to clock out", error);
+    dispatch(setSnackbarError(MESSAGE_CODE.E01002));
+  }
+}
+
+function resolveClockOutTime(endTimeIso?: string) {
+  if (endTimeIso) {
+    return endTimeIso;
+  }
+
+  return getNowISOStringWithZeroSeconds();
 }

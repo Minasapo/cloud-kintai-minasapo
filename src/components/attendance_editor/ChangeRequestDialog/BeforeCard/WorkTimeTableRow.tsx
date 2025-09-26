@@ -16,7 +16,7 @@ export default function WorkTimeTableRow({
       <TableCell>
         {(() => {
           if (!startTime && !endTime) {
-            return "(登録なし)";
+            return "変更なし";
           }
 
           return `${startTime?.format("HH:mm") ?? AttendanceTime.None} 〜 ${

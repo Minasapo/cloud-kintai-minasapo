@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { WorkStatus, WorkStatusCodes } from "../common";
 
@@ -14,27 +14,37 @@ const RestStartButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+type RestStartItemProps = {
+  workStatus: WorkStatus | null;
+  onClick: () => void;
+};
+
 export default function RestStartItem({
   workStatus,
   onClick,
-}: {
-  workStatus: WorkStatus | null;
-  onClick: () => void;
-}) {
-  const [disabled, setDisabled] = useState(true);
+}: RestStartItemProps) {
+  const isWorking = useMemo(
+    () => workStatus?.code === WorkStatusCodes.WORKING,
+    [workStatus?.code]
+  );
+  const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    setDisabled(workStatus?.code !== WorkStatusCodes.WORKING);
-  }, [workStatus]);
+    if (isWorking) {
+      setIsPending(false);
+    }
+  }, [isWorking]);
+
+  const handleClick = useCallback(() => {
+    setIsPending(true);
+    onClick();
+  }, [onClick]);
 
   return (
     <RestStartButton
       fullWidth
-      onClick={() => {
-        setDisabled(true);
-        onClick();
-      }}
-      disabled={disabled}
+      onClick={handleClick}
+      disabled={!isWorking || isPending}
       data-testid="rest-start-button"
     >
       休憩開始

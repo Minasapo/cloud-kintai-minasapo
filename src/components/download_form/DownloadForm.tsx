@@ -2,10 +2,11 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip, CircularProgress, Stack } from "@mui/material";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
+// ...existing code
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import useCloseDates from "../../hooks/useCloseDates/useCloseDates";
@@ -40,6 +41,8 @@ export default function DownloadForm() {
     mode: "onChange",
     defaultValues,
   });
+
+  // special holiday inclusion is determined inside the export components via AppConfig
 
   // derive workDates from watched start/end date so we can pass to ExportButton
   const startDate = watch("startDate") ?? dayjs();
