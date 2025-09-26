@@ -1,22 +1,38 @@
-import { Link as MuiLink, SxProps, Theme } from "@mui/material";
+import MuiLink, { LinkProps as MuiLinkProps } from "@mui/material/Link";
+import { forwardRef, memo, ReactNode } from "react";
 
-interface LinkProps {
-  label?: string;
-  href?: string;
-  color?: "primary" | "secondary";
-  sx?: SxProps<Theme> | undefined;
-  onClick?: () => void;
+export interface LinkProps extends MuiLinkProps {
+  label?: ReactNode;
 }
 
-const Link = ({
-  label = "link",
-  href = "/",
-  color = "primary",
-  onClick = () => {},
-  sx = {},
-}: LinkProps) => (
-  <MuiLink href={href} variant="button" color={color} sx={sx} onClick={onClick}>
-    {label}
-  </MuiLink>
-);
+const DEFAULT_LABEL: ReactNode = "link";
+const DEFAULT_HREF = "/";
+const DEFAULT_COLOR: LinkProps["color"] = "primary";
+const DEFAULT_VARIANT: LinkProps["variant"] = "button";
+
+const LinkBase = forwardRef<HTMLAnchorElement, LinkProps>(function LinkBase(
+  {
+    label,
+    children,
+    href = DEFAULT_HREF,
+    color = DEFAULT_COLOR,
+    variant = DEFAULT_VARIANT,
+    ...rest
+  },
+  ref
+) {
+  const content = children ?? label ?? DEFAULT_LABEL;
+
+  return (
+    <MuiLink ref={ref} href={href} color={color} variant={variant} {...rest}>
+      {content}
+    </MuiLink>
+  );
+});
+
+LinkBase.displayName = "Link";
+
+const Link = memo(LinkBase);
+Link.displayName = "Link";
+
 export default Link;
