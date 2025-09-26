@@ -1,65 +1,36 @@
-import { Button, Container, Stack, styled } from "@mui/material";
+import { Container, Stack } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
+
+import { AuthContext } from "@/context/AuthContext";
+import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
 import DesktopMenu from "./DesktopMenu";
 import { ExternalLinks } from "./ExternalLinks/ExternalLinks";
 import Logo from "./Logo";
 import MobileMenu from "./MobileMenu";
 import { SignInOutButton } from "./SignInOutButton";
-import { AuthContext } from "../../context/AuthContext";
-import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
-export const SignOutButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.logout.contrastText,
-  backgroundColor: theme.palette.logout.main,
-  border: `3px solid ${theme.palette.logout.main}`,
-  whiteSpace: "nowrap",
-  paddingLeft: "1rem",
-  paddingRight: "1rem",
-  "&:hover": {
-    color: theme.palette.logout.main,
-    backgroundColor: theme.palette.logout.contrastText,
-  },
-}));
-
-export const SignInButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.login.contrastText,
-  backgroundColor: theme.palette.login.main,
-  whiteSpace: "nowrap",
-  paddingLeft: "1rem",
-  paddingRight: "1rem",
-  "&:hover": {
-    color: theme.palette.login.main,
-    backgroundColor: theme.palette.login.contrastText,
-  },
-}));
+// styled-componentsはSignInOutButton.tsxで管理
 
 export default function Header() {
   const { isCognitoUserRole } = useContext(AuthContext);
   const [pathName, setPathName] = useState("/register");
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const name = url.pathname === "/" ? "/register" : url.pathname;
+    const name =
+      window.location.pathname === "/" ? "/register" : window.location.pathname;
     setPathName(name);
-  }, [window.location.href]);
+  }, []); // location変更時に再実行したい場合はpopstateイベントを利用
 
   return (
-    <header
-      style={{
-        backgroundColor: "#0FA85E",
-      }}
-    >
-      <Container maxWidth="xl" sx={{ p: 0 }}>
+    <header>
+      <Container maxWidth="xl" sx={{ p: 0, backgroundColor: "#0FA85E" }}>
         <Stack
           direction="row"
           alignItems="center"
           color="white"
           sx={{ p: 1, height: "50px", boxSizing: "border-box" }}
-          spacing={{
-            xs: 0,
-            md: 2,
-          }}
+          spacing={{ xs: 0, md: 2 }}
         >
           <Logo />
           <DesktopMenu pathName={pathName} />
