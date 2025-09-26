@@ -15,6 +15,7 @@ import HourlyPaidHolidayTimeItemMobile from "@/components/attendance_editor/item
 import PaidHolidayFlagInputMobile from "@/components/attendance_editor/PaidHolidayFlagInputMobile";
 import QuickInputButtonsMobile from "@/components/attendance_editor/QuickInputButtonsMobile";
 import GroupContainerMobile from "@/components/ui/GroupContainer/GroupContainerMobile";
+import { AppConfigContext } from "@/context/AppConfigContext";
 
 import Title from "../../../components/Title/Title";
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
@@ -33,6 +34,7 @@ import { WorkTimeInput } from "./WorkTimeInput/WorkTimeInput";
 import WorkTypeItemMobile from "./WorkTypeItemMobile";
 
 export function MobileEditor() {
+  const ctx = useContext(AttendanceEditContext);
   const {
     staff,
     onSubmit,
@@ -50,15 +52,14 @@ export function MobileEditor() {
     restRemove,
     restUpdate,
     changeRequests,
-  } = useContext(AttendanceEditContext);
-  const {
     hourlyPaidHolidayEnabled,
     hourlyPaidHolidayTimeFields,
     hourlyPaidHolidayTimeAppend,
     hourlyPaidHolidayTimeReplace,
     restReplace,
     workDate,
-  } = useContext(AttendanceEditContext);
+  } = ctx;
+  const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
 
   if (changeRequests.length > 0) {
     return (
@@ -87,111 +88,144 @@ export function MobileEditor() {
 
   const [holidayTab, setHolidayTab] = useState<number>(0);
 
-  type TabPanelProps = {
+  // タブパネル
+  const TabPanel = ({
+    children,
+    value,
+    index,
+  }: {
     children?: React.ReactNode;
     value: number;
     index: number;
+  }) => {
+    return value === index ? <Box sx={{ pt: 1 }}>{children}</Box> : null;
   };
+  TabPanel.displayName = "TabPanel";
 
-  const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) =>
-    value === index ? <Box sx={{ pt: 1 }}>{children}</Box> : null;
+  // 休暇タブ（AppConfigのフラグで特別休暇タブを表示制御）
+  const TabbedPaidHoliday = () => {
+    const tabs: { label: string; panel: JSX.Element }[] = [];
+    // 有給
+    tabs.push({
+      label: "有給休暇",
+      panel: (
+        <TabPanel value={holidayTab} index={tabs.length}>
+          <PaidHolidayFlagInputMobile control={control} setValue={setValue} />
+        </TabPanel>
+      ),
+    });
 
-  const TabbedPaidHoliday: React.FC = () => (
-    <>
-      <Tabs
-        value={holidayTab}
-        onChange={(_, v) => setHolidayTab(v)}
-        variant="fullWidth"
-        sx={{ mb: 1 }}
-      >
-        <Tab label="有給休暇" />
-        <Tab label="特別休暇" />
-        <Tab label="時間休暇" disabled={!hourlyPaidHolidayEnabled} />
-        <Tab label="振替休暇" />
-      </Tabs>
-
-      <TabPanel value={holidayTab} index={0}>
-        <PaidHolidayFlagInputMobile control={control} setValue={setValue} />
-      </TabPanel>
-
-      <TabPanel value={holidayTab} index={1}>
-        <Stack direction="row">
-          <Box sx={{ fontWeight: "bold", width: "120px" }}>{"特別休暇"}</Box>
-          <Stack spacing={1} sx={{ flexGrow: 2 }}>
-            <Box sx={{ color: "text.secondary", fontSize: 14 }}>
-              有給休暇ではない特別な休暇(忌引きなど)として扱われます。使用する際は、事前に勤怠管理者へご相談ください。
-            </Box>
-            <Controller
-              name="specialHolidayFlag"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      {...field}
-                      checked={!!field.value}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        field.onChange(e.target.checked)
+    // 特別休暇（フラグが有効な場合のみ）
+    if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
+      tabs.push({
+        label: "特別休暇",
+        panel: (
+          <TabPanel value={holidayTab} index={tabs.length}>
+            <Stack direction="row">
+              <Box sx={{ fontWeight: "bold", width: "120px" }}>特別休暇</Box>
+              <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                  有給休暇ではない特別な休暇(忌引きなど)です。利用時は管理者へご相談ください。
+                </Box>
+                <Controller
+                  name="specialHolidayFlag"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          {...field}
+                          checked={!!field.value}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                          disabled={changeRequests.length > 0}
+                        />
                       }
-                      disabled={changeRequests.length > 0}
+                      label=""
                     />
-                  }
-                  label={""}
+                  )}
                 />
-              )}
-            />
-          </Stack>
-        </Stack>
-      </TabPanel>
-
-      <TabPanel value={holidayTab} index={2}>
-        {!hourlyPaidHolidayEnabled ? (
-          <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
-            時間単位休暇は無効です。
-          </Stack>
-        ) : (
-          <>
-            <Label>時間単位休暇</Label>
-            {hourlyPaidHolidayTimeFields.length === 0 && (
-              <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
-                時間単位休暇の時間帯を追加してください。
               </Stack>
-            )}
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {hourlyPaidHolidayTimeFields.map(
-              (hourlyPaidHolidayTime: any, index: number) => (
+            </Stack>
+          </TabPanel>
+        ),
+      });
+    }
+
+    // 時間休暇
+    tabs.push({
+      label: "時間休暇",
+      panel: (
+        <TabPanel value={holidayTab} index={tabs.length}>
+          {!hourlyPaidHolidayEnabled ? (
+            <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
+              時間単位休暇は無効です。
+            </Stack>
+          ) : (
+            <>
+              <Label>時間単位休暇</Label>
+              {hourlyPaidHolidayTimeFields.length === 0 && (
+                <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
+                  時間帯を追加してください。
+                </Stack>
+              )}
+              {hourlyPaidHolidayTimeFields.map((time, index) => (
                 <HourlyPaidHolidayTimeItemMobile
-                  key={hourlyPaidHolidayTime.id}
-                  time={hourlyPaidHolidayTime}
+                  key={time.id}
+                  time={time}
                   index={index}
                 />
-              )
-            )}
-            <Stack>
-              <Button
-                variant="outlined"
-                size="medium"
-                startIcon={<AddCircleOutlineOutlinedIcon />}
-                fullWidth
-                onClick={() =>
-                  hourlyPaidHolidayTimeAppend({
-                    startTime: null,
-                    endTime: null,
-                  })
-                }
-              >
-                追加
-              </Button>
-            </Stack>
-          </>
-        )}
-      </TabPanel>
+              ))}
+              <Stack>
+                <Button
+                  variant="outlined"
+                  size="medium"
+                  startIcon={<AddCircleOutlineOutlinedIcon />}
+                  fullWidth
+                  onClick={() =>
+                    hourlyPaidHolidayTimeAppend({
+                      startTime: null,
+                      endTime: null,
+                    })
+                  }
+                >
+                  追加
+                </Button>
+              </Stack>
+            </>
+          )}
+        </TabPanel>
+      ),
+    });
 
-      <TabPanel value={holidayTab} index={3}>
-        <SubstituteHolidayDateInput />
-      </TabPanel>
-    </>
-  );
+    // 振替休暇
+    tabs.push({
+      label: "振替休暇",
+      panel: (
+        <TabPanel value={holidayTab} index={tabs.length}>
+          <SubstituteHolidayDateInput />
+        </TabPanel>
+      ),
+    });
+
+    return (
+      <>
+        <Tabs
+          value={holidayTab}
+          onChange={(_, v) => setHolidayTab(v)}
+          variant="fullWidth"
+          sx={{ mb: 1 }}
+        >
+          {tabs.map((t, i) => (
+            <Tab key={i} label={t.label} />
+          ))}
+        </Tabs>
+        {tabs.map((t, i) => (
+          <div key={`panel-${i}`}>{t.panel}</div>
+        ))}
+      </>
+    );
+  };
+  TabbedPaidHoliday.displayName = "TabbedPaidHoliday";
 
   return (
     <Stack direction="column" spacing={1} sx={{ p: 1, pb: 10 }}>
@@ -212,19 +246,15 @@ export function MobileEditor() {
           {/* 勤務日 */}
           <WorkDateItem />
         </GroupContainerMobile>
-
         <GroupContainerMobile>
-          {/* スタッフ */}
+          {/* スタッフ・勤務形態 */}
           <StaffNameItem />
-          {/* 勤務形態 */}
           <WorkTypeItemMobile />
         </GroupContainerMobile>
-
         <GroupContainerMobile>
           <Stack spacing={1}>
-            {/* 勤務時間 */}
+            {/* 勤務時間・休憩時間 */}
             <WorkTimeInput />
-            {/* 休憩時間 */}
             <RestTimeInput
               restFields={restFields}
               control={control}
@@ -234,22 +264,16 @@ export function MobileEditor() {
             />
           </Stack>
         </GroupContainerMobile>
-
         <GroupContainerMobile>
-          {/* 休暇(有給休暇/時間単位休暇/振替休暇) */}
+          {/* 休暇タブ */}
           <TabbedPaidHoliday />
         </GroupContainerMobile>
-
         <GroupContainerMobile title="備考">
           <RemarksInput register={register} />
         </GroupContainerMobile>
-
-        {/* スタッフコメント */}
         <GroupContainerMobile title="修正理由">
           <StaffCommentInput />
         </GroupContainerMobile>
-
-        {/* 申請ボタン */}
         <RequestButtonItem
           handleSubmit={handleSubmit}
           onSubmit={onSubmit}

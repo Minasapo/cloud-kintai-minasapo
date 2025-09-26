@@ -9,6 +9,7 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useContext, useEffect, useState } from "react";
 
+import { CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import Title from "@/components/common/Title";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -46,6 +47,7 @@ export default function AdminConfigManagement() {
     getPmHolidayStartTime,
     getPmHolidayEndTime,
     getAmPmHolidayEnabled,
+    getSpecialHolidayEnabled,
   } = useContext(AppConfigContext);
   const [startTime, setStartTime] = useState<Dayjs | null>(null);
   const [endTime, setEndTime] = useState<Dayjs | null>(null);
@@ -82,6 +84,8 @@ export default function AdminConfigManagement() {
     dayjs("18:00", "HH:mm")
   );
   const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
+  const [specialHolidayEnabled, setSpecialHolidayEnabled] =
+    useState<boolean>(false);
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
@@ -107,6 +111,9 @@ export default function AdminConfigManagement() {
     setLunchRestStartTime(getLunchRestStartTime());
     setLunchRestEndTime(getLunchRestEndTime());
     setHourlyPaidHolidayEnabled(getHourlyPaidHolidayEnabled());
+    if (typeof getSpecialHolidayEnabled === "function") {
+      setSpecialHolidayEnabled(getSpecialHolidayEnabled());
+    }
     // fetchConfigで午前休・午後休の時間帯があればセット
     if (typeof getAmHolidayStartTime === "function" && getAmHolidayStartTime())
       setAmHolidayStartTime(getAmHolidayStartTime());
@@ -250,6 +257,12 @@ export default function AdminConfigManagement() {
     setHourlyPaidHolidayEnabled(event.target.checked);
   };
 
+  const handleSpecialHolidayEnabledChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSpecialHolidayEnabled(event.target.checked);
+  };
+
   const handleSave = async () => {
     if (
       startTime &&
@@ -263,6 +276,7 @@ export default function AdminConfigManagement() {
     ) {
       try {
         if (id) {
+          // backend の GraphQL スキーマにフィールドがない場合を考慮し any にキャストして送る
           await saveConfig({
             id,
             workStartTime: startTime.format("HH:mm"),
@@ -294,7 +308,8 @@ export default function AdminConfigManagement() {
             pmHolidayStartTime: pmHolidayStartTime.format("HH:mm"),
             pmHolidayEndTime: pmHolidayEndTime.format("HH:mm"),
             amPmHolidayEnabled,
-          });
+            specialHolidayEnabled,
+          } as unknown as UpdateAppConfigInput);
           dispatch(setSnackbarSuccess(S14002));
         } else {
           await saveConfig({
@@ -318,7 +333,8 @@ export default function AdminConfigManagement() {
             pmHolidayStartTime: pmHolidayStartTime.format("HH:mm"),
             pmHolidayEndTime: pmHolidayEndTime.format("HH:mm"),
             amPmHolidayEnabled,
-          });
+            specialHolidayEnabled,
+          } as unknown as CreateAppConfigInput);
           dispatch(setSnackbarSuccess(S14001));
         }
         await fetchConfig();
@@ -416,6 +432,24 @@ export default function AdminConfigManagement() {
                 disabled={!amPmHolidayEnabled}
               />
             </Stack>
+          </Stack>
+        </GroupSection>
+        <GroupSection
+          title="特別休暇"
+          description="忌引きなど特別な休暇を設定します。有効にすると、勤怠編集画面で申請や編集が可能になります。"
+        >
+          <Stack spacing={1}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={specialHolidayEnabled}
+                  onChange={handleSpecialHolidayEnabledChange}
+                  color="primary"
+                />
+              }
+              label={specialHolidayEnabled ? "有効" : "無効"}
+              sx={{ mb: 1 }}
+            />
           </Stack>
         </GroupSection>
         <GroupSection title="出勤モード">
