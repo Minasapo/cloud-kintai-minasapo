@@ -12,7 +12,7 @@ export default function RestTableRow({ rests }: { rests: Rest[] }) {
       <TableCell>
         {(() => {
           if (rests.length === 0) {
-            return "(登録なし)";
+            return "変更なし";
           }
 
           return (

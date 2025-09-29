@@ -71,6 +71,7 @@ type Attendance @model @auth(rules: [{ allow: private }]) {
   hourlyPaidHolidayTimes: [HourlyPaidHolidayTime]
   remarks: String
   paidHolidayFlag: Boolean
+  specialHolidayFlag: Boolean
   isDeemedHoliday: Boolean
   hourlyPaidHolidayHours: Int
   substituteHolidayDate: String
@@ -110,6 +111,7 @@ type AttendanceHistory {
   hourlyPaidHolidayTimes: [HourlyPaidHolidayTime]
   remarks: String
   paidHolidayFlag: Boolean
+  specialHolidayFlag: Boolean
   hourlyPaidHolidayHours: Int
   substituteHolidayFlag: Boolean
   substituteHolidayDate: String
@@ -125,6 +127,7 @@ type AttendanceChangeRequest {
   hourlyPaidHolidayTimes: [HourlyPaidHolidayTime]
   remarks: String
   paidHolidayFlag: Boolean
+  specialHolidayFlag: Boolean
   hourlyPaidHolidayHours: Int
   substituteHolidayFlag: Boolean
   substituteHolidayDate: String
@@ -161,6 +164,7 @@ type AppConfig @model {
   amHolidayEndTime: String
   pmHolidayStartTime: String
   pmHolidayEndTime: String
+  specialHolidayEnabled: Boolean
   amPmHolidayEnabled: Boolean
   officeMode: Boolean
   hourlyPaidHolidayEnabled: Boolean

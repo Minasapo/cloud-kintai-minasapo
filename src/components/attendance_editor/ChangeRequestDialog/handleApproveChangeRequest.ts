@@ -58,6 +58,8 @@ export default async function handleApproveChangeRequest(
     hourlyPaidHolidayHours:
       targetChangeRequest.hourlyPaidHolidayHours ??
       attendance.hourlyPaidHolidayHours,
+    specialHolidayFlag:
+      targetChangeRequest.specialHolidayFlag ?? attendance.specialHolidayFlag,
     changeRequests: changeRequests.map((changeRequest) => ({
       startTime: changeRequest.startTime,
       endTime: changeRequest.endTime,
@@ -82,6 +84,7 @@ export default async function handleApproveChangeRequest(
       hourlyPaidHolidayHours: changeRequest.hourlyPaidHolidayHours,
       remarks: changeRequest.remarks,
       paidHolidayFlag: changeRequest.paidHolidayFlag,
+      specialHolidayFlag: changeRequest.specialHolidayFlag,
       completed: true,
       comment,
     })),

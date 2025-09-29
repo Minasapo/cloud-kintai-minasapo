@@ -333,6 +333,8 @@ export default function AdminStaffAttendanceList() {
                             attendance.substituteHolidayDate
                           }
                           remarks={attendance.remarks}
+                          // 特別休暇フラグを渡す
+                          specialHolidayFlag={attendance.specialHolidayFlag}
                         />
 
                         {/* 作成日時 */}
@@ -427,6 +429,8 @@ export default function AdminStaffAttendanceList() {
                       paidHolidayFlag={attendance.paidHolidayFlag}
                       substituteHolidayDate={attendance.substituteHolidayDate}
                       remarks={attendance.remarks}
+                      // 特別休暇フラグを渡す
+                      specialHolidayFlag={attendance.specialHolidayFlag}
                     />
 
                     {/* 作成日時 */}

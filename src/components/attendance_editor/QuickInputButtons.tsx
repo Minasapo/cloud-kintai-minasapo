@@ -235,6 +235,12 @@ export default function QuickInputButtons({
                       "定型入力: 定時退勤を適用します。よろしいですか？",
                       () => {
                         setValue("endTime", toISO(defaultEnd));
+                        setValue("rests", [
+                          {
+                            startTime: toISO(defaultLunchStart),
+                            endTime: toISO(defaultLunchEnd),
+                          },
+                        ]);
                       }
                     )
                   }

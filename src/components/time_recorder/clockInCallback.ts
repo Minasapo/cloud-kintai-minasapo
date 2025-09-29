@@ -5,16 +5,17 @@
  */
 
 import { Dispatch } from "@reduxjs/toolkit";
+import { Logger } from "aws-amplify";
 
+import { Attendance, Staff } from "@/API";
+import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-
-import { Staff } from "../../API";
-import * as MESSAGE_CODE from "../../errors";
-import { TimeRecordMailSender } from "../../lib/mail/TimeRecordMailSender";
+import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../lib/reducers/snackbarReducer";
+} from "@/lib/reducers/snackbarReducer";
+
 import { getNowISOStringWithZeroSeconds } from "./util";
 
 /**
@@ -27,30 +28,41 @@ import { getNowISOStringWithZeroSeconds } from "./util";
  * @param staff - スタッフ情報
  * @param logger - デバッグ用ロガー
  */
-export function clockInCallback(
+export async function clockInCallback(
   cognitoUser: CognitoUser | null | undefined,
   today: string,
   clockIn: (
-    userId: string,
-    today: string,
-    now: string
-  ) => Promise<import("../../API").Attendance>,
+    staffId: string,
+    workDate: string,
+    startTime: string
+  ) => Promise<Attendance>,
   dispatch: Dispatch,
   staff: Staff | null | undefined,
-  logger: { debug: (e: unknown) => void }
-) {
-  if (!cognitoUser || !staff) {
+  logger: Logger
+): Promise<void> {
+  if (!cognitoUser) {
+    logger.debug("Skipped clockInCallback because cognitoUser is missing");
     return;
   }
 
-  const now = getNowISOStringWithZeroSeconds();
-  clockIn(cognitoUser.id, today, now)
-    .then((res) => {
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S01001));
-      new TimeRecordMailSender(cognitoUser, res, staff).clockIn();
-    })
-    .catch((e) => {
-      logger.debug(e);
-      dispatch(setSnackbarError(MESSAGE_CODE.E01001));
-    });
+  if (!staff) {
+    logger.debug("Skipped clockInCallback because staff is missing");
+    return;
+  }
+
+  const startTimeIso = resolveClockInTime();
+
+  try {
+    const attendance = await clockIn(cognitoUser.id, today, startTimeIso);
+
+    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01001));
+    new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();
+  } catch (error) {
+    logger.error("Failed to clock in", error);
+    dispatch(setSnackbarError(MESSAGE_CODE.E01001));
+  }
+}
+
+function resolveClockInTime() {
+  return getNowISOStringWithZeroSeconds();
 }

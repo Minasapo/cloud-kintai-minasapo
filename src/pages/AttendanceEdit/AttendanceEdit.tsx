@@ -90,6 +90,7 @@ export default function AttendanceEdit() {
             goDirectlyFlag: data.goDirectlyFlag,
             returnDirectlyFlag: data.returnDirectlyFlag,
             remarks: data.remarks,
+            specialHolidayFlag: data.specialHolidayFlag,
             paidHolidayFlag: data.paidHolidayFlag,
             // hourlyPaidHolidayHours is deprecated here; send times array instead
             substituteHolidayDate: data.substituteHolidayDate,
@@ -141,6 +142,7 @@ export default function AttendanceEdit() {
             goDirectlyFlag: data.goDirectlyFlag,
             returnDirectlyFlag: data.returnDirectlyFlag,
             remarks: data.remarks,
+            specialHolidayFlag: data.specialHolidayFlag,
             paidHolidayFlag: data.paidHolidayFlag,
             // hourlyPaidHolidayHours is deprecated here; send times array instead
             substituteHolidayDate: data.substituteHolidayDate,
@@ -198,6 +200,7 @@ export default function AttendanceEdit() {
         setValue("startTime", res.startTime);
         setValue("endTime", res.endTime);
         setValue("paidHolidayFlag", res.paidHolidayFlag || false);
+        setValue("specialHolidayFlag", res.specialHolidayFlag || false);
         setValue("goDirectlyFlag", res.goDirectlyFlag || false);
         setValue("substituteHolidayDate", res.substituteHolidayDate);
         setValue("returnDirectlyFlag", res.returnDirectlyFlag || false);

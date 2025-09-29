@@ -8,6 +8,7 @@ import {
 import dayjs from "dayjs";
 
 import { AttendanceChangeRequest } from "../../../../API";
+import SpecialHolidayFlagTableRow from "../BeforeCard/SpecialHolidayFlagTableRow";
 import SubstituteHolidayDateTableRow from "../BeforeCard/SubstituteHolidayFlagDateRow";
 import HourlyPaidHolidayTableRow from "../HourlyPaidHolidayTableRow";
 import GoDirectlyFlagTableRow from "./GoDirectlyFlagTableRow";
@@ -19,8 +20,10 @@ import WorkTimeTableRow from "./WorkTimeTableRow";
 
 export default function AfterCard({
   changeRequest,
+  attendance,
 }: {
   changeRequest: AttendanceChangeRequest | null;
+  attendance: import("../../../../API").Attendance | null;
 }) {
   return (
     <Card sx={{ p: 2 }}>
@@ -30,18 +33,32 @@ export default function AfterCard({
       <TableContainer>
         <Table>
           <TableBody>
-            <PaidHolidayFlagTableRow value={changeRequest?.paidHolidayFlag} />
+            <PaidHolidayFlagTableRow
+              value={changeRequest?.paidHolidayFlag}
+              beforeValue={attendance?.paidHolidayFlag}
+            />
+            <SpecialHolidayFlagTableRow
+              value={changeRequest?.specialHolidayFlag}
+              beforeValue={attendance?.specialHolidayFlag}
+            />
             <HourlyPaidHolidayTableRow
               hours={changeRequest?.hourlyPaidHolidayHours}
               times={changeRequest?.hourlyPaidHolidayTimes}
               variant="after"
+              beforeHours={attendance?.hourlyPaidHolidayHours}
+              beforeTimes={attendance?.hourlyPaidHolidayTimes}
             />
             <SubstituteHolidayDateTableRow
               value={changeRequest?.substituteHolidayDate}
+              beforeValue={attendance?.substituteHolidayDate}
             />
-            <GoDirectlyFlagTableRow value={changeRequest?.goDirectlyFlag} />
+            <GoDirectlyFlagTableRow
+              value={changeRequest?.goDirectlyFlag}
+              beforeValue={attendance?.goDirectlyFlag}
+            />
             <ReturnDirectlyFlagTableRow
               value={changeRequest?.returnDirectlyFlag}
+              beforeValue={attendance?.returnDirectlyFlag}
             />
             <WorkTimeTableRow
               startTime={
@@ -49,6 +66,12 @@ export default function AfterCard({
               }
               endTime={
                 changeRequest?.endTime ? dayjs(changeRequest.endTime) : null
+              }
+              beforeStartTime={
+                attendance?.startTime ? dayjs(attendance.startTime) : null
+              }
+              beforeEndTime={
+                attendance?.endTime ? dayjs(attendance.endTime) : null
               }
             />
             <RestTableRow
@@ -59,8 +82,18 @@ export default function AfterCard({
                     )
                   : []
               }
+              beforeRests={
+                attendance?.rests
+                  ? attendance.rests.filter(
+                      (item): item is NonNullable<typeof item> => item !== null
+                    )
+                  : []
+              }
             />
-            <RemarksTableRow value={changeRequest?.remarks} />
+            <RemarksTableRow
+              value={changeRequest?.remarks}
+              beforeValue={attendance?.remarks}
+            />
           </TableBody>
         </Table>
       </TableContainer>

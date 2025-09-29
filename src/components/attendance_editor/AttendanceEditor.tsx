@@ -5,6 +5,7 @@ import {
   Box,
   Breadcrumbs,
   Button,
+  Checkbox,
   CircularProgress,
   FormControlLabel,
   IconButton,
@@ -19,7 +20,7 @@ import {
 import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
 
 import { SystemCommentInput } from "@/API";
@@ -100,6 +101,7 @@ export default function AttendanceEditor() {
     getLunchRestStartTime,
     getLunchRestEndTime,
     getHourlyPaidHolidayEnabled,
+    getSpecialHolidayEnabled,
     getStartTime,
     loading: appConfigLoading,
   } = useAppConfig();
@@ -272,26 +274,28 @@ export default function AttendanceEditor() {
 
   const onSubmit = useCallback(
     async (data: AttendanceEditInputs) => {
-      console.log("data", data.systemComments);
-
       if (attendance) {
-        await updateAttendance({
+        // 有給フラグが付いている場合は勤務時間/休憩等は送らない（バックエンド側バリデーション対策）
+        const payload = {
           id: attendance.id,
           staffId: attendance.staffId,
           workDate: data.workDate,
-          startTime: data.startTime,
-          endTime: data.endTime || null,
+          startTime: data.paidHolidayFlag ? null : data.startTime,
+          endTime: data.paidHolidayFlag ? null : data.endTime || null,
           isDeemedHoliday: data.isDeemedHoliday,
           goDirectlyFlag: data.goDirectlyFlag,
           returnDirectlyFlag: data.returnDirectlyFlag,
           remarks: data.remarks,
           revision: data.revision,
           paidHolidayFlag: data.paidHolidayFlag,
+          specialHolidayFlag: data.specialHolidayFlag,
           substituteHolidayDate: data.substituteHolidayDate,
-          rests: data.rests.map((rest) => ({
-            startTime: rest.startTime,
-            endTime: rest.endTime,
-          })),
+          rests: data.paidHolidayFlag
+            ? []
+            : data.rests.map((rest) => ({
+                startTime: rest.startTime,
+                endTime: rest.endTime,
+              })),
           systemComments: data.systemComments.map(
             ({ comment, confirmed, createdAt }) => ({
               comment,
@@ -299,21 +303,24 @@ export default function AttendanceEditor() {
               createdAt,
             })
           ),
-          hourlyPaidHolidayTimes:
-            (data.hourlyPaidHolidayTimes
-              ?.map((item) =>
-                item.startTime && item.endTime
-                  ? {
-                      startTime: item.startTime,
-                      endTime: item.endTime,
-                    }
-                  : null
-              )
-              .filter((item) => item !== null) as {
-              startTime: string;
-              endTime: string;
-            }[]) ?? [],
-        })
+          hourlyPaidHolidayTimes: data.paidHolidayFlag
+            ? []
+            : (data.hourlyPaidHolidayTimes
+                ?.map((item) =>
+                  item.startTime && item.endTime
+                    ? {
+                        startTime: item.startTime,
+                        endTime: item.endTime,
+                      }
+                    : null
+                )
+                .filter((item) => item !== null) as {
+                startTime: string;
+                endTime: string;
+              }[]) ?? [],
+        };
+
+        await updateAttendance(payload)
           .then((res) => {
             if (!staff || !res.histories) return;
 
@@ -337,22 +344,26 @@ export default function AttendanceEditor() {
       }
 
       await createAttendance({
+        // 有給の場合は勤務時間/休憩などのフィールドをクリアして送信
         staffId: targetStaffId,
         workDate: new AttendanceDateTime()
           .setDateString(targetWorkDate)
           .toDataFormat(),
-        startTime: data.startTime,
+        startTime: data.paidHolidayFlag ? null : data.startTime,
         isDeemedHoliday: data.isDeemedHoliday,
-        endTime: data.endTime,
+        endTime: data.paidHolidayFlag ? null : data.endTime,
         goDirectlyFlag: data.goDirectlyFlag,
         returnDirectlyFlag: data.returnDirectlyFlag,
         remarks: data.remarks,
+        specialHolidayFlag: data.specialHolidayFlag,
         paidHolidayFlag: data.paidHolidayFlag,
         substituteHolidayDate: data.substituteHolidayDate,
-        rests: data.rests.map((rest) => ({
-          startTime: rest.startTime,
-          endTime: rest.endTime,
-        })),
+        rests: data.paidHolidayFlag
+          ? []
+          : data.rests.map((rest) => ({
+              startTime: rest.startTime,
+              endTime: rest.endTime,
+            })),
         systemComments: data.systemComments.map(
           ({ comment, confirmed, createdAt }) => ({
             comment,
@@ -360,20 +371,21 @@ export default function AttendanceEditor() {
             createdAt,
           })
         ),
-        hourlyPaidHolidayTimes:
-          (data.hourlyPaidHolidayTimes
-            ?.map((item) =>
-              item.startTime && item.endTime
-                ? {
-                    startTime: item.startTime,
-                    endTime: item.endTime,
-                  }
-                : null
-            )
-            .filter((item) => item !== null) as {
-            startTime: string;
-            endTime: string;
-          }[]) ?? [],
+        hourlyPaidHolidayTimes: data.paidHolidayFlag
+          ? []
+          : (data.hourlyPaidHolidayTimes
+              ?.map((item) =>
+                item.startTime && item.endTime
+                  ? {
+                      startTime: item.startTime,
+                      endTime: item.endTime,
+                    }
+                  : null
+              )
+              .filter((item) => item !== null) as {
+              startTime: string;
+              endTime: string;
+            }[]) ?? [],
       })
         .then((res) => {
           if (!staff) {
@@ -410,6 +422,7 @@ export default function AttendanceEditor() {
     setValue("workDate", attendance.workDate);
     setValue("startTime", attendance.startTime);
     setValue("isDeemedHoliday", attendance.isDeemedHoliday ?? false);
+    setValue("specialHolidayFlag", attendance.specialHolidayFlag ?? false);
     setValue("endTime", attendance.endTime);
     setValue("remarks", attendance.remarks || "");
     setValue("goDirectlyFlag", attendance.goDirectlyFlag || false);
@@ -680,94 +693,154 @@ export default function AttendanceEditor() {
             </Box>
           </GroupContainer>
           <GroupContainer>
-            <Tabs
-              value={vacationTab}
-              onChange={(_, v) => setVacationTab(v)}
-              aria-label="vacation-tabs"
-              sx={{ borderBottom: 1, borderColor: "divider" }}
-            >
-              <Tab label="代休" />
-              <Tab label="有給(1日)" />
-              {getHourlyPaidHolidayEnabled() && (
-                <Tab
-                  label={`時間単位(${hourlyPaidHolidayTimeFields.length})`}
-                />
-              )}
-              <Tab label="指定休日" />
-            </Tabs>
+            {(() => {
+              const tabs: { label: string; panel: JSX.Element }[] = [];
+              // 代休
+              tabs.push({
+                label: "代休",
+                panel: (
+                  <TabPanel value={vacationTab} index={tabs.length}>
+                    <SubstituteHolidayDateInput />
+                  </TabPanel>
+                ),
+              });
 
-            <TabPanel value={vacationTab} index={0}>
-              <SubstituteHolidayDateInput />
-            </TabPanel>
+              // 有給(1日)
+              tabs.push({
+                label: "有給(1日)",
+                panel: (
+                  <TabPanel value={vacationTab} index={tabs.length}>
+                    <PaidHolidayFlagInputCommon
+                      label="有給休暇(1日)"
+                      control={control}
+                      setValue={setValue}
+                      workDate={workDate ? workDate.toISOString() : undefined}
+                      setPaidHolidayTimes={true}
+                      disabled={changeRequests.length > 0}
+                    />
+                  </TabPanel>
+                ),
+              });
 
-            <TabPanel value={vacationTab} index={1}>
-              <PaidHolidayFlagInputCommon
-                label="有給休暇(1日)"
-                control={control}
-                setValue={setValue}
-                workDate={workDate ? workDate.toISOString() : undefined}
-                setPaidHolidayTimes={true}
-                disabled={changeRequests.length > 0}
-              />
-            </TabPanel>
-            {getHourlyPaidHolidayEnabled() && (
-              <TabPanel value={vacationTab} index={2}>
-                <Stack spacing={1}>
-                  <Stack direction="row">
-                    <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                      {`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}
-                    </Box>
-                    <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                      {hourlyPaidHolidayTimeFields.length === 0 && (
-                        <Box sx={{ color: "text.secondary", fontSize: 14 }}>
-                          時間単位休暇の時間帯を追加してください。
-                        </Box>
-                      )}
-                      {hourlyPaidHolidayTimeFields.map(
-                        (hourlyPaidHolidayTime, index) => (
-                          <HourlyPaidHolidayTimeItem
-                            key={hourlyPaidHolidayTime.id}
-                            time={hourlyPaidHolidayTime}
-                            index={index}
-                          />
-                        )
-                      )}
-                      <Box>
-                        <IconButton
-                          aria-label="add-hourly-paid-holiday-time"
-                          onClick={() =>
-                            hourlyPaidHolidayTimeAppend({
-                              startTime: null,
-                              endTime: null,
-                            })
-                          }
-                        >
-                          <AddAlarmIcon />
-                        </IconButton>
+              // 特別休暇（AppConfigのフラグがONの時のみ）
+              if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
+                tabs.push({
+                  label: "特別休暇",
+                  panel: (
+                    <TabPanel value={vacationTab} index={tabs.length}>
+                      <Box sx={{ mt: 1 }}>
+                        <Stack direction="row" alignItems={"center"}>
+                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                            特別休暇
+                          </Box>
+                          <Box>
+                            <Controller
+                              name="specialHolidayFlag"
+                              control={control}
+                              render={({ field }) => (
+                                <Checkbox
+                                  {...field}
+                                  checked={field.value || false}
+                                  disabled={changeRequests.length > 0}
+                                />
+                              )}
+                            />
+                          </Box>
+                        </Stack>
                       </Box>
-                    </Stack>
-                  </Stack>
-                </Stack>
-              </TabPanel>
-            )}
+                    </TabPanel>
+                  ),
+                });
+              }
 
-            <TabPanel
-              value={vacationTab}
-              index={getHourlyPaidHolidayEnabled() ? 3 : 2}
-            >
-              <Box sx={{ mt: 1 }}>
-                <IsDeemedHolidayFlagInput
-                  control={control}
-                  name="isDeemedHoliday"
-                  disabled={!(staff?.workType === "shift")}
-                  helperText={
-                    staff?.workType === "shift"
-                      ? undefined
-                      : "※シフト勤務のスタッフのみ設定できます"
-                  }
-                />
-              </Box>
-            </TabPanel>
+              // 時間単位休暇
+              if (getHourlyPaidHolidayEnabled()) {
+                tabs.push({
+                  label: `時間単位(${hourlyPaidHolidayTimeFields.length}件)`,
+                  panel: (
+                    <TabPanel value={vacationTab} index={tabs.length}>
+                      <Stack spacing={1}>
+                        <Stack direction="row">
+                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                            {`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}
+                          </Box>
+                          <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                            {hourlyPaidHolidayTimeFields.length === 0 && (
+                              <Box
+                                sx={{ color: "text.secondary", fontSize: 14 }}
+                              >
+                                時間単位休暇の時間帯を追加してください。
+                              </Box>
+                            )}
+                            {hourlyPaidHolidayTimeFields.map(
+                              (hourlyPaidHolidayTime, index) => (
+                                <HourlyPaidHolidayTimeItem
+                                  key={hourlyPaidHolidayTime.id}
+                                  time={hourlyPaidHolidayTime}
+                                  index={index}
+                                />
+                              )
+                            )}
+                            <Box>
+                              <IconButton
+                                aria-label="add-hourly-paid-holiday-time"
+                                onClick={() =>
+                                  hourlyPaidHolidayTimeAppend({
+                                    startTime: null,
+                                    endTime: null,
+                                  })
+                                }
+                              >
+                                <AddAlarmIcon />
+                              </IconButton>
+                            </Box>
+                          </Stack>
+                        </Stack>
+                      </Stack>
+                    </TabPanel>
+                  ),
+                });
+              }
+
+              // 指定休日
+              tabs.push({
+                label: "指定休日",
+                panel: (
+                  <TabPanel value={vacationTab} index={tabs.length}>
+                    <Box sx={{ mt: 1 }}>
+                      <IsDeemedHolidayFlagInput
+                        control={control}
+                        name="isDeemedHoliday"
+                        disabled={!(staff?.workType === "shift")}
+                        helperText={
+                          staff?.workType === "shift"
+                            ? undefined
+                            : "※シフト勤務のスタッフのみ設定できます"
+                        }
+                      />
+                    </Box>
+                  </TabPanel>
+                ),
+              });
+
+              return (
+                <>
+                  <Tabs
+                    value={vacationTab}
+                    onChange={(_, v) => setVacationTab(v)}
+                    aria-label="vacation-tabs"
+                    sx={{ borderBottom: 1, borderColor: "divider" }}
+                  >
+                    {tabs.map((t, i) => (
+                      <Tab key={i} label={t.label} />
+                    ))}
+                  </Tabs>
+                  {tabs.map((t, i) => (
+                    <div key={`panel-${i}`}>{t.panel}</div>
+                  ))}
+                </>
+              );
+            })()}
           </GroupContainer>
           <GroupContainer>
             <Box>

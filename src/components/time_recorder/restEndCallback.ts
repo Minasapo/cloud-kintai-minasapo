@@ -1,15 +1,11 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Logger } from "aws-amplify";
 
+import { Attendance } from "@/API";
+import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 
-import { Attendance } from "../../API";
-import * as MESSAGE_CODE from "../../errors";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "../../lib/reducers/snackbarReducer";
-import { getNowISOStringWithZeroSeconds } from "./util";
+import { executeAttendanceMutation } from "./attendanceMutation";
 
 export function restEndCallback(
   cognitoUser: CognitoUser | null | undefined,
@@ -22,15 +18,14 @@ export function restEndCallback(
   dispatch: Dispatch,
   logger: Logger
 ) {
-  if (!cognitoUser) {
-    return;
-  }
-
-  const now = getNowISOStringWithZeroSeconds();
-  restEnd(cognitoUser.id, today, now)
-    .then(() => dispatch(setSnackbarSuccess(MESSAGE_CODE.S01006)))
-    .catch((e) => {
-      logger.debug(e);
-      dispatch(setSnackbarError(MESSAGE_CODE.E01004));
-    });
+  executeAttendanceMutation({
+    cognitoUser,
+    today,
+    mutation: restEnd,
+    dispatch,
+    successMessage: MESSAGE_CODE.S01006,
+    errorMessage: MESSAGE_CODE.E01004,
+    logger,
+    actionLabel: "restEnd",
+  });
 }

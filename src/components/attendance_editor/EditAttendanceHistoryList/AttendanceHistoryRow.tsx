@@ -31,27 +31,36 @@ export function AttendanceHistoryRow({
       )
     : [];
 
+  const handleToggle = () => {
+    // debug: 履歴オブジェクトの中身を確認（時間単位休暇があるか）
+    // 実行時はブラウザのコンソールで確認してください
+    // eslint-disable-next-line no-console
+    console.debug("AttendanceHistoryRow toggle history:", history);
+    setOpen(!open);
+  };
+
   return (
     <>
       <TableRow>
         <TableCell>
-          <IconButton onClick={() => setOpen(!open)}>
+          <IconButton onClick={handleToggle}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
         <WorkDateTableCell history={history} />
         <WorkTimeTableCell history={history} />
-        <PaidHolidayFlagTableCell history={history} />
-        <SubstituteHolidayDateTableCell history={history} />
         <GoDirectlyFlagTableCell history={history} />
         <ReturnDirectlyFlagTableCell history={history} />
+        <PaidHolidayFlagTableCell history={history} />
+        <SpecialHolidayFlagTableCell history={history} />
+        <SubstituteHolidayDateTableCell history={history} />
         <RemarksTableCell history={history} />
         <CreatedAtTableCell history={history} />
         <StaffIdTableCell history={history} />
         <TableCell sx={{ flexGrow: 1 }} />
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={14}>
           <Collapse in={open} timeout="auto" unmountOnExit sx={{ py: 1 }}>
             <Typography variant="h6">休憩</Typography>
             {rests.length === 0 ? (
@@ -105,6 +114,7 @@ export function AttendanceHistoryRow({
                       <TableRow>
                         <TableCell sx={{ width: 100 }}>開始</TableCell>
                         <TableCell sx={{ width: 100 }}>終了</TableCell>
+                        <TableCell />
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -130,6 +140,7 @@ export function AttendanceHistoryRow({
                                       .toTimeFormat()
                                   : "(なし)"}
                               </TableCell>
+                              <TableCell />
                             </TableRow>
                           ))}
                     </TableBody>
@@ -158,6 +169,14 @@ function SubstituteHolidayDateTableCell({
     .toDisplayDateFormat();
 
   return <TableCell>{substituteHolidayDate}</TableCell>;
+}
+
+function SpecialHolidayFlagTableCell({
+  history,
+}: {
+  history: AttendanceHistory;
+}) {
+  return <TableCell>{history.specialHolidayFlag ? "◯" : "-"}</TableCell>;
 }
 
 function RemarksTableCell({ history }: { history: AttendanceHistory }) {

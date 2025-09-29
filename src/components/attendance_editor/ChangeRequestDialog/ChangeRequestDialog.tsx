@@ -99,7 +99,10 @@ export default function ChangeRequestDialog({
               <ArrowForwardIcon fontSize="large" />
             </Box>
             <Box>
-              <AfterCard changeRequest={changeRequest} />
+              <AfterCard
+                changeRequest={changeRequest}
+                attendance={attendance}
+              />
             </Box>
           </Stack>
           <Stack direction="column" spacing={1}>

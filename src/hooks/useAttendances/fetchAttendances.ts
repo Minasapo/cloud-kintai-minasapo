@@ -56,6 +56,7 @@ export default async function fetchAttendances(staffId: string) {
       rests: matchAttendance?.rests ?? [],
       remarks: matchAttendance?.remarks ?? "",
       paidHolidayFlag: matchAttendance?.paidHolidayFlag ?? false,
+      specialHolidayFlag: matchAttendance?.specialHolidayFlag ?? false,
       isDeemedHoliday: matchAttendance?.isDeemedHoliday ?? false,
       substituteHolidayDate: matchAttendance?.substituteHolidayDate,
       changeRequests: matchAttendance?.changeRequests

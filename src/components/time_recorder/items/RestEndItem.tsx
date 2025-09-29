@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { WorkStatus, WorkStatusCodes } from "../common";
 
@@ -21,20 +21,26 @@ export default function RestEndItem({
   workStatus: WorkStatus | null;
   onClick: () => void;
 }) {
-  const [disabled, setDisabled] = useState(true);
+  const isResting = useMemo(
+    () => workStatus?.code === WorkStatusCodes.RESTING,
+    [workStatus]
+  );
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    setDisabled(workStatus?.code !== WorkStatusCodes.RESTING);
-  }, [workStatus]);
+    setIsProcessing(false);
+  }, [isResting]);
+
+  const handleClick = useCallback(() => {
+    setIsProcessing(true);
+    onClick();
+  }, [onClick]);
 
   return (
     <RestEndButton
       fullWidth
-      onClick={() => {
-        setDisabled(true);
-        onClick();
-      }}
-      disabled={disabled}
+      onClick={handleClick}
+      disabled={!isResting || isProcessing}
       data-testid="rest-end-button"
     >
       休憩終了

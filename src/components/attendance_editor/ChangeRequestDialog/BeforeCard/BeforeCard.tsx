@@ -14,6 +14,7 @@ import PaidHolidayFlagTableRow from "./PaidHolidayFlagTableRow";
 import RemarksTableRow from "./RemarksTableRow";
 import RestTableRow from "./RestTableRow";
 import ReturnDirectlyFlagTableRow from "./ReturnDirectlyFlagTableRow";
+import SpecialHolidayFlagTableRow from "./SpecialHolidayFlagTableRow";
 import SubstituteHolidayDateTableRow from "./SubstituteHolidayFlagDateRow";
 import WorkTimeTableRow from "./WorkTimeTableRow";
 
@@ -31,6 +32,9 @@ export default function BeforeCard({
         <Table>
           <TableBody>
             <PaidHolidayFlagTableRow value={attendance?.paidHolidayFlag} />
+            <SpecialHolidayFlagTableRow
+              value={attendance?.specialHolidayFlag}
+            />
             <HourlyPaidHolidayTableRow
               hours={attendance?.hourlyPaidHolidayHours}
               times={attendance?.hourlyPaidHolidayTimes}

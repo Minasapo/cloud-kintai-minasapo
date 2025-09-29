@@ -12,7 +12,7 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-export function goDirectlyCallback(
+export async function goDirectlyCallback(
   cognitoUser: CognitoUser | null | undefined,
   today: string,
   staff: Staff | null | undefined,
@@ -26,20 +26,34 @@ export function goDirectlyCallback(
   logger: Logger,
   // optional explicit ISO timestamp to use for work start (allows AppConfig-driven times)
   startTimeIso?: string
-) {
+): Promise<void> {
   if (!cognitoUser) {
+    logger.debug("Skipped goDirectlyCallback because cognitoUser is missing");
     return;
   }
 
-  const now = startTimeIso ?? new AttendanceDateTime().setWorkStart().toISOString();
+  const attendanceStartTime = resolveStartTime(startTimeIso);
 
-  clockIn(cognitoUser.id, today, now, GoDirectlyFlag.YES)
-    .then((res) => {
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S01003));
-      new TimeRecordMailSender(cognitoUser, res, staff).clockIn();
-    })
-    .catch((e) => {
-      logger.debug(e);
-      dispatch(setSnackbarError(MESSAGE_CODE.E01005));
-    });
+  try {
+    const attendance = await clockIn(
+      cognitoUser.id,
+      today,
+      attendanceStartTime,
+      GoDirectlyFlag.YES
+    );
+
+    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01003));
+    new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();
+  } catch (error) {
+    logger.error("Failed to clock in with go directly flag", error);
+    dispatch(setSnackbarError(MESSAGE_CODE.E01005));
+  }
+}
+
+function resolveStartTime(startTimeIso?: string) {
+  if (startTimeIso) {
+    return startTimeIso;
+  }
+
+  return new AttendanceDateTime().setWorkStart().toISOString();
 }

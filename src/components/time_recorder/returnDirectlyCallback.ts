@@ -12,7 +12,7 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-export function returnDirectlyCallback(
+export async function returnDirectlyCallback(
   cognitoUser: CognitoUser | null | undefined,
   today: string,
   staff: Staff | null | undefined,
@@ -26,20 +26,25 @@ export function returnDirectlyCallback(
   logger: Logger,
   // optional explicit ISO timestamp to use for work end (allows AppConfig-driven times)
   endTimeIso?: string
-) {
+): Promise<void> {
   if (!cognitoUser) {
     return;
   }
 
-  const now = endTimeIso ?? new AttendanceDateTime().setWorkEnd().toISOString();
+  const workEndTime =
+    endTimeIso ?? new AttendanceDateTime().setWorkEnd().toISOString();
 
-  clockOut(cognitoUser.id, today, now, ReturnDirectlyFlag.YES)
-    .then((res) => {
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S01004));
-      new TimeRecordMailSender(cognitoUser, res, staff).clockOut();
-    })
-    .catch((e) => {
-      logger.debug(e);
-      dispatch(setSnackbarError(MESSAGE_CODE.E01006));
-    });
+  try {
+    const attendance = await clockOut(
+      cognitoUser.id,
+      today,
+      workEndTime,
+      ReturnDirectlyFlag.YES
+    );
+    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01004));
+    new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
+  } catch (error) {
+    logger.debug(error);
+    dispatch(setSnackbarError(MESSAGE_CODE.E01006));
+  }
 }

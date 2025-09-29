@@ -120,7 +120,7 @@ export function AddHolidayCalendar({
           handleClose();
         }}
       >
-        <DialogTitle>会社休日を追加</DialogTitle>
+        <DialogTitle>休日を追加</DialogTitle>
         <DialogContent>
           <Stack spacing={2}>
             <DialogContentText>

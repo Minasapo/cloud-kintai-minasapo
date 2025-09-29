@@ -7,10 +7,14 @@ export default function HourlyPaidHolidayTableRow({
   hours,
   times,
   variant = "before",
+  beforeHours,
+  beforeTimes,
 }: {
   hours?: number | null;
   times?: Array<HourlyPaidHolidayTime | null> | null;
   variant?: "before" | "after";
+  beforeHours?: number | null;
+  beforeTimes?: Array<HourlyPaidHolidayTime | null> | null;
 }) {
   const hasTimes =
     times &&
@@ -20,8 +24,8 @@ export default function HourlyPaidHolidayTableRow({
     if (variant === "after") {
       if (hours == null && !hasTimes) return "変更なし";
     } else {
-      // hours が null の場合はこれまで通り登録なし表示にする
-      if (hours == null && !hasTimes) return "(登録なし)";
+      // hours が null の場合は変更なし表示にする
+      if (hours == null && !hasTimes) return "変更なし";
       // hours が 0 の場合（00:00 表示相当）は "なし" を表示する
       if (hours === 0 && !hasTimes) return "なし";
     }
@@ -59,10 +63,54 @@ export default function HourlyPaidHolidayTableRow({
     return "";
   };
 
+  const beforeValue = (() => {
+    if (
+      (!beforeHours || beforeHours === 0) &&
+      !(beforeTimes && beforeTimes.length > 0)
+    )
+      return null;
+    if (beforeTimes && beforeTimes.length > 0) {
+      const list = beforeTimes
+        .filter((t): t is NonNullable<typeof t> => t !== null)
+        .map((t) => {
+          try {
+            return `${dayjs(t.startTime).format("HH:mm")}〜${dayjs(
+              t.endTime
+            ).format("HH:mm")}`;
+          } catch (e) {
+            return "";
+          }
+        })
+        .filter((s) => s !== "");
+
+      return list.join(", ");
+    }
+
+    if (beforeHours != null && beforeHours !== 0) {
+      const h = Number(beforeHours);
+      if (isNaN(h)) return String(beforeHours);
+      const totalMinutes = Math.round(h * 60);
+      const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+      const mm = String(totalMinutes % 60).padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    return null;
+  })();
+
+  const rendered = renderValue();
+  const normalizedRendered = rendered === "変更なし" ? null : rendered;
+  const normalizedBefore = beforeValue ?? null;
+  const changed = normalizedRendered !== normalizedBefore;
+
   return (
     <TableRow>
       <TableCell>時間単位休暇</TableCell>
-      <TableCell>{renderValue()}</TableCell>
+      <TableCell
+        sx={changed ? { color: "error.main", fontWeight: "bold" } : {}}
+      >
+        {rendered}
+      </TableCell>
     </TableRow>
   );
 }

@@ -5,11 +5,31 @@ import { AttendanceTime } from "@/lib/AttendanceTime";
 
 import { Rest } from "../../../../API";
 
-export default function RestTableRow({ rests }: { rests: Rest[] }) {
+export default function RestTableRow({
+  rests,
+  beforeRests,
+}: {
+  rests: Rest[];
+  beforeRests?: Rest[];
+}) {
+  const changed =
+    (beforeRests ? beforeRests.length : 0) !== rests.length ||
+    (rests.some((r, i) => {
+      const b = beforeRests ? beforeRests[i] : null;
+      const rs = r.startTime ? dayjs(r.startTime).format("HH:mm") : null;
+      const re = r.endTime ? dayjs(r.endTime).format("HH:mm") : null;
+      const bs = b?.startTime ? dayjs(b.startTime).format("HH:mm") : null;
+      const be = b?.endTime ? dayjs(b.endTime).format("HH:mm") : null;
+
+      return rs !== bs || re !== be;
+    }) as unknown as boolean);
+
   return (
     <TableRow>
       <TableCell>休憩時間</TableCell>
-      <TableCell>
+      <TableCell
+        sx={changed ? { color: "error.main", fontWeight: "bold" } : {}}
+      >
         {(() => {
           if (rests.length === 0) {
             return "(変更なし)";

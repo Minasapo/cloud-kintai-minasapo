@@ -89,6 +89,7 @@ export default function TableBodyRow({
         paidHolidayFlag={attendance.paidHolidayFlag}
         substituteHolidayDate={attendance.substituteHolidayDate}
         remarks={attendance.remarks}
+        specialHolidayFlag={attendance.specialHolidayFlag}
       />
 
       {/* 作成日時 */}

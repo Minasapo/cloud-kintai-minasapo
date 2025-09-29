@@ -31,6 +31,7 @@ export declare type AppConfigCreateFormInputValues = {
     amHolidayEndTime?: string;
     pmHolidayStartTime?: string;
     pmHolidayEndTime?: string;
+    specialHolidayEnabled?: boolean;
     amPmHolidayEnabled?: boolean;
     officeMode?: boolean;
     hourlyPaidHolidayEnabled?: boolean;
@@ -45,6 +46,7 @@ export declare type AppConfigCreateFormValidationValues = {
     amHolidayEndTime?: ValidationFunction<string>;
     pmHolidayStartTime?: ValidationFunction<string>;
     pmHolidayEndTime?: ValidationFunction<string>;
+    specialHolidayEnabled?: ValidationFunction<boolean>;
     amPmHolidayEnabled?: ValidationFunction<boolean>;
     officeMode?: ValidationFunction<boolean>;
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
@@ -61,6 +63,7 @@ export declare type AppConfigCreateFormOverridesProps = {
     amHolidayEndTime?: PrimitiveOverrideProps<TextFieldProps>;
     pmHolidayStartTime?: PrimitiveOverrideProps<TextFieldProps>;
     pmHolidayEndTime?: PrimitiveOverrideProps<TextFieldProps>;
+    specialHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     amPmHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     officeMode?: PrimitiveOverrideProps<SwitchFieldProps>;
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;

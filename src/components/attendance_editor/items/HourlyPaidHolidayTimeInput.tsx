@@ -1,5 +1,5 @@
 import { Stack } from "@mui/material";
-import { renderTimeViewClock, TimePicker } from "@mui/x-date-pickers";
+import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useContext } from "react";
 import { Controller, FieldArrayWithId } from "react-hook-form";
@@ -41,10 +41,6 @@ export default function HourlyPaidHolidayTimeInput({
             value={field.value ? dayjs(field.value) : null}
             disabled={changeRequests.length > 0}
             ampm={false}
-            viewRenderers={{
-              hours: renderTimeViewClock,
-              minutes: renderTimeViewClock,
-            }}
             slotProps={{ textField: { size: "small", label } }}
             onChange={(newTime) => {
               if (!newTime) {

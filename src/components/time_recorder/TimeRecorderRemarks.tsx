@@ -2,7 +2,13 @@
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Box, IconButton, Stack, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { Attendance } from "../../API";
 
@@ -15,16 +21,32 @@ export default function TimeRecorderRemarks({
   attendance,
   onSave,
 }: TimeRecorderRemarksProps) {
-  const [formState, setFormState] = useState<Attendance["remarks"]>(undefined);
-  const [isChanged, setIsChanged] = useState(false);
+  const [formState, setFormState] = useState<Attendance["remarks"]>(
+    attendance?.remarks
+  );
 
   useEffect(() => {
     setFormState(attendance?.remarks);
   }, [attendance]);
 
-  useEffect(() => {
-    setIsChanged(attendance?.remarks !== formState);
-  }, [formState]);
+  const isChanged = useMemo(
+    () => attendance?.remarks !== formState,
+    [attendance?.remarks, formState]
+  );
+
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setFormState(event.target.value);
+  }, []);
+
+  const handleSave = useCallback(() => {
+    onSave(formState);
+  }, [formState, onSave]);
+
+  const handleClear = useCallback(() => {
+    setFormState(attendance?.remarks);
+  }, [attendance?.remarks]);
+
+  const textFieldValue = formState ?? "";
 
   return (
     <Stack>
@@ -34,11 +56,9 @@ export default function TimeRecorderRemarks({
           multiline
           minRows={2}
           fullWidth
-          value={formState ?? undefined}
+          value={textFieldValue}
           placeholder="労務担当より指示された時のみ(例：客先名やイベント名など)"
-          onChange={(event) => {
-            setFormState(event.target.value);
-          }}
+          onChange={handleChange}
         />
       </Box>
       <Box>
@@ -50,16 +70,12 @@ export default function TimeRecorderRemarks({
             spacing={0}
           >
             <Box>
-              <IconButton onClick={() => onSave(formState)}>
+              <IconButton onClick={handleSave}>
                 <CheckIcon color="success" data-testid="remarksSave" />
               </IconButton>
             </Box>
             <Box>
-              <IconButton
-                onClick={() => {
-                  setFormState(attendance?.remarks);
-                }}
-              >
+              <IconButton onClick={handleClear}>
                 <ClearIcon color="error" data-testid="remarksClear" />
               </IconButton>
             </Box>

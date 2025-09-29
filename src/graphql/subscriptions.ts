@@ -65,6 +65,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -111,6 +112,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -157,6 +159,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -439,6 +442,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -461,6 +465,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -484,6 +489,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -531,6 +537,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -553,6 +560,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -576,6 +584,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -623,6 +632,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -645,6 +655,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -668,6 +679,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate

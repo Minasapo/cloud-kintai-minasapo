@@ -4,12 +4,8 @@ import { Logger } from "aws-amplify";
 import { Attendance } from "@/API";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
 
-import { getNowISOStringWithZeroSeconds } from "./util";
+import { executeAttendanceMutation } from "./attendanceMutation";
 
 export function restStartCallback(
   cognitoUser: CognitoUser | null | undefined,
@@ -22,18 +18,14 @@ export function restStartCallback(
   ) => Promise<Attendance>,
   logger: Logger
 ) {
-  if (!cognitoUser) {
-    return;
-  }
-
-  const now = getNowISOStringWithZeroSeconds();
-
-  restStart(cognitoUser.id, today, now)
-    .then(() => {
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S01005));
-    })
-    .catch((e) => {
-      logger.debug(e);
-      dispatch(setSnackbarError(MESSAGE_CODE.E01003));
-    });
+  executeAttendanceMutation({
+    cognitoUser,
+    today,
+    mutation: restStart,
+    dispatch,
+    successMessage: MESSAGE_CODE.S01005,
+    errorMessage: MESSAGE_CODE.E01003,
+    logger,
+    actionLabel: "restStart",
+  });
 }
