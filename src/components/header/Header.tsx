@@ -10,8 +10,6 @@ import Logo from "./Logo";
 import MobileMenu from "./MobileMenu";
 import { SignInOutButton } from "./SignInOutButton";
 
-// styled-componentsはSignInOutButton.tsxで管理
-
 export default function Header() {
   const { isCognitoUserRole } = useContext(AuthContext);
   const [pathName, setPathName] = useState("/register");
@@ -24,22 +22,28 @@ export default function Header() {
 
   return (
     <header>
-      <Container maxWidth="xl" sx={{ p: 0, backgroundColor: "#0FA85E" }}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          color="white"
-          sx={{ p: 1, height: "50px", boxSizing: "border-box" }}
-          spacing={{ xs: 0, md: 2 }}
-        >
-          <Logo />
-          <DesktopMenu pathName={pathName} />
-          {!isCognitoUserRole(StaffRole.OPERATOR) && (
-            <ExternalLinks pathName={pathName} />
-          )}
-          <MobileMenu pathName={pathName} />
-          <SignInOutButton pathName={pathName} />
-        </Stack>
+      <Container
+        maxWidth={false}
+        disableGutters
+        sx={{ p: 0, backgroundColor: "#0FA85E" }}
+      >
+        <Container sx={{ px: { xs: 2, md: 3 } }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            color="white"
+            sx={{ p: 1, height: "50px", boxSizing: "border-box" }}
+            spacing={{ xs: 0, md: 2 }}
+          >
+            <Logo />
+            <DesktopMenu pathName={pathName} />
+            {!isCognitoUserRole(StaffRole.OPERATOR) && (
+              <ExternalLinks pathName={pathName} />
+            )}
+            <MobileMenu pathName={pathName} />
+            <SignInOutButton pathName={pathName} />
+          </Stack>
+        </Container>
       </Container>
     </header>
   );
