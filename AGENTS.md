@@ -16,6 +16,11 @@ Amplifyで動作する勤怠管理のWebアプリケーションです。
 - `amplify/`: Amplify のバックエンド設定（多くは自動生成。直接編集禁止のものが多い）
 - `playwright/`: E2E テスト
 - `src/time_recorder/`: 勤怠管理に関する主要コンポーネント
+- `src/pages/AttendanceEdit/AttendanceEdit.tsx`: スタッフ側の勤怠編集画面
+  - `src/pages/AttendanceEdit/MobileEditor/MobileEditor.tsx`: モバイル用の勤怠編集コンポーネント
+  - `src/pages/AttendanceEdit/DesktopEditor/DesktopEditor.tsx`: デスクトップ用の勤怠編集コンポーネント
+- `src/pages/admin/AdminAttendanceEditor.tsx`: 管理者側の勤怠編集画面
+- `src/components/download_form/DownloadForm.tsx`: 勤怠データのダウンロードフォーム
 
 ## クイックスタート（新規環境）
 
@@ -125,19 +130,7 @@ dayjs().format('YYYY-MM-DD')
 - PR: 変更点に応じて Playwright の E2E を追加または更新
 - 自動フォーマット: pre-commit hook で `lint-staged` を使う（`eslint --fix`, `prettier --write`）
 
- 
-
 ### 小さな注意点 / エッジケース
 
 - 既存の Amplify schema を変更する場合はバックエンド側に影響が出るため、バックエンドと協調して作業すること
 - 大きなリネームは履歴追跡を難しくするため、分割して行うこと
-
-## 次に実行可能なアクション
-
-以下はリポジトリで推奨される、今後の実施候補です。必要に応じて該当項目を選択し、実施手順を決定してください。
-
-1. `src/pages/_template/` にページ雛形を追加する（新規ページ作成のテンプレートを用意する）。
-2. `.github/PULL_REQUEST_TEMPLATE.md` を追加して PR 作成時の記入項目を統一する。
-3. `package.json` に `ci-check` スクリプトを追加し、CI で実行するビルド／lint／テストのコマンドをまとめる。
-
-上記のうち実施を希望する項目があれば選択してください。選択に基づき実装または案内を行います。
