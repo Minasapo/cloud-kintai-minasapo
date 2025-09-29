@@ -49,6 +49,7 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
           "退勤打刻",
           "直行",
           "直帰",
+          "欠勤",
           "有給休暇",
           "振替休日",
           ...(includeSpecialHoliday ? ["特別休暇"] : []),
@@ -81,6 +82,7 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
                   const goDirectlyFlag = !!matchAttendance.goDirectlyFlag;
                   const returnDirectlyFlag =
                     !!matchAttendance.returnDirectlyFlag;
+                  const absentFlag = !!matchAttendance.absentFlag;
                   const paidHolidayFlag = !!matchAttendance.paidHolidayFlag;
                   const specialHolidayFlag =
                     !!matchAttendance.specialHolidayFlag;
@@ -123,6 +125,7 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
                     endTime ? dayjs(endTime).format("HH:mm") : "",
                     goDirectlyFlag ? 1 : 0,
                     returnDirectlyFlag ? 1 : 0,
+                    absentFlag ? 1 : 0,
                     paidHolidayFlag ? 1 : 0,
                     substituteHolidayDate ? 1 : 0,
                     ...(includeSpecialHoliday
