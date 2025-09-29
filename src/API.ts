@@ -410,6 +410,7 @@ export type CreateAttendanceInput = {
   endTime?: string | null,
   goDirectlyFlag?: boolean | null,
   returnDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
   rests?: Array< RestInput | null > | null,
   hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
   remarks?: string | null,
@@ -440,6 +441,7 @@ export type AttendanceHistoryInput = {
   startTime?: string | null,
   endTime?: string | null,
   goDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
   returnDirectlyFlag?: boolean | null,
   rests?: Array< RestInput | null > | null,
   hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
@@ -456,6 +458,7 @@ export type AttendanceChangeRequestInput = {
   startTime?: string | null,
   endTime?: string | null,
   goDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
   returnDirectlyFlag?: boolean | null,
   rests?: Array< RestInput | null > | null,
   hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
@@ -483,6 +486,7 @@ export type ModelAttendanceConditionInput = {
   endTime?: ModelStringInput | null,
   goDirectlyFlag?: ModelBooleanInput | null,
   returnDirectlyFlag?: ModelBooleanInput | null,
+  absentFlag?: ModelBooleanInput | null,
   remarks?: ModelStringInput | null,
   paidHolidayFlag?: ModelBooleanInput | null,
   specialHolidayFlag?: ModelBooleanInput | null,
@@ -518,6 +522,7 @@ export type Attendance = {
   endTime?: string | null,
   goDirectlyFlag?: boolean | null,
   returnDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
   rests?:  Array<Rest | null > | null,
   hourlyPaidHolidayTimes?:  Array<HourlyPaidHolidayTime | null > | null,
   remarks?: string | null,
@@ -553,6 +558,7 @@ export type AttendanceHistory = {
   startTime?: string | null,
   endTime?: string | null,
   goDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
   returnDirectlyFlag?: boolean | null,
   rests?:  Array<Rest | null > | null,
   hourlyPaidHolidayTimes?:  Array<HourlyPaidHolidayTime | null > | null,
@@ -570,6 +576,7 @@ export type AttendanceChangeRequest = {
   startTime?: string | null,
   endTime?: string | null,
   goDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
   returnDirectlyFlag?: boolean | null,
   rests?:  Array<Rest | null > | null,
   hourlyPaidHolidayTimes?:  Array<HourlyPaidHolidayTime | null > | null,
@@ -599,6 +606,7 @@ export type UpdateAttendanceInput = {
   endTime?: string | null,
   goDirectlyFlag?: boolean | null,
   returnDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
   rests?: Array< RestInput | null > | null,
   hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
   remarks?: string | null,
@@ -838,6 +846,7 @@ export type ModelAttendanceFilterInput = {
   endTime?: ModelStringInput | null,
   goDirectlyFlag?: ModelBooleanInput | null,
   returnDirectlyFlag?: ModelBooleanInput | null,
+  absentFlag?: ModelBooleanInput | null,
   remarks?: ModelStringInput | null,
   paidHolidayFlag?: ModelBooleanInput | null,
   specialHolidayFlag?: ModelBooleanInput | null,
@@ -1011,6 +1020,7 @@ export type ModelSubscriptionAttendanceFilterInput = {
   endTime?: ModelSubscriptionStringInput | null,
   goDirectlyFlag?: ModelSubscriptionBooleanInput | null,
   returnDirectlyFlag?: ModelSubscriptionBooleanInput | null,
+  absentFlag?: ModelSubscriptionBooleanInput | null,
   remarks?: ModelSubscriptionStringInput | null,
   paidHolidayFlag?: ModelSubscriptionBooleanInput | null,
   specialHolidayFlag?: ModelSubscriptionBooleanInput | null,
@@ -1493,6 +1503,7 @@ export type CreateAttendanceMutation = {
     endTime?: string | null,
     goDirectlyFlag?: boolean | null,
     returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
     rests?:  Array< {
       __typename: "Rest",
       startTime?: string | null,
@@ -1516,6 +1527,7 @@ export type CreateAttendanceMutation = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -1540,6 +1552,7 @@ export type CreateAttendanceMutation = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -1588,6 +1601,7 @@ export type UpdateAttendanceMutation = {
     endTime?: string | null,
     goDirectlyFlag?: boolean | null,
     returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
     rests?:  Array< {
       __typename: "Rest",
       startTime?: string | null,
@@ -1611,6 +1625,7 @@ export type UpdateAttendanceMutation = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -1635,6 +1650,7 @@ export type UpdateAttendanceMutation = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -1683,6 +1699,7 @@ export type DeleteAttendanceMutation = {
     endTime?: string | null,
     goDirectlyFlag?: boolean | null,
     returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
     rests?:  Array< {
       __typename: "Rest",
       startTime?: string | null,
@@ -1706,6 +1723,7 @@ export type DeleteAttendanceMutation = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -1730,6 +1748,7 @@ export type DeleteAttendanceMutation = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -2194,6 +2213,7 @@ export type GetAttendanceQuery = {
     endTime?: string | null,
     goDirectlyFlag?: boolean | null,
     returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
     rests?:  Array< {
       __typename: "Rest",
       startTime?: string | null,
@@ -2217,6 +2237,7 @@ export type GetAttendanceQuery = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -2241,6 +2262,7 @@ export type GetAttendanceQuery = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -2292,6 +2314,7 @@ export type ListAttendancesQuery = {
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
         startTime?: string | null,
@@ -2315,6 +2338,7 @@ export type ListAttendancesQuery = {
         startTime?: string | null,
         endTime?: string | null,
         goDirectlyFlag?: boolean | null,
+        absentFlag?: boolean | null,
         returnDirectlyFlag?: boolean | null,
         rests?:  Array< {
           __typename: "Rest",
@@ -2339,6 +2363,7 @@ export type ListAttendancesQuery = {
         startTime?: string | null,
         endTime?: string | null,
         goDirectlyFlag?: boolean | null,
+        absentFlag?: boolean | null,
         returnDirectlyFlag?: boolean | null,
         rests?:  Array< {
           __typename: "Rest",
@@ -2395,6 +2420,7 @@ export type AttendancesByStaffIdQuery = {
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
         startTime?: string | null,
@@ -2418,6 +2444,7 @@ export type AttendancesByStaffIdQuery = {
         startTime?: string | null,
         endTime?: string | null,
         goDirectlyFlag?: boolean | null,
+        absentFlag?: boolean | null,
         returnDirectlyFlag?: boolean | null,
         rests?:  Array< {
           __typename: "Rest",
@@ -2442,6 +2469,7 @@ export type AttendancesByStaffIdQuery = {
         startTime?: string | null,
         endTime?: string | null,
         goDirectlyFlag?: boolean | null,
+        absentFlag?: boolean | null,
         returnDirectlyFlag?: boolean | null,
         rests?:  Array< {
           __typename: "Rest",
@@ -2944,6 +2972,7 @@ export type OnCreateAttendanceSubscription = {
     endTime?: string | null,
     goDirectlyFlag?: boolean | null,
     returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
     rests?:  Array< {
       __typename: "Rest",
       startTime?: string | null,
@@ -2967,6 +2996,7 @@ export type OnCreateAttendanceSubscription = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -2991,6 +3021,7 @@ export type OnCreateAttendanceSubscription = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -3038,6 +3069,7 @@ export type OnUpdateAttendanceSubscription = {
     endTime?: string | null,
     goDirectlyFlag?: boolean | null,
     returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
     rests?:  Array< {
       __typename: "Rest",
       startTime?: string | null,
@@ -3061,6 +3093,7 @@ export type OnUpdateAttendanceSubscription = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -3085,6 +3118,7 @@ export type OnUpdateAttendanceSubscription = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -3132,6 +3166,7 @@ export type OnDeleteAttendanceSubscription = {
     endTime?: string | null,
     goDirectlyFlag?: boolean | null,
     returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
     rests?:  Array< {
       __typename: "Rest",
       startTime?: string | null,
@@ -3155,6 +3190,7 @@ export type OnDeleteAttendanceSubscription = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",
@@ -3179,6 +3215,7 @@ export type OnDeleteAttendanceSubscription = {
       startTime?: string | null,
       endTime?: string | null,
       goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
       returnDirectlyFlag?: boolean | null,
       rests?:  Array< {
         __typename: "Rest",

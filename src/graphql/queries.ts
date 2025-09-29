@@ -379,6 +379,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -401,6 +402,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -425,6 +427,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -477,6 +480,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
       endTime
       goDirectlyFlag
       returnDirectlyFlag
+      absentFlag
       rests {
         startTime
         endTime
@@ -499,6 +503,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
         startTime
         endTime
         goDirectlyFlag
+        absentFlag
         returnDirectlyFlag
         rests {
           startTime
@@ -523,6 +528,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
         startTime
         endTime
         goDirectlyFlag
+        absentFlag
         returnDirectlyFlag
         rests {
           startTime
@@ -588,6 +594,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
       endTime
       goDirectlyFlag
       returnDirectlyFlag
+      absentFlag
       rests {
         startTime
         endTime
@@ -610,6 +617,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
         startTime
         endTime
         goDirectlyFlag
+        absentFlag
         returnDirectlyFlag
         rests {
           startTime
@@ -634,6 +642,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
         startTime
         endTime
         goDirectlyFlag
+        absentFlag
         returnDirectlyFlag
         rests {
           startTime

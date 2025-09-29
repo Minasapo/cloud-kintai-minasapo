@@ -467,6 +467,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -489,6 +490,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -513,6 +515,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -563,6 +566,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -585,6 +589,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -609,6 +614,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -659,6 +665,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -681,6 +688,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -705,6 +713,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
