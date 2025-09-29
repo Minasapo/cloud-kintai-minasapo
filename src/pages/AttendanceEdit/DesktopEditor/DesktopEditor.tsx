@@ -2,16 +2,20 @@ import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Container,
   Divider,
+  FormControlLabel,
   IconButton,
   Stack,
   styled,
   Tab,
   Tabs,
 } from "@mui/material";
+// ...existing imports above
 import { useContext, useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 
 import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
 import HourlyPaidHolidayTimeItem, {
@@ -19,6 +23,7 @@ import HourlyPaidHolidayTimeItem, {
 } from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
 import QuickInputButtons from "@/components/attendance_editor/QuickInputButtons";
 import GroupContainer from "@/components/ui/GroupContainer/GroupContainer";
+import { AppConfigContext } from "@/context/AppConfigContext";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 
 import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
@@ -30,6 +35,7 @@ import { AttendanceEditContext } from "../AttendanceEditProvider";
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
 import NoDataAlert from "./NoDataAlert";
 import PaidHolidayFlagInput from "./PaidHolidayFlagInput";
+// add Checkbox and FormControlLabel to top-level @mui/material import
 import RemarksInput from "./RemarksInput";
 import { calcTotalRestTime } from "./RestTimeItem/RestTimeInput/RestTimeInput";
 import RestTimeItem from "./RestTimeItem/RestTimeItem";
@@ -88,6 +94,7 @@ export default function DesktopEditor() {
   } = useContext(AttendanceEditContext);
   const { getStartTime } = useAppConfig();
   const { hourlyPaidHolidayEnabled } = useContext(AttendanceEditContext);
+  const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
   const [vacationTab, setVacationTab] = useState<number>(0);
   const [totalProductionTime, setTotalProductionTime] = useState<number>(0);
   const [totalHourlyPaidHolidayTime, setTotalHourlyPaidHolidayTime] =
@@ -194,68 +201,134 @@ export default function DesktopEditor() {
             />
           </GroupContainer>
           <GroupContainer>
-            <Tabs
-              value={vacationTab}
-              onChange={(_, v) => setVacationTab(v)}
-              aria-label="vacation-tabs-desktop"
-              sx={{ borderBottom: 1, borderColor: "divider" }}
-            >
-              <Tab label="代休" />
-              <Tab label="有給(1日)" />
-              {hourlyPaidHolidayEnabled && (
-                <Tab
-                  label={`時間単位(${hourlyPaidHolidayTimeFields.length})`}
-                />
-              )}
-            </Tabs>
+            {/* 動的にタブを構築して、AppConfig のフラグで特別休暇タブを表示制御 */}
+            {(() => {
+              const tabs: { label: string; panel: JSX.Element }[] = [];
+              // 代休
+              tabs.push({
+                label: "代休",
+                panel: (
+                  <TabPanel value={vacationTab} index={tabs.length}>
+                    <SubstituteHolidayDateInput />
+                  </TabPanel>
+                ),
+              });
+              // 有給(1日)
+              tabs.push({
+                label: "有給(1日)",
+                panel: (
+                  <TabPanel value={vacationTab} index={tabs.length}>
+                    <PaidHolidayFlagInput />
+                  </TabPanel>
+                ),
+              });
 
-            <TabPanel value={vacationTab} index={0}>
-              <SubstituteHolidayDateInput />
-            </TabPanel>
+              // 特別休暇（AppConfigのフラグがONの場合にのみ追加）
+              if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
+                tabs.push({
+                  label: "特別休暇",
+                  panel: (
+                    <TabPanel value={vacationTab} index={tabs.length}>
+                      <Stack direction="row">
+                        <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                          {"特別休暇"}
+                        </Box>
+                        <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                          <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                            有給休暇ではない特別な休暇(忌引きなど)として扱われます。
+                            <br />
+                            使用する際は、事前に勤怠管理者へご相談ください。
+                          </Box>
+                          <Controller
+                            name="specialHolidayFlag"
+                            control={control}
+                            render={({ field }) => (
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    {...field}
+                                    checked={!!field.value}
+                                    onChange={(
+                                      e: React.ChangeEvent<HTMLInputElement>
+                                    ) => field.onChange(e.target.checked)}
+                                    disabled={changeRequests.length > 0}
+                                  />
+                                }
+                                label={""}
+                              />
+                            )}
+                          />
+                        </Stack>
+                      </Stack>
+                    </TabPanel>
+                  ),
+                });
+              }
 
-            <TabPanel value={vacationTab} index={1}>
-              <PaidHolidayFlagInput />
-            </TabPanel>
+              // 時間単位休暇
+              if (hourlyPaidHolidayEnabled) {
+                tabs.push({
+                  label: `時間単位(${hourlyPaidHolidayTimeFields.length})`,
+                  panel: (
+                    <TabPanel value={vacationTab} index={tabs.length}>
+                      <Stack direction="row">
+                        <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                          {"時間単位休暇"}
+                        </Box>
+                        <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                          {hourlyPaidHolidayTimeFields.length === 0 && (
+                            <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                              時間単位休暇の時間帯を追加してください。
+                            </Box>
+                          )}
+                          {hourlyPaidHolidayTimeFields.map(
+                            (hourlyPaidHolidayTime, index) => (
+                              <HourlyPaidHolidayTimeItem
+                                key={hourlyPaidHolidayTime.id}
+                                time={hourlyPaidHolidayTime}
+                                index={index}
+                              />
+                            )
+                          )}
+                          <Box>
+                            <IconButton
+                              aria-label="add-hourly-paid-holiday-time"
+                              onClick={() =>
+                                hourlyPaidHolidayTimeAppend({
+                                  startTime: null,
+                                  endTime: null,
+                                })
+                              }
+                              disabled={changeRequests.length > 0}
+                            >
+                              <AddAlarmIcon />
+                            </IconButton>
+                          </Box>
+                        </Stack>
+                      </Stack>
+                    </TabPanel>
+                  ),
+                });
+              }
 
-            {hourlyPaidHolidayEnabled && (
-              <TabPanel value={vacationTab} index={2}>
-                <Stack direction="row">
-                  <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                    {"時間単位休暇"}
-                  </Box>
-                  <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                    {hourlyPaidHolidayTimeFields.length === 0 && (
-                      <Box sx={{ color: "text.secondary", fontSize: 14 }}>
-                        時間単位休暇の時間帯を追加してください。
-                      </Box>
-                    )}
-                    {hourlyPaidHolidayTimeFields.map(
-                      (hourlyPaidHolidayTime, index) => (
-                        <HourlyPaidHolidayTimeItem
-                          key={hourlyPaidHolidayTime.id}
-                          time={hourlyPaidHolidayTime}
-                          index={index}
-                        />
-                      )
-                    )}
-                    <Box>
-                      <IconButton
-                        aria-label="add-hourly-paid-holiday-time"
-                        onClick={() =>
-                          hourlyPaidHolidayTimeAppend({
-                            startTime: null,
-                            endTime: null,
-                          })
-                        }
-                        disabled={changeRequests.length > 0}
-                      >
-                        <AddAlarmIcon />
-                      </IconButton>
-                    </Box>
-                  </Stack>
-                </Stack>
-              </TabPanel>
-            )}
+              return (
+                <>
+                  <Tabs
+                    value={vacationTab}
+                    onChange={(_, v) => setVacationTab(v)}
+                    aria-label="vacation-tabs-desktop"
+                    sx={{ borderBottom: 1, borderColor: "divider" }}
+                  >
+                    {tabs.map((t, i) => (
+                      <Tab key={i} label={t.label} />
+                    ))}
+                  </Tabs>
+                  {tabs.map((t, i) => (
+                    <div key={`panel-${i}`}>{t.panel}</div>
+                  ))}
+                </>
+              );
+            })()}
           </GroupContainer>
           <GroupContainer>
             <RemarksInput />

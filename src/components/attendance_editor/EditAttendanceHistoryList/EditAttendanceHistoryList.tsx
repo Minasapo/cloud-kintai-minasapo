@@ -65,10 +65,11 @@ export default function EditAttendanceHistoryList() {
                   <TableCell sx={{ whiteSpace: "nowrap" }} />
                   <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>勤務時間</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>有給休暇</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>振替休日</TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>直行</TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>直帰</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>有給休暇</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>特別休暇</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>振替休日</TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>備考</TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>作成日時</TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>

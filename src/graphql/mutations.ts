@@ -71,6 +71,7 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -120,6 +121,7 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -169,6 +171,7 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
     amHolidayEndTime
     pmHolidayStartTime
     pmHolidayEndTime
+    specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
     hourlyPaidHolidayEnabled
@@ -476,6 +479,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -498,6 +502,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -521,6 +526,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -569,6 +575,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -591,6 +598,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -614,6 +622,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -662,6 +671,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
     }
     remarks
     paidHolidayFlag
+    specialHolidayFlag
     isDeemedHoliday
     hourlyPaidHolidayHours
     substituteHolidayDate
@@ -684,6 +694,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate
@@ -707,6 +718,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
       }
       remarks
       paidHolidayFlag
+      specialHolidayFlag
       hourlyPaidHolidayHours
       substituteHolidayFlag
       substituteHolidayDate

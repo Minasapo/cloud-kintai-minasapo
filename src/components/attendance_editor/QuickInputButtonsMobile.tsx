@@ -12,11 +12,13 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+
+type ButtonRoleMode = "all" | "admin" | "staff";
 
 type Props = {
   setValue: UseFormSetValue<AttendanceEditInputs>;
@@ -27,8 +29,42 @@ type Props = {
     items: { startTime: string | null; endTime: string | null }[]
   ) => void;
   workDate: dayjs.Dayjs | null;
-  visibleMode?: "all" | "admin" | "staff";
+  visibleMode?: ButtonRoleMode;
 };
+
+const BUTTON_ROLE_MAP: Record<
+  | "clear"
+  | "normal"
+  | "regularStart"
+  | "regularEnd"
+  | "amHalf"
+  | "pmHalf"
+  | "paidHoliday",
+  ButtonRoleMode
+> = {
+  clear: "all",
+  normal: "all",
+  regularStart: "staff",
+  regularEnd: "staff",
+  amHalf: "admin",
+  pmHalf: "admin",
+  paidHoliday: "admin",
+};
+
+function isVisibleFor(
+  mode: ButtonRoleMode | undefined,
+  visibleMode?: ButtonRoleMode
+) {
+  const current = visibleMode ?? "all";
+  if (current === "all" || mode === "all") return true;
+  return mode === current;
+}
+
+function toISO(time: string | null, workDate: dayjs.Dayjs | null) {
+  if (!time || !workDate) return null;
+  const [hh, mm] = time.split(":").map(Number);
+  return workDate.hour(hh).minute(mm).second(0).millisecond(0).toISOString();
+}
 
 export default function QuickInputButtonsMobile({
   setValue,
@@ -37,34 +73,6 @@ export default function QuickInputButtonsMobile({
   workDate,
   visibleMode,
 }: Props) {
-  type ButtonRoleMode = "all" | "admin" | "staff";
-
-  const isVisibleFor = (mode?: ButtonRoleMode) => {
-    const current = visibleMode ?? "all";
-    if (current === "all") return true;
-    if (mode === "all") return true;
-    return mode === current;
-  };
-
-  const BUTTON_ROLE_MAP: Record<
-    | "clear"
-    | "normal"
-    | "regularStart"
-    | "regularEnd"
-    | "amHalf"
-    | "pmHalf"
-    | "paidHoliday",
-    ButtonRoleMode
-  > = {
-    clear: "all",
-    normal: "all",
-    regularStart: "staff",
-    regularEnd: "staff",
-    amHalf: "admin",
-    pmHalf: "admin",
-    paidHoliday: "admin",
-  };
-
   const {
     getStartTime,
     getEndTime,
@@ -78,13 +86,12 @@ export default function QuickInputButtonsMobile({
   } = useAppConfig();
 
   const anyButtonVisible =
-    isVisibleFor(BUTTON_ROLE_MAP.clear) ||
-    isVisibleFor(BUTTON_ROLE_MAP.normal) ||
+    isVisibleFor(BUTTON_ROLE_MAP.clear, visibleMode) ||
+    isVisibleFor(BUTTON_ROLE_MAP.normal, visibleMode) ||
     (getAmPmHolidayEnabled() &&
-      (isVisibleFor(BUTTON_ROLE_MAP.amHalf) ||
-        isVisibleFor(BUTTON_ROLE_MAP.pmHalf))) ||
-    isVisibleFor(BUTTON_ROLE_MAP.paidHoliday);
-
+      (isVisibleFor(BUTTON_ROLE_MAP.amHalf, visibleMode) ||
+        isVisibleFor(BUTTON_ROLE_MAP.pmHalf, visibleMode))) ||
+    isVisibleFor(BUTTON_ROLE_MAP.paidHoliday, visibleMode);
   if (!anyButtonVisible) return null;
 
   const defaultStart = getStartTime().format("HH:mm");
@@ -96,139 +103,136 @@ export default function QuickInputButtonsMobile({
   const defaultPmStart = getPmHolidayStartTime().format("HH:mm");
   const defaultPmEnd = getPmHolidayEndTime().format("HH:mm");
 
-  const toISO = (time: string | null) => {
-    if (!time) return null;
-    if (!workDate) return null;
-
-    const [hh, mm] = time.split(":").map((v) => Number(v));
-    return workDate.hour(hh).minute(mm).second(0).millisecond(0).toISOString();
-  };
-
   const [open, setOpen] = useState(false);
-
-  // 選択状態 (選んでから「適用」ボタンで実行)
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  const items: {
-    key: string;
-    label: string;
-    visible: boolean;
-    action: () => void;
-  }[] = [];
-
-  if (isVisibleFor(BUTTON_ROLE_MAP.clear)) {
-    items.push({
-      key: "clear",
-      label: "クリア",
-      visible: true,
-      action: () => {
-        setValue("startTime", null);
-        setValue("endTime", null);
-        restReplace([]);
-        hourlyPaidHolidayTimeReplace([]);
-        setValue("paidHolidayFlag", false);
-        setValue("remarks", "");
-        setValue("goDirectlyFlag", false);
-        setValue("returnDirectlyFlag", false);
-      },
-    });
-  }
-
-  if (isVisibleFor(BUTTON_ROLE_MAP.normal)) {
-    items.push({
-      key: "normal",
-      label: "通常勤務",
-      visible: true,
-      action: () => {
-        setValue("startTime", toISO(defaultStart));
-        setValue("endTime", toISO(defaultEnd));
-        restReplace([
-          {
-            startTime: toISO(defaultLunchStart),
-            endTime: toISO(defaultLunchEnd),
-          },
-        ]);
-        hourlyPaidHolidayTimeReplace([]);
-        setValue("paidHolidayFlag", false);
-        setValue("remarks", "");
-      },
-    });
-  }
-
-  if (isVisibleFor(BUTTON_ROLE_MAP.regularStart)) {
-    items.push({
-      key: "regularStart",
-      label: "定時出勤",
-      visible: true,
-      action: () => {
-        setValue("startTime", toISO(defaultStart));
-      },
-    });
-  }
-
-  if (isVisibleFor(BUTTON_ROLE_MAP.regularEnd)) {
-    items.push({
-      key: "regularEnd",
-      label: "定時退勤",
-      visible: true,
-      action: () => {
-        setValue("endTime", toISO(defaultEnd));
-      },
-    });
-  }
-
-  if (getAmPmHolidayEnabled()) {
-    if (isVisibleFor(BUTTON_ROLE_MAP.amHalf)) {
-      items.push({
-        key: "amHalf",
-        label: "午前半休",
-        visible: true,
+  // 定型ボタンリストをuseMemoで最適化
+  const items = useMemo(() => {
+    const arr: { key: string; label: string; action: () => void }[] = [];
+    if (isVisibleFor(BUTTON_ROLE_MAP.clear, visibleMode)) {
+      arr.push({
+        key: "clear",
+        label: "クリア",
         action: () => {
-          setValue("startTime", toISO(defaultPmStart));
-          setValue("endTime", toISO(defaultPmEnd));
+          setValue("startTime", null);
+          setValue("endTime", null);
           restReplace([]);
           hourlyPaidHolidayTimeReplace([]);
           setValue("paidHolidayFlag", false);
-          setValue("remarks", "午前半休");
+          setValue("remarks", "");
+          setValue("goDirectlyFlag", false);
+          setValue("returnDirectlyFlag", false);
         },
       });
     }
-    if (isVisibleFor(BUTTON_ROLE_MAP.pmHalf)) {
-      items.push({
-        key: "pmHalf",
-        label: "午後半休",
-        visible: true,
+    if (isVisibleFor(BUTTON_ROLE_MAP.normal, visibleMode)) {
+      arr.push({
+        key: "normal",
+        label: "通常勤務",
         action: () => {
-          setValue("startTime", toISO(defaultAmStart));
-          setValue("endTime", toISO(defaultAmEnd));
-          restReplace([]);
+          setValue("startTime", toISO(defaultStart, workDate));
+          setValue("endTime", toISO(defaultEnd, workDate));
+          restReplace([
+            {
+              startTime: toISO(defaultLunchStart, workDate),
+              endTime: toISO(defaultLunchEnd, workDate),
+            },
+          ]);
           hourlyPaidHolidayTimeReplace([]);
           setValue("paidHolidayFlag", false);
-          setValue("remarks", "午後半休");
+          setValue("remarks", "");
         },
       });
     }
-  }
-
-  if (isVisibleFor(BUTTON_ROLE_MAP.paidHoliday)) {
-    items.push({
-      key: "paidHoliday",
-      label: "有給休暇(1日)",
-      visible: true,
-      action: () => {
-        setValue("startTime", toISO(defaultStart));
-        setValue("endTime", toISO(defaultEnd));
-        restReplace([
-          {
-            startTime: toISO(defaultLunchStart),
-            endTime: toISO(defaultLunchEnd),
+    if (isVisibleFor(BUTTON_ROLE_MAP.regularStart, visibleMode)) {
+      arr.push({
+        key: "regularStart",
+        label: "定時出勤",
+        action: () => {
+          setValue("startTime", toISO(defaultStart, workDate));
+        },
+      });
+    }
+    if (isVisibleFor(BUTTON_ROLE_MAP.regularEnd, visibleMode)) {
+      arr.push({
+        key: "regularEnd",
+        label: "定時退勤",
+        action: () => {
+          setValue("endTime", toISO(defaultEnd, workDate));
+          setValue("rests", [
+            {
+              startTime: toISO(defaultLunchStart, workDate),
+              endTime: toISO(defaultLunchEnd, workDate),
+            },
+          ]);
+        },
+      });
+    }
+    if (getAmPmHolidayEnabled()) {
+      if (isVisibleFor(BUTTON_ROLE_MAP.amHalf, visibleMode)) {
+        arr.push({
+          key: "amHalf",
+          label: "午前半休",
+          action: () => {
+            setValue("startTime", toISO(defaultPmStart, workDate));
+            setValue("endTime", toISO(defaultPmEnd, workDate));
+            restReplace([]);
+            hourlyPaidHolidayTimeReplace([]);
+            setValue("paidHolidayFlag", false);
+            setValue("remarks", "午前半休");
           },
-        ]);
-        hourlyPaidHolidayTimeReplace([]);
-        setValue("paidHolidayFlag", true);
-      },
-    });
-  }
+        });
+      }
+      if (isVisibleFor(BUTTON_ROLE_MAP.pmHalf, visibleMode)) {
+        arr.push({
+          key: "pmHalf",
+          label: "午後半休",
+          action: () => {
+            setValue("startTime", toISO(defaultAmStart, workDate));
+            setValue("endTime", toISO(defaultAmEnd, workDate));
+            restReplace([]);
+            hourlyPaidHolidayTimeReplace([]);
+            setValue("paidHolidayFlag", false);
+            setValue("remarks", "午後半休");
+          },
+        });
+      }
+    }
+    if (isVisibleFor(BUTTON_ROLE_MAP.paidHoliday, visibleMode)) {
+      arr.push({
+        key: "paidHoliday",
+        label: "有給休暇(1日)",
+        action: () => {
+          setValue("startTime", toISO(defaultStart, workDate));
+          setValue("endTime", toISO(defaultEnd, workDate));
+          restReplace([
+            {
+              startTime: toISO(defaultLunchStart, workDate),
+              endTime: toISO(defaultLunchEnd, workDate),
+            },
+          ]);
+          hourlyPaidHolidayTimeReplace([]);
+          setValue("paidHolidayFlag", true);
+        },
+      });
+    }
+    return arr;
+  }, [
+    visibleMode,
+    workDate,
+    setValue,
+    restReplace,
+    hourlyPaidHolidayTimeReplace,
+    getAmPmHolidayEnabled,
+    defaultStart,
+    defaultEnd,
+    defaultLunchStart,
+    defaultLunchEnd,
+    defaultAmStart,
+    defaultAmEnd,
+    defaultPmStart,
+    defaultPmEnd,
+  ]);
 
   return (
     <Box sx={{ mb: 1 }}>
@@ -238,7 +242,6 @@ export default function QuickInputButtonsMobile({
           選択
         </Button>
       </Stack>
-
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -252,10 +255,7 @@ export default function QuickInputButtonsMobile({
               <ListItemButton
                 key={it.key}
                 selected={selectedKey === it.key}
-                onClick={() => {
-                  // 選択してから下の「適用」ボタンで実行する
-                  setSelectedKey(it.key);
-                }}
+                onClick={() => setSelectedKey(it.key)}
               >
                 <ListItemText primary={it.label} />
               </ListItemButton>

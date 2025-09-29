@@ -3,6 +3,7 @@ import { Button } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
+import { Attendance } from "@/API";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
@@ -15,27 +16,14 @@ interface Rest {
   endTime?: string | null;
 }
 
-interface MatchAttendance {
-  staffId: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  goDirectlyFlag?: boolean;
-  returnDirectlyFlag?: boolean;
-  paidHolidayFlag?: boolean;
-  substituteHolidayDate?: string | null;
-  rests?: Rest[] | null;
-  remarks?: string | null;
-  hourlyPaidHolidayHours?: number | null;
-  workDate?: string | null;
-}
-
 interface Props {
   workDates: string[];
   selectedStaff: StaffType[];
 }
 
 export default function ExportButton({ workDates, selectedStaff }: Props) {
-  const { getHourlyPaidHolidayEnabled } = useContext(AppConfigContext);
+  const { getHourlyPaidHolidayEnabled, getSpecialHolidayEnabled } =
+    useContext(AppConfigContext);
 
   const disabled = workDates.length === 0 || selectedStaff.length === 0;
 
@@ -46,8 +34,11 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
           eq: workDate,
         },
       }))
-    ).then((res: MatchAttendance[] & any) => {
+    ).then((res: Attendance[]) => {
       const hourlyPaidHolidayEnabled: boolean = getHourlyPaidHolidayEnabled();
+      const includeSpecialHoliday = getSpecialHolidayEnabled
+        ? getSpecialHolidayEnabled()
+        : false;
       const exportData: string = [
         [
           "営業日",
@@ -60,6 +51,7 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
           "直帰",
           "有給休暇",
           "振替休日",
+          ...(includeSpecialHoliday ? ["特別休暇"] : []),
           ...(hourlyPaidHolidayEnabled ? ["時間単位休暇(h)"] : []),
           "摘要",
         ].join(","),
@@ -70,35 +62,37 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
             return aSortKey.localeCompare(bSortKey);
           })
           .map((staff: StaffType) => {
-            const attendances: MatchAttendance[] = res.filter(
-              (attendance: MatchAttendance) =>
+            const attendances: Attendance[] = res.filter(
+              (attendance: Attendance) =>
                 attendance.staffId === staff.cognitoUserId
             );
 
             return [
               ...workDates.map((workDate: string) => {
-                const matchAttendance: MatchAttendance | undefined =
+                const matchAttendance: Attendance | undefined =
                   attendances.find(
-                    (attendance: MatchAttendance) =>
-                      attendance.workDate === workDate
+                    (attendance: Attendance) => attendance.workDate === workDate
                   );
 
                 if (matchAttendance) {
-                  const {
-                    staffId,
-                    startTime,
-                    endTime,
-                    goDirectlyFlag,
-                    returnDirectlyFlag,
-                    paidHolidayFlag,
-                    substituteHolidayDate,
-                    rests,
-                    remarks,
-                    hourlyPaidHolidayHours,
-                  } = matchAttendance as MatchAttendance & any;
+                  const staffId = matchAttendance.staffId;
+                  const startTime = matchAttendance.startTime;
+                  const endTime = matchAttendance.endTime;
+                  const goDirectlyFlag = !!matchAttendance.goDirectlyFlag;
+                  const returnDirectlyFlag =
+                    !!matchAttendance.returnDirectlyFlag;
+                  const paidHolidayFlag = !!matchAttendance.paidHolidayFlag;
+                  const specialHolidayFlag =
+                    !!matchAttendance.specialHolidayFlag;
+                  const substituteHolidayDate =
+                    matchAttendance.substituteHolidayDate;
+                  const rests: (Rest | null)[] = matchAttendance.rests ?? [];
+                  const remarks = matchAttendance.remarks;
+                  const hourlyPaidHolidayHours =
+                    matchAttendance.hourlyPaidHolidayHours;
 
                   const totalRestTime: number =
-                    rests?.reduce((acc: number, rest: Rest) => {
+                    rests.reduce((acc: number, rest: Rest | null) => {
                       if (!rest) return acc;
 
                       const diff: number = calcTotalRestTime(
@@ -131,6 +125,9 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
                     returnDirectlyFlag ? 1 : 0,
                     paidHolidayFlag ? 1 : 0,
                     substituteHolidayDate ? 1 : 0,
+                    ...(includeSpecialHoliday
+                      ? [specialHolidayFlag ? 1 : 0]
+                      : []),
                     ...(hourlyPaidHolidayEnabled
                       ? [hourlyPaidHolidayHours ?? ""]
                       : []),
@@ -149,6 +146,7 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
                   "",
                   "",
                   "",
+                  ...(includeSpecialHoliday ? [""] : []),
                   ...(hourlyPaidHolidayEnabled ? [""] : []),
                   "",
                 ].join(",");

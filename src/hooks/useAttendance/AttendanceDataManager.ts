@@ -133,6 +133,7 @@ export class AttendanceDataManager {
       returnDirectlyFlag: currentAttendance.returnDirectlyFlag,
       remarks: currentAttendance.remarks,
       paidHolidayFlag: currentAttendance.paidHolidayFlag,
+      specialHolidayFlag: currentAttendance.specialHolidayFlag,
       substituteHolidayDate: currentAttendance.substituteHolidayDate,
       createdAt,
       rests: currentAttendance.rests
@@ -166,6 +167,7 @@ export class AttendanceDataManager {
               returnDirectlyFlag: history.returnDirectlyFlag,
               remarks: history.remarks,
               paidHolidayFlag: history.paidHolidayFlag,
+              specialHolidayFlag: history.specialHolidayFlag,
               substituteHolidayDate: history.substituteHolidayDate,
               createdAt: history.createdAt,
               rests: history.rests

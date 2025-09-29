@@ -20,7 +20,8 @@ export default function AggregateExportButton({
   workDates,
   selectedStaff,
 }: Props) {
-  const { getHourlyPaidHolidayEnabled } = useContext(AppConfigContext);
+  const { getHourlyPaidHolidayEnabled, getSpecialHolidayEnabled } =
+    useContext(AppConfigContext);
 
   const onClick = async () => {
     if (workDates.length === 0 || selectedStaff.length === 0) return;
@@ -30,6 +31,9 @@ export default function AggregateExportButton({
     );
 
     const hourlyPaidHolidayEnabled = getHourlyPaidHolidayEnabled();
+    const includeSpecialHoliday = getSpecialHolidayEnabled
+      ? getSpecialHolidayEnabled()
+      : false;
 
     const header = [
       "従業員コード",
@@ -40,6 +44,7 @@ export default function AggregateExportButton({
       "休憩合計(h)",
       "有給日数",
       "振替休日日数",
+      ...(includeSpecialHoliday ? ["特別休暇"] : []),
       ...(hourlyPaidHolidayEnabled ? ["時間単位休暇合計(h)"] : []),
       "摘要",
     ];
@@ -59,12 +64,14 @@ export default function AggregateExportButton({
         let totalRest = 0;
         let paidHolidayCount = 0;
         let substituteCount = 0;
+        let specialHolidayCount = 0;
         let hourlyPaidHolidayHoursSum = 0;
         const remarks: string[] = [];
 
         attendances.forEach((att) => {
           if (att.paidHolidayFlag) paidHolidayCount += 1;
           if (att.substituteHolidayDate) substituteCount += 1;
+          if (att.specialHolidayFlag) specialHolidayCount += 1;
           if (hourlyPaidHolidayEnabled && att.hourlyPaidHolidayHours)
             hourlyPaidHolidayHoursSum +=
               Number(att.hourlyPaidHolidayHours) || 0;
@@ -97,6 +104,7 @@ export default function AggregateExportButton({
           totalRest.toFixed(2),
           paidHolidayCount,
           substituteCount,
+          ...(includeSpecialHoliday ? [specialHolidayCount] : []),
           ...(hourlyPaidHolidayEnabled
             ? [hourlyPaidHolidayHoursSum.toFixed(2)]
             : []),
