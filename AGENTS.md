@@ -21,6 +21,7 @@ Amplifyで動作する勤怠管理のWebアプリケーションです。
   - `src/pages/AttendanceEdit/DesktopEditor/DesktopEditor.tsx`: デスクトップ用の勤怠編集コンポーネント
 - `src/pages/admin/AdminAttendanceEditor.tsx`: 管理者側の勤怠編集画面
 - `src/components/download_form/DownloadForm.tsx`: 勤怠データのダウンロードフォーム
+- `src/pages/admin/AdminConfigManagement/AdminConfigManagement.tsx`: 設定画面(管理者のみ)
 
 ## クイックスタート（新規環境）
 
