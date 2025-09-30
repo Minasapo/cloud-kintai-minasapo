@@ -13,7 +13,7 @@ import AdminStaffAttendanceList from "./pages/admin/AdminStaffAttendanceList/Adm
 import AdminStaffEditor from "./pages/admin/AdminStaffEditor/AdminStaffEditor";
 import JobTerm from "./pages/admin/JobTerm/JobTerm";
 import AttendanceEdit from "./pages/AttendanceEdit/AttendanceEdit";
-import List from "./pages/List";
+import AttendanceListPage from "./pages/AttendanceListPage";
 import Login from "./pages/Login/Login";
 import OfficeLayout from "./pages/office/OfficeLayout";
 import OfficePage from "./pages/office/OfficePage";
@@ -40,7 +40,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: "list",
-            element: <List />,
+            element: <AttendanceListPage />,
           },
           {
             path: ":targetWorkDate/edit",
@@ -48,7 +48,7 @@ const router = createBrowserRouter([
           },
           {
             path: "*",
-            element: <List />,
+            element: <AttendanceListPage />,
           },
         ],
       },
