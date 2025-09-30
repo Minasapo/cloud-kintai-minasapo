@@ -17,6 +17,7 @@ export type AttendanceEditInputs = {
   isDeemedHoliday?: UpdateAttendanceInput["isDeemedHoliday"];
   specialHolidayFlag?: UpdateAttendanceInput["specialHolidayFlag"];
   paidHolidayFlag: UpdateAttendanceInput["paidHolidayFlag"];
+  absentFlag?: UpdateAttendanceInput["absentFlag"];
   // hourlyPaidHolidayHours: UpdateAttendanceInput["hourlyPaidHolidayHours"];
   hourlyPaidHolidayTimes?: HourlyPaidHolidayTimeInputs[];
   substituteHolidayDate: UpdateAttendanceInput["substituteHolidayDate"];
@@ -40,6 +41,7 @@ export const defaultValues: AttendanceEditInputs = {
   // hourlyPaidHolidayHours: undefined,
   hourlyPaidHolidayTimes: [],
   substituteHolidayDate: undefined,
+  absentFlag: undefined,
   goDirectlyFlag: undefined,
   returnDirectlyFlag: undefined,
   remarks: undefined,

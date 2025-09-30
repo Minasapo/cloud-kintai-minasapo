@@ -68,6 +68,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    absentEnabled
     hourlyPaidHolidayEnabled
     links {
       label
@@ -115,6 +116,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    absentEnabled
     hourlyPaidHolidayEnabled
     links {
       label
@@ -162,6 +164,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    absentEnabled
     hourlyPaidHolidayEnabled
     links {
       label
@@ -430,6 +433,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -452,6 +456,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -476,6 +481,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -525,6 +531,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -547,6 +554,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -571,6 +579,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -620,6 +629,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -642,6 +652,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -666,6 +677,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime

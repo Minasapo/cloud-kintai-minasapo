@@ -67,6 +67,7 @@ type Attendance @model @auth(rules: [{ allow: private }]) {
   endTime: String
   goDirectlyFlag: Boolean
   returnDirectlyFlag: Boolean
+  absentFlag: Boolean
   rests: [Rest]
   hourlyPaidHolidayTimes: [HourlyPaidHolidayTime]
   remarks: String
@@ -106,6 +107,7 @@ type AttendanceHistory {
   startTime: String
   endTime: String
   goDirectlyFlag: Boolean
+  absentFlag: Boolean
   returnDirectlyFlag: Boolean
   rests: [Rest]
   hourlyPaidHolidayTimes: [HourlyPaidHolidayTime]
@@ -122,6 +124,7 @@ type AttendanceChangeRequest {
   startTime: String
   endTime: String
   goDirectlyFlag: Boolean
+  absentFlag: Boolean
   returnDirectlyFlag: Boolean
   rests: [Rest]
   hourlyPaidHolidayTimes: [HourlyPaidHolidayTime]
@@ -167,6 +170,7 @@ type AppConfig @model {
   specialHolidayEnabled: Boolean
   amPmHolidayEnabled: Boolean
   officeMode: Boolean
+  absentEnabled: Boolean
   hourlyPaidHolidayEnabled: Boolean
   links: [Link]
   reasons: [Reason]

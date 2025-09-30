@@ -34,6 +34,7 @@ export declare type AppConfigCreateFormInputValues = {
     specialHolidayEnabled?: boolean;
     amPmHolidayEnabled?: boolean;
     officeMode?: boolean;
+    absentEnabled?: boolean;
     hourlyPaidHolidayEnabled?: boolean;
 };
 export declare type AppConfigCreateFormValidationValues = {
@@ -49,6 +50,7 @@ export declare type AppConfigCreateFormValidationValues = {
     specialHolidayEnabled?: ValidationFunction<boolean>;
     amPmHolidayEnabled?: ValidationFunction<boolean>;
     officeMode?: ValidationFunction<boolean>;
+    absentEnabled?: ValidationFunction<boolean>;
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
@@ -66,6 +68,7 @@ export declare type AppConfigCreateFormOverridesProps = {
     specialHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     amPmHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     officeMode?: PrimitiveOverrideProps<SwitchFieldProps>;
+    absentEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
 } & EscapeHatchProps;
 export declare type AppConfigCreateFormProps = React.PropsWithChildren<{

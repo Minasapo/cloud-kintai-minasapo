@@ -74,6 +74,7 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    absentEnabled
     hourlyPaidHolidayEnabled
     links {
       label
@@ -124,6 +125,7 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    absentEnabled
     hourlyPaidHolidayEnabled
     links {
       label
@@ -174,6 +176,7 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    absentEnabled
     hourlyPaidHolidayEnabled
     links {
       label
@@ -467,6 +470,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -489,6 +493,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -513,6 +518,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -563,6 +569,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -585,6 +592,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -609,6 +617,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -659,6 +668,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -681,6 +691,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -705,6 +716,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
