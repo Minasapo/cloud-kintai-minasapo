@@ -2,8 +2,9 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip, Stack, TextField } from "@mui/material";
 import { useContext, useEffect, useRef, useState } from "react";
 
-import { AttendanceEditContext } from "../AttendanceEditProvider";
 import { AppConfigContext } from "@/context/AppConfigContext";
+
+import { AttendanceEditContext } from "../AttendanceEditProvider";
 
 export default function StaffCommentInput() {
   const { changeRequests, register, setValue } = useContext(
