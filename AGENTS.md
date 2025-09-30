@@ -22,6 +22,10 @@ Amplifyで動作する勤怠管理のWebアプリケーションです。
 - `src/pages/admin/AdminAttendanceEditor.tsx`: 管理者側の勤怠編集画面
 - `src/components/download_form/DownloadForm.tsx`: 勤怠データのダウンロードフォーム
 - `src/pages/admin/AdminConfigManagement/AdminConfigManagement.tsx`: 設定画面(管理者のみ)
+- `src/pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList.tsx`: スタッフの勤怠一覧(管理者のみ)
+- `src/components/AttendanceList/AttendanceList.tsx`: 勤怠一覧コンポーネント(スタッフ側)
+  - `src/components/AttendanceList/DesktopList.tsx`: デスクトップ用の勤怠一覧コンポーネント
+  - `src/components/AttendanceList/MobileList.tsx`: モバイル用の勤怠一覧コンポーネント
 
 ## クイックスタート（新規環境）
 
@@ -71,6 +75,8 @@ dayjs().format('YYYY-MM-DD')
 - コード構造: ロジックは関数化／カスタムフック化し、再利用性を高める。
 - 命名: 意味のある英語（camelCase / PascalCase）を使う。
 - コメント: 実装理由やトレードオフの説明は許容する。ただし、冗長なインラインコメントは避け、コメントは原則として日本語で記載してください。
+
+  コメントは実装の意図やトレードオフ、注意点など、変数名や関数名からは読み取れない情報を記載してください。変数名や関数名から明らかに分かる内容（例: `count` に「カウント」とだけ書く等）は冗長ですので記述しないでください。
 
 ## Amplify に関する注意
 
