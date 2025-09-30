@@ -103,6 +103,7 @@ export default function AttendanceEditor() {
     getHourlyPaidHolidayEnabled,
     getSpecialHolidayEnabled,
     getStartTime,
+    getAbsentEnabled,
     loading: appConfigLoading,
   } = useAppConfig();
   const dispatch = useAppDispatchV2();
@@ -725,34 +726,36 @@ export default function AttendanceEditor() {
                 ),
               });
 
-              // 欠勤
-              tabs.push({
-                label: "欠勤",
-                panel: (
-                  <TabPanel value={vacationTab} index={tabs.length}>
-                    <Box sx={{ mt: 1 }}>
-                      <Stack direction="row" alignItems={"center"}>
-                        <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                          欠勤
-                        </Box>
-                        <Box>
-                          <Controller
-                            name="absentFlag"
-                            control={control}
-                            render={({ field }) => (
-                              <Checkbox
-                                {...field}
-                                checked={field.value || false}
-                                disabled={changeRequests.length > 0}
-                              />
-                            )}
-                          />
-                        </Box>
-                      </Stack>
-                    </Box>
-                  </TabPanel>
-                ),
-              });
+              // 欠勤（AppConfig の absentEnabled が有効な場合のみ表示）
+              if (getAbsentEnabled && getAbsentEnabled()) {
+                tabs.push({
+                  label: "欠勤",
+                  panel: (
+                    <TabPanel value={vacationTab} index={tabs.length}>
+                      <Box sx={{ mt: 1 }}>
+                        <Stack direction="row" alignItems={"center"}>
+                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                            欠勤
+                          </Box>
+                          <Box>
+                            <Controller
+                              name="absentFlag"
+                              control={control}
+                              render={({ field }) => (
+                                <Checkbox
+                                  {...field}
+                                  checked={field.value || false}
+                                  disabled={changeRequests.length > 0}
+                                />
+                              )}
+                            />
+                          </Box>
+                        </Stack>
+                      </Box>
+                    </TabPanel>
+                  ),
+                });
+              }
 
               // 特別休暇（AppConfigのフラグがONの時のみ）
               if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {

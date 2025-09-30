@@ -3,7 +3,6 @@ import { Box, Chip, Stack, TextField } from "@mui/material";
 import { useContext, useEffect, useRef, useState } from "react";
 
 import { AttendanceEditContext } from "../AttendanceEditProvider";
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 export default function StaffCommentInput() {
@@ -39,7 +38,12 @@ export default function StaffCommentInput() {
         disabled={changeRequests.length > 0}
       />
       <Box>
-        <Stack direction="row" spacing={1} sx={{ mt: 1 }} alignItems={"center"}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ mt: 1, flexWrap: "wrap" }}
+          alignItems={"center"}
+        >
           {reasons.map((reason, index) => (
             <Chip
               key={index}

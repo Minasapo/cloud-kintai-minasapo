@@ -236,7 +236,7 @@ export default function QuickInputButtonsMobile({
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: "wrap" }}>
         <Box sx={{ fontWeight: "bold", mr: 1 }}>定型入力</Box>
         <Button variant="outlined" onClick={() => setOpen(true)}>
           選択
