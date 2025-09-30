@@ -170,6 +170,7 @@ type AppConfig @model {
   specialHolidayEnabled: Boolean
   amPmHolidayEnabled: Boolean
   officeMode: Boolean
+  absentEnabled: Boolean
   hourlyPaidHolidayEnabled: Boolean
   links: [Link]
   reasons: [Reason]

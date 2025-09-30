@@ -87,6 +87,7 @@ export type CreateAppConfigInput = {
   specialHolidayEnabled?: boolean | null,
   amPmHolidayEnabled?: boolean | null,
   officeMode?: boolean | null,
+  absentEnabled?: boolean | null,
   hourlyPaidHolidayEnabled?: boolean | null,
   links?: Array< LinkInput | null > | null,
   reasons?: Array< ReasonInput | null > | null,
@@ -124,6 +125,7 @@ export type ModelAppConfigConditionInput = {
   specialHolidayEnabled?: ModelBooleanInput | null,
   amPmHolidayEnabled?: ModelBooleanInput | null,
   officeMode?: ModelBooleanInput | null,
+  absentEnabled?: ModelBooleanInput | null,
   hourlyPaidHolidayEnabled?: ModelBooleanInput | null,
   and?: Array< ModelAppConfigConditionInput | null > | null,
   or?: Array< ModelAppConfigConditionInput | null > | null,
@@ -154,6 +156,7 @@ export type AppConfig = {
   specialHolidayEnabled?: boolean | null,
   amPmHolidayEnabled?: boolean | null,
   officeMode?: boolean | null,
+  absentEnabled?: boolean | null,
   hourlyPaidHolidayEnabled?: boolean | null,
   links?:  Array<Link | null > | null,
   reasons?:  Array<Reason | null > | null,
@@ -197,6 +200,7 @@ export type UpdateAppConfigInput = {
   specialHolidayEnabled?: boolean | null,
   amPmHolidayEnabled?: boolean | null,
   officeMode?: boolean | null,
+  absentEnabled?: boolean | null,
   hourlyPaidHolidayEnabled?: boolean | null,
   links?: Array< LinkInput | null > | null,
   reasons?: Array< ReasonInput | null > | null,
@@ -730,6 +734,7 @@ export type ModelAppConfigFilterInput = {
   specialHolidayEnabled?: ModelBooleanInput | null,
   amPmHolidayEnabled?: ModelBooleanInput | null,
   officeMode?: ModelBooleanInput | null,
+  absentEnabled?: ModelBooleanInput | null,
   hourlyPaidHolidayEnabled?: ModelBooleanInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
@@ -950,6 +955,7 @@ export type ModelSubscriptionAppConfigFilterInput = {
   specialHolidayEnabled?: ModelSubscriptionBooleanInput | null,
   amPmHolidayEnabled?: ModelSubscriptionBooleanInput | null,
   officeMode?: ModelSubscriptionBooleanInput | null,
+  absentEnabled?: ModelSubscriptionBooleanInput | null,
   hourlyPaidHolidayEnabled?: ModelSubscriptionBooleanInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
@@ -1125,6 +1131,7 @@ export type CreateAppConfigMutation = {
     specialHolidayEnabled?: boolean | null,
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
       __typename: "Link",
@@ -1174,6 +1181,7 @@ export type UpdateAppConfigMutation = {
     specialHolidayEnabled?: boolean | null,
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
       __typename: "Link",
@@ -1223,6 +1231,7 @@ export type DeleteAppConfigMutation = {
     specialHolidayEnabled?: boolean | null,
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
       __typename: "Link",
@@ -1905,6 +1914,7 @@ export type GetAppConfigQuery = {
     specialHolidayEnabled?: boolean | null,
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
       __typename: "Link",
@@ -1957,6 +1967,7 @@ export type ListAppConfigsQuery = {
       specialHolidayEnabled?: boolean | null,
       amPmHolidayEnabled?: boolean | null,
       officeMode?: boolean | null,
+      absentEnabled?: boolean | null,
       hourlyPaidHolidayEnabled?: boolean | null,
       links?:  Array< {
         __typename: "Link",
@@ -2609,6 +2620,7 @@ export type OnCreateAppConfigSubscription = {
     specialHolidayEnabled?: boolean | null,
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
       __typename: "Link",
@@ -2657,6 +2669,7 @@ export type OnUpdateAppConfigSubscription = {
     specialHolidayEnabled?: boolean | null,
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
       __typename: "Link",
@@ -2705,6 +2718,7 @@ export type OnDeleteAppConfigSubscription = {
     specialHolidayEnabled?: boolean | null,
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
       __typename: "Link",
