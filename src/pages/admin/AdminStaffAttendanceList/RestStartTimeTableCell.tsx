@@ -1,14 +1,12 @@
 import {
   styled,
   TableCell as MuiTableCell,
-  CircularProgress,
-  Box,
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext } from "react";
-import { AppConfigContext } from "../../../context/AppConfigContext";
 
 import { Attendance } from "../../../API";
+import { AppConfigContext } from "../../../context/AppConfigContext";
 
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   width: theme.spacing(16),
