@@ -767,3 +767,90 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument($fi
   APITypes.OnDeleteDocumentSubscriptionVariables,
   APITypes.OnDeleteDocumentSubscription
 >;
+export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+  onCreateWorkflow(filter: $filter) {
+    id
+    category
+    staffId
+    status
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateWorkflowSubscriptionVariables,
+  APITypes.OnCreateWorkflowSubscription
+>;
+export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+  onUpdateWorkflow(filter: $filter) {
+    id
+    category
+    staffId
+    status
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateWorkflowSubscriptionVariables,
+  APITypes.OnUpdateWorkflowSubscription
+>;
+export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+  onDeleteWorkflow(filter: $filter) {
+    id
+    category
+    staffId
+    status
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteWorkflowSubscriptionVariables,
+  APITypes.OnDeleteWorkflowSubscription
+>;

@@ -676,6 +676,109 @@ export type DeleteDocumentInput = {
   id: string,
 };
 
+export type CreateWorkflowInput = {
+  id?: string | null,
+  category?: WorkflowCategory | null,
+  staffId: string,
+  status: WorkflowStatus,
+  overTimeDetails?: OverTimeWorkflowInput | null,
+  comments?: Array< WorkflowCommentInput | null > | null,
+};
+
+export enum WorkflowCategory {
+  PAID_LEAVE = "PAID_LEAVE",
+  ABSENCE = "ABSENCE",
+  OVERTIME = "OVERTIME",
+  CUSTOM = "CUSTOM",
+}
+
+
+export enum WorkflowStatus {
+  DRAFT = "DRAFT",
+  SUBMITTED = "SUBMITTED",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  CANCELLED = "CANCELLED",
+}
+
+
+export type OverTimeWorkflowInput = {
+  date: string,
+  startTime: string,
+  endTime: string,
+  reason: string,
+};
+
+export type WorkflowCommentInput = {
+  id: string,
+  staffId: string,
+  text: string,
+  createdAt: string,
+};
+
+export type ModelWorkflowConditionInput = {
+  category?: ModelWorkflowCategoryInput | null,
+  staffId?: ModelStringInput | null,
+  status?: ModelWorkflowStatusInput | null,
+  and?: Array< ModelWorkflowConditionInput | null > | null,
+  or?: Array< ModelWorkflowConditionInput | null > | null,
+  not?: ModelWorkflowConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelWorkflowCategoryInput = {
+  eq?: WorkflowCategory | null,
+  ne?: WorkflowCategory | null,
+};
+
+export type ModelWorkflowStatusInput = {
+  eq?: WorkflowStatus | null,
+  ne?: WorkflowStatus | null,
+};
+
+export type Workflow = {
+  __typename: "Workflow",
+  id: string,
+  category?: WorkflowCategory | null,
+  staffId: string,
+  status: WorkflowStatus,
+  overTimeDetails?: OverTimeWorkflow | null,
+  comments?:  Array<WorkflowComment | null > | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type OverTimeWorkflow = {
+  __typename: "OverTimeWorkflow",
+  date: string,
+  startTime: string,
+  endTime: string,
+  reason: string,
+};
+
+export type WorkflowComment = {
+  __typename: "WorkflowComment",
+  id: string,
+  staffId: string,
+  text: string,
+  createdAt: string,
+};
+
+export type UpdateWorkflowInput = {
+  id: string,
+  category?: WorkflowCategory | null,
+  staffId?: string | null,
+  status?: WorkflowStatus | null,
+  overTimeDetails?: OverTimeWorkflowInput | null,
+  comments?: Array< WorkflowCommentInput | null > | null,
+};
+
+export type DeleteWorkflowInput = {
+  id: string,
+};
+
 export type EmailData = {
   to?: Array< string | null > | null,
   subject: string,
@@ -902,6 +1005,24 @@ export type ModelDocumentConnection = {
   nextToken?: string | null,
 };
 
+export type ModelWorkflowFilterInput = {
+  id?: ModelIDInput | null,
+  category?: ModelWorkflowCategoryInput | null,
+  staffId?: ModelStringInput | null,
+  status?: ModelWorkflowStatusInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelWorkflowFilterInput | null > | null,
+  or?: Array< ModelWorkflowFilterInput | null > | null,
+  not?: ModelWorkflowFilterInput | null,
+};
+
+export type ModelWorkflowConnection = {
+  __typename: "ModelWorkflowConnection",
+  items:  Array<Workflow | null >,
+  nextToken?: string | null,
+};
+
 export type ModelSubscriptionCheckForUpdateFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   deployUuid?: ModelSubscriptionStringInput | null,
@@ -1063,6 +1184,17 @@ export type ModelSubscriptionDocumentFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionDocumentFilterInput | null > | null,
   or?: Array< ModelSubscriptionDocumentFilterInput | null > | null,
+};
+
+export type ModelSubscriptionWorkflowFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  category?: ModelSubscriptionStringInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
+  or?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
 };
 
 export type CreateCheckForUpdateMutationVariables = {
@@ -1848,6 +1980,99 @@ export type DeleteDocumentMutation = {
   } | null,
 };
 
+export type CreateWorkflowMutationVariables = {
+  input: CreateWorkflowInput,
+  condition?: ModelWorkflowConditionInput | null,
+};
+
+export type CreateWorkflowMutation = {
+  createWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateWorkflowMutationVariables = {
+  input: UpdateWorkflowInput,
+  condition?: ModelWorkflowConditionInput | null,
+};
+
+export type UpdateWorkflowMutation = {
+  updateWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteWorkflowMutationVariables = {
+  input: DeleteWorkflowInput,
+  condition?: ModelWorkflowConditionInput | null,
+};
+
+export type DeleteWorkflowMutation = {
+  deleteWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
 export type SendMailQueryVariables = {
   data: EmailData,
 };
@@ -2551,6 +2776,110 @@ export type ListDocumentsQuery = {
       tag?: Array< string | null > | null,
       targetRole?: Array< string | null > | null,
       revision?: number | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetWorkflowQueryVariables = {
+  id: string,
+};
+
+export type GetWorkflowQuery = {
+  getWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListWorkflowsQueryVariables = {
+  filter?: ModelWorkflowFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListWorkflowsQuery = {
+  listWorkflows?:  {
+    __typename: "ModelWorkflowConnection",
+    items:  Array< {
+      __typename: "Workflow",
+      id: string,
+      category?: WorkflowCategory | null,
+      staffId: string,
+      status: WorkflowStatus,
+      overTimeDetails?:  {
+        __typename: "OverTimeWorkflow",
+        date: string,
+        startTime: string,
+        endTime: string,
+        reason: string,
+      } | null,
+      comments?:  Array< {
+        __typename: "WorkflowComment",
+        id: string,
+        staffId: string,
+        text: string,
+        createdAt: string,
+      } | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type WorkflowsByStaffIdQueryVariables = {
+  staffId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelWorkflowFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type WorkflowsByStaffIdQuery = {
+  workflowsByStaffId?:  {
+    __typename: "ModelWorkflowConnection",
+    items:  Array< {
+      __typename: "Workflow",
+      id: string,
+      category?: WorkflowCategory | null,
+      staffId: string,
+      status: WorkflowStatus,
+      overTimeDetails?:  {
+        __typename: "OverTimeWorkflow",
+        date: string,
+        startTime: string,
+        endTime: string,
+        reason: string,
+      } | null,
+      comments?:  Array< {
+        __typename: "WorkflowComment",
+        id: string,
+        staffId: string,
+        text: string,
+        createdAt: string,
+      } | null > | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -3312,6 +3641,96 @@ export type OnDeleteDocumentSubscription = {
     tag?: Array< string | null > | null,
     targetRole?: Array< string | null > | null,
     revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateWorkflowSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowFilterInput | null,
+};
+
+export type OnCreateWorkflowSubscription = {
+  onCreateWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateWorkflowSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowFilterInput | null,
+};
+
+export type OnUpdateWorkflowSubscription = {
+  onUpdateWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteWorkflowSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowFilterInput | null,
+};
+
+export type OnDeleteWorkflowSubscription = {
+  onDeleteWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
     createdAt: string,
     updatedAt: string,
   } | null,

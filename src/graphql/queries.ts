@@ -728,3 +728,114 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
   APITypes.ListDocumentsQueryVariables,
   APITypes.ListDocumentsQuery
 >;
+export const getWorkflow = /* GraphQL */ `query GetWorkflow($id: ID!) {
+  getWorkflow(id: $id) {
+    id
+    category
+    staffId
+    status
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetWorkflowQueryVariables,
+  APITypes.GetWorkflowQuery
+>;
+export const listWorkflows = /* GraphQL */ `query ListWorkflows(
+  $filter: ModelWorkflowFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listWorkflows(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      category
+      staffId
+      status
+      overTimeDetails {
+        date
+        startTime
+        endTime
+        reason
+        __typename
+      }
+      comments {
+        id
+        staffId
+        text
+        createdAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListWorkflowsQueryVariables,
+  APITypes.ListWorkflowsQuery
+>;
+export const workflowsByStaffId = /* GraphQL */ `query WorkflowsByStaffId(
+  $staffId: String!
+  $sortDirection: ModelSortDirection
+  $filter: ModelWorkflowFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  workflowsByStaffId(
+    staffId: $staffId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      category
+      staffId
+      status
+      overTimeDetails {
+        date
+        startTime
+        endTime
+        reason
+        __typename
+      }
+      comments {
+        id
+        staffId
+        text
+        createdAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.WorkflowsByStaffIdQueryVariables,
+  APITypes.WorkflowsByStaffIdQuery
+>;

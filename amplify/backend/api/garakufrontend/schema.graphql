@@ -198,3 +198,42 @@ type HourlyPaidHolidayTime {
   startTime: String!
   endTime: String!
 }
+
+enum WorkflowCategory {
+  PAID_LEAVE
+  ABSENCE
+  OVERTIME
+  CUSTOM
+}
+
+enum WorkflowStatus {
+  DRAFT
+  SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+type OverTimeWorkflow {
+  date: String!
+  startTime: String!
+  endTime: String!
+  reason: String!
+}
+
+type WorkflowComment {
+  id: ID!
+  staffId: String!
+  text: String!
+  createdAt: String!
+}
+
+type Workflow @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  category: WorkflowCategory
+  staffId: String! @index(name: "byStaffId", queryField: "workflowsByStaffId")
+  status: WorkflowStatus!
+  overTimeDetails: OverTimeWorkflow
+  comments: [WorkflowComment]
+}

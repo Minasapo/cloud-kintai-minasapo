@@ -815,3 +815,99 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
   APITypes.DeleteDocumentMutationVariables,
   APITypes.DeleteDocumentMutation
 >;
+export const createWorkflow = /* GraphQL */ `mutation CreateWorkflow(
+  $input: CreateWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  createWorkflow(input: $input, condition: $condition) {
+    id
+    category
+    staffId
+    status
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateWorkflowMutationVariables,
+  APITypes.CreateWorkflowMutation
+>;
+export const updateWorkflow = /* GraphQL */ `mutation UpdateWorkflow(
+  $input: UpdateWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  updateWorkflow(input: $input, condition: $condition) {
+    id
+    category
+    staffId
+    status
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowMutationVariables,
+  APITypes.UpdateWorkflowMutation
+>;
+export const deleteWorkflow = /* GraphQL */ `mutation DeleteWorkflow(
+  $input: DeleteWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  deleteWorkflow(input: $input, condition: $condition) {
+    id
+    category
+    staffId
+    status
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowMutationVariables,
+  APITypes.DeleteWorkflowMutation
+>;
