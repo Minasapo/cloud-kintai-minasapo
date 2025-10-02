@@ -4,7 +4,6 @@ import {
   CircularProgress,
   Container,
   FormControlLabel,
-  Link,
   Stack,
   styled,
   Switch,
@@ -20,6 +19,7 @@ import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import * as MESSAGE_CODE from "@/errors";
 import updateStaff from "@/hooks/useStaff/updateStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
@@ -29,14 +29,13 @@ import {
 } from "@/lib/reducers/snackbarReducer";
 
 import Title from "../components/Title/Title";
+import { AuthContext } from "../context/AuthContext";
 import fetchStaff from "../hooks/useStaff/fetchStaff";
 import {
   mappingStaffRole,
   roleLabelMap,
   StaffType,
 } from "../hooks/useStaffs/useStaffs";
-import { AuthContext } from "../context/AuthContext";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 
 const NotificationSwitch = styled(Switch)(({ theme }) => ({
   padding: 8,
