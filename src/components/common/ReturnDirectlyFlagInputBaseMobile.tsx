@@ -1,6 +1,7 @@
 import { Switch } from "@mui/material";
-import ReturnDirectlyFlagInputBase from "./ReturnDirectlyFlagInputBase";
 import { Control } from "react-hook-form";
+
+import ReturnDirectlyFlagInputBase from "./ReturnDirectlyFlagInputBase";
 
 interface Props {
   control: Control<any>;
