@@ -189,7 +189,9 @@ export default function NewWorkflow() {
     if (staff?.approverSetting === ApproverSettingMode.SINGLE) {
       const target = staff.approverSingle;
       if (target) {
-        const mapped = staffs.find((s) => s.cognitoUserId === target || s.id === target);
+        const mapped = staffs.find(
+          (s) => s.cognitoUserId === target || s.id === target
+        );
         const approverId = mapped ? mapped.id : target;
         approvalSteps.push({
           id: `s-0-${Date.now()}`,
@@ -205,7 +207,9 @@ export default function NewWorkflow() {
       const multiple = staff.approverMultiple || [];
       multiple.forEach((aid, idx) => {
         if (!aid) return;
-        const mapped = staffs.find((s) => s.cognitoUserId === aid || s.id === aid);
+        const mapped = staffs.find(
+          (s) => s.cognitoUserId === aid || s.id === aid
+        );
         const approverId = mapped ? mapped.id : aid;
         approvalSteps.push({
           id: `s-${idx}-${Date.now()}`,
@@ -238,11 +242,15 @@ export default function NewWorkflow() {
 
     // 保存用に submitter 側のスナップショット情報も入れておく
     if (staff?.approverSetting) {
-      input.submitterApproverSetting = staff.approverSetting as ApproverSettingMode;
-      if (staff.approverSingle) input.submitterApproverId = staff.approverSingle;
+      input.submitterApproverSetting =
+        staff.approverSetting as ApproverSettingMode;
+      if (staff.approverSingle)
+        input.submitterApproverId = staff.approverSingle;
       if (staff.approverMultiple && staff.approverMultiple.length > 0) {
         input.submitterApproverIds = staff.approverMultiple;
-        if (staff.approverMultipleMode) input.submitterApproverMultipleMode = staff.approverMultipleMode as ApproverMultipleMode;
+        if (staff.approverMultipleMode)
+          input.submitterApproverMultipleMode =
+            staff.approverMultipleMode as ApproverMultipleMode;
       }
     }
 
