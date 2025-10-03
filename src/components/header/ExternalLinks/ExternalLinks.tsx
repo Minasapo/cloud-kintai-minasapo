@@ -4,10 +4,11 @@ import AppsIcon from "@mui/icons-material/Apps";
 import { Box, Grid, IconButton, Paper, useMediaQuery } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 
+import { AppConfigContext } from "@/context/AppConfigContext";
+import { AuthContext } from "@/context/AuthContext";
+
 import { theme } from "../../../lib/theme";
 import { LinkGridItem } from "./LinkGridItem";
-import { AuthContext } from "@/context/AuthContext";
-import { AppConfigContext } from "@/context/AppConfigContext";
 
 export function ExternalLinks({ pathName }: { pathName: string }) {
   const { cognitoUser } = useContext(AuthContext);

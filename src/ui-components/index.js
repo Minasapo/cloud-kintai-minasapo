@@ -20,4 +20,6 @@ export { default as HolidayCalendarCreateForm } from "./HolidayCalendarCreateFor
 export { default as HolidayCalendarUpdateForm } from "./HolidayCalendarUpdateForm";
 export { default as StaffCreateForm } from "./StaffCreateForm";
 export { default as StaffUpdateForm } from "./StaffUpdateForm";
+export { default as WorkflowCreateForm } from "./WorkflowCreateForm";
+export { default as WorkflowUpdateForm } from "./WorkflowUpdateForm";
 export { default as studioTheme } from "./studioTheme";

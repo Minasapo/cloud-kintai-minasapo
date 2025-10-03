@@ -1,9 +1,10 @@
 import { styled, TableCell as MuiTableCell } from "@mui/material";
 import dayjs from "dayjs";
+import { useContext } from "react";
+
+import { AppConfigContext } from "@/context/AppConfigContext";
 
 import { Attendance } from "../../../API";
-import { useContext } from "react";
-import { AppConfigContext } from "@/context/AppConfigContext";
 
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   width: theme.spacing(16),

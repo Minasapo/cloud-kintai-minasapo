@@ -231,6 +231,10 @@ export const createStaff = /* GraphQL */ `mutation CreateStaff(
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -262,6 +266,10 @@ export const updateStaff = /* GraphQL */ `mutation UpdateStaff(
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -293,6 +301,10 @@ export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -814,4 +826,154 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
 ` as GeneratedMutation<
   APITypes.DeleteDocumentMutationVariables,
   APITypes.DeleteDocumentMutation
+>;
+export const createWorkflow = /* GraphQL */ `mutation CreateWorkflow(
+  $input: CreateWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  createWorkflow(input: $input, condition: $condition) {
+    id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
+    category
+    staffId
+    status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateWorkflowMutationVariables,
+  APITypes.CreateWorkflowMutation
+>;
+export const updateWorkflow = /* GraphQL */ `mutation UpdateWorkflow(
+  $input: UpdateWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  updateWorkflow(input: $input, condition: $condition) {
+    id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
+    category
+    staffId
+    status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowMutationVariables,
+  APITypes.UpdateWorkflowMutation
+>;
+export const deleteWorkflow = /* GraphQL */ `mutation DeleteWorkflow(
+  $input: DeleteWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  deleteWorkflow(input: $input, condition: $condition) {
+    id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
+    category
+    staffId
+    status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowMutationVariables,
+  APITypes.DeleteWorkflowMutation
 >;

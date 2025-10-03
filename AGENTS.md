@@ -91,6 +91,18 @@ dayjs().format('YYYY-MM-DD')
 4. Amplify のスキーマ/リソースを変更した場合は、手順と CLI コマンド（例: `amplify push`）を PR に記載
 5. 変更の要点（影響範囲、ロールバック手順）を PR 本文にまとめる
 
+## スナックバーの取り扱い（新ルール）
+
+- アプリ内でユーザー通知（成功・エラー・警告）を表示する際は、ローカル state の Snackbar を直接使うのではなく、`src/lib/reducers/snackbarReducer.ts` の Redux slice を使って表示すること。
+- 既存の実装例（`DocumentPoster.tsx` や各種ページ）を参考に、以下のパターンで実装してください:
+
+  1. `useAppDispatchV2` を `@/app/hooks` からインポートして `dispatch` を用意する。
+  2. 成功時は `dispatch(setSnackbarSuccess(MESSAGE_CODE.SXXXXX))` を呼ぶ（または表示したい文字列）。
+  3. エラー時は `dispatch(setSnackbarError(MESSAGE_CODE.EXXXXX))` を呼ぶ。
+
+- 理由: 全アプリで通知表示を一元管理することで UX の一貫性を保ち、将来的にグローバルなトラッキングや自動クローズ制御を中央で行いやすくするため。
+
+
 ## 追加の提案（任意）
 
 - 新規ページの雛形を `src/pages/_template/` として追加すると、開発者がコピーして始められて便利です。

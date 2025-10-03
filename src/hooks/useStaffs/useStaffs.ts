@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import {
+  ApproverMultipleMode,
+  ApproverSettingMode,
   CreateStaffInput,
   DeleteStaffInput,
   Staff,
@@ -46,6 +48,10 @@ export type StaffType = {
   notifications?: Staff["notifications"];
   sortKey?: Staff["sortKey"];
   workType?: string | null;
+  approverSetting?: ApproverSettingMode | null;
+  approverSingle?: string | null;
+  approverMultiple?: (string | null)[] | null;
+  approverMultipleMode?: ApproverMultipleMode | null;
 };
 
 export function mappingStaffRole(role: Staff["role"]): StaffRole {
@@ -94,6 +100,10 @@ export default function useStaffs() {
             workType: (staff as unknown as Record<string, unknown>).workType as
               | string
               | null,
+            approverSetting: staff.approverSetting ?? null,
+            approverSingle: staff.approverSingle ?? null,
+            approverMultiple: staff.approverMultiple ?? null,
+            approverMultipleMode: staff.approverMultipleMode ?? null,
           }))
         )
       )
@@ -125,6 +135,10 @@ export default function useStaffs() {
             sortKey: staff.sortKey,
             usageStartDate: staff.usageStartDate,
             workType: staff.workType,
+            approverSetting: staff.approverSetting ?? null,
+            approverSingle: staff.approverSingle ?? null,
+            approverMultiple: staff.approverMultiple ?? null,
+            approverMultipleMode: staff.approverMultipleMode ?? null,
           }))
         );
       })
@@ -153,6 +167,10 @@ export default function useStaffs() {
             notifications: staff.notifications,
             sortKey: staff.sortKey,
             workType: staff.workType,
+            approverSetting: staff.approverSetting ?? null,
+            approverSingle: staff.approverSingle ?? null,
+            approverMultiple: staff.approverMultiple ?? null,
+            approverMultipleMode: staff.approverMultipleMode ?? null,
           },
         ]);
       })
@@ -182,6 +200,10 @@ export default function useStaffs() {
                 notifications: staff.notifications,
                 sortKey: staff.sortKey,
                 workType: staff.workType,
+                approverSetting: staff.approverSetting ?? null,
+                approverSingle: staff.approverSingle ?? null,
+                approverMultiple: staff.approverMultiple ?? null,
+                approverMultipleMode: staff.approverMultipleMode ?? null,
               };
             }
             return s;
@@ -219,6 +241,10 @@ export default function useStaffs() {
       notifications: staff.notifications,
       sortKey: staff.sortKey,
       workType: staff.workType,
+      approverSetting: staff.approverSetting ?? null,
+      approverSingle: staff.approverSingle ?? null,
+      approverMultiple: staff.approverMultiple ?? null,
+      approverMultipleMode: staff.approverMultipleMode ?? null,
     }));
   };
 

@@ -216,6 +216,10 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -244,6 +248,10 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -272,6 +280,10 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -766,4 +778,145 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument($fi
 ` as GeneratedSubscription<
   APITypes.OnDeleteDocumentSubscriptionVariables,
   APITypes.OnDeleteDocumentSubscription
+>;
+export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+  onCreateWorkflow(filter: $filter) {
+    id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
+    category
+    staffId
+    status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateWorkflowSubscriptionVariables,
+  APITypes.OnCreateWorkflowSubscription
+>;
+export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+  onUpdateWorkflow(filter: $filter) {
+    id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
+    category
+    staffId
+    status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateWorkflowSubscriptionVariables,
+  APITypes.OnUpdateWorkflowSubscription
+>;
+export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+  onDeleteWorkflow(filter: $filter) {
+    id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
+    category
+    staffId
+    status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteWorkflowSubscriptionVariables,
+  APITypes.OnDeleteWorkflowSubscription
 >;
