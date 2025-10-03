@@ -147,11 +147,12 @@ export default function AdminWorkflowDetail() {
       steps.forEach((st, idx) => {
         const approverId = st.approverStaffId || "";
         const staff = staffs.find((s) => s.id === approverId);
-        const name = approverId === "ADMINS"
-          ? "管理者全員"
-          : staff
-          ? `${staff.familyName} ${staff.givenName}`
-          : approverId || "未設定";
+        const name =
+          approverId === "ADMINS"
+            ? "管理者全員"
+            : staff
+            ? `${staff.familyName} ${staff.givenName}`
+            : approverId || "未設定";
         const state = st.decisionStatus
           ? st.decisionStatus === ApprovalStatus.APPROVED
             ? "承認済み"
@@ -161,7 +162,9 @@ export default function AdminWorkflowDetail() {
             ? "スキップ"
             : "未承認"
           : "未承認";
-        const date = st.decisionTimestamp ? new Date(st.decisionTimestamp).toLocaleString() : "";
+        const date = st.decisionTimestamp
+          ? new Date(st.decisionTimestamp).toLocaleString()
+          : "";
         base.push({
           id: st.id ?? `s${idx + 1}`,
           name,
@@ -301,7 +304,9 @@ export default function AdminWorkflowDetail() {
     const senderDisplay = currentStaffLocal
       ? `${currentStaffLocal.familyName} ${currentStaffLocal.givenName}`
       : cognitoUser
-      ? `${cognitoUser.familyName ?? ""} ${cognitoUser.givenName ?? ""}`.trim() || "不明なユーザー"
+      ? `${cognitoUser.familyName ?? ""} ${
+          cognitoUser.givenName ?? ""
+        }`.trim() || "不明なユーザー"
       : "不明なユーザー";
 
     const newComment: WorkflowCommentInput = {
@@ -367,7 +372,9 @@ export default function AdminWorkflowDetail() {
       ? staffs.find((s) => s.cognitoUserId === cognitoUser.id)
       : undefined;
     if (!currentStaffLocal?.id) {
-      dispatch(setSnackbarError("承認を実行するユーザー情報が取得できませんでした。"));
+      dispatch(
+        setSnackbarError("承認を実行するユーザー情報が取得できませんでした。")
+      );
       return;
     }
 
@@ -383,7 +390,10 @@ export default function AdminWorkflowDetail() {
           decisionTimestamp: s.decisionTimestamp ?? null,
           stepOrder: s.stepOrder ?? 0,
         }));
-      } else if (workflow.assignedApproverStaffIds && workflow.assignedApproverStaffIds.length > 0) {
+      } else if (
+        workflow.assignedApproverStaffIds &&
+        workflow.assignedApproverStaffIds.length > 0
+      ) {
         steps = (workflow.assignedApproverStaffIds || []).map((aid, idx) => ({
           id: `s-${idx}-${workflow.id}`,
           approverStaffId: aid || "",
@@ -399,10 +409,14 @@ export default function AdminWorkflowDetail() {
       if (typeof workflow.nextApprovalStepIndex === "number") {
         idxToUpdate = workflow.nextApprovalStepIndex;
       } else {
-        idxToUpdate = steps.findIndex((st) => st.decisionStatus === ApprovalStatus.PENDING);
+        idxToUpdate = steps.findIndex(
+          (st) => st.decisionStatus === ApprovalStatus.PENDING
+        );
       }
       if (idxToUpdate < 0) {
-        dispatch(setSnackbarError("承認可能なステップが見つかりませんでした。"));
+        dispatch(
+          setSnackbarError("承認可能なステップが見つかりませんでした。")
+        );
         return;
       }
 
@@ -415,25 +429,38 @@ export default function AdminWorkflowDetail() {
       };
 
       // update summary arrays
-      const approved = Array.from(new Set([...(workflow.approvedStaffIds || []), currentStaffLocal.id]));
+      const approved = Array.from(
+        new Set([...(workflow.approvedStaffIds || []), currentStaffLocal.id])
+      );
 
       // determine finalization: ANY mode or all steps approved
       let isFinal = false;
       if (workflow.submitterApproverMultipleMode === "ANY") {
         isFinal = true;
       } else {
-        const anyPending = steps.some((s) => s.decisionStatus === ApprovalStatus.PENDING);
+        const anyPending = steps.some(
+          (s) => s.decisionStatus === ApprovalStatus.PENDING
+        );
         if (!anyPending) isFinal = true;
       }
 
       const updatedStatus = isFinal ? WorkflowStatus.APPROVED : workflow.status;
-      const finalDecisionTimestamp = isFinal ? new Date().toISOString() : workflow.finalDecisionTimestamp;
+      const finalDecisionTimestamp = isFinal
+        ? new Date().toISOString()
+        : workflow.finalDecisionTimestamp;
 
-      const nextIdx = isFinal ? null : steps.findIndex((s) => s.decisionStatus === ApprovalStatus.PENDING);
+      const nextIdx = isFinal
+        ? null
+        : steps.findIndex((s) => s.decisionStatus === ApprovalStatus.PENDING);
 
       const existingComments = (workflow.comments || [])
         .filter((c): c is WorkflowComment => Boolean(c))
-        .map((c) => ({ id: c.id, staffId: c.staffId, text: c.text, createdAt: c.createdAt }));
+        .map((c) => ({
+          id: c.id,
+          staffId: c.staffId,
+          text: c.text,
+          createdAt: c.createdAt,
+        }));
       const sysComment: WorkflowCommentInput = {
         id: `c-${Date.now()}`,
         staffId: "system",
@@ -475,7 +502,9 @@ export default function AdminWorkflowDetail() {
       ? staffs.find((s) => s.cognitoUserId === cognitoUser.id)
       : undefined;
     if (!currentStaffLocal?.id) {
-      dispatch(setSnackbarError("却下を実行するユーザー情報が取得できませんでした。"));
+      dispatch(
+        setSnackbarError("却下を実行するユーザー情報が取得できませんでした。")
+      );
       return;
     }
 
@@ -491,7 +520,10 @@ export default function AdminWorkflowDetail() {
           decisionTimestamp: s.decisionTimestamp ?? null,
           stepOrder: s.stepOrder ?? 0,
         }));
-      } else if (workflow.assignedApproverStaffIds && workflow.assignedApproverStaffIds.length > 0) {
+      } else if (
+        workflow.assignedApproverStaffIds &&
+        workflow.assignedApproverStaffIds.length > 0
+      ) {
         steps = (workflow.assignedApproverStaffIds || []).map((aid, idx) => ({
           id: `s-${idx}-${workflow.id}`,
           approverStaffId: aid || "",
@@ -507,10 +539,14 @@ export default function AdminWorkflowDetail() {
       if (typeof workflow.nextApprovalStepIndex === "number") {
         idxToUpdate = workflow.nextApprovalStepIndex;
       } else {
-        idxToUpdate = steps.findIndex((st) => st.decisionStatus === ApprovalStatus.PENDING);
+        idxToUpdate = steps.findIndex(
+          (st) => st.decisionStatus === ApprovalStatus.PENDING
+        );
       }
       if (idxToUpdate < 0) {
-        dispatch(setSnackbarError("却下可能なステップが見つかりませんでした。"));
+        dispatch(
+          setSnackbarError("却下可能なステップが見つかりませんでした。")
+        );
         return;
       }
 
@@ -522,11 +558,18 @@ export default function AdminWorkflowDetail() {
         approverComment: null,
       };
 
-      const rejected = Array.from(new Set([...(workflow.rejectedStaffIds || []), currentStaffLocal.id]));
+      const rejected = Array.from(
+        new Set([...(workflow.rejectedStaffIds || []), currentStaffLocal.id])
+      );
 
       const existingComments = (workflow.comments || [])
         .filter((c): c is WorkflowComment => Boolean(c))
-        .map((c) => ({ id: c.id, staffId: c.staffId, text: c.text, createdAt: c.createdAt }));
+        .map((c) => ({
+          id: c.id,
+          staffId: c.staffId,
+          text: c.text,
+          createdAt: c.createdAt,
+        }));
       const sysComment: WorkflowCommentInput = {
         id: `c-${Date.now()}`,
         staffId: "system",
