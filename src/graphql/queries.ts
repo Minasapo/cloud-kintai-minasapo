@@ -173,6 +173,10 @@ export const getStaff = /* GraphQL */ `query GetStaff($id: ID!) {
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -203,6 +207,10 @@ export const listStaff = /* GraphQL */ `query ListStaff(
       }
       sortKey
       workType
+      approverSetting
+      approverSingle
+      approverMultiple
+      approverMultipleMode
       createdAt
       updatedAt
       __typename
@@ -246,6 +254,10 @@ export const staffByCognitoUserId = /* GraphQL */ `query StaffByCognitoUserId(
       }
       sortKey
       workType
+      approverSetting
+      approverSingle
+      approverMultiple
+      approverMultipleMode
       createdAt
       updatedAt
       __typename

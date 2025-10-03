@@ -226,12 +226,29 @@ export type CreateStaffInput = {
   notifications?: NotificationInput | null,
   sortKey?: string | null,
   workType?: string | null,
+  approverSetting?: ApproverSettingMode | null,
+  approverSingle?: string | null,
+  approverMultiple?: Array< string | null > | null,
+  approverMultipleMode?: ApproverMultipleMode | null,
 };
 
 export type NotificationInput = {
   workStart?: boolean | null,
   workEnd?: boolean | null,
 };
+
+export enum ApproverSettingMode {
+  ADMINS = "ADMINS",
+  SINGLE = "SINGLE",
+  MULTIPLE = "MULTIPLE",
+}
+
+
+export enum ApproverMultipleMode {
+  ANY = "ANY",
+  ORDER = "ORDER",
+}
+
 
 export type ModelStaffConditionInput = {
   cognitoUserId?: ModelStringInput | null,
@@ -245,11 +262,25 @@ export type ModelStaffConditionInput = {
   usageStartDate?: ModelStringInput | null,
   sortKey?: ModelStringInput | null,
   workType?: ModelStringInput | null,
+  approverSetting?: ModelApproverSettingModeInput | null,
+  approverSingle?: ModelStringInput | null,
+  approverMultiple?: ModelStringInput | null,
+  approverMultipleMode?: ModelApproverMultipleModeInput | null,
   and?: Array< ModelStaffConditionInput | null > | null,
   or?: Array< ModelStaffConditionInput | null > | null,
   not?: ModelStaffConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
+};
+
+export type ModelApproverSettingModeInput = {
+  eq?: ApproverSettingMode | null,
+  ne?: ApproverSettingMode | null,
+};
+
+export type ModelApproverMultipleModeInput = {
+  eq?: ApproverMultipleMode | null,
+  ne?: ApproverMultipleMode | null,
 };
 
 export type Staff = {
@@ -267,6 +298,10 @@ export type Staff = {
   notifications?: Notification | null,
   sortKey?: string | null,
   workType?: string | null,
+  approverSetting?: ApproverSettingMode | null,
+  approverSingle?: string | null,
+  approverMultiple?: Array< string | null > | null,
+  approverMultipleMode?: ApproverMultipleMode | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -291,6 +326,10 @@ export type UpdateStaffInput = {
   notifications?: NotificationInput | null,
   sortKey?: string | null,
   workType?: string | null,
+  approverSetting?: ApproverSettingMode | null,
+  approverSingle?: string | null,
+  approverMultiple?: Array< string | null > | null,
+  approverMultipleMode?: ApproverMultipleMode | null,
 };
 
 export type DeleteStaffInput = {
@@ -865,6 +904,10 @@ export type ModelStaffFilterInput = {
   usageStartDate?: ModelStringInput | null,
   sortKey?: ModelStringInput | null,
   workType?: ModelStringInput | null,
+  approverSetting?: ModelApproverSettingModeInput | null,
+  approverSingle?: ModelStringInput | null,
+  approverMultiple?: ModelStringInput | null,
+  approverMultipleMode?: ModelApproverMultipleModeInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelStaffFilterInput | null > | null,
@@ -1102,6 +1145,10 @@ export type ModelSubscriptionStaffFilterInput = {
   usageStartDate?: ModelSubscriptionStringInput | null,
   sortKey?: ModelSubscriptionStringInput | null,
   workType?: ModelSubscriptionStringInput | null,
+  approverSetting?: ModelSubscriptionStringInput | null,
+  approverSingle?: ModelSubscriptionStringInput | null,
+  approverMultiple?: ModelSubscriptionStringInput | null,
+  approverMultipleMode?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionStaffFilterInput | null > | null,
@@ -1417,6 +1464,10 @@ export type CreateStaffMutation = {
     } | null,
     sortKey?: string | null,
     workType?: string | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -1447,6 +1498,10 @@ export type UpdateStaffMutation = {
     } | null,
     sortKey?: string | null,
     workType?: string | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -1477,6 +1532,10 @@ export type DeleteStaffMutation = {
     } | null,
     sortKey?: string | null,
     workType?: string | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2247,6 +2306,10 @@ export type GetStaffQuery = {
     } | null,
     sortKey?: string | null,
     workType?: string | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2280,6 +2343,10 @@ export type ListStaffQuery = {
       } | null,
       sortKey?: string | null,
       workType?: string | null,
+      approverSetting?: ApproverSettingMode | null,
+      approverSingle?: string | null,
+      approverMultiple?: Array< string | null > | null,
+      approverMultipleMode?: ApproverMultipleMode | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -2318,6 +2385,10 @@ export type StaffByCognitoUserIdQuery = {
       } | null,
       sortKey?: string | null,
       workType?: string | null,
+      approverSetting?: ApproverSettingMode | null,
+      approverSingle?: string | null,
+      approverMultiple?: Array< string | null > | null,
+      approverMultipleMode?: ApproverMultipleMode | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -3100,6 +3171,10 @@ export type OnCreateStaffSubscription = {
     } | null,
     sortKey?: string | null,
     workType?: string | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3129,6 +3204,10 @@ export type OnUpdateStaffSubscription = {
     } | null,
     sortKey?: string | null,
     workType?: string | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3158,6 +3237,10 @@ export type OnDeleteStaffSubscription = {
     } | null,
     sortKey?: string | null,
     workType?: string | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
     createdAt: string,
     updatedAt: string,
   } | null,

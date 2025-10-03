@@ -216,6 +216,10 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -244,6 +248,10 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -272,6 +280,10 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename

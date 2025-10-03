@@ -22,6 +22,21 @@ type Staff @model @auth(rules: [{ allow: private }]) {
   notifications: Notification
   sortKey: String
   workType: String
+  approverSetting: ApproverSettingMode
+  approverSingle: String
+  approverMultiple: [String]
+  approverMultipleMode: ApproverMultipleMode
+}
+
+enum ApproverSettingMode {
+  ADMINS
+  SINGLE
+  MULTIPLE
+}
+
+enum ApproverMultipleMode {
+  ANY
+  ORDER
 }
 
 type Notification {

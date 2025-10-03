@@ -231,6 +231,10 @@ export const createStaff = /* GraphQL */ `mutation CreateStaff(
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -262,6 +266,10 @@ export const updateStaff = /* GraphQL */ `mutation UpdateStaff(
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -293,6 +301,10 @@ export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
