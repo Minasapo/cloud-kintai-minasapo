@@ -4,13 +4,23 @@ import Layout from "./Layout";
 import AdminAttendance from "./pages/admin/AdminAttendance";
 import AdminAttendanceEditor from "./pages/admin/AdminAttendanceEditor";
 import AdminAttendancePrint from "./pages/admin/AdminAttendancePrint";
+import Absent from "./pages/admin/AdminConfigManagement/Absent";
 import AdminConfigManagement from "./pages/admin/AdminConfigManagement/AdminConfigManagement";
+import AmPmHoliday from "./pages/admin/AdminConfigManagement/AmPmHoliday";
+import Links from "./pages/admin/AdminConfigManagement/Links";
+import OfficeMode from "./pages/admin/AdminConfigManagement/OfficeMode";
+import QuickInput from "./pages/admin/AdminConfigManagement/QuickInput";
+import Reasons from "./pages/admin/AdminConfigManagement/Reasons";
+import SpecialHoliday from "./pages/admin/AdminConfigManagement/SpecialHoliday";
+import WorkingTime from "./pages/admin/AdminConfigManagement/WorkingTime";
 import AdminHolidayCalendar from "./pages/admin/AdminHolidayCalendar/HolidayCalendar/AdminHolidayCalendar";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminMasterLayout from "./pages/admin/AdminMasterLayout";
 import AdminStaff from "./pages/admin/AdminStaff/AdminStaff";
 import AdminStaffAttendanceList from "./pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
 import AdminStaffEditor from "./pages/admin/AdminStaffEditor/AdminStaffEditor";
+import AdminWorkflow from "./pages/admin/AdminWorkflow/AdminWorkflow";
+import AdminWorkflowDetail from "./pages/admin/AdminWorkflow/AdminWorkflowDetail";
 import JobTerm from "./pages/admin/JobTerm/JobTerm";
 import AttendanceEdit from "./pages/AttendanceEdit/AttendanceEdit";
 import AttendanceListPage from "./pages/AttendanceListPage";
@@ -21,6 +31,10 @@ import OfficeQRRegister from "./pages/office/qr/OfficeQRRegister";
 import OfficeQRView from "./pages/office/qr/OfficeQRView";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
+import NewWorkflow from "./pages/Workflow/NewWorkflow";
+import Workflow from "./pages/Workflow/Workflow";
+import WorkflowDetail from "./pages/Workflow/WorkflowDetail";
+import WorkflowEdit from "./pages/Workflow/WorkflowEdit";
 
 const router = createBrowserRouter([
   {
@@ -55,6 +69,27 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />,
+      },
+      {
+        path: "workflow",
+        children: [
+          {
+            index: true,
+            element: <Workflow />,
+          },
+          {
+            path: ":id",
+            element: <WorkflowDetail />,
+          },
+          {
+            path: ":id/edit",
+            element: <WorkflowEdit />,
+          },
+          {
+            path: "new",
+            element: <NewWorkflow />,
+          },
+        ],
       },
       // {
       //   path: "docs",
@@ -160,6 +195,51 @@ const router = createBrowserRouter([
               {
                 path: "feature_management",
                 element: <AdminConfigManagement />,
+              },
+              {
+                path: "feature_management/working_time",
+                element: <WorkingTime />,
+              },
+              {
+                path: "feature_management/am_pm_holiday",
+                element: <AmPmHoliday />,
+              },
+              {
+                path: "feature_management/office_mode",
+                element: <OfficeMode />,
+              },
+              {
+                path: "feature_management/links",
+                element: <Links />,
+              },
+              {
+                path: "feature_management/reasons",
+                element: <Reasons />,
+              },
+              {
+                path: "feature_management/quick_input",
+                element: <QuickInput />,
+              },
+              {
+                path: "feature_management/special_holiday",
+                element: <SpecialHoliday />,
+              },
+              {
+                path: "feature_management/absent",
+                element: <Absent />,
+              },
+            ],
+          },
+          {
+            path: "workflow",
+            children: [
+              {
+                index: true,
+                element: <AdminWorkflow />,
+              },
+              {
+                path: ":id",
+                element: <AdminWorkflowDetail />,
               },
             ],
           },
