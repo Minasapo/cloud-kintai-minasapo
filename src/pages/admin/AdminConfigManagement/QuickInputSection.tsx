@@ -1,13 +1,13 @@
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
+  Button,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
   Stack,
   Typography,
-  Button,
-  FormControlLabel,
-  Checkbox,
-  IconButton,
 } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Dayjs } from "dayjs";
 
 interface QuickInputEntry {
