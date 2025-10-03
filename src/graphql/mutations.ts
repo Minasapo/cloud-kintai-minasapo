@@ -833,9 +833,27 @@ export const createWorkflow = /* GraphQL */ `mutation CreateWorkflow(
 ) {
   createWorkflow(input: $input, condition: $condition) {
     id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
     category
     staffId
     status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
     overTimeDetails {
       date
       startTime
@@ -865,9 +883,27 @@ export const updateWorkflow = /* GraphQL */ `mutation UpdateWorkflow(
 ) {
   updateWorkflow(input: $input, condition: $condition) {
     id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
     category
     staffId
     status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
     overTimeDetails {
       date
       startTime
@@ -897,9 +933,27 @@ export const deleteWorkflow = /* GraphQL */ `mutation DeleteWorkflow(
 ) {
   deleteWorkflow(input: $input, condition: $condition) {
     id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
     category
     staffId
     status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
     overTimeDetails {
       date
       startTime

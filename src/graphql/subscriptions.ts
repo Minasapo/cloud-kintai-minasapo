@@ -782,9 +782,27 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument($fi
 export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onCreateWorkflow(filter: $filter) {
     id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
     category
     staffId
     status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
     overTimeDetails {
       date
       startTime
@@ -811,9 +829,27 @@ export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($fi
 export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onUpdateWorkflow(filter: $filter) {
     id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
     category
     staffId
     status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
     overTimeDetails {
       date
       startTime
@@ -840,9 +876,27 @@ export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($fi
 export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onDeleteWorkflow(filter: $filter) {
     id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
     category
     staffId
     status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
     overTimeDetails {
       date
       startTime

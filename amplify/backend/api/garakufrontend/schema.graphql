@@ -244,11 +244,37 @@ type WorkflowComment {
   createdAt: String!
 }
 
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SKIPPED
+}
+
+type ApprovalStep {
+  id: ID!
+  approverStaffId: String!
+  decisionStatus: ApprovalStatus!
+  approverComment: String
+  decisionTimestamp: String
+  stepOrder: Int
+}
+
 type Workflow @model @auth(rules: [{ allow: private }]) {
   id: ID!
+  approvedStaffIds: [String]
+  rejectedStaffIds: [String]
+  finalDecisionTimestamp: String
   category: WorkflowCategory
   staffId: String! @index(name: "byStaffId", queryField: "workflowsByStaffId")
   status: WorkflowStatus!
+  assignedApproverStaffIds: [String]
+  approvalSteps: [ApprovalStep]
+  nextApprovalStepIndex: Int
+  submitterApproverSetting: ApproverSettingMode
+  submitterApproverId: String
+  submitterApproverIds: [String]
+  submitterApproverMultipleMode: ApproverMultipleMode
   overTimeDetails: OverTimeWorkflow
   comments: [WorkflowComment]
 }

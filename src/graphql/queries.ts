@@ -743,9 +743,27 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
 export const getWorkflow = /* GraphQL */ `query GetWorkflow($id: ID!) {
   getWorkflow(id: $id) {
     id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
     category
     staffId
     status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
     overTimeDetails {
       date
       startTime
@@ -777,9 +795,27 @@ export const listWorkflows = /* GraphQL */ `query ListWorkflows(
   listWorkflows(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
+      approvedStaffIds
+      rejectedStaffIds
+      finalDecisionTimestamp
       category
       staffId
       status
+      assignedApproverStaffIds
+      approvalSteps {
+        id
+        approverStaffId
+        decisionStatus
+        approverComment
+        decisionTimestamp
+        stepOrder
+        __typename
+      }
+      nextApprovalStepIndex
+      submitterApproverSetting
+      submitterApproverId
+      submitterApproverIds
+      submitterApproverMultipleMode
       overTimeDetails {
         date
         startTime
@@ -822,9 +858,27 @@ export const workflowsByStaffId = /* GraphQL */ `query WorkflowsByStaffId(
   ) {
     items {
       id
+      approvedStaffIds
+      rejectedStaffIds
+      finalDecisionTimestamp
       category
       staffId
       status
+      assignedApproverStaffIds
+      approvalSteps {
+        id
+        approverStaffId
+        decisionStatus
+        approverComment
+        decisionTimestamp
+        stepOrder
+        __typename
+      }
+      nextApprovalStepIndex
+      submitterApproverSetting
+      submitterApproverId
+      submitterApproverIds
+      submitterApproverMultipleMode
       overTimeDetails {
         date
         startTime

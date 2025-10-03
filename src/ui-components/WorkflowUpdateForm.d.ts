@@ -23,21 +23,48 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type WorkflowUpdateFormInputValues = {
+    approvedStaffIds?: string[];
+    rejectedStaffIds?: string[];
+    finalDecisionTimestamp?: string;
     category?: string;
     staffId?: string;
     status?: string;
+    assignedApproverStaffIds?: string[];
+    nextApprovalStepIndex?: number;
+    submitterApproverSetting?: string;
+    submitterApproverId?: string;
+    submitterApproverIds?: string[];
+    submitterApproverMultipleMode?: string;
 };
 export declare type WorkflowUpdateFormValidationValues = {
+    approvedStaffIds?: ValidationFunction<string>;
+    rejectedStaffIds?: ValidationFunction<string>;
+    finalDecisionTimestamp?: ValidationFunction<string>;
     category?: ValidationFunction<string>;
     staffId?: ValidationFunction<string>;
     status?: ValidationFunction<string>;
+    assignedApproverStaffIds?: ValidationFunction<string>;
+    nextApprovalStepIndex?: ValidationFunction<number>;
+    submitterApproverSetting?: ValidationFunction<string>;
+    submitterApproverId?: ValidationFunction<string>;
+    submitterApproverIds?: ValidationFunction<string>;
+    submitterApproverMultipleMode?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type WorkflowUpdateFormOverridesProps = {
     WorkflowUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    approvedStaffIds?: PrimitiveOverrideProps<TextFieldProps>;
+    rejectedStaffIds?: PrimitiveOverrideProps<TextFieldProps>;
+    finalDecisionTimestamp?: PrimitiveOverrideProps<TextFieldProps>;
     category?: PrimitiveOverrideProps<SelectFieldProps>;
     staffId?: PrimitiveOverrideProps<TextFieldProps>;
     status?: PrimitiveOverrideProps<SelectFieldProps>;
+    assignedApproverStaffIds?: PrimitiveOverrideProps<TextFieldProps>;
+    nextApprovalStepIndex?: PrimitiveOverrideProps<TextFieldProps>;
+    submitterApproverSetting?: PrimitiveOverrideProps<SelectFieldProps>;
+    submitterApproverId?: PrimitiveOverrideProps<TextFieldProps>;
+    submitterApproverIds?: PrimitiveOverrideProps<TextFieldProps>;
+    submitterApproverMultipleMode?: PrimitiveOverrideProps<SelectFieldProps>;
 } & EscapeHatchProps;
 export declare type WorkflowUpdateFormProps = React.PropsWithChildren<{
     overrides?: WorkflowUpdateFormOverridesProps | undefined | null;
