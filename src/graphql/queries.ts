@@ -65,6 +65,7 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    absentEnabled
     hourlyPaidHolidayEnabled
     links {
       label
@@ -117,6 +118,7 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       specialHolidayEnabled
       amPmHolidayEnabled
       officeMode
+      absentEnabled
       hourlyPaidHolidayEnabled
       links {
         label
@@ -171,6 +173,10 @@ export const getStaff = /* GraphQL */ `query GetStaff($id: ID!) {
     }
     sortKey
     workType
+    approverSetting
+    approverSingle
+    approverMultiple
+    approverMultipleMode
     createdAt
     updatedAt
     __typename
@@ -201,6 +207,10 @@ export const listStaff = /* GraphQL */ `query ListStaff(
       }
       sortKey
       workType
+      approverSetting
+      approverSingle
+      approverMultiple
+      approverMultipleMode
       createdAt
       updatedAt
       __typename
@@ -244,6 +254,10 @@ export const staffByCognitoUserId = /* GraphQL */ `query StaffByCognitoUserId(
       }
       sortKey
       workType
+      approverSetting
+      approverSingle
+      approverMultiple
+      approverMultipleMode
       createdAt
       updatedAt
       __typename
@@ -379,6 +393,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
     endTime
     goDirectlyFlag
     returnDirectlyFlag
+    absentFlag
     rests {
       startTime
       endTime
@@ -401,6 +416,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -425,6 +441,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
       startTime
       endTime
       goDirectlyFlag
+      absentFlag
       returnDirectlyFlag
       rests {
         startTime
@@ -477,6 +494,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
       endTime
       goDirectlyFlag
       returnDirectlyFlag
+      absentFlag
       rests {
         startTime
         endTime
@@ -499,6 +517,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
         startTime
         endTime
         goDirectlyFlag
+        absentFlag
         returnDirectlyFlag
         rests {
           startTime
@@ -523,6 +542,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
         startTime
         endTime
         goDirectlyFlag
+        absentFlag
         returnDirectlyFlag
         rests {
           startTime
@@ -588,6 +608,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
       endTime
       goDirectlyFlag
       returnDirectlyFlag
+      absentFlag
       rests {
         startTime
         endTime
@@ -610,6 +631,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
         startTime
         endTime
         goDirectlyFlag
+        absentFlag
         returnDirectlyFlag
         rests {
           startTime
@@ -634,6 +656,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
         startTime
         endTime
         goDirectlyFlag
+        absentFlag
         returnDirectlyFlag
         rests {
           startTime
@@ -716,4 +739,169 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
 ` as GeneratedQuery<
   APITypes.ListDocumentsQueryVariables,
   APITypes.ListDocumentsQuery
+>;
+export const getWorkflow = /* GraphQL */ `query GetWorkflow($id: ID!) {
+  getWorkflow(id: $id) {
+    id
+    approvedStaffIds
+    rejectedStaffIds
+    finalDecisionTimestamp
+    category
+    staffId
+    status
+    assignedApproverStaffIds
+    approvalSteps {
+      id
+      approverStaffId
+      decisionStatus
+      approverComment
+      decisionTimestamp
+      stepOrder
+      __typename
+    }
+    nextApprovalStepIndex
+    submitterApproverSetting
+    submitterApproverId
+    submitterApproverIds
+    submitterApproverMultipleMode
+    overTimeDetails {
+      date
+      startTime
+      endTime
+      reason
+      __typename
+    }
+    comments {
+      id
+      staffId
+      text
+      createdAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetWorkflowQueryVariables,
+  APITypes.GetWorkflowQuery
+>;
+export const listWorkflows = /* GraphQL */ `query ListWorkflows(
+  $filter: ModelWorkflowFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listWorkflows(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      approvedStaffIds
+      rejectedStaffIds
+      finalDecisionTimestamp
+      category
+      staffId
+      status
+      assignedApproverStaffIds
+      approvalSteps {
+        id
+        approverStaffId
+        decisionStatus
+        approverComment
+        decisionTimestamp
+        stepOrder
+        __typename
+      }
+      nextApprovalStepIndex
+      submitterApproverSetting
+      submitterApproverId
+      submitterApproverIds
+      submitterApproverMultipleMode
+      overTimeDetails {
+        date
+        startTime
+        endTime
+        reason
+        __typename
+      }
+      comments {
+        id
+        staffId
+        text
+        createdAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListWorkflowsQueryVariables,
+  APITypes.ListWorkflowsQuery
+>;
+export const workflowsByStaffId = /* GraphQL */ `query WorkflowsByStaffId(
+  $staffId: String!
+  $sortDirection: ModelSortDirection
+  $filter: ModelWorkflowFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  workflowsByStaffId(
+    staffId: $staffId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      approvedStaffIds
+      rejectedStaffIds
+      finalDecisionTimestamp
+      category
+      staffId
+      status
+      assignedApproverStaffIds
+      approvalSteps {
+        id
+        approverStaffId
+        decisionStatus
+        approverComment
+        decisionTimestamp
+        stepOrder
+        __typename
+      }
+      nextApprovalStepIndex
+      submitterApproverSetting
+      submitterApproverId
+      submitterApproverIds
+      submitterApproverMultipleMode
+      overTimeDetails {
+        date
+        startTime
+        endTime
+        reason
+        __typename
+      }
+      comments {
+        id
+        staffId
+        text
+        createdAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.WorkflowsByStaffIdQueryVariables,
+  APITypes.WorkflowsByStaffIdQuery
 >;

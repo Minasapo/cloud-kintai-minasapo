@@ -78,6 +78,7 @@ export default function Layout() {
     getPmHolidayEndTime,
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
+    getAbsentEnabled,
   } = useAppConfig();
   const {
     fetchAllHolidayCalendars,
@@ -225,6 +226,7 @@ export default function Layout() {
       getPmHolidayEndTime,
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
+      getAbsentEnabled,
     }),
     [
       fetchConfig,
@@ -246,6 +248,7 @@ export default function Layout() {
       getPmHolidayEndTime,
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
+      getAbsentEnabled,
     ]
   );
 

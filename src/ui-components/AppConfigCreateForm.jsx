@@ -40,6 +40,7 @@ export default function AppConfigCreateForm(props) {
     specialHolidayEnabled: false,
     amPmHolidayEnabled: false,
     officeMode: false,
+    absentEnabled: false,
     hourlyPaidHolidayEnabled: false,
   };
   const [name, setName] = React.useState(initialValues.name);
@@ -74,6 +75,9 @@ export default function AppConfigCreateForm(props) {
     initialValues.amPmHolidayEnabled
   );
   const [officeMode, setOfficeMode] = React.useState(initialValues.officeMode);
+  const [absentEnabled, setAbsentEnabled] = React.useState(
+    initialValues.absentEnabled
+  );
   const [hourlyPaidHolidayEnabled, setHourlyPaidHolidayEnabled] =
     React.useState(initialValues.hourlyPaidHolidayEnabled);
   const [errors, setErrors] = React.useState({});
@@ -90,6 +94,7 @@ export default function AppConfigCreateForm(props) {
     setSpecialHolidayEnabled(initialValues.specialHolidayEnabled);
     setAmPmHolidayEnabled(initialValues.amPmHolidayEnabled);
     setOfficeMode(initialValues.officeMode);
+    setAbsentEnabled(initialValues.absentEnabled);
     setHourlyPaidHolidayEnabled(initialValues.hourlyPaidHolidayEnabled);
     setErrors({});
   };
@@ -106,6 +111,7 @@ export default function AppConfigCreateForm(props) {
     specialHolidayEnabled: [],
     amPmHolidayEnabled: [],
     officeMode: [],
+    absentEnabled: [],
     hourlyPaidHolidayEnabled: [],
   };
   const runValidationTasks = async (
@@ -146,6 +152,7 @@ export default function AppConfigCreateForm(props) {
           specialHolidayEnabled,
           amPmHolidayEnabled,
           officeMode,
+          absentEnabled,
           hourlyPaidHolidayEnabled,
         };
         const validationResponses = await Promise.all(
@@ -221,6 +228,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -257,6 +265,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -293,6 +302,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -329,6 +339,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -367,6 +378,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -403,6 +415,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -441,6 +454,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -477,6 +491,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -515,6 +530,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -551,6 +567,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled: value,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -589,6 +606,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled: value,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -627,6 +645,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode: value,
+              absentEnabled,
               hourlyPaidHolidayEnabled,
             };
             const result = onChange(modelFields);
@@ -641,6 +660,43 @@ export default function AppConfigCreateForm(props) {
         errorMessage={errors.officeMode?.errorMessage}
         hasError={errors.officeMode?.hasError}
         {...getOverrideProps(overrides, "officeMode")}
+      ></SwitchField>
+      <SwitchField
+        label="Absent enabled"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={absentEnabled}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              absentEnabled: value,
+              hourlyPaidHolidayEnabled,
+            };
+            const result = onChange(modelFields);
+            value = result?.absentEnabled ?? value;
+          }
+          if (errors.absentEnabled?.hasError) {
+            runValidationTasks("absentEnabled", value);
+          }
+          setAbsentEnabled(value);
+        }}
+        onBlur={() => runValidationTasks("absentEnabled", absentEnabled)}
+        errorMessage={errors.absentEnabled?.errorMessage}
+        hasError={errors.absentEnabled?.hasError}
+        {...getOverrideProps(overrides, "absentEnabled")}
       ></SwitchField>
       <SwitchField
         label="Hourly paid holiday enabled"
@@ -663,6 +719,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              absentEnabled,
               hourlyPaidHolidayEnabled: value,
             };
             const result = onChange(modelFields);

@@ -7,15 +7,177 @@
 /* eslint-disable */
 import * as React from "react";
 import {
+  Badge,
   Button,
+  Divider,
   Flex,
   Grid,
+  Icon,
+  ScrollView,
+  SelectField,
   SwitchField,
+  Text,
   TextField,
+  useTheme,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
 import { createStaff } from "../graphql/mutations";
+function ArrayField({
+  items = [],
+  onChange,
+  label,
+  inputFieldRef,
+  children,
+  hasError,
+  setFieldValue,
+  currentFieldValue,
+  defaultFieldValue,
+  lengthLimit,
+  getBadgeText,
+  runValidationTasks,
+  errorMessage,
+}) {
+  const labelElement = <Text>{label}</Text>;
+  const {
+    tokens: {
+      components: {
+        fieldmessages: { error: errorStyles },
+      },
+    },
+  } = useTheme();
+  const [selectedBadgeIndex, setSelectedBadgeIndex] = React.useState();
+  const [isEditing, setIsEditing] = React.useState();
+  React.useEffect(() => {
+    if (isEditing) {
+      inputFieldRef?.current?.focus();
+    }
+  }, [isEditing]);
+  const removeItem = async (removeIndex) => {
+    const newItems = items.filter((value, index) => index !== removeIndex);
+    await onChange(newItems);
+    setSelectedBadgeIndex(undefined);
+  };
+  const addItem = async () => {
+    const { hasError } = runValidationTasks();
+    if (
+      currentFieldValue !== undefined &&
+      currentFieldValue !== null &&
+      currentFieldValue !== "" &&
+      !hasError
+    ) {
+      const newItems = [...items];
+      if (selectedBadgeIndex !== undefined) {
+        newItems[selectedBadgeIndex] = currentFieldValue;
+        setSelectedBadgeIndex(undefined);
+      } else {
+        newItems.push(currentFieldValue);
+      }
+      await onChange(newItems);
+      setIsEditing(false);
+    }
+  };
+  const arraySection = (
+    <React.Fragment>
+      {!!items?.length && (
+        <ScrollView height="inherit" width="inherit" maxHeight={"7rem"}>
+          {items.map((value, index) => {
+            return (
+              <Badge
+                key={index}
+                style={{
+                  cursor: "pointer",
+                  alignItems: "center",
+                  marginRight: 3,
+                  marginTop: 3,
+                  backgroundColor:
+                    index === selectedBadgeIndex ? "#B8CEF9" : "",
+                }}
+                onClick={() => {
+                  setSelectedBadgeIndex(index);
+                  setFieldValue(items[index]);
+                  setIsEditing(true);
+                }}
+              >
+                {getBadgeText ? getBadgeText(value) : value.toString()}
+                <Icon
+                  style={{
+                    cursor: "pointer",
+                    paddingLeft: 3,
+                    width: 20,
+                    height: 20,
+                  }}
+                  viewBox={{ width: 20, height: 20 }}
+                  paths={[
+                    {
+                      d: "M10 10l5.09-5.09L10 10l5.09 5.09L10 10zm0 0L4.91 4.91 10 10l-5.09 5.09L10 10z",
+                      stroke: "black",
+                    },
+                  ]}
+                  ariaLabel="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    removeItem(index);
+                  }}
+                />
+              </Badge>
+            );
+          })}
+        </ScrollView>
+      )}
+      <Divider orientation="horizontal" marginTop={5} />
+    </React.Fragment>
+  );
+  if (lengthLimit !== undefined && items.length >= lengthLimit && !isEditing) {
+    return (
+      <React.Fragment>
+        {labelElement}
+        {arraySection}
+      </React.Fragment>
+    );
+  }
+  return (
+    <React.Fragment>
+      {labelElement}
+      {isEditing && children}
+      {!isEditing ? (
+        <>
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+            }}
+          >
+            Add item
+          </Button>
+          {errorMessage && hasError && (
+            <Text color={errorStyles.color} fontSize={errorStyles.fontSize}>
+              {errorMessage}
+            </Text>
+          )}
+        </>
+      ) : (
+        <Flex justifyContent="flex-end">
+          {(currentFieldValue || isEditing) && (
+            <Button
+              children="Cancel"
+              type="button"
+              size="small"
+              onClick={() => {
+                setFieldValue(defaultFieldValue);
+                setIsEditing(false);
+                setSelectedBadgeIndex(undefined);
+              }}
+            ></Button>
+          )}
+          <Button size="small" variation="link" onClick={addItem}>
+            {selectedBadgeIndex !== undefined ? "Save" : "Add"}
+          </Button>
+        </Flex>
+      )}
+      {arraySection}
+    </React.Fragment>
+  );
+}
 export default function StaffCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -39,6 +201,10 @@ export default function StaffCreateForm(props) {
     usageStartDate: "",
     sortKey: "",
     workType: "",
+    approverSetting: "",
+    approverSingle: "",
+    approverMultiple: [],
+    approverMultipleMode: "",
   };
   const [cognitoUserId, setCognitoUserId] = React.useState(
     initialValues.cognitoUserId
@@ -57,6 +223,18 @@ export default function StaffCreateForm(props) {
   );
   const [sortKey, setSortKey] = React.useState(initialValues.sortKey);
   const [workType, setWorkType] = React.useState(initialValues.workType);
+  const [approverSetting, setApproverSetting] = React.useState(
+    initialValues.approverSetting
+  );
+  const [approverSingle, setApproverSingle] = React.useState(
+    initialValues.approverSingle
+  );
+  const [approverMultiple, setApproverMultiple] = React.useState(
+    initialValues.approverMultiple
+  );
+  const [approverMultipleMode, setApproverMultipleMode] = React.useState(
+    initialValues.approverMultipleMode
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setCognitoUserId(initialValues.cognitoUserId);
@@ -70,8 +248,16 @@ export default function StaffCreateForm(props) {
     setUsageStartDate(initialValues.usageStartDate);
     setSortKey(initialValues.sortKey);
     setWorkType(initialValues.workType);
+    setApproverSetting(initialValues.approverSetting);
+    setApproverSingle(initialValues.approverSingle);
+    setApproverMultiple(initialValues.approverMultiple);
+    setCurrentApproverMultipleValue("");
+    setApproverMultipleMode(initialValues.approverMultipleMode);
     setErrors({});
   };
+  const [currentApproverMultipleValue, setCurrentApproverMultipleValue] =
+    React.useState("");
+  const approverMultipleRef = React.createRef();
   const validations = {
     cognitoUserId: [{ type: "Required" }],
     familyName: [],
@@ -84,6 +270,10 @@ export default function StaffCreateForm(props) {
     usageStartDate: [],
     sortKey: [],
     workType: [],
+    approverSetting: [],
+    approverSingle: [],
+    approverMultiple: [],
+    approverMultipleMode: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -122,6 +312,10 @@ export default function StaffCreateForm(props) {
           usageStartDate,
           sortKey,
           workType,
+          approverSetting,
+          approverSingle,
+          approverMultiple,
+          approverMultipleMode,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -195,6 +389,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.cognitoUserId ?? value;
@@ -229,6 +427,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.familyName ?? value;
@@ -263,6 +465,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.givenName ?? value;
@@ -297,6 +503,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.mailAddress ?? value;
@@ -331,6 +541,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.role ?? value;
@@ -365,6 +579,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.enabled ?? value;
@@ -399,6 +617,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -433,6 +655,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -467,6 +693,10 @@ export default function StaffCreateForm(props) {
               usageStartDate: value,
               sortKey,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.usageStartDate ?? value;
@@ -501,6 +731,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey: value,
               workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.sortKey ?? value;
@@ -535,6 +769,10 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType: value,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
             };
             const result = onChange(modelFields);
             value = result?.workType ?? value;
@@ -549,6 +787,213 @@ export default function StaffCreateForm(props) {
         hasError={errors.workType?.hasError}
         {...getOverrideProps(overrides, "workType")}
       ></TextField>
+      <SelectField
+        label="Approver setting"
+        placeholder="Please select an option"
+        isDisabled={false}
+        value={approverSetting}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              cognitoUserId,
+              familyName,
+              givenName,
+              mailAddress,
+              role,
+              enabled,
+              status,
+              owner,
+              usageStartDate,
+              sortKey,
+              workType,
+              approverSetting: value,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
+            };
+            const result = onChange(modelFields);
+            value = result?.approverSetting ?? value;
+          }
+          if (errors.approverSetting?.hasError) {
+            runValidationTasks("approverSetting", value);
+          }
+          setApproverSetting(value);
+        }}
+        onBlur={() => runValidationTasks("approverSetting", approverSetting)}
+        errorMessage={errors.approverSetting?.errorMessage}
+        hasError={errors.approverSetting?.hasError}
+        {...getOverrideProps(overrides, "approverSetting")}
+      >
+        <option
+          children="Admins"
+          value="ADMINS"
+          {...getOverrideProps(overrides, "approverSettingoption0")}
+        ></option>
+        <option
+          children="Single"
+          value="SINGLE"
+          {...getOverrideProps(overrides, "approverSettingoption1")}
+        ></option>
+        <option
+          children="Multiple"
+          value="MULTIPLE"
+          {...getOverrideProps(overrides, "approverSettingoption2")}
+        ></option>
+      </SelectField>
+      <TextField
+        label="Approver single"
+        isRequired={false}
+        isReadOnly={false}
+        value={approverSingle}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              cognitoUserId,
+              familyName,
+              givenName,
+              mailAddress,
+              role,
+              enabled,
+              status,
+              owner,
+              usageStartDate,
+              sortKey,
+              workType,
+              approverSetting,
+              approverSingle: value,
+              approverMultiple,
+              approverMultipleMode,
+            };
+            const result = onChange(modelFields);
+            value = result?.approverSingle ?? value;
+          }
+          if (errors.approverSingle?.hasError) {
+            runValidationTasks("approverSingle", value);
+          }
+          setApproverSingle(value);
+        }}
+        onBlur={() => runValidationTasks("approverSingle", approverSingle)}
+        errorMessage={errors.approverSingle?.errorMessage}
+        hasError={errors.approverSingle?.hasError}
+        {...getOverrideProps(overrides, "approverSingle")}
+      ></TextField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              cognitoUserId,
+              familyName,
+              givenName,
+              mailAddress,
+              role,
+              enabled,
+              status,
+              owner,
+              usageStartDate,
+              sortKey,
+              workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple: values,
+              approverMultipleMode,
+            };
+            const result = onChange(modelFields);
+            values = result?.approverMultiple ?? values;
+          }
+          setApproverMultiple(values);
+          setCurrentApproverMultipleValue("");
+        }}
+        currentFieldValue={currentApproverMultipleValue}
+        label={"Approver multiple"}
+        items={approverMultiple}
+        hasError={errors?.approverMultiple?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks(
+            "approverMultiple",
+            currentApproverMultipleValue
+          )
+        }
+        errorMessage={errors?.approverMultiple?.errorMessage}
+        setFieldValue={setCurrentApproverMultipleValue}
+        inputFieldRef={approverMultipleRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Approver multiple"
+          isRequired={false}
+          isReadOnly={false}
+          value={currentApproverMultipleValue}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (errors.approverMultiple?.hasError) {
+              runValidationTasks("approverMultiple", value);
+            }
+            setCurrentApproverMultipleValue(value);
+          }}
+          onBlur={() =>
+            runValidationTasks("approverMultiple", currentApproverMultipleValue)
+          }
+          errorMessage={errors.approverMultiple?.errorMessage}
+          hasError={errors.approverMultiple?.hasError}
+          ref={approverMultipleRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "approverMultiple")}
+        ></TextField>
+      </ArrayField>
+      <SelectField
+        label="Approver multiple mode"
+        placeholder="Please select an option"
+        isDisabled={false}
+        value={approverMultipleMode}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              cognitoUserId,
+              familyName,
+              givenName,
+              mailAddress,
+              role,
+              enabled,
+              status,
+              owner,
+              usageStartDate,
+              sortKey,
+              workType,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.approverMultipleMode ?? value;
+          }
+          if (errors.approverMultipleMode?.hasError) {
+            runValidationTasks("approverMultipleMode", value);
+          }
+          setApproverMultipleMode(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("approverMultipleMode", approverMultipleMode)
+        }
+        errorMessage={errors.approverMultipleMode?.errorMessage}
+        hasError={errors.approverMultipleMode?.hasError}
+        {...getOverrideProps(overrides, "approverMultipleMode")}
+      >
+        <option
+          children="Any"
+          value="ANY"
+          {...getOverrideProps(overrides, "approverMultipleModeoption0")}
+        ></option>
+        <option
+          children="Order"
+          value="ORDER"
+          {...getOverrideProps(overrides, "approverMultipleModeoption1")}
+        ></option>
+      </SelectField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

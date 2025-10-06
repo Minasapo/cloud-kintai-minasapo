@@ -40,6 +40,7 @@ export default function AggregateExportButton({
       "名前",
       "対象日数",
       "出勤日数",
+      "欠勤日数",
       "実働合計(h)",
       "休憩合計(h)",
       "有給日数",
@@ -63,6 +64,7 @@ export default function AggregateExportButton({
         let totalWork = 0;
         let totalRest = 0;
         let paidHolidayCount = 0;
+        let absentCount = 0;
         let substituteCount = 0;
         let specialHolidayCount = 0;
         let hourlyPaidHolidayHoursSum = 0;
@@ -70,6 +72,7 @@ export default function AggregateExportButton({
 
         attendances.forEach((att) => {
           if (att.paidHolidayFlag) paidHolidayCount += 1;
+          if (att.absentFlag) absentCount += 1;
           if (att.substituteHolidayDate) substituteCount += 1;
           if (att.specialHolidayFlag) specialHolidayCount += 1;
           if (hourlyPaidHolidayEnabled && att.hourlyPaidHolidayHours)
@@ -100,6 +103,7 @@ export default function AggregateExportButton({
           `${staff.familyName} ${staff.givenName}`,
           workDates.length,
           出勤日数,
+          absentCount,
           totalWork.toFixed(2),
           totalRest.toFixed(2),
           paidHolidayCount,
