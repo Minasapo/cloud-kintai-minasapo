@@ -1,7 +1,6 @@
 import { Grid, Link, Stack, Typography } from "@mui/material";
+
 import { predefinedIcons } from "@/constants/icons";
-import { useContext } from "react";
-import { AuthContext } from "@/context/AuthContext";
 
 export function LinkGridItem({
   url,

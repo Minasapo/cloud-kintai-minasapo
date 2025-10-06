@@ -1,17 +1,19 @@
-import React, { useContext, useEffect, useState } from "react";
 import {
-  Container,
-  Typography,
-  Box,
-  LinearProgress,
-  Button,
-  Tooltip,
   Alert,
+  Box,
+  Button,
+  Container,
+  LinearProgress,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import { QRCodeCanvas } from "qrcode.react";
 import dayjs from "dayjs";
-import { StaffRole } from "@/hooks/useStaffs/useStaffs";
+import { QRCodeCanvas } from "qrcode.react";
+import React, { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/context/AuthContext";
+import { StaffRole } from "@/hooks/useStaffs/useStaffs";
+
 import { AppConfigContext } from "../../../context/AppConfigContext";
 
 const generateToken = async (timestamp: number) => {

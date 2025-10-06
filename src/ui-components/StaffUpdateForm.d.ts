@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SelectFieldProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { Staff } from "../API.ts";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
@@ -34,6 +34,10 @@ export declare type StaffUpdateFormInputValues = {
     usageStartDate?: string;
     sortKey?: string;
     workType?: string;
+    approverSetting?: string;
+    approverSingle?: string;
+    approverMultiple?: string[];
+    approverMultipleMode?: string;
 };
 export declare type StaffUpdateFormValidationValues = {
     cognitoUserId?: ValidationFunction<string>;
@@ -47,6 +51,10 @@ export declare type StaffUpdateFormValidationValues = {
     usageStartDate?: ValidationFunction<string>;
     sortKey?: ValidationFunction<string>;
     workType?: ValidationFunction<string>;
+    approverSetting?: ValidationFunction<string>;
+    approverSingle?: ValidationFunction<string>;
+    approverMultiple?: ValidationFunction<string>;
+    approverMultipleMode?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type StaffUpdateFormOverridesProps = {
@@ -62,6 +70,10 @@ export declare type StaffUpdateFormOverridesProps = {
     usageStartDate?: PrimitiveOverrideProps<TextFieldProps>;
     sortKey?: PrimitiveOverrideProps<TextFieldProps>;
     workType?: PrimitiveOverrideProps<TextFieldProps>;
+    approverSetting?: PrimitiveOverrideProps<SelectFieldProps>;
+    approverSingle?: PrimitiveOverrideProps<TextFieldProps>;
+    approverMultiple?: PrimitiveOverrideProps<TextFieldProps>;
+    approverMultipleMode?: PrimitiveOverrideProps<SelectFieldProps>;
 } & EscapeHatchProps;
 export declare type StaffUpdateFormProps = React.PropsWithChildren<{
     overrides?: StaffUpdateFormOverridesProps | undefined | null;

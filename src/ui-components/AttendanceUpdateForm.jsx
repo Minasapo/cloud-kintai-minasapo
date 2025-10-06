@@ -36,6 +36,7 @@ export default function AttendanceUpdateForm(props) {
     endTime: "",
     goDirectlyFlag: false,
     returnDirectlyFlag: false,
+    absentFlag: false,
     remarks: "",
     paidHolidayFlag: false,
     specialHolidayFlag: false,
@@ -54,6 +55,7 @@ export default function AttendanceUpdateForm(props) {
   const [returnDirectlyFlag, setReturnDirectlyFlag] = React.useState(
     initialValues.returnDirectlyFlag
   );
+  const [absentFlag, setAbsentFlag] = React.useState(initialValues.absentFlag);
   const [remarks, setRemarks] = React.useState(initialValues.remarks);
   const [paidHolidayFlag, setPaidHolidayFlag] = React.useState(
     initialValues.paidHolidayFlag
@@ -82,6 +84,7 @@ export default function AttendanceUpdateForm(props) {
     setEndTime(cleanValues.endTime);
     setGoDirectlyFlag(cleanValues.goDirectlyFlag);
     setReturnDirectlyFlag(cleanValues.returnDirectlyFlag);
+    setAbsentFlag(cleanValues.absentFlag);
     setRemarks(cleanValues.remarks);
     setPaidHolidayFlag(cleanValues.paidHolidayFlag);
     setSpecialHolidayFlag(cleanValues.specialHolidayFlag);
@@ -115,6 +118,7 @@ export default function AttendanceUpdateForm(props) {
     endTime: [],
     goDirectlyFlag: [],
     returnDirectlyFlag: [],
+    absentFlag: [],
     remarks: [],
     paidHolidayFlag: [],
     specialHolidayFlag: [],
@@ -155,6 +159,7 @@ export default function AttendanceUpdateForm(props) {
           endTime: endTime ?? null,
           goDirectlyFlag: goDirectlyFlag ?? null,
           returnDirectlyFlag: returnDirectlyFlag ?? null,
+          absentFlag: absentFlag ?? null,
           remarks: remarks ?? null,
           paidHolidayFlag: paidHolidayFlag ?? null,
           specialHolidayFlag: specialHolidayFlag ?? null,
@@ -228,6 +233,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -264,6 +270,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -300,6 +307,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -336,6 +344,7 @@ export default function AttendanceUpdateForm(props) {
               endTime: value,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -372,6 +381,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag: value,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -408,6 +418,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag: value,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -431,6 +442,43 @@ export default function AttendanceUpdateForm(props) {
         hasError={errors.returnDirectlyFlag?.hasError}
         {...getOverrideProps(overrides, "returnDirectlyFlag")}
       ></SwitchField>
+      <SwitchField
+        label="Absent flag"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={absentFlag}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              staffId,
+              workDate,
+              startTime,
+              endTime,
+              goDirectlyFlag,
+              returnDirectlyFlag,
+              absentFlag: value,
+              remarks,
+              paidHolidayFlag,
+              specialHolidayFlag,
+              isDeemedHoliday,
+              hourlyPaidHolidayHours,
+              substituteHolidayDate,
+              revision,
+            };
+            const result = onChange(modelFields);
+            value = result?.absentFlag ?? value;
+          }
+          if (errors.absentFlag?.hasError) {
+            runValidationTasks("absentFlag", value);
+          }
+          setAbsentFlag(value);
+        }}
+        onBlur={() => runValidationTasks("absentFlag", absentFlag)}
+        errorMessage={errors.absentFlag?.errorMessage}
+        hasError={errors.absentFlag?.hasError}
+        {...getOverrideProps(overrides, "absentFlag")}
+      ></SwitchField>
       <TextField
         label="Remarks"
         isRequired={false}
@@ -446,6 +494,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks: value,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -482,6 +531,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag: value,
               specialHolidayFlag,
@@ -518,6 +568,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag: value,
@@ -556,6 +607,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -596,6 +648,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -634,6 +687,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,
@@ -676,6 +730,7 @@ export default function AttendanceUpdateForm(props) {
               endTime,
               goDirectlyFlag,
               returnDirectlyFlag,
+              absentFlag,
               remarks,
               paidHolidayFlag,
               specialHolidayFlag,

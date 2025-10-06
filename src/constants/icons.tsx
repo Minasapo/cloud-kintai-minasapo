@@ -1,7 +1,7 @@
-import LinkIcon from "@mui/icons-material/Link";
-import TrainIcon from "@mui/icons-material/Train";
 import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import CurrencyYenIcon from "@mui/icons-material/CurrencyYen";
+import LinkIcon from "@mui/icons-material/Link";
+import TrainIcon from "@mui/icons-material/Train";
 
 export const predefinedIcons = [
   { label: "リンク", value: "link", component: <LinkIcon /> },

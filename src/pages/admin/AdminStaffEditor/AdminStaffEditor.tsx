@@ -2,9 +2,13 @@ import {
   Autocomplete,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Container,
+  FormControlLabel,
   LinearProgress,
+  Radio,
+  RadioGroup,
   Stack,
   Switch,
   Table,
@@ -17,19 +21,21 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   Control,
   Controller,
   useForm,
   UseFormRegister,
   UseFormSetValue,
+  UseFormWatch,
 } from "react-hook-form";
 import { useParams } from "react-router-dom";
 
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import { AuthContext } from "@/context/AuthContext";
 
+import { ApproverMultipleMode, ApproverSettingMode } from "../../../API";
 import { useAppDispatchV2 } from "../../../app/hooks";
 import Title from "../../../components/Title/Title";
 import * as MESSAGE_CODE from "../../../errors";
@@ -37,7 +43,10 @@ import addUserToGroup from "../../../hooks/common/addUserToGroup";
 import removeUserFromGroup from "../../../hooks/common/removeUserFromGroup";
 import updateCognitoUser from "../../../hooks/common/updateCognitoUser";
 import { Staff } from "../../../hooks/useStaffs/common";
-import useStaffs, { StaffRole } from "../../../hooks/useStaffs/useStaffs";
+import useStaffs, {
+  StaffRole,
+  StaffType,
+} from "../../../hooks/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -56,6 +65,10 @@ type Inputs = {
   workType?: string | null;
   usageStartDate?: Staff["usageStartDate"] | null;
   sortKey: string;
+  approverSetting: ApproverSettingMode;
+  approverSingle: StaffType["cognitoUserId"] | null;
+  approverMultiple: StaffType["cognitoUserId"][];
+  approverMultipleMode: ApproverMultipleMode;
 };
 
 const defaultValues: Inputs = {
@@ -66,6 +79,10 @@ const defaultValues: Inputs = {
   role: StaffRole.STAFF,
   workType: undefined,
   sortKey: "1",
+  approverSetting: ApproverSettingMode.ADMINS,
+  approverSingle: null,
+  approverMultiple: [],
+  approverMultipleMode: ApproverMultipleMode.ANY,
 };
 
 export default function AdminStaffEditor() {
@@ -88,6 +105,7 @@ export default function AdminStaffEditor() {
     setValue,
     getValues,
     handleSubmit,
+    watch,
     formState: { isValid, isDirty, isSubmitting },
   } = useForm<Inputs>({
     mode: "onChange",
@@ -151,6 +169,11 @@ export default function AdminStaffEditor() {
           sortKey: data.sortKey,
           // include workType; cast to any because generated UpdateStaffInput may not include it yet
           ...(data.workType ? { workType: data.workType } : {}),
+          // approver settings
+          approverSetting: data.approverSetting,
+          approverSingle: data.approverSingle ?? null,
+          approverMultiple: data.approverMultiple ?? [],
+          approverMultipleMode: data.approverMultipleMode,
         })
           .then(() => {
             dispatch(setSnackbarSuccess(MESSAGE_CODE.S05003));
@@ -194,6 +217,26 @@ export default function AdminStaffEditor() {
       staff.usageStartDate ? dayjs(staff.usageStartDate) : null
     );
     setValue("sortKey", staff.sortKey || "");
+    // initialize approver-related fields from staff record
+    setValue(
+      "approverSetting",
+      (staff as unknown as { approverSetting?: ApproverSettingMode })
+        .approverSetting ?? ApproverSettingMode.ADMINS
+    );
+    setValue(
+      "approverSingle",
+      (staff as unknown as { approverSingle?: string }).approverSingle ?? null
+    );
+    setValue(
+      "approverMultiple",
+      (staff as unknown as { approverMultiple?: string[] }).approverMultiple ??
+        []
+    );
+    setValue(
+      "approverMultipleMode",
+      (staff as unknown as { approverMultipleMode?: ApproverMultipleMode })
+        .approverMultipleMode ?? ApproverMultipleMode.ANY
+    );
   }, [staffId, staffLoading]);
 
   if (staffLoading) {
@@ -342,6 +385,13 @@ export default function AdminStaffEditor() {
                   </Typography>
                 </TableCell>
               </TableRow>
+              <ApproverSettingTableRows
+                control={control}
+                setValue={setValue}
+                watch={watch}
+                staffs={staffs}
+                currentCognitoUserId={cognitoUser?.id}
+              />
             </TableBody>
           </Table>
         </TableContainer>
@@ -358,6 +408,322 @@ export default function AdminStaffEditor() {
         </Box>
       </Stack>
     </Container>
+  );
+}
+
+function ApproverSettingTableRows({
+  control,
+  setValue,
+  watch,
+  staffs,
+  currentCognitoUserId,
+}: {
+  control: Control<Inputs>;
+  setValue: UseFormSetValue<Inputs>;
+  watch: UseFormWatch<Inputs>;
+  staffs: StaffType[];
+  currentCognitoUserId?: string | null;
+}) {
+  const adminOptions = useMemo(() => {
+    return staffs
+      .filter(
+        (staff) =>
+          (staff.role === StaffRole.ADMIN || staff.owner) &&
+          staff.cognitoUserId !== currentCognitoUserId
+      )
+      .map((staff) => ({
+        value: staff.cognitoUserId,
+        label:
+          [staff.familyName, staff.givenName]
+            .filter((name): name is string => Boolean(name))
+            .join(" ") || staff.mailAddress,
+        description: staff.mailAddress,
+      }));
+  }, [staffs, currentCognitoUserId]);
+
+  const approverSetting = watch("approverSetting");
+  const approverMultiple = watch("approverMultiple") ?? [];
+  const approverMultipleMode = watch("approverMultipleMode");
+
+  const selectedMultipleOptions = approverMultiple
+    .map((value) => adminOptions.find((option) => option.value === value))
+    .filter(
+      (
+        option
+      ): option is { value: string; label: string; description: string } =>
+        Boolean(option)
+    );
+
+  return (
+    <>
+      <TableRow>
+        <TableCell>承認者設定</TableCell>
+        <TableCell>
+          <Controller
+            name="approverSetting"
+            control={control}
+            render={({ field }) => (
+              <Stack spacing={1}>
+                <RadioGroup
+                  row
+                  value={field.value}
+                  onChange={(event) => {
+                    const nextValue = event.target.value as ApproverSettingMode;
+                    field.onChange(nextValue);
+                    if (nextValue === ApproverSettingMode.ADMINS) {
+                      setValue("approverSingle", null, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                      setValue("approverMultiple", [], {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                      setValue(
+                        "approverMultipleMode",
+                        ApproverMultipleMode.ANY,
+                        {
+                          shouldDirty: true,
+                        }
+                      );
+                    }
+                    if (nextValue === ApproverSettingMode.SINGLE) {
+                      setValue("approverMultiple", [], {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                      setValue(
+                        "approverMultipleMode",
+                        ApproverMultipleMode.ANY,
+                        {
+                          shouldDirty: true,
+                        }
+                      );
+                    }
+                    if (nextValue === ApproverSettingMode.MULTIPLE) {
+                      setValue("approverSingle", null, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }
+                  }}
+                >
+                  <FormControlLabel
+                    value={ApproverSettingMode.ADMINS}
+                    control={<Radio />}
+                    label="管理者全員 (デフォルト)"
+                  />
+                  <FormControlLabel
+                    value={ApproverSettingMode.SINGLE}
+                    control={<Radio />}
+                    label="特定の承認者を1名に限定"
+                  />
+                  <FormControlLabel
+                    value={ApproverSettingMode.MULTIPLE}
+                    control={<Radio />}
+                    label="特定の承認者を複数選択"
+                  />
+                </RadioGroup>
+                <Typography variant="caption" color="text.secondary">
+                  ※承認者設定はモックアップです。保存してもバックエンド設定はまだ適用されません。
+                </Typography>
+              </Stack>
+            )}
+          />
+        </TableCell>
+      </TableRow>
+      {approverSetting === ApproverSettingMode.SINGLE && (
+        <TableRow>
+          <TableCell />
+          <TableCell>
+            <Controller
+              name="approverSingle"
+              control={control}
+              rules={{
+                validate: (value) => {
+                  if (approverSetting !== ApproverSettingMode.SINGLE)
+                    return true;
+                  return Boolean(value) || "承認者を選択してください";
+                },
+              }}
+              render={({ field, fieldState }) => {
+                const valueOption = adminOptions.find(
+                  (option) => option.value === field.value
+                );
+                return (
+                  <Autocomplete
+                    value={valueOption ?? null}
+                    options={adminOptions}
+                    onChange={(_, newValue) => {
+                      field.onChange(newValue?.value ?? null);
+                    }}
+                    getOptionLabel={(option) => option.label}
+                    isOptionEqualToValue={(option, value) =>
+                      option.value === value.value
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        size="small"
+                        sx={{ width: 400 }}
+                        label="承認者"
+                        placeholder="承認者を検索"
+                        error={Boolean(fieldState.error)}
+                        helperText={
+                          fieldState.error?.message ||
+                          "承認者を1名選択してください。"
+                        }
+                        onBlur={field.onBlur}
+                      />
+                    )}
+                  />
+                );
+              }}
+            />
+          </TableCell>
+        </TableRow>
+      )}
+      {approverSetting === ApproverSettingMode.MULTIPLE && (
+        <>
+          <TableRow>
+            <TableCell />
+            <TableCell>
+              <Controller
+                name="approverMultiple"
+                control={control}
+                rules={{
+                  validate: (value) => {
+                    if (approverSetting !== ApproverSettingMode.MULTIPLE)
+                      return true;
+                    return (
+                      (value?.length ?? 0) > 0 || "承認者を選択してください"
+                    );
+                  },
+                }}
+                render={({ field, fieldState }) => {
+                  const valueOptions = (field.value ?? [])
+                    .map((v) =>
+                      adminOptions.find((option) => option.value === v)
+                    )
+                    .filter((option): option is (typeof adminOptions)[number] =>
+                      Boolean(option)
+                    );
+                  return (
+                    <Autocomplete
+                      multiple
+                      options={adminOptions}
+                      value={valueOptions}
+                      onChange={(_, newValue) => {
+                        field.onChange(newValue.map((option) => option.value));
+                      }}
+                      disableCloseOnSelect
+                      getOptionLabel={(option) => option.label}
+                      isOptionEqualToValue={(option, value) =>
+                        option.value === value.value
+                      }
+                      renderTags={(tagValue, getTagProps) =>
+                        tagValue.map((option, index) => (
+                          <Chip
+                            {...getTagProps({ index })}
+                            key={option.value}
+                            label={option.label}
+                            size="small"
+                          />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          size="small"
+                          sx={{ width: 400 }}
+                          label="承認者"
+                          placeholder="承認者を選択"
+                          error={Boolean(fieldState.error)}
+                          helperText={
+                            fieldState.error?.message ||
+                            (approverMultipleMode === ApproverMultipleMode.ORDER
+                              ? "選択した順番が承認順になります。"
+                              : "複数選択できます。")
+                          }
+                          onBlur={field.onBlur}
+                        />
+                      )}
+                    />
+                  );
+                }}
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell />
+            <TableCell>
+              <Controller
+                name="approverMultipleMode"
+                control={control}
+                render={({ field }) => (
+                  <RadioGroup
+                    row
+                    value={field.value ?? ApproverMultipleMode.ANY}
+                    onChange={(event) => {
+                      const nextValue = event.target
+                        .value as ApproverMultipleMode;
+                      field.onChange(nextValue);
+                    }}
+                  >
+                    <FormControlLabel
+                      value={ApproverMultipleMode.ANY}
+                      control={<Radio />}
+                      label="誰か1人が承認すれば完了"
+                    />
+                    <FormControlLabel
+                      value={ApproverMultipleMode.ORDER}
+                      control={<Radio />}
+                      label="設定した順番で承認"
+                    />
+                  </RadioGroup>
+                )}
+              />
+            </TableCell>
+          </TableRow>
+          {approverMultipleMode === ApproverMultipleMode.ORDER && (
+            <TableRow>
+              <TableCell />
+              <TableCell>
+                <Stack spacing={1}>
+                  {selectedMultipleOptions.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      承認順を設定するスタッフを選択してください。
+                    </Typography>
+                  ) : (
+                    selectedMultipleOptions.map((option, index) => (
+                      <Box
+                        key={option.value}
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
+                      >
+                        <Chip label={index + 1} size="small" />
+                        <Stack spacing={0.5}>
+                          <Typography variant="body2">
+                            {option.label}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {option.description}
+                          </Typography>
+                        </Stack>
+                      </Box>
+                    ))
+                  )}
+                  <Typography variant="caption" color="text.secondary">
+                    選択した順番が承認順として利用されます。
+                  </Typography>
+                </Stack>
+              </TableCell>
+            </TableRow>
+          )}
+        </>
+      )}
+    </>
   );
 }
 

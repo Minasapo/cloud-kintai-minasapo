@@ -61,6 +61,7 @@
   "scripts": {
   "start": "vite",
   "build": "vite build",
+  "lint": "eslint ./src/ --ext .ts,.tsx",
   "eslint": "npx eslint ./src/",
   "test": "jest --passWithNoTests",
   "test:unit": "jest --passWithNoTests",

@@ -24,7 +24,8 @@ export class AttendanceDataManager {
     })) as GraphQLResult<GetAttendanceQuery>;
 
     if (response.errors) {
-      throw new Error(response.errors[0].message);
+      // Throw full errors object to make debugging GraphQL errors easier
+      throw new Error(JSON.stringify(response.errors));
     }
 
     if (!response.data?.getAttendance) {
@@ -53,7 +54,7 @@ export class AttendanceDataManager {
       })) as GraphQLResult<AttendancesByStaffIdQuery>;
 
       if (response.errors) {
-        throw new Error(response.errors[0].message);
+        throw new Error(JSON.stringify(response.errors));
       }
 
       if (!response.data?.attendancesByStaffId) {
@@ -96,7 +97,7 @@ export class AttendanceDataManager {
     })) as GraphQLResult<CreateAttendanceMutation>;
 
     if (response.errors) {
-      throw new Error(response.errors[0].message);
+      throw new Error(JSON.stringify(response.errors));
     }
 
     if (!response.data?.createAttendance) {
@@ -203,7 +204,7 @@ export class AttendanceDataManager {
     })) as GraphQLResult<UpdateAttendanceMutation>;
 
     if (response.errors) {
-      throw new Error(response.errors[0].message);
+      throw new Error(JSON.stringify(response.errors));
     }
 
     if (!response.data?.updateAttendance) {

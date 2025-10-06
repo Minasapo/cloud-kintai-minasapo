@@ -1,13 +1,13 @@
-import {
-  Stack,
-  Typography,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  IconButton,
-  Button,
-} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  Button,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 interface Reason {
   reason: string;

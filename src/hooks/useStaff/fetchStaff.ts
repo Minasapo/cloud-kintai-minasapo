@@ -1,8 +1,8 @@
 import { GraphQLResult } from "@aws-amplify/api";
 import { API } from "aws-amplify";
 
-import { ListStaffQuery, Staff, StaffByCognitoUserIdQuery } from "../../API";
-import { listStaff, staffByCognitoUserId } from "../../graphql/queries";
+import { Staff, StaffByCognitoUserIdQuery } from "../../API";
+import { staffByCognitoUserId } from "../../graphql/queries";
 
 export default async function fetchStaff(
   cognitoUserId: Staff["cognitoUserId"]

@@ -48,6 +48,7 @@ export default function AdminConfigManagement() {
     getPmHolidayEndTime,
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
+    getAbsentEnabled,
   } = useContext(AppConfigContext);
   const [startTime, setStartTime] = useState<Dayjs | null>(null);
   const [endTime, setEndTime] = useState<Dayjs | null>(null);
@@ -86,6 +87,7 @@ export default function AdminConfigManagement() {
   const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
   const [specialHolidayEnabled, setSpecialHolidayEnabled] =
     useState<boolean>(false);
+  const [absentEnabled, setAbsentEnabled] = useState<boolean>(false);
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
@@ -113,6 +115,9 @@ export default function AdminConfigManagement() {
     setHourlyPaidHolidayEnabled(getHourlyPaidHolidayEnabled());
     if (typeof getSpecialHolidayEnabled === "function") {
       setSpecialHolidayEnabled(getSpecialHolidayEnabled());
+    }
+    if (typeof getAbsentEnabled === "function") {
+      setAbsentEnabled(getAbsentEnabled());
     }
     // fetchConfigで午前休・午後休の時間帯があればセット
     if (typeof getAmHolidayStartTime === "function" && getAmHolidayStartTime())
@@ -263,6 +268,10 @@ export default function AdminConfigManagement() {
     setSpecialHolidayEnabled(event.target.checked);
   };
 
+  const handleAbsentEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAbsentEnabled(event.target.checked);
+  };
+
   const handleSave = async () => {
     if (
       startTime &&
@@ -292,6 +301,7 @@ export default function AdminConfigManagement() {
               enabled: reason.enabled,
             })),
             officeMode,
+                absentEnabled,
             quickInputStartTimes: quickInputStartTimes.map((entry) => ({
               time: entry.time.format("HH:mm"),
               enabled: entry.enabled,
@@ -327,6 +337,7 @@ export default function AdminConfigManagement() {
               enabled: reason.enabled,
             })),
             officeMode,
+                absentEnabled,
             hourlyPaidHolidayEnabled,
             amHolidayStartTime: amHolidayStartTime.format("HH:mm"),
             amHolidayEndTime: amHolidayEndTime.format("HH:mm"),
@@ -448,6 +459,21 @@ export default function AdminConfigManagement() {
                 />
               }
               label={specialHolidayEnabled ? "有効" : "無効"}
+              sx={{ mb: 1 }}
+            />
+          </Stack>
+        </GroupSection>
+        <GroupSection title="欠勤">
+          <Stack spacing={1}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={absentEnabled}
+                  onChange={handleAbsentEnabledChange}
+                  color="primary"
+                />
+              }
+              label={absentEnabled ? "有効" : "無効"}
               sx={{ mb: 1 }}
             />
           </Stack>

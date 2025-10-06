@@ -29,6 +29,7 @@ export declare type AttendanceUpdateFormInputValues = {
     endTime?: string;
     goDirectlyFlag?: boolean;
     returnDirectlyFlag?: boolean;
+    absentFlag?: boolean;
     remarks?: string;
     paidHolidayFlag?: boolean;
     specialHolidayFlag?: boolean;
@@ -44,6 +45,7 @@ export declare type AttendanceUpdateFormValidationValues = {
     endTime?: ValidationFunction<string>;
     goDirectlyFlag?: ValidationFunction<boolean>;
     returnDirectlyFlag?: ValidationFunction<boolean>;
+    absentFlag?: ValidationFunction<boolean>;
     remarks?: ValidationFunction<string>;
     paidHolidayFlag?: ValidationFunction<boolean>;
     specialHolidayFlag?: ValidationFunction<boolean>;
@@ -61,6 +63,7 @@ export declare type AttendanceUpdateFormOverridesProps = {
     endTime?: PrimitiveOverrideProps<TextFieldProps>;
     goDirectlyFlag?: PrimitiveOverrideProps<SwitchFieldProps>;
     returnDirectlyFlag?: PrimitiveOverrideProps<SwitchFieldProps>;
+    absentFlag?: PrimitiveOverrideProps<SwitchFieldProps>;
     remarks?: PrimitiveOverrideProps<TextFieldProps>;
     paidHolidayFlag?: PrimitiveOverrideProps<SwitchFieldProps>;
     specialHolidayFlag?: PrimitiveOverrideProps<SwitchFieldProps>;

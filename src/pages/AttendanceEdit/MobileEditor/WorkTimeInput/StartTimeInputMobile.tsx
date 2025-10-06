@@ -52,7 +52,7 @@ export default function StartTimeInputMobile({
         }}
       />
       <Box>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
           {quickInputStartTimes.map((entry, index) => (
             <Chip
               key={index}

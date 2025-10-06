@@ -277,6 +277,15 @@ export default function useAppConfig() {
       ? config.specialHolidayEnabled
       : false;
 
+  /**
+   * 欠勤機能の有効/無効を取得する。
+   * @returns boolean
+   */
+  const getAbsentEnabled = () =>
+    config && typeof config.absentEnabled === "boolean"
+      ? config.absentEnabled
+      : false;
+
   return {
     config,
     loading,
@@ -299,5 +308,6 @@ export default function useAppConfig() {
     getPmHolidayEndTime,
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
+    getAbsentEnabled,
   };
 }

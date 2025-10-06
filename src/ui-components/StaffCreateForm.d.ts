@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SelectFieldProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -33,6 +33,10 @@ export declare type StaffCreateFormInputValues = {
     usageStartDate?: string;
     sortKey?: string;
     workType?: string;
+    approverSetting?: string;
+    approverSingle?: string;
+    approverMultiple?: string[];
+    approverMultipleMode?: string;
 };
 export declare type StaffCreateFormValidationValues = {
     cognitoUserId?: ValidationFunction<string>;
@@ -46,6 +50,10 @@ export declare type StaffCreateFormValidationValues = {
     usageStartDate?: ValidationFunction<string>;
     sortKey?: ValidationFunction<string>;
     workType?: ValidationFunction<string>;
+    approverSetting?: ValidationFunction<string>;
+    approverSingle?: ValidationFunction<string>;
+    approverMultiple?: ValidationFunction<string>;
+    approverMultipleMode?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type StaffCreateFormOverridesProps = {
@@ -61,6 +69,10 @@ export declare type StaffCreateFormOverridesProps = {
     usageStartDate?: PrimitiveOverrideProps<TextFieldProps>;
     sortKey?: PrimitiveOverrideProps<TextFieldProps>;
     workType?: PrimitiveOverrideProps<TextFieldProps>;
+    approverSetting?: PrimitiveOverrideProps<SelectFieldProps>;
+    approverSingle?: PrimitiveOverrideProps<TextFieldProps>;
+    approverMultiple?: PrimitiveOverrideProps<TextFieldProps>;
+    approverMultipleMode?: PrimitiveOverrideProps<SelectFieldProps>;
 } & EscapeHatchProps;
 export declare type StaffCreateFormProps = React.PropsWithChildren<{
     overrides?: StaffCreateFormOverridesProps | undefined | null;

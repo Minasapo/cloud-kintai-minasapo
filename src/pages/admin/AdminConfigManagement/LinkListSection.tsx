@@ -1,15 +1,16 @@
-import {
-  Stack,
-  Typography,
-  TextField,
-  Select,
-  MenuItem,
-  FormControlLabel,
-  Checkbox,
-  IconButton,
-  Button,
-} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  Button,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+
 import { predefinedIcons } from "@/constants/icons";
 
 interface Link {

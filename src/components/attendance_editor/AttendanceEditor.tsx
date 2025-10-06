@@ -103,6 +103,7 @@ export default function AttendanceEditor() {
     getHourlyPaidHolidayEnabled,
     getSpecialHolidayEnabled,
     getStartTime,
+    getAbsentEnabled,
     loading: appConfigLoading,
   } = useAppConfig();
   const dispatch = useAppDispatchV2();
@@ -282,6 +283,7 @@ export default function AttendanceEditor() {
           workDate: data.workDate,
           startTime: data.paidHolidayFlag ? null : data.startTime,
           endTime: data.paidHolidayFlag ? null : data.endTime || null,
+          absentFlag: data.absentFlag ?? false,
           isDeemedHoliday: data.isDeemedHoliday,
           goDirectlyFlag: data.goDirectlyFlag,
           returnDirectlyFlag: data.returnDirectlyFlag,
@@ -350,6 +352,7 @@ export default function AttendanceEditor() {
           .setDateString(targetWorkDate)
           .toDataFormat(),
         startTime: data.paidHolidayFlag ? null : data.startTime,
+        absentFlag: data.absentFlag ?? false,
         isDeemedHoliday: data.isDeemedHoliday,
         endTime: data.paidHolidayFlag ? null : data.endTime,
         goDirectlyFlag: data.goDirectlyFlag,
@@ -428,6 +431,7 @@ export default function AttendanceEditor() {
     setValue("goDirectlyFlag", attendance.goDirectlyFlag || false);
     setValue("returnDirectlyFlag", attendance.returnDirectlyFlag || false);
     setValue("paidHolidayFlag", attendance.paidHolidayFlag || false);
+    setValue("absentFlag", attendance.absentFlag || false);
     setValue("substituteHolidayDate", attendance.substituteHolidayDate);
     setValue("revision", attendance.revision);
     // 追加: 既存のhourlyPaidHolidayTimesがあれば維持、なければ空配列
@@ -721,6 +725,37 @@ export default function AttendanceEditor() {
                   </TabPanel>
                 ),
               });
+
+              // 欠勤（AppConfig の absentEnabled が有効な場合のみ表示）
+              if (getAbsentEnabled && getAbsentEnabled()) {
+                tabs.push({
+                  label: "欠勤",
+                  panel: (
+                    <TabPanel value={vacationTab} index={tabs.length}>
+                      <Box sx={{ mt: 1 }}>
+                        <Stack direction="row" alignItems={"center"}>
+                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                            欠勤
+                          </Box>
+                          <Box>
+                            <Controller
+                              name="absentFlag"
+                              control={control}
+                              render={({ field }) => (
+                                <Checkbox
+                                  {...field}
+                                  checked={field.value || false}
+                                  disabled={changeRequests.length > 0}
+                                />
+                              )}
+                            />
+                          </Box>
+                        </Stack>
+                      </Box>
+                    </TabPanel>
+                  ),
+                });
+              }
 
               // 特別休暇（AppConfigのフラグがONの時のみ）
               if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
