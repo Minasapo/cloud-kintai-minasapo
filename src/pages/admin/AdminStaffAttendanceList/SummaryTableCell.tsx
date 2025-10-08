@@ -88,10 +88,10 @@ function getSummaryText(
 
   return (() => {
     const summaryMessage = [];
-  // paidHolidayFlag / absentFlag / specialHolidayFlag は
-  // Chip 表示で視覚的に示すため、備考のテキストには含めない
-  // paidHolidayFlag と absentFlag はここで扱われていないが、
-  // SummaryTableCell に Chip 表示用に props を渡す際に参照できます。
+    // paidHolidayFlag / absentFlag / specialHolidayFlag は
+    // Chip 表示で視覚的に示すため、備考のテキストには含めない
+    // paidHolidayFlag と absentFlag はここで扱われていないが、
+    // SummaryTableCell に Chip 表示用に props を渡す際に参照できます。
     if (isSubstituteHoliday) summaryMessage.push("振替休日");
     if (remarks) summaryMessage.push(remarks);
 
