@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import React, { useRef, useState } from "react";
-import type { UseFormSetValue } from "react-hook-form";
+import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 // Auth/role checks are intentionally not used here - visibility is driven by visibleMode prop
@@ -31,6 +31,7 @@ type QuickInputButtonsProps = {
    * 親コンポーネントから渡された値に応じて表示を切り替えます。
    */
   visibleMode?: "all" | "admin" | "staff";
+  getValues?: UseFormGetValues<AttendanceEditInputs>;
   /**
    * ボタンごとの表示モード。プロパティを指定しない場合は `visibleMode` のルールを使用します。
    */
@@ -43,6 +44,7 @@ export default function QuickInputButtons({
   hourlyPaidHolidayTimeReplace,
   workDate,
   visibleMode,
+  getValues,
 }: QuickInputButtonsProps) {
   type ButtonRoleMode = "all" | "admin" | "staff";
 
@@ -162,6 +164,7 @@ export default function QuickInputButtons({
                         restReplace([]);
                         hourlyPaidHolidayTimeReplace([]);
                         setValue("paidHolidayFlag", false);
+                        setValue("remarkTags", []);
                         setValue("remarks", "");
                         setValue("goDirectlyFlag", false);
                         setValue("returnDirectlyFlag", false);
@@ -194,6 +197,8 @@ export default function QuickInputButtons({
                         ]);
                         hourlyPaidHolidayTimeReplace([]);
                         setValue("paidHolidayFlag", false);
+                        // clear tags and free-text remarks for normal work
+                        setValue("remarkTags", []);
                         setValue("remarks", "");
                       }
                     )
@@ -267,7 +272,18 @@ export default function QuickInputButtons({
                             restReplace([]);
                             hourlyPaidHolidayTimeReplace([]);
                             setValue("paidHolidayFlag", false);
-                            setValue("remarks", "午前半休");
+                            // set tag for 午前半休
+                            try {
+                              if (getValues) {
+                                const tags: string[] =
+                                  (getValues("remarkTags") as string[]) || [];
+                                if (!tags.includes("午前半休")) {
+                                  setValue("remarkTags", [...tags, "午前半休"]);
+                                }
+                              }
+                            } catch (e) {
+                              // noop
+                            }
                           }
                         )
                       }
@@ -292,7 +308,17 @@ export default function QuickInputButtons({
                             restReplace([]);
                             hourlyPaidHolidayTimeReplace([]);
                             setValue("paidHolidayFlag", false);
-                            setValue("remarks", "午後半休");
+                            try {
+                              if (getValues) {
+                                const tags: string[] =
+                                  (getValues("remarkTags") as string[]) || [];
+                                if (!tags.includes("午後半休")) {
+                                  setValue("remarkTags", [...tags, "午後半休"]);
+                                }
+                              }
+                            } catch (e) {
+                              // noop
+                            }
                           }
                         )
                       }
@@ -324,6 +350,18 @@ export default function QuickInputButtons({
                         ]);
                         hourlyPaidHolidayTimeReplace([]);
                         setValue("paidHolidayFlag", true);
+                        // mark paid holiday as a tag
+                        try {
+                          if (getValues) {
+                            const tags: string[] =
+                              (getValues("remarkTags") as string[]) || [];
+                            if (!tags.includes("有給休暇")) {
+                              setValue("remarkTags", [...tags, "有給休暇"]);
+                            }
+                          }
+                        } catch (e) {
+                          // noop
+                        }
                       }
                     )
                   }

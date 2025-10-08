@@ -80,6 +80,7 @@ export default function DesktopEditor() {
     register,
     control,
     setValue,
+    getValues,
     watch,
     handleSubmit,
     isDirty,
@@ -168,6 +169,7 @@ export default function DesktopEditor() {
                 hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
                 workDate={workDate ?? null}
                 visibleMode="staff"
+                getValues={getValues}
               />
             )}
           </GroupContainer>
@@ -330,7 +332,7 @@ export default function DesktopEditor() {
               );
             })()}
           </GroupContainer>
-          <GroupContainer>
+          <GroupContainer title="備考">
             <RemarksInput />
           </GroupContainer>
           <GroupContainer>

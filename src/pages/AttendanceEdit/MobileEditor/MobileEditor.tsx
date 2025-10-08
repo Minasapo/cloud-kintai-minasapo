@@ -276,7 +276,7 @@ export function MobileEditor() {
           <TabbedPaidHoliday />
         </GroupContainerMobile>
         <GroupContainerMobile title="備考">
-          <RemarksInput register={register} />
+          <RemarksInput />
         </GroupContainerMobile>
         <GroupContainerMobile title="修正理由">
           <StaffCommentInput />
