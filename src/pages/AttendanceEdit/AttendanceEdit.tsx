@@ -17,14 +17,24 @@ import {
   setSnackbarSuccess,
 } from "../../lib/reducers/snackbarReducer";
 import AttendanceEditProvider from "./AttendanceEditProvider";
-import { AttendanceEditInputs, defaultValues } from "./common";
+import {
+  AttendanceEditInputs,
+  defaultValues,
+  HourlyPaidHolidayTimeInputs,
+} from "./common";
 import DesktopEditor from "./DesktopEditor/DesktopEditor";
 import { MobileEditor } from "./MobileEditor/MobileEditor";
 import sendChangeRequestMail from "./sendChangeRequestMail";
 
 export default function AttendanceEdit() {
   const { cognitoUser } = useContext(AuthContext);
-  const { getHourlyPaidHolidayEnabled } = useContext(AppConfigContext);
+  const {
+    getHourlyPaidHolidayEnabled,
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useContext(AppConfigContext);
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();
   const { targetWorkDate } = useParams();
@@ -293,7 +303,75 @@ export default function AttendanceEdit() {
         setValue("remarkTags", [...tags, "特別休暇"]);
       }
 
-      // 時間単位休暇はクリア（スタッフ側では既にUI側で対応しているため noop）
+      // 開始/終了時刻を規定値に設定
+      try {
+        const desiredStart = getStartTime().toISOString();
+        const desiredEnd = getEndTime().toISOString();
+        if (getValues("startTime") !== desiredStart) {
+          setValue("startTime", desiredStart);
+        }
+        if (getValues("endTime") !== desiredEnd) {
+          setValue("endTime", desiredEnd);
+        }
+      } catch (e) {
+        // noop
+      }
+
+      // 休憩をAppConfigの昼休憩時刻で設定
+      try {
+        const dateStr = (getValues("workDate") as string) || "";
+        const lunchStartCfg = getLunchRestStartTime();
+        const lunchEndCfg = getLunchRestEndTime();
+        // 安全な基準日を決定する（workDate が無ければ targetWorkDate を利用、なければ現在日）
+        const baseDay = dateStr
+          ? dayjs(dateStr)
+          : targetWorkDate
+          ? dayjs(targetWorkDate)
+          : dayjs();
+        const desiredRests = [
+          {
+            startTime: baseDay
+              .hour(lunchStartCfg.hour())
+              .minute(lunchStartCfg.minute())
+              .second(0)
+              .millisecond(0)
+              .toISOString(),
+            endTime: baseDay
+              .hour(lunchEndCfg.hour())
+              .minute(lunchEndCfg.minute())
+              .second(0)
+              .millisecond(0)
+              .toISOString(),
+          },
+        ];
+        const currentRests = getValues("rests") || [];
+        if (JSON.stringify(currentRests) !== JSON.stringify(desiredRests)) {
+          if (restReplace && typeof restReplace === "function") {
+            restReplace(desiredRests);
+          } else {
+            setValue("rests", desiredRests);
+          }
+        }
+      } catch (e) {
+        // noop
+      }
+
+      // 時間単位休暇はクリア
+      try {
+        const currentHourly = (getValues("hourlyPaidHolidayTimes") || []) as
+          | HourlyPaidHolidayTimeInputs[]
+          | undefined;
+        if (
+          currentHourly &&
+          currentHourly.length > 0 &&
+          hourlyPaidHolidayTimeReplace &&
+          typeof hourlyPaidHolidayTimeReplace === "function"
+        ) {
+          hourlyPaidHolidayTimeReplace([]);
+        }
+      } catch (e) {
+        // noop
+      }
 
       // 特別休暇がONのとき、有給フラグが立っていたら解除する（相互排他）
       try {
