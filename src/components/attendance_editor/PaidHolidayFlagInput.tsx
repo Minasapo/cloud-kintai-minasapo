@@ -2,9 +2,14 @@ import { Box, Checkbox, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import dayjs from "dayjs";
-import { Control, Controller, UseFormSetValue } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  UseFormGetValues,
+  UseFormSetValue,
+} from "react-hook-form";
 
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 
 import PaidHolidayFlagInputMobile from "./PaidHolidayFlagInputMobile";
 
@@ -15,6 +20,10 @@ interface PaidHolidayFlagInputProps {
   setValue: UseFormSetValue<any>;
   workDate?: string;
   setPaidHolidayTimes?: boolean;
+  restReplace?: (
+    items: { startTime: string | null; endTime: string | null }[]
+  ) => void;
+  getValues?: UseFormGetValues<any>;
 }
 
 export default function PaidHolidayFlagInput({
@@ -24,9 +33,18 @@ export default function PaidHolidayFlagInput({
   setValue,
   workDate,
   setPaidHolidayTimes = false,
+  restReplace,
+  getValues,
 }: PaidHolidayFlagInputProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const {
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useAppConfig();
 
   if (isMobile) {
     return (
@@ -38,6 +56,8 @@ export default function PaidHolidayFlagInput({
           setValue,
           workDate,
           setPaidHolidayTimes,
+          restReplace,
+          getValues,
         }}
       />
     );
@@ -50,26 +70,69 @@ export default function PaidHolidayFlagInput({
     if (!e.target.checked || !setPaidHolidayTimes || !workDate) return;
 
     const workDayjs = dayjs(workDate);
-    setValue(
-      "startTime",
-      new AttendanceDateTime().setDate(workDayjs).setWorkStart().toISOString()
-    );
-    setValue(
-      "endTime",
-      new AttendanceDateTime().setDate(workDayjs).setWorkEnd().toISOString()
-    );
-    setValue("rests", [
+
+    // compose times using AppConfig getters
+    const cfgStart = getStartTime();
+    const cfgEnd = getEndTime();
+    const cfgRestStart = getLunchRestStartTime();
+    const cfgRestEnd = getLunchRestEndTime();
+
+    const startDt = workDayjs
+      .hour(cfgStart.hour())
+      .minute(cfgStart.minute())
+      .second(0)
+      .millisecond(0);
+    const endDt = workDayjs
+      .hour(cfgEnd.hour())
+      .minute(cfgEnd.minute())
+      .second(0)
+      .millisecond(0);
+    const restStartDt = workDayjs
+      .hour(cfgRestStart.hour())
+      .minute(cfgRestStart.minute())
+      .second(0)
+      .millisecond(0);
+    const restEndDt = workDayjs
+      .hour(cfgRestEnd.hour())
+      .minute(cfgRestEnd.minute())
+      .second(0)
+      .millisecond(0);
+
+    setValue("startTime", startDt.toISOString());
+    setValue("endTime", endDt.toISOString());
+    const rests = [
       {
-        startTime: new AttendanceDateTime()
-          .setDate(workDayjs)
-          .setRestStart()
-          .toISOString(),
-        endTime: new AttendanceDateTime()
-          .setDate(workDayjs)
-          .setRestEnd()
-          .toISOString(),
+        startTime: restStartDt.toISOString(),
+        endTime: restEndDt.toISOString(),
       },
-    ]);
+    ];
+
+    if (restReplace && typeof restReplace === "function") {
+      restReplace(rests);
+    } else {
+      setValue("rests", rests);
+    }
+
+    // 有給ON時は特別休暇フラグを解除して相互排他にする
+    try {
+      if (getValues && getValues("specialHolidayFlag")) {
+        setValue("specialHolidayFlag", false);
+      }
+    } catch (e) {
+      // noop
+    }
+
+    // 備考欄に「有給休暇」を追記（既に含まれている場合は追加しない）
+    try {
+      if (getValues) {
+        const tags: string[] = (getValues("remarkTags") as string[]) || [];
+        if (!tags.includes("有給休暇")) {
+          setValue("remarkTags", [...tags, "有給休暇"]);
+        }
+      }
+    } catch (e) {
+      // noop
+    }
   };
 
   return (

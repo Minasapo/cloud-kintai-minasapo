@@ -22,6 +22,8 @@ Amplifyで動作する勤怠管理のWebアプリケーションです。
 - `src/pages/admin/AdminAttendanceEditor.tsx`: 管理者側の勤怠編集画面
 - `src/components/download_form/DownloadForm.tsx`: 勤怠データのダウンロードフォーム
 - `src/pages/admin/AdminConfigManagement/AdminConfigManagement.tsx`: 設定画面(管理者のみ)
+- `src/components/AttendanceDailyList/AttendanceDailyList.tsx`: 当日の全スタッフの勤怠一覧コンポーネント(管理者のみ)
+  - 編集ボタンを押すとスタッフの勤怠一覧へ遷移
 - `src/pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList.tsx`: スタッフの勤怠一覧(管理者のみ)
 - `src/components/AttendanceList/AttendanceList.tsx`: 勤怠一覧コンポーネント(スタッフ側)
   - `src/components/AttendanceList/DesktopList.tsx`: デスクトップ用の勤怠一覧コンポーネント
@@ -78,18 +80,16 @@ dayjs().format('YYYY-MM-DD')
 
   コメントは実装の意図やトレードオフ、注意点など、変数名や関数名からは読み取れない情報を記載してください。変数名や関数名から明らかに分かる内容（例: `count` に「カウント」とだけ書く等）は冗長ですので記述しないでください。
 
+## テストと TDD（追加）
+
+- コードを編集する際は、テストコードを追加できそうな箇所を随時作成してください。新機能の追加や既存コードの修正では、少なくとも1つのユニットテストまたは統合テストを含めることを推奨します。
+- コード修正で問題が見つかった場合は、問題を再現するテストをまず追加し（失敗するテスト）、その後修正を行ってテストが通るようにしてください。テストと修正は同一のPRで提出することを推奨します。
+- チームとしてはテスト駆動開発（TDD）を目指します。すぐにすべてを厳密なTDDにする必要はありませんが、まずテストを書いてから実装する習慣を徐々に広げていってください。これにより品質向上とリファクタリングの安全性が高まります。
+
 ## Amplify に関する注意
 
 - `amplify/` 配下には自動生成ファイルが多数あります。特に `amplify/backend/*` 内の自動生成ファイルは原則編集しないでください。
 - GraphQL モデルを変更する場合は、`amplify/backend/api/garakufrontend/schema.graphql` を編集してください。その後、Amplify CLI で push します。
-
-## PR チェックリスト（作業時に必須）
-
-1. ビルドが通る（`npm run build` またはプロジェクトのビルドコマンド）
-2. Lint を通す（`npm run lint` 等）
-3. 単体テスト（必要な範囲で）と E2E（新しい画面は Playwright テスト追加を推奨）
-4. Amplify のスキーマ/リソースを変更した場合は、手順と CLI コマンド（例: `amplify push`）を PR に記載
-5. 変更の要点（影響範囲、ロールバック手順）を PR 本文にまとめる
 
 ## スナックバーの取り扱い（新ルール）
 
@@ -101,12 +101,6 @@ dayjs().format('YYYY-MM-DD')
   3. エラー時は `dispatch(setSnackbarError(MESSAGE_CODE.EXXXXX))` を呼ぶ。
 
 - 理由: 全アプリで通知表示を一元管理することで UX の一貫性を保ち、将来的にグローバルなトラッキングや自動クローズ制御を中央で行いやすくするため。
-
-
-## 追加の提案（任意）
-
-- 新規ページの雛形を `src/pages/_template/` として追加すると、開発者がコピーして始められて便利です。
-- PR テンプレート（`.github/PULL_REQUEST_TEMPLATE.md`）を用意するとレビュープロセスが安定します。
 
 ## リファクタリング / 構成整理ガイド
 
@@ -136,20 +130,11 @@ dayjs().format('YYYY-MM-DD')
 
 ### リファクタリングの進め方（イテレーション）
 
+0. テストファーストの実践: 可能な限りテストを先に書くことを習慣化してください。コードを編集・リファクタリングする際は、該当箇所のテストを追加・更新し、テストが失敗する状態を明示してから実装で修正するワークフローを推奨します。各PRには少なくとも1つの関連テストを含めることを目標としてください。
+
 1. 小さく始める: `src/pages/_template/` を作り、新規ページは必ずテンプレを使う
 2. Lint/Prettier を厳格化（必要なら `eslint`/`prettier` 設定を追加）し、`npm run lint` を PR 条件にする
 3. CI に Build / Lint / Unit tests / E2E（軽量）を追加。まずは Build と Lint を必須にする
 4. 既存ページの優先順位付け（頻繁に変更される画面やバグが多い画面から）
 5. 1 PR = 1 画面 or 1 関連コンポーネントの単位で移行。PR に移行チェックリストを付ける
 6. 必要なら codemod（単純な API 名変更や import の一括置換）を作る
-
-### 品質ゲートと自動化提案
-
-- CI: `npm run build`（必須）, `npm run lint`（必須）, `npm test`（ユニット）
-- PR: 変更点に応じて Playwright の E2E を追加または更新
-- 自動フォーマット: pre-commit hook で `lint-staged` を使う（`eslint --fix`, `prettier --write`）
-
-### 小さな注意点 / エッジケース
-
-- 既存の Amplify schema を変更する場合はバックエンド側に影響が出るため、バックエンドと協調して作業すること
-- 大きなリネームは履歴追跡を難しくするため、分割して行うこと

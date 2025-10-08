@@ -177,10 +177,10 @@ export default function DesktopList({
 
                       {/* 摘要 */}
                       <SummaryTableCell
-                        paidHolidayFlag={attendance.paidHolidayFlag}
                         substituteHolidayDate={attendance.substituteHolidayDate}
                         remarks={attendance.remarks}
                         specialHolidayFlag={attendance.specialHolidayFlag}
+                        paidHolidayFlag={attendance.paidHolidayFlag}
                         absentFlag={attendance.absentFlag}
                       />
 
@@ -247,10 +247,10 @@ export default function DesktopList({
 
                 {/* 摘要 */}
                 <SummaryTableCell
-                  paidHolidayFlag={attendance.paidHolidayFlag}
                   substituteHolidayDate={attendance.substituteHolidayDate}
                   remarks={attendance.remarks}
                   specialHolidayFlag={attendance.specialHolidayFlag}
+                  paidHolidayFlag={attendance.paidHolidayFlag}
                   absentFlag={attendance.absentFlag}
                 />
 

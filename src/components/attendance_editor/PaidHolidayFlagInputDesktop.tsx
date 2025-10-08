@@ -1,6 +1,11 @@
 import { Box, Checkbox, Stack } from "@mui/material";
 import dayjs from "dayjs";
-import { Control, Controller, UseFormSetValue } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  UseFormGetValues,
+  UseFormSetValue,
+} from "react-hook-form";
 
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 
@@ -11,6 +16,10 @@ interface PaidHolidayFlagInputProps {
   setValue: UseFormSetValue<any>;
   workDate?: string;
   setPaidHolidayTimes?: boolean;
+  restReplace?: (
+    items: { startTime: string | null; endTime: string | null }[]
+  ) => void;
+  getValues?: UseFormGetValues<any>;
 }
 
 export default function PaidHolidayFlagInputDesktop({
@@ -20,6 +29,8 @@ export default function PaidHolidayFlagInputDesktop({
   setValue,
   workDate,
   setPaidHolidayTimes = false,
+  restReplace,
+  getValues,
 }: PaidHolidayFlagInputProps) {
   if (!control || !setValue) return null;
 
@@ -38,7 +49,7 @@ export default function PaidHolidayFlagInputDesktop({
       "endTime",
       new AttendanceDateTime().setDate(workDayjs).setWorkEnd().toISOString()
     );
-    setValue("rests", [
+    const rests = [
       {
         startTime: new AttendanceDateTime()
           .setDate(workDayjs)
@@ -49,7 +60,34 @@ export default function PaidHolidayFlagInputDesktop({
           .setRestEnd()
           .toISOString(),
       },
-    ]);
+    ];
+
+    if (restReplace && typeof restReplace === "function") {
+      restReplace(rests);
+    } else {
+      setValue("rests", rests);
+    }
+
+    try {
+      if (getValues) {
+        // remove special holiday tag if present (mutual exclusion)
+        try {
+          const special = (getValues("specialHolidayFlag") as boolean) || false;
+          if (special) {
+            setValue("specialHolidayFlag", false);
+          }
+        } catch (e) {
+          // noop
+        }
+
+        const tags: string[] = (getValues("remarkTags") as string[]) || [];
+        if (!tags.includes("有給休暇")) {
+          setValue("remarkTags", [...tags, "有給休暇"]);
+        }
+      }
+    } catch (e) {
+      // noop
+    }
   };
 
   return (
