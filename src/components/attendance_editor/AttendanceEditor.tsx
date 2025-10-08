@@ -613,15 +613,22 @@ export default function AttendanceEditor() {
       // 休憩を規定値に設定（既に同じ配列でなければ置換）
       const dateStr =
         (getValues("workDate") as string) || attendance?.workDate || "";
+      const lunchStartCfg = getLunchRestStartTime();
+      const lunchEndCfg = getLunchRestEndTime();
+      const baseDay = dateStr ? dayjs(dateStr) : workDate ? workDate : dayjs();
       const desiredRests: RestInputs[] = [
         {
-          startTime: new AttendanceDateTime()
-            .setDateString(dateStr)
-            .setRestStart()
+          startTime: baseDay
+            .hour(lunchStartCfg.hour())
+            .minute(lunchStartCfg.minute())
+            .second(0)
+            .millisecond(0)
             .toISOString(),
-          endTime: new AttendanceDateTime()
-            .setDateString(dateStr)
-            .setRestEnd()
+          endTime: baseDay
+            .hour(lunchEndCfg.hour())
+            .minute(lunchEndCfg.minute())
+            .second(0)
+            .millisecond(0)
             .toISOString(),
         },
       ];
@@ -903,9 +910,9 @@ export default function AttendanceEditor() {
           <GroupContainer>
             {(() => {
               const tabs: { label: string; panel: JSX.Element }[] = [];
-              // 代休
+              // 振替休日
               tabs.push({
-                label: "代休",
+                label: "振替休日",
                 panel: (
                   <TabPanel value={vacationTab} index={tabs.length}>
                     <SubstituteHolidayDateInput />

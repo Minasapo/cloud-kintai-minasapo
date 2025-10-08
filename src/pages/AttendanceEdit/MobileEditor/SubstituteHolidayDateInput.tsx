@@ -1,3 +1,4 @@
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -26,6 +27,9 @@ export function SubstituteHolidayDateInput() {
   return (
     <>
       <Label variant="body1">振替休暇</Label>
+      <Box sx={{ color: "text.secondary", fontSize: 14, mb: 0.5 }}>
+        勤務した日を指定して振替休日を設定します。設定すると該当日は休暇扱いとなり、一部の入力がクリアされます。
+      </Box>
       <Controller
         name="substituteHolidayDate"
         control={control}

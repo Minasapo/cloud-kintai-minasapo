@@ -1,4 +1,4 @@
-import { Checkbox, Stack } from "@mui/material";
+import { Box, Checkbox, Stack } from "@mui/material";
 import dayjs from "dayjs";
 import {
   Control,
@@ -113,7 +113,10 @@ export default function PaidHolidayFlagInputMobile({
   return (
     <>
       <Label variant="body1">{label}</Label>
-      <Stack direction="column" alignItems={"flex-start"}>
+      <Stack direction="column" alignItems={"flex-start"} spacing={1}>
+        <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+          1日有給を取得する場合はチェックを入れてください。既定の勤務開始／終了時刻と休憩がセットされます。
+        </Box>
         <Controller
           name="paidHolidayFlag"
           control={control}
