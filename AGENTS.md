@@ -85,14 +85,6 @@ dayjs().format('YYYY-MM-DD')
 - `amplify/` 配下には自動生成ファイルが多数あります。特に `amplify/backend/*` 内の自動生成ファイルは原則編集しないでください。
 - GraphQL モデルを変更する場合は、`amplify/backend/api/garakufrontend/schema.graphql` を編集してください。その後、Amplify CLI で push します。
 
-## PR チェックリスト（作業時に必須）
-
-1. ビルドが通る（`npm run build` またはプロジェクトのビルドコマンド）
-2. Lint を通す（`npm run lint` 等）
-3. 単体テスト（必要な範囲で）と E2E（新しい画面は Playwright テスト追加を推奨）
-4. Amplify のスキーマ/リソースを変更した場合は、手順と CLI コマンド（例: `amplify push`）を PR に記載
-5. 変更の要点（影響範囲、ロールバック手順）を PR 本文にまとめる
-
 ## スナックバーの取り扱い（新ルール）
 
 - アプリ内でユーザー通知（成功・エラー・警告）を表示する際は、ローカル state の Snackbar を直接使うのではなく、`src/lib/reducers/snackbarReducer.ts` の Redux slice を使って表示すること。
