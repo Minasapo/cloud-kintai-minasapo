@@ -110,7 +110,14 @@ export function MobileEditor() {
       label: "有給休暇",
       panel: (
         <TabPanel value={holidayTab} index={tabs.length}>
-          <PaidHolidayFlagInputMobile control={control} setValue={setValue} />
+          <PaidHolidayFlagInputMobile
+            control={control}
+            setValue={setValue}
+            workDate={workDate ? workDate.format("YYYY-MM-DD") : undefined}
+            setPaidHolidayTimes={true}
+            restReplace={restReplace}
+            getValues={getValues}
+          />
         </TabPanel>
       ),
     });

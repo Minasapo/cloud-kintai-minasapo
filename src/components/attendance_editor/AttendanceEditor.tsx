@@ -103,6 +103,7 @@ export default function AttendanceEditor() {
     getHourlyPaidHolidayEnabled,
     getSpecialHolidayEnabled,
     getStartTime,
+    getEndTime,
     getAbsentEnabled,
     loading: appConfigLoading,
   } = useAppConfig();
@@ -281,8 +282,13 @@ export default function AttendanceEditor() {
           id: attendance.id,
           staffId: attendance.staffId,
           workDate: data.workDate,
-          startTime: data.paidHolidayFlag ? null : data.startTime,
-          endTime: data.paidHolidayFlag ? null : data.endTime || null,
+          // 有給の場合は規定開始/終了時刻を送る
+          startTime: data.paidHolidayFlag
+            ? getStartTime().toISOString()
+            : data.startTime,
+          endTime: data.paidHolidayFlag
+            ? getEndTime().toISOString()
+            : data.endTime || null,
           absentFlag: data.absentFlag ?? false,
           isDeemedHoliday: data.isDeemedHoliday,
           goDirectlyFlag: data.goDirectlyFlag,
@@ -292,8 +298,24 @@ export default function AttendanceEditor() {
           paidHolidayFlag: data.paidHolidayFlag,
           specialHolidayFlag: data.specialHolidayFlag,
           substituteHolidayDate: data.substituteHolidayDate,
+          // 有給の場合は規定の昼休憩時間を送信する（勤務時間は規定値）
           rests: data.paidHolidayFlag
-            ? []
+            ? [
+                {
+                  startTime: new AttendanceDateTime()
+                    .setDateString(
+                      (data.workDate as string) || attendance?.workDate || ""
+                    )
+                    .setRestStart()
+                    .toISOString(),
+                  endTime: new AttendanceDateTime()
+                    .setDateString(
+                      (data.workDate as string) || attendance?.workDate || ""
+                    )
+                    .setRestEnd()
+                    .toISOString(),
+                },
+              ]
             : data.rests.map((rest) => ({
                 startTime: rest.startTime,
                 endTime: rest.endTime,
@@ -323,11 +345,29 @@ export default function AttendanceEditor() {
         };
 
         await updateAttendance(payload)
-          .then((res) => {
-            if (!staff || !res.histories) return;
+          .then(async (res) => {
+            // 成功時は可能ならメール送信
+            try {
+              if (staff && res && res.histories && enabledSendMail) {
+                new AttendanceEditMailSender(staff, res).changeRequest();
+              }
+            } catch (e) {
+              // メール送信に失敗しても更新処理自体は成功扱いにする
+              logger.error(`Failed to send edit mail: ${e}`);
+            }
 
-            if (enabledSendMail) {
-              new AttendanceEditMailSender(staff, res).changeRequest();
+            // 更新後は最新の勤怠を再取得してフォームを最新化する
+            try {
+              if (staff && targetWorkDate) {
+                await getAttendance(
+                  staff.cognitoUserId,
+                  new AttendanceDateTime()
+                    .setDateString(targetWorkDate)
+                    .toDataFormat()
+                );
+              }
+            } catch (e) {
+              logger.debug(`Failed to refetch attendance after update: ${e}`);
             }
 
             dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
@@ -351,10 +391,15 @@ export default function AttendanceEditor() {
         workDate: new AttendanceDateTime()
           .setDateString(targetWorkDate)
           .toDataFormat(),
-        startTime: data.paidHolidayFlag ? null : data.startTime,
+        // 有給の場合は規定開始/終了時刻のみ送る
+        startTime: data.paidHolidayFlag
+          ? getStartTime().toISOString()
+          : data.startTime,
         absentFlag: data.absentFlag ?? false,
         isDeemedHoliday: data.isDeemedHoliday,
-        endTime: data.paidHolidayFlag ? null : data.endTime,
+        endTime: data.paidHolidayFlag
+          ? getEndTime().toISOString()
+          : data.endTime,
         goDirectlyFlag: data.goDirectlyFlag,
         returnDirectlyFlag: data.returnDirectlyFlag,
         remarks: data.remarks,
@@ -362,7 +407,18 @@ export default function AttendanceEditor() {
         paidHolidayFlag: data.paidHolidayFlag,
         substituteHolidayDate: data.substituteHolidayDate,
         rests: data.paidHolidayFlag
-          ? []
+          ? [
+              {
+                startTime: new AttendanceDateTime()
+                  .setDateString((targetWorkDate as string) || "")
+                  .setRestStart()
+                  .toISOString(),
+                endTime: new AttendanceDateTime()
+                  .setDateString((targetWorkDate as string) || "")
+                  .setRestEnd()
+                  .toISOString(),
+              },
+            ]
           : data.rests.map((rest) => ({
               startTime: rest.startTime,
               endTime: rest.endTime,
@@ -721,6 +777,8 @@ export default function AttendanceEditor() {
                       workDate={workDate ? workDate.toISOString() : undefined}
                       setPaidHolidayTimes={true}
                       disabled={changeRequests.length > 0}
+                      restReplace={restReplace}
+                      getValues={getValues}
                     />
                   </TabPanel>
                 ),
