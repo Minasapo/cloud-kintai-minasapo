@@ -99,7 +99,11 @@ export default function AttendanceDailyList() {
             <Tooltip title={full} arrow placement="top">
               <Box
                 component="span"
-                sx={{ display: "inline-block", verticalAlign: "middle", ml: 0.5 }}
+                sx={{
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  ml: 0.5,
+                }}
               >
                 {visible}
               </Box>
