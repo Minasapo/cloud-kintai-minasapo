@@ -1,7 +1,7 @@
 import { Box, LinearProgress } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -204,7 +204,25 @@ export default function AttendanceEdit() {
         setValue("goDirectlyFlag", res.goDirectlyFlag || false);
         setValue("substituteHolidayDate", res.substituteHolidayDate);
         setValue("returnDirectlyFlag", res.returnDirectlyFlag || false);
-        setValue("remarks", res.remarks);
+        // initialize remarkTags from remarks: extract known tags and keep other text in remarks
+        try {
+          const text = res.remarks || "";
+          const lines = text
+            .split(/\r?\n/)
+            .map((l) => l.trim())
+            .filter(Boolean);
+          const known = ["有給休暇", "特別休暇", "欠勤"];
+          const tags: string[] = [];
+          const others: string[] = [];
+          for (const l of lines) {
+            if (known.includes(l)) tags.push(l);
+            else others.push(l);
+          }
+          setValue("remarkTags", tags);
+          setValue("remarks", others.join("\n"));
+        } catch (e) {
+          setValue("remarks", res.remarks);
+        }
         setValue(
           "rests",
           res.rests
@@ -236,6 +254,91 @@ export default function AttendanceEdit() {
         dispatch(setSnackbarError(MESSAGE_CODE.E02001));
       });
   }, [staff, targetWorkDate]);
+
+  // absentFlag の変更に応じて備考欄を自動更新する
+  const absentFlagValue = useWatch({ control, name: "absentFlag" });
+
+  useEffect(() => {
+    const flag = !!absentFlagValue;
+    try {
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      const has = tags.includes("欠勤");
+      if (flag && !has) {
+        setValue("remarkTags", [...tags, "欠勤"]);
+      }
+      if (!flag && has) {
+        setValue(
+          "remarkTags",
+          tags.filter((t) => t !== "欠勤")
+        );
+      }
+    } catch (e) {
+      // noop
+    }
+  }, [absentFlagValue, setValue, getValues]);
+
+  // specialHolidayFlag の変更に応じて備考欄へ "特別休暇" を追記/削除し、ON の場合は有給と同様に規定の開始/終了時刻と休憩を設定する
+  const specialHolidayFlagValue = useWatch({
+    control,
+    name: "specialHolidayFlag",
+  });
+
+  useEffect(() => {
+    const flag = !!specialHolidayFlagValue;
+
+    if (flag) {
+      // 備考タグに特別休暇が無ければ追記
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (!tags.includes("特別休暇")) {
+        setValue("remarkTags", [...tags, "特別休暇"]);
+      }
+
+      // 時間単位休暇はクリア（スタッフ側では既にUI側で対応しているため noop）
+
+      // 特別休暇がONのとき、有給フラグが立っていたら解除する（相互排他）
+      try {
+        const currentPaid = getValues("paidHolidayFlag");
+        if (currentPaid) {
+          setValue("paidHolidayFlag", false);
+        }
+      } catch (e) {
+        // noop
+      }
+    } else {
+      // OFF になったら備考タグから "特別休暇" を削除
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (tags.includes("特別休暇")) {
+        setValue(
+          "remarkTags",
+          tags.filter((t) => t !== "特別休暇")
+        );
+      }
+    }
+  }, [specialHolidayFlagValue]);
+
+  // paidHolidayFlag の変更に応じて備考欄へ "有給休暇" を追記/削除する
+  const paidHolidayFlagValue = useWatch({ control, name: "paidHolidayFlag" });
+
+  useEffect(() => {
+    const flag = !!paidHolidayFlagValue;
+    try {
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (flag) {
+        if (!tags.includes("有給休暇")) {
+          setValue("remarkTags", [...tags, "有給休暇"]);
+        }
+      } else {
+        if (tags.includes("有給休暇")) {
+          setValue(
+            "remarkTags",
+            tags.filter((t) => t !== "有給休暇")
+          );
+        }
+      }
+    } catch (e) {
+      // noop
+    }
+  }, [paidHolidayFlagValue]);
 
   const changeRequests = attendance?.changeRequests
     ? attendance.changeRequests
