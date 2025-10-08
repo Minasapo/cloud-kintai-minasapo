@@ -910,9 +910,9 @@ export default function AttendanceEditor() {
           <GroupContainer>
             {(() => {
               const tabs: { label: string; panel: JSX.Element }[] = [];
-              // 代休
+              // 振替休日
               tabs.push({
-                label: "代休",
+                label: "振替休日",
                 panel: (
                   <TabPanel value={vacationTab} index={tabs.length}>
                     <SubstituteHolidayDateInput />
