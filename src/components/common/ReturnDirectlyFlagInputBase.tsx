@@ -1,5 +1,5 @@
 import { Box, Checkbox, Stack } from "@mui/material";
-import { ReactElement } from "react";
+import { forwardRef, ReactElement } from "react";
 import { Control, Controller } from "react-hook-form";
 
 import { Label as MobileLabel } from "../../pages/AttendanceEdit/MobileEditor/Label";
@@ -24,7 +24,12 @@ export default function ReturnDirectlyFlagInputBase({
   layout = "row",
 }: ReturnDirectlyFlagInputBaseProps) {
   if (!control) return null;
-  const Input = inputComponent || ((props) => <Checkbox {...props} />);
+  // default Input forwards ref to the underlying Checkbox inputRef
+  const DefaultInput = forwardRef(function DefaultInput(props: any, ref: any) {
+    return <Checkbox {...props} inputRef={ref} />;
+  });
+
+  const Input = inputComponent || DefaultInput;
 
   if (layout === "row") {
     return (
