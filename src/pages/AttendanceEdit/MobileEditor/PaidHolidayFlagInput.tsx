@@ -11,7 +11,10 @@ export function PaidHolidayFlagInput() {
     <PaidHolidayFlagInputCommon
       label="有給休暇(1日)"
       control={control}
-      setValue={() => {}}
+      setValue={useContext(AttendanceEditContext).setValue!}
+      restReplace={useContext(AttendanceEditContext).restReplace}
+      getValues={useContext(AttendanceEditContext).getValues}
+      setPaidHolidayTimes={true}
     />
   );
 }
