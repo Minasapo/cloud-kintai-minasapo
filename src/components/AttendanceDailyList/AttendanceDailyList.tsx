@@ -4,6 +4,7 @@ import {
   Alert,
   AlertTitle,
   Box,
+  Chip,
   LinearProgress,
   Stack,
   Table,
@@ -13,6 +14,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
@@ -59,17 +61,57 @@ export default function AttendanceDailyList() {
 
   const renderSummaryMessage = useCallback((row: AttendanceDaily) => {
     if (!row.attendance) return "";
-    const { paidHolidayFlag, substituteHolidayDate, remarks } = row.attendance;
+    const {
+      substituteHolidayDate,
+      remarks,
+      specialHolidayFlag,
+      paidHolidayFlag,
+      absentFlag,
+    } = row.attendance;
+
     const isSubstituteHoliday = substituteHolidayDate
       ? dayjs(substituteHolidayDate).isValid()
       : false;
 
-    const summaryMessage = [];
-    if (paidHolidayFlag) summaryMessage.push("有給休暇");
-    if (isSubstituteHoliday) summaryMessage.push("振替休日");
-    if (remarks) summaryMessage.push(remarks);
+    const full = (() => {
+      const parts: string[] = [];
+      if (isSubstituteHoliday) parts.push("振替休日");
+      if (remarks) parts.push(remarks);
+      return parts.join(" ");
+    })();
 
-    return summaryMessage.join(" ");
+    const MAX = 32;
+    const needTruncate = full && full.length > MAX;
+    const visible = needTruncate ? `${full.slice(0, MAX)}...` : full;
+
+    return (
+      <Box component="span">
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          {specialHolidayFlag && (
+            <Chip size="small" label="特別休暇" color="info" />
+          )}
+          {paidHolidayFlag && (
+            <Chip size="small" label="有給休暇" color="success" />
+          )}
+          {absentFlag && <Chip size="small" label="欠勤" color="error" />}
+
+          {needTruncate ? (
+            <Tooltip title={full} arrow placement="top">
+              <Box
+                component="span"
+                sx={{ display: "inline-block", verticalAlign: "middle", ml: 0.5 }}
+              >
+                {visible}
+              </Box>
+            </Tooltip>
+          ) : (
+            <Box component="span" sx={{ ml: 0.5 }}>
+              {visible}
+            </Box>
+          )}
+        </Stack>
+      </Box>
+    );
   }, []);
 
   const filteredAttendanceList = useMemo(() => {
