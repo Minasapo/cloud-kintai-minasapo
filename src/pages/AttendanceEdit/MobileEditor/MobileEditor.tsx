@@ -128,30 +128,29 @@ export function MobileEditor() {
         label: "特別休暇",
         panel: (
           <TabPanel value={holidayTab} index={tabs.length}>
-            <Stack direction="row">
-              <Box sx={{ fontWeight: "bold", width: "120px" }}>特別休暇</Box>
-              <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                <Box sx={{ color: "text.secondary", fontSize: 14 }}>
-                  有給休暇ではない特別な休暇(忌引きなど)です。利用時は管理者へご相談ください。
-                </Box>
-                <Controller
-                  name="specialHolidayFlag"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          {...field}
-                          checked={!!field.value}
-                          onChange={(e) => field.onChange(e.target.checked)}
-                          disabled={changeRequests.length > 0}
-                        />
-                      }
-                      label=""
-                    />
-                  )}
-                />
-              </Stack>
+            {/* 他の休暇項目と同様にラベルを上に配置し、内容は縦並びにする */}
+            <Label>特別休暇</Label>
+            <Stack direction="column" alignItems={"flex-start"} spacing={1}>
+              <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                有給休暇ではない特別な休暇(忌引きなど)です。利用時は管理者へご相談ください。
+              </Box>
+              <Controller
+                name="specialHolidayFlag"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        {...field}
+                        checked={!!field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        disabled={changeRequests.length > 0}
+                      />
+                    }
+                    label=""
+                  />
+                )}
+              />
             </Stack>
           </TabPanel>
         ),
