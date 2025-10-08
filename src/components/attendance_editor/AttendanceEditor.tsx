@@ -20,7 +20,7 @@ import {
 import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
 
 import { SystemCommentInput } from "@/API";
@@ -37,6 +37,8 @@ import AttendanceEditProvider from "@/pages/AttendanceEdit/AttendanceEditProvide
 import {
   AttendanceEditInputs,
   defaultValues,
+  HourlyPaidHolidayTimeInputs,
+  RestInputs,
 } from "@/pages/AttendanceEdit/common";
 import { SubstituteHolidayDateInput } from "@/pages/AttendanceEdit/DesktopEditor/SubstituteHolidayDateInput";
 
@@ -276,6 +278,8 @@ export default function AttendanceEditor() {
 
   const onSubmit = useCallback(
     async (data: AttendanceEditInputs) => {
+      // 備考はユーザー入力の値（data.remarks）をそのまま保存します。
+      // 画面上に表示しているタグ（remarkTags）は見かけ上の表示であり、備考の値には影響を与えません。
       if (attendance) {
         // 有給フラグが付いている場合は勤務時間/休憩等は送らない（バックエンド側バリデーション対策）
         const payload = {
@@ -483,7 +487,18 @@ export default function AttendanceEditor() {
     setValue("isDeemedHoliday", attendance.isDeemedHoliday ?? false);
     setValue("specialHolidayFlag", attendance.specialHolidayFlag ?? false);
     setValue("endTime", attendance.endTime);
+    // 備考はそのまま表示する（タグと直接紐付けない）
     setValue("remarks", attendance.remarks || "");
+    // remarkTags はフラグから初期化する（有給/特別/欠勤）
+    try {
+      const initTags: string[] = [];
+      if (attendance.paidHolidayFlag) initTags.push("有給休暇");
+      if (attendance.specialHolidayFlag) initTags.push("特別休暇");
+      if (attendance.absentFlag) initTags.push("欠勤");
+      setValue("remarkTags", initTags);
+    } catch (e) {
+      // noop
+    }
     setValue("goDirectlyFlag", attendance.goDirectlyFlag || false);
     setValue("returnDirectlyFlag", attendance.returnDirectlyFlag || false);
     setValue("paidHolidayFlag", attendance.paidHolidayFlag || false);
@@ -545,6 +560,138 @@ export default function AttendanceEditor() {
       hourlyPaidHolidayTimeReplace(hourlyPaidHolidayTimes);
     }
   }, [attendance]);
+
+  // absentFlag の変更に応じて備考欄を自動更新する
+  const absentFlagValue = useWatch({ control, name: "absentFlag" });
+
+  useEffect(() => {
+    const flag = !!absentFlagValue;
+    const tags: string[] = (getValues("remarkTags") as string[]) || [];
+    const has = tags.includes("欠勤");
+    if (flag && !has) {
+      setValue("remarkTags", [...tags, "欠勤"]);
+    }
+    if (!flag && has) {
+      setValue(
+        "remarkTags",
+        tags.filter((t) => t !== "欠勤")
+      );
+    }
+  }, [absentFlagValue, setValue, getValues]);
+
+  // specialHolidayFlag の変更に応じて備考欄へ "特別休暇" を追記/削除し、
+  // ON の場合は有給と同様に規定の開始/終了時刻と休憩を設定する
+  const specialHolidayFlagValue = useWatch({
+    control,
+    name: "specialHolidayFlag",
+  });
+
+  useEffect(() => {
+    const flag = !!specialHolidayFlagValue;
+
+    if (flag) {
+      // 備考タグに特別休暇が無ければ追記
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (!tags.includes("特別休暇")) {
+        setValue("remarkTags", [...tags, "特別休暇"]);
+      }
+
+      // 開始/終了時刻を規定値に設定（既に同じであれば何もしない）
+      try {
+        const desiredStart = getStartTime().toISOString();
+        const desiredEnd = getEndTime().toISOString();
+        if (getValues("startTime") !== desiredStart) {
+          setValue("startTime", desiredStart);
+        }
+        if (getValues("endTime") !== desiredEnd) {
+          setValue("endTime", desiredEnd);
+        }
+      } catch (e) {
+        logger.debug(`failed to set default times for special holiday: ${e}`);
+      }
+
+      // 休憩を規定値に設定（既に同じ配列でなければ置換）
+      const dateStr =
+        (getValues("workDate") as string) || attendance?.workDate || "";
+      const desiredRests: RestInputs[] = [
+        {
+          startTime: new AttendanceDateTime()
+            .setDateString(dateStr)
+            .setRestStart()
+            .toISOString(),
+          endTime: new AttendanceDateTime()
+            .setDateString(dateStr)
+            .setRestEnd()
+            .toISOString(),
+        },
+      ];
+      try {
+        const currentRests = getValues("rests") || [];
+        if (JSON.stringify(currentRests) !== JSON.stringify(desiredRests)) {
+          if (restReplace && typeof restReplace === "function") {
+            restReplace(desiredRests);
+          } else {
+            setValue("rests", desiredRests);
+          }
+        }
+      } catch (e) {
+        // noop
+      }
+
+      // 時間単位休暇はクリア（有給時と同様）
+      try {
+        const currentHourly = getValues("hourlyPaidHolidayTimes") || [];
+        if ((currentHourly as HourlyPaidHolidayTimeInputs[]).length > 0) {
+          hourlyPaidHolidayTimeReplace([]);
+        }
+      } catch (e) {
+        // noop
+      }
+
+      // 特別休暇がONのとき、有給フラグが立っていたら解除する（相互排他）
+      try {
+        const currentPaid = getValues("paidHolidayFlag");
+        if (currentPaid) {
+          setValue("paidHolidayFlag", false);
+        }
+      } catch (e) {
+        // noop
+      }
+    } else {
+      // OFF になったら備考タグから "特別休暇" を削除
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (tags.includes("特別休暇")) {
+        setValue(
+          "remarkTags",
+          tags.filter((t) => t !== "特別休暇")
+        );
+      }
+    }
+  }, [specialHolidayFlagValue]);
+
+  // paidHolidayFlag の変更に応じて備考欄へ "有給休暇" を追記/削除する
+  const paidHolidayFlagValue = useWatch({ control, name: "paidHolidayFlag" });
+
+  useEffect(() => {
+    const flag = !!paidHolidayFlagValue;
+    try {
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (flag) {
+        if (!tags.includes("有給休暇")) {
+          setValue("remarkTags", [...tags, "有給休暇"]);
+        }
+      } else {
+        if (tags.includes("有給休暇")) {
+          setValue(
+            "remarkTags",
+            tags.filter((t) => t !== "有給休暇")
+          );
+        }
+      }
+    } catch (e) {
+      // noop
+    }
+  }, [paidHolidayFlagValue]);
 
   if (appConfigLoading || staffsLoading || attendance === undefined) {
     return <LinearProgress />;
@@ -674,6 +821,7 @@ export default function AttendanceEditor() {
               hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
               workDate={workDate}
               visibleMode="admin"
+              getValues={getValues}
             />
           </GroupContainer>
           <GroupContainer>
@@ -935,10 +1083,8 @@ export default function AttendanceEditor() {
               );
             })()}
           </GroupContainer>
-          <GroupContainer>
-            <Box>
-              <RemarksItem />
-            </Box>
+          <GroupContainer title="備考">
+            <RemarksItem />
           </GroupContainer>
           <GroupContainer>
             {attendance?.updatedAt && (

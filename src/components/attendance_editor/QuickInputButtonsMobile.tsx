@@ -119,6 +119,8 @@ export default function QuickInputButtonsMobile({
           restReplace([]);
           hourlyPaidHolidayTimeReplace([]);
           setValue("paidHolidayFlag", false);
+          // clear both tags and free-text remarks
+          setValue("remarkTags", []);
           setValue("remarks", "");
           setValue("goDirectlyFlag", false);
           setValue("returnDirectlyFlag", false);
@@ -140,6 +142,8 @@ export default function QuickInputButtonsMobile({
           ]);
           hourlyPaidHolidayTimeReplace([]);
           setValue("paidHolidayFlag", false);
+          // clear tags and free-text remarks for normal work
+          setValue("remarkTags", []);
           setValue("remarks", "");
         },
       });
@@ -179,7 +183,8 @@ export default function QuickInputButtonsMobile({
             restReplace([]);
             hourlyPaidHolidayTimeReplace([]);
             setValue("paidHolidayFlag", false);
-            setValue("remarks", "午前半休");
+            // set tag for 午前半休
+            setValue("remarkTags", ["午前半休"]);
           },
         });
       }
@@ -193,7 +198,8 @@ export default function QuickInputButtonsMobile({
             restReplace([]);
             hourlyPaidHolidayTimeReplace([]);
             setValue("paidHolidayFlag", false);
-            setValue("remarks", "午後半休");
+            // set tag for 午後半休
+            setValue("remarkTags", ["午後半休"]);
           },
         });
       }
@@ -213,6 +219,8 @@ export default function QuickInputButtonsMobile({
           ]);
           hourlyPaidHolidayTimeReplace([]);
           setValue("paidHolidayFlag", true);
+          // mark paid holiday as a tag
+          setValue("remarkTags", ["有給休暇"]);
         },
       });
     }

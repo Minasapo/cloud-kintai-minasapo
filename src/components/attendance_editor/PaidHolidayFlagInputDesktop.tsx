@@ -70,10 +70,19 @@ export default function PaidHolidayFlagInputDesktop({
 
     try {
       if (getValues) {
-        const current = (getValues("remarks") as string) || "";
-        if (!current.includes("有給休暇")) {
-          const appended = current ? `${current}\n有給休暇` : `有給休暇`;
-          setValue("remarks", appended);
+        // remove special holiday tag if present (mutual exclusion)
+        try {
+          const special = (getValues("specialHolidayFlag") as boolean) || false;
+          if (special) {
+            setValue("specialHolidayFlag", false);
+          }
+        } catch (e) {
+          // noop
+        }
+
+        const tags: string[] = (getValues("remarkTags") as string[]) || [];
+        if (!tags.includes("有給休暇")) {
+          setValue("remarkTags", [...tags, "有給休暇"]);
         }
       }
     } catch (e) {

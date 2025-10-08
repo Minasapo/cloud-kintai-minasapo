@@ -91,11 +91,19 @@ export default function PaidHolidayFlagInputMobile({
 
     try {
       if (getValues) {
-        const current = (getValues("remarks") as string) || "";
-        if (!current.includes("有給休暇")) {
-          const appended = current ? `${current}\n有給休暇` : `有給休暇`;
-          setValue("remarks", appended);
+        const tags: string[] = (getValues("remarkTags") as string[]) || [];
+        if (!tags.includes("有給休暇")) {
+          setValue("remarkTags", [...tags, "有給休暇"]);
         }
+      }
+    } catch (e) {
+      // noop
+    }
+
+    // 有給ON時は特別休暇フラグを解除して相互排他にする
+    try {
+      if (getValues && getValues("specialHolidayFlag")) {
+        setValue("specialHolidayFlag", false);
       }
     } catch (e) {
       // noop
