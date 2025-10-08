@@ -176,13 +176,13 @@ export default function DesktopList({
                       <RestTimeTableCell attendance={attendance} />
 
                       {/* 摘要 */}
-                        <SummaryTableCell
-                          substituteHolidayDate={attendance.substituteHolidayDate}
-                          remarks={attendance.remarks}
-                          specialHolidayFlag={attendance.specialHolidayFlag}
-                          paidHolidayFlag={attendance.paidHolidayFlag}
-                          absentFlag={attendance.absentFlag}
-                        />
+                      <SummaryTableCell
+                        substituteHolidayDate={attendance.substituteHolidayDate}
+                        remarks={attendance.remarks}
+                        specialHolidayFlag={attendance.specialHolidayFlag}
+                        paidHolidayFlag={attendance.paidHolidayFlag}
+                        absentFlag={attendance.absentFlag}
+                      />
 
                       {/* 作成日時 */}
                       <CreatedAtTableCell createdAt={attendance.createdAt} />
@@ -246,13 +246,13 @@ export default function DesktopList({
                 <RestTimeTableCell attendance={attendance} />
 
                 {/* 摘要 */}
-                  <SummaryTableCell
-                    substituteHolidayDate={attendance.substituteHolidayDate}
-                    remarks={attendance.remarks}
-                    specialHolidayFlag={attendance.specialHolidayFlag}
-                    paidHolidayFlag={attendance.paidHolidayFlag}
-                    absentFlag={attendance.absentFlag}
-                  />
+                <SummaryTableCell
+                  substituteHolidayDate={attendance.substituteHolidayDate}
+                  remarks={attendance.remarks}
+                  specialHolidayFlag={attendance.specialHolidayFlag}
+                  paidHolidayFlag={attendance.paidHolidayFlag}
+                  absentFlag={attendance.absentFlag}
+                />
 
                 {/* 作成日時 */}
                 <CreatedAtTableCell createdAt={attendance.createdAt} />
