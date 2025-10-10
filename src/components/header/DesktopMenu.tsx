@@ -42,6 +42,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
   const adminMenuList = [
     { label: "スタッフ管理", href: "/admin/staff" },
     { label: "勤怠管理", href: "/admin/attendances" },
+    { label: "シフト管理", href: "/admin/shift" },
     { label: "ワークフロー管理", href: "/admin/workflow" },
   ];
 

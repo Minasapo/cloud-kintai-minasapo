@@ -31,6 +31,7 @@ import OfficeQRRegister from "./pages/office/qr/OfficeQRRegister";
 import OfficeQRView from "./pages/office/qr/OfficeQRView";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
+import ShiftManagement from "./pages/ShiftManagement/ShiftManagement";
 import NewWorkflow from "./pages/Workflow/NewWorkflow";
 import Workflow from "./pages/Workflow/Workflow";
 import WorkflowDetail from "./pages/Workflow/WorkflowDetail";
@@ -175,6 +176,10 @@ const router = createBrowserRouter([
                 element: <AdminAttendancePrint />,
               },
             ],
+          },
+          {
+            path: "shift",
+            element: <ShiftManagement />,
           },
           {
             path: "master",
