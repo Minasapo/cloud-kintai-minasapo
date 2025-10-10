@@ -1,7 +1,7 @@
 import { Box, LinearProgress } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -17,14 +17,24 @@ import {
   setSnackbarSuccess,
 } from "../../lib/reducers/snackbarReducer";
 import AttendanceEditProvider from "./AttendanceEditProvider";
-import { AttendanceEditInputs, defaultValues } from "./common";
+import {
+  AttendanceEditInputs,
+  defaultValues,
+  HourlyPaidHolidayTimeInputs,
+} from "./common";
 import DesktopEditor from "./DesktopEditor/DesktopEditor";
 import { MobileEditor } from "./MobileEditor/MobileEditor";
 import sendChangeRequestMail from "./sendChangeRequestMail";
 
 export default function AttendanceEdit() {
   const { cognitoUser } = useContext(AuthContext);
-  const { getHourlyPaidHolidayEnabled } = useContext(AppConfigContext);
+  const {
+    getHourlyPaidHolidayEnabled,
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useContext(AppConfigContext);
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();
   const { targetWorkDate } = useParams();
@@ -204,7 +214,25 @@ export default function AttendanceEdit() {
         setValue("goDirectlyFlag", res.goDirectlyFlag || false);
         setValue("substituteHolidayDate", res.substituteHolidayDate);
         setValue("returnDirectlyFlag", res.returnDirectlyFlag || false);
-        setValue("remarks", res.remarks);
+        // initialize remarkTags from remarks: extract known tags and keep other text in remarks
+        try {
+          const text = res.remarks || "";
+          const lines = text
+            .split(/\r?\n/)
+            .map((l) => l.trim())
+            .filter(Boolean);
+          const known = ["有給休暇", "特別休暇", "欠勤"];
+          const tags: string[] = [];
+          const others: string[] = [];
+          for (const l of lines) {
+            if (known.includes(l)) tags.push(l);
+            else others.push(l);
+          }
+          setValue("remarkTags", tags);
+          setValue("remarks", others.join("\n"));
+        } catch (e) {
+          setValue("remarks", res.remarks);
+        }
         setValue(
           "rests",
           res.rests
@@ -236,6 +264,159 @@ export default function AttendanceEdit() {
         dispatch(setSnackbarError(MESSAGE_CODE.E02001));
       });
   }, [staff, targetWorkDate]);
+
+  // absentFlag の変更に応じて備考欄を自動更新する
+  const absentFlagValue = useWatch({ control, name: "absentFlag" });
+
+  useEffect(() => {
+    const flag = !!absentFlagValue;
+    try {
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      const has = tags.includes("欠勤");
+      if (flag && !has) {
+        setValue("remarkTags", [...tags, "欠勤"]);
+      }
+      if (!flag && has) {
+        setValue(
+          "remarkTags",
+          tags.filter((t) => t !== "欠勤")
+        );
+      }
+    } catch (e) {
+      // noop
+    }
+  }, [absentFlagValue, setValue, getValues]);
+
+  // specialHolidayFlag の変更に応じて備考欄へ "特別休暇" を追記/削除し、ON の場合は有給と同様に規定の開始/終了時刻と休憩を設定する
+  const specialHolidayFlagValue = useWatch({
+    control,
+    name: "specialHolidayFlag",
+  });
+
+  useEffect(() => {
+    const flag = !!specialHolidayFlagValue;
+
+    if (flag) {
+      // 備考タグに特別休暇が無ければ追記
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (!tags.includes("特別休暇")) {
+        setValue("remarkTags", [...tags, "特別休暇"]);
+      }
+
+      // 開始/終了時刻を規定値に設定
+      try {
+        const desiredStart = getStartTime().toISOString();
+        const desiredEnd = getEndTime().toISOString();
+        if (getValues("startTime") !== desiredStart) {
+          setValue("startTime", desiredStart);
+        }
+        if (getValues("endTime") !== desiredEnd) {
+          setValue("endTime", desiredEnd);
+        }
+      } catch (e) {
+        // noop
+      }
+
+      // 休憩をAppConfigの昼休憩時刻で設定
+      try {
+        const dateStr = (getValues("workDate") as string) || "";
+        const lunchStartCfg = getLunchRestStartTime();
+        const lunchEndCfg = getLunchRestEndTime();
+        // 安全な基準日を決定する（workDate が無ければ targetWorkDate を利用、なければ現在日）
+        const baseDay = dateStr
+          ? dayjs(dateStr)
+          : targetWorkDate
+          ? dayjs(targetWorkDate)
+          : dayjs();
+        const desiredRests = [
+          {
+            startTime: baseDay
+              .hour(lunchStartCfg.hour())
+              .minute(lunchStartCfg.minute())
+              .second(0)
+              .millisecond(0)
+              .toISOString(),
+            endTime: baseDay
+              .hour(lunchEndCfg.hour())
+              .minute(lunchEndCfg.minute())
+              .second(0)
+              .millisecond(0)
+              .toISOString(),
+          },
+        ];
+        const currentRests = getValues("rests") || [];
+        if (JSON.stringify(currentRests) !== JSON.stringify(desiredRests)) {
+          if (restReplace && typeof restReplace === "function") {
+            restReplace(desiredRests);
+          } else {
+            setValue("rests", desiredRests);
+          }
+        }
+      } catch (e) {
+        // noop
+      }
+
+      // 時間単位休暇はクリア
+      try {
+        const currentHourly = (getValues("hourlyPaidHolidayTimes") || []) as
+          | HourlyPaidHolidayTimeInputs[]
+          | undefined;
+        if (
+          currentHourly &&
+          currentHourly.length > 0 &&
+          hourlyPaidHolidayTimeReplace &&
+          typeof hourlyPaidHolidayTimeReplace === "function"
+        ) {
+          hourlyPaidHolidayTimeReplace([]);
+        }
+      } catch (e) {
+        // noop
+      }
+
+      // 特別休暇がONのとき、有給フラグが立っていたら解除する（相互排他）
+      try {
+        const currentPaid = getValues("paidHolidayFlag");
+        if (currentPaid) {
+          setValue("paidHolidayFlag", false);
+        }
+      } catch (e) {
+        // noop
+      }
+    } else {
+      // OFF になったら備考タグから "特別休暇" を削除
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (tags.includes("特別休暇")) {
+        setValue(
+          "remarkTags",
+          tags.filter((t) => t !== "特別休暇")
+        );
+      }
+    }
+  }, [specialHolidayFlagValue]);
+
+  // paidHolidayFlag の変更に応じて備考欄へ "有給休暇" を追記/削除する
+  const paidHolidayFlagValue = useWatch({ control, name: "paidHolidayFlag" });
+
+  useEffect(() => {
+    const flag = !!paidHolidayFlagValue;
+    try {
+      const tags: string[] = (getValues("remarkTags") as string[]) || [];
+      if (flag) {
+        if (!tags.includes("有給休暇")) {
+          setValue("remarkTags", [...tags, "有給休暇"]);
+        }
+      } else {
+        if (tags.includes("有給休暇")) {
+          setValue(
+            "remarkTags",
+            tags.filter((t) => t !== "有給休暇")
+          );
+        }
+      }
+    } catch (e) {
+      // noop
+    }
+  }, [paidHolidayFlagValue]);
 
   const changeRequests = attendance?.changeRequests
     ? attendance.changeRequests

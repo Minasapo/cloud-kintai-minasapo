@@ -21,8 +21,10 @@ describe("RestTimeMessage", () => {
 
   it("AppConfig で設定された昼休憩時間を表示する", () => {
     mockUseAppConfig.mockReturnValue({
-      getLunchRestStartTime: () => dayjs("11:30", "HH:mm"),
-      getLunchRestEndTime: () => dayjs("12:45", "HH:mm"),
+      getLunchRestStartTime: () =>
+        dayjs().hour(11).minute(30).second(0).millisecond(0),
+      getLunchRestEndTime: () =>
+        dayjs().hour(12).minute(45).second(0).millisecond(0),
     } as unknown as ReturnType<typeof useAppConfig>);
 
     render(<RestTimeMessage />);
@@ -37,8 +39,10 @@ describe("RestTimeMessage", () => {
 
   it("昼休憩がデフォルト設定の場合でも文言を表示する", () => {
     mockUseAppConfig.mockReturnValue({
-      getLunchRestStartTime: () => dayjs("12:00", "HH:mm"),
-      getLunchRestEndTime: () => dayjs("13:00", "HH:mm"),
+      getLunchRestStartTime: () =>
+        dayjs().hour(12).minute(0).second(0).millisecond(0),
+      getLunchRestEndTime: () =>
+        dayjs().hour(13).minute(0).second(0).millisecond(0),
     } as unknown as ReturnType<typeof useAppConfig>);
 
     render(<RestTimeMessage />);

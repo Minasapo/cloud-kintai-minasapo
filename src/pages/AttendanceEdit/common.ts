@@ -24,6 +24,7 @@ export type AttendanceEditInputs = {
   goDirectlyFlag: UpdateAttendanceInput["goDirectlyFlag"];
   returnDirectlyFlag: UpdateAttendanceInput["returnDirectlyFlag"];
   remarks: UpdateAttendanceInput["remarks"];
+  remarkTags?: string[];
   rests: RestInputs[];
   staffComment?: string;
   histories?: UpdateAttendanceInput["histories"];
@@ -33,18 +34,19 @@ export type AttendanceEditInputs = {
 };
 
 export const defaultValues: AttendanceEditInputs = {
-  startTime: undefined,
-  isDeemedHoliday: undefined,
-  specialHolidayFlag: undefined,
-  endTime: undefined,
-  paidHolidayFlag: undefined,
+  startTime: "",
+  isDeemedHoliday: false,
+  specialHolidayFlag: false,
+  endTime: "",
+  paidHolidayFlag: false,
   // hourlyPaidHolidayHours: undefined,
   hourlyPaidHolidayTimes: [],
   substituteHolidayDate: undefined,
-  absentFlag: undefined,
-  goDirectlyFlag: undefined,
-  returnDirectlyFlag: undefined,
-  remarks: undefined,
+  absentFlag: false,
+  goDirectlyFlag: false,
+  returnDirectlyFlag: false,
+  remarks: "",
+  remarkTags: [],
   rests: [],
   systemComments: [],
 };

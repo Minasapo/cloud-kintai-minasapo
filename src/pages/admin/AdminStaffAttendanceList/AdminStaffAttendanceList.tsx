@@ -328,12 +328,12 @@ export default function AdminStaffAttendanceList() {
 
                         {/* 摘要 */}
                         <SummaryTableCell
-                          paidHolidayFlag={attendance.paidHolidayFlag}
                           substituteHolidayDate={
                             attendance.substituteHolidayDate
                           }
                           remarks={attendance.remarks}
                           specialHolidayFlag={attendance.specialHolidayFlag}
+                          paidHolidayFlag={attendance.paidHolidayFlag}
                           absentFlag={attendance.absentFlag}
                         />
 
@@ -426,11 +426,11 @@ export default function AdminStaffAttendanceList() {
 
                     {/* 摘要 */}
                     <SummaryTableCell
-                      paidHolidayFlag={attendance.paidHolidayFlag}
                       substituteHolidayDate={attendance.substituteHolidayDate}
                       remarks={attendance.remarks}
                       // 特別休暇フラグを渡す
                       specialHolidayFlag={attendance.specialHolidayFlag}
+                      paidHolidayFlag={attendance.paidHolidayFlag}
                       absentFlag={attendance.absentFlag}
                     />
 

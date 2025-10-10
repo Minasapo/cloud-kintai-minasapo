@@ -80,6 +80,7 @@ export default function DesktopEditor() {
     register,
     control,
     setValue,
+    getValues,
     watch,
     handleSubmit,
     isDirty,
@@ -168,6 +169,7 @@ export default function DesktopEditor() {
                 hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
                 workDate={workDate ?? null}
                 visibleMode="staff"
+                getValues={getValues}
               />
             )}
           </GroupContainer>
@@ -204,9 +206,9 @@ export default function DesktopEditor() {
             {/* 動的にタブを構築して、AppConfig のフラグで特別休暇タブを表示制御 */}
             {(() => {
               const tabs: { label: string; panel: JSX.Element }[] = [];
-              // 代休
+              // 振替休日
               tabs.push({
-                label: "代休",
+                label: "振替休日",
                 panel: (
                   <TabPanel value={vacationTab} index={tabs.length}>
                     <SubstituteHolidayDateInput />
@@ -330,7 +332,7 @@ export default function DesktopEditor() {
               );
             })()}
           </GroupContainer>
-          <GroupContainer>
+          <GroupContainer title="備考">
             <RemarksInput />
           </GroupContainer>
           <GroupContainer>

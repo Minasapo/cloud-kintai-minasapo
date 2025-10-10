@@ -110,7 +110,14 @@ export function MobileEditor() {
       label: "有給休暇",
       panel: (
         <TabPanel value={holidayTab} index={tabs.length}>
-          <PaidHolidayFlagInputMobile control={control} setValue={setValue} />
+          <PaidHolidayFlagInputMobile
+            control={control}
+            setValue={setValue}
+            workDate={workDate ? workDate.format("YYYY-MM-DD") : undefined}
+            setPaidHolidayTimes={true}
+            restReplace={restReplace}
+            getValues={getValues}
+          />
         </TabPanel>
       ),
     });
@@ -121,30 +128,29 @@ export function MobileEditor() {
         label: "特別休暇",
         panel: (
           <TabPanel value={holidayTab} index={tabs.length}>
-            <Stack direction="row">
-              <Box sx={{ fontWeight: "bold", width: "120px" }}>特別休暇</Box>
-              <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                <Box sx={{ color: "text.secondary", fontSize: 14 }}>
-                  有給休暇ではない特別な休暇(忌引きなど)です。利用時は管理者へご相談ください。
-                </Box>
-                <Controller
-                  name="specialHolidayFlag"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          {...field}
-                          checked={!!field.value}
-                          onChange={(e) => field.onChange(e.target.checked)}
-                          disabled={changeRequests.length > 0}
-                        />
-                      }
-                      label=""
-                    />
-                  )}
-                />
-              </Stack>
+            {/* 他の休暇項目と同様にラベルを上に配置し、内容は縦並びにする */}
+            <Label>特別休暇</Label>
+            <Stack direction="column" alignItems={"flex-start"} spacing={1}>
+              <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                有給休暇ではない特別な休暇(忌引きなど)です。利用時は管理者へご相談ください。
+              </Box>
+              <Controller
+                name="specialHolidayFlag"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        {...field}
+                        checked={!!field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        disabled={changeRequests.length > 0}
+                      />
+                    }
+                    label=""
+                  />
+                )}
+              />
             </Stack>
           </TabPanel>
         ),
@@ -269,7 +275,7 @@ export function MobileEditor() {
           <TabbedPaidHoliday />
         </GroupContainerMobile>
         <GroupContainerMobile title="備考">
-          <RemarksInput register={register} />
+          <RemarksInput />
         </GroupContainerMobile>
         <GroupContainerMobile title="修正理由">
           <StaffCommentInput />
