@@ -364,29 +364,32 @@ export default function AdminStaffEditor() {
                 </>
               )}
 
-              <TableRow>
-                <TableCell>
-                  <Controller
-                    name="developer"
-                    control={control as unknown as Control<Inputs, any>}
-                    render={({ field }) => (
-                      <Switch
-                        data-testid="developer-flag-checkbox"
-                        checked={Boolean(field.value)}
-                        onChange={() => {
-                          setValue("developer", !field.value, {
-                            shouldDirty: true,
-                          });
-                          field.onChange(!field.value);
-                        }}
-                      />
-                    )}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body1">開発者フラグ</Typography>
-                </TableCell>
-              </TableRow>
+              {/* 開発者フラグ: 高度設定タブでのみ表示 */}
+              {tabIndex === 1 && (
+                <TableRow>
+                  <TableCell>
+                    <Controller
+                      name="developer"
+                      control={control as unknown as Control<Inputs, any>}
+                      render={({ field }) => (
+                        <Switch
+                          data-testid="developer-flag-checkbox"
+                          checked={Boolean(field.value)}
+                          onChange={() => {
+                            setValue("developer", !field.value, {
+                              shouldDirty: true,
+                            });
+                            field.onChange(!field.value);
+                          }}
+                        />
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">開発者フラグ</Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

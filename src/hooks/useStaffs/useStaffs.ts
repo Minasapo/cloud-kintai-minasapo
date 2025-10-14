@@ -86,8 +86,6 @@ export default function useStaffs() {
           res.map((staff) => ({
             id: staff.id,
             cognitoUserId: staff.cognitoUserId,
-            developer: (staff as unknown as Record<string, unknown>)
-              .developer as boolean | undefined,
             familyName: staff.familyName,
             givenName: staff.givenName,
             mailAddress: staff.mailAddress,
@@ -103,6 +101,8 @@ export default function useStaffs() {
             workType: (staff as unknown as Record<string, unknown>).workType as
               | string
               | null,
+            developer: (staff as unknown as Record<string, unknown>)
+              .developer as boolean | undefined,
             approverSetting: staff.approverSetting ?? null,
             approverSingle: staff.approverSingle ?? null,
             approverMultiple: staff.approverMultiple ?? null,
@@ -218,6 +218,7 @@ export default function useStaffs() {
             return s;
           })
         );
+        return; // keep Promise<void> signature
       })
       .catch((e: Error) => {
         throw e;
