@@ -86,6 +86,12 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
       path: "/workflow",
       icon: <ViewListIcon />,
       onClick: () => navigate("/workflow"),
+    {
+      label: "\u30b7\u30d5\u30c8",
+      path: "/shift",
+      icon: <ViewListIcon />,
+      onClick: () => navigate("/shift"),
+    },
     },
     */
     {

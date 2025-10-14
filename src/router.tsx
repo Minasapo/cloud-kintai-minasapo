@@ -31,7 +31,10 @@ import OfficeQRRegister from "./pages/office/qr/OfficeQRRegister";
 import OfficeQRView from "./pages/office/qr/OfficeQRView";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
+import ShiftRequest from "./pages/Shift/ShiftRequest";
+import ShiftDayView from "./pages/ShiftManagement/ShiftDayView";
 import ShiftManagement from "./pages/ShiftManagement/ShiftManagement";
+import StaffShiftList from "./pages/ShiftManagement/StaffShiftList";
 import NewWorkflow from "./pages/Workflow/NewWorkflow";
 import Workflow from "./pages/Workflow/Workflow";
 import WorkflowDetail from "./pages/Workflow/WorkflowDetail";
@@ -89,6 +92,15 @@ const router = createBrowserRouter([
           {
             path: "new",
             element: <NewWorkflow />,
+          },
+        ],
+      },
+      {
+        path: "shift",
+        children: [
+          {
+            index: true,
+            element: <ShiftRequest />,
           },
         ],
       },
@@ -180,6 +192,14 @@ const router = createBrowserRouter([
           {
             path: "shift",
             element: <ShiftManagement />,
+          },
+          {
+            path: "shift/day/:date",
+            element: <ShiftDayView />,
+          },
+          {
+            path: "shift/:staffId",
+            element: <StaffShiftList />,
           },
           {
             path: "master",
