@@ -64,4 +64,3 @@ amplifytools.xcconfig
 playwright-logs/
 playwright-report/
 /.playwright-mcp/
-.playwright-mcp/
