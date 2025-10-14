@@ -173,6 +173,7 @@ export const getStaff = /* GraphQL */ `query GetStaff($id: ID!) {
     }
     sortKey
     workType
+    developer
     approverSetting
     approverSingle
     approverMultiple
@@ -207,6 +208,7 @@ export const listStaff = /* GraphQL */ `query ListStaff(
       }
       sortKey
       workType
+      developer
       approverSetting
       approverSingle
       approverMultiple
@@ -254,6 +256,7 @@ export const staffByCognitoUserId = /* GraphQL */ `query StaffByCognitoUserId(
       }
       sortKey
       workType
+      developer
       approverSetting
       approverSingle
       approverMultiple

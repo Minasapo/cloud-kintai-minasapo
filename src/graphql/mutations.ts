@@ -231,6 +231,7 @@ export const createStaff = /* GraphQL */ `mutation CreateStaff(
     }
     sortKey
     workType
+    developer
     approverSetting
     approverSingle
     approverMultiple
@@ -266,6 +267,7 @@ export const updateStaff = /* GraphQL */ `mutation UpdateStaff(
     }
     sortKey
     workType
+    developer
     approverSetting
     approverSingle
     approverMultiple
@@ -301,6 +303,7 @@ export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
     }
     sortKey
     workType
+    developer
     approverSetting
     approverSingle
     approverMultiple
