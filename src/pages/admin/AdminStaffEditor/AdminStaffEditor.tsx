@@ -185,7 +185,11 @@ export default function AdminStaffEditor() {
             aria-label="スタッフ編集タブ"
           >
             <Tab label="全般" />
-            <Tab label="高度設定" disabled={!cognitoUser?.owner} />
+            <Tab
+              label="高度設定"
+              disabled={!cognitoUser?.owner}
+              data-testid="advanced-tab"
+            />
           </Tabs>
         </Box>
 
@@ -360,38 +364,36 @@ export default function AdminStaffEditor() {
                 </>
               )}
 
-              {tabIndex === 1 && cognitoUser?.owner && (
-                <>
-                  <TableRow>
-                    <TableCell>
-                      <Controller
-                        name="developer"
-                        control={control as unknown as Control<Inputs, any>}
-                        render={({ field }) => (
-                          <Switch
-                            checked={Boolean(field.value)}
-                            onChange={() => {
-                              setValue("developer", !field.value, {
-                                shouldDirty: true,
-                              });
-                              field.onChange(!field.value);
-                            }}
-                          />
-                        )}
+              <TableRow>
+                <TableCell>
+                  <Controller
+                    name="developer"
+                    control={control as unknown as Control<Inputs, any>}
+                    render={({ field }) => (
+                      <Switch
+                        data-testid="developer-flag-checkbox"
+                        checked={Boolean(field.value)}
+                        onChange={() => {
+                          setValue("developer", !field.value, {
+                            shouldDirty: true,
+                          });
+                          field.onChange(!field.value);
+                        }}
                       />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">開発者フラグ</Typography>
-                    </TableCell>
-                  </TableRow>
-                </>
-              )}
+                    )}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body1">開発者フラグ</Typography>
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
 
         <Box sx={{ mt: 4, mb: 8 }}>
           <Button
+            data-testid="save-button"
             variant="contained"
             size="medium"
             disabled={!isValid || !isDirty || saving || isSubmitting}
