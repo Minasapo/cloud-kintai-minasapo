@@ -201,6 +201,7 @@ export default function StaffCreateForm(props) {
     usageStartDate: "",
     sortKey: "",
     workType: "",
+    developer: false,
     approverSetting: "",
     approverSingle: "",
     approverMultiple: [],
@@ -223,6 +224,7 @@ export default function StaffCreateForm(props) {
   );
   const [sortKey, setSortKey] = React.useState(initialValues.sortKey);
   const [workType, setWorkType] = React.useState(initialValues.workType);
+  const [developer, setDeveloper] = React.useState(initialValues.developer);
   const [approverSetting, setApproverSetting] = React.useState(
     initialValues.approverSetting
   );
@@ -248,6 +250,7 @@ export default function StaffCreateForm(props) {
     setUsageStartDate(initialValues.usageStartDate);
     setSortKey(initialValues.sortKey);
     setWorkType(initialValues.workType);
+    setDeveloper(initialValues.developer);
     setApproverSetting(initialValues.approverSetting);
     setApproverSingle(initialValues.approverSingle);
     setApproverMultiple(initialValues.approverMultiple);
@@ -270,6 +273,7 @@ export default function StaffCreateForm(props) {
     usageStartDate: [],
     sortKey: [],
     workType: [],
+    developer: [],
     approverSetting: [],
     approverSingle: [],
     approverMultiple: [],
@@ -312,6 +316,7 @@ export default function StaffCreateForm(props) {
           usageStartDate,
           sortKey,
           workType,
+          developer,
           approverSetting,
           approverSingle,
           approverMultiple,
@@ -389,6 +394,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -427,6 +433,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -465,6 +472,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -503,6 +511,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -541,6 +550,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -579,6 +589,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -617,6 +628,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -655,6 +667,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -693,6 +706,7 @@ export default function StaffCreateForm(props) {
               usageStartDate: value,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -731,6 +745,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey: value,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -769,6 +784,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType: value,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,
@@ -787,6 +803,45 @@ export default function StaffCreateForm(props) {
         hasError={errors.workType?.hasError}
         {...getOverrideProps(overrides, "workType")}
       ></TextField>
+      <SwitchField
+        label="Developer"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={developer}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              cognitoUserId,
+              familyName,
+              givenName,
+              mailAddress,
+              role,
+              enabled,
+              status,
+              owner,
+              usageStartDate,
+              sortKey,
+              workType,
+              developer: value,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
+            };
+            const result = onChange(modelFields);
+            value = result?.developer ?? value;
+          }
+          if (errors.developer?.hasError) {
+            runValidationTasks("developer", value);
+          }
+          setDeveloper(value);
+        }}
+        onBlur={() => runValidationTasks("developer", developer)}
+        errorMessage={errors.developer?.errorMessage}
+        hasError={errors.developer?.hasError}
+        {...getOverrideProps(overrides, "developer")}
+      ></SwitchField>
       <SelectField
         label="Approver setting"
         placeholder="Please select an option"
@@ -807,6 +862,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting: value,
               approverSingle,
               approverMultiple,
@@ -861,6 +917,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle: value,
               approverMultiple,
@@ -895,6 +952,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple: values,
@@ -963,6 +1021,7 @@ export default function StaffCreateForm(props) {
               usageStartDate,
               sortKey,
               workType,
+              developer,
               approverSetting,
               approverSingle,
               approverMultiple,

@@ -6,6 +6,11 @@ Amplifyで動作する勤怠管理のWebアプリケーションです。
 - バックエンド: AWS Amplify
 - E2E テスト: Playwright（`playwright/`）
 
+### Playwright MCP の利用について
+
+- 動作確認やエラー調査を行う際には、Playwright の MCP（Managed Cross Browser Platform）を利用することがあります。MCP を使うとリモートでのブラウザ実行や詳細なログ取得が容易になり、問題の切り分けが速くなります。
+- MCP 用のログイン情報はリポジトリルートの `.env` ファイルに定義されている `PLAYWRIGHT_MCP_EMAIL` と `PLAYWRIGHT_MCP_PASSWORD` を使用してください（`#file:.env` を参照）。
+
 このファイルは、開発ルールと運用上の注意を簡潔にまとめたものです。新規参加者がまず読むべき「クイックスタート」「ページ追加手順」「PR チェックリスト」を含みます。
 
 ## 主要なディレクトリ（抜粋）

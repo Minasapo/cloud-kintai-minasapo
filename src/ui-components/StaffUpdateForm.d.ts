@@ -34,6 +34,7 @@ export declare type StaffUpdateFormInputValues = {
     usageStartDate?: string;
     sortKey?: string;
     workType?: string;
+    developer?: boolean;
     approverSetting?: string;
     approverSingle?: string;
     approverMultiple?: string[];
@@ -51,6 +52,7 @@ export declare type StaffUpdateFormValidationValues = {
     usageStartDate?: ValidationFunction<string>;
     sortKey?: ValidationFunction<string>;
     workType?: ValidationFunction<string>;
+    developer?: ValidationFunction<boolean>;
     approverSetting?: ValidationFunction<string>;
     approverSingle?: ValidationFunction<string>;
     approverMultiple?: ValidationFunction<string>;
@@ -70,6 +72,7 @@ export declare type StaffUpdateFormOverridesProps = {
     usageStartDate?: PrimitiveOverrideProps<TextFieldProps>;
     sortKey?: PrimitiveOverrideProps<TextFieldProps>;
     workType?: PrimitiveOverrideProps<TextFieldProps>;
+    developer?: PrimitiveOverrideProps<SwitchFieldProps>;
     approverSetting?: PrimitiveOverrideProps<SelectFieldProps>;
     approverSingle?: PrimitiveOverrideProps<TextFieldProps>;
     approverMultiple?: PrimitiveOverrideProps<TextFieldProps>;
