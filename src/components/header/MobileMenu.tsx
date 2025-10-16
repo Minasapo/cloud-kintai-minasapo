@@ -1,5 +1,3 @@
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import ViewListIcon from "@mui/icons-material/ViewList";
@@ -14,12 +12,11 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { type ReactElement, useContext, useState } from "react";
+import { type ReactElement, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "../../context/AuthContext";
 import { useMobileDrawer } from "../../hooks/useMobileDrawer";
-import { StaffRole } from "../../hooks/useStaffs/useStaffs";
 import { theme } from "../../lib/theme";
 
 // 型定義
@@ -89,6 +86,12 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
       path: "/workflow",
       icon: <ViewListIcon />,
       onClick: () => navigate("/workflow"),
+    {
+      label: "\u30b7\u30d5\u30c8",
+      path: "/shift",
+      icon: <ViewListIcon />,
+      onClick: () => navigate("/shift"),
+    },
     },
     */
     {
@@ -110,30 +113,7 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
     },
   ];
 
-  // 管理メニュー（管理者のみ表示）
-  const adminItems: MenuItem[] = [
-    {
-      label: "スタッフ管理",
-      path: "/admin/staff",
-      icon: <ViewListIcon />,
-      onClick: () => navigate("/admin/staff"),
-    },
-    {
-      label: "勤怠管理",
-      path: "/admin/attendances",
-      icon: <ViewListIcon />,
-      onClick: () => navigate("/admin/attendances"),
-    },
-    {
-      label: "ワークフロー管理",
-      path: "/admin/workflow",
-      icon: <ViewListIcon />,
-      onClick: () => navigate("/admin/workflow"),
-    },
-  ];
-
-  const [adminOpen, setAdminOpen] = useState(false);
-  const toggleAdmin = () => setAdminOpen((s) => !s);
+  // 管理メニューはモバイル上では表示しない
 
   // ログインページでは表示しない
   if (pathName === "/login") return null;
@@ -155,70 +135,7 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
       <Drawer anchor="right" open={isOpen} onClose={closeDrawer}>
         <MenuList menuItems={menuItems} onClose={closeDrawer} />
 
-        {/* 管理セクション（管理者のみ） */}
-        {(() => {
-          const { isCognitoUserRole } = useContext(AuthContext);
-          if (!isCognitoUserRole) return null;
-          const canViewAdmin =
-            isCognitoUserRole(StaffRole.ADMIN) ||
-            isCognitoUserRole(StaffRole.STAFF_ADMIN);
-          if (!canViewAdmin) return null;
-
-          return (
-            <Box sx={{ width: 250 }}>
-              <List>
-                <ListItem disablePadding>
-                  <ListItemButton onClick={toggleAdmin} sx={{ height: 48 }}>
-                    <ListItemText primary="管理" />
-                    {adminOpen ? <ExpandLess /> : <ExpandMore />}
-                  </ListItemButton>
-                </ListItem>
-                {adminOpen &&
-                  adminItems.map((item, idx) => (
-                    <ListItem key={idx} disablePadding>
-                      <ListItemButton
-                        onClick={() => {
-                          item.onClick && item.onClick();
-                          closeDrawer();
-                        }}
-                        sx={{
-                          pl: 4,
-                          height: 48,
-                          "&:hover, &:focus": {
-                            backgroundColor: "transparent",
-                          },
-                        }}
-                      >
-                        <ListItemIcon>{item.icon}</ListItemIcon>
-                        <ListItemText primary={item.label} />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-              </List>
-              <Divider />
-              {/* 管理の後に設定を表示 */}
-              <List>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => {
-                      navigate("/admin/master");
-                      closeDrawer();
-                    }}
-                    sx={{
-                      height: 48,
-                      "&:hover, &:focus": { backgroundColor: "transparent" },
-                    }}
-                  >
-                    <ListItemIcon>
-                      <ViewListIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="設定" />
-                  </ListItemButton>
-                </ListItem>
-              </List>
-            </Box>
-          );
-        })()}
+        {/* 管理セクションはモバイルでは非表示 */}
       </Drawer>
     </Box>
   );

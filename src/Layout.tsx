@@ -293,11 +293,11 @@ export default function Layout() {
     <AuthContext.Provider value={authContextValue}>
       <AppConfigContext.Provider value={appConfigContextValue}>
         <AppContext.Provider value={appContextValue}>
-          <Stack sx={{ height: "100vh" }}>
+          <Stack sx={{ minHeight: "100vh" }}>
             <Box>
               <Header />
             </Box>
-            <Box sx={{ flexGrow: 2 }}>
+            <Box sx={{ flex: 1, overflow: "auto" }}>
               <Outlet />
             </Box>
             <Box>
