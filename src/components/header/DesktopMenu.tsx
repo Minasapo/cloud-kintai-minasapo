@@ -19,6 +19,8 @@ import { useContext, useEffect, useState } from "react";
 
 import { AppConfigContext } from "../../context/AppConfigContext";
 import { AuthContext } from "../../context/AuthContext";
+import useAuthenticatedUser from "../../hooks/useAuthenticatedUser";
+import fetchStaff from "../../hooks/useStaff/fetchStaff";
 import { StaffRole } from "../../hooks/useStaffs/useStaffs";
 import Link from "../link/Link";
 
@@ -65,15 +67,50 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
   const { user } = useAuthenticator();
   const isMailVerified = user?.attributes?.email_verified ? true : false;
 
+  // developer flag for current staff (used to hide admin shift link)
+  const { authenticatedUser } = useAuthenticatedUser();
+  const [isDeveloper, setIsDeveloper] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      if (!authenticatedUser?.cognitoUserId) {
+        if (mounted) setIsDeveloper(false);
+        return;
+      }
+      try {
+        const staff = await fetchStaff(authenticatedUser.cognitoUserId);
+        const developerFlag = (staff as unknown as Record<string, unknown>)
+          .developer as boolean | undefined;
+        if (mounted) setIsDeveloper(Boolean(developerFlag));
+      } catch (e) {
+        if (mounted) setIsDeveloper(false);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [authenticatedUser]);
+
   if (isMailVerified) {
     if (
       isCognitoUserRole(StaffRole.ADMIN) ||
       isCognitoUserRole(StaffRole.STAFF_ADMIN)
     ) {
       // 通常メニューはフラットに追加。管理はドロップダウンで表示する
-      viewableList.push(...menuList, ...operatorMenuList);
+      // hide top-level "シフト" for non-developers
+      const filteredMenuList = menuList.filter((m) => {
+        if (m.href === "/shift") return isDeveloper === true;
+        return true;
+      });
+      viewableList.push(...filteredMenuList, ...operatorMenuList);
     } else if (isCognitoUserRole(StaffRole.STAFF)) {
-      viewableList.push(...menuList);
+      const filteredMenuList = menuList.filter((m) => {
+        if (m.href === "/shift") return isDeveloper === true;
+        return true;
+      });
+      viewableList.push(...filteredMenuList);
     } else if (isCognitoUserRole(StaffRole.OPERATOR)) {
       viewableList.push(...operatorMenuList);
     }
@@ -150,17 +187,25 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
               open={open}
               onClose={handleClose}
             >
-              {adminMenuList.map((m) => (
-                <MuiMenuItem
-                  key={m.href}
-                  onClick={() => {
-                    handleClose();
-                    window.location.href = m.href;
-                  }}
-                >
-                  {m.label}
-                </MuiMenuItem>
-              ))}
+              {adminMenuList
+                .filter((m) => {
+                  if (m.href === "/admin/shift") {
+                    // only show shift management link when staff has developer flag
+                    return isDeveloper === true;
+                  }
+                  return true;
+                })
+                .map((m) => (
+                  <MuiMenuItem
+                    key={m.href}
+                    onClick={() => {
+                      handleClose();
+                      window.location.href = m.href;
+                    }}
+                  >
+                    {m.label}
+                  </MuiMenuItem>
+                ))}
             </MuiMenu>
           </Box>
         )}

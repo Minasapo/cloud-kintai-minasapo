@@ -16,6 +16,7 @@ import WorkingTime from "./pages/admin/AdminConfigManagement/WorkingTime";
 import AdminHolidayCalendar from "./pages/admin/AdminHolidayCalendar/HolidayCalendar/AdminHolidayCalendar";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminMasterLayout from "./pages/admin/AdminMasterLayout";
+import AdminShiftGuard from "./pages/admin/AdminShiftGuard";
 import AdminStaff from "./pages/admin/AdminStaff/AdminStaff";
 import AdminStaffAttendanceList from "./pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
 import AdminStaffEditor from "./pages/admin/AdminStaffEditor/AdminStaffEditor";
@@ -100,7 +101,11 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ShiftRequest />,
+            element: (
+              <AdminShiftGuard>
+                <ShiftRequest />
+              </AdminShiftGuard>
+            ),
           },
         ],
       },
@@ -191,15 +196,27 @@ const router = createBrowserRouter([
           },
           {
             path: "shift",
-            element: <ShiftManagement />,
+            element: (
+              <AdminShiftGuard>
+                <ShiftManagement />
+              </AdminShiftGuard>
+            ),
           },
           {
             path: "shift/day/:date",
-            element: <ShiftDayView />,
+            element: (
+              <AdminShiftGuard>
+                <ShiftDayView />
+              </AdminShiftGuard>
+            ),
           },
           {
             path: "shift/:staffId",
-            element: <StaffShiftList />,
+            element: (
+              <AdminShiftGuard>
+                <StaffShiftList />
+              </AdminShiftGuard>
+            ),
           },
           {
             path: "master",
