@@ -33,6 +33,7 @@ export declare type StaffCreateFormInputValues = {
     usageStartDate?: string;
     sortKey?: string;
     workType?: string;
+    developer?: boolean;
     approverSetting?: string;
     approverSingle?: string;
     approverMultiple?: string[];
@@ -50,6 +51,7 @@ export declare type StaffCreateFormValidationValues = {
     usageStartDate?: ValidationFunction<string>;
     sortKey?: ValidationFunction<string>;
     workType?: ValidationFunction<string>;
+    developer?: ValidationFunction<boolean>;
     approverSetting?: ValidationFunction<string>;
     approverSingle?: ValidationFunction<string>;
     approverMultiple?: ValidationFunction<string>;
@@ -69,6 +71,7 @@ export declare type StaffCreateFormOverridesProps = {
     usageStartDate?: PrimitiveOverrideProps<TextFieldProps>;
     sortKey?: PrimitiveOverrideProps<TextFieldProps>;
     workType?: PrimitiveOverrideProps<TextFieldProps>;
+    developer?: PrimitiveOverrideProps<SwitchFieldProps>;
     approverSetting?: PrimitiveOverrideProps<SelectFieldProps>;
     approverSingle?: PrimitiveOverrideProps<TextFieldProps>;
     approverMultiple?: PrimitiveOverrideProps<TextFieldProps>;

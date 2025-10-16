@@ -48,6 +48,7 @@ export type StaffType = {
   notifications?: Staff["notifications"];
   sortKey?: Staff["sortKey"];
   workType?: string | null;
+  developer?: Staff["developer"];
   approverSetting?: ApproverSettingMode | null;
   approverSingle?: string | null;
   approverMultiple?: (string | null)[] | null;
@@ -100,6 +101,8 @@ export default function useStaffs() {
             workType: (staff as unknown as Record<string, unknown>).workType as
               | string
               | null,
+            developer: (staff as unknown as Record<string, unknown>)
+              .developer as boolean | undefined,
             approverSetting: staff.approverSetting ?? null,
             approverSingle: staff.approverSingle ?? null,
             approverMultiple: staff.approverMultiple ?? null,
@@ -135,6 +138,8 @@ export default function useStaffs() {
             sortKey: staff.sortKey,
             usageStartDate: staff.usageStartDate,
             workType: staff.workType,
+            developer: (staff as unknown as Record<string, unknown>)
+              .developer as boolean | undefined,
             approverSetting: staff.approverSetting ?? null,
             approverSingle: staff.approverSingle ?? null,
             approverMultiple: staff.approverMultiple ?? null,
@@ -167,6 +172,8 @@ export default function useStaffs() {
             notifications: staff.notifications,
             sortKey: staff.sortKey,
             workType: staff.workType,
+            developer: (staff as unknown as Record<string, unknown>)
+              .developer as boolean | undefined,
             approverSetting: staff.approverSetting ?? null,
             approverSingle: staff.approverSingle ?? null,
             approverMultiple: staff.approverMultiple ?? null,
@@ -200,6 +207,8 @@ export default function useStaffs() {
                 notifications: staff.notifications,
                 sortKey: staff.sortKey,
                 workType: staff.workType,
+                developer: (staff as unknown as Record<string, unknown>)
+                  .developer as boolean | undefined,
                 approverSetting: staff.approverSetting ?? null,
                 approverSingle: staff.approverSingle ?? null,
                 approverMultiple: staff.approverMultiple ?? null,
@@ -209,6 +218,7 @@ export default function useStaffs() {
             return s;
           })
         );
+        return; // keep Promise<void> signature
       })
       .catch((e: Error) => {
         throw e;
@@ -241,6 +251,9 @@ export default function useStaffs() {
       notifications: staff.notifications,
       sortKey: staff.sortKey,
       workType: staff.workType,
+      developer: (staff as unknown as Record<string, unknown>).developer as
+        | boolean
+        | undefined,
       approverSetting: staff.approverSetting ?? null,
       approverSingle: staff.approverSingle ?? null,
       approverMultiple: staff.approverMultiple ?? null,

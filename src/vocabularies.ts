@@ -24,6 +24,11 @@ const vocabularies = {
     Submit: "送信",
     Submitting: "送信中",
     "Your passwords must match": "パスワードが一致しません",
+    "Reset Password": "パスワードリセット",
+    "New Password": "新しいパスワード",
+    "Attempt limit exceeded, please try after some time.":
+      "試行回数の上限を超えました。しばらくしてからもう一度お試しください。",
+    "Resend Code": "コードを再送信",
   },
 };
 

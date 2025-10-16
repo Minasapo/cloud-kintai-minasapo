@@ -216,6 +216,7 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
     }
     sortKey
     workType
+    developer
     approverSetting
     approverSingle
     approverMultiple
@@ -248,6 +249,7 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
     }
     sortKey
     workType
+    developer
     approverSetting
     approverSingle
     approverMultiple
@@ -280,6 +282,7 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
     }
     sortKey
     workType
+    developer
     approverSetting
     approverSingle
     approverMultiple

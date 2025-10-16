@@ -16,6 +16,7 @@ import WorkingTime from "./pages/admin/AdminConfigManagement/WorkingTime";
 import AdminHolidayCalendar from "./pages/admin/AdminHolidayCalendar/HolidayCalendar/AdminHolidayCalendar";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminMasterLayout from "./pages/admin/AdminMasterLayout";
+import AdminShiftGuard from "./pages/admin/AdminShiftGuard";
 import AdminStaff from "./pages/admin/AdminStaff/AdminStaff";
 import AdminStaffAttendanceList from "./pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
 import AdminStaffEditor from "./pages/admin/AdminStaffEditor/AdminStaffEditor";
@@ -31,6 +32,10 @@ import OfficeQRRegister from "./pages/office/qr/OfficeQRRegister";
 import OfficeQRView from "./pages/office/qr/OfficeQRView";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
+import ShiftRequest from "./pages/Shift/ShiftRequest";
+import ShiftDayView from "./pages/ShiftManagement/ShiftDayView";
+import ShiftManagement from "./pages/ShiftManagement/ShiftManagement";
+import StaffShiftList from "./pages/ShiftManagement/StaffShiftList";
 import NewWorkflow from "./pages/Workflow/NewWorkflow";
 import Workflow from "./pages/Workflow/Workflow";
 import WorkflowDetail from "./pages/Workflow/WorkflowDetail";
@@ -88,6 +93,19 @@ const router = createBrowserRouter([
           {
             path: "new",
             element: <NewWorkflow />,
+          },
+        ],
+      },
+      {
+        path: "shift",
+        children: [
+          {
+            index: true,
+            element: (
+              <AdminShiftGuard>
+                <ShiftRequest />
+              </AdminShiftGuard>
+            ),
           },
         ],
       },
@@ -175,6 +193,30 @@ const router = createBrowserRouter([
                 element: <AdminAttendancePrint />,
               },
             ],
+          },
+          {
+            path: "shift",
+            element: (
+              <AdminShiftGuard>
+                <ShiftManagement />
+              </AdminShiftGuard>
+            ),
+          },
+          {
+            path: "shift/day/:date",
+            element: (
+              <AdminShiftGuard>
+                <ShiftDayView />
+              </AdminShiftGuard>
+            ),
+          },
+          {
+            path: "shift/:staffId",
+            element: (
+              <AdminShiftGuard>
+                <StaffShiftList />
+              </AdminShiftGuard>
+            ),
           },
           {
             path: "master",

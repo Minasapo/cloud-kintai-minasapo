@@ -22,6 +22,7 @@ type Staff @model @auth(rules: [{ allow: private }]) {
   notifications: Notification
   sortKey: String
   workType: String
+  developer: Boolean
   approverSetting: ApproverSettingMode
   approverSingle: String
   approverMultiple: [String]
