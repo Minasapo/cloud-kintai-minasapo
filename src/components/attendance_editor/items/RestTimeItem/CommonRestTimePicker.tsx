@@ -2,7 +2,10 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import { useContext } from "react";
 import { Controller } from "react-hook-form";
+
+import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
 
 interface CommonRestTimePickerProps {
   name: string;
@@ -28,6 +31,8 @@ export function CommonRestTimePicker({
   chipLabel,
   onChipClick,
 }: CommonRestTimePickerProps) {
+  const { readOnly } = useContext(AttendanceEditContext);
+
   return (
     <>
       <Controller
@@ -40,6 +45,7 @@ export function CommonRestTimePicker({
             slotProps={{
               textField: { size: "small" },
             }}
+            disabled={!!readOnly}
             onChange={(newValue) => {
               if (newValue && !newValue.isValid()) {
                 return;
@@ -73,7 +79,10 @@ export function CommonRestTimePicker({
           variant="outlined"
           color="success"
           icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-          onClick={onChipClick}
+          onClick={() => {
+            if (readOnly) return;
+            onChipClick();
+          }}
         />
       </Box>
     </>

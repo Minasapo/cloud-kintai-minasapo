@@ -12,7 +12,7 @@ export default function StartTimeInputMobile({
 }: {
   dataTestId?: string;
 } = {}) {
-  const { workDate, setValue, watch, changeRequests } = useContext(
+  const { workDate, setValue, watch, changeRequests, readOnly } = useContext(
     AttendanceEditContext
   );
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
@@ -60,8 +60,9 @@ export default function StartTimeInputMobile({
               color="success"
               variant="outlined"
               icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-              disabled={changeRequests.length > 0}
+              disabled={changeRequests.length > 0 || !!readOnly}
               onClick={() => {
+                if (readOnly) return;
                 const startTime = dayjs(
                   `${workDate.format("YYYY-MM-DD")} ${entry.time}`
                 ).toISOString();

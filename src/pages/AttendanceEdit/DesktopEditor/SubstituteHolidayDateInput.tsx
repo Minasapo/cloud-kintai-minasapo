@@ -20,9 +20,8 @@ const Label = styled(Typography)(() => ({
 }));
 
 export function SubstituteHolidayDateInput() {
-  const { control, setValue, restReplace, changeRequests } = useContext(
-    AttendanceEditContext
-  );
+  const { control, setValue, restReplace, changeRequests, readOnly } =
+    useContext(AttendanceEditContext);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDate, setPendingDate] = useState<dayjs.Dayjs | null>(null);
@@ -37,7 +36,6 @@ export function SubstituteHolidayDateInput() {
       <Controller
         name="substituteHolidayDate"
         control={control}
-        disabled={changeRequests.length > 0}
         render={({ field }) => (
           <>
             <DatePicker
@@ -48,7 +46,9 @@ export function SubstituteHolidayDateInput() {
               slotProps={{
                 textField: { size: "small" },
               }}
+              disabled={changeRequests.length > 0 || !!readOnly}
               onAccept={(date) => {
+                if (readOnly) return;
                 // 新しい日付が設定された場合は確認ダイアログを表示し、
                 // ユーザーが承認したときのみフォーム値とフラグをクリアする
                 if (date) {
@@ -96,6 +96,12 @@ export function SubstituteHolidayDateInput() {
                 </Button>
                 <Button
                   onClick={() => {
+                    if (readOnly) {
+                      setConfirmOpen(false);
+                      setPendingDate(null);
+                      return;
+                    }
+
                     if (pendingDate) {
                       field.onChange(pendingDate);
 

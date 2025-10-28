@@ -10,6 +10,9 @@ import {
   FormControlLabel,
   IconButton,
   LinearProgress,
+  List,
+  ListItemButton,
+  ListItemText,
   Stack,
   styled,
   Switch,
@@ -21,9 +24,9 @@ import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { SystemCommentInput } from "@/API";
+import { AttendanceHistory, SystemCommentInput } from "@/API";
 import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
 import IsDeemedHolidayFlagInput from "@/components/attendance_editor/IsDeemedHolidayFlagInput";
 import PaidHolidayFlagInputCommon from "@/components/attendance_editor/PaidHolidayFlagInput";
@@ -98,7 +101,7 @@ const SaveButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export default function AttendanceEditor() {
+export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const {
     getLunchRestStartTime,
     getLunchRestEndTime,
@@ -112,6 +115,7 @@ export default function AttendanceEditor() {
   const dispatch = useAppDispatchV2();
 
   const { targetWorkDate, staffId: targetStaffId } = useParams();
+  const navigate = useNavigate();
   const { staffs, loading: staffsLoading, error: staffSError } = useStaffs();
   const { attendance, getAttendance, updateAttendance, createAttendance } =
     useAttendance();
@@ -170,6 +174,116 @@ export default function AttendanceEditor() {
     name: "hourlyPaidHolidayTimes",
   });
 
+  // histories (sorted newest first) and navigation state
+  const sortedHistories = useMemo<AttendanceHistory[]>(() => {
+    if (!attendance?.histories) return [];
+    return attendance.histories
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .sort((a, b) =>
+        dayjs(b.createdAt).isBefore(dayjs(a.createdAt)) ? -1 : 1
+      ) as AttendanceHistory[];
+  }, [attendance?.histories]);
+
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
+  const [historiesLoading, setHistoriesLoading] = useState<boolean>(false);
+
+  // apply selected history to the form
+  const applyHistory = useCallback(
+    (index: number) => {
+      if (!sortedHistories || !sortedHistories[index]) return;
+      const h = sortedHistories[index];
+
+      logger.debug(
+        `applyHistory called index=${index}, createdAt=${h?.createdAt}`
+      );
+
+      try {
+        // set simple fields
+        setValue("startTime", h.startTime ?? "");
+        setValue("endTime", h.endTime ?? "");
+        setValue("goDirectlyFlag", h.goDirectlyFlag ?? false);
+        setValue("returnDirectlyFlag", h.returnDirectlyFlag ?? false);
+        setValue("paidHolidayFlag", h.paidHolidayFlag ?? false);
+        setValue("specialHolidayFlag", h.specialHolidayFlag ?? false);
+        setValue("remarks", h.remarks ?? "");
+        setValue("substituteHolidayDate", h.substituteHolidayDate ?? undefined);
+
+        // rests
+        const rests: RestInputs[] = h.rests
+          ? h.rests
+              .filter((r): r is NonNullable<typeof r> => r !== null)
+              .map((r) => ({
+                startTime: r.startTime ?? null,
+                endTime: r.endTime ?? null,
+              }))
+          : [];
+        restReplace(rests);
+
+        // hourly paid holiday times
+        const hourly: HourlyPaidHolidayTimeInputs[] = h.hourlyPaidHolidayTimes
+          ? h.hourlyPaidHolidayTimes
+              .filter((r): r is NonNullable<typeof r> => r !== null)
+              .map((r) => ({
+                startTime: r.startTime ?? null,
+                endTime: r.endTime ?? null,
+              }))
+          : [];
+        hourlyPaidHolidayTimeReplace(hourly);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to apply history to form:", e);
+      }
+    },
+    [sortedHistories, setValue, restReplace, hourlyPaidHolidayTimeReplace]
+  );
+
+  // reset history index when histories change
+  useEffect(() => {
+    if (!sortedHistories || sortedHistories.length === 0) return;
+    setHistoryIndex(0);
+  }, [sortedHistories.length]);
+
+  useEffect(() => {
+    if (!sortedHistories || sortedHistories.length === 0) return;
+    applyHistory(historyIndex);
+  }, [historyIndex, sortedHistories, applyHistory]);
+
+  // When opened in readOnly (履歴表示) mode, ensure the latest history is applied
+  // immediately even if historyIndex is already 0 (state may not change).
+  useEffect(() => {
+    if (!readOnly) return;
+    if (!sortedHistories || sortedHistories.length === 0) return;
+    try {
+      // apply latest (index 0) and ensure index reflects it
+      applyHistory(0);
+      setHistoryIndex(0);
+    } catch (e) {
+      // noop
+    }
+  }, [readOnly, sortedHistories.length, applyHistory]);
+
+  // If attendance is fetched after mount, some effects may overwrite form values.
+  // Ensure that once attendance is available and we're in readOnly, we re-apply
+  // the latest history asynchronously so it wins over other setValue calls.
+  useEffect(() => {
+    if (!readOnly) return;
+    if (!attendance) return;
+    if (!sortedHistories || sortedHistories.length === 0) return;
+
+    // schedule after current tick so other attendance->setValue effects run first
+    const id = window.setTimeout(() => {
+      try {
+        logger.debug(`re-applying latest history after attendance load`);
+        applyHistory(0);
+        setHistoryIndex(0);
+      } catch (e) {
+        // noop
+      }
+    }, 0);
+
+    return () => window.clearTimeout(id);
+  }, [attendance, readOnly, sortedHistories.length, applyHistory]);
+
   useEffect(() => {
     if (!targetStaffId) return;
 
@@ -206,14 +320,19 @@ export default function AttendanceEditor() {
     reset();
 
     setWorkDate(AttendanceDateTime.convertToDayjs(targetWorkDate));
-
+    setHistoriesLoading(true);
     getAttendance(
       staff.cognitoUserId,
       new AttendanceDateTime().setDateString(targetWorkDate).toDataFormat()
-    ).catch((e: Error) => {
-      logger.debug(e);
-      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
-    });
+    )
+      .then(() => {
+        // no-op
+      })
+      .catch((e: Error) => {
+        logger.debug(e);
+        dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+      })
+      .finally(() => setHistoriesLoading(false));
   }, [staff, targetStaffId, targetWorkDate]);
 
   const lunchRestStartTime = useMemo(
@@ -770,6 +889,7 @@ export default function AttendanceEditor() {
         hourlyPaidHolidayTimeUpdate,
         hourlyPaidHolidayTimeReplace,
         hourlyPaidHolidayEnabled: getHourlyPaidHolidayEnabled(),
+        readOnly,
       }}
     >
       <Stack spacing={2} sx={{ pb: 5 }}>
@@ -796,363 +916,485 @@ export default function AttendanceEditor() {
         </Box>
         <Box>
           <Title>勤怠編集</Title>
-        </Box>
-        <Stack spacing={2} sx={{ px: 30 }}>
-          <Box>
-            {errors.startTime && (
-              <Box>
-                <Alert severity="error">
-                  <AlertTitle>入力内容に誤りがあります。</AlertTitle>
-                  <Typography variant="body2">
-                    {errors.startTime.message}
-                  </Typography>
-                </Alert>
-              </Box>
-            )}
-            {!attendance && (
-              <Box>
-                <Alert severity="info">
-                  指定された日付に勤怠情報の登録がありません。保存時に新規作成されます。
-                </Alert>
-              </Box>
-            )}
-          </Box>
-          <Stack direction="row" spacing={1}>
-            <EditAttendanceHistoryList />
-            <SystemCommentList />
-          </Stack>
-          <GroupContainer>
-            <QuickInputButtons
-              setValue={setValue}
-              restReplace={restReplace}
-              hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
-              workDate={workDate}
-              visibleMode="admin"
-              getValues={getValues}
-            />
-          </GroupContainer>
-          <GroupContainer>
-            <Box>
-              <WorkDateItem
-                staffId={targetStaffId}
-                workDate={workDate}
-                MoveDateItemComponent={MoveDateItem}
-              />
-            </Box>
-          </GroupContainer>
-          <GroupContainer>
-            <Stack spacing={2}>
-              <StaffNameItem />
-              <WorkTypeItem />
-            </Stack>
-          </GroupContainer>
-          <GroupContainer>
-            <WorkTimeItem />
-            <GoDirectlyFlagCheckbox
-              name="goDirectlyFlag"
-              control={control}
-              disabled={changeRequests.length > 0}
-              onChangeExtra={(checked) => {
-                if (checked) {
-                  setValue("startTime", getStartTime().toISOString());
-                }
-              }}
-            />
-            <ReturnDirectlyFlagInput />
-            <Stack direction="row">
-              <Box
-                sx={{ fontWeight: "bold", width: "150px" }}
-              >{`休憩時間(${restFields.length}件)`}</Box>
-              <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                {restFields.length === 0 && (
-                  <Stack direction="column" spacing={1}>
-                    <Alert severity="info">
-                      昼休憩はスタッフが退勤打刻時に{lunchRestStartTime}〜
-                      {lunchRestEndTime}で自動打刻されます。
-                    </Alert>
-                    {visibleRestWarning && (
-                      <Box>
-                        <LunchRestTimeNotSetWarning
-                          targetWorkDate={targetWorkDate}
-                        />
-                      </Box>
+          {readOnly && (
+            <Box sx={{ mt: 1 }}>
+              <Alert severity="info">
+                <div>この画面は表示専用です（編集はできません）</div>
+                {sortedHistories[historyIndex] && (
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    履歴作成日時:{" "}
+                    {dayjs(sortedHistories[historyIndex].createdAt).format(
+                      "YYYY/MM/DD HH:mm:ss"
                     )}
-                  </Stack>
-                )}
-                {restFields.map((rest, index) => (
-                  <RestTimeItem key={index} rest={rest} index={index} />
-                ))}
-                <Box>
-                  <IconButton
-                    aria-label="staff-search"
-                    onClick={() =>
-                      restAppend({
-                        startTime: null,
-                        endTime: null,
-                      })
-                    }
-                  >
-                    <AddAlarmIcon />
-                  </IconButton>
-                </Box>
-              </Stack>
-            </Stack>
-            <Box>
-              <SeparatorItem />
-            </Box>
-            <Box>
-              <ProductionTimeItem
-                time={totalProductionTime}
-                hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
-              />
-            </Box>
-          </GroupContainer>
-          <GroupContainer>
-            {(() => {
-              const tabs: { label: string; panel: JSX.Element }[] = [];
-              // 振替休日
-              tabs.push({
-                label: "振替休日",
-                panel: (
-                  <TabPanel value={vacationTab} index={tabs.length}>
-                    <SubstituteHolidayDateInput />
-                  </TabPanel>
-                ),
-              });
-
-              // 有給(1日)
-              tabs.push({
-                label: "有給(1日)",
-                panel: (
-                  <TabPanel value={vacationTab} index={tabs.length}>
-                    <PaidHolidayFlagInputCommon
-                      label="有給休暇(1日)"
-                      control={control}
-                      setValue={setValue}
-                      workDate={workDate ? workDate.toISOString() : undefined}
-                      setPaidHolidayTimes={true}
-                      disabled={changeRequests.length > 0}
-                      restReplace={restReplace}
-                      getValues={getValues}
-                    />
-                  </TabPanel>
-                ),
-              });
-
-              // 欠勤（AppConfig の absentEnabled が有効な場合のみ表示）
-              if (getAbsentEnabled && getAbsentEnabled()) {
-                tabs.push({
-                  label: "欠勤",
-                  panel: (
-                    <TabPanel value={vacationTab} index={tabs.length}>
-                      <Box sx={{ mt: 1 }}>
-                        <Stack direction="row" alignItems={"center"}>
-                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                            欠勤
-                          </Box>
-                          <Box>
-                            <Controller
-                              name="absentFlag"
-                              control={control}
-                              render={({ field }) => (
-                                <Checkbox
-                                  {...field}
-                                  checked={field.value || false}
-                                  disabled={changeRequests.length > 0}
-                                />
-                              )}
-                            />
-                          </Box>
-                        </Stack>
-                      </Box>
-                    </TabPanel>
-                  ),
-                });
-              }
-
-              // 特別休暇（AppConfigのフラグがONの時のみ）
-              if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
-                tabs.push({
-                  label: "特別休暇",
-                  panel: (
-                    <TabPanel value={vacationTab} index={tabs.length}>
-                      <Box sx={{ mt: 1 }}>
-                        <Stack direction="row" alignItems={"center"}>
-                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                            特別休暇
-                          </Box>
-                          <Box>
-                            <Controller
-                              name="specialHolidayFlag"
-                              control={control}
-                              render={({ field }) => (
-                                <Checkbox
-                                  {...field}
-                                  checked={field.value || false}
-                                  disabled={changeRequests.length > 0}
-                                />
-                              )}
-                            />
-                          </Box>
-                        </Stack>
-                      </Box>
-                    </TabPanel>
-                  ),
-                });
-              }
-
-              // 時間単位休暇
-              if (getHourlyPaidHolidayEnabled()) {
-                tabs.push({
-                  label: `時間単位(${hourlyPaidHolidayTimeFields.length}件)`,
-                  panel: (
-                    <TabPanel value={vacationTab} index={tabs.length}>
-                      <Stack spacing={1}>
-                        <Stack direction="row">
-                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                            {`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}
-                          </Box>
-                          <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                            {hourlyPaidHolidayTimeFields.length === 0 && (
-                              <Box
-                                sx={{ color: "text.secondary", fontSize: 14 }}
-                              >
-                                時間単位休暇の時間帯を追加してください。
-                              </Box>
-                            )}
-                            {hourlyPaidHolidayTimeFields.map(
-                              (hourlyPaidHolidayTime, index) => (
-                                <HourlyPaidHolidayTimeItem
-                                  key={hourlyPaidHolidayTime.id}
-                                  time={hourlyPaidHolidayTime}
-                                  index={index}
-                                />
-                              )
-                            )}
-                            <Box>
-                              <IconButton
-                                aria-label="add-hourly-paid-holiday-time"
-                                onClick={() =>
-                                  hourlyPaidHolidayTimeAppend({
-                                    startTime: null,
-                                    endTime: null,
-                                  })
-                                }
-                              >
-                                <AddAlarmIcon />
-                              </IconButton>
-                            </Box>
-                          </Stack>
-                        </Stack>
-                      </Stack>
-                    </TabPanel>
-                  ),
-                });
-              }
-
-              // 指定休日
-              tabs.push({
-                label: "指定休日",
-                panel: (
-                  <TabPanel value={vacationTab} index={tabs.length}>
-                    <Box sx={{ mt: 1 }}>
-                      <IsDeemedHolidayFlagInput
-                        control={control}
-                        name="isDeemedHoliday"
-                        disabled={!(staff?.workType === "shift")}
-                        helperText={
-                          staff?.workType === "shift"
-                            ? undefined
-                            : "※シフト勤務のスタッフのみ設定できます"
-                        }
-                      />
-                    </Box>
-                  </TabPanel>
-                ),
-              });
-
-              return (
-                <>
-                  <Tabs
-                    value={vacationTab}
-                    onChange={(_, v) => setVacationTab(v)}
-                    aria-label="vacation-tabs"
-                    sx={{ borderBottom: 1, borderColor: "divider" }}
-                  >
-                    {tabs.map((t, i) => (
-                      <Tab key={i} label={t.label} />
-                    ))}
-                  </Tabs>
-                  {tabs.map((t, i) => (
-                    <div key={`panel-${i}`}>{t.panel}</div>
-                  ))}
-                </>
-              );
-            })()}
-          </GroupContainer>
-          <GroupContainer title="備考">
-            <RemarksItem />
-          </GroupContainer>
-          <GroupContainer>
-            {attendance?.updatedAt && (
-              <Stack direction="row" alignItems={"center"}>
-                <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                  最終更新日時
-                </Box>
-                <Box sx={{ flexGrow: 2 }}>
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ pl: 1 }}
-                  >
-                    {dayjs(attendance.updatedAt).format("YYYY/MM/DD HH:mm:ss")}
                   </Typography>
+                )}
+              </Alert>
+            </Box>
+          )}
+          {/* 戻るボタンをアラート下に移動 */}
+          {readOnly && (
+            <Box sx={{ mt: 1 }}>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  const date = workDate
+                    ? workDate.format(AttendanceDate.DataFormat)
+                    : targetWorkDate;
+                  const sid = targetStaffId;
+                  if (date && sid) {
+                    navigate(`/admin/attendances/edit/${date}/${sid}`);
+                  }
+                }}
+                sx={{ zIndex: 1500, pointerEvents: "auto" }}
+              >
+                編集画面に戻る
+              </Button>
+            </Box>
+          )}
+        </Box>
+
+        {/* 履歴一覧とフォームを左右に並べる（表示専用モード） */}
+        <Box
+          sx={
+            readOnly
+              ? { mt: 1, display: "flex", gap: 2, alignItems: "flex-start" }
+              : {}
+          }
+        >
+          {/* 左: 履歴リスト（表示専用時） */}
+          {readOnly && (
+            <Box
+              sx={{
+                width: 260,
+                maxHeight: "60vh",
+                overflowY: "auto",
+                zIndex: 1500,
+                pointerEvents: "auto",
+              }}
+            >
+              {historiesLoading ? (
+                <Box sx={{ p: 2 }}>
+                  <LinearProgress />
                 </Box>
-              </Stack>
-            )}
-            <Box>
-              <Stack direction="row" alignItems={"center"}>
-                <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                  メール設定
-                </Box>
-                <Box>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={enabledSendMail}
-                        onChange={() => setEnabledSendMail(!enabledSendMail)}
+              ) : sortedHistories && sortedHistories.length > 0 ? (
+                <List dense disablePadding>
+                  {sortedHistories.map((h, idx) => (
+                    <ListItemButton
+                      key={idx}
+                      selected={idx === historyIndex}
+                      onClick={() => {
+                        setHistoryIndex(idx);
+                        try {
+                          applyHistory(idx);
+                        } catch (e) {
+                          // noop
+                        }
+                      }}
+                    >
+                      <ListItemText
+                        primary={`履歴 #${sortedHistories.length - idx}`}
+                        secondary={dayjs(h.createdAt).format(
+                          "YYYY/MM/DD HH:mm:ss"
+                        )}
                       />
-                    }
-                    label="スタッフに変更通知メールを送信する"
+                    </ListItemButton>
+                  ))}
+                </List>
+              ) : (
+                <Box sx={{ p: 2 }}>
+                  <Alert severity="info">履歴がありません。</Alert>
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* 右: フォーム（常に表示） */}
+          <Box sx={{ flexGrow: 1 }}>
+            <Stack spacing={2} sx={{ px: 30 }}>
+              {errors.startTime && (
+                <Box>
+                  <Alert severity="error">
+                    <AlertTitle>入力内容に誤りがあります。</AlertTitle>
+                    <Typography variant="body2">
+                      {errors.startTime?.message}
+                    </Typography>
+                  </Alert>
+                </Box>
+              )}
+
+              {!attendance && (
+                <Box>
+                  <Alert severity="info">
+                    指定された日付に勤怠情報の登録がありません。保存時に新規作成されます。
+                  </Alert>
+                </Box>
+              )}
+
+              <Stack direction="row" spacing={1}>
+                {!readOnly && <EditAttendanceHistoryList />}
+                {!readOnly && <SystemCommentList />}
+              </Stack>
+
+              {!readOnly && (
+                <GroupContainer>
+                  <QuickInputButtons
+                    setValue={setValue}
+                    restReplace={restReplace}
+                    hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
+                    workDate={workDate}
+                    visibleMode="admin"
+                    getValues={getValues}
+                    readOnly={readOnly}
+                  />
+                </GroupContainer>
+              )}
+
+              <GroupContainer>
+                <Box>
+                  <WorkDateItem
+                    staffId={targetStaffId}
+                    workDate={workDate}
+                    MoveDateItemComponent={MoveDateItem}
                   />
                 </Box>
-              </Stack>
-            </Box>
-          </GroupContainer>
-          <Stack
-            direction="row"
-            alignItems={"center"}
-            justifyContent={"center"}
-            spacing={3}
-          >
-            <Box>
-              <SaveButton
-                onClick={handleSubmit(onSubmit)}
-                disabled={!isValid || !isDirty || isSubmitting}
-                startIcon={
-                  isSubmitting ? <CircularProgress size={"24"} /> : null
-                }
+              </GroupContainer>
+
+              <GroupContainer>
+                <Stack spacing={2}>
+                  <StaffNameItem />
+                  <WorkTypeItem />
+                </Stack>
+              </GroupContainer>
+
+              <GroupContainer>
+                <WorkTimeItem />
+                <GoDirectlyFlagCheckbox
+                  name="goDirectlyFlag"
+                  control={control}
+                  disabled={changeRequests.length > 0 || !!readOnly}
+                  onChangeExtra={(checked) => {
+                    if (checked)
+                      setValue("startTime", getStartTime().toISOString());
+                  }}
+                />
+                <ReturnDirectlyFlagInput />
+
+                <Stack direction="row">
+                  <Box
+                    sx={{ fontWeight: "bold", width: "150px" }}
+                  >{`休憩時間(${restFields.length}件)`}</Box>
+                  <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                    {restFields.length === 0 && (
+                      <Stack direction="column" spacing={1}>
+                        <Alert severity="info">
+                          昼休憩はスタッフが退勤打刻時に{lunchRestStartTime}〜
+                          {lunchRestEndTime}で自動打刻されます。
+                        </Alert>
+                        {visibleRestWarning && (
+                          <Box>
+                            <LunchRestTimeNotSetWarning
+                              targetWorkDate={targetWorkDate}
+                            />
+                          </Box>
+                        )}
+                      </Stack>
+                    )}
+
+                    {restFields.map((rest, index) => (
+                      <RestTimeItem key={index} rest={rest} index={index} />
+                    ))}
+
+                    <Box>
+                      <IconButton
+                        aria-label="staff-search"
+                        onClick={() =>
+                          restAppend({ startTime: null, endTime: null })
+                        }
+                        disabled={!!readOnly}
+                      >
+                        <AddAlarmIcon />
+                      </IconButton>
+                    </Box>
+                  </Stack>
+                </Stack>
+
+                <Box>
+                  <SeparatorItem />
+                </Box>
+
+                <Box>
+                  <ProductionTimeItem
+                    time={totalProductionTime}
+                    hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
+                  />
+                </Box>
+              </GroupContainer>
+
+              {/* 休暇タブ群（長いので省略せず既存ロジックを再利用） */}
+              <GroupContainer>
+                {(() => {
+                  const tabs: { label: string; panel: JSX.Element }[] = [];
+                  // 振替休日
+                  tabs.push({
+                    label: "振替休日",
+                    panel: (
+                      <TabPanel value={vacationTab} index={tabs.length}>
+                        <SubstituteHolidayDateInput />
+                      </TabPanel>
+                    ),
+                  });
+                  // 有給(1日)
+                  tabs.push({
+                    label: "有給(1日)",
+                    panel: (
+                      <TabPanel value={vacationTab} index={tabs.length}>
+                        <PaidHolidayFlagInputCommon
+                          label="有給休暇(1日)"
+                          control={control}
+                          setValue={setValue}
+                          workDate={
+                            workDate ? workDate.toISOString() : undefined
+                          }
+                          setPaidHolidayTimes={true}
+                          disabled={changeRequests.length > 0 || !!readOnly}
+                          restReplace={restReplace}
+                          getValues={getValues}
+                        />
+                      </TabPanel>
+                    ),
+                  });
+                  if (getAbsentEnabled && getAbsentEnabled()) {
+                    tabs.push({
+                      label: "欠勤",
+                      panel: (
+                        <TabPanel value={vacationTab} index={tabs.length}>
+                          <Box sx={{ mt: 1 }}>
+                            <Stack direction="row" alignItems={"center"}>
+                              <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                                欠勤
+                              </Box>
+                              <Box>
+                                <Controller
+                                  name="absentFlag"
+                                  control={control}
+                                  render={({ field }) => (
+                                    <Checkbox
+                                      {...field}
+                                      checked={field.value || false}
+                                      disabled={
+                                        changeRequests.length > 0 || !!readOnly
+                                      }
+                                    />
+                                  )}
+                                />
+                              </Box>
+                            </Stack>
+                          </Box>
+                        </TabPanel>
+                      ),
+                    });
+                  }
+                  if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
+                    tabs.push({
+                      label: "特別休暇",
+                      panel: (
+                        <TabPanel value={vacationTab} index={tabs.length}>
+                          <Box sx={{ mt: 1 }}>
+                            <Stack direction="row" alignItems={"center"}>
+                              <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                                特別休暇
+                              </Box>
+                              <Box>
+                                <Controller
+                                  name="specialHolidayFlag"
+                                  control={control}
+                                  render={({ field }) => (
+                                    <Checkbox
+                                      {...field}
+                                      checked={field.value || false}
+                                      disabled={
+                                        changeRequests.length > 0 || !!readOnly
+                                      }
+                                    />
+                                  )}
+                                />
+                              </Box>
+                            </Stack>
+                          </Box>
+                        </TabPanel>
+                      ),
+                    });
+                  }
+                  if (getHourlyPaidHolidayEnabled()) {
+                    tabs.push({
+                      label: `時間単位(${hourlyPaidHolidayTimeFields.length}件)`,
+                      panel: (
+                        <TabPanel value={vacationTab} index={tabs.length}>
+                          <Stack spacing={1}>
+                            <Stack direction="row">
+                              <Box
+                                sx={{ fontWeight: "bold", width: "150px" }}
+                              >{`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}</Box>
+                              <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                                {hourlyPaidHolidayTimeFields.length === 0 && (
+                                  <Box
+                                    sx={{
+                                      color: "text.secondary",
+                                      fontSize: 14,
+                                    }}
+                                  >
+                                    時間単位休暇の時間帯を追加してください。
+                                  </Box>
+                                )}
+                                {hourlyPaidHolidayTimeFields.map(
+                                  (hourlyPaidHolidayTime, index) => (
+                                    <HourlyPaidHolidayTimeItem
+                                      key={hourlyPaidHolidayTime.id}
+                                      time={hourlyPaidHolidayTime}
+                                      index={index}
+                                    />
+                                  )
+                                )}
+                                <Box>
+                                  <IconButton
+                                    aria-label="add-hourly-paid-holiday-time"
+                                    onClick={() =>
+                                      hourlyPaidHolidayTimeAppend({
+                                        startTime: null,
+                                        endTime: null,
+                                      })
+                                    }
+                                    disabled={!!readOnly}
+                                  >
+                                    <AddAlarmIcon />
+                                  </IconButton>
+                                </Box>
+                              </Stack>
+                            </Stack>
+                          </Stack>
+                        </TabPanel>
+                      ),
+                    });
+                  }
+                  // 指定休日
+                  tabs.push({
+                    label: "指定休日",
+                    panel: (
+                      <TabPanel value={vacationTab} index={tabs.length}>
+                        <Box sx={{ mt: 1 }}>
+                          <IsDeemedHolidayFlagInput
+                            control={control}
+                            name="isDeemedHoliday"
+                            disabled={!(staff?.workType === "shift") || !!readOnly}
+                            helperText={
+                              staff?.workType === "shift"
+                                ? undefined
+                                : "※シフト勤務のスタッフのみ設定できます"
+                            }
+                          />
+                        </Box>
+                      </TabPanel>
+                    ),
+                  });
+
+                  return (
+                    <>
+                      <Tabs
+                        value={vacationTab}
+                        onChange={(_, v) => setVacationTab(v)}
+                        aria-label="vacation-tabs"
+                        sx={{ borderBottom: 1, borderColor: "divider" }}
+                      >
+                        {tabs.map((t, i) => (
+                          <Tab key={i} label={t.label} />
+                        ))}
+                      </Tabs>
+                      {tabs.map((t, i) => (
+                        <div key={`panel-${i}`}>{t.panel}</div>
+                      ))}
+                    </>
+                  );
+                })()}
+              </GroupContainer>
+
+              <GroupContainer title="備考">
+                <RemarksItem />
+              </GroupContainer>
+
+              {!readOnly && (
+                <GroupContainer>
+                  {attendance?.updatedAt && (
+                    <Stack direction="row" alignItems={"center"}>
+                      <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                        最終更新日時
+                      </Box>
+                      <Box sx={{ flexGrow: 2 }}>
+                        <Typography
+                          variant="body1"
+                          color="text.secondary"
+                          sx={{ pl: 1 }}
+                        >
+                          {dayjs(attendance.updatedAt).format(
+                            "YYYY/MM/DD HH:mm:ss"
+                          )}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  )}
+                  <Box>
+                    <Stack direction="row" alignItems={"center"}>
+                      <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                        メール設定
+                      </Box>
+                      <Box>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={enabledSendMail}
+                              onChange={() =>
+                                setEnabledSendMail(!enabledSendMail)
+                              }
+                            />
+                          }
+                          label="スタッフに変更通知メールを送信する"
+                        />
+                      </Box>
+                    </Stack>
+                  </Box>
+                </GroupContainer>
+              )}
+
+              <Stack
+                direction="row"
+                alignItems={"center"}
+                justifyContent={"center"}
+                spacing={3}
               >
-                保存
-              </SaveButton>
-            </Box>
-          </Stack>
-        </Stack>
+                <Box>
+                  {!readOnly && (
+                    <SaveButton
+                      onClick={handleSubmit(onSubmit)}
+                      disabled={!isValid || !isDirty || isSubmitting}
+                      startIcon={
+                        isSubmitting ? <CircularProgress size={"24"} /> : null
+                      }
+                    >
+                      保存
+                    </SaveButton>
+                  )}
+                </Box>
+              </Stack>
+            </Stack>
+          </Box>
+        </Box>
         <ChangeRequestDialog
           attendance={attendance}
           updateAttendance={updateAttendance}
           staff={staff}
         />
+        {/* readOnly mode: don't overlay the whole page. Inputs/components
+            should rely on their own `disabled`/`readOnly` props so the UI
+            remains visible but non-editable where appropriate. */}
       </Stack>
     </AttendanceEditProvider>
   );

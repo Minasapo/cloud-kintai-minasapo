@@ -28,7 +28,7 @@ export function RestTimeItem({
   rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;
   index: number;
 }) {
-  const { restRemove } = useContext(AttendanceEditContext);
+  const { restRemove, readOnly } = useContext(AttendanceEditContext);
   const [totalRestTime, setTotalRestTime] = useState<number>(0);
 
   useEffect(() => {
@@ -59,6 +59,7 @@ export function RestTimeItem({
           <IconButton
             aria-label="staff-search"
             onClick={() => restRemove(index)}
+            disabled={!!readOnly}
           >
             <DeleteIcon />
           </IconButton>

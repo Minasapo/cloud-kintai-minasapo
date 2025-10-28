@@ -39,7 +39,7 @@ export default function HourlyPaidHolidayTimeItem({
   time: FieldArrayWithId<AttendanceEditInputs, "hourlyPaidHolidayTimes", "id">;
   index: number;
 }) {
-  const { hourlyPaidHolidayTimeRemove, changeRequests } = useContext(
+  const { hourlyPaidHolidayTimeRemove, changeRequests, readOnly } = useContext(
     AttendanceEditContext
   );
 
@@ -73,8 +73,8 @@ export default function HourlyPaidHolidayTimeItem({
           <IconButton
             aria-label="delete-hourly-paid-holiday-time"
             onClick={() => hourlyPaidHolidayTimeRemove(index)}
-            disabled={changeRequests.length > 0}
-            aria-disabled={changeRequests.length > 0}
+            disabled={changeRequests.length > 0 || !!readOnly}
+            aria-disabled={changeRequests.length > 0 || !!readOnly}
           >
             <DeleteIcon />
           </IconButton>

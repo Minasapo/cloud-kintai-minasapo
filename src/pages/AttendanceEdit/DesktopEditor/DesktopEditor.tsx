@@ -13,7 +13,6 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
-// ...existing imports above
 import { useContext, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 
@@ -92,6 +91,7 @@ export default function DesktopEditor() {
     restReplace,
     hourlyPaidHolidayTimeReplace,
     workDate,
+    readOnly,
   } = useContext(AttendanceEditContext);
   const { getStartTime } = useAppConfig();
   const { hourlyPaidHolidayEnabled } = useContext(AttendanceEditContext);
@@ -187,7 +187,7 @@ export default function DesktopEditor() {
             <GoDirectlyFlagCheckbox
               name="goDirectlyFlag"
               control={control}
-              disabled={changeRequests.length > 0}
+              disabled={changeRequests.length > 0 || !!readOnly}
               onChangeExtra={(checked: boolean) => {
                 if (checked && setValue) {
                   setValue("startTime", getStartTime().toISOString());
