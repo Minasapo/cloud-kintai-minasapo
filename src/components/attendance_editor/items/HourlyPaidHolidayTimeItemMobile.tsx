@@ -17,7 +17,9 @@ export default function HourlyPaidHolidayTimeItemMobile({
   time: FieldArrayWithId<AttendanceEditInputs, "hourlyPaidHolidayTimes", "id">;
   index: number;
 }) {
-  const { hourlyPaidHolidayTimeRemove } = useContext(AttendanceEditContext);
+  const { hourlyPaidHolidayTimeRemove, readOnly } = useContext(
+    AttendanceEditContext
+  );
 
   const totalHourlyPaidHolidayTime = calcTotalHourlyPaidHolidayTime(
     time.startTime,
@@ -59,6 +61,7 @@ export default function HourlyPaidHolidayTimeItemMobile({
             aria-label="delete-hourly-paid-holiday-time"
             onClick={() => hourlyPaidHolidayTimeRemove(index)}
             size="small"
+            disabled={!!readOnly}
           >
             <DeleteIcon />
           </IconButton>

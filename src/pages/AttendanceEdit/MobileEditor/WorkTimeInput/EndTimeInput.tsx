@@ -14,7 +14,7 @@ import { AttendanceEditInputs } from "../../common";
  */
 export default function EndTimeInput({
   workDate,
-  control,
+  control: _control,
   setValue,
 }: {
   workDate: dayjs.Dayjs | null;
@@ -40,7 +40,7 @@ export default function EndTimeInput({
     }
   }, [getQuickInputEndTimes]);
 
-  const { watch } = useContext(AttendanceEditContext);
+  const { watch, readOnly } = useContext(AttendanceEditContext);
   if (!workDate) return null;
 
   const endTime = watch ? watch("endTime") : null;
@@ -70,7 +70,11 @@ export default function EndTimeInput({
           <QuickInputChips
             quickInputTimes={quickInputEndTimes}
             workDate={workDate}
-            onSelectTime={(endTime) => setValue("endTime", endTime)}
+            disabled={!!readOnly}
+            onSelectTime={(endTime) => {
+              if (readOnly) return;
+              setValue("endTime", endTime);
+            }}
           />
         </Box>
       </Stack>

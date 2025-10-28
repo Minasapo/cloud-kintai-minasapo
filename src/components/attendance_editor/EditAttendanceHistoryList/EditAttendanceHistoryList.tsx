@@ -15,7 +15,8 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
 
@@ -24,9 +25,36 @@ import { AttendanceHistoryRow } from "./AttendanceHistoryRow";
 export default function EditAttendanceHistoryList() {
   const { getValues, attendance } = useContext(AttendanceEditContext);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { targetWorkDate, staffId } = useParams();
+
+  const readOnly = searchParams.get("readOnly") === "true";
+
+  useEffect(() => {
+    // If we're in readOnly mode, open dialog by default on mount
+    if (readOnly) setOpen(true);
+  }, [readOnly]);
 
   const handleClickOpen = () => {
-    setOpen(true);
+    // If already in readOnly mode, open dialog.
+    if (readOnly) {
+      setOpen(true);
+      return;
+    }
+
+    // Otherwise navigate to admin edit page with readOnly flag so the full-page
+    // attendance editor is shown in read-only mode and the dialog will auto-open.
+    const workDate =
+      attendance?.workDate || getValues?.("workDate") || targetWorkDate;
+    const sid = attendance?.staffId || staffId;
+    if (!workDate || !sid) {
+      // Fallback: just open dialog if we can't determine route params
+      setOpen(true);
+      return;
+    }
+
+    navigate(`/admin/attendances/history/${workDate}/${sid}`);
   };
 
   const handleClose = () => {
@@ -42,6 +70,11 @@ export default function EditAttendanceHistoryList() {
         size="medium"
         startIcon={<HistoryIcon />}
         onClick={handleClickOpen}
+        disabled={
+          !attendance ||
+          !attendance.histories ||
+          attendance.histories.filter((item) => item !== null).length === 0
+        }
       >
         変更履歴
       </Button>

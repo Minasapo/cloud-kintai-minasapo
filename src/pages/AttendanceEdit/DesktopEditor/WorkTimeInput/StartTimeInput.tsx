@@ -14,7 +14,7 @@ export default function StartTimeInput({
 }: {
   dataTestId?: string;
 } = {}) {
-  const { workDate, control, setValue, changeRequests } = useContext(
+  const { workDate, control, setValue, changeRequests, readOnly } = useContext(
     AttendanceEditContext
   );
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
@@ -43,7 +43,7 @@ export default function StartTimeInput({
           <TimePicker
             ampm={false}
             value={field.value ? dayjs(field.value) : null}
-            disabled={changeRequests.length > 0}
+            disabled={changeRequests.length > 0 || !!readOnly}
             slotProps={{
               textField: {
                 size: "small",
@@ -76,7 +76,7 @@ export default function StartTimeInput({
               color="success"
               variant="outlined"
               icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-              disabled={changeRequests.length > 0}
+              disabled={changeRequests.length > 0 || !!readOnly}
               onClick={() => {
                 const startTime = dayjs(
                   `${workDate.format("YYYY-MM-DD")} ${entry.time}`

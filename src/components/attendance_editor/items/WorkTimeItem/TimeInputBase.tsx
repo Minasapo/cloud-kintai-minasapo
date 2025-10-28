@@ -2,8 +2,10 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip, Stack } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import { useContext } from "react";
 import { Controller } from "react-hook-form";
 
+import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
 
 interface TimeInputBaseProps<K extends keyof AttendanceEditInputs> {
@@ -23,6 +25,7 @@ export default function TimeInputBase<K extends keyof AttendanceEditInputs>({
   quickInputTimes,
   chipColor = (enabled) => (enabled ? "success" : "default"),
 }: TimeInputBaseProps<K>) {
+  const { readOnly } = useContext(AttendanceEditContext);
   if (!workDate || !control || !setValue) return null;
 
   return (
@@ -38,6 +41,7 @@ export default function TimeInputBase<K extends keyof AttendanceEditInputs>({
               slotProps={{
                 textField: { size: "small" },
               }}
+              disabled={!!readOnly}
               onChange={(value) => {
                 if (value && !value.isValid()) return;
                 const formatted = (() => {
@@ -65,6 +69,7 @@ export default function TimeInputBase<K extends keyof AttendanceEditInputs>({
               variant="outlined"
               icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
               onClick={() => {
+                if (readOnly) return;
                 const time = dayjs(
                   `${workDate.format("YYYY-MM-DD")} ${entry.time}`
                 ).toISOString();

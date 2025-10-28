@@ -13,7 +13,7 @@ export default function EndTimeInput({
   dataTestId = "end-time-input",
 }: { dataTestId?: string } = {}) {
   const { getQuickInputEndTimes } = useContext(AppConfigContext);
-  const { workDate, control, setValue, changeRequests } = useContext(
+  const { workDate, control, setValue, changeRequests, readOnly } = useContext(
     AttendanceEditContext
   );
 
@@ -45,7 +45,7 @@ export default function EndTimeInput({
             <TimePicker
               value={field.value ? dayjs(field.value) : null}
               ampm={false}
-              disabled={changeRequests.length > 0}
+              disabled={changeRequests.length > 0 || !!readOnly}
               slotProps={{
                 textField: {
                   size: "small",
@@ -72,7 +72,7 @@ export default function EndTimeInput({
           <QuickInputChips
             quickInputTimes={quickInputEndTimes}
             workDate={workDate}
-            disabled={changeRequests.length > 0}
+            disabled={changeRequests.length > 0 || !!readOnly}
             onSelectTime={(endTime) =>
               setValue("endTime", endTime, { shouldDirty: true })
             }

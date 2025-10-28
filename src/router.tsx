@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Layout from "./Layout";
 import AdminAttendance from "./pages/admin/AdminAttendance";
 import AdminAttendanceEditor from "./pages/admin/AdminAttendanceEditor";
+import AdminAttendanceHistory from "./pages/admin/AdminAttendanceHistory";
 import AdminAttendancePrint from "./pages/admin/AdminAttendancePrint";
 import Absent from "./pages/admin/AdminConfigManagement/Absent";
 import AdminConfigManagement from "./pages/admin/AdminConfigManagement/AdminConfigManagement";
@@ -187,6 +188,10 @@ const router = createBrowserRouter([
               {
                 path: "edit/:targetWorkDate/:staffId",
                 element: <AdminAttendanceEditor />,
+              },
+              {
+                path: "history/:targetWorkDate/:staffId",
+                element: <AdminAttendanceHistory />,
               },
               {
                 path: "print",

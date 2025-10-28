@@ -6,7 +6,9 @@ import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
 
 export default function ReturnDirectlyFlagInput() {
-  const { workDate, control, setValue } = useContext(AttendanceEditContext);
+  const { workDate, control, setValue, changeRequests, readOnly } = useContext(
+    AttendanceEditContext
+  );
   const { getEndTime } = useAppConfig();
   if (!workDate || !control || !setValue) return null;
   // getEndTime returns a dayjs with the configured time (HH:mm)
@@ -23,6 +25,7 @@ export default function ReturnDirectlyFlagInput() {
   return (
     <ReturnDirectlyFlagInputBase
       control={control}
+      disabled={changeRequests?.length > 0 || !!readOnly}
       onChangeFlag={(checked) => {
         if (checked) {
           setValue("endTime", computeEndTimeIso());
