@@ -1285,7 +1285,9 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                           <IsDeemedHolidayFlagInput
                             control={control}
                             name="isDeemedHoliday"
-                            disabled={!(staff?.workType === "shift") || !!readOnly}
+                            disabled={
+                              !(staff?.workType === "shift") || !!readOnly
+                            }
                             helperText={
                               staff?.workType === "shift"
                                 ? undefined

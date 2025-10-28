@@ -48,33 +48,33 @@ export default function RemarksItem() {
 
           <Box sx={{ width: "100%" }}>
             {control ? (
-                <Controller
-                  name="remarks"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      size="small"
-                      placeholder="備考を入力してください（タグは上に表示されます）"
-                      variant="standard"
-                      InputProps={{ disableUnderline: true }}
-                      disabled={!!readOnly}
-                    />
-                  )}
-                />
+              <Controller
+                name="remarks"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    size="small"
+                    placeholder="備考を入力してください（タグは上に表示されます）"
+                    variant="standard"
+                    InputProps={{ disableUnderline: true }}
+                    disabled={!!readOnly}
+                  />
+                )}
+              />
             ) : (
               <TextField
                 fullWidth
                 size="small"
-                  value={(getValues("remarks") as string) || ""}
-                  onChange={(e) =>
-                    !readOnly && setValue && setValue("remarks", e.target.value)
-                  }
+                value={(getValues("remarks") as string) || ""}
+                onChange={(e) =>
+                  !readOnly && setValue && setValue("remarks", e.target.value)
+                }
                 placeholder="備考を入力してください（タグは上に表示されます）"
                 variant="standard"
                 InputProps={{ disableUnderline: true }}
-                  disabled={!!readOnly}
+                disabled={!!readOnly}
               />
             )}
           </Box>
