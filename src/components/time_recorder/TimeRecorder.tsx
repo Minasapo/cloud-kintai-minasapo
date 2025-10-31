@@ -28,10 +28,7 @@ import useAttendance from "../../hooks/useAttendance/useAttendance";
 import { getWorkStatus } from "../../hooks/useAttendance/WorkStatus";
 import useAttendances from "../../hooks/useAttendances/useAttendances";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "../../lib/reducers/snackbarReducer";
+import { setSnackbarError } from "../../lib/reducers/snackbarReducer";
 import Clock from "../clock/Clock";
 import { AttendanceErrorAlert } from "./AttendanceErrorAlert";
 import { clockInCallback } from "./clockInCallback";
@@ -49,7 +46,6 @@ import { restEndCallback } from "./restEndCallback";
 import { restStartCallback } from "./restStartCallback";
 import { RestTimeMessage } from "./RestTimeMessage";
 import { returnDirectlyCallback } from "./returnDirectlyCallback";
-import TimeRecorderRemarks from "./TimeRecorderRemarks";
 
 /**
  * 勤怠打刻用のメインコンポーネント。
@@ -328,7 +324,7 @@ export default function TimeRecorder(): JSX.Element {
           <RestEndItem workStatus={workStatus} onClick={handleRestEnd} />
         </Grid>
 
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <TimeRecorderRemarks
             attendance={attendance}
             onSave={(remarks) => {
@@ -344,7 +340,7 @@ export default function TimeRecorder(): JSX.Element {
                 });
             }}
           />
-        </Grid>
+        </Grid> */}
         {isAttendanceError && (
           <Grid item xs={12}>
             <AttendanceErrorAlert />

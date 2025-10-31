@@ -54,6 +54,7 @@ export default function RemarksItem() {
                 render={({ field }) => (
                   <TextField
                     {...field}
+                    data-testid="remarks-input"
                     fullWidth
                     size="small"
                     placeholder="備考を入力してください（タグは上に表示されます）"
@@ -65,6 +66,7 @@ export default function RemarksItem() {
               />
             ) : (
               <TextField
+                data-testid="remarks-input"
                 fullWidth
                 size="small"
                 value={(getValues("remarks") as string) || ""}

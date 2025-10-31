@@ -40,6 +40,7 @@ export default function StaffCommentInput({
           minRows={2}
           placeholder="修正理由欄：管理者へ伝えたいことを記載"
           disabled={changeRequests.length > 0}
+          inputProps={{ "data-testid": "staff-comment-input-desktop" }}
         />
         <Box>
           <Stack
@@ -52,6 +53,7 @@ export default function StaffCommentInput({
             {reasons.map((reason, index) => (
               <Chip
                 key={index}
+                data-testid={`staff-comment-reason-chip-${index}`}
                 label={reason.reason}
                 variant="outlined"
                 color="primary"

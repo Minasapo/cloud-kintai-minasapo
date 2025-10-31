@@ -17,10 +17,18 @@ export interface TimeRecorderRemarksProps {
   onSave: (remarks: Attendance["remarks"]) => void;
 }
 
+/**
+ * @deprecated このコンポーネントは非推奨です。
+ * 可能であれば代替の Remarks コンポーネントまたは新しい実装へ移行してください。
+ * - 理由: UI/仕様の変更により置き換え予定です。
+ *
+ * 開発環境ではコンソールに警告が表示されます。
+ */
 export default function TimeRecorderRemarks({
   attendance,
   onSave,
 }: TimeRecorderRemarksProps) {
+  // 非推奨マークは JSDoc の @deprecated のみで表現します（ランタイムの警告は表示しません）
   const [formState, setFormState] = useState<Attendance["remarks"]>(
     attendance?.remarks
   );

@@ -90,9 +90,13 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    // Start Vite dev server so Playwright can navigate to the app during tests.
+    command: "npm run start",
+    url: "http://localhost:5173",
+    // When developing locally, reuse an existing server if one is already running.
+    reuseExistingServer: !process.env.CI,
+    // Increase timeout to allow Vite to cold-start on slower machines.
+    timeout: 120 * 1000,
+  },
 });
