@@ -923,3 +923,75 @@ export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($fi
   APITypes.OnDeleteWorkflowSubscriptionVariables,
   APITypes.OnDeleteWorkflowSubscription
 >;
+export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperationLog(
+  $filter: ModelSubscriptionOperationLogFilterInput
+) {
+  onCreateOperationLog(filter: $filter) {
+    id
+    staffId
+    action
+    resource
+    resourceId
+    timestamp
+    details
+    ipAddress
+    userAgent
+    metadata
+    severity
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateOperationLogSubscriptionVariables,
+  APITypes.OnCreateOperationLogSubscription
+>;
+export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperationLog(
+  $filter: ModelSubscriptionOperationLogFilterInput
+) {
+  onUpdateOperationLog(filter: $filter) {
+    id
+    staffId
+    action
+    resource
+    resourceId
+    timestamp
+    details
+    ipAddress
+    userAgent
+    metadata
+    severity
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateOperationLogSubscriptionVariables,
+  APITypes.OnUpdateOperationLogSubscription
+>;
+export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperationLog(
+  $filter: ModelSubscriptionOperationLogFilterInput
+) {
+  onDeleteOperationLog(filter: $filter) {
+    id
+    staffId
+    action
+    resource
+    resourceId
+    timestamp
+    details
+    ipAddress
+    userAgent
+    metadata
+    severity
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteOperationLogSubscriptionVariables,
+  APITypes.OnDeleteOperationLogSubscription
+>;
