@@ -193,10 +193,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       if (!sortedHistories || !sortedHistories[index]) return;
       const h = sortedHistories[index];
 
-      logger.debug(
-        `applyHistory called index=${index}, createdAt=${h?.createdAt}`
-      );
-
       try {
         // set simple fields
         setValue("startTime", h.startTime ?? "");
@@ -273,7 +269,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     // schedule after current tick so other attendance->setValue effects run first
     const id = window.setTimeout(() => {
       try {
-        logger.debug(`re-applying latest history after attendance load`);
         applyHistory(0);
         setHistoryIndex(0);
       } catch (e) {
@@ -328,8 +323,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       .then(() => {
         // no-op
       })
-      .catch((e: Error) => {
-        logger.debug(e);
+      .catch(() => {
         dispatch(setSnackbarError(MESSAGE_CODE.E02001));
       })
       .finally(() => setHistoriesLoading(false));

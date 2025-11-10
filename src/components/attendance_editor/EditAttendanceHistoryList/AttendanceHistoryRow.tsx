@@ -32,10 +32,6 @@ export function AttendanceHistoryRow({
     : [];
 
   const handleToggle = () => {
-    // debug: 履歴オブジェクトの中身を確認（時間単位休暇があるか）
-    // 実行時はブラウザのコンソールで確認してください
-    // eslint-disable-next-line no-console
-    console.debug("AttendanceHistoryRow toggle history:", history);
     setOpen(!open);
   };
 
