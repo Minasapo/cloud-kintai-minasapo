@@ -18,21 +18,30 @@ export default async function handleApproveChangeRequest(
     id: attendance.id,
     staffId: attendance.staffId,
     workDate: attendance.workDate,
+    // If the changeRequest explicitly contains the field (even empty string or null),
+    // use that value. Otherwise keep the existing attendance value.
     startTime:
-      targetChangeRequest.startTime && targetChangeRequest.startTime !== ""
-        ? targetChangeRequest.startTime
+      typeof targetChangeRequest.startTime !== "undefined"
+        ? // map empty string to null for storage cleanliness
+          targetChangeRequest.startTime === ""
+          ? null
+          : targetChangeRequest.startTime
         : attendance.startTime,
     endTime:
-      targetChangeRequest.endTime && targetChangeRequest.endTime !== ""
-        ? targetChangeRequest.endTime
+      typeof targetChangeRequest.endTime !== "undefined"
+        ? targetChangeRequest.endTime === ""
+          ? null
+          : targetChangeRequest.endTime
         : attendance.endTime,
     goDirectlyFlag:
       targetChangeRequest.goDirectlyFlag ?? attendance.goDirectlyFlag,
     returnDirectlyFlag:
       targetChangeRequest.returnDirectlyFlag ?? attendance.returnDirectlyFlag,
     remarks:
-      targetChangeRequest.remarks && targetChangeRequest.remarks !== ""
-        ? targetChangeRequest.remarks
+      typeof targetChangeRequest.remarks !== "undefined"
+        ? targetChangeRequest.remarks === ""
+          ? null
+          : targetChangeRequest.remarks
         : attendance.remarks,
     rests: targetChangeRequest.rests
       ? targetChangeRequest.rests

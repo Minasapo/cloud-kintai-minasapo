@@ -44,6 +44,9 @@ module.exports = {
     "import/newline-after-import": "error",
     "import/no-duplicates": "error",
     "@typescript-eslint/no-unused-vars": "off",
+    // Temporarily relax explicit any rule to reduce noise while we iteratively add types.
+    // TODO: revert to 'error' and fix usages gradually.
+    "@typescript-eslint/no-explicit-any": "warn",
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": [
       "warn",

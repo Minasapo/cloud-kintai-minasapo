@@ -5,7 +5,6 @@ import {
   TableContainer,
   Typography,
 } from "@mui/material";
-import dayjs from "dayjs";
 
 import { AttendanceChangeRequest } from "../../../../API";
 import SpecialHolidayFlagTableRow from "../BeforeCard/SpecialHolidayFlagTableRow";
@@ -61,26 +60,22 @@ export default function AfterCard({
               beforeValue={attendance?.returnDirectlyFlag}
             />
             <WorkTimeTableRow
-              startTime={
-                changeRequest?.startTime ? dayjs(changeRequest.startTime) : null
-              }
-              endTime={
-                changeRequest?.endTime ? dayjs(changeRequest.endTime) : null
-              }
-              beforeStartTime={
-                attendance?.startTime ? dayjs(attendance.startTime) : null
-              }
-              beforeEndTime={
-                attendance?.endTime ? dayjs(attendance.endTime) : null
-              }
+              // pass raw string values so we can distinguish empty string (explicit clear)
+              startTime={changeRequest?.startTime ?? null}
+              endTime={changeRequest?.endTime ?? null}
+              beforeStartTime={attendance?.startTime ?? null}
+              beforeEndTime={attendance?.endTime ?? null}
             />
             <RestTableRow
+              // pass null when rests is not present on the change request
+              // so the row can distinguish "変更なし" (null) vs
+              // "空にしました" (explicit empty array)
               rests={
                 changeRequest?.rests
                   ? changeRequest.rests.filter(
                       (item): item is NonNullable<typeof item> => item !== null
                     )
-                  : []
+                  : null
               }
               beforeRests={
                 attendance?.rests

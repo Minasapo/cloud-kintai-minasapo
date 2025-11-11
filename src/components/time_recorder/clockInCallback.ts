@@ -7,9 +7,10 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Logger } from "aws-amplify";
 
-import { Attendance, Staff } from "@/API";
+import { Attendance, CreateOperationLogInput, Staff } from "@/API";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
+import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
@@ -52,8 +53,42 @@ export async function clockInCallback(
 
   const startTimeIso = resolveClockInTime();
 
+  // capture pressed time immediately to measure processing duration
+  const pressedAt = getNowISOStringWithZeroSeconds();
+  const t0 = Date.now();
+
   try {
     const attendance = await clockIn(cognitoUser.id, today, startTimeIso);
+    const t1 = Date.now();
+    const processingTimeMs = t1 - t0;
+
+    // record button-press time and include attendance time + processing time inside details (best-effort)
+    try {
+      const input: CreateOperationLogInput = {
+        staffId: cognitoUser.id,
+        action: "clock_in",
+        resource: "attendance",
+        resourceId: attendance?.id ?? undefined,
+        // primary timestamp: when the user pressed the button
+        timestamp: pressedAt,
+        details: JSON.stringify({
+          workDate: today,
+          attendanceTime: startTimeIso,
+          processingTimeMs,
+          staffName: staff
+            ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
+            : undefined,
+        }),
+        // metadata is a good place to store structured diagnostic info
+        metadata: JSON.stringify({ processingTimeMs }),
+        userAgent:
+          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      };
+
+      await createOperationLogData(input);
+    } catch (logErr) {
+      logger.error("Failed to create operation log for clockIn", logErr);
+    }
 
     dispatch(setSnackbarSuccess(MESSAGE_CODE.S01001));
     new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();

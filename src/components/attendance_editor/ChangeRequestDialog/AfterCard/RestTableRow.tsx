@@ -9,20 +9,27 @@ export default function RestTableRow({
   rests,
   beforeRests,
 }: {
-  rests: Rest[];
+  // null means the change request did not include rests (no change)
+  // empty array means the change request explicitly cleared rests
+  rests: Rest[] | null;
   beforeRests?: Rest[];
 }) {
-  const changed =
-    (beforeRests ? beforeRests.length : 0) !== rests.length ||
-    (rests.some((r, i) => {
-      const b = beforeRests ? beforeRests[i] : null;
-      const rs = r.startTime ? dayjs(r.startTime).format("HH:mm") : null;
-      const re = r.endTime ? dayjs(r.endTime).format("HH:mm") : null;
-      const bs = b?.startTime ? dayjs(b.startTime).format("HH:mm") : null;
-      const be = b?.endTime ? dayjs(b.endTime).format("HH:mm") : null;
+  const before = beforeRests ?? [];
 
-      return rs !== bs || re !== be;
-    }) as unknown as boolean);
+  // determine whether something changed
+  const changed =
+    rests === null
+      ? false
+      : before.length !== rests.length ||
+        (rests.some((r, i) => {
+          const b = before[i] ?? null;
+          const rs = r.startTime ? dayjs(r.startTime).format("HH:mm") : null;
+          const re = r.endTime ? dayjs(r.endTime).format("HH:mm") : null;
+          const bs = b?.startTime ? dayjs(b.startTime).format("HH:mm") : null;
+          const be = b?.endTime ? dayjs(b.endTime).format("HH:mm") : null;
+
+          return rs !== bs || re !== be;
+        }) as unknown as boolean);
 
   return (
     <TableRow>
@@ -31,8 +38,14 @@ export default function RestTableRow({
         sx={changed ? { color: "error.main", fontWeight: "bold" } : {}}
       >
         {(() => {
-          if (rests.length === 0) {
+          // when rests is null, the change request didn't touch rests
+          if (rests === null) {
             return "(変更なし)";
+          }
+
+          // explicit clear
+          if (rests.length === 0) {
+            return "空にしました";
           }
 
           return (

@@ -888,6 +888,73 @@ export type DeleteWorkflowInput = {
   id: string,
 };
 
+export type CreateOperationLogInput = {
+  id?: string | null,
+  staffId?: string | null,
+  action: string,
+  resource?: string | null,
+  resourceId?: string | null,
+  timestamp: string,
+  details?: string | null,
+  ipAddress?: string | null,
+  userAgent?: string | null,
+  metadata?: string | null,
+  severity?: string | null,
+};
+
+export type ModelOperationLogConditionInput = {
+  staffId?: ModelStringInput | null,
+  action?: ModelStringInput | null,
+  resource?: ModelStringInput | null,
+  resourceId?: ModelStringInput | null,
+  timestamp?: ModelStringInput | null,
+  details?: ModelStringInput | null,
+  ipAddress?: ModelStringInput | null,
+  userAgent?: ModelStringInput | null,
+  metadata?: ModelStringInput | null,
+  severity?: ModelStringInput | null,
+  and?: Array< ModelOperationLogConditionInput | null > | null,
+  or?: Array< ModelOperationLogConditionInput | null > | null,
+  not?: ModelOperationLogConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type OperationLog = {
+  __typename: "OperationLog",
+  id: string,
+  staffId?: string | null,
+  action: string,
+  resource?: string | null,
+  resourceId?: string | null,
+  timestamp: string,
+  details?: string | null,
+  ipAddress?: string | null,
+  userAgent?: string | null,
+  metadata?: string | null,
+  severity?: string | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateOperationLogInput = {
+  id: string,
+  staffId?: string | null,
+  action?: string | null,
+  resource?: string | null,
+  resourceId?: string | null,
+  timestamp?: string | null,
+  details?: string | null,
+  ipAddress?: string | null,
+  userAgent?: string | null,
+  metadata?: string | null,
+  severity?: string | null,
+};
+
+export type DeleteOperationLogInput = {
+  id: string,
+};
+
 export type EmailData = {
   to?: Array< string | null > | null,
   subject: string,
@@ -1146,6 +1213,31 @@ export type ModelWorkflowConnection = {
   nextToken?: string | null,
 };
 
+export type ModelOperationLogFilterInput = {
+  id?: ModelIDInput | null,
+  staffId?: ModelStringInput | null,
+  action?: ModelStringInput | null,
+  resource?: ModelStringInput | null,
+  resourceId?: ModelStringInput | null,
+  timestamp?: ModelStringInput | null,
+  details?: ModelStringInput | null,
+  ipAddress?: ModelStringInput | null,
+  userAgent?: ModelStringInput | null,
+  metadata?: ModelStringInput | null,
+  severity?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelOperationLogFilterInput | null > | null,
+  or?: Array< ModelOperationLogFilterInput | null > | null,
+  not?: ModelOperationLogFilterInput | null,
+};
+
+export type ModelOperationLogConnection = {
+  __typename: "ModelOperationLogConnection",
+  items:  Array<OperationLog | null >,
+  nextToken?: string | null,
+};
+
 export type ModelSubscriptionCheckForUpdateFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   deployUuid?: ModelSubscriptionStringInput | null,
@@ -1332,6 +1424,24 @@ export type ModelSubscriptionWorkflowFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
   or?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
+};
+
+export type ModelSubscriptionOperationLogFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  action?: ModelSubscriptionStringInput | null,
+  resource?: ModelSubscriptionStringInput | null,
+  resourceId?: ModelSubscriptionStringInput | null,
+  timestamp?: ModelSubscriptionStringInput | null,
+  details?: ModelSubscriptionStringInput | null,
+  ipAddress?: ModelSubscriptionStringInput | null,
+  userAgent?: ModelSubscriptionStringInput | null,
+  metadata?: ModelSubscriptionStringInput | null,
+  severity?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
+  or?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
 };
 
 export type CreateCheckForUpdateMutationVariables = {
@@ -2279,6 +2389,78 @@ export type DeleteWorkflowMutation = {
   } | null,
 };
 
+export type CreateOperationLogMutationVariables = {
+  input: CreateOperationLogInput,
+  condition?: ModelOperationLogConditionInput | null,
+};
+
+export type CreateOperationLogMutation = {
+  createOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateOperationLogMutationVariables = {
+  input: UpdateOperationLogInput,
+  condition?: ModelOperationLogConditionInput | null,
+};
+
+export type UpdateOperationLogMutation = {
+  updateOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteOperationLogMutationVariables = {
+  input: DeleteOperationLogInput,
+  condition?: ModelOperationLogConditionInput | null,
+};
+
+export type DeleteOperationLogMutation = {
+  deleteOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
 export type SendMailQueryVariables = {
   data: EmailData,
 };
@@ -3155,6 +3337,90 @@ export type WorkflowsByStaffIdQuery = {
         text: string,
         createdAt: string,
       } | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetOperationLogQueryVariables = {
+  id: string,
+};
+
+export type GetOperationLogQuery = {
+  getOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListOperationLogsQueryVariables = {
+  filter?: ModelOperationLogFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListOperationLogsQuery = {
+  listOperationLogs?:  {
+    __typename: "ModelOperationLogConnection",
+    items:  Array< {
+      __typename: "OperationLog",
+      id: string,
+      staffId?: string | null,
+      action: string,
+      resource?: string | null,
+      resourceId?: string | null,
+      timestamp: string,
+      details?: string | null,
+      ipAddress?: string | null,
+      userAgent?: string | null,
+      metadata?: string | null,
+      severity?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type OperationLogsByStaffIdQueryVariables = {
+  staffId: string,
+  timestamp?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelOperationLogFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type OperationLogsByStaffIdQuery = {
+  operationLogsByStaffId?:  {
+    __typename: "ModelOperationLogConnection",
+    items:  Array< {
+      __typename: "OperationLog",
+      id: string,
+      staffId?: string | null,
+      action: string,
+      resource?: string | null,
+      resourceId?: string | null,
+      timestamp: string,
+      details?: string | null,
+      ipAddress?: string | null,
+      userAgent?: string | null,
+      metadata?: string | null,
+      severity?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -4075,6 +4341,75 @@ export type OnDeleteWorkflowSubscription = {
       text: string,
       createdAt: string,
     } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateOperationLogSubscriptionVariables = {
+  filter?: ModelSubscriptionOperationLogFilterInput | null,
+};
+
+export type OnCreateOperationLogSubscription = {
+  onCreateOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateOperationLogSubscriptionVariables = {
+  filter?: ModelSubscriptionOperationLogFilterInput | null,
+};
+
+export type OnUpdateOperationLogSubscription = {
+  onUpdateOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteOperationLogSubscriptionVariables = {
+  filter?: ModelSubscriptionOperationLogFilterInput | null,
+};
+
+export type OnDeleteOperationLogSubscription = {
+  onDeleteOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
