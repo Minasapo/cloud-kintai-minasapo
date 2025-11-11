@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { useCallback, useState } from "react";
 
 import { OperationLog } from "@/API";
@@ -15,7 +16,14 @@ export default function useAdminOperationLogs(initialLimit = 30) {
     setError(null);
     try {
       const res = await fetchOperationLogs(null, initialLimit);
-      setLogs(res.items);
+      // ensure newest-first order by timestamp
+      const sorted = res.items.slice().sort((a, b) => {
+        // Use timestamp when available, otherwise fall back to createdAt.
+        const ta = dayjs(a.timestamp ?? a.createdAt).valueOf() || 0;
+        const tb = dayjs(b.timestamp ?? b.createdAt).valueOf() || 0;
+        return tb - ta;
+      });
+      setLogs(sorted);
       setNextToken(res.nextToken ?? null);
       return res.items;
     } catch (err) {
@@ -32,7 +40,15 @@ export default function useAdminOperationLogs(initialLimit = 30) {
     setError(null);
     try {
       const res = await fetchOperationLogs(nextToken, initialLimit);
-      setLogs((prev) => [...prev, ...res.items]);
+      setLogs((prev) => {
+        const merged = [...prev, ...res.items];
+        // sort merged list newest-first; prefer timestamp, then createdAt
+        return merged.slice().sort((a, b) => {
+          const ta = dayjs(a.timestamp ?? a.createdAt).valueOf() || 0;
+          const tb = dayjs(b.timestamp ?? b.createdAt).valueOf() || 0;
+          return tb - ta;
+        });
+      });
       setNextToken(res.nextToken ?? null);
       return res.items;
     } catch (err) {
