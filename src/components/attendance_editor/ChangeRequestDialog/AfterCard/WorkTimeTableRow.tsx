@@ -9,16 +9,29 @@ export default function WorkTimeTableRow({
   beforeStartTime,
   beforeEndTime,
 }: {
-  startTime: dayjs.Dayjs | null;
-  endTime: dayjs.Dayjs | null;
-  beforeStartTime?: dayjs.Dayjs | null;
-  beforeEndTime?: dayjs.Dayjs | null;
+  // raw ISO strings are passed so we can detect explicit empty-string clears
+  startTime: string | null;
+  endTime: string | null;
+  beforeStartTime?: string | null;
+  beforeEndTime?: string | null;
 }) {
+  const afterStartFormatted =
+    startTime && startTime !== "" ? dayjs(startTime).format("HH:mm") : null;
+  const afterEndFormatted =
+    endTime && endTime !== "" ? dayjs(endTime).format("HH:mm") : null;
+
+  const beforeStartFormatted =
+    beforeStartTime && beforeStartTime !== ""
+      ? dayjs(beforeStartTime).format("HH:mm")
+      : null;
+  const beforeEndFormatted =
+    beforeEndTime && beforeEndTime !== ""
+      ? dayjs(beforeEndTime).format("HH:mm")
+      : null;
+
   const changed =
-    (startTime?.format("HH:mm") ?? null) !==
-      (beforeStartTime?.format("HH:mm") ?? null) ||
-    (endTime?.format("HH:mm") ?? null) !==
-      (beforeEndTime?.format("HH:mm") ?? null);
+    (afterStartFormatted ?? null) !== (beforeStartFormatted ?? null) ||
+    (afterEndFormatted ?? null) !== (beforeEndFormatted ?? null);
 
   return (
     <TableRow>
@@ -27,12 +40,14 @@ export default function WorkTimeTableRow({
         sx={changed ? { color: "error.main", fontWeight: "bold" } : {}}
       >
         {(() => {
+          // When both after values are falsy (null or empty string), decide between
+          // "変更なし" and "空にしました" based on whether something actually changed.
           if (!startTime && !endTime) {
-            return "変更なし";
+            return changed ? "空にしました" : "変更なし";
           }
 
-          return `${startTime?.format("HH:mm") ?? AttendanceTime.None} 〜 ${
-            endTime?.format("HH:mm") ?? AttendanceTime.None
+          return `${afterStartFormatted ?? AttendanceTime.None} 〜 ${
+            afterEndFormatted ?? AttendanceTime.None
           }`;
         })()}
       </TableCell>
