@@ -4,7 +4,9 @@ import dayjs from "dayjs";
 import React, { useContext, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { getNowISOStringWithZeroSeconds } from "@/components/time_recorder/util";
 import { AuthContext } from "@/context/AuthContext";
+import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
@@ -118,7 +120,33 @@ const OfficeQRRegister: React.FC = () => {
 
     const now = dayjs().second(0).millisecond(0).toISOString();
     clockIn(cognitoUser.id, today, now)
-      .then(() => {
+      .then(async (attendance) => {
+        try {
+          const pressedAt = getNowISOStringWithZeroSeconds();
+          const input = {
+            staffId: cognitoUser.id,
+            action: "clock_in",
+            resource: "attendance",
+            resourceId: attendance?.id ?? undefined,
+            timestamp: pressedAt,
+            details: JSON.stringify({
+              workDate: today,
+              attendanceTime: now,
+            }),
+            userAgent:
+              typeof navigator !== "undefined"
+                ? navigator.userAgent
+                : undefined,
+          };
+
+          await createOperationLogData(input);
+        } catch (logErr) {
+          logger.error(
+            "Failed to create operation log for office QR clockIn",
+            logErr
+          );
+        }
+
         dispatch(setSnackbarSuccess("出勤が記録されました。"));
       })
       .catch((e) => {
@@ -134,7 +162,33 @@ const OfficeQRRegister: React.FC = () => {
 
     const now = dayjs().second(0).millisecond(0).toISOString();
     clockOut(cognitoUser.id, today, now)
-      .then(() => {
+      .then(async (attendance) => {
+        try {
+          const pressedAt = getNowISOStringWithZeroSeconds();
+          const input = {
+            staffId: cognitoUser.id,
+            action: "clock_out",
+            resource: "attendance",
+            resourceId: attendance?.id ?? undefined,
+            timestamp: pressedAt,
+            details: JSON.stringify({
+              workDate: today,
+              attendanceTime: now,
+            }),
+            userAgent:
+              typeof navigator !== "undefined"
+                ? navigator.userAgent
+                : undefined,
+          };
+
+          await createOperationLogData(input);
+        } catch (logErr) {
+          logger.error(
+            "Failed to create operation log for office QR clockOut",
+            logErr
+          );
+        }
+
         dispatch(setSnackbarSuccess("退勤が記録されました。"));
       })
       .catch((e) => {
