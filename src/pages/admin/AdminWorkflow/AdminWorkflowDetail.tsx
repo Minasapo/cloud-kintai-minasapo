@@ -30,6 +30,7 @@ import Page from "@/components/Page/Page";
 import StatusChip from "@/components/StatusChip/StatusChip";
 import { AuthContext } from "@/context/AuthContext";
 import { getWorkflow } from "@/graphql/queries";
+import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
@@ -484,6 +485,23 @@ export default function AdminWorkflowDetail() {
       setWorkflow(updated);
       setMessages(commentsToMessages(updated.comments || []));
       dispatch(setSnackbarSuccess("承認しました"));
+      try {
+        await createOperationLogData({
+          staffId: currentStaffLocal?.id ?? undefined,
+          action: "approve_workflow",
+          resource: "workflow",
+          resourceId: updated.id,
+          timestamp: new Date().toISOString(),
+          details: JSON.stringify({
+            workflowId: updated.id,
+            category: updated.category ?? null,
+            applicantStaffId: updated.staffId ?? null,
+            result: "approved",
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to create operation log for approve:", err);
+      }
     } catch (err) {
       console.error(err);
       const msg = err instanceof Error ? err.message : String(err);
@@ -593,6 +611,23 @@ export default function AdminWorkflowDetail() {
       setWorkflow(updated);
       setMessages(commentsToMessages(updated.comments || []));
       dispatch(setSnackbarSuccess("却下しました"));
+      try {
+        await createOperationLogData({
+          staffId: currentStaffLocal?.id ?? undefined,
+          action: "reject_workflow",
+          resource: "workflow",
+          resourceId: updated.id,
+          timestamp: new Date().toISOString(),
+          details: JSON.stringify({
+            workflowId: updated.id,
+            category: updated.category ?? null,
+            applicantStaffId: updated.staffId ?? null,
+            result: "rejected",
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to create operation log for reject:", err);
+      }
     } catch (err) {
       console.error(err);
       const msg = err instanceof Error ? err.message : String(err);
