@@ -16,7 +16,7 @@ import SpecialHoliday from "./pages/admin/AdminConfigManagement/SpecialHoliday";
 import WorkingTime from "./pages/admin/AdminConfigManagement/WorkingTime";
 import AdminHolidayCalendar from "./pages/admin/AdminHolidayCalendar/HolidayCalendar/AdminHolidayCalendar";
 import AdminLayout from "./pages/admin/AdminLayout";
-import AdminLogs from "./pages/admin/AdminLogs/AdminLogs";
+import AdminLogs from "./pages/admin/AdminLogs/AdminLogsClean";
 import AdminMasterLayout from "./pages/admin/AdminMasterLayout";
 import AdminShiftGuard from "./pages/admin/AdminShiftGuard";
 import AdminStaff from "./pages/admin/AdminStaff/AdminStaff";
