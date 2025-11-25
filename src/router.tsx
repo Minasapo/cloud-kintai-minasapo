@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Layout from "./Layout";
 import AdminAttendance from "./pages/admin/AdminAttendance";
 import AdminAttendanceEditor from "./pages/admin/AdminAttendanceEditor";
+import AdminAttendanceHistory from "./pages/admin/AdminAttendanceHistory";
 import AdminAttendancePrint from "./pages/admin/AdminAttendancePrint";
 import Absent from "./pages/admin/AdminConfigManagement/Absent";
 import AdminConfigManagement from "./pages/admin/AdminConfigManagement/AdminConfigManagement";
@@ -15,6 +16,7 @@ import SpecialHoliday from "./pages/admin/AdminConfigManagement/SpecialHoliday";
 import WorkingTime from "./pages/admin/AdminConfigManagement/WorkingTime";
 import AdminHolidayCalendar from "./pages/admin/AdminHolidayCalendar/HolidayCalendar/AdminHolidayCalendar";
 import AdminLayout from "./pages/admin/AdminLayout";
+import AdminLogs from "./pages/admin/AdminLogs/AdminLogsClean";
 import AdminMasterLayout from "./pages/admin/AdminMasterLayout";
 import AdminShiftGuard from "./pages/admin/AdminShiftGuard";
 import AdminStaff from "./pages/admin/AdminStaff/AdminStaff";
@@ -189,6 +191,10 @@ const router = createBrowserRouter([
                 element: <AdminAttendanceEditor />,
               },
               {
+                path: "history/:targetWorkDate/:staffId",
+                element: <AdminAttendanceHistory />,
+              },
+              {
                 path: "print",
                 element: <AdminAttendancePrint />,
               },
@@ -284,6 +290,10 @@ const router = createBrowserRouter([
                 element: <AdminWorkflowDetail />,
               },
             ],
+          },
+          {
+            path: "logs",
+            element: <AdminLogs />,
           },
         ],
       },

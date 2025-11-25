@@ -7,10 +7,11 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Logger } from "aws-amplify";
 
-import { Attendance, Staff } from "@/API";
+import { Attendance, CreateOperationLogInput, Staff } from "@/API";
 import * as MESSAGE_CODE from "@/errors";
 import { ReturnDirectlyFlag } from "@/hooks/useAttendance/useAttendance";
 import { CognitoUser } from "@/hooks/useCognitoUser";
+import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
@@ -55,8 +56,41 @@ export async function clockOutCallback(
 
   const clockOutTime = resolveClockOutTime(endTimeIso);
 
+  // capture pressed time and t0 immediately to measure processing duration
+  const pressedAt = getNowISOStringWithZeroSeconds();
+  const t0 = Date.now();
+
   try {
     const attendance = await clockOut(cognitoUser.id, today, clockOutTime);
+    const t1 = Date.now();
+    const processingTimeMs = t1 - t0;
+
+    // record button-press time and include attendance time + processing time inside details (best-effort)
+    try {
+      const input: CreateOperationLogInput = {
+        staffId: cognitoUser.id,
+        action: "clock_out",
+        resource: "attendance",
+        resourceId: attendance?.id ?? undefined,
+        // primary timestamp: when the user pressed the button
+        timestamp: pressedAt,
+        details: JSON.stringify({
+          workDate: today,
+          attendanceTime: clockOutTime,
+          processingTimeMs,
+          staffName: staff
+            ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
+            : undefined,
+        }),
+        metadata: JSON.stringify({ processingTimeMs }),
+        userAgent:
+          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      };
+
+      await createOperationLogData(input);
+    } catch (logErr) {
+      logger.error("Failed to create operation log for clockOut", logErr);
+    }
 
     dispatch(setSnackbarSuccess(MESSAGE_CODE.S01002));
     new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();

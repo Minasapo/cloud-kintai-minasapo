@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
@@ -133,14 +134,37 @@ export default function ChangeRequestDialog({
         <Button
           onClick={() => {
             handleRejectChangeRequest(attendance, updateAttendance, comment)
-              .then(() => {
-                if (!staff || !attendance) {
+              .then(async (updatedAttendance) => {
+                if (!staff || !updatedAttendance) {
                   throw new Error(MESSAGE_CODE.E00002);
                 }
 
-                new GenericMailSender(staff, attendance).rejectChangeRequest(
-                  comment
-                );
+                new GenericMailSender(
+                  staff,
+                  updatedAttendance
+                ).rejectChangeRequest(comment);
+
+                // OperationLog を作成（失敗しても処理を止めない）
+                try {
+                  await createOperationLogData({
+                    staffId: staff.id,
+                    action: "reject_change_request",
+                    resource: "attendance",
+                    resourceId: updatedAttendance.id,
+                    timestamp: new Date().toISOString(),
+                    details: JSON.stringify({
+                      workDate: updatedAttendance.workDate,
+                      applicantStaffId: updatedAttendance.staffId,
+                      result: "rejected",
+                      comment: comment ?? null,
+                    }),
+                  });
+                } catch (err) {
+                  console.error(
+                    "Failed to create operation log for reject change request:",
+                    err
+                  );
+                }
 
                 dispatch(setSnackbarSuccess(MESSAGE_CODE.S04007));
                 handleClose();
@@ -156,17 +180,43 @@ export default function ChangeRequestDialog({
         <Button
           onClick={() => {
             handleApproveChangeRequest(attendance, updateAttendance, comment)
-              .then(() => {
-                if (!staff || !attendance) {
+              .then(async (updatedAttendance) => {
+                if (!staff || !updatedAttendance) {
                   throw new Error(MESSAGE_CODE.E00002);
                 }
 
-                new GenericMailSender(staff, attendance).approveChangeRequest(
-                  comment
-                );
+                new GenericMailSender(
+                  staff,
+                  updatedAttendance
+                ).approveChangeRequest(comment);
+
+                // OperationLog を作成（失敗しても処理を止めない）
+                try {
+                  await createOperationLogData({
+                    staffId: staff.id,
+                    action: "approve_change_request",
+                    resource: "attendance",
+                    resourceId: updatedAttendance.id,
+                    timestamp: new Date().toISOString(),
+                    details: JSON.stringify({
+                      workDate: updatedAttendance.workDate,
+                      applicantStaffId: updatedAttendance.staffId,
+                      result: "approved",
+                      comment: comment ?? null,
+                    }),
+                  });
+                } catch (err) {
+                  console.error(
+                    "Failed to create operation log for approve change request:",
+                    err
+                  );
+                }
+
                 dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
                 // navigate to staff attendance list
-                navigate(`/admin/staff/${attendance.staffId}/attendance`);
+                navigate(
+                  `/admin/staff/${updatedAttendance.staffId}/attendance`
+                );
                 handleClose();
               })
               .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E04006)));

@@ -30,6 +30,7 @@ type Props = {
   ) => void;
   workDate: dayjs.Dayjs | null;
   visibleMode?: ButtonRoleMode;
+  readOnly?: boolean;
 };
 
 const BUTTON_ROLE_MAP: Record<
@@ -72,6 +73,7 @@ export default function QuickInputButtonsMobile({
   hourlyPaidHolidayTimeReplace,
   workDate,
   visibleMode,
+  readOnly,
 }: Props) {
   const {
     getStartTime,
@@ -114,6 +116,7 @@ export default function QuickInputButtonsMobile({
         key: "clear",
         label: "クリア",
         action: () => {
+          if (readOnly) return;
           setValue("startTime", null);
           setValue("endTime", null);
           restReplace([]);
@@ -132,6 +135,7 @@ export default function QuickInputButtonsMobile({
         key: "normal",
         label: "通常勤務",
         action: () => {
+          if (readOnly) return;
           setValue("startTime", toISO(defaultStart, workDate));
           setValue("endTime", toISO(defaultEnd, workDate));
           restReplace([
@@ -153,6 +157,7 @@ export default function QuickInputButtonsMobile({
         key: "regularStart",
         label: "定時出勤",
         action: () => {
+          if (readOnly) return;
           setValue("startTime", toISO(defaultStart, workDate));
         },
       });
@@ -162,6 +167,7 @@ export default function QuickInputButtonsMobile({
         key: "regularEnd",
         label: "定時退勤",
         action: () => {
+          if (readOnly) return;
           setValue("endTime", toISO(defaultEnd, workDate));
           setValue("rests", [
             {
@@ -178,6 +184,7 @@ export default function QuickInputButtonsMobile({
           key: "amHalf",
           label: "午前半休",
           action: () => {
+            if (readOnly) return;
             setValue("startTime", toISO(defaultPmStart, workDate));
             setValue("endTime", toISO(defaultPmEnd, workDate));
             restReplace([]);
@@ -193,6 +200,7 @@ export default function QuickInputButtonsMobile({
           key: "pmHalf",
           label: "午後半休",
           action: () => {
+            if (readOnly) return;
             setValue("startTime", toISO(defaultAmStart, workDate));
             setValue("endTime", toISO(defaultAmEnd, workDate));
             restReplace([]);
@@ -209,6 +217,7 @@ export default function QuickInputButtonsMobile({
         key: "paidHoliday",
         label: "有給休暇(1日)",
         action: () => {
+          if (readOnly) return;
           setValue("startTime", toISO(defaultStart, workDate));
           setValue("endTime", toISO(defaultEnd, workDate));
           restReplace([

@@ -13,7 +13,6 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
-// ...existing imports above
 import { useContext, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 
@@ -25,6 +24,7 @@ import QuickInputButtons from "@/components/attendance_editor/QuickInputButtons"
 import GroupContainer from "@/components/ui/GroupContainer/GroupContainer";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import useOperationLog from "@/hooks/useOperationLog/useOperationLog";
 
 import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
 import StaffNameItem from "../../../components/attendance_editor/items/StaffNameItem";
@@ -75,6 +75,7 @@ const RequestButton = styled(Button)(({ theme }) => ({
 
 export default function DesktopEditor() {
   const {
+    attendance,
     staff,
     onSubmit,
     register,
@@ -92,7 +93,11 @@ export default function DesktopEditor() {
     restReplace,
     hourlyPaidHolidayTimeReplace,
     workDate,
+    readOnly,
   } = useContext(AttendanceEditContext);
+
+  // OperationLog を作成するためのフック
+  const { create: createOperationLog } = useOperationLog();
   const { getStartTime } = useAppConfig();
   const { hourlyPaidHolidayEnabled } = useContext(AttendanceEditContext);
   const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
@@ -187,7 +192,7 @@ export default function DesktopEditor() {
             <GoDirectlyFlagCheckbox
               name="goDirectlyFlag"
               control={control}
-              disabled={changeRequests.length > 0}
+              disabled={changeRequests.length > 0 || !!readOnly}
               onChangeExtra={(checked: boolean) => {
                 if (checked && setValue) {
                   setValue("startTime", getStartTime().toISOString());
@@ -348,7 +353,47 @@ export default function DesktopEditor() {
               <Box sx={{ paddingBottom: 2 }}>
                 <RequestButton
                   data-testid="attendance-submit-button"
-                  onClick={handleSubmit(onSubmit)}
+                  onClick={async () => {
+                    // capture pressed time and t0 for processing-time measurement
+                    const pressedAt = new Date().toISOString();
+                    const t0 = Date.now();
+
+                    // call validation + submit and measure duration regardless of success
+                    let submitError: unknown = undefined;
+                    try {
+                      await handleSubmit(onSubmit)();
+                    } catch (e) {
+                      submitError = e;
+                    }
+
+                    const t1 = Date.now();
+                    const processingTimeMs = t1 - t0;
+
+                    // Try to create an operation log (best-effort). Include processing time.
+                    try {
+                      await createOperationLog({
+                        staffId: staff?.cognitoUserId ?? undefined,
+                        action: "submit_change_request",
+                        resource: "attendance",
+                        resourceId: attendance?.id ?? String(workDate ?? ""),
+                        // primary timestamp: when the user pressed the button
+                        timestamp: pressedAt,
+                        details: JSON.stringify({
+                          startTime: getValues?.("startTime"),
+                          endTime: getValues?.("endTime"),
+                          remarks: getValues?.("remarks"),
+                          processingTimeMs,
+                          success: submitError ? false : true,
+                        }),
+                        metadata: JSON.stringify({ processingTimeMs }),
+                        severity: "INFO",
+                      });
+                    } catch (e) {
+                      // ログ作成失敗は握りつぶす。ただしデバッグに出す
+                      // eslint-disable-next-line no-console
+                      console.log("createOperationLog failed", e);
+                    }
+                  }}
                   disabled={
                     !isDirty ||
                     !isValid ||

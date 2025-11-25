@@ -980,3 +980,78 @@ export const deleteWorkflow = /* GraphQL */ `mutation DeleteWorkflow(
   APITypes.DeleteWorkflowMutationVariables,
   APITypes.DeleteWorkflowMutation
 >;
+export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
+  $input: CreateOperationLogInput!
+  $condition: ModelOperationLogConditionInput
+) {
+  createOperationLog(input: $input, condition: $condition) {
+    id
+    staffId
+    action
+    resource
+    resourceId
+    timestamp
+    details
+    ipAddress
+    userAgent
+    metadata
+    severity
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateOperationLogMutationVariables,
+  APITypes.CreateOperationLogMutation
+>;
+export const updateOperationLog = /* GraphQL */ `mutation UpdateOperationLog(
+  $input: UpdateOperationLogInput!
+  $condition: ModelOperationLogConditionInput
+) {
+  updateOperationLog(input: $input, condition: $condition) {
+    id
+    staffId
+    action
+    resource
+    resourceId
+    timestamp
+    details
+    ipAddress
+    userAgent
+    metadata
+    severity
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateOperationLogMutationVariables,
+  APITypes.UpdateOperationLogMutation
+>;
+export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
+  $input: DeleteOperationLogInput!
+  $condition: ModelOperationLogConditionInput
+) {
+  deleteOperationLog(input: $input, condition: $condition) {
+    id
+    staffId
+    action
+    resource
+    resourceId
+    timestamp
+    details
+    ipAddress
+    userAgent
+    metadata
+    severity
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteOperationLogMutationVariables,
+  APITypes.DeleteOperationLogMutation
+>;

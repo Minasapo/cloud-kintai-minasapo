@@ -32,6 +32,7 @@ type QuickInputButtonsProps = {
    */
   visibleMode?: "all" | "admin" | "staff";
   getValues?: UseFormGetValues<AttendanceEditInputs>;
+  readOnly?: boolean;
   /**
    * ボタンごとの表示モード。プロパティを指定しない場合は `visibleMode` のルールを使用します。
    */
@@ -45,6 +46,7 @@ export default function QuickInputButtons({
   workDate,
   visibleMode,
   getValues,
+  readOnly,
 }: QuickInputButtonsProps) {
   type ButtonRoleMode = "all" | "admin" | "staff";
 
@@ -171,6 +173,7 @@ export default function QuickInputButtons({
                       }
                     )
                   }
+                  disabled={!!readOnly}
                 >
                   クリア
                 </Button>
@@ -203,6 +206,7 @@ export default function QuickInputButtons({
                       }
                     )
                   }
+                  disabled={!!readOnly}
                 >
                   通常勤務
                 </Button>
@@ -223,6 +227,7 @@ export default function QuickInputButtons({
                       }
                     )
                   }
+                  disabled={!!readOnly}
                 >
                   定時出勤
                 </Button>
@@ -249,6 +254,7 @@ export default function QuickInputButtons({
                       }
                     )
                   }
+                  disabled={!!readOnly}
                 >
                   定時退勤
                 </Button>
@@ -287,6 +293,7 @@ export default function QuickInputButtons({
                           }
                         )
                       }
+                      disabled={!!readOnly}
                     >
                       午前半休
                     </Button>
@@ -322,6 +329,7 @@ export default function QuickInputButtons({
                           }
                         )
                       }
+                      disabled={!!readOnly}
                     >
                       午後半休
                     </Button>
@@ -365,6 +373,7 @@ export default function QuickInputButtons({
                       }
                     )
                   }
+                  disabled={!!readOnly}
                 >
                   有給休暇(1日)
                 </Button>

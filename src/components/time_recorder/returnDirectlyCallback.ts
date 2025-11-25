@@ -1,16 +1,19 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Logger } from "aws-amplify";
 
-import { Attendance, Staff } from "@/API";
+import { Attendance, CreateOperationLogInput, Staff } from "@/API";
 import * as MESSAGE_CODE from "@/errors";
 import { ReturnDirectlyFlag } from "@/hooks/useAttendance/useAttendance";
 import { CognitoUser } from "@/hooks/useCognitoUser";
+import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+
+import { getNowISOStringWithZeroSeconds } from "./util";
 
 export async function returnDirectlyCallback(
   cognitoUser: CognitoUser | null | undefined,
@@ -41,6 +44,31 @@ export async function returnDirectlyCallback(
       workEndTime,
       ReturnDirectlyFlag.YES
     );
+    try {
+      const pressedAt = getNowISOStringWithZeroSeconds();
+      const input: CreateOperationLogInput = {
+        staffId: cognitoUser.id,
+        action: "return_directly",
+        resource: "attendance",
+        resourceId: attendance?.id ?? undefined,
+        // primary timestamp: when the user pressed the button
+        timestamp: pressedAt,
+        details: JSON.stringify({
+          workDate: today,
+          attendanceTime: workEndTime,
+          staffName: staff
+            ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
+            : undefined,
+        }),
+        userAgent:
+          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      };
+
+      await createOperationLogData(input);
+    } catch (logErr) {
+      logger.error("Failed to create operation log for returnDirectly", logErr);
+    }
+
     dispatch(setSnackbarSuccess(MESSAGE_CODE.S01004));
     new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
   } catch (error) {

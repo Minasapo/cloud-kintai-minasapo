@@ -25,6 +25,7 @@ export default function HourlyPaidHolidayTimeInput({
     control,
     hourlyPaidHolidayTimeUpdate: _hourlyPaidHolidayTimeUpdate,
     changeRequests,
+    readOnly,
   } = useContext(AttendanceEditContext);
 
   if (!workDate || !control) {
@@ -39,7 +40,7 @@ export default function HourlyPaidHolidayTimeInput({
         render={({ field }) => (
           <TimePicker
             value={field.value ? dayjs(field.value) : null}
-            disabled={changeRequests.length > 0}
+            disabled={changeRequests.length > 0 || !!readOnly}
             ampm={false}
             slotProps={{ textField: { size: "small", label } }}
             onChange={(newTime) => {

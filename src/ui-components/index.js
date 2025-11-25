@@ -18,6 +18,8 @@ export { default as DocumentCreateForm } from "./DocumentCreateForm";
 export { default as DocumentUpdateForm } from "./DocumentUpdateForm";
 export { default as HolidayCalendarCreateForm } from "./HolidayCalendarCreateForm";
 export { default as HolidayCalendarUpdateForm } from "./HolidayCalendarUpdateForm";
+export { default as OperationLogCreateForm } from "./OperationLogCreateForm";
+export { default as OperationLogUpdateForm } from "./OperationLogUpdateForm";
 export { default as StaffCreateForm } from "./StaffCreateForm";
 export { default as StaffUpdateForm } from "./StaffUpdateForm";
 export { default as WorkflowCreateForm } from "./WorkflowCreateForm";

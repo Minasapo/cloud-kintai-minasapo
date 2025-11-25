@@ -286,24 +286,26 @@ export default function Layout() {
     companyHolidayCalendarLoading ||
     authStatus === "configuring"
   ) {
-    return <LinearProgress />;
+    return <LinearProgress data-testid="layout-linear-progress" />;
   }
 
   return (
     <AuthContext.Provider value={authContextValue}>
       <AppConfigContext.Provider value={appConfigContextValue}>
         <AppContext.Provider value={appContextValue}>
-          <Stack sx={{ minHeight: "100vh" }}>
-            <Box>
+          <Stack sx={{ minHeight: "100vh" }} data-testid="layout-stack">
+            <Box data-testid="layout-header">
               <Header />
             </Box>
-            <Box sx={{ flex: 1, overflow: "auto" }}>
+            <Box sx={{ flex: 1, overflow: "auto" }} data-testid="layout-main">
               <Outlet />
             </Box>
-            <Box>
+            <Box data-testid="layout-footer">
               <Footer />
             </Box>
-            <SnackbarGroup />
+            <Box data-testid="layout-snackbar">
+              <SnackbarGroup />
+            </Box>
           </Stack>
         </AppContext.Provider>
       </AppConfigContext.Provider>

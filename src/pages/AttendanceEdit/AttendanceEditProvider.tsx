@@ -29,6 +29,8 @@ type AttendanceEditContextProps = {
   isSubmitting: boolean;
   restFields: FieldArrayWithId<AttendanceEditInputs, "rests", "id">[];
   changeRequests: AttendanceChangeRequest[];
+  // 表示専用モードかどうか
+  readOnly?: boolean;
   restAppend?: UseFieldArrayAppend<AttendanceEditInputs, "rests">;
   restRemove?: UseFieldArrayRemove;
   restUpdate?: UseFieldArrayUpdate<AttendanceEditInputs, "rests">;
@@ -86,6 +88,7 @@ export const AttendanceEditContext = createContext<AttendanceEditContextProps>({
   isSubmitting: false,
   restFields: [],
   changeRequests: [],
+  readOnly: false,
   systemCommentFields: [],
   hourlyPaidHolidayTimeFields: [],
   hourlyPaidHolidayTimeAppend: () => {},

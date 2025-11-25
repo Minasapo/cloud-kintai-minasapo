@@ -96,6 +96,36 @@ dayjs().format('YYYY-MM-DD')
 - `amplify/` 配下には自動生成ファイルが多数あります。特に `amplify/backend/*` 内の自動生成ファイルは原則編集しないでください。
 - GraphQL モデルを変更する場合は、`amplify/backend/api/garakufrontend/schema.graphql` を編集してください。その後、Amplify CLI で push します。
 
+## 操作ログ (Operation Log)
+
+このプロジェクトでは、スタッフの操作（例: 打刻／休憩ボタンの押下）を追跡するために `OperationLog` モデルを導入しています。開発者がログを確認・拡張・運用できるよう、下記に実装場所と運用上の注意をまとめます。
+
+- モデル位置
+  - Amplify schema: `amplify/backend/api/garakufrontend/schema.graphql` に `OperationLog` を追加しています。
+  - 主要フィールド: `id`, `staffId`, `action`, `resource`, `resourceId`, `timestamp`, `details`, `ipAddress`, `userAgent`, `metadata`, `severity`
+
+- フロントエンドの参照箇所
+  - 作成ラッパー: `src/hooks/useOperationLog/createOperationLogData.tsx`（GraphQL の `createOperationLog` を呼ぶ）
+  - 管理画面向け取得フック: `src/hooks/useAdminOperationLogs/*`（ページネーション対応）
+  - 管理 UI（一覧）: `src/pages/admin/AdminLogs/AdminLogsClean.tsx`（最新 30 件を表示、スクロールで過去ログを逐次読込）
+
+- いつログを作るか
+  - 打刻（出勤・退勤）や休憩開始／終了のボタン押下時にログを作成します（実装箇所: `src/components/time_recorder/*Callback.ts` 系）。
+  - `timestamp` にはフロントエンドで取得した押下時刻（pressedAt）を入れており、クライアントでの押下時刻を正確に残します。
+  - `details` にはスタッフの表示名など人が読みやすい形で情報を入れる設計です（フロントエンドで staff 名を解決して保存します）。
+
+- 表示・取り扱いの注意
+  - `userAgent` を保存しますが、個人情報保護の観点から必要最小限の保持に留め、表示は短縮して tooltip などで詳細を確認できる形にしています。
+  - ログの保持期間（例: 90日）や削除ポリシーを策定しておくことを推奨します。大量のログが溜まる場合はバックエンドでの TTL やバッチ削除を検討してください。
+
+- 開発者向け操作例（参考）
+  - 最新 30 件取得: GraphQL の `listOperationLogs(limit: 30, sortDirection: DESC)` を利用
+  - 作成: `createOperationLog(input: { staffId: "...", action: "punch", resource: "attendance", timestamp: "...", userAgent: "..." })`
+
+- 実装の補足
+  - 管理画面は `nextToken` を利用したページネーションで過去ログを読み込む実装です。フロントエンドのフックは既存の GraphQL クライアントジェネレータ（`src/API.ts` 等）に依存します。
+  - 仕様変更時は schema の変更→Amplify push、ならびにフロントエンドの hook や管理画面の更新を忘れずに行ってください。
+
 ## スナックバーの取り扱い（新ルール）
 
 - アプリ内でユーザー通知（成功・エラー・警告）を表示する際は、ローカル state の Snackbar を直接使うのではなく、`src/lib/reducers/snackbarReducer.ts` の Redux slice を使って表示すること。

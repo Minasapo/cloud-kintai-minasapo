@@ -908,3 +908,95 @@ export const workflowsByStaffId = /* GraphQL */ `query WorkflowsByStaffId(
   APITypes.WorkflowsByStaffIdQueryVariables,
   APITypes.WorkflowsByStaffIdQuery
 >;
+export const getOperationLog = /* GraphQL */ `query GetOperationLog($id: ID!) {
+  getOperationLog(id: $id) {
+    id
+    staffId
+    action
+    resource
+    resourceId
+    timestamp
+    details
+    ipAddress
+    userAgent
+    metadata
+    severity
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetOperationLogQueryVariables,
+  APITypes.GetOperationLogQuery
+>;
+export const listOperationLogs = /* GraphQL */ `query ListOperationLogs(
+  $filter: ModelOperationLogFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listOperationLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      staffId
+      action
+      resource
+      resourceId
+      timestamp
+      details
+      ipAddress
+      userAgent
+      metadata
+      severity
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListOperationLogsQueryVariables,
+  APITypes.ListOperationLogsQuery
+>;
+export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffId(
+  $staffId: String!
+  $timestamp: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelOperationLogFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  operationLogsByStaffId(
+    staffId: $staffId
+    timestamp: $timestamp
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      staffId
+      action
+      resource
+      resourceId
+      timestamp
+      details
+      ipAddress
+      userAgent
+      metadata
+      severity
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.OperationLogsByStaffIdQueryVariables,
+  APITypes.OperationLogsByStaffIdQuery
+>;

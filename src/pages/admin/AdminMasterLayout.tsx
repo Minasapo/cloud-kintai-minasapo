@@ -39,7 +39,7 @@ export default function AdminMasterLayout() {
       const s = localStorage.getItem("adminSettingsOpen");
       if (s !== null) setSettingsOpen(s === "true");
     } catch (e) {
-      // ignore
+      void e;
     }
   }, []);
 
@@ -50,7 +50,9 @@ export default function AdminMasterLayout() {
         "adminSidebarCollapsed",
         sidebarCollapsed ? "true" : "false"
       );
-    } catch (e) {}
+    } catch (e) {
+      void e;
+    }
   }, [sidebarCollapsed]);
   useEffect(() => {
     try {
@@ -58,7 +60,9 @@ export default function AdminMasterLayout() {
         "adminSettingsOpen",
         settingsOpen ? "true" : "false"
       );
-    } catch (e) {}
+    } catch (e) {
+      void e;
+    }
   }, [settingsOpen]);
 
   const menuList = [
