@@ -89,6 +89,7 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
       enabled
       __typename
     }
+    themeColor
     createdAt
     updatedAt
     __typename
@@ -142,6 +143,7 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
         enabled
         __typename
       }
+      themeColor
       createdAt
       updatedAt
       __typename

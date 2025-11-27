@@ -192,6 +192,7 @@ type AppConfig @model {
   reasons: [Reason]
   quickInputStartTimes: [QuickInputTime]
   quickInputEndTimes: [QuickInputTime]
+  themeColor: String
 }
 
 type EmailResult {
