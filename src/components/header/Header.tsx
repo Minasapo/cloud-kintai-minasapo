@@ -1,6 +1,8 @@
 import { Container, Stack } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
+import { DEFAULT_THEME_COLOR } from "@/constants/theme";
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
@@ -12,7 +14,16 @@ import { SignInOutButton } from "./SignInOutButton";
 
 export default function Header() {
   const { isCognitoUserRole } = useContext(AuthContext);
+  const { getThemeColor } = useContext(AppConfigContext);
   const [pathName, setPathName] = useState("/register");
+
+  const themeColor = useMemo(
+    () =>
+      typeof getThemeColor === "function"
+        ? getThemeColor()
+        : DEFAULT_THEME_COLOR,
+    [getThemeColor]
+  );
 
   useEffect(() => {
     const name =
@@ -25,7 +36,7 @@ export default function Header() {
       <Container
         maxWidth={false}
         disableGutters
-        sx={{ p: 0, backgroundColor: "#0FA85E" }}
+        sx={{ p: 0, backgroundColor: themeColor || DEFAULT_THEME_COLOR }}
       >
         <Container sx={{ px: { xs: 2, md: 3 } }}>
           <Stack

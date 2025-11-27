@@ -1,10 +1,23 @@
 import { Box, Typography } from "@mui/material";
+import { useContext, useMemo } from "react";
+
+import { DEFAULT_THEME_COLOR } from "@/constants/theme";
+import { AppConfigContext } from "@/context/AppConfigContext";
 
 export default function Footer() {
+  const { getThemeColor } = useContext(AppConfigContext);
+  const themeColor = useMemo(
+    () =>
+      typeof getThemeColor === "function"
+        ? getThemeColor()
+        : DEFAULT_THEME_COLOR,
+    [getThemeColor]
+  );
+
   return (
     <footer
       style={{
-        backgroundColor: "#0FA85E",
+        backgroundColor: themeColor || DEFAULT_THEME_COLOR,
       }}
     >
       <Box textAlign="center" sx={{ p: 1 }}>

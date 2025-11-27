@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
 import { AppConfig, CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
+import { DEFAULT_THEME_COLOR } from "@/constants/theme";
 
 import { AppConfigDataManager } from "./AppConfigDataManager";
 
@@ -20,6 +21,7 @@ export type DefaultAppConfig = Pick<
   | "reasons"
   | "quickInputStartTimes"
   | "quickInputEndTimes"
+  | "themeColor"
 >;
 
 /**
@@ -36,6 +38,7 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   reasons: [],
   quickInputStartTimes: [],
   quickInputEndTimes: [],
+  themeColor: DEFAULT_THEME_COLOR,
 };
 
 const LOCAL_STORAGE_KEY = "appConfig";
@@ -286,6 +289,9 @@ export default function useAppConfig() {
       ? config.absentEnabled
       : false;
 
+  const getThemeColor = () =>
+    config?.themeColor ?? DEFAULT_CONFIG.themeColor ?? DEFAULT_THEME_COLOR;
+
   return {
     config,
     loading,
@@ -309,5 +315,6 @@ export default function useAppConfig() {
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
     getAbsentEnabled,
+    getThemeColor,
   };
 }
