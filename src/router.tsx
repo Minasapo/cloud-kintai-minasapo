@@ -22,6 +22,7 @@ import AdminShiftGuard from "./pages/admin/AdminShiftGuard";
 import AdminStaff from "./pages/admin/AdminStaff/AdminStaff";
 import AdminStaffAttendanceList from "./pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
 import AdminStaffEditor from "./pages/admin/AdminStaffEditor/AdminStaffEditor";
+import AdminTheme from "./pages/admin/AdminTheme/AdminTheme";
 import AdminWorkflow from "./pages/admin/AdminWorkflow/AdminWorkflow";
 import AdminWorkflowDetail from "./pages/admin/AdminWorkflow/AdminWorkflowDetail";
 import JobTerm from "./pages/admin/JobTerm/JobTerm";
@@ -239,6 +240,10 @@ const router = createBrowserRouter([
               {
                 path: "holiday_calendar",
                 element: <AdminHolidayCalendar />,
+              },
+              {
+                path: "theme",
+                element: <AdminTheme />,
               },
               {
                 path: "feature_management",

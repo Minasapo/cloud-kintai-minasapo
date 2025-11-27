@@ -92,6 +92,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
       enabled
       __typename
     }
+    themeColor
     createdAt
     updatedAt
     __typename
@@ -140,6 +141,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
       enabled
       __typename
     }
+    themeColor
     createdAt
     updatedAt
     __typename
@@ -188,6 +190,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
       enabled
       __typename
     }
+    themeColor
     createdAt
     updatedAt
     __typename

@@ -98,6 +98,7 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
       enabled
       __typename
     }
+    themeColor
     createdAt
     updatedAt
     __typename
@@ -149,6 +150,7 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
       enabled
       __typename
     }
+    themeColor
     createdAt
     updatedAt
     __typename
@@ -200,6 +202,7 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
       enabled
       __typename
     }
+    themeColor
     createdAt
     updatedAt
     __typename

@@ -68,6 +68,7 @@ export default function AdminMasterLayout() {
   const menuList = [
     { name: "集計対象月", path: "/admin/master/job_term" },
     { name: "休日カレンダー", path: "/admin/master/holiday_calendar" },
+    { name: "テーマ", path: "/admin/master/theme" },
     {
       name: "勤怠",
       path: "/admin/master/feature_management",

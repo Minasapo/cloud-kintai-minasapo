@@ -18,7 +18,6 @@ import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
 import useCompanyHolidayCalendar from "./hooks/useCompanyHolidayCalendars/useCompanyHolidayCalendars";
 import useHolidayCalendar from "./hooks/useHolidayCalendars/useHolidayCalendars";
-
 /**
  * cookieの有効期限を管理しつつ、指定したfetch関数を実行するユーティリティ関数。
  *
@@ -79,6 +78,7 @@ export default function Layout() {
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
     getAbsentEnabled,
+    getThemeColor,
   } = useAppConfig();
   const {
     fetchAllHolidayCalendars,
@@ -227,6 +227,7 @@ export default function Layout() {
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
       getAbsentEnabled,
+      getThemeColor,
     }),
     [
       fetchConfig,
@@ -249,6 +250,7 @@ export default function Layout() {
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
       getAbsentEnabled,
+      getThemeColor,
     ]
   );
 

@@ -41,6 +41,7 @@ type AppConfigContextProps = {
   getAmPmHolidayEnabled: () => boolean;
   getSpecialHolidayEnabled?: () => boolean;
   getAbsentEnabled?: () => boolean;
+  getThemeColor: () => string;
 };
 
 export const AppConfigContext = createContext<AppConfigContextProps>({
@@ -69,4 +70,6 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getAmPmHolidayEnabled: () => false,
   getSpecialHolidayEnabled: () => false,
   getAbsentEnabled: () => false,
+  // Ensure a string is always returned to satisfy the context type
+  getThemeColor: () => DEFAULT_CONFIG.themeColor ?? "",
 });
