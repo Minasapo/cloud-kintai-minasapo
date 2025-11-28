@@ -239,6 +239,7 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
     approverSingle
     approverMultiple
     approverMultipleMode
+    shiftGroup
     createdAt
     updatedAt
     __typename
@@ -272,6 +273,7 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
     approverSingle
     approverMultiple
     approverMultipleMode
+    shiftGroup
     createdAt
     updatedAt
     __typename
@@ -305,6 +307,7 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
     approverSingle
     approverMultiple
     approverMultipleMode
+    shiftGroup
     createdAt
     updatedAt
     __typename

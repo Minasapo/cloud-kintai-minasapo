@@ -254,6 +254,7 @@ export const createStaff = /* GraphQL */ `mutation CreateStaff(
     approverSingle
     approverMultiple
     approverMultipleMode
+    shiftGroup
     createdAt
     updatedAt
     __typename
@@ -290,6 +291,7 @@ export const updateStaff = /* GraphQL */ `mutation UpdateStaff(
     approverSingle
     approverMultiple
     approverMultipleMode
+    shiftGroup
     createdAt
     updatedAt
     __typename
@@ -326,6 +328,7 @@ export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
     approverSingle
     approverMultiple
     approverMultipleMode
+    shiftGroup
     createdAt
     updatedAt
     __typename

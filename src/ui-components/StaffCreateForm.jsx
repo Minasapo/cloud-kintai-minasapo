@@ -206,6 +206,7 @@ export default function StaffCreateForm(props) {
     approverSingle: "",
     approverMultiple: [],
     approverMultipleMode: "",
+    shiftGroup: "",
   };
   const [cognitoUserId, setCognitoUserId] = React.useState(
     initialValues.cognitoUserId
@@ -237,6 +238,7 @@ export default function StaffCreateForm(props) {
   const [approverMultipleMode, setApproverMultipleMode] = React.useState(
     initialValues.approverMultipleMode
   );
+  const [shiftGroup, setShiftGroup] = React.useState(initialValues.shiftGroup);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setCognitoUserId(initialValues.cognitoUserId);
@@ -256,6 +258,7 @@ export default function StaffCreateForm(props) {
     setApproverMultiple(initialValues.approverMultiple);
     setCurrentApproverMultipleValue("");
     setApproverMultipleMode(initialValues.approverMultipleMode);
+    setShiftGroup(initialValues.shiftGroup);
     setErrors({});
   };
   const [currentApproverMultipleValue, setCurrentApproverMultipleValue] =
@@ -278,6 +281,7 @@ export default function StaffCreateForm(props) {
     approverSingle: [],
     approverMultiple: [],
     approverMultipleMode: [],
+    shiftGroup: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -321,6 +325,7 @@ export default function StaffCreateForm(props) {
           approverSingle,
           approverMultiple,
           approverMultipleMode,
+          shiftGroup,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -399,6 +404,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.cognitoUserId ?? value;
@@ -438,6 +444,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.familyName ?? value;
@@ -477,6 +484,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.givenName ?? value;
@@ -516,6 +524,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.mailAddress ?? value;
@@ -555,6 +564,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.role ?? value;
@@ -594,6 +604,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.enabled ?? value;
@@ -633,6 +644,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -672,6 +684,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -711,6 +724,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.usageStartDate ?? value;
@@ -750,6 +764,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.sortKey ?? value;
@@ -789,6 +804,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.workType ?? value;
@@ -828,6 +844,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.developer ?? value;
@@ -867,6 +884,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.approverSetting ?? value;
@@ -922,6 +940,7 @@ export default function StaffCreateForm(props) {
               approverSingle: value,
               approverMultiple,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.approverSingle ?? value;
@@ -957,6 +976,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple: values,
               approverMultipleMode,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             values = result?.approverMultiple ?? values;
@@ -1026,6 +1046,7 @@ export default function StaffCreateForm(props) {
               approverSingle,
               approverMultiple,
               approverMultipleMode: value,
+              shiftGroup,
             };
             const result = onChange(modelFields);
             value = result?.approverMultipleMode ?? value;
@@ -1053,6 +1074,46 @@ export default function StaffCreateForm(props) {
           {...getOverrideProps(overrides, "approverMultipleModeoption1")}
         ></option>
       </SelectField>
+      <TextField
+        label="Shift group"
+        isRequired={false}
+        isReadOnly={false}
+        value={shiftGroup}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              cognitoUserId,
+              familyName,
+              givenName,
+              mailAddress,
+              role,
+              enabled,
+              status,
+              owner,
+              usageStartDate,
+              sortKey,
+              workType,
+              developer,
+              approverSetting,
+              approverSingle,
+              approverMultiple,
+              approverMultipleMode,
+              shiftGroup: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.shiftGroup ?? value;
+          }
+          if (errors.shiftGroup?.hasError) {
+            runValidationTasks("shiftGroup", value);
+          }
+          setShiftGroup(value);
+        }}
+        onBlur={() => runValidationTasks("shiftGroup", shiftGroup)}
+        errorMessage={errors.shiftGroup?.errorMessage}
+        hasError={errors.shiftGroup?.hasError}
+        {...getOverrideProps(overrides, "shiftGroup")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
