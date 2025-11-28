@@ -69,6 +69,7 @@ export default function AdminMasterLayout() {
     { name: "集計対象月", path: "/admin/master/job_term" },
     { name: "休日カレンダー", path: "/admin/master/holiday_calendar" },
     { name: "テーマ", path: "/admin/master/theme" },
+    { name: "シフト", path: "/admin/master/shift" },
     {
       name: "勤怠",
       path: "/admin/master/feature_management",

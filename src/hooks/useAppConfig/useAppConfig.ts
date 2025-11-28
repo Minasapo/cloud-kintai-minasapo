@@ -22,6 +22,7 @@ export type DefaultAppConfig = Pick<
   | "quickInputStartTimes"
   | "quickInputEndTimes"
   | "themeColor"
+  | "shiftGroups"
 >;
 
 /**
@@ -39,6 +40,7 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   quickInputStartTimes: [],
   quickInputEndTimes: [],
   themeColor: DEFAULT_THEME_COLOR,
+  shiftGroups: [],
 };
 
 const LOCAL_STORAGE_KEY = "appConfig";
@@ -205,6 +207,21 @@ export default function useAppConfig() {
     return [];
   };
 
+  const getShiftGroups = () => {
+    if (config && config.shiftGroups) {
+      return config.shiftGroups
+        .filter((group) => group !== null)
+        .map((group) => ({
+          label: group?.label ?? "",
+          description: group?.description ?? null,
+          min: group?.min ?? null,
+          max: group?.max ?? null,
+          fixed: group?.fixed ?? null,
+        }));
+    }
+    return [];
+  };
+
   /**
    * 昼休憩開始時刻を取得する。
    * @returns dayjsオブジェクト
@@ -305,6 +322,7 @@ export default function useAppConfig() {
     getOfficeMode,
     getQuickInputStartTimes,
     getQuickInputEndTimes,
+    getShiftGroups,
     getLunchRestStartTime,
     getLunchRestEndTime,
     getHourlyPaidHolidayEnabled,

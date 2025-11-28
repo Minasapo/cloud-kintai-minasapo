@@ -228,11 +228,6 @@ export default function TimeRecorder(): JSX.Element {
       return;
     }
 
-    logger.debug("Staff and attendance loading state:", {
-      staff,
-      attendanceLoading,
-    });
-
     const errorCount = attendances
       .map((attendance) => {
         const status = new AttendanceState(
@@ -258,14 +253,9 @@ export default function TimeRecorder(): JSX.Element {
         holidayCalendars,
         companyHolidayCalendars
       ).get();
-      logger.debug("Attendance status for time elapsed error count:", {
-        workDate,
-        status,
-      });
       return status === AttendanceStatus.Error;
     }).length;
 
-    logger.debug("Total time elapsed error count:", timeElapsedErrorCount);
     setIsTimeElapsedError(timeElapsedErrorCount > 0);
   }, [
     attendanceLoading,

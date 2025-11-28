@@ -31,6 +31,13 @@ type AppConfigContextProps = {
     time: string;
     enabled: boolean;
   }[];
+  getShiftGroups: () => {
+    label: string;
+    description?: string | null;
+    min?: number | null;
+    max?: number | null;
+    fixed?: number | null;
+  }[];
   getLunchRestStartTime: () => dayjs.Dayjs;
   getLunchRestEndTime: () => dayjs.Dayjs;
   getHourlyPaidHolidayEnabled: () => boolean;
@@ -59,6 +66,7 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getOfficeMode: () => false,
   getQuickInputStartTimes: () => [],
   getQuickInputEndTimes: () => [],
+  getShiftGroups: () => [],
   getLunchRestStartTime: () =>
     dayjs(DEFAULT_CONFIG.lunchRestStartTime, "HH:mm"),
   getLunchRestEndTime: () => dayjs(DEFAULT_CONFIG.lunchRestEndTime, "HH:mm"),

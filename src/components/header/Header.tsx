@@ -48,11 +48,9 @@ export default function Header() {
           >
             <Logo />
             <DesktopMenu pathName={pathName} />
-            {!isCognitoUserRole(StaffRole.OPERATOR) && (
-              <ExternalLinks pathName={pathName} />
-            )}
+            {!isCognitoUserRole(StaffRole.OPERATOR) && <ExternalLinks />}
             <MobileMenu pathName={pathName} />
-            <SignInOutButton pathName={pathName} />
+            <SignInOutButton />
           </Stack>
         </Container>
       </Container>

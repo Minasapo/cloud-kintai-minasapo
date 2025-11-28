@@ -5,6 +5,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Button,
+  ButtonGroup,
   Container,
   Dialog,
   DialogActions,
@@ -35,7 +36,40 @@ import React, { useEffect, useMemo, useState } from "react";
 
 export default function ShiftRequest() {
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
-  type Status = "work" | "off" | "auto";
+  type Status = "work" | "fixedOff" | "requestedOff" | "auto";
+  const weekdayLabels = ["日", "月", "火", "水", "木", "金", "土"];
+  const statusLabelMap: Record<Status, string> = {
+    work: "出勤",
+    fixedOff: "固定休",
+    requestedOff: "希望休",
+    auto: "おまかせ",
+  };
+  const statusColorMap: Record<
+    Status,
+    | "inherit"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "error"
+    | "info"
+    | "warning"
+  > = {
+    work: "success",
+    fixedOff: "error",
+    requestedOff: "warning",
+    auto: "info",
+  };
+  const normalizeStatus = (value?: string): Status => {
+    if (
+      value === "work" ||
+      value === "fixedOff" ||
+      value === "requestedOff" ||
+      value === "auto"
+    )
+      return value;
+    if (value === "off") return "fixedOff";
+    return "auto";
+  };
   const [selectedDates, setSelectedDates] = useState<
     Record<string, { status: Status }>
   >({});
@@ -55,13 +89,13 @@ export default function ShiftRequest() {
   const [newPatternMapping, setNewPatternMapping] = useState<
     Record<number, Status>
   >(() => ({
-    0: "off",
+    0: "fixedOff",
     1: "work",
     2: "work",
     3: "work",
     4: "work",
     5: "work",
-    6: "off",
+    6: "fixedOff",
   }));
 
   const monthStart = currentMonth.startOf("month");
@@ -86,7 +120,20 @@ export default function ShiftRequest() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(PATTERNS_KEY);
-      if (raw) setPatterns(JSON.parse(raw));
+      if (raw) {
+        const parsed: Pattern[] = JSON.parse(raw);
+        setPatterns(
+          parsed.map((pattern) => ({
+            ...pattern,
+            mapping: Object.fromEntries(
+              Object.entries(pattern.mapping).map(([weekday, status]) => [
+                weekday,
+                normalizeStatus(status as string),
+              ])
+            ) as Record<number, Status>,
+          }))
+        );
+      }
     } catch (e) {
       // ignore
     }
@@ -105,7 +152,7 @@ export default function ShiftRequest() {
     const next: Record<string, { status: Status }> = {};
     days.forEach((d) => {
       const wd = d.day();
-      const status = pattern.mapping[wd] ?? "auto";
+      const status = normalizeStatus(pattern.mapping[wd]);
       next[d.format("YYYY-MM-DD")] = { status };
     });
     setSelectedDates(next);
@@ -121,25 +168,6 @@ export default function ShiftRequest() {
     persistPatterns([p, ...patterns]);
     setNewPatternDialogOpen(false);
     setNewPatternName("");
-  };
-
-  // 作成補助: 現在の選択から曜日ごとのパターンを推定する
-  const deriveMappingFromSelected = (): Record<number, Status> => {
-    const byWeekday: Record<number, Record<Status, number>> = {} as any;
-    days.forEach((d) => {
-      const wd = d.day();
-      byWeekday[wd] = byWeekday[wd] || { work: 0, off: 0, auto: 0 };
-      const s = selectedDates[d.format("YYYY-MM-DD")]?.status;
-      if (s) byWeekday[wd][s]++;
-    });
-    const mapping: Record<number, Status> = {} as any;
-    Object.keys(byWeekday).forEach((k) => {
-      const wd = Number(k);
-      const counts = byWeekday[wd];
-      const max = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
-      mapping[wd] = (max && (max[0] as Status)) || "auto";
-    });
-    return mapping;
   };
 
   const clearAll = () => setSelectedDates({});
@@ -162,9 +190,35 @@ export default function ShiftRequest() {
       Object.values(selectedDates).filter((v) => v.status === "work").length,
     [selectedDates]
   );
-  const offCount = useMemo(
-    () => Object.values(selectedDates).filter((v) => v.status === "off").length,
+  const fixedOffCount = useMemo(
+    () =>
+      Object.values(selectedDates).filter((v) => v.status === "fixedOff")
+        .length,
     [selectedDates]
+  );
+  const requestedOffCount = useMemo(
+    () =>
+      Object.values(selectedDates).filter((v) => v.status === "requestedOff")
+        .length,
+    [selectedDates]
+  );
+
+  const BulkSelectionButtons = () => (
+    <Box
+      sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}
+    >
+      <Button onClick={() => selectAll("work")}>全て出勤</Button>
+      <Button onClick={() => selectAll("fixedOff")} color="error">
+        全て固定休
+      </Button>
+      <Button onClick={() => selectAll("requestedOff")} color="warning">
+        全て希望休
+      </Button>
+      <Button onClick={() => selectAll("auto")}>全ておまかせ</Button>
+      <Button onClick={() => clearAll()} sx={{ ml: 1 }}>
+        クリア
+      </Button>
+    </Box>
   );
 
   return (
@@ -173,7 +227,6 @@ export default function ShiftRequest() {
         <Typography variant="h5" gutterBottom>
           希望シフト入力（1ヶ月選択）
         </Typography>
-
         <Box
           sx={{
             display: "flex",
@@ -209,10 +262,8 @@ export default function ShiftRequest() {
         </Box>
 
         {/* カウント表示 */}
-        <Box sx={{ mb: 1 }}>
-          <Typography variant="body2">
-            出勤: {workCount}日 / 休み: {offCount}日
-          </Typography>
+        <Box sx={{ mb: 2 }}>
+          <BulkSelectionButtons />
         </Box>
 
         {/* 縦並びテーブル表示（各行が日付） */}
@@ -224,12 +275,18 @@ export default function ShiftRequest() {
             </TableRow>
           </TableHead>
           <TableBody>
+            <TableRow>
+              <TableCell colSpan={2} sx={{ backgroundColor: "grey.50" }}>
+                <Typography variant="body2">
+                  出勤: {workCount}日 / 固定休: {fixedOffCount}日 / 希望休:{" "}
+                  {requestedOffCount}日
+                </Typography>
+              </TableCell>
+            </TableRow>
             {days.map((d) => {
               const key = d.format("YYYY-MM-DD");
               const selected = selectedDates[key]?.status;
-              const weekday = ["日", "月", "火", "水", "木", "金", "土"][
-                d.day()
-              ];
+              const weekday = weekdayLabels[d.day()];
               return (
                 <TableRow key={key} hover>
                   <TableCell
@@ -237,46 +294,69 @@ export default function ShiftRequest() {
                   >{`${d.format("M/D")}(${weekday})`}</TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <Button
-                        size="small"
-                        variant={selected === "work" ? "contained" : "outlined"}
-                        color={selected === "work" ? "success" : "inherit"}
-                        onClick={() =>
-                          setSelectedDates((prev) => ({
-                            ...prev,
-                            [key]: { status: "work" },
-                          }))
-                        }
-                      >
-                        出勤
-                      </Button>
+                      <ButtonGroup size="small" variant="outlined">
+                        <Button
+                          variant={
+                            selected === "work" ? "contained" : "outlined"
+                          }
+                          color={statusColorMap.work}
+                          onClick={() =>
+                            setSelectedDates((prev) => ({
+                              ...prev,
+                              [key]: { status: "work" },
+                            }))
+                          }
+                        >
+                          出勤
+                        </Button>
 
-                      <Button
-                        size="small"
-                        variant={selected === "off" ? "contained" : "outlined"}
-                        color={selected === "off" ? "error" : "inherit"}
-                        onClick={() =>
-                          setSelectedDates((prev) => ({
-                            ...prev,
-                            [key]: { status: "off" },
-                          }))
-                        }
-                      >
-                        休み
-                      </Button>
+                        <Button
+                          variant={
+                            selected === "fixedOff" ? "contained" : "outlined"
+                          }
+                          color={statusColorMap.fixedOff}
+                          onClick={() =>
+                            setSelectedDates((prev) => ({
+                              ...prev,
+                              [key]: { status: "fixedOff" },
+                            }))
+                          }
+                        >
+                          固定休
+                        </Button>
 
-                      <Button
-                        size="small"
-                        variant={selected === "auto" ? "contained" : "outlined"}
-                        onClick={() =>
-                          setSelectedDates((prev) => ({
-                            ...prev,
-                            [key]: { status: "auto" },
-                          }))
-                        }
-                      >
-                        おまかせ
-                      </Button>
+                        <Button
+                          variant={
+                            selected === "requestedOff"
+                              ? "contained"
+                              : "outlined"
+                          }
+                          color={statusColorMap.requestedOff}
+                          onClick={() =>
+                            setSelectedDates((prev) => ({
+                              ...prev,
+                              [key]: { status: "requestedOff" },
+                            }))
+                          }
+                        >
+                          希望休
+                        </Button>
+
+                        <Button
+                          variant={
+                            selected === "auto" ? "contained" : "outlined"
+                          }
+                          color={statusColorMap.auto}
+                          onClick={() =>
+                            setSelectedDates((prev) => ({
+                              ...prev,
+                              [key]: { status: "auto" },
+                            }))
+                          }
+                        >
+                          おまかせ
+                        </Button>
+                      </ButtonGroup>
 
                       {selected && (
                         <Button
@@ -305,43 +385,23 @@ export default function ShiftRequest() {
           sx={{ mt: 3 }}
           onSubmit={(e) => e.preventDefault()}
         >
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            alignItems="center"
-          >
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              <Button onClick={() => selectAll("work")}>全て出勤</Button>
-              <Button onClick={() => selectAll("off")} color="error">
-                全て休み
-              </Button>
-              <Button onClick={() => selectAll("auto")}>全ておまかせ</Button>
-              <Button onClick={() => clearAll()} sx={{ ml: 1 }}>
-                クリア
-              </Button>
-              <Button
-                sx={{ ml: 1 }}
-                onClick={() => {
-                  // 新規パターンを現在の選択から作成する
-                  setNewPatternMapping(deriveMappingFromSelected());
-                  setNewPatternName("");
-                  setNewPatternDialogOpen(true);
-                }}
-              >
-                現在の選択でパターン作成
-              </Button>
-            </Box>
-
+          <Stack spacing={2} alignItems="stretch">
             <TextField
               label="備考"
               multiline
               rows={2}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              sx={{ flex: 1 }}
             />
 
-            <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 onClick={handleSave}
@@ -350,12 +410,7 @@ export default function ShiftRequest() {
                 保存 (モック)
               </Button>
               {saved && (
-                <Typography
-                  sx={{ display: "inline", ml: 2 }}
-                  color="success.main"
-                >
-                  保存しました
-                </Typography>
+                <Typography color="success.main">保存しました</Typography>
               )}
             </Box>
           </Stack>
@@ -381,11 +436,9 @@ export default function ShiftRequest() {
                         secondary={Object.entries(p.mapping)
                           .map(
                             ([k, v]) =>
-                              `${
-                                ["日", "月", "火", "水", "木", "金", "土"][
-                                  Number(k)
-                                ]
-                              }:${v}`
+                              `${weekdayLabels[Number(k)]}:${
+                                statusLabelMap[normalizeStatus(v as string)]
+                              }`
                           )
                           .join(" ")}
                       />
@@ -454,11 +507,9 @@ export default function ShiftRequest() {
               >
                 {Array.from({ length: 7 }).map((_, i) => (
                   <FormControl size="small" fullWidth key={i}>
-                    <InputLabel>
-                      {["日", "月", "火", "水", "木", "金", "土"][i]}
-                    </InputLabel>
+                    <InputLabel>{weekdayLabels[i]}</InputLabel>
                     <Select
-                      label={["日", "月", "火", "水", "木", "金", "土"][i]}
+                      label={weekdayLabels[i]}
                       value={newPatternMapping[i]}
                       onChange={(e) =>
                         setNewPatternMapping((prev) => ({
@@ -468,7 +519,8 @@ export default function ShiftRequest() {
                       }
                     >
                       <MenuItem value="work">出勤</MenuItem>
-                      <MenuItem value="off">休み</MenuItem>
+                      <MenuItem value="fixedOff">固定休</MenuItem>
+                      <MenuItem value="requestedOff">希望休</MenuItem>
                       <MenuItem value="auto">おまかせ</MenuItem>
                     </Select>
                   </FormControl>
