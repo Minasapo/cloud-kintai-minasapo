@@ -715,7 +715,6 @@ export default function ShiftManagement() {
                           boxSizing: "border-box",
                           borderRight: "1px solid",
                           borderColor: "divider",
-                          // 左に固定して出勤/休日列も含めて結合
                           position: "sticky",
                           left: 0,
                           zIndex: 2,
@@ -725,18 +724,12 @@ export default function ShiftManagement() {
                           textAlign: "right",
                         }}
                       >
-                        <Typography variant="body2">
-                          想定人数（過不足）
-                        </Typography>
+                        <Typography variant="body2">出勤人数</Typography>
                       </TableCell>
 
                       {days.map((d) => {
                         const key = d.format("YYYY-MM-DD");
                         const actual = dailyCounts.get(key) ?? 0;
-                        const expected = expectedCounts.get(key) ?? 0;
-                        const delta = actual - expected;
-                        const deltaText = delta > 0 ? `+${delta}` : `${delta}`;
-                        // deltaColor was used previously for text color; background highlight now used instead
                         return (
                           <TableCell
                             key={key}
@@ -745,13 +738,11 @@ export default function ShiftManagement() {
                               width: 56,
                               height: 40,
                               position: "relative",
-                              // 日付ごとの区切り（左罫線）
                               borderLeft: "1px solid",
                               borderColor: "divider",
                             }}
                             align="center"
                           >
-                            {/* 差分を上に、想定人数を下に小さく表示（縦並び） */}
                             <Box
                               sx={{
                                 display: "flex",
@@ -759,31 +750,11 @@ export default function ShiftManagement() {
                                 alignItems: "center",
                               }}
                             >
-                              {/* シンプルなテキストで差分を表示（背景のChip風表示を廃止） */}
                               <Typography
                                 variant="body2"
-                                sx={{
-                                  fontWeight: 600,
-                                  fontSize: 14,
-                                  color:
-                                    delta > 0
-                                      ? "success.main"
-                                      : delta < 0
-                                      ? "error.main"
-                                      : "text.primary",
-                                }}
+                                sx={{ fontWeight: 600, fontSize: 14 }}
                               >
-                                {deltaText}
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  color: "text.secondary",
-                                  lineHeight: 1,
-                                  mt: 0.5,
-                                }}
-                              >
-                                （{expected}）
+                                {actual}
                               </Typography>
                             </Box>
                           </TableCell>
