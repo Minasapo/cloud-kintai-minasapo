@@ -19,6 +19,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogs from "./pages/admin/AdminLogs/AdminLogsClean";
 import AdminMasterLayout from "./pages/admin/AdminMasterLayout";
 import AdminShiftGuard from "./pages/admin/AdminShiftGuard";
+import AdminShiftSettings from "./pages/admin/AdminShiftSettings/AdminShiftSettings";
 import AdminStaff from "./pages/admin/AdminStaff/AdminStaff";
 import AdminStaffAttendanceList from "./pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
 import AdminStaffEditor from "./pages/admin/AdminStaffEditor/AdminStaffEditor";
@@ -104,11 +105,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: (
-              <AdminShiftGuard>
-                <ShiftRequest />
-              </AdminShiftGuard>
-            ),
+            element: <ShiftRequest />,
           },
         ],
       },
@@ -244,6 +241,10 @@ const router = createBrowserRouter([
               {
                 path: "theme",
                 element: <AdminTheme />,
+              },
+              {
+                path: "shift",
+                element: <AdminShiftSettings />,
               },
               {
                 path: "feature_management",

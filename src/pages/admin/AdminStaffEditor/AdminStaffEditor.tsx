@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Autocomplete,
   Box,
@@ -34,6 +35,7 @@ import {
 import { useParams } from "react-router-dom";
 
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 
 import { ApproverMultipleMode, ApproverSettingMode } from "../../../API";
@@ -57,6 +59,7 @@ type Inputs = {
   sortKey?: string | null;
   usageStartDate?: string | null;
   workType?: string | null;
+  shiftGroup?: string | null;
   role?: string | null;
   approverSetting?: ApproverSettingMode | null;
   approverSingle?: string | null;
@@ -69,6 +72,7 @@ export default function AdminStaffEditor() {
   const { staffId } = useParams();
   const dispatch = useAppDispatchV2();
   const { cognitoUser } = useContext(AuthContext);
+  const { getShiftGroups } = useContext(AppConfigContext);
   const {
     staffs,
     loading: staffLoading,
@@ -107,6 +111,7 @@ export default function AdminStaffEditor() {
       "workType",
       (staff as unknown as Record<string, unknown>).workType as string | null
     );
+    setValue("shiftGroup", staff.shiftGroup ?? null);
     // permissive read in case backend schema hasn't added developer yet
     setValue(
       "developer",
@@ -115,6 +120,16 @@ export default function AdminStaffEditor() {
         | undefined) ?? false
     );
   }, [staffId, staffs, setValue]);
+
+  const shiftGroupOptions = useMemo(
+    () =>
+      getShiftGroups().map((group) => ({
+        value: group.label,
+        label: group.label,
+        description: group.description ?? "",
+      })),
+    [getShiftGroups]
+  );
 
   if (staffLoading) return <LinearProgress />;
   if (staffError) {
@@ -135,6 +150,7 @@ export default function AdminStaffEditor() {
         sortKey: data.sortKey,
         usageStartDate: data.usageStartDate,
         workType: data.workType,
+        shiftGroup: data.shiftGroup ?? null,
       };
 
       // approver related
@@ -319,6 +335,49 @@ export default function AdminStaffEditor() {
                   </TableRow>
 
                   <TableRow>
+                    <TableCell>シフトグループ</TableCell>
+                    <TableCell>
+                      {shiftGroupOptions.length === 0 ? (
+                        <Typography color="text.secondary">
+                          利用可能なシフトグループがありません。管理画面の「シフト設定」で登録してください。
+                        </Typography>
+                      ) : (
+                        <Controller
+                          name="shiftGroup"
+                          control={control as unknown as Control<Inputs, any>}
+                          render={({ field }) => {
+                            const selectedOption =
+                              shiftGroupOptions.find(
+                                (option) => option.value === field.value
+                              ) ?? null;
+                            return (
+                              <Autocomplete
+                                value={selectedOption}
+                                options={shiftGroupOptions}
+                                onChange={(_, newValue) => {
+                                  field.onChange(newValue?.value ?? null);
+                                }}
+                                isOptionEqualToValue={(option, value) =>
+                                  option.value === value.value
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    size="small"
+                                    sx={{ width: 400 }}
+                                    placeholder="所属させるシフトグループを選択"
+                                    onBlur={field.onBlur}
+                                  />
+                                )}
+                              />
+                            );
+                          }}
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow>
                     <TableCell>承認者設定</TableCell>
                     <TableCell>
                       <Controller
@@ -356,7 +415,6 @@ export default function AdminStaffEditor() {
 
                   <ApproverSettingTableRows
                     control={control}
-                    setValue={setValue}
                     watch={watch}
                     staffs={staffs}
                     currentCognitoUserId={cognitoUser?.id}
@@ -415,13 +473,11 @@ export default function AdminStaffEditor() {
 
 function ApproverSettingTableRows({
   control,
-  setValue,
   watch,
   staffs,
   currentCognitoUserId,
 }: {
   control: Control<Inputs, any>;
-  setValue: UseFormSetValue<Inputs>;
   watch: (name: string) => unknown;
   staffs: any[];
   currentCognitoUserId?: string | null;
