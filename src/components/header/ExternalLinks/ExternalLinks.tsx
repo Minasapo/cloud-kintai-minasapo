@@ -10,8 +10,8 @@ import { AuthContext } from "@/context/AuthContext";
 import { theme } from "../../../lib/theme";
 import { LinkGridItem } from "./LinkGridItem";
 
-export function ExternalLinks({ pathName }: { pathName: string }) {
-  const { cognitoUser } = useContext(AuthContext);
+export function ExternalLinks() {
+  const { cognitoUser, authStatus } = useContext(AuthContext);
   const { getLinks } = useContext(AppConfigContext);
 
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
@@ -25,7 +25,7 @@ export function ExternalLinks({ pathName }: { pathName: string }) {
     setLinks(getLinks);
   }, [getLinks]);
 
-  if (!cognitoUser) {
+  if (authStatus !== "authenticated" || !cognitoUser) {
     return null;
   }
 

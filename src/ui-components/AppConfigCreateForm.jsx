@@ -42,6 +42,7 @@ export default function AppConfigCreateForm(props) {
     officeMode: false,
     absentEnabled: false,
     hourlyPaidHolidayEnabled: false,
+    themeColor: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [workStartTime, setWorkStartTime] = React.useState(
@@ -80,6 +81,7 @@ export default function AppConfigCreateForm(props) {
   );
   const [hourlyPaidHolidayEnabled, setHourlyPaidHolidayEnabled] =
     React.useState(initialValues.hourlyPaidHolidayEnabled);
+  const [themeColor, setThemeColor] = React.useState(initialValues.themeColor);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
@@ -96,6 +98,7 @@ export default function AppConfigCreateForm(props) {
     setOfficeMode(initialValues.officeMode);
     setAbsentEnabled(initialValues.absentEnabled);
     setHourlyPaidHolidayEnabled(initialValues.hourlyPaidHolidayEnabled);
+    setThemeColor(initialValues.themeColor);
     setErrors({});
   };
   const validations = {
@@ -113,6 +116,7 @@ export default function AppConfigCreateForm(props) {
     officeMode: [],
     absentEnabled: [],
     hourlyPaidHolidayEnabled: [],
+    themeColor: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -154,6 +158,7 @@ export default function AppConfigCreateForm(props) {
           officeMode,
           absentEnabled,
           hourlyPaidHolidayEnabled,
+          themeColor,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -230,6 +235,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -267,6 +273,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.workStartTime ?? value;
@@ -304,6 +311,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.workEndTime ?? value;
@@ -341,6 +349,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.lunchRestStartTime ?? value;
@@ -380,6 +389,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.lunchRestEndTime ?? value;
@@ -417,6 +427,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.amHolidayStartTime ?? value;
@@ -456,6 +467,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.amHolidayEndTime ?? value;
@@ -493,6 +505,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.pmHolidayStartTime ?? value;
@@ -532,6 +545,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.pmHolidayEndTime ?? value;
@@ -569,6 +583,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.specialHolidayEnabled ?? value;
@@ -608,6 +623,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.amPmHolidayEnabled ?? value;
@@ -647,6 +663,7 @@ export default function AppConfigCreateForm(props) {
               officeMode: value,
               absentEnabled,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.officeMode ?? value;
@@ -684,6 +701,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled: value,
               hourlyPaidHolidayEnabled,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.absentEnabled ?? value;
@@ -721,6 +739,7 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               absentEnabled,
               hourlyPaidHolidayEnabled: value,
+              themeColor,
             };
             const result = onChange(modelFields);
             value = result?.hourlyPaidHolidayEnabled ?? value;
@@ -740,6 +759,44 @@ export default function AppConfigCreateForm(props) {
         hasError={errors.hourlyPaidHolidayEnabled?.hasError}
         {...getOverrideProps(overrides, "hourlyPaidHolidayEnabled")}
       ></SwitchField>
+      <TextField
+        label="Theme color"
+        isRequired={false}
+        isReadOnly={false}
+        value={themeColor}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.themeColor ?? value;
+          }
+          if (errors.themeColor?.hasError) {
+            runValidationTasks("themeColor", value);
+          }
+          setThemeColor(value);
+        }}
+        onBlur={() => runValidationTasks("themeColor", themeColor)}
+        errorMessage={errors.themeColor?.errorMessage}
+        hasError={errors.themeColor?.hasError}
+        {...getOverrideProps(overrides, "themeColor")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

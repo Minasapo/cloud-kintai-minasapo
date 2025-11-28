@@ -53,6 +53,7 @@ export type StaffType = {
   approverSingle?: string | null;
   approverMultiple?: (string | null)[] | null;
   approverMultipleMode?: ApproverMultipleMode | null;
+  shiftGroup?: string | null;
 };
 
 export function mappingStaffRole(role: Staff["role"]): StaffRole {
@@ -107,6 +108,7 @@ export default function useStaffs() {
             approverSingle: staff.approverSingle ?? null,
             approverMultiple: staff.approverMultiple ?? null,
             approverMultipleMode: staff.approverMultipleMode ?? null,
+            shiftGroup: staff.shiftGroup ?? null,
           }))
         )
       )
@@ -144,6 +146,7 @@ export default function useStaffs() {
             approverSingle: staff.approverSingle ?? null,
             approverMultiple: staff.approverMultiple ?? null,
             approverMultipleMode: staff.approverMultipleMode ?? null,
+            shiftGroup: staff.shiftGroup ?? null,
           }))
         );
       })
@@ -178,6 +181,7 @@ export default function useStaffs() {
             approverSingle: staff.approverSingle ?? null,
             approverMultiple: staff.approverMultiple ?? null,
             approverMultipleMode: staff.approverMultipleMode ?? null,
+            shiftGroup: staff.shiftGroup ?? null,
           },
         ]);
       })
@@ -213,6 +217,7 @@ export default function useStaffs() {
                 approverSingle: staff.approverSingle ?? null,
                 approverMultiple: staff.approverMultiple ?? null,
                 approverMultipleMode: staff.approverMultipleMode ?? null,
+                shiftGroup: staff.shiftGroup ?? null,
               };
             }
             return s;
@@ -258,6 +263,7 @@ export default function useStaffs() {
       approverSingle: staff.approverSingle ?? null,
       approverMultiple: staff.approverMultiple ?? null,
       approverMultipleMode: staff.approverMultipleMode ?? null,
+      shiftGroup: staff.shiftGroup ?? null,
     }));
   };
 

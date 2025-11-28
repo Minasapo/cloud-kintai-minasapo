@@ -27,6 +27,7 @@ type Staff @model @auth(rules: [{ allow: private }]) {
   approverSingle: String
   approverMultiple: [String]
   approverMultipleMode: ApproverMultipleMode
+  shiftGroup: String
 }
 
 enum ApproverSettingMode {
@@ -172,6 +173,14 @@ type QuickInputTime {
   enabled: Boolean!
 }
 
+type ShiftGroup {
+  label: String!
+  description: String
+  min: Int
+  max: Int
+  fixed: Int
+}
+
 type AppConfig @model {
   id: ID!
   name: String!
@@ -192,6 +201,8 @@ type AppConfig @model {
   reasons: [Reason]
   quickInputStartTimes: [QuickInputTime]
   quickInputEndTimes: [QuickInputTime]
+  themeColor: String
+  shiftGroups: [ShiftGroup]
 }
 
 type EmailResult {

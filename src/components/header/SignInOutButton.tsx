@@ -5,7 +5,6 @@ import { AuthContext } from "@/context/AuthContext";
 
 import StaffIcon from "./StaffIcon";
 
-// Styled Components
 export const SignOutButton = styled(Button)(({ theme }) => ({
   color: theme.palette.logout.contrastText,
   backgroundColor: theme.palette.logout.main,
@@ -31,48 +30,31 @@ export const SignInButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-interface SignInOutButtonProps {
-  pathName: string;
-}
-
-// 定数の定義
 const RESPONSIVE_DISPLAY = {
   xs: "none",
   md: "block",
 } as const;
 
-const LOGIN_PAGE_PATH = "/login" as const;
+export function SignInOutButton() {
+  const { signOut, signIn, cognitoUser, authStatus } = useContext(AuthContext);
 
-/**
- * ログイン・ログアウトボタンコンポーネント
- * ログイン状態に応じて適切なボタンを表示し、スタッフアイコンも表示する
- */
-export function SignInOutButton({ pathName }: SignInOutButtonProps) {
-  const { signOut, signIn, cognitoUser } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
 
-  // ログインページでは表示しない
-  if (pathName === LOGIN_PAGE_PATH) return null;
-
-  const isAuthenticated = Boolean(cognitoUser?.id);
-
-  const handleSignOut = () => {
-    signOut();
-  };
-
-  const handleSignIn = () => {
-    signIn();
-  };
+  if (authStatus === "configuring") {
+    return null;
+  }
 
   return (
     <Box sx={{ display: RESPONSIVE_DISPLAY }}>
       <Stack direction="row" alignItems="center" spacing={1}>
         {isAuthenticated ? (
-          <SignOutButton onClick={handleSignOut}>ログアウト</SignOutButton>
+          <>
+            <SignOutButton onClick={signOut}>ログアウト</SignOutButton>
+            {cognitoUser && <StaffIcon name={cognitoUser.familyName} />}
+          </>
         ) : (
-          <SignInButton onClick={handleSignIn}>ログイン</SignInButton>
+          <SignInButton onClick={signIn}>ログイン</SignInButton>
         )}
-
-        {cognitoUser && <StaffIcon name={cognitoUser.familyName} />}
       </Stack>
     </Box>
   );

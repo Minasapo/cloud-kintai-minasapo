@@ -37,7 +37,12 @@ export class AttendanceState {
     private companyHolidayCalendars: CompanyHolidayCalendar[]
   ) {}
 
-  get() {
+  get(): AttendanceStatus {
+    // 当日の勤怠は確定前のためステータス判定から除外する
+    if (this.isToday()) {
+      return AttendanceStatus.None;
+    }
+
     if (this.isEnabledStartDate()) {
       return AttendanceStatus.None;
     }
@@ -67,12 +72,6 @@ export class AttendanceState {
         );
 
     if (isWeekday) {
-      if (this.isToday()) {
-        if (this.isLate()) return AttendanceStatus.Late;
-        if (this.isWorking()) return AttendanceStatus.Working;
-        return AttendanceStatus.Ok;
-      }
-
       return this.isLate() || this.isWorking()
         ? AttendanceStatus.Error
         : AttendanceStatus.Ok;

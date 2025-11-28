@@ -18,7 +18,6 @@ import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
 import useCompanyHolidayCalendar from "./hooks/useCompanyHolidayCalendars/useCompanyHolidayCalendars";
 import useHolidayCalendar from "./hooks/useHolidayCalendars/useHolidayCalendars";
-
 /**
  * cookieの有効期限を管理しつつ、指定したfetch関数を実行するユーティリティ関数。
  *
@@ -68,6 +67,7 @@ export default function Layout() {
     getOfficeMode,
     getQuickInputStartTimes,
     getQuickInputEndTimes,
+    getShiftGroups,
     getLunchRestStartTime,
     getLunchRestEndTime,
     loading: appConfigLoading,
@@ -79,6 +79,7 @@ export default function Layout() {
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
     getAbsentEnabled,
+    getThemeColor,
   } = useAppConfig();
   const {
     fetchAllHolidayCalendars,
@@ -98,37 +99,6 @@ export default function Layout() {
     updateCompanyHolidayCalendar,
     deleteCompanyHolidayCalendar,
   } = useCompanyHolidayCalendar();
-
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    if (url.pathname === "/login") return;
-
-    if (authStatus === "configuring") {
-      return;
-    }
-
-    if (authStatus === "unauthenticated") {
-      navigate("/login");
-      return;
-    }
-
-    if (authStatus !== "authenticated") {
-      return;
-    }
-
-    const isMailVerified = user.attributes?.email_verified ? true : false;
-    if (isMailVerified) return;
-
-    alert(
-      "メール認証が完了していません。ログイン時にメール認証を行なってください。"
-    );
-
-    try {
-      void signOut();
-    } catch (error) {
-      console.error(error);
-    }
-  }, [authStatus]);
 
   /**
    * cookieを設定する関数
@@ -188,6 +158,39 @@ export default function Layout() {
   }, [getCookie, setCookie, fetchAllCompanyHolidayCalendars]);
 
   useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.pathname === "/login") return;
+
+    if (authStatus === "configuring") {
+      return;
+    }
+
+    if (authStatus === "unauthenticated") {
+      navigate("/login");
+      return;
+    }
+
+    if (authStatus !== "authenticated") {
+      return;
+    }
+
+    const isMailVerified = user.attributes?.email_verified ? true : false;
+    if (isMailVerified) {
+      return;
+    }
+
+    alert(
+      "メール認証が完了していません。ログイン時にメール認証を行なってください。"
+    );
+
+    try {
+      void signOut();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [authStatus]);
+
+  useEffect(() => {
     fetchConfigWithCookie();
     fetchHolidayCalendarsWithCookie();
     fetchCompanyHolidayCalendarsWithCookie();
@@ -217,6 +220,7 @@ export default function Layout() {
       getOfficeMode,
       getQuickInputStartTimes,
       getQuickInputEndTimes,
+      getShiftGroups,
       getLunchRestStartTime,
       getLunchRestEndTime,
       getHourlyPaidHolidayEnabled,
@@ -227,6 +231,7 @@ export default function Layout() {
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
       getAbsentEnabled,
+      getThemeColor,
     }),
     [
       fetchConfig,
@@ -239,6 +244,7 @@ export default function Layout() {
       getOfficeMode,
       getQuickInputStartTimes,
       getQuickInputEndTimes,
+      getShiftGroups,
       getLunchRestStartTime,
       getLunchRestEndTime,
       getHourlyPaidHolidayEnabled,
@@ -249,6 +255,7 @@ export default function Layout() {
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
       getAbsentEnabled,
+      getThemeColor,
     ]
   );
 
@@ -280,11 +287,11 @@ export default function Layout() {
   );
 
   if (
+    authStatus === "configuring" ||
     cognitoUserLoading ||
     appConfigLoading ||
     holidayCalendarLoading ||
-    companyHolidayCalendarLoading ||
-    authStatus === "configuring"
+    companyHolidayCalendarLoading
   ) {
     return <LinearProgress data-testid="layout-linear-progress" />;
   }

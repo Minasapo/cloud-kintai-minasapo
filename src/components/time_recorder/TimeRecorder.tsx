@@ -9,8 +9,10 @@ import {
   FormControlLabel,
   Grid,
   LinearProgress,
+  SxProps,
   Typography,
 } from "@mui/material";
+import { Theme } from "@mui/material/styles";
 import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -89,6 +91,40 @@ export default function TimeRecorder(): JSX.Element {
   const today = useMemo(() => dayjs().format(AttendanceDate.DataFormat), []);
 
   const logger = useMemo(() => new Logger("TimeRecorder", "DEBUG"), []);
+
+  const clockInDisplayText = useMemo(() => {
+    if (!attendance?.startTime) {
+      return null;
+    }
+    return `${dayjs(attendance.startTime).format("HH:mm")} 出勤`;
+  }, [attendance?.startTime]);
+
+  const clockOutDisplayText = useMemo(() => {
+    if (!attendance?.endTime) {
+      return null;
+    }
+    return `${dayjs(attendance.endTime).format("HH:mm")} 退勤`;
+  }, [attendance?.endTime]);
+
+  const clockInBadgeStyles: SxProps<Theme> = {
+    display: "inline-block",
+    px: 1.5,
+    py: 0.25,
+    borderRadius: 1,
+    bgcolor: "#E4F8C9",
+    color: (theme) => theme.palette.success.dark,
+    fontWeight: 700,
+  };
+
+  const clockOutBadgeStyles: SxProps<Theme> = {
+    display: "inline-block",
+    px: 1.5,
+    py: 0.25,
+    borderRadius: 1,
+    bgcolor: "#FDE0E0",
+    color: (theme) => theme.palette.error.dark,
+    fontWeight: 700,
+  };
 
   const handleClockIn = useCallback(
     () => clockInCallback(cognitoUser, today, clockIn, dispatch, staff, logger),
@@ -192,11 +228,6 @@ export default function TimeRecorder(): JSX.Element {
       return;
     }
 
-    logger.debug("Staff and attendance loading state:", {
-      staff,
-      attendanceLoading,
-    });
-
     const errorCount = attendances
       .map((attendance) => {
         const status = new AttendanceState(
@@ -222,14 +253,9 @@ export default function TimeRecorder(): JSX.Element {
         holidayCalendars,
         companyHolidayCalendars
       ).get();
-      logger.debug("Attendance status for time elapsed error count:", {
-        workDate,
-        status,
-      });
       return status === AttendanceStatus.Error;
     }).length;
 
-    logger.debug("Total time elapsed error count:", timeElapsedErrorCount);
     setIsTimeElapsedError(timeElapsedErrorCount > 0);
   }, [
     attendanceLoading,
@@ -276,6 +302,30 @@ export default function TimeRecorder(): JSX.Element {
           >
             {workStatus.text || "読み込み中..."}
           </Typography>
+          {(clockInDisplayText || clockOutDisplayText) && (
+            <Box display="flex" justifyContent="center" gap={1} mt={0.5}>
+              {clockInDisplayText && (
+                <Typography
+                  variant="body2"
+                  textAlign="center"
+                  data-testid="clock-in-time-text"
+                  sx={clockInBadgeStyles}
+                >
+                  {clockInDisplayText}
+                </Typography>
+              )}
+              {clockOutDisplayText && (
+                <Typography
+                  variant="body2"
+                  textAlign="center"
+                  data-testid="clock-out-time-text"
+                  sx={clockOutBadgeStyles}
+                >
+                  {clockOutDisplayText}
+                </Typography>
+              )}
+            </Box>
+          )}
         </Grid>
         <Grid item xs={12}>
           <Clock />

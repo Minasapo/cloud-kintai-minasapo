@@ -37,6 +37,7 @@ export declare type AppConfigUpdateFormInputValues = {
     officeMode?: boolean;
     absentEnabled?: boolean;
     hourlyPaidHolidayEnabled?: boolean;
+    themeColor?: string;
 };
 export declare type AppConfigUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -53,6 +54,7 @@ export declare type AppConfigUpdateFormValidationValues = {
     officeMode?: ValidationFunction<boolean>;
     absentEnabled?: ValidationFunction<boolean>;
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
+    themeColor?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type AppConfigUpdateFormOverridesProps = {
@@ -71,6 +73,7 @@ export declare type AppConfigUpdateFormOverridesProps = {
     officeMode?: PrimitiveOverrideProps<SwitchFieldProps>;
     absentEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    themeColor?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type AppConfigUpdateFormProps = React.PropsWithChildren<{
     overrides?: AppConfigUpdateFormOverridesProps | undefined | null;

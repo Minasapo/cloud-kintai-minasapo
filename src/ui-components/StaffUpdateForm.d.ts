@@ -39,6 +39,7 @@ export declare type StaffUpdateFormInputValues = {
     approverSingle?: string;
     approverMultiple?: string[];
     approverMultipleMode?: string;
+    shiftGroup?: string;
 };
 export declare type StaffUpdateFormValidationValues = {
     cognitoUserId?: ValidationFunction<string>;
@@ -57,6 +58,7 @@ export declare type StaffUpdateFormValidationValues = {
     approverSingle?: ValidationFunction<string>;
     approverMultiple?: ValidationFunction<string>;
     approverMultipleMode?: ValidationFunction<string>;
+    shiftGroup?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type StaffUpdateFormOverridesProps = {
@@ -77,6 +79,7 @@ export declare type StaffUpdateFormOverridesProps = {
     approverSingle?: PrimitiveOverrideProps<TextFieldProps>;
     approverMultiple?: PrimitiveOverrideProps<TextFieldProps>;
     approverMultipleMode?: PrimitiveOverrideProps<SelectFieldProps>;
+    shiftGroup?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type StaffUpdateFormProps = React.PropsWithChildren<{
     overrides?: StaffUpdateFormOverridesProps | undefined | null;

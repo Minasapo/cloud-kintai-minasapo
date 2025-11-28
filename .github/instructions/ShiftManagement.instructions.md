@@ -1,3 +1,7 @@
+---
+applyTo: "src/pages/ShiftManagement/ShiftManagement.tsx"
+---
+
 ## ShiftManagement.tsx 用インストラクション
 
 このファイルは `src/pages/ShiftManagement/ShiftManagement.tsx` を編集・拡張する際の開発ルールと実装ガイドです。主に新規実装者やレビュー担当者が守るべき方針を簡潔にまとめています。
