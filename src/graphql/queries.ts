@@ -16,7 +16,8 @@ export const sendMail = /* GraphQL */ `query SendMail($data: EmailData!) {
   }
 }
 ` as GeneratedQuery<APITypes.SendMailQueryVariables, APITypes.SendMailQuery>;
-export const getCheckForUpdate = /* GraphQL */ `query GetCheckForUpdate($id: ID!) {
+export const getCheckForUpdate =
+  /* GraphQL */ `query GetCheckForUpdate($id: ID!) {
   getCheckForUpdate(id: $id) {
     id
     deployUuid
@@ -26,9 +27,9 @@ export const getCheckForUpdate = /* GraphQL */ `query GetCheckForUpdate($id: ID!
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetCheckForUpdateQueryVariables,
-  APITypes.GetCheckForUpdateQuery
->;
+    APITypes.GetCheckForUpdateQueryVariables,
+    APITypes.GetCheckForUpdateQuery
+  >;
 export const listCheckForUpdates = /* GraphQL */ `query ListCheckForUpdates(
   $filter: ModelCheckForUpdateFilterInput
   $limit: Int
@@ -93,6 +94,9 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     shiftGroups {
       label
       description
+      min
+      max
+      fixed
       __typename
     }
     createdAt
@@ -152,6 +156,9 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       shiftGroups {
         label
         description
+        min
+        max
+        fixed
         __typename
       }
       createdAt
@@ -288,7 +295,8 @@ export const staffByCognitoUserId = /* GraphQL */ `query StaffByCognitoUserId(
   APITypes.StaffByCognitoUserIdQueryVariables,
   APITypes.StaffByCognitoUserIdQuery
 >;
-export const getHolidayCalendar = /* GraphQL */ `query GetHolidayCalendar($id: ID!) {
+export const getHolidayCalendar =
+  /* GraphQL */ `query GetHolidayCalendar($id: ID!) {
   getHolidayCalendar(id: $id) {
     id
     holidayDate
@@ -299,9 +307,9 @@ export const getHolidayCalendar = /* GraphQL */ `query GetHolidayCalendar($id: I
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetHolidayCalendarQueryVariables,
-  APITypes.GetHolidayCalendarQuery
->;
+    APITypes.GetHolidayCalendarQueryVariables,
+    APITypes.GetHolidayCalendarQuery
+  >;
 export const listHolidayCalendars = /* GraphQL */ `query ListHolidayCalendars(
   $filter: ModelHolidayCalendarFilterInput
   $limit: Int
@@ -324,7 +332,8 @@ export const listHolidayCalendars = /* GraphQL */ `query ListHolidayCalendars(
   APITypes.ListHolidayCalendarsQueryVariables,
   APITypes.ListHolidayCalendarsQuery
 >;
-export const getCompanyHolidayCalendar = /* GraphQL */ `query GetCompanyHolidayCalendar($id: ID!) {
+export const getCompanyHolidayCalendar =
+  /* GraphQL */ `query GetCompanyHolidayCalendar($id: ID!) {
   getCompanyHolidayCalendar(id: $id) {
     id
     holidayDate
@@ -335,10 +344,11 @@ export const getCompanyHolidayCalendar = /* GraphQL */ `query GetCompanyHolidayC
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetCompanyHolidayCalendarQueryVariables,
-  APITypes.GetCompanyHolidayCalendarQuery
->;
-export const listCompanyHolidayCalendars = /* GraphQL */ `query ListCompanyHolidayCalendars(
+    APITypes.GetCompanyHolidayCalendarQueryVariables,
+    APITypes.GetCompanyHolidayCalendarQuery
+  >;
+export const listCompanyHolidayCalendars =
+  /* GraphQL */ `query ListCompanyHolidayCalendars(
   $filter: ModelCompanyHolidayCalendarFilterInput
   $limit: Int
   $nextToken: String
@@ -361,9 +371,9 @@ export const listCompanyHolidayCalendars = /* GraphQL */ `query ListCompanyHolid
   }
 }
 ` as GeneratedQuery<
-  APITypes.ListCompanyHolidayCalendarsQueryVariables,
-  APITypes.ListCompanyHolidayCalendarsQuery
->;
+    APITypes.ListCompanyHolidayCalendarsQueryVariables,
+    APITypes.ListCompanyHolidayCalendarsQuery
+  >;
 export const getCloseDate = /* GraphQL */ `query GetCloseDate($id: ID!) {
   getCloseDate(id: $id) {
     id
@@ -975,7 +985,8 @@ export const listOperationLogs = /* GraphQL */ `query ListOperationLogs(
   APITypes.ListOperationLogsQueryVariables,
   APITypes.ListOperationLogsQuery
 >;
-export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffId(
+export const operationLogsByStaffId =
+  /* GraphQL */ `query OperationLogsByStaffId(
   $staffId: String!
   $timestamp: ModelStringKeyConditionInput
   $sortDirection: ModelSortDirection
@@ -1012,6 +1023,6 @@ export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffI
   }
 }
 ` as GeneratedQuery<
-  APITypes.OperationLogsByStaffIdQueryVariables,
-  APITypes.OperationLogsByStaffIdQuery
->;
+    APITypes.OperationLogsByStaffIdQueryVariables,
+    APITypes.OperationLogsByStaffIdQuery
+  >;

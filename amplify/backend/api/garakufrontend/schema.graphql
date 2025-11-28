@@ -176,6 +176,9 @@ type QuickInputTime {
 type ShiftGroup {
   label: String!
   description: String
+  min: Int
+  max: Int
+  fixed: Int
 }
 
 type AppConfig @model {
