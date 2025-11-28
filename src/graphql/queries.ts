@@ -90,6 +90,11 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
       __typename
     }
     themeColor
+    shiftGroups {
+      label
+      description
+      __typename
+    }
     createdAt
     updatedAt
     __typename
@@ -144,6 +149,11 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
         __typename
       }
       themeColor
+      shiftGroups {
+        label
+        description
+        __typename
+      }
       createdAt
       updatedAt
       __typename

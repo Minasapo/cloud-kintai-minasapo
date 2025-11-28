@@ -172,6 +172,11 @@ type QuickInputTime {
   enabled: Boolean!
 }
 
+type ShiftGroup {
+  label: String!
+  description: String
+}
+
 type AppConfig @model {
   id: ID!
   name: String!
@@ -193,6 +198,7 @@ type AppConfig @model {
   quickInputStartTimes: [QuickInputTime]
   quickInputEndTimes: [QuickInputTime]
   themeColor: String
+  shiftGroups: [ShiftGroup]
 }
 
 type EmailResult {

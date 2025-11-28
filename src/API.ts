@@ -94,6 +94,7 @@ export type CreateAppConfigInput = {
   quickInputStartTimes?: Array< QuickInputTimeInput | null > | null,
   quickInputEndTimes?: Array< QuickInputTimeInput | null > | null,
   themeColor?: string | null,
+  shiftGroups?: Array< ShiftGroupInput | null > | null,
 };
 
 export type LinkInput = {
@@ -111,6 +112,11 @@ export type ReasonInput = {
 export type QuickInputTimeInput = {
   time: string,
   enabled: boolean,
+};
+
+export type ShiftGroupInput = {
+  label: string,
+  description?: string | null,
 };
 
 export type ModelAppConfigConditionInput = {
@@ -165,6 +171,7 @@ export type AppConfig = {
   quickInputStartTimes?:  Array<QuickInputTime | null > | null,
   quickInputEndTimes?:  Array<QuickInputTime | null > | null,
   themeColor?: string | null,
+  shiftGroups?:  Array<ShiftGroup | null > | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -189,6 +196,12 @@ export type QuickInputTime = {
   enabled: boolean,
 };
 
+export type ShiftGroup = {
+  __typename: "ShiftGroup",
+  label: string,
+  description?: string | null,
+};
+
 export type UpdateAppConfigInput = {
   id: string,
   name?: string | null,
@@ -210,6 +223,7 @@ export type UpdateAppConfigInput = {
   quickInputStartTimes?: Array< QuickInputTimeInput | null > | null,
   quickInputEndTimes?: Array< QuickInputTimeInput | null > | null,
   themeColor?: string | null,
+  shiftGroups?: Array< ShiftGroupInput | null > | null,
 };
 
 export type DeleteAppConfigInput = {
@@ -1541,6 +1555,11 @@ export type CreateAppConfigMutation = {
       enabled: boolean,
     } | null > | null,
     themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+    } | null > | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -1592,6 +1611,11 @@ export type UpdateAppConfigMutation = {
       enabled: boolean,
     } | null > | null,
     themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+    } | null > | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -1643,6 +1667,11 @@ export type DeleteAppConfigMutation = {
       enabled: boolean,
     } | null > | null,
     themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+    } | null > | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2561,6 +2590,11 @@ export type GetAppConfigQuery = {
       enabled: boolean,
     } | null > | null,
     themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+    } | null > | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2615,6 +2649,11 @@ export type ListAppConfigsQuery = {
         enabled: boolean,
       } | null > | null,
       themeColor?: string | null,
+      shiftGroups?:  Array< {
+        __typename: "ShiftGroup",
+        label: string,
+        description?: string | null,
+      } | null > | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -3526,6 +3565,11 @@ export type OnCreateAppConfigSubscription = {
       enabled: boolean,
     } | null > | null,
     themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+    } | null > | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3576,6 +3620,11 @@ export type OnUpdateAppConfigSubscription = {
       enabled: boolean,
     } | null > | null,
     themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+    } | null > | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3626,6 +3675,11 @@ export type OnDeleteAppConfigSubscription = {
       enabled: boolean,
     } | null > | null,
     themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+    } | null > | null,
     createdAt: string,
     updatedAt: string,
   } | null,
