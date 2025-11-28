@@ -9,7 +9,10 @@ function hashString(s: string) {
   return Math.abs(h);
 }
 
-type State = "work" | "off" | "auto";
+export type ShiftState = "work" | "fixedOff" | "requestedOff" | "auto";
+
+const getOffState = (seed: number): ShiftState =>
+  seed % 2 === 0 ? "fixedOff" : "requestedOff";
 
 /**
  * シミュレーション向けのモックシフトデータを生成する
@@ -23,12 +26,12 @@ export default function generateMockShifts(
   shiftStaffs: { id: string }[],
   days: dayjs.Dayjs[],
   scenario: string = "patterned"
-): Map<string, Record<string, State>> {
-  const map = new Map<string, Record<string, State>>();
+): Map<string, Record<string, ShiftState>> {
+  const map = new Map<string, Record<string, ShiftState>>();
   const total = shiftStaffs.length;
 
   shiftStaffs.forEach((s, idx) => {
-    const per: Record<string, State> = {};
+    const per: Record<string, ShiftState> = {};
     const h = hashString(s.id || String(idx));
     days.forEach((d, di) => {
       const key = d.format("YYYY-MM-DD");
@@ -39,7 +42,7 @@ export default function generateMockShifts(
         if (wd >= 1 && wd <= 5) {
           per[key] = "work";
         } else {
-          per[key] = "off";
+          per[key] = getOffState(h + di + wd);
         }
         if ((h + di) % 11 === 0) per[key] = "auto";
       } else if (scenario === "balanced") {
@@ -47,20 +50,20 @@ export default function generateMockShifts(
         const need = Math.max(1, Math.floor(total * 0.6));
         // 順序をずらして毎日異なるスタッフが選ばれるようにする
         const chosen = (di + idx) % total < need;
-        per[key] = chosen ? "work" : "off";
+        per[key] = chosen ? "work" : getOffState(h + di);
         if (!chosen && (h + di) % 7 === 0) per[key] = "auto";
       } else if (scenario === "sparse") {
         // 出勤が少ない
         const r = (h + di * 37) % 100;
         if (r < 20) per[key] = "work";
         else if (r < 30) per[key] = "auto";
-        else per[key] = "off";
+        else per[key] = getOffState(r + di);
       } else {
         // random（決定的）
         const r = (h + di * 97) % 100;
         if (r < 60) per[key] = "work";
         else if (r < 75) per[key] = "auto";
-        else per[key] = "off";
+        else per[key] = getOffState(r + di * 2);
       }
     });
     map.set(s.id, per);

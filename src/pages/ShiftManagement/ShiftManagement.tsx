@@ -25,7 +25,39 @@ import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import useCompanyHolidayCalendars from "../../hooks/useCompanyHolidayCalendars/useCompanyHolidayCalendars";
 import useHolidayCalendar from "../../hooks/useHolidayCalendars/useHolidayCalendars";
 import useStaffs from "../../hooks/useStaffs/useStaffs";
-import generateMockShifts from "./generateMockShifts";
+import generateMockShifts, { ShiftState } from "./generateMockShifts";
+
+const hashString = (s: string) => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h << 5) - h + s.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+};
+
+const getAutoRestState = (staffId: string, dateKey: string): ShiftState =>
+  hashString(`${staffId}-${dateKey}`) % 2 === 0 ? "fixedOff" : "requestedOff";
+
+const statusVisualMap: Record<ShiftState, { label: string; color: string }> = {
+  work: { label: "○", color: "success.main" },
+  fixedOff: { label: "固", color: "error.main" },
+  requestedOff: { label: "希", color: "warning.main" },
+  auto: { label: "△", color: "info.main" },
+};
+
+const defaultStatusVisual = { label: "-", color: "text.secondary" };
+
+const STAFF_GROUP_LABELS = ["熟練クルー", "スタンダードクルー", "育成クルー"];
+const STAFF_GROUP_DESCRIPTIONS: Record<string, string> = {
+  熟練クルー:
+    "現場経験が豊富なメンバー。クリティカル枠を支える主力ラインです。",
+  スタンダードクルー: "日々のオペレーションを安定させる基幹メンバー。",
+  育成クルー: "オンボーディング中のメンバー。先輩と被せて配置します。",
+};
+
+const getStaffGroupLabel = (staffId: string) =>
+  STAFF_GROUP_LABELS[hashString(staffId) % STAFF_GROUP_LABELS.length];
 
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagement() {
@@ -36,6 +68,21 @@ export default function ShiftManagement() {
     () => staffs.filter((s) => s.workType === "shift"),
     [staffs]
   );
+
+  const groupedShiftStaffs = useMemo(() => {
+    const map = new Map<string, typeof shiftStaffs>();
+    shiftStaffs.forEach((staff) => {
+      const groupName = getStaffGroupLabel(staff.id);
+      if (!map.has(groupName)) map.set(groupName, []);
+      map.get(groupName)!.push(staff);
+    });
+    return Array.from(map.entries()).map(([groupName, members]) => ({
+      groupName,
+      description:
+        STAFF_GROUP_DESCRIPTIONS[groupName] ?? "運用上の調整グループ",
+      members,
+    }));
+  }, [shiftStaffs]);
 
   const [currentMonth, setCurrentMonth] = useState(dayjs());
   const monthStart = currentMonth.startOf("month");
@@ -86,7 +133,7 @@ export default function ShiftManagement() {
 
   // mockShifts を state 化し、scenario/shiftStaffs/days に応じて生成する
   const [mockShifts, setMockShifts] = React.useState<
-    Map<string, Record<string, "work" | "off" | "auto">>
+    Map<string, Record<string, ShiftState>>
   >(new Map());
 
   React.useEffect(() => {
@@ -115,6 +162,23 @@ export default function ShiftManagement() {
     });
     return m;
   }, [days, shiftStaffs, mockShifts]);
+
+  const groupDailyCounts = useMemo(() => {
+    const result = new Map<string, Map<string, number>>();
+    groupedShiftStaffs.forEach(({ groupName, members }) => {
+      const groupCounts = new Map<string, number>();
+      days.forEach((d) => {
+        const key = d.format("YYYY-MM-DD");
+        let cnt = 0;
+        members.forEach((member) => {
+          if (mockShifts.get(member.id)?.[key] === "work") cnt += 1;
+        });
+        groupCounts.set(key, cnt);
+      });
+      result.set(groupName, groupCounts);
+    });
+    return result;
+  }, [groupedShiftStaffs, days, mockShifts]);
 
   // 想定人数: 今はシンプルにシフト勤務スタッフ数を全員出勤とした想定値を表示する
   const expectedCounts = useMemo(() => {
@@ -178,14 +242,12 @@ export default function ShiftManagement() {
         shiftStaffs.forEach((s) => {
           const per = { ...(next.get(s.id) || {}) } as Record<
             string,
-            "work" | "off" | "auto"
+            ShiftState
           >;
           if (per[key] === "auto") {
-            if (selected.has(s.id)) {
-              per[key] = "work";
-            } else {
-              per[key] = "off";
-            }
+            per[key] = selected.has(s.id)
+              ? "work"
+              : getAutoRestState(s.id, key);
             next.set(s.id, per);
           }
         });
@@ -276,7 +338,7 @@ export default function ShiftManagement() {
             stickyHeader
             size="small"
             sx={{
-              minWidth: STAFF_COL_WIDTH + days.length * 56 + AGG_COL_WIDTH * 2,
+              minWidth: STAFF_COL_WIDTH + days.length * 56 + AGG_COL_WIDTH * 3,
               tableLayout: "fixed",
             }}
           >
@@ -328,8 +390,8 @@ export default function ShiftManagement() {
 
                 <TableCell
                   align="center"
-                  aria-label="休日"
-                  title="休日"
+                  aria-label="固定休"
+                  title="固定休"
                   sx={{
                     bgcolor: "background.paper",
                     width: AGG_COL_WIDTH,
@@ -343,7 +405,27 @@ export default function ShiftManagement() {
                     borderColor: "divider",
                   }}
                 >
-                  休日
+                  固定休
+                </TableCell>
+
+                <TableCell
+                  align="center"
+                  aria-label="希望休"
+                  title="希望休"
+                  sx={{
+                    bgcolor: "background.paper",
+                    width: AGG_COL_WIDTH,
+                    boxSizing: "border-box",
+                    position: "sticky",
+                    top: 0,
+                    left: `${STAFF_COL_WIDTH + AGG_COL_WIDTH * 2}px`,
+                    zIndex: 3,
+                    whiteSpace: "normal",
+                    borderRight: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  希望休
                 </TableCell>
 
                 {days.map((d) => {
@@ -400,12 +482,12 @@ export default function ShiftManagement() {
                   {/* 想定人数と過不足を1行に統合 */}
                   <TableRow sx={{ cursor: "default" }}>
                     <TableCell
-                      colSpan={3}
+                      colSpan={4}
                       sx={{
                         bgcolor: "background.paper",
                         pl: 1,
                         pr: 1,
-                        width: STAFF_COL_WIDTH + AGG_COL_WIDTH * 2,
+                        width: STAFF_COL_WIDTH + AGG_COL_WIDTH * 3,
                         boxSizing: "border-box",
                         borderRight: "1px solid",
                         borderColor: "divider",
@@ -489,7 +571,7 @@ export default function ShiftManagement() {
 
               {shiftStaffs.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={days.length + 3}>
+                  <TableCell colSpan={days.length + 4}>
                     <Typography sx={{ py: 2 }}>
                       シフト勤務のスタッフは見つかりませんでした。
                     </Typography>
@@ -497,118 +579,224 @@ export default function ShiftManagement() {
                 </TableRow>
               )}
 
-              {shiftStaffs.map((s) => (
-                <TableRow
-                  key={s.id}
-                  hover
-                  onClick={() => navigate(`/admin/shift/${s.id}`)}
-                  sx={{ cursor: "pointer" }}
-                >
-                  <TableCell
-                    sx={{
-                      bgcolor: "background.paper",
-                      pl: 1,
-                      width: STAFF_COL_WIDTH,
-                      minWidth: STAFF_COL_WIDTH,
-                      maxWidth: STAFF_COL_WIDTH,
-                      boxSizing: "border-box",
-                      borderRight: "1px solid",
-                      borderColor: "divider",
-                      // 左に固定
-                      position: "sticky",
-                      left: 0,
-                      zIndex: 1,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    <Typography variant="body2">{`${s.familyName} ${s.givenName}`}</Typography>
-                  </TableCell>
-
-                  {(() => {
-                    const per = mockShifts.get(s.id) || {};
-                    const workCount = Object.values(per).filter(
-                      (v) => v === "work"
-                    ).length;
-                    const offCount = Object.values(per).filter(
-                      (v) => v === "off"
-                    ).length;
-                    return (
-                      <>
-                        <TableCell
-                          sx={{
-                            p: 0,
-                            width: AGG_COL_WIDTH,
-                            height: 40,
-                            bgcolor: "background.paper",
-                            borderRight: "1px solid",
-                            borderColor: "divider",
-                            position: "sticky",
-                            left: `${STAFF_COL_WIDTH}px`,
-                            zIndex: 1,
-                          }}
-                          align="center"
-                        >
-                          <Typography variant="body2">{workCount}</Typography>
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            p: 0,
-                            width: AGG_COL_WIDTH,
-                            height: 40,
-                            bgcolor: "background.paper",
-                            borderRight: "1px solid",
-                            borderColor: "divider",
-                            position: "sticky",
-                            left: `${STAFF_COL_WIDTH + AGG_COL_WIDTH}px`,
-                            zIndex: 1,
-                          }}
-                          align="center"
-                        >
-                          <Typography variant="body2">{offCount}</Typography>
-                        </TableCell>
-                      </>
-                    );
-                  })()}
-
-                  {days.map((d) => {
-                    const key = d.format("YYYY-MM-DD");
-                    const state = mockShifts.get(s.id)?.[key];
-                    return (
+              {groupedShiftStaffs.map(({ groupName, description, members }) => {
+                const coverage = groupDailyCounts.get(groupName);
+                return (
+                  <React.Fragment key={groupName}>
+                    <TableRow sx={{ bgcolor: "grey.100" }}>
                       <TableCell
-                        key={key}
-                        sx={{
-                          p: 0,
-                          width: 56,
-                          height: 40,
-                          position: "relative",
-                          // 各日付の左罫線
-                          borderLeft: "1px solid",
-                          borderColor: "divider",
-                        }}
-                        align="center"
+                        colSpan={days.length + 4}
+                        sx={{ py: 1.5, pl: 1 }}
                       >
-                        {state === "work" ? (
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "success.main", fontWeight: 700 }}
-                          >
-                            ○
-                          </Typography>
-                        ) : (
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "text.secondary", fontWeight: 700 }}
-                          >
-                            ×
-                          </Typography>
-                        )}
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: 600 }}
+                        >
+                          {groupName}（{members.length}名）
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {description}
+                        </Typography>
                       </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
+                    </TableRow>
+
+                    <TableRow sx={{ cursor: "default" }}>
+                      <TableCell
+                        colSpan={4}
+                        sx={{
+                          bgcolor: "background.paper",
+                          pl: 1,
+                          pr: 1,
+                          width: STAFF_COL_WIDTH + AGG_COL_WIDTH * 3,
+                          boxSizing: "border-box",
+                          borderRight: "1px solid",
+                          borderColor: "divider",
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 2,
+                          textAlign: "right",
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {groupName} の日別稼働（出勤人数 / グループ人数）
+                        </Typography>
+                      </TableCell>
+                      {days.map((d) => {
+                        const key = d.format("YYYY-MM-DD");
+                        const actual = coverage?.get(key) ?? 0;
+                        return (
+                          <TableCell
+                            key={`${groupName}-${key}-coverage`}
+                            sx={{
+                              p: 0,
+                              width: 56,
+                              height: 40,
+                              position: "relative",
+                              borderLeft: "1px solid",
+                              borderColor: "divider",
+                            }}
+                            align="center"
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 600 }}
+                              >
+                                {actual}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ lineHeight: 1 }}
+                              >
+                                / {members.length}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+
+                    {members.map((s) => (
+                      <TableRow
+                        key={s.id}
+                        hover
+                        onClick={() => navigate(`/admin/shift/${s.id}`)}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <TableCell
+                          sx={{
+                            bgcolor: "background.paper",
+                            pl: 1,
+                            width: STAFF_COL_WIDTH,
+                            minWidth: STAFF_COL_WIDTH,
+                            maxWidth: STAFF_COL_WIDTH,
+                            boxSizing: "border-box",
+                            borderRight: "1px solid",
+                            borderColor: "divider",
+                            position: "sticky",
+                            left: 0,
+                            zIndex: 1,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          <Typography variant="body2">{`${s.familyName} ${s.givenName}`}</Typography>
+                        </TableCell>
+
+                        {(() => {
+                          const per = mockShifts.get(s.id) || {};
+                          const workCount = Object.values(per).filter(
+                            (v) => v === "work"
+                          ).length;
+                          const fixedOffCount = Object.values(per).filter(
+                            (v) => v === "fixedOff"
+                          ).length;
+                          const requestedOffCount = Object.values(per).filter(
+                            (v) => v === "requestedOff"
+                          ).length;
+                          return (
+                            <>
+                              <TableCell
+                                sx={{
+                                  p: 0,
+                                  width: AGG_COL_WIDTH,
+                                  height: 40,
+                                  bgcolor: "background.paper",
+                                  borderRight: "1px solid",
+                                  borderColor: "divider",
+                                  position: "sticky",
+                                  left: `${STAFF_COL_WIDTH}px`,
+                                  zIndex: 1,
+                                }}
+                                align="center"
+                              >
+                                <Typography variant="body2">
+                                  {workCount}
+                                </Typography>
+                              </TableCell>
+                              <TableCell
+                                sx={{
+                                  p: 0,
+                                  width: AGG_COL_WIDTH,
+                                  height: 40,
+                                  bgcolor: "background.paper",
+                                  borderRight: "1px solid",
+                                  borderColor: "divider",
+                                  position: "sticky",
+                                  left: `${STAFF_COL_WIDTH + AGG_COL_WIDTH}px`,
+                                  zIndex: 1,
+                                }}
+                                align="center"
+                              >
+                                <Typography variant="body2">
+                                  {fixedOffCount}
+                                </Typography>
+                              </TableCell>
+                              <TableCell
+                                sx={{
+                                  p: 0,
+                                  width: AGG_COL_WIDTH,
+                                  height: 40,
+                                  bgcolor: "background.paper",
+                                  borderRight: "1px solid",
+                                  borderColor: "divider",
+                                  position: "sticky",
+                                  left: `${
+                                    STAFF_COL_WIDTH + AGG_COL_WIDTH * 2
+                                  }px`,
+                                  zIndex: 1,
+                                }}
+                                align="center"
+                              >
+                                <Typography variant="body2">
+                                  {requestedOffCount}
+                                </Typography>
+                              </TableCell>
+                            </>
+                          );
+                        })()}
+
+                        {days.map((d) => {
+                          const key = d.format("YYYY-MM-DD");
+                          const state = mockShifts.get(s.id)?.[key];
+                          const visual =
+                            (state && statusVisualMap[state]) ||
+                            defaultStatusVisual;
+                          return (
+                            <TableCell
+                              key={key}
+                              sx={{
+                                p: 0,
+                                width: 56,
+                                height: 40,
+                                position: "relative",
+                                borderLeft: "1px solid",
+                                borderColor: "divider",
+                              }}
+                              align="center"
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{ color: visual.color, fontWeight: 700 }}
+                              >
+                                {visual.label}
+                              </Typography>
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </React.Fragment>
+                );
+              })}
             </TableBody>
           </Table>
         </Box>
