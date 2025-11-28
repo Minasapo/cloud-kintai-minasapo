@@ -16,8 +16,7 @@ export const sendMail = /* GraphQL */ `query SendMail($data: EmailData!) {
   }
 }
 ` as GeneratedQuery<APITypes.SendMailQueryVariables, APITypes.SendMailQuery>;
-export const getCheckForUpdate =
-  /* GraphQL */ `query GetCheckForUpdate($id: ID!) {
+export const getCheckForUpdate = /* GraphQL */ `query GetCheckForUpdate($id: ID!) {
   getCheckForUpdate(id: $id) {
     id
     deployUuid
@@ -27,9 +26,9 @@ export const getCheckForUpdate =
   }
 }
 ` as GeneratedQuery<
-    APITypes.GetCheckForUpdateQueryVariables,
-    APITypes.GetCheckForUpdateQuery
-  >;
+  APITypes.GetCheckForUpdateQueryVariables,
+  APITypes.GetCheckForUpdateQuery
+>;
 export const listCheckForUpdates = /* GraphQL */ `query ListCheckForUpdates(
   $filter: ModelCheckForUpdateFilterInput
   $limit: Int
@@ -295,8 +294,7 @@ export const staffByCognitoUserId = /* GraphQL */ `query StaffByCognitoUserId(
   APITypes.StaffByCognitoUserIdQueryVariables,
   APITypes.StaffByCognitoUserIdQuery
 >;
-export const getHolidayCalendar =
-  /* GraphQL */ `query GetHolidayCalendar($id: ID!) {
+export const getHolidayCalendar = /* GraphQL */ `query GetHolidayCalendar($id: ID!) {
   getHolidayCalendar(id: $id) {
     id
     holidayDate
@@ -307,9 +305,9 @@ export const getHolidayCalendar =
   }
 }
 ` as GeneratedQuery<
-    APITypes.GetHolidayCalendarQueryVariables,
-    APITypes.GetHolidayCalendarQuery
-  >;
+  APITypes.GetHolidayCalendarQueryVariables,
+  APITypes.GetHolidayCalendarQuery
+>;
 export const listHolidayCalendars = /* GraphQL */ `query ListHolidayCalendars(
   $filter: ModelHolidayCalendarFilterInput
   $limit: Int
@@ -332,8 +330,7 @@ export const listHolidayCalendars = /* GraphQL */ `query ListHolidayCalendars(
   APITypes.ListHolidayCalendarsQueryVariables,
   APITypes.ListHolidayCalendarsQuery
 >;
-export const getCompanyHolidayCalendar =
-  /* GraphQL */ `query GetCompanyHolidayCalendar($id: ID!) {
+export const getCompanyHolidayCalendar = /* GraphQL */ `query GetCompanyHolidayCalendar($id: ID!) {
   getCompanyHolidayCalendar(id: $id) {
     id
     holidayDate
@@ -344,11 +341,10 @@ export const getCompanyHolidayCalendar =
   }
 }
 ` as GeneratedQuery<
-    APITypes.GetCompanyHolidayCalendarQueryVariables,
-    APITypes.GetCompanyHolidayCalendarQuery
-  >;
-export const listCompanyHolidayCalendars =
-  /* GraphQL */ `query ListCompanyHolidayCalendars(
+  APITypes.GetCompanyHolidayCalendarQueryVariables,
+  APITypes.GetCompanyHolidayCalendarQuery
+>;
+export const listCompanyHolidayCalendars = /* GraphQL */ `query ListCompanyHolidayCalendars(
   $filter: ModelCompanyHolidayCalendarFilterInput
   $limit: Int
   $nextToken: String
@@ -371,9 +367,9 @@ export const listCompanyHolidayCalendars =
   }
 }
 ` as GeneratedQuery<
-    APITypes.ListCompanyHolidayCalendarsQueryVariables,
-    APITypes.ListCompanyHolidayCalendarsQuery
-  >;
+  APITypes.ListCompanyHolidayCalendarsQueryVariables,
+  APITypes.ListCompanyHolidayCalendarsQuery
+>;
 export const getCloseDate = /* GraphQL */ `query GetCloseDate($id: ID!) {
   getCloseDate(id: $id) {
     id
@@ -768,6 +764,113 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
   APITypes.ListDocumentsQueryVariables,
   APITypes.ListDocumentsQuery
 >;
+export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
+  getShiftRequest(id: $id) {
+    id
+    staffId
+    targetMonth
+    note
+    entries {
+      date
+      status
+      __typename
+    }
+    summary {
+      workDays
+      fixedOffDays
+      requestedOffDays
+      __typename
+    }
+    submittedAt
+    updatedAt
+    createdAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetShiftRequestQueryVariables,
+  APITypes.GetShiftRequestQuery
+>;
+export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
+  $filter: ModelShiftRequestFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listShiftRequests(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      staffId
+      targetMonth
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      createdAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListShiftRequestsQueryVariables,
+  APITypes.ListShiftRequestsQuery
+>;
+export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffId(
+  $staffId: String!
+  $targetMonth: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelShiftRequestFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  shiftRequestsByStaffId(
+    staffId: $staffId
+    targetMonth: $targetMonth
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      staffId
+      targetMonth
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      createdAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ShiftRequestsByStaffIdQueryVariables,
+  APITypes.ShiftRequestsByStaffIdQuery
+>;
 export const getWorkflow = /* GraphQL */ `query GetWorkflow($id: ID!) {
   getWorkflow(id: $id) {
     id
@@ -985,8 +1088,7 @@ export const listOperationLogs = /* GraphQL */ `query ListOperationLogs(
   APITypes.ListOperationLogsQueryVariables,
   APITypes.ListOperationLogsQuery
 >;
-export const operationLogsByStaffId =
-  /* GraphQL */ `query OperationLogsByStaffId(
+export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffId(
   $staffId: String!
   $timestamp: ModelStringKeyConditionInput
   $sortDirection: ModelSortDirection
@@ -1023,6 +1125,6 @@ export const operationLogsByStaffId =
   }
 }
 ` as GeneratedQuery<
-    APITypes.OperationLogsByStaffIdQueryVariables,
-    APITypes.OperationLogsByStaffIdQuery
-  >;
+  APITypes.OperationLogsByStaffIdQueryVariables,
+  APITypes.OperationLogsByStaffIdQuery
+>;

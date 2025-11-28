@@ -181,6 +181,40 @@ type ShiftGroup {
   fixed: Int
 }
 
+enum ShiftRequestStatus {
+  WORK
+  FIXED_OFF
+  REQUESTED_OFF
+  AUTO
+}
+
+type ShiftRequestDayPreference {
+  date: String!
+  status: ShiftRequestStatus!
+}
+
+type ShiftRequestSummary {
+  workDays: Int
+  fixedOffDays: Int
+  requestedOffDays: Int
+}
+
+type ShiftRequest @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  staffId: String!
+    @index(
+      name: "shiftRequestsByStaffId"
+      sortKeyFields: ["targetMonth"]
+      queryField: "shiftRequestsByStaffId"
+    )
+  targetMonth: String!
+  note: String
+  entries: [ShiftRequestDayPreference]
+  summary: ShiftRequestSummary
+  submittedAt: String
+  updatedAt: String
+}
+
 type AppConfig @model {
   id: ID!
   name: String!
