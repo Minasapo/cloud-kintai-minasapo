@@ -934,6 +934,104 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
   APITypes.ShiftRequestsByStaffIdQueryVariables,
   APITypes.ShiftRequestsByStaffIdQuery
 >;
+export const getShiftPlanYear = /* GraphQL */ `query GetShiftPlanYear($id: ID!) {
+  getShiftPlanYear(id: $id) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetShiftPlanYearQueryVariables,
+  APITypes.GetShiftPlanYearQuery
+>;
+export const listShiftPlanYears = /* GraphQL */ `query ListShiftPlanYears(
+  $filter: ModelShiftPlanYearFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listShiftPlanYears(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      targetYear
+      plans {
+        month
+        editStart
+        editEnd
+        enabled
+        dailyCapacities
+        __typename
+      }
+      notes
+      createdBy
+      updatedBy
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListShiftPlanYearsQueryVariables,
+  APITypes.ListShiftPlanYearsQuery
+>;
+export const shiftPlanYearByTargetYear = /* GraphQL */ `query ShiftPlanYearByTargetYear(
+  $targetYear: Int!
+  $id: ModelIDKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelShiftPlanYearFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  shiftPlanYearByTargetYear(
+    targetYear: $targetYear
+    id: $id
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      targetYear
+      plans {
+        month
+        editStart
+        editEnd
+        enabled
+        dailyCapacities
+        __typename
+      }
+      notes
+      createdBy
+      updatedBy
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ShiftPlanYearByTargetYearQueryVariables,
+  APITypes.ShiftPlanYearByTargetYearQuery
+>;
 export const getWorkflow = /* GraphQL */ `query GetWorkflow($id: ID!) {
   getWorkflow(id: $id) {
     id

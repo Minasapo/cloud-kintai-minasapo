@@ -962,6 +962,84 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
   APITypes.OnDeleteShiftRequestSubscriptionVariables,
   APITypes.OnDeleteShiftRequestSubscription
 >;
+export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPlanYear(
+  $filter: ModelSubscriptionShiftPlanYearFilterInput
+) {
+  onCreateShiftPlanYear(filter: $filter) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateShiftPlanYearSubscriptionVariables,
+  APITypes.OnCreateShiftPlanYearSubscription
+>;
+export const onUpdateShiftPlanYear = /* GraphQL */ `subscription OnUpdateShiftPlanYear(
+  $filter: ModelSubscriptionShiftPlanYearFilterInput
+) {
+  onUpdateShiftPlanYear(filter: $filter) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateShiftPlanYearSubscriptionVariables,
+  APITypes.OnUpdateShiftPlanYearSubscription
+>;
+export const onDeleteShiftPlanYear = /* GraphQL */ `subscription OnDeleteShiftPlanYear(
+  $filter: ModelSubscriptionShiftPlanYearFilterInput
+) {
+  onDeleteShiftPlanYear(filter: $filter) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteShiftPlanYearSubscriptionVariables,
+  APITypes.OnDeleteShiftPlanYearSubscription
+>;
 export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onCreateWorkflow(filter: $filter) {
     id

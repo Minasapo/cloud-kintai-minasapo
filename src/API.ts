@@ -858,6 +858,69 @@ export type DeleteShiftRequestInput = {
   id: string,
 };
 
+export type CreateShiftPlanYearInput = {
+  id?: string | null,
+  targetYear: number,
+  plans?: Array< ShiftPlanMonthSettingInput | null > | null,
+  notes?: string | null,
+  createdBy?: string | null,
+  updatedBy?: string | null,
+};
+
+export type ShiftPlanMonthSettingInput = {
+  month: number,
+  editStart?: string | null,
+  editEnd?: string | null,
+  enabled?: boolean | null,
+  dailyCapacities?: Array< number | null > | null,
+};
+
+export type ModelShiftPlanYearConditionInput = {
+  targetYear?: ModelIntInput | null,
+  notes?: ModelStringInput | null,
+  createdBy?: ModelStringInput | null,
+  updatedBy?: ModelStringInput | null,
+  and?: Array< ModelShiftPlanYearConditionInput | null > | null,
+  or?: Array< ModelShiftPlanYearConditionInput | null > | null,
+  not?: ModelShiftPlanYearConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ShiftPlanYear = {
+  __typename: "ShiftPlanYear",
+  id: string,
+  targetYear: number,
+  plans?:  Array<ShiftPlanMonthSetting | null > | null,
+  notes?: string | null,
+  createdBy?: string | null,
+  updatedBy?: string | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ShiftPlanMonthSetting = {
+  __typename: "ShiftPlanMonthSetting",
+  month: number,
+  editStart?: string | null,
+  editEnd?: string | null,
+  enabled?: boolean | null,
+  dailyCapacities?: Array< number | null > | null,
+};
+
+export type UpdateShiftPlanYearInput = {
+  id: string,
+  targetYear?: number | null,
+  plans?: Array< ShiftPlanMonthSettingInput | null > | null,
+  notes?: string | null,
+  createdBy?: string | null,
+  updatedBy?: string | null,
+};
+
+export type DeleteShiftPlanYearInput = {
+  id: string,
+};
+
 export type CreateWorkflowInput = {
   id?: string | null,
   approvedStaffIds?: Array< string | null > | null,
@@ -1346,6 +1409,25 @@ export type ModelShiftRequestConnection = {
   nextToken?: string | null,
 };
 
+export type ModelShiftPlanYearFilterInput = {
+  id?: ModelIDInput | null,
+  targetYear?: ModelIntInput | null,
+  notes?: ModelStringInput | null,
+  createdBy?: ModelStringInput | null,
+  updatedBy?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelShiftPlanYearFilterInput | null > | null,
+  or?: Array< ModelShiftPlanYearFilterInput | null > | null,
+  not?: ModelShiftPlanYearFilterInput | null,
+};
+
+export type ModelShiftPlanYearConnection = {
+  __typename: "ModelShiftPlanYearConnection",
+  items:  Array<ShiftPlanYear | null >,
+  nextToken?: string | null,
+};
+
 export type ModelWorkflowFilterInput = {
   id?: ModelIDInput | null,
   approvedStaffIds?: ModelStringInput | null,
@@ -1578,6 +1660,18 @@ export type ModelSubscriptionShiftRequestFilterInput = {
   createdAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionShiftRequestFilterInput | null > | null,
   or?: Array< ModelSubscriptionShiftRequestFilterInput | null > | null,
+};
+
+export type ModelSubscriptionShiftPlanYearFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  targetYear?: ModelSubscriptionIntInput | null,
+  notes?: ModelSubscriptionStringInput | null,
+  createdBy?: ModelSubscriptionStringInput | null,
+  updatedBy?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionShiftPlanYearFilterInput | null > | null,
+  or?: Array< ModelSubscriptionShiftPlanYearFilterInput | null > | null,
 };
 
 export type ModelSubscriptionWorkflowFilterInput = {
@@ -2593,6 +2687,84 @@ export type DeleteShiftRequestMutation = {
       changeReason?: string | null,
     } | null > | null,
     createdAt: string,
+  } | null,
+};
+
+export type CreateShiftPlanYearMutationVariables = {
+  input: CreateShiftPlanYearInput,
+  condition?: ModelShiftPlanYearConditionInput | null,
+};
+
+export type CreateShiftPlanYearMutation = {
+  createShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateShiftPlanYearMutationVariables = {
+  input: UpdateShiftPlanYearInput,
+  condition?: ModelShiftPlanYearConditionInput | null,
+};
+
+export type UpdateShiftPlanYearMutation = {
+  updateShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteShiftPlanYearMutationVariables = {
+  input: DeleteShiftPlanYearInput,
+  condition?: ModelShiftPlanYearConditionInput | null,
+};
+
+export type DeleteShiftPlanYearMutation = {
+  deleteShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
@@ -3718,6 +3890,96 @@ export type ShiftRequestsByStaffIdQuery = {
         changeReason?: string | null,
       } | null > | null,
       createdAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetShiftPlanYearQueryVariables = {
+  id: string,
+};
+
+export type GetShiftPlanYearQuery = {
+  getShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListShiftPlanYearsQueryVariables = {
+  filter?: ModelShiftPlanYearFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListShiftPlanYearsQuery = {
+  listShiftPlanYears?:  {
+    __typename: "ModelShiftPlanYearConnection",
+    items:  Array< {
+      __typename: "ShiftPlanYear",
+      id: string,
+      targetYear: number,
+      plans?:  Array< {
+        __typename: "ShiftPlanMonthSetting",
+        month: number,
+        editStart?: string | null,
+        editEnd?: string | null,
+        enabled?: boolean | null,
+        dailyCapacities?: Array< number | null > | null,
+      } | null > | null,
+      notes?: string | null,
+      createdBy?: string | null,
+      updatedBy?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ShiftPlanYearByTargetYearQueryVariables = {
+  targetYear: number,
+  id?: ModelIDKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelShiftPlanYearFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ShiftPlanYearByTargetYearQuery = {
+  shiftPlanYearByTargetYear?:  {
+    __typename: "ModelShiftPlanYearConnection",
+    items:  Array< {
+      __typename: "ShiftPlanYear",
+      id: string,
+      targetYear: number,
+      plans?:  Array< {
+        __typename: "ShiftPlanMonthSetting",
+        month: number,
+        editStart?: string | null,
+        editEnd?: string | null,
+        enabled?: boolean | null,
+        dailyCapacities?: Array< number | null > | null,
+      } | null > | null,
+      notes?: string | null,
+      createdBy?: string | null,
+      updatedBy?: string | null,
+      createdAt: string,
+      updatedAt: string,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -4913,6 +5175,81 @@ export type OnDeleteShiftRequestSubscription = {
       changeReason?: string | null,
     } | null > | null,
     createdAt: string,
+  } | null,
+};
+
+export type OnCreateShiftPlanYearSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftPlanYearFilterInput | null,
+};
+
+export type OnCreateShiftPlanYearSubscription = {
+  onCreateShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateShiftPlanYearSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftPlanYearFilterInput | null,
+};
+
+export type OnUpdateShiftPlanYearSubscription = {
+  onUpdateShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteShiftPlanYearSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftPlanYearFilterInput | null,
+};
+
+export type OnDeleteShiftPlanYearSubscription = {
+  onDeleteShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 

@@ -229,6 +229,28 @@ type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   histories: [ShiftRequestHistory]
 }
 
+type ShiftPlanMonthSetting {
+  month: Int!
+  editStart: String
+  editEnd: String
+  enabled: Boolean
+  dailyCapacities: [Int]
+}
+
+type ShiftPlanYear @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  targetYear: Int!
+    @index(
+      name: "shiftPlanYearByTargetYear"
+      sortKeyFields: ["id"]
+      queryField: "shiftPlanYearByTargetYear"
+    )
+  plans: [ShiftPlanMonthSetting]
+  notes: String
+  createdBy: String
+  updatedBy: String
+}
+
 type AppConfig @model {
   id: ID!
   name: String!

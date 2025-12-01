@@ -1013,6 +1013,87 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
   APITypes.DeleteShiftRequestMutationVariables,
   APITypes.DeleteShiftRequestMutation
 >;
+export const createShiftPlanYear = /* GraphQL */ `mutation CreateShiftPlanYear(
+  $input: CreateShiftPlanYearInput!
+  $condition: ModelShiftPlanYearConditionInput
+) {
+  createShiftPlanYear(input: $input, condition: $condition) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateShiftPlanYearMutationVariables,
+  APITypes.CreateShiftPlanYearMutation
+>;
+export const updateShiftPlanYear = /* GraphQL */ `mutation UpdateShiftPlanYear(
+  $input: UpdateShiftPlanYearInput!
+  $condition: ModelShiftPlanYearConditionInput
+) {
+  updateShiftPlanYear(input: $input, condition: $condition) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateShiftPlanYearMutationVariables,
+  APITypes.UpdateShiftPlanYearMutation
+>;
+export const deleteShiftPlanYear = /* GraphQL */ `mutation DeleteShiftPlanYear(
+  $input: DeleteShiftPlanYearInput!
+  $condition: ModelShiftPlanYearConditionInput
+) {
+  deleteShiftPlanYear(input: $input, condition: $condition) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteShiftPlanYearMutationVariables,
+  APITypes.DeleteShiftPlanYearMutation
+>;
 export const createWorkflow = /* GraphQL */ `mutation CreateWorkflow(
   $input: CreateWorkflowInput!
   $condition: ModelWorkflowConditionInput
