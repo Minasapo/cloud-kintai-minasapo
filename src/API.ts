@@ -756,6 +756,7 @@ export type CreateShiftRequestInput = {
   summary?: ShiftRequestSummaryInput | null,
   submittedAt?: string | null,
   updatedAt?: string | null,
+  histories?: Array< ShiftRequestHistoryInput | null > | null,
 };
 
 export type ShiftRequestDayPreferenceInput = {
@@ -775,6 +776,18 @@ export type ShiftRequestSummaryInput = {
   workDays?: number | null,
   fixedOffDays?: number | null,
   requestedOffDays?: number | null,
+};
+
+export type ShiftRequestHistoryInput = {
+  version: number,
+  note?: string | null,
+  entries?: Array< ShiftRequestDayPreferenceInput | null > | null,
+  summary?: ShiftRequestSummaryInput | null,
+  submittedAt?: string | null,
+  updatedAt?: string | null,
+  recordedAt: string,
+  recordedByStaffId?: string | null,
+  changeReason?: string | null,
 };
 
 export type ModelShiftRequestConditionInput = {
@@ -799,6 +812,7 @@ export type ShiftRequest = {
   summary?: ShiftRequestSummary | null,
   submittedAt?: string | null,
   updatedAt?: string | null,
+  histories?:  Array<ShiftRequestHistory | null > | null,
   createdAt: string,
 };
 
@@ -815,6 +829,19 @@ export type ShiftRequestSummary = {
   requestedOffDays?: number | null,
 };
 
+export type ShiftRequestHistory = {
+  __typename: "ShiftRequestHistory",
+  version: number,
+  note?: string | null,
+  entries?:  Array<ShiftRequestDayPreference | null > | null,
+  summary?: ShiftRequestSummary | null,
+  submittedAt?: string | null,
+  updatedAt?: string | null,
+  recordedAt: string,
+  recordedByStaffId?: string | null,
+  changeReason?: string | null,
+};
+
 export type UpdateShiftRequestInput = {
   id: string,
   staffId?: string | null,
@@ -824,6 +851,7 @@ export type UpdateShiftRequestInput = {
   summary?: ShiftRequestSummaryInput | null,
   submittedAt?: string | null,
   updatedAt?: string | null,
+  histories?: Array< ShiftRequestHistoryInput | null > | null,
 };
 
 export type DeleteShiftRequestInput = {
@@ -2443,6 +2471,27 @@ export type CreateShiftRequestMutation = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -2472,6 +2521,27 @@ export type UpdateShiftRequestMutation = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -2501,6 +2571,27 @@ export type DeleteShiftRequestMutation = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -3494,6 +3585,27 @@ export type GetShiftRequestQuery = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -3526,6 +3638,27 @@ export type ListShiftRequestsQuery = {
       } | null,
       submittedAt?: string | null,
       updatedAt?: string | null,
+      histories?:  Array< {
+        __typename: "ShiftRequestHistory",
+        version: number,
+        note?: string | null,
+        entries?:  Array< {
+          __typename: "ShiftRequestDayPreference",
+          date: string,
+          status: ShiftRequestStatus,
+        } | null > | null,
+        summary?:  {
+          __typename: "ShiftRequestSummary",
+          workDays?: number | null,
+          fixedOffDays?: number | null,
+          requestedOffDays?: number | null,
+        } | null,
+        submittedAt?: string | null,
+        updatedAt?: string | null,
+        recordedAt: string,
+        recordedByStaffId?: string | null,
+        changeReason?: string | null,
+      } | null > | null,
       createdAt: string,
     } | null >,
     nextToken?: string | null,
@@ -3563,6 +3696,27 @@ export type ShiftRequestsByStaffIdQuery = {
       } | null,
       submittedAt?: string | null,
       updatedAt?: string | null,
+      histories?:  Array< {
+        __typename: "ShiftRequestHistory",
+        version: number,
+        note?: string | null,
+        entries?:  Array< {
+          __typename: "ShiftRequestDayPreference",
+          date: string,
+          status: ShiftRequestStatus,
+        } | null > | null,
+        summary?:  {
+          __typename: "ShiftRequestSummary",
+          workDays?: number | null,
+          fixedOffDays?: number | null,
+          requestedOffDays?: number | null,
+        } | null,
+        submittedAt?: string | null,
+        updatedAt?: string | null,
+        recordedAt: string,
+        recordedByStaffId?: string | null,
+        changeReason?: string | null,
+      } | null > | null,
       createdAt: string,
     } | null >,
     nextToken?: string | null,
@@ -4639,6 +4793,27 @@ export type OnCreateShiftRequestSubscription = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -4667,6 +4842,27 @@ export type OnUpdateShiftRequestSubscription = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -4695,6 +4891,27 @@ export type OnDeleteShiftRequestSubscription = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
     createdAt: string,
   } | null,
 };

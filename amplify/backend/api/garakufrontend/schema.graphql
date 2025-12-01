@@ -199,6 +199,18 @@ type ShiftRequestSummary {
   requestedOffDays: Int
 }
 
+type ShiftRequestHistory {
+  version: Int!
+  note: String
+  entries: [ShiftRequestDayPreference]
+  summary: ShiftRequestSummary
+  submittedAt: String
+  updatedAt: String
+  recordedAt: String!
+  recordedByStaffId: String
+  changeReason: String
+}
+
 type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   id: ID!
   staffId: String!
@@ -213,6 +225,8 @@ type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   summary: ShiftRequestSummary
   submittedAt: String
   updatedAt: String
+  # 変更履歴（最新が先頭になるようクライアントで整列）
+  histories: [ShiftRequestHistory]
 }
 
 type AppConfig @model {

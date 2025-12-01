@@ -783,6 +783,27 @@ export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
     }
     submittedAt
     updatedAt
+    histories {
+      version
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      recordedAt
+      recordedByStaffId
+      changeReason
+      __typename
+    }
     createdAt
     __typename
   }
@@ -815,6 +836,27 @@ export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
       }
       submittedAt
       updatedAt
+      histories {
+        version
+        note
+        entries {
+          date
+          status
+          __typename
+        }
+        summary {
+          workDays
+          fixedOffDays
+          requestedOffDays
+          __typename
+        }
+        submittedAt
+        updatedAt
+        recordedAt
+        recordedByStaffId
+        changeReason
+        __typename
+      }
       createdAt
       __typename
     }
@@ -860,6 +902,27 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
       }
       submittedAt
       updatedAt
+      histories {
+        version
+        note
+        entries {
+          date
+          status
+          __typename
+        }
+        summary {
+          workDays
+          fixedOffDays
+          requestedOffDays
+          __typename
+        }
+        submittedAt
+        updatedAt
+        recordedAt
+        recordedByStaffId
+        changeReason
+        __typename
+      }
       createdAt
       __typename
     }

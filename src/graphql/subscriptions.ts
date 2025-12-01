@@ -833,6 +833,27 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
     }
     submittedAt
     updatedAt
+    histories {
+      version
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      recordedAt
+      recordedByStaffId
+      changeReason
+      __typename
+    }
     createdAt
     __typename
   }
@@ -862,6 +883,27 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
     }
     submittedAt
     updatedAt
+    histories {
+      version
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      recordedAt
+      recordedByStaffId
+      changeReason
+      __typename
+    }
     createdAt
     __typename
   }
@@ -891,6 +933,27 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
     }
     submittedAt
     updatedAt
+    histories {
+      version
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      recordedAt
+      recordedByStaffId
+      changeReason
+      __typename
+    }
     createdAt
     __typename
   }
