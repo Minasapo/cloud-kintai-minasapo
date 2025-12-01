@@ -1,3 +1,4 @@
+import { GraphQLResult } from "@aws-amplify/api";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -6,6 +7,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -31,12 +33,61 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import React, { useEffect, useMemo, useState } from "react";
 
+import {
+  CreateShiftRequestMutation,
+  ShiftRequestsByStaffIdQuery,
+  ShiftRequestStatus,
+  Staff,
+  UpdateShiftRequestMutation,
+} from "@/API";
+import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
+import { createShiftRequest, updateShiftRequest } from "@/graphql/mutations";
+import { shiftRequestsByStaffId } from "@/graphql/queries";
+import useCognitoUser from "@/hooks/useCognitoUser";
+import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/lib/reducers/snackbarReducer";
+
+type Status = "work" | "fixedOff" | "requestedOff" | "auto";
+
+const statusToShiftRequestStatus: Record<Status, ShiftRequestStatus> = {
+  work: ShiftRequestStatus.WORK,
+  fixedOff: ShiftRequestStatus.FIXED_OFF,
+  requestedOff: ShiftRequestStatus.REQUESTED_OFF,
+  auto: ShiftRequestStatus.AUTO,
+};
+
+const shiftRequestStatusToStatus = (
+  status?: ShiftRequestStatus | null
+): Status => {
+  switch (status) {
+    case ShiftRequestStatus.WORK:
+      return "work";
+    case ShiftRequestStatus.FIXED_OFF:
+      return "fixedOff";
+    case ShiftRequestStatus.REQUESTED_OFF:
+      return "requestedOff";
+    default:
+      return "auto";
+  }
+};
+
 export default function ShiftRequest() {
+  const dispatch = useAppDispatchV2();
+  const { cognitoUser, loading: cognitoUserLoading } = useCognitoUser();
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
-  type Status = "work" | "fixedOff" | "requestedOff" | "auto";
+  const [staff, setStaff] = useState<Staff | null>(null);
+  const [isLoadingStaff, setIsLoadingStaff] = useState(true);
+  const [isLoadingShiftRequest, setIsLoadingShiftRequest] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [shiftRequestId, setShiftRequestId] = useState<string | null>(null);
   const weekdayLabels = ["日", "月", "火", "水", "木", "金", "土"];
   const statusLabelMap: Record<Status, string> = {
     work: "出勤",
@@ -74,7 +125,6 @@ export default function ShiftRequest() {
     Record<string, { status: Status }>
   >({});
   const [note, setNote] = useState("");
-  const [saved, setSaved] = useState(false);
   // patterns
   type Pattern = {
     id: string;
@@ -98,7 +148,10 @@ export default function ShiftRequest() {
     6: "fixedOff",
   }));
 
-  const monthStart = currentMonth.startOf("month");
+  const monthStart = useMemo(
+    () => currentMonth.startOf("month"),
+    [currentMonth]
+  );
   const daysInMonth = monthStart.daysInMonth();
 
   const days = useMemo(
@@ -139,6 +192,115 @@ export default function ShiftRequest() {
     }
   }, []);
 
+  useEffect(() => {
+    if (cognitoUserLoading) return;
+    if (!cognitoUser?.id) {
+      setStaff(null);
+      setIsLoadingStaff(false);
+      return;
+    }
+
+    let isMounted = true;
+    const loadStaff = async () => {
+      setIsLoadingStaff(true);
+      try {
+        const staffData = await fetchStaff(cognitoUser.id);
+        if (!isMounted) return;
+        setStaff(staffData ?? null);
+      } catch (error) {
+        if (!isMounted) return;
+        setStaff(null);
+        dispatch(setSnackbarError(MESSAGE_CODE.E05001));
+      } finally {
+        if (isMounted) {
+          setIsLoadingStaff(false);
+        }
+      }
+    };
+
+    loadStaff();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [cognitoUser, cognitoUserLoading, dispatch]);
+
+  useEffect(() => {
+    if (!staff?.id) {
+      setShiftRequestId(null);
+      setSelectedDates({});
+      setNote("");
+      setIsLoadingShiftRequest(false);
+      return;
+    }
+
+    let isMounted = true;
+    const fetchShiftRequest = async () => {
+      setIsLoadingShiftRequest(true);
+      try {
+        const targetMonthKey = monthStart.format("YYYY-MM");
+        const response = (await API.graphql({
+          query: shiftRequestsByStaffId,
+          variables: {
+            staffId: staff.id,
+            targetMonth: { eq: targetMonthKey },
+            limit: 1,
+          },
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+        })) as GraphQLResult<ShiftRequestsByStaffIdQuery>;
+
+        if (!isMounted) return;
+
+        if (response.errors) {
+          throw new Error(response.errors[0].message);
+        }
+
+        const items =
+          response.data?.shiftRequestsByStaffId?.items?.filter(
+            (item): item is NonNullable<typeof item> => item !== null
+          ) ?? [];
+
+        const existing = items[0];
+
+        if (!existing) {
+          setShiftRequestId(null);
+          setSelectedDates({});
+          setNote("");
+          return;
+        }
+
+        const nextSelected: Record<string, { status: Status }> = {};
+        existing.entries
+          ?.filter(
+            (entry): entry is NonNullable<typeof entry> => entry !== null
+          )
+          .forEach((entry) => {
+            nextSelected[entry.date] = {
+              status: shiftRequestStatusToStatus(entry.status),
+            };
+          });
+
+        setShiftRequestId(existing.id);
+        setSelectedDates(nextSelected);
+        setNote(existing.note ?? "");
+      } catch (error) {
+        if (isMounted) {
+          dispatch(setSnackbarError(MESSAGE_CODE.E16002));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingShiftRequest(false);
+        }
+      }
+    };
+
+    fetchShiftRequest();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch, monthStart, staff?.id]);
+
   const persistPatterns = (p: Pattern[]) => {
     setPatterns(p);
     try {
@@ -177,11 +339,77 @@ export default function ShiftRequest() {
 
   // 一括で選択中の日にステータスを適用（未使用のため保持しない）
 
-  const handleSave = () => {
-    const dates = Object.keys(selectedDates).sort();
-    console.log("保存(モック):", { dates, selectedDates, note });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    if (!staff?.id) {
+      dispatch(setSnackbarError(MESSAGE_CODE.E05001));
+      return;
+    }
+
+    const entries = Object.entries(selectedDates)
+      .map(([date, value]) => ({
+        date,
+        status: statusToShiftRequestStatus[value.status],
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (entries.length === 0) return;
+
+    const submittedAt = dayjs().toISOString();
+    const targetMonthKey = monthStart.format("YYYY-MM");
+
+    setIsSaving(true);
+    try {
+      if (shiftRequestId) {
+        const response = (await API.graphql({
+          query: updateShiftRequest,
+          variables: {
+            input: {
+              id: shiftRequestId,
+              note,
+              entries,
+              summary,
+              submittedAt,
+            },
+          },
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+        })) as GraphQLResult<UpdateShiftRequestMutation>;
+
+        if (response.errors) {
+          throw new Error(response.errors[0].message);
+        }
+
+        setShiftRequestId(
+          response.data?.updateShiftRequest?.id ?? shiftRequestId
+        );
+      } else {
+        const response = (await API.graphql({
+          query: createShiftRequest,
+          variables: {
+            input: {
+              staffId: staff.id,
+              targetMonth: targetMonthKey,
+              note,
+              entries,
+              summary,
+              submittedAt,
+            },
+          },
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+        })) as GraphQLResult<CreateShiftRequestMutation>;
+
+        if (response.errors) {
+          throw new Error(response.errors[0].message);
+        }
+
+        setShiftRequestId(response.data?.createShiftRequest?.id ?? null);
+      }
+
+      dispatch(setSnackbarSuccess(MESSAGE_CODE.S16001));
+    } catch (error) {
+      dispatch(setSnackbarError(MESSAGE_CODE.E16001));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // カウント：出勤と休み
@@ -203,19 +431,48 @@ export default function ShiftRequest() {
     [selectedDates]
   );
 
+  const summary = useMemo(
+    () => ({
+      workDays: workCount,
+      fixedOffDays: fixedOffCount,
+      requestedOffDays: requestedOffCount,
+    }),
+    [fixedOffCount, requestedOffCount, workCount]
+  );
+
+  const interactionDisabled =
+    !staff || isLoadingStaff || isLoadingShiftRequest || isSaving;
+  const hasSelection = Object.keys(selectedDates).length > 0;
+
   const BulkSelectionButtons = () => (
     <Box
       sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}
     >
-      <Button onClick={() => selectAll("work")}>全て出勤</Button>
-      <Button onClick={() => selectAll("fixedOff")} color="error">
+      <Button onClick={() => selectAll("work")} disabled={interactionDisabled}>
+        全て出勤
+      </Button>
+      <Button
+        onClick={() => selectAll("fixedOff")}
+        color="error"
+        disabled={interactionDisabled}
+      >
         全て固定休
       </Button>
-      <Button onClick={() => selectAll("requestedOff")} color="warning">
+      <Button
+        onClick={() => selectAll("requestedOff")}
+        color="warning"
+        disabled={interactionDisabled}
+      >
         全て希望休
       </Button>
-      <Button onClick={() => selectAll("auto")}>全ておまかせ</Button>
-      <Button onClick={() => clearAll()} sx={{ ml: 1 }}>
+      <Button onClick={() => selectAll("auto")} disabled={interactionDisabled}>
+        全ておまかせ
+      </Button>
+      <Button
+        onClick={() => clearAll()}
+        sx={{ ml: 1 }}
+        disabled={interactionDisabled}
+      >
         クリア
       </Button>
     </Box>
@@ -225,7 +482,7 @@ export default function ShiftRequest() {
     <Container sx={{ py: 3 }}>
       <Paper sx={{ p: 2 }}>
         <Typography variant="h5" gutterBottom>
-          希望シフト入力（1ヶ月選択）
+          希望シフト
         </Typography>
         <Box
           sx={{
@@ -261,6 +518,12 @@ export default function ShiftRequest() {
           </Box>
         </Box>
 
+        {(isLoadingStaff || isLoadingShiftRequest) && (
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <CircularProgress size={24} />
+          </Box>
+        )}
+
         {/* カウント表示 */}
         <Box sx={{ mb: 2 }}>
           <BulkSelectionButtons />
@@ -278,8 +541,8 @@ export default function ShiftRequest() {
             <TableRow>
               <TableCell colSpan={2} sx={{ backgroundColor: "grey.50" }}>
                 <Typography variant="body2">
-                  出勤: {workCount}日 / 固定休: {fixedOffCount}日 / 希望休:{" "}
-                  {requestedOffCount}日
+                  出勤: {summary.workDays}日 / 固定休: {summary.fixedOffDays}日
+                  / 希望休: {summary.requestedOffDays}日
                 </Typography>
               </TableCell>
             </TableRow>
@@ -300,6 +563,7 @@ export default function ShiftRequest() {
                             selected === "work" ? "contained" : "outlined"
                           }
                           color={statusColorMap.work}
+                          disabled={interactionDisabled}
                           onClick={() =>
                             setSelectedDates((prev) => ({
                               ...prev,
@@ -315,6 +579,7 @@ export default function ShiftRequest() {
                             selected === "fixedOff" ? "contained" : "outlined"
                           }
                           color={statusColorMap.fixedOff}
+                          disabled={interactionDisabled}
                           onClick={() =>
                             setSelectedDates((prev) => ({
                               ...prev,
@@ -332,6 +597,7 @@ export default function ShiftRequest() {
                               : "outlined"
                           }
                           color={statusColorMap.requestedOff}
+                          disabled={interactionDisabled}
                           onClick={() =>
                             setSelectedDates((prev) => ({
                               ...prev,
@@ -347,6 +613,7 @@ export default function ShiftRequest() {
                             selected === "auto" ? "contained" : "outlined"
                           }
                           color={statusColorMap.auto}
+                          disabled={interactionDisabled}
                           onClick={() =>
                             setSelectedDates((prev) => ({
                               ...prev,
@@ -361,6 +628,7 @@ export default function ShiftRequest() {
                       {selected && (
                         <Button
                           size="small"
+                          disabled={interactionDisabled}
                           onClick={() =>
                             setSelectedDates((prev) => {
                               const c = { ...prev };
@@ -391,6 +659,7 @@ export default function ShiftRequest() {
               multiline
               rows={2}
               value={note}
+              disabled={interactionDisabled}
               onChange={(e) => setNote(e.target.value)}
             />
 
@@ -405,13 +674,11 @@ export default function ShiftRequest() {
               <Button
                 variant="contained"
                 onClick={handleSave}
-                disabled={Object.keys(selectedDates).length === 0}
+                disabled={!hasSelection || interactionDisabled}
               >
-                保存 (モック)
+                保存
               </Button>
-              {saved && (
-                <Typography color="success.main">保存しました</Typography>
-              )}
+              {isSaving && <CircularProgress size={20} />}
             </Box>
           </Stack>
         </Box>

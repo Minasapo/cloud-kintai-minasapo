@@ -1,3 +1,4 @@
+import { GraphQLResult } from "@aws-amplify/api";
 import {
   Alert,
   Box,
@@ -16,17 +17,35 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { ListShiftRequestsQuery, ShiftRequestStatus } from "@/API";
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { listShiftRequests } from "@/graphql/queries";
 
 import useCompanyHolidayCalendars from "../../hooks/useCompanyHolidayCalendars/useCompanyHolidayCalendars";
 import useHolidayCalendar from "../../hooks/useHolidayCalendars/useHolidayCalendars";
 import useStaffs from "../../hooks/useStaffs/useStaffs";
 import generateMockShifts, { ShiftState } from "./generateMockShifts";
+
+const shiftRequestStatusToShiftState = (
+  status?: ShiftRequestStatus | null
+): ShiftState => {
+  switch (status) {
+    case ShiftRequestStatus.WORK:
+      return "work";
+    case ShiftRequestStatus.FIXED_OFF:
+      return "fixedOff";
+    case ShiftRequestStatus.REQUESTED_OFF:
+      return "requestedOff";
+    default:
+      return "auto";
+  }
+};
 
 const hashString = (s: string) => {
   let h = 0;
@@ -190,7 +209,10 @@ export default function ShiftManagement() {
   }, [shiftGroupDefinitions, shiftStaffs]);
 
   const [currentMonth, setCurrentMonth] = useState(dayjs());
-  const monthStart = currentMonth.startOf("month");
+  const monthStart = useMemo(
+    () => currentMonth.startOf("month"),
+    [currentMonth]
+  );
   const daysInMonth = monthStart.daysInMonth();
 
   const days = useMemo(
@@ -233,15 +255,28 @@ export default function ShiftManagement() {
     return { minWidth: 56 };
   };
 
-  // シミュレーションシナリオを選べるようにする
-  const [scenario, setScenario] = React.useState<string>("patterned");
+  // シミュレーションシナリオを選べるようにする（デフォルトは実際の希望シフト）
+  const [scenario, setScenario] = React.useState<string>("actual");
 
   // mockShifts を state 化し、scenario/shiftStaffs/days に応じて生成する
   const [mockShifts, setMockShifts] = React.useState<
     Map<string, Record<string, ShiftState>>
   >(new Map());
 
+  const [shiftRequestAssignments, setShiftRequestAssignments] = React.useState<
+    Map<string, Record<string, ShiftState>>
+  >(new Map());
+  const [shiftRequestsLoading, setShiftRequestsLoading] = useState(false);
+  const [shiftRequestsError, setShiftRequestsError] = useState<string | null>(
+    null
+  );
+
   React.useEffect(() => {
+    // 実績表示モードではモック生成は不要
+    if (scenario === "actual") {
+      setMockShifts(new Map());
+      return;
+    }
     // shiftStaffs が未ロードのときは空のマップを設定
     if (!shiftStaffs || shiftStaffs.length === 0) {
       setMockShifts(new Map());
@@ -255,18 +290,107 @@ export default function ShiftManagement() {
     setMockShifts(map);
   }, [shiftStaffs, days, scenario]);
 
+  React.useEffect(() => {
+    if (!shiftStaffs || shiftStaffs.length === 0) {
+      setShiftRequestAssignments(new Map());
+      return;
+    }
+
+    let isMounted = true;
+    const fetchShiftRequests = async () => {
+      setShiftRequestsLoading(true);
+      setShiftRequestsError(null);
+      try {
+        const staffIdSet = new Set(shiftStaffs.map((s) => s.id));
+        const targetMonthKey = monthStart.format("YYYY-MM");
+        const nextAssignments = new Map<string, Record<string, ShiftState>>();
+        let nextToken: string | null | undefined = undefined;
+
+        do {
+          const response = (await API.graphql({
+            query: listShiftRequests,
+            variables: {
+              filter: { targetMonth: { eq: targetMonthKey } },
+              limit: 500,
+              nextToken,
+            },
+            authMode: "AMAZON_COGNITO_USER_POOLS",
+          })) as GraphQLResult<ListShiftRequestsQuery>;
+
+          if (!isMounted) return;
+
+          if (response.errors) {
+            throw new Error(response.errors.map((e) => e.message).join(","));
+          }
+
+          const items =
+            response.data?.listShiftRequests?.items?.filter(
+              (item): item is NonNullable<typeof item> => item !== null
+            ) ?? [];
+
+          items.forEach((item) => {
+            if (!staffIdSet.has(item.staffId)) return;
+            const per: Record<string, ShiftState> = {};
+            item.entries
+              ?.filter(
+                (entry): entry is NonNullable<typeof entry> => entry !== null
+              )
+              .forEach((entry) => {
+                per[entry.date] = shiftRequestStatusToShiftState(entry.status);
+              });
+            nextAssignments.set(item.staffId, per);
+          });
+
+          nextToken = response.data?.listShiftRequests?.nextToken ?? null;
+        } while (nextToken);
+
+        if (!isMounted) return;
+        setShiftRequestAssignments(nextAssignments);
+      } catch (err) {
+        console.error(err);
+        if (isMounted) {
+          setShiftRequestsError("希望シフトの取得に失敗しました。");
+        }
+      } finally {
+        if (isMounted) {
+          setShiftRequestsLoading(false);
+        }
+      }
+    };
+
+    fetchShiftRequests();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [shiftStaffs, monthStart]);
+
+  const displayShifts = useMemo(() => {
+    const next = new Map<string, Record<string, ShiftState>>();
+    shiftStaffs.forEach((staff) => {
+      if (scenario === "actual" && shiftRequestAssignments.has(staff.id)) {
+        next.set(staff.id, shiftRequestAssignments.get(staff.id)!);
+      } else if (scenario !== "actual" && mockShifts.has(staff.id)) {
+        next.set(staff.id, mockShifts.get(staff.id)!);
+      } else {
+        next.set(staff.id, {});
+      }
+    });
+    return next;
+  }, [mockShifts, scenario, shiftRequestAssignments, shiftStaffs]);
+
   const dailyCounts = useMemo(() => {
     const m = new Map<string, number>();
     days.forEach((d) => {
       const key = d.format("YYYY-MM-DD");
       let cnt = 0;
       shiftStaffs.forEach((s) => {
-        if (mockShifts.get(s.id)?.[key] === "work") cnt += 1;
+        if (displayShifts.get(s.id)?.[key] === "work") cnt += 1;
       });
       m.set(key, cnt);
     });
     return m;
-  }, [days, shiftStaffs, mockShifts]);
+  }, [days, shiftStaffs, displayShifts]);
 
   const groupDailyCounts = useMemo(() => {
     const result = new Map<string, Map<string, number>>();
@@ -276,14 +400,14 @@ export default function ShiftManagement() {
         const key = d.format("YYYY-MM-DD");
         let cnt = 0;
         members.forEach((member) => {
-          if (mockShifts.get(member.id)?.[key] === "work") cnt += 1;
+          if (displayShifts.get(member.id)?.[key] === "work") cnt += 1;
         });
         groupCounts.set(key, cnt);
       });
       result.set(groupName, groupCounts);
     });
     return result;
-  }, [groupedShiftStaffs, days, mockShifts]);
+  }, [displayShifts, groupedShiftStaffs, days]);
 
   // 想定人数: 今はシンプルにシフト勤務スタッフ数を全員出勤とした想定値を表示する
   const expectedCounts = useMemo(() => {
@@ -311,6 +435,7 @@ export default function ShiftManagement() {
   // 全スタッフの状況を見て、日ごとに 'auto' を持つスタッフの中から
   // 必要分だけ 'work' を割り当て、残りを 'off' にするロジック
   const autoAdjustAll = () => {
+    if (scenario === "actual") return;
     setMockShifts((prev) => {
       const next = new Map(prev);
 
@@ -405,6 +530,7 @@ export default function ShiftManagement() {
             onClick={autoAdjustAll}
             sx={{ ml: 1 }}
             clickable
+            disabled={scenario === "actual"}
           />
 
           <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -415,6 +541,7 @@ export default function ShiftManagement() {
               label="シミュレーション"
               onChange={(e) => setScenario(String(e.target.value))}
             >
+              <MenuItem value="actual">希望シフト</MenuItem>
               <MenuItem value="patterned">平日中心 (patterned)</MenuItem>
               <MenuItem value="balanced">均等ローテ (balanced)</MenuItem>
               <MenuItem value="sparse">出勤少なめ (sparse)</MenuItem>
@@ -424,7 +551,7 @@ export default function ShiftManagement() {
         </Box>
       </Box>
 
-      {loading && (
+      {(loading || shiftRequestsLoading) && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />
         </Box>
@@ -436,7 +563,11 @@ export default function ShiftManagement() {
         </Alert>
       )}
 
-      {!loading && !error && (
+      {shiftRequestsError && (
+        <Alert severity="error">{shiftRequestsError}</Alert>
+      )}
+
+      {!loading && !shiftRequestsLoading && !error && (
         <>
           <Box
             sx={{
@@ -972,7 +1103,7 @@ export default function ShiftManagement() {
                             </TableCell>
 
                             {(() => {
-                              const per = mockShifts.get(s.id) || {};
+                              const per = displayShifts.get(s.id) || {};
                               const workCount = Object.values(per).filter(
                                 (v) => v === "work"
                               ).length;
@@ -1048,7 +1179,7 @@ export default function ShiftManagement() {
 
                             {days.map((d) => {
                               const key = d.format("YYYY-MM-DD");
-                              const state = mockShifts.get(s.id)?.[key];
+                              const state = displayShifts.get(s.id)?.[key];
                               const visual =
                                 (state && statusVisualMap[state]) ||
                                 defaultStatusVisual;
