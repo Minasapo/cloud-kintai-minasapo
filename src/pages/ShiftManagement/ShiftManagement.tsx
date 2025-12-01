@@ -248,11 +248,12 @@ export default function ShiftManagement() {
     const dateKey = d.format("YYYY-MM-DD");
     const day = d.day();
     if (holidaySet.has(dateKey) || day === 0)
-      return { minWidth: 56, bgcolor: "rgba(244,67,54,0.18)" };
+      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(244,67,54,0.18)" };
     if (companyHolidaySet.has(dateKey))
-      return { minWidth: 56, bgcolor: "rgba(255,152,0,0.18)" };
-    if (day === 6) return { minWidth: 56, bgcolor: "rgba(33,150,243,0.12)" };
-    return { minWidth: 56 };
+      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(255,152,0,0.18)" };
+    if (day === 6)
+      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(33,150,243,0.12)" };
+    return { minWidth: DAY_COL_WIDTH };
   };
 
   // シミュレーションシナリオを選べるようにする（デフォルトは実際の希望シフト）
@@ -265,6 +266,9 @@ export default function ShiftManagement() {
 
   const [shiftRequestAssignments, setShiftRequestAssignments] = React.useState<
     Map<string, Record<string, ShiftState>>
+  >(new Map());
+  const [shiftRequestHistoryMeta, setShiftRequestHistoryMeta] = React.useState<
+    Map<string, { changeCount: number; latestChangeAt: string | null }>
   >(new Map());
   const [shiftRequestsLoading, setShiftRequestsLoading] = useState(false);
   const [shiftRequestsError, setShiftRequestsError] = useState<string | null>(
@@ -293,6 +297,7 @@ export default function ShiftManagement() {
   React.useEffect(() => {
     if (!shiftStaffs || shiftStaffs.length === 0) {
       setShiftRequestAssignments(new Map());
+      setShiftRequestHistoryMeta(new Map());
       return;
     }
 
@@ -304,6 +309,10 @@ export default function ShiftManagement() {
         const staffIdSet = new Set(shiftStaffs.map((s) => s.id));
         const targetMonthKey = monthStart.format("YYYY-MM");
         const nextAssignments = new Map<string, Record<string, ShiftState>>();
+        const nextHistoryMeta = new Map<
+          string,
+          { changeCount: number; latestChangeAt: string | null }
+        >();
         let nextToken: string | null | undefined = undefined;
 
         do {
@@ -339,6 +348,25 @@ export default function ShiftManagement() {
                 per[entry.date] = shiftRequestStatusToShiftState(entry.status);
               });
             nextAssignments.set(item.staffId, per);
+
+            const histories =
+              item.histories?.filter(
+                (history): history is NonNullable<typeof history> =>
+                  history !== null
+              ) ?? [];
+            const changeCount = histories.length;
+            let latestChangeAt: string | null = null;
+            histories.forEach((history) => {
+              const candidate = history.recordedAt ?? null;
+              if (!candidate) return;
+              if (!latestChangeAt || dayjs(candidate).isAfter(latestChangeAt)) {
+                latestChangeAt = candidate;
+              }
+            });
+            nextHistoryMeta.set(item.staffId, {
+              changeCount,
+              latestChangeAt,
+            });
           });
 
           nextToken = response.data?.listShiftRequests?.nextToken ?? null;
@@ -346,6 +374,7 @@ export default function ShiftManagement() {
 
         if (!isMounted) return;
         setShiftRequestAssignments(nextAssignments);
+        setShiftRequestHistoryMeta(nextHistoryMeta);
       } catch (err) {
         console.error(err);
         if (isMounted) {
@@ -494,10 +523,24 @@ export default function ShiftManagement() {
     });
   };
 
-  // 固定幅を広めにしてスタッフ名や集計ヘッダーが切れないようにする
-  const STAFF_COL_WIDTH = 280;
-  // 出勤 / 休憩 等の集計列はヘッダーが切れないよう少し広めにする
-  const AGG_COL_WIDTH = 64;
+  // 固定幅を抑えて全体をコンパクトに表示
+  const STAFF_COL_WIDTH = 220;
+  // 出勤 / 休憩 等の集計列はヘッダー文字の可読性を保ちながら縮小
+  const AGG_COL_WIDTH = 52;
+  const HISTORY_COL_WIDTH = 120;
+  const DAY_COL_WIDTH = 48;
+  const verticalTextSx = {
+    writingMode: "vertical-rl" as const,
+    textOrientation: "mixed" as const,
+    whiteSpace: "nowrap" as const,
+  };
+  const SUMMARY_LEFTS = {
+    work: STAFF_COL_WIDTH,
+    fixedOff: STAFF_COL_WIDTH + AGG_COL_WIDTH,
+    requestedOff: STAFF_COL_WIDTH + AGG_COL_WIDTH * 2,
+    changeCount: STAFF_COL_WIDTH + AGG_COL_WIDTH * 3,
+    latestChange: STAFF_COL_WIDTH + AGG_COL_WIDTH * 4,
+  } as const;
 
   return (
     <Container sx={{ py: 3 }}>
@@ -693,7 +736,10 @@ export default function ShiftManagement() {
               size="small"
               sx={{
                 minWidth:
-                  STAFF_COL_WIDTH + days.length * 56 + AGG_COL_WIDTH * 3,
+                  STAFF_COL_WIDTH +
+                  AGG_COL_WIDTH * 4 +
+                  HISTORY_COL_WIDTH +
+                  days.length * DAY_COL_WIDTH,
                 tableLayout: "fixed",
               }}
             >
@@ -706,7 +752,8 @@ export default function ShiftManagement() {
                       minWidth: STAFF_COL_WIDTH,
                       maxWidth: STAFF_COL_WIDTH,
                       boxSizing: "border-box",
-                      pl: 1,
+                      pl: 0.25,
+                      py: 0.25,
                       borderRight: "1px solid",
                       borderColor: "divider",
                       // 左に固定してスクロールしても見えるようにする
@@ -733,14 +780,18 @@ export default function ShiftManagement() {
                       // ヘッダー行は上に固定しておく
                       position: "sticky",
                       top: 0,
-                      left: `${STAFF_COL_WIDTH}px`,
+                      left: `${SUMMARY_LEFTS.work}px`,
                       zIndex: 3,
                       whiteSpace: "nowrap",
                       borderRight: "1px solid",
                       borderColor: "divider",
+                      verticalAlign: "top",
+                      py: 0.25,
                     }}
                   >
-                    出勤
+                    <Typography component="span" sx={verticalTextSx}>
+                      出勤
+                    </Typography>
                   </TableCell>
 
                   <TableCell
@@ -753,14 +804,18 @@ export default function ShiftManagement() {
                       boxSizing: "border-box",
                       position: "sticky",
                       top: 0,
-                      left: `${STAFF_COL_WIDTH + AGG_COL_WIDTH}px`,
+                      left: `${SUMMARY_LEFTS.fixedOff}px`,
                       zIndex: 3,
                       whiteSpace: "nowrap",
                       borderRight: "1px solid",
                       borderColor: "divider",
+                      verticalAlign: "top",
+                      py: 0.25,
                     }}
                   >
-                    固定休
+                    <Typography component="span" sx={verticalTextSx}>
+                      固定休
+                    </Typography>
                   </TableCell>
 
                   <TableCell
@@ -773,14 +828,66 @@ export default function ShiftManagement() {
                       boxSizing: "border-box",
                       position: "sticky",
                       top: 0,
-                      left: `${STAFF_COL_WIDTH + AGG_COL_WIDTH * 2}px`,
+                      left: `${SUMMARY_LEFTS.requestedOff}px`,
                       zIndex: 3,
                       whiteSpace: "nowrap",
                       borderRight: "1px solid",
                       borderColor: "divider",
+                      verticalAlign: "top",
+                      py: 0.25,
                     }}
                   >
-                    希望休
+                    <Typography component="span" sx={verticalTextSx}>
+                      希望休
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell
+                    align="center"
+                    aria-label="変更回数"
+                    title="変更回数"
+                    sx={{
+                      bgcolor: "background.paper",
+                      width: AGG_COL_WIDTH,
+                      boxSizing: "border-box",
+                      position: "sticky",
+                      top: 0,
+                      left: `${SUMMARY_LEFTS.changeCount}px`,
+                      zIndex: 3,
+                      whiteSpace: "nowrap",
+                      borderRight: "1px solid",
+                      borderColor: "divider",
+                      verticalAlign: "top",
+                      py: 0.25,
+                    }}
+                  >
+                    <Typography component="span" sx={verticalTextSx}>
+                      変更回数
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell
+                    align="center"
+                    aria-label="最新変更"
+                    title="最新変更"
+                    sx={{
+                      bgcolor: "background.paper",
+                      width: HISTORY_COL_WIDTH,
+                      boxSizing: "border-box",
+                      position: "sticky",
+                      top: 0,
+                      left: `${SUMMARY_LEFTS.latestChange}px`,
+                      zIndex: 3,
+                      whiteSpace: "nowrap",
+                      borderRight: "1px solid",
+                      borderColor: "divider",
+                      verticalAlign: "top",
+                      py: 0.25,
+                    }}
+                  >
+                    <Typography component="span" sx={verticalTextSx}>
+                      最新変更
+                    </Typography>
                   </TableCell>
 
                   {days.map((d) => {
@@ -806,14 +913,14 @@ export default function ShiftManagement() {
                           position: "relative",
                           top: 0,
                           zIndex: 0,
-                          // 各日付カラムの区切り用の縦線
                           borderLeft: "1px solid",
                           borderColor: "divider",
-                          px: 0,
+                          px: 0.2,
+                          py: 0.2,
                         }}
                       >
                         <Box
-                          sx={{ cursor: "pointer", px: 0.5 }}
+                          sx={{ cursor: "pointer", px: 0.25 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/admin/shift/day/${key}`);
@@ -837,12 +944,14 @@ export default function ShiftManagement() {
                     {/* 想定人数と過不足を1行に統合 */}
                     <TableRow sx={{ cursor: "default" }}>
                       <TableCell
-                        colSpan={4}
+                        colSpan={6}
                         sx={{
                           bgcolor: "background.paper",
-                          pl: 1,
-                          pr: 1,
-                          width: STAFF_COL_WIDTH + AGG_COL_WIDTH * 3,
+                          py: 0.25,
+                          width:
+                            STAFF_COL_WIDTH +
+                            AGG_COL_WIDTH * 4 +
+                            HISTORY_COL_WIDTH,
                           boxSizing: "border-box",
                           borderRight: "1px solid",
                           borderColor: "divider",
@@ -865,8 +974,8 @@ export default function ShiftManagement() {
                           <TableCell
                             key={key}
                             sx={{
-                              p: 0,
-                              width: 56,
+                              p: 0.25,
+                              width: DAY_COL_WIDTH,
                               height: 40,
                               position: "relative",
                               borderLeft: "1px solid",
@@ -897,7 +1006,7 @@ export default function ShiftManagement() {
 
                 {shiftStaffs.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={days.length + 4}>
+                    <TableCell colSpan={days.length + 6}>
                       <Typography sx={{ py: 2 }}>
                         シフト勤務のスタッフは見つかりませんでした。
                       </Typography>
@@ -931,11 +1040,9 @@ export default function ShiftManagement() {
                       <React.Fragment key={groupName}>
                         <TableRow sx={{ bgcolor: "grey.100" }}>
                           <TableCell
-                            colSpan={4}
+                            colSpan={6}
                             sx={{
-                              py: 1.5,
-                              pl: 1,
-                              pr: 1,
+                              py: 0.75,
                               boxSizing: "border-box",
                               borderRight: "1px solid",
                               borderColor: "divider",
@@ -980,7 +1087,7 @@ export default function ShiftManagement() {
                           <TableCell
                             colSpan={days.length}
                             sx={{
-                              py: 1.5,
+                              py: 0.75,
                               bgcolor: "grey.100",
                               borderBottom: "1px solid",
                               borderColor: "divider",
@@ -991,12 +1098,14 @@ export default function ShiftManagement() {
                         {!isUnassignedGroup && (
                           <TableRow sx={{ cursor: "default" }}>
                             <TableCell
-                              colSpan={4}
+                              colSpan={6}
                               sx={{
                                 bgcolor: "background.paper",
-                                pl: 1,
-                                pr: 1,
-                                width: STAFF_COL_WIDTH + AGG_COL_WIDTH * 3,
+                                py: 0.25,
+                                width:
+                                  STAFF_COL_WIDTH +
+                                  AGG_COL_WIDTH * 4 +
+                                  HISTORY_COL_WIDTH,
                                 boxSizing: "border-box",
                                 borderRight: "1px solid",
                                 borderColor: "divider",
@@ -1039,8 +1148,8 @@ export default function ShiftManagement() {
                                 <TableCell
                                   key={`${groupName}-${key}-coverage`}
                                   sx={{
-                                    p: 0,
-                                    width: 56,
+                                    p: 0.25,
+                                    width: DAY_COL_WIDTH,
                                     height: 40,
                                     position: "relative",
                                     borderLeft: "1px solid",
@@ -1084,7 +1193,6 @@ export default function ShiftManagement() {
                             <TableCell
                               sx={{
                                 bgcolor: "background.paper",
-                                pl: 1,
                                 width: STAFF_COL_WIDTH,
                                 minWidth: STAFF_COL_WIDTH,
                                 maxWidth: STAFF_COL_WIDTH,
@@ -1113,6 +1221,16 @@ export default function ShiftManagement() {
                               const requestedOffCount = Object.values(
                                 per
                               ).filter((v) => v === "requestedOff").length;
+                              const historyMeta = shiftRequestHistoryMeta.get(
+                                s.id
+                              );
+                              const changeCount = historyMeta?.changeCount ?? 0;
+                              const latestChangeLabel =
+                                historyMeta?.latestChangeAt
+                                  ? dayjs(historyMeta.latestChangeAt).format(
+                                      "M/D HH:mm"
+                                    )
+                                  : "-";
                               return (
                                 <>
                                   <TableCell
@@ -1124,12 +1242,19 @@ export default function ShiftManagement() {
                                       borderRight: "1px solid",
                                       borderColor: "divider",
                                       position: "sticky",
-                                      left: `${STAFF_COL_WIDTH}px`,
+                                      left: `${SUMMARY_LEFTS.work}px`,
                                       zIndex: 1,
+                                      verticalAlign: "middle",
                                     }}
                                     align="center"
                                   >
-                                    <Typography variant="body2">
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        textAlign: "center",
+                                        width: "100%",
+                                      }}
+                                    >
                                       {workCount}
                                     </Typography>
                                   </TableCell>
@@ -1142,14 +1267,19 @@ export default function ShiftManagement() {
                                       borderRight: "1px solid",
                                       borderColor: "divider",
                                       position: "sticky",
-                                      left: `${
-                                        STAFF_COL_WIDTH + AGG_COL_WIDTH
-                                      }px`,
+                                      left: `${SUMMARY_LEFTS.fixedOff}px`,
                                       zIndex: 1,
+                                      verticalAlign: "middle",
                                     }}
                                     align="center"
                                   >
-                                    <Typography variant="body2">
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        textAlign: "center",
+                                        width: "100%",
+                                      }}
+                                    >
                                       {fixedOffCount}
                                     </Typography>
                                   </TableCell>
@@ -1162,15 +1292,70 @@ export default function ShiftManagement() {
                                       borderRight: "1px solid",
                                       borderColor: "divider",
                                       position: "sticky",
-                                      left: `${
-                                        STAFF_COL_WIDTH + AGG_COL_WIDTH * 2
-                                      }px`,
+                                      left: `${SUMMARY_LEFTS.requestedOff}px`,
                                       zIndex: 1,
+                                      verticalAlign: "middle",
                                     }}
                                     align="center"
                                   >
-                                    <Typography variant="body2">
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        textAlign: "center",
+                                        width: "100%",
+                                      }}
+                                    >
                                       {requestedOffCount}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell
+                                    sx={{
+                                      p: 0,
+                                      width: AGG_COL_WIDTH,
+                                      height: 40,
+                                      bgcolor: "background.paper",
+                                      borderRight: "1px solid",
+                                      borderColor: "divider",
+                                      position: "sticky",
+                                      left: `${SUMMARY_LEFTS.changeCount}px`,
+                                      zIndex: 1,
+                                      verticalAlign: "middle",
+                                    }}
+                                    align="center"
+                                  >
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        textAlign: "center",
+                                        width: "100%",
+                                      }}
+                                    >
+                                      {changeCount}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell
+                                    sx={{
+                                      p: 0,
+                                      width: HISTORY_COL_WIDTH,
+                                      height: 40,
+                                      bgcolor: "background.paper",
+                                      borderRight: "1px solid",
+                                      borderColor: "divider",
+                                      position: "sticky",
+                                      left: `${SUMMARY_LEFTS.latestChange}px`,
+                                      zIndex: 1,
+                                      verticalAlign: "middle",
+                                    }}
+                                    align="center"
+                                  >
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        textAlign: "center",
+                                        width: "100%",
+                                      }}
+                                    >
+                                      {latestChangeLabel}
                                     </Typography>
                                   </TableCell>
                                 </>
@@ -1187,8 +1372,8 @@ export default function ShiftManagement() {
                                 <TableCell
                                   key={key}
                                   sx={{
-                                    p: 0,
-                                    width: 56,
+                                    p: 0.25,
+                                    width: DAY_COL_WIDTH,
                                     height: 40,
                                     position: "relative",
                                     borderLeft: "1px solid",

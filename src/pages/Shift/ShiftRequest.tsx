@@ -39,6 +39,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import {
   CreateShiftRequestMutation,
+  ShiftRequestHistoryInput,
   ShiftRequestsByStaffIdQuery,
   ShiftRequestStatus,
   Staff,
@@ -88,6 +89,7 @@ export default function ShiftRequest() {
   const [isLoadingShiftRequest, setIsLoadingShiftRequest] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [shiftRequestId, setShiftRequestId] = useState<string | null>(null);
+  const [histories, setHistories] = useState<ShiftRequestHistoryInput[]>([]);
   const weekdayLabels = ["日", "月", "火", "水", "木", "金", "土"];
   const statusLabelMap: Record<Status, string> = {
     work: "出勤",
@@ -231,6 +233,7 @@ export default function ShiftRequest() {
       setSelectedDates({});
       setNote("");
       setIsLoadingShiftRequest(false);
+      setHistories([]);
       return;
     }
 
@@ -266,6 +269,7 @@ export default function ShiftRequest() {
           setShiftRequestId(null);
           setSelectedDates({});
           setNote("");
+          setHistories([]);
           return;
         }
 
@@ -283,6 +287,43 @@ export default function ShiftRequest() {
         setShiftRequestId(existing.id);
         setSelectedDates(nextSelected);
         setNote(existing.note ?? "");
+        const sanitizedHistories =
+          existing.histories
+            ?.filter(
+              (history): history is NonNullable<typeof history> =>
+                history !== null
+            )
+            .map((history) => ({
+              version: history.version,
+              note: history.note ?? undefined,
+              entries:
+                history.entries
+                  ?.filter(
+                    (entry): entry is NonNullable<typeof entry> =>
+                      entry !== null
+                  )
+                  .map((entry) => ({
+                    date: entry.date,
+                    status: entry.status,
+                  })) ?? undefined,
+              summary: history.summary
+                ? {
+                    workDays: history.summary.workDays ?? undefined,
+                    fixedOffDays: history.summary.fixedOffDays ?? undefined,
+                    requestedOffDays:
+                      history.summary.requestedOffDays ?? undefined,
+                  }
+                : undefined,
+              submittedAt: history.submittedAt ?? undefined,
+              updatedAt: history.updatedAt ?? undefined,
+              recordedAt: history.recordedAt,
+              recordedByStaffId: history.recordedByStaffId ?? undefined,
+              changeReason: history.changeReason ?? undefined,
+            })) ?? [];
+        // DynamoDBの戻り順序は保証されないため、バージョン昇順に整列して保持
+        setHistories(
+          sanitizedHistories.sort((a, b) => (a.version ?? 0) - (b.version ?? 0))
+        );
       } catch (error) {
         if (isMounted) {
           dispatch(setSnackbarError(MESSAGE_CODE.E16002));
@@ -356,9 +397,24 @@ export default function ShiftRequest() {
 
     const submittedAt = dayjs().toISOString();
     const targetMonthKey = monthStart.format("YYYY-MM");
+    const maxVersion = histories.reduce(
+      (acc, history) => Math.max(acc, history.version ?? 0),
+      0
+    );
+    const historySnapshot: ShiftRequestHistoryInput = {
+      version: maxVersion + 1,
+      note,
+      entries,
+      summary: { ...summary },
+      submittedAt,
+      updatedAt: submittedAt,
+      recordedAt: submittedAt,
+      recordedByStaffId: staff.id,
+    };
 
     setIsSaving(true);
     try {
+      const nextHistories = [...histories, historySnapshot];
       if (shiftRequestId) {
         const response = (await API.graphql({
           query: updateShiftRequest,
@@ -369,6 +425,7 @@ export default function ShiftRequest() {
               entries,
               summary,
               submittedAt,
+              histories: nextHistories,
             },
           },
           authMode: "AMAZON_COGNITO_USER_POOLS",
@@ -381,6 +438,7 @@ export default function ShiftRequest() {
         setShiftRequestId(
           response.data?.updateShiftRequest?.id ?? shiftRequestId
         );
+        setHistories(nextHistories);
       } else {
         const response = (await API.graphql({
           query: createShiftRequest,
@@ -392,6 +450,7 @@ export default function ShiftRequest() {
               entries,
               summary,
               submittedAt,
+              histories: nextHistories,
             },
           },
           authMode: "AMAZON_COGNITO_USER_POOLS",
@@ -402,6 +461,7 @@ export default function ShiftRequest() {
         }
 
         setShiftRequestId(response.data?.createShiftRequest?.id ?? null);
+        setHistories(nextHistories);
       }
 
       dispatch(setSnackbarSuccess(MESSAGE_CODE.S16001));
