@@ -16,6 +16,7 @@ import {
   DialogTitle,
   Divider,
   FormControl,
+  FormControlLabel,
   IconButton,
   InputLabel,
   List,
@@ -31,10 +32,18 @@ import {
   TableRow,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { API } from "aws-amplify";
-import dayjs from "dayjs";
-import React, { useEffect, useMemo, useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   CreateShiftRequestMutation,
@@ -82,6 +91,8 @@ const shiftRequestStatusToStatus = (
 export default function ShiftRequest() {
   const dispatch = useAppDispatchV2();
   const { cognitoUser, loading: cognitoUserLoading } = useCognitoUser();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
   const [staff, setStaff] = useState<Staff | null>(null);
   const [isLoadingStaff, setIsLoadingStaff] = useState(true);
@@ -126,6 +137,8 @@ export default function ShiftRequest() {
     Record<string, { status: Status }>
   >({});
   const [note, setNote] = useState("");
+  const [focusedDateKey, setFocusedDateKey] = useState<string | null>(null);
+  const mobileDayRefs = useRef<Record<string, HTMLDivElement | null>>({});
   // patterns
   type Pattern = {
     id: string;
@@ -162,6 +175,18 @@ export default function ShiftRequest() {
       ),
     [monthStart.year(), monthStart.month(), daysInMonth]
   );
+
+  const calendarDays = useMemo(() => {
+    const start = monthStart.startOf("week");
+    const end = monthStart.endOf("month").endOf("week");
+    const items: Dayjs[] = [];
+    let cursor = start;
+    while (cursor.isBefore(end) || cursor.isSame(end, "day")) {
+      items.push(cursor);
+      cursor = cursor.add(1, "day");
+    }
+    return items;
+  }, [monthStart]);
 
   // 日付クリックのサイクルは今回のテーブル版では使わないため削除
 
@@ -204,6 +229,59 @@ export default function ShiftRequest() {
       return next;
     });
   };
+
+  const setStatusForDate = (key: string, status: Status) => {
+    if (isMobile) {
+      setFocusedDateKey(key);
+    }
+    setSelectedDates((prev) => ({
+      ...prev,
+      [key]: { status },
+    }));
+  };
+
+  const clearDateSelection = (key: string) => {
+    if (isMobile) {
+      setFocusedDateKey(key);
+    }
+    setSelectedDates((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const scrollToDateCard = useCallback((key: string) => {
+    const target = mobileDayRefs.current[key];
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  useEffect(() => {
+    const refKeys = Object.keys(mobileDayRefs.current);
+    refKeys.forEach((key) => {
+      if (!dayKeyList.includes(key)) {
+        delete mobileDayRefs.current[key];
+      }
+    });
+  }, [dayKeyList]);
+
+  useEffect(() => {
+    if (focusedDateKey && !dayKeyList.includes(focusedDateKey)) {
+      setFocusedDateKey(null);
+    }
+  }, [dayKeyList, focusedDateKey]);
+
+  const handleCalendarDayClick = useCallback(
+    (dayValue: Dayjs) => {
+      if (!dayValue.isSame(monthStart, "month")) return;
+      const key = dayValue.format("YYYY-MM-DD");
+      setFocusedDateKey(key);
+      scrollToDateCard(key);
+    },
+    [monthStart, scrollToDateCard]
+  );
 
   useEffect(() => {
     try {
@@ -536,6 +614,75 @@ export default function ShiftRequest() {
   const hasSelection = Object.keys(selectedDates).length > 0;
   const hasRowSelection = selectedRowKeys.length > 0;
 
+  const getStatusBgColor = (status?: Status) => {
+    if (!status) return undefined;
+    switch (status) {
+      case "work":
+        return theme.palette.success.light;
+      case "fixedOff":
+        return theme.palette.error.light;
+      case "requestedOff":
+        return theme.palette.warning.light;
+      case "auto":
+      default:
+        return theme.palette.info.light;
+    }
+  };
+
+  const renderSummary = () => (
+    <Typography variant="body2">
+      出勤: {summary.workDays}日 / 固定休: {summary.fixedOffDays}日 / 希望休:{" "}
+      {summary.requestedOffDays}日
+    </Typography>
+  );
+
+  const StatusButtons = ({
+    dateKey,
+    selected,
+  }: {
+    dateKey: string;
+    selected?: Status;
+  }) => (
+    <ButtonGroup
+      size="small"
+      variant="outlined"
+      sx={{ flexWrap: isMobile ? "wrap" : "nowrap" }}
+    >
+      <Button
+        variant={selected === "work" ? "contained" : "outlined"}
+        color={statusColorMap.work}
+        disabled={interactionDisabled}
+        onClick={() => setStatusForDate(dateKey, "work")}
+      >
+        出勤
+      </Button>
+      <Button
+        variant={selected === "fixedOff" ? "contained" : "outlined"}
+        color={statusColorMap.fixedOff}
+        disabled={interactionDisabled}
+        onClick={() => setStatusForDate(dateKey, "fixedOff")}
+      >
+        固定休
+      </Button>
+      <Button
+        variant={selected === "requestedOff" ? "contained" : "outlined"}
+        color={statusColorMap.requestedOff}
+        disabled={interactionDisabled}
+        onClick={() => setStatusForDate(dateKey, "requestedOff")}
+      >
+        希望休
+      </Button>
+      <Button
+        variant={selected === "auto" ? "contained" : "outlined"}
+        color={statusColorMap.auto}
+        disabled={interactionDisabled}
+        onClick={() => setStatusForDate(dateKey, "auto")}
+      >
+        おまかせ
+      </Button>
+    </ButtonGroup>
+  );
+
   return (
     <Container sx={{ py: 3 }}>
       <Paper sx={{ p: 2 }}>
@@ -582,12 +729,16 @@ export default function ShiftRequest() {
             選択した日付に一括でステータスを設定
           </Typography>
           <Stack
-            direction="row"
+            direction={isMobile ? "column" : "row"}
             spacing={1}
-            alignItems="center"
+            alignItems={isMobile ? "stretch" : "center"}
             flexWrap="wrap"
           >
-            <ButtonGroup size="small" variant="outlined">
+            <ButtonGroup
+              size="small"
+              variant="outlined"
+              sx={{ flexWrap: isMobile ? "wrap" : "nowrap" }}
+            >
               <Button
                 color={statusColorMap.work}
                 disabled={interactionDisabled || !hasRowSelection}
@@ -621,145 +772,235 @@ export default function ShiftRequest() {
         </Box>
 
         {/* 縦並びテーブル表示（各行が日付） */}
-        <Table size="small" sx={{ mb: 2 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={
-                    selectedRowKeys.length > 0 &&
-                    selectedRowKeys.length < dayKeyList.length
-                  }
-                  checked={isAllRowsSelected}
-                  onChange={toggleAllRowsSelection}
-                  disabled={interactionDisabled}
+        {!isMobile ? (
+          <Table size="small" sx={{ mb: 2 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    indeterminate={
+                      selectedRowKeys.length > 0 &&
+                      selectedRowKeys.length < dayKeyList.length
+                    }
+                    checked={isAllRowsSelected}
+                    onChange={toggleAllRowsSelection}
+                    disabled={interactionDisabled}
+                  />
+                </TableCell>
+                <TableCell>日付 (曜日)</TableCell>
+                <TableCell>ステータス</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell
+                  padding="checkbox"
+                  sx={{ backgroundColor: "grey.50" }}
                 />
-              </TableCell>
-              <TableCell>日付 (曜日)</TableCell>
-              <TableCell>ステータス</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell
-                padding="checkbox"
-                sx={{ backgroundColor: "grey.50" }}
+                <TableCell colSpan={2} sx={{ backgroundColor: "grey.50" }}>
+                  {renderSummary()}
+                </TableCell>
+              </TableRow>
+              {days.map((d) => {
+                const key = d.format("YYYY-MM-DD");
+                const selected = selectedDates[key]?.status;
+                const weekday = weekdayLabels[d.day()];
+                return (
+                  <TableRow key={key} hover>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedRowKeys.includes(key)}
+                        onChange={() => toggleRowSelection(key)}
+                        disabled={interactionDisabled}
+                      />
+                    </TableCell>
+                    <TableCell
+                      sx={{ whiteSpace: "nowrap", width: 140 }}
+                    >{`${d.format("M/D")}(${weekday})`}</TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <StatusButtons dateKey={key} selected={selected} />
+                        {selected && (
+                          <Button
+                            size="small"
+                            disabled={interactionDisabled}
+                            onClick={() => clearDateSelection(key)}
+                          >
+                            解除
+                          </Button>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        ) : (
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    indeterminate={
+                      selectedRowKeys.length > 0 &&
+                      selectedRowKeys.length < dayKeyList.length
+                    }
+                    checked={isAllRowsSelected}
+                    onChange={toggleAllRowsSelection}
+                    disabled={interactionDisabled}
+                  />
+                }
+                label="すべて選択"
               />
-              <TableCell colSpan={2} sx={{ backgroundColor: "grey.50" }}>
-                <Typography variant="body2">
-                  出勤: {summary.workDays}日 / 固定休: {summary.fixedOffDays}日
-                  / 希望休: {summary.requestedOffDays}日
-                </Typography>
-              </TableCell>
-            </TableRow>
-            {days.map((d) => {
-              const key = d.format("YYYY-MM-DD");
-              const selected = selectedDates[key]?.status;
-              const weekday = weekdayLabels[d.day()];
-              return (
-                <TableRow key={key} hover>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selectedRowKeys.includes(key)}
-                      onChange={() => toggleRowSelection(key)}
-                      disabled={interactionDisabled}
-                    />
-                  </TableCell>
-                  <TableCell
-                    sx={{ whiteSpace: "nowrap", width: 140 }}
-                  >{`${d.format("M/D")}(${weekday})`}</TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <ButtonGroup size="small" variant="outlined">
-                        <Button
-                          variant={
-                            selected === "work" ? "contained" : "outlined"
-                          }
-                          color={statusColorMap.work}
-                          disabled={interactionDisabled}
-                          onClick={() =>
-                            setSelectedDates((prev) => ({
-                              ...prev,
-                              [key]: { status: "work" },
-                            }))
-                          }
-                        >
-                          出勤
-                        </Button>
-
-                        <Button
-                          variant={
-                            selected === "fixedOff" ? "contained" : "outlined"
-                          }
-                          color={statusColorMap.fixedOff}
-                          disabled={interactionDisabled}
-                          onClick={() =>
-                            setSelectedDates((prev) => ({
-                              ...prev,
-                              [key]: { status: "fixedOff" },
-                            }))
-                          }
-                        >
-                          固定休
-                        </Button>
-
-                        <Button
-                          variant={
-                            selected === "requestedOff"
-                              ? "contained"
-                              : "outlined"
-                          }
-                          color={statusColorMap.requestedOff}
-                          disabled={interactionDisabled}
-                          onClick={() =>
-                            setSelectedDates((prev) => ({
-                              ...prev,
-                              [key]: { status: "requestedOff" },
-                            }))
-                          }
-                        >
-                          希望休
-                        </Button>
-
-                        <Button
-                          variant={
-                            selected === "auto" ? "contained" : "outlined"
-                          }
-                          color={statusColorMap.auto}
-                          disabled={interactionDisabled}
-                          onClick={() =>
-                            setSelectedDates((prev) => ({
-                              ...prev,
-                              [key]: { status: "auto" },
-                            }))
-                          }
-                        >
-                          おまかせ
-                        </Button>
-                      </ButtonGroup>
-
-                      {selected && (
-                        <Button
-                          size="small"
-                          disabled={interactionDisabled}
-                          onClick={() =>
-                            setSelectedDates((prev) => {
-                              const c = { ...prev };
-                              delete c[key];
-                              return c;
-                            })
-                          }
-                        >
-                          解除
-                        </Button>
+              {renderSummary()}
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" gutterBottom>
+                カレンダー
+              </Typography>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
+                  gap: 0.5,
+                  textAlign: "center",
+                }}
+              >
+                {weekdayLabels.map((label, idx) => (
+                  <Typography
+                    key={`weekday-${idx}`}
+                    variant="caption"
+                    sx={{ color: "text.secondary", py: 0.5 }}
+                  >
+                    {label}
+                  </Typography>
+                ))}
+                {calendarDays.map((dayValue) => {
+                  const key = dayValue.format("YYYY-MM-DD");
+                  const status = selectedDates[key]?.status;
+                  const isCurrentMonthDay = dayValue.isSame(
+                    monthStart,
+                    "month"
+                  );
+                  const isFocused = focusedDateKey === key;
+                  const bgColor = isFocused
+                    ? theme.palette.primary.light
+                    : getStatusBgColor(status);
+                  return (
+                    <Box
+                      key={`calendar-${key}`}
+                      onClick={() => handleCalendarDayClick(dayValue)}
+                      sx={{
+                        minHeight: 52,
+                        px: 0.5,
+                        py: 0.5,
+                        borderRadius: 1,
+                        border: "1px solid",
+                        borderColor: isFocused
+                          ? theme.palette.primary.main
+                          : "divider",
+                        bgcolor: bgColor,
+                        color: isCurrentMonthDay
+                          ? "text.primary"
+                          : "text.disabled",
+                        cursor: isCurrentMonthDay ? "pointer" : "default",
+                        opacity: isCurrentMonthDay ? 1 : 0.4,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 0.25,
+                      }}
+                    >
+                      <Typography variant="body2">{dayValue.date()}</Typography>
+                      {status && (
+                        <Typography variant="caption" sx={{ fontSize: 10 }}>
+                          {statusLabelMap[status]}
+                        </Typography>
                       )}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
+            <Stack spacing={1}>
+              {days.map((d) => {
+                const key = d.format("YYYY-MM-DD");
+                const selected = selectedDates[key]?.status;
+                const weekday = weekdayLabels[d.day()];
+                return (
+                  <Paper
+                    key={key}
+                    variant="outlined"
+                    ref={(node) => {
+                      if (node) {
+                        mobileDayRefs.current[key] = node;
+                      } else {
+                        delete mobileDayRefs.current[key];
+                      }
+                    }}
+                    sx={{
+                      p: 2,
+                      backgroundColor: "grey.50",
+                      borderColor:
+                        focusedDateKey === key
+                          ? theme.palette.primary.main
+                          : undefined,
+                      boxShadow:
+                        focusedDateKey === key
+                          ? `0 0 0 2px ${theme.palette.primary.light}`
+                          : undefined,
+                    }}
+                  >
+                    <Stack spacing={1}>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="flex-start"
+                      >
+                        <Checkbox
+                          checked={selectedRowKeys.includes(key)}
+                          onChange={() => {
+                            toggleRowSelection(key);
+                            if (isMobile) {
+                              setFocusedDateKey(key);
+                            }
+                          }}
+                          disabled={interactionDisabled}
+                          sx={{ mt: -0.5 }}
+                        />
+                        <Box sx={{ flexGrow: 1 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Typography sx={{ whiteSpace: "nowrap" }}>
+                              {`${d.format("M/D")}(${weekday})`}
+                            </Typography>
+                            {selected && (
+                              <Button
+                                size="small"
+                                disabled={interactionDisabled}
+                                onClick={() => clearDateSelection(key)}
+                              >
+                                解除
+                              </Button>
+                            )}
+                          </Box>
+                        </Box>
+                      </Stack>
+                      <StatusButtons dateKey={key} selected={selected} />
                     </Stack>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                  </Paper>
+                );
+              })}
+            </Stack>
+          </Box>
+        )}
 
         <Box
           component="form"
