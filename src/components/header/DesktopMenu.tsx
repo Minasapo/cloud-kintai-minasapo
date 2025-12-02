@@ -46,6 +46,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     { label: "スタッフ管理", href: "/admin/staff" },
     { label: "勤怠管理", href: "/admin/attendances" },
     { label: "シフト管理", href: "/admin/shift" },
+    { label: "シフト計画管理", href: "/admin/shift-plan" },
     { label: "ログ管理", href: "/admin/logs" },
     { label: "ワークフロー管理", href: "/admin/workflow" },
   ];

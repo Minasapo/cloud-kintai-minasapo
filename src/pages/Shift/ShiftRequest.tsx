@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Checkbox,
   CircularProgress,
   Container,
   Dialog,
@@ -19,8 +20,6 @@ import {
   InputLabel,
   List,
   ListItem,
-  ListItemSecondaryAction,
-  ListItemText,
   MenuItem,
   Paper,
   Select,
@@ -166,10 +165,44 @@ export default function ShiftRequest() {
 
   // 日付クリックのサイクルは今回のテーブル版では使わないため削除
 
-  const selectAll = (status: Status = "work") => {
-    const next: Record<string, { status: Status }> = {};
-    days.forEach((d) => (next[d.format("YYYY-MM-DD")] = { status }));
-    setSelectedDates(next);
+  const dayKeyList = useMemo(
+    () => days.map((d) => d.format("YYYY-MM-DD")),
+    [days]
+  );
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+
+  useEffect(() => {
+    const dayKeySet = new Set(dayKeyList);
+    setSelectedRowKeys((prev) => prev.filter((key) => dayKeySet.has(key)));
+  }, [dayKeyList]);
+
+  const toggleRowSelection = (key: string) => {
+    setSelectedRowKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  const isAllRowsSelected =
+    selectedRowKeys.length === dayKeyList.length && dayKeyList.length > 0;
+
+  const toggleAllRowsSelection = () => {
+    if (isAllRowsSelected) {
+      setSelectedRowKeys([]);
+    } else {
+      setSelectedRowKeys([...dayKeyList]);
+    }
+  };
+
+  const applyStatusToSelection = (status: Status) => {
+    if (selectedRowKeys.length === 0) return;
+    setSelectedDates((prev) => {
+      const next = { ...prev };
+      selectedRowKeys.forEach((key) => {
+        next[key] = { status };
+      });
+      return next;
+    });
   };
 
   useEffect(() => {
@@ -373,8 +406,6 @@ export default function ShiftRequest() {
     setNewPatternName("");
   };
 
-  const clearAll = () => setSelectedDates({});
-
   const prevMonth = () => setCurrentMonth((m) => m.subtract(1, "month"));
   const nextMonth = () => setCurrentMonth((m) => m.add(1, "month"));
 
@@ -503,40 +534,7 @@ export default function ShiftRequest() {
   const interactionDisabled =
     !staff || isLoadingStaff || isLoadingShiftRequest || isSaving;
   const hasSelection = Object.keys(selectedDates).length > 0;
-
-  const BulkSelectionButtons = () => (
-    <Box
-      sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}
-    >
-      <Button onClick={() => selectAll("work")} disabled={interactionDisabled}>
-        全て出勤
-      </Button>
-      <Button
-        onClick={() => selectAll("fixedOff")}
-        color="error"
-        disabled={interactionDisabled}
-      >
-        全て固定休
-      </Button>
-      <Button
-        onClick={() => selectAll("requestedOff")}
-        color="warning"
-        disabled={interactionDisabled}
-      >
-        全て希望休
-      </Button>
-      <Button onClick={() => selectAll("auto")} disabled={interactionDisabled}>
-        全ておまかせ
-      </Button>
-      <Button
-        onClick={() => clearAll()}
-        sx={{ ml: 1 }}
-        disabled={interactionDisabled}
-      >
-        クリア
-      </Button>
-    </Box>
-  );
+  const hasRowSelection = selectedRowKeys.length > 0;
 
   return (
     <Container sx={{ py: 3 }}>
@@ -563,12 +561,6 @@ export default function ShiftRequest() {
           </Box>
 
           <Box>
-            <Button onClick={() => selectAll("work")} sx={{ mr: 1 }}>
-              全選択
-            </Button>
-            <Button onClick={clearAll} sx={{ mr: 1 }}>
-              クリア
-            </Button>
             <Button
               startIcon={<AddIcon />}
               onClick={() => setPatternDialogOpen(true)}
@@ -584,21 +576,75 @@ export default function ShiftRequest() {
           </Box>
         )}
 
-        {/* カウント表示 */}
+        {/* 選択項目への一括適用 */}
         <Box sx={{ mb: 2 }}>
-          <BulkSelectionButtons />
+          <Typography variant="subtitle2" gutterBottom>
+            選択した日付に一括でステータスを設定
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            flexWrap="wrap"
+          >
+            <ButtonGroup size="small" variant="outlined">
+              <Button
+                color={statusColorMap.work}
+                disabled={interactionDisabled || !hasRowSelection}
+                onClick={() => applyStatusToSelection("work")}
+              >
+                出勤
+              </Button>
+              <Button
+                color={statusColorMap.fixedOff}
+                disabled={interactionDisabled || !hasRowSelection}
+                onClick={() => applyStatusToSelection("fixedOff")}
+              >
+                固定休
+              </Button>
+              <Button
+                color={statusColorMap.requestedOff}
+                disabled={interactionDisabled || !hasRowSelection}
+                onClick={() => applyStatusToSelection("requestedOff")}
+              >
+                希望休
+              </Button>
+              <Button
+                color={statusColorMap.auto}
+                disabled={interactionDisabled || !hasRowSelection}
+                onClick={() => applyStatusToSelection("auto")}
+              >
+                おまかせ
+              </Button>
+            </ButtonGroup>
+          </Stack>
         </Box>
 
         {/* 縦並びテーブル表示（各行が日付） */}
         <Table size="small" sx={{ mb: 2 }}>
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={
+                    selectedRowKeys.length > 0 &&
+                    selectedRowKeys.length < dayKeyList.length
+                  }
+                  checked={isAllRowsSelected}
+                  onChange={toggleAllRowsSelection}
+                  disabled={interactionDisabled}
+                />
+              </TableCell>
               <TableCell>日付 (曜日)</TableCell>
               <TableCell>ステータス</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
+              <TableCell
+                padding="checkbox"
+                sx={{ backgroundColor: "grey.50" }}
+              />
               <TableCell colSpan={2} sx={{ backgroundColor: "grey.50" }}>
                 <Typography variant="body2">
                   出勤: {summary.workDays}日 / 固定休: {summary.fixedOffDays}日
@@ -612,6 +658,13 @@ export default function ShiftRequest() {
               const weekday = weekdayLabels[d.day()];
               return (
                 <TableRow key={key} hover>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selectedRowKeys.includes(key)}
+                      onChange={() => toggleRowSelection(key)}
+                      disabled={interactionDisabled}
+                    />
+                  </TableCell>
                   <TableCell
                     sx={{ whiteSpace: "nowrap", width: 140 }}
                   >{`${d.format("M/D")}(${weekday})`}</TableCell>
@@ -755,39 +808,72 @@ export default function ShiftRequest() {
               <Typography>登録されたパターンはありません。</Typography>
             ) : (
               <List>
-                {patterns.map((p) => (
+                {patterns.map((p, index) => (
                   <React.Fragment key={p.id}>
-                    <ListItem>
-                      <ListItemText
-                        primary={p.name}
-                        secondary={Object.entries(p.mapping)
-                          .map(
-                            ([k, v]) =>
-                              `${weekdayLabels[Number(k)]}:${
-                                statusLabelMap[normalizeStatus(v as string)]
-                              }`
-                          )
-                          .join(" ")}
-                      />
-                      <ListItemSecondaryAction>
-                        <Button
-                          size="small"
-                          onClick={() => applyPattern(p)}
-                          sx={{ mr: 1 }}
+                    <ListItem disableGutters sx={{ px: 0 }}>
+                      <Paper
+                        variant="outlined"
+                        sx={{ width: "100%", p: 2, backgroundColor: "grey.50" }}
+                      >
+                        <Typography variant="subtitle1" gutterBottom>
+                          {p.name}
+                        </Typography>
+                        <Table size="small" sx={{ tableLayout: "fixed" }}>
+                          <TableHead>
+                            <TableRow>
+                              {weekdayLabels.map((label, idx) => (
+                                <TableCell
+                                  key={`${p.id}-weekday-${idx}`}
+                                  align="center"
+                                  sx={{ py: 0.5, whiteSpace: "nowrap" }}
+                                >
+                                  {label}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            <TableRow>
+                              {weekdayLabels.map((_, idx) => {
+                                const normalized = normalizeStatus(
+                                  p.mapping[idx] as string
+                                );
+                                return (
+                                  <TableCell
+                                    key={`${p.id}-status-${idx}`}
+                                    align="center"
+                                    sx={{ py: 0.5, whiteSpace: "nowrap" }}
+                                  >
+                                    {statusLabelMap[normalized]}
+                                  </TableCell>
+                                );
+                              })}
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                        <Stack
+                          direction="row"
+                          justifyContent="flex-end"
+                          spacing={1}
+                          sx={{ mt: 1 }}
                         >
-                          適用
-                        </Button>
-                        <Button
-                          size="small"
-                          color="error"
-                          onClick={() => deletePattern(p.id)}
-                          startIcon={<DeleteIcon />}
-                        >
-                          削除
-                        </Button>
-                      </ListItemSecondaryAction>
+                          <Button size="small" onClick={() => applyPattern(p)}>
+                            適用
+                          </Button>
+                          <Button
+                            size="small"
+                            color="error"
+                            onClick={() => deletePattern(p.id)}
+                            startIcon={<DeleteIcon />}
+                          >
+                            削除
+                          </Button>
+                        </Stack>
+                      </Paper>
                     </ListItem>
-                    <Divider />
+                    {index !== patterns.length - 1 && (
+                      <Divider sx={{ my: 1 }} />
+                    )}
                   </React.Fragment>
                 ))}
               </List>

@@ -27,6 +27,7 @@ import AdminTheme from "./pages/admin/AdminTheme/AdminTheme";
 import AdminWorkflow from "./pages/admin/AdminWorkflow/AdminWorkflow";
 import AdminWorkflowDetail from "./pages/admin/AdminWorkflow/AdminWorkflowDetail";
 import JobTerm from "./pages/admin/JobTerm/JobTerm";
+import ShiftPlanManagement from "./pages/admin/ShiftPlanManagement/ShiftPlanManagement";
 import AttendanceEdit from "./pages/AttendanceEdit/AttendanceEdit";
 import AttendanceListPage from "./pages/AttendanceListPage";
 import Login from "./pages/Login/Login";
@@ -221,6 +222,10 @@ const router = createBrowserRouter([
                 <StaffShiftList />
               </AdminShiftGuard>
             ),
+          },
+          {
+            path: "shift-plan",
+            element: <ShiftPlanManagement />,
           },
           {
             path: "master",
