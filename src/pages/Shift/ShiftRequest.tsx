@@ -3,6 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SaveIcon from "@mui/icons-material/Save";
 import {
   Box,
   Button,
@@ -25,6 +26,7 @@ import {
   Paper,
   Select,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -138,6 +140,7 @@ export default function ShiftRequest() {
   >({});
   const [note, setNote] = useState("");
   const [focusedDateKey, setFocusedDateKey] = useState<string | null>(null);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const mobileDayRefs = useRef<Record<string, HTMLDivElement | null>>({});
   // patterns
   type Pattern = {
@@ -258,6 +261,22 @@ export default function ShiftRequest() {
     }
   }, []);
 
+  const handleCalendarDayClick = useCallback(
+    (dayValue: Dayjs) => {
+      if (!dayValue.isSame(monthStart, "month")) return;
+      const key = dayValue.format("YYYY-MM-DD");
+      if (isSelectionMode) {
+        setSelectedRowKeys((prev) =>
+          prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+        );
+        return;
+      }
+      setFocusedDateKey(key);
+      scrollToDateCard(key);
+    },
+    [isSelectionMode, monthStart, scrollToDateCard]
+  );
+
   useEffect(() => {
     const refKeys = Object.keys(mobileDayRefs.current);
     refKeys.forEach((key) => {
@@ -273,15 +292,17 @@ export default function ShiftRequest() {
     }
   }, [dayKeyList, focusedDateKey]);
 
-  const handleCalendarDayClick = useCallback(
-    (dayValue: Dayjs) => {
-      if (!dayValue.isSame(monthStart, "month")) return;
-      const key = dayValue.format("YYYY-MM-DD");
-      setFocusedDateKey(key);
-      scrollToDateCard(key);
-    },
-    [monthStart, scrollToDateCard]
-  );
+  useEffect(() => {
+    if (!isMobile && isSelectionMode) {
+      setIsSelectionMode(false);
+    }
+  }, [isMobile, isSelectionMode]);
+
+  useEffect(() => {
+    if (isSelectionMode) {
+      setFocusedDateKey(null);
+    }
+  }, [isSelectionMode]);
 
   useEffect(() => {
     try {
@@ -684,7 +705,7 @@ export default function ShiftRequest() {
   );
 
   return (
-    <Container sx={{ py: 3 }}>
+    <Container sx={{ py: 3, pb: isMobile ? 10 : 3 }}>
       <Paper sx={{ p: 2 }}>
         <Typography variant="h5" gutterBottom>
           希望シフト
@@ -838,166 +859,180 @@ export default function ShiftRequest() {
           </Table>
         ) : (
           <Box sx={{ mb: 2 }}>
-            <Box sx={{ mb: 2 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    indeterminate={
-                      selectedRowKeys.length > 0 &&
-                      selectedRowKeys.length < dayKeyList.length
-                    }
-                    checked={isAllRowsSelected}
-                    onChange={toggleAllRowsSelection}
-                    disabled={interactionDisabled}
-                  />
-                }
-                label="すべて選択"
-              />
-              {renderSummary()}
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                カレンダー
-              </Typography>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
-                  gap: 0.5,
-                  textAlign: "center",
-                }}
-              >
-                {weekdayLabels.map((label, idx) => (
-                  <Typography
-                    key={`weekday-${idx}`}
-                    variant="caption"
-                    sx={{ color: "text.secondary", py: 0.5 }}
+            <Stack spacing={2}>
+              <Box>
+                <Stack spacing={1}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    flexWrap="wrap"
+                    rowGap={1}
                   >
-                    {label}
-                  </Typography>
-                ))}
-                {calendarDays.map((dayValue) => {
-                  const key = dayValue.format("YYYY-MM-DD");
-                  const status = selectedDates[key]?.status;
-                  const isCurrentMonthDay = dayValue.isSame(
-                    monthStart,
-                    "month"
-                  );
-                  const isFocused = focusedDateKey === key;
-                  const bgColor = isFocused
-                    ? theme.palette.primary.light
-                    : getStatusBgColor(status);
-                  return (
-                    <Box
-                      key={`calendar-${key}`}
-                      onClick={() => handleCalendarDayClick(dayValue)}
-                      sx={{
-                        minHeight: 52,
-                        px: 0.5,
-                        py: 0.5,
-                        borderRadius: 1,
-                        border: "1px solid",
-                        borderColor: isFocused
-                          ? theme.palette.primary.main
-                          : "divider",
-                        bgcolor: bgColor,
-                        color: isCurrentMonthDay
-                          ? "text.primary"
-                          : "text.disabled",
-                        cursor: isCurrentMonthDay ? "pointer" : "default",
-                        opacity: isCurrentMonthDay ? 1 : 0.4,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 0.25,
-                      }}
-                    >
-                      <Typography variant="body2">{dayValue.date()}</Typography>
-                      {status && (
-                        <Typography variant="caption" sx={{ fontSize: 10 }}>
-                          {statusLabelMap[status]}
-                        </Typography>
-                      )}
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Box>
-            <Stack spacing={1}>
-              {days.map((d) => {
-                const key = d.format("YYYY-MM-DD");
-                const selected = selectedDates[key]?.status;
-                const weekday = weekdayLabels[d.day()];
-                return (
-                  <Paper
-                    key={key}
-                    variant="outlined"
-                    ref={(node) => {
-                      if (node) {
-                        mobileDayRefs.current[key] = node;
-                      } else {
-                        delete mobileDayRefs.current[key];
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={isSelectionMode}
+                          onChange={(_, checked) => setIsSelectionMode(checked)}
+                          disabled={interactionDisabled}
+                        />
                       }
-                    }}
-                    sx={{
-                      p: 2,
-                      backgroundColor: "grey.50",
-                      borderColor:
-                        focusedDateKey === key
+                      label="選択モード"
+                    />
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        size="small"
+                        disabled={interactionDisabled || !isSelectionMode}
+                        onClick={toggleAllRowsSelection}
+                      >
+                        すべて選択
+                      </Button>
+                      <Button
+                        size="small"
+                        disabled={interactionDisabled || !isSelectionMode}
+                        onClick={() => setSelectedRowKeys([])}
+                      >
+                        選択解除
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  カレンダー
+                </Typography>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
+                    gap: 0.5,
+                    textAlign: "center",
+                  }}
+                >
+                  {weekdayLabels.map((label, idx) => (
+                    <Typography
+                      key={`weekday-${idx}`}
+                      variant="caption"
+                      sx={{ color: "text.secondary", py: 0.5 }}
+                    >
+                      {label}
+                    </Typography>
+                  ))}
+                  {calendarDays.map((dayValue) => {
+                    const key = dayValue.format("YYYY-MM-DD");
+                    const status = selectedDates[key]?.status;
+                    const isCurrentMonthDay = dayValue.isSame(
+                      monthStart,
+                      "month"
+                    );
+                    const isFocused = focusedDateKey === key;
+                    const isSelectedDate = selectedRowKeys.includes(key);
+                    const highlighted = isFocused || isSelectedDate;
+                    const bgColor = isFocused
+                      ? theme.palette.primary.light
+                      : isSelectedDate
+                      ? theme.palette.action.selected
+                      : getStatusBgColor(status);
+                    return (
+                      <Box
+                        key={`calendar-${key}`}
+                        onClick={() => handleCalendarDayClick(dayValue)}
+                        sx={{
+                          minHeight: 52,
+                          px: 0.5,
+                          py: 0.5,
+                          borderRadius: 1,
+                          border: "1px solid",
+                          borderColor: highlighted
+                            ? theme.palette.primary.main
+                            : "divider",
+                          bgcolor: bgColor,
+                          color: isCurrentMonthDay
+                            ? "text.primary"
+                            : "text.disabled",
+                          cursor: isCurrentMonthDay ? "pointer" : "default",
+                          opacity: isCurrentMonthDay ? 1 : 0.4,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 0.25,
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {dayValue.date()}
+                        </Typography>
+                        {status && (
+                          <Typography variant="caption" sx={{ fontSize: 10 }}>
+                            {statusLabelMap[status]}
+                          </Typography>
+                        )}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </Box>
+              <Box>{renderSummary()}</Box>
+              <Stack spacing={1}>
+                {days.map((d) => {
+                  const key = d.format("YYYY-MM-DD");
+                  const selected = selectedDates[key]?.status;
+                  const weekday = weekdayLabels[d.day()];
+                  const isCardSelected = selectedRowKeys.includes(key);
+                  const isCardFocused = focusedDateKey === key;
+                  const highlight = isCardSelected || isCardFocused;
+                  return (
+                    <Paper
+                      key={key}
+                      variant="outlined"
+                      ref={(node) => {
+                        if (node) {
+                          mobileDayRefs.current[key] = node;
+                        } else {
+                          delete mobileDayRefs.current[key];
+                        }
+                      }}
+                      sx={{
+                        p: 2,
+                        backgroundColor: isCardSelected
+                          ? theme.palette.action.selected
+                          : "grey.50",
+                        borderColor: highlight
                           ? theme.palette.primary.main
                           : undefined,
-                      boxShadow:
-                        focusedDateKey === key
+                        boxShadow: highlight
                           ? `0 0 0 2px ${theme.palette.primary.light}`
                           : undefined,
-                    }}
-                  >
-                    <Stack spacing={1}>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="flex-start"
-                      >
-                        <Checkbox
-                          checked={selectedRowKeys.includes(key)}
-                          onChange={() => {
-                            toggleRowSelection(key);
-                            if (isMobile) {
-                              setFocusedDateKey(key);
-                            }
+                      }}
+                    >
+                      <Stack spacing={1}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
                           }}
-                          disabled={interactionDisabled}
-                          sx={{ mt: -0.5 }}
-                        />
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Typography sx={{ whiteSpace: "nowrap" }}>
-                              {`${d.format("M/D")}(${weekday})`}
-                            </Typography>
-                            {selected && (
-                              <Button
-                                size="small"
-                                disabled={interactionDisabled}
-                                onClick={() => clearDateSelection(key)}
-                              >
-                                解除
-                              </Button>
-                            )}
-                          </Box>
+                        >
+                          <Typography sx={{ whiteSpace: "nowrap" }}>
+                            {`${d.format("M/D")}(${weekday})`}
+                          </Typography>
+                          {selected && (
+                            <Button
+                              size="small"
+                              disabled={interactionDisabled}
+                              onClick={() => clearDateSelection(key)}
+                            >
+                              解除
+                            </Button>
+                          )}
                         </Box>
+                        <StatusButtons dateKey={key} selected={selected} />
                       </Stack>
-                      <StatusButtons dateKey={key} selected={selected} />
-                    </Stack>
-                  </Paper>
-                );
-              })}
+                    </Paper>
+                  );
+                })}
+              </Stack>
             </Stack>
           </Box>
         )}
@@ -1017,25 +1052,58 @@ export default function ShiftRequest() {
               onChange={(e) => setNote(e.target.value)}
             />
 
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                disabled={!hasSelection || interactionDisabled}
+            {!isMobile && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 2,
+                }}
               >
-                保存
-              </Button>
-              {isSaving && <CircularProgress size={20} />}
-            </Box>
+                <Button
+                  variant="contained"
+                  onClick={handleSave}
+                  disabled={!hasSelection || interactionDisabled}
+                >
+                  保存
+                </Button>
+                {isSaving && <CircularProgress size={20} />}
+              </Box>
+            )}
           </Stack>
         </Box>
+        {isMobile && (
+          <IconButton
+            aria-label="保存"
+            onClick={handleSave}
+            disabled={!hasSelection || interactionDisabled}
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+              width: 56,
+              height: 56,
+              zIndex: (theme) => theme.zIndex.snackbar,
+              bgcolor: (theme) => theme.palette.primary.main,
+              color: (theme) => theme.palette.primary.contrastText,
+              boxShadow: 6,
+              "&:hover": {
+                bgcolor: (theme) => theme.palette.primary.dark,
+              },
+              "&.Mui-disabled": {
+                bgcolor: (theme) => theme.palette.action.disabledBackground,
+                color: (theme) => theme.palette.action.disabled,
+              },
+            }}
+          >
+            {isSaving ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              <SaveIcon />
+            )}
+          </IconButton>
+        )}
         {/* パターン管理ダイアログ */}
         <Dialog
           open={patternDialogOpen}
