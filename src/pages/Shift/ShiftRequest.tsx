@@ -36,6 +36,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { API } from "aws-amplify";
 import dayjs, { Dayjs } from "dayjs";
 import React, {
@@ -123,6 +124,15 @@ export default function ShiftRequest() {
     requestedOff: "warning",
     auto: "info",
   };
+  const statusBackgroundMap = useMemo(
+    () => ({
+      work: alpha(theme.palette.success.main, 0.25),
+      fixedOff: alpha(theme.palette.error.main, 0.23),
+      requestedOff: alpha(theme.palette.warning.main, 0.3),
+      auto: alpha(theme.palette.info.main, 0.18),
+    }),
+    [theme]
+  );
   const normalizeStatus = (value?: string): Status => {
     if (
       value === "work" ||
@@ -198,22 +208,60 @@ export default function ShiftRequest() {
   );
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const [selectionAnchorKey, setSelectionAnchorKey] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const dayKeySet = new Set(dayKeyList);
     setSelectedRowKeys((prev) => prev.filter((key) => dayKeySet.has(key)));
   }, [dayKeyList]);
 
+  useEffect(() => {
+    if (selectionAnchorKey && !dayKeyList.includes(selectionAnchorKey)) {
+      setSelectionAnchorKey(null);
+    }
+  }, [dayKeyList, selectionAnchorKey]);
+
+  useEffect(() => {
+    setSelectionAnchorKey(null);
+  }, [isSelectionMode]);
+
+  const clearRowSelection = useCallback(() => {
+    setSelectedRowKeys([]);
+    setSelectionAnchorKey(null);
+  }, []);
+
   const isAllRowsSelected =
     selectedRowKeys.length === dayKeyList.length && dayKeyList.length > 0;
 
   const toggleAllRowsSelection = () => {
     if (isAllRowsSelected) {
-      setSelectedRowKeys([]);
+      clearRowSelection();
     } else {
       setSelectedRowKeys([...dayKeyList]);
+      setSelectionAnchorKey(dayKeyList[0] ?? null);
     }
   };
+
+  const extendSelectionRange = useCallback(
+    (anchorKey: string, targetKey: string) => {
+      const startIndex = dayKeyList.indexOf(anchorKey);
+      const endIndex = dayKeyList.indexOf(targetKey);
+      if (startIndex === -1 || endIndex === -1) return;
+      const [from, to] =
+        startIndex <= endIndex
+          ? [startIndex, endIndex]
+          : [endIndex, startIndex];
+      const rangeKeys = dayKeyList.slice(from, to + 1);
+      setSelectedRowKeys((prev) => {
+        const merged = new Set(prev);
+        rangeKeys.forEach((rangeKey) => merged.add(rangeKey));
+        return Array.from(merged);
+      });
+    },
+    [dayKeyList]
+  );
 
   const applyStatusToSelection = (status: Status) => {
     if (selectedRowKeys.length === 0) return;
@@ -254,18 +302,61 @@ export default function ShiftRequest() {
   }, [isMobile]);
 
   const handleCalendarDayClick = useCallback(
-    (dayValue: Dayjs) => {
+    (dayValue: Dayjs, event?: React.MouseEvent<HTMLDivElement>) => {
       if (!dayValue.isSame(monthStart, "month")) return;
       const key = dayValue.format("YYYY-MM-DD");
       if (isSelectionMode) {
-        setSelectedRowKeys((prev) =>
-          prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-        );
+        if (!isMobile && event?.shiftKey && selectionAnchorKey) {
+          extendSelectionRange(selectionAnchorKey, key);
+        } else {
+          setSelectedRowKeys((prev) =>
+            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+          );
+        }
+        setSelectionAnchorKey(key);
         return;
       }
       setFocusedDateKey(key);
     },
-    [isSelectionMode, monthStart]
+    [
+      extendSelectionRange,
+      isMobile,
+      isSelectionMode,
+      monthStart,
+      selectionAnchorKey,
+    ]
+  );
+
+  const handleWeekdayLabelClick = useCallback(
+    (weekdayIndex: number) => {
+      if (isMobile || !isSelectionMode) return;
+      const columnKeys = days
+        .filter((day) => day.day() === weekdayIndex)
+        .map((day) => day.format("YYYY-MM-DD"));
+      if (columnKeys.length === 0) return;
+
+      let nextAnchor: string | null = selectionAnchorKey;
+      setSelectedRowKeys((prev) => {
+        const prevSet = new Set(prev);
+        const isColumnAlreadySelected = columnKeys.every((key) =>
+          prevSet.has(key)
+        );
+
+        if (isColumnAlreadySelected) {
+          columnKeys.forEach((key) => prevSet.delete(key));
+          if (selectionAnchorKey && columnKeys.includes(selectionAnchorKey)) {
+            nextAnchor = null;
+          }
+        } else {
+          columnKeys.forEach((key) => prevSet.add(key));
+          nextAnchor = columnKeys[0] ?? null;
+        }
+
+        return dayKeyList.filter((key) => prevSet.has(key));
+      });
+      setSelectionAnchorKey(nextAnchor ?? null);
+    },
+    [dayKeyList, days, isMobile, isSelectionMode, selectionAnchorKey]
   );
 
   useEffect(() => {
@@ -622,20 +713,8 @@ export default function ShiftRequest() {
     scrollToDayDetail();
   }, [hasRowSelection, isSelectionMode, scrollToDayDetail]);
 
-  const getStatusBgColor = (status?: Status) => {
-    if (!status) return undefined;
-    switch (status) {
-      case "work":
-        return theme.palette.success.light;
-      case "fixedOff":
-        return theme.palette.error.light;
-      case "requestedOff":
-        return theme.palette.warning.light;
-      case "auto":
-      default:
-        return theme.palette.info.light;
-    }
-  };
+  const getStatusBgColor = (status?: Status) =>
+    status ? statusBackgroundMap[status] : undefined;
 
   const renderSummary = () => (
     <Typography variant="body2">
@@ -816,6 +895,8 @@ export default function ShiftRequest() {
     );
   };
 
+  const canBulkSelectByWeekday = !isMobile && isSelectionMode;
+
   return (
     <Container sx={{ py: 3, pb: isMobile ? 10 : 3 }}>
       <Paper sx={{ p: 2 }}>
@@ -892,7 +973,7 @@ export default function ShiftRequest() {
                     <Button
                       size="small"
                       disabled={interactionDisabled || !isSelectionMode}
-                      onClick={() => setSelectedRowKeys([])}
+                      onClick={clearRowSelection}
                     >
                       選択解除
                     </Button>
@@ -916,7 +997,29 @@ export default function ShiftRequest() {
                   <Typography
                     key={`weekday-${idx}`}
                     variant="caption"
-                    sx={{ color: "text.secondary", py: 0.5 }}
+                    role={canBulkSelectByWeekday ? "button" : undefined}
+                    tabIndex={canBulkSelectByWeekday ? 0 : undefined}
+                    onClick={
+                      canBulkSelectByWeekday
+                        ? () => handleWeekdayLabelClick(idx)
+                        : undefined
+                    }
+                    onKeyDown={
+                      canBulkSelectByWeekday
+                        ? (event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              handleWeekdayLabelClick(idx);
+                            }
+                          }
+                        : undefined
+                    }
+                    sx={{
+                      color: "text.secondary",
+                      py: 0.5,
+                      cursor: canBulkSelectByWeekday ? "pointer" : "default",
+                      userSelect: "none",
+                    }}
                   >
                     {label}
                   </Typography>
@@ -930,26 +1033,34 @@ export default function ShiftRequest() {
                   );
                   const isFocused = focusedDateKey === key;
                   const isSelectedDate = selectedRowKeys.includes(key);
-                  const highlighted = isFocused || isSelectedDate;
-                  const bgColor = isFocused
-                    ? theme.palette.primary.light
+                  const statusBgColor =
+                    getStatusBgColor(status) || theme.palette.background.paper;
+                  const boxShadowValue = isFocused
+                    ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.8)}`
                     : isSelectedDate
-                    ? theme.palette.action.selected
-                    : getStatusBgColor(status);
+                    ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.5)}`
+                    : undefined;
+                  const borderColor = isFocused
+                    ? theme.palette.primary.main
+                    : isSelectedDate
+                    ? alpha(theme.palette.primary.main, 0.5)
+                    : "divider";
                   return (
                     <Box
                       key={`calendar-${key}`}
-                      onClick={() => handleCalendarDayClick(dayValue)}
+                      onClick={(event) =>
+                        handleCalendarDayClick(dayValue, event)
+                      }
                       sx={{
+                        position: "relative",
                         minHeight: 52,
                         px: 0.5,
                         py: 0.5,
                         borderRadius: 1,
                         border: "1px solid",
-                        borderColor: highlighted
-                          ? theme.palette.primary.main
-                          : "divider",
-                        bgcolor: bgColor,
+                        borderColor,
+                        bgcolor: statusBgColor,
+                        boxShadow: boxShadowValue,
                         color: isCurrentMonthDay
                           ? "text.primary"
                           : "text.disabled",
