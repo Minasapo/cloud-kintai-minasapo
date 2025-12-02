@@ -109,6 +109,11 @@ export default function ShiftRequest() {
     requestedOff: "希望休",
     auto: "おまかせ",
   };
+  const statusMobileLabelMap: Partial<Record<Status, string>> = {
+    work: "出",
+    fixedOff: "固",
+    requestedOff: "希",
+  };
   const statusColorMap: Record<
     Status,
     | "inherit"
@@ -1168,76 +1173,97 @@ export default function ShiftRequest() {
             {patterns.length === 0 ? (
               <Typography>登録されたパターンはありません。</Typography>
             ) : (
-              <List>
-                {patterns.map((p, index) => (
-                  <React.Fragment key={p.id}>
-                    <ListItem disableGutters sx={{ px: 0 }}>
-                      <Paper
-                        variant="outlined"
-                        sx={{ width: "100%", p: 2, backgroundColor: "grey.50" }}
-                      >
-                        <Typography variant="subtitle1" gutterBottom>
-                          {p.name}
-                        </Typography>
-                        <Table size="small" sx={{ tableLayout: "fixed" }}>
-                          <TableHead>
-                            <TableRow>
-                              {weekdayLabels.map((label, idx) => (
-                                <TableCell
-                                  key={`${p.id}-weekday-${idx}`}
-                                  align="center"
-                                  sx={{ py: 0.5, whiteSpace: "nowrap" }}
-                                >
-                                  {label}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            <TableRow>
-                              {weekdayLabels.map((_, idx) => {
-                                const normalized = normalizeStatus(
-                                  p.mapping[idx] as string
-                                );
-                                return (
+              <>
+                {isMobile && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "block", mb: 1 }}
+                  >
+                    凡例: 出=出勤 / 固=固定休 / 希=希望休
+                  </Typography>
+                )}
+                <List>
+                  {patterns.map((p, index) => (
+                    <React.Fragment key={p.id}>
+                      <ListItem disableGutters sx={{ px: 0 }}>
+                        <Paper
+                          variant="outlined"
+                          sx={{
+                            width: "100%",
+                            p: 2,
+                            backgroundColor: "grey.50",
+                          }}
+                        >
+                          <Typography variant="subtitle1" gutterBottom>
+                            {p.name}
+                          </Typography>
+                          <Table size="small" sx={{ tableLayout: "fixed" }}>
+                            <TableHead>
+                              <TableRow>
+                                {weekdayLabels.map((label, idx) => (
                                   <TableCell
-                                    key={`${p.id}-status-${idx}`}
+                                    key={`${p.id}-weekday-${idx}`}
                                     align="center"
                                     sx={{ py: 0.5, whiteSpace: "nowrap" }}
                                   >
-                                    {statusLabelMap[normalized]}
+                                    {label}
                                   </TableCell>
-                                );
-                              })}
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                        <Stack
-                          direction="row"
-                          justifyContent="flex-end"
-                          spacing={1}
-                          sx={{ mt: 1 }}
-                        >
-                          <Button size="small" onClick={() => applyPattern(p)}>
-                            適用
-                          </Button>
-                          <Button
-                            size="small"
-                            color="error"
-                            onClick={() => deletePattern(p.id)}
-                            startIcon={<DeleteIcon />}
+                                ))}
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              <TableRow>
+                                {weekdayLabels.map((_, idx) => {
+                                  const normalized = normalizeStatus(
+                                    p.mapping[idx] as string
+                                  );
+                                  return (
+                                    <TableCell
+                                      key={`${p.id}-status-${idx}`}
+                                      align="center"
+                                      sx={{ py: 0.5, whiteSpace: "nowrap" }}
+                                    >
+                                      {isMobile
+                                        ? statusMobileLabelMap[normalized] ??
+                                          statusLabelMap[normalized]
+                                        : statusLabelMap[normalized]}
+                                    </TableCell>
+                                  );
+                                })}
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                          <Stack
+                            direction="row"
+                            justifyContent="flex-end"
+                            spacing={1}
+                            sx={{ mt: 1 }}
                           >
-                            削除
-                          </Button>
-                        </Stack>
-                      </Paper>
-                    </ListItem>
-                    {index !== patterns.length - 1 && (
-                      <Divider sx={{ my: 1 }} />
-                    )}
-                  </React.Fragment>
-                ))}
-              </List>
+                            <Button
+                              size="small"
+                              onClick={() => applyPattern(p)}
+                            >
+                              適用
+                            </Button>
+                            <Button
+                              size="small"
+                              color="error"
+                              onClick={() => deletePattern(p.id)}
+                              startIcon={<DeleteIcon />}
+                            >
+                              削除
+                            </Button>
+                          </Stack>
+                        </Paper>
+                      </ListItem>
+                      {index !== patterns.length - 1 && (
+                        <Divider sx={{ my: 1 }} />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </List>
+              </>
             )}
           </DialogContent>
           <DialogActions>
