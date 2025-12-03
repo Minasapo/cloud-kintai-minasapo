@@ -183,6 +183,12 @@ export default function DailyReport() {
   const resolvedAuthorName = authorName || "スタッフ";
   const canSubmit = Boolean(staffId && createForm.title.trim());
   const canEditSubmit = Boolean(editDraft && editDraft.title.trim());
+  const selectedReport =
+    selectedReportId && selectedReportId !== "create"
+      ? reports.find((report) => report.id === selectedReportId) ?? null
+      : null;
+  const isSelectedReportSubmitted =
+    selectedReport?.status === DailyReportStatus.SUBMITTED;
 
   useEffect(() => {
     if (!cognitoUser?.id) {
@@ -491,44 +497,46 @@ export default function DailyReport() {
     form: DailyReportForm,
     onChange: (field: keyof DailyReportForm, value: string) => void
   ) => (
-    <Stack spacing={2}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="日付"
-            type="date"
-            value={form.date}
-            onChange={(event) => onChange("date", event.target.value)}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="担当者"
-            value={form.author || resolvedAuthorName}
-            InputProps={{ readOnly: true }}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
-        </Grid>
+    <Grid spacing={2} container>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          label="日付"
+          type="date"
+          value={form.date}
+          onChange={(event) => onChange("date", event.target.value)}
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+        />
       </Grid>
-      <TextField
-        label="タイトル"
-        value={form.title}
-        onChange={(event) => onChange("title", event.target.value)}
-        fullWidth
-      />
-      <TextField
-        label="内容"
-        value={form.content}
-        onChange={(event) => onChange("content", event.target.value)}
-        multiline
-        minRows={6}
-        fullWidth
-        placeholder={"例) サマリ/実施タスク/課題などをまとめて記入"}
-      />
-    </Stack>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          label="担当者"
+          value={form.author || resolvedAuthorName}
+          InputProps={{ readOnly: true }}
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TextField
+          label="タイトル"
+          value={form.title}
+          onChange={(event) => onChange("title", event.target.value)}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TextField
+          label="内容"
+          value={form.content}
+          onChange={(event) => onChange("content", event.target.value)}
+          multiline
+          minRows={6}
+          fullWidth
+          placeholder={"例) サマリ/実施タスク/課題などをまとめて記入"}
+        />
+      </Grid>
+    </Grid>
   );
 
   return (
@@ -691,9 +699,7 @@ export default function DailyReport() {
                     </Stack>
                   ) : selectedReportId ? (
                     (() => {
-                      const report = reports.find(
-                        (r) => r.id === selectedReportId
-                      );
+                      const report = selectedReport;
                       if (!report) {
                         return (
                           <Typography color="text.secondary">
@@ -852,7 +858,11 @@ export default function DailyReport() {
                       >
                         <Button
                           variant="outlined"
-                          disabled={!canEditSubmit || isUpdating}
+                          disabled={
+                            !canEditSubmit ||
+                            isUpdating ||
+                            isSelectedReportSubmitted
+                          }
                           onClick={() => {
                             void handleSaveEdit(DailyReportStatus.DRAFT);
                           }}
@@ -877,10 +887,7 @@ export default function DailyReport() {
                         variant="outlined"
                         disabled={isUpdating}
                         onClick={() => {
-                          const report = reports.find(
-                            (r) => r.id === selectedReportId
-                          );
-                          if (report) handleStartEdit(report);
+                          if (selectedReport) handleStartEdit(selectedReport);
                         }}
                       >
                         編集
