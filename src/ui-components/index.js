@@ -14,6 +14,8 @@ export { default as CloseDateCreateForm } from "./CloseDateCreateForm";
 export { default as CloseDateUpdateForm } from "./CloseDateUpdateForm";
 export { default as CompanyHolidayCalendarCreateForm } from "./CompanyHolidayCalendarCreateForm";
 export { default as CompanyHolidayCalendarUpdateForm } from "./CompanyHolidayCalendarUpdateForm";
+export { default as DailyReportCreateForm } from "./DailyReportCreateForm";
+export { default as DailyReportUpdateForm } from "./DailyReportUpdateForm";
 export { default as DocumentCreateForm } from "./DocumentCreateForm";
 export { default as DocumentUpdateForm } from "./DocumentUpdateForm";
 export { default as HolidayCalendarCreateForm } from "./HolidayCalendarCreateForm";

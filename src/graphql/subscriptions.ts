@@ -1253,3 +1253,102 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
   APITypes.OnDeleteOperationLogSubscriptionVariables,
   APITypes.OnDeleteOperationLogSubscription
 >;
+export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyReport(
+  $filter: ModelSubscriptionDailyReportFilterInput
+) {
+  onCreateDailyReport(filter: $filter) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateDailyReportSubscriptionVariables,
+  APITypes.OnCreateDailyReportSubscription
+>;
+export const onUpdateDailyReport = /* GraphQL */ `subscription OnUpdateDailyReport(
+  $filter: ModelSubscriptionDailyReportFilterInput
+) {
+  onUpdateDailyReport(filter: $filter) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateDailyReportSubscriptionVariables,
+  APITypes.OnUpdateDailyReportSubscription
+>;
+export const onDeleteDailyReport = /* GraphQL */ `subscription OnDeleteDailyReport(
+  $filter: ModelSubscriptionDailyReportFilterInput
+) {
+  onDeleteDailyReport(filter: $filter) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteDailyReportSubscriptionVariables,
+  APITypes.OnDeleteDailyReportSubscription
+>;

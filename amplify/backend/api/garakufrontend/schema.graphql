@@ -388,3 +388,47 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
   # 重大度レベル（例: INFO, WARN, ERROR）
   severity: String
 }
+
+enum DailyReportStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+}
+
+enum DailyReportReactionType {
+  CHEER
+  CHECK
+  THANKS
+  LOOK
+}
+
+type DailyReportReaction {
+  staffId: String!
+  type: DailyReportReactionType!
+  createdAt: String!
+}
+
+type DailyReportComment {
+  id: ID!
+  staffId: String!
+  authorName: String
+  body: String!
+  createdAt: String!
+}
+
+type DailyReport @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  staffId: String!
+    @index(
+      name: "dailyReportsByStaffId"
+      sortKeyFields: ["reportDate"]
+      queryField: "dailyReportsByStaffId"
+    )
+  reportDate: String!
+  title: String!
+  content: String
+  status: DailyReportStatus!
+  updatedAt: String
+  reactions: [DailyReportReaction]
+  comments: [DailyReportComment]
+}

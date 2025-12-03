@@ -1157,6 +1157,111 @@ export type DeleteOperationLogInput = {
   id: string,
 };
 
+export type CreateDailyReportInput = {
+  id?: string | null,
+  staffId: string,
+  reportDate: string,
+  title: string,
+  content?: string | null,
+  status: DailyReportStatus,
+  updatedAt?: string | null,
+  reactions?: Array< DailyReportReactionInput | null > | null,
+  comments?: Array< DailyReportCommentInput | null > | null,
+};
+
+export enum DailyReportStatus {
+  DRAFT = "DRAFT",
+  SUBMITTED = "SUBMITTED",
+  APPROVED = "APPROVED",
+}
+
+
+export type DailyReportReactionInput = {
+  staffId: string,
+  type: DailyReportReactionType,
+  createdAt: string,
+};
+
+export enum DailyReportReactionType {
+  CHEER = "CHEER",
+  CHECK = "CHECK",
+  THANKS = "THANKS",
+  LOOK = "LOOK",
+}
+
+
+export type DailyReportCommentInput = {
+  id: string,
+  staffId: string,
+  authorName?: string | null,
+  body: string,
+  createdAt: string,
+};
+
+export type ModelDailyReportConditionInput = {
+  staffId?: ModelStringInput | null,
+  reportDate?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  content?: ModelStringInput | null,
+  status?: ModelDailyReportStatusInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelDailyReportConditionInput | null > | null,
+  or?: Array< ModelDailyReportConditionInput | null > | null,
+  not?: ModelDailyReportConditionInput | null,
+  createdAt?: ModelStringInput | null,
+};
+
+export type ModelDailyReportStatusInput = {
+  eq?: DailyReportStatus | null,
+  ne?: DailyReportStatus | null,
+};
+
+export type DailyReport = {
+  __typename: "DailyReport",
+  id: string,
+  staffId: string,
+  reportDate: string,
+  title: string,
+  content?: string | null,
+  status: DailyReportStatus,
+  updatedAt?: string | null,
+  reactions?:  Array<DailyReportReaction | null > | null,
+  comments?:  Array<DailyReportComment | null > | null,
+  createdAt: string,
+};
+
+export type DailyReportReaction = {
+  __typename: "DailyReportReaction",
+  staffId: string,
+  type: DailyReportReactionType,
+  createdAt: string,
+};
+
+export type DailyReportComment = {
+  __typename: "DailyReportComment",
+  id: string,
+  staffId: string,
+  authorName?: string | null,
+  body: string,
+  createdAt: string,
+};
+
+export type UpdateDailyReportInput = {
+  id: string,
+  staffId?: string | null,
+  reportDate?: string | null,
+  title?: string | null,
+  content?: string | null,
+  status?: DailyReportStatus | null,
+  updatedAt?: string | null,
+  reactions?: Array< DailyReportReactionInput | null > | null,
+  comments?: Array< DailyReportCommentInput | null > | null,
+};
+
+export type DeleteDailyReportInput = {
+  id: string,
+};
+
 export type EmailData = {
   to?: Array< string | null > | null,
   subject: string,
@@ -1480,6 +1585,26 @@ export type ModelOperationLogConnection = {
   nextToken?: string | null,
 };
 
+export type ModelDailyReportFilterInput = {
+  id?: ModelIDInput | null,
+  staffId?: ModelStringInput | null,
+  reportDate?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  content?: ModelStringInput | null,
+  status?: ModelDailyReportStatusInput | null,
+  updatedAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  and?: Array< ModelDailyReportFilterInput | null > | null,
+  or?: Array< ModelDailyReportFilterInput | null > | null,
+  not?: ModelDailyReportFilterInput | null,
+};
+
+export type ModelDailyReportConnection = {
+  __typename: "ModelDailyReportConnection",
+  items:  Array<DailyReport | null >,
+  nextToken?: string | null,
+};
+
 export type ModelSubscriptionCheckForUpdateFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   deployUuid?: ModelSubscriptionStringInput | null,
@@ -1710,6 +1835,19 @@ export type ModelSubscriptionOperationLogFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
   or?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
+};
+
+export type ModelSubscriptionDailyReportFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  reportDate?: ModelSubscriptionStringInput | null,
+  title?: ModelSubscriptionStringInput | null,
+  content?: ModelSubscriptionStringInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionDailyReportFilterInput | null > | null,
+  or?: Array< ModelSubscriptionDailyReportFilterInput | null > | null,
 };
 
 export type CreateCheckForUpdateMutationVariables = {
@@ -2987,6 +3125,105 @@ export type DeleteOperationLogMutation = {
   } | null,
 };
 
+export type CreateDailyReportMutationVariables = {
+  input: CreateDailyReportInput,
+  condition?: ModelDailyReportConditionInput | null,
+};
+
+export type CreateDailyReportMutation = {
+  createDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type UpdateDailyReportMutationVariables = {
+  input: UpdateDailyReportInput,
+  condition?: ModelDailyReportConditionInput | null,
+};
+
+export type UpdateDailyReportMutation = {
+  updateDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type DeleteDailyReportMutationVariables = {
+  input: DeleteDailyReportInput,
+  condition?: ModelDailyReportConditionInput | null,
+};
+
+export type DeleteDailyReportMutation = {
+  deleteDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
 export type SendMailQueryVariables = {
   data: EmailData,
 };
@@ -4222,6 +4459,117 @@ export type OperationLogsByStaffIdQuery = {
       severity?: string | null,
       createdAt: string,
       updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetDailyReportQueryVariables = {
+  id: string,
+};
+
+export type GetDailyReportQuery = {
+  getDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type ListDailyReportsQueryVariables = {
+  filter?: ModelDailyReportFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListDailyReportsQuery = {
+  listDailyReports?:  {
+    __typename: "ModelDailyReportConnection",
+    items:  Array< {
+      __typename: "DailyReport",
+      id: string,
+      staffId: string,
+      reportDate: string,
+      title: string,
+      content?: string | null,
+      status: DailyReportStatus,
+      updatedAt?: string | null,
+      reactions?:  Array< {
+        __typename: "DailyReportReaction",
+        staffId: string,
+        type: DailyReportReactionType,
+        createdAt: string,
+      } | null > | null,
+      comments?:  Array< {
+        __typename: "DailyReportComment",
+        id: string,
+        staffId: string,
+        authorName?: string | null,
+        body: string,
+        createdAt: string,
+      } | null > | null,
+      createdAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type DailyReportsByStaffIdQueryVariables = {
+  staffId: string,
+  reportDate?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelDailyReportFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type DailyReportsByStaffIdQuery = {
+  dailyReportsByStaffId?:  {
+    __typename: "ModelDailyReportConnection",
+    items:  Array< {
+      __typename: "DailyReport",
+      id: string,
+      staffId: string,
+      reportDate: string,
+      title: string,
+      content?: string | null,
+      status: DailyReportStatus,
+      updatedAt?: string | null,
+      reactions?:  Array< {
+        __typename: "DailyReportReaction",
+        staffId: string,
+        type: DailyReportReactionType,
+        createdAt: string,
+      } | null > | null,
+      comments?:  Array< {
+        __typename: "DailyReportComment",
+        id: string,
+        staffId: string,
+        authorName?: string | null,
+        body: string,
+        createdAt: string,
+      } | null > | null,
+      createdAt: string,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -5463,5 +5811,101 @@ export type OnDeleteOperationLogSubscription = {
     severity?: string | null,
     createdAt: string,
     updatedAt: string,
+  } | null,
+};
+
+export type OnCreateDailyReportSubscriptionVariables = {
+  filter?: ModelSubscriptionDailyReportFilterInput | null,
+};
+
+export type OnCreateDailyReportSubscription = {
+  onCreateDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type OnUpdateDailyReportSubscriptionVariables = {
+  filter?: ModelSubscriptionDailyReportFilterInput | null,
+};
+
+export type OnUpdateDailyReportSubscription = {
+  onUpdateDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type OnDeleteDailyReportSubscriptionVariables = {
+  filter?: ModelSubscriptionDailyReportFilterInput | null,
+};
+
+export type OnDeleteDailyReportSubscription = {
+  onDeleteDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
   } | null,
 };

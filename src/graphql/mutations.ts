@@ -1319,3 +1319,105 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
   APITypes.DeleteOperationLogMutationVariables,
   APITypes.DeleteOperationLogMutation
 >;
+export const createDailyReport = /* GraphQL */ `mutation CreateDailyReport(
+  $input: CreateDailyReportInput!
+  $condition: ModelDailyReportConditionInput
+) {
+  createDailyReport(input: $input, condition: $condition) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDailyReportMutationVariables,
+  APITypes.CreateDailyReportMutation
+>;
+export const updateDailyReport = /* GraphQL */ `mutation UpdateDailyReport(
+  $input: UpdateDailyReportInput!
+  $condition: ModelDailyReportConditionInput
+) {
+  updateDailyReport(input: $input, condition: $condition) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDailyReportMutationVariables,
+  APITypes.UpdateDailyReportMutation
+>;
+export const deleteDailyReport = /* GraphQL */ `mutation DeleteDailyReport(
+  $input: DeleteDailyReportInput!
+  $condition: ModelDailyReportConditionInput
+) {
+  deleteDailyReport(input: $input, condition: $condition) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDailyReportMutationVariables,
+  APITypes.DeleteDailyReportMutation
+>;
