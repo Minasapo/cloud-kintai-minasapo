@@ -1,6 +1,4 @@
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -30,8 +28,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "../../../lib/reducers/snackbarReducer";
-import AfterCard from "./AfterCard/AfterCard";
-import BeforeCard from "./BeforeCard/BeforeCard";
+import { ChangeRequestDiffTable } from "./ChangeRequestDiffTable";
 import handleApproveChangeRequest from "./handleApproveChangeRequest";
 import handleRejectChangeRequest from "./handleRejectChangeRequest";
 
@@ -82,6 +79,10 @@ export default function ChangeRequestDialog({
     return dayjs(workDate).format(AttendanceDate.DisplayFormat);
   };
 
+  if (!attendance || !changeRequest) {
+    return null;
+  }
+
   return (
     <Dialog onClose={handleClose} open={open} fullWidth maxWidth="md">
       <DialogTitle>変更リクエスト(勤務日: {getWorkDate()})</DialogTitle>
@@ -92,20 +93,11 @@ export default function ChangeRequestDialog({
             <br />
             内容を確認して承認または却下してください。
           </Typography>
-          <Stack direction="row" spacing={2} justifyContent="center">
-            <Box>
-              <BeforeCard attendance={attendance} />
-            </Box>
-            <Box sx={{ alignSelf: "center" }}>
-              <ArrowForwardIcon fontSize="large" />
-            </Box>
-            <Box>
-              <AfterCard
-                changeRequest={changeRequest}
-                attendance={attendance}
-              />
-            </Box>
-          </Stack>
+          <ChangeRequestDiffTable
+            attendance={attendance}
+            changeRequest={changeRequest}
+            size="medium"
+          />
           <Stack direction="column" spacing={1}>
             <Typography variant="body1">【スタッフからのコメント】</Typography>
             <TextField

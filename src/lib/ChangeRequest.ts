@@ -16,4 +16,11 @@ export class ChangeRequest {
       (changeRequest) => !changeRequest.completed
     ).length;
   }
+
+  getFirstUnapproved(): AttendanceChangeRequest | null {
+    return (
+      this.changeRequests.find((changeRequest) => !changeRequest.completed) ??
+      null
+    );
+  }
 }
