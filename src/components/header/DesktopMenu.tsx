@@ -37,6 +37,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
   const menuList = [
     { label: "勤怠打刻", href: "/register" },
     { label: "勤怠一覧", href: "/attendance/list" },
+    { label: "日報", href: "/attendance/report" },
     { label: "シフト", href: "/shift" },
     { label: "ワークフロー", href: "/workflow" },
     // { label: "ドキュメント", href: "/docs" },
@@ -48,6 +49,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     { label: "シフト管理", href: "/admin/shift" },
     { label: "シフト計画管理", href: "/admin/shift-plan" },
     { label: "ログ管理", href: "/admin/logs" },
+    { label: "日報管理", href: "/admin/daily-report" },
     { label: "ワークフロー管理", href: "/admin/workflow" },
   ];
 
