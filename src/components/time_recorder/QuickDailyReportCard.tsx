@@ -2,12 +2,18 @@ import { GraphQLResult } from "@aws-amplify/api";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import {
   Alert,
+  Button,
   Card,
   CardContent,
   CircularProgress,
   Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   LinearProgress,
   Stack,
@@ -49,6 +55,7 @@ export default function QuickDailyReportCard({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const defaultTitle = useMemo(() => `${date}の日報`, [date]);
   const isEditable = Boolean(staffId) && !isLoading;
@@ -129,6 +136,12 @@ export default function QuickDailyReportCard({
     }
   }, [error]);
 
+  useEffect(() => {
+    if (!staffId) {
+      setIsDialogOpen(false);
+    }
+  }, [staffId]);
+
   const handleSave = async () => {
     if (!staffId || !isDirty) return;
 
@@ -206,6 +219,15 @@ export default function QuickDailyReportCard({
     setIsOpen((prev) => !prev);
   };
 
+  const handleDialogOpen = () => {
+    if (!staffId) return;
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+  };
+
   const renderSaveIcon = () => {
     if (!isSaving) {
       return <CheckIcon fontSize="small" />;
@@ -240,6 +262,18 @@ export default function QuickDailyReportCard({
               {date} / {reportId ? "既存データを更新" : "新規作成"}
             </Typography>
           </Stack>
+          <Tooltip title="拡大表示">
+            <span>
+              <IconButton
+                size="small"
+                onClick={handleDialogOpen}
+                disabled={!staffId || isLoading}
+                aria-label="拡大表示"
+              >
+                <OpenInFullIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
           {isOpen && (
             <Stack direction="row" spacing={0.5}>
               <Tooltip title="入力をキャンセル">
@@ -291,6 +325,50 @@ export default function QuickDailyReportCard({
           </Stack>
         </Collapse>
       </CardContent>
+      <Dialog
+        open={isDialogOpen}
+        onClose={handleDialogClose}
+        fullWidth
+        maxWidth="md"
+        aria-labelledby={`${contentPanelId}-dialog-title`}
+      >
+        <DialogTitle id={`${contentPanelId}-dialog-title`}>
+          今日の日報メモを拡大表示
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2}>
+            {isLoading && <LinearProgress />}
+            <TextField
+              multiline
+              minRows={10}
+              fullWidth
+              autoFocus
+              placeholder={
+                staffId
+                  ? "今日の振り返りや共有事項をここに入力できます"
+                  : "スタッフ情報を読み込み中です"
+              }
+              value={content}
+              onChange={(event) => setContent(event.target.value)}
+              disabled={!staffId || isLoading}
+            />
+            <Typography variant="caption" color="text.secondary">
+              保存すると標準のカードにも内容が反映されます。
+            </Typography>
+            {error && <Alert severity="error">{error}</Alert>}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose}>閉じる</Button>
+          <Button
+            variant="contained"
+            onClick={() => void handleSave()}
+            disabled={!isEditable || !isDirty || isSaving}
+          >
+            {isSaving ? "保存中..." : "保存"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }
