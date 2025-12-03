@@ -538,9 +538,6 @@ export default function DailyReport() {
           <Typography variant="h4" component="h1" gutterBottom>
             日報
           </Typography>
-          <Typography color="text.secondary">
-            簡易モックです。画面遷移なしで作成・編集・コメントまで確認できます。
-          </Typography>
         </Box>
 
         {requestError && (
