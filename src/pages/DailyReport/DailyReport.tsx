@@ -10,16 +10,20 @@ import {
   Container,
   Divider,
   Grid,
-  List,
-  ListItemButton,
-  ListItemText,
   Paper,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import {
+  PickersDay,
+  type PickersDayProps,
+} from "@mui/x-date-pickers/PickersDay";
 import { API } from "aws-amplify";
-import { useCallback, useEffect, useState } from "react";
+import dayjs, { type Dayjs } from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type {
   CreateDailyReportMutation,
@@ -166,6 +170,9 @@ export default function DailyReport() {
   const [createForm, setCreateForm] = useState<DailyReportForm>(() =>
     emptyForm()
   );
+  const [calendarDate, setCalendarDate] = useState<Dayjs>(() =>
+    dayjs().startOf("day")
+  );
   const [editingReportId, setEditingReportId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<DailyReportForm | null>(null);
   const [selectedReportId, setSelectedReportId] = useState<
@@ -178,6 +185,52 @@ export default function DailyReport() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const { dateMap: reportsByDate, dateSet: reportedDateSet } = useMemo(() => {
+    const dateMap = new Map<string, DailyReportItem>();
+    const dateSet = new Set<string>();
+    reports.forEach((report) => {
+      if (!dateMap.has(report.date)) {
+        dateMap.set(report.date, report);
+      }
+      dateSet.add(report.date);
+    });
+    return { dateMap, dateSet };
+  }, [reports]);
+  const ReportCalendarDay = useMemo(
+    () =>
+      function ReportCalendarDay(dayProps: PickersDayProps<Dayjs>) {
+        const { day, outsideCurrentMonth, selected, ...other } = dayProps;
+        const dateKey = day.format("YYYY-MM-DD");
+        const hasReport = reportedDateSet.has(dateKey);
+
+        return (
+          <PickersDay
+            {...other}
+            day={day}
+            outsideCurrentMonth={outsideCurrentMonth}
+            selected={selected}
+            sx={(theme) => {
+              const baseStyle = { borderRadius: 2 };
+              if (selected || outsideCurrentMonth) {
+                return baseStyle;
+              }
+              if (hasReport) {
+                return {
+                  ...baseStyle,
+                  bgcolor: alpha(theme.palette.success.main, 0.4),
+                  color: theme.palette.success.contrastText,
+                  "&:hover, &:focus": {
+                    bgcolor: alpha(theme.palette.success.main, 0.6),
+                  },
+                };
+              }
+              return baseStyle;
+            }}
+          />
+        );
+      },
+    [reportedDateSet]
+  );
 
   const isCreateMode = selectedReportId === "create";
   const resolvedAuthorName = authorName || "スタッフ";
@@ -189,6 +242,20 @@ export default function DailyReport() {
       : null;
   const isSelectedReportSubmitted =
     selectedReport?.status === DailyReportStatus.SUBMITTED;
+  useEffect(() => {
+    const nextDateString = selectedReport
+      ? selectedReport.date
+      : isCreateMode
+      ? createForm.date
+      : null;
+
+    if (!nextDateString) return;
+
+    setCalendarDate((current) => {
+      const nextDate = dayjs(nextDateString).startOf("day");
+      return current.isSame(nextDate, "day") ? current : nextDate;
+    });
+  }, [selectedReport, isCreateMode, createForm.date]);
 
   useEffect(() => {
     if (!cognitoUser?.id) {
@@ -332,6 +399,30 @@ export default function DailyReport() {
     setEditDraft(null);
     setActionError(null);
   }, [selectedReportId]);
+
+  const handleCalendarChange = (value: Dayjs | null) => {
+    if (!value) return;
+    const normalized = value.startOf("day");
+    setCalendarDate(normalized);
+    const dateKey = normalized.format("YYYY-MM-DD");
+    const reportForDate = reportsByDate.get(dateKey);
+    if (reportForDate) {
+      setSelectedReportId(reportForDate.id);
+      return;
+    }
+    setSelectedReportId("create");
+    setCreateForm((prev) => {
+      const prevDefaultTitle = buildDefaultTitle(prev.date);
+      const nextDefaultTitle = buildDefaultTitle(dateKey);
+      const shouldSyncTitle =
+        prev.title.trim() === "" || prev.title === prevDefaultTitle;
+      return {
+        ...prev,
+        date: dateKey,
+        title: shouldSyncTitle ? nextDefaultTitle : prev.title,
+      };
+    });
+  };
 
   const handleCreateChange = (field: keyof DailyReportForm, value: string) => {
     setCreateForm((prev) => {
@@ -555,76 +646,45 @@ export default function DailyReport() {
         )}
 
         <Grid container spacing={3} alignItems="flex-start">
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={3}>
             <Paper variant="outlined" sx={{ height: "100%" }}>
-              <List disablePadding>
-                <ListItemButton
-                  selected={selectedReportId === "create"}
-                  onClick={() => setSelectedReportId("create")}
-                  alignItems="flex-start"
-                  sx={{
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                  }}
+              <Box sx={{ p: 1 }}>
+                <DateCalendar
+                  value={calendarDate}
+                  onChange={handleCalendarChange}
+                  reduceAnimations
+                  slots={{ day: ReportCalendarDay }}
+                />
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mt: 0.5 }}
                 >
-                  <ListItemText
-                    primary="＋ 日報を作成"
-                    secondary="クリックして作成フォームを開く"
-                    primaryTypographyProps={{ fontWeight: 600 }}
-                  />
-                </ListItemButton>
-                {reports.map((report) => {
-                  const statusMeta = STATUS_META[report.status];
-                  return (
-                    <ListItemButton
-                      key={report.id}
-                      selected={selectedReportId === report.id}
-                      onClick={() => setSelectedReportId(report.id)}
-                      alignItems="flex-start"
-                      sx={{
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                      }}
-                    >
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                        sx={{ width: 1 }}
-                      >
-                        <ListItemText
-                          primary={report.title}
-                          secondary={report.date}
-                          primaryTypographyProps={{ fontWeight: 600 }}
-                        />
-                        <Chip
-                          size="small"
-                          label={statusMeta.label}
-                          color={statusMeta.color}
-                        />
-                      </Stack>
-                    </ListItemButton>
-                  );
-                })}
-              </List>
-              {isLoadingReports && (
-                <Box sx={{ px: 3, py: 2 }}>
-                  <Typography color="text.secondary" variant="body2">
+                  カレンダーの日付を選択すると該当日の日報を確認・作成できます。
+                </Typography>
+                {isLoadingReports && (
+                  <Typography
+                    color="text.secondary"
+                    variant="body2"
+                    sx={{ mt: 1 }}
+                  >
                     日報を読み込み中です…
                   </Typography>
-                </Box>
-              )}
-              {!isLoadingReports && reports.length === 0 && (
-                <Box sx={{ px: 3, pb: 3 }}>
-                  <Typography color="text.secondary" variant="body2">
-                    まだ日報がありません。新規作成から登録してください。
+                )}
+                {!isLoadingReports && reports.length === 0 && (
+                  <Typography
+                    color="text.secondary"
+                    variant="body2"
+                    sx={{ mt: 1 }}
+                  >
+                    まだ日報がありません。カレンダーから日付を選択して作成してください。
                   </Typography>
-                </Box>
-              )}
+                )}
+              </Box>
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={9}>
             <Stack spacing={3}>
               <Card variant="outlined">
                 <CardContent>
