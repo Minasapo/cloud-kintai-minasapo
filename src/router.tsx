@@ -117,33 +117,6 @@ const router = createBrowserRouter([
           },
         ],
       },
-      // {
-      //   path: "docs",
-      //   element: <Document />,
-      //   children: [
-      //     {
-      //       index: true,
-      //       element: <ListDocument />,
-      //     },
-      //     {
-      //       path: "post",
-      //       element: <DocumentPoster />,
-      //     },
-      //     {
-      //       path: ":documentId",
-      //       children: [
-      //         {
-      //           index: true,
-      //           element: <DocumentView />,
-      //         },
-      //         {
-      //           path: "edit",
-      //           element: <DocumentEditor />,
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
       {
         path: "profile",
         element: <Profile />,
