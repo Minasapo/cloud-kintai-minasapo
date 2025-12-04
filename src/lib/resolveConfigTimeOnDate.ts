@@ -16,8 +16,7 @@ export function resolveConfigTimeOnDate(
   const baseDate =
     dateCandidates
       .map((candidate) => toDayjsOrNull(candidate))
-      .find((candidate): candidate is Dayjs => Boolean(candidate)) ??
-    dayjs();
+      .find((candidate): candidate is Dayjs => Boolean(candidate)) ?? dayjs();
 
   return baseDate
     .hour(configTime.hour())

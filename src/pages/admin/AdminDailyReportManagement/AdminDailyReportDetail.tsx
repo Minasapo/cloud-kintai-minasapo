@@ -26,8 +26,9 @@ import Title from "@/components/Title/Title";
 import { updateDailyReport } from "@/graphql/mutations";
 import { getDailyReport } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
 
 import {
   type AdminComment,
@@ -446,7 +447,8 @@ export default function AdminDailyReportDetail() {
                   flexWrap="wrap"
                 >
                   <Typography variant="subtitle2" color="text.secondary">
-                    {report.date} | {report.author}
+                    {formatDateSlash(report.date) || report.date} |{" "}
+                    {report.author}
                   </Typography>
                   <Chip
                     label={STATUS_META[report.status].label}
@@ -457,8 +459,7 @@ export default function AdminDailyReportDetail() {
               </Box>
 
               <Typography variant="body2" color="text.secondary">
-                最終更新:{" "}
-                {report.updatedAt ? report.updatedAt.replace("T", " ") : "-"}
+                最終更新: {formatDateTimeReadable(report.updatedAt) || "-"}
               </Typography>
 
               <Typography
@@ -558,7 +559,8 @@ export default function AdminDailyReportDetail() {
                             {comment.author}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {new Date(comment.createdAt).toLocaleString()}
+                            {formatDateTimeReadable(comment.createdAt) ||
+                              comment.createdAt}
                           </Typography>
                         </Stack>
                         <Typography sx={{ mt: 1 }}>{comment.body}</Typography>

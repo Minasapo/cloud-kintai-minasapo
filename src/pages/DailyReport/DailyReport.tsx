@@ -39,6 +39,7 @@ import { createDailyReport, updateDailyReport } from "@/graphql/mutations";
 import { dailyReportsByStaffId } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
 
 type ReportStatus = DailyReportStatus;
 type EditableStatus = Extract<ReportStatus, "DRAFT" | "SUBMITTED">;
@@ -785,7 +786,8 @@ export default function DailyReport() {
                                 variant="subtitle2"
                                 color="text.secondary"
                               >
-                                {report.date} | {report.author}
+                                {formatDateSlash(report.date) || report.date} |{" "}
+                                {report.author}
                               </Typography>
                               <Typography variant="h5">
                                 {report.title}
@@ -795,7 +797,9 @@ export default function DailyReport() {
                                   variant="body2"
                                   color="text.secondary"
                                 >
-                                  最終更新: {report.updatedAt.replace("T", " ")}
+                                  最終更新:{" "}
+                                  {formatDateTimeReadable(report.updatedAt) ||
+                                    "-"}
                                 </Typography>
                               )}
                             </Box>
@@ -885,9 +889,9 @@ export default function DailyReport() {
                                           variant="caption"
                                           color="text.secondary"
                                         >
-                                          {new Date(
+                                          {formatDateTimeReadable(
                                             comment.createdAt
-                                          ).toLocaleString()}
+                                          ) || comment.createdAt}
                                         </Typography>
                                       </Stack>
                                       <Typography sx={{ mt: 0.5 }}>
