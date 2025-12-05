@@ -7,6 +7,10 @@ import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProv
 export default function WorkTypeItem() {
   const { staff } = useContext(AttendanceEditContext);
 
+  if (!staff) {
+    return null;
+  }
+
   const workTypeValue = (staff as unknown as Record<string, unknown>)
     .workType as string | null | undefined;
 
