@@ -8,6 +8,7 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
+import GroupContainerMobile from "@shared/ui/group-container/GroupContainerMobile";
 import Title from "@shared/ui/typography/Title";
 import React, { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -15,7 +16,6 @@ import { Controller } from "react-hook-form";
 import HourlyPaidHolidayTimeItemMobile from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItemMobile";
 import PaidHolidayFlagInputMobile from "@/components/attendance_editor/PaidHolidayFlagInputMobile";
 import QuickInputButtonsMobile from "@/components/attendance_editor/QuickInputButtonsMobile";
-import GroupContainerMobile from "@/components/ui/GroupContainer/GroupContainerMobile";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
