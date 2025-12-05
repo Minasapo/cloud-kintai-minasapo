@@ -38,7 +38,7 @@ import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTime
 import { Staff } from "../../API";
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
-import useAttendances from "../../hooks/useAttendances/useAttendances";
+import { useListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";
 import { setSnackbarError } from "../../lib/reducers/snackbarReducer";
 import Title from "../Title/Title";
@@ -81,11 +81,24 @@ export default function AttendanceTable() {
   /**
    * 勤怠情報取得用カスタムフック。
    */
+  const shouldFetchAttendances = Boolean(cognitoUser?.id);
   const {
-    attendances,
-    getAttendances,
-    loading: attendanceLoading,
-  } = useAttendances();
+    data: attendancesData,
+    isLoading: isAttendancesInitialLoading,
+    isFetching: isAttendancesFetching,
+    isUninitialized: isAttendancesUninitialized,
+    error: attendancesError,
+  } = useListRecentAttendancesQuery(
+    { staffId: cognitoUser?.id ?? "" },
+    { skip: !shouldFetchAttendances }
+  );
+
+  const attendances = attendancesData ?? [];
+  const attendanceLoading =
+    !shouldFetchAttendances ||
+    isAttendancesInitialLoading ||
+    isAttendancesFetching ||
+    isAttendancesUninitialized;
 
   /**
    * スタッフ情報の状態。
@@ -105,12 +118,6 @@ export default function AttendanceTable() {
    */
   useEffect(() => {
     if (!cognitoUser) return;
-
-    getAttendances(cognitoUser.id).catch((error) => {
-      logger.debug(error);
-      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
-    });
-
     fetchStaff(cognitoUser.id)
       .then((res) => {
         setStaff(res);
@@ -119,7 +126,14 @@ export default function AttendanceTable() {
         logger.debug(error);
         dispatch(setSnackbarError(MESSAGE_CODE.E00001));
       });
-  }, [cognitoUser]);
+  }, [cognitoUser, dispatch, logger]);
+
+  useEffect(() => {
+    if (attendancesError) {
+      logger.debug(attendancesError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+    }
+  }, [attendancesError, dispatch, logger]);
 
   /**
    * 勤怠データから合計勤務時間（休憩時間を除く）を計算する。
