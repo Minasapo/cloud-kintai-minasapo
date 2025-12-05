@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
-import { useState } from "react";
-
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { useCallback, useState } from "react";
 
 import {
   Attendance,
@@ -9,8 +7,13 @@ import {
   RestInput,
   SystemCommentInput,
   UpdateAttendanceInput,
-} from "../../API";
-import { AttendanceDataManager } from "./AttendanceDataManager";
+} from "@/API";
+import {
+  useCreateAttendanceMutation,
+  useLazyGetAttendanceByStaffAndDateQuery,
+  useUpdateAttendanceMutation,
+} from "@/lib/api/attendanceApi";
+import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 
 export enum GoDirectlyFlag {
   YES,
@@ -27,41 +30,45 @@ export default function useAttendance() {
     undefined
   );
   const [loading, setLoading] = useState(true);
-  const attendanceDataManager = new AttendanceDataManager();
 
-  const getAttendance = async (staffId: string, workDate: string) =>
-    attendanceDataManager
-      .fetchAll(staffId, workDate)
-      .then((res) => {
-        setAttendance(res);
-        return res;
-      })
-      .catch((e: Error) => {
-        throw e;
-      })
-      .finally(() => setLoading(false));
+  const [triggerGetAttendance] = useLazyGetAttendanceByStaffAndDateQuery();
+  const [createAttendanceMutation] = useCreateAttendanceMutation();
+  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 
-  const createAttendance = async (input: CreateAttendanceInput) =>
-    attendanceDataManager
-      .create(input)
-      .then((res) => {
-        setAttendance(res);
-        return res;
-      })
-      .catch((e: Error) => {
-        throw e;
-      });
+  const getAttendance = useCallback(
+    async (staffId: string, workDate: string) => {
+      setLoading(true);
+      try {
+        const result = await triggerGetAttendance({
+          staffId,
+          workDate,
+        }).unwrap();
+        setAttendance(result ?? null);
+        return result;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [triggerGetAttendance]
+  );
 
-  const updateAttendance = async (input: UpdateAttendanceInput) =>
-    attendanceDataManager
-      .update(input)
-      .then((res) => {
-        setAttendance(res);
-        return res;
-      })
-      .catch((e: Error) => {
-        throw e;
-      });
+  const createAttendance = useCallback(
+    async (input: CreateAttendanceInput) => {
+      const created = await createAttendanceMutation(input).unwrap();
+      setAttendance(created);
+      return created;
+    },
+    [createAttendanceMutation]
+  );
+
+  const updateAttendance = useCallback(
+    async (input: UpdateAttendanceInput) => {
+      const updated = await updateAttendanceMutation(input).unwrap();
+      setAttendance(updated);
+      return updated;
+    },
+    [updateAttendanceMutation]
+  );
 
   const clockIn = async (
     staffId: string,
