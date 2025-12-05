@@ -224,7 +224,7 @@ export default function AdminShiftSettings() {
 
   return (
     <Stack spacing={2.5}>
-      <Title text="シフト設定" />
+      <Title>シフト設定</Title>
       <Typography>
         シフトグループを定義し、公開範囲や担当者単位でシフトを整理できます。
         ラベル・説明に加えて、各グループの最小／最大人数、または固定人数を任意で設定し、必要に応じて追加・編集・削除してください（レンジ指定と固定人数は同時に使用できません）。
