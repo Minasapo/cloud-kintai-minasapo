@@ -18,12 +18,12 @@ import {
   Typography,
 } from "@mui/material";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import StatusChip from "@shared/ui/chips/StatusChip";
 import Title from "@shared/ui/typography/Title";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { WorkflowCategory, WorkflowStatus } from "@/API";
-import StatusChip from "@/components/StatusChip/StatusChip";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
