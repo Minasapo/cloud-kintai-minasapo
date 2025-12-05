@@ -6,9 +6,8 @@ import { listHolidayCalendars } from "../../graphql/queries";
 
 export default async function fetchHolidayCalendars() {
   const holidayCalendars: HolidayCalendar[] = [];
-  const nextToken: string | null = null;
-  const isLooping = true;
-  while (isLooping) {
+  let nextToken: string | null = null;
+  while (true) {
     const response = (await API.graphql({
       query: listHolidayCalendars,
       variables: { nextToken },
@@ -29,11 +28,10 @@ export default async function fetchHolidayCalendars() {
       )
     );
 
-    if (response.data.listHolidayCalendars.nextToken) {
-      continue;
+    nextToken = response.data.listHolidayCalendars.nextToken ?? null;
+    if (!nextToken) {
+      break;
     }
-
-    break;
   }
 
   return holidayCalendars;

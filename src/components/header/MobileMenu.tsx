@@ -100,6 +100,12 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
       icon: <ViewListIcon />,
       onClick: () => navigate("/attendance/list"),
     },
+    {
+      label: "日報",
+      path: "/attendance/report",
+      icon: <ViewListIcon />,
+      onClick: () => navigate("/attendance/report"),
+    },
     // 設定は管理の後に表示するのでここでは定義しない
     {
       label: "サインアウト",

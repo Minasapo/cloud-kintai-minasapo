@@ -3,18 +3,27 @@ import { useContext } from "react";
 
 import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 
 export function GoDirectlyFlagInput() {
-  const context = useContext(AttendanceEditContext);
-  const control = context?.control;
-  const setValue = context?.setValue;
+  const { control, setValue, workDate, getValues, attendance } = useContext(
+    AttendanceEditContext
+  );
   const { getStartTime } = useAppConfig();
 
   if (!control || !setValue) {
     return null;
   }
+
+  const computeStartTimeIso = () =>
+    resolveConfigTimeOnDate(
+      getStartTime(),
+      getValues?.("startTime") as string | null | undefined,
+      workDate ?? undefined,
+      attendance?.workDate
+    );
 
   return (
     <GoDirectlyFlagCheckbox
@@ -24,7 +33,7 @@ export function GoDirectlyFlagInput() {
       onChangeExtra={(checked: boolean) => {
         if (checked) {
           setValue("goDirectlyFlag", true);
-          setValue("startTime", getStartTime().toISOString());
+          setValue("startTime", computeStartTimeIso());
         }
       }}
     />

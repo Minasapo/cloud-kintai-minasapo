@@ -25,6 +25,7 @@ import GroupContainer from "@/components/ui/GroupContainer/GroupContainer";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useOperationLog from "@/hooks/useOperationLog/useOperationLog";
+import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 
 import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
 import StaffNameItem from "../../../components/attendance_editor/items/StaffNameItem";
@@ -195,7 +196,15 @@ export default function DesktopEditor() {
               disabled={changeRequests.length > 0 || !!readOnly}
               onChangeExtra={(checked: boolean) => {
                 if (checked && setValue) {
-                  setValue("startTime", getStartTime().toISOString());
+                  setValue(
+                    "startTime",
+                    resolveConfigTimeOnDate(
+                      getStartTime(),
+                      getValues?.("startTime") as string | null | undefined,
+                      workDate ?? undefined,
+                      attendance?.workDate
+                    )
+                  );
                 }
               }}
             />

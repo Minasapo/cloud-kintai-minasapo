@@ -833,11 +833,238 @@ export const onDeleteDocument =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnDeleteDocumentSubscriptionVariables,
-    APITypes.OnDeleteDocumentSubscription
-  >;
-export const onCreateWorkflow =
-  /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+  APITypes.OnDeleteDocumentSubscriptionVariables,
+  APITypes.OnDeleteDocumentSubscription
+>;
+export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftRequest(
+  $filter: ModelSubscriptionShiftRequestFilterInput
+) {
+  onCreateShiftRequest(filter: $filter) {
+    id
+    staffId
+    targetMonth
+    note
+    entries {
+      date
+      status
+      __typename
+    }
+    summary {
+      workDays
+      fixedOffDays
+      requestedOffDays
+      __typename
+    }
+    submittedAt
+    updatedAt
+    histories {
+      version
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      recordedAt
+      recordedByStaffId
+      changeReason
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateShiftRequestSubscriptionVariables,
+  APITypes.OnCreateShiftRequestSubscription
+>;
+export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftRequest(
+  $filter: ModelSubscriptionShiftRequestFilterInput
+) {
+  onUpdateShiftRequest(filter: $filter) {
+    id
+    staffId
+    targetMonth
+    note
+    entries {
+      date
+      status
+      __typename
+    }
+    summary {
+      workDays
+      fixedOffDays
+      requestedOffDays
+      __typename
+    }
+    submittedAt
+    updatedAt
+    histories {
+      version
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      recordedAt
+      recordedByStaffId
+      changeReason
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateShiftRequestSubscriptionVariables,
+  APITypes.OnUpdateShiftRequestSubscription
+>;
+export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftRequest(
+  $filter: ModelSubscriptionShiftRequestFilterInput
+) {
+  onDeleteShiftRequest(filter: $filter) {
+    id
+    staffId
+    targetMonth
+    note
+    entries {
+      date
+      status
+      __typename
+    }
+    summary {
+      workDays
+      fixedOffDays
+      requestedOffDays
+      __typename
+    }
+    submittedAt
+    updatedAt
+    histories {
+      version
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      recordedAt
+      recordedByStaffId
+      changeReason
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteShiftRequestSubscriptionVariables,
+  APITypes.OnDeleteShiftRequestSubscription
+>;
+export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPlanYear(
+  $filter: ModelSubscriptionShiftPlanYearFilterInput
+) {
+  onCreateShiftPlanYear(filter: $filter) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateShiftPlanYearSubscriptionVariables,
+  APITypes.OnCreateShiftPlanYearSubscription
+>;
+export const onUpdateShiftPlanYear = /* GraphQL */ `subscription OnUpdateShiftPlanYear(
+  $filter: ModelSubscriptionShiftPlanYearFilterInput
+) {
+  onUpdateShiftPlanYear(filter: $filter) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateShiftPlanYearSubscriptionVariables,
+  APITypes.OnUpdateShiftPlanYearSubscription
+>;
+export const onDeleteShiftPlanYear = /* GraphQL */ `subscription OnDeleteShiftPlanYear(
+  $filter: ModelSubscriptionShiftPlanYearFilterInput
+) {
+  onDeleteShiftPlanYear(filter: $filter) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteShiftPlanYearSubscriptionVariables,
+  APITypes.OnDeleteShiftPlanYearSubscription
+>;
+export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onCreateWorkflow(filter: $filter) {
     id
     approvedStaffIds
@@ -1052,6 +1279,105 @@ export const onDeleteOperationLog =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnDeleteOperationLogSubscriptionVariables,
-    APITypes.OnDeleteOperationLogSubscription
-  >;
+  APITypes.OnDeleteOperationLogSubscriptionVariables,
+  APITypes.OnDeleteOperationLogSubscription
+>;
+export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyReport(
+  $filter: ModelSubscriptionDailyReportFilterInput
+) {
+  onCreateDailyReport(filter: $filter) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateDailyReportSubscriptionVariables,
+  APITypes.OnCreateDailyReportSubscription
+>;
+export const onUpdateDailyReport = /* GraphQL */ `subscription OnUpdateDailyReport(
+  $filter: ModelSubscriptionDailyReportFilterInput
+) {
+  onUpdateDailyReport(filter: $filter) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateDailyReportSubscriptionVariables,
+  APITypes.OnUpdateDailyReportSubscription
+>;
+export const onDeleteDailyReport = /* GraphQL */ `subscription OnDeleteDailyReport(
+  $filter: ModelSubscriptionDailyReportFilterInput
+) {
+  onDeleteDailyReport(filter: $filter) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteDailyReportSubscriptionVariables,
+  APITypes.OnDeleteDailyReportSubscription
+>;

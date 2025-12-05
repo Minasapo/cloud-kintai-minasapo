@@ -768,6 +768,274 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
   APITypes.ListDocumentsQueryVariables,
   APITypes.ListDocumentsQuery
 >;
+export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
+  getShiftRequest(id: $id) {
+    id
+    staffId
+    targetMonth
+    note
+    entries {
+      date
+      status
+      __typename
+    }
+    summary {
+      workDays
+      fixedOffDays
+      requestedOffDays
+      __typename
+    }
+    submittedAt
+    updatedAt
+    histories {
+      version
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      recordedAt
+      recordedByStaffId
+      changeReason
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetShiftRequestQueryVariables,
+  APITypes.GetShiftRequestQuery
+>;
+export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
+  $filter: ModelShiftRequestFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listShiftRequests(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      staffId
+      targetMonth
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      histories {
+        version
+        note
+        entries {
+          date
+          status
+          __typename
+        }
+        summary {
+          workDays
+          fixedOffDays
+          requestedOffDays
+          __typename
+        }
+        submittedAt
+        updatedAt
+        recordedAt
+        recordedByStaffId
+        changeReason
+        __typename
+      }
+      createdAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListShiftRequestsQueryVariables,
+  APITypes.ListShiftRequestsQuery
+>;
+export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffId(
+  $staffId: String!
+  $targetMonth: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelShiftRequestFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  shiftRequestsByStaffId(
+    staffId: $staffId
+    targetMonth: $targetMonth
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      staffId
+      targetMonth
+      note
+      entries {
+        date
+        status
+        __typename
+      }
+      summary {
+        workDays
+        fixedOffDays
+        requestedOffDays
+        __typename
+      }
+      submittedAt
+      updatedAt
+      histories {
+        version
+        note
+        entries {
+          date
+          status
+          __typename
+        }
+        summary {
+          workDays
+          fixedOffDays
+          requestedOffDays
+          __typename
+        }
+        submittedAt
+        updatedAt
+        recordedAt
+        recordedByStaffId
+        changeReason
+        __typename
+      }
+      createdAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ShiftRequestsByStaffIdQueryVariables,
+  APITypes.ShiftRequestsByStaffIdQuery
+>;
+export const getShiftPlanYear = /* GraphQL */ `query GetShiftPlanYear($id: ID!) {
+  getShiftPlanYear(id: $id) {
+    id
+    targetYear
+    plans {
+      month
+      editStart
+      editEnd
+      enabled
+      dailyCapacities
+      __typename
+    }
+    notes
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetShiftPlanYearQueryVariables,
+  APITypes.GetShiftPlanYearQuery
+>;
+export const listShiftPlanYears = /* GraphQL */ `query ListShiftPlanYears(
+  $filter: ModelShiftPlanYearFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listShiftPlanYears(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      targetYear
+      plans {
+        month
+        editStart
+        editEnd
+        enabled
+        dailyCapacities
+        __typename
+      }
+      notes
+      createdBy
+      updatedBy
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListShiftPlanYearsQueryVariables,
+  APITypes.ListShiftPlanYearsQuery
+>;
+export const shiftPlanYearByTargetYear = /* GraphQL */ `query ShiftPlanYearByTargetYear(
+  $targetYear: Int!
+  $id: ModelIDKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelShiftPlanYearFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  shiftPlanYearByTargetYear(
+    targetYear: $targetYear
+    id: $id
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      targetYear
+      plans {
+        month
+        editStart
+        editEnd
+        enabled
+        dailyCapacities
+        __typename
+      }
+      notes
+      createdBy
+      updatedBy
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ShiftPlanYearByTargetYearQueryVariables,
+  APITypes.ShiftPlanYearByTargetYearQuery
+>;
 export const getWorkflow = /* GraphQL */ `query GetWorkflow($id: ID!) {
   getWorkflow(id: $id) {
     id
@@ -1023,6 +1291,125 @@ export const operationLogsByStaffId =
   }
 }
 ` as GeneratedQuery<
-    APITypes.OperationLogsByStaffIdQueryVariables,
-    APITypes.OperationLogsByStaffIdQuery
-  >;
+  APITypes.OperationLogsByStaffIdQueryVariables,
+  APITypes.OperationLogsByStaffIdQuery
+>;
+export const getDailyReport = /* GraphQL */ `query GetDailyReport($id: ID!) {
+  getDailyReport(id: $id) {
+    id
+    staffId
+    reportDate
+    title
+    content
+    status
+    updatedAt
+    reactions {
+      staffId
+      type
+      createdAt
+      __typename
+    }
+    comments {
+      id
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
+    createdAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetDailyReportQueryVariables,
+  APITypes.GetDailyReportQuery
+>;
+export const listDailyReports = /* GraphQL */ `query ListDailyReports(
+  $filter: ModelDailyReportFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listDailyReports(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      staffId
+      reportDate
+      title
+      content
+      status
+      updatedAt
+      reactions {
+        staffId
+        type
+        createdAt
+        __typename
+      }
+      comments {
+        id
+        staffId
+        authorName
+        body
+        createdAt
+        __typename
+      }
+      createdAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListDailyReportsQueryVariables,
+  APITypes.ListDailyReportsQuery
+>;
+export const dailyReportsByStaffId = /* GraphQL */ `query DailyReportsByStaffId(
+  $staffId: String!
+  $reportDate: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelDailyReportFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  dailyReportsByStaffId(
+    staffId: $staffId
+    reportDate: $reportDate
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      staffId
+      reportDate
+      title
+      content
+      status
+      updatedAt
+      reactions {
+        staffId
+        type
+        createdAt
+        __typename
+      }
+      comments {
+        id
+        staffId
+        authorName
+        body
+        createdAt
+        __typename
+      }
+      createdAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.DailyReportsByStaffIdQueryVariables,
+  APITypes.DailyReportsByStaffIdQuery
+>;

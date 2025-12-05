@@ -181,6 +181,76 @@ type ShiftGroup {
   fixed: Int
 }
 
+enum ShiftRequestStatus {
+  WORK
+  FIXED_OFF
+  REQUESTED_OFF
+  AUTO
+}
+
+type ShiftRequestDayPreference {
+  date: String!
+  status: ShiftRequestStatus!
+}
+
+type ShiftRequestSummary {
+  workDays: Int
+  fixedOffDays: Int
+  requestedOffDays: Int
+}
+
+type ShiftRequestHistory {
+  version: Int!
+  note: String
+  entries: [ShiftRequestDayPreference]
+  summary: ShiftRequestSummary
+  submittedAt: String
+  updatedAt: String
+  recordedAt: String!
+  recordedByStaffId: String
+  changeReason: String
+}
+
+type ShiftRequest @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  staffId: String!
+    @index(
+      name: "shiftRequestsByStaffId"
+      sortKeyFields: ["targetMonth"]
+      queryField: "shiftRequestsByStaffId"
+    )
+  targetMonth: String!
+  note: String
+  entries: [ShiftRequestDayPreference]
+  summary: ShiftRequestSummary
+  submittedAt: String
+  updatedAt: String
+  # 変更履歴（最新が先頭になるようクライアントで整列）
+  histories: [ShiftRequestHistory]
+}
+
+type ShiftPlanMonthSetting {
+  month: Int!
+  editStart: String
+  editEnd: String
+  enabled: Boolean
+  dailyCapacities: [Int]
+}
+
+type ShiftPlanYear @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  targetYear: Int!
+    @index(
+      name: "shiftPlanYearByTargetYear"
+      sortKeyFields: ["id"]
+      queryField: "shiftPlanYearByTargetYear"
+    )
+  plans: [ShiftPlanMonthSetting]
+  notes: String
+  createdBy: String
+  updatedBy: String
+}
+
 type AppConfig @model {
   id: ID!
   name: String!
@@ -317,4 +387,48 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
   metadata: String
   # 重大度レベル（例: INFO, WARN, ERROR）
   severity: String
+}
+
+enum DailyReportStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+}
+
+enum DailyReportReactionType {
+  CHEER
+  CHECK
+  THANKS
+  LOOK
+}
+
+type DailyReportReaction {
+  staffId: String!
+  type: DailyReportReactionType!
+  createdAt: String!
+}
+
+type DailyReportComment {
+  id: ID!
+  staffId: String!
+  authorName: String
+  body: String!
+  createdAt: String!
+}
+
+type DailyReport @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  staffId: String!
+    @index(
+      name: "dailyReportsByStaffId"
+      sortKeyFields: ["reportDate"]
+      queryField: "dailyReportsByStaffId"
+    )
+  reportDate: String!
+  title: String!
+  content: String
+  status: DailyReportStatus!
+  updatedAt: String
+  reactions: [DailyReportReaction]
+  comments: [DailyReportComment]
 }

@@ -18,12 +18,19 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useParams } from "react-router-dom";
 
 import { Attendance } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import MoveDateItem from "@/components/AttendanceDailyList/MoveDateItem";
+import { AppConfigContext } from "@/context/AppConfigContext";
 import * as MESSAGE_CODE from "@/errors";
 import fetchAttendances from "@/hooks/useAttendances/fetchAttendances";
 import { AttendanceDate } from "@/lib/AttendanceDate";
@@ -34,14 +41,26 @@ import useAttendanceDaily, {
 } from "../../hooks/useAttendanceDaily/useAttendanceDaily";
 import { ActionsTableCell } from "./ActionsTableCell";
 import { EndTimeTableCell } from "./EndTimeTableCell";
+import {
+  calculateTotalOvertimeMinutes,
+  formatMinutesToHHmm,
+} from "./overtimeUtils";
 import { StartTimeTableCell } from "./StartTimeTableCell";
 
 export default function AttendanceDailyList() {
   const { targetWorkDate } = useParams();
   const { attendanceDailyList, error, loading } = useAttendanceDaily();
+  const { getEndTime } = useContext(AppConfigContext);
   const today = dayjs().format(AttendanceDate.QueryParamFormat);
   const dispatch = useAppDispatchV2();
   const [searchName, setSearchName] = useState("");
+
+  const scheduledEnd = useMemo(() => {
+    const parsed = getEndTime();
+    return { hour: parsed.hour(), minute: parsed.minute() };
+  }, [getEndTime]);
+  const scheduledHour = scheduledEnd.hour;
+  const scheduledMinute = scheduledEnd.minute;
 
   useEffect(() => {
     if (error) {
@@ -136,6 +155,41 @@ export default function AttendanceDailyList() {
   const [attendanceErrorMap, setAttendanceErrorMap] = useState<
     Record<string, Error | null>
   >({});
+
+  const overtimeMinutesMap = useMemo(() => {
+    return Object.entries(attendanceMap).reduce(
+      (acc, [staffId, attendances]) => {
+        acc[staffId] = calculateTotalOvertimeMinutes(
+          attendances,
+          scheduledHour,
+          scheduledMinute
+        );
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  }, [attendanceMap, scheduledHour, scheduledMinute]);
+
+  const getOvertimeMinutes = useCallback(
+    (row: AttendanceDaily) => {
+      const mapped = overtimeMinutesMap[row.sub];
+      if (typeof mapped === "number") {
+        return mapped;
+      }
+      if (!row.attendance) return 0;
+      return calculateTotalOvertimeMinutes(
+        [row.attendance],
+        scheduledHour,
+        scheduledMinute
+      );
+    },
+    [overtimeMinutesMap, scheduledHour, scheduledMinute]
+  );
+
+  const renderOvertimeValue = useCallback(
+    (row: AttendanceDaily) => formatMinutesToHHmm(getOvertimeMinutes(row)),
+    [getOvertimeMinutes]
+  );
 
   useEffect(() => {
     // load attendances for visible staff rows
@@ -232,6 +286,9 @@ export default function AttendanceDailyList() {
                     <TableCell className="table-cell-header--end-time">
                       退勤時刻
                     </TableCell>
+                    <TableCell className="table-cell-header--overtime">
+                      残業時間
+                    </TableCell>
                     <TableCell>摘要</TableCell>
                     <TableCell />
                   </TableRow>
@@ -251,6 +308,9 @@ export default function AttendanceDailyList() {
                       <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
                       <StartTimeTableCell row={row} />
                       <EndTimeTableCell row={row} />
+                      <TableCell sx={{ textAlign: "right" }}>
+                        {renderOvertimeValue(row)}
+                      </TableCell>
                       <TableCell>{renderSummaryMessage(row)}</TableCell>
                       <TableCell sx={{ whiteSpace: "nowrap" }} />
                     </TableRow>
@@ -276,6 +336,9 @@ export default function AttendanceDailyList() {
               <TableCell className="table-cell-header--end-time">
                 退勤時刻
               </TableCell>
+              <TableCell className="table-cell-header--overtime">
+                残業時間
+              </TableCell>
               <TableCell>摘要</TableCell>
               <TableCell />
             </TableRow>
@@ -292,6 +355,9 @@ export default function AttendanceDailyList() {
                 <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
                 <StartTimeTableCell row={row} />
                 <EndTimeTableCell row={row} />
+                <TableCell sx={{ textAlign: "right" }}>
+                  {renderOvertimeValue(row)}
+                </TableCell>
                 <TableCell>{renderSummaryMessage(row)}</TableCell>
                 <TableCell sx={{ whiteSpace: "nowrap" }} />
               </TableRow>

@@ -73,27 +73,27 @@ export type DeleteCheckForUpdateInput = {
 };
 
 export type CreateAppConfigInput = {
-  id?: string | null;
-  name: string;
-  workStartTime?: string | null;
-  workEndTime?: string | null;
-  lunchRestStartTime?: string | null;
-  lunchRestEndTime?: string | null;
-  amHolidayStartTime?: string | null;
-  amHolidayEndTime?: string | null;
-  pmHolidayStartTime?: string | null;
-  pmHolidayEndTime?: string | null;
-  specialHolidayEnabled?: boolean | null;
-  amPmHolidayEnabled?: boolean | null;
-  officeMode?: boolean | null;
-  absentEnabled?: boolean | null;
-  hourlyPaidHolidayEnabled?: boolean | null;
-  links?: Array<LinkInput | null> | null;
-  reasons?: Array<ReasonInput | null> | null;
-  quickInputStartTimes?: Array<QuickInputTimeInput | null> | null;
-  quickInputEndTimes?: Array<QuickInputTimeInput | null> | null;
-  themeColor?: string | null;
-  shiftGroups?: Array<ShiftGroupInput | null> | null;
+  id?: string | null,
+  name: string,
+  workStartTime?: string | null,
+  workEndTime?: string | null,
+  lunchRestStartTime?: string | null,
+  lunchRestEndTime?: string | null,
+  amHolidayStartTime?: string | null,
+  amHolidayEndTime?: string | null,
+  pmHolidayStartTime?: string | null,
+  pmHolidayEndTime?: string | null,
+  specialHolidayEnabled?: boolean | null,
+  amPmHolidayEnabled?: boolean | null,
+  officeMode?: boolean | null,
+  absentEnabled?: boolean | null,
+  hourlyPaidHolidayEnabled?: boolean | null,
+  links?: Array< LinkInput | null > | null,
+  reasons?: Array< ReasonInput | null > | null,
+  quickInputStartTimes?: Array< QuickInputTimeInput | null > | null,
+  quickInputEndTimes?: Array< QuickInputTimeInput | null > | null,
+  themeColor?: string | null,
+  shiftGroups?: Array< ShiftGroupInput | null > | null,
 };
 
 export type LinkInput = {
@@ -121,27 +121,35 @@ export type ShiftGroupInput = {
   fixed?: number | null;
 };
 
+export type ShiftGroupInput = {
+  label: string,
+  description?: string | null,
+  min?: number | null,
+  max?: number | null,
+  fixed?: number | null,
+};
+
 export type ModelAppConfigConditionInput = {
-  name?: ModelStringInput | null;
-  workStartTime?: ModelStringInput | null;
-  workEndTime?: ModelStringInput | null;
-  lunchRestStartTime?: ModelStringInput | null;
-  lunchRestEndTime?: ModelStringInput | null;
-  amHolidayStartTime?: ModelStringInput | null;
-  amHolidayEndTime?: ModelStringInput | null;
-  pmHolidayStartTime?: ModelStringInput | null;
-  pmHolidayEndTime?: ModelStringInput | null;
-  specialHolidayEnabled?: ModelBooleanInput | null;
-  amPmHolidayEnabled?: ModelBooleanInput | null;
-  officeMode?: ModelBooleanInput | null;
-  absentEnabled?: ModelBooleanInput | null;
-  hourlyPaidHolidayEnabled?: ModelBooleanInput | null;
-  themeColor?: ModelStringInput | null;
-  and?: Array<ModelAppConfigConditionInput | null> | null;
-  or?: Array<ModelAppConfigConditionInput | null> | null;
-  not?: ModelAppConfigConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  name?: ModelStringInput | null,
+  workStartTime?: ModelStringInput | null,
+  workEndTime?: ModelStringInput | null,
+  lunchRestStartTime?: ModelStringInput | null,
+  lunchRestEndTime?: ModelStringInput | null,
+  amHolidayStartTime?: ModelStringInput | null,
+  amHolidayEndTime?: ModelStringInput | null,
+  pmHolidayStartTime?: ModelStringInput | null,
+  pmHolidayEndTime?: ModelStringInput | null,
+  specialHolidayEnabled?: ModelBooleanInput | null,
+  amPmHolidayEnabled?: ModelBooleanInput | null,
+  officeMode?: ModelBooleanInput | null,
+  absentEnabled?: ModelBooleanInput | null,
+  hourlyPaidHolidayEnabled?: ModelBooleanInput | null,
+  themeColor?: ModelStringInput | null,
+  and?: Array< ModelAppConfigConditionInput | null > | null,
+  or?: Array< ModelAppConfigConditionInput | null > | null,
+  not?: ModelAppConfigConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type ModelBooleanInput = {
@@ -152,30 +160,30 @@ export type ModelBooleanInput = {
 };
 
 export type AppConfig = {
-  __typename: "AppConfig";
-  id: string;
-  name: string;
-  workStartTime?: string | null;
-  workEndTime?: string | null;
-  lunchRestStartTime?: string | null;
-  lunchRestEndTime?: string | null;
-  amHolidayStartTime?: string | null;
-  amHolidayEndTime?: string | null;
-  pmHolidayStartTime?: string | null;
-  pmHolidayEndTime?: string | null;
-  specialHolidayEnabled?: boolean | null;
-  amPmHolidayEnabled?: boolean | null;
-  officeMode?: boolean | null;
-  absentEnabled?: boolean | null;
-  hourlyPaidHolidayEnabled?: boolean | null;
-  links?: Array<Link | null> | null;
-  reasons?: Array<Reason | null> | null;
-  quickInputStartTimes?: Array<QuickInputTime | null> | null;
-  quickInputEndTimes?: Array<QuickInputTime | null> | null;
-  themeColor?: string | null;
-  shiftGroups?: Array<ShiftGroup | null> | null;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "AppConfig",
+  id: string,
+  name: string,
+  workStartTime?: string | null,
+  workEndTime?: string | null,
+  lunchRestStartTime?: string | null,
+  lunchRestEndTime?: string | null,
+  amHolidayStartTime?: string | null,
+  amHolidayEndTime?: string | null,
+  pmHolidayStartTime?: string | null,
+  pmHolidayEndTime?: string | null,
+  specialHolidayEnabled?: boolean | null,
+  amPmHolidayEnabled?: boolean | null,
+  officeMode?: boolean | null,
+  absentEnabled?: boolean | null,
+  hourlyPaidHolidayEnabled?: boolean | null,
+  links?:  Array<Link | null > | null,
+  reasons?:  Array<Reason | null > | null,
+  quickInputStartTimes?:  Array<QuickInputTime | null > | null,
+  quickInputEndTimes?:  Array<QuickInputTime | null > | null,
+  themeColor?: string | null,
+  shiftGroups?:  Array<ShiftGroup | null > | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type Link = {
@@ -207,28 +215,37 @@ export type ShiftGroup = {
   fixed?: number | null;
 };
 
+export type ShiftGroup = {
+  __typename: "ShiftGroup",
+  label: string,
+  description?: string | null,
+  min?: number | null,
+  max?: number | null,
+  fixed?: number | null,
+};
+
 export type UpdateAppConfigInput = {
-  id: string;
-  name?: string | null;
-  workStartTime?: string | null;
-  workEndTime?: string | null;
-  lunchRestStartTime?: string | null;
-  lunchRestEndTime?: string | null;
-  amHolidayStartTime?: string | null;
-  amHolidayEndTime?: string | null;
-  pmHolidayStartTime?: string | null;
-  pmHolidayEndTime?: string | null;
-  specialHolidayEnabled?: boolean | null;
-  amPmHolidayEnabled?: boolean | null;
-  officeMode?: boolean | null;
-  absentEnabled?: boolean | null;
-  hourlyPaidHolidayEnabled?: boolean | null;
-  links?: Array<LinkInput | null> | null;
-  reasons?: Array<ReasonInput | null> | null;
-  quickInputStartTimes?: Array<QuickInputTimeInput | null> | null;
-  quickInputEndTimes?: Array<QuickInputTimeInput | null> | null;
-  themeColor?: string | null;
-  shiftGroups?: Array<ShiftGroupInput | null> | null;
+  id: string,
+  name?: string | null,
+  workStartTime?: string | null,
+  workEndTime?: string | null,
+  lunchRestStartTime?: string | null,
+  lunchRestEndTime?: string | null,
+  amHolidayStartTime?: string | null,
+  amHolidayEndTime?: string | null,
+  pmHolidayStartTime?: string | null,
+  pmHolidayEndTime?: string | null,
+  specialHolidayEnabled?: boolean | null,
+  amPmHolidayEnabled?: boolean | null,
+  officeMode?: boolean | null,
+  absentEnabled?: boolean | null,
+  hourlyPaidHolidayEnabled?: boolean | null,
+  links?: Array< LinkInput | null > | null,
+  reasons?: Array< ReasonInput | null > | null,
+  quickInputStartTimes?: Array< QuickInputTimeInput | null > | null,
+  quickInputEndTimes?: Array< QuickInputTimeInput | null > | null,
+  themeColor?: string | null,
+  shiftGroups?: Array< ShiftGroupInput | null > | null,
 };
 
 export type DeleteAppConfigInput = {
@@ -236,25 +253,25 @@ export type DeleteAppConfigInput = {
 };
 
 export type CreateStaffInput = {
-  id?: string | null;
-  cognitoUserId: string;
-  familyName?: string | null;
-  givenName?: string | null;
-  mailAddress: string;
-  role: string;
-  enabled: boolean;
-  status: string;
-  owner?: boolean | null;
-  usageStartDate?: string | null;
-  notifications?: NotificationInput | null;
-  sortKey?: string | null;
-  workType?: string | null;
-  developer?: boolean | null;
-  approverSetting?: ApproverSettingMode | null;
-  approverSingle?: string | null;
-  approverMultiple?: Array<string | null> | null;
-  approverMultipleMode?: ApproverMultipleMode | null;
-  shiftGroup?: string | null;
+  id?: string | null,
+  cognitoUserId: string,
+  familyName?: string | null,
+  givenName?: string | null,
+  mailAddress: string,
+  role: string,
+  enabled: boolean,
+  status: string,
+  owner?: boolean | null,
+  usageStartDate?: string | null,
+  notifications?: NotificationInput | null,
+  sortKey?: string | null,
+  workType?: string | null,
+  developer?: boolean | null,
+  approverSetting?: ApproverSettingMode | null,
+  approverSingle?: string | null,
+  approverMultiple?: Array< string | null > | null,
+  approverMultipleMode?: ApproverMultipleMode | null,
+  shiftGroup?: string | null,
 };
 
 export type NotificationInput = {
@@ -274,28 +291,28 @@ export enum ApproverMultipleMode {
 }
 
 export type ModelStaffConditionInput = {
-  cognitoUserId?: ModelStringInput | null;
-  familyName?: ModelStringInput | null;
-  givenName?: ModelStringInput | null;
-  mailAddress?: ModelStringInput | null;
-  role?: ModelStringInput | null;
-  enabled?: ModelBooleanInput | null;
-  status?: ModelStringInput | null;
-  owner?: ModelBooleanInput | null;
-  usageStartDate?: ModelStringInput | null;
-  sortKey?: ModelStringInput | null;
-  workType?: ModelStringInput | null;
-  developer?: ModelBooleanInput | null;
-  approverSetting?: ModelApproverSettingModeInput | null;
-  approverSingle?: ModelStringInput | null;
-  approverMultiple?: ModelStringInput | null;
-  approverMultipleMode?: ModelApproverMultipleModeInput | null;
-  shiftGroup?: ModelStringInput | null;
-  and?: Array<ModelStaffConditionInput | null> | null;
-  or?: Array<ModelStaffConditionInput | null> | null;
-  not?: ModelStaffConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  cognitoUserId?: ModelStringInput | null,
+  familyName?: ModelStringInput | null,
+  givenName?: ModelStringInput | null,
+  mailAddress?: ModelStringInput | null,
+  role?: ModelStringInput | null,
+  enabled?: ModelBooleanInput | null,
+  status?: ModelStringInput | null,
+  owner?: ModelBooleanInput | null,
+  usageStartDate?: ModelStringInput | null,
+  sortKey?: ModelStringInput | null,
+  workType?: ModelStringInput | null,
+  developer?: ModelBooleanInput | null,
+  approverSetting?: ModelApproverSettingModeInput | null,
+  approverSingle?: ModelStringInput | null,
+  approverMultiple?: ModelStringInput | null,
+  approverMultipleMode?: ModelApproverMultipleModeInput | null,
+  shiftGroup?: ModelStringInput | null,
+  and?: Array< ModelStaffConditionInput | null > | null,
+  or?: Array< ModelStaffConditionInput | null > | null,
+  not?: ModelStaffConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type ModelApproverSettingModeInput = {
@@ -309,28 +326,28 @@ export type ModelApproverMultipleModeInput = {
 };
 
 export type Staff = {
-  __typename: "Staff";
-  id: string;
-  cognitoUserId: string;
-  familyName?: string | null;
-  givenName?: string | null;
-  mailAddress: string;
-  role: string;
-  enabled: boolean;
-  status: string;
-  owner?: boolean | null;
-  usageStartDate?: string | null;
-  notifications?: Notification | null;
-  sortKey?: string | null;
-  workType?: string | null;
-  developer?: boolean | null;
-  approverSetting?: ApproverSettingMode | null;
-  approverSingle?: string | null;
-  approverMultiple?: Array<string | null> | null;
-  approverMultipleMode?: ApproverMultipleMode | null;
-  shiftGroup?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "Staff",
+  id: string,
+  cognitoUserId: string,
+  familyName?: string | null,
+  givenName?: string | null,
+  mailAddress: string,
+  role: string,
+  enabled: boolean,
+  status: string,
+  owner?: boolean | null,
+  usageStartDate?: string | null,
+  notifications?: Notification | null,
+  sortKey?: string | null,
+  workType?: string | null,
+  developer?: boolean | null,
+  approverSetting?: ApproverSettingMode | null,
+  approverSingle?: string | null,
+  approverMultiple?: Array< string | null > | null,
+  approverMultipleMode?: ApproverMultipleMode | null,
+  shiftGroup?: string | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type Notification = {
@@ -340,25 +357,25 @@ export type Notification = {
 };
 
 export type UpdateStaffInput = {
-  id: string;
-  cognitoUserId?: string | null;
-  familyName?: string | null;
-  givenName?: string | null;
-  mailAddress?: string | null;
-  role?: string | null;
-  enabled?: boolean | null;
-  status?: string | null;
-  owner?: boolean | null;
-  usageStartDate?: string | null;
-  notifications?: NotificationInput | null;
-  sortKey?: string | null;
-  workType?: string | null;
-  developer?: boolean | null;
-  approverSetting?: ApproverSettingMode | null;
-  approverSingle?: string | null;
-  approverMultiple?: Array<string | null> | null;
-  approverMultipleMode?: ApproverMultipleMode | null;
-  shiftGroup?: string | null;
+  id: string,
+  cognitoUserId?: string | null,
+  familyName?: string | null,
+  givenName?: string | null,
+  mailAddress?: string | null,
+  role?: string | null,
+  enabled?: boolean | null,
+  status?: string | null,
+  owner?: boolean | null,
+  usageStartDate?: string | null,
+  notifications?: NotificationInput | null,
+  sortKey?: string | null,
+  workType?: string | null,
+  developer?: boolean | null,
+  approverSetting?: ApproverSettingMode | null,
+  approverSingle?: string | null,
+  approverMultiple?: Array< string | null > | null,
+  approverMultipleMode?: ApproverMultipleMode | null,
+  shiftGroup?: string | null,
 };
 
 export type DeleteStaffInput = {
@@ -744,6 +761,180 @@ export type DeleteDocumentInput = {
   id: string;
 };
 
+export type CreateShiftRequestInput = {
+  id?: string | null,
+  staffId: string,
+  targetMonth: string,
+  note?: string | null,
+  entries?: Array< ShiftRequestDayPreferenceInput | null > | null,
+  summary?: ShiftRequestSummaryInput | null,
+  submittedAt?: string | null,
+  updatedAt?: string | null,
+  histories?: Array< ShiftRequestHistoryInput | null > | null,
+};
+
+export type ShiftRequestDayPreferenceInput = {
+  date: string,
+  status: ShiftRequestStatus,
+};
+
+export enum ShiftRequestStatus {
+  WORK = "WORK",
+  FIXED_OFF = "FIXED_OFF",
+  REQUESTED_OFF = "REQUESTED_OFF",
+  AUTO = "AUTO",
+}
+
+
+export type ShiftRequestSummaryInput = {
+  workDays?: number | null,
+  fixedOffDays?: number | null,
+  requestedOffDays?: number | null,
+};
+
+export type ShiftRequestHistoryInput = {
+  version: number,
+  note?: string | null,
+  entries?: Array< ShiftRequestDayPreferenceInput | null > | null,
+  summary?: ShiftRequestSummaryInput | null,
+  submittedAt?: string | null,
+  updatedAt?: string | null,
+  recordedAt: string,
+  recordedByStaffId?: string | null,
+  changeReason?: string | null,
+};
+
+export type ModelShiftRequestConditionInput = {
+  staffId?: ModelStringInput | null,
+  targetMonth?: ModelStringInput | null,
+  note?: ModelStringInput | null,
+  submittedAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelShiftRequestConditionInput | null > | null,
+  or?: Array< ModelShiftRequestConditionInput | null > | null,
+  not?: ModelShiftRequestConditionInput | null,
+  createdAt?: ModelStringInput | null,
+};
+
+export type ShiftRequest = {
+  __typename: "ShiftRequest",
+  id: string,
+  staffId: string,
+  targetMonth: string,
+  note?: string | null,
+  entries?:  Array<ShiftRequestDayPreference | null > | null,
+  summary?: ShiftRequestSummary | null,
+  submittedAt?: string | null,
+  updatedAt?: string | null,
+  histories?:  Array<ShiftRequestHistory | null > | null,
+  createdAt: string,
+};
+
+export type ShiftRequestDayPreference = {
+  __typename: "ShiftRequestDayPreference",
+  date: string,
+  status: ShiftRequestStatus,
+};
+
+export type ShiftRequestSummary = {
+  __typename: "ShiftRequestSummary",
+  workDays?: number | null,
+  fixedOffDays?: number | null,
+  requestedOffDays?: number | null,
+};
+
+export type ShiftRequestHistory = {
+  __typename: "ShiftRequestHistory",
+  version: number,
+  note?: string | null,
+  entries?:  Array<ShiftRequestDayPreference | null > | null,
+  summary?: ShiftRequestSummary | null,
+  submittedAt?: string | null,
+  updatedAt?: string | null,
+  recordedAt: string,
+  recordedByStaffId?: string | null,
+  changeReason?: string | null,
+};
+
+export type UpdateShiftRequestInput = {
+  id: string,
+  staffId?: string | null,
+  targetMonth?: string | null,
+  note?: string | null,
+  entries?: Array< ShiftRequestDayPreferenceInput | null > | null,
+  summary?: ShiftRequestSummaryInput | null,
+  submittedAt?: string | null,
+  updatedAt?: string | null,
+  histories?: Array< ShiftRequestHistoryInput | null > | null,
+};
+
+export type DeleteShiftRequestInput = {
+  id: string,
+};
+
+export type CreateShiftPlanYearInput = {
+  id?: string | null,
+  targetYear: number,
+  plans?: Array< ShiftPlanMonthSettingInput | null > | null,
+  notes?: string | null,
+  createdBy?: string | null,
+  updatedBy?: string | null,
+};
+
+export type ShiftPlanMonthSettingInput = {
+  month: number,
+  editStart?: string | null,
+  editEnd?: string | null,
+  enabled?: boolean | null,
+  dailyCapacities?: Array< number | null > | null,
+};
+
+export type ModelShiftPlanYearConditionInput = {
+  targetYear?: ModelIntInput | null,
+  notes?: ModelStringInput | null,
+  createdBy?: ModelStringInput | null,
+  updatedBy?: ModelStringInput | null,
+  and?: Array< ModelShiftPlanYearConditionInput | null > | null,
+  or?: Array< ModelShiftPlanYearConditionInput | null > | null,
+  not?: ModelShiftPlanYearConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ShiftPlanYear = {
+  __typename: "ShiftPlanYear",
+  id: string,
+  targetYear: number,
+  plans?:  Array<ShiftPlanMonthSetting | null > | null,
+  notes?: string | null,
+  createdBy?: string | null,
+  updatedBy?: string | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ShiftPlanMonthSetting = {
+  __typename: "ShiftPlanMonthSetting",
+  month: number,
+  editStart?: string | null,
+  editEnd?: string | null,
+  enabled?: boolean | null,
+  dailyCapacities?: Array< number | null > | null,
+};
+
+export type UpdateShiftPlanYearInput = {
+  id: string,
+  targetYear?: number | null,
+  plans?: Array< ShiftPlanMonthSettingInput | null > | null,
+  notes?: string | null,
+  createdBy?: string | null,
+  updatedBy?: string | null,
+};
+
+export type DeleteShiftPlanYearInput = {
+  id: string,
+};
+
 export type CreateWorkflowInput = {
   id?: string | null;
   approvedStaffIds?: Array<string | null> | null;
@@ -977,6 +1168,111 @@ export type DeleteOperationLogInput = {
   id: string;
 };
 
+export type CreateDailyReportInput = {
+  id?: string | null,
+  staffId: string,
+  reportDate: string,
+  title: string,
+  content?: string | null,
+  status: DailyReportStatus,
+  updatedAt?: string | null,
+  reactions?: Array< DailyReportReactionInput | null > | null,
+  comments?: Array< DailyReportCommentInput | null > | null,
+};
+
+export enum DailyReportStatus {
+  DRAFT = "DRAFT",
+  SUBMITTED = "SUBMITTED",
+  APPROVED = "APPROVED",
+}
+
+
+export type DailyReportReactionInput = {
+  staffId: string,
+  type: DailyReportReactionType,
+  createdAt: string,
+};
+
+export enum DailyReportReactionType {
+  CHEER = "CHEER",
+  CHECK = "CHECK",
+  THANKS = "THANKS",
+  LOOK = "LOOK",
+}
+
+
+export type DailyReportCommentInput = {
+  id: string,
+  staffId: string,
+  authorName?: string | null,
+  body: string,
+  createdAt: string,
+};
+
+export type ModelDailyReportConditionInput = {
+  staffId?: ModelStringInput | null,
+  reportDate?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  content?: ModelStringInput | null,
+  status?: ModelDailyReportStatusInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelDailyReportConditionInput | null > | null,
+  or?: Array< ModelDailyReportConditionInput | null > | null,
+  not?: ModelDailyReportConditionInput | null,
+  createdAt?: ModelStringInput | null,
+};
+
+export type ModelDailyReportStatusInput = {
+  eq?: DailyReportStatus | null,
+  ne?: DailyReportStatus | null,
+};
+
+export type DailyReport = {
+  __typename: "DailyReport",
+  id: string,
+  staffId: string,
+  reportDate: string,
+  title: string,
+  content?: string | null,
+  status: DailyReportStatus,
+  updatedAt?: string | null,
+  reactions?:  Array<DailyReportReaction | null > | null,
+  comments?:  Array<DailyReportComment | null > | null,
+  createdAt: string,
+};
+
+export type DailyReportReaction = {
+  __typename: "DailyReportReaction",
+  staffId: string,
+  type: DailyReportReactionType,
+  createdAt: string,
+};
+
+export type DailyReportComment = {
+  __typename: "DailyReportComment",
+  id: string,
+  staffId: string,
+  authorName?: string | null,
+  body: string,
+  createdAt: string,
+};
+
+export type UpdateDailyReportInput = {
+  id: string,
+  staffId?: string | null,
+  reportDate?: string | null,
+  title?: string | null,
+  content?: string | null,
+  status?: DailyReportStatus | null,
+  updatedAt?: string | null,
+  reactions?: Array< DailyReportReactionInput | null > | null,
+  comments?: Array< DailyReportCommentInput | null > | null,
+};
+
+export type DeleteDailyReportInput = {
+  id: string,
+};
+
 export type EmailData = {
   to?: Array<string | null> | null;
   subject: string;
@@ -1022,27 +1318,27 @@ export type ModelCheckForUpdateConnection = {
 };
 
 export type ModelAppConfigFilterInput = {
-  id?: ModelIDInput | null;
-  name?: ModelStringInput | null;
-  workStartTime?: ModelStringInput | null;
-  workEndTime?: ModelStringInput | null;
-  lunchRestStartTime?: ModelStringInput | null;
-  lunchRestEndTime?: ModelStringInput | null;
-  amHolidayStartTime?: ModelStringInput | null;
-  amHolidayEndTime?: ModelStringInput | null;
-  pmHolidayStartTime?: ModelStringInput | null;
-  pmHolidayEndTime?: ModelStringInput | null;
-  specialHolidayEnabled?: ModelBooleanInput | null;
-  amPmHolidayEnabled?: ModelBooleanInput | null;
-  officeMode?: ModelBooleanInput | null;
-  absentEnabled?: ModelBooleanInput | null;
-  hourlyPaidHolidayEnabled?: ModelBooleanInput | null;
-  themeColor?: ModelStringInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelAppConfigFilterInput | null> | null;
-  or?: Array<ModelAppConfigFilterInput | null> | null;
-  not?: ModelAppConfigFilterInput | null;
+  id?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  workStartTime?: ModelStringInput | null,
+  workEndTime?: ModelStringInput | null,
+  lunchRestStartTime?: ModelStringInput | null,
+  lunchRestEndTime?: ModelStringInput | null,
+  amHolidayStartTime?: ModelStringInput | null,
+  amHolidayEndTime?: ModelStringInput | null,
+  pmHolidayStartTime?: ModelStringInput | null,
+  pmHolidayEndTime?: ModelStringInput | null,
+  specialHolidayEnabled?: ModelBooleanInput | null,
+  amPmHolidayEnabled?: ModelBooleanInput | null,
+  officeMode?: ModelBooleanInput | null,
+  absentEnabled?: ModelBooleanInput | null,
+  hourlyPaidHolidayEnabled?: ModelBooleanInput | null,
+  themeColor?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAppConfigFilterInput | null > | null,
+  or?: Array< ModelAppConfigFilterInput | null > | null,
+  not?: ModelAppConfigFilterInput | null,
 };
 
 export type ModelAppConfigConnection = {
@@ -1052,29 +1348,29 @@ export type ModelAppConfigConnection = {
 };
 
 export type ModelStaffFilterInput = {
-  id?: ModelIDInput | null;
-  cognitoUserId?: ModelStringInput | null;
-  familyName?: ModelStringInput | null;
-  givenName?: ModelStringInput | null;
-  mailAddress?: ModelStringInput | null;
-  role?: ModelStringInput | null;
-  enabled?: ModelBooleanInput | null;
-  status?: ModelStringInput | null;
-  owner?: ModelBooleanInput | null;
-  usageStartDate?: ModelStringInput | null;
-  sortKey?: ModelStringInput | null;
-  workType?: ModelStringInput | null;
-  developer?: ModelBooleanInput | null;
-  approverSetting?: ModelApproverSettingModeInput | null;
-  approverSingle?: ModelStringInput | null;
-  approverMultiple?: ModelStringInput | null;
-  approverMultipleMode?: ModelApproverMultipleModeInput | null;
-  shiftGroup?: ModelStringInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelStaffFilterInput | null> | null;
-  or?: Array<ModelStaffFilterInput | null> | null;
-  not?: ModelStaffFilterInput | null;
+  id?: ModelIDInput | null,
+  cognitoUserId?: ModelStringInput | null,
+  familyName?: ModelStringInput | null,
+  givenName?: ModelStringInput | null,
+  mailAddress?: ModelStringInput | null,
+  role?: ModelStringInput | null,
+  enabled?: ModelBooleanInput | null,
+  status?: ModelStringInput | null,
+  owner?: ModelBooleanInput | null,
+  usageStartDate?: ModelStringInput | null,
+  sortKey?: ModelStringInput | null,
+  workType?: ModelStringInput | null,
+  developer?: ModelBooleanInput | null,
+  approverSetting?: ModelApproverSettingModeInput | null,
+  approverSingle?: ModelStringInput | null,
+  approverMultiple?: ModelStringInput | null,
+  approverMultipleMode?: ModelApproverMultipleModeInput | null,
+  shiftGroup?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelStaffFilterInput | null > | null,
+  or?: Array< ModelStaffFilterInput | null > | null,
+  not?: ModelStaffFilterInput | null,
 };
 
 export type ModelStaffConnection = {
@@ -1209,6 +1505,44 @@ export type ModelDocumentConnection = {
   nextToken?: string | null;
 };
 
+export type ModelShiftRequestFilterInput = {
+  id?: ModelIDInput | null,
+  staffId?: ModelStringInput | null,
+  targetMonth?: ModelStringInput | null,
+  note?: ModelStringInput | null,
+  submittedAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  and?: Array< ModelShiftRequestFilterInput | null > | null,
+  or?: Array< ModelShiftRequestFilterInput | null > | null,
+  not?: ModelShiftRequestFilterInput | null,
+};
+
+export type ModelShiftRequestConnection = {
+  __typename: "ModelShiftRequestConnection",
+  items:  Array<ShiftRequest | null >,
+  nextToken?: string | null,
+};
+
+export type ModelShiftPlanYearFilterInput = {
+  id?: ModelIDInput | null,
+  targetYear?: ModelIntInput | null,
+  notes?: ModelStringInput | null,
+  createdBy?: ModelStringInput | null,
+  updatedBy?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelShiftPlanYearFilterInput | null > | null,
+  or?: Array< ModelShiftPlanYearFilterInput | null > | null,
+  not?: ModelShiftPlanYearFilterInput | null,
+};
+
+export type ModelShiftPlanYearConnection = {
+  __typename: "ModelShiftPlanYearConnection",
+  items:  Array<ShiftPlanYear | null >,
+  nextToken?: string | null,
+};
+
 export type ModelWorkflowFilterInput = {
   id?: ModelIDInput | null;
   approvedStaffIds?: ModelStringInput | null;
@@ -1261,6 +1595,26 @@ export type ModelOperationLogConnection = {
   nextToken?: string | null;
 };
 
+export type ModelDailyReportFilterInput = {
+  id?: ModelIDInput | null,
+  staffId?: ModelStringInput | null,
+  reportDate?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  content?: ModelStringInput | null,
+  status?: ModelDailyReportStatusInput | null,
+  updatedAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  and?: Array< ModelDailyReportFilterInput | null > | null,
+  or?: Array< ModelDailyReportFilterInput | null > | null,
+  not?: ModelDailyReportFilterInput | null,
+};
+
+export type ModelDailyReportConnection = {
+  __typename: "ModelDailyReportConnection",
+  items:  Array<DailyReport | null >,
+  nextToken?: string | null,
+};
+
 export type ModelSubscriptionCheckForUpdateFilterInput = {
   id?: ModelSubscriptionIDInput | null;
   deployUuid?: ModelSubscriptionStringInput | null;
@@ -1301,26 +1655,26 @@ export type ModelSubscriptionStringInput = {
 };
 
 export type ModelSubscriptionAppConfigFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  name?: ModelSubscriptionStringInput | null;
-  workStartTime?: ModelSubscriptionStringInput | null;
-  workEndTime?: ModelSubscriptionStringInput | null;
-  lunchRestStartTime?: ModelSubscriptionStringInput | null;
-  lunchRestEndTime?: ModelSubscriptionStringInput | null;
-  amHolidayStartTime?: ModelSubscriptionStringInput | null;
-  amHolidayEndTime?: ModelSubscriptionStringInput | null;
-  pmHolidayStartTime?: ModelSubscriptionStringInput | null;
-  pmHolidayEndTime?: ModelSubscriptionStringInput | null;
-  specialHolidayEnabled?: ModelSubscriptionBooleanInput | null;
-  amPmHolidayEnabled?: ModelSubscriptionBooleanInput | null;
-  officeMode?: ModelSubscriptionBooleanInput | null;
-  absentEnabled?: ModelSubscriptionBooleanInput | null;
-  hourlyPaidHolidayEnabled?: ModelSubscriptionBooleanInput | null;
-  themeColor?: ModelSubscriptionStringInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionAppConfigFilterInput | null> | null;
-  or?: Array<ModelSubscriptionAppConfigFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  name?: ModelSubscriptionStringInput | null,
+  workStartTime?: ModelSubscriptionStringInput | null,
+  workEndTime?: ModelSubscriptionStringInput | null,
+  lunchRestStartTime?: ModelSubscriptionStringInput | null,
+  lunchRestEndTime?: ModelSubscriptionStringInput | null,
+  amHolidayStartTime?: ModelSubscriptionStringInput | null,
+  amHolidayEndTime?: ModelSubscriptionStringInput | null,
+  pmHolidayStartTime?: ModelSubscriptionStringInput | null,
+  pmHolidayEndTime?: ModelSubscriptionStringInput | null,
+  specialHolidayEnabled?: ModelSubscriptionBooleanInput | null,
+  amPmHolidayEnabled?: ModelSubscriptionBooleanInput | null,
+  officeMode?: ModelSubscriptionBooleanInput | null,
+  absentEnabled?: ModelSubscriptionBooleanInput | null,
+  hourlyPaidHolidayEnabled?: ModelSubscriptionBooleanInput | null,
+  themeColor?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionAppConfigFilterInput | null > | null,
+  or?: Array< ModelSubscriptionAppConfigFilterInput | null > | null,
 };
 
 export type ModelSubscriptionBooleanInput = {
@@ -1329,28 +1683,28 @@ export type ModelSubscriptionBooleanInput = {
 };
 
 export type ModelSubscriptionStaffFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  cognitoUserId?: ModelSubscriptionStringInput | null;
-  familyName?: ModelSubscriptionStringInput | null;
-  givenName?: ModelSubscriptionStringInput | null;
-  mailAddress?: ModelSubscriptionStringInput | null;
-  role?: ModelSubscriptionStringInput | null;
-  enabled?: ModelSubscriptionBooleanInput | null;
-  status?: ModelSubscriptionStringInput | null;
-  owner?: ModelSubscriptionBooleanInput | null;
-  usageStartDate?: ModelSubscriptionStringInput | null;
-  sortKey?: ModelSubscriptionStringInput | null;
-  workType?: ModelSubscriptionStringInput | null;
-  developer?: ModelSubscriptionBooleanInput | null;
-  approverSetting?: ModelSubscriptionStringInput | null;
-  approverSingle?: ModelSubscriptionStringInput | null;
-  approverMultiple?: ModelSubscriptionStringInput | null;
-  approverMultipleMode?: ModelSubscriptionStringInput | null;
-  shiftGroup?: ModelSubscriptionStringInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionStaffFilterInput | null> | null;
-  or?: Array<ModelSubscriptionStaffFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  cognitoUserId?: ModelSubscriptionStringInput | null,
+  familyName?: ModelSubscriptionStringInput | null,
+  givenName?: ModelSubscriptionStringInput | null,
+  mailAddress?: ModelSubscriptionStringInput | null,
+  role?: ModelSubscriptionStringInput | null,
+  enabled?: ModelSubscriptionBooleanInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  owner?: ModelSubscriptionBooleanInput | null,
+  usageStartDate?: ModelSubscriptionStringInput | null,
+  sortKey?: ModelSubscriptionStringInput | null,
+  workType?: ModelSubscriptionStringInput | null,
+  developer?: ModelSubscriptionBooleanInput | null,
+  approverSetting?: ModelSubscriptionStringInput | null,
+  approverSingle?: ModelSubscriptionStringInput | null,
+  approverMultiple?: ModelSubscriptionStringInput | null,
+  approverMultipleMode?: ModelSubscriptionStringInput | null,
+  shiftGroup?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionStaffFilterInput | null > | null,
+  or?: Array< ModelSubscriptionStaffFilterInput | null > | null,
 };
 
 export type ModelSubscriptionHolidayCalendarFilterInput = {
@@ -1431,6 +1785,30 @@ export type ModelSubscriptionDocumentFilterInput = {
   or?: Array<ModelSubscriptionDocumentFilterInput | null> | null;
 };
 
+export type ModelSubscriptionShiftRequestFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  targetMonth?: ModelSubscriptionStringInput | null,
+  note?: ModelSubscriptionStringInput | null,
+  submittedAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionShiftRequestFilterInput | null > | null,
+  or?: Array< ModelSubscriptionShiftRequestFilterInput | null > | null,
+};
+
+export type ModelSubscriptionShiftPlanYearFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  targetYear?: ModelSubscriptionIntInput | null,
+  notes?: ModelSubscriptionStringInput | null,
+  createdBy?: ModelSubscriptionStringInput | null,
+  updatedBy?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionShiftPlanYearFilterInput | null > | null,
+  or?: Array< ModelSubscriptionShiftPlanYearFilterInput | null > | null,
+};
+
 export type ModelSubscriptionWorkflowFilterInput = {
   id?: ModelSubscriptionIDInput | null;
   approvedStaffIds?: ModelSubscriptionStringInput | null;
@@ -1467,6 +1845,19 @@ export type ModelSubscriptionOperationLogFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null;
   and?: Array<ModelSubscriptionOperationLogFilterInput | null> | null;
   or?: Array<ModelSubscriptionOperationLogFilterInput | null> | null;
+};
+
+export type ModelSubscriptionDailyReportFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  reportDate?: ModelSubscriptionStringInput | null,
+  title?: ModelSubscriptionStringInput | null,
+  content?: ModelSubscriptionStringInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionDailyReportFilterInput | null > | null,
+  or?: Array< ModelSubscriptionDailyReportFilterInput | null > | null,
 };
 
 export type CreateCheckForUpdateMutationVariables = {
@@ -1520,57 +1911,57 @@ export type CreateAppConfigMutationVariables = {
 };
 
 export type CreateAppConfigMutation = {
-  createAppConfig?: {
-    __typename: "AppConfig";
-    id: string;
-    name: string;
-    workStartTime?: string | null;
-    workEndTime?: string | null;
-    lunchRestStartTime?: string | null;
-    lunchRestEndTime?: string | null;
-    amHolidayStartTime?: string | null;
-    amHolidayEndTime?: string | null;
-    pmHolidayStartTime?: string | null;
-    pmHolidayEndTime?: string | null;
-    specialHolidayEnabled?: boolean | null;
-    amPmHolidayEnabled?: boolean | null;
-    officeMode?: boolean | null;
-    absentEnabled?: boolean | null;
-    hourlyPaidHolidayEnabled?: boolean | null;
-    links?: Array<{
-      __typename: "Link";
-      label: string;
-      url: string;
-      enabled: boolean;
-      icon?: string | null;
-    } | null> | null;
-    reasons?: Array<{
-      __typename: "Reason";
-      reason: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputStartTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputEndTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    themeColor?: string | null;
-    shiftGroups?: Array<{
-      __typename: "ShiftGroup";
-      label: string;
-      description?: string | null;
-      min?: number | null;
-      max?: number | null;
-      fixed?: number | null;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createAppConfig?:  {
+    __typename: "AppConfig",
+    id: string,
+    name: string,
+    workStartTime?: string | null,
+    workEndTime?: string | null,
+    lunchRestStartTime?: string | null,
+    lunchRestEndTime?: string | null,
+    amHolidayStartTime?: string | null,
+    amHolidayEndTime?: string | null,
+    pmHolidayStartTime?: string | null,
+    pmHolidayEndTime?: string | null,
+    specialHolidayEnabled?: boolean | null,
+    amPmHolidayEnabled?: boolean | null,
+    officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
+    hourlyPaidHolidayEnabled?: boolean | null,
+    links?:  Array< {
+      __typename: "Link",
+      label: string,
+      url: string,
+      enabled: boolean,
+      icon?: string | null,
+    } | null > | null,
+    reasons?:  Array< {
+      __typename: "Reason",
+      reason: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputStartTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputEndTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+      min?: number | null,
+      max?: number | null,
+      fixed?: number | null,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateAppConfigMutationVariables = {
@@ -1579,57 +1970,57 @@ export type UpdateAppConfigMutationVariables = {
 };
 
 export type UpdateAppConfigMutation = {
-  updateAppConfig?: {
-    __typename: "AppConfig";
-    id: string;
-    name: string;
-    workStartTime?: string | null;
-    workEndTime?: string | null;
-    lunchRestStartTime?: string | null;
-    lunchRestEndTime?: string | null;
-    amHolidayStartTime?: string | null;
-    amHolidayEndTime?: string | null;
-    pmHolidayStartTime?: string | null;
-    pmHolidayEndTime?: string | null;
-    specialHolidayEnabled?: boolean | null;
-    amPmHolidayEnabled?: boolean | null;
-    officeMode?: boolean | null;
-    absentEnabled?: boolean | null;
-    hourlyPaidHolidayEnabled?: boolean | null;
-    links?: Array<{
-      __typename: "Link";
-      label: string;
-      url: string;
-      enabled: boolean;
-      icon?: string | null;
-    } | null> | null;
-    reasons?: Array<{
-      __typename: "Reason";
-      reason: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputStartTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputEndTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    themeColor?: string | null;
-    shiftGroups?: Array<{
-      __typename: "ShiftGroup";
-      label: string;
-      description?: string | null;
-      min?: number | null;
-      max?: number | null;
-      fixed?: number | null;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateAppConfig?:  {
+    __typename: "AppConfig",
+    id: string,
+    name: string,
+    workStartTime?: string | null,
+    workEndTime?: string | null,
+    lunchRestStartTime?: string | null,
+    lunchRestEndTime?: string | null,
+    amHolidayStartTime?: string | null,
+    amHolidayEndTime?: string | null,
+    pmHolidayStartTime?: string | null,
+    pmHolidayEndTime?: string | null,
+    specialHolidayEnabled?: boolean | null,
+    amPmHolidayEnabled?: boolean | null,
+    officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
+    hourlyPaidHolidayEnabled?: boolean | null,
+    links?:  Array< {
+      __typename: "Link",
+      label: string,
+      url: string,
+      enabled: boolean,
+      icon?: string | null,
+    } | null > | null,
+    reasons?:  Array< {
+      __typename: "Reason",
+      reason: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputStartTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputEndTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+      min?: number | null,
+      max?: number | null,
+      fixed?: number | null,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteAppConfigMutationVariables = {
@@ -1638,57 +2029,57 @@ export type DeleteAppConfigMutationVariables = {
 };
 
 export type DeleteAppConfigMutation = {
-  deleteAppConfig?: {
-    __typename: "AppConfig";
-    id: string;
-    name: string;
-    workStartTime?: string | null;
-    workEndTime?: string | null;
-    lunchRestStartTime?: string | null;
-    lunchRestEndTime?: string | null;
-    amHolidayStartTime?: string | null;
-    amHolidayEndTime?: string | null;
-    pmHolidayStartTime?: string | null;
-    pmHolidayEndTime?: string | null;
-    specialHolidayEnabled?: boolean | null;
-    amPmHolidayEnabled?: boolean | null;
-    officeMode?: boolean | null;
-    absentEnabled?: boolean | null;
-    hourlyPaidHolidayEnabled?: boolean | null;
-    links?: Array<{
-      __typename: "Link";
-      label: string;
-      url: string;
-      enabled: boolean;
-      icon?: string | null;
-    } | null> | null;
-    reasons?: Array<{
-      __typename: "Reason";
-      reason: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputStartTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputEndTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    themeColor?: string | null;
-    shiftGroups?: Array<{
-      __typename: "ShiftGroup";
-      label: string;
-      description?: string | null;
-      min?: number | null;
-      max?: number | null;
-      fixed?: number | null;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteAppConfig?:  {
+    __typename: "AppConfig",
+    id: string,
+    name: string,
+    workStartTime?: string | null,
+    workEndTime?: string | null,
+    lunchRestStartTime?: string | null,
+    lunchRestEndTime?: string | null,
+    amHolidayStartTime?: string | null,
+    amHolidayEndTime?: string | null,
+    pmHolidayStartTime?: string | null,
+    pmHolidayEndTime?: string | null,
+    specialHolidayEnabled?: boolean | null,
+    amPmHolidayEnabled?: boolean | null,
+    officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
+    hourlyPaidHolidayEnabled?: boolean | null,
+    links?:  Array< {
+      __typename: "Link",
+      label: string,
+      url: string,
+      enabled: boolean,
+      icon?: string | null,
+    } | null > | null,
+    reasons?:  Array< {
+      __typename: "Reason",
+      reason: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputStartTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputEndTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+      min?: number | null,
+      max?: number | null,
+      fixed?: number | null,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateStaffMutationVariables = {
@@ -1697,34 +2088,34 @@ export type CreateStaffMutationVariables = {
 };
 
 export type CreateStaffMutation = {
-  createStaff?: {
-    __typename: "Staff";
-    id: string;
-    cognitoUserId: string;
-    familyName?: string | null;
-    givenName?: string | null;
-    mailAddress: string;
-    role: string;
-    enabled: boolean;
-    status: string;
-    owner?: boolean | null;
-    usageStartDate?: string | null;
-    notifications?: {
-      __typename: "Notification";
-      workStart?: boolean | null;
-      workEnd?: boolean | null;
-    } | null;
-    sortKey?: string | null;
-    workType?: string | null;
-    developer?: boolean | null;
-    approverSetting?: ApproverSettingMode | null;
-    approverSingle?: string | null;
-    approverMultiple?: Array<string | null> | null;
-    approverMultipleMode?: ApproverMultipleMode | null;
-    shiftGroup?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createStaff?:  {
+    __typename: "Staff",
+    id: string,
+    cognitoUserId: string,
+    familyName?: string | null,
+    givenName?: string | null,
+    mailAddress: string,
+    role: string,
+    enabled: boolean,
+    status: string,
+    owner?: boolean | null,
+    usageStartDate?: string | null,
+    notifications?:  {
+      __typename: "Notification",
+      workStart?: boolean | null,
+      workEnd?: boolean | null,
+    } | null,
+    sortKey?: string | null,
+    workType?: string | null,
+    developer?: boolean | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
+    shiftGroup?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateStaffMutationVariables = {
@@ -1733,34 +2124,34 @@ export type UpdateStaffMutationVariables = {
 };
 
 export type UpdateStaffMutation = {
-  updateStaff?: {
-    __typename: "Staff";
-    id: string;
-    cognitoUserId: string;
-    familyName?: string | null;
-    givenName?: string | null;
-    mailAddress: string;
-    role: string;
-    enabled: boolean;
-    status: string;
-    owner?: boolean | null;
-    usageStartDate?: string | null;
-    notifications?: {
-      __typename: "Notification";
-      workStart?: boolean | null;
-      workEnd?: boolean | null;
-    } | null;
-    sortKey?: string | null;
-    workType?: string | null;
-    developer?: boolean | null;
-    approverSetting?: ApproverSettingMode | null;
-    approverSingle?: string | null;
-    approverMultiple?: Array<string | null> | null;
-    approverMultipleMode?: ApproverMultipleMode | null;
-    shiftGroup?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateStaff?:  {
+    __typename: "Staff",
+    id: string,
+    cognitoUserId: string,
+    familyName?: string | null,
+    givenName?: string | null,
+    mailAddress: string,
+    role: string,
+    enabled: boolean,
+    status: string,
+    owner?: boolean | null,
+    usageStartDate?: string | null,
+    notifications?:  {
+      __typename: "Notification",
+      workStart?: boolean | null,
+      workEnd?: boolean | null,
+    } | null,
+    sortKey?: string | null,
+    workType?: string | null,
+    developer?: boolean | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
+    shiftGroup?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteStaffMutationVariables = {
@@ -1769,34 +2160,34 @@ export type DeleteStaffMutationVariables = {
 };
 
 export type DeleteStaffMutation = {
-  deleteStaff?: {
-    __typename: "Staff";
-    id: string;
-    cognitoUserId: string;
-    familyName?: string | null;
-    givenName?: string | null;
-    mailAddress: string;
-    role: string;
-    enabled: boolean;
-    status: string;
-    owner?: boolean | null;
-    usageStartDate?: string | null;
-    notifications?: {
-      __typename: "Notification";
-      workStart?: boolean | null;
-      workEnd?: boolean | null;
-    } | null;
-    sortKey?: string | null;
-    workType?: string | null;
-    developer?: boolean | null;
-    approverSetting?: ApproverSettingMode | null;
-    approverSingle?: string | null;
-    approverMultiple?: Array<string | null> | null;
-    approverMultipleMode?: ApproverMultipleMode | null;
-    shiftGroup?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteStaff?:  {
+    __typename: "Staff",
+    id: string,
+    cognitoUserId: string,
+    familyName?: string | null,
+    givenName?: string | null,
+    mailAddress: string,
+    role: string,
+    enabled: boolean,
+    status: string,
+    owner?: boolean | null,
+    usageStartDate?: string | null,
+    notifications?:  {
+      __typename: "Notification",
+      workStart?: boolean | null,
+      workEnd?: boolean | null,
+    } | null,
+    sortKey?: string | null,
+    workType?: string | null,
+    developer?: boolean | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
+    shiftGroup?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateHolidayCalendarMutationVariables = {
@@ -2297,102 +2688,330 @@ export type DeleteDocumentMutation = {
   } | null;
 };
 
+export type CreateShiftRequestMutationVariables = {
+  input: CreateShiftRequestInput,
+  condition?: ModelShiftRequestConditionInput | null,
+};
+
+export type CreateShiftRequestMutation = {
+  createShiftRequest?:  {
+    __typename: "ShiftRequest",
+    id: string,
+    staffId: string,
+    targetMonth: string,
+    note?: string | null,
+    entries?:  Array< {
+      __typename: "ShiftRequestDayPreference",
+      date: string,
+      status: ShiftRequestStatus,
+    } | null > | null,
+    summary?:  {
+      __typename: "ShiftRequestSummary",
+      workDays?: number | null,
+      fixedOffDays?: number | null,
+      requestedOffDays?: number | null,
+    } | null,
+    submittedAt?: string | null,
+    updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type UpdateShiftRequestMutationVariables = {
+  input: UpdateShiftRequestInput,
+  condition?: ModelShiftRequestConditionInput | null,
+};
+
+export type UpdateShiftRequestMutation = {
+  updateShiftRequest?:  {
+    __typename: "ShiftRequest",
+    id: string,
+    staffId: string,
+    targetMonth: string,
+    note?: string | null,
+    entries?:  Array< {
+      __typename: "ShiftRequestDayPreference",
+      date: string,
+      status: ShiftRequestStatus,
+    } | null > | null,
+    summary?:  {
+      __typename: "ShiftRequestSummary",
+      workDays?: number | null,
+      fixedOffDays?: number | null,
+      requestedOffDays?: number | null,
+    } | null,
+    submittedAt?: string | null,
+    updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type DeleteShiftRequestMutationVariables = {
+  input: DeleteShiftRequestInput,
+  condition?: ModelShiftRequestConditionInput | null,
+};
+
+export type DeleteShiftRequestMutation = {
+  deleteShiftRequest?:  {
+    __typename: "ShiftRequest",
+    id: string,
+    staffId: string,
+    targetMonth: string,
+    note?: string | null,
+    entries?:  Array< {
+      __typename: "ShiftRequestDayPreference",
+      date: string,
+      status: ShiftRequestStatus,
+    } | null > | null,
+    summary?:  {
+      __typename: "ShiftRequestSummary",
+      workDays?: number | null,
+      fixedOffDays?: number | null,
+      requestedOffDays?: number | null,
+    } | null,
+    submittedAt?: string | null,
+    updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type CreateShiftPlanYearMutationVariables = {
+  input: CreateShiftPlanYearInput,
+  condition?: ModelShiftPlanYearConditionInput | null,
+};
+
+export type CreateShiftPlanYearMutation = {
+  createShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateShiftPlanYearMutationVariables = {
+  input: UpdateShiftPlanYearInput,
+  condition?: ModelShiftPlanYearConditionInput | null,
+};
+
+export type UpdateShiftPlanYearMutation = {
+  updateShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteShiftPlanYearMutationVariables = {
+  input: DeleteShiftPlanYearInput,
+  condition?: ModelShiftPlanYearConditionInput | null,
+};
+
+export type DeleteShiftPlanYearMutation = {
+  deleteShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
 export type CreateWorkflowMutationVariables = {
-  input: CreateWorkflowInput;
-  condition?: ModelWorkflowConditionInput | null;
+  input: CreateWorkflowInput,
+  condition?: ModelWorkflowConditionInput | null,
 };
 
 export type CreateWorkflowMutation = {
-  createWorkflow?: {
-    __typename: "Workflow";
-    id: string;
-    approvedStaffIds?: Array<string | null> | null;
-    rejectedStaffIds?: Array<string | null> | null;
-    finalDecisionTimestamp?: string | null;
-    category?: WorkflowCategory | null;
-    staffId: string;
-    status: WorkflowStatus;
-    assignedApproverStaffIds?: Array<string | null> | null;
-    approvalSteps?: Array<{
-      __typename: "ApprovalStep";
-      id: string;
-      approverStaffId: string;
-      decisionStatus: ApprovalStatus;
-      approverComment?: string | null;
-      decisionTimestamp?: string | null;
-      stepOrder?: number | null;
-    } | null> | null;
-    nextApprovalStepIndex?: number | null;
-    submitterApproverSetting?: ApproverSettingMode | null;
-    submitterApproverId?: string | null;
-    submitterApproverIds?: Array<string | null> | null;
-    submitterApproverMultipleMode?: ApproverMultipleMode | null;
-    overTimeDetails?: {
-      __typename: "OverTimeWorkflow";
-      date: string;
-      startTime: string;
-      endTime: string;
-      reason: string;
-    } | null;
-    comments?: Array<{
-      __typename: "WorkflowComment";
-      id: string;
-      staffId: string;
-      text: string;
-      createdAt: string;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    approvedStaffIds?: Array< string | null > | null,
+    rejectedStaffIds?: Array< string | null > | null,
+    finalDecisionTimestamp?: string | null,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    assignedApproverStaffIds?: Array< string | null > | null,
+    approvalSteps?:  Array< {
+      __typename: "ApprovalStep",
+      id: string,
+      approverStaffId: string,
+      decisionStatus: ApprovalStatus,
+      approverComment?: string | null,
+      decisionTimestamp?: string | null,
+      stepOrder?: number | null,
+    } | null > | null,
+    nextApprovalStepIndex?: number | null,
+    submitterApproverSetting?: ApproverSettingMode | null,
+    submitterApproverId?: string | null,
+    submitterApproverIds?: Array< string | null > | null,
+    submitterApproverMultipleMode?: ApproverMultipleMode | null,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateWorkflowMutationVariables = {
-  input: UpdateWorkflowInput;
-  condition?: ModelWorkflowConditionInput | null;
+  input: UpdateWorkflowInput,
+  condition?: ModelWorkflowConditionInput | null,
 };
 
 export type UpdateWorkflowMutation = {
-  updateWorkflow?: {
-    __typename: "Workflow";
-    id: string;
-    approvedStaffIds?: Array<string | null> | null;
-    rejectedStaffIds?: Array<string | null> | null;
-    finalDecisionTimestamp?: string | null;
-    category?: WorkflowCategory | null;
-    staffId: string;
-    status: WorkflowStatus;
-    assignedApproverStaffIds?: Array<string | null> | null;
-    approvalSteps?: Array<{
-      __typename: "ApprovalStep";
-      id: string;
-      approverStaffId: string;
-      decisionStatus: ApprovalStatus;
-      approverComment?: string | null;
-      decisionTimestamp?: string | null;
-      stepOrder?: number | null;
-    } | null> | null;
-    nextApprovalStepIndex?: number | null;
-    submitterApproverSetting?: ApproverSettingMode | null;
-    submitterApproverId?: string | null;
-    submitterApproverIds?: Array<string | null> | null;
-    submitterApproverMultipleMode?: ApproverMultipleMode | null;
-    overTimeDetails?: {
-      __typename: "OverTimeWorkflow";
-      date: string;
-      startTime: string;
-      endTime: string;
-      reason: string;
-    } | null;
-    comments?: Array<{
-      __typename: "WorkflowComment";
-      id: string;
-      staffId: string;
-      text: string;
-      createdAt: string;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    approvedStaffIds?: Array< string | null > | null,
+    rejectedStaffIds?: Array< string | null > | null,
+    finalDecisionTimestamp?: string | null,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    assignedApproverStaffIds?: Array< string | null > | null,
+    approvalSteps?:  Array< {
+      __typename: "ApprovalStep",
+      id: string,
+      approverStaffId: string,
+      decisionStatus: ApprovalStatus,
+      approverComment?: string | null,
+      decisionTimestamp?: string | null,
+      stepOrder?: number | null,
+    } | null > | null,
+    nextApprovalStepIndex?: number | null,
+    submitterApproverSetting?: ApproverSettingMode | null,
+    submitterApproverId?: string | null,
+    submitterApproverIds?: Array< string | null > | null,
+    submitterApproverMultipleMode?: ApproverMultipleMode | null,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteWorkflowMutationVariables = {
@@ -2516,6 +3135,105 @@ export type DeleteOperationLogMutation = {
   } | null;
 };
 
+export type CreateDailyReportMutationVariables = {
+  input: CreateDailyReportInput,
+  condition?: ModelDailyReportConditionInput | null,
+};
+
+export type CreateDailyReportMutation = {
+  createDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type UpdateDailyReportMutationVariables = {
+  input: UpdateDailyReportInput,
+  condition?: ModelDailyReportConditionInput | null,
+};
+
+export type UpdateDailyReportMutation = {
+  updateDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type DeleteDailyReportMutationVariables = {
+  input: DeleteDailyReportInput,
+  condition?: ModelDailyReportConditionInput | null,
+};
+
+export type DeleteDailyReportMutation = {
+  deleteDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
 export type SendMailQueryVariables = {
   data: EmailData;
 };
@@ -2567,57 +3285,57 @@ export type GetAppConfigQueryVariables = {
 };
 
 export type GetAppConfigQuery = {
-  getAppConfig?: {
-    __typename: "AppConfig";
-    id: string;
-    name: string;
-    workStartTime?: string | null;
-    workEndTime?: string | null;
-    lunchRestStartTime?: string | null;
-    lunchRestEndTime?: string | null;
-    amHolidayStartTime?: string | null;
-    amHolidayEndTime?: string | null;
-    pmHolidayStartTime?: string | null;
-    pmHolidayEndTime?: string | null;
-    specialHolidayEnabled?: boolean | null;
-    amPmHolidayEnabled?: boolean | null;
-    officeMode?: boolean | null;
-    absentEnabled?: boolean | null;
-    hourlyPaidHolidayEnabled?: boolean | null;
-    links?: Array<{
-      __typename: "Link";
-      label: string;
-      url: string;
-      enabled: boolean;
-      icon?: string | null;
-    } | null> | null;
-    reasons?: Array<{
-      __typename: "Reason";
-      reason: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputStartTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputEndTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    themeColor?: string | null;
-    shiftGroups?: Array<{
-      __typename: "ShiftGroup";
-      label: string;
-      description?: string | null;
-      min?: number | null;
-      max?: number | null;
-      fixed?: number | null;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getAppConfig?:  {
+    __typename: "AppConfig",
+    id: string,
+    name: string,
+    workStartTime?: string | null,
+    workEndTime?: string | null,
+    lunchRestStartTime?: string | null,
+    lunchRestEndTime?: string | null,
+    amHolidayStartTime?: string | null,
+    amHolidayEndTime?: string | null,
+    pmHolidayStartTime?: string | null,
+    pmHolidayEndTime?: string | null,
+    specialHolidayEnabled?: boolean | null,
+    amPmHolidayEnabled?: boolean | null,
+    officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
+    hourlyPaidHolidayEnabled?: boolean | null,
+    links?:  Array< {
+      __typename: "Link",
+      label: string,
+      url: string,
+      enabled: boolean,
+      icon?: string | null,
+    } | null > | null,
+    reasons?:  Array< {
+      __typename: "Reason",
+      reason: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputStartTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputEndTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+      min?: number | null,
+      max?: number | null,
+      fixed?: number | null,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListAppConfigsQueryVariables = {
@@ -2627,61 +3345,61 @@ export type ListAppConfigsQueryVariables = {
 };
 
 export type ListAppConfigsQuery = {
-  listAppConfigs?: {
-    __typename: "ModelAppConfigConnection";
-    items: Array<{
-      __typename: "AppConfig";
-      id: string;
-      name: string;
-      workStartTime?: string | null;
-      workEndTime?: string | null;
-      lunchRestStartTime?: string | null;
-      lunchRestEndTime?: string | null;
-      amHolidayStartTime?: string | null;
-      amHolidayEndTime?: string | null;
-      pmHolidayStartTime?: string | null;
-      pmHolidayEndTime?: string | null;
-      specialHolidayEnabled?: boolean | null;
-      amPmHolidayEnabled?: boolean | null;
-      officeMode?: boolean | null;
-      absentEnabled?: boolean | null;
-      hourlyPaidHolidayEnabled?: boolean | null;
-      links?: Array<{
-        __typename: "Link";
-        label: string;
-        url: string;
-        enabled: boolean;
-        icon?: string | null;
-      } | null> | null;
-      reasons?: Array<{
-        __typename: "Reason";
-        reason: string;
-        enabled: boolean;
-      } | null> | null;
-      quickInputStartTimes?: Array<{
-        __typename: "QuickInputTime";
-        time: string;
-        enabled: boolean;
-      } | null> | null;
-      quickInputEndTimes?: Array<{
-        __typename: "QuickInputTime";
-        time: string;
-        enabled: boolean;
-      } | null> | null;
-      themeColor?: string | null;
-      shiftGroups?: Array<{
-        __typename: "ShiftGroup";
-        label: string;
-        description?: string | null;
-        min?: number | null;
-        max?: number | null;
-        fixed?: number | null;
-      } | null> | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listAppConfigs?:  {
+    __typename: "ModelAppConfigConnection",
+    items:  Array< {
+      __typename: "AppConfig",
+      id: string,
+      name: string,
+      workStartTime?: string | null,
+      workEndTime?: string | null,
+      lunchRestStartTime?: string | null,
+      lunchRestEndTime?: string | null,
+      amHolidayStartTime?: string | null,
+      amHolidayEndTime?: string | null,
+      pmHolidayStartTime?: string | null,
+      pmHolidayEndTime?: string | null,
+      specialHolidayEnabled?: boolean | null,
+      amPmHolidayEnabled?: boolean | null,
+      officeMode?: boolean | null,
+      absentEnabled?: boolean | null,
+      hourlyPaidHolidayEnabled?: boolean | null,
+      links?:  Array< {
+        __typename: "Link",
+        label: string,
+        url: string,
+        enabled: boolean,
+        icon?: string | null,
+      } | null > | null,
+      reasons?:  Array< {
+        __typename: "Reason",
+        reason: string,
+        enabled: boolean,
+      } | null > | null,
+      quickInputStartTimes?:  Array< {
+        __typename: "QuickInputTime",
+        time: string,
+        enabled: boolean,
+      } | null > | null,
+      quickInputEndTimes?:  Array< {
+        __typename: "QuickInputTime",
+        time: string,
+        enabled: boolean,
+      } | null > | null,
+      themeColor?: string | null,
+      shiftGroups?:  Array< {
+        __typename: "ShiftGroup",
+        label: string,
+        description?: string | null,
+        min?: number | null,
+        max?: number | null,
+        fixed?: number | null,
+      } | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetStaffQueryVariables = {
@@ -2689,34 +3407,34 @@ export type GetStaffQueryVariables = {
 };
 
 export type GetStaffQuery = {
-  getStaff?: {
-    __typename: "Staff";
-    id: string;
-    cognitoUserId: string;
-    familyName?: string | null;
-    givenName?: string | null;
-    mailAddress: string;
-    role: string;
-    enabled: boolean;
-    status: string;
-    owner?: boolean | null;
-    usageStartDate?: string | null;
-    notifications?: {
-      __typename: "Notification";
-      workStart?: boolean | null;
-      workEnd?: boolean | null;
-    } | null;
-    sortKey?: string | null;
-    workType?: string | null;
-    developer?: boolean | null;
-    approverSetting?: ApproverSettingMode | null;
-    approverSingle?: string | null;
-    approverMultiple?: Array<string | null> | null;
-    approverMultipleMode?: ApproverMultipleMode | null;
-    shiftGroup?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getStaff?:  {
+    __typename: "Staff",
+    id: string,
+    cognitoUserId: string,
+    familyName?: string | null,
+    givenName?: string | null,
+    mailAddress: string,
+    role: string,
+    enabled: boolean,
+    status: string,
+    owner?: boolean | null,
+    usageStartDate?: string | null,
+    notifications?:  {
+      __typename: "Notification",
+      workStart?: boolean | null,
+      workEnd?: boolean | null,
+    } | null,
+    sortKey?: string | null,
+    workType?: string | null,
+    developer?: boolean | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
+    shiftGroup?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListStaffQueryVariables = {
@@ -2726,38 +3444,38 @@ export type ListStaffQueryVariables = {
 };
 
 export type ListStaffQuery = {
-  listStaff?: {
-    __typename: "ModelStaffConnection";
-    items: Array<{
-      __typename: "Staff";
-      id: string;
-      cognitoUserId: string;
-      familyName?: string | null;
-      givenName?: string | null;
-      mailAddress: string;
-      role: string;
-      enabled: boolean;
-      status: string;
-      owner?: boolean | null;
-      usageStartDate?: string | null;
-      notifications?: {
-        __typename: "Notification";
-        workStart?: boolean | null;
-        workEnd?: boolean | null;
-      } | null;
-      sortKey?: string | null;
-      workType?: string | null;
-      developer?: boolean | null;
-      approverSetting?: ApproverSettingMode | null;
-      approverSingle?: string | null;
-      approverMultiple?: Array<string | null> | null;
-      approverMultipleMode?: ApproverMultipleMode | null;
-      shiftGroup?: string | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listStaff?:  {
+    __typename: "ModelStaffConnection",
+    items:  Array< {
+      __typename: "Staff",
+      id: string,
+      cognitoUserId: string,
+      familyName?: string | null,
+      givenName?: string | null,
+      mailAddress: string,
+      role: string,
+      enabled: boolean,
+      status: string,
+      owner?: boolean | null,
+      usageStartDate?: string | null,
+      notifications?:  {
+        __typename: "Notification",
+        workStart?: boolean | null,
+        workEnd?: boolean | null,
+      } | null,
+      sortKey?: string | null,
+      workType?: string | null,
+      developer?: boolean | null,
+      approverSetting?: ApproverSettingMode | null,
+      approverSingle?: string | null,
+      approverMultiple?: Array< string | null > | null,
+      approverMultipleMode?: ApproverMultipleMode | null,
+      shiftGroup?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type StaffByCognitoUserIdQueryVariables = {
@@ -2770,38 +3488,38 @@ export type StaffByCognitoUserIdQueryVariables = {
 };
 
 export type StaffByCognitoUserIdQuery = {
-  staffByCognitoUserId?: {
-    __typename: "ModelStaffConnection";
-    items: Array<{
-      __typename: "Staff";
-      id: string;
-      cognitoUserId: string;
-      familyName?: string | null;
-      givenName?: string | null;
-      mailAddress: string;
-      role: string;
-      enabled: boolean;
-      status: string;
-      owner?: boolean | null;
-      usageStartDate?: string | null;
-      notifications?: {
-        __typename: "Notification";
-        workStart?: boolean | null;
-        workEnd?: boolean | null;
-      } | null;
-      sortKey?: string | null;
-      workType?: string | null;
-      developer?: boolean | null;
-      approverSetting?: ApproverSettingMode | null;
-      approverSingle?: string | null;
-      approverMultiple?: Array<string | null> | null;
-      approverMultipleMode?: ApproverMultipleMode | null;
-      shiftGroup?: string | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  staffByCognitoUserId?:  {
+    __typename: "ModelStaffConnection",
+    items:  Array< {
+      __typename: "Staff",
+      id: string,
+      cognitoUserId: string,
+      familyName?: string | null,
+      givenName?: string | null,
+      mailAddress: string,
+      role: string,
+      enabled: boolean,
+      status: string,
+      owner?: boolean | null,
+      usageStartDate?: string | null,
+      notifications?:  {
+        __typename: "Notification",
+        workStart?: boolean | null,
+        workEnd?: boolean | null,
+      } | null,
+      sortKey?: string | null,
+      workType?: string | null,
+      developer?: boolean | null,
+      approverSetting?: ApproverSettingMode | null,
+      approverSingle?: string | null,
+      approverMultiple?: Array< string | null > | null,
+      approverMultipleMode?: ApproverMultipleMode | null,
+      shiftGroup?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetHolidayCalendarQueryVariables = {
@@ -3262,6 +3980,258 @@ export type ListDocumentsQuery = {
   } | null;
 };
 
+export type GetShiftRequestQueryVariables = {
+  id: string,
+};
+
+export type GetShiftRequestQuery = {
+  getShiftRequest?:  {
+    __typename: "ShiftRequest",
+    id: string,
+    staffId: string,
+    targetMonth: string,
+    note?: string | null,
+    entries?:  Array< {
+      __typename: "ShiftRequestDayPreference",
+      date: string,
+      status: ShiftRequestStatus,
+    } | null > | null,
+    summary?:  {
+      __typename: "ShiftRequestSummary",
+      workDays?: number | null,
+      fixedOffDays?: number | null,
+      requestedOffDays?: number | null,
+    } | null,
+    submittedAt?: string | null,
+    updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type ListShiftRequestsQueryVariables = {
+  filter?: ModelShiftRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListShiftRequestsQuery = {
+  listShiftRequests?:  {
+    __typename: "ModelShiftRequestConnection",
+    items:  Array< {
+      __typename: "ShiftRequest",
+      id: string,
+      staffId: string,
+      targetMonth: string,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      histories?:  Array< {
+        __typename: "ShiftRequestHistory",
+        version: number,
+        note?: string | null,
+        entries?:  Array< {
+          __typename: "ShiftRequestDayPreference",
+          date: string,
+          status: ShiftRequestStatus,
+        } | null > | null,
+        summary?:  {
+          __typename: "ShiftRequestSummary",
+          workDays?: number | null,
+          fixedOffDays?: number | null,
+          requestedOffDays?: number | null,
+        } | null,
+        submittedAt?: string | null,
+        updatedAt?: string | null,
+        recordedAt: string,
+        recordedByStaffId?: string | null,
+        changeReason?: string | null,
+      } | null > | null,
+      createdAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ShiftRequestsByStaffIdQueryVariables = {
+  staffId: string,
+  targetMonth?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelShiftRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ShiftRequestsByStaffIdQuery = {
+  shiftRequestsByStaffId?:  {
+    __typename: "ModelShiftRequestConnection",
+    items:  Array< {
+      __typename: "ShiftRequest",
+      id: string,
+      staffId: string,
+      targetMonth: string,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      histories?:  Array< {
+        __typename: "ShiftRequestHistory",
+        version: number,
+        note?: string | null,
+        entries?:  Array< {
+          __typename: "ShiftRequestDayPreference",
+          date: string,
+          status: ShiftRequestStatus,
+        } | null > | null,
+        summary?:  {
+          __typename: "ShiftRequestSummary",
+          workDays?: number | null,
+          fixedOffDays?: number | null,
+          requestedOffDays?: number | null,
+        } | null,
+        submittedAt?: string | null,
+        updatedAt?: string | null,
+        recordedAt: string,
+        recordedByStaffId?: string | null,
+        changeReason?: string | null,
+      } | null > | null,
+      createdAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetShiftPlanYearQueryVariables = {
+  id: string,
+};
+
+export type GetShiftPlanYearQuery = {
+  getShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListShiftPlanYearsQueryVariables = {
+  filter?: ModelShiftPlanYearFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListShiftPlanYearsQuery = {
+  listShiftPlanYears?:  {
+    __typename: "ModelShiftPlanYearConnection",
+    items:  Array< {
+      __typename: "ShiftPlanYear",
+      id: string,
+      targetYear: number,
+      plans?:  Array< {
+        __typename: "ShiftPlanMonthSetting",
+        month: number,
+        editStart?: string | null,
+        editEnd?: string | null,
+        enabled?: boolean | null,
+        dailyCapacities?: Array< number | null > | null,
+      } | null > | null,
+      notes?: string | null,
+      createdBy?: string | null,
+      updatedBy?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ShiftPlanYearByTargetYearQueryVariables = {
+  targetYear: number,
+  id?: ModelIDKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelShiftPlanYearFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ShiftPlanYearByTargetYearQuery = {
+  shiftPlanYearByTargetYear?:  {
+    __typename: "ModelShiftPlanYearConnection",
+    items:  Array< {
+      __typename: "ShiftPlanYear",
+      id: string,
+      targetYear: number,
+      plans?:  Array< {
+        __typename: "ShiftPlanMonthSetting",
+        month: number,
+        editStart?: string | null,
+        editEnd?: string | null,
+        enabled?: boolean | null,
+        dailyCapacities?: Array< number | null > | null,
+      } | null > | null,
+      notes?: string | null,
+      createdBy?: string | null,
+      updatedBy?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
 export type GetWorkflowQueryVariables = {
   id: string;
 };
@@ -3504,6 +4474,117 @@ export type OperationLogsByStaffIdQuery = {
   } | null;
 };
 
+export type GetDailyReportQueryVariables = {
+  id: string,
+};
+
+export type GetDailyReportQuery = {
+  getDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type ListDailyReportsQueryVariables = {
+  filter?: ModelDailyReportFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListDailyReportsQuery = {
+  listDailyReports?:  {
+    __typename: "ModelDailyReportConnection",
+    items:  Array< {
+      __typename: "DailyReport",
+      id: string,
+      staffId: string,
+      reportDate: string,
+      title: string,
+      content?: string | null,
+      status: DailyReportStatus,
+      updatedAt?: string | null,
+      reactions?:  Array< {
+        __typename: "DailyReportReaction",
+        staffId: string,
+        type: DailyReportReactionType,
+        createdAt: string,
+      } | null > | null,
+      comments?:  Array< {
+        __typename: "DailyReportComment",
+        id: string,
+        staffId: string,
+        authorName?: string | null,
+        body: string,
+        createdAt: string,
+      } | null > | null,
+      createdAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type DailyReportsByStaffIdQueryVariables = {
+  staffId: string,
+  reportDate?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelDailyReportFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type DailyReportsByStaffIdQuery = {
+  dailyReportsByStaffId?:  {
+    __typename: "ModelDailyReportConnection",
+    items:  Array< {
+      __typename: "DailyReport",
+      id: string,
+      staffId: string,
+      reportDate: string,
+      title: string,
+      content?: string | null,
+      status: DailyReportStatus,
+      updatedAt?: string | null,
+      reactions?:  Array< {
+        __typename: "DailyReportReaction",
+        staffId: string,
+        type: DailyReportReactionType,
+        createdAt: string,
+      } | null > | null,
+      comments?:  Array< {
+        __typename: "DailyReportComment",
+        id: string,
+        staffId: string,
+        authorName?: string | null,
+        body: string,
+        createdAt: string,
+      } | null > | null,
+      createdAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
 export type OnCreateCheckForUpdateSubscriptionVariables = {
   filter?: ModelSubscriptionCheckForUpdateFilterInput | null;
 };
@@ -3551,57 +4632,57 @@ export type OnCreateAppConfigSubscriptionVariables = {
 };
 
 export type OnCreateAppConfigSubscription = {
-  onCreateAppConfig?: {
-    __typename: "AppConfig";
-    id: string;
-    name: string;
-    workStartTime?: string | null;
-    workEndTime?: string | null;
-    lunchRestStartTime?: string | null;
-    lunchRestEndTime?: string | null;
-    amHolidayStartTime?: string | null;
-    amHolidayEndTime?: string | null;
-    pmHolidayStartTime?: string | null;
-    pmHolidayEndTime?: string | null;
-    specialHolidayEnabled?: boolean | null;
-    amPmHolidayEnabled?: boolean | null;
-    officeMode?: boolean | null;
-    absentEnabled?: boolean | null;
-    hourlyPaidHolidayEnabled?: boolean | null;
-    links?: Array<{
-      __typename: "Link";
-      label: string;
-      url: string;
-      enabled: boolean;
-      icon?: string | null;
-    } | null> | null;
-    reasons?: Array<{
-      __typename: "Reason";
-      reason: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputStartTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputEndTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    themeColor?: string | null;
-    shiftGroups?: Array<{
-      __typename: "ShiftGroup";
-      label: string;
-      description?: string | null;
-      min?: number | null;
-      max?: number | null;
-      fixed?: number | null;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateAppConfig?:  {
+    __typename: "AppConfig",
+    id: string,
+    name: string,
+    workStartTime?: string | null,
+    workEndTime?: string | null,
+    lunchRestStartTime?: string | null,
+    lunchRestEndTime?: string | null,
+    amHolidayStartTime?: string | null,
+    amHolidayEndTime?: string | null,
+    pmHolidayStartTime?: string | null,
+    pmHolidayEndTime?: string | null,
+    specialHolidayEnabled?: boolean | null,
+    amPmHolidayEnabled?: boolean | null,
+    officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
+    hourlyPaidHolidayEnabled?: boolean | null,
+    links?:  Array< {
+      __typename: "Link",
+      label: string,
+      url: string,
+      enabled: boolean,
+      icon?: string | null,
+    } | null > | null,
+    reasons?:  Array< {
+      __typename: "Reason",
+      reason: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputStartTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputEndTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+      min?: number | null,
+      max?: number | null,
+      fixed?: number | null,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateAppConfigSubscriptionVariables = {
@@ -3609,57 +4690,57 @@ export type OnUpdateAppConfigSubscriptionVariables = {
 };
 
 export type OnUpdateAppConfigSubscription = {
-  onUpdateAppConfig?: {
-    __typename: "AppConfig";
-    id: string;
-    name: string;
-    workStartTime?: string | null;
-    workEndTime?: string | null;
-    lunchRestStartTime?: string | null;
-    lunchRestEndTime?: string | null;
-    amHolidayStartTime?: string | null;
-    amHolidayEndTime?: string | null;
-    pmHolidayStartTime?: string | null;
-    pmHolidayEndTime?: string | null;
-    specialHolidayEnabled?: boolean | null;
-    amPmHolidayEnabled?: boolean | null;
-    officeMode?: boolean | null;
-    absentEnabled?: boolean | null;
-    hourlyPaidHolidayEnabled?: boolean | null;
-    links?: Array<{
-      __typename: "Link";
-      label: string;
-      url: string;
-      enabled: boolean;
-      icon?: string | null;
-    } | null> | null;
-    reasons?: Array<{
-      __typename: "Reason";
-      reason: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputStartTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputEndTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    themeColor?: string | null;
-    shiftGroups?: Array<{
-      __typename: "ShiftGroup";
-      label: string;
-      description?: string | null;
-      min?: number | null;
-      max?: number | null;
-      fixed?: number | null;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateAppConfig?:  {
+    __typename: "AppConfig",
+    id: string,
+    name: string,
+    workStartTime?: string | null,
+    workEndTime?: string | null,
+    lunchRestStartTime?: string | null,
+    lunchRestEndTime?: string | null,
+    amHolidayStartTime?: string | null,
+    amHolidayEndTime?: string | null,
+    pmHolidayStartTime?: string | null,
+    pmHolidayEndTime?: string | null,
+    specialHolidayEnabled?: boolean | null,
+    amPmHolidayEnabled?: boolean | null,
+    officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
+    hourlyPaidHolidayEnabled?: boolean | null,
+    links?:  Array< {
+      __typename: "Link",
+      label: string,
+      url: string,
+      enabled: boolean,
+      icon?: string | null,
+    } | null > | null,
+    reasons?:  Array< {
+      __typename: "Reason",
+      reason: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputStartTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputEndTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+      min?: number | null,
+      max?: number | null,
+      fixed?: number | null,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteAppConfigSubscriptionVariables = {
@@ -3667,57 +4748,57 @@ export type OnDeleteAppConfigSubscriptionVariables = {
 };
 
 export type OnDeleteAppConfigSubscription = {
-  onDeleteAppConfig?: {
-    __typename: "AppConfig";
-    id: string;
-    name: string;
-    workStartTime?: string | null;
-    workEndTime?: string | null;
-    lunchRestStartTime?: string | null;
-    lunchRestEndTime?: string | null;
-    amHolidayStartTime?: string | null;
-    amHolidayEndTime?: string | null;
-    pmHolidayStartTime?: string | null;
-    pmHolidayEndTime?: string | null;
-    specialHolidayEnabled?: boolean | null;
-    amPmHolidayEnabled?: boolean | null;
-    officeMode?: boolean | null;
-    absentEnabled?: boolean | null;
-    hourlyPaidHolidayEnabled?: boolean | null;
-    links?: Array<{
-      __typename: "Link";
-      label: string;
-      url: string;
-      enabled: boolean;
-      icon?: string | null;
-    } | null> | null;
-    reasons?: Array<{
-      __typename: "Reason";
-      reason: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputStartTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    quickInputEndTimes?: Array<{
-      __typename: "QuickInputTime";
-      time: string;
-      enabled: boolean;
-    } | null> | null;
-    themeColor?: string | null;
-    shiftGroups?: Array<{
-      __typename: "ShiftGroup";
-      label: string;
-      description?: string | null;
-      min?: number | null;
-      max?: number | null;
-      fixed?: number | null;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteAppConfig?:  {
+    __typename: "AppConfig",
+    id: string,
+    name: string,
+    workStartTime?: string | null,
+    workEndTime?: string | null,
+    lunchRestStartTime?: string | null,
+    lunchRestEndTime?: string | null,
+    amHolidayStartTime?: string | null,
+    amHolidayEndTime?: string | null,
+    pmHolidayStartTime?: string | null,
+    pmHolidayEndTime?: string | null,
+    specialHolidayEnabled?: boolean | null,
+    amPmHolidayEnabled?: boolean | null,
+    officeMode?: boolean | null,
+    absentEnabled?: boolean | null,
+    hourlyPaidHolidayEnabled?: boolean | null,
+    links?:  Array< {
+      __typename: "Link",
+      label: string,
+      url: string,
+      enabled: boolean,
+      icon?: string | null,
+    } | null > | null,
+    reasons?:  Array< {
+      __typename: "Reason",
+      reason: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputStartTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    quickInputEndTimes?:  Array< {
+      __typename: "QuickInputTime",
+      time: string,
+      enabled: boolean,
+    } | null > | null,
+    themeColor?: string | null,
+    shiftGroups?:  Array< {
+      __typename: "ShiftGroup",
+      label: string,
+      description?: string | null,
+      min?: number | null,
+      max?: number | null,
+      fixed?: number | null,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateStaffSubscriptionVariables = {
@@ -3725,34 +4806,34 @@ export type OnCreateStaffSubscriptionVariables = {
 };
 
 export type OnCreateStaffSubscription = {
-  onCreateStaff?: {
-    __typename: "Staff";
-    id: string;
-    cognitoUserId: string;
-    familyName?: string | null;
-    givenName?: string | null;
-    mailAddress: string;
-    role: string;
-    enabled: boolean;
-    status: string;
-    owner?: boolean | null;
-    usageStartDate?: string | null;
-    notifications?: {
-      __typename: "Notification";
-      workStart?: boolean | null;
-      workEnd?: boolean | null;
-    } | null;
-    sortKey?: string | null;
-    workType?: string | null;
-    developer?: boolean | null;
-    approverSetting?: ApproverSettingMode | null;
-    approverSingle?: string | null;
-    approverMultiple?: Array<string | null> | null;
-    approverMultipleMode?: ApproverMultipleMode | null;
-    shiftGroup?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateStaff?:  {
+    __typename: "Staff",
+    id: string,
+    cognitoUserId: string,
+    familyName?: string | null,
+    givenName?: string | null,
+    mailAddress: string,
+    role: string,
+    enabled: boolean,
+    status: string,
+    owner?: boolean | null,
+    usageStartDate?: string | null,
+    notifications?:  {
+      __typename: "Notification",
+      workStart?: boolean | null,
+      workEnd?: boolean | null,
+    } | null,
+    sortKey?: string | null,
+    workType?: string | null,
+    developer?: boolean | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
+    shiftGroup?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateStaffSubscriptionVariables = {
@@ -3760,34 +4841,34 @@ export type OnUpdateStaffSubscriptionVariables = {
 };
 
 export type OnUpdateStaffSubscription = {
-  onUpdateStaff?: {
-    __typename: "Staff";
-    id: string;
-    cognitoUserId: string;
-    familyName?: string | null;
-    givenName?: string | null;
-    mailAddress: string;
-    role: string;
-    enabled: boolean;
-    status: string;
-    owner?: boolean | null;
-    usageStartDate?: string | null;
-    notifications?: {
-      __typename: "Notification";
-      workStart?: boolean | null;
-      workEnd?: boolean | null;
-    } | null;
-    sortKey?: string | null;
-    workType?: string | null;
-    developer?: boolean | null;
-    approverSetting?: ApproverSettingMode | null;
-    approverSingle?: string | null;
-    approverMultiple?: Array<string | null> | null;
-    approverMultipleMode?: ApproverMultipleMode | null;
-    shiftGroup?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateStaff?:  {
+    __typename: "Staff",
+    id: string,
+    cognitoUserId: string,
+    familyName?: string | null,
+    givenName?: string | null,
+    mailAddress: string,
+    role: string,
+    enabled: boolean,
+    status: string,
+    owner?: boolean | null,
+    usageStartDate?: string | null,
+    notifications?:  {
+      __typename: "Notification",
+      workStart?: boolean | null,
+      workEnd?: boolean | null,
+    } | null,
+    sortKey?: string | null,
+    workType?: string | null,
+    developer?: boolean | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
+    shiftGroup?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteStaffSubscriptionVariables = {
@@ -3795,34 +4876,34 @@ export type OnDeleteStaffSubscriptionVariables = {
 };
 
 export type OnDeleteStaffSubscription = {
-  onDeleteStaff?: {
-    __typename: "Staff";
-    id: string;
-    cognitoUserId: string;
-    familyName?: string | null;
-    givenName?: string | null;
-    mailAddress: string;
-    role: string;
-    enabled: boolean;
-    status: string;
-    owner?: boolean | null;
-    usageStartDate?: string | null;
-    notifications?: {
-      __typename: "Notification";
-      workStart?: boolean | null;
-      workEnd?: boolean | null;
-    } | null;
-    sortKey?: string | null;
-    workType?: string | null;
-    developer?: boolean | null;
-    approverSetting?: ApproverSettingMode | null;
-    approverSingle?: string | null;
-    approverMultiple?: Array<string | null> | null;
-    approverMultipleMode?: ApproverMultipleMode | null;
-    shiftGroup?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteStaff?:  {
+    __typename: "Staff",
+    id: string,
+    cognitoUserId: string,
+    familyName?: string | null,
+    givenName?: string | null,
+    mailAddress: string,
+    role: string,
+    enabled: boolean,
+    status: string,
+    owner?: boolean | null,
+    usageStartDate?: string | null,
+    notifications?:  {
+      __typename: "Notification",
+      workStart?: boolean | null,
+      workEnd?: boolean | null,
+    } | null,
+    sortKey?: string | null,
+    workType?: string | null,
+    developer?: boolean | null,
+    approverSetting?: ApproverSettingMode | null,
+    approverSingle?: string | null,
+    approverMultiple?: Array< string | null > | null,
+    approverMultipleMode?: ApproverMultipleMode | null,
+    shiftGroup?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateHolidayCalendarSubscriptionVariables = {
@@ -4308,6 +5389,228 @@ export type OnDeleteDocumentSubscription = {
   } | null;
 };
 
+export type OnCreateShiftRequestSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftRequestFilterInput | null,
+};
+
+export type OnCreateShiftRequestSubscription = {
+  onCreateShiftRequest?:  {
+    __typename: "ShiftRequest",
+    id: string,
+    staffId: string,
+    targetMonth: string,
+    note?: string | null,
+    entries?:  Array< {
+      __typename: "ShiftRequestDayPreference",
+      date: string,
+      status: ShiftRequestStatus,
+    } | null > | null,
+    summary?:  {
+      __typename: "ShiftRequestSummary",
+      workDays?: number | null,
+      fixedOffDays?: number | null,
+      requestedOffDays?: number | null,
+    } | null,
+    submittedAt?: string | null,
+    updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type OnUpdateShiftRequestSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftRequestFilterInput | null,
+};
+
+export type OnUpdateShiftRequestSubscription = {
+  onUpdateShiftRequest?:  {
+    __typename: "ShiftRequest",
+    id: string,
+    staffId: string,
+    targetMonth: string,
+    note?: string | null,
+    entries?:  Array< {
+      __typename: "ShiftRequestDayPreference",
+      date: string,
+      status: ShiftRequestStatus,
+    } | null > | null,
+    summary?:  {
+      __typename: "ShiftRequestSummary",
+      workDays?: number | null,
+      fixedOffDays?: number | null,
+      requestedOffDays?: number | null,
+    } | null,
+    submittedAt?: string | null,
+    updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type OnDeleteShiftRequestSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftRequestFilterInput | null,
+};
+
+export type OnDeleteShiftRequestSubscription = {
+  onDeleteShiftRequest?:  {
+    __typename: "ShiftRequest",
+    id: string,
+    staffId: string,
+    targetMonth: string,
+    note?: string | null,
+    entries?:  Array< {
+      __typename: "ShiftRequestDayPreference",
+      date: string,
+      status: ShiftRequestStatus,
+    } | null > | null,
+    summary?:  {
+      __typename: "ShiftRequestSummary",
+      workDays?: number | null,
+      fixedOffDays?: number | null,
+      requestedOffDays?: number | null,
+    } | null,
+    submittedAt?: string | null,
+    updatedAt?: string | null,
+    histories?:  Array< {
+      __typename: "ShiftRequestHistory",
+      version: number,
+      note?: string | null,
+      entries?:  Array< {
+        __typename: "ShiftRequestDayPreference",
+        date: string,
+        status: ShiftRequestStatus,
+      } | null > | null,
+      summary?:  {
+        __typename: "ShiftRequestSummary",
+        workDays?: number | null,
+        fixedOffDays?: number | null,
+        requestedOffDays?: number | null,
+      } | null,
+      submittedAt?: string | null,
+      updatedAt?: string | null,
+      recordedAt: string,
+      recordedByStaffId?: string | null,
+      changeReason?: string | null,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type OnCreateShiftPlanYearSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftPlanYearFilterInput | null,
+};
+
+export type OnCreateShiftPlanYearSubscription = {
+  onCreateShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateShiftPlanYearSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftPlanYearFilterInput | null,
+};
+
+export type OnUpdateShiftPlanYearSubscription = {
+  onUpdateShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteShiftPlanYearSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftPlanYearFilterInput | null,
+};
+
+export type OnDeleteShiftPlanYearSubscription = {
+  onDeleteShiftPlanYear?:  {
+    __typename: "ShiftPlanYear",
+    id: string,
+    targetYear: number,
+    plans?:  Array< {
+      __typename: "ShiftPlanMonthSetting",
+      month: number,
+      editStart?: string | null,
+      editEnd?: string | null,
+      enabled?: boolean | null,
+      dailyCapacities?: Array< number | null > | null,
+    } | null > | null,
+    notes?: string | null,
+    createdBy?: string | null,
+    updatedBy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
 export type OnCreateWorkflowSubscriptionVariables = {
   filter?: ModelSubscriptionWorkflowFilterInput | null;
 };
@@ -4519,4 +5822,100 @@ export type OnDeleteOperationLogSubscription = {
     createdAt: string;
     updatedAt: string;
   } | null;
+};
+
+export type OnCreateDailyReportSubscriptionVariables = {
+  filter?: ModelSubscriptionDailyReportFilterInput | null,
+};
+
+export type OnCreateDailyReportSubscription = {
+  onCreateDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type OnUpdateDailyReportSubscriptionVariables = {
+  filter?: ModelSubscriptionDailyReportFilterInput | null,
+};
+
+export type OnUpdateDailyReportSubscription = {
+  onUpdateDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
+};
+
+export type OnDeleteDailyReportSubscriptionVariables = {
+  filter?: ModelSubscriptionDailyReportFilterInput | null,
+};
+
+export type OnDeleteDailyReportSubscription = {
+  onDeleteDailyReport?:  {
+    __typename: "DailyReport",
+    id: string,
+    staffId: string,
+    reportDate: string,
+    title: string,
+    content?: string | null,
+    status: DailyReportStatus,
+    updatedAt?: string | null,
+    reactions?:  Array< {
+      __typename: "DailyReportReaction",
+      staffId: string,
+      type: DailyReportReactionType,
+      createdAt: string,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "DailyReportComment",
+      id: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+  } | null,
 };

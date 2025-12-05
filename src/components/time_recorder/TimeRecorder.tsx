@@ -44,6 +44,7 @@ import GoDirectlyItem from "./items/GoDirectlyItem";
 import RestEndItem from "./items/RestEndItem";
 import RestStartItem from "./items/RestStartItem";
 import ReturnDirectly from "./items/ReturnDirectlyItem";
+import QuickDailyReportCard from "./QuickDailyReportCard";
 import { restEndCallback } from "./restEndCallback";
 import { restStartCallback } from "./restStartCallback";
 import { RestTimeMessage } from "./RestTimeMessage";
@@ -391,6 +392,9 @@ export default function TimeRecorder(): JSX.Element {
             }}
           />
         </Grid> */}
+        <Grid item xs={12}>
+          <QuickDailyReportCard staffId={staff?.id ?? null} date={today} />
+        </Grid>
         {isAttendanceError && (
           <Grid item xs={12}>
             <AttendanceErrorAlert />

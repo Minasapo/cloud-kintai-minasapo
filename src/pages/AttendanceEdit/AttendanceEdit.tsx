@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
+import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
@@ -305,8 +306,18 @@ export default function AttendanceEdit() {
 
       // 開始/終了時刻を規定値に設定
       try {
-        const desiredStart = getStartTime().toISOString();
-        const desiredEnd = getEndTime().toISOString();
+        const desiredStart = resolveConfigTimeOnDate(
+          getStartTime(),
+          getValues("startTime") as string | null | undefined,
+          targetWorkDate,
+          attendance?.workDate
+        );
+        const desiredEnd = resolveConfigTimeOnDate(
+          getEndTime(),
+          getValues("endTime") as string | null | undefined,
+          targetWorkDate,
+          attendance?.workDate
+        );
         if (getValues("startTime") !== desiredStart) {
           setValue("startTime", desiredStart);
         }

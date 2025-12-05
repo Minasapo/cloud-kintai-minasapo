@@ -14,6 +14,8 @@ import QuickInput from "./pages/admin/AdminConfigManagement/QuickInput";
 import Reasons from "./pages/admin/AdminConfigManagement/Reasons";
 import SpecialHoliday from "./pages/admin/AdminConfigManagement/SpecialHoliday";
 import WorkingTime from "./pages/admin/AdminConfigManagement/WorkingTime";
+import AdminDailyReportDetail from "./pages/admin/AdminDailyReportManagement/AdminDailyReportDetail";
+import AdminDailyReportManagement from "./pages/admin/AdminDailyReportManagement/AdminDailyReportManagement";
 import AdminHolidayCalendar from "./pages/admin/AdminHolidayCalendar/HolidayCalendar/AdminHolidayCalendar";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogs from "./pages/admin/AdminLogs/AdminLogsClean";
@@ -27,8 +29,10 @@ import AdminTheme from "./pages/admin/AdminTheme/AdminTheme";
 import AdminWorkflow from "./pages/admin/AdminWorkflow/AdminWorkflow";
 import AdminWorkflowDetail from "./pages/admin/AdminWorkflow/AdminWorkflowDetail";
 import JobTerm from "./pages/admin/JobTerm/JobTerm";
+import ShiftPlanManagement from "./pages/admin/ShiftPlanManagement/ShiftPlanManagement";
 import AttendanceEdit from "./pages/AttendanceEdit/AttendanceEdit";
 import AttendanceListPage from "./pages/AttendanceListPage";
+import DailyReport from "./pages/DailyReport/DailyReport";
 import Login from "./pages/Login/Login";
 import OfficeLayout from "./pages/office/OfficeLayout";
 import OfficePage from "./pages/office/OfficePage";
@@ -64,6 +68,10 @@ const router = createBrowserRouter([
           {
             path: "list",
             element: <AttendanceListPage />,
+          },
+          {
+            path: "report",
+            element: <DailyReport />,
           },
           {
             path: ":targetWorkDate/edit",
@@ -109,33 +117,6 @@ const router = createBrowserRouter([
           },
         ],
       },
-      // {
-      //   path: "docs",
-      //   element: <Document />,
-      //   children: [
-      //     {
-      //       index: true,
-      //       element: <ListDocument />,
-      //     },
-      //     {
-      //       path: "post",
-      //       element: <DocumentPoster />,
-      //     },
-      //     {
-      //       path: ":documentId",
-      //       children: [
-      //         {
-      //           index: true,
-      //           element: <DocumentView />,
-      //         },
-      //         {
-      //           path: "edit",
-      //           element: <DocumentEditor />,
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
       {
         path: "profile",
         element: <Profile />,
@@ -223,6 +204,10 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: "shift-plan",
+            element: <ShiftPlanManagement />,
+          },
+          {
             path: "master",
             element: <AdminMasterLayout />,
             children: [
@@ -300,6 +285,19 @@ const router = createBrowserRouter([
           {
             path: "logs",
             element: <AdminLogs />,
+          },
+          {
+            path: "daily-report",
+            children: [
+              {
+                index: true,
+                element: <AdminDailyReportManagement />,
+              },
+              {
+                path: ":id",
+                element: <AdminDailyReportDetail />,
+              },
+            ],
           },
         ],
       },
