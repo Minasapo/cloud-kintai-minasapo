@@ -15,6 +15,7 @@ import {
   MenuItem as MuiMenuItem,
   Stack,
 } from "@mui/material";
+import Link from "@shared/ui/link/Link";
 import { useContext, useEffect, useState } from "react";
 
 import { AppConfigContext } from "../../context/AppConfigContext";
@@ -22,7 +23,6 @@ import { AuthContext } from "../../context/AuthContext";
 import useAuthenticatedUser from "../../hooks/useAuthenticatedUser";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";
 import { StaffRole } from "../../hooks/useStaffs/useStaffs";
-import Link from "../link/Link";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
   const { isCognitoUserRole } = useContext(AuthContext);
