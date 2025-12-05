@@ -10,6 +10,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import StatusChip from "@shared/ui/chips/StatusChip";
+import Page from "@shared/ui/page/Page";
 import { API } from "aws-amplify";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,8 +27,6 @@ import {
   WorkflowStatus,
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import Page from "@/components/Page/Page";
-import StatusChip from "@/components/StatusChip/StatusChip";
 import { AuthContext } from "@/context/AuthContext";
 import { getWorkflow } from "@/graphql/queries";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
