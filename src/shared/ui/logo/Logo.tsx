@@ -15,7 +15,11 @@ const Logo = () => (
     }}
   >
     <Link href="/">
-      <img src={LogoImage} alt="クラウド勤怠のロゴ" style={{ height: "100%" }} />
+      <img
+        src={LogoImage}
+        alt="クラウド勤怠のロゴ"
+        style={{ height: "100%" }}
+      />
     </Link>
   </Box>
 );
