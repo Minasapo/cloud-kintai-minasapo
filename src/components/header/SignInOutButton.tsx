@@ -1,9 +1,8 @@
 import { Box, Button, Stack, styled } from "@mui/material";
+import StaffIcon from "@shared/ui/icon/StaffIcon";
 import { useContext } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
-
-import StaffIcon from "./StaffIcon";
 
 export const SignOutButton = styled(Button)(({ theme }) => ({
   color: theme.palette.logout.contrastText,
