@@ -34,10 +34,10 @@ import handleApproveChangeRequest from "@/components/attendance_editor/ChangeReq
 import { AttendanceStatusTooltip } from "@/components/AttendanceList/AttendanceStatusTooltip";
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import { AppContext } from "@/context/AppContext";
-import { AttendanceDataManager } from "@/hooks/useAttendance/AttendanceDataManager";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
+import { useUpdateAttendanceMutation } from "@/lib/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { ChangeRequest } from "@/lib/ChangeRequest";
 import { CompanyHoliday } from "@/lib/CompanyHoliday";
@@ -111,7 +111,7 @@ export default function AdminStaffAttendanceList() {
   const [quickViewChangeRequest, setQuickViewChangeRequest] =
     useState<AttendanceChangeRequest | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const attendanceDataManager = useMemo(() => new AttendanceDataManager(), []);
+  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
   const staffForMail = useMemo<StaffType | null>(() => {
     if (!staff) return null;
     return {
@@ -265,7 +265,7 @@ export default function AdminStaffAttendanceList() {
         // eslint-disable-next-line no-await-in-loop
         const updatedAttendance = await handleApproveChangeRequest(
           attendance,
-          (input) => attendanceDataManager.update(input),
+          (input) => updateAttendanceMutation(input).unwrap(),
           undefined
         );
 
@@ -303,7 +303,6 @@ export default function AdminStaffAttendanceList() {
       setBulkApproving(false);
     }
   }, [
-    attendanceDataManager,
     dispatch,
     getAttendances,
     pendingAttendances,
@@ -311,6 +310,7 @@ export default function AdminStaffAttendanceList() {
     staff,
     staffForMail,
     staffId,
+    updateAttendanceMutation,
   ]);
 
   useEffect(() => {
