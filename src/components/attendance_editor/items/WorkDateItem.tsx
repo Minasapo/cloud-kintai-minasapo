@@ -1,10 +1,16 @@
 import { Box, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
+import { ComponentType } from "react";
 
 export type WorkDateItemProps = {
   workDate: dayjs.Dayjs | null;
   staffId?: string;
-  MoveDateItemComponent: React.ComponentType<any>;
+  MoveDateItemComponent: ComponentType<MoveDateComponentProps>;
+};
+
+type MoveDateComponentProps = {
+  workDate: dayjs.Dayjs | null;
+  staffId?: string;
 };
 
 export default function WorkDateItem({
