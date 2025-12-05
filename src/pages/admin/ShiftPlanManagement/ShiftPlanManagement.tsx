@@ -24,6 +24,7 @@ import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -40,9 +41,9 @@ import {
   UpdateShiftPlanYearMutationVariables,
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
+import { AppContext } from "@/context/AppContext";
 import { createShiftPlanYear, updateShiftPlanYear } from "@/graphql/mutations";
 import { shiftPlanYearByTargetYear } from "@/graphql/queries";
-import useHolidayCalendar from "@/hooks/useHolidayCalendars/useHolidayCalendars";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -145,7 +146,7 @@ export default function ShiftPlanManagement() {
   const [yearRecordIds, setYearRecordIds] = useState<Record<number, string>>(
     {}
   );
-  const { holidayCalendars = [] } = useHolidayCalendar();
+  const { holidayCalendars } = useContext(AppContext);
   const holidayNameMap = useMemo(() => {
     if (!holidayCalendars.length) return new Map<string, string>();
     return new Map(
