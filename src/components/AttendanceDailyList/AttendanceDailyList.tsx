@@ -32,7 +32,7 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import MoveDateItem from "@/components/AttendanceDailyList/MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import * as MESSAGE_CODE from "@/errors";
-import fetchAttendances from "@/hooks/useAttendances/fetchAttendances";
+import { useLazyListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
@@ -54,6 +54,7 @@ export default function AttendanceDailyList() {
   const today = dayjs().format(AttendanceDate.QueryParamFormat);
   const dispatch = useAppDispatchV2();
   const [searchName, setSearchName] = useState("");
+  const [triggerListAttendances] = useLazyListRecentAttendancesQuery();
 
   const scheduledEnd = useMemo(() => {
     const parsed = getEndTime();
@@ -192,26 +193,50 @@ export default function AttendanceDailyList() {
   );
 
   useEffect(() => {
-    // load attendances for visible staff rows
     const staffIds = Array.from(
       new Set((attendanceDailyList || []).map((r) => r.sub))
     );
 
+    if (staffIds.length === 0) {
+      return;
+    }
+
+    let isMounted = true;
+
     staffIds.forEach((staffId) => {
-      setAttendanceLoadingMap((s) => ({ ...s, [staffId]: true }));
-      setAttendanceErrorMap((s) => ({ ...s, [staffId]: null }));
-      fetchAttendances(staffId)
+      setAttendanceLoadingMap((state) => ({ ...state, [staffId]: true }));
+      setAttendanceErrorMap((state) => ({ ...state, [staffId]: null }));
+
+      triggerListAttendances({ staffId })
+        .unwrap()
         .then((res) => {
-          setAttendanceMap((m) => ({ ...m, [staffId]: res }));
+          if (!isMounted) return;
+          setAttendanceMap((map) => ({ ...map, [staffId]: res }));
         })
-        .catch((e: Error) => {
-          setAttendanceErrorMap((s) => ({ ...s, [staffId]: e }));
+        .catch((err) => {
+          if (!isMounted) return;
+          const errorInstance =
+            err instanceof Error
+              ? err
+              : new Error("Failed to fetch attendances");
+          setAttendanceErrorMap((state) => ({
+            ...state,
+            [staffId]: errorInstance,
+          }));
         })
         .finally(() => {
-          setAttendanceLoadingMap((s) => ({ ...s, [staffId]: false }));
+          if (!isMounted) return;
+          setAttendanceLoadingMap((state) => ({
+            ...state,
+            [staffId]: false,
+          }));
         });
     });
-  }, [attendanceDailyList]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [attendanceDailyList, triggerListAttendances]);
 
   const isRequesting = useCallback((row: AttendanceDaily) => {
     if (!row.attendance?.changeRequests) return false;
