@@ -3,21 +3,27 @@ import { Box, Chip } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useContext } from "react";
-import { Controller } from "react-hook-form";
+import {
+  Controller,
+  FieldArrayWithId,
+  UseFieldArrayUpdate,
+} from "react-hook-form";
 
 import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+
+import { AttendanceControl, AttendanceFieldPath } from "../../types";
 
 interface CommonRestTimePickerProps {
-  name: string;
+  name: AttendanceFieldPath;
   value: string | null | undefined;
   workDate: dayjs.Dayjs;
-  control: any;
-  rest: any;
+  control: AttendanceControl;
+  rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;
   index: number;
-  restUpdate: (index: number, rest: any) => void;
+  restUpdate: UseFieldArrayUpdate<AttendanceEditInputs, "rests">;
   chipLabel: string;
   onChipClick: () => void;
-  onChange?: (newValue: dayjs.Dayjs | null, field: any) => void;
 }
 
 export function CommonRestTimePicker({
