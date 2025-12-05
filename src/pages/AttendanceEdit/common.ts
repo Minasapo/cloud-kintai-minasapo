@@ -12,8 +12,8 @@ export type HourlyPaidHolidayTimeInputs = {
 
 export type AttendanceEditInputs = {
   workDate?: UpdateAttendanceInput["workDate"] | null;
-  startTime: UpdateAttendanceInput["startTime"];
-  endTime: UpdateAttendanceInput["endTime"];
+  startTime: UpdateAttendanceInput["startTime"] | null;
+  endTime: UpdateAttendanceInput["endTime"] | null;
   isDeemedHoliday?: UpdateAttendanceInput["isDeemedHoliday"];
   specialHolidayFlag?: UpdateAttendanceInput["specialHolidayFlag"];
   paidHolidayFlag: UpdateAttendanceInput["paidHolidayFlag"];
