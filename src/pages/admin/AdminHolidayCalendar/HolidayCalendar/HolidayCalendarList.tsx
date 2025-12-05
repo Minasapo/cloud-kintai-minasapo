@@ -63,9 +63,8 @@ export default function HolidayCalendarList() {
   );
 
   const bulkCreateHolidayCalendar = useCallback(
-    async (
-      inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0]
-    ) => bulkCreateHolidayCalendarsMutation(inputs).unwrap(),
+    async (inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0]) =>
+      bulkCreateHolidayCalendarsMutation(inputs).unwrap(),
     [bulkCreateHolidayCalendarsMutation]
   );
 
@@ -82,7 +81,8 @@ export default function HolidayCalendarList() {
     [deleteHolidayCalendarMutation]
   );
 
-  const calendarLoading = isHolidayCalendarsLoading || isHolidayCalendarsFetching;
+  const calendarLoading =
+    isHolidayCalendarsLoading || isHolidayCalendarsFetching;
 
   useEffect(() => {
     if (holidayCalendarsError) {
