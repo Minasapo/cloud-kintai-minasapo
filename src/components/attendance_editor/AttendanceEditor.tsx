@@ -26,13 +26,23 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { AttendanceHistory, SystemCommentInput } from "@/API";
+import {
+  AttendanceHistory,
+  CreateAttendanceInput,
+  SystemCommentInput,
+  UpdateAttendanceInput,
+} from "@/API";
 import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
 import IsDeemedHolidayFlagInput from "@/components/attendance_editor/IsDeemedHolidayFlagInput";
 import PaidHolidayFlagInputCommon from "@/components/attendance_editor/PaidHolidayFlagInput";
 import ReturnDirectlyFlagInput from "@/components/attendance_editor/ReturnDirectlyFlagInput";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import {
+  useCreateAttendanceMutation,
+  useLazyGetAttendanceByStaffAndDateQuery,
+  useUpdateAttendanceMutation,
+} from "@/lib/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { AttendanceEditMailSender } from "@/lib/mail/AttendanceEditMailSender";
@@ -48,7 +58,6 @@ import { SubstituteHolidayDateInput } from "@/pages/AttendanceEdit/DesktopEditor
 
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
-import useAttendance from "../../hooks/useAttendance/useAttendance";
 import useStaffs, {
   mappingStaffRole,
   StaffType,
@@ -118,8 +127,21 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const { targetWorkDate, staffId: targetStaffId } = useParams();
   const navigate = useNavigate();
   const { staffs, loading: staffsLoading, error: staffSError } = useStaffs();
-  const { attendance, getAttendance, updateAttendance, createAttendance } =
-    useAttendance();
+  const [triggerGetAttendance, { data: attendanceData }] =
+    useLazyGetAttendanceByStaffAndDateQuery();
+  const [createAttendanceMutation] = useCreateAttendanceMutation();
+  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
+  const attendance = attendanceData ?? null;
+
+  const handleUpdateAttendance = useCallback(
+    (input: UpdateAttendanceInput) => updateAttendanceMutation(input).unwrap(),
+    [updateAttendanceMutation]
+  );
+
+  const handleCreateAttendance = useCallback(
+    (input: CreateAttendanceInput) => createAttendanceMutation(input).unwrap(),
+    [createAttendanceMutation]
+  );
   const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
   const [workDate, setWorkDate] = useState<dayjs.Dayjs | null>(null);
   const [enabledSendMail, setEnabledSendMail] = useState<boolean>(true);
@@ -317,18 +339,25 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
     setWorkDate(AttendanceDateTime.convertToDayjs(targetWorkDate));
     setHistoriesLoading(true);
-    getAttendance(
-      staff.cognitoUserId,
-      new AttendanceDateTime().setDateString(targetWorkDate).toDataFormat()
-    )
-      .then(() => {
-        // no-op
-      })
+    triggerGetAttendance({
+      staffId: staff.cognitoUserId,
+      workDate: new AttendanceDateTime()
+        .setDateString(targetWorkDate)
+        .toDataFormat(),
+    })
+      .unwrap()
       .catch(() => {
         dispatch(setSnackbarError(MESSAGE_CODE.E02001));
       })
       .finally(() => setHistoriesLoading(false));
-  }, [staff, targetStaffId, targetWorkDate]);
+  }, [
+    staff,
+    targetStaffId,
+    targetWorkDate,
+    triggerGetAttendance,
+    dispatch,
+    reset,
+  ]);
 
   const lunchRestStartTime = useMemo(
     () => getLunchRestStartTime().format("HH:mm"),
@@ -472,38 +501,43 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
               }[]) ?? [],
         };
 
-        await updateAttendance(payload)
-          .then(async (res) => {
-            // 成功時は可能ならメール送信
-            try {
-              if (staff && res && res.histories && enabledSendMail) {
-                new AttendanceEditMailSender(staff, res).changeRequest();
-              }
-            } catch (e) {
-              // メール送信に失敗しても更新処理自体は成功扱いにする
-              logger.error(`Failed to send edit mail: ${e}`);
-            }
+        try {
+          const res = await handleUpdateAttendance(payload);
 
-            // 更新後は最新の勤怠を再取得してフォームを最新化する
-            try {
-              if (staff && targetWorkDate) {
-                await getAttendance(
-                  staff.cognitoUserId,
-                  new AttendanceDateTime()
-                    .setDateString(targetWorkDate)
-                    .toDataFormat()
-                );
-              }
-            } catch (e) {
-              logger.debug(`Failed to refetch attendance after update: ${e}`);
+          // 成功時は可能ならメール送信
+          try {
+            if (staff && res && res.histories && enabledSendMail) {
+              new AttendanceEditMailSender(staff, res).changeRequest();
             }
+          } catch (mailError) {
+            // メール送信に失敗しても更新処理自体は成功扱いにする
+            logger.error(`Failed to send edit mail: ${mailError}`);
+          }
 
-            dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
-          })
-          .catch((e) => {
-            console.log(e);
-            dispatch(setSnackbarError(MESSAGE_CODE.E04001));
-          });
+          // 更新後は最新の勤怠を再取得してフォームを最新化する
+          if (staff && targetWorkDate) {
+            try {
+              setHistoriesLoading(true);
+              await triggerGetAttendance({
+                staffId: staff.cognitoUserId,
+                workDate: new AttendanceDateTime()
+                  .setDateString(targetWorkDate)
+                  .toDataFormat(),
+              }).unwrap();
+            } catch (refetchError) {
+              logger.debug(
+                `Failed to refetch attendance after update: ${refetchError}`
+              );
+            } finally {
+              setHistoriesLoading(false);
+            }
+          }
+
+          dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
+        } catch (error) {
+          console.log(error);
+          dispatch(setSnackbarError(MESSAGE_CODE.E04001));
+        }
 
         return;
       }
@@ -513,99 +547,102 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         return;
       }
 
-      await createAttendance({
-        // 有給の場合は勤務時間/休憩などのフィールドをクリアして送信
-        staffId: targetStaffId,
-        workDate: new AttendanceDateTime()
-          .setDateString(targetWorkDate)
-          .toDataFormat(),
-        // 有給の場合は規定開始/終了時刻のみ送る
-        startTime: data.paidHolidayFlag
-          ? resolveConfigTimeOnDate(
-              getStartTime(),
-              data.workDate as string | null | undefined,
-              targetWorkDate
-            )
-          : data.startTime,
-        absentFlag: data.absentFlag ?? false,
-        isDeemedHoliday: data.isDeemedHoliday,
-        endTime: data.paidHolidayFlag
-          ? resolveConfigTimeOnDate(
-              getEndTime(),
-              data.workDate as string | null | undefined,
-              targetWorkDate
-            )
-          : data.endTime,
-        goDirectlyFlag: data.goDirectlyFlag,
-        returnDirectlyFlag: data.returnDirectlyFlag,
-        remarks: data.remarks,
-        specialHolidayFlag: data.specialHolidayFlag,
-        paidHolidayFlag: data.paidHolidayFlag,
-        substituteHolidayDate: data.substituteHolidayDate,
-        rests: data.paidHolidayFlag
-          ? [
-              {
-                startTime: new AttendanceDateTime()
-                  .setDateString((targetWorkDate as string) || "")
-                  .setRestStart()
-                  .toISOString(),
-                endTime: new AttendanceDateTime()
-                  .setDateString((targetWorkDate as string) || "")
-                  .setRestEnd()
-                  .toISOString(),
-              },
-            ]
-          : data.rests.map((rest) => ({
-              startTime: rest.startTime,
-              endTime: rest.endTime,
-            })),
-        systemComments: data.systemComments.map(
-          ({ comment, confirmed, createdAt }) => ({
-            comment,
-            confirmed,
-            createdAt,
-          })
-        ),
-        hourlyPaidHolidayTimes: data.paidHolidayFlag
-          ? []
-          : (data.hourlyPaidHolidayTimes
-              ?.map((item) =>
-                item.startTime && item.endTime
-                  ? {
-                      startTime: item.startTime,
-                      endTime: item.endTime,
-                    }
-                  : null
+      try {
+        const res = await handleCreateAttendance({
+          // 有給の場合は勤務時間/休憩などのフィールドをクリアして送信
+          staffId: targetStaffId,
+          workDate: new AttendanceDateTime()
+            .setDateString(targetWorkDate)
+            .toDataFormat(),
+          // 有給の場合は規定開始/終了時刻のみ送る
+          startTime: data.paidHolidayFlag
+            ? resolveConfigTimeOnDate(
+                getStartTime(),
+                data.workDate as string | null | undefined,
+                targetWorkDate
               )
-              .filter((item) => item !== null) as {
-              startTime: string;
-              endTime: string;
-            }[]) ?? [],
-      })
-        .then((res) => {
-          if (!staff) {
-            return;
-          }
-
-          if (enabledSendMail) {
-            new AttendanceEditMailSender(staff, res).changeRequest();
-          }
-
-          dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
-        })
-        .catch(() => {
-          dispatch(setSnackbarError(MESSAGE_CODE.E04001));
+            : data.startTime,
+          absentFlag: data.absentFlag ?? false,
+          isDeemedHoliday: data.isDeemedHoliday,
+          endTime: data.paidHolidayFlag
+            ? resolveConfigTimeOnDate(
+                getEndTime(),
+                data.workDate as string | null | undefined,
+                targetWorkDate
+              )
+            : data.endTime,
+          goDirectlyFlag: data.goDirectlyFlag,
+          returnDirectlyFlag: data.returnDirectlyFlag,
+          remarks: data.remarks,
+          specialHolidayFlag: data.specialHolidayFlag,
+          paidHolidayFlag: data.paidHolidayFlag,
+          substituteHolidayDate: data.substituteHolidayDate,
+          rests: data.paidHolidayFlag
+            ? [
+                {
+                  startTime: new AttendanceDateTime()
+                    .setDateString((targetWorkDate as string) || "")
+                    .setRestStart()
+                    .toISOString(),
+                  endTime: new AttendanceDateTime()
+                    .setDateString((targetWorkDate as string) || "")
+                    .setRestEnd()
+                    .toISOString(),
+                },
+              ]
+            : data.rests.map((rest) => ({
+                startTime: rest.startTime,
+                endTime: rest.endTime,
+              })),
+          systemComments: data.systemComments.map(
+            ({ comment, confirmed, createdAt }) => ({
+              comment,
+              confirmed,
+              createdAt,
+            })
+          ),
+          hourlyPaidHolidayTimes: data.paidHolidayFlag
+            ? []
+            : (data.hourlyPaidHolidayTimes
+                ?.map((item) =>
+                  item.startTime && item.endTime
+                    ? {
+                        startTime: item.startTime,
+                        endTime: item.endTime,
+                      }
+                    : null
+                )
+                .filter((item) => item !== null) as {
+                startTime: string;
+                endTime: string;
+              }[]) ?? [],
         });
+
+        if (!staff) {
+          return;
+        }
+
+        if (enabledSendMail) {
+          new AttendanceEditMailSender(staff, res).changeRequest();
+        }
+
+        dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
+      } catch (error) {
+        dispatch(setSnackbarError(MESSAGE_CODE.E04001));
+      }
     },
     [
       attendance,
       staff,
       enabledSendMail,
-      updateAttendance,
-      createAttendance,
+      handleUpdateAttendance,
+      handleCreateAttendance,
       targetStaffId,
       targetWorkDate,
       dispatch,
+      triggerGetAttendance,
+      getStartTime,
+      getEndTime,
     ]
   );
 
@@ -1424,7 +1461,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         </Box>
         <ChangeRequestDialog
           attendance={attendance}
-          updateAttendance={updateAttendance}
+          updateAttendance={handleUpdateAttendance}
           staff={staff}
         />
         {/* readOnly mode: don't overlay the whole page. Inputs/components
