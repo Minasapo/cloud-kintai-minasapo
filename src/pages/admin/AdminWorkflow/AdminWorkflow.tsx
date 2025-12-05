@@ -20,7 +20,7 @@ import {
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Title from "@shared/ui/typography/Title";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { WorkflowCategory, WorkflowStatus } from "@/API";
