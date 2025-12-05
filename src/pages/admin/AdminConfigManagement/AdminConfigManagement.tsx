@@ -268,7 +268,9 @@ export default function AdminConfigManagement() {
     setSpecialHolidayEnabled(event.target.checked);
   };
 
-  const handleAbsentEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAbsentEnabledChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setAbsentEnabled(event.target.checked);
   };
 
@@ -301,7 +303,7 @@ export default function AdminConfigManagement() {
               enabled: reason.enabled,
             })),
             officeMode,
-                absentEnabled,
+            absentEnabled,
             quickInputStartTimes: quickInputStartTimes.map((entry) => ({
               time: entry.time.format("HH:mm"),
               enabled: entry.enabled,
@@ -337,7 +339,7 @@ export default function AdminConfigManagement() {
               enabled: reason.enabled,
             })),
             officeMode,
-                absentEnabled,
+            absentEnabled,
             hourlyPaidHolidayEnabled,
             amHolidayStartTime: amHolidayStartTime.format("HH:mm"),
             amHolidayEndTime: amHolidayEndTime.format("HH:mm"),
@@ -360,7 +362,7 @@ export default function AdminConfigManagement() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Stack spacing={2} sx={{ pb: 2 }}>
-        <Title text="設定" />
+        <Title>設定</Title>
         <GroupSection title="勤務時間">
           <Stack spacing={1}>
             <WorkingTimeSection
