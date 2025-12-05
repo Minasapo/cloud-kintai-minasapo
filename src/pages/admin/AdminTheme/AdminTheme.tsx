@@ -161,7 +161,7 @@ export default function AdminTheme() {
 
   return (
     <Stack spacing={3}>
-      <Title text="テーマ" />
+      <Title>テーマ</Title>
       <Typography>
         テーマを選択すると、ヘッダーとフッターの配色が変更されます。
       </Typography>
