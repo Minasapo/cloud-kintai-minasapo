@@ -1,31 +1,35 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
-import { Attendance } from "../../API";
-import fetchAttendances from "./fetchAttendances";
+import { Attendance } from "@/API";
+import { useLazyListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
 
 export default function useAttendances() {
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const [triggerListAttendances] = useLazyListRecentAttendancesQuery();
 
-  const getAttendances = async (staffId: string) => {
-    setLoading(true);
-    setAttendances([]);
-    setError(null);
+  const getAttendances = useCallback(
+    async (staffId: string) => {
+      setLoading(true);
+      setAttendances([]);
+      setError(null);
 
-    fetchAttendances(staffId)
-      .then((res) => {
-        setAttendances(res);
-        return res;
-      })
-      .catch((e: Error) => {
-        setError(e);
-        throw e;
-      })
-      .finally(() => {
+      try {
+        const result = await triggerListAttendances({ staffId }).unwrap();
+        setAttendances(result);
+        return result;
+      } catch (err) {
+        const errorInstance =
+          err instanceof Error ? err : new Error("Failed to fetch attendances");
+        setError(errorInstance);
+        throw errorInstance;
+      } finally {
         setLoading(false);
-      });
-  };
+      }
+    },
+    [triggerListAttendances]
+  );
 
   return {
     attendances,
