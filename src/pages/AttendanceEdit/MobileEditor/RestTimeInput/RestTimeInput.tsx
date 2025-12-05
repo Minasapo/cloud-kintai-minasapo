@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { useContext } from "react";
 import {
-  Control,
   FieldArrayMethodProps,
   FieldArrayWithId,
   UseFieldArrayRemove,
@@ -25,8 +24,6 @@ import RestStartTimeInput from "./RestStartTimeInputMobile";
 
 type RestTimeInputProps = {
   restFields: FieldArrayWithId<AttendanceEditInputs, "rests", "id">[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<AttendanceEditInputs, any>;
   restAppend: (
     value: RestInputs | RestInputs[],
     options?: FieldArrayMethodProps | undefined
@@ -37,7 +34,6 @@ type RestTimeInputProps = {
 
 export function RestTimeInput({
   restFields,
-  control,
   restAppend,
   restRemove,
   restUpdate,
@@ -79,7 +75,6 @@ export function RestTimeInput({
               workDate={workDate}
               rest={rest}
               index={index}
-              control={control}
               restUpdate={restUpdate}
               testIdPrefix="mobile"
             />
