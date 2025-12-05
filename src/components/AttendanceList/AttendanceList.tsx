@@ -42,6 +42,7 @@ import useAttendances from "../../hooks/useAttendances/useAttendances";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";
 import { setSnackbarError } from "../../lib/reducers/snackbarReducer";
 import Title from "../Title/Title";
+// import DesktopCalendarView from "./DesktopCalendarView";
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";
 
@@ -191,6 +192,13 @@ export default function AttendanceTable() {
           }}
         />
       </Box>
+      {/* <DesktopCalendarView
+        attendances={attendances}
+        holidayCalendars={holidayCalendars}
+        companyHolidayCalendars={companyHolidayCalendars}
+        navigate={navigate}
+        staff={staff}
+      /> */}
       <DesktopList
         attendances={attendances}
         holidayCalendars={holidayCalendars}

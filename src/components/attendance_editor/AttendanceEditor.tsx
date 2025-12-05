@@ -36,6 +36,7 @@ import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { AttendanceEditMailSender } from "@/lib/mail/AttendanceEditMailSender";
+import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 import AttendanceEditProvider from "@/pages/AttendanceEdit/AttendanceEditProvider";
 import {
   AttendanceEditInputs,
@@ -401,10 +402,20 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           workDate: data.workDate,
           // 有給の場合は規定開始/終了時刻を送る
           startTime: data.paidHolidayFlag
-            ? getStartTime().toISOString()
+            ? resolveConfigTimeOnDate(
+                getStartTime(),
+                data.workDate as string | null | undefined,
+                attendance?.workDate,
+                targetWorkDate
+              )
             : data.startTime,
           endTime: data.paidHolidayFlag
-            ? getEndTime().toISOString()
+            ? resolveConfigTimeOnDate(
+                getEndTime(),
+                data.workDate as string | null | undefined,
+                attendance?.workDate,
+                targetWorkDate
+              )
             : data.endTime || null,
           absentFlag: data.absentFlag ?? false,
           isDeemedHoliday: data.isDeemedHoliday,
@@ -510,12 +521,20 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           .toDataFormat(),
         // 有給の場合は規定開始/終了時刻のみ送る
         startTime: data.paidHolidayFlag
-          ? getStartTime().toISOString()
+          ? resolveConfigTimeOnDate(
+              getStartTime(),
+              data.workDate as string | null | undefined,
+              targetWorkDate
+            )
           : data.startTime,
         absentFlag: data.absentFlag ?? false,
         isDeemedHoliday: data.isDeemedHoliday,
         endTime: data.paidHolidayFlag
-          ? getEndTime().toISOString()
+          ? resolveConfigTimeOnDate(
+              getEndTime(),
+              data.workDate as string | null | undefined,
+              targetWorkDate
+            )
           : data.endTime,
         goDirectlyFlag: data.goDirectlyFlag,
         returnDirectlyFlag: data.returnDirectlyFlag,
@@ -711,8 +730,20 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
       // 開始/終了時刻を規定値に設定（既に同じであれば何もしない）
       try {
-        const desiredStart = getStartTime().toISOString();
-        const desiredEnd = getEndTime().toISOString();
+        const desiredStart = resolveConfigTimeOnDate(
+          getStartTime(),
+          getValues("startTime") as string | null | undefined,
+          targetWorkDate,
+          attendance?.workDate,
+          workDate
+        );
+        const desiredEnd = resolveConfigTimeOnDate(
+          getEndTime(),
+          getValues("endTime") as string | null | undefined,
+          targetWorkDate,
+          attendance?.workDate,
+          workDate
+        );
         if (getValues("startTime") !== desiredStart) {
           setValue("startTime", desiredStart);
         }
@@ -1068,7 +1099,15 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                   disabled={changeRequests.length > 0 || !!readOnly}
                   onChangeExtra={(checked) => {
                     if (checked)
-                      setValue("startTime", getStartTime().toISOString());
+                      setValue(
+                        "startTime",
+                        resolveConfigTimeOnDate(
+                          getStartTime(),
+                          getValues("startTime") as string | null | undefined,
+                          workDate,
+                          targetWorkDate
+                        )
+                      );
                   }}
                 />
                 <ReturnDirectlyFlagInput />

@@ -12,7 +12,8 @@ export default async function handleApproveChangeRequest(
   const changeRequests = attendance.changeRequests.filter(
     (item): item is NonNullable<typeof item> => item !== null
   );
-  const targetChangeRequest = changeRequests[0];
+  const targetChangeRequest =
+    changeRequests.find((request) => !request.completed) || changeRequests[0];
 
   return updateAttendance({
     id: attendance.id,

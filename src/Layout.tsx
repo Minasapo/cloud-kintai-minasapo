@@ -141,7 +141,8 @@ export default function Layout() {
       "holidayCalendarsLastFetchTime",
       fetchAllHolidayCalendars,
       getCookie,
-      setCookie
+      setCookie,
+      24 * 60
     );
   }, [getCookie, setCookie, fetchAllHolidayCalendars]);
 
@@ -153,7 +154,8 @@ export default function Layout() {
       "companyHolidayCalendarsLastFetchTime",
       fetchAllCompanyHolidayCalendars,
       getCookie,
-      setCookie
+      setCookie,
+      24 * 60
     );
   }, [getCookie, setCookie, fetchAllCompanyHolidayCalendars]);
 

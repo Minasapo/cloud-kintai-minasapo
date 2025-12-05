@@ -14,6 +14,7 @@ export interface MenuItem {
 export const GENERAL_MENU_ITEMS: readonly MenuItem[] = [
   { label: "勤怠打刻", href: "/register" },
   { label: "勤怠一覧", href: "/attendance/list" },
+  { label: "日報", href: "/attendance/report" },
   // { label: "ドキュメント", href: "/docs" }, // コメントアウト済み
 ] as const;
 
