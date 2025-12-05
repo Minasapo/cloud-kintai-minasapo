@@ -9,9 +9,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import { useState } from "react";
-
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 
 import useDocuments from "../../../hooks/useDocuments/useDocuments";
 import { FilterGrid } from "./FilterGrid";

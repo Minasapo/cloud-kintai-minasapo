@@ -11,6 +11,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import Title from "@shared/ui/typography/Title";
 import { API } from "aws-amplify";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -21,8 +23,6 @@ import type {
   GetDailyReportQuery,
   UpdateDailyReportMutation,
 } from "@/API";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-import Title from "@/components/Title/Title";
 import { updateDailyReport } from "@/graphql/mutations";
 import { getDailyReport } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";

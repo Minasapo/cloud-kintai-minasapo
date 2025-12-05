@@ -20,13 +20,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import Title from "@shared/ui/typography/Title";
 import { API } from "aws-amplify";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import type { ListDailyReportsQuery } from "@/API";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-import Title from "@/components/Title/Title";
 import { listDailyReports } from "@/graphql/queries";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 

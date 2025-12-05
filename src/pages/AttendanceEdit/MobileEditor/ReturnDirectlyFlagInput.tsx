@@ -1,7 +1,7 @@
 import { Switch } from "@mui/material";
+import ReturnDirectlyFlagInputBase from "@shared/ui/form/flags/ReturnDirectlyFlagInputBase";
 import { useContext } from "react";
 
-import ReturnDirectlyFlagInputBase from "@/components/common/ReturnDirectlyFlagInputBase";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 

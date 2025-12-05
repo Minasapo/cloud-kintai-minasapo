@@ -11,11 +11,11 @@ import {
 } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridRowParams } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
+import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import Title from "@/components/common/Title";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import { CloseDate } from "../../../API";

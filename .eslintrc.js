@@ -33,8 +33,27 @@ module.exports = {
     "import",
     "simple-import-sort",
     "unused-imports",
+    "boundaries",
   ],
   ignorePatterns: ["src/ui-components/*"],
+  settings: {
+    react: {
+      version: "detect",
+    },
+    "import/resolver": {
+      typescript: {
+        project: "./tsconfig.json",
+      },
+    },
+    "boundaries/elements": [
+      { type: "app", pattern: "src/app/**" },
+      { type: "processes", pattern: "src/processes/**" },
+      { type: "pages", pattern: "src/pages/**" },
+      { type: "features", pattern: "src/features/**" },
+      { type: "entities", pattern: "src/entities/**" },
+      { type: "shared", pattern: "src/shared/**" },
+    ],
+  },
   rules: {
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
@@ -55,6 +74,28 @@ module.exports = {
         varsIgnorePattern: "^_",
         args: "after-used",
         argsIgnorePattern: "^_",
+      },
+    ],
+    "boundaries/element-types": [
+      "error",
+      {
+        default: "allow",
+        rules: [
+          {
+            from: "app",
+            allow: ["processes", "pages", "features", "entities", "shared"],
+          },
+          {
+            from: "processes",
+            allow: ["pages", "features", "entities", "shared"],
+          },
+          { from: "pages", allow: ["features", "entities", "shared"] },
+          { from: "features", allow: ["entities", "shared"] },
+          { from: "entities", allow: ["shared"] },
+          { from: "shared", allow: ["shared"] },
+        ],
+        message:
+          "依存方向は app -> processes -> pages -> features -> entities -> shared のみ許可されています",
       },
     ],
   },

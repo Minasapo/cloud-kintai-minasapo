@@ -1,6 +1,6 @@
 import { Box, Card, Stack, Typography } from "@mui/material";
+import Title from "@shared/ui/typography/Title";
 
-import Title from "../../components/Title/Title";
 import work_end from "../../images/work_end.gif";
 
 export default function WorkEndDocument() {

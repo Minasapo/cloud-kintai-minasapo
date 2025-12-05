@@ -1,10 +1,10 @@
 import { Typography } from "@mui/material";
 
-interface TitleProps {
+interface HeadlineProps {
   text: string;
 }
 
-export default function Title({ text }: TitleProps) {
+export default function Headline({ text }: HeadlineProps) {
   return (
     <Typography
       variant="h4"

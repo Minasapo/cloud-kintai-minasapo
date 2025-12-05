@@ -24,6 +24,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
@@ -39,7 +40,6 @@ import {
   UpdateShiftRequestMutation,
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import * as MESSAGE_CODE from "@/errors";
 import { createShiftRequest, updateShiftRequest } from "@/graphql/mutations";

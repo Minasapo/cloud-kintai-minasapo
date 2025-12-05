@@ -20,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -33,7 +34,6 @@ import {
 } from "@/API";
 import handleApproveChangeRequest from "@/components/attendance_editor/ChangeRequestDialog/handleApproveChangeRequest";
 import { AttendanceStatusTooltip } from "@/components/AttendanceList/AttendanceStatusTooltip";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
