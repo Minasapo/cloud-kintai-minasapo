@@ -12,9 +12,10 @@ import {
 } from "@mui/material";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import type { Attendance, Rest } from "@/API";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import { useLazyListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
 
@@ -37,15 +38,15 @@ export default function ShiftDayView() {
   );
 
   // 出勤データがあればそれを利用し、なければ既存のモックを利用する
-  const [attendanceMap, setAttendanceMap] = useState<Map<string, any>>(
-    new Map()
-  );
+  const [attendanceMap, setAttendanceMap] = useState<
+    Map<string, Attendance | null>
+  >(new Map());
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
-      const map = new Map<string, any>();
+      const map = new Map<string, Attendance | null>();
 
       await Promise.all(
         shiftStaffs.map(async (s) => {
@@ -107,12 +108,10 @@ export default function ShiftDayView() {
         Array.isArray(attendance.rests) &&
         attendance.rests.length > 0
       ) {
-        attendance.rests.forEach((r: any) => {
-          if (r && r.startTime && r.endTime) {
-            const rs = dayjs(r.startTime).hour();
-            const re = dayjs(r.endTime).hour();
-            breaks.push({ start: rs, end: Math.max(rs + 1, re) });
-          }
+        attendance.rests.filter(isRestWithTimes).forEach((rest) => {
+          const rs = dayjs(rest.startTime).hour();
+          const re = dayjs(rest.endTime).hour();
+          breaks.push({ start: rs, end: Math.max(rs + 1, re) });
         });
       } else {
         // フォールバック: 基本の昼休み（勤務時間内に収まる場合のみ追加）
@@ -399,3 +398,8 @@ export default function ShiftDayView() {
     </Container>
   );
 }
+
+const isRestWithTimes = (
+  rest: Rest | null | undefined
+): rest is Rest & { startTime: string; endTime: string } =>
+  Boolean(rest?.startTime && rest?.endTime);
