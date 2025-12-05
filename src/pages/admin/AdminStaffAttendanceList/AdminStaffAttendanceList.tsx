@@ -37,7 +37,10 @@ import { AppContext } from "@/context/AppContext";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
-import { useUpdateAttendanceMutation } from "@/lib/api/attendanceApi";
+import {
+  useListRecentAttendancesQuery,
+  useUpdateAttendanceMutation,
+} from "@/lib/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { ChangeRequest } from "@/lib/ChangeRequest";
 import { CompanyHoliday } from "@/lib/CompanyHoliday";
@@ -49,7 +52,6 @@ import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTime
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
-import useAttendances from "../../../hooks/useAttendances/useAttendances";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -105,7 +107,25 @@ export default function AdminStaffAttendanceList() {
   const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
   const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
 
-  const { attendances, getAttendances } = useAttendances();
+  const shouldFetchAttendances = Boolean(staffId);
+  const {
+    data: attendancesData,
+    isLoading: isAttendancesInitialLoading,
+    isFetching: isAttendancesFetching,
+    isUninitialized: isAttendancesUninitialized,
+    error: attendancesError,
+    refetch: refetchAttendances,
+  } = useListRecentAttendancesQuery(
+    { staffId: staffId ?? "" },
+    { skip: !shouldFetchAttendances }
+  );
+
+  const attendances = attendancesData ?? [];
+  const attendanceLoading =
+    !shouldFetchAttendances ||
+    isAttendancesInitialLoading ||
+    isAttendancesFetching ||
+    isAttendancesUninitialized;
   const [quickViewAttendance, setQuickViewAttendance] =
     useState<Attendance | null>(null);
   const [quickViewChangeRequest, setQuickViewChangeRequest] =
@@ -147,16 +167,19 @@ export default function AdminStaffAttendanceList() {
 
   useEffect(() => {
     if (!staffId) return;
-    getAttendances(staffId).catch(() =>
-      dispatch(setSnackbarError(MESSAGE_CODE.E02001))
-    );
 
     fetchStaff(staffId)
       .then(setStaff)
       .catch(() => {
         dispatch(setSnackbarError(MESSAGE_CODE.E00001));
       });
-  }, [staffId]);
+  }, [staffId, dispatch]);
+
+  useEffect(() => {
+    if (attendancesError) {
+      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+    }
+  }, [attendancesError, dispatch]);
 
   const totalTime = useMemo(() => {
     const totalWorkTime = attendances.reduce((acc, attendance) => {
@@ -295,7 +318,7 @@ export default function AdminStaffAttendanceList() {
 
       dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
       setSelectedAttendanceIds([]);
-      await getAttendances(staffId);
+      await refetchAttendances();
     } catch (error) {
       console.error("Bulk approve failed", error);
       dispatch(setSnackbarError(MESSAGE_CODE.E04006));
@@ -304,7 +327,7 @@ export default function AdminStaffAttendanceList() {
     }
   }, [
     dispatch,
-    getAttendances,
+    refetchAttendances,
     pendingAttendances,
     selectedAttendanceIds,
     staff,
