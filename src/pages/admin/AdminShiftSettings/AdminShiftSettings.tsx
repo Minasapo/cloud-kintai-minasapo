@@ -9,11 +9,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import Title from "@/components/common/Title";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import {

@@ -1,7 +1,6 @@
 import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import Title from "@shared/ui/typography/Title";
 import { useState } from "react";
-
-import Title from "@/components/common/Title";
 
 import CompanyHolidayCalendarList from "../CompanyHolidayCalendar/CompanyHolidayCalendarList";
 import HolidayCalendarList from "./HolidayCalendarList";

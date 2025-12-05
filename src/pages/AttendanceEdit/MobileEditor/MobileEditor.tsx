@@ -8,6 +8,7 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
+import Title from "@shared/ui/typography/Title";
 import React, { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
 
@@ -17,7 +18,6 @@ import QuickInputButtonsMobile from "@/components/attendance_editor/QuickInputBu
 import GroupContainerMobile from "@/components/ui/GroupContainer/GroupContainerMobile";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
-import Title from "../../../components/Title/Title";
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 import ChangeRequestingAlert from "../DesktopEditor/ChangeRequestingMessage";

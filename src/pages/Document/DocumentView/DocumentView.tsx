@@ -1,12 +1,12 @@
 import EditIcon from "@mui/icons-material/Edit";
 import PersonIcon from "@mui/icons-material/Person";
 import { Box, Button, Chip, Paper, Stack, Typography } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import { Storage } from "aws-amplify";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import { Document as APIDocument } from "../../../API";

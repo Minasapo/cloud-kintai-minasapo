@@ -1,6 +1,5 @@
 import { Box, Stack, Typography } from "@mui/material";
-
-import Title from "../../components/Title/Title";
+import Title from "@shared/ui/typography/Title";
 
 export default function AttendanceRemarksDocument() {
   return (

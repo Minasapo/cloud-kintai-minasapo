@@ -10,11 +10,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import { useLazyListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
 

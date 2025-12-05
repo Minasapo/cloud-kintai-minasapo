@@ -1,6 +1,5 @@
 import { Box, Container, Stack } from "@mui/material";
-
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 
 import AttendanceDailyList from "../../components/AttendanceDailyList/AttendanceDailyList";
 import DownloadForm from "../../components/download_form/DownloadForm";

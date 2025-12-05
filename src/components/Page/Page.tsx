@@ -1,10 +1,9 @@
 import { Container, Stack } from "@mui/material";
-import React, { type ReactNode } from "react";
-
 import CommonBreadcrumbs, {
   type BreadcrumbItem,
-} from "@/components/common/CommonBreadcrumbs";
-import Title from "@/components/Title/Title";
+} from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import Title from "@shared/ui/typography/Title";
+import React, { type ReactNode } from "react";
 
 export default function Page({
   title,

@@ -16,12 +16,12 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import * as MESSAGE_CODE from "@/errors";
 import {
   useGetCompanyHolidayCalendarsQuery,
