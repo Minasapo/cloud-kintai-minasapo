@@ -9,6 +9,7 @@ import {
   Checkbox,
   Container,
   IconButton,
+  LinearProgress,
   Stack,
   Table,
   TableBody,
@@ -20,7 +21,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -33,7 +34,6 @@ import {
 import handleApproveChangeRequest from "@/components/attendance_editor/ChangeRequestDialog/handleApproveChangeRequest";
 import { AttendanceStatusTooltip } from "@/components/AttendanceList/AttendanceStatusTooltip";
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-import { AppContext } from "@/context/AppContext";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
@@ -41,6 +41,10 @@ import {
   useListRecentAttendancesQuery,
   useUpdateAttendanceMutation,
 } from "@/lib/api/attendanceApi";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@/lib/api/calendarApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { ChangeRequest } from "@/lib/ChangeRequest";
 import { CompanyHoliday } from "@/lib/CompanyHoliday";
@@ -103,9 +107,25 @@ export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();
-
-  const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
   const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
+
+  const {
+    data: holidayCalendars = [],
+    isLoading: isHolidayCalendarsLoading,
+    isFetching: isHolidayCalendarsFetching,
+    error: holidayCalendarsError,
+  } = useGetHolidayCalendarsQuery();
+  const {
+    data: companyHolidayCalendars = [],
+    isLoading: isCompanyHolidayCalendarsLoading,
+    isFetching: isCompanyHolidayCalendarsFetching,
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+  const calendarLoading =
+    isHolidayCalendarsLoading ||
+    isHolidayCalendarsFetching ||
+    isCompanyHolidayCalendarsLoading ||
+    isCompanyHolidayCalendarsFetching;
 
   const shouldFetchAttendances = Boolean(staffId);
   const {
@@ -180,6 +200,13 @@ export default function AdminStaffAttendanceList() {
       dispatch(setSnackbarError(MESSAGE_CODE.E02001));
     }
   }, [attendancesError, dispatch]);
+
+  useEffect(() => {
+    if (holidayCalendarsError || companyHolidayCalendarsError) {
+      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
 
   const totalTime = useMemo(() => {
     const totalWorkTime = attendances.reduce((acc, attendance) => {
@@ -372,6 +399,14 @@ export default function AdminStaffAttendanceList() {
     return (
       <Container maxWidth="xl" sx={{ pt: 2 }}>
         <Typography>データ取得中に何らかの問題が発生しました</Typography>
+      </Container>
+    );
+  }
+
+  if (attendanceLoading || calendarLoading) {
+    return (
+      <Container maxWidth="xl" sx={{ pt: 2 }}>
+        <LinearProgress />
       </Container>
     );
   }
