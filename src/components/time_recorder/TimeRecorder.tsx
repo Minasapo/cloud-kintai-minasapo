@@ -24,7 +24,6 @@ import {
   UpdateAttendanceInput,
 } from "@/API";
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AppContext } from "@/context/AppContext";
 import { AuthContext } from "@/context/AuthContext";
 import {
   useCreateAttendanceMutation,
@@ -32,6 +31,10 @@ import {
   useListRecentAttendancesQuery,
   useUpdateAttendanceMutation,
 } from "@/lib/api/attendanceApi";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@/lib/api/calendarApi";
 import {
   clockInAction,
   clockOutAction,
@@ -77,12 +80,29 @@ export default function TimeRecorder(): JSX.Element {
 
   const dispatch = useAppDispatchV2();
 
-  const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
   const { getStartTime, getEndTime } = useContext(AppConfigContext);
 
   const today = useMemo(() => dayjs().format(AttendanceDate.DataFormat), []);
 
   const shouldFetchAttendance = Boolean(cognitoUser?.id);
+
+  const {
+    data: holidayCalendars = [],
+    isLoading: isHolidayCalendarsLoading,
+    isFetching: isHolidayCalendarsFetching,
+    error: holidayCalendarsError,
+  } = useGetHolidayCalendarsQuery();
+  const {
+    data: companyHolidayCalendars = [],
+    isLoading: isCompanyHolidayCalendarsLoading,
+    isFetching: isCompanyHolidayCalendarsFetching,
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+  const calendarLoading =
+    isHolidayCalendarsLoading ||
+    isHolidayCalendarsFetching ||
+    isCompanyHolidayCalendarsLoading ||
+    isCompanyHolidayCalendarsFetching;
 
   const {
     data: attendanceData,
@@ -239,6 +259,18 @@ export default function TimeRecorder(): JSX.Element {
 
   const logger = useMemo(() => new Logger("TimeRecorder", "DEBUG"), []);
 
+  useEffect(() => {
+    if (holidayCalendarsError || companyHolidayCalendarsError) {
+      logger.debug(holidayCalendarsError ?? companyHolidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [
+    holidayCalendarsError,
+    companyHolidayCalendarsError,
+    dispatch,
+    logger,
+  ]);
+
   const clockInDisplayText = useMemo(() => {
     if (!attendance?.startTime) {
       return null;
@@ -379,7 +411,12 @@ export default function TimeRecorder(): JSX.Element {
   }, [attendancesError, dispatch, shouldFetchAttendance]);
 
   useEffect(() => {
-    if (!staff || attendanceLoading || attendancesLoading) {
+    if (
+      !staff ||
+      attendanceLoading ||
+      attendancesLoading ||
+      calendarLoading
+    ) {
       return;
     }
 
@@ -416,16 +453,17 @@ export default function TimeRecorder(): JSX.Element {
     attendanceLoading,
     attendancesLoading,
     staff,
-    holidayCalendars,
-    companyHolidayCalendars,
+      holidayCalendars,
+      companyHolidayCalendars,
     attendances,
+    calendarLoading,
   ]);
 
   useEffect(() => {
     setWorkStatus(getWorkStatus(attendance));
   }, [attendance]);
 
-  if (attendanceLoading || workStatus === undefined) {
+  if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return (
       <Box
         sx={{
