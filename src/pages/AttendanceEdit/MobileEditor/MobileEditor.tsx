@@ -263,7 +263,6 @@ export function MobileEditor() {
             <WorkTimeInput />
             <RestTimeInput
               restFields={restFields}
-              control={control}
               restAppend={restAppend}
               restRemove={restRemove}
               restUpdate={restUpdate}
