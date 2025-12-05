@@ -68,10 +68,8 @@ export default function Layout() {
     getAbsentEnabled,
     getThemeColor,
   } = useAppConfig();
-  const {
-    data: holidayCalendars = [],
-    isLoading: holidayCalendarLoading,
-  } = useGetHolidayCalendarsQuery();
+  const { data: holidayCalendars = [], isLoading: holidayCalendarLoading } =
+    useGetHolidayCalendarsQuery();
   const {
     data: companyHolidayCalendars = [],
     isLoading: companyHolidayCalendarLoading,
