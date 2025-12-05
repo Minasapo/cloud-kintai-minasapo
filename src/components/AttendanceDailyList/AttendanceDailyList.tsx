@@ -33,6 +33,10 @@ import MoveDateItem from "@/components/AttendanceDailyList/MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import * as MESSAGE_CODE from "@/errors";
 import { useLazyListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@/lib/api/calendarApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
@@ -55,6 +59,23 @@ export default function AttendanceDailyList() {
   const dispatch = useAppDispatchV2();
   const [searchName, setSearchName] = useState("");
   const [triggerListAttendances] = useLazyListRecentAttendancesQuery();
+  const {
+    data: holidayCalendars = [],
+    isLoading: isHolidayCalendarsLoading,
+    isFetching: isHolidayCalendarsFetching,
+    error: holidayCalendarsError,
+  } = useGetHolidayCalendarsQuery();
+  const {
+    data: companyHolidayCalendars = [],
+    isLoading: isCompanyHolidayCalendarsLoading,
+    isFetching: isCompanyHolidayCalendarsFetching,
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+  const calendarsLoading =
+    isHolidayCalendarsLoading ||
+    isHolidayCalendarsFetching ||
+    isCompanyHolidayCalendarsLoading ||
+    isCompanyHolidayCalendarsFetching;
 
   const scheduledEnd = useMemo(() => {
     const parsed = getEndTime();
@@ -69,6 +90,13 @@ export default function AttendanceDailyList() {
       console.error(error);
     }
   }, [error]);
+
+  useEffect(() => {
+    if (holidayCalendarsError || companyHolidayCalendarsError) {
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+    }
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
 
   const sortedAttendanceList = useMemo(() => {
     // create a copy before sort to avoid mutating the original attendanceDailyList
@@ -262,7 +290,7 @@ export default function AttendanceDailyList() {
     });
   }, [loading, attendanceDailyList, attendanceMap, isRequesting]);
 
-  if (loading) {
+  if (loading || calendarsLoading) {
     return <LinearProgress sx={{ width: "100%" }} />;
   }
 
@@ -329,6 +357,9 @@ export default function AttendanceDailyList() {
                         attendances={attendanceMap[row.sub] ?? []}
                         attendanceLoading={!!attendanceLoadingMap[row.sub]}
                         attendanceError={attendanceErrorMap[row.sub] ?? null}
+                        holidayCalendars={holidayCalendars}
+                        companyHolidayCalendars={companyHolidayCalendars}
+                        calendarLoading={calendarsLoading}
                       />
                       <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
                       <StartTimeTableCell row={row} />
@@ -376,6 +407,9 @@ export default function AttendanceDailyList() {
                   attendances={attendanceMap[row.sub] ?? []}
                   attendanceLoading={!!attendanceLoadingMap[row.sub]}
                   attendanceError={attendanceErrorMap[row.sub] ?? null}
+                  holidayCalendars={holidayCalendars}
+                  companyHolidayCalendars={companyHolidayCalendars}
+                  calendarLoading={calendarsLoading}
                 />
                 <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
                 <StartTimeTableCell row={row} />
