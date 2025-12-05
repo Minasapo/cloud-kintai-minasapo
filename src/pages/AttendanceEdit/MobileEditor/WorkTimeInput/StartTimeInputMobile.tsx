@@ -1,7 +1,7 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Box, Chip, Stack, TextField } from "@mui/material";
 import dayjs from "dayjs";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 
