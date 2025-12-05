@@ -1,7 +1,11 @@
 import dayjs from "dayjs";
 import { useCallback, useMemo } from "react";
 
-import type { AppConfig, CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
+import type {
+  AppConfig,
+  CreateAppConfigInput,
+  UpdateAppConfigInput,
+} from "@/API";
 import { DEFAULT_THEME_COLOR } from "@/constants/theme";
 import {
   useCreateAppConfigMutation,
@@ -122,7 +126,10 @@ const useAppConfig = () => {
       }));
   }, [config]);
 
-  const getOfficeMode = useCallback(() => config?.officeMode ?? false, [config]);
+  const getOfficeMode = useCallback(
+    () => config?.officeMode ?? false,
+    [config]
+  );
 
   const getQuickInputStartTimes = useCallback(
     (onlyEnabled = false) => {
@@ -233,7 +240,8 @@ const useAppConfig = () => {
   );
 
   const getThemeColor = useCallback(
-    () => config?.themeColor ?? DEFAULT_CONFIG.themeColor ?? DEFAULT_THEME_COLOR,
+    () =>
+      config?.themeColor ?? DEFAULT_CONFIG.themeColor ?? DEFAULT_THEME_COLOR,
     [config]
   );
 
