@@ -51,7 +51,10 @@ export const appConfigApi = createApi({
           return [baseTag];
         }
 
-        return [baseTag, { type: "AppConfig" as const, id: result.id ?? "UNKNOWN" }];
+        return [
+          baseTag,
+          { type: "AppConfig" as const, id: result.id ?? "UNKNOWN" },
+        ];
       },
     }),
     createAppConfig: builder.mutation<AppConfig, CreateAppConfigInput>({
