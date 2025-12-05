@@ -1,8 +1,6 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import ViewListIcon from "@mui/icons-material/ViewList";
-import MobileMenuView, {
-  MobileMenuItem,
-} from "@shared/ui/header/MobileMenu";
+import MobileMenuView, { MobileMenuItem } from "@shared/ui/header/MobileMenu";
 import { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
