@@ -1,6 +1,8 @@
 import type { Middleware, Reducer } from "@reduxjs/toolkit";
 
+import { appConfigApi } from "@/lib/api/appConfigApi";
 import { attendanceApi } from "@/lib/api/attendanceApi";
+import { calendarApi } from "@/lib/api/calendarApi";
 
 export type RegisteredRtkApi = {
   reducerPath: string;
@@ -11,4 +13,8 @@ export type RegisteredRtkApi = {
   };
 };
 
-export const rtkApis: RegisteredRtkApi[] = [attendanceApi];
+export const rtkApis: RegisteredRtkApi[] = [
+  attendanceApi,
+  calendarApi,
+  appConfigApi,
+];
