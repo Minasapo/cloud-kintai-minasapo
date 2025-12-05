@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Page from "@shared/ui/page/Page";
 import { API } from "aws-amplify";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,7 +26,6 @@ import {
   WorkflowStatus,
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import Page from "@/components/Page/Page";
 import WorkflowTypeFields from "@/components/Workflow/WorkflowTypeFields";
 import { AuthContext } from "@/context/AuthContext";
 import { getWorkflow } from "@/graphql/queries";
