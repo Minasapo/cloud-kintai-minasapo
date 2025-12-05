@@ -9,11 +9,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import Title from "@/components/common/Title";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import {
@@ -224,7 +224,7 @@ export default function AdminShiftSettings() {
 
   return (
     <Stack spacing={2.5}>
-      <Title text="シフト設定" />
+      <Title>シフト設定</Title>
       <Typography>
         シフトグループを定義し、公開範囲や担当者単位でシフトを整理できます。
         ラベル・説明に加えて、各グループの最小／最大人数、または固定人数を任意で設定し、必要に応じて追加・編集・削除してください（レンジ指定と固定人数は同時に使用できません）。

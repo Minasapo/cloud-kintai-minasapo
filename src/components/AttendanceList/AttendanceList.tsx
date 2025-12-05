@@ -15,6 +15,7 @@ import {
  * MaterialUIのDatePickerコンポーネント。
  */
 import { DatePicker } from "@mui/x-date-pickers";
+import Title from "@shared/ui/typography/Title";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
@@ -44,7 +45,6 @@ import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";
 import { setSnackbarError } from "../../lib/reducers/snackbarReducer";
-import Title from "../Title/Title";
 // import DesktopCalendarView from "./DesktopCalendarView";
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";

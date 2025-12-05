@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";

@@ -6,8 +6,8 @@ import { AttendanceEditInputs } from "../common";
 export function RequestButtonItem({
   handleSubmit,
   onSubmit,
-  isDirty,
-  isValid,
+  isDirty: _isDirty,
+  isValid: _isValid,
   isSubmitting,
 }: {
   handleSubmit: UseFormHandleSubmit<AttendanceEditInputs, undefined>;

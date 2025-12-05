@@ -7,11 +7,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import Title from "@/components/common/Title";
 import { DEFAULT_THEME_COLOR } from "@/constants/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
@@ -161,7 +161,7 @@ export default function AdminTheme() {
 
   return (
     <Stack spacing={3}>
-      <Title text="テーマ" />
+      <Title>テーマ</Title>
       <Typography>
         テーマを選択すると、ヘッダーとフッターの配色が変更されます。
       </Typography>

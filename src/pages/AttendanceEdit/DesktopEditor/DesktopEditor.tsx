@@ -13,6 +13,7 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
+import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 
@@ -30,7 +31,6 @@ import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
 import StaffNameItem from "../../../components/attendance_editor/items/StaffNameItem";
 import WorkTypeItem from "../../../components/attendance_editor/items/WorkTypeItem";
-import Title from "../../../components/Title/Title";
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 import ChangeRequestingAlert from "./ChangeRequestingMessage";

@@ -1,26 +1,32 @@
 import { Box, Checkbox, Stack } from "@mui/material";
 import dayjs from "dayjs";
-import {
-  Control,
-  Controller,
-  UseFormGetValues,
-  UseFormSetValue,
-} from "react-hook-form";
+import { Controller, UseFieldArrayReplace } from "react-hook-form";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import {
+  AttendanceEditInputs,
+  RestInputs,
+} from "@/pages/AttendanceEdit/common";
 import { Label } from "@/pages/AttendanceEdit/MobileEditor/Label";
+
+import {
+  AttendanceControl,
+  AttendanceControllerField,
+  AttendanceGetValues,
+  AttendanceSetValue,
+} from "./types";
+
+type PaidHolidayFlagField = AttendanceControllerField<"paidHolidayFlag">;
 
 interface PaidHolidayFlagInputProps {
   label?: string;
   disabled?: boolean;
-  control: Control<any>;
-  setValue: UseFormSetValue<any>;
+  control: AttendanceControl;
+  setValue: AttendanceSetValue;
   workDate?: string;
   setPaidHolidayTimes?: boolean;
-  restReplace?: (
-    items: { startTime: string | null; endTime: string | null }[]
-  ) => void;
-  getValues?: UseFormGetValues<any>;
+  restReplace?: UseFieldArrayReplace<AttendanceEditInputs, "rests">;
+  getValues?: AttendanceGetValues;
 }
 
 export default function PaidHolidayFlagInputMobile({
@@ -41,7 +47,10 @@ export default function PaidHolidayFlagInputMobile({
     getLunchRestEndTime,
   } = useAppConfig();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: PaidHolidayFlagField
+  ) => {
     setValue("paidHolidayFlag", e.target.checked);
     field.onChange(e);
 
@@ -76,7 +85,7 @@ export default function PaidHolidayFlagInputMobile({
 
     setValue("startTime", startDt.toISOString());
     setValue("endTime", endDt.toISOString());
-    const rests = [
+    const rests: RestInputs[] = [
       {
         startTime: restStartDt.toISOString(),
         endTime: restEndDt.toISOString(),

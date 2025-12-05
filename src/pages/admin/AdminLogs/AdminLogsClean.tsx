@@ -9,11 +9,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 
 import { Staff } from "@/API";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import { getOperationLogLabel } from "@/constants/operationLogLabels";
 import useAdminOperationLogs from "@/hooks/useAdminOperationLogs/useAdminOperationLogs";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";

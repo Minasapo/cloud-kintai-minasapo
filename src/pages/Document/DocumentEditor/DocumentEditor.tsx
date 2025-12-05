@@ -7,15 +7,14 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import Title from "@shared/ui/typography/Title";
 import { Storage } from "aws-amplify";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-
 import { useAppDispatchV2 } from "../../../app/hooks";
-import Title from "../../../components/Title/Title";
 import * as MESSAGE_CODE from "../../../errors";
 import fetchDocument from "../../../hooks/useDocuments/fetchDocument";
 import updateDocumentData from "../../../hooks/useDocuments/updateDocumentData";

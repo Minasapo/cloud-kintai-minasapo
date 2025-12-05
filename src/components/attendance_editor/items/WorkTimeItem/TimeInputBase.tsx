@@ -6,25 +6,33 @@ import { useContext } from "react";
 import { Controller } from "react-hook-form";
 
 import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
 
-interface TimeInputBaseProps<K extends keyof AttendanceEditInputs> {
-  name: K;
-  control: any;
-  setValue: (name: K, value: any) => void;
+import {
+  AttendanceControl,
+  AttendanceFieldValue,
+  AttendanceSetValue,
+  AttendanceTimeFieldName,
+} from "../../types";
+
+interface TimeInputBaseProps<TFieldName extends AttendanceTimeFieldName> {
+  name: TFieldName;
+  control: AttendanceControl;
+  setValue: AttendanceSetValue;
   workDate: dayjs.Dayjs;
   quickInputTimes: { time: string; enabled: boolean }[];
   chipColor?: (enabled: boolean) => "success" | "default";
 }
 
-export default function TimeInputBase<K extends keyof AttendanceEditInputs>({
+export default function TimeInputBase<
+  TFieldName extends AttendanceTimeFieldName
+>({
   name,
   control,
   setValue,
   workDate,
   quickInputTimes,
   chipColor = (enabled) => (enabled ? "success" : "default"),
-}: TimeInputBaseProps<K>) {
+}: TimeInputBaseProps<TFieldName>) {
   const { readOnly } = useContext(AttendanceEditContext);
   if (!workDate || !control || !setValue) return null;
 
@@ -32,7 +40,7 @@ export default function TimeInputBase<K extends keyof AttendanceEditInputs>({
     <Stack direction="row" spacing={1}>
       <Stack spacing={1}>
         <Controller
-          name={name as string}
+          name={name}
           control={control}
           render={({ field }) => (
             <TimePicker
@@ -54,8 +62,12 @@ export default function TimeInputBase<K extends keyof AttendanceEditInputs>({
                     .millisecond(0)
                     .toISOString();
                 })();
-                field.onChange(formatted);
-                setValue(name, formatted);
+                const nextValue = formatted as AttendanceFieldValue<TFieldName>;
+                field.onChange(nextValue);
+                setValue(
+                  name as AttendanceTimeFieldName,
+                  nextValue as AttendanceFieldValue<AttendanceTimeFieldName>
+                );
               }}
             />
           )}
@@ -73,7 +85,11 @@ export default function TimeInputBase<K extends keyof AttendanceEditInputs>({
                 const time = dayjs(
                   `${workDate.format("YYYY-MM-DD")} ${entry.time}`
                 ).toISOString();
-                setValue(name, time);
+                const nextValue = time as AttendanceFieldValue<TFieldName>;
+                setValue(
+                  name as AttendanceTimeFieldName,
+                  nextValue as AttendanceFieldValue<AttendanceTimeFieldName>
+                );
               }}
               sx={{ mr: 1, mb: 1 }}
             />

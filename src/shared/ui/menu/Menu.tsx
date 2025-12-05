@@ -1,6 +1,5 @@
 import { Box, Stack } from "@mui/material";
-
-import Link from "../link/Link";
+import Link from "@shared/ui/link/Link";
 
 const MENU_ITEMS = [
   {

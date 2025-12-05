@@ -17,10 +17,9 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 
 export default function AdminMasterLayout() {
   const navigate = useNavigate();

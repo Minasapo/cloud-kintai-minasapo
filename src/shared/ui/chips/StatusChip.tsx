@@ -1,20 +1,17 @@
 import { Chip } from "@mui/material";
-import React from "react";
 
 import { WorkflowStatus } from "@/API";
 import { STATUS_LABELS } from "@/lib/workflowLabels";
 
-type Props = {
+interface StatusChipProps {
   status?: string | null;
-};
+}
 
-export default function StatusChip({ status }: Props) {
+export default function StatusChip({ status }: StatusChipProps) {
   const label = status
     ? STATUS_LABELS[status as WorkflowStatus] || status
     : "-";
 
-  // Map workflow status to Chip color/variant
-  // Use a neutral/outlined style for CANCELLED so it's not bright red
   let color:
     | "default"
     | "primary"

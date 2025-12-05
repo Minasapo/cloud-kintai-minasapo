@@ -5,13 +5,15 @@ export type BreadcrumbItem = {
   href?: string;
 };
 
+interface CommonBreadcrumbsProps {
+  items: BreadcrumbItem[];
+  current: string;
+}
+
 export default function CommonBreadcrumbs({
   items,
   current,
-}: {
-  items: BreadcrumbItem[];
-  current: string;
-}) {
+}: CommonBreadcrumbsProps) {
   return (
     <Breadcrumbs>
       {items.map((item, idx) =>

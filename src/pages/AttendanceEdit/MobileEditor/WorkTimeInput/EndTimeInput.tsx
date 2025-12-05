@@ -1,9 +1,9 @@
 import { Box, Stack, TextField } from "@mui/material";
+import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import { UseFormSetValue } from "react-hook-form";
 
-import QuickInputChips from "@/components/QuickInputChips";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 import { AttendanceEditContext } from "../../AttendanceEditProvider";

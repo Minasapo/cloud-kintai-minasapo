@@ -10,11 +10,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip, Stack, TextField } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext } from "react";
-import {
-  Control,
-  FieldArrayWithId,
-  UseFieldArrayUpdate,
-} from "react-hook-form";
+import { FieldArrayWithId, UseFieldArrayUpdate } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
@@ -38,11 +34,6 @@ type RestEndTimeInputProps = {
    */
   index: number;
   /**
-   * react-hook-formのcontrol
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<AttendanceEditInputs, any>;
-  /**
    * 休憩データの更新関数
    */
   restUpdate: UseFieldArrayUpdate<AttendanceEditInputs, "rests">;
@@ -59,7 +50,6 @@ export default function RestEndTimeInput({
   workDate,
   rest,
   index,
-  control,
   restUpdate,
   testIdPrefix = "mobile",
 }: RestEndTimeInputProps) {

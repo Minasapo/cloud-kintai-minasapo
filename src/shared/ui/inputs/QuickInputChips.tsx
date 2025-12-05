@@ -1,20 +1,25 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Chip, Stack } from "@mui/material";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 
-type QuickInputTime = { time: string; enabled: boolean };
+export interface QuickInputTime {
+  time: string;
+  enabled: boolean;
+}
+
+interface QuickInputChipsProps {
+  quickInputTimes: QuickInputTime[];
+  workDate: Dayjs;
+  disabled?: boolean;
+  onSelectTime: (isoString: string) => void;
+}
 
 export default function QuickInputChips({
   quickInputTimes,
   workDate,
   disabled = false,
   onSelectTime,
-}: {
-  quickInputTimes: QuickInputTime[];
-  workDate: Dayjs;
-  disabled?: boolean;
-  onSelectTime: (isoString: string) => void;
-}) {
+}: QuickInputChipsProps) {
   return (
     <Stack direction="row" spacing={1}>
       {quickInputTimes.map((entry, index) => (

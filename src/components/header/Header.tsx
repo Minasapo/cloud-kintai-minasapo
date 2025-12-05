@@ -1,4 +1,5 @@
 import { Container, Stack } from "@mui/material";
+import Logo from "@shared/ui/logo/Logo";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { DEFAULT_THEME_COLOR } from "@/constants/theme";
@@ -8,7 +9,6 @@ import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
 import DesktopMenu from "./DesktopMenu";
 import { ExternalLinks } from "./ExternalLinks/ExternalLinks";
-import Logo from "./Logo";
 import MobileMenu from "./MobileMenu";
 import { SignInOutButton } from "./SignInOutButton";
 

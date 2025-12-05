@@ -1,6 +1,6 @@
 import { Box, Card, Stack, Typography } from "@mui/material";
+import Title from "@shared/ui/typography/Title";
 
-import Title from "../../components/Title/Title";
 import rest_end from "../../images/rest_end.gif";
 
 export default function RestEndDocument() {

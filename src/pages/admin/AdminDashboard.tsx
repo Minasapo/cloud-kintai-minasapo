@@ -1,6 +1,5 @@
 import { Box, Stack } from "@mui/material";
-
-import Menu from "../../components/menu/Menu";
+import Menu from "@shared/ui/menu/Menu";
 
 export default function AdminDashboard() {
   return (

@@ -1,10 +1,10 @@
 import { Box, Stack } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
+import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 
-import QuickInputChips from "@/components/QuickInputChips";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 import { AttendanceEditContext } from "../../AttendanceEditProvider";
