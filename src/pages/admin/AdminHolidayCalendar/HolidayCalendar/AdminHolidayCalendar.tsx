@@ -1,12 +1,12 @@
 import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
 import Title from "@shared/ui/typography/Title";
-import { useState } from "react";
+import { type ReactNode, type SyntheticEvent, useState } from "react";
 
 import CompanyHolidayCalendarList from "../CompanyHolidayCalendar/CompanyHolidayCalendarList";
 import HolidayCalendarList from "./HolidayCalendarList";
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   index: number;
   value: number;
 }
@@ -37,7 +37,7 @@ function a11yProps(index: number) {
 export default function AdminHolidayCalendar() {
   const [value, setValue] = useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
