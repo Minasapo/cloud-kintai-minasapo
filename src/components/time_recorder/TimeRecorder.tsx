@@ -264,12 +264,7 @@ export default function TimeRecorder(): JSX.Element {
       logger.debug(holidayCalendarsError ?? companyHolidayCalendarsError);
       dispatch(setSnackbarError(MESSAGE_CODE.E00001));
     }
-  }, [
-    holidayCalendarsError,
-    companyHolidayCalendarsError,
-    dispatch,
-    logger,
-  ]);
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch, logger]);
 
   const clockInDisplayText = useMemo(() => {
     if (!attendance?.startTime) {
@@ -411,12 +406,7 @@ export default function TimeRecorder(): JSX.Element {
   }, [attendancesError, dispatch, shouldFetchAttendance]);
 
   useEffect(() => {
-    if (
-      !staff ||
-      attendanceLoading ||
-      attendancesLoading ||
-      calendarLoading
-    ) {
+    if (!staff || attendanceLoading || attendancesLoading || calendarLoading) {
       return;
     }
 
@@ -453,8 +443,8 @@ export default function TimeRecorder(): JSX.Element {
     attendanceLoading,
     attendancesLoading,
     staff,
-      holidayCalendars,
-      companyHolidayCalendars,
+    holidayCalendars,
+    companyHolidayCalendars,
     attendances,
     calendarLoading,
   ]);
