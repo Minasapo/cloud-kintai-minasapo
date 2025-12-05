@@ -46,12 +46,12 @@ import {
 import { getWorkStatus } from "@/lib/attendance/workStatus";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import Clock from "@/shared/ui/clock/Clock";
 
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";
 import { setSnackbarError } from "../../lib/reducers/snackbarReducer";
-import Clock from "../clock/Clock";
 import { AttendanceErrorAlert } from "./AttendanceErrorAlert";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
