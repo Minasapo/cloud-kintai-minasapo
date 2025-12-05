@@ -65,6 +65,10 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import {
+  loadShiftPatterns,
+  saveShiftPatterns,
+} from "@/lib/storage/shiftPatternStorage";
 
 type Status = "work" | "fixedOff" | "requestedOff" | "auto";
 
@@ -88,6 +92,19 @@ const shiftRequestStatusToStatus = (
     default:
       return "auto";
   }
+};
+
+const normalizeStatus = (value?: string): Status => {
+  if (
+    value === "work" ||
+    value === "fixedOff" ||
+    value === "requestedOff" ||
+    value === "auto"
+  ) {
+    return value;
+  }
+  if (value === "off") return "fixedOff";
+  return "auto";
 };
 
 export default function ShiftRequest() {
@@ -138,17 +155,6 @@ export default function ShiftRequest() {
     }),
     [theme]
   );
-  const normalizeStatus = (value?: string): Status => {
-    if (
-      value === "work" ||
-      value === "fixedOff" ||
-      value === "requestedOff" ||
-      value === "auto"
-    )
-      return value;
-    if (value === "off") return "fixedOff";
-    return "auto";
-  };
   const [selectedDates, setSelectedDates] = useState<
     Record<string, { status: Status }>
   >({});
@@ -162,8 +168,8 @@ export default function ShiftRequest() {
     name: string;
     mapping: Record<number, Status>; // weekday (0=Sun) -> status
   };
-  const PATTERNS_KEY = "shiftPatterns_v1";
   const [patterns, setPatterns] = useState<Pattern[]>([]);
+  const [isLoadingPatterns, setIsLoadingPatterns] = useState(true);
   const [patternDialogOpen, setPatternDialogOpen] = useState(false);
   const [newPatternDialogOpen, setNewPatternDialogOpen] = useState(false);
   const [newPatternName, setNewPatternName] = useState("");
@@ -382,26 +388,54 @@ export default function ShiftRequest() {
   }, [isSelectionMode]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(PATTERNS_KEY);
-      if (raw) {
-        const parsed: Pattern[] = JSON.parse(raw);
+    if (cognitoUserLoading) {
+      setIsLoadingPatterns(true);
+      return;
+    }
+    if (!cognitoUser) {
+      setPatterns([]);
+      setIsLoadingPatterns(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchPatterns = async () => {
+      setIsLoadingPatterns(true);
+      try {
+        const stored = await loadShiftPatterns();
+        if (!isMounted) return;
         setPatterns(
-          parsed.map((pattern) => ({
-            ...pattern,
+          stored.map((pattern) => ({
+            id: pattern.id,
+            name: pattern.name,
             mapping: Object.fromEntries(
               Object.entries(pattern.mapping).map(([weekday, status]) => [
-                weekday,
-                normalizeStatus(status as string),
+                Number(weekday),
+                normalizeStatus(status),
               ])
             ) as Record<number, Status>,
           }))
         );
+      } catch (error) {
+        if (isMounted) {
+          console.error("Failed to load shift patterns", error);
+          setPatterns([]);
+          dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingPatterns(false);
+        }
       }
-    } catch (e) {
-      // ignore
-    }
-  }, []);
+    };
+
+    void fetchPatterns();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [cognitoUser, cognitoUserLoading, dispatch]);
 
   useEffect(() => {
     if (cognitoUserLoading) return;
@@ -551,14 +585,36 @@ export default function ShiftRequest() {
     };
   }, [dispatch, monthStart, staff?.id]);
 
-  const persistPatterns = (p: Pattern[]) => {
-    setPatterns(p);
-    try {
-      localStorage.setItem(PATTERNS_KEY, JSON.stringify(p));
-    } catch (e) {
-      // ignore
-    }
-  };
+  const serializePatterns = useCallback(
+    (patternList: Pattern[]) =>
+      patternList.map((pattern) => ({
+        id: pattern.id,
+        name: pattern.name,
+        mapping: Object.fromEntries(
+          Object.entries(pattern.mapping).map(([weekday, status]) => [
+            String(weekday),
+            status,
+          ])
+        ),
+      })),
+    []
+  );
+
+  const persistPatterns = useCallback(
+    async (nextPatterns: Pattern[]) => {
+      setPatterns(nextPatterns);
+      if (cognitoUserLoading || !cognitoUser) {
+        return;
+      }
+      try {
+        await saveShiftPatterns(serializePatterns(nextPatterns));
+      } catch (error) {
+        console.error("Failed to save shift patterns", error);
+        dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+      }
+    },
+    [cognitoUser, cognitoUserLoading, dispatch, serializePatterns]
+  );
 
   const applyPattern = (pattern: Pattern) => {
     const next: Record<string, { status: Status }> = {};
@@ -572,12 +628,12 @@ export default function ShiftRequest() {
   };
 
   const deletePattern = (id: string) => {
-    persistPatterns(patterns.filter((p) => p.id !== id));
+    void persistPatterns(patterns.filter((p) => p.id !== id));
   };
 
   const createPattern = (name: string, mapping: Record<number, Status>) => {
     const p: Pattern = { id: String(Date.now()), name, mapping };
-    persistPatterns([p, ...patterns]);
+    void persistPatterns([p, ...patterns]);
     setNewPatternDialogOpen(false);
     setNewPatternName("");
   };
@@ -1170,7 +1226,11 @@ export default function ShiftRequest() {
         >
           <DialogTitle>マイパターン一覧</DialogTitle>
           <DialogContent>
-            {patterns.length === 0 ? (
+            {isLoadingPatterns ? (
+              <Box display="flex" justifyContent="center" py={3}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : patterns.length === 0 ? (
               <Typography>登録されたパターンはありません。</Typography>
             ) : (
               <>
@@ -1243,6 +1303,7 @@ export default function ShiftRequest() {
                             <Button
                               size="small"
                               onClick={() => applyPattern(p)}
+                              disabled={isLoadingPatterns}
                             >
                               適用
                             </Button>
@@ -1250,6 +1311,7 @@ export default function ShiftRequest() {
                               size="small"
                               color="error"
                               onClick={() => deletePattern(p.id)}
+                              disabled={isLoadingPatterns}
                               startIcon={<DeleteIcon />}
                             >
                               削除
@@ -1274,6 +1336,7 @@ export default function ShiftRequest() {
                 setNewPatternDialogOpen(true);
               }}
               startIcon={<AddIcon />}
+              disabled={isLoadingPatterns}
             >
               新規作成
             </Button>
@@ -1338,6 +1401,7 @@ export default function ShiftRequest() {
                 if (!newPatternName) return;
                 createPattern(newPatternName, newPatternMapping);
               }}
+              disabled={isLoadingPatterns}
             >
               保存
             </Button>

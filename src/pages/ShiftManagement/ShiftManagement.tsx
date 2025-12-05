@@ -47,12 +47,14 @@ import { listShiftRequests } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@/lib/api/calendarApi";
+import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-import useCompanyHolidayCalendars from "../../hooks/useCompanyHolidayCalendars/useCompanyHolidayCalendars";
-import useHolidayCalendar from "../../hooks/useHolidayCalendars/useHolidayCalendars";
 import useStaffs from "../../hooks/useStaffs/useStaffs";
 import generateMockShifts, { ShiftState } from "./generateMockShifts";
 
@@ -364,8 +366,19 @@ export default function ShiftManagement() {
     return map;
   }, [dayKeyList]);
 
-  const { holidayCalendars = [] } = useHolidayCalendar();
-  const { companyHolidayCalendars = [] } = useCompanyHolidayCalendars();
+  const { data: holidayCalendars = [], error: holidayCalendarsError } =
+    useGetHolidayCalendarsQuery();
+  const {
+    data: companyHolidayCalendars = [],
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+
+  React.useEffect(() => {
+    if (holidayCalendarsError || companyHolidayCalendarsError) {
+      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
 
   const holidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),

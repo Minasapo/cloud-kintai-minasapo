@@ -40,9 +40,10 @@ import {
   UpdateShiftPlanYearMutationVariables,
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
 import { createShiftPlanYear, updateShiftPlanYear } from "@/graphql/mutations";
 import { shiftPlanYearByTargetYear } from "@/graphql/queries";
-import useHolidayCalendar from "@/hooks/useHolidayCalendars/useHolidayCalendars";
+import { useGetHolidayCalendarsQuery } from "@/lib/api/calendarApi";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -145,7 +146,14 @@ export default function ShiftPlanManagement() {
   const [yearRecordIds, setYearRecordIds] = useState<Record<number, string>>(
     {}
   );
-  const { holidayCalendars = [] } = useHolidayCalendar();
+  const { data: holidayCalendars = [], error: holidayCalendarsError } =
+    useGetHolidayCalendarsQuery();
+  useEffect(() => {
+    if (holidayCalendarsError) {
+      console.error(holidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [holidayCalendarsError, dispatch]);
   const holidayNameMap = useMemo(() => {
     if (!holidayCalendars.length) return new Map<string, string>();
     return new Map(

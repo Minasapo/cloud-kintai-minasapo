@@ -1,4 +1,4 @@
-import { Attendance } from "../../API";
+import { Attendance } from "@/API";
 
 export enum WorkStatusCodes {
   PROCESSING = "PROCESSING",

@@ -1,17 +1,22 @@
 import { Box, LinearProgress } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { Attendance } from "@/API";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import {
+  useCreateAttendanceMutation,
+  useGetAttendanceByStaffAndDateQuery,
+  useUpdateAttendanceMutation,
+} from "@/lib/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
-import useAttendance from "../../hooks/useAttendance/useAttendance";
 import useStaffs, { StaffType } from "../../hooks/useStaffs/useStaffs";
 import {
   setSnackbarError,
@@ -43,13 +48,53 @@ export default function AttendanceEdit() {
   const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
 
   const { staffs, loading: staffsLoading, error: staffSError } = useStaffs();
+  const [createAttendanceMutation] = useCreateAttendanceMutation();
+  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
+
+  const createAttendance = useCallback(
+    (input: Parameters<typeof createAttendanceMutation>[0]) =>
+      createAttendanceMutation(input).unwrap(),
+    [createAttendanceMutation]
+  );
+
+  const updateAttendance = useCallback(
+    (input: Parameters<typeof updateAttendanceMutation>[0]) =>
+      updateAttendanceMutation(input).unwrap(),
+    [updateAttendanceMutation]
+  );
+
+  const targetWorkDateISO = useMemo(() => {
+    if (!targetWorkDate) {
+      return null;
+    }
+
+    return dayjs(targetWorkDate).format(AttendanceDate.DataFormat);
+  }, [targetWorkDate]);
+
+  const staffId = staff?.cognitoUserId ?? null;
+  const shouldFetchAttendance = Boolean(staffId && targetWorkDateISO);
+
   const {
-    attendance,
-    getAttendance,
-    updateAttendance,
-    createAttendance,
-    loading: attendanceLoading,
-  } = useAttendance();
+    data: attendanceData,
+    isLoading: isAttendanceInitialLoading,
+    isFetching: isAttendanceFetching,
+    isUninitialized: isAttendanceUninitialized,
+    error: attendanceError,
+  } = useGetAttendanceByStaffAndDateQuery(
+    {
+      staffId: staffId ?? "",
+      workDate: targetWorkDateISO ?? "",
+    },
+    { skip: !shouldFetchAttendance }
+  );
+
+  const attendance: Attendance | null = attendanceData ?? null;
+
+  const attendanceLoading =
+    !shouldFetchAttendance ||
+    isAttendanceInitialLoading ||
+    isAttendanceFetching ||
+    isAttendanceUninitialized;
 
   const {
     register,
@@ -197,74 +242,82 @@ export default function AttendanceEdit() {
   }, [staffs, cognitoUser]);
 
   useEffect(() => {
-    if (!staff || !targetWorkDate) return;
+    if (!staffId || !targetWorkDateISO) {
+      return;
+    }
 
     reset();
+  }, [staffId, targetWorkDateISO, reset]);
 
-    getAttendance(
-      staff.cognitoUserId,
-      dayjs(targetWorkDate).format(AttendanceDate.DataFormat)
-    )
-      .then((res) => {
-        if (!res) return;
+  useEffect(() => {
+    if (!shouldFetchAttendance || !attendanceError) {
+      return;
+    }
 
-        setValue("startTime", res.startTime);
-        setValue("endTime", res.endTime);
-        setValue("paidHolidayFlag", res.paidHolidayFlag || false);
-        setValue("specialHolidayFlag", res.specialHolidayFlag || false);
-        setValue("goDirectlyFlag", res.goDirectlyFlag || false);
-        setValue("substituteHolidayDate", res.substituteHolidayDate);
-        setValue("returnDirectlyFlag", res.returnDirectlyFlag || false);
-        // initialize remarkTags from remarks: extract known tags and keep other text in remarks
-        try {
-          const text = res.remarks || "";
-          const lines = text
-            .split(/\r?\n/)
-            .map((l) => l.trim())
-            .filter(Boolean);
-          const known = ["有給休暇", "特別休暇", "欠勤"];
-          const tags: string[] = [];
-          const others: string[] = [];
-          for (const l of lines) {
-            if (known.includes(l)) tags.push(l);
-            else others.push(l);
-          }
-          setValue("remarkTags", tags);
-          setValue("remarks", others.join("\n"));
-        } catch (e) {
-          setValue("remarks", res.remarks);
+    dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+  }, [attendanceError, dispatch, shouldFetchAttendance]);
+
+  useEffect(() => {
+    if (!attendance || !targetWorkDateISO) {
+      return;
+    }
+
+    if (attendance.workDate !== targetWorkDateISO) {
+      return;
+    }
+
+    setValue("startTime", attendance.startTime);
+    setValue("endTime", attendance.endTime);
+    setValue("paidHolidayFlag", attendance.paidHolidayFlag || false);
+    setValue("specialHolidayFlag", attendance.specialHolidayFlag || false);
+    setValue("goDirectlyFlag", attendance.goDirectlyFlag || false);
+    setValue("substituteHolidayDate", attendance.substituteHolidayDate);
+    setValue("returnDirectlyFlag", attendance.returnDirectlyFlag || false);
+
+    try {
+      const text = attendance.remarks || "";
+      const lines = text
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+      const known = ["有給休暇", "特別休暇", "欠勤"];
+      const tags: string[] = [];
+      const others: string[] = [];
+      lines.forEach((line) => {
+        if (known.includes(line)) {
+          tags.push(line);
+        } else {
+          others.push(line);
         }
-        setValue(
-          "rests",
-          res.rests
-            ? res.rests
-                .filter(
-                  (item): item is NonNullable<typeof item> => item !== null
-                )
-                .map((item) => ({
-                  startTime: item.startTime,
-                  endTime: item.endTime,
-                }))
-            : []
-        );
-        setValue(
-          "hourlyPaidHolidayTimes",
-          res.hourlyPaidHolidayTimes
-            ? res.hourlyPaidHolidayTimes
-                .filter(
-                  (item): item is NonNullable<typeof item> => item !== null
-                )
-                .map((item) => ({
-                  startTime: item.startTime,
-                  endTime: item.endTime,
-                }))
-            : []
-        );
-      })
-      .catch(() => {
-        dispatch(setSnackbarError(MESSAGE_CODE.E02001));
       });
-  }, [staff, targetWorkDate]);
+      setValue("remarkTags", tags);
+      setValue("remarks", others.join("\n"));
+    } catch (error) {
+      setValue("remarks", attendance.remarks);
+    }
+
+    const normalizedRests = attendance.rests
+      ? attendance.rests
+          .filter((item): item is NonNullable<typeof item> => item !== null)
+          .map((item) => ({
+            startTime: item.startTime,
+            endTime: item.endTime,
+          }))
+      : [];
+
+    setValue("rests", normalizedRests);
+
+    const normalizedHourlyPaidHolidayTimes = attendance.hourlyPaidHolidayTimes
+      ? attendance.hourlyPaidHolidayTimes
+          .filter((item): item is NonNullable<typeof item> => item !== null)
+          .map((item) => ({
+            startTime: item.startTime,
+            endTime: item.endTime,
+          }))
+      : [];
+
+    setValue("hourlyPaidHolidayTimes", normalizedHourlyPaidHolidayTimes);
+  }, [attendance, targetWorkDateISO, setValue]);
 
   // absentFlag の変更に応じて備考欄を自動更新する
   const absentFlagValue = useWatch({ control, name: "absentFlag" });

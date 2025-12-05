@@ -29,8 +29,12 @@ import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { AppContext } from "@/context/AppContext";
 import { AuthContext } from "@/context/AuthContext";
+import { useListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@/lib/api/calendarApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";
@@ -38,7 +42,6 @@ import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTime
 import { Staff } from "../../API";
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
-import useAttendances from "../../hooks/useAttendances/useAttendances";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";
 import { setSnackbarError } from "../../lib/reducers/snackbarReducer";
 import Title from "../Title/Title";
@@ -67,10 +70,6 @@ export default function AttendanceTable() {
    */
   const { cognitoUser } = useContext(AuthContext);
   /**
-   * 祝日カレンダー情報。
-   */
-  const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
-  /**
    * Reduxのdispatch関数。
    */
   const dispatch = useAppDispatchV2();
@@ -81,36 +80,56 @@ export default function AttendanceTable() {
   /**
    * 勤怠情報取得用カスタムフック。
    */
+  const shouldFetchAttendances = Boolean(cognitoUser?.id);
   const {
-    attendances,
-    getAttendances,
-    loading: attendanceLoading,
-  } = useAttendances();
+    data: holidayCalendars = [],
+    isLoading: isHolidayCalendarsLoading,
+    isFetching: isHolidayCalendarsFetching,
+    error: holidayCalendarsError,
+  } = useGetHolidayCalendarsQuery();
+  const {
+    data: companyHolidayCalendars = [],
+    isLoading: isCompanyHolidayCalendarsLoading,
+    isFetching: isCompanyHolidayCalendarsFetching,
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+  const calendarLoading =
+    isHolidayCalendarsLoading ||
+    isHolidayCalendarsFetching ||
+    isCompanyHolidayCalendarsLoading ||
+    isCompanyHolidayCalendarsFetching;
+  const {
+    data: attendancesData,
+    isLoading: isAttendancesInitialLoading,
+    isFetching: isAttendancesFetching,
+    isUninitialized: isAttendancesUninitialized,
+    error: attendancesError,
+  } = useListRecentAttendancesQuery(
+    { staffId: cognitoUser?.id ?? "" },
+    { skip: !shouldFetchAttendances }
+  );
+
+  const attendances = attendancesData ?? [];
+  const attendanceLoading =
+    !shouldFetchAttendances ||
+    isAttendancesInitialLoading ||
+    isAttendancesFetching ||
+    isAttendancesUninitialized;
 
   /**
    * スタッフ情報の状態。
    */
-  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
-
-  /**
-   * ログ出力用Logger。
-   */
-  const logger = new Logger(
-    "AttendanceList",
-    import.meta.env.DEV ? "DEBUG" : "ERROR"
+  const logger = useMemo(
+    () => new Logger("AttendanceList", import.meta.env.DEV ? "DEBUG" : "ERROR"),
+    []
   );
+  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
 
   /**
    * ユーザー情報取得・勤怠情報取得の副作用。
    */
   useEffect(() => {
     if (!cognitoUser) return;
-
-    getAttendances(cognitoUser.id).catch((error) => {
-      logger.debug(error);
-      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
-    });
-
     fetchStaff(cognitoUser.id)
       .then((res) => {
         setStaff(res);
@@ -119,7 +138,21 @@ export default function AttendanceTable() {
         logger.debug(error);
         dispatch(setSnackbarError(MESSAGE_CODE.E00001));
       });
-  }, [cognitoUser]);
+  }, [cognitoUser, dispatch, logger]);
+
+  useEffect(() => {
+    if (holidayCalendarsError || companyHolidayCalendarsError) {
+      logger.debug(holidayCalendarsError ?? companyHolidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch, logger]);
+
+  useEffect(() => {
+    if (attendancesError) {
+      logger.debug(attendancesError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+    }
+  }, [attendancesError, dispatch, logger]);
 
   /**
    * 勤怠データから合計勤務時間（休憩時間を除く）を計算する。
@@ -147,7 +180,7 @@ export default function AttendanceTable() {
     return totalWorkTime - totalRestTime;
   }, [attendances]);
 
-  if (attendanceLoading) {
+  if (attendanceLoading || calendarLoading) {
     return <LinearProgress />;
   }
 

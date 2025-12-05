@@ -15,14 +15,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-import fetchAttendances from "@/hooks/useAttendances/fetchAttendances";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useLazyListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
 
 // 日付ごとの時間軸ビュー（デモ用のモック表示）
 export default function ShiftDayView() {
   const { date } = useParams<{ date?: string }>();
   const navigate = useNavigate();
   const { loading, error, staffs } = useStaffs();
+  const [triggerListAttendances] = useLazyListRecentAttendancesQuery();
 
   const target = useMemo(() => (date ? dayjs(date) : dayjs()), [date]);
   const dateKey = target.format("YYYY-MM-DD");
@@ -42,31 +43,36 @@ export default function ShiftDayView() {
 
   useEffect(() => {
     let mounted = true;
+
     async function load() {
       const map = new Map<string, any>();
+
       await Promise.all(
         shiftStaffs.map(async (s) => {
           try {
-            const list = await fetchAttendances(String(s.id));
-            // fetchAttendances は日付リスト(30日)の配列を返す。dateKey に一致する要素を探す
-            const matched =
-              list.find((a: any) => a.workDate === dateKey) ?? null;
+            const list = await triggerListAttendances({
+              staffId: String(s.id),
+            }).unwrap();
+
+            const matched = list.find((a) => a.workDate === dateKey) ?? null;
             map.set(s.id, matched);
           } catch (e) {
-            // フェッチ失敗時は null をセットして既存モックにフォールバック
             map.set(s.id, null);
           }
         })
       );
 
-      if (mounted) setAttendanceMap(map);
+      if (mounted) {
+        setAttendanceMap(map);
+      }
     }
 
     load();
+
     return () => {
       mounted = false;
     };
-  }, [shiftStaffs, dateKey]);
+  }, [shiftStaffs, dateKey, triggerListAttendances]);
 
   // モック: 各スタッフに対して安定した開始時刻・勤務時間・休憩を割り当てる（attendance が無い場合のフォールバック）
   const mockTimeRanges = useMemo(() => {

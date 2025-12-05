@@ -4,6 +4,7 @@ import {
   FormControl,
   IconButton,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Paper,
   Select,
@@ -20,15 +21,22 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext } from "react";
+import { useCallback, useEffect } from "react";
 
 import { CompanyHolidayCalendar } from "@/API";
-import { AppContext } from "@/context/AppContext";
+import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
+import {
+  useBulkCreateCompanyHolidayCalendarsMutation,
+  useCreateCompanyHolidayCalendarMutation,
+  useDeleteCompanyHolidayCalendarMutation,
+  useGetCompanyHolidayCalendarsQuery,
+  useUpdateCompanyHolidayCalendarMutation,
+} from "@/lib/api/calendarApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { CompanyHolidayCalenderMessage } from "@/lib/message/CompanyHolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 
-import { useAppDispatchV2 } from "../../../../app/hooks";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -44,14 +52,55 @@ const YEAR_OFFSET = 4;
 
 export default function CompanyHolidayCalendarList() {
   const dispatch = useAppDispatchV2();
-
   const {
-    companyHolidayCalendars,
-    createCompanyHolidayCalendar,
-    updateCompanyHolidayCalendar,
-    deleteCompanyHolidayCalendar,
-    bulkCreateCompanyHolidayCalendar,
-  } = useContext(AppContext);
+    data: companyHolidayCalendars = [],
+    isLoading: isCompanyHolidayCalendarsLoading,
+    isFetching: isCompanyHolidayCalendarsFetching,
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+  const [createCompanyHolidayCalendarMutation] =
+    useCreateCompanyHolidayCalendarMutation();
+  const [updateCompanyHolidayCalendarMutation] =
+    useUpdateCompanyHolidayCalendarMutation();
+  const [deleteCompanyHolidayCalendarMutation] =
+    useDeleteCompanyHolidayCalendarMutation();
+  const [bulkCreateCompanyHolidayCalendarsMutation] =
+    useBulkCreateCompanyHolidayCalendarsMutation();
+
+  const createCompanyHolidayCalendar = useCallback(
+    async (input: Parameters<typeof createCompanyHolidayCalendarMutation>[0]) =>
+      createCompanyHolidayCalendarMutation(input).unwrap(),
+    [createCompanyHolidayCalendarMutation]
+  );
+
+  const updateCompanyHolidayCalendar = useCallback(
+    async (input: Parameters<typeof updateCompanyHolidayCalendarMutation>[0]) =>
+      updateCompanyHolidayCalendarMutation(input).unwrap(),
+    [updateCompanyHolidayCalendarMutation]
+  );
+
+  const deleteCompanyHolidayCalendar = useCallback(
+    async (input: Parameters<typeof deleteCompanyHolidayCalendarMutation>[0]) =>
+      deleteCompanyHolidayCalendarMutation(input).unwrap(),
+    [deleteCompanyHolidayCalendarMutation]
+  );
+
+  const bulkCreateCompanyHolidayCalendar = useCallback(
+    async (
+      input: Parameters<typeof bulkCreateCompanyHolidayCalendarsMutation>[0]
+    ) => bulkCreateCompanyHolidayCalendarsMutation(input).unwrap(),
+    [bulkCreateCompanyHolidayCalendarsMutation]
+  );
+
+  const calendarLoading =
+    isCompanyHolidayCalendarsLoading || isCompanyHolidayCalendarsFetching;
+
+  useEffect(() => {
+    if (companyHolidayCalendarsError) {
+      console.error(companyHolidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [companyHolidayCalendarsError, dispatch]);
 
   const {
     page,
@@ -75,6 +124,10 @@ export default function CompanyHolidayCalendarList() {
     yearRange: YEAR_RANGE,
     yearOffset: YEAR_OFFSET,
   });
+
+  if (calendarLoading) {
+    return <LinearProgress sx={{ width: "100%" }} />;
+  }
 
   const handleDelete = async (
     companyHolidayCalendar: CompanyHolidayCalendar
