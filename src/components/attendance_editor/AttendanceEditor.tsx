@@ -20,6 +20,7 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
+import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import Title from "@shared/ui/typography/Title";
 import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
@@ -68,7 +69,6 @@ import {
   setSnackbarSuccess,
 } from "../../lib/reducers/snackbarReducer";
 import MoveDateItem from "../attendance_editor/MoveDateItem";
-import GroupContainer from "../ui/GroupContainer/GroupContainer";
 import ChangeRequestDialog from "./ChangeRequestDialog/ChangeRequestDialog";
 // eslint-disable-next-line import/no-cycle
 import EditAttendanceHistoryList from "./EditAttendanceHistoryList/EditAttendanceHistoryList";
