@@ -7,27 +7,46 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { ElementType, ReactNode } from "react";
-import { Control, Controller } from "react-hook-form";
+import { ChangeEvent, ComponentType, ReactNode } from "react";
+import { Controller } from "react-hook-form";
 
 import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
 
 import { Label as MobileLabel } from "../../pages/AttendanceEdit/MobileEditor/Label";
+import {
+  AttendanceBooleanFieldName,
+  AttendanceControl,
+  AttendanceControllerField,
+} from "./types";
 
 const DesktopLabel = styled(Typography)(() => ({
   width: "150px",
   fontWeight: "bold",
 }));
 
+type BooleanFieldName = AttendanceBooleanFieldName;
+type BooleanField = AttendanceControllerField<BooleanFieldName>;
+
 interface GoDirectlyFlagCheckboxProps {
-  control: Control<AttendanceEditInputs, any>;
-  name: any;
+  control: AttendanceControl;
+  name: BooleanFieldName;
   label?: ReactNode;
   disabled?: boolean;
   onChangeExtra?: (checked: boolean) => void;
-  inputComponent?: ElementType<any>;
+  inputComponent?: BooleanInputComponent;
   mobileLabel?: ReactNode;
 }
+
+type BooleanInputProps = {
+  checked?: boolean;
+  disabled?: boolean;
+  name?: string;
+  inputRef?: BooleanField["ref"];
+  onBlur?: BooleanField["onBlur"];
+  onChange?: (event: ChangeEvent<HTMLInputElement>, checked?: boolean) => void;
+};
+
+type BooleanInputComponent = ComponentType<BooleanInputProps>;
 
 function RenderInput({
   field,
@@ -35,20 +54,20 @@ function RenderInput({
   InputComponent,
   onChangeExtra,
 }: {
-  field: any;
+  field: BooleanField;
   disabled: boolean;
-  InputComponent: ElementType<any>;
+  InputComponent: BooleanInputComponent;
   onChangeExtra?: (checked: boolean) => void;
 }) {
   return (
     <InputComponent
-      checked={field.value || false}
+      checked={field.value ?? false}
       disabled={disabled}
       name={field.name}
       inputRef={field.ref}
       onBlur={field.onBlur}
-      onChange={(e: any) => {
-        const checked = e.target.checked;
+      onChange={(event, checkedFromComponent) => {
+        const checked = checkedFromComponent ?? event.target.checked;
         field.onChange(checked);
         onChangeExtra?.(checked);
       }}
@@ -67,14 +86,15 @@ export function GoDirectlyFlagCheckbox({
 }: GoDirectlyFlagCheckboxProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const InputComponent = inputComponent || (isMobile ? Switch : Checkbox);
+  const ComponentToRender = inputComponent ?? (isMobile ? Switch : Checkbox);
+  const InputComponent = ComponentToRender as BooleanInputComponent;
   const displayLabel = isMobile && mobileLabel ? mobileLabel : label;
 
   if (isMobile) {
     return (
       <Stack direction="row" alignItems="center" spacing={1} mb={1}>
         <MobileLabel variant="body1">{displayLabel}</MobileLabel>
-        <Controller
+        <Controller<AttendanceEditInputs, BooleanFieldName>
           name={name}
           control={control}
           render={({ field }) => (
@@ -94,7 +114,7 @@ export function GoDirectlyFlagCheckbox({
   return (
     <Stack direction="row" alignItems="center">
       <DesktopLabel variant="body1">{label}</DesktopLabel>
-      <Controller
+      <Controller<AttendanceEditInputs, BooleanFieldName>
         name={name}
         control={control}
         render={({ field }) => (
