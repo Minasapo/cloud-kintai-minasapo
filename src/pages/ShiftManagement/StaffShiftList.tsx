@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
