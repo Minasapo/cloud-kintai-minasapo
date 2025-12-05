@@ -43,7 +43,7 @@ export default function AdminHolidayCalendar() {
 
   return (
     <Stack spacing={2}>
-      <Title text="休日カレンダー管理" />
+      <Title>休日カレンダー管理</Title>
       <Typography>
         こちらでは、法定休日および会社休日のカレンダーを管理できます。
         <br />
