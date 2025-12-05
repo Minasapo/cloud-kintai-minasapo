@@ -1371,6 +1371,7 @@ export default function ShiftManagement() {
                       width:
                         STAFF_COL_WIDTH + AGG_COL_WIDTH + HISTORY_COL_WIDTH,
                       boxSizing: "border-box",
+                      pl: 1,
                       borderRight: "1px solid",
                       borderColor: "divider",
                       position: "sticky",
@@ -1407,7 +1408,6 @@ export default function ShiftManagement() {
                           borderColor: "divider",
                           ...highlightSx,
                         }}
-                        align="center"
                       >
                         <Box
                           sx={{
