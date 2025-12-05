@@ -17,27 +17,32 @@ import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { Attendance, CreateAttendanceInput, Staff, UpdateAttendanceInput } from "@/API";
+import {
+  Attendance,
+  CreateAttendanceInput,
+  Staff,
+  UpdateAttendanceInput,
+} from "@/API";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AppContext } from "@/context/AppContext";
 import { AuthContext } from "@/context/AuthContext";
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-import {
-  GoDirectlyFlag,
-  ReturnDirectlyFlag,
-  clockInAction,
-  clockOutAction,
-  restEndAction,
-  restStartAction,
-} from "@/lib/attendance/attendanceActions";
-import { getWorkStatus } from "@/lib/attendance/workStatus";
 import {
   useCreateAttendanceMutation,
   useGetAttendanceByStaffAndDateQuery,
   useListRecentAttendancesQuery,
   useUpdateAttendanceMutation,
 } from "@/lib/api/attendanceApi";
+import {
+  clockInAction,
+  clockOutAction,
+  GoDirectlyFlag,
+  restEndAction,
+  restStartAction,
+  ReturnDirectlyFlag,
+} from "@/lib/attendance/attendanceActions";
+import { getWorkStatus } from "@/lib/attendance/workStatus";
+import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
@@ -122,14 +127,12 @@ export default function TimeRecorder(): JSX.Element {
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 
   const createAttendance = useCallback(
-    (input: CreateAttendanceInput) =>
-      createAttendanceMutation(input).unwrap(),
+    (input: CreateAttendanceInput) => createAttendanceMutation(input).unwrap(),
     [createAttendanceMutation]
   );
 
   const updateAttendance = useCallback(
-    (input: UpdateAttendanceInput) =>
-      updateAttendanceMutation(input).unwrap(),
+    (input: UpdateAttendanceInput) => updateAttendanceMutation(input).unwrap(),
     [updateAttendanceMutation]
   );
 
@@ -138,10 +141,7 @@ export default function TimeRecorder(): JSX.Element {
       return;
     }
 
-    await Promise.allSettled([
-      refetchAttendance(),
-      refetchAttendances(),
-    ]);
+    await Promise.allSettled([refetchAttendance(), refetchAttendances()]);
   }, [refetchAttendance, refetchAttendances, shouldFetchAttendance]);
 
   const clockIn = useCallback(
