@@ -145,12 +145,7 @@ export default function AttendanceTable() {
       logger.debug(holidayCalendarsError ?? companyHolidayCalendarsError);
       dispatch(setSnackbarError(MESSAGE_CODE.E00001));
     }
-  }, [
-    holidayCalendarsError,
-    companyHolidayCalendarsError,
-    dispatch,
-    logger,
-  ]);
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch, logger]);
 
   useEffect(() => {
     if (attendancesError) {
