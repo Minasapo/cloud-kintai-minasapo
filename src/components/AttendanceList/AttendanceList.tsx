@@ -108,9 +108,9 @@ export default function AttendanceTable() {
   /**
    * ログ出力用Logger。
    */
-  const logger = new Logger(
-    "AttendanceList",
-    import.meta.env.DEV ? "DEBUG" : "ERROR"
+  const logger = useMemo(
+    () => new Logger("AttendanceList", import.meta.env.DEV ? "DEBUG" : "ERROR"),
+    []
   );
 
   /**
