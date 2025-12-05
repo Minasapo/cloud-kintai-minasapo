@@ -1,4 +1,5 @@
 import { Alert, Box, Button, Container, styled } from "@mui/material";
+import Clock from "@shared/ui/clock/Clock";
 import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import React, { useContext, useState } from "react";
@@ -24,7 +25,6 @@ import {
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
-import Clock from "../../../components/clock/Clock";
 import { AppConfigContext } from "../../../context/AppConfigContext";
 import {
   setSnackbarError,
