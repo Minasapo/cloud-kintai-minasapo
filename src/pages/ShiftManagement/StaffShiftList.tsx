@@ -16,13 +16,12 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
+import { AppContext } from "@/context/AppContext";
 
-import useCompanyHolidayCalendars from "../../hooks/useCompanyHolidayCalendars/useCompanyHolidayCalendars";
-import useHolidayCalendar from "../../hooks/useHolidayCalendars/useHolidayCalendars";
 import useStaffs from "../../hooks/useStaffs/useStaffs";
 
 export default function StaffShiftList() {
@@ -43,9 +42,8 @@ export default function StaffShiftList() {
     [monthStart.year(), monthStart.month(), daysInMonth]
   );
 
-  // 祝日・会社休日はフックから取得して Set に変換（高速参照）
-  const { holidayCalendars = [] } = useHolidayCalendar();
-  const { companyHolidayCalendars = [] } = useCompanyHolidayCalendars();
+  // 祝日・会社休日はコンテキストから取得して Set に変換（高速参照）
+  const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
 
   const publicHolidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),
