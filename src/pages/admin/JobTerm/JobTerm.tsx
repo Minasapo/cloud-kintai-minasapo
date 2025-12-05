@@ -87,7 +87,7 @@ export default function JobTerm() {
   return (
     <>
       <Stack spacing={2}>
-        <Title text="集計対象月" />
+        <Title>集計対象月</Title>
         <Typography>
           月ごとに勤怠を締める日付を指定します。
           <br />
