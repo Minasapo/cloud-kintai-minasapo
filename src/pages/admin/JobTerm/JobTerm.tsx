@@ -105,7 +105,7 @@ export default function JobTerm() {
                     options={candidateCloseDates}
                     value={value}
                     getOptionLabel={(option) => option.format("YYYY/MM")}
-                    onChange={(e, v) => {
+                    onChange={(_, v) => {
                       if (!v) return;
                       onChange(v);
                     }}
