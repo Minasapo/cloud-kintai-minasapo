@@ -13,12 +13,12 @@ export default function MoveDateItem({
   staffId,
   workDate,
 }: {
-  staffId: string;
+  staffId?: string;
   workDate: dayjs.Dayjs | null;
 }) {
   const navigate = useNavigate();
 
-  if (!workDate) {
+  if (!workDate || !staffId) {
     return null;
   }
 
