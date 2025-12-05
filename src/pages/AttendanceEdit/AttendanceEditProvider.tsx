@@ -36,8 +36,7 @@ type AttendanceEditContextProps = {
   restUpdate?: UseFieldArrayUpdate<AttendanceEditInputs, "rests">;
   restReplace?: UseFieldArrayReplace<AttendanceEditInputs, "rests">;
   register?: UseFormRegister<AttendanceEditInputs>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control?: Control<AttendanceEditInputs, any>;
+  control?: Control<AttendanceEditInputs>;
   setValue?: UseFormSetValue<AttendanceEditInputs>;
   getValues?: UseFormGetValues<AttendanceEditInputs>;
   watch?: UseFormWatch<AttendanceEditInputs>;
