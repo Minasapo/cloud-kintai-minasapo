@@ -9,7 +9,7 @@ import { Logger } from "aws-amplify";
 
 import { Attendance, CreateOperationLogInput, Staff } from "@/API";
 import * as MESSAGE_CODE from "@/errors";
-import { ReturnDirectlyFlag } from "@/hooks/useAttendance/useAttendance";
+import { ReturnDirectlyFlag } from "@/lib/attendance/attendanceActions";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
