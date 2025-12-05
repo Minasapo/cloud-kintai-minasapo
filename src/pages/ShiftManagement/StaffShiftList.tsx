@@ -3,6 +3,7 @@ import {
   Box,
   Chip,
   Container,
+  LinearProgress,
   Paper,
   Stack,
   Table,
@@ -16,15 +17,22 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
+import { useAppDispatchV2 } from "@/app/hooks";
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-import { AppContext } from "@/context/AppContext";
+import * as MESSAGE_CODE from "@/errors";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@/lib/api/calendarApi";
+import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import useStaffs from "../../hooks/useStaffs/useStaffs";
 
 export default function StaffShiftList() {
+  const dispatch = useAppDispatchV2();
   const { staffId } = useParams();
   const { staffs } = useStaffs();
 
@@ -42,8 +50,30 @@ export default function StaffShiftList() {
     [monthStart.year(), monthStart.month(), daysInMonth]
   );
 
-  // 祝日・会社休日はコンテキストから取得して Set に変換（高速参照）
-  const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
+  const {
+    data: holidayCalendars = [],
+    isLoading: isHolidayCalendarsLoading,
+    isFetching: isHolidayCalendarsFetching,
+    error: holidayCalendarsError,
+  } = useGetHolidayCalendarsQuery();
+  const {
+    data: companyHolidayCalendars = [],
+    isLoading: isCompanyHolidayCalendarsLoading,
+    isFetching: isCompanyHolidayCalendarsFetching,
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+  const calendarLoading =
+    isHolidayCalendarsLoading ||
+    isHolidayCalendarsFetching ||
+    isCompanyHolidayCalendarsLoading ||
+    isCompanyHolidayCalendarsFetching;
+
+  useEffect(() => {
+    if (holidayCalendarsError || companyHolidayCalendarsError) {
+      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
 
   const publicHolidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),
@@ -88,6 +118,10 @@ export default function StaffShiftList() {
 
   const prevMonth = () => setCurrentMonth((m) => m.subtract(1, "month"));
   const nextMonth = () => setCurrentMonth((m) => m.add(1, "month"));
+
+  if (calendarLoading) {
+    return <LinearProgress sx={{ width: "100%" }} />;
+  }
 
   return (
     <Container sx={{ py: 3 }}>
