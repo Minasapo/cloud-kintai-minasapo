@@ -29,9 +29,12 @@ import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { AppContext } from "@/context/AppContext";
 import { AuthContext } from "@/context/AuthContext";
 import { useListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@/lib/api/calendarApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";
@@ -67,10 +70,6 @@ export default function AttendanceTable() {
    */
   const { cognitoUser } = useContext(AuthContext);
   /**
-   * 祝日カレンダー情報。
-   */
-  const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
-  /**
    * Reduxのdispatch関数。
    */
   const dispatch = useAppDispatchV2();
@@ -82,6 +81,23 @@ export default function AttendanceTable() {
    * 勤怠情報取得用カスタムフック。
    */
   const shouldFetchAttendances = Boolean(cognitoUser?.id);
+  const {
+    data: holidayCalendars = [],
+    isLoading: isHolidayCalendarsLoading,
+    isFetching: isHolidayCalendarsFetching,
+    error: holidayCalendarsError,
+  } = useGetHolidayCalendarsQuery();
+  const {
+    data: companyHolidayCalendars = [],
+    isLoading: isCompanyHolidayCalendarsLoading,
+    isFetching: isCompanyHolidayCalendarsFetching,
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+  const calendarLoading =
+    isHolidayCalendarsLoading ||
+    isHolidayCalendarsFetching ||
+    isCompanyHolidayCalendarsLoading ||
+    isCompanyHolidayCalendarsFetching;
   const {
     data: attendancesData,
     isLoading: isAttendancesInitialLoading,
@@ -103,15 +119,11 @@ export default function AttendanceTable() {
   /**
    * スタッフ情報の状態。
    */
-  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
-
-  /**
-   * ログ出力用Logger。
-   */
   const logger = useMemo(
     () => new Logger("AttendanceList", import.meta.env.DEV ? "DEBUG" : "ERROR"),
     []
   );
+  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
 
   /**
    * ユーザー情報取得・勤怠情報取得の副作用。
@@ -127,6 +139,18 @@ export default function AttendanceTable() {
         dispatch(setSnackbarError(MESSAGE_CODE.E00001));
       });
   }, [cognitoUser, dispatch, logger]);
+
+  useEffect(() => {
+    if (holidayCalendarsError || companyHolidayCalendarsError) {
+      logger.debug(holidayCalendarsError ?? companyHolidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [
+    holidayCalendarsError,
+    companyHolidayCalendarsError,
+    dispatch,
+    logger,
+  ]);
 
   useEffect(() => {
     if (attendancesError) {
@@ -161,7 +185,7 @@ export default function AttendanceTable() {
     return totalWorkTime - totalRestTime;
   }, [attendances]);
 
-  if (attendanceLoading) {
+  if (attendanceLoading || calendarLoading) {
     return <LinearProgress />;
   }
 
