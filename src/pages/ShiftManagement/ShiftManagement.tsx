@@ -41,6 +41,7 @@ import {
 import { useAppDispatchV2 } from "@/app/hooks";
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { AppContext } from "@/context/AppContext";
 import * as MESSAGE_CODE from "@/errors";
 import { createShiftRequest, updateShiftRequest } from "@/graphql/mutations";
 import { listShiftRequests } from "@/graphql/queries";
@@ -51,8 +52,6 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-import useCompanyHolidayCalendars from "../../hooks/useCompanyHolidayCalendars/useCompanyHolidayCalendars";
-import useHolidayCalendar from "../../hooks/useHolidayCalendars/useHolidayCalendars";
 import useStaffs from "../../hooks/useStaffs/useStaffs";
 import generateMockShifts, { ShiftState } from "./generateMockShifts";
 
@@ -364,8 +363,7 @@ export default function ShiftManagement() {
     return map;
   }, [dayKeyList]);
 
-  const { holidayCalendars = [] } = useHolidayCalendar();
-  const { companyHolidayCalendars = [] } = useCompanyHolidayCalendars();
+  const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
 
   const holidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),
