@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
@@ -30,40 +30,6 @@ export default function AdminMasterLayout() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
-
-  // initialize from localStorage
-  useEffect(() => {
-    try {
-      const v = localStorage.getItem("adminSidebarCollapsed");
-      if (v !== null) setSidebarCollapsed(v === "true");
-      const s = localStorage.getItem("adminSettingsOpen");
-      if (s !== null) setSettingsOpen(s === "true");
-    } catch (e) {
-      void e;
-    }
-  }, []);
-
-  // persist changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "adminSidebarCollapsed",
-        sidebarCollapsed ? "true" : "false"
-      );
-    } catch (e) {
-      void e;
-    }
-  }, [sidebarCollapsed]);
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "adminSettingsOpen",
-        settingsOpen ? "true" : "false"
-      );
-    } catch (e) {
-      void e;
-    }
-  }, [settingsOpen]);
 
   const menuList = [
     { name: "集計対象月", path: "/admin/master/job_term" },
