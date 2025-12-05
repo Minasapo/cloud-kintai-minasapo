@@ -3,33 +3,33 @@
 //  This file was automatically generated and should not be edited.
 
 export type CreateCheckForUpdateInput = {
-  id?: string | null;
-  deployUuid: string;
+  id?: string | null,
+  deployUuid: string,
 };
 
 export type ModelCheckForUpdateConditionInput = {
-  deployUuid?: ModelStringInput | null;
-  and?: Array<ModelCheckForUpdateConditionInput | null> | null;
-  or?: Array<ModelCheckForUpdateConditionInput | null> | null;
-  not?: ModelCheckForUpdateConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  deployUuid?: ModelStringInput | null,
+  and?: Array< ModelCheckForUpdateConditionInput | null > | null,
+  or?: Array< ModelCheckForUpdateConditionInput | null > | null,
+  not?: ModelCheckForUpdateConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type ModelStringInput = {
-  ne?: string | null;
-  eq?: string | null;
-  le?: string | null;
-  lt?: string | null;
-  ge?: string | null;
-  gt?: string | null;
-  contains?: string | null;
-  notContains?: string | null;
-  between?: Array<string | null> | null;
-  beginsWith?: string | null;
-  attributeExists?: boolean | null;
-  attributeType?: ModelAttributeTypes | null;
-  size?: ModelSizeInput | null;
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
 };
 
 export enum ModelAttributeTypes {
@@ -45,31 +45,32 @@ export enum ModelAttributeTypes {
   _null = "_null",
 }
 
+
 export type ModelSizeInput = {
-  ne?: number | null;
-  eq?: number | null;
-  le?: number | null;
-  lt?: number | null;
-  ge?: number | null;
-  gt?: number | null;
-  between?: Array<number | null> | null;
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
 };
 
 export type CheckForUpdate = {
-  __typename: "CheckForUpdate";
-  id: string;
-  deployUuid: string;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "CheckForUpdate",
+  id: string,
+  deployUuid: string,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type UpdateCheckForUpdateInput = {
-  id: string;
-  deployUuid?: string | null;
+  id: string,
+  deployUuid?: string | null,
 };
 
 export type DeleteCheckForUpdateInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateAppConfigInput = {
@@ -97,28 +98,20 @@ export type CreateAppConfigInput = {
 };
 
 export type LinkInput = {
-  label: string;
-  url: string;
-  enabled: boolean;
-  icon?: string | null;
+  label: string,
+  url: string,
+  enabled: boolean,
+  icon?: string | null,
 };
 
 export type ReasonInput = {
-  reason: string;
-  enabled: boolean;
+  reason: string,
+  enabled: boolean,
 };
 
 export type QuickInputTimeInput = {
-  time: string;
-  enabled: boolean;
-};
-
-export type ShiftGroupInput = {
-  label: string;
-  description?: string | null;
-  min?: number | null;
-  max?: number | null;
-  fixed?: number | null;
+  time: string,
+  enabled: boolean,
 };
 
 export type ShiftGroupInput = {
@@ -153,10 +146,10 @@ export type ModelAppConfigConditionInput = {
 };
 
 export type ModelBooleanInput = {
-  ne?: boolean | null;
-  eq?: boolean | null;
-  attributeExists?: boolean | null;
-  attributeType?: ModelAttributeTypes | null;
+  ne?: boolean | null,
+  eq?: boolean | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
 };
 
 export type AppConfig = {
@@ -187,32 +180,23 @@ export type AppConfig = {
 };
 
 export type Link = {
-  __typename: "Link";
-  label: string;
-  url: string;
-  enabled: boolean;
-  icon?: string | null;
+  __typename: "Link",
+  label: string,
+  url: string,
+  enabled: boolean,
+  icon?: string | null,
 };
 
 export type Reason = {
-  __typename: "Reason";
-  reason: string;
-  enabled: boolean;
+  __typename: "Reason",
+  reason: string,
+  enabled: boolean,
 };
 
 export type QuickInputTime = {
-  __typename: "QuickInputTime";
-  time: string;
-  enabled: boolean;
-};
-
-export type ShiftGroup = {
-  __typename: "ShiftGroup";
-  label: string;
-  description?: string | null;
-  min?: number | null;
-  max?: number | null;
-  fixed?: number | null;
+  __typename: "QuickInputTime",
+  time: string,
+  enabled: boolean,
 };
 
 export type ShiftGroup = {
@@ -249,7 +233,7 @@ export type UpdateAppConfigInput = {
 };
 
 export type DeleteAppConfigInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateStaffInput = {
@@ -275,8 +259,8 @@ export type CreateStaffInput = {
 };
 
 export type NotificationInput = {
-  workStart?: boolean | null;
-  workEnd?: boolean | null;
+  workStart?: boolean | null,
+  workEnd?: boolean | null,
 };
 
 export enum ApproverSettingMode {
@@ -285,10 +269,12 @@ export enum ApproverSettingMode {
   MULTIPLE = "MULTIPLE",
 }
 
+
 export enum ApproverMultipleMode {
   ANY = "ANY",
   ORDER = "ORDER",
 }
+
 
 export type ModelStaffConditionInput = {
   cognitoUserId?: ModelStringInput | null,
@@ -316,13 +302,13 @@ export type ModelStaffConditionInput = {
 };
 
 export type ModelApproverSettingModeInput = {
-  eq?: ApproverSettingMode | null;
-  ne?: ApproverSettingMode | null;
+  eq?: ApproverSettingMode | null,
+  ne?: ApproverSettingMode | null,
 };
 
 export type ModelApproverMultipleModeInput = {
-  eq?: ApproverMultipleMode | null;
-  ne?: ApproverMultipleMode | null;
+  eq?: ApproverMultipleMode | null,
+  ne?: ApproverMultipleMode | null,
 };
 
 export type Staff = {
@@ -351,9 +337,9 @@ export type Staff = {
 };
 
 export type Notification = {
-  __typename: "Notification";
-  workStart?: boolean | null;
-  workEnd?: boolean | null;
+  __typename: "Notification",
+  workStart?: boolean | null,
+  workEnd?: boolean | null,
 };
 
 export type UpdateStaffInput = {
@@ -379,386 +365,386 @@ export type UpdateStaffInput = {
 };
 
 export type DeleteStaffInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateHolidayCalendarInput = {
-  id?: string | null;
-  holidayDate: string;
-  name: string;
+  id?: string | null,
+  holidayDate: string,
+  name: string,
 };
 
 export type ModelHolidayCalendarConditionInput = {
-  holidayDate?: ModelStringInput | null;
-  name?: ModelStringInput | null;
-  and?: Array<ModelHolidayCalendarConditionInput | null> | null;
-  or?: Array<ModelHolidayCalendarConditionInput | null> | null;
-  not?: ModelHolidayCalendarConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  holidayDate?: ModelStringInput | null,
+  name?: ModelStringInput | null,
+  and?: Array< ModelHolidayCalendarConditionInput | null > | null,
+  or?: Array< ModelHolidayCalendarConditionInput | null > | null,
+  not?: ModelHolidayCalendarConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type HolidayCalendar = {
-  __typename: "HolidayCalendar";
-  id: string;
-  holidayDate: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "HolidayCalendar",
+  id: string,
+  holidayDate: string,
+  name: string,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type UpdateHolidayCalendarInput = {
-  id: string;
-  holidayDate?: string | null;
-  name?: string | null;
+  id: string,
+  holidayDate?: string | null,
+  name?: string | null,
 };
 
 export type DeleteHolidayCalendarInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateCompanyHolidayCalendarInput = {
-  id?: string | null;
-  holidayDate: string;
-  name: string;
+  id?: string | null,
+  holidayDate: string,
+  name: string,
 };
 
 export type ModelCompanyHolidayCalendarConditionInput = {
-  holidayDate?: ModelStringInput | null;
-  name?: ModelStringInput | null;
-  and?: Array<ModelCompanyHolidayCalendarConditionInput | null> | null;
-  or?: Array<ModelCompanyHolidayCalendarConditionInput | null> | null;
-  not?: ModelCompanyHolidayCalendarConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  holidayDate?: ModelStringInput | null,
+  name?: ModelStringInput | null,
+  and?: Array< ModelCompanyHolidayCalendarConditionInput | null > | null,
+  or?: Array< ModelCompanyHolidayCalendarConditionInput | null > | null,
+  not?: ModelCompanyHolidayCalendarConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type CompanyHolidayCalendar = {
-  __typename: "CompanyHolidayCalendar";
-  id: string;
-  holidayDate: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "CompanyHolidayCalendar",
+  id: string,
+  holidayDate: string,
+  name: string,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type UpdateCompanyHolidayCalendarInput = {
-  id: string;
-  holidayDate?: string | null;
-  name?: string | null;
+  id: string,
+  holidayDate?: string | null,
+  name?: string | null,
 };
 
 export type DeleteCompanyHolidayCalendarInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateCloseDateInput = {
-  id?: string | null;
-  closeDate: string;
-  startDate: string;
-  endDate: string;
+  id?: string | null,
+  closeDate: string,
+  startDate: string,
+  endDate: string,
 };
 
 export type ModelCloseDateConditionInput = {
-  closeDate?: ModelStringInput | null;
-  startDate?: ModelStringInput | null;
-  endDate?: ModelStringInput | null;
-  and?: Array<ModelCloseDateConditionInput | null> | null;
-  or?: Array<ModelCloseDateConditionInput | null> | null;
-  not?: ModelCloseDateConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  closeDate?: ModelStringInput | null,
+  startDate?: ModelStringInput | null,
+  endDate?: ModelStringInput | null,
+  and?: Array< ModelCloseDateConditionInput | null > | null,
+  or?: Array< ModelCloseDateConditionInput | null > | null,
+  not?: ModelCloseDateConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type CloseDate = {
-  __typename: "CloseDate";
-  id: string;
-  closeDate: string;
-  startDate: string;
-  endDate: string;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "CloseDate",
+  id: string,
+  closeDate: string,
+  startDate: string,
+  endDate: string,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type UpdateCloseDateInput = {
-  id: string;
-  closeDate?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
+  id: string,
+  closeDate?: string | null,
+  startDate?: string | null,
+  endDate?: string | null,
 };
 
 export type DeleteCloseDateInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateAttendanceInput = {
-  id?: string | null;
-  staffId: string;
-  workDate: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  goDirectlyFlag?: boolean | null;
-  returnDirectlyFlag?: boolean | null;
-  absentFlag?: boolean | null;
-  rests?: Array<RestInput | null> | null;
-  hourlyPaidHolidayTimes?: Array<HourlyPaidHolidayTimeInput | null> | null;
-  remarks?: string | null;
-  paidHolidayFlag?: boolean | null;
-  specialHolidayFlag?: boolean | null;
-  isDeemedHoliday?: boolean | null;
-  hourlyPaidHolidayHours?: number | null;
-  substituteHolidayDate?: string | null;
-  histories?: Array<AttendanceHistoryInput | null> | null;
-  changeRequests?: Array<AttendanceChangeRequestInput | null> | null;
-  systemComments?: Array<SystemCommentInput | null> | null;
-  revision?: number | null;
+  id?: string | null,
+  staffId: string,
+  workDate: string,
+  startTime?: string | null,
+  endTime?: string | null,
+  goDirectlyFlag?: boolean | null,
+  returnDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
+  rests?: Array< RestInput | null > | null,
+  hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
+  remarks?: string | null,
+  paidHolidayFlag?: boolean | null,
+  specialHolidayFlag?: boolean | null,
+  isDeemedHoliday?: boolean | null,
+  hourlyPaidHolidayHours?: number | null,
+  substituteHolidayDate?: string | null,
+  histories?: Array< AttendanceHistoryInput | null > | null,
+  changeRequests?: Array< AttendanceChangeRequestInput | null > | null,
+  systemComments?: Array< SystemCommentInput | null > | null,
+  revision?: number | null,
 };
 
 export type RestInput = {
-  startTime?: string | null;
-  endTime?: string | null;
+  startTime?: string | null,
+  endTime?: string | null,
 };
 
 export type HourlyPaidHolidayTimeInput = {
-  startTime: string;
-  endTime: string;
+  startTime: string,
+  endTime: string,
 };
 
 export type AttendanceHistoryInput = {
-  staffId: string;
-  workDate: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  goDirectlyFlag?: boolean | null;
-  absentFlag?: boolean | null;
-  returnDirectlyFlag?: boolean | null;
-  rests?: Array<RestInput | null> | null;
-  hourlyPaidHolidayTimes?: Array<HourlyPaidHolidayTimeInput | null> | null;
-  remarks?: string | null;
-  paidHolidayFlag?: boolean | null;
-  specialHolidayFlag?: boolean | null;
-  hourlyPaidHolidayHours?: number | null;
-  substituteHolidayFlag?: boolean | null;
-  substituteHolidayDate?: string | null;
-  createdAt: string;
+  staffId: string,
+  workDate: string,
+  startTime?: string | null,
+  endTime?: string | null,
+  goDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
+  returnDirectlyFlag?: boolean | null,
+  rests?: Array< RestInput | null > | null,
+  hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
+  remarks?: string | null,
+  paidHolidayFlag?: boolean | null,
+  specialHolidayFlag?: boolean | null,
+  hourlyPaidHolidayHours?: number | null,
+  substituteHolidayFlag?: boolean | null,
+  substituteHolidayDate?: string | null,
+  createdAt: string,
 };
 
 export type AttendanceChangeRequestInput = {
-  startTime?: string | null;
-  endTime?: string | null;
-  goDirectlyFlag?: boolean | null;
-  absentFlag?: boolean | null;
-  returnDirectlyFlag?: boolean | null;
-  rests?: Array<RestInput | null> | null;
-  hourlyPaidHolidayTimes?: Array<HourlyPaidHolidayTimeInput | null> | null;
-  remarks?: string | null;
-  paidHolidayFlag?: boolean | null;
-  specialHolidayFlag?: boolean | null;
-  hourlyPaidHolidayHours?: number | null;
-  substituteHolidayFlag?: boolean | null;
-  substituteHolidayDate?: string | null;
-  completed?: boolean | null;
-  comment?: string | null;
-  staffComment?: string | null;
+  startTime?: string | null,
+  endTime?: string | null,
+  goDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
+  returnDirectlyFlag?: boolean | null,
+  rests?: Array< RestInput | null > | null,
+  hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
+  remarks?: string | null,
+  paidHolidayFlag?: boolean | null,
+  specialHolidayFlag?: boolean | null,
+  hourlyPaidHolidayHours?: number | null,
+  substituteHolidayFlag?: boolean | null,
+  substituteHolidayDate?: string | null,
+  completed?: boolean | null,
+  comment?: string | null,
+  staffComment?: string | null,
 };
 
 export type SystemCommentInput = {
-  comment: string;
-  confirmed: boolean;
-  createdAt: string;
+  comment: string,
+  confirmed: boolean,
+  createdAt: string,
 };
 
 export type ModelAttendanceConditionInput = {
-  staffId?: ModelStringInput | null;
-  workDate?: ModelStringInput | null;
-  startTime?: ModelStringInput | null;
-  endTime?: ModelStringInput | null;
-  goDirectlyFlag?: ModelBooleanInput | null;
-  returnDirectlyFlag?: ModelBooleanInput | null;
-  absentFlag?: ModelBooleanInput | null;
-  remarks?: ModelStringInput | null;
-  paidHolidayFlag?: ModelBooleanInput | null;
-  specialHolidayFlag?: ModelBooleanInput | null;
-  isDeemedHoliday?: ModelBooleanInput | null;
-  hourlyPaidHolidayHours?: ModelIntInput | null;
-  substituteHolidayDate?: ModelStringInput | null;
-  revision?: ModelIntInput | null;
-  and?: Array<ModelAttendanceConditionInput | null> | null;
-  or?: Array<ModelAttendanceConditionInput | null> | null;
-  not?: ModelAttendanceConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  staffId?: ModelStringInput | null,
+  workDate?: ModelStringInput | null,
+  startTime?: ModelStringInput | null,
+  endTime?: ModelStringInput | null,
+  goDirectlyFlag?: ModelBooleanInput | null,
+  returnDirectlyFlag?: ModelBooleanInput | null,
+  absentFlag?: ModelBooleanInput | null,
+  remarks?: ModelStringInput | null,
+  paidHolidayFlag?: ModelBooleanInput | null,
+  specialHolidayFlag?: ModelBooleanInput | null,
+  isDeemedHoliday?: ModelBooleanInput | null,
+  hourlyPaidHolidayHours?: ModelIntInput | null,
+  substituteHolidayDate?: ModelStringInput | null,
+  revision?: ModelIntInput | null,
+  and?: Array< ModelAttendanceConditionInput | null > | null,
+  or?: Array< ModelAttendanceConditionInput | null > | null,
+  not?: ModelAttendanceConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type ModelIntInput = {
-  ne?: number | null;
-  eq?: number | null;
-  le?: number | null;
-  lt?: number | null;
-  ge?: number | null;
-  gt?: number | null;
-  between?: Array<number | null> | null;
-  attributeExists?: boolean | null;
-  attributeType?: ModelAttributeTypes | null;
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
 };
 
 export type Attendance = {
-  __typename: "Attendance";
-  id: string;
-  staffId: string;
-  workDate: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  goDirectlyFlag?: boolean | null;
-  returnDirectlyFlag?: boolean | null;
-  absentFlag?: boolean | null;
-  rests?: Array<Rest | null> | null;
-  hourlyPaidHolidayTimes?: Array<HourlyPaidHolidayTime | null> | null;
-  remarks?: string | null;
-  paidHolidayFlag?: boolean | null;
-  specialHolidayFlag?: boolean | null;
-  isDeemedHoliday?: boolean | null;
-  hourlyPaidHolidayHours?: number | null;
-  substituteHolidayDate?: string | null;
-  histories?: Array<AttendanceHistory | null> | null;
-  changeRequests?: Array<AttendanceChangeRequest | null> | null;
-  systemComments?: Array<SystemComment | null> | null;
-  revision?: number | null;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "Attendance",
+  id: string,
+  staffId: string,
+  workDate: string,
+  startTime?: string | null,
+  endTime?: string | null,
+  goDirectlyFlag?: boolean | null,
+  returnDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
+  rests?:  Array<Rest | null > | null,
+  hourlyPaidHolidayTimes?:  Array<HourlyPaidHolidayTime | null > | null,
+  remarks?: string | null,
+  paidHolidayFlag?: boolean | null,
+  specialHolidayFlag?: boolean | null,
+  isDeemedHoliday?: boolean | null,
+  hourlyPaidHolidayHours?: number | null,
+  substituteHolidayDate?: string | null,
+  histories?:  Array<AttendanceHistory | null > | null,
+  changeRequests?:  Array<AttendanceChangeRequest | null > | null,
+  systemComments?:  Array<SystemComment | null > | null,
+  revision?: number | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type Rest = {
-  __typename: "Rest";
-  startTime?: string | null;
-  endTime?: string | null;
+  __typename: "Rest",
+  startTime?: string | null,
+  endTime?: string | null,
 };
 
 export type HourlyPaidHolidayTime = {
-  __typename: "HourlyPaidHolidayTime";
-  startTime: string;
-  endTime: string;
+  __typename: "HourlyPaidHolidayTime",
+  startTime: string,
+  endTime: string,
 };
 
 export type AttendanceHistory = {
-  __typename: "AttendanceHistory";
-  staffId: string;
-  workDate: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  goDirectlyFlag?: boolean | null;
-  absentFlag?: boolean | null;
-  returnDirectlyFlag?: boolean | null;
-  rests?: Array<Rest | null> | null;
-  hourlyPaidHolidayTimes?: Array<HourlyPaidHolidayTime | null> | null;
-  remarks?: string | null;
-  paidHolidayFlag?: boolean | null;
-  specialHolidayFlag?: boolean | null;
-  hourlyPaidHolidayHours?: number | null;
-  substituteHolidayFlag?: boolean | null;
-  substituteHolidayDate?: string | null;
-  createdAt: string;
+  __typename: "AttendanceHistory",
+  staffId: string,
+  workDate: string,
+  startTime?: string | null,
+  endTime?: string | null,
+  goDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
+  returnDirectlyFlag?: boolean | null,
+  rests?:  Array<Rest | null > | null,
+  hourlyPaidHolidayTimes?:  Array<HourlyPaidHolidayTime | null > | null,
+  remarks?: string | null,
+  paidHolidayFlag?: boolean | null,
+  specialHolidayFlag?: boolean | null,
+  hourlyPaidHolidayHours?: number | null,
+  substituteHolidayFlag?: boolean | null,
+  substituteHolidayDate?: string | null,
+  createdAt: string,
 };
 
 export type AttendanceChangeRequest = {
-  __typename: "AttendanceChangeRequest";
-  startTime?: string | null;
-  endTime?: string | null;
-  goDirectlyFlag?: boolean | null;
-  absentFlag?: boolean | null;
-  returnDirectlyFlag?: boolean | null;
-  rests?: Array<Rest | null> | null;
-  hourlyPaidHolidayTimes?: Array<HourlyPaidHolidayTime | null> | null;
-  remarks?: string | null;
-  paidHolidayFlag?: boolean | null;
-  specialHolidayFlag?: boolean | null;
-  hourlyPaidHolidayHours?: number | null;
-  substituteHolidayFlag?: boolean | null;
-  substituteHolidayDate?: string | null;
-  completed?: boolean | null;
-  comment?: string | null;
-  staffComment?: string | null;
+  __typename: "AttendanceChangeRequest",
+  startTime?: string | null,
+  endTime?: string | null,
+  goDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
+  returnDirectlyFlag?: boolean | null,
+  rests?:  Array<Rest | null > | null,
+  hourlyPaidHolidayTimes?:  Array<HourlyPaidHolidayTime | null > | null,
+  remarks?: string | null,
+  paidHolidayFlag?: boolean | null,
+  specialHolidayFlag?: boolean | null,
+  hourlyPaidHolidayHours?: number | null,
+  substituteHolidayFlag?: boolean | null,
+  substituteHolidayDate?: string | null,
+  completed?: boolean | null,
+  comment?: string | null,
+  staffComment?: string | null,
 };
 
 export type SystemComment = {
-  __typename: "SystemComment";
-  comment: string;
-  confirmed: boolean;
-  createdAt: string;
+  __typename: "SystemComment",
+  comment: string,
+  confirmed: boolean,
+  createdAt: string,
 };
 
 export type UpdateAttendanceInput = {
-  id: string;
-  staffId?: string | null;
-  workDate?: string | null;
-  startTime?: string | null;
-  endTime?: string | null;
-  goDirectlyFlag?: boolean | null;
-  returnDirectlyFlag?: boolean | null;
-  absentFlag?: boolean | null;
-  rests?: Array<RestInput | null> | null;
-  hourlyPaidHolidayTimes?: Array<HourlyPaidHolidayTimeInput | null> | null;
-  remarks?: string | null;
-  paidHolidayFlag?: boolean | null;
-  specialHolidayFlag?: boolean | null;
-  isDeemedHoliday?: boolean | null;
-  hourlyPaidHolidayHours?: number | null;
-  substituteHolidayDate?: string | null;
-  histories?: Array<AttendanceHistoryInput | null> | null;
-  changeRequests?: Array<AttendanceChangeRequestInput | null> | null;
-  systemComments?: Array<SystemCommentInput | null> | null;
-  revision?: number | null;
+  id: string,
+  staffId?: string | null,
+  workDate?: string | null,
+  startTime?: string | null,
+  endTime?: string | null,
+  goDirectlyFlag?: boolean | null,
+  returnDirectlyFlag?: boolean | null,
+  absentFlag?: boolean | null,
+  rests?: Array< RestInput | null > | null,
+  hourlyPaidHolidayTimes?: Array< HourlyPaidHolidayTimeInput | null > | null,
+  remarks?: string | null,
+  paidHolidayFlag?: boolean | null,
+  specialHolidayFlag?: boolean | null,
+  isDeemedHoliday?: boolean | null,
+  hourlyPaidHolidayHours?: number | null,
+  substituteHolidayDate?: string | null,
+  histories?: Array< AttendanceHistoryInput | null > | null,
+  changeRequests?: Array< AttendanceChangeRequestInput | null > | null,
+  systemComments?: Array< SystemCommentInput | null > | null,
+  revision?: number | null,
 };
 
 export type DeleteAttendanceInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateDocumentInput = {
-  id?: string | null;
-  title: string;
-  content: string;
-  tag?: Array<string | null> | null;
-  targetRole?: Array<string | null> | null;
-  revision?: number | null;
+  id?: string | null,
+  title: string,
+  content: string,
+  tag?: Array< string | null > | null,
+  targetRole?: Array< string | null > | null,
+  revision?: number | null,
 };
 
 export type ModelDocumentConditionInput = {
-  title?: ModelStringInput | null;
-  content?: ModelStringInput | null;
-  tag?: ModelStringInput | null;
-  targetRole?: ModelStringInput | null;
-  revision?: ModelIntInput | null;
-  and?: Array<ModelDocumentConditionInput | null> | null;
-  or?: Array<ModelDocumentConditionInput | null> | null;
-  not?: ModelDocumentConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  title?: ModelStringInput | null,
+  content?: ModelStringInput | null,
+  tag?: ModelStringInput | null,
+  targetRole?: ModelStringInput | null,
+  revision?: ModelIntInput | null,
+  and?: Array< ModelDocumentConditionInput | null > | null,
+  or?: Array< ModelDocumentConditionInput | null > | null,
+  not?: ModelDocumentConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type Document = {
-  __typename: "Document";
-  id: string;
-  title: string;
-  content: string;
-  tag?: Array<string | null> | null;
-  targetRole?: Array<string | null> | null;
-  revision?: number | null;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "Document",
+  id: string,
+  title: string,
+  content: string,
+  tag?: Array< string | null > | null,
+  targetRole?: Array< string | null > | null,
+  revision?: number | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type UpdateDocumentInput = {
-  id: string;
-  title?: string | null;
-  content?: string | null;
-  tag?: Array<string | null> | null;
-  targetRole?: Array<string | null> | null;
-  revision?: number | null;
+  id: string,
+  title?: string | null,
+  content?: string | null,
+  tag?: Array< string | null > | null,
+  targetRole?: Array< string | null > | null,
+  revision?: number | null,
 };
 
 export type DeleteDocumentInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateShiftRequestInput = {
@@ -936,22 +922,22 @@ export type DeleteShiftPlanYearInput = {
 };
 
 export type CreateWorkflowInput = {
-  id?: string | null;
-  approvedStaffIds?: Array<string | null> | null;
-  rejectedStaffIds?: Array<string | null> | null;
-  finalDecisionTimestamp?: string | null;
-  category?: WorkflowCategory | null;
-  staffId: string;
-  status: WorkflowStatus;
-  assignedApproverStaffIds?: Array<string | null> | null;
-  approvalSteps?: Array<ApprovalStepInput | null> | null;
-  nextApprovalStepIndex?: number | null;
-  submitterApproverSetting?: ApproverSettingMode | null;
-  submitterApproverId?: string | null;
-  submitterApproverIds?: Array<string | null> | null;
-  submitterApproverMultipleMode?: ApproverMultipleMode | null;
-  overTimeDetails?: OverTimeWorkflowInput | null;
-  comments?: Array<WorkflowCommentInput | null> | null;
+  id?: string | null,
+  approvedStaffIds?: Array< string | null > | null,
+  rejectedStaffIds?: Array< string | null > | null,
+  finalDecisionTimestamp?: string | null,
+  category?: WorkflowCategory | null,
+  staffId: string,
+  status: WorkflowStatus,
+  assignedApproverStaffIds?: Array< string | null > | null,
+  approvalSteps?: Array< ApprovalStepInput | null > | null,
+  nextApprovalStepIndex?: number | null,
+  submitterApproverSetting?: ApproverSettingMode | null,
+  submitterApproverId?: string | null,
+  submitterApproverIds?: Array< string | null > | null,
+  submitterApproverMultipleMode?: ApproverMultipleMode | null,
+  overTimeDetails?: OverTimeWorkflowInput | null,
+  comments?: Array< WorkflowCommentInput | null > | null,
 };
 
 export enum WorkflowCategory {
@@ -960,6 +946,7 @@ export enum WorkflowCategory {
   OVERTIME = "OVERTIME",
   CUSTOM = "CUSTOM",
 }
+
 
 export enum WorkflowStatus {
   DRAFT = "DRAFT",
@@ -970,13 +957,14 @@ export enum WorkflowStatus {
   CANCELLED = "CANCELLED",
 }
 
+
 export type ApprovalStepInput = {
-  id: string;
-  approverStaffId: string;
-  decisionStatus: ApprovalStatus;
-  approverComment?: string | null;
-  decisionTimestamp?: string | null;
-  stepOrder?: number | null;
+  id: string,
+  approverStaffId: string,
+  decisionStatus: ApprovalStatus,
+  approverComment?: string | null,
+  decisionTimestamp?: string | null,
+  stepOrder?: number | null,
 };
 
 export enum ApprovalStatus {
@@ -986,186 +974,187 @@ export enum ApprovalStatus {
   SKIPPED = "SKIPPED",
 }
 
+
 export type OverTimeWorkflowInput = {
-  date: string;
-  startTime: string;
-  endTime: string;
-  reason: string;
+  date: string,
+  startTime: string,
+  endTime: string,
+  reason: string,
 };
 
 export type WorkflowCommentInput = {
-  id: string;
-  staffId: string;
-  text: string;
-  createdAt: string;
+  id: string,
+  staffId: string,
+  text: string,
+  createdAt: string,
 };
 
 export type ModelWorkflowConditionInput = {
-  approvedStaffIds?: ModelStringInput | null;
-  rejectedStaffIds?: ModelStringInput | null;
-  finalDecisionTimestamp?: ModelStringInput | null;
-  category?: ModelWorkflowCategoryInput | null;
-  staffId?: ModelStringInput | null;
-  status?: ModelWorkflowStatusInput | null;
-  assignedApproverStaffIds?: ModelStringInput | null;
-  nextApprovalStepIndex?: ModelIntInput | null;
-  submitterApproverSetting?: ModelApproverSettingModeInput | null;
-  submitterApproverId?: ModelStringInput | null;
-  submitterApproverIds?: ModelStringInput | null;
-  submitterApproverMultipleMode?: ModelApproverMultipleModeInput | null;
-  and?: Array<ModelWorkflowConditionInput | null> | null;
-  or?: Array<ModelWorkflowConditionInput | null> | null;
-  not?: ModelWorkflowConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  approvedStaffIds?: ModelStringInput | null,
+  rejectedStaffIds?: ModelStringInput | null,
+  finalDecisionTimestamp?: ModelStringInput | null,
+  category?: ModelWorkflowCategoryInput | null,
+  staffId?: ModelStringInput | null,
+  status?: ModelWorkflowStatusInput | null,
+  assignedApproverStaffIds?: ModelStringInput | null,
+  nextApprovalStepIndex?: ModelIntInput | null,
+  submitterApproverSetting?: ModelApproverSettingModeInput | null,
+  submitterApproverId?: ModelStringInput | null,
+  submitterApproverIds?: ModelStringInput | null,
+  submitterApproverMultipleMode?: ModelApproverMultipleModeInput | null,
+  and?: Array< ModelWorkflowConditionInput | null > | null,
+  or?: Array< ModelWorkflowConditionInput | null > | null,
+  not?: ModelWorkflowConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type ModelWorkflowCategoryInput = {
-  eq?: WorkflowCategory | null;
-  ne?: WorkflowCategory | null;
+  eq?: WorkflowCategory | null,
+  ne?: WorkflowCategory | null,
 };
 
 export type ModelWorkflowStatusInput = {
-  eq?: WorkflowStatus | null;
-  ne?: WorkflowStatus | null;
+  eq?: WorkflowStatus | null,
+  ne?: WorkflowStatus | null,
 };
 
 export type Workflow = {
-  __typename: "Workflow";
-  id: string;
-  approvedStaffIds?: Array<string | null> | null;
-  rejectedStaffIds?: Array<string | null> | null;
-  finalDecisionTimestamp?: string | null;
-  category?: WorkflowCategory | null;
-  staffId: string;
-  status: WorkflowStatus;
-  assignedApproverStaffIds?: Array<string | null> | null;
-  approvalSteps?: Array<ApprovalStep | null> | null;
-  nextApprovalStepIndex?: number | null;
-  submitterApproverSetting?: ApproverSettingMode | null;
-  submitterApproverId?: string | null;
-  submitterApproverIds?: Array<string | null> | null;
-  submitterApproverMultipleMode?: ApproverMultipleMode | null;
-  overTimeDetails?: OverTimeWorkflow | null;
-  comments?: Array<WorkflowComment | null> | null;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "Workflow",
+  id: string,
+  approvedStaffIds?: Array< string | null > | null,
+  rejectedStaffIds?: Array< string | null > | null,
+  finalDecisionTimestamp?: string | null,
+  category?: WorkflowCategory | null,
+  staffId: string,
+  status: WorkflowStatus,
+  assignedApproverStaffIds?: Array< string | null > | null,
+  approvalSteps?:  Array<ApprovalStep | null > | null,
+  nextApprovalStepIndex?: number | null,
+  submitterApproverSetting?: ApproverSettingMode | null,
+  submitterApproverId?: string | null,
+  submitterApproverIds?: Array< string | null > | null,
+  submitterApproverMultipleMode?: ApproverMultipleMode | null,
+  overTimeDetails?: OverTimeWorkflow | null,
+  comments?:  Array<WorkflowComment | null > | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type ApprovalStep = {
-  __typename: "ApprovalStep";
-  id: string;
-  approverStaffId: string;
-  decisionStatus: ApprovalStatus;
-  approverComment?: string | null;
-  decisionTimestamp?: string | null;
-  stepOrder?: number | null;
+  __typename: "ApprovalStep",
+  id: string,
+  approverStaffId: string,
+  decisionStatus: ApprovalStatus,
+  approverComment?: string | null,
+  decisionTimestamp?: string | null,
+  stepOrder?: number | null,
 };
 
 export type OverTimeWorkflow = {
-  __typename: "OverTimeWorkflow";
-  date: string;
-  startTime: string;
-  endTime: string;
-  reason: string;
+  __typename: "OverTimeWorkflow",
+  date: string,
+  startTime: string,
+  endTime: string,
+  reason: string,
 };
 
 export type WorkflowComment = {
-  __typename: "WorkflowComment";
-  id: string;
-  staffId: string;
-  text: string;
-  createdAt: string;
+  __typename: "WorkflowComment",
+  id: string,
+  staffId: string,
+  text: string,
+  createdAt: string,
 };
 
 export type UpdateWorkflowInput = {
-  id: string;
-  approvedStaffIds?: Array<string | null> | null;
-  rejectedStaffIds?: Array<string | null> | null;
-  finalDecisionTimestamp?: string | null;
-  category?: WorkflowCategory | null;
-  staffId?: string | null;
-  status?: WorkflowStatus | null;
-  assignedApproverStaffIds?: Array<string | null> | null;
-  approvalSteps?: Array<ApprovalStepInput | null> | null;
-  nextApprovalStepIndex?: number | null;
-  submitterApproverSetting?: ApproverSettingMode | null;
-  submitterApproverId?: string | null;
-  submitterApproverIds?: Array<string | null> | null;
-  submitterApproverMultipleMode?: ApproverMultipleMode | null;
-  overTimeDetails?: OverTimeWorkflowInput | null;
-  comments?: Array<WorkflowCommentInput | null> | null;
+  id: string,
+  approvedStaffIds?: Array< string | null > | null,
+  rejectedStaffIds?: Array< string | null > | null,
+  finalDecisionTimestamp?: string | null,
+  category?: WorkflowCategory | null,
+  staffId?: string | null,
+  status?: WorkflowStatus | null,
+  assignedApproverStaffIds?: Array< string | null > | null,
+  approvalSteps?: Array< ApprovalStepInput | null > | null,
+  nextApprovalStepIndex?: number | null,
+  submitterApproverSetting?: ApproverSettingMode | null,
+  submitterApproverId?: string | null,
+  submitterApproverIds?: Array< string | null > | null,
+  submitterApproverMultipleMode?: ApproverMultipleMode | null,
+  overTimeDetails?: OverTimeWorkflowInput | null,
+  comments?: Array< WorkflowCommentInput | null > | null,
 };
 
 export type DeleteWorkflowInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateOperationLogInput = {
-  id?: string | null;
-  staffId?: string | null;
-  action: string;
-  resource?: string | null;
-  resourceId?: string | null;
-  timestamp: string;
-  details?: string | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
-  metadata?: string | null;
-  severity?: string | null;
+  id?: string | null,
+  staffId?: string | null,
+  action: string,
+  resource?: string | null,
+  resourceId?: string | null,
+  timestamp: string,
+  details?: string | null,
+  ipAddress?: string | null,
+  userAgent?: string | null,
+  metadata?: string | null,
+  severity?: string | null,
 };
 
 export type ModelOperationLogConditionInput = {
-  staffId?: ModelStringInput | null;
-  action?: ModelStringInput | null;
-  resource?: ModelStringInput | null;
-  resourceId?: ModelStringInput | null;
-  timestamp?: ModelStringInput | null;
-  details?: ModelStringInput | null;
-  ipAddress?: ModelStringInput | null;
-  userAgent?: ModelStringInput | null;
-  metadata?: ModelStringInput | null;
-  severity?: ModelStringInput | null;
-  and?: Array<ModelOperationLogConditionInput | null> | null;
-  or?: Array<ModelOperationLogConditionInput | null> | null;
-  not?: ModelOperationLogConditionInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
+  staffId?: ModelStringInput | null,
+  action?: ModelStringInput | null,
+  resource?: ModelStringInput | null,
+  resourceId?: ModelStringInput | null,
+  timestamp?: ModelStringInput | null,
+  details?: ModelStringInput | null,
+  ipAddress?: ModelStringInput | null,
+  userAgent?: ModelStringInput | null,
+  metadata?: ModelStringInput | null,
+  severity?: ModelStringInput | null,
+  and?: Array< ModelOperationLogConditionInput | null > | null,
+  or?: Array< ModelOperationLogConditionInput | null > | null,
+  not?: ModelOperationLogConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
 };
 
 export type OperationLog = {
-  __typename: "OperationLog";
-  id: string;
-  staffId?: string | null;
-  action: string;
-  resource?: string | null;
-  resourceId?: string | null;
-  timestamp: string;
-  details?: string | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
-  metadata?: string | null;
-  severity?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  __typename: "OperationLog",
+  id: string,
+  staffId?: string | null,
+  action: string,
+  resource?: string | null,
+  resourceId?: string | null,
+  timestamp: string,
+  details?: string | null,
+  ipAddress?: string | null,
+  userAgent?: string | null,
+  metadata?: string | null,
+  severity?: string | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type UpdateOperationLogInput = {
-  id: string;
-  staffId?: string | null;
-  action?: string | null;
-  resource?: string | null;
-  resourceId?: string | null;
-  timestamp?: string | null;
-  details?: string | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
-  metadata?: string | null;
-  severity?: string | null;
+  id: string,
+  staffId?: string | null,
+  action?: string | null,
+  resource?: string | null,
+  resourceId?: string | null,
+  timestamp?: string | null,
+  details?: string | null,
+  ipAddress?: string | null,
+  userAgent?: string | null,
+  metadata?: string | null,
+  severity?: string | null,
 };
 
 export type DeleteOperationLogInput = {
-  id: string;
+  id: string,
 };
 
 export type CreateDailyReportInput = {
@@ -1274,47 +1263,47 @@ export type DeleteDailyReportInput = {
 };
 
 export type EmailData = {
-  to?: Array<string | null> | null;
-  subject: string;
-  body: string;
+  to?: Array< string | null > | null,
+  subject: string,
+  body: string,
 };
 
 export type EmailResult = {
-  __typename: "EmailResult";
-  statusCode?: number | null;
-  body?: string | null;
+  __typename: "EmailResult",
+  statusCode?: number | null,
+  body?: string | null,
 };
 
 export type ModelCheckForUpdateFilterInput = {
-  id?: ModelIDInput | null;
-  deployUuid?: ModelStringInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelCheckForUpdateFilterInput | null> | null;
-  or?: Array<ModelCheckForUpdateFilterInput | null> | null;
-  not?: ModelCheckForUpdateFilterInput | null;
+  id?: ModelIDInput | null,
+  deployUuid?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelCheckForUpdateFilterInput | null > | null,
+  or?: Array< ModelCheckForUpdateFilterInput | null > | null,
+  not?: ModelCheckForUpdateFilterInput | null,
 };
 
 export type ModelIDInput = {
-  ne?: string | null;
-  eq?: string | null;
-  le?: string | null;
-  lt?: string | null;
-  ge?: string | null;
-  gt?: string | null;
-  contains?: string | null;
-  notContains?: string | null;
-  between?: Array<string | null> | null;
-  beginsWith?: string | null;
-  attributeExists?: boolean | null;
-  attributeType?: ModelAttributeTypes | null;
-  size?: ModelSizeInput | null;
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
 };
 
 export type ModelCheckForUpdateConnection = {
-  __typename: "ModelCheckForUpdateConnection";
-  items: Array<CheckForUpdate | null>;
-  nextToken?: string | null;
+  __typename: "ModelCheckForUpdateConnection",
+  items:  Array<CheckForUpdate | null >,
+  nextToken?: string | null,
 };
 
 export type ModelAppConfigFilterInput = {
@@ -1342,9 +1331,9 @@ export type ModelAppConfigFilterInput = {
 };
 
 export type ModelAppConfigConnection = {
-  __typename: "ModelAppConfigConnection";
-  items: Array<AppConfig | null>;
-  nextToken?: string | null;
+  __typename: "ModelAppConfigConnection",
+  items:  Array<AppConfig | null >,
+  nextToken?: string | null,
 };
 
 export type ModelStaffFilterInput = {
@@ -1374,19 +1363,19 @@ export type ModelStaffFilterInput = {
 };
 
 export type ModelStaffConnection = {
-  __typename: "ModelStaffConnection";
-  items: Array<Staff | null>;
-  nextToken?: string | null;
+  __typename: "ModelStaffConnection",
+  items:  Array<Staff | null >,
+  nextToken?: string | null,
 };
 
 export type ModelIDKeyConditionInput = {
-  eq?: string | null;
-  le?: string | null;
-  lt?: string | null;
-  ge?: string | null;
-  gt?: string | null;
-  between?: Array<string | null> | null;
-  beginsWith?: string | null;
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
 };
 
 export enum ModelSortDirection {
@@ -1394,115 +1383,116 @@ export enum ModelSortDirection {
   DESC = "DESC",
 }
 
+
 export type ModelHolidayCalendarFilterInput = {
-  id?: ModelIDInput | null;
-  holidayDate?: ModelStringInput | null;
-  name?: ModelStringInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelHolidayCalendarFilterInput | null> | null;
-  or?: Array<ModelHolidayCalendarFilterInput | null> | null;
-  not?: ModelHolidayCalendarFilterInput | null;
+  id?: ModelIDInput | null,
+  holidayDate?: ModelStringInput | null,
+  name?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelHolidayCalendarFilterInput | null > | null,
+  or?: Array< ModelHolidayCalendarFilterInput | null > | null,
+  not?: ModelHolidayCalendarFilterInput | null,
 };
 
 export type ModelHolidayCalendarConnection = {
-  __typename: "ModelHolidayCalendarConnection";
-  items: Array<HolidayCalendar | null>;
-  nextToken?: string | null;
+  __typename: "ModelHolidayCalendarConnection",
+  items:  Array<HolidayCalendar | null >,
+  nextToken?: string | null,
 };
 
 export type ModelCompanyHolidayCalendarFilterInput = {
-  id?: ModelIDInput | null;
-  holidayDate?: ModelStringInput | null;
-  name?: ModelStringInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelCompanyHolidayCalendarFilterInput | null> | null;
-  or?: Array<ModelCompanyHolidayCalendarFilterInput | null> | null;
-  not?: ModelCompanyHolidayCalendarFilterInput | null;
+  id?: ModelIDInput | null,
+  holidayDate?: ModelStringInput | null,
+  name?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelCompanyHolidayCalendarFilterInput | null > | null,
+  or?: Array< ModelCompanyHolidayCalendarFilterInput | null > | null,
+  not?: ModelCompanyHolidayCalendarFilterInput | null,
 };
 
 export type ModelCompanyHolidayCalendarConnection = {
-  __typename: "ModelCompanyHolidayCalendarConnection";
-  items: Array<CompanyHolidayCalendar | null>;
-  nextToken?: string | null;
+  __typename: "ModelCompanyHolidayCalendarConnection",
+  items:  Array<CompanyHolidayCalendar | null >,
+  nextToken?: string | null,
 };
 
 export type ModelCloseDateFilterInput = {
-  id?: ModelIDInput | null;
-  closeDate?: ModelStringInput | null;
-  startDate?: ModelStringInput | null;
-  endDate?: ModelStringInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelCloseDateFilterInput | null> | null;
-  or?: Array<ModelCloseDateFilterInput | null> | null;
-  not?: ModelCloseDateFilterInput | null;
+  id?: ModelIDInput | null,
+  closeDate?: ModelStringInput | null,
+  startDate?: ModelStringInput | null,
+  endDate?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelCloseDateFilterInput | null > | null,
+  or?: Array< ModelCloseDateFilterInput | null > | null,
+  not?: ModelCloseDateFilterInput | null,
 };
 
 export type ModelCloseDateConnection = {
-  __typename: "ModelCloseDateConnection";
-  items: Array<CloseDate | null>;
-  nextToken?: string | null;
+  __typename: "ModelCloseDateConnection",
+  items:  Array<CloseDate | null >,
+  nextToken?: string | null,
 };
 
 export type ModelAttendanceFilterInput = {
-  id?: ModelIDInput | null;
-  staffId?: ModelStringInput | null;
-  workDate?: ModelStringInput | null;
-  startTime?: ModelStringInput | null;
-  endTime?: ModelStringInput | null;
-  goDirectlyFlag?: ModelBooleanInput | null;
-  returnDirectlyFlag?: ModelBooleanInput | null;
-  absentFlag?: ModelBooleanInput | null;
-  remarks?: ModelStringInput | null;
-  paidHolidayFlag?: ModelBooleanInput | null;
-  specialHolidayFlag?: ModelBooleanInput | null;
-  isDeemedHoliday?: ModelBooleanInput | null;
-  hourlyPaidHolidayHours?: ModelIntInput | null;
-  substituteHolidayDate?: ModelStringInput | null;
-  revision?: ModelIntInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelAttendanceFilterInput | null> | null;
-  or?: Array<ModelAttendanceFilterInput | null> | null;
-  not?: ModelAttendanceFilterInput | null;
+  id?: ModelIDInput | null,
+  staffId?: ModelStringInput | null,
+  workDate?: ModelStringInput | null,
+  startTime?: ModelStringInput | null,
+  endTime?: ModelStringInput | null,
+  goDirectlyFlag?: ModelBooleanInput | null,
+  returnDirectlyFlag?: ModelBooleanInput | null,
+  absentFlag?: ModelBooleanInput | null,
+  remarks?: ModelStringInput | null,
+  paidHolidayFlag?: ModelBooleanInput | null,
+  specialHolidayFlag?: ModelBooleanInput | null,
+  isDeemedHoliday?: ModelBooleanInput | null,
+  hourlyPaidHolidayHours?: ModelIntInput | null,
+  substituteHolidayDate?: ModelStringInput | null,
+  revision?: ModelIntInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAttendanceFilterInput | null > | null,
+  or?: Array< ModelAttendanceFilterInput | null > | null,
+  not?: ModelAttendanceFilterInput | null,
 };
 
 export type ModelAttendanceConnection = {
-  __typename: "ModelAttendanceConnection";
-  items: Array<Attendance | null>;
-  nextToken?: string | null;
+  __typename: "ModelAttendanceConnection",
+  items:  Array<Attendance | null >,
+  nextToken?: string | null,
 };
 
 export type ModelStringKeyConditionInput = {
-  eq?: string | null;
-  le?: string | null;
-  lt?: string | null;
-  ge?: string | null;
-  gt?: string | null;
-  between?: Array<string | null> | null;
-  beginsWith?: string | null;
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
 };
 
 export type ModelDocumentFilterInput = {
-  id?: ModelIDInput | null;
-  title?: ModelStringInput | null;
-  content?: ModelStringInput | null;
-  tag?: ModelStringInput | null;
-  targetRole?: ModelStringInput | null;
-  revision?: ModelIntInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelDocumentFilterInput | null> | null;
-  or?: Array<ModelDocumentFilterInput | null> | null;
-  not?: ModelDocumentFilterInput | null;
+  id?: ModelIDInput | null,
+  title?: ModelStringInput | null,
+  content?: ModelStringInput | null,
+  tag?: ModelStringInput | null,
+  targetRole?: ModelStringInput | null,
+  revision?: ModelIntInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelDocumentFilterInput | null > | null,
+  or?: Array< ModelDocumentFilterInput | null > | null,
+  not?: ModelDocumentFilterInput | null,
 };
 
 export type ModelDocumentConnection = {
-  __typename: "ModelDocumentConnection";
-  items: Array<Document | null>;
-  nextToken?: string | null;
+  __typename: "ModelDocumentConnection",
+  items:  Array<Document | null >,
+  nextToken?: string | null,
 };
 
 export type ModelShiftRequestFilterInput = {
@@ -1544,55 +1534,55 @@ export type ModelShiftPlanYearConnection = {
 };
 
 export type ModelWorkflowFilterInput = {
-  id?: ModelIDInput | null;
-  approvedStaffIds?: ModelStringInput | null;
-  rejectedStaffIds?: ModelStringInput | null;
-  finalDecisionTimestamp?: ModelStringInput | null;
-  category?: ModelWorkflowCategoryInput | null;
-  staffId?: ModelStringInput | null;
-  status?: ModelWorkflowStatusInput | null;
-  assignedApproverStaffIds?: ModelStringInput | null;
-  nextApprovalStepIndex?: ModelIntInput | null;
-  submitterApproverSetting?: ModelApproverSettingModeInput | null;
-  submitterApproverId?: ModelStringInput | null;
-  submitterApproverIds?: ModelStringInput | null;
-  submitterApproverMultipleMode?: ModelApproverMultipleModeInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelWorkflowFilterInput | null> | null;
-  or?: Array<ModelWorkflowFilterInput | null> | null;
-  not?: ModelWorkflowFilterInput | null;
+  id?: ModelIDInput | null,
+  approvedStaffIds?: ModelStringInput | null,
+  rejectedStaffIds?: ModelStringInput | null,
+  finalDecisionTimestamp?: ModelStringInput | null,
+  category?: ModelWorkflowCategoryInput | null,
+  staffId?: ModelStringInput | null,
+  status?: ModelWorkflowStatusInput | null,
+  assignedApproverStaffIds?: ModelStringInput | null,
+  nextApprovalStepIndex?: ModelIntInput | null,
+  submitterApproverSetting?: ModelApproverSettingModeInput | null,
+  submitterApproverId?: ModelStringInput | null,
+  submitterApproverIds?: ModelStringInput | null,
+  submitterApproverMultipleMode?: ModelApproverMultipleModeInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelWorkflowFilterInput | null > | null,
+  or?: Array< ModelWorkflowFilterInput | null > | null,
+  not?: ModelWorkflowFilterInput | null,
 };
 
 export type ModelWorkflowConnection = {
-  __typename: "ModelWorkflowConnection";
-  items: Array<Workflow | null>;
-  nextToken?: string | null;
+  __typename: "ModelWorkflowConnection",
+  items:  Array<Workflow | null >,
+  nextToken?: string | null,
 };
 
 export type ModelOperationLogFilterInput = {
-  id?: ModelIDInput | null;
-  staffId?: ModelStringInput | null;
-  action?: ModelStringInput | null;
-  resource?: ModelStringInput | null;
-  resourceId?: ModelStringInput | null;
-  timestamp?: ModelStringInput | null;
-  details?: ModelStringInput | null;
-  ipAddress?: ModelStringInput | null;
-  userAgent?: ModelStringInput | null;
-  metadata?: ModelStringInput | null;
-  severity?: ModelStringInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelOperationLogFilterInput | null> | null;
-  or?: Array<ModelOperationLogFilterInput | null> | null;
-  not?: ModelOperationLogFilterInput | null;
+  id?: ModelIDInput | null,
+  staffId?: ModelStringInput | null,
+  action?: ModelStringInput | null,
+  resource?: ModelStringInput | null,
+  resourceId?: ModelStringInput | null,
+  timestamp?: ModelStringInput | null,
+  details?: ModelStringInput | null,
+  ipAddress?: ModelStringInput | null,
+  userAgent?: ModelStringInput | null,
+  metadata?: ModelStringInput | null,
+  severity?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelOperationLogFilterInput | null > | null,
+  or?: Array< ModelOperationLogFilterInput | null > | null,
+  not?: ModelOperationLogFilterInput | null,
 };
 
 export type ModelOperationLogConnection = {
-  __typename: "ModelOperationLogConnection";
-  items: Array<OperationLog | null>;
-  nextToken?: string | null;
+  __typename: "ModelOperationLogConnection",
+  items:  Array<OperationLog | null >,
+  nextToken?: string | null,
 };
 
 export type ModelDailyReportFilterInput = {
@@ -1616,42 +1606,42 @@ export type ModelDailyReportConnection = {
 };
 
 export type ModelSubscriptionCheckForUpdateFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  deployUuid?: ModelSubscriptionStringInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionCheckForUpdateFilterInput | null> | null;
-  or?: Array<ModelSubscriptionCheckForUpdateFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  deployUuid?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionCheckForUpdateFilterInput | null > | null,
+  or?: Array< ModelSubscriptionCheckForUpdateFilterInput | null > | null,
 };
 
 export type ModelSubscriptionIDInput = {
-  ne?: string | null;
-  eq?: string | null;
-  le?: string | null;
-  lt?: string | null;
-  ge?: string | null;
-  gt?: string | null;
-  contains?: string | null;
-  notContains?: string | null;
-  between?: Array<string | null> | null;
-  beginsWith?: string | null;
-  in?: Array<string | null> | null;
-  notIn?: Array<string | null> | null;
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  in?: Array< string | null > | null,
+  notIn?: Array< string | null > | null,
 };
 
 export type ModelSubscriptionStringInput = {
-  ne?: string | null;
-  eq?: string | null;
-  le?: string | null;
-  lt?: string | null;
-  ge?: string | null;
-  gt?: string | null;
-  contains?: string | null;
-  notContains?: string | null;
-  between?: Array<string | null> | null;
-  beginsWith?: string | null;
-  in?: Array<string | null> | null;
-  notIn?: Array<string | null> | null;
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  in?: Array< string | null > | null,
+  notIn?: Array< string | null > | null,
 };
 
 export type ModelSubscriptionAppConfigFilterInput = {
@@ -1678,8 +1668,8 @@ export type ModelSubscriptionAppConfigFilterInput = {
 };
 
 export type ModelSubscriptionBooleanInput = {
-  ne?: boolean | null;
-  eq?: boolean | null;
+  ne?: boolean | null,
+  eq?: boolean | null,
 };
 
 export type ModelSubscriptionStaffFilterInput = {
@@ -1708,81 +1698,81 @@ export type ModelSubscriptionStaffFilterInput = {
 };
 
 export type ModelSubscriptionHolidayCalendarFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  holidayDate?: ModelSubscriptionStringInput | null;
-  name?: ModelSubscriptionStringInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionHolidayCalendarFilterInput | null> | null;
-  or?: Array<ModelSubscriptionHolidayCalendarFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  holidayDate?: ModelSubscriptionStringInput | null,
+  name?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionHolidayCalendarFilterInput | null > | null,
+  or?: Array< ModelSubscriptionHolidayCalendarFilterInput | null > | null,
 };
 
 export type ModelSubscriptionCompanyHolidayCalendarFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  holidayDate?: ModelSubscriptionStringInput | null;
-  name?: ModelSubscriptionStringInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionCompanyHolidayCalendarFilterInput | null> | null;
-  or?: Array<ModelSubscriptionCompanyHolidayCalendarFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  holidayDate?: ModelSubscriptionStringInput | null,
+  name?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionCompanyHolidayCalendarFilterInput | null > | null,
+  or?: Array< ModelSubscriptionCompanyHolidayCalendarFilterInput | null > | null,
 };
 
 export type ModelSubscriptionCloseDateFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  closeDate?: ModelSubscriptionStringInput | null;
-  startDate?: ModelSubscriptionStringInput | null;
-  endDate?: ModelSubscriptionStringInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionCloseDateFilterInput | null> | null;
-  or?: Array<ModelSubscriptionCloseDateFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  closeDate?: ModelSubscriptionStringInput | null,
+  startDate?: ModelSubscriptionStringInput | null,
+  endDate?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionCloseDateFilterInput | null > | null,
+  or?: Array< ModelSubscriptionCloseDateFilterInput | null > | null,
 };
 
 export type ModelSubscriptionAttendanceFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  staffId?: ModelSubscriptionStringInput | null;
-  workDate?: ModelSubscriptionStringInput | null;
-  startTime?: ModelSubscriptionStringInput | null;
-  endTime?: ModelSubscriptionStringInput | null;
-  goDirectlyFlag?: ModelSubscriptionBooleanInput | null;
-  returnDirectlyFlag?: ModelSubscriptionBooleanInput | null;
-  absentFlag?: ModelSubscriptionBooleanInput | null;
-  remarks?: ModelSubscriptionStringInput | null;
-  paidHolidayFlag?: ModelSubscriptionBooleanInput | null;
-  specialHolidayFlag?: ModelSubscriptionBooleanInput | null;
-  isDeemedHoliday?: ModelSubscriptionBooleanInput | null;
-  hourlyPaidHolidayHours?: ModelSubscriptionIntInput | null;
-  substituteHolidayDate?: ModelSubscriptionStringInput | null;
-  revision?: ModelSubscriptionIntInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionAttendanceFilterInput | null> | null;
-  or?: Array<ModelSubscriptionAttendanceFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  workDate?: ModelSubscriptionStringInput | null,
+  startTime?: ModelSubscriptionStringInput | null,
+  endTime?: ModelSubscriptionStringInput | null,
+  goDirectlyFlag?: ModelSubscriptionBooleanInput | null,
+  returnDirectlyFlag?: ModelSubscriptionBooleanInput | null,
+  absentFlag?: ModelSubscriptionBooleanInput | null,
+  remarks?: ModelSubscriptionStringInput | null,
+  paidHolidayFlag?: ModelSubscriptionBooleanInput | null,
+  specialHolidayFlag?: ModelSubscriptionBooleanInput | null,
+  isDeemedHoliday?: ModelSubscriptionBooleanInput | null,
+  hourlyPaidHolidayHours?: ModelSubscriptionIntInput | null,
+  substituteHolidayDate?: ModelSubscriptionStringInput | null,
+  revision?: ModelSubscriptionIntInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionAttendanceFilterInput | null > | null,
+  or?: Array< ModelSubscriptionAttendanceFilterInput | null > | null,
 };
 
 export type ModelSubscriptionIntInput = {
-  ne?: number | null;
-  eq?: number | null;
-  le?: number | null;
-  lt?: number | null;
-  ge?: number | null;
-  gt?: number | null;
-  between?: Array<number | null> | null;
-  in?: Array<number | null> | null;
-  notIn?: Array<number | null> | null;
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  in?: Array< number | null > | null,
+  notIn?: Array< number | null > | null,
 };
 
 export type ModelSubscriptionDocumentFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  title?: ModelSubscriptionStringInput | null;
-  content?: ModelSubscriptionStringInput | null;
-  tag?: ModelSubscriptionStringInput | null;
-  targetRole?: ModelSubscriptionStringInput | null;
-  revision?: ModelSubscriptionIntInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionDocumentFilterInput | null> | null;
-  or?: Array<ModelSubscriptionDocumentFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  title?: ModelSubscriptionStringInput | null,
+  content?: ModelSubscriptionStringInput | null,
+  tag?: ModelSubscriptionStringInput | null,
+  targetRole?: ModelSubscriptionStringInput | null,
+  revision?: ModelSubscriptionIntInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionDocumentFilterInput | null > | null,
+  or?: Array< ModelSubscriptionDocumentFilterInput | null > | null,
 };
 
 export type ModelSubscriptionShiftRequestFilterInput = {
@@ -1810,41 +1800,41 @@ export type ModelSubscriptionShiftPlanYearFilterInput = {
 };
 
 export type ModelSubscriptionWorkflowFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  approvedStaffIds?: ModelSubscriptionStringInput | null;
-  rejectedStaffIds?: ModelSubscriptionStringInput | null;
-  finalDecisionTimestamp?: ModelSubscriptionStringInput | null;
-  category?: ModelSubscriptionStringInput | null;
-  staffId?: ModelSubscriptionStringInput | null;
-  status?: ModelSubscriptionStringInput | null;
-  assignedApproverStaffIds?: ModelSubscriptionStringInput | null;
-  nextApprovalStepIndex?: ModelSubscriptionIntInput | null;
-  submitterApproverSetting?: ModelSubscriptionStringInput | null;
-  submitterApproverId?: ModelSubscriptionStringInput | null;
-  submitterApproverIds?: ModelSubscriptionStringInput | null;
-  submitterApproverMultipleMode?: ModelSubscriptionStringInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionWorkflowFilterInput | null> | null;
-  or?: Array<ModelSubscriptionWorkflowFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  approvedStaffIds?: ModelSubscriptionStringInput | null,
+  rejectedStaffIds?: ModelSubscriptionStringInput | null,
+  finalDecisionTimestamp?: ModelSubscriptionStringInput | null,
+  category?: ModelSubscriptionStringInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  assignedApproverStaffIds?: ModelSubscriptionStringInput | null,
+  nextApprovalStepIndex?: ModelSubscriptionIntInput | null,
+  submitterApproverSetting?: ModelSubscriptionStringInput | null,
+  submitterApproverId?: ModelSubscriptionStringInput | null,
+  submitterApproverIds?: ModelSubscriptionStringInput | null,
+  submitterApproverMultipleMode?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
+  or?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
 };
 
 export type ModelSubscriptionOperationLogFilterInput = {
-  id?: ModelSubscriptionIDInput | null;
-  staffId?: ModelSubscriptionStringInput | null;
-  action?: ModelSubscriptionStringInput | null;
-  resource?: ModelSubscriptionStringInput | null;
-  resourceId?: ModelSubscriptionStringInput | null;
-  timestamp?: ModelSubscriptionStringInput | null;
-  details?: ModelSubscriptionStringInput | null;
-  ipAddress?: ModelSubscriptionStringInput | null;
-  userAgent?: ModelSubscriptionStringInput | null;
-  metadata?: ModelSubscriptionStringInput | null;
-  severity?: ModelSubscriptionStringInput | null;
-  createdAt?: ModelSubscriptionStringInput | null;
-  updatedAt?: ModelSubscriptionStringInput | null;
-  and?: Array<ModelSubscriptionOperationLogFilterInput | null> | null;
-  or?: Array<ModelSubscriptionOperationLogFilterInput | null> | null;
+  id?: ModelSubscriptionIDInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  action?: ModelSubscriptionStringInput | null,
+  resource?: ModelSubscriptionStringInput | null,
+  resourceId?: ModelSubscriptionStringInput | null,
+  timestamp?: ModelSubscriptionStringInput | null,
+  details?: ModelSubscriptionStringInput | null,
+  ipAddress?: ModelSubscriptionStringInput | null,
+  userAgent?: ModelSubscriptionStringInput | null,
+  metadata?: ModelSubscriptionStringInput | null,
+  severity?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
+  or?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
 };
 
 export type ModelSubscriptionDailyReportFilterInput = {
@@ -1861,53 +1851,53 @@ export type ModelSubscriptionDailyReportFilterInput = {
 };
 
 export type CreateCheckForUpdateMutationVariables = {
-  input: CreateCheckForUpdateInput;
-  condition?: ModelCheckForUpdateConditionInput | null;
+  input: CreateCheckForUpdateInput,
+  condition?: ModelCheckForUpdateConditionInput | null,
 };
 
 export type CreateCheckForUpdateMutation = {
-  createCheckForUpdate?: {
-    __typename: "CheckForUpdate";
-    id: string;
-    deployUuid: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createCheckForUpdate?:  {
+    __typename: "CheckForUpdate",
+    id: string,
+    deployUuid: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateCheckForUpdateMutationVariables = {
-  input: UpdateCheckForUpdateInput;
-  condition?: ModelCheckForUpdateConditionInput | null;
+  input: UpdateCheckForUpdateInput,
+  condition?: ModelCheckForUpdateConditionInput | null,
 };
 
 export type UpdateCheckForUpdateMutation = {
-  updateCheckForUpdate?: {
-    __typename: "CheckForUpdate";
-    id: string;
-    deployUuid: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateCheckForUpdate?:  {
+    __typename: "CheckForUpdate",
+    id: string,
+    deployUuid: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteCheckForUpdateMutationVariables = {
-  input: DeleteCheckForUpdateInput;
-  condition?: ModelCheckForUpdateConditionInput | null;
+  input: DeleteCheckForUpdateInput,
+  condition?: ModelCheckForUpdateConditionInput | null,
 };
 
 export type DeleteCheckForUpdateMutation = {
-  deleteCheckForUpdate?: {
-    __typename: "CheckForUpdate";
-    id: string;
-    deployUuid: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteCheckForUpdate?:  {
+    __typename: "CheckForUpdate",
+    id: string,
+    deployUuid: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateAppConfigMutationVariables = {
-  input: CreateAppConfigInput;
-  condition?: ModelAppConfigConditionInput | null;
+  input: CreateAppConfigInput,
+  condition?: ModelAppConfigConditionInput | null,
 };
 
 export type CreateAppConfigMutation = {
@@ -1965,8 +1955,8 @@ export type CreateAppConfigMutation = {
 };
 
 export type UpdateAppConfigMutationVariables = {
-  input: UpdateAppConfigInput;
-  condition?: ModelAppConfigConditionInput | null;
+  input: UpdateAppConfigInput,
+  condition?: ModelAppConfigConditionInput | null,
 };
 
 export type UpdateAppConfigMutation = {
@@ -2024,8 +2014,8 @@ export type UpdateAppConfigMutation = {
 };
 
 export type DeleteAppConfigMutationVariables = {
-  input: DeleteAppConfigInput;
-  condition?: ModelAppConfigConditionInput | null;
+  input: DeleteAppConfigInput,
+  condition?: ModelAppConfigConditionInput | null,
 };
 
 export type DeleteAppConfigMutation = {
@@ -2083,8 +2073,8 @@ export type DeleteAppConfigMutation = {
 };
 
 export type CreateStaffMutationVariables = {
-  input: CreateStaffInput;
-  condition?: ModelStaffConditionInput | null;
+  input: CreateStaffInput,
+  condition?: ModelStaffConditionInput | null,
 };
 
 export type CreateStaffMutation = {
@@ -2119,8 +2109,8 @@ export type CreateStaffMutation = {
 };
 
 export type UpdateStaffMutationVariables = {
-  input: UpdateStaffInput;
-  condition?: ModelStaffConditionInput | null;
+  input: UpdateStaffInput,
+  condition?: ModelStaffConditionInput | null,
 };
 
 export type UpdateStaffMutation = {
@@ -2155,8 +2145,8 @@ export type UpdateStaffMutation = {
 };
 
 export type DeleteStaffMutationVariables = {
-  input: DeleteStaffInput;
-  condition?: ModelStaffConditionInput | null;
+  input: DeleteStaffInput,
+  condition?: ModelStaffConditionInput | null,
 };
 
 export type DeleteStaffMutation = {
@@ -2191,501 +2181,501 @@ export type DeleteStaffMutation = {
 };
 
 export type CreateHolidayCalendarMutationVariables = {
-  input: CreateHolidayCalendarInput;
-  condition?: ModelHolidayCalendarConditionInput | null;
+  input: CreateHolidayCalendarInput,
+  condition?: ModelHolidayCalendarConditionInput | null,
 };
 
 export type CreateHolidayCalendarMutation = {
-  createHolidayCalendar?: {
-    __typename: "HolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createHolidayCalendar?:  {
+    __typename: "HolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateHolidayCalendarMutationVariables = {
-  input: UpdateHolidayCalendarInput;
-  condition?: ModelHolidayCalendarConditionInput | null;
+  input: UpdateHolidayCalendarInput,
+  condition?: ModelHolidayCalendarConditionInput | null,
 };
 
 export type UpdateHolidayCalendarMutation = {
-  updateHolidayCalendar?: {
-    __typename: "HolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateHolidayCalendar?:  {
+    __typename: "HolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteHolidayCalendarMutationVariables = {
-  input: DeleteHolidayCalendarInput;
-  condition?: ModelHolidayCalendarConditionInput | null;
+  input: DeleteHolidayCalendarInput,
+  condition?: ModelHolidayCalendarConditionInput | null,
 };
 
 export type DeleteHolidayCalendarMutation = {
-  deleteHolidayCalendar?: {
-    __typename: "HolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteHolidayCalendar?:  {
+    __typename: "HolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateCompanyHolidayCalendarMutationVariables = {
-  input: CreateCompanyHolidayCalendarInput;
-  condition?: ModelCompanyHolidayCalendarConditionInput | null;
+  input: CreateCompanyHolidayCalendarInput,
+  condition?: ModelCompanyHolidayCalendarConditionInput | null,
 };
 
 export type CreateCompanyHolidayCalendarMutation = {
-  createCompanyHolidayCalendar?: {
-    __typename: "CompanyHolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createCompanyHolidayCalendar?:  {
+    __typename: "CompanyHolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateCompanyHolidayCalendarMutationVariables = {
-  input: UpdateCompanyHolidayCalendarInput;
-  condition?: ModelCompanyHolidayCalendarConditionInput | null;
+  input: UpdateCompanyHolidayCalendarInput,
+  condition?: ModelCompanyHolidayCalendarConditionInput | null,
 };
 
 export type UpdateCompanyHolidayCalendarMutation = {
-  updateCompanyHolidayCalendar?: {
-    __typename: "CompanyHolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateCompanyHolidayCalendar?:  {
+    __typename: "CompanyHolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteCompanyHolidayCalendarMutationVariables = {
-  input: DeleteCompanyHolidayCalendarInput;
-  condition?: ModelCompanyHolidayCalendarConditionInput | null;
+  input: DeleteCompanyHolidayCalendarInput,
+  condition?: ModelCompanyHolidayCalendarConditionInput | null,
 };
 
 export type DeleteCompanyHolidayCalendarMutation = {
-  deleteCompanyHolidayCalendar?: {
-    __typename: "CompanyHolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteCompanyHolidayCalendar?:  {
+    __typename: "CompanyHolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateCloseDateMutationVariables = {
-  input: CreateCloseDateInput;
-  condition?: ModelCloseDateConditionInput | null;
+  input: CreateCloseDateInput,
+  condition?: ModelCloseDateConditionInput | null,
 };
 
 export type CreateCloseDateMutation = {
-  createCloseDate?: {
-    __typename: "CloseDate";
-    id: string;
-    closeDate: string;
-    startDate: string;
-    endDate: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createCloseDate?:  {
+    __typename: "CloseDate",
+    id: string,
+    closeDate: string,
+    startDate: string,
+    endDate: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateCloseDateMutationVariables = {
-  input: UpdateCloseDateInput;
-  condition?: ModelCloseDateConditionInput | null;
+  input: UpdateCloseDateInput,
+  condition?: ModelCloseDateConditionInput | null,
 };
 
 export type UpdateCloseDateMutation = {
-  updateCloseDate?: {
-    __typename: "CloseDate";
-    id: string;
-    closeDate: string;
-    startDate: string;
-    endDate: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateCloseDate?:  {
+    __typename: "CloseDate",
+    id: string,
+    closeDate: string,
+    startDate: string,
+    endDate: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteCloseDateMutationVariables = {
-  input: DeleteCloseDateInput;
-  condition?: ModelCloseDateConditionInput | null;
+  input: DeleteCloseDateInput,
+  condition?: ModelCloseDateConditionInput | null,
 };
 
 export type DeleteCloseDateMutation = {
-  deleteCloseDate?: {
-    __typename: "CloseDate";
-    id: string;
-    closeDate: string;
-    startDate: string;
-    endDate: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteCloseDate?:  {
+    __typename: "CloseDate",
+    id: string,
+    closeDate: string,
+    startDate: string,
+    endDate: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateAttendanceMutationVariables = {
-  input: CreateAttendanceInput;
-  condition?: ModelAttendanceConditionInput | null;
+  input: CreateAttendanceInput,
+  condition?: ModelAttendanceConditionInput | null,
 };
 
 export type CreateAttendanceMutation = {
-  createAttendance?: {
-    __typename: "Attendance";
-    id: string;
-    staffId: string;
-    workDate: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    goDirectlyFlag?: boolean | null;
-    returnDirectlyFlag?: boolean | null;
-    absentFlag?: boolean | null;
-    rests?: Array<{
-      __typename: "Rest";
-      startTime?: string | null;
-      endTime?: string | null;
-    } | null> | null;
-    hourlyPaidHolidayTimes?: Array<{
-      __typename: "HourlyPaidHolidayTime";
-      startTime: string;
-      endTime: string;
-    } | null> | null;
-    remarks?: string | null;
-    paidHolidayFlag?: boolean | null;
-    specialHolidayFlag?: boolean | null;
-    isDeemedHoliday?: boolean | null;
-    hourlyPaidHolidayHours?: number | null;
-    substituteHolidayDate?: string | null;
-    histories?: Array<{
-      __typename: "AttendanceHistory";
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      createdAt: string;
-    } | null> | null;
-    changeRequests?: Array<{
-      __typename: "AttendanceChangeRequest";
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      completed?: boolean | null;
-      comment?: string | null;
-      staffComment?: string | null;
-    } | null> | null;
-    systemComments?: Array<{
-      __typename: "SystemComment";
-      comment: string;
-      confirmed: boolean;
-      createdAt: string;
-    } | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createAttendance?:  {
+    __typename: "Attendance",
+    id: string,
+    staffId: string,
+    workDate: string,
+    startTime?: string | null,
+    endTime?: string | null,
+    goDirectlyFlag?: boolean | null,
+    returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
+    rests?:  Array< {
+      __typename: "Rest",
+      startTime?: string | null,
+      endTime?: string | null,
+    } | null > | null,
+    hourlyPaidHolidayTimes?:  Array< {
+      __typename: "HourlyPaidHolidayTime",
+      startTime: string,
+      endTime: string,
+    } | null > | null,
+    remarks?: string | null,
+    paidHolidayFlag?: boolean | null,
+    specialHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
+    hourlyPaidHolidayHours?: number | null,
+    substituteHolidayDate?: string | null,
+    histories?:  Array< {
+      __typename: "AttendanceHistory",
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      createdAt: string,
+    } | null > | null,
+    changeRequests?:  Array< {
+      __typename: "AttendanceChangeRequest",
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      completed?: boolean | null,
+      comment?: string | null,
+      staffComment?: string | null,
+    } | null > | null,
+    systemComments?:  Array< {
+      __typename: "SystemComment",
+      comment: string,
+      confirmed: boolean,
+      createdAt: string,
+    } | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateAttendanceMutationVariables = {
-  input: UpdateAttendanceInput;
-  condition?: ModelAttendanceConditionInput | null;
+  input: UpdateAttendanceInput,
+  condition?: ModelAttendanceConditionInput | null,
 };
 
 export type UpdateAttendanceMutation = {
-  updateAttendance?: {
-    __typename: "Attendance";
-    id: string;
-    staffId: string;
-    workDate: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    goDirectlyFlag?: boolean | null;
-    returnDirectlyFlag?: boolean | null;
-    absentFlag?: boolean | null;
-    rests?: Array<{
-      __typename: "Rest";
-      startTime?: string | null;
-      endTime?: string | null;
-    } | null> | null;
-    hourlyPaidHolidayTimes?: Array<{
-      __typename: "HourlyPaidHolidayTime";
-      startTime: string;
-      endTime: string;
-    } | null> | null;
-    remarks?: string | null;
-    paidHolidayFlag?: boolean | null;
-    specialHolidayFlag?: boolean | null;
-    isDeemedHoliday?: boolean | null;
-    hourlyPaidHolidayHours?: number | null;
-    substituteHolidayDate?: string | null;
-    histories?: Array<{
-      __typename: "AttendanceHistory";
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      createdAt: string;
-    } | null> | null;
-    changeRequests?: Array<{
-      __typename: "AttendanceChangeRequest";
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      completed?: boolean | null;
-      comment?: string | null;
-      staffComment?: string | null;
-    } | null> | null;
-    systemComments?: Array<{
-      __typename: "SystemComment";
-      comment: string;
-      confirmed: boolean;
-      createdAt: string;
-    } | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateAttendance?:  {
+    __typename: "Attendance",
+    id: string,
+    staffId: string,
+    workDate: string,
+    startTime?: string | null,
+    endTime?: string | null,
+    goDirectlyFlag?: boolean | null,
+    returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
+    rests?:  Array< {
+      __typename: "Rest",
+      startTime?: string | null,
+      endTime?: string | null,
+    } | null > | null,
+    hourlyPaidHolidayTimes?:  Array< {
+      __typename: "HourlyPaidHolidayTime",
+      startTime: string,
+      endTime: string,
+    } | null > | null,
+    remarks?: string | null,
+    paidHolidayFlag?: boolean | null,
+    specialHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
+    hourlyPaidHolidayHours?: number | null,
+    substituteHolidayDate?: string | null,
+    histories?:  Array< {
+      __typename: "AttendanceHistory",
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      createdAt: string,
+    } | null > | null,
+    changeRequests?:  Array< {
+      __typename: "AttendanceChangeRequest",
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      completed?: boolean | null,
+      comment?: string | null,
+      staffComment?: string | null,
+    } | null > | null,
+    systemComments?:  Array< {
+      __typename: "SystemComment",
+      comment: string,
+      confirmed: boolean,
+      createdAt: string,
+    } | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteAttendanceMutationVariables = {
-  input: DeleteAttendanceInput;
-  condition?: ModelAttendanceConditionInput | null;
+  input: DeleteAttendanceInput,
+  condition?: ModelAttendanceConditionInput | null,
 };
 
 export type DeleteAttendanceMutation = {
-  deleteAttendance?: {
-    __typename: "Attendance";
-    id: string;
-    staffId: string;
-    workDate: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    goDirectlyFlag?: boolean | null;
-    returnDirectlyFlag?: boolean | null;
-    absentFlag?: boolean | null;
-    rests?: Array<{
-      __typename: "Rest";
-      startTime?: string | null;
-      endTime?: string | null;
-    } | null> | null;
-    hourlyPaidHolidayTimes?: Array<{
-      __typename: "HourlyPaidHolidayTime";
-      startTime: string;
-      endTime: string;
-    } | null> | null;
-    remarks?: string | null;
-    paidHolidayFlag?: boolean | null;
-    specialHolidayFlag?: boolean | null;
-    isDeemedHoliday?: boolean | null;
-    hourlyPaidHolidayHours?: number | null;
-    substituteHolidayDate?: string | null;
-    histories?: Array<{
-      __typename: "AttendanceHistory";
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      createdAt: string;
-    } | null> | null;
-    changeRequests?: Array<{
-      __typename: "AttendanceChangeRequest";
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      completed?: boolean | null;
-      comment?: string | null;
-      staffComment?: string | null;
-    } | null> | null;
-    systemComments?: Array<{
-      __typename: "SystemComment";
-      comment: string;
-      confirmed: boolean;
-      createdAt: string;
-    } | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteAttendance?:  {
+    __typename: "Attendance",
+    id: string,
+    staffId: string,
+    workDate: string,
+    startTime?: string | null,
+    endTime?: string | null,
+    goDirectlyFlag?: boolean | null,
+    returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
+    rests?:  Array< {
+      __typename: "Rest",
+      startTime?: string | null,
+      endTime?: string | null,
+    } | null > | null,
+    hourlyPaidHolidayTimes?:  Array< {
+      __typename: "HourlyPaidHolidayTime",
+      startTime: string,
+      endTime: string,
+    } | null > | null,
+    remarks?: string | null,
+    paidHolidayFlag?: boolean | null,
+    specialHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
+    hourlyPaidHolidayHours?: number | null,
+    substituteHolidayDate?: string | null,
+    histories?:  Array< {
+      __typename: "AttendanceHistory",
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      createdAt: string,
+    } | null > | null,
+    changeRequests?:  Array< {
+      __typename: "AttendanceChangeRequest",
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      completed?: boolean | null,
+      comment?: string | null,
+      staffComment?: string | null,
+    } | null > | null,
+    systemComments?:  Array< {
+      __typename: "SystemComment",
+      comment: string,
+      confirmed: boolean,
+      createdAt: string,
+    } | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateDocumentMutationVariables = {
-  input: CreateDocumentInput;
-  condition?: ModelDocumentConditionInput | null;
+  input: CreateDocumentInput,
+  condition?: ModelDocumentConditionInput | null,
 };
 
 export type CreateDocumentMutation = {
-  createDocument?: {
-    __typename: "Document";
-    id: string;
-    title: string;
-    content: string;
-    tag?: Array<string | null> | null;
-    targetRole?: Array<string | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createDocument?:  {
+    __typename: "Document",
+    id: string,
+    title: string,
+    content: string,
+    tag?: Array< string | null > | null,
+    targetRole?: Array< string | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateDocumentMutationVariables = {
-  input: UpdateDocumentInput;
-  condition?: ModelDocumentConditionInput | null;
+  input: UpdateDocumentInput,
+  condition?: ModelDocumentConditionInput | null,
 };
 
 export type UpdateDocumentMutation = {
-  updateDocument?: {
-    __typename: "Document";
-    id: string;
-    title: string;
-    content: string;
-    tag?: Array<string | null> | null;
-    targetRole?: Array<string | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateDocument?:  {
+    __typename: "Document",
+    id: string,
+    title: string,
+    content: string,
+    tag?: Array< string | null > | null,
+    targetRole?: Array< string | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteDocumentMutationVariables = {
-  input: DeleteDocumentInput;
-  condition?: ModelDocumentConditionInput | null;
+  input: DeleteDocumentInput,
+  condition?: ModelDocumentConditionInput | null,
 };
 
 export type DeleteDocumentMutation = {
-  deleteDocument?: {
-    __typename: "Document";
-    id: string;
-    title: string;
-    content: string;
-    tag?: Array<string | null> | null;
-    targetRole?: Array<string | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteDocument?:  {
+    __typename: "Document",
+    id: string,
+    title: string,
+    content: string,
+    tag?: Array< string | null > | null,
+    targetRole?: Array< string | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateShiftRequestMutationVariables = {
@@ -3015,124 +3005,124 @@ export type UpdateWorkflowMutation = {
 };
 
 export type DeleteWorkflowMutationVariables = {
-  input: DeleteWorkflowInput;
-  condition?: ModelWorkflowConditionInput | null;
+  input: DeleteWorkflowInput,
+  condition?: ModelWorkflowConditionInput | null,
 };
 
 export type DeleteWorkflowMutation = {
-  deleteWorkflow?: {
-    __typename: "Workflow";
-    id: string;
-    approvedStaffIds?: Array<string | null> | null;
-    rejectedStaffIds?: Array<string | null> | null;
-    finalDecisionTimestamp?: string | null;
-    category?: WorkflowCategory | null;
-    staffId: string;
-    status: WorkflowStatus;
-    assignedApproverStaffIds?: Array<string | null> | null;
-    approvalSteps?: Array<{
-      __typename: "ApprovalStep";
-      id: string;
-      approverStaffId: string;
-      decisionStatus: ApprovalStatus;
-      approverComment?: string | null;
-      decisionTimestamp?: string | null;
-      stepOrder?: number | null;
-    } | null> | null;
-    nextApprovalStepIndex?: number | null;
-    submitterApproverSetting?: ApproverSettingMode | null;
-    submitterApproverId?: string | null;
-    submitterApproverIds?: Array<string | null> | null;
-    submitterApproverMultipleMode?: ApproverMultipleMode | null;
-    overTimeDetails?: {
-      __typename: "OverTimeWorkflow";
-      date: string;
-      startTime: string;
-      endTime: string;
-      reason: string;
-    } | null;
-    comments?: Array<{
-      __typename: "WorkflowComment";
-      id: string;
-      staffId: string;
-      text: string;
-      createdAt: string;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    approvedStaffIds?: Array< string | null > | null,
+    rejectedStaffIds?: Array< string | null > | null,
+    finalDecisionTimestamp?: string | null,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    assignedApproverStaffIds?: Array< string | null > | null,
+    approvalSteps?:  Array< {
+      __typename: "ApprovalStep",
+      id: string,
+      approverStaffId: string,
+      decisionStatus: ApprovalStatus,
+      approverComment?: string | null,
+      decisionTimestamp?: string | null,
+      stepOrder?: number | null,
+    } | null > | null,
+    nextApprovalStepIndex?: number | null,
+    submitterApproverSetting?: ApproverSettingMode | null,
+    submitterApproverId?: string | null,
+    submitterApproverIds?: Array< string | null > | null,
+    submitterApproverMultipleMode?: ApproverMultipleMode | null,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateOperationLogMutationVariables = {
-  input: CreateOperationLogInput;
-  condition?: ModelOperationLogConditionInput | null;
+  input: CreateOperationLogInput,
+  condition?: ModelOperationLogConditionInput | null,
 };
 
 export type CreateOperationLogMutation = {
-  createOperationLog?: {
-    __typename: "OperationLog";
-    id: string;
-    staffId?: string | null;
-    action: string;
-    resource?: string | null;
-    resourceId?: string | null;
-    timestamp: string;
-    details?: string | null;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-    metadata?: string | null;
-    severity?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  createOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type UpdateOperationLogMutationVariables = {
-  input: UpdateOperationLogInput;
-  condition?: ModelOperationLogConditionInput | null;
+  input: UpdateOperationLogInput,
+  condition?: ModelOperationLogConditionInput | null,
 };
 
 export type UpdateOperationLogMutation = {
-  updateOperationLog?: {
-    __typename: "OperationLog";
-    id: string;
-    staffId?: string | null;
-    action: string;
-    resource?: string | null;
-    resourceId?: string | null;
-    timestamp: string;
-    details?: string | null;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-    metadata?: string | null;
-    severity?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  updateOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type DeleteOperationLogMutationVariables = {
-  input: DeleteOperationLogInput;
-  condition?: ModelOperationLogConditionInput | null;
+  input: DeleteOperationLogInput,
+  condition?: ModelOperationLogConditionInput | null,
 };
 
 export type DeleteOperationLogMutation = {
-  deleteOperationLog?: {
-    __typename: "OperationLog";
-    id: string;
-    staffId?: string | null;
-    action: string;
-    resource?: string | null;
-    resourceId?: string | null;
-    timestamp: string;
-    details?: string | null;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-    metadata?: string | null;
-    severity?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  deleteOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateDailyReportMutationVariables = {
@@ -3235,53 +3225,53 @@ export type DeleteDailyReportMutation = {
 };
 
 export type SendMailQueryVariables = {
-  data: EmailData;
+  data: EmailData,
 };
 
 export type SendMailQuery = {
-  sendMail?: {
-    __typename: "EmailResult";
-    statusCode?: number | null;
-    body?: string | null;
-  } | null;
+  sendMail?:  {
+    __typename: "EmailResult",
+    statusCode?: number | null,
+    body?: string | null,
+  } | null,
 };
 
 export type GetCheckForUpdateQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetCheckForUpdateQuery = {
-  getCheckForUpdate?: {
-    __typename: "CheckForUpdate";
-    id: string;
-    deployUuid: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getCheckForUpdate?:  {
+    __typename: "CheckForUpdate",
+    id: string,
+    deployUuid: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListCheckForUpdatesQueryVariables = {
-  filter?: ModelCheckForUpdateFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelCheckForUpdateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListCheckForUpdatesQuery = {
-  listCheckForUpdates?: {
-    __typename: "ModelCheckForUpdateConnection";
-    items: Array<{
-      __typename: "CheckForUpdate";
-      id: string;
-      deployUuid: string;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listCheckForUpdates?:  {
+    __typename: "ModelCheckForUpdateConnection",
+    items:  Array< {
+      __typename: "CheckForUpdate",
+      id: string,
+      deployUuid: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetAppConfigQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetAppConfigQuery = {
@@ -3339,9 +3329,9 @@ export type GetAppConfigQuery = {
 };
 
 export type ListAppConfigsQueryVariables = {
-  filter?: ModelAppConfigFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelAppConfigFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListAppConfigsQuery = {
@@ -3403,7 +3393,7 @@ export type ListAppConfigsQuery = {
 };
 
 export type GetStaffQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetStaffQuery = {
@@ -3438,9 +3428,9 @@ export type GetStaffQuery = {
 };
 
 export type ListStaffQueryVariables = {
-  filter?: ModelStaffFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelStaffFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListStaffQuery = {
@@ -3479,12 +3469,12 @@ export type ListStaffQuery = {
 };
 
 export type StaffByCognitoUserIdQueryVariables = {
-  cognitoUserId: string;
-  id?: ModelIDKeyConditionInput | null;
-  sortDirection?: ModelSortDirection | null;
-  filter?: ModelStaffFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  cognitoUserId: string,
+  id?: ModelIDKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelStaffFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type StaffByCognitoUserIdQuery = {
@@ -3523,461 +3513,461 @@ export type StaffByCognitoUserIdQuery = {
 };
 
 export type GetHolidayCalendarQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetHolidayCalendarQuery = {
-  getHolidayCalendar?: {
-    __typename: "HolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getHolidayCalendar?:  {
+    __typename: "HolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListHolidayCalendarsQueryVariables = {
-  filter?: ModelHolidayCalendarFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelHolidayCalendarFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListHolidayCalendarsQuery = {
-  listHolidayCalendars?: {
-    __typename: "ModelHolidayCalendarConnection";
-    items: Array<{
-      __typename: "HolidayCalendar";
-      id: string;
-      holidayDate: string;
-      name: string;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listHolidayCalendars?:  {
+    __typename: "ModelHolidayCalendarConnection",
+    items:  Array< {
+      __typename: "HolidayCalendar",
+      id: string,
+      holidayDate: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetCompanyHolidayCalendarQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetCompanyHolidayCalendarQuery = {
-  getCompanyHolidayCalendar?: {
-    __typename: "CompanyHolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getCompanyHolidayCalendar?:  {
+    __typename: "CompanyHolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListCompanyHolidayCalendarsQueryVariables = {
-  filter?: ModelCompanyHolidayCalendarFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelCompanyHolidayCalendarFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListCompanyHolidayCalendarsQuery = {
-  listCompanyHolidayCalendars?: {
-    __typename: "ModelCompanyHolidayCalendarConnection";
-    items: Array<{
-      __typename: "CompanyHolidayCalendar";
-      id: string;
-      holidayDate: string;
-      name: string;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listCompanyHolidayCalendars?:  {
+    __typename: "ModelCompanyHolidayCalendarConnection",
+    items:  Array< {
+      __typename: "CompanyHolidayCalendar",
+      id: string,
+      holidayDate: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetCloseDateQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetCloseDateQuery = {
-  getCloseDate?: {
-    __typename: "CloseDate";
-    id: string;
-    closeDate: string;
-    startDate: string;
-    endDate: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getCloseDate?:  {
+    __typename: "CloseDate",
+    id: string,
+    closeDate: string,
+    startDate: string,
+    endDate: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListCloseDatesQueryVariables = {
-  filter?: ModelCloseDateFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelCloseDateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListCloseDatesQuery = {
-  listCloseDates?: {
-    __typename: "ModelCloseDateConnection";
-    items: Array<{
-      __typename: "CloseDate";
-      id: string;
-      closeDate: string;
-      startDate: string;
-      endDate: string;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listCloseDates?:  {
+    __typename: "ModelCloseDateConnection",
+    items:  Array< {
+      __typename: "CloseDate",
+      id: string,
+      closeDate: string,
+      startDate: string,
+      endDate: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetAttendanceQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetAttendanceQuery = {
-  getAttendance?: {
-    __typename: "Attendance";
-    id: string;
-    staffId: string;
-    workDate: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    goDirectlyFlag?: boolean | null;
-    returnDirectlyFlag?: boolean | null;
-    absentFlag?: boolean | null;
-    rests?: Array<{
-      __typename: "Rest";
-      startTime?: string | null;
-      endTime?: string | null;
-    } | null> | null;
-    hourlyPaidHolidayTimes?: Array<{
-      __typename: "HourlyPaidHolidayTime";
-      startTime: string;
-      endTime: string;
-    } | null> | null;
-    remarks?: string | null;
-    paidHolidayFlag?: boolean | null;
-    specialHolidayFlag?: boolean | null;
-    isDeemedHoliday?: boolean | null;
-    hourlyPaidHolidayHours?: number | null;
-    substituteHolidayDate?: string | null;
-    histories?: Array<{
-      __typename: "AttendanceHistory";
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      createdAt: string;
-    } | null> | null;
-    changeRequests?: Array<{
-      __typename: "AttendanceChangeRequest";
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      completed?: boolean | null;
-      comment?: string | null;
-      staffComment?: string | null;
-    } | null> | null;
-    systemComments?: Array<{
-      __typename: "SystemComment";
-      comment: string;
-      confirmed: boolean;
-      createdAt: string;
-    } | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getAttendance?:  {
+    __typename: "Attendance",
+    id: string,
+    staffId: string,
+    workDate: string,
+    startTime?: string | null,
+    endTime?: string | null,
+    goDirectlyFlag?: boolean | null,
+    returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
+    rests?:  Array< {
+      __typename: "Rest",
+      startTime?: string | null,
+      endTime?: string | null,
+    } | null > | null,
+    hourlyPaidHolidayTimes?:  Array< {
+      __typename: "HourlyPaidHolidayTime",
+      startTime: string,
+      endTime: string,
+    } | null > | null,
+    remarks?: string | null,
+    paidHolidayFlag?: boolean | null,
+    specialHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
+    hourlyPaidHolidayHours?: number | null,
+    substituteHolidayDate?: string | null,
+    histories?:  Array< {
+      __typename: "AttendanceHistory",
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      createdAt: string,
+    } | null > | null,
+    changeRequests?:  Array< {
+      __typename: "AttendanceChangeRequest",
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      completed?: boolean | null,
+      comment?: string | null,
+      staffComment?: string | null,
+    } | null > | null,
+    systemComments?:  Array< {
+      __typename: "SystemComment",
+      comment: string,
+      confirmed: boolean,
+      createdAt: string,
+    } | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListAttendancesQueryVariables = {
-  filter?: ModelAttendanceFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelAttendanceFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListAttendancesQuery = {
-  listAttendances?: {
-    __typename: "ModelAttendanceConnection";
-    items: Array<{
-      __typename: "Attendance";
-      id: string;
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      isDeemedHoliday?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayDate?: string | null;
-      histories?: Array<{
-        __typename: "AttendanceHistory";
-        staffId: string;
-        workDate: string;
-        startTime?: string | null;
-        endTime?: string | null;
-        goDirectlyFlag?: boolean | null;
-        absentFlag?: boolean | null;
-        returnDirectlyFlag?: boolean | null;
-        rests?: Array<{
-          __typename: "Rest";
-          startTime?: string | null;
-          endTime?: string | null;
-        } | null> | null;
-        hourlyPaidHolidayTimes?: Array<{
-          __typename: "HourlyPaidHolidayTime";
-          startTime: string;
-          endTime: string;
-        } | null> | null;
-        remarks?: string | null;
-        paidHolidayFlag?: boolean | null;
-        specialHolidayFlag?: boolean | null;
-        hourlyPaidHolidayHours?: number | null;
-        substituteHolidayFlag?: boolean | null;
-        substituteHolidayDate?: string | null;
-        createdAt: string;
-      } | null> | null;
-      changeRequests?: Array<{
-        __typename: "AttendanceChangeRequest";
-        startTime?: string | null;
-        endTime?: string | null;
-        goDirectlyFlag?: boolean | null;
-        absentFlag?: boolean | null;
-        returnDirectlyFlag?: boolean | null;
-        rests?: Array<{
-          __typename: "Rest";
-          startTime?: string | null;
-          endTime?: string | null;
-        } | null> | null;
-        hourlyPaidHolidayTimes?: Array<{
-          __typename: "HourlyPaidHolidayTime";
-          startTime: string;
-          endTime: string;
-        } | null> | null;
-        remarks?: string | null;
-        paidHolidayFlag?: boolean | null;
-        specialHolidayFlag?: boolean | null;
-        hourlyPaidHolidayHours?: number | null;
-        substituteHolidayFlag?: boolean | null;
-        substituteHolidayDate?: string | null;
-        completed?: boolean | null;
-        comment?: string | null;
-        staffComment?: string | null;
-      } | null> | null;
-      systemComments?: Array<{
-        __typename: "SystemComment";
-        comment: string;
-        confirmed: boolean;
-        createdAt: string;
-      } | null> | null;
-      revision?: number | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listAttendances?:  {
+    __typename: "ModelAttendanceConnection",
+    items:  Array< {
+      __typename: "Attendance",
+      id: string,
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      isDeemedHoliday?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayDate?: string | null,
+      histories?:  Array< {
+        __typename: "AttendanceHistory",
+        staffId: string,
+        workDate: string,
+        startTime?: string | null,
+        endTime?: string | null,
+        goDirectlyFlag?: boolean | null,
+        absentFlag?: boolean | null,
+        returnDirectlyFlag?: boolean | null,
+        rests?:  Array< {
+          __typename: "Rest",
+          startTime?: string | null,
+          endTime?: string | null,
+        } | null > | null,
+        hourlyPaidHolidayTimes?:  Array< {
+          __typename: "HourlyPaidHolidayTime",
+          startTime: string,
+          endTime: string,
+        } | null > | null,
+        remarks?: string | null,
+        paidHolidayFlag?: boolean | null,
+        specialHolidayFlag?: boolean | null,
+        hourlyPaidHolidayHours?: number | null,
+        substituteHolidayFlag?: boolean | null,
+        substituteHolidayDate?: string | null,
+        createdAt: string,
+      } | null > | null,
+      changeRequests?:  Array< {
+        __typename: "AttendanceChangeRequest",
+        startTime?: string | null,
+        endTime?: string | null,
+        goDirectlyFlag?: boolean | null,
+        absentFlag?: boolean | null,
+        returnDirectlyFlag?: boolean | null,
+        rests?:  Array< {
+          __typename: "Rest",
+          startTime?: string | null,
+          endTime?: string | null,
+        } | null > | null,
+        hourlyPaidHolidayTimes?:  Array< {
+          __typename: "HourlyPaidHolidayTime",
+          startTime: string,
+          endTime: string,
+        } | null > | null,
+        remarks?: string | null,
+        paidHolidayFlag?: boolean | null,
+        specialHolidayFlag?: boolean | null,
+        hourlyPaidHolidayHours?: number | null,
+        substituteHolidayFlag?: boolean | null,
+        substituteHolidayDate?: string | null,
+        completed?: boolean | null,
+        comment?: string | null,
+        staffComment?: string | null,
+      } | null > | null,
+      systemComments?:  Array< {
+        __typename: "SystemComment",
+        comment: string,
+        confirmed: boolean,
+        createdAt: string,
+      } | null > | null,
+      revision?: number | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type AttendancesByStaffIdQueryVariables = {
-  staffId: string;
-  workDate?: ModelStringKeyConditionInput | null;
-  sortDirection?: ModelSortDirection | null;
-  filter?: ModelAttendanceFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  staffId: string,
+  workDate?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelAttendanceFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type AttendancesByStaffIdQuery = {
-  attendancesByStaffId?: {
-    __typename: "ModelAttendanceConnection";
-    items: Array<{
-      __typename: "Attendance";
-      id: string;
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      isDeemedHoliday?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayDate?: string | null;
-      histories?: Array<{
-        __typename: "AttendanceHistory";
-        staffId: string;
-        workDate: string;
-        startTime?: string | null;
-        endTime?: string | null;
-        goDirectlyFlag?: boolean | null;
-        absentFlag?: boolean | null;
-        returnDirectlyFlag?: boolean | null;
-        rests?: Array<{
-          __typename: "Rest";
-          startTime?: string | null;
-          endTime?: string | null;
-        } | null> | null;
-        hourlyPaidHolidayTimes?: Array<{
-          __typename: "HourlyPaidHolidayTime";
-          startTime: string;
-          endTime: string;
-        } | null> | null;
-        remarks?: string | null;
-        paidHolidayFlag?: boolean | null;
-        specialHolidayFlag?: boolean | null;
-        hourlyPaidHolidayHours?: number | null;
-        substituteHolidayFlag?: boolean | null;
-        substituteHolidayDate?: string | null;
-        createdAt: string;
-      } | null> | null;
-      changeRequests?: Array<{
-        __typename: "AttendanceChangeRequest";
-        startTime?: string | null;
-        endTime?: string | null;
-        goDirectlyFlag?: boolean | null;
-        absentFlag?: boolean | null;
-        returnDirectlyFlag?: boolean | null;
-        rests?: Array<{
-          __typename: "Rest";
-          startTime?: string | null;
-          endTime?: string | null;
-        } | null> | null;
-        hourlyPaidHolidayTimes?: Array<{
-          __typename: "HourlyPaidHolidayTime";
-          startTime: string;
-          endTime: string;
-        } | null> | null;
-        remarks?: string | null;
-        paidHolidayFlag?: boolean | null;
-        specialHolidayFlag?: boolean | null;
-        hourlyPaidHolidayHours?: number | null;
-        substituteHolidayFlag?: boolean | null;
-        substituteHolidayDate?: string | null;
-        completed?: boolean | null;
-        comment?: string | null;
-        staffComment?: string | null;
-      } | null> | null;
-      systemComments?: Array<{
-        __typename: "SystemComment";
-        comment: string;
-        confirmed: boolean;
-        createdAt: string;
-      } | null> | null;
-      revision?: number | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  attendancesByStaffId?:  {
+    __typename: "ModelAttendanceConnection",
+    items:  Array< {
+      __typename: "Attendance",
+      id: string,
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      isDeemedHoliday?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayDate?: string | null,
+      histories?:  Array< {
+        __typename: "AttendanceHistory",
+        staffId: string,
+        workDate: string,
+        startTime?: string | null,
+        endTime?: string | null,
+        goDirectlyFlag?: boolean | null,
+        absentFlag?: boolean | null,
+        returnDirectlyFlag?: boolean | null,
+        rests?:  Array< {
+          __typename: "Rest",
+          startTime?: string | null,
+          endTime?: string | null,
+        } | null > | null,
+        hourlyPaidHolidayTimes?:  Array< {
+          __typename: "HourlyPaidHolidayTime",
+          startTime: string,
+          endTime: string,
+        } | null > | null,
+        remarks?: string | null,
+        paidHolidayFlag?: boolean | null,
+        specialHolidayFlag?: boolean | null,
+        hourlyPaidHolidayHours?: number | null,
+        substituteHolidayFlag?: boolean | null,
+        substituteHolidayDate?: string | null,
+        createdAt: string,
+      } | null > | null,
+      changeRequests?:  Array< {
+        __typename: "AttendanceChangeRequest",
+        startTime?: string | null,
+        endTime?: string | null,
+        goDirectlyFlag?: boolean | null,
+        absentFlag?: boolean | null,
+        returnDirectlyFlag?: boolean | null,
+        rests?:  Array< {
+          __typename: "Rest",
+          startTime?: string | null,
+          endTime?: string | null,
+        } | null > | null,
+        hourlyPaidHolidayTimes?:  Array< {
+          __typename: "HourlyPaidHolidayTime",
+          startTime: string,
+          endTime: string,
+        } | null > | null,
+        remarks?: string | null,
+        paidHolidayFlag?: boolean | null,
+        specialHolidayFlag?: boolean | null,
+        hourlyPaidHolidayHours?: number | null,
+        substituteHolidayFlag?: boolean | null,
+        substituteHolidayDate?: string | null,
+        completed?: boolean | null,
+        comment?: string | null,
+        staffComment?: string | null,
+      } | null > | null,
+      systemComments?:  Array< {
+        __typename: "SystemComment",
+        comment: string,
+        confirmed: boolean,
+        createdAt: string,
+      } | null > | null,
+      revision?: number | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetDocumentQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetDocumentQuery = {
-  getDocument?: {
-    __typename: "Document";
-    id: string;
-    title: string;
-    content: string;
-    tag?: Array<string | null> | null;
-    targetRole?: Array<string | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getDocument?:  {
+    __typename: "Document",
+    id: string,
+    title: string,
+    content: string,
+    tag?: Array< string | null > | null,
+    targetRole?: Array< string | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListDocumentsQueryVariables = {
-  filter?: ModelDocumentFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelDocumentFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListDocumentsQuery = {
-  listDocuments?: {
-    __typename: "ModelDocumentConnection";
-    items: Array<{
-      __typename: "Document";
-      id: string;
-      title: string;
-      content: string;
-      tag?: Array<string | null> | null;
-      targetRole?: Array<string | null> | null;
-      revision?: number | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listDocuments?:  {
+    __typename: "ModelDocumentConnection",
+    items:  Array< {
+      __typename: "Document",
+      id: string,
+      title: string,
+      content: string,
+      tag?: Array< string | null > | null,
+      targetRole?: Array< string | null > | null,
+      revision?: number | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetShiftRequestQueryVariables = {
@@ -4233,245 +4223,245 @@ export type ShiftPlanYearByTargetYearQuery = {
 };
 
 export type GetWorkflowQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetWorkflowQuery = {
-  getWorkflow?: {
-    __typename: "Workflow";
-    id: string;
-    approvedStaffIds?: Array<string | null> | null;
-    rejectedStaffIds?: Array<string | null> | null;
-    finalDecisionTimestamp?: string | null;
-    category?: WorkflowCategory | null;
-    staffId: string;
-    status: WorkflowStatus;
-    assignedApproverStaffIds?: Array<string | null> | null;
-    approvalSteps?: Array<{
-      __typename: "ApprovalStep";
-      id: string;
-      approverStaffId: string;
-      decisionStatus: ApprovalStatus;
-      approverComment?: string | null;
-      decisionTimestamp?: string | null;
-      stepOrder?: number | null;
-    } | null> | null;
-    nextApprovalStepIndex?: number | null;
-    submitterApproverSetting?: ApproverSettingMode | null;
-    submitterApproverId?: string | null;
-    submitterApproverIds?: Array<string | null> | null;
-    submitterApproverMultipleMode?: ApproverMultipleMode | null;
-    overTimeDetails?: {
-      __typename: "OverTimeWorkflow";
-      date: string;
-      startTime: string;
-      endTime: string;
-      reason: string;
-    } | null;
-    comments?: Array<{
-      __typename: "WorkflowComment";
-      id: string;
-      staffId: string;
-      text: string;
-      createdAt: string;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    approvedStaffIds?: Array< string | null > | null,
+    rejectedStaffIds?: Array< string | null > | null,
+    finalDecisionTimestamp?: string | null,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    assignedApproverStaffIds?: Array< string | null > | null,
+    approvalSteps?:  Array< {
+      __typename: "ApprovalStep",
+      id: string,
+      approverStaffId: string,
+      decisionStatus: ApprovalStatus,
+      approverComment?: string | null,
+      decisionTimestamp?: string | null,
+      stepOrder?: number | null,
+    } | null > | null,
+    nextApprovalStepIndex?: number | null,
+    submitterApproverSetting?: ApproverSettingMode | null,
+    submitterApproverId?: string | null,
+    submitterApproverIds?: Array< string | null > | null,
+    submitterApproverMultipleMode?: ApproverMultipleMode | null,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListWorkflowsQueryVariables = {
-  filter?: ModelWorkflowFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelWorkflowFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListWorkflowsQuery = {
-  listWorkflows?: {
-    __typename: "ModelWorkflowConnection";
-    items: Array<{
-      __typename: "Workflow";
-      id: string;
-      approvedStaffIds?: Array<string | null> | null;
-      rejectedStaffIds?: Array<string | null> | null;
-      finalDecisionTimestamp?: string | null;
-      category?: WorkflowCategory | null;
-      staffId: string;
-      status: WorkflowStatus;
-      assignedApproverStaffIds?: Array<string | null> | null;
-      approvalSteps?: Array<{
-        __typename: "ApprovalStep";
-        id: string;
-        approverStaffId: string;
-        decisionStatus: ApprovalStatus;
-        approverComment?: string | null;
-        decisionTimestamp?: string | null;
-        stepOrder?: number | null;
-      } | null> | null;
-      nextApprovalStepIndex?: number | null;
-      submitterApproverSetting?: ApproverSettingMode | null;
-      submitterApproverId?: string | null;
-      submitterApproverIds?: Array<string | null> | null;
-      submitterApproverMultipleMode?: ApproverMultipleMode | null;
-      overTimeDetails?: {
-        __typename: "OverTimeWorkflow";
-        date: string;
-        startTime: string;
-        endTime: string;
-        reason: string;
-      } | null;
-      comments?: Array<{
-        __typename: "WorkflowComment";
-        id: string;
-        staffId: string;
-        text: string;
-        createdAt: string;
-      } | null> | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listWorkflows?:  {
+    __typename: "ModelWorkflowConnection",
+    items:  Array< {
+      __typename: "Workflow",
+      id: string,
+      approvedStaffIds?: Array< string | null > | null,
+      rejectedStaffIds?: Array< string | null > | null,
+      finalDecisionTimestamp?: string | null,
+      category?: WorkflowCategory | null,
+      staffId: string,
+      status: WorkflowStatus,
+      assignedApproverStaffIds?: Array< string | null > | null,
+      approvalSteps?:  Array< {
+        __typename: "ApprovalStep",
+        id: string,
+        approverStaffId: string,
+        decisionStatus: ApprovalStatus,
+        approverComment?: string | null,
+        decisionTimestamp?: string | null,
+        stepOrder?: number | null,
+      } | null > | null,
+      nextApprovalStepIndex?: number | null,
+      submitterApproverSetting?: ApproverSettingMode | null,
+      submitterApproverId?: string | null,
+      submitterApproverIds?: Array< string | null > | null,
+      submitterApproverMultipleMode?: ApproverMultipleMode | null,
+      overTimeDetails?:  {
+        __typename: "OverTimeWorkflow",
+        date: string,
+        startTime: string,
+        endTime: string,
+        reason: string,
+      } | null,
+      comments?:  Array< {
+        __typename: "WorkflowComment",
+        id: string,
+        staffId: string,
+        text: string,
+        createdAt: string,
+      } | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type WorkflowsByStaffIdQueryVariables = {
-  staffId: string;
-  sortDirection?: ModelSortDirection | null;
-  filter?: ModelWorkflowFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  staffId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelWorkflowFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type WorkflowsByStaffIdQuery = {
-  workflowsByStaffId?: {
-    __typename: "ModelWorkflowConnection";
-    items: Array<{
-      __typename: "Workflow";
-      id: string;
-      approvedStaffIds?: Array<string | null> | null;
-      rejectedStaffIds?: Array<string | null> | null;
-      finalDecisionTimestamp?: string | null;
-      category?: WorkflowCategory | null;
-      staffId: string;
-      status: WorkflowStatus;
-      assignedApproverStaffIds?: Array<string | null> | null;
-      approvalSteps?: Array<{
-        __typename: "ApprovalStep";
-        id: string;
-        approverStaffId: string;
-        decisionStatus: ApprovalStatus;
-        approverComment?: string | null;
-        decisionTimestamp?: string | null;
-        stepOrder?: number | null;
-      } | null> | null;
-      nextApprovalStepIndex?: number | null;
-      submitterApproverSetting?: ApproverSettingMode | null;
-      submitterApproverId?: string | null;
-      submitterApproverIds?: Array<string | null> | null;
-      submitterApproverMultipleMode?: ApproverMultipleMode | null;
-      overTimeDetails?: {
-        __typename: "OverTimeWorkflow";
-        date: string;
-        startTime: string;
-        endTime: string;
-        reason: string;
-      } | null;
-      comments?: Array<{
-        __typename: "WorkflowComment";
-        id: string;
-        staffId: string;
-        text: string;
-        createdAt: string;
-      } | null> | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  workflowsByStaffId?:  {
+    __typename: "ModelWorkflowConnection",
+    items:  Array< {
+      __typename: "Workflow",
+      id: string,
+      approvedStaffIds?: Array< string | null > | null,
+      rejectedStaffIds?: Array< string | null > | null,
+      finalDecisionTimestamp?: string | null,
+      category?: WorkflowCategory | null,
+      staffId: string,
+      status: WorkflowStatus,
+      assignedApproverStaffIds?: Array< string | null > | null,
+      approvalSteps?:  Array< {
+        __typename: "ApprovalStep",
+        id: string,
+        approverStaffId: string,
+        decisionStatus: ApprovalStatus,
+        approverComment?: string | null,
+        decisionTimestamp?: string | null,
+        stepOrder?: number | null,
+      } | null > | null,
+      nextApprovalStepIndex?: number | null,
+      submitterApproverSetting?: ApproverSettingMode | null,
+      submitterApproverId?: string | null,
+      submitterApproverIds?: Array< string | null > | null,
+      submitterApproverMultipleMode?: ApproverMultipleMode | null,
+      overTimeDetails?:  {
+        __typename: "OverTimeWorkflow",
+        date: string,
+        startTime: string,
+        endTime: string,
+        reason: string,
+      } | null,
+      comments?:  Array< {
+        __typename: "WorkflowComment",
+        id: string,
+        staffId: string,
+        text: string,
+        createdAt: string,
+      } | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetOperationLogQueryVariables = {
-  id: string;
+  id: string,
 };
 
 export type GetOperationLogQuery = {
-  getOperationLog?: {
-    __typename: "OperationLog";
-    id: string;
-    staffId?: string | null;
-    action: string;
-    resource?: string | null;
-    resourceId?: string | null;
-    timestamp: string;
-    details?: string | null;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-    metadata?: string | null;
-    severity?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  getOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type ListOperationLogsQueryVariables = {
-  filter?: ModelOperationLogFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  filter?: ModelOperationLogFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type ListOperationLogsQuery = {
-  listOperationLogs?: {
-    __typename: "ModelOperationLogConnection";
-    items: Array<{
-      __typename: "OperationLog";
-      id: string;
-      staffId?: string | null;
-      action: string;
-      resource?: string | null;
-      resourceId?: string | null;
-      timestamp: string;
-      details?: string | null;
-      ipAddress?: string | null;
-      userAgent?: string | null;
-      metadata?: string | null;
-      severity?: string | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  listOperationLogs?:  {
+    __typename: "ModelOperationLogConnection",
+    items:  Array< {
+      __typename: "OperationLog",
+      id: string,
+      staffId?: string | null,
+      action: string,
+      resource?: string | null,
+      resourceId?: string | null,
+      timestamp: string,
+      details?: string | null,
+      ipAddress?: string | null,
+      userAgent?: string | null,
+      metadata?: string | null,
+      severity?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type OperationLogsByStaffIdQueryVariables = {
-  staffId: string;
-  timestamp?: ModelStringKeyConditionInput | null;
-  sortDirection?: ModelSortDirection | null;
-  filter?: ModelOperationLogFilterInput | null;
-  limit?: number | null;
-  nextToken?: string | null;
+  staffId: string,
+  timestamp?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelOperationLogFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
 export type OperationLogsByStaffIdQuery = {
-  operationLogsByStaffId?: {
-    __typename: "ModelOperationLogConnection";
-    items: Array<{
-      __typename: "OperationLog";
-      id: string;
-      staffId?: string | null;
-      action: string;
-      resource?: string | null;
-      resourceId?: string | null;
-      timestamp: string;
-      details?: string | null;
-      ipAddress?: string | null;
-      userAgent?: string | null;
-      metadata?: string | null;
-      severity?: string | null;
-      createdAt: string;
-      updatedAt: string;
-    } | null>;
-    nextToken?: string | null;
-  } | null;
+  operationLogsByStaffId?:  {
+    __typename: "ModelOperationLogConnection",
+    items:  Array< {
+      __typename: "OperationLog",
+      id: string,
+      staffId?: string | null,
+      action: string,
+      resource?: string | null,
+      resourceId?: string | null,
+      timestamp: string,
+      details?: string | null,
+      ipAddress?: string | null,
+      userAgent?: string | null,
+      metadata?: string | null,
+      severity?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
 };
 
 export type GetDailyReportQueryVariables = {
@@ -4586,49 +4576,49 @@ export type DailyReportsByStaffIdQuery = {
 };
 
 export type OnCreateCheckForUpdateSubscriptionVariables = {
-  filter?: ModelSubscriptionCheckForUpdateFilterInput | null;
+  filter?: ModelSubscriptionCheckForUpdateFilterInput | null,
 };
 
 export type OnCreateCheckForUpdateSubscription = {
-  onCreateCheckForUpdate?: {
-    __typename: "CheckForUpdate";
-    id: string;
-    deployUuid: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateCheckForUpdate?:  {
+    __typename: "CheckForUpdate",
+    id: string,
+    deployUuid: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateCheckForUpdateSubscriptionVariables = {
-  filter?: ModelSubscriptionCheckForUpdateFilterInput | null;
+  filter?: ModelSubscriptionCheckForUpdateFilterInput | null,
 };
 
 export type OnUpdateCheckForUpdateSubscription = {
-  onUpdateCheckForUpdate?: {
-    __typename: "CheckForUpdate";
-    id: string;
-    deployUuid: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateCheckForUpdate?:  {
+    __typename: "CheckForUpdate",
+    id: string,
+    deployUuid: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteCheckForUpdateSubscriptionVariables = {
-  filter?: ModelSubscriptionCheckForUpdateFilterInput | null;
+  filter?: ModelSubscriptionCheckForUpdateFilterInput | null,
 };
 
 export type OnDeleteCheckForUpdateSubscription = {
-  onDeleteCheckForUpdate?: {
-    __typename: "CheckForUpdate";
-    id: string;
-    deployUuid: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteCheckForUpdate?:  {
+    __typename: "CheckForUpdate",
+    id: string,
+    deployUuid: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateAppConfigSubscriptionVariables = {
-  filter?: ModelSubscriptionAppConfigFilterInput | null;
+  filter?: ModelSubscriptionAppConfigFilterInput | null,
 };
 
 export type OnCreateAppConfigSubscription = {
@@ -4686,7 +4676,7 @@ export type OnCreateAppConfigSubscription = {
 };
 
 export type OnUpdateAppConfigSubscriptionVariables = {
-  filter?: ModelSubscriptionAppConfigFilterInput | null;
+  filter?: ModelSubscriptionAppConfigFilterInput | null,
 };
 
 export type OnUpdateAppConfigSubscription = {
@@ -4744,7 +4734,7 @@ export type OnUpdateAppConfigSubscription = {
 };
 
 export type OnDeleteAppConfigSubscriptionVariables = {
-  filter?: ModelSubscriptionAppConfigFilterInput | null;
+  filter?: ModelSubscriptionAppConfigFilterInput | null,
 };
 
 export type OnDeleteAppConfigSubscription = {
@@ -4802,7 +4792,7 @@ export type OnDeleteAppConfigSubscription = {
 };
 
 export type OnCreateStaffSubscriptionVariables = {
-  filter?: ModelSubscriptionStaffFilterInput | null;
+  filter?: ModelSubscriptionStaffFilterInput | null,
 };
 
 export type OnCreateStaffSubscription = {
@@ -4837,7 +4827,7 @@ export type OnCreateStaffSubscription = {
 };
 
 export type OnUpdateStaffSubscriptionVariables = {
-  filter?: ModelSubscriptionStaffFilterInput | null;
+  filter?: ModelSubscriptionStaffFilterInput | null,
 };
 
 export type OnUpdateStaffSubscription = {
@@ -4872,7 +4862,7 @@ export type OnUpdateStaffSubscription = {
 };
 
 export type OnDeleteStaffSubscriptionVariables = {
-  filter?: ModelSubscriptionStaffFilterInput | null;
+  filter?: ModelSubscriptionStaffFilterInput | null,
 };
 
 export type OnDeleteStaffSubscription = {
@@ -4907,486 +4897,486 @@ export type OnDeleteStaffSubscription = {
 };
 
 export type OnCreateHolidayCalendarSubscriptionVariables = {
-  filter?: ModelSubscriptionHolidayCalendarFilterInput | null;
+  filter?: ModelSubscriptionHolidayCalendarFilterInput | null,
 };
 
 export type OnCreateHolidayCalendarSubscription = {
-  onCreateHolidayCalendar?: {
-    __typename: "HolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateHolidayCalendar?:  {
+    __typename: "HolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateHolidayCalendarSubscriptionVariables = {
-  filter?: ModelSubscriptionHolidayCalendarFilterInput | null;
+  filter?: ModelSubscriptionHolidayCalendarFilterInput | null,
 };
 
 export type OnUpdateHolidayCalendarSubscription = {
-  onUpdateHolidayCalendar?: {
-    __typename: "HolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateHolidayCalendar?:  {
+    __typename: "HolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteHolidayCalendarSubscriptionVariables = {
-  filter?: ModelSubscriptionHolidayCalendarFilterInput | null;
+  filter?: ModelSubscriptionHolidayCalendarFilterInput | null,
 };
 
 export type OnDeleteHolidayCalendarSubscription = {
-  onDeleteHolidayCalendar?: {
-    __typename: "HolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteHolidayCalendar?:  {
+    __typename: "HolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateCompanyHolidayCalendarSubscriptionVariables = {
-  filter?: ModelSubscriptionCompanyHolidayCalendarFilterInput | null;
+  filter?: ModelSubscriptionCompanyHolidayCalendarFilterInput | null,
 };
 
 export type OnCreateCompanyHolidayCalendarSubscription = {
-  onCreateCompanyHolidayCalendar?: {
-    __typename: "CompanyHolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateCompanyHolidayCalendar?:  {
+    __typename: "CompanyHolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateCompanyHolidayCalendarSubscriptionVariables = {
-  filter?: ModelSubscriptionCompanyHolidayCalendarFilterInput | null;
+  filter?: ModelSubscriptionCompanyHolidayCalendarFilterInput | null,
 };
 
 export type OnUpdateCompanyHolidayCalendarSubscription = {
-  onUpdateCompanyHolidayCalendar?: {
-    __typename: "CompanyHolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateCompanyHolidayCalendar?:  {
+    __typename: "CompanyHolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteCompanyHolidayCalendarSubscriptionVariables = {
-  filter?: ModelSubscriptionCompanyHolidayCalendarFilterInput | null;
+  filter?: ModelSubscriptionCompanyHolidayCalendarFilterInput | null,
 };
 
 export type OnDeleteCompanyHolidayCalendarSubscription = {
-  onDeleteCompanyHolidayCalendar?: {
-    __typename: "CompanyHolidayCalendar";
-    id: string;
-    holidayDate: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteCompanyHolidayCalendar?:  {
+    __typename: "CompanyHolidayCalendar",
+    id: string,
+    holidayDate: string,
+    name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateCloseDateSubscriptionVariables = {
-  filter?: ModelSubscriptionCloseDateFilterInput | null;
+  filter?: ModelSubscriptionCloseDateFilterInput | null,
 };
 
 export type OnCreateCloseDateSubscription = {
-  onCreateCloseDate?: {
-    __typename: "CloseDate";
-    id: string;
-    closeDate: string;
-    startDate: string;
-    endDate: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateCloseDate?:  {
+    __typename: "CloseDate",
+    id: string,
+    closeDate: string,
+    startDate: string,
+    endDate: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateCloseDateSubscriptionVariables = {
-  filter?: ModelSubscriptionCloseDateFilterInput | null;
+  filter?: ModelSubscriptionCloseDateFilterInput | null,
 };
 
 export type OnUpdateCloseDateSubscription = {
-  onUpdateCloseDate?: {
-    __typename: "CloseDate";
-    id: string;
-    closeDate: string;
-    startDate: string;
-    endDate: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateCloseDate?:  {
+    __typename: "CloseDate",
+    id: string,
+    closeDate: string,
+    startDate: string,
+    endDate: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteCloseDateSubscriptionVariables = {
-  filter?: ModelSubscriptionCloseDateFilterInput | null;
+  filter?: ModelSubscriptionCloseDateFilterInput | null,
 };
 
 export type OnDeleteCloseDateSubscription = {
-  onDeleteCloseDate?: {
-    __typename: "CloseDate";
-    id: string;
-    closeDate: string;
-    startDate: string;
-    endDate: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteCloseDate?:  {
+    __typename: "CloseDate",
+    id: string,
+    closeDate: string,
+    startDate: string,
+    endDate: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateAttendanceSubscriptionVariables = {
-  filter?: ModelSubscriptionAttendanceFilterInput | null;
+  filter?: ModelSubscriptionAttendanceFilterInput | null,
 };
 
 export type OnCreateAttendanceSubscription = {
-  onCreateAttendance?: {
-    __typename: "Attendance";
-    id: string;
-    staffId: string;
-    workDate: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    goDirectlyFlag?: boolean | null;
-    returnDirectlyFlag?: boolean | null;
-    absentFlag?: boolean | null;
-    rests?: Array<{
-      __typename: "Rest";
-      startTime?: string | null;
-      endTime?: string | null;
-    } | null> | null;
-    hourlyPaidHolidayTimes?: Array<{
-      __typename: "HourlyPaidHolidayTime";
-      startTime: string;
-      endTime: string;
-    } | null> | null;
-    remarks?: string | null;
-    paidHolidayFlag?: boolean | null;
-    specialHolidayFlag?: boolean | null;
-    isDeemedHoliday?: boolean | null;
-    hourlyPaidHolidayHours?: number | null;
-    substituteHolidayDate?: string | null;
-    histories?: Array<{
-      __typename: "AttendanceHistory";
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      createdAt: string;
-    } | null> | null;
-    changeRequests?: Array<{
-      __typename: "AttendanceChangeRequest";
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      completed?: boolean | null;
-      comment?: string | null;
-      staffComment?: string | null;
-    } | null> | null;
-    systemComments?: Array<{
-      __typename: "SystemComment";
-      comment: string;
-      confirmed: boolean;
-      createdAt: string;
-    } | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateAttendance?:  {
+    __typename: "Attendance",
+    id: string,
+    staffId: string,
+    workDate: string,
+    startTime?: string | null,
+    endTime?: string | null,
+    goDirectlyFlag?: boolean | null,
+    returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
+    rests?:  Array< {
+      __typename: "Rest",
+      startTime?: string | null,
+      endTime?: string | null,
+    } | null > | null,
+    hourlyPaidHolidayTimes?:  Array< {
+      __typename: "HourlyPaidHolidayTime",
+      startTime: string,
+      endTime: string,
+    } | null > | null,
+    remarks?: string | null,
+    paidHolidayFlag?: boolean | null,
+    specialHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
+    hourlyPaidHolidayHours?: number | null,
+    substituteHolidayDate?: string | null,
+    histories?:  Array< {
+      __typename: "AttendanceHistory",
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      createdAt: string,
+    } | null > | null,
+    changeRequests?:  Array< {
+      __typename: "AttendanceChangeRequest",
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      completed?: boolean | null,
+      comment?: string | null,
+      staffComment?: string | null,
+    } | null > | null,
+    systemComments?:  Array< {
+      __typename: "SystemComment",
+      comment: string,
+      confirmed: boolean,
+      createdAt: string,
+    } | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateAttendanceSubscriptionVariables = {
-  filter?: ModelSubscriptionAttendanceFilterInput | null;
+  filter?: ModelSubscriptionAttendanceFilterInput | null,
 };
 
 export type OnUpdateAttendanceSubscription = {
-  onUpdateAttendance?: {
-    __typename: "Attendance";
-    id: string;
-    staffId: string;
-    workDate: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    goDirectlyFlag?: boolean | null;
-    returnDirectlyFlag?: boolean | null;
-    absentFlag?: boolean | null;
-    rests?: Array<{
-      __typename: "Rest";
-      startTime?: string | null;
-      endTime?: string | null;
-    } | null> | null;
-    hourlyPaidHolidayTimes?: Array<{
-      __typename: "HourlyPaidHolidayTime";
-      startTime: string;
-      endTime: string;
-    } | null> | null;
-    remarks?: string | null;
-    paidHolidayFlag?: boolean | null;
-    specialHolidayFlag?: boolean | null;
-    isDeemedHoliday?: boolean | null;
-    hourlyPaidHolidayHours?: number | null;
-    substituteHolidayDate?: string | null;
-    histories?: Array<{
-      __typename: "AttendanceHistory";
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      createdAt: string;
-    } | null> | null;
-    changeRequests?: Array<{
-      __typename: "AttendanceChangeRequest";
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      completed?: boolean | null;
-      comment?: string | null;
-      staffComment?: string | null;
-    } | null> | null;
-    systemComments?: Array<{
-      __typename: "SystemComment";
-      comment: string;
-      confirmed: boolean;
-      createdAt: string;
-    } | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateAttendance?:  {
+    __typename: "Attendance",
+    id: string,
+    staffId: string,
+    workDate: string,
+    startTime?: string | null,
+    endTime?: string | null,
+    goDirectlyFlag?: boolean | null,
+    returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
+    rests?:  Array< {
+      __typename: "Rest",
+      startTime?: string | null,
+      endTime?: string | null,
+    } | null > | null,
+    hourlyPaidHolidayTimes?:  Array< {
+      __typename: "HourlyPaidHolidayTime",
+      startTime: string,
+      endTime: string,
+    } | null > | null,
+    remarks?: string | null,
+    paidHolidayFlag?: boolean | null,
+    specialHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
+    hourlyPaidHolidayHours?: number | null,
+    substituteHolidayDate?: string | null,
+    histories?:  Array< {
+      __typename: "AttendanceHistory",
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      createdAt: string,
+    } | null > | null,
+    changeRequests?:  Array< {
+      __typename: "AttendanceChangeRequest",
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      completed?: boolean | null,
+      comment?: string | null,
+      staffComment?: string | null,
+    } | null > | null,
+    systemComments?:  Array< {
+      __typename: "SystemComment",
+      comment: string,
+      confirmed: boolean,
+      createdAt: string,
+    } | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteAttendanceSubscriptionVariables = {
-  filter?: ModelSubscriptionAttendanceFilterInput | null;
+  filter?: ModelSubscriptionAttendanceFilterInput | null,
 };
 
 export type OnDeleteAttendanceSubscription = {
-  onDeleteAttendance?: {
-    __typename: "Attendance";
-    id: string;
-    staffId: string;
-    workDate: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    goDirectlyFlag?: boolean | null;
-    returnDirectlyFlag?: boolean | null;
-    absentFlag?: boolean | null;
-    rests?: Array<{
-      __typename: "Rest";
-      startTime?: string | null;
-      endTime?: string | null;
-    } | null> | null;
-    hourlyPaidHolidayTimes?: Array<{
-      __typename: "HourlyPaidHolidayTime";
-      startTime: string;
-      endTime: string;
-    } | null> | null;
-    remarks?: string | null;
-    paidHolidayFlag?: boolean | null;
-    specialHolidayFlag?: boolean | null;
-    isDeemedHoliday?: boolean | null;
-    hourlyPaidHolidayHours?: number | null;
-    substituteHolidayDate?: string | null;
-    histories?: Array<{
-      __typename: "AttendanceHistory";
-      staffId: string;
-      workDate: string;
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      createdAt: string;
-    } | null> | null;
-    changeRequests?: Array<{
-      __typename: "AttendanceChangeRequest";
-      startTime?: string | null;
-      endTime?: string | null;
-      goDirectlyFlag?: boolean | null;
-      absentFlag?: boolean | null;
-      returnDirectlyFlag?: boolean | null;
-      rests?: Array<{
-        __typename: "Rest";
-        startTime?: string | null;
-        endTime?: string | null;
-      } | null> | null;
-      hourlyPaidHolidayTimes?: Array<{
-        __typename: "HourlyPaidHolidayTime";
-        startTime: string;
-        endTime: string;
-      } | null> | null;
-      remarks?: string | null;
-      paidHolidayFlag?: boolean | null;
-      specialHolidayFlag?: boolean | null;
-      hourlyPaidHolidayHours?: number | null;
-      substituteHolidayFlag?: boolean | null;
-      substituteHolidayDate?: string | null;
-      completed?: boolean | null;
-      comment?: string | null;
-      staffComment?: string | null;
-    } | null> | null;
-    systemComments?: Array<{
-      __typename: "SystemComment";
-      comment: string;
-      confirmed: boolean;
-      createdAt: string;
-    } | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteAttendance?:  {
+    __typename: "Attendance",
+    id: string,
+    staffId: string,
+    workDate: string,
+    startTime?: string | null,
+    endTime?: string | null,
+    goDirectlyFlag?: boolean | null,
+    returnDirectlyFlag?: boolean | null,
+    absentFlag?: boolean | null,
+    rests?:  Array< {
+      __typename: "Rest",
+      startTime?: string | null,
+      endTime?: string | null,
+    } | null > | null,
+    hourlyPaidHolidayTimes?:  Array< {
+      __typename: "HourlyPaidHolidayTime",
+      startTime: string,
+      endTime: string,
+    } | null > | null,
+    remarks?: string | null,
+    paidHolidayFlag?: boolean | null,
+    specialHolidayFlag?: boolean | null,
+    isDeemedHoliday?: boolean | null,
+    hourlyPaidHolidayHours?: number | null,
+    substituteHolidayDate?: string | null,
+    histories?:  Array< {
+      __typename: "AttendanceHistory",
+      staffId: string,
+      workDate: string,
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      createdAt: string,
+    } | null > | null,
+    changeRequests?:  Array< {
+      __typename: "AttendanceChangeRequest",
+      startTime?: string | null,
+      endTime?: string | null,
+      goDirectlyFlag?: boolean | null,
+      absentFlag?: boolean | null,
+      returnDirectlyFlag?: boolean | null,
+      rests?:  Array< {
+        __typename: "Rest",
+        startTime?: string | null,
+        endTime?: string | null,
+      } | null > | null,
+      hourlyPaidHolidayTimes?:  Array< {
+        __typename: "HourlyPaidHolidayTime",
+        startTime: string,
+        endTime: string,
+      } | null > | null,
+      remarks?: string | null,
+      paidHolidayFlag?: boolean | null,
+      specialHolidayFlag?: boolean | null,
+      hourlyPaidHolidayHours?: number | null,
+      substituteHolidayFlag?: boolean | null,
+      substituteHolidayDate?: string | null,
+      completed?: boolean | null,
+      comment?: string | null,
+      staffComment?: string | null,
+    } | null > | null,
+    systemComments?:  Array< {
+      __typename: "SystemComment",
+      comment: string,
+      confirmed: boolean,
+      createdAt: string,
+    } | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateDocumentSubscriptionVariables = {
-  filter?: ModelSubscriptionDocumentFilterInput | null;
+  filter?: ModelSubscriptionDocumentFilterInput | null,
 };
 
 export type OnCreateDocumentSubscription = {
-  onCreateDocument?: {
-    __typename: "Document";
-    id: string;
-    title: string;
-    content: string;
-    tag?: Array<string | null> | null;
-    targetRole?: Array<string | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateDocument?:  {
+    __typename: "Document",
+    id: string,
+    title: string,
+    content: string,
+    tag?: Array< string | null > | null,
+    targetRole?: Array< string | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateDocumentSubscriptionVariables = {
-  filter?: ModelSubscriptionDocumentFilterInput | null;
+  filter?: ModelSubscriptionDocumentFilterInput | null,
 };
 
 export type OnUpdateDocumentSubscription = {
-  onUpdateDocument?: {
-    __typename: "Document";
-    id: string;
-    title: string;
-    content: string;
-    tag?: Array<string | null> | null;
-    targetRole?: Array<string | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateDocument?:  {
+    __typename: "Document",
+    id: string,
+    title: string,
+    content: string,
+    tag?: Array< string | null > | null,
+    targetRole?: Array< string | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteDocumentSubscriptionVariables = {
-  filter?: ModelSubscriptionDocumentFilterInput | null;
+  filter?: ModelSubscriptionDocumentFilterInput | null,
 };
 
 export type OnDeleteDocumentSubscription = {
-  onDeleteDocument?: {
-    __typename: "Document";
-    id: string;
-    title: string;
-    content: string;
-    tag?: Array<string | null> | null;
-    targetRole?: Array<string | null> | null;
-    revision?: number | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteDocument?:  {
+    __typename: "Document",
+    id: string,
+    title: string,
+    content: string,
+    tag?: Array< string | null > | null,
+    targetRole?: Array< string | null > | null,
+    revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateShiftRequestSubscriptionVariables = {
@@ -5612,216 +5602,216 @@ export type OnDeleteShiftPlanYearSubscription = {
 };
 
 export type OnCreateWorkflowSubscriptionVariables = {
-  filter?: ModelSubscriptionWorkflowFilterInput | null;
+  filter?: ModelSubscriptionWorkflowFilterInput | null,
 };
 
 export type OnCreateWorkflowSubscription = {
-  onCreateWorkflow?: {
-    __typename: "Workflow";
-    id: string;
-    approvedStaffIds?: Array<string | null> | null;
-    rejectedStaffIds?: Array<string | null> | null;
-    finalDecisionTimestamp?: string | null;
-    category?: WorkflowCategory | null;
-    staffId: string;
-    status: WorkflowStatus;
-    assignedApproverStaffIds?: Array<string | null> | null;
-    approvalSteps?: Array<{
-      __typename: "ApprovalStep";
-      id: string;
-      approverStaffId: string;
-      decisionStatus: ApprovalStatus;
-      approverComment?: string | null;
-      decisionTimestamp?: string | null;
-      stepOrder?: number | null;
-    } | null> | null;
-    nextApprovalStepIndex?: number | null;
-    submitterApproverSetting?: ApproverSettingMode | null;
-    submitterApproverId?: string | null;
-    submitterApproverIds?: Array<string | null> | null;
-    submitterApproverMultipleMode?: ApproverMultipleMode | null;
-    overTimeDetails?: {
-      __typename: "OverTimeWorkflow";
-      date: string;
-      startTime: string;
-      endTime: string;
-      reason: string;
-    } | null;
-    comments?: Array<{
-      __typename: "WorkflowComment";
-      id: string;
-      staffId: string;
-      text: string;
-      createdAt: string;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    approvedStaffIds?: Array< string | null > | null,
+    rejectedStaffIds?: Array< string | null > | null,
+    finalDecisionTimestamp?: string | null,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    assignedApproverStaffIds?: Array< string | null > | null,
+    approvalSteps?:  Array< {
+      __typename: "ApprovalStep",
+      id: string,
+      approverStaffId: string,
+      decisionStatus: ApprovalStatus,
+      approverComment?: string | null,
+      decisionTimestamp?: string | null,
+      stepOrder?: number | null,
+    } | null > | null,
+    nextApprovalStepIndex?: number | null,
+    submitterApproverSetting?: ApproverSettingMode | null,
+    submitterApproverId?: string | null,
+    submitterApproverIds?: Array< string | null > | null,
+    submitterApproverMultipleMode?: ApproverMultipleMode | null,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateWorkflowSubscriptionVariables = {
-  filter?: ModelSubscriptionWorkflowFilterInput | null;
+  filter?: ModelSubscriptionWorkflowFilterInput | null,
 };
 
 export type OnUpdateWorkflowSubscription = {
-  onUpdateWorkflow?: {
-    __typename: "Workflow";
-    id: string;
-    approvedStaffIds?: Array<string | null> | null;
-    rejectedStaffIds?: Array<string | null> | null;
-    finalDecisionTimestamp?: string | null;
-    category?: WorkflowCategory | null;
-    staffId: string;
-    status: WorkflowStatus;
-    assignedApproverStaffIds?: Array<string | null> | null;
-    approvalSteps?: Array<{
-      __typename: "ApprovalStep";
-      id: string;
-      approverStaffId: string;
-      decisionStatus: ApprovalStatus;
-      approverComment?: string | null;
-      decisionTimestamp?: string | null;
-      stepOrder?: number | null;
-    } | null> | null;
-    nextApprovalStepIndex?: number | null;
-    submitterApproverSetting?: ApproverSettingMode | null;
-    submitterApproverId?: string | null;
-    submitterApproverIds?: Array<string | null> | null;
-    submitterApproverMultipleMode?: ApproverMultipleMode | null;
-    overTimeDetails?: {
-      __typename: "OverTimeWorkflow";
-      date: string;
-      startTime: string;
-      endTime: string;
-      reason: string;
-    } | null;
-    comments?: Array<{
-      __typename: "WorkflowComment";
-      id: string;
-      staffId: string;
-      text: string;
-      createdAt: string;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    approvedStaffIds?: Array< string | null > | null,
+    rejectedStaffIds?: Array< string | null > | null,
+    finalDecisionTimestamp?: string | null,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    assignedApproverStaffIds?: Array< string | null > | null,
+    approvalSteps?:  Array< {
+      __typename: "ApprovalStep",
+      id: string,
+      approverStaffId: string,
+      decisionStatus: ApprovalStatus,
+      approverComment?: string | null,
+      decisionTimestamp?: string | null,
+      stepOrder?: number | null,
+    } | null > | null,
+    nextApprovalStepIndex?: number | null,
+    submitterApproverSetting?: ApproverSettingMode | null,
+    submitterApproverId?: string | null,
+    submitterApproverIds?: Array< string | null > | null,
+    submitterApproverMultipleMode?: ApproverMultipleMode | null,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteWorkflowSubscriptionVariables = {
-  filter?: ModelSubscriptionWorkflowFilterInput | null;
+  filter?: ModelSubscriptionWorkflowFilterInput | null,
 };
 
 export type OnDeleteWorkflowSubscription = {
-  onDeleteWorkflow?: {
-    __typename: "Workflow";
-    id: string;
-    approvedStaffIds?: Array<string | null> | null;
-    rejectedStaffIds?: Array<string | null> | null;
-    finalDecisionTimestamp?: string | null;
-    category?: WorkflowCategory | null;
-    staffId: string;
-    status: WorkflowStatus;
-    assignedApproverStaffIds?: Array<string | null> | null;
-    approvalSteps?: Array<{
-      __typename: "ApprovalStep";
-      id: string;
-      approverStaffId: string;
-      decisionStatus: ApprovalStatus;
-      approverComment?: string | null;
-      decisionTimestamp?: string | null;
-      stepOrder?: number | null;
-    } | null> | null;
-    nextApprovalStepIndex?: number | null;
-    submitterApproverSetting?: ApproverSettingMode | null;
-    submitterApproverId?: string | null;
-    submitterApproverIds?: Array<string | null> | null;
-    submitterApproverMultipleMode?: ApproverMultipleMode | null;
-    overTimeDetails?: {
-      __typename: "OverTimeWorkflow";
-      date: string;
-      startTime: string;
-      endTime: string;
-      reason: string;
-    } | null;
-    comments?: Array<{
-      __typename: "WorkflowComment";
-      id: string;
-      staffId: string;
-      text: string;
-      createdAt: string;
-    } | null> | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteWorkflow?:  {
+    __typename: "Workflow",
+    id: string,
+    approvedStaffIds?: Array< string | null > | null,
+    rejectedStaffIds?: Array< string | null > | null,
+    finalDecisionTimestamp?: string | null,
+    category?: WorkflowCategory | null,
+    staffId: string,
+    status: WorkflowStatus,
+    assignedApproverStaffIds?: Array< string | null > | null,
+    approvalSteps?:  Array< {
+      __typename: "ApprovalStep",
+      id: string,
+      approverStaffId: string,
+      decisionStatus: ApprovalStatus,
+      approverComment?: string | null,
+      decisionTimestamp?: string | null,
+      stepOrder?: number | null,
+    } | null > | null,
+    nextApprovalStepIndex?: number | null,
+    submitterApproverSetting?: ApproverSettingMode | null,
+    submitterApproverId?: string | null,
+    submitterApproverIds?: Array< string | null > | null,
+    submitterApproverMultipleMode?: ApproverMultipleMode | null,
+    overTimeDetails?:  {
+      __typename: "OverTimeWorkflow",
+      date: string,
+      startTime: string,
+      endTime: string,
+      reason: string,
+    } | null,
+    comments?:  Array< {
+      __typename: "WorkflowComment",
+      id: string,
+      staffId: string,
+      text: string,
+      createdAt: string,
+    } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateOperationLogSubscriptionVariables = {
-  filter?: ModelSubscriptionOperationLogFilterInput | null;
+  filter?: ModelSubscriptionOperationLogFilterInput | null,
 };
 
 export type OnCreateOperationLogSubscription = {
-  onCreateOperationLog?: {
-    __typename: "OperationLog";
-    id: string;
-    staffId?: string | null;
-    action: string;
-    resource?: string | null;
-    resourceId?: string | null;
-    timestamp: string;
-    details?: string | null;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-    metadata?: string | null;
-    severity?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onCreateOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnUpdateOperationLogSubscriptionVariables = {
-  filter?: ModelSubscriptionOperationLogFilterInput | null;
+  filter?: ModelSubscriptionOperationLogFilterInput | null,
 };
 
 export type OnUpdateOperationLogSubscription = {
-  onUpdateOperationLog?: {
-    __typename: "OperationLog";
-    id: string;
-    staffId?: string | null;
-    action: string;
-    resource?: string | null;
-    resourceId?: string | null;
-    timestamp: string;
-    details?: string | null;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-    metadata?: string | null;
-    severity?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onUpdateOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnDeleteOperationLogSubscriptionVariables = {
-  filter?: ModelSubscriptionOperationLogFilterInput | null;
+  filter?: ModelSubscriptionOperationLogFilterInput | null,
 };
 
 export type OnDeleteOperationLogSubscription = {
-  onDeleteOperationLog?: {
-    __typename: "OperationLog";
-    id: string;
-    staffId?: string | null;
-    action: string;
-    resource?: string | null;
-    resourceId?: string | null;
-    timestamp: string;
-    details?: string | null;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-    metadata?: string | null;
-    severity?: string | null;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
+  onDeleteOperationLog?:  {
+    __typename: "OperationLog",
+    id: string,
+    staffId?: string | null,
+    action: string,
+    resource?: string | null,
+    resourceId?: string | null,
+    timestamp: string,
+    details?: string | null,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+    metadata?: string | null,
+    severity?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type OnCreateDailyReportSubscriptionVariables = {
