@@ -82,7 +82,9 @@ const parseResponseBody = async (body: unknown) => {
   }
 };
 
-export const loadShiftPatterns = async (): Promise<ShiftPatternStorageRecord[]> => {
+export const loadShiftPatterns = async (): Promise<
+  ShiftPatternStorageRecord[]
+> => {
   try {
     const result = await Storage.get(STORAGE_KEY, {
       level: STORAGE_LEVEL,
