@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import FooterView from "@shared/ui/footer/Footer";
 import { useContext, useMemo } from "react";
 
 import { DEFAULT_THEME_COLOR } from "@/constants/theme";
@@ -14,22 +14,5 @@ export default function Footer() {
     [getThemeColor]
   );
 
-  return (
-    <footer
-      style={{
-        backgroundColor: themeColor || DEFAULT_THEME_COLOR,
-      }}
-    >
-      <Box textAlign="center" sx={{ p: 1 }}>
-        <Typography
-          sx={{
-            variant: "body2",
-            color: "white",
-          }}
-        >
-          © 2025 Virtual Tech Japan Inc.
-        </Typography>
-      </Box>
-    </footer>
-  );
+  return <FooterView themeColor={themeColor || DEFAULT_THEME_COLOR} />;
 }

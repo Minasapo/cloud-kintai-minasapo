@@ -21,9 +21,9 @@ import {
   useUpdateHolidayCalendarMutation,
 } from "@/lib/api/calendarApi";
 
-import SnackbarGroup from "./components/ snackbar/SnackbarGroup";
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
+import SnackbarGroup from "./components/snackbar/SnackbarGroup";
 import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";

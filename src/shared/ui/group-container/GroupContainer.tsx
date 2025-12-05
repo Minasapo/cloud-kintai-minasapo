@@ -10,7 +10,7 @@ import {
   Theme,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 const Container = styled(Box)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
@@ -38,17 +38,17 @@ export interface GroupContainerProps {
   collapsible?: boolean;
   defaultCollapsed?: boolean;
   sx?: SxProps<Theme>;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
-export default function GroupContainer({
+const GroupContainer = ({
   title,
   count,
   collapsible = false,
   defaultCollapsed = false,
   children,
   sx,
-}: GroupContainerProps) {
+}: GroupContainerProps) => {
   const [collapsed, setCollapsed] = useState<boolean>(defaultCollapsed);
 
   return (
@@ -81,4 +81,6 @@ export default function GroupContainer({
       </Collapse>
     </Container>
   );
-}
+};
+
+export default GroupContainer;

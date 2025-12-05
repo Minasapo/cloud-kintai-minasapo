@@ -13,6 +13,7 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
+import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -22,7 +23,6 @@ import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
 } from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
 import QuickInputButtons from "@/components/attendance_editor/QuickInputButtons";
-import GroupContainer from "@/components/ui/GroupContainer/GroupContainer";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useOperationLog from "@/hooks/useOperationLog/useOperationLog";
