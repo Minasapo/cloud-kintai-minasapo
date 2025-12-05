@@ -18,13 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { Attendance } from "@/API";
