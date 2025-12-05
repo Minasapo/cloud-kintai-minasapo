@@ -3,7 +3,7 @@ import { Logger } from "aws-amplify";
 
 import { Attendance, CreateOperationLogInput, Staff } from "@/API";
 import * as MESSAGE_CODE from "@/errors";
-import { GoDirectlyFlag } from "@/hooks/useAttendance/useAttendance";
+import { GoDirectlyFlag } from "@/lib/attendance/attendanceActions";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
