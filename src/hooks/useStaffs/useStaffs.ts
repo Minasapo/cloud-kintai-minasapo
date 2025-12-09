@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+
+import { AuthContext } from "@/context/AuthContext";
 
 import {
   ApproverMultipleMode,
@@ -77,8 +79,16 @@ export default function useStaffs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [staffs, setStaffs] = useState<StaffType[]>([]);
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setLoading(false);
+      setError(null);
+      setStaffs([]);
+      return;
+    }
     setLoading(true);
     setError(null);
     fetchStaffs()
@@ -118,10 +128,13 @@ export default function useStaffs() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [isAuthenticated]);
 
-  const refreshStaff = () =>
-    fetchStaffs()
+  const refreshStaff = () => {
+    if (!isAuthenticated) {
+      return Promise.reject(new Error("User is not authenticated"));
+    }
+    return fetchStaffs()
       .then((res) => {
         setStaffs(
           res.map((staff) => ({
@@ -153,9 +166,17 @@ export default function useStaffs() {
       .catch((e: Error) => {
         throw e;
       });
+  };
 
-  const createStaff = async (input: CreateStaffInput) =>
-    createStaffData(input)
+  const ensureAuthenticated = () => {
+    if (!isAuthenticated) {
+      throw new Error("User is not authenticated");
+    }
+  };
+
+  const createStaff = async (input: CreateStaffInput) => {
+    ensureAuthenticated();
+    return createStaffData(input)
       .then((staff) => {
         setStaffs([
           ...staffs,
@@ -188,9 +209,11 @@ export default function useStaffs() {
       .catch((e: Error) => {
         throw e;
       });
+  };
 
-  const updateStaff = async (input: UpdateStaffInput) =>
-    updateStaffData(input)
+  const updateStaff = async (input: UpdateStaffInput) => {
+    ensureAuthenticated();
+    return updateStaffData(input)
       .then((staff) => {
         setStaffs(
           staffs.map((s) => {
@@ -228,17 +251,21 @@ export default function useStaffs() {
       .catch((e: Error) => {
         throw e;
       });
+  };
 
-  const deleteStaff = async (input: DeleteStaffInput) =>
-    deleteStaffData(input)
+  const deleteStaff = async (input: DeleteStaffInput) => {
+    ensureAuthenticated();
+    return deleteStaffData(input)
       .then((staff) => {
         setStaffs(staffs.filter((s) => s.id !== staff.id));
       })
       .catch((e: Error) => {
         throw e;
       });
+  };
 
   const getAllStaffs = async (): Promise<StaffType[]> => {
+    ensureAuthenticated();
     const res = await fetchStaffs();
     return res.map((staff) => ({
       id: staff.id,
