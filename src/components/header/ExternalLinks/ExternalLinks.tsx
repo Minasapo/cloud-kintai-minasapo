@@ -15,18 +15,18 @@ export function ExternalLinks() {
     setLinks(getLinks());
   }, [getLinks]);
 
-  if (authStatus !== "authenticated" || !cognitoUser) {
-    return null;
-  }
-
-  const { familyName, givenName } = cognitoUser;
+  const { familyName = "", givenName = "" } = cognitoUser ?? {};
 
   const staffName = useMemo(() => {
-    const names = [familyName ?? "", givenName ?? ""]
+    const names = [familyName, givenName]
       .map((name) => name.trim())
       .filter(Boolean);
     return names.join(" ");
   }, [familyName, givenName]);
+
+  if (authStatus !== "authenticated" || !cognitoUser) {
+    return null;
+  }
 
   return <ExternalLinksView links={links} staffName={staffName} />;
 }
