@@ -34,7 +34,7 @@ import {
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
-} from "@/lib/api/calendarApi";
+} from "@/entities/calendar/api/calendarApi";
 import {
   clockInAction,
   clockOutAction,
