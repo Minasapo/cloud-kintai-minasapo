@@ -22,11 +22,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import * as MESSAGE_CODE from "@/errors";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
-} from "@/lib/api/calendarApi";
+} from "@/entities/calendar/api/calendarApi";
+import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import useStaffs from "../../hooks/useStaffs/useStaffs";
