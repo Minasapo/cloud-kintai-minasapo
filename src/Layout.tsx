@@ -68,12 +68,15 @@ export default function Layout() {
     getAbsentEnabled,
     getThemeColor,
   } = useAppConfig();
+  const isAuthenticated = authStatus === "authenticated";
   const { data: holidayCalendars = [], isLoading: holidayCalendarLoading } =
-    useGetHolidayCalendarsQuery();
+    useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
   const {
     data: companyHolidayCalendars = [],
     isLoading: companyHolidayCalendarLoading,
-  } = useGetCompanyHolidayCalendarsQuery();
+  } = useGetCompanyHolidayCalendarsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
   const [bulkCreateHolidayCalendarsMutation] =
