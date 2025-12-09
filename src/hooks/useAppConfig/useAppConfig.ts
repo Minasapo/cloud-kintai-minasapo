@@ -3,14 +3,14 @@ import {
   useGetAppConfigQuery,
   useUpdateAppConfigMutation,
 } from "@entities/app-config/api/appConfigApi";
-import dayjs from "dayjs";
-import { useCallback, useMemo } from "react";
-
 import type {
   AppConfig,
   CreateAppConfigInput,
   UpdateAppConfigInput,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import dayjs from "dayjs";
+import { useCallback, useMemo } from "react";
+
 import { DEFAULT_THEME_COLOR } from "@/constants/theme";
 
 /**

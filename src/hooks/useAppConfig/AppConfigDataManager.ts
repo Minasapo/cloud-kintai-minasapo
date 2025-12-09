@@ -4,8 +4,6 @@ import {
   updateAppConfig,
 } from "@shared/api/graphql/documents/mutations";
 import { listAppConfigs } from "@shared/api/graphql/documents/queries";
-import { API } from "aws-amplify";
-
 import {
   AppConfig,
   CreateAppConfigInput,
@@ -13,7 +11,8 @@ import {
   ListAppConfigsQuery,
   UpdateAppConfigInput,
   UpdateAppConfigMutation,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import { API } from "aws-amplify";
 
 export class AppConfigDataManager {
   async fetch(name: string = "default") {
