@@ -208,13 +208,6 @@ export default function QuickDailyReportCard({
     setIsDialogOpen(false);
   };
 
-  const renderSaveIcon = () => {
-    if (!isSaving) {
-      return <CheckIcon fontSize="small" />;
-    }
-    return <CircularProgress size={18} />;
-  };
-
   return (
     <QuickDailyReportCardView
       date={date}
