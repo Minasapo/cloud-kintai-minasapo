@@ -12,12 +12,12 @@ import {
 } from "@/API";
 import { getNowISOStringWithZeroSeconds } from "@/components/time_recorder/util";
 import { AuthContext } from "@/context/AuthContext";
-import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import {
   useCreateAttendanceMutation,
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
-} from "@/lib/api/attendanceApi";
+} from "@/entities/attendance/api/attendanceApi";
+import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import {
   clockInAction,
   clockOutAction,
