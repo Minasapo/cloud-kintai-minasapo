@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useMemo, useState } from "react";
 
 export function sortCalendar<T extends { holidayDate: string }>(a: T, b: T) {
   return dayjs(a.holidayDate).isBefore(dayjs(b.holidayDate)) ? 1 : -1;
@@ -36,33 +36,40 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
     (_, i) => currentYear - YEAR_OFFSET + i
   );
 
-  const sorted = [...(items || [])].sort((a, b) => sortCalendar(a, b));
+  const normalizedItems = useMemo(() => items ?? [], [items]);
 
-  const filtered = sorted.filter((hc) => {
-    const date = dayjs(hc.holidayDate);
+  const sorted = useMemo(
+    () => [...normalizedItems].sort((a, b) => sortCalendar(a, b)),
+    [normalizedItems]
+  );
 
-    // Support filtering by year+month, year only, or month only.
-    if (selectedYear !== "" && selectedMonth !== "") {
-      const mm = String(selectedMonth).padStart(2, "0");
-      const ym = `${selectedYear}-${mm}`;
-      if (date.format("YYYY-MM") !== ym) return false;
-    } else if (selectedYear !== "") {
-      if (date.year() !== Number(selectedYear)) return false;
-    } else if (selectedMonth !== "") {
-      if (date.month() + 1 !== Number(selectedMonth)) return false;
-    }
+  const filtered = useMemo(() => {
+    return sorted.filter((hc) => {
+      const date = dayjs(hc.holidayDate);
 
-    if (nameFilter) {
-      const name = (hc.name || "").toString().toLowerCase();
-      if (!name.includes(nameFilter.toLowerCase())) return false;
-    }
+      // Support filtering by year+month, year only, or month only.
+      if (selectedYear !== "" && selectedMonth !== "") {
+        const mm = String(selectedMonth).padStart(2, "0");
+        const ym = `${selectedYear}-${mm}`;
+        if (date.format("YYYY-MM") !== ym) return false;
+      } else if (selectedYear !== "") {
+        if (date.year() !== Number(selectedYear)) return false;
+      } else if (selectedMonth !== "") {
+        if (date.month() + 1 !== Number(selectedMonth)) return false;
+      }
 
-    return true;
-  });
+      if (nameFilter) {
+        const name = (hc.name || "").toString().toLowerCase();
+        if (!name.includes(nameFilter.toLowerCase())) return false;
+      }
 
-  const paginated = filtered.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+      return true;
+    });
+  }, [nameFilter, selectedMonth, selectedYear, sorted]);
+
+  const paginated = useMemo(
+    () => filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [filtered, page, rowsPerPage]
   );
 
   const handleChangePage = (_event: unknown, newPage: number) => {
