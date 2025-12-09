@@ -1,16 +1,7 @@
-// cspell: ignore testid
-import CheckIcon from "@mui/icons-material/Check";
-import ClearIcon from "@mui/icons-material/Clear";
-import { Box, IconButton, Stack, TextField } from "@mui/material";
-import {
-  type ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Attendance } from "../../API";
+import type { Attendance } from "@/API";
+import TimeRecorderRemarksView from "@/shared/ui/time-recorder/TimeRecorderRemarks";
 
 export interface TimeRecorderRemarksProps {
   attendance: Attendance | undefined | null;
@@ -42,8 +33,8 @@ export default function TimeRecorderRemarks({
     [attendance?.remarks, formState]
   );
 
-  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setFormState(event.target.value);
+  const handleChange = useCallback((value: string) => {
+    setFormState(value);
   }, []);
 
   const handleSave = useCallback(() => {
@@ -57,39 +48,13 @@ export default function TimeRecorderRemarks({
   const textFieldValue = formState ?? "";
 
   return (
-    <Stack>
-      <Box>
-        <TextField
-          data-testid="remarks-text"
-          multiline
-          minRows={2}
-          fullWidth
-          value={textFieldValue}
-          placeholder="労務担当より指示された時のみ(例：客先名やイベント名など)"
-          onChange={handleChange}
-        />
-      </Box>
-      <Box>
-        {isChanged && (
-          <Stack
-            direction="row"
-            justifyContent="flex-end"
-            alignItems="center"
-            spacing={0}
-          >
-            <Box>
-              <IconButton onClick={handleSave}>
-                <CheckIcon color="success" data-testid="remarksSave" />
-              </IconButton>
-            </Box>
-            <Box>
-              <IconButton onClick={handleClear}>
-                <ClearIcon color="error" data-testid="remarksClear" />
-              </IconButton>
-            </Box>
-          </Stack>
-        )}
-      </Box>
-    </Stack>
+    <TimeRecorderRemarksView
+      value={textFieldValue}
+      placeholder="労務担当より指示された時のみ(例：客先名やイベント名など)"
+      isChanged={isChanged}
+      onChange={handleChange}
+      onSave={handleSave}
+      onClear={handleClear}
+    />
   );
 }
