@@ -9,7 +9,7 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { createCheckForUpdate } from "/api/graphql/documents/mutations";
+import { createCheckForUpdate } from "@shared/api/graphql/documents/mutations";
 export default function CheckForUpdateCreateForm(props) {
   const {
     clearOnSuccess = true,

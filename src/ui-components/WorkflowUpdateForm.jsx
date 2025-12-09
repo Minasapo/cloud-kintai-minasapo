@@ -21,8 +21,8 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getWorkflow } from "/api/graphql/documents/queries";
-import { updateWorkflow } from "/api/graphql/documents/mutations";
+import { getWorkflow } from "@shared/api/graphql/documents/queries";
+import { updateWorkflow } from "@shared/api/graphql/documents/mutations";
 function ArrayField({
   items = [],
   onChange,
