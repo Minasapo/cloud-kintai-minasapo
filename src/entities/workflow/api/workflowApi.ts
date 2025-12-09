@@ -1,4 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 
 import type {
   CreateWorkflowInput,
@@ -16,7 +17,6 @@ import {
   updateWorkflow,
 } from "@/graphql/mutations";
 import { listWorkflows } from "@/graphql/queries";
-import { graphqlBaseQuery } from "@/lib/api/graphqlBaseQuery";
 
 type WorkflowTag = {
   type: "Workflow";
