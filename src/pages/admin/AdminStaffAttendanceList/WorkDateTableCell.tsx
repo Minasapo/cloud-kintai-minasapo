@@ -1,15 +1,14 @@
 import { styled, TableCell as MuiTableCell } from "@mui/material";
+import {
+  Attendance,
+  CompanyHolidayCalendar,
+  HolidayCalendar,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
 import { CompanyHoliday } from "@/lib/CompanyHoliday";
 import { DayOfWeek } from "@/lib/DayOfWeek";
 import { Holiday } from "@/lib/Holiday";
-
-import {
-  Attendance,
-  CompanyHolidayCalendar,
-  HolidayCalendar,
-} from "../../../API";
 
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   width: theme.spacing(10),

@@ -1,12 +1,12 @@
-import dayjs from "dayjs";
-
 import {
   Attendance,
   CreateAttendanceInput,
   RestInput,
   SystemCommentInput,
   UpdateAttendanceInput,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import dayjs from "dayjs";
+
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 
 export enum GoDirectlyFlag {

@@ -4,10 +4,6 @@
  */
 
 import { useAuthenticator } from "@aws-amplify/ui-react";
-import { Box, LinearProgress, Stack } from "@mui/material";
-import { useCallback, useEffect, useMemo } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-
 import {
   useBulkCreateCompanyHolidayCalendarsMutation,
   useBulkCreateHolidayCalendarsMutation,
@@ -19,7 +15,10 @@ import {
   useGetHolidayCalendarsQuery,
   useUpdateCompanyHolidayCalendarMutation,
   useUpdateHolidayCalendarMutation,
-} from "@/entities/calendar/api/calendarApi";
+} from "@entities/calendar/api/calendarApi";
+import { Box, LinearProgress, Stack } from "@mui/material";
+import { useCallback, useEffect, useMemo } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";

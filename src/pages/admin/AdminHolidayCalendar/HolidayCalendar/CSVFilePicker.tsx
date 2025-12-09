@@ -10,6 +10,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import {
+  CreateHolidayCalendarInput,
+  HolidayCalendar,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useState } from "react";
 
@@ -17,7 +21,6 @@ import { AttendanceDate } from "@/lib/AttendanceDate";
 import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 
-import { CreateHolidayCalendarInput, HolidayCalendar } from "../../../../API";
 import { useAppDispatchV2 } from "../../../../app/hooks";
 import {
   setSnackbarError,

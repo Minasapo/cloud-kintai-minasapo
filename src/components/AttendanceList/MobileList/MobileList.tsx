@@ -13,16 +13,16 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-import { AttendanceGraph } from "@/pages/admin/AdminStaffAttendanceList/AttendanceGraph";
-
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
-} from "../../../API";
+} from "@shared/api/graphql/types";
+
+import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceGraph } from "@/pages/admin/AdminStaffAttendanceList/AttendanceGraph";
+
 import TableBodyRow from "./TableBodyRow";
 
 const MobileBox = styled(Box)(({ theme }) => ({

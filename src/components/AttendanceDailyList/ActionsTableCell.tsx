@@ -10,15 +10,15 @@ import {
   TableCell,
   Tooltip,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { useAppDispatchV2 } from "@/app/hooks";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";

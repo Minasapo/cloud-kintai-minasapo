@@ -15,7 +15,7 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { createDailyReport } from "../graphql/mutations";
+import { createDailyReport } from "@shared/api/graphql/documents/mutations";
 export default function DailyReportCreateForm(props) {
   const {
     clearOnSuccess = true,

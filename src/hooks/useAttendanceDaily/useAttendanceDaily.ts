@@ -1,10 +1,10 @@
+import { useLazyGetAttendanceByStaffAndDateQuery } from "@entities/attendance/api/attendanceApi";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 
-import { useLazyGetAttendanceByStaffAndDateQuery } from "@/entities/attendance/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import { Attendance } from "../../API";
 import useStaffs from "../useStaffs/useStaffs";
 
 export interface AttendanceDaily {

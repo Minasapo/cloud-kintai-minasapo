@@ -1,1 +1,1 @@
-export * from "@/entities/calendar/api/calendarApi";
+export * from "@entities/calendar/api/calendarApi";

@@ -9,8 +9,8 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getCheckForUpdate } from "../graphql/queries";
-import { updateCheckForUpdate } from "../graphql/mutations";
+import { getCheckForUpdate } from "@shared/api/graphql/documents/queries";
+import { updateCheckForUpdate } from "@shared/api/graphql/documents/mutations";
 export default function CheckForUpdateUpdateForm(props) {
   const {
     id: idProp,

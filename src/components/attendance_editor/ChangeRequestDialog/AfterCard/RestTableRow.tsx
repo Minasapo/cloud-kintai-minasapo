@@ -1,9 +1,8 @@
 import { Box, Stack, TableCell, TableRow } from "@mui/material";
+import { Rest } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
 import { AttendanceTime } from "@/lib/AttendanceTime";
-
-import { Rest } from "../../../../API";
 
 export default function RestTableRow({
   rests,

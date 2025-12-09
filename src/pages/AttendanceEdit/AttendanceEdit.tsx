@@ -1,17 +1,17 @@
+import {
+  useCreateAttendanceMutation,
+  useGetAttendanceByStaffAndDateQuery,
+  useUpdateAttendanceMutation,
+} from "@entities/attendance/api/attendanceApi";
 import { Box, LinearProgress } from "@mui/material";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Attendance } from "@/API";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import {
-  useCreateAttendanceMutation,
-  useGetAttendanceByStaffAndDateQuery,
-  useUpdateAttendanceMutation,
-} from "@/entities/attendance/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 

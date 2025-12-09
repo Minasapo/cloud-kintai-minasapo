@@ -3,6 +3,11 @@
  * ユーザーの勤怠情報を取得し、デスクトップ・モバイル両方のリストで表示する。
  * MaterialUIを使用し、日付選択や合計勤務時間の表示も行う。
  */
+import { useListRecentAttendancesQuery } from "@entities/attendance/api/attendanceApi";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@entities/calendar/api/calendarApi";
 import {
   Box,
   Breadcrumbs,
@@ -15,6 +20,7 @@ import {
  * MaterialUIのDatePickerコンポーネント。
  */
 import { DatePicker } from "@mui/x-date-pickers";
+import { Staff } from "@shared/api/graphql/types";
 import Title from "@shared/ui/typography/Title";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
@@ -31,16 +37,10 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { useListRecentAttendancesQuery } from "@/entities/attendance/api/attendanceApi";
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@/entities/calendar/api/calendarApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 
-import { Staff } from "../../API";
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";

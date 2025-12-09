@@ -1,10 +1,10 @@
+import { sendMail } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 import dayjs from "dayjs";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import * as MESSAGE_CODE from "../../errors";
-import { sendMail } from "../../graphql/queries";
 import { CognitoUser } from "../../hooks/useCognitoUser";
 import { StaffRole, StaffType } from "../../hooks/useStaffs/useStaffs";
 

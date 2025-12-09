@@ -1,6 +1,5 @@
 import { Alert } from "@mui/material";
-
-import { AttendanceChangeRequest } from "../../../API";
+import { AttendanceChangeRequest } from "@shared/api/graphql/types";
 
 export default function ChangeRequestingAlert({
   changeRequests,

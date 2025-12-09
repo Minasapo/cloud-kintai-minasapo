@@ -2,16 +2,18 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "../API";
-type GeneratedSubscription<InputType, OutputType> = string & {
-  __generatedSubscriptionInput: InputType;
-  __generatedSubscriptionOutput: OutputType;
+import * as APITypes from "../types";
+type GeneratedMutation<InputType, OutputType> = string & {
+  __generatedMutationInput: InputType;
+  __generatedMutationOutput: OutputType;
 };
 
-export const onCreateCheckForUpdate = /* GraphQL */ `subscription OnCreateCheckForUpdate(
-  $filter: ModelSubscriptionCheckForUpdateFilterInput
+export const createCheckForUpdate =
+  /* GraphQL */ `mutation CreateCheckForUpdate(
+  $input: CreateCheckForUpdateInput!
+  $condition: ModelCheckForUpdateConditionInput
 ) {
-  onCreateCheckForUpdate(filter: $filter) {
+  createCheckForUpdate(input: $input, condition: $condition) {
     id
     deployUuid
     createdAt
@@ -19,14 +21,16 @@ export const onCreateCheckForUpdate = /* GraphQL */ `subscription OnCreateCheckF
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateCheckForUpdateSubscriptionVariables,
-  APITypes.OnCreateCheckForUpdateSubscription
->;
-export const onUpdateCheckForUpdate = /* GraphQL */ `subscription OnUpdateCheckForUpdate(
-  $filter: ModelSubscriptionCheckForUpdateFilterInput
+` as GeneratedMutation<
+    APITypes.CreateCheckForUpdateMutationVariables,
+    APITypes.CreateCheckForUpdateMutation
+  >;
+export const updateCheckForUpdate =
+  /* GraphQL */ `mutation UpdateCheckForUpdate(
+  $input: UpdateCheckForUpdateInput!
+  $condition: ModelCheckForUpdateConditionInput
 ) {
-  onUpdateCheckForUpdate(filter: $filter) {
+  updateCheckForUpdate(input: $input, condition: $condition) {
     id
     deployUuid
     createdAt
@@ -34,14 +38,16 @@ export const onUpdateCheckForUpdate = /* GraphQL */ `subscription OnUpdateCheckF
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateCheckForUpdateSubscriptionVariables,
-  APITypes.OnUpdateCheckForUpdateSubscription
->;
-export const onDeleteCheckForUpdate = /* GraphQL */ `subscription OnDeleteCheckForUpdate(
-  $filter: ModelSubscriptionCheckForUpdateFilterInput
+` as GeneratedMutation<
+    APITypes.UpdateCheckForUpdateMutationVariables,
+    APITypes.UpdateCheckForUpdateMutation
+  >;
+export const deleteCheckForUpdate =
+  /* GraphQL */ `mutation DeleteCheckForUpdate(
+  $input: DeleteCheckForUpdateInput!
+  $condition: ModelCheckForUpdateConditionInput
 ) {
-  onDeleteCheckForUpdate(filter: $filter) {
+  deleteCheckForUpdate(input: $input, condition: $condition) {
     id
     deployUuid
     createdAt
@@ -49,12 +55,15 @@ export const onDeleteCheckForUpdate = /* GraphQL */ `subscription OnDeleteCheckF
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteCheckForUpdateSubscriptionVariables,
-  APITypes.OnDeleteCheckForUpdateSubscription
->;
-export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
-  onCreateAppConfig(filter: $filter) {
+` as GeneratedMutation<
+    APITypes.DeleteCheckForUpdateMutationVariables,
+    APITypes.DeleteCheckForUpdateMutation
+  >;
+export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
+  $input: CreateAppConfigInput!
+  $condition: ModelAppConfigConditionInput
+) {
+  createAppConfig(input: $input, condition: $condition) {
     id
     name
     workStartTime
@@ -106,12 +115,15 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateAppConfigSubscriptionVariables,
-  APITypes.OnCreateAppConfigSubscription
+` as GeneratedMutation<
+  APITypes.CreateAppConfigMutationVariables,
+  APITypes.CreateAppConfigMutation
 >;
-export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
-  onUpdateAppConfig(filter: $filter) {
+export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
+  $input: UpdateAppConfigInput!
+  $condition: ModelAppConfigConditionInput
+) {
+  updateAppConfig(input: $input, condition: $condition) {
     id
     name
     workStartTime
@@ -163,12 +175,15 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateAppConfigSubscriptionVariables,
-  APITypes.OnUpdateAppConfigSubscription
+` as GeneratedMutation<
+  APITypes.UpdateAppConfigMutationVariables,
+  APITypes.UpdateAppConfigMutation
 >;
-export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
-  onDeleteAppConfig(filter: $filter) {
+export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
+  $input: DeleteAppConfigInput!
+  $condition: ModelAppConfigConditionInput
+) {
+  deleteAppConfig(input: $input, condition: $condition) {
     id
     name
     workStartTime
@@ -220,12 +235,15 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteAppConfigSubscriptionVariables,
-  APITypes.OnDeleteAppConfigSubscription
+` as GeneratedMutation<
+  APITypes.DeleteAppConfigMutationVariables,
+  APITypes.DeleteAppConfigMutation
 >;
-export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: ModelSubscriptionStaffFilterInput) {
-  onCreateStaff(filter: $filter) {
+export const createStaff = /* GraphQL */ `mutation CreateStaff(
+  $input: CreateStaffInput!
+  $condition: ModelStaffConditionInput
+) {
+  createStaff(input: $input, condition: $condition) {
     id
     cognitoUserId
     familyName
@@ -254,12 +272,15 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateStaffSubscriptionVariables,
-  APITypes.OnCreateStaffSubscription
+` as GeneratedMutation<
+  APITypes.CreateStaffMutationVariables,
+  APITypes.CreateStaffMutation
 >;
-export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: ModelSubscriptionStaffFilterInput) {
-  onUpdateStaff(filter: $filter) {
+export const updateStaff = /* GraphQL */ `mutation UpdateStaff(
+  $input: UpdateStaffInput!
+  $condition: ModelStaffConditionInput
+) {
+  updateStaff(input: $input, condition: $condition) {
     id
     cognitoUserId
     familyName
@@ -288,12 +309,15 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateStaffSubscriptionVariables,
-  APITypes.OnUpdateStaffSubscription
+` as GeneratedMutation<
+  APITypes.UpdateStaffMutationVariables,
+  APITypes.UpdateStaffMutation
 >;
-export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: ModelSubscriptionStaffFilterInput) {
-  onDeleteStaff(filter: $filter) {
+export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
+  $input: DeleteStaffInput!
+  $condition: ModelStaffConditionInput
+) {
+  deleteStaff(input: $input, condition: $condition) {
     id
     cognitoUserId
     familyName
@@ -322,14 +346,16 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteStaffSubscriptionVariables,
-  APITypes.OnDeleteStaffSubscription
+` as GeneratedMutation<
+  APITypes.DeleteStaffMutationVariables,
+  APITypes.DeleteStaffMutation
 >;
-export const onCreateHolidayCalendar = /* GraphQL */ `subscription OnCreateHolidayCalendar(
-  $filter: ModelSubscriptionHolidayCalendarFilterInput
+export const createHolidayCalendar =
+  /* GraphQL */ `mutation CreateHolidayCalendar(
+  $input: CreateHolidayCalendarInput!
+  $condition: ModelHolidayCalendarConditionInput
 ) {
-  onCreateHolidayCalendar(filter: $filter) {
+  createHolidayCalendar(input: $input, condition: $condition) {
     id
     holidayDate
     name
@@ -338,14 +364,16 @@ export const onCreateHolidayCalendar = /* GraphQL */ `subscription OnCreateHolid
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateHolidayCalendarSubscriptionVariables,
-  APITypes.OnCreateHolidayCalendarSubscription
->;
-export const onUpdateHolidayCalendar = /* GraphQL */ `subscription OnUpdateHolidayCalendar(
-  $filter: ModelSubscriptionHolidayCalendarFilterInput
+` as GeneratedMutation<
+    APITypes.CreateHolidayCalendarMutationVariables,
+    APITypes.CreateHolidayCalendarMutation
+  >;
+export const updateHolidayCalendar =
+  /* GraphQL */ `mutation UpdateHolidayCalendar(
+  $input: UpdateHolidayCalendarInput!
+  $condition: ModelHolidayCalendarConditionInput
 ) {
-  onUpdateHolidayCalendar(filter: $filter) {
+  updateHolidayCalendar(input: $input, condition: $condition) {
     id
     holidayDate
     name
@@ -354,14 +382,16 @@ export const onUpdateHolidayCalendar = /* GraphQL */ `subscription OnUpdateHolid
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateHolidayCalendarSubscriptionVariables,
-  APITypes.OnUpdateHolidayCalendarSubscription
->;
-export const onDeleteHolidayCalendar = /* GraphQL */ `subscription OnDeleteHolidayCalendar(
-  $filter: ModelSubscriptionHolidayCalendarFilterInput
+` as GeneratedMutation<
+    APITypes.UpdateHolidayCalendarMutationVariables,
+    APITypes.UpdateHolidayCalendarMutation
+  >;
+export const deleteHolidayCalendar =
+  /* GraphQL */ `mutation DeleteHolidayCalendar(
+  $input: DeleteHolidayCalendarInput!
+  $condition: ModelHolidayCalendarConditionInput
 ) {
-  onDeleteHolidayCalendar(filter: $filter) {
+  deleteHolidayCalendar(input: $input, condition: $condition) {
     id
     holidayDate
     name
@@ -370,14 +400,16 @@ export const onDeleteHolidayCalendar = /* GraphQL */ `subscription OnDeleteHolid
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteHolidayCalendarSubscriptionVariables,
-  APITypes.OnDeleteHolidayCalendarSubscription
->;
-export const onCreateCompanyHolidayCalendar = /* GraphQL */ `subscription OnCreateCompanyHolidayCalendar(
-  $filter: ModelSubscriptionCompanyHolidayCalendarFilterInput
+` as GeneratedMutation<
+    APITypes.DeleteHolidayCalendarMutationVariables,
+    APITypes.DeleteHolidayCalendarMutation
+  >;
+export const createCompanyHolidayCalendar =
+  /* GraphQL */ `mutation CreateCompanyHolidayCalendar(
+  $input: CreateCompanyHolidayCalendarInput!
+  $condition: ModelCompanyHolidayCalendarConditionInput
 ) {
-  onCreateCompanyHolidayCalendar(filter: $filter) {
+  createCompanyHolidayCalendar(input: $input, condition: $condition) {
     id
     holidayDate
     name
@@ -386,14 +418,16 @@ export const onCreateCompanyHolidayCalendar = /* GraphQL */ `subscription OnCrea
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateCompanyHolidayCalendarSubscriptionVariables,
-  APITypes.OnCreateCompanyHolidayCalendarSubscription
->;
-export const onUpdateCompanyHolidayCalendar = /* GraphQL */ `subscription OnUpdateCompanyHolidayCalendar(
-  $filter: ModelSubscriptionCompanyHolidayCalendarFilterInput
+` as GeneratedMutation<
+    APITypes.CreateCompanyHolidayCalendarMutationVariables,
+    APITypes.CreateCompanyHolidayCalendarMutation
+  >;
+export const updateCompanyHolidayCalendar =
+  /* GraphQL */ `mutation UpdateCompanyHolidayCalendar(
+  $input: UpdateCompanyHolidayCalendarInput!
+  $condition: ModelCompanyHolidayCalendarConditionInput
 ) {
-  onUpdateCompanyHolidayCalendar(filter: $filter) {
+  updateCompanyHolidayCalendar(input: $input, condition: $condition) {
     id
     holidayDate
     name
@@ -402,14 +436,16 @@ export const onUpdateCompanyHolidayCalendar = /* GraphQL */ `subscription OnUpda
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateCompanyHolidayCalendarSubscriptionVariables,
-  APITypes.OnUpdateCompanyHolidayCalendarSubscription
->;
-export const onDeleteCompanyHolidayCalendar = /* GraphQL */ `subscription OnDeleteCompanyHolidayCalendar(
-  $filter: ModelSubscriptionCompanyHolidayCalendarFilterInput
+` as GeneratedMutation<
+    APITypes.UpdateCompanyHolidayCalendarMutationVariables,
+    APITypes.UpdateCompanyHolidayCalendarMutation
+  >;
+export const deleteCompanyHolidayCalendar =
+  /* GraphQL */ `mutation DeleteCompanyHolidayCalendar(
+  $input: DeleteCompanyHolidayCalendarInput!
+  $condition: ModelCompanyHolidayCalendarConditionInput
 ) {
-  onDeleteCompanyHolidayCalendar(filter: $filter) {
+  deleteCompanyHolidayCalendar(input: $input, condition: $condition) {
     id
     holidayDate
     name
@@ -418,12 +454,15 @@ export const onDeleteCompanyHolidayCalendar = /* GraphQL */ `subscription OnDele
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteCompanyHolidayCalendarSubscriptionVariables,
-  APITypes.OnDeleteCompanyHolidayCalendarSubscription
->;
-export const onCreateCloseDate = /* GraphQL */ `subscription OnCreateCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
-  onCreateCloseDate(filter: $filter) {
+` as GeneratedMutation<
+    APITypes.DeleteCompanyHolidayCalendarMutationVariables,
+    APITypes.DeleteCompanyHolidayCalendarMutation
+  >;
+export const createCloseDate = /* GraphQL */ `mutation CreateCloseDate(
+  $input: CreateCloseDateInput!
+  $condition: ModelCloseDateConditionInput
+) {
+  createCloseDate(input: $input, condition: $condition) {
     id
     closeDate
     startDate
@@ -433,44 +472,51 @@ export const onCreateCloseDate = /* GraphQL */ `subscription OnCreateCloseDate($
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateCloseDateSubscriptionVariables,
-  APITypes.OnCreateCloseDateSubscription
+` as GeneratedMutation<
+  APITypes.CreateCloseDateMutationVariables,
+  APITypes.CreateCloseDateMutation
 >;
-export const onUpdateCloseDate = /* GraphQL */ `subscription OnUpdateCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
-  onUpdateCloseDate(filter: $filter) {
-    id
-    closeDate
-    startDate
-    endDate
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdateCloseDateSubscriptionVariables,
-  APITypes.OnUpdateCloseDateSubscription
->;
-export const onDeleteCloseDate = /* GraphQL */ `subscription OnDeleteCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
-  onDeleteCloseDate(filter: $filter) {
-    id
-    closeDate
-    startDate
-    endDate
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteCloseDateSubscriptionVariables,
-  APITypes.OnDeleteCloseDateSubscription
->;
-export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance(
-  $filter: ModelSubscriptionAttendanceFilterInput
+export const updateCloseDate = /* GraphQL */ `mutation UpdateCloseDate(
+  $input: UpdateCloseDateInput!
+  $condition: ModelCloseDateConditionInput
 ) {
-  onCreateAttendance(filter: $filter) {
+  updateCloseDate(input: $input, condition: $condition) {
+    id
+    closeDate
+    startDate
+    endDate
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCloseDateMutationVariables,
+  APITypes.UpdateCloseDateMutation
+>;
+export const deleteCloseDate = /* GraphQL */ `mutation DeleteCloseDate(
+  $input: DeleteCloseDateInput!
+  $condition: ModelCloseDateConditionInput
+) {
+  deleteCloseDate(input: $input, condition: $condition) {
+    id
+    closeDate
+    startDate
+    endDate
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCloseDateMutationVariables,
+  APITypes.DeleteCloseDateMutation
+>;
+export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
+  $input: CreateAttendanceInput!
+  $condition: ModelAttendanceConditionInput
+) {
+  createAttendance(input: $input, condition: $condition) {
     id
     staffId
     workDate
@@ -561,14 +607,15 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateAttendanceSubscriptionVariables,
-  APITypes.OnCreateAttendanceSubscription
+` as GeneratedMutation<
+  APITypes.CreateAttendanceMutationVariables,
+  APITypes.CreateAttendanceMutation
 >;
-export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance(
-  $filter: ModelSubscriptionAttendanceFilterInput
+export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
+  $input: UpdateAttendanceInput!
+  $condition: ModelAttendanceConditionInput
 ) {
-  onUpdateAttendance(filter: $filter) {
+  updateAttendance(input: $input, condition: $condition) {
     id
     staffId
     workDate
@@ -659,14 +706,15 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateAttendanceSubscriptionVariables,
-  APITypes.OnUpdateAttendanceSubscription
+` as GeneratedMutation<
+  APITypes.UpdateAttendanceMutationVariables,
+  APITypes.UpdateAttendanceMutation
 >;
-export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance(
-  $filter: ModelSubscriptionAttendanceFilterInput
+export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
+  $input: DeleteAttendanceInput!
+  $condition: ModelAttendanceConditionInput
 ) {
-  onDeleteAttendance(filter: $filter) {
+  deleteAttendance(input: $input, condition: $condition) {
     id
     staffId
     workDate
@@ -757,65 +805,75 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteAttendanceSubscriptionVariables,
-  APITypes.OnDeleteAttendanceSubscription
+` as GeneratedMutation<
+  APITypes.DeleteAttendanceMutationVariables,
+  APITypes.DeleteAttendanceMutation
 >;
-export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument($filter: ModelSubscriptionDocumentFilterInput) {
-  onCreateDocument(filter: $filter) {
-    id
-    title
-    content
-    tag
-    targetRole
-    revision
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateDocumentSubscriptionVariables,
-  APITypes.OnCreateDocumentSubscription
->;
-export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument($filter: ModelSubscriptionDocumentFilterInput) {
-  onUpdateDocument(filter: $filter) {
-    id
-    title
-    content
-    tag
-    targetRole
-    revision
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdateDocumentSubscriptionVariables,
-  APITypes.OnUpdateDocumentSubscription
->;
-export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument($filter: ModelSubscriptionDocumentFilterInput) {
-  onDeleteDocument(filter: $filter) {
-    id
-    title
-    content
-    tag
-    targetRole
-    revision
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteDocumentSubscriptionVariables,
-  APITypes.OnDeleteDocumentSubscription
->;
-export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftRequest(
-  $filter: ModelSubscriptionShiftRequestFilterInput
+export const createDocument = /* GraphQL */ `mutation CreateDocument(
+  $input: CreateDocumentInput!
+  $condition: ModelDocumentConditionInput
 ) {
-  onCreateShiftRequest(filter: $filter) {
+  createDocument(input: $input, condition: $condition) {
+    id
+    title
+    content
+    tag
+    targetRole
+    revision
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDocumentMutationVariables,
+  APITypes.CreateDocumentMutation
+>;
+export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
+  $input: UpdateDocumentInput!
+  $condition: ModelDocumentConditionInput
+) {
+  updateDocument(input: $input, condition: $condition) {
+    id
+    title
+    content
+    tag
+    targetRole
+    revision
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDocumentMutationVariables,
+  APITypes.UpdateDocumentMutation
+>;
+export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
+  $input: DeleteDocumentInput!
+  $condition: ModelDocumentConditionInput
+) {
+  deleteDocument(input: $input, condition: $condition) {
+    id
+    title
+    content
+    tag
+    targetRole
+    revision
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDocumentMutationVariables,
+  APITypes.DeleteDocumentMutation
+>;
+export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
+  $input: CreateShiftRequestInput!
+  $condition: ModelShiftRequestConditionInput
+) {
+  createShiftRequest(input: $input, condition: $condition) {
     id
     staffId
     targetMonth
@@ -858,14 +916,15 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateShiftRequestSubscriptionVariables,
-  APITypes.OnCreateShiftRequestSubscription
+` as GeneratedMutation<
+  APITypes.CreateShiftRequestMutationVariables,
+  APITypes.CreateShiftRequestMutation
 >;
-export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftRequest(
-  $filter: ModelSubscriptionShiftRequestFilterInput
+export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
+  $input: UpdateShiftRequestInput!
+  $condition: ModelShiftRequestConditionInput
 ) {
-  onUpdateShiftRequest(filter: $filter) {
+  updateShiftRequest(input: $input, condition: $condition) {
     id
     staffId
     targetMonth
@@ -908,14 +967,15 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateShiftRequestSubscriptionVariables,
-  APITypes.OnUpdateShiftRequestSubscription
+` as GeneratedMutation<
+  APITypes.UpdateShiftRequestMutationVariables,
+  APITypes.UpdateShiftRequestMutation
 >;
-export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftRequest(
-  $filter: ModelSubscriptionShiftRequestFilterInput
+export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
+  $input: DeleteShiftRequestInput!
+  $condition: ModelShiftRequestConditionInput
 ) {
-  onDeleteShiftRequest(filter: $filter) {
+  deleteShiftRequest(input: $input, condition: $condition) {
     id
     staffId
     targetMonth
@@ -958,14 +1018,15 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteShiftRequestSubscriptionVariables,
-  APITypes.OnDeleteShiftRequestSubscription
+` as GeneratedMutation<
+  APITypes.DeleteShiftRequestMutationVariables,
+  APITypes.DeleteShiftRequestMutation
 >;
-export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPlanYear(
-  $filter: ModelSubscriptionShiftPlanYearFilterInput
+export const createShiftPlanYear = /* GraphQL */ `mutation CreateShiftPlanYear(
+  $input: CreateShiftPlanYearInput!
+  $condition: ModelShiftPlanYearConditionInput
 ) {
-  onCreateShiftPlanYear(filter: $filter) {
+  createShiftPlanYear(input: $input, condition: $condition) {
     id
     targetYear
     plans {
@@ -984,14 +1045,15 @@ export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPl
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateShiftPlanYearSubscriptionVariables,
-  APITypes.OnCreateShiftPlanYearSubscription
+` as GeneratedMutation<
+  APITypes.CreateShiftPlanYearMutationVariables,
+  APITypes.CreateShiftPlanYearMutation
 >;
-export const onUpdateShiftPlanYear = /* GraphQL */ `subscription OnUpdateShiftPlanYear(
-  $filter: ModelSubscriptionShiftPlanYearFilterInput
+export const updateShiftPlanYear = /* GraphQL */ `mutation UpdateShiftPlanYear(
+  $input: UpdateShiftPlanYearInput!
+  $condition: ModelShiftPlanYearConditionInput
 ) {
-  onUpdateShiftPlanYear(filter: $filter) {
+  updateShiftPlanYear(input: $input, condition: $condition) {
     id
     targetYear
     plans {
@@ -1010,14 +1072,15 @@ export const onUpdateShiftPlanYear = /* GraphQL */ `subscription OnUpdateShiftPl
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateShiftPlanYearSubscriptionVariables,
-  APITypes.OnUpdateShiftPlanYearSubscription
+` as GeneratedMutation<
+  APITypes.UpdateShiftPlanYearMutationVariables,
+  APITypes.UpdateShiftPlanYearMutation
 >;
-export const onDeleteShiftPlanYear = /* GraphQL */ `subscription OnDeleteShiftPlanYear(
-  $filter: ModelSubscriptionShiftPlanYearFilterInput
+export const deleteShiftPlanYear = /* GraphQL */ `mutation DeleteShiftPlanYear(
+  $input: DeleteShiftPlanYearInput!
+  $condition: ModelShiftPlanYearConditionInput
 ) {
-  onDeleteShiftPlanYear(filter: $filter) {
+  deleteShiftPlanYear(input: $input, condition: $condition) {
     id
     targetYear
     plans {
@@ -1036,12 +1099,15 @@ export const onDeleteShiftPlanYear = /* GraphQL */ `subscription OnDeleteShiftPl
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteShiftPlanYearSubscriptionVariables,
-  APITypes.OnDeleteShiftPlanYearSubscription
+` as GeneratedMutation<
+  APITypes.DeleteShiftPlanYearMutationVariables,
+  APITypes.DeleteShiftPlanYearMutation
 >;
-export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
-  onCreateWorkflow(filter: $filter) {
+export const createWorkflow = /* GraphQL */ `mutation CreateWorkflow(
+  $input: CreateWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  createWorkflow(input: $input, condition: $condition) {
     id
     approvedStaffIds
     rejectedStaffIds
@@ -1083,12 +1149,15 @@ export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($fi
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateWorkflowSubscriptionVariables,
-  APITypes.OnCreateWorkflowSubscription
+` as GeneratedMutation<
+  APITypes.CreateWorkflowMutationVariables,
+  APITypes.CreateWorkflowMutation
 >;
-export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
-  onUpdateWorkflow(filter: $filter) {
+export const updateWorkflow = /* GraphQL */ `mutation UpdateWorkflow(
+  $input: UpdateWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  updateWorkflow(input: $input, condition: $condition) {
     id
     approvedStaffIds
     rejectedStaffIds
@@ -1130,12 +1199,15 @@ export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($fi
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateWorkflowSubscriptionVariables,
-  APITypes.OnUpdateWorkflowSubscription
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowMutationVariables,
+  APITypes.UpdateWorkflowMutation
 >;
-export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
-  onDeleteWorkflow(filter: $filter) {
+export const deleteWorkflow = /* GraphQL */ `mutation DeleteWorkflow(
+  $input: DeleteWorkflowInput!
+  $condition: ModelWorkflowConditionInput
+) {
+  deleteWorkflow(input: $input, condition: $condition) {
     id
     approvedStaffIds
     rejectedStaffIds
@@ -1177,14 +1249,15 @@ export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($fi
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteWorkflowSubscriptionVariables,
-  APITypes.OnDeleteWorkflowSubscription
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowMutationVariables,
+  APITypes.DeleteWorkflowMutation
 >;
-export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperationLog(
-  $filter: ModelSubscriptionOperationLogFilterInput
+export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
+  $input: CreateOperationLogInput!
+  $condition: ModelOperationLogConditionInput
 ) {
-  onCreateOperationLog(filter: $filter) {
+  createOperationLog(input: $input, condition: $condition) {
     id
     staffId
     action
@@ -1201,14 +1274,15 @@ export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperatio
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateOperationLogSubscriptionVariables,
-  APITypes.OnCreateOperationLogSubscription
+` as GeneratedMutation<
+  APITypes.CreateOperationLogMutationVariables,
+  APITypes.CreateOperationLogMutation
 >;
-export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperationLog(
-  $filter: ModelSubscriptionOperationLogFilterInput
+export const updateOperationLog = /* GraphQL */ `mutation UpdateOperationLog(
+  $input: UpdateOperationLogInput!
+  $condition: ModelOperationLogConditionInput
 ) {
-  onUpdateOperationLog(filter: $filter) {
+  updateOperationLog(input: $input, condition: $condition) {
     id
     staffId
     action
@@ -1225,14 +1299,15 @@ export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperatio
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateOperationLogSubscriptionVariables,
-  APITypes.OnUpdateOperationLogSubscription
+` as GeneratedMutation<
+  APITypes.UpdateOperationLogMutationVariables,
+  APITypes.UpdateOperationLogMutation
 >;
-export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperationLog(
-  $filter: ModelSubscriptionOperationLogFilterInput
+export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
+  $input: DeleteOperationLogInput!
+  $condition: ModelOperationLogConditionInput
 ) {
-  onDeleteOperationLog(filter: $filter) {
+  deleteOperationLog(input: $input, condition: $condition) {
     id
     staffId
     action
@@ -1249,14 +1324,15 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteOperationLogSubscriptionVariables,
-  APITypes.OnDeleteOperationLogSubscription
+` as GeneratedMutation<
+  APITypes.DeleteOperationLogMutationVariables,
+  APITypes.DeleteOperationLogMutation
 >;
-export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyReport(
-  $filter: ModelSubscriptionDailyReportFilterInput
+export const createDailyReport = /* GraphQL */ `mutation CreateDailyReport(
+  $input: CreateDailyReportInput!
+  $condition: ModelDailyReportConditionInput
 ) {
-  onCreateDailyReport(filter: $filter) {
+  createDailyReport(input: $input, condition: $condition) {
     id
     staffId
     reportDate
@@ -1282,14 +1358,15 @@ export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyRepo
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnCreateDailyReportSubscriptionVariables,
-  APITypes.OnCreateDailyReportSubscription
+` as GeneratedMutation<
+  APITypes.CreateDailyReportMutationVariables,
+  APITypes.CreateDailyReportMutation
 >;
-export const onUpdateDailyReport = /* GraphQL */ `subscription OnUpdateDailyReport(
-  $filter: ModelSubscriptionDailyReportFilterInput
+export const updateDailyReport = /* GraphQL */ `mutation UpdateDailyReport(
+  $input: UpdateDailyReportInput!
+  $condition: ModelDailyReportConditionInput
 ) {
-  onUpdateDailyReport(filter: $filter) {
+  updateDailyReport(input: $input, condition: $condition) {
     id
     staffId
     reportDate
@@ -1315,14 +1392,15 @@ export const onUpdateDailyReport = /* GraphQL */ `subscription OnUpdateDailyRepo
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnUpdateDailyReportSubscriptionVariables,
-  APITypes.OnUpdateDailyReportSubscription
+` as GeneratedMutation<
+  APITypes.UpdateDailyReportMutationVariables,
+  APITypes.UpdateDailyReportMutation
 >;
-export const onDeleteDailyReport = /* GraphQL */ `subscription OnDeleteDailyReport(
-  $filter: ModelSubscriptionDailyReportFilterInput
+export const deleteDailyReport = /* GraphQL */ `mutation DeleteDailyReport(
+  $input: DeleteDailyReportInput!
+  $condition: ModelDailyReportConditionInput
 ) {
-  onDeleteDailyReport(filter: $filter) {
+  deleteDailyReport(input: $input, condition: $condition) {
     id
     staffId
     reportDate
@@ -1348,7 +1426,7 @@ export const onDeleteDailyReport = /* GraphQL */ `subscription OnDeleteDailyRepo
     __typename
   }
 }
-` as GeneratedSubscription<
-  APITypes.OnDeleteDailyReportSubscriptionVariables,
-  APITypes.OnDeleteDailyReportSubscription
+` as GeneratedMutation<
+  APITypes.DeleteDailyReportMutationVariables,
+  APITypes.DeleteDailyReportMutation
 >;

@@ -1,13 +1,12 @@
 import { TableCell, TableRow } from "@mui/material";
-
-import { AttendanceChangeRequest } from "../../../../API";
+import { AttendanceChangeRequest } from "@shared/api/graphql/types";
 
 export default function GoDirectlyFlagTableRow({
   value,
   beforeValue,
 }: {
   value: AttendanceChangeRequest["goDirectlyFlag"];
-  beforeValue?: import("../../../../API").Attendance["goDirectlyFlag"];
+  beforeValue?: import("@shared/api/graphql/types").Attendance["goDirectlyFlag"];
 }) {
   const changed =
     (value === null ? null : value) !==

@@ -1,3 +1,4 @@
+import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { createContext } from "react";
 import {
@@ -14,7 +15,6 @@ import {
   UseFormWatch,
 } from "react-hook-form";
 
-import { Attendance, AttendanceChangeRequest } from "@/API";
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 
 import { AttendanceEditInputs } from "./common";

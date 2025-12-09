@@ -13,10 +13,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Page from "@shared/ui/page/Page";
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 import {
   ApprovalStatus,
   ApprovalStepInput,
@@ -25,7 +21,11 @@ import {
   CreateWorkflowInput,
   WorkflowCategory,
   WorkflowStatus,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import Page from "@shared/ui/page/Page";
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { useAppDispatchV2 } from "@/app/hooks";
 import WorkflowTypeFields from "@/components/Workflow/WorkflowTypeFields";
 import { AuthContext } from "@/context/AuthContext";

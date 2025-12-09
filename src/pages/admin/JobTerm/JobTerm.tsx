@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridRowParams } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
+import { CloseDate } from "@shared/api/graphql/types";
 import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -18,7 +19,6 @@ import { Controller, useForm } from "react-hook-form";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import { CloseDate } from "../../../API";
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
 import useCloseDates from "../../../hooks/useCloseDates/useCloseDates";

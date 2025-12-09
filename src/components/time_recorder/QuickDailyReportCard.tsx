@@ -1,16 +1,19 @@
 import { GraphQLResult } from "@aws-amplify/api";
-import { API } from "aws-amplify";
-import { useEffect, useMemo, useState } from "react";
-
+import {
+  createDailyReport,
+  updateDailyReport,
+} from "@shared/api/graphql/documents/mutations";
+import { dailyReportsByStaffId } from "@shared/api/graphql/documents/queries";
 import type {
   CreateDailyReportMutation,
   DailyReportsByStaffIdQuery,
   UpdateDailyReportMutation,
-} from "@/API";
-import { DailyReportStatus } from "@/API";
+} from "@shared/api/graphql/types";
+import { DailyReportStatus } from "@shared/api/graphql/types";
+import { API } from "aws-amplify";
+import { useEffect, useMemo, useState } from "react";
+
 import { useAppDispatchV2 } from "@/app/hooks";
-import { createDailyReport, updateDailyReport } from "@/graphql/mutations";
-import { dailyReportsByStaffId } from "@/graphql/queries";
 import {
   setSnackbarError,
   setSnackbarSuccess,

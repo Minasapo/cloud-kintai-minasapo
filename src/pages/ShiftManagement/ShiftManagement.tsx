@@ -1,5 +1,9 @@
 import { GraphQLResult } from "@aws-amplify/api";
 import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@entities/calendar/api/calendarApi";
+import {
   Alert,
   Badge,
   Box,
@@ -24,12 +28,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import { API } from "aws-amplify";
-import dayjs from "dayjs";
-import React, { useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import {
+  createShiftRequest,
+  updateShiftRequest,
+} from "@shared/api/graphql/documents/mutations";
+import { listShiftRequests } from "@shared/api/graphql/documents/queries";
 import {
   CreateShiftRequestMutation,
   ListShiftRequestsQuery,
@@ -38,17 +41,17 @@ import {
   ShiftRequestStatus,
   ShiftRequestSummaryInput,
   UpdateShiftRequestMutation,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import { API } from "aws-amplify";
+import dayjs from "dayjs";
+import React, { useContext, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@/entities/calendar/api/calendarApi";
 import * as MESSAGE_CODE from "@/errors";
-import { createShiftRequest, updateShiftRequest } from "@/graphql/mutations";
-import { listShiftRequests } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import {

@@ -1,1 +1,1 @@
-export * from "@/entities/app-config/api/appConfigApi";
+export * from "@entities/app-config/api/appConfigApi";

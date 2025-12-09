@@ -1,4 +1,4 @@
-import { Attendance, UpdateAttendanceInput } from "../../../API";
+import { Attendance, UpdateAttendanceInput } from "@shared/api/graphql/types";
 
 export default async function handleRejectChangeRequest(
   attendance: Attendance | null,

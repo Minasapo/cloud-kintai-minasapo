@@ -4,7 +4,7 @@ import {
   type DailyReportReaction,
   DailyReportReactionType,
   DailyReportStatus,
-} from "@/API";
+} from "@shared/api/graphql/types";
 
 export type ReportStatus = DailyReportStatus;
 export type DisplayStatus = Exclude<ReportStatus, DailyReportStatus.DRAFT>;

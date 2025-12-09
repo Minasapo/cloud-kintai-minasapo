@@ -1,3 +1,4 @@
+import { useLazyListRecentAttendancesQuery } from "@entities/attendance/api/attendanceApi";
 import {
   Box,
   Chip,
@@ -10,13 +11,12 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import type { Attendance, Rest } from "@shared/api/graphql/types";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import type { Attendance, Rest } from "@/API";
-import { useLazyListRecentAttendancesQuery } from "@/entities/attendance/api/attendanceApi";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 
 // 日付ごとの時間軸ビュー（デモ用のモック表示）

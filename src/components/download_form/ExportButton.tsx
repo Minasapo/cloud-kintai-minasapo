@@ -1,9 +1,9 @@
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import { Button } from "@mui/material";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
-import { Attendance } from "@/API";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 

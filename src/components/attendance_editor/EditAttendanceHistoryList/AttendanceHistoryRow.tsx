@@ -10,12 +10,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { AttendanceHistory } from "@shared/api/graphql/types";
 import { useContext, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
-
-import { AttendanceHistory } from "../../../API";
 
 export function AttendanceHistoryRow({
   history,

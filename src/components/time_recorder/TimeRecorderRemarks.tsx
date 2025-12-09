@@ -1,6 +1,6 @@
+import type { Attendance } from "@shared/api/graphql/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { Attendance } from "@/API";
 import TimeRecorderRemarksView from "@/shared/ui/time-recorder/TimeRecorderRemarks";
 
 export interface TimeRecorderRemarksProps {

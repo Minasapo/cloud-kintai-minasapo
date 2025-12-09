@@ -7,10 +7,10 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
+import { CreateStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { CreateStaffInput, UpdateStaffInput } from "../../../API";
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
 import addUserToGroup from "../../../hooks/common/addUserToGroup";

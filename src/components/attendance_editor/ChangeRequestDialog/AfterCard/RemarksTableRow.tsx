@@ -1,13 +1,12 @@
 import { TableCell, TableRow } from "@mui/material";
-
-import { AttendanceChangeRequest } from "../../../../API";
+import { AttendanceChangeRequest } from "@shared/api/graphql/types";
 
 export default function RemarksTableRow({
   value,
   beforeValue,
 }: {
   value: AttendanceChangeRequest["remarks"];
-  beforeValue?: import("../../../../API").Attendance["remarks"];
+  beforeValue?: import("@shared/api/graphql/types").Attendance["remarks"];
 }) {
   const changed = (value ?? null) !== (beforeValue ?? null);
 

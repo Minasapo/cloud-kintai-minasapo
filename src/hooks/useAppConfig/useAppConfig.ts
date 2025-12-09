@@ -1,17 +1,17 @@
-import dayjs from "dayjs";
-import { useCallback, useMemo } from "react";
-
-import type {
-  AppConfig,
-  CreateAppConfigInput,
-  UpdateAppConfigInput,
-} from "@/API";
-import { DEFAULT_THEME_COLOR } from "@/constants/theme";
 import {
   useCreateAppConfigMutation,
   useGetAppConfigQuery,
   useUpdateAppConfigMutation,
-} from "@/entities/app-config/api/appConfigApi";
+} from "@entities/app-config/api/appConfigApi";
+import type {
+  AppConfig,
+  CreateAppConfigInput,
+  UpdateAppConfigInput,
+} from "@shared/api/graphql/types";
+import dayjs from "dayjs";
+import { useCallback, useMemo } from "react";
+
+import { DEFAULT_THEME_COLOR } from "@/constants/theme";
 
 /**
  * アプリケーション設定の一部項目のみを抽出した型。

@@ -9,8 +9,8 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getOperationLog } from "../graphql/queries";
-import { updateOperationLog } from "../graphql/mutations";
+import { getOperationLog } from "@shared/api/graphql/documents/queries";
+import { updateOperationLog } from "@shared/api/graphql/documents/mutations";
 export default function OperationLogUpdateForm(props) {
   const {
     id: idProp,

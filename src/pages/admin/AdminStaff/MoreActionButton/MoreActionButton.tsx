@@ -1,8 +1,8 @@
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { IconButton, Menu } from "@mui/material";
+import { DeleteStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 
-import { DeleteStaffInput, UpdateStaffInput } from "../../../../API";
 import { StaffType } from "../../../../hooks/useStaffs/useStaffs";
 import { DeleteAccountMenuItem } from "./DeleteAccountMenuItem";
 import { DisableAccountMenuItem } from "./DisableAccountMenuItem";

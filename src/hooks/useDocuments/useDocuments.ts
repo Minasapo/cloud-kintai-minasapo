@@ -1,6 +1,9 @@
+import {
+  CreateDocumentInput,
+  Document as APIDocument,
+} from "@shared/api/graphql/types";
 import { useEffect, useState } from "react";
 
-import { CreateDocumentInput, Document as APIDocument } from "../../API";
 import createDocumentData from "./createDocumentData";
 import fetchDocuments from "./fetchDocuments";
 

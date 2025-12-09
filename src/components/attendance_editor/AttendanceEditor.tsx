@@ -1,3 +1,8 @@
+import {
+  useCreateAttendanceMutation,
+  useLazyGetAttendanceByStaffAndDateQuery,
+  useUpdateAttendanceMutation,
+} from "@entities/attendance/api/attendanceApi";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
   Alert,
@@ -20,6 +25,12 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
+import {
+  AttendanceHistory,
+  CreateAttendanceInput,
+  SystemCommentInput,
+  UpdateAttendanceInput,
+} from "@shared/api/graphql/types";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import Title from "@shared/ui/typography/Title";
 import { Logger } from "aws-amplify";
@@ -28,21 +39,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import {
-  AttendanceHistory,
-  CreateAttendanceInput,
-  SystemCommentInput,
-  UpdateAttendanceInput,
-} from "@/API";
 import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
 import IsDeemedHolidayFlagInput from "@/components/attendance_editor/IsDeemedHolidayFlagInput";
 import PaidHolidayFlagInputCommon from "@/components/attendance_editor/PaidHolidayFlagInput";
 import ReturnDirectlyFlagInput from "@/components/attendance_editor/ReturnDirectlyFlagInput";
-import {
-  useCreateAttendanceMutation,
-  useLazyGetAttendanceByStaffAndDateQuery,
-  useUpdateAttendanceMutation,
-} from "@/entities/attendance/api/attendanceApi";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
