@@ -20,6 +20,7 @@ import {
  * MaterialUIのDatePickerコンポーネント。
  */
 import { DatePicker } from "@mui/x-date-pickers";
+import { Staff } from "@shared/api/graphql/types";
 import Title from "@shared/ui/typography/Title";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
@@ -40,7 +41,6 @@ import { AttendanceDate } from "@/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 
-import { Staff } from "../../API";
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";

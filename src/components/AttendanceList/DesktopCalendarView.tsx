@@ -10,16 +10,16 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import dayjs, { Dayjs } from "dayjs";
-import { useMemo, useState } from "react";
-import { NavigateFunction } from "react-router-dom";
-
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import dayjs, { Dayjs } from "dayjs";
+import { useMemo, useState } from "react";
+import { NavigateFunction } from "react-router-dom";
+
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { CompanyHoliday } from "@/lib/CompanyHoliday";

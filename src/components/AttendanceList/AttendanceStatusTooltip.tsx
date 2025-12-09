@@ -2,15 +2,14 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import { Box, Tooltip } from "@mui/material";
-
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
-} from "../../API";
+} from "@shared/api/graphql/types";
+
+import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 
 export function AttendanceStatusTooltip({
   staff,

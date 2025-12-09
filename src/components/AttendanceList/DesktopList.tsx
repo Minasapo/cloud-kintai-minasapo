@@ -14,6 +14,12 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import {
+  Attendance,
+  CompanyHolidayCalendar,
+  HolidayCalendar,
+  Staff,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { NavigateFunction } from "react-router-dom";
 
@@ -28,12 +34,6 @@ import { UpdatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/Updat
 import { WorkDateTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkDateTableCell";
 import { WorkTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkTimeTableCell";
 
-import {
-  Attendance,
-  CompanyHolidayCalendar,
-  HolidayCalendar,
-  Staff,
-} from "../../API";
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 
 const DesktopBox = styled(Box)(({ theme }) => ({
