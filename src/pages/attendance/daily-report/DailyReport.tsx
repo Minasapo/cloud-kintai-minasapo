@@ -12,15 +12,14 @@ import {
   Grid,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import {
-  PickersDay,
-  type PickersDayProps,
-} from "@mui/x-date-pickers/PickersDay";
+  DailyReportCalendar,
+  DailyReportFormChangeHandler,
+  DailyReportFormData,
+  DailyReportFormFields,
+} from "@features/attendance/daily-report";
 import {
   createDailyReport,
   updateDailyReport,
@@ -77,12 +76,7 @@ interface DailyReportItem {
   comments: AdminComment[];
 }
 
-interface DailyReportForm {
-  date: string;
-  author: string;
-  title: string;
-  content: string;
-}
+type DailyReportForm = DailyReportFormData;
 
 const STATUS_META: Record<
   ReportStatus,
@@ -203,42 +197,6 @@ export default function DailyReport() {
     });
     return { dateMap, dateSet };
   }, [reports]);
-  const ReportCalendarDay = useMemo(
-    () =>
-      function ReportCalendarDay(dayProps: PickersDayProps<Dayjs>) {
-        const { day, outsideCurrentMonth, selected, ...other } = dayProps;
-        const dateKey = day.format("YYYY-MM-DD");
-        const hasReport = reportedDateSet.has(dateKey);
-
-        return (
-          <PickersDay
-            {...other}
-            day={day}
-            outsideCurrentMonth={outsideCurrentMonth}
-            selected={selected}
-            sx={(theme) => {
-              const baseStyle = { borderRadius: 2 };
-              if (selected || outsideCurrentMonth) {
-                return baseStyle;
-              }
-              if (hasReport) {
-                return {
-                  ...baseStyle,
-                  bgcolor: alpha(theme.palette.success.main, 0.4),
-                  color: theme.palette.success.contrastText,
-                  "&:hover, &:focus": {
-                    bgcolor: alpha(theme.palette.success.main, 0.6),
-                  },
-                };
-              }
-              return baseStyle;
-            }}
-          />
-        );
-      },
-    [reportedDateSet]
-  );
-
   const isCreateMode = selectedReportId === "create";
   const resolvedAuthorName = authorName || "スタッフ";
   const canSubmit = Boolean(staffId && createForm.title.trim());
@@ -431,7 +389,7 @@ export default function DailyReport() {
     });
   };
 
-  const handleCreateChange = (field: keyof DailyReportForm, value: string) => {
+  const handleCreateChange: DailyReportFormChangeHandler = (field, value) => {
     setCreateForm((prev) => {
       if (field === "date") {
         const nextDate = value;
@@ -527,7 +485,7 @@ export default function DailyReport() {
     });
   };
 
-  const handleEditChange = (field: keyof DailyReportForm, value: string) => {
+  const handleEditChange: DailyReportFormChangeHandler = (field, value) => {
     setEditDraft((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
@@ -591,52 +549,6 @@ export default function DailyReport() {
     setActionError(null);
   };
 
-  const renderFormFields = (
-    form: DailyReportForm,
-    onChange: (field: keyof DailyReportForm, value: string) => void
-  ) => (
-    <Grid spacing={2} container>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          label="日付"
-          type="date"
-          value={form.date}
-          onChange={(event) => onChange("date", event.target.value)}
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          label="担当者"
-          value={form.author || resolvedAuthorName}
-          InputProps={{ readOnly: true }}
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="タイトル"
-          value={form.title}
-          onChange={(event) => onChange("title", event.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="内容"
-          value={form.content}
-          onChange={(event) => onChange("content", event.target.value)}
-          multiline
-          minRows={6}
-          fullWidth
-          placeholder={"例) サマリ/実施タスク/課題などをまとめて記入"}
-        />
-      </Grid>
-    </Grid>
-  );
-
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Stack spacing={3}>
@@ -654,41 +566,13 @@ export default function DailyReport() {
 
         <Grid container spacing={3} alignItems="flex-start">
           <Grid item xs={12} md={3}>
-            <Paper variant="outlined" sx={{ height: "100%" }}>
-              <Box sx={{ p: 1 }}>
-                <DateCalendar
-                  value={calendarDate}
-                  onChange={handleCalendarChange}
-                  reduceAnimations
-                  slots={{ day: ReportCalendarDay }}
-                />
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ display: "block", mt: 0.5 }}
-                >
-                  カレンダーの日付を選択すると該当日の日報を確認・作成できます。
-                </Typography>
-                {isLoadingReports && (
-                  <Typography
-                    color="text.secondary"
-                    variant="body2"
-                    sx={{ mt: 1 }}
-                  >
-                    日報を読み込み中です…
-                  </Typography>
-                )}
-                {!isLoadingReports && reports.length === 0 && (
-                  <Typography
-                    color="text.secondary"
-                    variant="body2"
-                    sx={{ mt: 1 }}
-                  >
-                    まだ日報がありません。カレンダーから日付を選択して作成してください。
-                  </Typography>
-                )}
-              </Box>
-            </Paper>
+            <DailyReportCalendar
+              value={calendarDate}
+              onChange={handleCalendarChange}
+              reportedDateSet={reportedDateSet}
+              isLoadingReports={isLoadingReports}
+              hasReports={reports.length > 0}
+            />
           </Grid>
 
           <Grid item xs={12} md={9}>
@@ -718,7 +602,11 @@ export default function DailyReport() {
                         onSubmit={(event) => event.preventDefault()}
                       >
                         <Stack spacing={3}>
-                          {renderFormFields(createForm, handleCreateChange)}
+                          <DailyReportFormFields
+                            form={createForm}
+                            onChange={handleCreateChange}
+                            resolvedAuthorName={resolvedAuthorName}
+                          />
                           <Stack
                             direction={{ xs: "column", sm: "row" }}
                             justifyContent="flex-end"
@@ -822,7 +710,11 @@ export default function DailyReport() {
 
                           {isEditing && editDraft ? (
                             <Stack spacing={2}>
-                              {renderFormFields(editDraft, handleEditChange)}
+                              <DailyReportFormFields
+                                form={editDraft}
+                                onChange={handleEditChange}
+                                resolvedAuthorName={resolvedAuthorName}
+                              />
                             </Stack>
                           ) : (
                             <Typography
