@@ -31,7 +31,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { useListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
+import { useListRecentAttendancesQuery } from "@/entities/attendance/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
