@@ -30,7 +30,7 @@ import {
   useGetAttendanceByStaffAndDateQuery,
   useListRecentAttendancesQuery,
   useUpdateAttendanceMutation,
-} from "@/lib/api/attendanceApi";
+} from "@/entities/attendance/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
