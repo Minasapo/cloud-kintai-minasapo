@@ -1,4 +1,10 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import {
+  createWorkflow,
+  deleteWorkflow,
+  updateWorkflow,
+} from "@shared/api/graphql/documents/mutations";
+import { listWorkflows } from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 
 import type {
@@ -11,12 +17,6 @@ import type {
   UpdateWorkflowMutation,
   Workflow,
 } from "@/API";
-import {
-  createWorkflow,
-  deleteWorkflow,
-  updateWorkflow,
-} from "@/graphql/mutations";
-import { listWorkflows } from "@/graphql/queries";
 
 type WorkflowTag = {
   type: "Workflow";
