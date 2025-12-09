@@ -22,14 +22,14 @@ import { useCallback, useEffect } from "react";
 
 import { HolidayCalendar } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import * as MESSAGE_CODE from "@/errors";
 import {
   useBulkCreateHolidayCalendarsMutation,
   useCreateHolidayCalendarMutation,
   useDeleteHolidayCalendarMutation,
   useGetHolidayCalendarsQuery,
   useUpdateHolidayCalendarMutation,
-} from "@/lib/api/calendarApi";
+} from "@/entities/calendar/api/calendarApi";
+import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
