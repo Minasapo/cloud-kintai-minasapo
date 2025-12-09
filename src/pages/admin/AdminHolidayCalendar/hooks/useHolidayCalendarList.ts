@@ -5,9 +5,14 @@ export function sortCalendar<T extends { holidayDate: string }>(a: T, b: T) {
   return dayjs(a.holidayDate).isBefore(dayjs(b.holidayDate)) ? 1 : -1;
 }
 
-export function useHolidayCalendarList<
-  T extends { holidayDate: string; name?: string }
->(
+type HolidayCalendarLike = {
+  id?: string | null;
+  holidayDate: string;
+  name?: string;
+  createdAt?: string | null;
+};
+
+export function useHolidayCalendarList<T extends HolidayCalendarLike>(
   items: T[] | undefined,
   options?: {
     initialRowsPerPage?: number;
