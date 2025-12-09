@@ -1,4 +1,5 @@
 import { GraphQLResult } from "@aws-amplify/api";
+import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -7,7 +8,6 @@ import {
   ShiftPlanYearByTargetYearQuery,
   ShiftPlanYearByTargetYearQueryVariables,
 } from "@/API";
-import { shiftPlanYearByTargetYear } from "@/graphql/queries";
 
 type UseShiftPlanYearResult = {
   plans: ShiftPlanMonthSetting[] | null;
