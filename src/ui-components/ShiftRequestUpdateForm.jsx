@@ -9,8 +9,8 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getShiftRequest } from "../graphql/queries";
-import { updateShiftRequest } from "../graphql/mutations";
+import { getShiftRequest } from "/api/graphql/documents/queries";
+import { updateShiftRequest } from "/api/graphql/documents/mutations";
 export default function ShiftRequestUpdateForm(props) {
   const {
     id: idProp,

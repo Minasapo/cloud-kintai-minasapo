@@ -9,7 +9,7 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { createHolidayCalendar } from "../graphql/mutations";
+import { createHolidayCalendar } from "/api/graphql/documents/mutations";
 export default function HolidayCalendarCreateForm(props) {
   const {
     clearOnSuccess = true,

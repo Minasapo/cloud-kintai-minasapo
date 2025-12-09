@@ -15,8 +15,8 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getAttendance } from "../graphql/queries";
-import { updateAttendance } from "../graphql/mutations";
+import { getAttendance } from "/api/graphql/documents/queries";
+import { updateAttendance } from "/api/graphql/documents/mutations";
 export default function AttendanceUpdateForm(props) {
   const {
     id: idProp,

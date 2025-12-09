@@ -20,8 +20,8 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getDocument } from "../graphql/queries";
-import { updateDocument } from "../graphql/mutations";
+import { getDocument } from "/api/graphql/documents/queries";
+import { updateDocument } from "/api/graphql/documents/mutations";
 function ArrayField({
   items = [],
   onChange,

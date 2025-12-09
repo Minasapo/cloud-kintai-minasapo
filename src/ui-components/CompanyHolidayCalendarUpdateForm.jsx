@@ -9,8 +9,8 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getCompanyHolidayCalendar } from "../graphql/queries";
-import { updateCompanyHolidayCalendar } from "../graphql/mutations";
+import { getCompanyHolidayCalendar } from "/api/graphql/documents/queries";
+import { updateCompanyHolidayCalendar } from "/api/graphql/documents/mutations";
 export default function CompanyHolidayCalendarUpdateForm(props) {
   const {
     id: idProp,

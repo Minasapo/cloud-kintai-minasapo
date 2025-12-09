@@ -15,7 +15,7 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { createAttendance } from "../graphql/mutations";
+import { createAttendance } from "/api/graphql/documents/mutations";
 export default function AttendanceCreateForm(props) {
   const {
     clearOnSuccess = true,

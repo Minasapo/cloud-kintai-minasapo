@@ -15,8 +15,8 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getAppConfig } from "../graphql/queries";
-import { updateAppConfig } from "../graphql/mutations";
+import { getAppConfig } from "/api/graphql/documents/queries";
+import { updateAppConfig } from "/api/graphql/documents/mutations";
 export default function AppConfigUpdateForm(props) {
   const {
     id: idProp,
