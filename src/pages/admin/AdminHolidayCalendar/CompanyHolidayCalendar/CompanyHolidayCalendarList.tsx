@@ -119,7 +119,7 @@ export default function CompanyHolidayCalendarList() {
     handleChangePage,
     handleChangeRowsPerPage,
     clearFilters,
-  } = useHolidayCalendarList(companyHolidayCalendars, {
+  } = useHolidayCalendarList<CompanyHolidayCalendar>(companyHolidayCalendars, {
     initialRowsPerPage: 20,
     yearRange: YEAR_RANGE,
     yearOffset: YEAR_OFFSET,
