@@ -1,8 +1,8 @@
+import { Attendance, AttendanceHistory } from "@shared/api/graphql/types";
+
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { AttendanceTime } from "@/lib/AttendanceTime";
-
-import { Attendance, AttendanceHistory } from "../../API";
 
 function showBlankLine(): string {
   return "";
