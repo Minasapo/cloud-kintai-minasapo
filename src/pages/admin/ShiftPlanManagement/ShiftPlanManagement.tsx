@@ -26,6 +26,15 @@ import {
   updateShiftPlanYear,
 } from "@shared/api/graphql/documents/mutations";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
+import {
+  CreateShiftPlanYearMutation,
+  CreateShiftPlanYearMutationVariables,
+  ShiftPlanMonthSetting,
+  ShiftPlanMonthSettingInput,
+  ShiftPlanYearByTargetYearQuery,
+  ShiftPlanYearByTargetYearQueryVariables,
+  UpdateShiftPlanYearMutationVariables,
+} from "@shared/api/graphql/types";
 import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import {
@@ -36,15 +45,6 @@ import {
   useTransition,
 } from "react";
 
-import {
-  CreateShiftPlanYearMutation,
-  CreateShiftPlanYearMutationVariables,
-  ShiftPlanMonthSetting,
-  ShiftPlanMonthSettingInput,
-  ShiftPlanYearByTargetYearQuery,
-  ShiftPlanYearByTargetYearQueryVariables,
-  UpdateShiftPlanYearMutationVariables,
-} from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import {

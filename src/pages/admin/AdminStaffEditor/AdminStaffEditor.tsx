@@ -23,6 +23,10 @@ import {
   Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import {
+  ApproverMultipleMode,
+  ApproverSettingMode,
+} from "@shared/api/graphql/types";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
@@ -39,7 +43,6 @@ import { useParams } from "react-router-dom";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 
-import { ApproverMultipleMode, ApproverSettingMode } from "../../../API";
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
 import useStaffs, { StaffRole } from "../../../hooks/useStaffs/useStaffs";

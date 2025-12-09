@@ -1,7 +1,6 @@
-import { styled,TableCell as MuiTableCell } from "@mui/material";
+import { styled, TableCell as MuiTableCell } from "@mui/material";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { Attendance } from "../../../API";
 
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   width: theme.spacing(18),

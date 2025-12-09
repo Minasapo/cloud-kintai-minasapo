@@ -1,4 +1,5 @@
-import { CreateStaffInput, UpdateStaffInput } from "../../../API";
+import { CreateStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
+
 import * as MESSAGE_CODE from "../../../errors";
 import fetchCognitoUsers from "../../../hooks/common/fetchCognitoUsers";
 import { StaffType } from "../../../hooks/useStaffs/useStaffs";
