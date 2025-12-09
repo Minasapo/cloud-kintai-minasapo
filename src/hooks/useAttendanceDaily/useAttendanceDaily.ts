@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 
-import { useLazyGetAttendanceByStaffAndDateQuery } from "@/lib/api/attendanceApi";
+import { useLazyGetAttendanceByStaffAndDateQuery } from "@/entities/attendance/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import { Attendance } from "../../API";
