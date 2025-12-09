@@ -41,15 +41,15 @@ import {
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@/entities/calendar/api/calendarApi";
 import * as MESSAGE_CODE from "@/errors";
 import { createShiftRequest, updateShiftRequest } from "@/graphql/mutations";
 import { listShiftRequests } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@/lib/api/calendarApi";
 import {
   setSnackbarError,
   setSnackbarSuccess,
