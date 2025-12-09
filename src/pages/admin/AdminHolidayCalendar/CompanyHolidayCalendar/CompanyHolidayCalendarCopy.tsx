@@ -11,14 +11,14 @@ import {
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import {
+  CompanyHolidayCalendar,
+  CreateCompanyHolidayCalendarInput,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import {
-  CompanyHolidayCalendar,
-  CreateCompanyHolidayCalendarInput,
-} from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { CompanyHolidayCalenderMessage } from "@/lib/message/CompanyHolidayCalenderMessage";

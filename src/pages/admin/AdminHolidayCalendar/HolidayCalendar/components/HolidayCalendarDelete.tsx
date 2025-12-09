@@ -1,8 +1,11 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { IconButton } from "@mui/material";
+import {
+  DeleteHolidayCalendarInput,
+  HolidayCalendar,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { DeleteHolidayCalendarInput, HolidayCalendar } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";

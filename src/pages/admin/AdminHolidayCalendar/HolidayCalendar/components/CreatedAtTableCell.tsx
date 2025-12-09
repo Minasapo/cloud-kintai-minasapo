@@ -1,7 +1,7 @@
 import { TableCell } from "@mui/material";
+import { HolidayCalendar } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { HolidayCalendar } from "@/API";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 export default function CreatedAtTableCell({

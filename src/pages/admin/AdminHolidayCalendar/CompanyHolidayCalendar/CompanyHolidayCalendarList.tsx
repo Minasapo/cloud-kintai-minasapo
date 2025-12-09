@@ -27,10 +27,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { CompanyHolidayCalendar } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useEffect } from "react";
 
-import { CompanyHolidayCalendar } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import { AttendanceDate } from "@/lib/AttendanceDate";
