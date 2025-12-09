@@ -1,6 +1,5 @@
 import { TableCell, TableRow } from "@mui/material";
-
-import { Attendance, AttendanceChangeRequest } from "../../../../API";
+import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 
 export default function SpecialHolidayFlagTableRow({
   value,
