@@ -1,3 +1,7 @@
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@entities/calendar/api/calendarApi";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import {
   Box,
@@ -22,10 +26,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@/entities/calendar/api/calendarApi";
 import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
