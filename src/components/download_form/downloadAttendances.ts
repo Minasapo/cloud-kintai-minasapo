@@ -1,12 +1,11 @@
 import { GraphQLResult } from "@aws-amplify/api";
 import { listAttendances } from "@shared/api/graphql/documents/queries";
-import { API } from "aws-amplify";
-
 import {
   Attendance,
   ListAttendancesQuery,
   ModelAttendanceFilterInput,
-} from "../../API";
+} from "@shared/api/graphql/types";
+import { API } from "aws-amplify";
 
 export default async function downloadAttendances(
   $orCondition: ModelAttendanceFilterInput[]
