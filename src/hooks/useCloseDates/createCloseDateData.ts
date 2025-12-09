@@ -1,4 +1,5 @@
 import { GraphQLResult } from "@aws-amplify/api";
+import { createCloseDate } from "@shared/api/graphql/documents/mutations";
 import { API } from "aws-amplify";
 
 import {
@@ -6,7 +7,6 @@ import {
   CreateCloseDateInput,
   CreateCloseDateMutation,
 } from "../../API";
-import { createCloseDate } from "../../graphql/mutations";
 
 export default async function createCloseDateData(input: CreateCloseDateInput) {
   const response = (await API.graphql({
