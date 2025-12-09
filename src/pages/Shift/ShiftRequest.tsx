@@ -37,6 +37,11 @@ import {
   useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import {
+  createShiftRequest,
+  updateShiftRequest,
+} from "@shared/api/graphql/documents/mutations";
+import { shiftRequestsByStaffId } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 import dayjs, { Dayjs } from "dayjs";
 import React, {
@@ -57,8 +62,6 @@ import {
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import { createShiftRequest, updateShiftRequest } from "@/graphql/mutations";
-import { shiftRequestsByStaffId } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import {
