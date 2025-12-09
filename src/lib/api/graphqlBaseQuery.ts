@@ -17,7 +17,9 @@ export type SerializableValue =
   | SerializableValue[]
   | { [key: string]: SerializableValue };
 
-export type GraphQLBaseQueryArgs<TVariables extends object = Record<string, unknown>> = {
+export type GraphQLBaseQueryArgs<
+  TVariables extends object = Record<string, unknown>
+> = {
   document: string;
   variables?: TVariables;
   authMode?: GraphQLAuthMode;
@@ -60,9 +62,7 @@ const serializeValue = (
     seen.add(value);
     const serializedArray = value
       .map((item) => serializeValue(item, seen))
-      .filter(
-        (item): item is SerializableValue => typeof item !== "undefined"
-      );
+      .filter((item): item is SerializableValue => typeof item !== "undefined");
     seen.delete(value);
     return serializedArray;
   }
@@ -105,9 +105,7 @@ const serializeGraphQLErrors = (
 
       const base: Record<string, unknown> = {
         message:
-          typeof error.message === "string"
-            ? error.message
-            : "GraphQL error",
+          typeof error.message === "string" ? error.message : "GraphQL error",
       };
 
       if (Array.isArray(error.path)) {
@@ -116,12 +114,9 @@ const serializeGraphQLErrors = (
 
       if (Array.isArray(error.locations)) {
         base.locations = error.locations.map((location) => ({
-          line:
-            typeof location?.line === "number" ? location.line : undefined,
+          line: typeof location?.line === "number" ? location.line : undefined,
           column:
-            typeof location?.column === "number"
-              ? location.column
-              : undefined,
+            typeof location?.column === "number" ? location.column : undefined,
         }));
       }
 
@@ -191,17 +186,16 @@ const serializeUnknownError = (error: unknown): SerializableValue => {
   return { message: "Unknown error" };
 };
 
-export const graphqlBaseQuery = <
-  TVariables extends object = Record<string, unknown>,
->({
-  defaultAuthMode = "AMAZON_COGNITO_USER_POOLS",
-}: {
-  defaultAuthMode?: GraphQLAuthMode;
-} = {}): BaseQueryFn<
-  GraphQLBaseQueryArgs<TVariables>,
-  unknown,
-  GraphQLBaseQueryError
-> =>
+export const graphqlBaseQuery =
+  <TVariables extends object = Record<string, unknown>>({
+    defaultAuthMode = "AMAZON_COGNITO_USER_POOLS",
+  }: {
+    defaultAuthMode?: GraphQLAuthMode;
+  } = {}): BaseQueryFn<
+    GraphQLBaseQueryArgs<TVariables>,
+    unknown,
+    GraphQLBaseQueryError
+  > =>
   async ({ document, variables, authMode }) => {
     try {
       const result = (await API.graphql({
