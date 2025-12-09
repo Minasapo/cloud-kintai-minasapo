@@ -1,4 +1,12 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import {
+  createAttendance,
+  updateAttendance,
+} from "@shared/api/graphql/documents/mutations";
+import {
+  attendancesByStaffId,
+  getAttendance,
+} from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 import dayjs from "dayjs";
 
@@ -15,8 +23,6 @@ import type {
   UpdateAttendanceInput,
   UpdateAttendanceMutation,
 } from "@/API";
-import { createAttendance, updateAttendance } from "@/graphql/mutations";
-import { attendancesByStaffId, getAttendance } from "@/graphql/queries";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 
