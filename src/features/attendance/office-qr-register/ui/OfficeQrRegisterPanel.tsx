@@ -29,7 +29,12 @@ export function OfficeQrRegisterPanel({
     return (
       <Container>
         <Box sx={{ mt: 4, textAlign: "center" }}>
-          <Alert severity="warning">現在、使用することができません。</Alert>
+          <Alert
+            severity="warning"
+            data-testid="office-qr-register-disabled-alert"
+          >
+            現在、使用することができません。
+          </Alert>
         </Box>
       </Container>
     );
@@ -38,7 +43,11 @@ export function OfficeQrRegisterPanel({
   if (errorMessage) {
     return (
       <Container>
-        <Alert severity="error" sx={{ mt: 4 }}>
+        <Alert
+          severity="error"
+          sx={{ mt: 4 }}
+          data-testid="office-qr-register-error-alert"
+        >
           {errorMessage}
         </Alert>
       </Container>
@@ -55,8 +64,11 @@ export function OfficeQrRegisterPanel({
           flexDirection: "column",
           alignItems: "center",
         }}
+        data-testid="office-qr-register-panel"
       >
-        <Clock />
+        <Box data-testid="office-qr-register-clock">
+          <Clock />
+        </Box>
         {mode === "clock_in" && (
           <ActionButton
             variant="contained"
@@ -70,6 +82,7 @@ export function OfficeQrRegisterPanel({
               height: "80px",
               fontSize: "1.5rem",
             }}
+            data-testid="office-qr-register-clock-in-button"
           >
             出勤
           </ActionButton>
@@ -87,6 +100,7 @@ export function OfficeQrRegisterPanel({
               height: "80px",
               fontSize: "1.5rem",
             }}
+            data-testid="office-qr-register-clock-out-button"
           >
             退勤
           </ActionButton>
