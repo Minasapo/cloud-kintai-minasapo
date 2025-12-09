@@ -1,4 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 
 import type {
   CompanyHolidayCalendar,
@@ -30,7 +31,6 @@ import {
   listCompanyHolidayCalendars,
   listHolidayCalendars,
 } from "@/graphql/queries";
-import { graphqlBaseQuery } from "@/lib/api/graphqlBaseQuery";
 
 type CalendarTag = {
   type: "HolidayCalendar" | "CompanyHolidayCalendar";
