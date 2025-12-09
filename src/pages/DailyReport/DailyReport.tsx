@@ -21,6 +21,11 @@ import {
   PickersDay,
   type PickersDayProps,
 } from "@mui/x-date-pickers/PickersDay";
+import {
+  createDailyReport,
+  updateDailyReport,
+} from "@shared/api/graphql/documents/mutations";
+import { dailyReportsByStaffId } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -35,8 +40,6 @@ import type {
   UpdateDailyReportMutation,
 } from "@/API";
 import { DailyReportStatus, ModelSortDirection } from "@/API";
-import { createDailyReport, updateDailyReport } from "@/graphql/mutations";
-import { dailyReportsByStaffId } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
