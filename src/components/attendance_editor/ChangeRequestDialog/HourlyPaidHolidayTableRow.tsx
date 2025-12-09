@@ -1,7 +1,6 @@
 import { TableCell, TableRow } from "@mui/material";
+import { HourlyPaidHolidayTime } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { HourlyPaidHolidayTime } from "../../../API";
 
 export default function HourlyPaidHolidayTableRow({
   hours,
