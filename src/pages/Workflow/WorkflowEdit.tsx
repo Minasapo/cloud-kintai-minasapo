@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import Page from "@shared/ui/page/Page";
 import { API } from "aws-amplify";
 import React, { useContext, useEffect, useState } from "react";
@@ -28,7 +29,6 @@ import {
 import { useAppDispatchV2 } from "@/app/hooks";
 import WorkflowTypeFields from "@/components/Workflow/WorkflowTypeFields";
 import { AuthContext } from "@/context/AuthContext";
-import { getWorkflow } from "@/graphql/queries";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
