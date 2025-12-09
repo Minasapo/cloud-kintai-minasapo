@@ -35,7 +35,7 @@ import { useListRecentAttendancesQuery } from "@/entities/attendance/api/attenda
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
-} from "@/lib/api/calendarApi";
+} from "@/entities/calendar/api/calendarApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";
