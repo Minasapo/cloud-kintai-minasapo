@@ -11,6 +11,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
+import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import Title from "@shared/ui/typography/Title";
 import { API } from "aws-amplify";
@@ -23,8 +25,6 @@ import type {
   GetDailyReportQuery,
   UpdateDailyReportMutation,
 } from "@/API";
-import { updateDailyReport } from "@/graphql/mutations";
-import { getDailyReport } from "@/graphql/queries";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
