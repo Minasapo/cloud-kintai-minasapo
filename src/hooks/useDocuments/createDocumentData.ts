@@ -1,4 +1,5 @@
 import { GraphQLResult } from "@aws-amplify/api";
+import { createDocument } from "@shared/api/graphql/documents/mutations";
 import { API } from "aws-amplify";
 
 import {
@@ -6,7 +7,6 @@ import {
   CreateDocumentMutation,
   Document as APIDocument,
 } from "../../API";
-import { createDocument } from "../../graphql/mutations";
 
 export default async function createDocumentData(input: CreateDocumentInput) {
   const response = (await API.graphql({
