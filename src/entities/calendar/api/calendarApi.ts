@@ -1,4 +1,16 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import {
+  createCompanyHolidayCalendar,
+  createHolidayCalendar,
+  deleteCompanyHolidayCalendar,
+  deleteHolidayCalendar,
+  updateCompanyHolidayCalendar,
+  updateHolidayCalendar,
+} from "@shared/api/graphql/documents/mutations";
+import {
+  listCompanyHolidayCalendars,
+  listHolidayCalendars,
+} from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 
 import type {
@@ -19,18 +31,6 @@ import type {
   UpdateHolidayCalendarInput,
   UpdateHolidayCalendarMutation,
 } from "@/API";
-import {
-  createCompanyHolidayCalendar,
-  createHolidayCalendar,
-  deleteCompanyHolidayCalendar,
-  deleteHolidayCalendar,
-  updateCompanyHolidayCalendar,
-  updateHolidayCalendar,
-} from "@/graphql/mutations";
-import {
-  listCompanyHolidayCalendars,
-  listHolidayCalendars,
-} from "@/graphql/queries";
 
 type CalendarTag = {
   type: "HolidayCalendar" | "CompanyHolidayCalendar";
