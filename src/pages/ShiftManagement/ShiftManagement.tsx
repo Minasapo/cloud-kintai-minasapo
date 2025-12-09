@@ -1,5 +1,9 @@
 import { GraphQLResult } from "@aws-amplify/api";
 import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@entities/calendar/api/calendarApi";
+import {
   Alert,
   Badge,
   Box,
@@ -42,10 +46,6 @@ import {
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@/entities/calendar/api/calendarApi";
 import * as MESSAGE_CODE from "@/errors";
 import { createShiftRequest, updateShiftRequest } from "@/graphql/mutations";
 import { listShiftRequests } from "@/graphql/queries";
