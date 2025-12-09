@@ -12,7 +12,6 @@ import {
   listHolidayCalendars,
 } from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
-
 import type {
   CompanyHolidayCalendar,
   CreateCompanyHolidayCalendarInput,
@@ -30,7 +29,7 @@ import type {
   UpdateCompanyHolidayCalendarMutation,
   UpdateHolidayCalendarInput,
   UpdateHolidayCalendarMutation,
-} from "@/API";
+} from "@shared/api/graphql/types";
 
 type CalendarTag = {
   type: "HolidayCalendar" | "CompanyHolidayCalendar";

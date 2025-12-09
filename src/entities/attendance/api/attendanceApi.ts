@@ -8,8 +8,6 @@ import {
   getAttendance,
 } from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
-import dayjs from "dayjs";
-
 import type {
   Attendance,
   AttendanceHistory,
@@ -22,7 +20,9 @@ import type {
   RestInput,
   UpdateAttendanceInput,
   UpdateAttendanceMutation,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import dayjs from "dayjs";
+
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 

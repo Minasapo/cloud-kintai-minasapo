@@ -6,7 +6,6 @@ import {
 } from "@shared/api/graphql/documents/mutations";
 import { listWorkflows } from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
-
 import type {
   CreateWorkflowInput,
   CreateWorkflowMutation,
@@ -16,7 +15,7 @@ import type {
   UpdateWorkflowInput,
   UpdateWorkflowMutation,
   Workflow,
-} from "@/API";
+} from "@shared/api/graphql/types";
 
 type WorkflowTag = {
   type: "Workflow";
