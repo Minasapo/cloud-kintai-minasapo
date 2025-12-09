@@ -1,8 +1,7 @@
+import { appConfigApi } from "@entities/app-config/api/appConfigApi";
+import { attendanceApi } from "@entities/attendance/api/attendanceApi";
+import { calendarApi } from "@entities/calendar/api/calendarApi";
 import type { Middleware, Reducer } from "@reduxjs/toolkit";
-
-import { appConfigApi } from "@/entities/app-config/api/appConfigApi";
-import { attendanceApi } from "@/entities/attendance/api/attendanceApi";
-import { calendarApi } from "@/entities/calendar/api/calendarApi";
 
 export type RegisteredRtkApi = {
   reducerPath: string;
