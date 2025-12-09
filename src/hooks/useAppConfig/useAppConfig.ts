@@ -11,7 +11,7 @@ import {
   useCreateAppConfigMutation,
   useGetAppConfigQuery,
   useUpdateAppConfigMutation,
-} from "@/lib/api/appConfigApi";
+} from "@/entities/app-config/api/appConfigApi";
 
 /**
  * アプリケーション設定の一部項目のみを抽出した型。

@@ -31,11 +31,11 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { useListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
+import { useListRecentAttendancesQuery } from "@/entities/attendance/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
-} from "@/lib/api/calendarApi";
+} from "@/entities/calendar/api/calendarApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";

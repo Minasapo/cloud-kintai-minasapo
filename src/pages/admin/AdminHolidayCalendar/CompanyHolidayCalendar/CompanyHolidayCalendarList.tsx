@@ -25,14 +25,14 @@ import { useCallback, useEffect } from "react";
 
 import { CompanyHolidayCalendar } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import * as MESSAGE_CODE from "@/errors";
 import {
   useBulkCreateCompanyHolidayCalendarsMutation,
   useCreateCompanyHolidayCalendarMutation,
   useDeleteCompanyHolidayCalendarMutation,
   useGetCompanyHolidayCalendarsQuery,
   useUpdateCompanyHolidayCalendarMutation,
-} from "@/lib/api/calendarApi";
+} from "@/entities/calendar/api/calendarApi";
+import * as MESSAGE_CODE from "@/errors";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { CompanyHolidayCalenderMessage } from "@/lib/message/CompanyHolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";

@@ -11,7 +11,7 @@ import {
   useCreateAttendanceMutation,
   useGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
-} from "@/lib/api/attendanceApi";
+} from "@/entities/attendance/api/attendanceApi";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 

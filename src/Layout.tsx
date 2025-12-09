@@ -19,7 +19,7 @@ import {
   useGetHolidayCalendarsQuery,
   useUpdateCompanyHolidayCalendarMutation,
   useUpdateHolidayCalendarMutation,
-} from "@/lib/api/calendarApi";
+} from "@/entities/calendar/api/calendarApi";
 
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
@@ -68,12 +68,15 @@ export default function Layout() {
     getAbsentEnabled,
     getThemeColor,
   } = useAppConfig();
+  const isAuthenticated = authStatus === "authenticated";
   const { data: holidayCalendars = [], isLoading: holidayCalendarLoading } =
-    useGetHolidayCalendarsQuery();
+    useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
   const {
     data: companyHolidayCalendars = [],
     isLoading: companyHolidayCalendarLoading,
-  } = useGetCompanyHolidayCalendarsQuery();
+  } = useGetCompanyHolidayCalendarsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
   const [bulkCreateHolidayCalendarsMutation] =
