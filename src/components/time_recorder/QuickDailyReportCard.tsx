@@ -1,4 +1,9 @@
 import { GraphQLResult } from "@aws-amplify/api";
+import {
+  createDailyReport,
+  updateDailyReport,
+} from "@shared/api/graphql/documents/mutations";
+import { dailyReportsByStaffId } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 import { useEffect, useMemo, useState } from "react";
 
@@ -9,8 +14,6 @@ import type {
 } from "@/API";
 import { DailyReportStatus } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import { createDailyReport, updateDailyReport } from "@/graphql/mutations";
-import { dailyReportsByStaffId } from "@/graphql/queries";
 import {
   setSnackbarError,
   setSnackbarSuccess,
