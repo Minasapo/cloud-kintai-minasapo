@@ -1,4 +1,4 @@
-import { WorkflowCategory, WorkflowStatus } from "@/API";
+import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 
 export const CATEGORY_LABELS: Record<string, string> = {
   [WorkflowCategory.PAID_LEAVE]: "有給休暇申請",
