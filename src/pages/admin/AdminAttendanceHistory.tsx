@@ -1,6 +1,5 @@
+import AttendanceEditor from "@features/attendance/edit/AttendanceEditor";
 import { Container } from "@mui/material";
-
-import AttendanceEditor from "@/components/attendance_editor/AttendanceEditor";
 
 export default function AdminAttendanceHistory(): JSX.Element {
   // AttendanceEditor reads route params internally when needed, so this page

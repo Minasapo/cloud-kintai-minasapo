@@ -1,3 +1,11 @@
+import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/GoDirectlyFlagCheckbox";
+import HourlyPaidHolidayTimeItem, {
+  calcTotalHourlyPaidHolidayTime,
+} from "@features/attendance/edit/items/HourlyPaidHolidayTimeItem";
+import ProductionTimeItem from "@features/attendance/edit/items/ProductionTimeItem";
+import StaffNameItem from "@features/attendance/edit/items/StaffNameItem";
+import WorkTypeItem from "@features/attendance/edit/items/WorkTypeItem";
+import QuickInputButtons from "@features/attendance/edit/QuickInputButtons";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
   Box,
@@ -18,14 +26,6 @@ import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 
-import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
-import HourlyPaidHolidayTimeItem, {
-  calcTotalHourlyPaidHolidayTime,
-} from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
-import ProductionTimeItem from "@/components/attendance_editor/items/ProductionTimeItem";
-import StaffNameItem from "@/components/attendance_editor/items/StaffNameItem";
-import WorkTypeItem from "@/components/attendance_editor/items/WorkTypeItem";
-import QuickInputButtons from "@/components/attendance_editor/QuickInputButtons";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useOperationLog from "@/hooks/useOperationLog/useOperationLog";

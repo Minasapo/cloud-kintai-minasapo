@@ -1,0 +1,28 @@
+.amplify-table {
+  width: 700px !important;
+}
+
+.table-td {
+  white-space: nowrap !important;
+
+  &-head {
+    @extend .table-td;
+    text-align: center;
+  }
+
+  &-body {
+    @extend .table-td;
+
+    & > div {
+      text-align: center;
+    }
+
+    &-time > div, &-date > div {
+      text-align: right;
+    }
+  }
+
+  &-description {
+    max-width: 300px;
+  }
+}

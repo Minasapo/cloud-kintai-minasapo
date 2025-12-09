@@ -1,6 +1,5 @@
+import AttendanceList from "@features/attendance/list/AttendanceList";
 import { Box, Container, Stack } from "@mui/material";
-
-import AttendanceList from "@/components/AttendanceList/AttendanceList";
 
 export default function AttendanceListPage() {
   return (

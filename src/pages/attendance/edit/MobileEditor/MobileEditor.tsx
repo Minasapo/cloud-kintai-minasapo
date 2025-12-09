@@ -1,3 +1,6 @@
+import HourlyPaidHolidayTimeItemMobile from "@features/attendance/edit/items/HourlyPaidHolidayTimeItemMobile";
+import PaidHolidayFlagInputMobile from "@features/attendance/edit/PaidHolidayFlagInputMobile";
+import QuickInputButtonsMobile from "@features/attendance/edit/QuickInputButtonsMobile";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import {
   Box,
@@ -13,9 +16,6 @@ import Title from "@shared/ui/typography/Title";
 import React, { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
 
-import HourlyPaidHolidayTimeItemMobile from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItemMobile";
-import PaidHolidayFlagInputMobile from "@/components/attendance_editor/PaidHolidayFlagInputMobile";
-import QuickInputButtonsMobile from "@/components/attendance_editor/QuickInputButtonsMobile";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";

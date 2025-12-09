@@ -1,7 +1,7 @@
+import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/GoDirectlyFlagCheckbox";
 import { Switch } from "@mui/material";
 import { useContext } from "react";
 
-import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectlyFlagCheckbox";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 

@@ -1,7 +1,6 @@
+import AttendanceEditor from "@features/attendance/edit/AttendanceEditor";
 import { Container } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
-
-import AttendanceEditor from "../../components/attendance_editor/AttendanceEditor";
 
 export default function AdminAttendanceEditor() {
   const [searchParams] = useSearchParams();

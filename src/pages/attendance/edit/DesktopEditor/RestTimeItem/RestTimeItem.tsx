@@ -1,9 +1,8 @@
+import { LunchRestTimeNotSetWarning } from "@features/attendance/edit/LunchRestTimeNotSetWarning";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import { Box, IconButton, Stack, styled, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
-
-import { LunchRestTimeNotSetWarning } from "@/components/attendance_editor/LunchRestTimeNotSetWarning";
 
 import { AttendanceEditContext } from "../../AttendanceEditProvider";
 import NoRestTimeMessage from "./NoRestTimeMessage";

@@ -1,6 +1,5 @@
+import RemarksItem from "@features/attendance/edit/items/RemarksItem";
 import { useContext } from "react";
-
-import RemarksItem from "@/components/attendance_editor/items/RemarksItem";
 
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 
