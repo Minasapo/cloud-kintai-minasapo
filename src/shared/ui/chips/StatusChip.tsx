@@ -1,6 +1,6 @@
 import { Chip } from "@mui/material";
+import { WorkflowStatus } from "@shared/api/graphql/types";
 
-import { WorkflowStatus } from "@/API";
 import { STATUS_LABELS } from "@/lib/workflowLabels";
 
 interface StatusChipProps {
