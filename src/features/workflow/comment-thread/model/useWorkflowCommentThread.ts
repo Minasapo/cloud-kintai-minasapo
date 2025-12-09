@@ -1,0 +1,205 @@
+import type {
+  GetWorkflowQuery,
+  UpdateWorkflowInput,
+  WorkflowComment,
+  WorkflowCommentInput,
+} from "@shared/api/graphql/types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import type { CognitoUser } from "@/hooks/useCognitoUser";
+import type { StaffType } from "@/hooks/useStaffs/useStaffs";
+
+import type { WorkflowCommentMessage } from "../ui/WorkflowCommentThread";
+
+type UseWorkflowCommentThreadParams = {
+  workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null;
+  staffs: StaffType[];
+  cognitoUser?: CognitoUser | null;
+  updateWorkflow: (
+    input: UpdateWorkflowInput
+  ) => Promise<GetWorkflowQuery["getWorkflow"] | null | undefined>;
+  onWorkflowChange: (
+    workflow: NonNullable<GetWorkflowQuery["getWorkflow"]>
+  ) => void;
+  notifySuccess: (message: string) => void;
+  notifyError: (message: string) => void;
+};
+
+type UseWorkflowCommentThreadResult = {
+  currentStaff?: StaffType;
+  messages: WorkflowCommentMessage[];
+  expandedMessages: Record<string, boolean>;
+  toggleExpanded: (id: string) => void;
+  input: string;
+  setInput: (value: string) => void;
+  sending: boolean;
+  formatSender: (sender?: string) => string;
+  sendMessage: () => void;
+};
+
+const useWorkflowCommentThread = ({
+  workflow,
+  staffs,
+  cognitoUser,
+  updateWorkflow,
+  onWorkflowChange,
+  notifySuccess,
+  notifyError,
+}: UseWorkflowCommentThreadParams): UseWorkflowCommentThreadResult => {
+  const [messages, setMessages] = useState<WorkflowCommentMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [expandedMessages, setExpandedMessages] = useState<
+    Record<string, boolean>
+  >({});
+
+  const currentStaff = useMemo(() => {
+    if (!cognitoUser?.id) return undefined;
+    return staffs.find((s) => s.cognitoUserId === cognitoUser.id);
+  }, [cognitoUser, staffs]);
+
+  const formatSender = useCallback((sender?: string) => {
+    const value = sender ?? "";
+    if (!value.trim()) return "システム";
+    const normalized = value.trim().toLowerCase();
+    if (
+      normalized === "system" ||
+      normalized.startsWith("system") ||
+      normalized.includes("bot")
+    ) {
+      return "システム";
+    }
+    return value;
+  }, []);
+
+  const commentsToMessages = useCallback(
+    (comments?: Array<WorkflowComment | null> | null) => {
+      if (!comments) return [];
+      return comments
+        .filter((c): c is WorkflowComment => Boolean(c))
+        .map((c) => {
+          const staff = staffs.find((s) => s.id === c.staffId);
+          const sender = staff
+            ? `${staff.familyName} ${staff.givenName}`
+            : c.staffId || "システム";
+          const time = c.createdAt
+            ? new Date(c.createdAt).toLocaleString()
+            : "";
+          return {
+            id: c.id || `c-${Date.now()}`,
+            sender,
+            staffId: c.staffId,
+            text: c.text,
+            time,
+          };
+        });
+    },
+    [staffs]
+  );
+
+  useEffect(() => {
+    setMessages(commentsToMessages(workflow?.comments || []));
+  }, [workflow, commentsToMessages]);
+
+  useEffect(() => {
+    setExpandedMessages({});
+  }, [workflow?.id]);
+
+  const toggleExpanded = useCallback((id: string) => {
+    setExpandedMessages((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  const sendMessage = useCallback(() => {
+    void (async () => {
+      if (sending) return;
+      if (!input.trim()) return;
+      if (!workflow?.id) return;
+
+      const senderStaff = currentStaff;
+      const senderDisplay = senderStaff
+        ? `${senderStaff.familyName} ${senderStaff.givenName}`
+        : cognitoUser
+        ? `${cognitoUser.familyName ?? ""} ${
+            cognitoUser.givenName ?? ""
+          }`.trim() || "不明なユーザー"
+        : "不明なユーザー";
+
+      const newComment: WorkflowCommentInput = {
+        id: `c-${Date.now()}`,
+        staffId: senderStaff?.id ?? cognitoUser?.id ?? "system",
+        text: input.trim(),
+        createdAt: new Date().toISOString(),
+      };
+
+      const existingInputs = (workflow.comments || [])
+        .filter((c): c is WorkflowComment => Boolean(c))
+        .map((c) => ({
+          id: c.id,
+          staffId: c.staffId,
+          text: c.text,
+          createdAt: c.createdAt,
+        }));
+
+      const updateInput: UpdateWorkflowInput = {
+        id: workflow.id,
+        comments: [...existingInputs, newComment],
+      };
+
+      const optimisticMsg: WorkflowCommentMessage = {
+        id: newComment.id,
+        sender: senderDisplay,
+        staffId: newComment.staffId,
+        text: newComment.text,
+        time: new Date(newComment.createdAt).toLocaleString(),
+      };
+
+      setMessages((prev) => [...prev, optimisticMsg]);
+      setInput("");
+      setSending(true);
+      try {
+        const updated = await updateWorkflow(updateInput);
+        if (updated) {
+          onWorkflowChange(
+            updated as NonNullable<GetWorkflowQuery["getWorkflow"]>
+          );
+          setMessages(commentsToMessages(updated.comments || []));
+        }
+        notifySuccess("コメントを送信しました");
+      } catch (error) {
+        console.error(error);
+        const message = error instanceof Error ? error.message : String(error);
+        notifyError(message);
+        setMessages((prev) =>
+          prev.filter((msg) => msg.id !== optimisticMsg.id)
+        );
+      } finally {
+        setSending(false);
+      }
+    })();
+  }, [
+    sending,
+    input,
+    workflow,
+    currentStaff,
+    cognitoUser,
+    updateWorkflow,
+    onWorkflowChange,
+    commentsToMessages,
+    notifySuccess,
+    notifyError,
+  ]);
+
+  return {
+    currentStaff,
+    messages,
+    expandedMessages,
+    toggleExpanded,
+    input,
+    setInput,
+    sending,
+    formatSender,
+    sendMessage,
+  };
+};
+
+export default useWorkflowCommentThread;
