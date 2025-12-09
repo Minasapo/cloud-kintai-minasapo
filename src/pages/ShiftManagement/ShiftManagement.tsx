@@ -41,6 +41,7 @@ import {
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { AuthContext } from "@/context/AuthContext";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -256,6 +257,8 @@ export default function ShiftManagement() {
   const { cognitoUser } = useCognitoUser();
   const { loading, error, staffs } = useStaffs();
   const { getShiftGroups } = useContext(AppConfigContext);
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
 
   const shiftStaffs = useMemo(
     () => staffs.filter((s) => s.workType === "shift"),
@@ -367,11 +370,13 @@ export default function ShiftManagement() {
   }, [dayKeyList]);
 
   const { data: holidayCalendars = [], error: holidayCalendarsError } =
-    useGetHolidayCalendarsQuery();
+    useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
   const {
     data: companyHolidayCalendars = [],
     error: companyHolidayCalendarsError,
-  } = useGetCompanyHolidayCalendarsQuery();
+  } = useGetCompanyHolidayCalendarsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   React.useEffect(() => {
     if (holidayCalendarsError || companyHolidayCalendarsError) {
@@ -402,7 +407,7 @@ export default function ShiftManagement() {
     plans: shiftPlanPlans,
     loading: shiftPlanLoading,
     error: shiftPlanError,
-  } = useShiftPlanYear(monthStart.year());
+  } = useShiftPlanYear(monthStart.year(), { enabled: isAuthenticated });
 
   const getHeaderCellSx = (d: dayjs.Dayjs) => {
     const dateKey = d.format("YYYY-MM-DD");
@@ -994,6 +999,14 @@ export default function ShiftManagement() {
     aggregate: STAFF_COL_WIDTH,
     changeHistory: STAFF_COL_WIDTH + AGG_COL_WIDTH,
   } as const;
+
+  if (!isAuthenticated) {
+    return (
+      <Container sx={{ py: 6, display: "flex", justifyContent: "center" }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <Container sx={{ py: 3 }}>
