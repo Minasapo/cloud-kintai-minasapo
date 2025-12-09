@@ -5,9 +5,9 @@ import {
   TableContainer,
   Typography,
 } from "@mui/material";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { Attendance } from "../../../../API";
 import HourlyPaidHolidayTableRow from "../HourlyPaidHolidayTableRow";
 import GoDirectlyFlagTableRow from "./GoDirectlyFlagTableRow";
 import PaidHolidayFlagTableRow from "./PaidHolidayFlagTableRow";
