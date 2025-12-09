@@ -1,4 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 
 import type {
   AppConfig,
@@ -10,7 +11,6 @@ import type {
 } from "@/API";
 import { createAppConfig, updateAppConfig } from "@/graphql/mutations";
 import { listAppConfigs } from "@/graphql/queries";
-import { graphqlBaseQuery } from "@/lib/api/graphqlBaseQuery";
 
 const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
