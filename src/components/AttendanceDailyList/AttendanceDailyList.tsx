@@ -25,8 +25,8 @@ import { Attendance } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import MoveDateItem from "@/components/AttendanceDailyList/MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { useLazyListRecentAttendancesQuery } from "@/entities/attendance/api/attendanceApi";
 import * as MESSAGE_CODE from "@/errors";
-import { useLazyListRecentAttendancesQuery } from "@/lib/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
