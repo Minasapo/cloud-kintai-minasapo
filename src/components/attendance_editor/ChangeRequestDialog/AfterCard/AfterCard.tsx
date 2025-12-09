@@ -5,8 +5,8 @@ import {
   TableContainer,
   Typography,
 } from "@mui/material";
+import { AttendanceChangeRequest } from "@shared/api/graphql/types";
 
-import { AttendanceChangeRequest } from "../../../../API";
 import SpecialHolidayFlagTableRow from "../BeforeCard/SpecialHolidayFlagTableRow";
 import SubstituteHolidayDateTableRow from "../BeforeCard/SubstituteHolidayFlagDateRow";
 import HourlyPaidHolidayTableRow from "../HourlyPaidHolidayTableRow";
@@ -22,7 +22,7 @@ export default function AfterCard({
   attendance,
 }: {
   changeRequest: AttendanceChangeRequest | null;
-  attendance: import("../../../../API").Attendance | null;
+  attendance: import("@shared/api/graphql/types").Attendance | null;
 }) {
   return (
     <Card sx={{ p: 2 }}>
