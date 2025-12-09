@@ -1,7 +1,7 @@
 import type { Middleware, Reducer } from "@reduxjs/toolkit";
 
+import { attendanceApi } from "@/entities/attendance/api/attendanceApi";
 import { appConfigApi } from "@/lib/api/appConfigApi";
-import { attendanceApi } from "@/lib/api/attendanceApi";
 import { calendarApi } from "@/lib/api/calendarApi";
 
 export type RegisteredRtkApi = {
