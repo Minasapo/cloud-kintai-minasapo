@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 import dayjs from "dayjs";
 
+import { AttendanceDirectLocator } from "../locators/AttendanceDirectLocator";
 /* eslint-disable import/order */
 import { AttendanceLocator } from "./attendance-locator";
-import { AttendanceDirectLocator } from "./locators/AttendanceDirectLocator";
 /* eslint-enable import/order */
 
 test.beforeEach(async ({ page }, testInfo) => {

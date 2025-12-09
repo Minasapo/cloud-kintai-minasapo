@@ -1,5 +1,5 @@
 ---
-applyTo: "tests/attendance-flow.spec.ts"
+applyTo: "tests/attendance/flow.spec.ts"
 ---
 
 # 実装
