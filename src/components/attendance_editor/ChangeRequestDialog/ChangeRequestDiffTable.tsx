@@ -6,10 +6,10 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 
-import { Attendance, AttendanceChangeRequest } from "@/API";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 export type ChangeRequestDiffTableProps = {
