@@ -22,11 +22,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { Attendance } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import MoveDateItem from "@/components/AttendanceDailyList/MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
