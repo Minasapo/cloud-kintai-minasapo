@@ -1,8 +1,8 @@
 import { GraphQLResult } from "@aws-amplify/api";
+import { listStaff } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 
 import { ListStaffQuery, Staff } from "../../API";
-import { listStaff } from "../../graphql/queries";
 
 export default async function fetchStaffs() {
   const staffs: Staff[] = [];
