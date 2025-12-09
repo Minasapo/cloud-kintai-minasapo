@@ -34,13 +34,13 @@ import {
 } from "@/API";
 import handleApproveChangeRequest from "@/components/attendance_editor/ChangeRequestDialog/handleApproveChangeRequest";
 import { AttendanceStatusTooltip } from "@/components/AttendanceList/AttendanceStatusTooltip";
-import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
 import {
   useListRecentAttendancesQuery,
   useUpdateAttendanceMutation,
-} from "@/lib/api/attendanceApi";
+} from "@/entities/attendance/api/attendanceApi";
+import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
+import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
