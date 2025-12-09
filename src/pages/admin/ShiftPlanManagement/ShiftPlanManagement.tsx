@@ -21,6 +21,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import {
+  createShiftPlanYear,
+  updateShiftPlanYear,
+} from "@shared/api/graphql/documents/mutations";
+import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import {
@@ -42,8 +47,6 @@ import {
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import { createShiftPlanYear, updateShiftPlanYear } from "@/graphql/mutations";
-import { shiftPlanYearByTargetYear } from "@/graphql/queries";
 import {
   setSnackbarError,
   setSnackbarSuccess,
