@@ -1,17 +1,15 @@
 import {
-  Autocomplete,
-  Box,
-  Button,
-  Container,
-  Paper,
-  Stack,
-  TextField,
-} from "@mui/material";
+  documentFormDefaultValues,
+  DocumentFormInputs,
+  DocumentTargetRoleSelect,
+  DocumentTitleInput,
+} from "@features/attendance/document";
+import { Box, Button, Container, Paper, Stack } from "@mui/material";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import Title from "@shared/ui/typography/Title";
 import { Storage } from "aws-amplify";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -23,7 +21,6 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-import { defaultValues, DocumentInputs } from "./common";
 import ContentBlockNoteEditor from "./ContentBlockNoteEditor";
 
 async function updateImageUrl(content: string) {
@@ -70,12 +67,11 @@ export default function DocumentEditor() {
   const dispatch = useAppDispatchV2();
   const { documentId } = useParams();
 
-  const { register, control, setValue, handleSubmit } = useForm<DocumentInputs>(
-    {
+  const { register, control, setValue, handleSubmit } =
+    useForm<DocumentFormInputs>({
       mode: "onChange",
-      defaultValues,
-    }
-  );
+      defaultValues: documentFormDefaultValues,
+    });
 
   const [documentTitle, setDocumentTitle] = useState<string | null | undefined>(
     undefined
@@ -85,7 +81,7 @@ export default function DocumentEditor() {
     string | null | undefined
   >(undefined);
 
-  const onSubmit = (data: DocumentInputs) => {
+  const onSubmit = (data: DocumentFormInputs) => {
     if (!documentId) return;
 
     updateDocumentData({
@@ -156,24 +152,8 @@ export default function DocumentEditor() {
               保存
             </Button>
           </Box>
-          <TextField {...register("title")} />
-          <Controller
-            name="targetRole"
-            control={control}
-            render={({ field }) => (
-              <Autocomplete
-                value={field.value}
-                multiple
-                options={["スタッフ", "管理者"]}
-                renderInput={(params) => (
-                  <TextField {...params} label="対象者" />
-                )}
-                onChange={(_, data) => {
-                  field.onChange(data);
-                }}
-              />
-            )}
-          />
+          <DocumentTitleInput register={register} />
+          <DocumentTargetRoleSelect control={control} />
           <Paper elevation={3}>
             <ContentBlockNoteEditor
               content={documentContent}
