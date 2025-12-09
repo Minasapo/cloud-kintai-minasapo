@@ -38,13 +38,13 @@ import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectl
 import IsDeemedHolidayFlagInput from "@/components/attendance_editor/IsDeemedHolidayFlagInput";
 import PaidHolidayFlagInputCommon from "@/components/attendance_editor/PaidHolidayFlagInput";
 import ReturnDirectlyFlagInput from "@/components/attendance_editor/ReturnDirectlyFlagInput";
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import {
   useCreateAttendanceMutation,
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
-} from "@/lib/api/attendanceApi";
+} from "@/entities/attendance/api/attendanceApi";
+import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { AttendanceEditMailSender } from "@/lib/mail/AttendanceEditMailSender";
