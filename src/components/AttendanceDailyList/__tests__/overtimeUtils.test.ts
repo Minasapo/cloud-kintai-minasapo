@@ -1,4 +1,4 @@
-import { Attendance } from "@/API";
+import { Attendance } from "@shared/api/graphql/types";
 
 import {
   calculateTotalOvertimeMinutes,
