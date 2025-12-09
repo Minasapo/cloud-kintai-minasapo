@@ -44,10 +44,10 @@ import ShiftRequest from "./pages/Shift/ShiftRequest";
 import ShiftDayView from "./pages/ShiftManagement/ShiftDayView";
 import ShiftManagement from "./pages/ShiftManagement/ShiftManagement";
 import StaffShiftList from "./pages/ShiftManagement/StaffShiftList";
-import NewWorkflow from "./pages/Workflow/NewWorkflow";
-import Workflow from "./pages/Workflow/Workflow";
-import WorkflowDetail from "./pages/Workflow/WorkflowDetail";
-import WorkflowEdit from "./pages/Workflow/WorkflowEdit";
+import WorkflowDetailPage from "./pages/workflow/detail/WorkflowDetailPage";
+import WorkflowEditPage from "./pages/workflow/edit/WorkflowEditPage";
+import WorkflowListPage from "./pages/workflow/list/WorkflowListPage";
+import NewWorkflowPage from "./pages/workflow/new/NewWorkflowPage";
 
 const router = createBrowserRouter([
   {
@@ -92,19 +92,19 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Workflow />,
+            element: <WorkflowListPage />,
           },
           {
             path: ":id",
-            element: <WorkflowDetail />,
+            element: <WorkflowDetailPage />,
           },
           {
             path: ":id/edit",
-            element: <WorkflowEdit />,
+            element: <WorkflowEditPage />,
           },
           {
             path: "new",
-            element: <NewWorkflow />,
+            element: <NewWorkflowPage />,
           },
         ],
       },
