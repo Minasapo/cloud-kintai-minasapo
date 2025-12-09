@@ -7,8 +7,7 @@ export function useOfficeLayoutAccess() {
   const { isCognitoUserRole } = useContext(AuthContext);
 
   const isAuthorized =
-    isCognitoUserRole(StaffRole.OPERATOR) ||
-    isCognitoUserRole(StaffRole.ADMIN);
+    isCognitoUserRole(StaffRole.OPERATOR) || isCognitoUserRole(StaffRole.ADMIN);
 
   return {
     isAuthorized,
