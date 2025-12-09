@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
 import { API } from "aws-amplify";
@@ -29,7 +30,6 @@ import {
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
-import { getWorkflow } from "@/graphql/queries";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
