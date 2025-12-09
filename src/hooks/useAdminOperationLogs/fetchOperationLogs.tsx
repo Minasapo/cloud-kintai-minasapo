@@ -1,8 +1,8 @@
 import { GraphQLResult } from "@aws-amplify/api";
+import { listOperationLogs } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 
 import { ListOperationLogsQuery, OperationLog } from "@/API";
-import { listOperationLogs } from "@/graphql/queries";
 
 export default async function fetchOperationLogs(
   nextToken: string | null = null,
