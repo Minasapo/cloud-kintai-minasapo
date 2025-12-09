@@ -26,10 +26,6 @@ import {
   updateDailyReport,
 } from "@shared/api/graphql/documents/mutations";
 import { dailyReportsByStaffId } from "@shared/api/graphql/documents/queries";
-import { API } from "aws-amplify";
-import dayjs, { type Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
 import type {
   CreateDailyReportMutation,
   DailyReport as DailyReportModel,
@@ -38,8 +34,15 @@ import type {
   DailyReportReactionType,
   DailyReportsByStaffIdQuery,
   UpdateDailyReportMutation,
-} from "@/API";
-import { DailyReportStatus, ModelSortDirection } from "@/API";
+} from "@shared/api/graphql/types";
+import {
+  DailyReportStatus,
+  ModelSortDirection,
+} from "@shared/api/graphql/types";
+import { API } from "aws-amplify";
+import dayjs, { type Dayjs } from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";

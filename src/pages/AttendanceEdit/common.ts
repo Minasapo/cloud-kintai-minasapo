@@ -1,4 +1,8 @@
-import { Rest, SystemCommentInput, UpdateAttendanceInput } from "../../API";
+import {
+  Rest,
+  SystemCommentInput,
+  UpdateAttendanceInput,
+} from "@shared/api/graphql/types";
 
 export type RestInputs = {
   startTime: Rest["startTime"] | null;

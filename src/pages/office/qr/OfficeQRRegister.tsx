@@ -4,17 +4,17 @@ import {
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
 import { Alert, Box, Button, Container, styled } from "@mui/material";
+import {
+  Attendance,
+  CreateAttendanceInput,
+  UpdateAttendanceInput,
+} from "@shared/api/graphql/types";
 import Clock from "@shared/ui/clock/Clock";
 import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import React, { useContext, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import {
-  Attendance,
-  CreateAttendanceInput,
-  UpdateAttendanceInput,
-} from "@/API";
 import { getNowISOStringWithZeroSeconds } from "@/components/time_recorder/util";
 import { AuthContext } from "@/context/AuthContext";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";

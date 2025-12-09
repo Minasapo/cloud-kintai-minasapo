@@ -11,12 +11,6 @@ import {
   Typography,
 } from "@mui/material";
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
-import StatusChip from "@shared/ui/chips/StatusChip";
-import Page from "@shared/ui/page/Page";
-import { API } from "aws-amplify";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-
 import {
   ApprovalStatus,
   ApprovalStep,
@@ -26,7 +20,13 @@ import {
   WorkflowComment,
   WorkflowCommentInput,
   WorkflowStatus,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import StatusChip from "@shared/ui/chips/StatusChip";
+import Page from "@shared/ui/page/Page";
+import { API } from "aws-amplify";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import useStaffs from "@/hooks/useStaffs/useStaffs";

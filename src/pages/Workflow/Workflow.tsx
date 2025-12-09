@@ -17,13 +17,13 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import { DatePicker } from "@mui/x-date-pickers";
+import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { WorkflowCategory, WorkflowStatus } from "@/API";
 import { AuthContext } from "@/context/AuthContext";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";

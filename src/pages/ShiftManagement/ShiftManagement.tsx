@@ -33,12 +33,6 @@ import {
   updateShiftRequest,
 } from "@shared/api/graphql/documents/mutations";
 import { listShiftRequests } from "@shared/api/graphql/documents/queries";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import { API } from "aws-amplify";
-import dayjs from "dayjs";
-import React, { useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 import {
   CreateShiftRequestMutation,
   ListShiftRequestsQuery,
@@ -47,7 +41,13 @@ import {
   ShiftRequestStatus,
   ShiftRequestSummaryInput,
   UpdateShiftRequestMutation,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import { API } from "aws-amplify";
+import dayjs from "dayjs";
+import React, { useContext, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";

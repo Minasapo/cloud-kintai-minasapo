@@ -14,18 +14,18 @@ import {
   Typography,
 } from "@mui/material";
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
-import Page from "@shared/ui/page/Page";
-import { API } from "aws-amplify";
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-
 import {
   GetWorkflowQuery,
   UpdateWorkflowInput,
   WorkflowCategory,
   WorkflowComment,
   WorkflowStatus,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import Page from "@shared/ui/page/Page";
+import { API } from "aws-amplify";
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { useAppDispatchV2 } from "@/app/hooks";
 import WorkflowTypeFields from "@/components/Workflow/WorkflowTypeFields";
 import { AuthContext } from "@/context/AuthContext";
