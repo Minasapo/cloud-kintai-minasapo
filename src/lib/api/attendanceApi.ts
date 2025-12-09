@@ -1,1 +1,1 @@
-export * from "@/entities/attendance/api/attendanceApi";
+export * from "@entities/attendance/api/attendanceApi";
