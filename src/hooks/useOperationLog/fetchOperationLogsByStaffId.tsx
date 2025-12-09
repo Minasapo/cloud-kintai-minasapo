@@ -1,12 +1,11 @@
 import { GraphQLResult } from "@aws-amplify/api";
 import { operationLogsByStaffId } from "@shared/api/graphql/documents/queries";
-import { API } from "aws-amplify";
-
 import {
   OperationLog,
   OperationLogsByStaffIdQuery,
   OperationLogsByStaffIdQueryVariables,
-} from "../../API";
+} from "@shared/api/graphql/types";
+import { API } from "aws-amplify";
 
 export default async function fetchOperationLogsByStaffId(
   staffId: string,

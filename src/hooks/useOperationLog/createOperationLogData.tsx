@@ -1,12 +1,11 @@
 import { GraphQLResult } from "@aws-amplify/api";
 import { createOperationLog } from "@shared/api/graphql/documents/mutations";
-import { API } from "aws-amplify";
-
 import {
   CreateOperationLogInput,
   CreateOperationLogMutation,
   OperationLog,
-} from "../../API";
+} from "@shared/api/graphql/types";
+import { API } from "aws-amplify";
 
 export default async function createOperationLogData(
   input: CreateOperationLogInput

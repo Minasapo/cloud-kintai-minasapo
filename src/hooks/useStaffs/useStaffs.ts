@@ -1,7 +1,3 @@
-import { useContext, useEffect, useState } from "react";
-
-import { AuthContext } from "@/context/AuthContext";
-
 import {
   ApproverMultipleMode,
   ApproverSettingMode,
@@ -9,7 +5,11 @@ import {
   DeleteStaffInput,
   Staff,
   UpdateStaffInput,
-} from "../../API";
+} from "@shared/api/graphql/types";
+import { useContext, useEffect, useState } from "react";
+
+import { AuthContext } from "@/context/AuthContext";
+
 import createStaffData from "./createStaffData";
 import deleteStaffData from "./deleteStaffData";
 import fetchStaffs from "./fetchStaffs";

@@ -4,13 +4,13 @@ import {
   useGetWorkflowsQuery,
   useUpdateWorkflowMutation,
 } from "@entities/workflow/api/workflowApi";
-import { useCallback, useContext } from "react";
-
 import {
   CreateWorkflowInput,
   UpdateWorkflowInput,
   Workflow as APIWorkflow,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import { useCallback, useContext } from "react";
+
 import { AuthContext } from "@/context/AuthContext";
 
 const extractErrorMessage = (error: unknown) => {

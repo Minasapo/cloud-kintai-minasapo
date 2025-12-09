@@ -1,8 +1,11 @@
 import { GraphQLResult } from "@aws-amplify/api";
 import { deleteStaff } from "@shared/api/graphql/documents/mutations";
+import {
+  DeleteStaffInput,
+  DeleteStaffMutation,
+  Staff,
+} from "@shared/api/graphql/types";
 import { API } from "aws-amplify";
-
-import { DeleteStaffInput, DeleteStaffMutation, Staff } from "../../API";
 
 export default async function deleteStaffData(input: DeleteStaffInput) {
   const response = (await API.graphql({
