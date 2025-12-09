@@ -7,6 +7,10 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { DatePicker } from "@mui/x-date-pickers";
+import {
+  HolidayCalendar,
+  UpdateHolidayCalendarInput,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -15,7 +19,6 @@ import { AttendanceDate } from "@/lib/AttendanceDate";
 import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 
-import { HolidayCalendar, UpdateHolidayCalendarInput } from "../../../../API";
 import { useAppDispatchV2 } from "../../../../app/hooks";
 import {
   setSnackbarError,

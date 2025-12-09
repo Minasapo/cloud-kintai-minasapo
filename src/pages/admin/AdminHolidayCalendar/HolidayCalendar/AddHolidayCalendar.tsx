@@ -10,6 +10,10 @@ import {
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import {
+  CreateHolidayCalendarInput,
+  HolidayCalendar,
+} from "@shared/api/graphql/types";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -17,7 +21,6 @@ import { AttendanceDate } from "@/lib/AttendanceDate";
 import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 
-import { CreateHolidayCalendarInput, HolidayCalendar } from "../../../../API";
 import { useAppDispatchV2 } from "../../../../app/hooks";
 import {
   setSnackbarError,

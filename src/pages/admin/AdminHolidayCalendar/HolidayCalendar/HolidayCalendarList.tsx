@@ -25,9 +25,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { HolidayCalendar } from "@shared/api/graphql/types";
 import { useCallback, useEffect } from "react";
 
-import { HolidayCalendar } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
