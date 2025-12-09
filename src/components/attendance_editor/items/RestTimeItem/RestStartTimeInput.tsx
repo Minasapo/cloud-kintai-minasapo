@@ -4,8 +4,8 @@ import { useContext } from "react";
 import { FieldArrayWithId } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
 import { CommonRestTimePicker } from "./CommonRestTimePicker";
 

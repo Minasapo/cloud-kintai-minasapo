@@ -3,7 +3,7 @@ import { useContext } from "react";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 export default function ReturnDirectlyFlagInput() {
   const { workDate, control, setValue, changeRequests, readOnly } = useContext(

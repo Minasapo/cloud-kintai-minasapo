@@ -6,8 +6,8 @@ import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import {
   AttendanceEditInputs,
   RestInputs,
-} from "@/pages/AttendanceEdit/common";
-import { Label } from "@/pages/AttendanceEdit/MobileEditor/Label";
+} from "@/pages/attendance/edit/common";
+import { Label } from "@/pages/attendance/edit/MobileEditor/Label";
 
 import {
   AttendanceControl,

@@ -49,14 +49,14 @@ import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { AttendanceEditMailSender } from "@/lib/mail/AttendanceEditMailSender";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
-import AttendanceEditProvider from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import AttendanceEditProvider from "@/pages/attendance/edit/AttendanceEditProvider";
 import {
   AttendanceEditInputs,
   defaultValues,
   HourlyPaidHolidayTimeInputs,
   RestInputs,
-} from "@/pages/AttendanceEdit/common";
-import { SubstituteHolidayDateInput } from "@/pages/AttendanceEdit/DesktopEditor/SubstituteHolidayDateInput";
+} from "@/pages/attendance/edit/common";
+import { SubstituteHolidayDateInput } from "@/pages/attendance/edit/DesktopEditor/SubstituteHolidayDateInput";
 
 import { useAppDispatchV2 } from "../../app/hooks";
 import * as MESSAGE_CODE from "../../errors";

@@ -8,7 +8,7 @@ import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import {
   AttendanceEditInputs,
   RestInputs,
-} from "@/pages/AttendanceEdit/common";
+} from "@/pages/attendance/edit/common";
 
 import PaidHolidayFlagInputMobile from "./PaidHolidayFlagInputMobile";
 import {

@@ -10,9 +10,9 @@ import {
 import { ChangeEvent, ComponentType, ReactNode } from "react";
 import { Controller } from "react-hook-form";
 
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
-import { Label as MobileLabel } from "../../pages/AttendanceEdit/MobileEditor/Label";
+import { Label as MobileLabel } from "../../pages/attendance/edit/MobileEditor/Label";
 import {
   AttendanceBooleanFieldName,
   AttendanceControl,

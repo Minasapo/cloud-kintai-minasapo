@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 import EndTimeInput from "./EndTimeInput";
 import StartTimeInput from "./StartTimeInput";

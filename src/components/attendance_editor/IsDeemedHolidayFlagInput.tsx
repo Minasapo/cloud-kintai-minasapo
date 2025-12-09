@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { Control, Controller } from "react-hook-form";
 
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
 // -----------------------------------------------------------------------------
 // ファイル / コンポーネントの概要
@@ -23,7 +23,7 @@ import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
  * - react-hook-form の Controller を使用してフォーム制御を行います
  *
  * 参照:
- * - AttendanceEditInputs 型は /src/pages/AttendanceEdit/common で定義されています
+ * - AttendanceEditInputs 型は /src/pages/attendance/edit/common で定義されています
  */
 
 // -----------------------------------------------------------------------------

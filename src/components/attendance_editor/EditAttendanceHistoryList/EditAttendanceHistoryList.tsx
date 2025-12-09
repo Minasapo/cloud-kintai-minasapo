@@ -18,7 +18,7 @@ import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 import { AttendanceHistoryRow } from "./AttendanceHistoryRow";
 

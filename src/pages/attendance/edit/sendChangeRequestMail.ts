@@ -2,11 +2,10 @@ import { sendMail } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 import dayjs from "dayjs";
 
+import * as MESSAGE_CODE from "@/errors";
+import { CognitoUser } from "@/hooks/useCognitoUser";
+import { StaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
-
-import * as MESSAGE_CODE from "../../errors";
-import { CognitoUser } from "../../hooks/useCognitoUser";
-import { StaffRole, StaffType } from "../../hooks/useStaffs/useStaffs";
 
 export default function sendChangeRequestMail(
   cognitoUser: CognitoUser,

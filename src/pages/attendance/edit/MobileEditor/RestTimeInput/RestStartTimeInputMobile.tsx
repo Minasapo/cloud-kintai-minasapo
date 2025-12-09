@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { useContext } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { RestInputs } from "@/pages/AttendanceEdit/common";
+import { RestInputs } from "@/pages/attendance/edit/common";
 
 import { AttendanceEditContext } from "../../AttendanceEditProvider";
 

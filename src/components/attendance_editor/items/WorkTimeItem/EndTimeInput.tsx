@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 import TimeInputBase from "./TimeInputBase";
 

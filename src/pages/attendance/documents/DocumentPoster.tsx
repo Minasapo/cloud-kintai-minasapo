@@ -18,13 +18,13 @@ import { Storage } from "aws-amplify";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
-import { useAppDispatchV2 } from "../../app/hooks";
-import * as MESSAGE_CODE from "../../errors";
-import createDocumentData from "../../hooks/useDocuments/createDocumentData";
+import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
+import createDocumentData from "@/hooks/useDocuments/createDocumentData";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../lib/reducers/snackbarReducer";
+} from "@/lib/reducers/snackbarReducer";
 
 type Inputs = {
   title: string | null | undefined;

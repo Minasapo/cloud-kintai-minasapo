@@ -16,7 +16,7 @@ import { useMemo, useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
 type ButtonRoleMode = "all" | "admin" | "staff";
 

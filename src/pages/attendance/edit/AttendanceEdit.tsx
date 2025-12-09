@@ -10,18 +10,18 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import * as MESSAGE_CODE from "@/errors";
+import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
-import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
-
-import { useAppDispatchV2 } from "../../app/hooks";
-import * as MESSAGE_CODE from "../../errors";
-import useStaffs, { StaffType } from "../../hooks/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../lib/reducers/snackbarReducer";
+} from "@/lib/reducers/snackbarReducer";
+import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
+
 import AttendanceEditProvider from "./AttendanceEditProvider";
 import {
   AttendanceEditInputs,

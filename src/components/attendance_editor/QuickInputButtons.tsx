@@ -15,7 +15,7 @@ import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 // Auth/role checks are intentionally not used here - visibility is driven by visibleMode prop
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
 type QuickInputButtonsProps = {
   setValue: UseFormSetValue<AttendanceEditInputs>;

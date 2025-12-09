@@ -6,7 +6,7 @@ import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import {
   AttendanceEditInputs,
   RestInputs,
-} from "@/pages/AttendanceEdit/common";
+} from "@/pages/attendance/edit/common";
 
 import {
   AttendanceControl,

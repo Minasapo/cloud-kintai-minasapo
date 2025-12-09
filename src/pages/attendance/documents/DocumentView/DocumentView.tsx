@@ -8,12 +8,12 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
+import fetchDocument from "@/hooks/useDocuments/fetchDocument";
 import { AttendanceDate } from "@/lib/AttendanceDate";
+import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
-import fetchDocument from "../../../hooks/useDocuments/fetchDocument";
-import { setSnackbarError } from "../../../lib/reducers/snackbarReducer";
 import ContentView from "./ContentView";
 
 async function updateImageUrl(content: string) {

@@ -12,7 +12,8 @@ import {
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import { useState } from "react";
 
-import useDocuments from "../../../hooks/useDocuments/useDocuments";
+import useDocuments from "@/hooks/useDocuments/useDocuments";
+
 import { FilterGrid } from "./FilterGrid";
 import { SearchGrid } from "./SearchGrid";
 

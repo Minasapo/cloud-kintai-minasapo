@@ -14,14 +14,15 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
-import fetchDocument from "../../../hooks/useDocuments/fetchDocument";
-import updateDocumentData from "../../../hooks/useDocuments/updateDocumentData";
+import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
+import fetchDocument from "@/hooks/useDocuments/fetchDocument";
+import updateDocumentData from "@/hooks/useDocuments/updateDocumentData";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../lib/reducers/snackbarReducer";
+} from "@/lib/reducers/snackbarReducer";
+
 import { defaultValues, DocumentInputs } from "./common";
 import ContentBlockNoteEditor from "./ContentBlockNoteEditor";
 

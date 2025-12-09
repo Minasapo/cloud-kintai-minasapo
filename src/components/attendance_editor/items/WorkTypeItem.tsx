@@ -2,7 +2,7 @@ import { Stack, Typography } from "@mui/material";
 import { useContext } from "react";
 
 import { getWorkTypeLabel } from "@/pages/admin/AdminStaff/workTypeOptions";
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 export default function WorkTypeItem() {
   const { staff } = useContext(AttendanceEditContext);

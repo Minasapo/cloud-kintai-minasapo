@@ -1,6 +1,6 @@
 import { FieldArrayWithId } from "react-hook-form";
 
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
 import HourlyPaidHolidayTimeInput from "./HourlyPaidHolidayTimeInput";
 

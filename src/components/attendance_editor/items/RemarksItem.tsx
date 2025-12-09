@@ -2,7 +2,7 @@ import { Box, Chip, Stack, TextField } from "@mui/material";
 import { useContext } from "react";
 import { Controller } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 export default function RemarksItem() {
   const { getValues, setValue, control, watch, readOnly } = useContext(

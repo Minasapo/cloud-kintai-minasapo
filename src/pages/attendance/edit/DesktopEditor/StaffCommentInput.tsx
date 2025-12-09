@@ -3,7 +3,8 @@ import { Box, Chip, Stack, styled, TextField, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
 
-import { AppConfigContext } from "../../../context/AppConfigContext";
+import { AppConfigContext } from "@/context/AppConfigContext";
+
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 import { AttendanceEditInputs } from "../common";
 

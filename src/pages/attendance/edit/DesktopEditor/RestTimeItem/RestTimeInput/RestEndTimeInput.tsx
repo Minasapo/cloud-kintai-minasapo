@@ -7,7 +7,7 @@ import { Controller, FieldArrayWithId } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 import { AttendanceEditInputs } from "../../../common";
 

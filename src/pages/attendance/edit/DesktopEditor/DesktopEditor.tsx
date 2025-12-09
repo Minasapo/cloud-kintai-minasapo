@@ -22,15 +22,15 @@ import { GoDirectlyFlagCheckbox } from "@/components/attendance_editor/GoDirectl
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
 } from "@/components/attendance_editor/items/HourlyPaidHolidayTimeItem";
+import ProductionTimeItem from "@/components/attendance_editor/items/ProductionTimeItem";
+import StaffNameItem from "@/components/attendance_editor/items/StaffNameItem";
+import WorkTypeItem from "@/components/attendance_editor/items/WorkTypeItem";
 import QuickInputButtons from "@/components/attendance_editor/QuickInputButtons";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useOperationLog from "@/hooks/useOperationLog/useOperationLog";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 
-import ProductionTimeItem from "../../../components/attendance_editor/items/ProductionTimeItem";
-import StaffNameItem from "../../../components/attendance_editor/items/StaffNameItem";
-import WorkTypeItem from "../../../components/attendance_editor/items/WorkTypeItem";
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 import ChangeRequestingAlert from "./ChangeRequestingMessage";

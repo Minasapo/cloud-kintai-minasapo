@@ -2,7 +2,7 @@ import { Alert, Button } from "@mui/material";
 import { useContext } from "react";
 
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 export function LunchRestTimeNotSetWarning({
   targetWorkDate,

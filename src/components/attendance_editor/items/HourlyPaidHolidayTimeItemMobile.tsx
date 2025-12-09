@@ -3,8 +3,8 @@ import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useContext } from "react";
 import { FieldArrayWithId } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/pages/AttendanceEdit/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/pages/AttendanceEdit/common";
+import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
 import HourlyPaidHolidayEndTimeInput from "./HourlyPaidHolidayEndTimeInput";
 import HourlyPaidHolidayStartTimeInput from "./HourlyPaidHolidayStartTimeInput";
