@@ -46,7 +46,8 @@ export default function Workflow() {
 
   const { workflows, loading, error } = useWorkflows();
   const { staffs } = useStaffs();
-  const { cognitoUser } = useContext(AuthContext);
+  const { cognitoUser, authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
   const currentStaffId = useMemo(() => {
     if (!cognitoUser?.id) return undefined;
     return staffs.find((s) => s.cognitoUserId === cognitoUser.id)?.id;
@@ -173,6 +174,23 @@ export default function Workflow() {
       applicationFrom ||
       applicationTo
   );
+
+  if (!isAuthenticated) {
+    return (
+      <Page title="ワークフロー" maxWidth="lg">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: 240,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      </Page>
+    );
+  }
 
   return (
     <Page title="ワークフロー" maxWidth="lg">
