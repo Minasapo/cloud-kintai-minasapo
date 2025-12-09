@@ -19,7 +19,7 @@ import {
   useGetHolidayCalendarsQuery,
   useUpdateCompanyHolidayCalendarMutation,
   useUpdateHolidayCalendarMutation,
-} from "@/lib/api/calendarApi";
+} from "@/entities/calendar/api/calendarApi";
 
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
