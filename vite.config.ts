@@ -68,6 +68,8 @@ const manualChunks = (id: string) => {
   return "vendor-misc";
 };
 
+const shouldUseManualChunks = process.env.ENABLE_MANUAL_CHUNKS === "true";
+
 export default defineConfig({
   server: {
     host: true,
@@ -82,7 +84,7 @@ export default defineConfig({
     outDir: "build",
     rollupOptions: {
       output: {
-        manualChunks,
+        manualChunks: shouldUseManualChunks ? manualChunks : undefined,
       },
     },
   },
