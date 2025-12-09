@@ -1,6 +1,5 @@
+import { UpdateAppConfigInput } from "@shared/api/graphql/types";
 import { createContext } from "react";
-
-import { UpdateAppConfigInput } from "@/API";
 
 type AdminAppConfigContextProps = {
   fetchAllConfigs: () => Promise<void>;

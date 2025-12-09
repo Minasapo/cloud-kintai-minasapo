@@ -1,7 +1,10 @@
+import {
+  CreateAppConfigInput,
+  UpdateAppConfigInput,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { createContext } from "react";
 
-import { CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
 import { DEFAULT_CONFIG } from "@/hooks/useAppConfig/useAppConfig";
 
 type AppConfigContextProps = {
