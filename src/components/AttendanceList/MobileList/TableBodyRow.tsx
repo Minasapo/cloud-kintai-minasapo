@@ -6,15 +6,15 @@ import {
   TableCell,
   TableRow,
 } from "@mui/material";
-import dayjs from "dayjs";
-import { useNavigate } from "react-router-dom";
-
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
+
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { getTableRowClassName } from "@/pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
 import { CreatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/CreatedAtTableCell";
