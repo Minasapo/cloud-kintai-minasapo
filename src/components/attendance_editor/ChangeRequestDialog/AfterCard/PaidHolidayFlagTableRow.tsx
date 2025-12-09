@@ -1,13 +1,12 @@
 import { TableCell, TableRow } from "@mui/material";
-
-import { AttendanceChangeRequest } from "../../../../API";
+import { AttendanceChangeRequest } from "@shared/api/graphql/types";
 
 export default function PaidHolidayFlagTableRow({
   value,
   beforeValue,
 }: {
   value: AttendanceChangeRequest["paidHolidayFlag"];
-  beforeValue?: import("../../../../API").Attendance["paidHolidayFlag"];
+  beforeValue?: import("@shared/api/graphql/types").Attendance["paidHolidayFlag"];
 }) {
   const changed =
     (value === null ? null : value) !==
