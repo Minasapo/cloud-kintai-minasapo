@@ -8,6 +8,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import {
+  Attendance,
+  AttendanceChangeRequest,
+  UpdateAttendanceInput,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,11 +22,6 @@ import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
 
-import {
-  Attendance,
-  AttendanceChangeRequest,
-  UpdateAttendanceInput,
-} from "../../../API";
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
 import {
