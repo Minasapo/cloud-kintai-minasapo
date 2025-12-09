@@ -1,7 +1,11 @@
 import { Dispatch } from "@reduxjs/toolkit";
+import {
+  Attendance,
+  CreateOperationLogInput,
+  Staff,
+} from "@shared/api/graphql/types";
 import { Logger } from "aws-amplify";
 
-import { Attendance, CreateOperationLogInput, Staff } from "@/API";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";

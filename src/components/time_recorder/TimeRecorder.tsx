@@ -23,16 +23,16 @@ import {
   Typography,
 } from "@mui/material";
 import { Theme } from "@mui/material/styles";
-import { Logger } from "aws-amplify";
-import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-
 import {
   Attendance,
   CreateAttendanceInput,
   Staff,
   UpdateAttendanceInput,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import { Logger } from "aws-amplify";
+import dayjs from "dayjs";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import {
