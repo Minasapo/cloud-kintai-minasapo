@@ -40,10 +40,10 @@ import {
   UpdateShiftPlanYearMutationVariables,
 } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
+import { useGetHolidayCalendarsQuery } from "@/entities/calendar/api/calendarApi";
 import * as MESSAGE_CODE from "@/errors";
 import { createShiftPlanYear, updateShiftPlanYear } from "@/graphql/mutations";
 import { shiftPlanYearByTargetYear } from "@/graphql/queries";
-import { useGetHolidayCalendarsQuery } from "@/lib/api/calendarApi";
 import {
   setSnackbarError,
   setSnackbarSuccess,
