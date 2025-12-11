@@ -1,5 +1,5 @@
 import { GraphQLResult } from "@aws-amplify/api";
-import { Grid, Paper, Typography } from "@mui/material";
+import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import {
   ApprovalStatus,
@@ -20,6 +20,7 @@ import { AuthContext } from "@/context/AuthContext";
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/ui/WorkflowApprovalTimeline";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
+import WorkflowApplicationDetails from "@/features/workflow/detail-panel/ui/WorkflowApplicationDetails";
 import WorkflowDetailActions from "@/features/workflow/detail-panel/ui/WorkflowDetailActions";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
@@ -369,17 +370,24 @@ export default function WorkflowDetailPage() {
         {!loading && !error && (
           <Grid container spacing={2}>
             <Grid item xs={12} sm={7}>
-              <WorkflowMetadataPanel
-                workflowId={workflow?.id}
-                fallbackId={id}
-                category={workflow?.category ?? null}
-                categoryLabel={categoryLabel}
-                staffName={staffName}
-                applicationDate={applicationDate}
-                status={workflow?.status ?? null}
-                overTimeDetails={workflow?.overTimeDetails ?? null}
-                approvalSteps={approvalSteps}
-              />
+              <Stack spacing={3}>
+                <WorkflowMetadataPanel
+                  workflowId={workflow?.id}
+                  fallbackId={id}
+                  category={workflow?.category ?? null}
+                  categoryLabel={categoryLabel}
+                  staffName={staffName}
+                  applicationDate={applicationDate}
+                  status={workflow?.status ?? null}
+                  overTimeDetails={workflow?.overTimeDetails ?? null}
+                  approvalSteps={approvalSteps}
+                />
+                <WorkflowApplicationDetails
+                  category={workflow?.category ?? null}
+                  categoryLabel={categoryLabel}
+                  overTimeDetails={workflow?.overTimeDetails ?? null}
+                />
+              </Stack>
             </Grid>
 
             <Grid item xs={12} sm={5}>
