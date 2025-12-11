@@ -35,7 +35,8 @@ type ClockMode = "clock_in" | "clock_out" | null;
 export function useOfficeQrRegister() {
   const dispatch = useAppDispatchV2();
   const logger = useMemo(
-    () => new Logger("OfficeQrRegister", import.meta.env.DEV ? "DEBUG" : "ERROR"),
+    () =>
+      new Logger("OfficeQrRegister", import.meta.env.DEV ? "DEBUG" : "ERROR"),
     []
   );
   const { getOfficeMode } = useContext(AppConfigContext);
@@ -154,7 +155,10 @@ export function useOfficeQrRegister() {
 
         await createOperationLogData(input);
       } catch (logErr) {
-        logger.error("Failed to create operation log for office QR clockIn", logErr);
+        logger.error(
+          "Failed to create operation log for office QR clockIn",
+          logErr
+        );
       }
 
       dispatch(setSnackbarSuccess("出勤が記録されました。"));
@@ -209,7 +213,10 @@ export function useOfficeQrRegister() {
 
         await createOperationLogData(input);
       } catch (logErr) {
-        logger.error("Failed to create operation log for office QR clockOut", logErr);
+        logger.error(
+          "Failed to create operation log for office QR clockOut",
+          logErr
+        );
       }
 
       dispatch(setSnackbarSuccess("退勤が記録されました。"));
