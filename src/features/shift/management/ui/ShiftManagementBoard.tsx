@@ -59,6 +59,7 @@ import {
 } from "@/lib/reducers/snackbarReducer";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
+import { getCellHighlightSx } from "../lib/selectionHighlight";
 import { buildSummaryFromAssignments } from "../lib/shiftAssignments";
 import {
   getGroupCoveragePresentation,
@@ -77,10 +78,7 @@ import {
   shiftStateToShiftRequestStatus,
   statusVisualMap,
 } from "../lib/shiftStateMapping";
-import {
-  getCellHighlightSx,
-  getShiftKeyState,
-} from "../lib/selectionHighlight";
+import useShiftSelection from "../model/useShiftSelection";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
 import ShiftManagementSummaryRow from "./components/ShiftManagementSummaryRow";
 
@@ -195,13 +193,18 @@ export default function ShiftManagementBoard() {
     [days]
   );
 
-  const dayKeyToIndex = useMemo(() => {
-    const map = new Map<string, number>();
-    dayKeyList.forEach((key, index) => {
-      map.set(key, index);
-    });
-    return map;
-  }, [dayKeyList]);
+  const {
+    selectedStaffIds,
+    selectedDayKeys,
+    hasBulkSelection,
+    selectedCellCount,
+    handleStaffCheckboxChange,
+    handleDayCheckboxChange,
+  } = useShiftSelection({
+    displayedStaffOrder,
+    dayKeyList,
+    staffIdToIndex,
+  });
 
   const { data: holidayCalendars = [], error: holidayCalendarsError } =
     useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
@@ -282,12 +285,6 @@ export default function ShiftManagementBoard() {
     dateKey: string;
   } | null>(null);
   const [editingState, setEditingState] = useState<ShiftState>("auto");
-  const [selectedStaffIds, setSelectedStaffIds] = useState<Set<string>>(
-    () => new Set()
-  );
-  const [selectedDayKeys, setSelectedDayKeys] = useState<Set<string>>(
-    () => new Set()
-  );
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [bulkEditState, setBulkEditState] = useState<ShiftState>("work");
   const [isSavingSingleEdit, setIsSavingSingleEdit] = useState(false);
@@ -499,79 +496,6 @@ export default function ShiftManagementBoard() {
   const editingDialogDateLabel = editingCell
     ? dayjs(editingCell.dateKey).format("YYYY年M月D日 (dd)")
     : "";
-  const hasBulkSelection =
-    selectedStaffIds.size > 0 && selectedDayKeys.size > 0;
-  const selectedCellCount = selectedStaffIds.size * selectedDayKeys.size;
-  // Shift+クリック時に連続選択するための起点インデックスを保持
-  const lastStaffSelectionIndexRef = React.useRef<number | null>(null);
-  const lastDaySelectionIndexRef = React.useRef<number | null>(null);
-
-  const updateStaffSelections = (ids: string[], shouldSelect: boolean) => {
-    if (!ids.length) return;
-    setSelectedStaffIds((prev) => {
-      const next = new Set(prev);
-      ids.forEach((id) => {
-        if (shouldSelect) {
-          next.add(id);
-        } else {
-          next.delete(id);
-        }
-      });
-      return next;
-    });
-  };
-
-  const updateDaySelections = (keys: string[], shouldSelect: boolean) => {
-    if (!keys.length) return;
-    setSelectedDayKeys((prev) => {
-      const next = new Set(prev);
-      keys.forEach((key) => {
-        if (shouldSelect) {
-          next.add(key);
-        } else {
-          next.delete(key);
-        }
-      });
-      return next;
-    });
-  };
-
-  const handleStaffCheckboxChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    staffId: string
-  ) => {
-    event.stopPropagation();
-    const shouldSelect = event.target.checked;
-    const staffIndex = staffIdToIndex.get(staffId);
-    const isShiftSelection =
-      staffIndex !== undefined &&
-      lastStaffSelectionIndexRef.current !== null &&
-      getShiftKeyState(event.nativeEvent);
-
-    if (isShiftSelection) {
-      const start = Math.min(
-        staffIndex,
-        lastStaffSelectionIndexRef.current as number
-      );
-      const end = Math.max(
-        staffIndex,
-        lastStaffSelectionIndexRef.current as number
-      );
-      const idsInRange = displayedStaffOrder
-        .slice(start, end + 1)
-        .map((staff) => staff.id);
-      updateStaffSelections(idsInRange, shouldSelect);
-    } else {
-      updateStaffSelections([staffId], shouldSelect);
-    }
-
-    if (staffIndex !== undefined) {
-      lastStaffSelectionIndexRef.current = staffIndex;
-    } else {
-      lastStaffSelectionIndexRef.current = null;
-    }
-  };
-
   const persistShiftRequestChanges = async (
     staffId: string,
     dayKeys: string[],
@@ -726,48 +650,6 @@ export default function ShiftManagementBoard() {
       return next;
     });
   };
-
-  const handleDayCheckboxChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    dateKey: string
-  ) => {
-    event.stopPropagation();
-    const shouldSelect = event.target.checked;
-    const dayIndex = dayKeyToIndex.get(dateKey);
-    const isShiftSelection =
-      dayIndex !== undefined &&
-      lastDaySelectionIndexRef.current !== null &&
-      getShiftKeyState(event.nativeEvent);
-
-    if (isShiftSelection) {
-      const start = Math.min(
-        dayIndex,
-        lastDaySelectionIndexRef.current as number
-      );
-      const end = Math.max(
-        dayIndex,
-        lastDaySelectionIndexRef.current as number
-      );
-      const keysInRange = dayKeyList.slice(start, end + 1);
-      updateDaySelections(keysInRange, shouldSelect);
-    } else {
-      updateDaySelections([dateKey], shouldSelect);
-    }
-
-    if (dayIndex !== undefined) {
-      lastDaySelectionIndexRef.current = dayIndex;
-    } else {
-      lastDaySelectionIndexRef.current = null;
-    }
-  };
-
-  React.useEffect(() => {
-    lastStaffSelectionIndexRef.current = null;
-  }, [displayedStaffOrder]);
-
-  React.useEffect(() => {
-    lastDaySelectionIndexRef.current = null;
-  }, [dayKeyList]);
 
   const openShiftEditDialog = (
     staffId: string,
