@@ -40,10 +40,10 @@ import OfficeQRRegister from "./pages/office/qr/OfficeQRRegister";
 import OfficeQRView from "./pages/office/qr/OfficeQRView";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
-import ShiftRequest from "./pages/Shift/ShiftRequest";
-import ShiftDayView from "./pages/ShiftManagement/ShiftDayView";
-import ShiftManagement from "./pages/ShiftManagement/ShiftManagement";
-import StaffShiftList from "./pages/ShiftManagement/StaffShiftList";
+import ShiftDayViewPage from "./pages/shift/day-view";
+import ShiftManagementPage from "./pages/shift/management";
+import ShiftRequest from "./pages/shift/request";
+import StaffShiftListPage from "./pages/shift/staff";
 import WorkflowDetailPage from "./pages/workflow/detail/WorkflowDetailPage";
 import WorkflowEditPage from "./pages/workflow/edit/WorkflowEditPage";
 import WorkflowListPage from "./pages/workflow/list/WorkflowListPage";
@@ -183,7 +183,7 @@ const router = createBrowserRouter([
             path: "shift",
             element: (
               <AdminShiftGuard>
-                <ShiftManagement />
+                <ShiftManagementPage />
               </AdminShiftGuard>
             ),
           },
@@ -191,7 +191,7 @@ const router = createBrowserRouter([
             path: "shift/day/:date",
             element: (
               <AdminShiftGuard>
-                <ShiftDayView />
+                <ShiftDayViewPage />
               </AdminShiftGuard>
             ),
           },
@@ -199,7 +199,7 @@ const router = createBrowserRouter([
             path: "shift/:staffId",
             element: (
               <AdminShiftGuard>
-                <StaffShiftList />
+                <StaffShiftListPage />
               </AdminShiftGuard>
             ),
           },
