@@ -1,12 +1,11 @@
 import { OfficeQrPanel, useOfficeQr } from "@features/attendance/office-qr";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
-import { AppConfigContext } from "../../../context/AppConfigContext";
-
-const OfficeQRView: React.FC = () => {
+export function OfficeQrExperience() {
   const { isCognitoUserRole } = useContext(AuthContext);
   const { getOfficeMode } = useContext(AppConfigContext);
   const [showAdminAlert, setShowAdminAlert] = useState(false);
@@ -47,6 +46,4 @@ const OfficeQRView: React.FC = () => {
       onManualRefresh={handleManualRefresh}
     />
   );
-};
-
-export default OfficeQRView;
+}

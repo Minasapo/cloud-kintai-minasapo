@@ -34,10 +34,10 @@ import DailyReport from "./pages/attendance/daily-report/DailyReport";
 import AttendanceEdit from "./pages/attendance/edit/AttendanceEdit";
 import AttendanceListPage from "./pages/attendance/list/AttendanceListPage";
 import Login from "./pages/Login/Login";
-import OfficeLayout from "./pages/office/OfficeLayout";
-import OfficePage from "./pages/office/OfficePage";
-import OfficeQRRegister from "./pages/office/qr/OfficeQRRegister";
-import OfficeQRView from "./pages/office/qr/OfficeQRView";
+import OfficeHomePage from "./pages/office/home/OfficeHomePage";
+import OfficeLayoutPage from "./pages/office/layout/OfficeLayoutPage";
+import OfficeQrPage from "./pages/office/qr/OfficeQrPage";
+import OfficeQrRegisterPage from "./pages/office/qr-register/OfficeQrRegisterPage";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import ShiftDayViewPage from "./pages/shift/day-view";
@@ -303,19 +303,19 @@ const router = createBrowserRouter([
       },
       {
         path: "office",
-        element: <OfficeLayout />,
+        element: <OfficeLayoutPage />,
         children: [
           {
             index: true,
-            element: <OfficePage />,
+            element: <OfficeHomePage />,
           },
           {
             path: "qr",
-            element: <OfficeQRView />,
+            element: <OfficeQrPage />,
           },
           {
             path: "qr/register",
-            element: <OfficeQRRegister />,
+            element: <OfficeQrRegisterPage />,
           },
         ],
       },
