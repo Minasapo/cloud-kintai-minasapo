@@ -1,3 +1,4 @@
+import { ChangeRequestDiffTable } from "@features/attendance/edit/ChangeRequestDialog/ChangeRequestDiffTable";
 import {
   Button,
   Dialog,
@@ -12,7 +13,6 @@ import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 
-import { ChangeRequestDiffTable } from "@/components/attendance_editor/ChangeRequestDialog/ChangeRequestDiffTable";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 export type ChangeRequestQuickViewDialogProps = {

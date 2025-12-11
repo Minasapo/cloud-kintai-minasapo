@@ -1,3 +1,4 @@
+import { calcTotalRestTime } from "@features/attendance/edit/items/RestTimeItem/RestTimeItem";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import { Button } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
@@ -5,10 +6,9 @@ import dayjs from "dayjs";
 import { useContext } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import { StaffType } from "../../hooks/useStaffs/useStaffs";
-import { calcTotalRestTime } from "../attendance_editor/items/RestTimeItem/RestTimeItem";
 import downloadAttendances from "./downloadAttendances";
 
 interface Rest {

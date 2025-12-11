@@ -1,5 +1,6 @@
 import "./styles.scss";
 
+import { useAppDispatchV2 } from "@app/hooks";
 import {
   useListRecentAttendancesQuery,
   useUpdateAttendanceMutation,
@@ -8,6 +9,8 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import handleApproveChangeRequest from "@features/attendance/edit/ChangeRequestDialog/handleApproveChangeRequest";
+import { AttendanceStatusTooltip } from "@features/attendance/list/AttendanceStatusTooltip";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
@@ -34,14 +37,14 @@ import {
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
+  UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import handleApproveChangeRequest from "@/components/attendance_editor/ChangeRequestDialog/handleApproveChangeRequest";
-import { AttendanceStatusTooltip } from "@/components/AttendanceList/AttendanceStatusTooltip";
+import * as MESSAGE_CODE from "@/errors";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
@@ -51,15 +54,13 @@ import { CompanyHoliday } from "@/lib/CompanyHoliday";
 import { DayOfWeek, DayOfWeekString } from "@/lib/DayOfWeek";
 import { Holiday } from "@/lib/Holiday";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
-import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
-import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";
-
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../lib/reducers/snackbarReducer";
+} from "@/lib/reducers/snackbarReducer";
+import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
+import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+
 import { AttendanceGraph } from "./AttendanceGraph";
 import ChangeRequestQuickViewDialog from "./ChangeRequestQuickViewDialog";
 import { CreatedAtTableCell } from "./CreatedAtTableCell";
@@ -315,7 +316,8 @@ export default function AdminStaffAttendanceList() {
         // eslint-disable-next-line no-await-in-loop
         const updatedAttendance = await handleApproveChangeRequest(
           attendance,
-          (input) => updateAttendanceMutation(input).unwrap(),
+          (input: UpdateAttendanceInput) =>
+            updateAttendanceMutation(input).unwrap(),
           undefined
         );
 
