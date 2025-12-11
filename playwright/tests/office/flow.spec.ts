@@ -14,7 +14,9 @@ test.describe("office/qr ルート", () => {
 
       const disabledAlert = page.getByTestId("office-qr-disabled-alert");
       if ((await disabledAlert.count()) > 0) {
-        await expect(disabledAlert).toContainText("現在、使用することができません。");
+        await expect(disabledAlert).toContainText(
+          "現在、使用することができません。"
+        );
         return;
       }
 
@@ -33,9 +35,13 @@ test.describe("office/qr ルート", () => {
     test("トークン無しでアクセスするとエラーが表示される", async ({ page }) => {
       await page.goto("/office/qr/register");
 
-      const disabledAlert = page.getByTestId("office-qr-register-disabled-alert");
+      const disabledAlert = page.getByTestId(
+        "office-qr-register-disabled-alert"
+      );
       if ((await disabledAlert.count()) > 0) {
-        await expect(disabledAlert).toContainText("現在、使用することができません。");
+        await expect(disabledAlert).toContainText(
+          "現在、使用することができません。"
+        );
         return;
       }
 
