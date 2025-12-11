@@ -2,8 +2,13 @@ import { useOfficeQrRegister } from "../model/useOfficeQrRegister";
 import { OfficeQrRegisterPanel } from "./OfficeQrRegisterPanel";
 
 export function OfficeQrRegister() {
-  const { isOfficeModeEnabled, errorMessage, mode, handleClockIn, handleClockOut } =
-    useOfficeQrRegister();
+  const {
+    isOfficeModeEnabled,
+    errorMessage,
+    mode,
+    handleClockIn,
+    handleClockOut,
+  } = useOfficeQrRegister();
 
   return (
     <OfficeQrRegisterPanel
