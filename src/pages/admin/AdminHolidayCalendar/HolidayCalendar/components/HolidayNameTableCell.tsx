@@ -1,6 +1,5 @@
 import { TableCell } from "@mui/material";
-
-import { HolidayCalendar } from "@/API";
+import { HolidayCalendar } from "@shared/api/graphql/types";
 
 export default function HolidayNameTableCell({
   holidayCalendar,

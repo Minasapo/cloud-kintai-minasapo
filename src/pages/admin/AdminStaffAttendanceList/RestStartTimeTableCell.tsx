@@ -1,11 +1,8 @@
-import {
-  styled,
-  TableCell as MuiTableCell,
-} from "@mui/material";
+import { styled, TableCell as MuiTableCell } from "@mui/material";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
-import { Attendance } from "../../../API";
 import { AppConfigContext } from "../../../context/AppConfigContext";
 
 const TableCell = styled(MuiTableCell)(({ theme }) => ({

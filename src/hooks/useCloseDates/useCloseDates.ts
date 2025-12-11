@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-
 import {
   CloseDate,
   CreateCloseDateInput,
   DeleteCloseDateInput,
   UpdateCloseDateInput,
-} from "../../API";
+} from "@shared/api/graphql/types";
+import { useEffect, useState } from "react";
+
 import createCloseDateData from "./createCloseDateData";
 import deleteCloseDateData from "./deleteCloseDateData";
 import fetchCloseDates from "./fetchCloseDates";

@@ -1,9 +1,12 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import React, { useContext, useEffect, useState } from "react";
+import {
+  CreateAppConfigInput,
+  UpdateAppConfigInput,
+} from "@shared/api/graphql/types";
+import { useContext, useEffect, useState } from "react";
 
-import { CreateAppConfigInput, UpdateAppConfigInput } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";

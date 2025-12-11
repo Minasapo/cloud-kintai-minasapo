@@ -1,13 +1,12 @@
 import { GraphQLResult } from "@aws-amplify/api";
-import { API } from "aws-amplify";
-import { useCallback, useEffect, useRef, useState } from "react";
-
+import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import {
   ShiftPlanMonthSetting,
   ShiftPlanYearByTargetYearQuery,
   ShiftPlanYearByTargetYearQueryVariables,
-} from "@/API";
-import { shiftPlanYearByTargetYear } from "@/graphql/queries";
+} from "@shared/api/graphql/types";
+import { API } from "aws-amplify";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type UseShiftPlanYearResult = {
   plans: ShiftPlanMonthSetting[] | null;
@@ -31,11 +30,19 @@ const buildErrorMessage = (error: unknown): string => {
   return "Unknown error";
 };
 
-const useShiftPlanYear = (targetYear: number): UseShiftPlanYearResult => {
+type UseShiftPlanYearOptions = {
+  enabled?: boolean;
+};
+
+const useShiftPlanYear = (
+  targetYear: number,
+  options?: UseShiftPlanYearOptions
+): UseShiftPlanYearResult => {
   const [plans, setPlans] = useState<ShiftPlanMonthSetting[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isMountedRef = useRef(false);
+  const enabled = options?.enabled ?? true;
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -45,6 +52,9 @@ const useShiftPlanYear = (targetYear: number): UseShiftPlanYearResult => {
   }, []);
 
   const fetchPlans = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -79,11 +89,17 @@ const useShiftPlanYear = (targetYear: number): UseShiftPlanYearResult => {
         setLoading(false);
       }
     }
-  }, [targetYear]);
+  }, [targetYear, enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      setPlans(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     void fetchPlans();
-  }, [fetchPlans]);
+  }, [fetchPlans, enabled]);
 
   return { plans, loading, error, refetch: fetchPlans };
 };

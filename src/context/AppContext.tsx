@@ -1,5 +1,3 @@
-import { createContext } from "react";
-
 import {
   CompanyHolidayCalendar,
   CreateCompanyHolidayCalendarInput,
@@ -9,7 +7,8 @@ import {
   HolidayCalendar,
   UpdateCompanyHolidayCalendarInput,
   UpdateHolidayCalendarInput,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import { createContext } from "react";
 
 type AppContextProps = {
   holidayCalendars: HolidayCalendar[];

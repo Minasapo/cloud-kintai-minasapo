@@ -2,14 +2,14 @@ projects:
   garakufrontend:
     schemaPath: amplify/backend/api/garakufrontend/build/schema.graphql
     includes:
-      - src/graphql/**/*.ts
+      - src/shared/api/graphql/documents/**/*.ts
     excludes:
       - ./amplify/**
     extensions:
       amplify:
         codeGenTarget: typescript
-        generatedFileName: src/API.ts
-        docsFilePath: src/graphql
+        generatedFileName: src/shared/api/graphql/types.ts
+        docsFilePath: src/shared/api/graphql/documents
         maxDepth: 4
 extensions:
   amplify:

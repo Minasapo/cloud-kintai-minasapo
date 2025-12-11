@@ -1,4 +1,5 @@
 import { GraphQLResult } from "@aws-amplify/api";
+import { useGetHolidayCalendarsQuery } from "@entities/calendar/api/calendarApi";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import SaveIcon from "@mui/icons-material/Save";
@@ -20,6 +21,20 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import {
+  createShiftPlanYear,
+  updateShiftPlanYear,
+} from "@shared/api/graphql/documents/mutations";
+import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
+import {
+  CreateShiftPlanYearMutation,
+  CreateShiftPlanYearMutationVariables,
+  ShiftPlanMonthSetting,
+  ShiftPlanMonthSettingInput,
+  ShiftPlanYearByTargetYearQuery,
+  ShiftPlanYearByTargetYearQueryVariables,
+  UpdateShiftPlanYearMutationVariables,
+} from "@shared/api/graphql/types";
 import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import {
@@ -30,19 +45,8 @@ import {
   useTransition,
 } from "react";
 
-import {
-  CreateShiftPlanYearMutation,
-  CreateShiftPlanYearMutationVariables,
-  ShiftPlanMonthSetting,
-  ShiftPlanMonthSettingInput,
-  ShiftPlanYearByTargetYearQuery,
-  ShiftPlanYearByTargetYearQueryVariables,
-  UpdateShiftPlanYearMutationVariables,
-} from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import { createShiftPlanYear, updateShiftPlanYear } from "@/graphql/mutations";
-import { shiftPlanYearByTargetYear } from "@/graphql/queries";
-import useHolidayCalendar from "@/hooks/useHolidayCalendars/useHolidayCalendars";
+import * as MESSAGE_CODE from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -145,7 +149,14 @@ export default function ShiftPlanManagement() {
   const [yearRecordIds, setYearRecordIds] = useState<Record<number, string>>(
     {}
   );
-  const { holidayCalendars = [] } = useHolidayCalendar();
+  const { data: holidayCalendars = [], error: holidayCalendarsError } =
+    useGetHolidayCalendarsQuery();
+  useEffect(() => {
+    if (holidayCalendarsError) {
+      console.error(holidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [holidayCalendarsError, dispatch]);
   const holidayNameMap = useMemo(() => {
     if (!holidayCalendars.length) return new Map<string, string>();
     return new Map(

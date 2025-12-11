@@ -1,6 +1,6 @@
+import { Attendance, Staff } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 
-import { Attendance, Staff } from "../../API";
 import { AttendanceState, AttendanceStatus } from "../AttendanceState";
 
 describe("AttendanceState", () => {

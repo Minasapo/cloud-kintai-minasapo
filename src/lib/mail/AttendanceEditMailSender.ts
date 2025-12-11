@@ -1,7 +1,7 @@
+import getAttendanceMailBody from "@features/attendance/edit/attendanceMailTemplate";
+import { Attendance, AttendanceHistory } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { Attendance, AttendanceHistory } from "@/API";
-import getAttendanceMailBody from "@/components/attendance_editor/attendanceMailTemplate";
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 
 import { AttendanceDate } from "../AttendanceDate";

@@ -1,6 +1,5 @@
 import { Alert, AlertTitle } from "@mui/material";
-
-import { Attendance } from "../../../API";
+import { Attendance } from "@shared/api/graphql/types";
 
 export function ApprovalPendingMessage({
   attendances,

@@ -1,6 +1,8 @@
+import {
+  CreateOperationLogInput,
+  OperationLog,
+} from "@shared/api/graphql/types";
 import { useCallback, useState } from "react";
-
-import { CreateOperationLogInput, OperationLog } from "@/API";
 
 import createOperationLogData from "./createOperationLogData";
 import fetchOperationLogsByStaffId from "./fetchOperationLogsByStaffId";

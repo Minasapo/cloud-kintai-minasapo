@@ -1,7 +1,15 @@
 import {
+  useBulkCreateHolidayCalendarsMutation,
+  useCreateHolidayCalendarMutation,
+  useDeleteHolidayCalendarMutation,
+  useGetHolidayCalendarsQuery,
+  useUpdateHolidayCalendarMutation,
+} from "@entities/calendar/api/calendarApi";
+import {
   Button,
   FormControl,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Paper,
   Select,
@@ -17,10 +25,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useContext } from "react";
+import { HolidayCalendar } from "@shared/api/graphql/types";
+import { useCallback, useEffect } from "react";
 
-import { HolidayCalendar } from "@/API";
-import { AppContext } from "@/context/AppContext";
+import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
+import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import { AddHolidayCalendar } from "./AddHolidayCalendar";
@@ -33,13 +43,53 @@ import HolidayCalendarCopy from "./HolidayCalendarCopy";
 import HolidayCalendarEdit from "./HolidayCalendarEdit";
 
 export default function HolidayCalendarList() {
+  const dispatch = useAppDispatchV2();
   const {
-    holidayCalendars,
-    bulkCreateHolidayCalendar,
-    updateHolidayCalendar,
-    createHolidayCalendar,
-    deleteHolidayCalendar,
-  } = useContext(AppContext);
+    data: holidayCalendars = [],
+    isLoading: isHolidayCalendarsLoading,
+    isFetching: isHolidayCalendarsFetching,
+    error: holidayCalendarsError,
+  } = useGetHolidayCalendarsQuery();
+  const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
+  const [bulkCreateHolidayCalendarsMutation] =
+    useBulkCreateHolidayCalendarsMutation();
+  const [updateHolidayCalendarMutation] = useUpdateHolidayCalendarMutation();
+  const [deleteHolidayCalendarMutation] = useDeleteHolidayCalendarMutation();
+
+  const createHolidayCalendar = useCallback(
+    async (input: Parameters<typeof createHolidayCalendarMutation>[0]) =>
+      createHolidayCalendarMutation(input).unwrap(),
+    [createHolidayCalendarMutation]
+  );
+
+  const bulkCreateHolidayCalendar = useCallback(
+    async (inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0]) =>
+      bulkCreateHolidayCalendarsMutation(inputs).unwrap(),
+    [bulkCreateHolidayCalendarsMutation]
+  );
+
+  const updateHolidayCalendar = useCallback(
+    async (input: Parameters<typeof updateHolidayCalendarMutation>[0]) =>
+      updateHolidayCalendarMutation(input).unwrap(),
+    [updateHolidayCalendarMutation]
+  );
+
+  const deleteHolidayCalendar = useCallback(
+    async (input: Parameters<typeof deleteHolidayCalendarMutation>[0]) => {
+      await deleteHolidayCalendarMutation(input).unwrap();
+    },
+    [deleteHolidayCalendarMutation]
+  );
+
+  const calendarLoading =
+    isHolidayCalendarsLoading || isHolidayCalendarsFetching;
+
+  useEffect(() => {
+    if (holidayCalendarsError) {
+      console.error(holidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [holidayCalendarsError, dispatch]);
 
   const {
     page,
@@ -63,6 +113,10 @@ export default function HolidayCalendarList() {
     yearRange: 7,
     yearOffset: 5,
   });
+
+  if (calendarLoading) {
+    return <LinearProgress sx={{ width: "100%" }} />;
+  }
 
   return (
     <>

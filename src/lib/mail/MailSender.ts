@@ -1,7 +1,7 @@
+import { sendMail } from "@shared/api/graphql/documents/queries";
 import { API } from "aws-amplify";
 
 import * as MESSAGE_CODE from "@/errors";
-import { sendMail } from "@/graphql/queries";
 
 export abstract class MailSender {
   protected send(to: string[], subject: string, body: string) {

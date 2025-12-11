@@ -11,14 +11,14 @@ import {
 } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridRowParams } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
+import { CloseDate } from "@shared/api/graphql/types";
+import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import Title from "@/components/common/Title";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import { CloseDate } from "../../../API";
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
 import useCloseDates from "../../../hooks/useCloseDates/useCloseDates";
@@ -87,7 +87,7 @@ export default function JobTerm() {
   return (
     <>
       <Stack spacing={2}>
-        <Title text="集計対象月" />
+        <Title>集計対象月</Title>
         <Typography>
           月ごとに勤怠を締める日付を指定します。
           <br />
@@ -105,7 +105,7 @@ export default function JobTerm() {
                     options={candidateCloseDates}
                     value={value}
                     getOptionLabel={(option) => option.format("YYYY/MM")}
-                    onChange={(e, v) => {
+                    onChange={(_, v) => {
                       if (!v) return;
                       onChange(v);
                     }}

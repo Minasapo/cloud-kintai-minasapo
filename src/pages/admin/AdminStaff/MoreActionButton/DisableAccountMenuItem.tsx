@@ -5,10 +5,10 @@ import {
   ListItemText,
   MenuItem,
 } from "@mui/material";
+import { UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { UpdateStaffInput } from "../../../../API";
 import * as MESSAGE_CODE from "../../../../errors";
 import disableStaff from "../../../../hooks/common/disableStaff";
 import { StaffType } from "../../../../hooks/useStaffs/useStaffs";

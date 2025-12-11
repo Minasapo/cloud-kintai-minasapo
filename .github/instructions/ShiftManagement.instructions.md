@@ -1,10 +1,8 @@
----
-applyTo: "src/pages/ShiftManagement/ShiftManagement.tsx"
----
+## applyTo: "src/features/shift/management/ui/ShiftManagementBoard.tsx"
 
-## ShiftManagement.tsx 用インストラクション
+## ShiftManagementBoard.tsx 用インストラクション
 
-このファイルは `src/pages/ShiftManagement/ShiftManagement.tsx` を編集・拡張する際の開発ルールと実装ガイドです。主に新規実装者やレビュー担当者が守るべき方針を簡潔にまとめています。
+このファイルは `src/features/shift/management/ui/ShiftManagementBoard.tsx` を編集・拡張する際の開発ルールと実装ガイドです。主に新規実装者やレビュー担当者が守るべき方針を簡潔にまとめています。
 
 目的
 
@@ -31,10 +29,10 @@ applyTo: "src/pages/ShiftManagement/ShiftManagement.tsx"
 
 推奨構成
 
-- `src/pages/ShiftManagement/ShiftManagement.tsx` — ページコンポーネント（ルーティング先）。
-- `src/pages/ShiftManagement/ShiftList.tsx` — シフト一覧テーブル（小コンポーネント化）。
-- `src/pages/ShiftManagement/ShiftEditDialog.tsx` — 編集用ダイアログ／フォーム。
-- `src/hooks/useShiftApi.ts` — シフトの取得・保存 API を分離したカスタムフック。
+- `src/pages/shift/management/index.tsx` — ルーティング用の薄いページラッパ。`ShiftManagementBoard` を描画するだけに留める。
+- `src/features/shift/management/ui/ShiftManagementBoard.tsx` — メインボード（本インストラクション対象）。一覧表示や操作ガード、編集ダイアログの起点を担う。
+- `src/features/shift/management/lib/generateMockShifts.ts` など `lib/` 以下 — 一時的なモックやユーティリティ。将来的に API 化されたらここから差し替える。
+- `src/hooks/useShiftApi.ts` など共有 hook — API 呼び出しや変換ロジックはコンポーネントから分離する。
 
 よくあるエッジケース
 

@@ -1,92 +1,119 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-
+import {
+  useCreateWorkflowMutation,
+  useDeleteWorkflowMutation,
+  useGetWorkflowsQuery,
+  useUpdateWorkflowMutation,
+} from "@entities/workflow/api/workflowApi";
 import {
   CreateWorkflowInput,
   UpdateWorkflowInput,
   Workflow as APIWorkflow,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import { useCallback, useContext } from "react";
 
-import { WorkflowDataManager } from "./WorkflowDataManager";
+import { AuthContext } from "@/context/AuthContext";
+
+const extractErrorMessage = (error: unknown) => {
+  if (!error) {
+    return null;
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return null;
+};
 
 export default function useWorkflows() {
-  const [workflows, setWorkflows] = useState<APIWorkflow[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
 
-  // WorkflowDataManager を再生成しないように安定化
-  const dataManager = useMemo(() => new WorkflowDataManager(), []);
+  const {
+    data,
+    isLoading: isQueryLoading,
+    isFetching: isQueryFetching,
+    error: queryError,
+    refetch,
+  } = useGetWorkflowsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
-  // fetchWorkflows を useCallback にして参照を安定化
+  const [
+    createWorkflowMutation,
+    { isLoading: isCreating, error: createError },
+  ] = useCreateWorkflowMutation();
+  const [
+    updateWorkflowMutation,
+    { isLoading: isUpdating, error: updateError },
+  ] = useUpdateWorkflowMutation();
+  const [
+    deleteWorkflowMutation,
+    { isLoading: isDeleting, error: deleteError },
+  ] = useDeleteWorkflowMutation();
+
+  const workflows: APIWorkflow[] | null = data ?? null;
+  const loading =
+    isQueryLoading || isQueryFetching || isCreating || isUpdating || isDeleting;
+  const errorMessage =
+    extractErrorMessage(queryError) ??
+    extractErrorMessage(createError) ??
+    extractErrorMessage(updateError) ??
+    extractErrorMessage(deleteError) ??
+    null;
+
   const fetchWorkflows = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const items = await dataManager.list();
-      setWorkflows(items);
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
+    if (!isAuthenticated) {
+      return;
     }
-  }, [dataManager]);
+    await refetch();
+  }, [isAuthenticated, refetch]);
 
-  // create/update/remove も安定化（必要に応じて）
   const create = useCallback(
     async (input: CreateWorkflowInput) => {
-      setLoading(true);
-      try {
-        const created = await dataManager.create(input);
-        // append to list
-        setWorkflows((prev) => (prev ? [created, ...prev] : [created]));
-        return created;
-      } finally {
-        setLoading(false);
+      if (!isAuthenticated) {
+        throw new Error("User is not authenticated");
       }
+      const created = await createWorkflowMutation(input).unwrap();
+      return created;
     },
-    [dataManager]
+    [createWorkflowMutation, isAuthenticated]
   );
 
   const update = useCallback(
     async (input: UpdateWorkflowInput) => {
-      setLoading(true);
-      try {
-        const updated = await dataManager.update(input);
-        setWorkflows((prev) =>
-          prev
-            ? prev.map((w) => (w.id === updated.id ? updated : w))
-            : [updated]
-        );
-        return updated;
-      } finally {
-        setLoading(false);
+      if (!isAuthenticated) {
+        throw new Error("User is not authenticated");
       }
+      const updated = await updateWorkflowMutation(input).unwrap();
+      return updated;
     },
-    [dataManager]
+    [isAuthenticated, updateWorkflowMutation]
   );
 
   const remove = useCallback(
     async (id: string) => {
-      setLoading(true);
-      try {
-        await dataManager.delete({ id });
-        setWorkflows((prev) => (prev ? prev.filter((w) => w.id !== id) : null));
-      } finally {
-        setLoading(false);
+      if (!isAuthenticated) {
+        throw new Error("User is not authenticated");
       }
+      await deleteWorkflowMutation({ id }).unwrap();
     },
-    [dataManager]
+    [deleteWorkflowMutation, isAuthenticated]
   );
-
-  // eslint-disable コメントを削除し、fetchWorkflows を依存に指定
-  useEffect(() => {
-    fetchWorkflows();
-  }, [fetchWorkflows]);
 
   return {
     workflows,
     loading,
-    error,
+    error: errorMessage,
     fetchWorkflows,
     create,
     update,

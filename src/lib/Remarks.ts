@@ -1,6 +1,9 @@
+import {
+  Attendance,
+  CompanyHolidayCalendar,
+  HolidayCalendar,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { Attendance, CompanyHolidayCalendar, HolidayCalendar } from "@/API";
 
 import { CompanyHoliday } from "./CompanyHoliday";
 import { Holiday } from "./Holiday";

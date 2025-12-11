@@ -1,6 +1,5 @@
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { Attendance } from "@/API";
 
 const ZERO_PAD = (value: number) => value.toString().padStart(2, "0");
 

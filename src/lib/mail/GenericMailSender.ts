@@ -1,6 +1,6 @@
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { Attendance } from "@/API";
 import * as MESSAGE_CODE from "@/errors";
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 

@@ -1,10 +1,10 @@
 import { Paper } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { Attendance } from "@/API";
-import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
-import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
+import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 
 export function AttendanceGraph({
   attendances,

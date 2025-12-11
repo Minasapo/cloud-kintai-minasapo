@@ -1,5 +1,5 @@
 ---
-applyTo: "src/pages/Workflow/Workflow.tsx"
+applyTo: "src/pages/workflow/list/WorkflowListPage.tsx"
 ---
 
 # ワークフロー機能（ドキュメント）
@@ -14,16 +14,16 @@ applyTo: "src/pages/Workflow/Workflow.tsx"
 
 ## 主要な画面とルート
 
-- `/workflow` — ワークフロー一覧（`src/pages/Workflow/Workflow.tsx`）
-- `/workflow/new` — 新規作成（`src/pages/Workflow/NewWorkflow.tsx`）
-- `/workflow/:id` — 詳細（`src/pages/Workflow/WorkflowDetail.tsx`）
-- `/workflow/:id/edit` — 編集（`src/pages/Workflow/WorkflowEdit.tsx`）
+- `/workflow` — ワークフロー一覧（`src/pages/workflow/list/WorkflowListPage.tsx`）
+- `/workflow/new` — 新規作成（`src/pages/workflow/new/NewWorkflowPage.tsx`）
+- `/workflow/:id` — 詳細（`src/pages/workflow/detail/WorkflowDetailPage.tsx`）
+- `/workflow/:id/edit` — 編集（`src/pages/workflow/edit/WorkflowEditPage.tsx`）
 
 ルーティングは既存の `src/router.tsx` に追加してあります。ヘッダー（Desktop/Mobile メニュー）にも項目を追加しています。
 
 ## 主要なファイル
 
-- `src/pages/Workflow/Workflow.tsx`
+- `src/pages/workflow/list/WorkflowListPage.tsx`
 
   - ワークフロー一覧表示。ダミーデータ `INITIAL_DATA` を元にテーブルレンダリング。
   - 列: ID, 名前, 種別 (category), 申請日 (applicationDate), ステータス, 作成日
@@ -31,7 +31,7 @@ applyTo: "src/pages/Workflow/Workflow.tsx"
   - 申請日・作成日の範囲入力は、コンパクト化のためポップオーバー内に 2 つの `DatePicker` を配置（選択は即時適用、適用ボタンはなし）。
   - グローバルな「すべてのフィルターをクリア」ボタンは、追加された申請日・作成日フィルタも含めて全てクリアし、ポップオーバーを閉じます。
 
-- `src/pages/Workflow/NewWorkflow.tsx`
+- `src/pages/workflow/new/NewWorkflowPage.tsx`
 
   - 新規作成フォーム（モック）。
   - 仕様:
@@ -41,11 +41,11 @@ applyTo: "src/pages/Workflow/Workflow.tsx"
     - 種別に応じたモックフィールド (有給: 開始/終了日、欠勤: 欠勤理由、その他: 備考) を表示。
     - 作成後はモックの alert を表示して一覧に戻る（永続化はしていない）。
 
-- `src/pages/Workflow/WorkflowDetail.tsx`
+- `src/pages/workflow/detail/WorkflowDetailPage.tsx`
 
   - 詳細表示のモック（`useParams` で id を取得して表示）。
 
-- `src/pages/Workflow/WorkflowEdit.tsx`
+- `src/pages/workflow/edit/WorkflowEditPage.tsx`
 
   - 編集画面のモック（保存は alert、一覧/詳細へ遷移）。
 
@@ -100,10 +100,10 @@ npm run dev
 ## 変更したファイル一覧（実装時点）
 
 - 追加/編集:
-  - src/pages/Workflow/Workflow.tsx
-  - src/pages/Workflow/NewWorkflow.tsx
-  - src/pages/Workflow/WorkflowDetail.tsx
-  - src/pages/Workflow/WorkflowEdit.tsx
+  - src/pages/workflow/list/WorkflowListPage.tsx
+  - src/pages/workflow/new/NewWorkflowPage.tsx
+  - src/pages/workflow/detail/WorkflowDetailPage.tsx
+  - src/pages/workflow/edit/WorkflowEditPage.tsx
   - src/components/Page/Page.tsx (既存の Page を整備/利用)
   - src/router.tsx (ルート追加)
   - src/components/header/DesktopMenu.tsx (ヘッダーに項目追加)

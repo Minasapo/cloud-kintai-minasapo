@@ -9,8 +9,8 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getCloseDate } from "../graphql/queries";
-import { updateCloseDate } from "../graphql/mutations";
+import { getCloseDate } from "@shared/api/graphql/documents/queries";
+import { updateCloseDate } from "@shared/api/graphql/documents/mutations";
 export default function CloseDateUpdateForm(props) {
   const {
     id: idProp,

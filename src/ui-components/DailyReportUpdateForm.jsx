@@ -15,8 +15,8 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
-import { getDailyReport } from "../graphql/queries";
-import { updateDailyReport } from "../graphql/mutations";
+import { getDailyReport } from "@shared/api/graphql/documents/queries";
+import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 export default function DailyReportUpdateForm(props) {
   const {
     id: idProp,

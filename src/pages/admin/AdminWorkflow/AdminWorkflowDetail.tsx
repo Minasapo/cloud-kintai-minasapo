@@ -10,10 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { API } from "aws-amplify";
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-
+import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import {
   ApprovalStatus,
   ApprovalStep,
@@ -24,12 +21,15 @@ import {
   WorkflowComment,
   WorkflowCommentInput,
   WorkflowStatus,
-} from "@/API";
+} from "@shared/api/graphql/types";
+import StatusChip from "@shared/ui/chips/StatusChip";
+import Page from "@shared/ui/page/Page";
+import { API } from "aws-amplify";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { useAppDispatchV2 } from "@/app/hooks";
-import Page from "@/components/Page/Page";
-import StatusChip from "@/components/StatusChip/StatusChip";
 import { AuthContext } from "@/context/AuthContext";
-import { getWorkflow } from "@/graphql/queries";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";

@@ -1,5 +1,16 @@
 import "./styles.scss";
 
+import { useAppDispatchV2 } from "@app/hooks";
+import {
+  useListRecentAttendancesQuery,
+  useUpdateAttendanceMutation,
+} from "@entities/attendance/api/attendanceApi";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@entities/calendar/api/calendarApi";
+import handleApproveChangeRequest from "@features/attendance/edit/ChangeRequestDialog/handleApproveChangeRequest";
+import { AttendanceStatusTooltip } from "@features/attendance/list/AttendanceStatusTooltip";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
@@ -9,6 +20,7 @@ import {
   Checkbox,
   Container,
   IconButton,
+  LinearProgress,
   Stack,
   Table,
   TableBody,
@@ -19,22 +31,20 @@ import {
   Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-
 import {
   Attendance,
   AttendanceChangeRequest,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
-} from "@/API";
-import handleApproveChangeRequest from "@/components/attendance_editor/ChangeRequestDialog/handleApproveChangeRequest";
-import { AttendanceStatusTooltip } from "@/components/AttendanceList/AttendanceStatusTooltip";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-import { AppContext } from "@/context/AppContext";
-import { AttendanceDataManager } from "@/hooks/useAttendance/AttendanceDataManager";
+  UpdateAttendanceInput,
+} from "@shared/api/graphql/types";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import * as MESSAGE_CODE from "@/errors";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
@@ -44,16 +54,13 @@ import { CompanyHoliday } from "@/lib/CompanyHoliday";
 import { DayOfWeek, DayOfWeekString } from "@/lib/DayOfWeek";
 import { Holiday } from "@/lib/Holiday";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
-import { calcTotalRestTime } from "@/pages/AttendanceEdit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
-import { calcTotalWorkTime } from "@/pages/AttendanceEdit/DesktopEditor/WorkTimeInput/WorkTimeInput";
-
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
-import useAttendances from "../../../hooks/useAttendances/useAttendances";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../lib/reducers/snackbarReducer";
+} from "@/lib/reducers/snackbarReducer";
+import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
+import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+
 import { AttendanceGraph } from "./AttendanceGraph";
 import ChangeRequestQuickViewDialog from "./ChangeRequestQuickViewDialog";
 import { CreatedAtTableCell } from "./CreatedAtTableCell";
@@ -101,17 +108,51 @@ export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();
-
-  const { holidayCalendars, companyHolidayCalendars } = useContext(AppContext);
   const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
 
-  const { attendances, getAttendances } = useAttendances();
+  const {
+    data: holidayCalendars = [],
+    isLoading: isHolidayCalendarsLoading,
+    isFetching: isHolidayCalendarsFetching,
+    error: holidayCalendarsError,
+  } = useGetHolidayCalendarsQuery();
+  const {
+    data: companyHolidayCalendars = [],
+    isLoading: isCompanyHolidayCalendarsLoading,
+    isFetching: isCompanyHolidayCalendarsFetching,
+    error: companyHolidayCalendarsError,
+  } = useGetCompanyHolidayCalendarsQuery();
+  const calendarLoading =
+    isHolidayCalendarsLoading ||
+    isHolidayCalendarsFetching ||
+    isCompanyHolidayCalendarsLoading ||
+    isCompanyHolidayCalendarsFetching;
+
+  const shouldFetchAttendances = Boolean(staffId);
+  const {
+    data: attendancesData,
+    isLoading: isAttendancesInitialLoading,
+    isFetching: isAttendancesFetching,
+    isUninitialized: isAttendancesUninitialized,
+    error: attendancesError,
+    refetch: refetchAttendances,
+  } = useListRecentAttendancesQuery(
+    { staffId: staffId ?? "" },
+    { skip: !shouldFetchAttendances }
+  );
+
+  const attendances = attendancesData ?? [];
+  const attendanceLoading =
+    !shouldFetchAttendances ||
+    isAttendancesInitialLoading ||
+    isAttendancesFetching ||
+    isAttendancesUninitialized;
   const [quickViewAttendance, setQuickViewAttendance] =
     useState<Attendance | null>(null);
   const [quickViewChangeRequest, setQuickViewChangeRequest] =
     useState<AttendanceChangeRequest | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const attendanceDataManager = useMemo(() => new AttendanceDataManager(), []);
+  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
   const staffForMail = useMemo<StaffType | null>(() => {
     if (!staff) return null;
     return {
@@ -147,16 +188,26 @@ export default function AdminStaffAttendanceList() {
 
   useEffect(() => {
     if (!staffId) return;
-    getAttendances(staffId).catch(() =>
-      dispatch(setSnackbarError(MESSAGE_CODE.E02001))
-    );
 
     fetchStaff(staffId)
       .then(setStaff)
       .catch(() => {
         dispatch(setSnackbarError(MESSAGE_CODE.E00001));
       });
-  }, [staffId]);
+  }, [staffId, dispatch]);
+
+  useEffect(() => {
+    if (attendancesError) {
+      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+    }
+  }, [attendancesError, dispatch]);
+
+  useEffect(() => {
+    if (holidayCalendarsError || companyHolidayCalendarsError) {
+      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
 
   const totalTime = useMemo(() => {
     const totalWorkTime = attendances.reduce((acc, attendance) => {
@@ -265,7 +316,8 @@ export default function AdminStaffAttendanceList() {
         // eslint-disable-next-line no-await-in-loop
         const updatedAttendance = await handleApproveChangeRequest(
           attendance,
-          (input) => attendanceDataManager.update(input),
+          (input: UpdateAttendanceInput) =>
+            updateAttendanceMutation(input).unwrap(),
           undefined
         );
 
@@ -295,7 +347,7 @@ export default function AdminStaffAttendanceList() {
 
       dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
       setSelectedAttendanceIds([]);
-      await getAttendances(staffId);
+      await refetchAttendances();
     } catch (error) {
       console.error("Bulk approve failed", error);
       dispatch(setSnackbarError(MESSAGE_CODE.E04006));
@@ -303,14 +355,14 @@ export default function AdminStaffAttendanceList() {
       setBulkApproving(false);
     }
   }, [
-    attendanceDataManager,
     dispatch,
-    getAttendances,
+    refetchAttendances,
     pendingAttendances,
     selectedAttendanceIds,
     staff,
     staffForMail,
     staffId,
+    updateAttendanceMutation,
   ]);
 
   useEffect(() => {
@@ -349,6 +401,14 @@ export default function AdminStaffAttendanceList() {
     return (
       <Container maxWidth="xl" sx={{ pt: 2 }}>
         <Typography>データ取得中に何らかの問題が発生しました</Typography>
+      </Container>
+    );
+  }
+
+  if (attendanceLoading || calendarLoading) {
+    return (
+      <Container maxWidth="xl" sx={{ pt: 2 }}>
+        <LinearProgress />
       </Container>
     );
   }

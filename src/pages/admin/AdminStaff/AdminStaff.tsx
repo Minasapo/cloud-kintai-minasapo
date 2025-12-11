@@ -14,12 +14,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import Title from "@shared/ui/typography/Title";
 import { useState } from "react";
 
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-
 import { useAppDispatchV2 } from "../../../app/hooks";
-import Title from "../../../components/Title/Title";
 import * as MESSAGE_CODE from "../../../errors";
 import useStaffs from "../../../hooks/useStaffs/useStaffs";
 import { setSnackbarError } from "../../../lib/reducers/snackbarReducer";

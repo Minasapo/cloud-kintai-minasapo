@@ -1,7 +1,6 @@
 import { Box, Chip, Stack, TableCell, Tooltip } from "@mui/material";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { Attendance } from "../../../API";
 
 export function SummaryTableCell({
   substituteHolidayDate,

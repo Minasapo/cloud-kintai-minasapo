@@ -1,8 +1,8 @@
 import { TableCell } from "@mui/material";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
-import { Attendance } from "@/API";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 export function RestTimeTableCell({ attendance }: { attendance: Attendance }) {

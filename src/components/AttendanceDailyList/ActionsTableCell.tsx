@@ -10,12 +10,16 @@ import {
   TableCell,
   Tooltip,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import {
+  Attendance,
+  CompanyHolidayCalendar,
+  HolidayCalendar,
+  Staff,
+} from "@shared/api/graphql/types";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Attendance, CompanyHolidayCalendar, Staff } from "@/API";
 import { useAppDispatchV2 } from "@/app/hooks";
-import { AppContext } from "@/context/AppContext";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
@@ -39,14 +43,14 @@ function getBadgeContent(attendances: Attendance[]) {
 function AttendanceTotalStatus({
   attendances,
   companyHolidayCalendars,
+  holidayCalendars,
   staff,
 }: {
   attendances: Attendance[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
+  holidayCalendars: HolidayCalendar[];
   staff: Staff;
 }) {
-  const { holidayCalendars } = useContext(AppContext);
-
   const judgedStatus = attendances.map((attendance) =>
     new AttendanceState(
       staff,
@@ -101,16 +105,21 @@ export function ActionsTableCell({
   attendances,
   attendanceLoading,
   attendanceError,
+  holidayCalendars,
+  companyHolidayCalendars,
+  calendarLoading,
 }: {
   row: AttendanceDaily;
   attendances: Attendance[];
   attendanceLoading: boolean;
   attendanceError: Error | null;
+  holidayCalendars: HolidayCalendar[];
+  companyHolidayCalendars: CompanyHolidayCalendar[];
+  calendarLoading: boolean;
 }) {
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();
 
-  const { companyHolidayCalendars } = useContext(AppContext);
   const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
   const [staffLoading, setStaffLoading] = useState(true);
 
@@ -126,9 +135,9 @@ export function ActionsTableCell({
       .finally(() => {
         setStaffLoading(false);
       });
-  }, [row]);
+  }, [row, dispatch]);
 
-  if (attendanceLoading || staffLoading || attendanceError)
+  if (attendanceLoading || staffLoading || attendanceError || calendarLoading)
     return (
       <TableCell>
         <Box sx={{ width: 24, height: 24 }} />
@@ -146,6 +155,7 @@ export function ActionsTableCell({
         <AttendanceTotalStatus
           attendances={attendances}
           companyHolidayCalendars={companyHolidayCalendars}
+          holidayCalendars={holidayCalendars}
           staff={staff}
         />
         <IconButton

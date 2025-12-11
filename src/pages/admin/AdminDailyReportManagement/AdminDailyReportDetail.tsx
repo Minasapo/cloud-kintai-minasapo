@@ -11,20 +11,20 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { API } from "aws-amplify";
-import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-
+import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
+import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
   DailyReportComment,
   DailyReportReaction,
   GetDailyReportQuery,
   UpdateDailyReportMutation,
-} from "@/API";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-import Title from "@/components/Title/Title";
-import { updateDailyReport } from "@/graphql/mutations";
-import { getDailyReport } from "@/graphql/queries";
+} from "@shared/api/graphql/types";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import Title from "@shared/ui/typography/Title";
+import { API } from "aws-amplify";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import useStaffs from "@/hooks/useStaffs/useStaffs";

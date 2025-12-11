@@ -1,10 +1,10 @@
+import { useLazyGetAttendanceByStaffAndDateQuery } from "@entities/attendance/api/attendanceApi";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import { Attendance } from "../../API";
-import { AttendanceDataManager } from "../useAttendance/AttendanceDataManager";
 import useStaffs from "../useStaffs/useStaffs";
 
 export interface AttendanceDaily {
@@ -23,9 +23,37 @@ export default function useAttendanceDaily() {
   >([]);
 
   const { staffs, loading: staffLoading, error: staffError } = useStaffs();
+  const [triggerGetAttendance] = useLazyGetAttendanceByStaffAndDateQuery();
 
   const now = dayjs();
   const workDate = now.format(AttendanceDate.DataFormat);
+
+  const fetchAllByWorkDate = useCallback(
+    async (targetDate: string) => {
+      const results = await Promise.all(
+        staffs.map(
+          async ({ cognitoUserId, givenName, familyName, sortKey }) => {
+            const attendance = await triggerGetAttendance({
+              staffId: cognitoUserId,
+              workDate: targetDate,
+            }).unwrap();
+
+            return {
+              sub: cognitoUserId,
+              givenName,
+              familyName,
+              attendance: attendance ?? null,
+              sortKey: sortKey || "",
+            } as AttendanceDaily;
+          }
+        )
+      );
+
+      setAttendanceDailyList(results);
+      return results;
+    },
+    [staffs, triggerGetAttendance]
+  );
 
   useEffect(() => {
     if (staffLoading || staffError) return;
@@ -41,29 +69,7 @@ export default function useAttendanceDaily() {
       .finally(() => {
         setLoading(false);
       });
-  }, [staffs, staffLoading, staffError, workDate]);
-
-  const fetchAllByWorkDate = async (targetDate: string) => {
-    return await Promise.all(
-      staffs.map(async ({ cognitoUserId, givenName, familyName, sortKey }) => {
-        const attendance = await new AttendanceDataManager().fetchAll(
-          cognitoUserId,
-          targetDate
-        );
-
-        return {
-          sub: cognitoUserId,
-          givenName,
-          familyName,
-          attendance,
-          sortKey: sortKey || "",
-        } as AttendanceDaily;
-      })
-    ).then((res) => {
-      setAttendanceDailyList(res);
-      return res;
-    });
-  };
+  }, [staffs, staffLoading, staffError, workDate, fetchAllByWorkDate]);
 
   return {
     loading,

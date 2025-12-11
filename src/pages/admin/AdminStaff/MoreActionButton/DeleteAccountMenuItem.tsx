@@ -5,10 +5,10 @@ import {
   ListItemText,
   MenuItem,
 } from "@mui/material";
+import { DeleteStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { DeleteStaffInput } from "../../../../API";
 import * as MESSAGE_CODE from "../../../../errors";
 import deleteCognitoUser from "../../../../hooks/common/deleteCognitoUser";
 import { StaffType } from "../../../../hooks/useStaffs/useStaffs";

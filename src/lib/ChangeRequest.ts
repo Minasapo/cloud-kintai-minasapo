@@ -1,4 +1,4 @@
-import { Attendance, AttendanceChangeRequest } from "@/API";
+import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 
 export class ChangeRequest {
   private changeRequests: AttendanceChangeRequest[];

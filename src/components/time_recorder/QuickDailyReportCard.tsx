@@ -1,42 +1,24 @@
 import { GraphQLResult } from "@aws-amplify/api";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import {
-  Alert,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  LinearProgress,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { API } from "aws-amplify";
-import { useEffect, useMemo, useState } from "react";
-
+  createDailyReport,
+  updateDailyReport,
+} from "@shared/api/graphql/documents/mutations";
+import { dailyReportsByStaffId } from "@shared/api/graphql/documents/queries";
 import type {
   CreateDailyReportMutation,
   DailyReportsByStaffIdQuery,
   UpdateDailyReportMutation,
-} from "@/API";
-import { DailyReportStatus } from "@/API";
+} from "@shared/api/graphql/types";
+import { DailyReportStatus } from "@shared/api/graphql/types";
+import { API } from "aws-amplify";
+import { useEffect, useMemo, useState } from "react";
+
 import { useAppDispatchV2 } from "@/app/hooks";
-import { createDailyReport, updateDailyReport } from "@/graphql/mutations";
-import { dailyReportsByStaffId } from "@/graphql/queries";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import QuickDailyReportCardView from "@/shared/ui/time-recorder/QuickDailyReportCard";
 
 interface QuickDailyReportCardProps {
   staffId: string | null | undefined;
@@ -58,7 +40,8 @@ export default function QuickDailyReportCard({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const defaultTitle = useMemo(() => `${date}の日報`, [date]);
-  const isEditable = Boolean(staffId) && !isLoading;
+  const hasStaff = Boolean(staffId);
+  const isEditable = hasStaff && !isLoading;
   const isDirty = content !== savedContent;
   const contentPanelId = useMemo(() => `quick-daily-report-${date}`, [date]);
 
@@ -228,147 +211,26 @@ export default function QuickDailyReportCard({
     setIsDialogOpen(false);
   };
 
-  const renderSaveIcon = () => {
-    if (!isSaving) {
-      return <CheckIcon fontSize="small" />;
-    }
-    return <CircularProgress size={18} />;
-  };
-
   return (
-    <Card variant="outlined">
-      <CardContent sx={{ p: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-          <IconButton
-            size="small"
-            onClick={handleToggle}
-            aria-expanded={isOpen}
-            aria-controls={contentPanelId}
-            sx={{
-              transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s",
-            }}
-          >
-            <ExpandMoreIcon fontSize="small" />
-          </IconButton>
-          <Stack
-            spacing={0.25}
-            flexGrow={1}
-            onClick={handleToggle}
-            sx={{ cursor: "pointer" }}
-          >
-            <Typography variant="subtitle2">今日の日報メモ</Typography>
-            <Typography variant="caption" color="text.secondary">
-              {date} / {reportId ? "既存データを更新" : "新規作成"}
-            </Typography>
-          </Stack>
-          <Tooltip title="拡大表示">
-            <span>
-              <IconButton
-                size="small"
-                onClick={handleDialogOpen}
-                disabled={!staffId || isLoading}
-                aria-label="拡大表示"
-              >
-                <OpenInFullIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
-          {isOpen && (
-            <Stack direction="row" spacing={0.5}>
-              <Tooltip title="入力をキャンセル">
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={handleClear}
-                    disabled={!isEditable || !isDirty || isSaving}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-              <Tooltip title="保存">
-                <span>
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={handleSave}
-                    disabled={!isEditable || !isDirty || isSaving}
-                  >
-                    {renderSaveIcon()}
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </Stack>
-          )}
-        </Stack>
-        <Collapse in={isOpen} timeout="auto" unmountOnExit>
-          <Stack spacing={1} mt={1} id={contentPanelId}>
-            {isLoading && <LinearProgress />}
-            <TextField
-              multiline
-              minRows={4}
-              fullWidth
-              placeholder={
-                staffId
-                  ? "今日の振り返りや共有事項をここに入力できます"
-                  : "スタッフ情報を読み込み中です"
-              }
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              disabled={!staffId || isLoading}
-            />
-            <Typography variant="caption" color="text.secondary">
-              他の日報は、日報ページから編集・閲覧できます。
-            </Typography>
-            {error && <Alert severity="error">{error}</Alert>}
-          </Stack>
-        </Collapse>
-      </CardContent>
-      <Dialog
-        open={isDialogOpen}
-        onClose={handleDialogClose}
-        fullWidth
-        maxWidth="md"
-        aria-labelledby={`${contentPanelId}-dialog-title`}
-      >
-        <DialogTitle id={`${contentPanelId}-dialog-title`}>
-          今日の日報メモを拡大表示
-        </DialogTitle>
-        <DialogContent dividers>
-          <Stack spacing={2}>
-            {isLoading && <LinearProgress />}
-            <TextField
-              multiline
-              minRows={10}
-              fullWidth
-              autoFocus
-              placeholder={
-                staffId
-                  ? "今日の振り返りや共有事項をここに入力できます"
-                  : "スタッフ情報を読み込み中です"
-              }
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              disabled={!staffId || isLoading}
-            />
-            <Typography variant="caption" color="text.secondary">
-              保存すると標準のカードにも内容が反映されます。
-            </Typography>
-            {error && <Alert severity="error">{error}</Alert>}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose}>閉じる</Button>
-          <Button
-            variant="contained"
-            onClick={() => void handleSave()}
-            disabled={!isEditable || !isDirty || isSaving}
-          >
-            {isSaving ? "保存中..." : "保存"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Card>
+    <QuickDailyReportCardView
+      date={date}
+      reportId={reportId}
+      content={content}
+      isOpen={isOpen}
+      isDialogOpen={isDialogOpen}
+      isLoading={isLoading}
+      isEditable={isEditable}
+      isDirty={isDirty}
+      isSaving={isSaving}
+      hasStaff={hasStaff}
+      error={error}
+      contentPanelId={contentPanelId}
+      onToggle={handleToggle}
+      onDialogOpen={handleDialogOpen}
+      onDialogClose={handleDialogClose}
+      onClear={handleClear}
+      onSave={() => void handleSave()}
+      onContentChange={(value) => setContent(value)}
+    />
   );
 }

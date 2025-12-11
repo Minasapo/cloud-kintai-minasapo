@@ -1,7 +1,6 @@
+import { OperationLog } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useState } from "react";
-
-import { OperationLog } from "@/API";
 
 import fetchOperationLogs from "./fetchOperationLogs";
 

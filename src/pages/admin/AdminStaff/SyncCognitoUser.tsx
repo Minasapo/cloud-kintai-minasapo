@@ -1,8 +1,8 @@
 import SyncIcon from "@mui/icons-material/Sync";
 import { Box, Button, CircularProgress } from "@mui/material";
+import { CreateStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 
-import { CreateStaffInput, UpdateStaffInput } from "../../../API";
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
 import { StaffType } from "../../../hooks/useStaffs/useStaffs";

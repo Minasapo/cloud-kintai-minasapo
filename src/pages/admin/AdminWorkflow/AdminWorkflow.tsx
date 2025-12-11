@@ -17,13 +17,13 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
+import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+import StatusChip from "@shared/ui/chips/StatusChip";
+import Title from "@shared/ui/typography/Title";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { WorkflowCategory, WorkflowStatus } from "@/API";
-import CommonBreadcrumbs from "@/components/common/CommonBreadcrumbs";
-import StatusChip from "@/components/StatusChip/StatusChip";
-import Title from "@/components/Title/Title";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
