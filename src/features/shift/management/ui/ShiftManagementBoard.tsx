@@ -38,8 +38,6 @@ import {
   ListShiftRequestsQuery,
   ShiftRequestDayPreferenceInput,
   ShiftRequestHistoryInput,
-  ShiftRequestStatus,
-  ShiftRequestSummaryInput,
   UpdateShiftRequestMutation,
 } from "@shared/api/graphql/types";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
@@ -61,197 +59,30 @@ import {
 } from "@/lib/reducers/snackbarReducer";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
-
-const shiftRequestStatusToShiftState = (
-  status?: ShiftRequestStatus | null
-): ShiftState => {
-  switch (status) {
-    case ShiftRequestStatus.WORK:
-      return "work";
-    case ShiftRequestStatus.FIXED_OFF:
-      return "fixedOff";
-    case ShiftRequestStatus.REQUESTED_OFF:
-      return "requestedOff";
-    default:
-      return "auto";
-  }
-};
-
-const shiftStateToShiftRequestStatus = (
-  state: ShiftState
-): ShiftRequestStatus => {
-  switch (state) {
-    case "work":
-      return ShiftRequestStatus.WORK;
-    case "fixedOff":
-      return ShiftRequestStatus.FIXED_OFF;
-    case "requestedOff":
-      return ShiftRequestStatus.REQUESTED_OFF;
-    default:
-      return ShiftRequestStatus.AUTO;
-  }
-};
-
-const statusVisualMap: Record<ShiftState, { label: string; color: string }> = {
-  work: { label: "○", color: "success.main" },
-  fixedOff: { label: "固", color: "error.main" },
-  requestedOff: { label: "希", color: "warning.main" },
-  auto: { label: "△", color: "info.main" },
-};
-
-const defaultStatusVisual = { label: "-", color: "text.secondary" };
-
-const shiftStateOptions: Array<{ value: ShiftState; label: string }> = [
-  { value: "work", label: "出勤" },
-  { value: "fixedOff", label: "固定休" },
-  { value: "requestedOff", label: "希望休" },
-  { value: "auto", label: "自動調整枠" },
-];
-
-const SHIFT_MANUAL_CHANGE_REASON = "shift-management/manual-edit";
-
-type ShiftRequestRecordSnapshot = {
-  id: string | null;
-  histories: ShiftRequestHistoryInput[];
-  note?: string | null;
-  submittedAt?: string | null;
-  targetMonth: string;
-};
-
-type ListShiftRequestItem = NonNullable<
-  NonNullable<
-    NonNullable<ListShiftRequestsQuery["listShiftRequests"]>["items"]
-  >[number]
->;
-
-type ListShiftRequestHistoryItem = NonNullable<
-  NonNullable<ListShiftRequestItem["histories"]>[number]
->;
-
-const convertHistoryToInput = (
-  history: ListShiftRequestHistoryItem
-): ShiftRequestHistoryInput => ({
-  version: history.version,
-  note: history.note ?? undefined,
-  entries:
-    history.entries
-      ?.filter((entry): entry is NonNullable<typeof entry> => entry !== null)
-      .map<ShiftRequestDayPreferenceInput>((entry) => ({
-        date: entry.date,
-        status: entry.status,
-      })) ?? [],
-  summary: history.summary
-    ? {
-        workDays: history.summary.workDays ?? undefined,
-        fixedOffDays: history.summary.fixedOffDays ?? undefined,
-        requestedOffDays: history.summary.requestedOffDays ?? undefined,
-      }
-    : undefined,
-  submittedAt: history.submittedAt ?? undefined,
-  updatedAt: history.updatedAt ?? undefined,
-  recordedAt:
-    history.recordedAt ??
-    history.updatedAt ??
-    history.submittedAt ??
-    dayjs().toISOString(),
-  recordedByStaffId: history.recordedByStaffId ?? undefined,
-  changeReason: history.changeReason ?? undefined,
-});
-
-const buildSummaryFromAssignments = (
-  assignments: Record<string, ShiftState>
-): ShiftRequestSummaryInput => {
-  const values = Object.values(assignments);
-  const count = (target: ShiftState) =>
-    values.filter((state) => state === target).length;
-  return {
-    workDays: count("work"),
-    fixedOffDays: count("fixedOff"),
-    requestedOffDays: count("requestedOff"),
-  };
-};
-
-const ROW_HIGHLIGHT_COLOR = "rgba(63, 81, 181, 0.12)";
-const COLUMN_HIGHLIGHT_COLOR = "rgba(255, 193, 7, 0.18)";
-const INTERSECTION_HIGHLIGHT_COLOR = "rgba(76, 175, 80, 0.2)";
-
-const getCellHighlightSx = (
-  isRowSelected: boolean,
-  isColumnSelected: boolean
-) => {
-  if (!isRowSelected && !isColumnSelected) return null;
-  const color = isRowSelected
-    ? isColumnSelected
-      ? INTERSECTION_HIGHLIGHT_COLOR
-      : ROW_HIGHLIGHT_COLOR
-    : COLUMN_HIGHLIGHT_COLOR;
-  return { boxShadow: `inset 0 0 0 9999px ${color}` };
-};
-
-type ShiftGroupConstraints = {
-  min: number | null;
-  max: number | null;
-  fixed: number | null;
-};
-
-type GroupCoveragePresentation = {
-  primary: string;
-  primaryColor: string;
-  violationReason?: string | null;
-  violationTone?: "error" | "warning" | null;
-};
-
-const getGroupCoveragePresentation = (
-  actual: number,
-  constraints: ShiftGroupConstraints
-): GroupCoveragePresentation => {
-  const hasMin = constraints.min !== null;
-  const hasMax = constraints.max !== null;
-
-  let violationReason: string | null = null;
-  let violationTone: "error" | "warning" | null = null;
-
-  if (constraints.fixed !== null) {
-    if (actual < constraints.fixed) {
-      violationReason = `固定人数 ${constraints.fixed}名を下回っています`;
-      violationTone = "error";
-    } else if (actual > constraints.fixed) {
-      violationReason = `固定人数 ${constraints.fixed}名を超えています`;
-      violationTone = "warning";
-    }
-  } else {
-    if (hasMin && actual < (constraints.min as number)) {
-      violationReason = `必要人数は${constraints.min}名以上です`;
-      violationTone = "error";
-    } else if (hasMax && actual > (constraints.max as number)) {
-      violationReason = `必要人数は${constraints.max}名以下です`;
-      violationTone = "warning";
-    }
-  }
-
-  let primaryColor = "text.primary";
-  if (violationTone === "error") {
-    primaryColor = "error.main";
-  } else if (violationTone === "warning") {
-    primaryColor = "warning.main";
-  }
-
-  return {
-    primary: `${actual}`,
-    primaryColor,
-    violationReason,
-    violationTone,
-  };
-};
-
-const getShiftKeyState = (nativeEvent: Event) => {
-  if ("shiftKey" in nativeEvent) {
-    return Boolean(
-      (nativeEvent as MouseEvent | KeyboardEvent | PointerEvent).shiftKey
-    );
-  }
-  return false;
-};
+import { buildSummaryFromAssignments } from "../lib/shiftAssignments";
+import {
+  getGroupCoveragePresentation,
+  ShiftGroupConstraints,
+} from "../lib/shiftGroups";
+import {
+  convertHistoryToInput,
+  ShiftRequestHistoryMeta,
+  ShiftRequestRecordSnapshot,
+} from "../lib/shiftRequests";
+import {
+  defaultStatusVisual,
+  SHIFT_MANUAL_CHANGE_REASON,
+  shiftRequestStatusToShiftState,
+  shiftStateOptions,
+  shiftStateToShiftRequestStatus,
+  statusVisualMap,
+} from "../lib/shiftStateMapping";
+import {
+  getCellHighlightSx,
+  getShiftKeyState,
+} from "../lib/selectionHighlight";
+import ShiftManagementLegend from "./components/ShiftManagementLegend";
+import ShiftManagementSummaryRow from "./components/ShiftManagementSummaryRow";
 
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
@@ -436,7 +267,7 @@ export default function ShiftManagementBoard() {
     Map<string, Record<string, ShiftState>>
   >(new Map());
   const [shiftRequestHistoryMeta, setShiftRequestHistoryMeta] = React.useState<
-    Map<string, { changeCount: number; latestChangeAt: string | null }>
+    Map<string, ShiftRequestHistoryMeta>
   >(new Map());
   const [shiftRequestRecords, setShiftRequestRecords] = useState<
     Map<string, ShiftRequestRecordSnapshot>
@@ -1096,115 +927,7 @@ export default function ShiftManagementBoard() {
 
       {!loading && !shiftRequestsLoading && !error && (
         <>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 0.5,
-              mb: 1.5,
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              凡例
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 2,
-                alignItems: "center",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <Typography
-                  sx={{ color: statusVisualMap.work.color, fontWeight: 700 }}
-                >
-                  {statusVisualMap.work.label}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  出勤
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <Typography
-                  sx={{
-                    color: statusVisualMap.fixedOff.color,
-                    fontWeight: 700,
-                  }}
-                >
-                  {statusVisualMap.fixedOff.label}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  固定休
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <Typography
-                  sx={{
-                    color: statusVisualMap.requestedOff.color,
-                    fontWeight: 700,
-                  }}
-                >
-                  {statusVisualMap.requestedOff.label}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  希望休
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <Typography
-                  sx={{ color: statusVisualMap.auto.color, fontWeight: 700 }}
-                >
-                  {statusVisualMap.auto.label}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  自動調整枠
-                </Typography>
-              </Box>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 2,
-                alignItems: "center",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                <Box
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: 0.5,
-                    bgcolor: "rgba(244, 67, 54, 0.18)",
-                    border: "1px solid",
-                    borderColor: "rgba(244, 67, 54, 0.32)",
-                  }}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  下限未達／固定人数不足
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                <Box
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: 0.5,
-                    bgcolor: "rgba(255, 193, 7, 0.18)",
-                    border: "1px solid",
-                    borderColor: "rgba(255, 193, 7, 0.4)",
-                  }}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  上限超過／固定人数超過
-                </Typography>
-              </Box>
-              <Typography variant="caption" color="text.secondary">
-                数値は日別の出勤人数を示します。
-              </Typography>
-            </Box>
-          </Box>
+          <ShiftManagementLegend />
 
           <Box
             sx={{
@@ -1391,53 +1114,57 @@ export default function ShiftManagementBoard() {
               </TableHead>
 
               <TableBody>
-                <TableRow sx={{ cursor: "default" }}>
-                  <TableCell
-                    colSpan={3}
-                    sx={{
-                      bgcolor: "background.paper",
-                      py: 0.25,
-                      width:
-                        STAFF_COL_WIDTH + AGG_COL_WIDTH + HISTORY_COL_WIDTH,
-                      boxSizing: "border-box",
-                      pl: 1,
-                      borderRight: "1px solid",
-                      borderColor: "divider",
-                      position: "sticky",
-                      left: 0,
-                      zIndex: 2,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      textAlign: "right",
-                    }}
-                  >
-                    <Typography variant="body2">計画人数</Typography>
-                  </TableCell>
-
-                  {days.map((d) => {
-                    const key = d.format("YYYY-MM-DD");
-                    const planned = plannedDailyCounts.get(key);
-                    const displayValue = shiftPlanLoading
-                      ? "..."
-                      : typeof planned === "number"
-                      ? planned
-                      : "-";
-                    const highlightSx =
-                      getCellHighlightSx(false, selectedDayKeys.has(key)) ?? {};
-                    return (
-                      <TableCell
-                        key={`${key}-plan`}
-                        sx={{
-                          p: 0.25,
-                          width: DAY_COL_WIDTH,
-                          height: 40,
-                          position: "relative",
-                          borderLeft: "1px solid",
-                          borderColor: "divider",
-                          ...highlightSx,
-                        }}
-                      >
+                {shiftStaffs.length > 0 && (
+                  <>
+                    <ShiftManagementSummaryRow
+                      label="計画人数"
+                      days={days}
+                      selectedDayKeys={selectedDayKeys}
+                      dayColumnWidth={DAY_COL_WIDTH}
+                      labelCellProps={{
+                        sx: {
+                          width:
+                            STAFF_COL_WIDTH + AGG_COL_WIDTH + HISTORY_COL_WIDTH,
+                          pl: 1,
+                        },
+                      }}
+                      renderValue={(dayKey) => {
+                        const planned = plannedDailyCounts.get(dayKey);
+                        const displayValue = shiftPlanLoading
+                          ? "..."
+                          : typeof planned === "number"
+                          ? planned
+                          : "-";
+                        return (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 600, fontSize: 14 }}
+                            >
+                              {displayValue}
+                            </Typography>
+                          </Box>
+                        );
+                      }}
+                    />
+                    <ShiftManagementSummaryRow
+                      label="出勤人数(合計)"
+                      days={days}
+                      selectedDayKeys={selectedDayKeys}
+                      dayColumnWidth={DAY_COL_WIDTH}
+                      labelCellProps={{
+                        sx: {
+                          width:
+                            STAFF_COL_WIDTH + AGG_COL_WIDTH + HISTORY_COL_WIDTH,
+                        },
+                      }}
+                      renderValue={(dayKey) => (
                         <Box
                           sx={{
                             display: "flex",
@@ -1449,78 +1176,11 @@ export default function ShiftManagementBoard() {
                             variant="body2"
                             sx={{ fontWeight: 600, fontSize: 14 }}
                           >
-                            {displayValue}
+                            {dailyCounts.get(dayKey) ?? 0}
                           </Typography>
                         </Box>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-
-                {shiftStaffs.length > 0 && (
-                  <>
-                    {/* 想定人数と過不足を1行に統合 */}
-                    <TableRow sx={{ cursor: "default" }}>
-                      <TableCell
-                        colSpan={3}
-                        sx={{
-                          bgcolor: "background.paper",
-                          py: 0.25,
-                          width:
-                            STAFF_COL_WIDTH + AGG_COL_WIDTH + HISTORY_COL_WIDTH,
-                          boxSizing: "border-box",
-                          borderRight: "1px solid",
-                          borderColor: "divider",
-                          position: "sticky",
-                          left: 0,
-                          zIndex: 2,
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textAlign: "right",
-                        }}
-                      >
-                        <Typography variant="body2">出勤人数(合計)</Typography>
-                      </TableCell>
-
-                      {days.map((d) => {
-                        const key = d.format("YYYY-MM-DD");
-                        const actual = dailyCounts.get(key) ?? 0;
-                        const highlightSx =
-                          getCellHighlightSx(false, selectedDayKeys.has(key)) ??
-                          {};
-                        return (
-                          <TableCell
-                            key={key}
-                            sx={{
-                              p: 0.25,
-                              width: DAY_COL_WIDTH,
-                              height: 40,
-                              position: "relative",
-                              borderLeft: "1px solid",
-                              borderColor: "divider",
-                              ...highlightSx,
-                            }}
-                            align="center"
-                          >
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                              }}
-                            >
-                              <Typography
-                                variant="body2"
-                                sx={{ fontWeight: 600, fontSize: 14 }}
-                              >
-                                {actual}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
+                      )}
+                    />
                   </>
                 )}
 
