@@ -12,14 +12,6 @@ import {
   Chip,
   CircularProgress,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -53,10 +45,7 @@ import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";
@@ -74,11 +63,13 @@ import {
   defaultStatusVisual,
   SHIFT_MANUAL_CHANGE_REASON,
   shiftRequestStatusToShiftState,
-  shiftStateOptions,
   shiftStateToShiftRequestStatus,
   statusVisualMap,
 } from "../lib/shiftStateMapping";
+import useShiftManagementDialogs from "../model/useShiftManagementDialogs";
 import useShiftSelection from "../model/useShiftSelection";
+import ShiftBulkEditDialog from "./components/ShiftBulkEditDialog";
+import ShiftEditDialog from "./components/ShiftEditDialog";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
 import ShiftManagementSummaryRow from "./components/ShiftManagementSummaryRow";
 
@@ -279,16 +270,6 @@ export default function ShiftManagementBoard() {
   const [shiftRequestsError, setShiftRequestsError] = useState<string | null>(
     null
   );
-  const [editingCell, setEditingCell] = useState<{
-    staffId: string;
-    staffName: string;
-    dateKey: string;
-  } | null>(null);
-  const [editingState, setEditingState] = useState<ShiftState>("auto");
-  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
-  const [bulkEditState, setBulkEditState] = useState<ShiftState>("work");
-  const [isSavingSingleEdit, setIsSavingSingleEdit] = useState(false);
-  const [isSavingBulkEdit, setIsSavingBulkEdit] = useState(false);
 
   React.useEffect(() => {
     // 実績表示モードではモック生成は不要
@@ -492,10 +473,6 @@ export default function ShiftManagementBoard() {
     return map;
   }, [days, monthStart, shiftPlanPlans]);
 
-  const isEditDialogOpen = Boolean(editingCell);
-  const editingDialogDateLabel = editingCell
-    ? dayjs(editingCell.dateKey).format("YYYY年M月D日 (dd)")
-    : "";
   const persistShiftRequestChanges = async (
     staffId: string,
     dayKeys: string[],
@@ -651,58 +628,35 @@ export default function ShiftManagementBoard() {
     });
   };
 
-  const openShiftEditDialog = (
-    staffId: string,
-    staffName: string,
-    dateKey: string,
-    currentState: ShiftState
-  ) => {
-    setEditingCell({ staffId, staffName, dateKey });
-    setEditingState(currentState);
-  };
-
-  const closeShiftEditDialog = () => setEditingCell(null);
-
-  const saveShiftEdit = async () => {
-    if (!editingCell) return;
-    setIsSavingSingleEdit(true);
-
-    try {
-      const { staffId, dateKey } = editingCell;
-      await applyShiftState([staffId], [dateKey], editingState);
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S16001));
-      closeShiftEditDialog();
-    } catch (error) {
-      console.error("Failed to save shift edit", error);
-      dispatch(setSnackbarError(MESSAGE_CODE.E16001));
-    } finally {
-      setIsSavingSingleEdit(false);
-    }
-  };
+  const {
+    editingCell,
+    editingState,
+    isEditDialogOpen,
+    isSavingSingleEdit,
+    openShiftEditDialog,
+    closeShiftEditDialog,
+    handleEditingStateChange,
+    saveShiftEdit,
+    isBulkDialogOpen,
+    openBulkEditDialog,
+    closeBulkEditDialog,
+    bulkEditState,
+    handleBulkEditStateChange,
+    isSavingBulkEdit,
+    applyBulkEdit,
+  } = useShiftManagementDialogs(applyShiftState);
 
   const prevMonth = () => setCurrentMonth((m) => m.subtract(1, "month"));
   const nextMonth = () => setCurrentMonth((m) => m.add(1, "month"));
-  const openBulkEditDialog = () => {
+  const handleOpenBulkEditDialog = () => {
     if (!hasBulkSelection) return;
-    setIsBulkDialogOpen(true);
+    openBulkEditDialog();
   };
-  const closeBulkEditDialog = () => setIsBulkDialogOpen(false);
-  const applyBulkEdit = async () => {
+  const handleApplyBulkEdit = () => {
     if (!hasBulkSelection) return;
-    setIsSavingBulkEdit(true);
-
-    try {
-      const staffIds = Array.from(selectedStaffIds);
-      const dayKeys = Array.from(selectedDayKeys);
-      await applyShiftState(staffIds, dayKeys, bulkEditState);
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S16001));
-      closeBulkEditDialog();
-    } catch (error) {
-      console.error("Failed to apply bulk shift edit", error);
-      dispatch(setSnackbarError(MESSAGE_CODE.E16001));
-    } finally {
-      setIsSavingBulkEdit(false);
-    }
+    const staffIds = Array.from(selectedStaffIds);
+    const dayKeys = Array.from(selectedDayKeys);
+    void applyBulkEdit(staffIds, dayKeys);
   };
 
   // 固定幅を抑えて全体をコンパクトに表示
@@ -766,7 +720,7 @@ export default function ShiftManagementBoard() {
                 variant="contained"
                 color="primary"
                 disabled={!hasBulkSelection}
-                onClick={openBulkEditDialog}
+                onClick={handleOpenBulkEditDialog}
               >
                 選択した項目を変更
               </Button>
@@ -776,7 +730,7 @@ export default function ShiftManagementBoard() {
               variant="contained"
               color="primary"
               disabled
-              onClick={openBulkEditDialog}
+              onClick={handleOpenBulkEditDialog}
             >
               選択した項目を変更
             </Button>
@@ -1404,9 +1358,11 @@ export default function ShiftManagementBoard() {
                                 const dateLabel = d.format("M月D日 (dd)");
                                 const handleOpen = () =>
                                   openShiftEditDialog(
-                                    s.id,
-                                    staffDisplayName,
-                                    key,
+                                    {
+                                      staffId: s.id,
+                                      staffName: staffDisplayName,
+                                      dateKey: key,
+                                    },
                                     editState
                                   );
                                 const isDaySelected = selectedDayKeys.has(key);
@@ -1468,152 +1424,28 @@ export default function ShiftManagementBoard() {
         </>
       )}
 
-      <Dialog
+      <ShiftEditDialog
         open={isEditDialogOpen}
-        onClose={(_, _reason) => {
-          if (isSavingSingleEdit) return;
-          closeShiftEditDialog();
-        }}
-        fullWidth
-        maxWidth="xs"
-        aria-labelledby="shift-edit-dialog-title"
-      >
-        <DialogTitle id="shift-edit-dialog-title">シフトを変更</DialogTitle>
-        <DialogContent dividers>
-          {editingCell ? (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                {editingCell.staffName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {editingDialogDateLabel}
-              </Typography>
-            </Box>
-          ) : null}
+        editingCell={editingCell}
+        editingState={editingState}
+        isSaving={isSavingSingleEdit}
+        onClose={closeShiftEditDialog}
+        onStateChange={handleEditingStateChange}
+        onSubmit={saveShiftEdit}
+      />
 
-          <FormControl fullWidth size="small">
-            <InputLabel id="shift-edit-state-label">ステータス</InputLabel>
-            <Select
-              labelId="shift-edit-state-label"
-              label="ステータス"
-              value={editingState}
-              onChange={(event) =>
-                setEditingState(event.target.value as ShiftState)
-              }
-              disabled={isSavingSingleEdit}
-            >
-              {shiftStateOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography
-                      component="span"
-                      sx={{
-                        color: statusVisualMap[option.value].color,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {statusVisualMap[option.value].label}
-                    </Typography>
-                    <Typography component="span">{option.label}</Typography>
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeShiftEditDialog} disabled={isSavingSingleEdit}>
-            キャンセル
-          </Button>
-          <Button
-            onClick={saveShiftEdit}
-            variant="contained"
-            disabled={!editingCell || isSavingSingleEdit}
-            startIcon={
-              isSavingSingleEdit ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : undefined
-            }
-          >
-            {isSavingSingleEdit ? "保存中..." : "変更する"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
+      <ShiftBulkEditDialog
         open={isBulkDialogOpen}
-        onClose={(_, _reason) => {
-          if (isSavingBulkEdit) return;
-          closeBulkEditDialog();
-        }}
-        fullWidth
-        maxWidth="xs"
-        aria-labelledby="shift-bulk-edit-dialog-title"
-      >
-        <DialogTitle id="shift-bulk-edit-dialog-title">
-          選択した項目を一括変更
-        </DialogTitle>
-        <DialogContent dividers>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2">
-              選択スタッフ: {selectedStaffIds.size} 名
-            </Typography>
-            <Typography variant="body2">
-              選択日付: {selectedDayKeys.size} 日
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              対象セル: {selectedCellCount} 件
-            </Typography>
-          </Box>
-
-          <FormControl fullWidth size="small">
-            <InputLabel id="shift-bulk-edit-state-label">ステータス</InputLabel>
-            <Select
-              labelId="shift-bulk-edit-state-label"
-              label="ステータス"
-              value={bulkEditState}
-              onChange={(event) =>
-                setBulkEditState(event.target.value as ShiftState)
-              }
-              disabled={isSavingBulkEdit}
-            >
-              {shiftStateOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography
-                      component="span"
-                      sx={{
-                        color: statusVisualMap[option.value].color,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {statusVisualMap[option.value].label}
-                    </Typography>
-                    <Typography component="span">{option.label}</Typography>
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeBulkEditDialog} disabled={isSavingBulkEdit}>
-            キャンセル
-          </Button>
-          <Button
-            onClick={applyBulkEdit}
-            variant="contained"
-            disabled={!hasBulkSelection || isSavingBulkEdit}
-            startIcon={
-              isSavingBulkEdit ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : undefined
-            }
-          >
-            {isSavingBulkEdit ? "保存中..." : "変更する"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        selectedStaffCount={selectedStaffIds.size}
+        selectedDayCount={selectedDayKeys.size}
+        selectedCellCount={selectedCellCount}
+        bulkEditState={bulkEditState}
+        isSaving={isSavingBulkEdit}
+        canSubmit={hasBulkSelection}
+        onClose={closeBulkEditDialog}
+        onStateChange={handleBulkEditStateChange}
+        onSubmit={handleApplyBulkEdit}
+      />
     </Container>
   );
 }
