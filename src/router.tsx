@@ -42,7 +42,7 @@ import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import ShiftDayViewPage from "./pages/shift/day-view";
 import ShiftManagementPage from "./pages/shift/management";
-import ShiftRequest from "./pages/shift/request";
+import ShiftRequestPage from "./pages/shift/request";
 import StaffShiftListPage from "./pages/shift/staff";
 import WorkflowDetailPage from "./pages/workflow/detail/WorkflowDetailPage";
 import WorkflowEditPage from "./pages/workflow/edit/WorkflowEditPage";
@@ -113,7 +113,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ShiftRequest />,
+            element: <ShiftRequestPage />,
           },
         ],
       },
