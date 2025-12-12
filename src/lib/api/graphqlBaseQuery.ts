@@ -1,6 +1,6 @@
+import type { GraphQLAuthMode } from "@aws-amplify/core/internals/utils";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import type { GraphQLResult } from "aws-amplify/api";
-import type { GraphQLAuthMode } from "@aws-amplify/core/internals/utils";
 
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
