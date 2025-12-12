@@ -1,7 +1,6 @@
 import "./index.css";
 
 import { Authenticator } from "@aws-amplify/ui-react";
-import { ThemeProvider } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Amplify } from "aws-amplify";
@@ -13,7 +12,6 @@ import { RouterProvider } from "react-router-dom";
 
 import { store } from "./app/store";
 import config from "./aws-exports";
-import { theme } from "./lib/theme";
 import reportWebVitals from "./reportWebVitals";
 import router from "./router";
 import vocabularies from "./vocabularies";
@@ -30,11 +28,9 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <Authenticator.Provider>
-        <ThemeProvider theme={theme}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <RouterProvider router={router} />
-          </LocalizationProvider>
-        </ThemeProvider>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <RouterProvider router={router} />
+        </LocalizationProvider>
       </Authenticator.Provider>
     </Provider>
   </React.StrictMode>

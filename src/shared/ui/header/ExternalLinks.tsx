@@ -11,10 +11,10 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 
 import { predefinedIcons } from "@/constants/icons";
-import { theme } from "@/lib/theme";
 
 export type ExternalLinkItem = {
   label: string;
@@ -30,6 +30,7 @@ export interface ExternalLinksProps {
 
 const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
+  const theme = useTheme();
   const isMobileSize = useMediaQuery(theme.breakpoints.down("md"));
 
   const open = Boolean(anchor);

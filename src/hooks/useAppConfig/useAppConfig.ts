@@ -11,7 +11,7 @@ import type {
 import dayjs from "dayjs";
 import { useCallback, useMemo } from "react";
 
-import { DEFAULT_THEME_COLOR } from "@/constants/theme";
+import { resolveThemeColor } from "@/constants/theme";
 
 /**
  * アプリケーション設定の一部項目のみを抽出した型。
@@ -46,7 +46,7 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   reasons: [],
   quickInputStartTimes: [],
   quickInputEndTimes: [],
-  themeColor: DEFAULT_THEME_COLOR,
+  themeColor: resolveThemeColor(),
   shiftGroups: [],
 };
 
@@ -239,11 +239,11 @@ const useAppConfig = () => {
     [config]
   );
 
-  const getThemeColor = useCallback(
-    () =>
-      config?.themeColor ?? DEFAULT_CONFIG.themeColor ?? DEFAULT_THEME_COLOR,
-    [config]
-  );
+  const getThemeColor = useCallback(() => {
+    const fallbackColor = DEFAULT_CONFIG.themeColor;
+    const candidate = config?.themeColor ?? fallbackColor;
+    return resolveThemeColor(candidate || undefined);
+  }, [config]);
 
   const loading = useMemo(
     () => isLoading || isFetching || isCreating || isUpdating,

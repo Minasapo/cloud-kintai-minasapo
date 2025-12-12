@@ -11,6 +11,7 @@ import OfficeHomePage from "./pages/office/home/OfficeHomePage";
 import OfficeLayoutPage from "./pages/office/layout/OfficeLayoutPage";
 import OfficeQrPage from "./pages/office/qr/OfficeQrPage";
 import OfficeQrRegisterPage from "./pages/office/qr-register/OfficeQrRegisterPage";
+import DesignTokenPreviewPage from "./pages/preview/DesignTokenPreviewPage";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import ShiftRequestPage from "./pages/shift/request";
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: "register",
         element: <Register />,
+      },
+      {
+        path: "preview/design-tokens",
+        element: <DesignTokenPreviewPage />,
       },
       {
         path: "attendance",

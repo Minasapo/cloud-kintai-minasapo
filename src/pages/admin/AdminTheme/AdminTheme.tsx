@@ -15,7 +15,7 @@ import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { DEFAULT_THEME_COLOR } from "@/constants/theme";
+import { resolveThemeColor } from "@/constants/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
 import {
@@ -61,10 +61,12 @@ const isDarkColor = (color: string) => {
   return brightness < 110;
 };
 
+const DEFAULT_BRAND_COLOR = resolveThemeColor();
+
 const paletteCandidates = [
-  DEFAULT_THEME_COLOR,
+  DEFAULT_BRAND_COLOR,
   ...basePalette.filter(
-    (color) => color.toLowerCase() !== DEFAULT_THEME_COLOR.toLowerCase()
+    (color) => color.toLowerCase() !== DEFAULT_BRAND_COLOR.toLowerCase()
   ),
 ];
 
@@ -78,8 +80,8 @@ export default function AdminTheme() {
   const dispatch = useAppDispatchV2();
   const { getThemeColor, getConfigId, saveConfig, fetchConfig } =
     useContext(AppConfigContext);
-  const [colorCode, setColorCode] = useState(DEFAULT_THEME_COLOR);
-  const [currentColor, setCurrentColor] = useState(DEFAULT_THEME_COLOR);
+  const [colorCode, setColorCode] = useState(DEFAULT_BRAND_COLOR);
+  const [currentColor, setCurrentColor] = useState(DEFAULT_BRAND_COLOR);
   const [customMode, setCustomMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const isValidHex = useMemo(
@@ -88,7 +90,9 @@ export default function AdminTheme() {
   );
 
   useEffect(() => {
-    const themeColor = getThemeColor ? getThemeColor() : DEFAULT_THEME_COLOR;
+    const themeColor = resolveThemeColor(
+      getThemeColor ? getThemeColor() : undefined
+    );
     if (!themeColor) return;
     setColorCode(themeColor);
     setCurrentColor(themeColor);

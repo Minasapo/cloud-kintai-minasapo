@@ -17,6 +17,7 @@ import {
   useUpdateHolidayCalendarMutation,
 } from "@entities/calendar/api/calendarApi";
 import { Box, LinearProgress, Stack } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
 import { useCallback, useEffect, useMemo } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
@@ -28,6 +29,7 @@ import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
+import { createAppTheme } from "./lib/theme";
 /**
  * アプリケーションのレイアウトコンポーネント。
  * 認証状態や各種設定・カレンダー情報の取得、各種コンテキストの提供を行う。
@@ -297,6 +299,16 @@ export default function Layout() {
     ]
   );
 
+  const configuredThemeColor = useMemo(
+    () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
+    [getThemeColor]
+  );
+
+  const appTheme = useMemo(
+    () => createAppTheme(configuredThemeColor),
+    [configuredThemeColor]
+  );
+
   if (
     authStatus === "configuring" ||
     cognitoUserLoading ||
@@ -304,29 +316,35 @@ export default function Layout() {
     holidayCalendarLoading ||
     companyHolidayCalendarLoading
   ) {
-    return <LinearProgress data-testid="layout-linear-progress" />;
+    return (
+      <ThemeProvider theme={appTheme}>
+        <LinearProgress data-testid="layout-linear-progress" />
+      </ThemeProvider>
+    );
   }
 
   return (
-    <AuthContext.Provider value={authContextValue}>
-      <AppConfigContext.Provider value={appConfigContextValue}>
-        <AppContext.Provider value={appContextValue}>
-          <Stack sx={{ minHeight: "100vh" }} data-testid="layout-stack">
-            <Box data-testid="layout-header">
-              <Header />
-            </Box>
-            <Box sx={{ flex: 1, overflow: "auto" }} data-testid="layout-main">
-              <Outlet />
-            </Box>
-            <Box data-testid="layout-footer">
-              <Footer />
-            </Box>
-            <Box data-testid="layout-snackbar">
-              <SnackbarGroup />
-            </Box>
-          </Stack>
-        </AppContext.Provider>
-      </AppConfigContext.Provider>
-    </AuthContext.Provider>
+    <ThemeProvider theme={appTheme}>
+      <AuthContext.Provider value={authContextValue}>
+        <AppConfigContext.Provider value={appConfigContextValue}>
+          <AppContext.Provider value={appContextValue}>
+            <Stack sx={{ minHeight: "100vh" }} data-testid="layout-stack">
+              <Box data-testid="layout-header">
+                <Header />
+              </Box>
+              <Box sx={{ flex: 1, overflow: "auto" }} data-testid="layout-main">
+                <Outlet />
+              </Box>
+              <Box data-testid="layout-footer">
+                <Footer />
+              </Box>
+              <Box data-testid="layout-snackbar">
+                <SnackbarGroup />
+              </Box>
+            </Stack>
+          </AppContext.Provider>
+        </AppConfigContext.Provider>
+      </AuthContext.Provider>
+    </ThemeProvider>
   );
 }
