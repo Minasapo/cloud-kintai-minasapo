@@ -398,7 +398,6 @@ export default function AdminDailyReportDetail() {
   return (
     <Container maxWidth="md" sx={{ py: 3 }}>
       <Stack spacing={3}>
-
         {loadError && <Alert severity="error">{loadError}</Alert>}
 
         {actionError && (

@@ -80,7 +80,8 @@ export default function AdminLogsClean() {
         <Stack spacing={1}>
           <Box>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              最新の 30 件を表示します。スクロールで過去のログを順次読み込みます。
+              最新の 30
+              件を表示します。スクロールで過去のログを順次読み込みます。
             </Typography>
 
             <List>

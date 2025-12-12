@@ -679,7 +679,6 @@ export default function ShiftManagementBoard() {
 
   return (
     <Container sx={{ py: 3 }}>
-
       <Box
         sx={{
           display: "flex",
