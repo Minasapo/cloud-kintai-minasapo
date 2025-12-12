@@ -6,6 +6,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import {
   Box,
   Button,
+  ButtonBase,
   Container,
   IconButton,
   LinearProgress,
@@ -38,6 +39,7 @@ import {
 import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -73,6 +75,14 @@ const SUNDAY_BG = "#ffebee";
 const SATURDAY_BG = "#e3f2fd";
 const HOLIDAY_BG = "#fff8e1";
 const CELL_NOWRAP_SX = { whiteSpace: "nowrap" as const };
+const INPUT_PLACEHOLDER = "入力";
+
+const sanitizeCapacityValue = (value: string): string => {
+  if (!value.trim()) return "";
+  const numericValue = Math.max(0, Number(value));
+  if (Number.isNaN(numericValue)) return "";
+  return String(Math.trunc(numericValue));
+};
 
 const createDefaultRows = (year: number): ShiftPlanRow[] =>
   Array.from({ length: 12 }, (_, index) => {
@@ -133,6 +143,106 @@ const convertRowsToPlanInput = (
       value === "" ? null : Number(value)
     ),
   }));
+
+type EditableCapacityCellProps = {
+  value: string;
+  labelText: string;
+  labelColor: string;
+  onCommit: (value: string) => void;
+};
+
+const EditableCapacityCell = memo(function EditableCapacityCell({
+  value,
+  labelText,
+  labelColor,
+  onCommit,
+}: EditableCapacityCellProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraft(value);
+    }
+  }, [isEditing, value]);
+
+  const handleCommit = useCallback(() => {
+    const normalized = sanitizeCapacityValue(draft);
+    setDraft(normalized);
+    onCommit(normalized);
+    setIsEditing(false);
+  }, [draft, onCommit]);
+
+  const handleCancel = useCallback(() => {
+    setDraft(value);
+    setIsEditing(false);
+  }, [value]);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleCommit();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        handleCancel();
+      }
+    },
+    [handleCommit, handleCancel]
+  );
+
+  return (
+    <Stack spacing={0.25} alignItems="center">
+      <Typography
+        variant="caption"
+        sx={{ fontSize: "0.65rem" }}
+        color={labelColor}
+      >
+        {labelText}
+      </Typography>
+      {isEditing ? (
+        <TextField
+          autoFocus
+          type="number"
+          size="small"
+          value={draft}
+          inputProps={{ min: 0 }}
+          sx={{
+            width: 52,
+            "& input": {
+              textAlign: "center",
+              fontSize: "0.75rem",
+              padding: "4px",
+            },
+          }}
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={handleCommit}
+          onKeyDown={handleKeyDown}
+        />
+      ) : (
+        <ButtonBase
+          onClick={() => setIsEditing(true)}
+          sx={{
+            width: 52,
+            borderRadius: 1,
+            border: "1px dashed",
+            borderColor: value ? "divider" : "primary.light",
+            px: 0.5,
+            py: 0.5,
+          }}
+        >
+          <Typography
+            variant="body2"
+            color={value ? "text.primary" : "text.disabled"}
+            sx={{ fontSize: "0.75rem" }}
+          >
+            {value || INPUT_PLACEHOLDER}
+          </Typography>
+        </ButtonBase>
+      )}
+    </Stack>
+  );
+});
 
 export default function ShiftPlanManagement() {
   const dispatch = useAppDispatchV2();
@@ -294,18 +404,13 @@ export default function ShiftPlanManagement() {
 
   const handleDailyCapacityChange = useCallback(
     (month: number, dayIndex: number, value: string) => {
+      const normalizedValue = sanitizeCapacityValue(value);
       setYearlyPlans((prev) => {
         const rows = prev[selectedYear] ?? createDefaultRows(selectedYear);
         const updatedRows = rows.map((row) => {
           if (row.month !== month) return row;
-          const sanitizedValue = (() => {
-            if (value === "") return "";
-            const numericValue = Math.max(0, Number(value));
-            if (Number.isNaN(numericValue)) return "";
-            return String(numericValue);
-          })();
           const nextCapacity = [...row.dailyCapacity];
-          nextCapacity[dayIndex] = sanitizedValue;
+          nextCapacity[dayIndex] = normalizedValue;
           return { ...row, dailyCapacity: nextCapacity };
         });
         return {
@@ -555,36 +660,18 @@ export default function ShiftPlanManagement() {
                           : weekdayColor;
                         const labelText = isHoliday ? "祝" : weekdayLabel;
                         const cellContent = (
-                          <Stack spacing={0.25} alignItems="center">
-                            <Typography
-                              variant="caption"
-                              sx={{ fontSize: "0.65rem" }}
-                              color={labelColor}
-                            >
-                              {labelText}
-                            </Typography>
-                            <TextField
-                              type="number"
-                              size="small"
-                              value={value}
-                              inputProps={{ min: 0 }}
-                              sx={{
-                                width: 52,
-                                "& input": {
-                                  textAlign: "center",
-                                  fontSize: "0.75rem",
-                                  padding: "4px",
-                                },
-                              }}
-                              onChange={(event) =>
-                                handleDailyCapacityChange(
-                                  row.month,
-                                  dayIndex,
-                                  event.target.value
-                                )
-                              }
-                            />
-                          </Stack>
+                          <EditableCapacityCell
+                            value={value}
+                            labelText={labelText}
+                            labelColor={labelColor}
+                            onCommit={(nextValue) =>
+                              handleDailyCapacityChange(
+                                row.month,
+                                dayIndex,
+                                nextValue
+                              )
+                            }
+                          />
                         );
                         return (
                           <TableCell
