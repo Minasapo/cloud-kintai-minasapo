@@ -1,7 +1,6 @@
 import type { GraphQLResult } from "@aws-amplify/api";
 import {
   Alert,
-  Box,
   Chip,
   Container,
   FormControl,
@@ -18,12 +17,9 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Typography,
 } from "@mui/material";
 import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import Title from "@shared/ui/typography/Title";
 import { API } from "aws-amplify";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -172,22 +168,6 @@ export default function AdminDailyReportManagement() {
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Stack spacing={3}>
-        <Box>
-          <CommonBreadcrumbs
-            items={[
-              { label: "TOP", href: "/" },
-              { label: "管理", href: "/admin" },
-            ]}
-            current="日報管理"
-          />
-        </Box>
-        <Box>
-          <Title>日報管理</Title>
-          <Typography variant="body2" color="text.secondary">
-            スタッフの日報ステータスを一覧で確認し、ステータスや担当者、期間で絞り込みできます。
-          </Typography>
-        </Box>
-
         <Paper sx={{ p: 2 }}>
           <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
             {statusSummary.map((status) => (

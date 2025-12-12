@@ -12,7 +12,7 @@ import {
 import { DataGrid, GridActionsCellItem, GridRowParams } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
 import { CloseDate } from "@shared/api/graphql/types";
-import Title from "@shared/ui/typography/Title";
+// Title removed per admin UI simplification
 import dayjs from "dayjs";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -87,7 +87,6 @@ export default function JobTerm() {
   return (
     <>
       <Stack spacing={2}>
-        <Title>集計対象月</Title>
         <Typography>
           月ごとに勤怠を締める日付を指定します。
           <br />

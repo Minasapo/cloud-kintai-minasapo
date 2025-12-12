@@ -39,7 +39,7 @@ import {
   Staff,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+// Breadcrumbs removed per admin UI simplification
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -58,9 +58,6 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
-import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
-
 import { AttendanceGraph } from "./AttendanceGraph";
 import ChangeRequestQuickViewDialog from "./ChangeRequestQuickViewDialog";
 import { CreatedAtTableCell } from "./CreatedAtTableCell";
@@ -208,29 +205,6 @@ export default function AdminStaffAttendanceList() {
       dispatch(setSnackbarError(MESSAGE_CODE.E00001));
     }
   }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
-
-  const totalTime = useMemo(() => {
-    const totalWorkTime = attendances.reduce((acc, attendance) => {
-      if (!attendance.startTime || !attendance.endTime) return acc;
-      const workTime = calcTotalWorkTime(
-        attendance.startTime,
-        attendance.endTime
-      );
-      return acc + workTime;
-    }, 0);
-
-    const totalRestTime = attendances.reduce((acc, attendance) => {
-      if (!attendance.rests) return acc;
-      const restTime = attendance.rests
-        .filter((item): item is NonNullable<typeof item> => !!item)
-        .reduce((acc, rest) => {
-          if (!rest.startTime || !rest.endTime) return acc;
-          return acc + calcTotalRestTime(rest.startTime, rest.endTime);
-        }, 0);
-      return acc + restTime;
-    }, 0);
-    return totalWorkTime - totalRestTime;
-  }, [attendances]);
 
   const handleEdit = useCallback(
     (workDate: string) => {
@@ -416,20 +390,7 @@ export default function AdminStaffAttendanceList() {
   return (
     <Container maxWidth="xl">
       <Stack spacing={1} sx={{ pt: 1 }}>
-        <Box>
-          <CommonBreadcrumbs
-            items={[
-              { label: "TOP", href: "/" },
-              { label: "勤怠管理", href: "/admin/attendances" },
-            ]}
-            current="勤怠一覧"
-          />
-        </Box>
-        <Typography variant="h4">
-          {`${staff?.familyName || "(不明)"} さんの勤怠(${totalTime.toFixed(
-            1
-          )}h)`}
-        </Typography>
+        {/* breadcrumbs and main heading removed */}
         <Box>
           <DatePicker
             value={dayjs()}

@@ -32,7 +32,6 @@ import {
   ShiftRequestHistoryInput,
   UpdateShiftRequestMutation,
 } from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import { API } from "aws-amplify";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
@@ -680,17 +679,6 @@ export default function ShiftManagementBoard() {
 
   return (
     <Container sx={{ py: 3 }}>
-      <Box sx={{ mb: 1 }}>
-        <CommonBreadcrumbs
-          items={[{ label: "TOP", href: "/" }]}
-          current="シフト管理"
-        />
-      </Box>
-
-      <Typography variant="h4" gutterBottom>
-        シフト管理
-      </Typography>
-
       <Box
         sx={{
           display: "flex",

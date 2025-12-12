@@ -66,5 +66,9 @@
     {
       "file": ".vscode/copilot-pr-description-instructions.md"
     }
-  ]
+  ],
+  "chat.tools.terminal.autoApprove": {
+    "npm run lint": true,
+    "npx eslint": true
+  }
 }

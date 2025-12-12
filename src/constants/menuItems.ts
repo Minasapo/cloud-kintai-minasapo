@@ -22,9 +22,9 @@ export const GENERAL_MENU_ITEMS: readonly MenuItem[] = [
  * 管理者向けメニュー項目
  */
 export const ADMIN_MENU_ITEMS: readonly MenuItem[] = [
-  { label: "スタッフ管理", href: "/admin/staff" },
   { label: "勤怠管理", href: "/admin/attendances" },
-  { label: "マスタ管理", href: "/admin/master" },
+  { label: "スタッフ管理", href: "/admin/staff" },
+  { label: "設定", href: "/admin/master" },
 ] as const;
 
 /**
