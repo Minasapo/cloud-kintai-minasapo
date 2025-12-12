@@ -2,7 +2,18 @@ import { TableCell, TableCellProps, TableRow, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { ReactNode } from "react";
 
+import { DESIGN_TOKENS } from "@/constants/designTokens";
+
 import { getCellHighlightSx } from "../../lib/selectionHighlight";
+
+const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
+const toSpacingUnit = (value: number) => value / 8;
+const SHIFT_BOARD_PADDING_X = toSpacingUnit(shiftBoardTokens.columnGap);
+const SHIFT_BOARD_HALF_PADDING_Y = toSpacingUnit(shiftBoardTokens.rowGap) / 2;
+const SHIFT_BOARD_CELL_BASE_SX = {
+  borderRadius: `${shiftBoardTokens.cellRadius}px`,
+  transition: `background-color ${DESIGN_TOKENS.motion.duration.medium}ms ${DESIGN_TOKENS.motion.easing.standard}, box-shadow ${DESIGN_TOKENS.motion.duration.medium}ms ${DESIGN_TOKENS.motion.easing.standard}`,
+};
 
 export type ShiftManagementSummaryRowProps = {
   label: ReactNode;
@@ -28,8 +39,10 @@ export default function ShiftManagementSummaryRow({
       <TableCell
         colSpan={colSpan ?? 3}
         sx={{
+          ...SHIFT_BOARD_CELL_BASE_SX,
           bgcolor: "background.paper",
-          py: 0.25,
+          px: SHIFT_BOARD_PADDING_X,
+          py: SHIFT_BOARD_HALF_PADDING_Y,
           boxSizing: "border-box",
           borderRight: "1px solid",
           borderColor: "divider",
@@ -55,7 +68,9 @@ export default function ShiftManagementSummaryRow({
           <TableCell
             key={key}
             sx={{
-              p: 0.25,
+              ...SHIFT_BOARD_CELL_BASE_SX,
+              px: SHIFT_BOARD_PADDING_X,
+              py: SHIFT_BOARD_HALF_PADDING_Y,
               width: dayColumnWidth,
               height: 40,
               position: "relative",
