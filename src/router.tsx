@@ -102,7 +102,7 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <Navigate to="staff" replace />,
+                element: <Navigate to="attendances" replace />,
               },
               ...adminChildRoutes,
             ],

@@ -14,14 +14,14 @@ const useHeaderMenu = (): UseHeaderMenuResult =>
   useMemo(
     () => [
       {
-        primaryLabel: "スタッフ",
-        description: "スタッフ情報の登録・編集や在籍状況の確認を行います。",
-        href: "/admin/staff",
-      },
-      {
         primaryLabel: "勤怠",
         description: "勤怠一覧や申請内容を確認し、必要に応じて修正します。",
         href: "/admin/attendances",
+      },
+      {
+        primaryLabel: "スタッフ",
+        description: "スタッフ情報の登録・編集や在籍状況の確認を行います。",
+        href: "/admin/staff",
       },
       {
         primaryLabel: "シフト",
