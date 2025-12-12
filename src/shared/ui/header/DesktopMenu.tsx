@@ -10,18 +10,14 @@ export interface DesktopMenuProps {
   pathName: string;
   menuItems: DesktopMenuItem[];
   adminLink?: DesktopMenuItem | null;
-  settingsMenu?: DesktopMenuItem | null;
   showAdminMenu: boolean;
-  showSettingsLink: boolean;
 }
 
 const DesktopMenu = ({
   pathName,
   menuItems,
   adminLink,
-  settingsMenu,
   showAdminMenu,
-  showSettingsLink,
 }: DesktopMenuProps) => {
   return (
     <Box
@@ -74,30 +70,6 @@ const DesktopMenu = ({
                   backgroundColor:
                     pathName === adminLink.href ? "white" : "inherit",
                   color: pathName === adminLink.href ? "#0FA85E" : "white",
-                },
-                textDecoration: "none",
-              }}
-            />
-          </Box>
-        )}
-
-        {showSettingsLink && settingsMenu && (
-          <Box>
-            <Link
-              label={settingsMenu.label}
-              href={settingsMenu.href}
-              sx={{
-                display: "block",
-                height: 1,
-                lineHeight: "32px",
-                px: 1,
-                color: pathName === settingsMenu.href ? "#0FA85E" : "white",
-                backgroundColor:
-                  pathName === settingsMenu.href ? "white" : "inherit",
-                "&:hover, &:focus": {
-                  backgroundColor:
-                    pathName === settingsMenu.href ? "white" : "inherit",
-                  color: pathName === settingsMenu.href ? "#0FA85E" : "white",
                 },
                 textDecoration: "none",
               }}

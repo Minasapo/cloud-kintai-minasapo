@@ -43,12 +43,6 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     []
   );
 
-  // 設定（マスタ管理）の独立表示（管理配下から外す）
-  const settingsMenu: DesktopMenuItem = {
-    label: "設定",
-    href: "/admin/master",
-  };
-
   const operatorMenuList: DesktopMenuItem[] = officeMode
     ? [{ label: "QR表示", href: "/office/qr" }]
     : [];
@@ -127,9 +121,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
       pathName={pathName}
       menuItems={menuItems}
       adminLink={adminLink}
-      settingsMenu={settingsMenu}
       showAdminMenu={isAdminUser}
-      showSettingsLink={isAdminUser}
     />
   );
 }
