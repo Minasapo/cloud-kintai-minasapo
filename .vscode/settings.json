@@ -69,6 +69,10 @@
   ],
   "chat.tools.terminal.autoApprove": {
     "npm run lint": true,
-    "npx eslint": true
+    "npx eslint": true,
+    "npm view": true,
+    "npm ls": true,
+    "npx tsc --noEmit": true,
+    "npm run test:unit": true
   }
 }
