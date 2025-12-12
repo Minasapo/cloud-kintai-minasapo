@@ -1,5 +1,3 @@
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
-import ChevronRight from "@mui/icons-material/ChevronRight";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -13,7 +11,6 @@ import {
   ListItemButton,
   ListItemText,
   Stack,
-  Tooltip,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -28,7 +25,6 @@ export default function AdminMasterLayout() {
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
   const menuList = [
     { name: "集計対象月", path: "/admin/master/job_term" },
@@ -121,31 +117,12 @@ export default function AdminMasterLayout() {
   const drawerContent = (
     <Box
       sx={{
-        width: sidebarCollapsed ? 72 : 260,
+        width: 260,
         p: 1,
         transition: "width 200ms",
       }}
       role="presentation"
     >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: sidebarCollapsed ? "center" : "flex-end",
-          mb: 1,
-        }}
-      >
-        <Tooltip
-          title={sidebarCollapsed ? "メニューを開く" : "メニューを折りたたむ"}
-        >
-          <IconButton
-            size="small"
-            onClick={() => setSidebarCollapsed((s) => !s)}
-          >
-            {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
-          </IconButton>
-        </Tooltip>
-      </Box>
       <List>{menuBoxList}</List>
     </Box>
   );
@@ -171,7 +148,7 @@ export default function AdminMasterLayout() {
         {isMdUp ? (
           <Box
             sx={{
-              width: sidebarCollapsed ? 72 : 260,
+              width: 260,
               pr: 2,
               transition: "width 200ms",
             }}
