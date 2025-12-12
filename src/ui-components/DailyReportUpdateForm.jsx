@@ -14,7 +14,7 @@ import {
   TextField,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 export default function DailyReportUpdateForm(props) {
@@ -62,7 +62,7 @@ export default function DailyReportUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await API.graphql({
+            await graphqlClient.graphql({
               query: getDailyReport.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -142,7 +142,7 @@ export default function DailyReportUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: updateDailyReport.replaceAll("__typename", ""),
             variables: {
               input: {

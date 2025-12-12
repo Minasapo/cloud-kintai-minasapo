@@ -14,7 +14,7 @@ import {
   TextField,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { getAppConfig } from "@shared/api/graphql/documents/queries";
 import { updateAppConfig } from "@shared/api/graphql/documents/mutations";
 export default function AppConfigUpdateForm(props) {
@@ -112,7 +112,7 @@ export default function AppConfigUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await API.graphql({
+            await graphqlClient.graphql({
               query: getAppConfig.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -210,7 +210,7 @@ export default function AppConfigUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: updateAppConfig.replaceAll("__typename", ""),
             variables: {
               input: {

@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   Avatar,
   Box,
@@ -24,7 +23,7 @@ import {
 } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -33,6 +32,7 @@ import { AuthContext } from "@/context/AuthContext";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
@@ -60,10 +60,10 @@ export default function AdminWorkflowDetail() {
       setLoading(true);
       setError(null);
       try {
-        const resp = (await API.graphql({
+        const resp = (await graphqlClient.graphql({
           query: getWorkflow,
           variables: { id },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<GetWorkflowQuery>;
 
         if (resp.errors) throw new Error(resp.errors[0].message);

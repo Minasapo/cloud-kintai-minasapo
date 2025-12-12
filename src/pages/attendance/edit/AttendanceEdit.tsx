@@ -292,7 +292,7 @@ export default function AttendanceEdit() {
       });
       setValue("remarkTags", tags);
       setValue("remarks", others.join("\n"));
-    } catch (error) {
+    } catch {
       setValue("remarks", attendance.remarks);
     }
 
@@ -336,7 +336,7 @@ export default function AttendanceEdit() {
           tags.filter((t) => t !== "欠勤")
         );
       }
-    } catch (e) {
+    } catch {
       // noop
     }
   }, [absentFlagValue, setValue, getValues]);
@@ -377,7 +377,7 @@ export default function AttendanceEdit() {
         if (getValues("endTime") !== desiredEnd) {
           setValue("endTime", desiredEnd);
         }
-      } catch (e) {
+      } catch {
         // noop
       }
 
@@ -416,7 +416,7 @@ export default function AttendanceEdit() {
             setValue("rests", desiredRests);
           }
         }
-      } catch (e) {
+      } catch {
         // noop
       }
 
@@ -433,7 +433,7 @@ export default function AttendanceEdit() {
         ) {
           hourlyPaidHolidayTimeReplace([]);
         }
-      } catch (e) {
+      } catch {
         // noop
       }
 
@@ -443,7 +443,7 @@ export default function AttendanceEdit() {
         if (currentPaid) {
           setValue("paidHolidayFlag", false);
         }
-      } catch (e) {
+      } catch {
         // noop
       }
     } else {
@@ -477,7 +477,7 @@ export default function AttendanceEdit() {
           );
         }
       }
-    } catch (e) {
+    } catch {
       // noop
     }
   }, [paidHolidayFlagValue]);

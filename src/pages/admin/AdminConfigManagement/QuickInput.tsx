@@ -122,7 +122,7 @@ export default function QuickInput() {
         dispatch(setSnackbarSuccess(S14001));
       }
       await fetchConfig();
-    } catch (error) {
+    } catch {
       dispatch(setSnackbarError(E14001));
     }
   };

@@ -31,7 +31,7 @@ export default function AdminShiftGuard({
         const developerFlag = (staff as unknown as Record<string, unknown>)
           .developer as boolean | undefined;
         if (mounted) setIsDeveloper(Boolean(developerFlag));
-      } catch (e) {
+      } catch {
         // If staff not found or error, deny access
         if (mounted) setIsDeveloper(false);
       } finally {

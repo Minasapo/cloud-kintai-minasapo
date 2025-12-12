@@ -14,7 +14,7 @@ import {
   TextField,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { createDailyReport } from "@shared/api/graphql/documents/mutations";
 export default function DailyReportCreateForm(props) {
   const {
@@ -120,7 +120,7 @@ export default function DailyReportCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: createDailyReport.replaceAll("__typename", ""),
             variables: {
               input: {

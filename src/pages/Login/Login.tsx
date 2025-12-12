@@ -10,7 +10,7 @@ import { AuthContext } from "../../context/AuthContext";
 import logo from "./logo_large.png";
 
 export default function Login() {
-  const { user, authStatus } = useContext(AuthContext);
+  const { authStatus, cognitoUser } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
   // eslint-disable-next-line max-len
@@ -19,13 +19,12 @@ export default function Login() {
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
-    if (!user?.attributes?.sub) return;
+    if (!cognitoUser?.id) return;
 
-    const isMailVerified = user?.attributes?.email_verified ? true : false;
-    if (!isMailVerified) return;
+    if (!cognitoUser.emailVerified) return;
 
     navigate(from, { replace: true });
-  }, [authStatus, navigate, from, user]);
+  }, [authStatus, navigate, from, cognitoUser]);
 
   return (
     <Stack

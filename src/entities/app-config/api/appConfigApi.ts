@@ -30,7 +30,7 @@ export const appConfigApi = createApi({
           variables: {
             filter: { name: { eq: name } },
           },
-          authMode: "API_KEY",
+          authMode: "apiKey",
         });
 
         if (result.error) {
@@ -63,7 +63,7 @@ export const appConfigApi = createApi({
         const result = await baseQuery({
           document: createAppConfig,
           variables: { input },
-          authMode: "API_KEY",
+          authMode: "apiKey",
         });
 
         if (result.error) {
@@ -86,7 +86,7 @@ export const appConfigApi = createApi({
         const result = await baseQuery({
           document: updateAppConfig,
           variables: { input },
-          authMode: "API_KEY",
+          authMode: "apiKey",
         });
 
         if (result.error) {

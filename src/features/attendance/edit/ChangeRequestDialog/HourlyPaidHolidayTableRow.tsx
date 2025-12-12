@@ -37,7 +37,7 @@ export default function HourlyPaidHolidayTableRow({
             return `${dayjs(t.startTime).format("HH:mm")}〜${dayjs(
               t.endTime
             ).format("HH:mm")}`;
-          } catch (e) {
+          } catch {
             return "";
           }
         })
@@ -76,7 +76,7 @@ export default function HourlyPaidHolidayTableRow({
             return `${dayjs(t.startTime).format("HH:mm")}〜${dayjs(
               t.endTime
             ).format("HH:mm")}`;
-          } catch (e) {
+          } catch {
             return "";
           }
         })

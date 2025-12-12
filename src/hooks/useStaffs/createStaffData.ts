@@ -1,17 +1,18 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import { createStaff } from "@shared/api/graphql/documents/mutations";
 import {
   CreateStaffInput,
   CreateStaffMutation,
   Staff,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
+
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 export default async function createStaffData(input: CreateStaffInput) {
-  const response = (await API.graphql({
+  const response = (await graphqlClient.graphql({
     query: createStaff,
     variables: { input },
-    authMode: "AMAZON_COGNITO_USER_POOLS",
+    authMode: "userPool",
   })) as GraphQLResult<CreateStaffMutation>;
 
   if (response.errors) {

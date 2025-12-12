@@ -287,7 +287,7 @@ export default function QuickInputButtons({
                                   setValue("remarkTags", [...tags, "午前半休"]);
                                 }
                               }
-                            } catch (e) {
+                            } catch {
                               // noop
                             }
                           }
@@ -323,7 +323,7 @@ export default function QuickInputButtons({
                                   setValue("remarkTags", [...tags, "午後半休"]);
                                 }
                               }
-                            } catch (e) {
+                            } catch {
                               // noop
                             }
                           }
@@ -367,7 +367,7 @@ export default function QuickInputButtons({
                               setValue("remarkTags", [...tags, "有給休暇"]);
                             }
                           }
-                        } catch (e) {
+                        } catch {
                           // noop
                         }
                       }

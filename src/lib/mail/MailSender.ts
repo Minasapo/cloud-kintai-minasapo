@@ -1,7 +1,7 @@
 import { sendMail } from "@shared/api/graphql/documents/queries";
-import { API } from "aws-amplify";
 
 import * as MESSAGE_CODE from "@/errors";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 export abstract class MailSender {
   protected send(to: string[], subject: string, body: string) {
@@ -17,7 +17,7 @@ export abstract class MailSender {
     };
 
     try {
-      void API.graphql(params);
+      void graphqlClient.graphql(params);
     } catch {
       throw new Error(MESSAGE_CODE.E00001);
     }

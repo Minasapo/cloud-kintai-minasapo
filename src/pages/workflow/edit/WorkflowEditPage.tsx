@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   Box,
   Button,
@@ -22,7 +21,7 @@ import {
   WorkflowStatus,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -31,6 +30,7 @@ import { AuthContext } from "@/context/AuthContext";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
@@ -69,10 +69,10 @@ export default function WorkflowEditPage() {
     const fetch = async () => {
       if (!id) return;
       try {
-        const resp = (await API.graphql({
+        const resp = (await graphqlClient.graphql({
           query: getWorkflow,
           variables: { id },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<GetWorkflowQuery>;
 
         if (resp.errors) throw new Error(resp.errors[0].message);
@@ -207,10 +207,10 @@ export default function WorkflowEditPage() {
         // 提出済みに変わる場合は system コメントを既存コメントに追加して送信
         if (targetStatus === WorkflowStatus.SUBMITTED) {
           // get existing workflow to extract comments
-          const resp = (await API.graphql({
+          const resp = (await graphqlClient.graphql({
             query: getWorkflow,
             variables: { id },
-            authMode: "AMAZON_COGNITO_USER_POOLS",
+            authMode: "userPool",
           })) as GraphQLResult<GetWorkflowQuery>;
 
           const existing = (resp.data?.getWorkflow?.comments ||

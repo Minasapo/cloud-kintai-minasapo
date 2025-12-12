@@ -175,7 +175,7 @@ export default function AdminStaffEditor() {
 
       await updateStaff(payload as any);
       dispatch(setSnackbarSuccess("保存しました"));
-    } catch (e) {
+    } catch {
       dispatch(setSnackbarError(MESSAGE_CODE.E05002));
     } finally {
       setSaving(false);

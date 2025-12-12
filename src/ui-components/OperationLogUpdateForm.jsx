@@ -8,7 +8,7 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { getOperationLog } from "@shared/api/graphql/documents/queries";
 import { updateOperationLog } from "@shared/api/graphql/documents/mutations";
 export default function OperationLogUpdateForm(props) {
@@ -69,7 +69,7 @@ export default function OperationLogUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await API.graphql({
+            await graphqlClient.graphql({
               query: getOperationLog.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -157,7 +157,7 @@ export default function OperationLogUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: updateOperationLog.replaceAll("__typename", ""),
             variables: {
               input: {

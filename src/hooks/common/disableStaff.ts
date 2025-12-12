@@ -3,22 +3,19 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { API, Auth } from "aws-amplify";
+import { adminPost } from "@/lib/amplify/adminQueriesClient";
 
 export default async function disableStaff(username: string) {
   const params = {
     headers: {
       "Content-Type": "application/json",
-      Authorization: (await Auth.currentSession())
-        .getAccessToken()
-        .getJwtToken(),
     },
     body: {
       username,
     },
   };
 
-  return API.post("AdminQueries", "/disableUser", params).catch((e) => {
+  return adminPost("/disableUser", params).catch((e) => {
     throw e;
   });
 }

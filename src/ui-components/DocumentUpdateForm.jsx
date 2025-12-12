@@ -19,7 +19,7 @@ import {
   useTheme,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { getDocument } from "@shared/api/graphql/documents/queries";
 import { updateDocument } from "@shared/api/graphql/documents/mutations";
 function ArrayField({
@@ -220,7 +220,7 @@ export default function DocumentUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await API.graphql({
+            await graphqlClient.graphql({
               query: getDocument.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -303,7 +303,7 @@ export default function DocumentUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: updateDocument.replaceAll("__typename", ""),
             variables: {
               input: {

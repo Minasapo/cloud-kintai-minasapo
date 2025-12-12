@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -32,7 +31,7 @@ import {
   ShiftRequestHistoryInput,
   UpdateShiftRequestMutation,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -44,6 +43,7 @@ import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
@@ -313,14 +313,14 @@ export default function ShiftManagementBoard() {
         let nextToken: string | null | undefined = undefined;
 
         do {
-          const response = (await API.graphql({
+          const response = (await graphqlClient.graphql({
             query: listShiftRequests,
             variables: {
               filter: { targetMonth: { eq: targetMonthKey } },
               limit: 500,
               nextToken,
             },
-            authMode: "AMAZON_COGNITO_USER_POOLS",
+            authMode: "userPool",
           })) as GraphQLResult<ListShiftRequestsQuery>;
 
           if (!isMounted) return;
@@ -531,7 +531,7 @@ export default function ShiftManagementBoard() {
       | undefined;
 
     if (record?.id) {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: updateShiftRequest,
         variables: {
           input: {
@@ -539,7 +539,7 @@ export default function ShiftManagementBoard() {
             ...inputBase,
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<UpdateShiftRequestMutation>;
 
       if (response.errors?.length) {
@@ -548,7 +548,7 @@ export default function ShiftManagementBoard() {
 
       responseShiftRequest = response.data?.updateShiftRequest;
     } else {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: createShiftRequest,
         variables: {
           input: {
@@ -557,7 +557,7 @@ export default function ShiftManagementBoard() {
             ...inputBase,
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<CreateShiftRequestMutation>;
 
       if (response.errors?.length) {

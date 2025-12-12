@@ -184,8 +184,11 @@ export default function Layout() {
       return;
     }
 
-    const isMailVerified = user.attributes?.email_verified ? true : false;
-    if (isMailVerified) {
+    if (cognitoUserLoading || !cognitoUser) {
+      return;
+    }
+
+    if (cognitoUser.emailVerified) {
       return;
     }
 
@@ -198,7 +201,7 @@ export default function Layout() {
     } catch (error) {
       console.error(error);
     }
-  }, [authStatus]);
+  }, [authStatus, cognitoUser, cognitoUserLoading, navigate, signOut]);
 
   useEffect(() => {
     void fetchConfig();

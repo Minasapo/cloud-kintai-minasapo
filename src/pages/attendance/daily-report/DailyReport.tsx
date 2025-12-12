@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   DailyReportCalendar,
   DailyReportFormChangeHandler,
@@ -38,12 +37,13 @@ import {
   DailyReportStatus,
   ModelSortDirection,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
 
 type ReportStatus = DailyReportStatus;
@@ -295,7 +295,7 @@ export default function DailyReport() {
       let nextToken: string | null | undefined = undefined;
 
       do {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: dailyReportsByStaffId,
           variables: {
             staffId,
@@ -303,7 +303,7 @@ export default function DailyReport() {
             limit: 50,
             nextToken,
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<DailyReportsByStaffIdQuery>;
 
         if (response.errors?.length) {
@@ -426,7 +426,7 @@ export default function DailyReport() {
       (createForm.author || resolvedAuthorName).trim() || resolvedAuthorName;
 
     try {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: createDailyReport,
         variables: {
           input: {
@@ -440,7 +440,7 @@ export default function DailyReport() {
             comments: [],
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<CreateDailyReportMutation>;
 
       if (response.errors?.length) {
@@ -500,7 +500,7 @@ export default function DailyReport() {
     setActionError(null);
 
     try {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
           input: {
@@ -512,7 +512,7 @@ export default function DailyReport() {
             updatedAt: new Date().toISOString(),
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<UpdateDailyReportMutation>;
 
       if (response.errors?.length) {
