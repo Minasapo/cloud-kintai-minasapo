@@ -73,6 +73,7 @@
     "npm view": true,
     "npm ls": true,
     "npx tsc --noEmit": true,
-    "npm run test:unit": true
+    "npm run test:unit": true,
+    "npm run build": true
   }
 }
