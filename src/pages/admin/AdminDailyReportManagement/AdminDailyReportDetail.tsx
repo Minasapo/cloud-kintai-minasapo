@@ -19,8 +19,6 @@ import type {
   GetDailyReportQuery,
   UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import Title from "@shared/ui/typography/Title";
 import { API } from "aws-amplify";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -400,16 +398,6 @@ export default function AdminDailyReportDetail() {
   return (
     <Container maxWidth="md" sx={{ py: 3 }}>
       <Stack spacing={3}>
-        <Box>
-          <CommonBreadcrumbs
-            items={[
-              { label: "TOP", href: "/" },
-              { label: "管理", href: "/admin" },
-              { label: "日報管理", href: "/admin/daily-report" },
-            ]}
-            current="日報詳細"
-          />
-        </Box>
 
         {loadError && <Alert severity="error">{loadError}</Alert>}
 
@@ -439,7 +427,9 @@ export default function AdminDailyReportDetail() {
           <Paper sx={{ p: 4 }}>
             <Stack spacing={3}>
               <Box>
-                <Title>{report.title}</Title>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  {report.title}
+                </Typography>
                 <Stack
                   direction="row"
                   spacing={1}

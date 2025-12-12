@@ -1,13 +1,5 @@
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {
-  Box,
-  Button,
-  Menu as MuiMenu,
-  MenuItem as MuiMenuItem,
-  Stack,
-} from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import Link from "@shared/ui/link/Link";
-import { useState } from "react";
 
 export type DesktopMenuItem = {
   label: string;
@@ -17,38 +9,20 @@ export type DesktopMenuItem = {
 export interface DesktopMenuProps {
   pathName: string;
   menuItems: DesktopMenuItem[];
-  adminMenuItems?: DesktopMenuItem[];
+  adminLink?: DesktopMenuItem | null;
   settingsMenu?: DesktopMenuItem | null;
   showAdminMenu: boolean;
   showSettingsLink: boolean;
-  onAdminNavigate?: (href: string) => void;
 }
 
 const DesktopMenu = ({
   pathName,
   menuItems,
-  adminMenuItems = [],
+  adminLink,
   settingsMenu,
   showAdminMenu,
   showSettingsLink,
-  onAdminNavigate,
 }: DesktopMenuProps) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => setAnchorEl(null);
-
-  const handleAdminItemClick = (href: string) => {
-    if (onAdminNavigate) {
-      onAdminNavigate(href);
-    } else {
-      window.location.href = href;
-    }
-    handleClose();
-  };
-
   return (
     <Box
       sx={{
@@ -83,47 +57,27 @@ const DesktopMenu = ({
           </Box>
         ))}
 
-        {showAdminMenu && adminMenuItems.length > 0 && (
+        {showAdminMenu && adminLink && (
           <Box>
-            <Button
-              onClick={handleOpen}
-              aria-controls={open ? "admin-menu" : undefined}
-              aria-expanded={open ? "true" : undefined}
-              aria-haspopup="menu"
-              endIcon={<ExpandMoreIcon sx={{ color: "white" }} />}
+            <Link
+              label={adminLink.label}
+              href={adminLink.href}
               sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                color: "white",
-                backgroundColor: "inherit",
+                display: "block",
                 height: 1,
                 lineHeight: "32px",
                 px: 1,
-                textTransform: "none",
-                textDecoration: "none",
-                "&:focus": {
-                  outline: "none",
-                  backgroundColor: "inherit",
+                color: pathName === adminLink.href ? "#0FA85E" : "white",
+                backgroundColor:
+                  pathName === adminLink.href ? "white" : "inherit",
+                "&:hover, &:focus": {
+                  backgroundColor:
+                    pathName === adminLink.href ? "white" : "inherit",
+                  color: pathName === adminLink.href ? "#0FA85E" : "white",
                 },
+                textDecoration: "none",
               }}
-            >
-              管理
-            </Button>
-            <MuiMenu
-              id="admin-menu"
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-            >
-              {adminMenuItems.map((menu) => (
-                <MuiMenuItem
-                  key={menu.href}
-                  onClick={() => handleAdminItemClick(menu.href)}
-                >
-                  {menu.label}
-                </MuiMenuItem>
-              ))}
-            </MuiMenu>
+            />
           </Box>
         )}
 

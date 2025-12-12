@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
+// CommonBreadcrumbs removed per simplified admin UI
 import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -191,10 +191,7 @@ export default function AdminMasterLayout() {
         <Box sx={{ flexGrow: 2 }}>
           <Stack spacing={1} sx={{ px: 5 }}>
             <Box>
-              <CommonBreadcrumbs
-                items={[{ label: "TOP", href: "/" }]}
-                current="マスタ管理"
-              />
+              <Outlet />
             </Box>
             <Box>
               <Outlet />

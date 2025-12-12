@@ -1,7 +1,6 @@
 import "./styles.scss";
 
 import {
-  Box,
   Container,
   LinearProgress,
   Stack,
@@ -14,8 +13,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import Title from "@shared/ui/typography/Title";
 import { useState } from "react";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
@@ -62,13 +59,6 @@ export default function AdminStaff() {
     <>
       <Container maxWidth="xl" sx={{ height: 1, pt: 2 }}>
         <Stack spacing={2}>
-          <Box>
-            <CommonBreadcrumbs
-              items={[{ label: "TOP", href: "/" }]}
-              current="スタッフ一覧"
-            />
-          </Box>
-          <Title>スタッフ一覧</Title>
           <Stack direction="row" spacing={2}>
             <CreateStaffDialog
               staffs={staffs}

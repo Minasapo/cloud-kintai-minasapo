@@ -10,7 +10,6 @@ import {
   Typography,
 } from "@mui/material";
 import { Staff } from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 
@@ -78,19 +77,10 @@ export default function AdminLogsClean() {
   return (
     <Container maxWidth="xl">
       <Stack spacing={2} sx={{ pt: 1 }}>
-        <Box>
-          <CommonBreadcrumbs
-            items={[{ label: "TOP", href: "/" }]}
-            current="ログ管理"
-          />
-        </Box>
-
         <Stack spacing={1}>
           <Box>
-            <Typography variant="h6">ログ管理</Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              最新の 30
-              件を表示します。スクロールで過去のログを順次読み込みます。
+              最新の 30 件を表示します。スクロールで過去のログを順次読み込みます。
             </Typography>
 
             <List>

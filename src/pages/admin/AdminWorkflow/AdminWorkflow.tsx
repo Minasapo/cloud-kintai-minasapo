@@ -1,5 +1,4 @@
 import {
-  Box,
   Container,
   FormControl,
   InputLabel,
@@ -18,9 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import StatusChip from "@shared/ui/chips/StatusChip";
-import Title from "@shared/ui/typography/Title";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -82,13 +79,6 @@ export default function AdminWorkflow() {
   return (
     <Container maxWidth="xl" sx={{ height: 1, pt: 2 }}>
       <Stack spacing={2}>
-        <Box>
-          <CommonBreadcrumbs
-            items={[{ label: "TOP", href: "/" }]}
-            current="ワークフロー管理"
-          />
-        </Box>
-        <Title>ワークフロー管理</Title>
         <Typography variant="body2" color="text.secondary">
           ワークフローの一覧を表示します。管理者用の画面です。
         </Typography>

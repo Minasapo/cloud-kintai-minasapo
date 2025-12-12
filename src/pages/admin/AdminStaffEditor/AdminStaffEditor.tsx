@@ -27,8 +27,7 @@ import {
   ApproverMultipleMode,
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import Title from "@shared/ui/typography/Title";
+// Breadcrumbs/Title removed per admin UI simplification
 import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import {
@@ -186,16 +185,7 @@ export default function AdminStaffEditor() {
   return (
     <Container maxWidth="lg" sx={{ pt: 2, pb: 8 }}>
       <Stack spacing={2}>
-        <CommonBreadcrumbs
-          items={[
-            { label: "TOP", href: "/" },
-            { label: "スタッフ一覧", href: "/admin/staff" },
-          ]}
-          current={`${getValues("familyName") ?? "(未設定)"} ${
-            getValues("givenName") ?? ""
-          }`}
-        />
-        <Title>スタッフ編集</Title>
+        {/* breadcrumbs and page title removed */}
 
         <Box>
           <Tabs

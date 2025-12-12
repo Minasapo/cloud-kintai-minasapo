@@ -38,16 +38,8 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     []
   );
 
-  const adminMenuList = useMemo<DesktopMenuItem[]>(
-    () => [
-      { label: "スタッフ管理", href: "/admin/staff" },
-      { label: "勤怠管理", href: "/admin/attendances" },
-      { label: "シフト管理", href: "/admin/shift" },
-      { label: "シフト計画管理", href: "/admin/shift-plan" },
-      { label: "ログ管理", href: "/admin/logs" },
-      { label: "日報管理", href: "/admin/daily-report" },
-      { label: "ワークフロー管理", href: "/admin/workflow" },
-    ],
+  const adminLink = useMemo<DesktopMenuItem>(
+    () => ({ label: "管理", href: "/admin" }),
     []
   );
 
@@ -130,22 +122,11 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     isDeveloper,
   ]);
 
-  const filteredAdminMenuItems = useMemo(
-    () =>
-      adminMenuList.filter((menu) => {
-        if (menu.href === "/admin/shift") {
-          return isDeveloper === true;
-        }
-        return true;
-      }),
-    [adminMenuList, isDeveloper]
-  );
-
   return (
     <DesktopMenuView
       pathName={pathName}
       menuItems={menuItems}
-      adminMenuItems={filteredAdminMenuItems}
+      adminLink={adminLink}
       settingsMenu={settingsMenu}
       showAdminMenu={isAdminUser}
       showSettingsLink={isAdminUser}
