@@ -36,7 +36,7 @@ import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import Title from "@shared/ui/typography/Title";
 import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -111,6 +111,42 @@ const SaveButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+type FetchStaffResult = Awaited<ReturnType<typeof fetchStaff>>;
+
+const mapFetchedStaffToStaffType = (staff: FetchStaffResult): StaffType => ({
+  id: staff.id,
+  cognitoUserId: staff.cognitoUserId,
+  familyName: staff.familyName,
+  givenName: staff.givenName,
+  mailAddress: staff.mailAddress,
+  owner: staff.owner ?? false,
+  role: mappingStaffRole(staff.role),
+  enabled: staff.enabled,
+  status: staff.status,
+  createdAt: staff.createdAt,
+  updatedAt: staff.updatedAt,
+  usageStartDate: staff.usageStartDate,
+  notifications: staff.notifications,
+  workType: staff.workType,
+});
+
+const hasSameStaffSnapshot = (
+  next: StaffType | null | undefined,
+  prev: StaffType | null | undefined
+) => {
+  if (!next || !prev) {
+    return false;
+  }
+
+  return (
+    next.id === prev.id &&
+    next.updatedAt === prev.updatedAt &&
+    next.status === prev.status &&
+    next.role === prev.role &&
+    next.mailAddress === prev.mailAddress
+  );
+};
+
 export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const {
     getLunchRestStartTime,
@@ -126,7 +162,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
   const { targetWorkDate, staffId: targetStaffId } = useParams();
   const navigate = useNavigate();
-  const { staffs, loading: staffsLoading, error: staffSError } = useStaffs();
+  const { loading: staffsLoading, error: staffSError } = useStaffs();
   const [triggerGetAttendance, { data: attendanceData }] =
     useLazyGetAttendanceByStaffAndDateQuery();
   const [createAttendanceMutation] = useCreateAttendanceMutation();
@@ -146,6 +182,10 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const [workDate, setWorkDate] = useState<dayjs.Dayjs | null>(null);
   const [enabledSendMail, setEnabledSendMail] = useState<boolean>(true);
   const [vacationTab, setVacationTab] = useState<number>(0);
+
+  const staffCacheRef = useRef<Map<string, StaffType | null>>(new Map());
+  const staffRequestIdRef = useRef(0);
+  const attendanceRequestIdRef = useRef(0);
 
   const logger = new Logger(
     "AttendanceEditor",
@@ -303,41 +343,58 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   }, [attendance, readOnly, sortedHistories.length, applyHistory]);
 
   useEffect(() => {
-    if (!targetStaffId) return;
+    if (!targetStaffId) {
+      setStaff(null);
+      return;
+    }
+
+    const requestId = staffRequestIdRef.current + 1;
+    staffRequestIdRef.current = requestId;
+
+    if (staffCacheRef.current.has(targetStaffId)) {
+      setStaff(staffCacheRef.current.get(targetStaffId) ?? null);
+    } else {
+      setStaff(undefined);
+    }
 
     fetchStaff(targetStaffId)
-      .then((res) =>
-        setStaff({
-          id: res.id,
-          cognitoUserId: res.cognitoUserId,
-          familyName: res.familyName,
-          givenName: res.givenName,
-          mailAddress: res.mailAddress,
-          owner: res.owner ?? false,
-          role: mappingStaffRole(res.role),
-          enabled: res.enabled,
-          status: res.status,
-          createdAt: res.createdAt,
-          updatedAt: res.updatedAt,
-          usageStartDate: res.usageStartDate,
-          notifications: res.notifications,
-          workType: res.workType,
-        })
-      )
+      .then((res) => {
+        if (staffRequestIdRef.current !== requestId) {
+          return;
+        }
+
+        const nextStaff = mapFetchedStaffToStaffType(res);
+        const prevStaff = staffCacheRef.current.get(targetStaffId) ?? null;
+        staffCacheRef.current.set(targetStaffId, nextStaff);
+
+        if (hasSameStaffSnapshot(nextStaff, prevStaff)) {
+          return;
+        }
+
+        setStaff(nextStaff);
+      })
       .catch((e) => {
         logger.error(
           `Failed to fetch staff with ID ${targetStaffId}: ${e.message}`
         );
+
+        if (staffRequestIdRef.current !== requestId) {
+          return;
+        }
+
+        staffCacheRef.current.delete(targetStaffId);
+        setStaff(null);
         dispatch(setSnackbarError(MESSAGE_CODE.E02001));
       });
-  }, [staffs, targetStaffId]);
+  }, [dispatch, logger, targetStaffId]);
 
   useEffect(() => {
     if (!staff || !targetStaffId || !targetWorkDate) return;
 
-    reset();
-
     setWorkDate(AttendanceDateTime.convertToDayjs(targetWorkDate));
+    const requestId = attendanceRequestIdRef.current + 1;
+    attendanceRequestIdRef.current = requestId;
+
     setHistoriesLoading(true);
     triggerGetAttendance({
       staffId: staff.cognitoUserId,
@@ -346,10 +403,38 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         .toDataFormat(),
     })
       .unwrap()
+      .then((result) => {
+        if (attendanceRequestIdRef.current !== requestId) {
+          return;
+        }
+
+        if (!result) {
+          reset(defaultValues);
+          restReplace([]);
+          hourlyPaidHolidayTimeReplace([]);
+          systemCommentReplace([]);
+          setValue(
+            "workDate",
+            new AttendanceDateTime()
+              .setDateString(targetWorkDate)
+              .toDataFormat()
+          );
+          setValue("histories", []);
+          setValue("changeRequests", []);
+          setValue("revision", undefined);
+        }
+      })
       .catch(() => {
+        if (attendanceRequestIdRef.current !== requestId) {
+          return;
+        }
         dispatch(setSnackbarError(MESSAGE_CODE.E02001));
       })
-      .finally(() => setHistoriesLoading(false));
+      .finally(() => {
+        if (attendanceRequestIdRef.current === requestId) {
+          setHistoriesLoading(false);
+        }
+      });
   }, [
     staff,
     targetStaffId,
@@ -357,6 +442,10 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     triggerGetAttendance,
     dispatch,
     reset,
+    restReplace,
+    hourlyPaidHolidayTimeReplace,
+    systemCommentReplace,
+    setValue,
   ]);
 
   const lunchRestStartTime = useMemo(
