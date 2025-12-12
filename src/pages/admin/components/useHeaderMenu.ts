@@ -34,11 +34,6 @@ const useHeaderMenu = (): UseHeaderMenuResult =>
         href: "/admin/shift-plan",
       },
       {
-        primaryLabel: "マスタ",
-        description: "勤務時間や出勤区分などの各種マスタ設定を管理します。",
-        href: "/admin/master",
-      },
-      {
         primaryLabel: "日報",
         description: "提出された日報を確認し、差し戻しや承認を実行します。",
         href: "/admin/daily-report",
@@ -52,6 +47,11 @@ const useHeaderMenu = (): UseHeaderMenuResult =>
         primaryLabel: "ログ",
         description: "操作ログを検索し、監査や不備調査に活用します。",
         href: "/admin/logs",
+      },
+      {
+        primaryLabel: "設定",
+        description: "勤務時間や出勤区分などの各種マスタ設定を管理します。",
+        href: "/admin/master",
       },
     ],
     []
