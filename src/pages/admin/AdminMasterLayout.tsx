@@ -193,9 +193,6 @@ export default function AdminMasterLayout() {
             <Box>
               <Outlet />
             </Box>
-            <Box>
-              <Outlet />
-            </Box>
           </Stack>
         </Box>
       </Stack>
