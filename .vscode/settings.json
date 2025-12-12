@@ -74,6 +74,7 @@
     "npm ls": true,
     "npx tsc --noEmit": true,
     "npm run test:unit": true,
-    "npm run build": true
+    "npm run build": true,
+    "sed": true
   }
 }
