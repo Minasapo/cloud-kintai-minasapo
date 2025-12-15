@@ -24,23 +24,34 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "../../../../lib/reducers/snackbarReducer";
+import {
+  buildHolidayDateRange,
+  HolidayDateRangeError,
+  MAX_HOLIDAY_RANGE_DAYS,
+} from "../HolidayCalendar/utils/buildHolidayDateRange";
 
 type Inputs = {
-  holidayDate: string;
+  startDate: string;
+  endDate: string;
   name: string;
 };
 
 const defaultValues: Inputs = {
-  holidayDate: "",
+  startDate: "",
+  endDate: "",
   name: "",
 };
 
 export default function AddCompanyHolidayCalendar({
   createCompanyHolidayCalendar,
+  bulkCreateCompanyHolidayCalendar,
 }: {
   createCompanyHolidayCalendar: (
     input: CreateCompanyHolidayCalendarInput
   ) => Promise<CompanyHolidayCalendar>;
+  bulkCreateCompanyHolidayCalendar: (
+    inputs: CreateCompanyHolidayCalendarInput[]
+  ) => Promise<CompanyHolidayCalendar[]>;
 }) {
   const dispatch = useAppDispatchV2();
 
@@ -51,34 +62,56 @@ export default function AddCompanyHolidayCalendar({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { isValid, isDirty, isSubmitting },
   } = useForm<Inputs>({
     mode: "onChange",
     defaultValues,
   });
 
+  const startDateValue = watch("startDate");
+
   const handleClose = () => {
     setOpen(false);
   };
 
-  const onSubmit = async (data: Inputs) => {
+  const onSubmit = async ({ startDate, endDate, name }: Inputs) => {
     const companyHolidayCalenderMessage = new CompanyHolidayCalenderMessage();
-    await createCompanyHolidayCalendar(data)
-      .then(() => {
+    const isRangeSubmission = Boolean(endDate);
+
+    try {
+      if (isRangeSubmission) {
+        const range = buildHolidayDateRange(startDate, endDate);
+        const inputs = range.map((holidayDate) => ({ holidayDate, name }));
+        await bulkCreateCompanyHolidayCalendar(inputs);
+        const successMessage = `${companyHolidayCalenderMessage.getCategoryName()}を${
+          range.length
+        }件作成しました`;
+        dispatch(setSnackbarSuccess(successMessage));
+      } else {
+        const [holidayDate] = buildHolidayDateRange(startDate);
+        await createCompanyHolidayCalendar({ holidayDate, name });
         dispatch(
           setSnackbarSuccess(
             companyHolidayCalenderMessage.create(MessageStatus.SUCCESS)
           )
         );
-        setOpen(false);
-      })
-      .catch(() =>
-        dispatch(
-          setSnackbarError(
-            companyHolidayCalenderMessage.create(MessageStatus.ERROR)
-          )
+      }
+
+      reset(defaultValues);
+      setOpen(false);
+    } catch (error) {
+      if (error instanceof HolidayDateRangeError) {
+        dispatch(setSnackbarError(error.message));
+        return;
+      }
+
+      dispatch(
+        setSnackbarError(
+          companyHolidayCalenderMessage.create(MessageStatus.ERROR)
         )
       );
+    }
   };
 
   return (
@@ -106,16 +139,19 @@ export default function AddCompanyHolidayCalendar({
             <DialogContentText>
               休日としたい日付と休日名を入力してください。
             </DialogContentText>
+            <DialogContentText>
+              {`開始日のみ入力した場合は単日登録、終了日を指定すると開始日から終了日までをまとめて登録します（最大${MAX_HOLIDAY_RANGE_DAYS}日）。`}
+            </DialogContentText>
             <Controller
-              name="holidayDate"
+              name="startDate"
               control={control}
-              rules={{ required: true }}
-              render={({ field }) => {
+              rules={{ required: "開始日は必須項目です。" }}
+              render={({ field, fieldState }) => {
                 const { ref, value, onChange, name, onBlur, ...rest } = field;
                 return (
                   <DatePicker
                     {...rest}
-                    label="日付"
+                    label="開始日"
                     format={AttendanceDate.DisplayFormat}
                     value={value ? dayjs(value) : null}
                     onChange={(date) =>
@@ -129,6 +165,69 @@ export default function AddCompanyHolidayCalendar({
                         inputRef: ref,
                         name,
                         onBlur,
+                        error: Boolean(fieldState.error),
+                        helperText: fieldState.error?.message,
+                      },
+                    }}
+                  />
+                );
+              }}
+            />
+            <Controller
+              name="endDate"
+              control={control}
+              rules={{
+                validate: (value) => {
+                  if (!value) {
+                    return true;
+                  }
+
+                  if (!startDateValue) {
+                    return "開始日を先に入力してください。";
+                  }
+
+                  const start = dayjs(
+                    startDateValue,
+                    AttendanceDate.DataFormat,
+                    true
+                  );
+                  const end = dayjs(value, AttendanceDate.DataFormat, true);
+
+                  if (!start.isValid()) {
+                    return "開始日はYYYY-MM-DD形式で入力してください。";
+                  }
+
+                  if (!end.isValid()) {
+                    return "終了日はYYYY-MM-DD形式で入力してください。";
+                  }
+
+                  if (end.isBefore(start)) {
+                    return "終了日は開始日以降の日付を指定してください。";
+                  }
+
+                  return true;
+                },
+              }}
+              render={({ field, fieldState }) => {
+                const { ref, value, onChange, name, onBlur, ...rest } = field;
+                return (
+                  <DatePicker
+                    {...rest}
+                    label="終了日 (任意)"
+                    format={AttendanceDate.DisplayFormat}
+                    value={value ? dayjs(value) : null}
+                    onChange={(date) =>
+                      onChange(
+                        date ? date.format(AttendanceDate.DataFormat) : ""
+                      )
+                    }
+                    slotProps={{
+                      textField: {
+                        inputRef: ref,
+                        name,
+                        onBlur,
+                        error: Boolean(fieldState.error),
+                        helperText: fieldState.error?.message,
                       },
                     }}
                   />

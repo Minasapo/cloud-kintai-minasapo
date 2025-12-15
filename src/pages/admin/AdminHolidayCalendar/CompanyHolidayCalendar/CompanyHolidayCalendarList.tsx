@@ -169,6 +169,7 @@ export default function CompanyHolidayCalendarList() {
         <Stack direction="row" spacing={1}>
           <AddCompanyHolidayCalendar
             createCompanyHolidayCalendar={createCompanyHolidayCalendar}
+            bulkCreateCompanyHolidayCalendar={bulkCreateCompanyHolidayCalendar}
           />
           <ExcelFilePicker
             bulkCreateCompanyHolidayCalendar={bulkCreateCompanyHolidayCalendar}
