@@ -105,7 +105,7 @@ export default function PaidHolidayFlagInputMobile({
           setValue("remarkTags", [...tags, "有給休暇"]);
         }
       }
-    } catch (e) {
+    } catch {
       // noop
     }
 
@@ -114,7 +114,7 @@ export default function PaidHolidayFlagInputMobile({
       if (getValues && getValues("specialHolidayFlag")) {
         setValue("specialHolidayFlag", false);
       }
-    } catch (e) {
+    } catch {
       // noop
     }
   };

@@ -9,7 +9,6 @@ import type {
   CreateAttendanceInput,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
-import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -23,6 +22,7 @@ import {
   clockOutAction,
 } from "@/lib/attendance/attendanceActions";
 import { AttendanceDate } from "@/lib/AttendanceDate";
+import { Logger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,

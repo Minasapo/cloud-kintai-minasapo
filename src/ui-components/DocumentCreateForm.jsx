@@ -19,7 +19,7 @@ import {
   useTheme,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { createDocument } from "@shared/api/graphql/documents/mutations";
 function ArrayField({
   items = [],
@@ -282,7 +282,7 @@ export default function DocumentCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: createDocument.replaceAll("__typename", ""),
             variables: {
               input: {

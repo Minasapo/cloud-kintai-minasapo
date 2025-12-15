@@ -1,4 +1,5 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
 
 import { StaffRole } from "./useStaffs/useStaffs";
@@ -10,6 +11,7 @@ export interface CognitoUser {
   mailAddress: string;
   owner: boolean;
   roles: StaffRole[];
+  emailVerified: boolean;
 }
 
 export default function useCognitoUser() {
@@ -22,72 +24,93 @@ export default function useCognitoUser() {
   useEffect(() => {
     if (authStatus === "configuring") return;
 
-    if (authStatus === "unauthenticated") {
-      setLoading(false);
-      return;
-    }
+    let isMounted = true;
 
-    if (!user) {
-      setCognitoUser(null);
-      setLoading(false);
-      return;
-    }
+    const resolveCognitoUser = async () => {
+      setLoading(true);
 
-    const userAttributes = user.attributes;
-    if (!userAttributes) {
-      setCognitoUser(null);
-      setLoading(false);
-      return;
-    }
+      if (authStatus !== "authenticated" || !user) {
+        if (isMounted) {
+          setCognitoUser(null);
+          setLoading(false);
+        }
+        return;
+      }
 
-    const { sub: id } = userAttributes;
+      try {
+        const session = await fetchAuthSession();
+        const idToken = session.tokens?.idToken;
+        const payload = idToken?.payload;
 
-    const signInUserSession = user.getSignInUserSession();
-    if (!signInUserSession) {
-      setCognitoUser(null);
-      setLoading(false);
-      return;
-    }
-
-    const idToken = signInUserSession.getIdToken();
-    const userGroups: string[] = idToken.payload["cognito:groups"]
-      ? idToken.payload["cognito:groups"]
-      : [];
-
-    if (!user?.attributes?.sub) {
-      setCognitoUser(null);
-      setLoading(false);
-      return;
-    }
-
-    setCognitoUser({
-      id,
-      givenName: user.attributes.given_name,
-      familyName: user.attributes.family_name,
-      mailAddress: user.attributes.email,
-      owner: user.attributes["custom:owner"] === "1" ? true : false,
-      roles: (() => {
-        if (userGroups.length === 0) {
-          return [StaffRole.GUEST];
+        if (!payload) {
+          throw new Error("Missing ID token payload");
         }
 
-        return userGroups.map((group) => {
-          switch (group) {
-            case "Admin":
-              return StaffRole.ADMIN;
-            case "StaffAdmin":
-              return StaffRole.STAFF_ADMIN;
-            case "Staff":
-              return StaffRole.STAFF;
-            case "Operator":
-              return StaffRole.OPERATOR;
-            default:
-              return StaffRole.GUEST;
-          }
-        });
-      })(),
-    });
-    setLoading(false);
+        const sub = typeof payload.sub === "string" ? payload.sub : undefined;
+        if (!sub) {
+          throw new Error("Missing user sub");
+        }
+
+        const userGroups = Array.isArray(payload["cognito:groups"])
+          ? ([...payload["cognito:groups"]] as string[])
+          : [];
+
+        const ownerRaw = payload["custom:owner"];
+        const owner = ownerRaw === "1" || ownerRaw === 1 || ownerRaw === true;
+
+        const emailVerifiedRaw = payload.email_verified;
+        const emailVerified =
+          typeof emailVerifiedRaw === "string"
+            ? emailVerifiedRaw === "true"
+            : Boolean(emailVerifiedRaw);
+
+        const mappedRoles = userGroups.length
+          ? userGroups.map((group) => {
+              switch (group) {
+                case "Admin":
+                  return StaffRole.ADMIN;
+                case "StaffAdmin":
+                  return StaffRole.STAFF_ADMIN;
+                case "Staff":
+                  return StaffRole.STAFF;
+                case "Operator":
+                  return StaffRole.OPERATOR;
+                default:
+                  return StaffRole.GUEST;
+              }
+            })
+          : [StaffRole.GUEST];
+
+        if (isMounted) {
+          setCognitoUser({
+            id: sub,
+            givenName:
+              typeof payload.given_name === "string" ? payload.given_name : "",
+            familyName:
+              typeof payload.family_name === "string"
+                ? payload.family_name
+                : "",
+            mailAddress: typeof payload.email === "string" ? payload.email : "",
+            owner,
+            roles: mappedRoles,
+            emailVerified,
+          });
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error(error);
+        if (isMounted) {
+          setCognitoUser(null);
+          setLoading(false);
+        }
+      }
+    };
+
+    void resolveCognitoUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, authStatus]);
 
   const isCognitoUserRole = (role: StaffRole) => {

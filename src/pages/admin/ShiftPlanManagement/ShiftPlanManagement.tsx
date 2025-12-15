@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import { useGetHolidayCalendarsQuery } from "@entities/calendar/api/calendarApi";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -36,7 +35,7 @@ import {
   ShiftPlanYearByTargetYearQueryVariables,
   UpdateShiftPlanYearMutationVariables,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import {
   memo,
@@ -49,6 +48,7 @@ import {
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -293,13 +293,13 @@ export default function ShiftPlanManagement() {
     const fetchYearPlan = async () => {
       setIsFetchingYear(true);
       try {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: shiftPlanYearByTargetYear,
           variables: {
             targetYear: selectedYear,
             limit: 1,
           } as ShiftPlanYearByTargetYearQueryVariables,
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<ShiftPlanYearByTargetYearQuery>;
 
         if (!isMounted) return;
@@ -443,7 +443,7 @@ export default function ShiftPlanManagement() {
       const plansInput = convertRowsToPlanInput(currentRows);
       const existingId = yearRecordIds[selectedYear];
       if (existingId) {
-        await API.graphql({
+        await graphqlClient.graphql({
           query: updateShiftPlanYear,
           variables: {
             input: {
@@ -452,10 +452,10 @@ export default function ShiftPlanManagement() {
               plans: plansInput,
             },
           } as UpdateShiftPlanYearMutationVariables,
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         });
       } else {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: createShiftPlanYear,
           variables: {
             input: {
@@ -463,7 +463,7 @@ export default function ShiftPlanManagement() {
               plans: plansInput,
             },
           } as CreateShiftPlanYearMutationVariables,
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<CreateShiftPlanYearMutation>;
 
         const createdId = response.data?.createShiftPlanYear?.id;

@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -20,6 +19,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   createShiftRequest,
   updateShiftRequest,
@@ -32,18 +32,20 @@ import {
   ShiftRequestHistoryInput,
   UpdateShiftRequestMutation,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
@@ -71,6 +73,39 @@ import ShiftBulkEditDialog from "./components/ShiftBulkEditDialog";
 import ShiftEditDialog from "./components/ShiftEditDialog";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
 import ShiftManagementSummaryRow from "./components/ShiftManagementSummaryRow";
+
+const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
+const toSpacingUnit = (value: number) => value / 8;
+
+const SHIFT_BOARD_PADDING_X = toSpacingUnit(shiftBoardTokens.columnGap);
+const SHIFT_BOARD_PADDING_Y = toSpacingUnit(shiftBoardTokens.rowGap);
+const SHIFT_BOARD_HALF_PADDING_X = SHIFT_BOARD_PADDING_X / 2;
+const SHIFT_BOARD_HALF_PADDING_Y = SHIFT_BOARD_PADDING_Y / 2;
+const SHIFT_BOARD_CELL_RADIUS = `${shiftBoardTokens.cellRadius}px`;
+const SHIFT_BOARD_TRANSITION = `${DESIGN_TOKENS.motion.duration.medium}ms ${DESIGN_TOKENS.motion.easing.standard}`;
+const SHIFT_BOARD_FOCUS_RING_COLOR =
+  DESIGN_TOKENS.color.brand.primary.focusRing;
+const SHIFT_BOARD_FOCUS_SHADOW = DESIGN_TOKENS.shadow.card;
+
+const SHIFT_BOARD_CELL_BASE_SX = {
+  borderRadius: SHIFT_BOARD_CELL_RADIUS,
+  transition: `background-color ${SHIFT_BOARD_TRANSITION}, box-shadow ${SHIFT_BOARD_TRANSITION}`,
+};
+
+const SHIFT_BOARD_INTERACTIVE_FOCUS_SX = {
+  "&:focus-visible": {
+    outline: `2px solid ${SHIFT_BOARD_FOCUS_RING_COLOR}`,
+    outlineOffset: 2,
+    boxShadow: SHIFT_BOARD_FOCUS_SHADOW,
+  },
+};
+
+const HOLIDAY_BG = alpha(DESIGN_TOKENS.color.brand.accent.base, 0.22);
+const COMPANY_HOLIDAY_BG = alpha(
+  DESIGN_TOKENS.color.brand.secondary.base,
+  0.18
+);
+const SATURDAY_BG = alpha(DESIGN_TOKENS.color.brand.primary.base, 0.12);
 
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
@@ -240,11 +275,10 @@ export default function ShiftManagementBoard() {
     const dateKey = d.format("YYYY-MM-DD");
     const day = d.day();
     if (holidaySet.has(dateKey) || day === 0)
-      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(244,67,54,0.18)" };
+      return { minWidth: DAY_COL_WIDTH, bgcolor: HOLIDAY_BG };
     if (companyHolidaySet.has(dateKey))
-      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(255,152,0,0.18)" };
-    if (day === 6)
-      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(33,150,243,0.12)" };
+      return { minWidth: DAY_COL_WIDTH, bgcolor: COMPANY_HOLIDAY_BG };
+    if (day === 6) return { minWidth: DAY_COL_WIDTH, bgcolor: SATURDAY_BG };
     return { minWidth: DAY_COL_WIDTH };
   };
 
@@ -313,14 +347,14 @@ export default function ShiftManagementBoard() {
         let nextToken: string | null | undefined = undefined;
 
         do {
-          const response = (await API.graphql({
+          const response = (await graphqlClient.graphql({
             query: listShiftRequests,
             variables: {
               filter: { targetMonth: { eq: targetMonthKey } },
               limit: 500,
               nextToken,
             },
-            authMode: "AMAZON_COGNITO_USER_POOLS",
+            authMode: "userPool",
           })) as GraphQLResult<ListShiftRequestsQuery>;
 
           if (!isMounted) return;
@@ -531,7 +565,7 @@ export default function ShiftManagementBoard() {
       | undefined;
 
     if (record?.id) {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: updateShiftRequest,
         variables: {
           input: {
@@ -539,7 +573,7 @@ export default function ShiftManagementBoard() {
             ...inputBase,
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<UpdateShiftRequestMutation>;
 
       if (response.errors?.length) {
@@ -548,7 +582,7 @@ export default function ShiftManagementBoard() {
 
       responseShiftRequest = response.data?.updateShiftRequest;
     } else {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: createShiftRequest,
         variables: {
           input: {
@@ -557,7 +591,7 @@ export default function ShiftManagementBoard() {
             ...inputBase,
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<CreateShiftRequestMutation>;
 
       if (response.errors?.length) {
@@ -759,7 +793,7 @@ export default function ShiftManagementBoard() {
               overflow: "auto",
               border: 1,
               borderColor: "divider",
-              borderRadius: 1,
+              borderRadius: SHIFT_BOARD_CELL_RADIUS,
             }}
           >
             <Table
@@ -778,13 +812,14 @@ export default function ShiftManagementBoard() {
                 <TableRow>
                   <TableCell
                     sx={{
+                      ...SHIFT_BOARD_CELL_BASE_SX,
                       bgcolor: "background.paper",
                       width: STAFF_COL_WIDTH,
                       minWidth: STAFF_COL_WIDTH,
                       maxWidth: STAFF_COL_WIDTH,
                       boxSizing: "border-box",
-                      pl: 0.25,
-                      py: 0.25,
+                      pl: SHIFT_BOARD_HALF_PADDING_X,
+                      py: SHIFT_BOARD_HALF_PADDING_Y,
                       borderRight: "1px solid",
                       borderColor: "divider",
                       // 左に固定してスクロールしても見えるようにする
@@ -805,6 +840,7 @@ export default function ShiftManagementBoard() {
                     aria-label="集計"
                     title="集計"
                     sx={{
+                      ...SHIFT_BOARD_CELL_BASE_SX,
                       bgcolor: "background.paper",
                       width: AGG_COL_WIDTH,
                       boxSizing: "border-box",
@@ -815,7 +851,8 @@ export default function ShiftManagementBoard() {
                       borderRight: "1px solid",
                       borderColor: "divider",
                       verticalAlign: "top",
-                      py: 0.25,
+                      px: SHIFT_BOARD_HALF_PADDING_X,
+                      py: SHIFT_BOARD_HALF_PADDING_Y,
                     }}
                   >
                     <Box
@@ -844,6 +881,7 @@ export default function ShiftManagementBoard() {
                     aria-label="最新変更 (回数)"
                     title="最新変更 (回数)"
                     sx={{
+                      ...SHIFT_BOARD_CELL_BASE_SX,
                       bgcolor: "background.paper",
                       width: HISTORY_COL_WIDTH,
                       boxSizing: "border-box",
@@ -855,7 +893,8 @@ export default function ShiftManagementBoard() {
                       borderRight: "1px solid",
                       borderColor: "divider",
                       verticalAlign: "top",
-                      py: 0.25,
+                      px: SHIFT_BOARD_HALF_PADDING_X,
+                      py: SHIFT_BOARD_HALF_PADDING_Y,
                     }}
                   >
                     <Typography
@@ -888,14 +927,15 @@ export default function ShiftManagementBoard() {
                         key={key}
                         align="center"
                         sx={{
+                          ...SHIFT_BOARD_CELL_BASE_SX,
                           ...getHeaderCellSx(d),
                           position: "relative",
                           top: 0,
                           zIndex: 0,
                           borderLeft: "1px solid",
                           borderColor: "divider",
-                          px: 0.2,
-                          py: 0.1,
+                          px: SHIFT_BOARD_PADDING_X,
+                          py: SHIFT_BOARD_HALF_PADDING_Y,
                           ...columnHighlightSx,
                         }}
                       >
@@ -1104,8 +1144,10 @@ export default function ShiftManagementBoard() {
                             <TableCell
                               colSpan={3}
                               sx={{
+                                ...SHIFT_BOARD_CELL_BASE_SX,
                                 bgcolor: "background.paper",
-                                py: 0.25,
+                                px: SHIFT_BOARD_PADDING_X,
+                                py: SHIFT_BOARD_HALF_PADDING_Y,
                                 width:
                                   STAFF_COL_WIDTH +
                                   AGG_COL_WIDTH +
@@ -1152,7 +1194,9 @@ export default function ShiftManagementBoard() {
                                 <TableCell
                                   key={`${groupName}-${key}-coverage`}
                                   sx={{
-                                    p: 0.25,
+                                    ...SHIFT_BOARD_CELL_BASE_SX,
+                                    px: SHIFT_BOARD_PADDING_X,
+                                    py: SHIFT_BOARD_HALF_PADDING_Y,
                                     width: DAY_COL_WIDTH,
                                     height: 40,
                                     position: "relative",
@@ -1198,11 +1242,14 @@ export default function ShiftManagementBoard() {
                             <TableRow key={s.id}>
                               <TableCell
                                 sx={{
+                                  ...SHIFT_BOARD_CELL_BASE_SX,
                                   bgcolor: "background.paper",
                                   width: STAFF_COL_WIDTH,
                                   minWidth: STAFF_COL_WIDTH,
                                   maxWidth: STAFF_COL_WIDTH,
                                   boxSizing: "border-box",
+                                  px: SHIFT_BOARD_PADDING_X,
+                                  py: SHIFT_BOARD_HALF_PADDING_Y,
                                   borderRight: "1px solid",
                                   borderColor: "divider",
                                   position: "sticky",
@@ -1272,7 +1319,9 @@ export default function ShiftManagementBoard() {
                                   <>
                                     <TableCell
                                       sx={{
-                                        p: 0,
+                                        ...SHIFT_BOARD_CELL_BASE_SX,
+                                        px: SHIFT_BOARD_HALF_PADDING_X,
+                                        py: SHIFT_BOARD_HALF_PADDING_Y,
                                         width: AGG_COL_WIDTH,
                                         height: 40,
                                         bgcolor: "background.paper",
@@ -1302,7 +1351,9 @@ export default function ShiftManagementBoard() {
                                     </TableCell>
                                     <TableCell
                                       sx={{
-                                        p: 0,
+                                        ...SHIFT_BOARD_CELL_BASE_SX,
+                                        px: SHIFT_BOARD_HALF_PADDING_X,
+                                        py: SHIFT_BOARD_HALF_PADDING_Y,
                                         width: HISTORY_COL_WIDTH,
                                         height: 40,
                                         bgcolor: "background.paper",
@@ -1363,7 +1414,10 @@ export default function ShiftManagementBoard() {
                                   <TableCell
                                     key={key}
                                     sx={{
-                                      p: 0.25,
+                                      ...SHIFT_BOARD_CELL_BASE_SX,
+                                      ...SHIFT_BOARD_INTERACTIVE_FOCUS_SX,
+                                      px: SHIFT_BOARD_PADDING_X,
+                                      py: SHIFT_BOARD_HALF_PADDING_Y,
                                       width: DAY_COL_WIDTH,
                                       height: 40,
                                       position: "relative",

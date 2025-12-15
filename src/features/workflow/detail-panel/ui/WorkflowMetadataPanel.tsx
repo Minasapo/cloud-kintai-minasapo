@@ -4,9 +4,8 @@ import StatusChip from "@shared/ui/chips/StatusChip";
 
 import { formatDateSlash } from "@/lib/date";
 
-import WorkflowApprovalTimeline, {
-  WorkflowApprovalStepView,
-} from "../../approval-flow/ui/WorkflowApprovalTimeline";
+import type { WorkflowApprovalStepView } from "../../approval-flow/types";
+import WorkflowApprovalTimeline from "../../approval-flow/ui/WorkflowApprovalTimeline";
 
 type WorkflowMetadataPanelProps = {
   workflowId?: string | null;

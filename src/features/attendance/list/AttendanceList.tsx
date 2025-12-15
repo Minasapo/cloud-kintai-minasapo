@@ -24,10 +24,6 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { Staff } from "@shared/api/graphql/types";
 import Title from "@shared/ui/typography/Title";
 /**
- * AmplifyのLogger。デバッグ・エラー出力に使用。
- */
-import { Logger } from "aws-amplify";
-/**
  * 日付操作ライブラリ。日付のフォーマットや計算に使用。
  */
 import dayjs from "dayjs";
@@ -41,6 +37,10 @@ import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
+/**
+ * AmplifyのLogger。デバッグ・エラー出力に使用。
+ */
+import { Logger } from "@/lib/logger";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";

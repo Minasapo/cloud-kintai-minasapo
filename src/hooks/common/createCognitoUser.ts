@@ -3,12 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { API, Auth } from "aws-amplify";
-
-// type UserAttributes = {
-//   Name: string;
-//   Value: string;
-// };
+import { adminPost } from "@/lib/amplify/adminQueriesClient";
 
 export default async function createCognitoUser(
   username: string,
@@ -18,9 +13,6 @@ export default async function createCognitoUser(
   const params = {
     headers: {
       "Content-Type": "application/json",
-      Authorization: (await Auth.currentSession())
-        .getAccessToken()
-        .getJwtToken(),
     },
     body: {
       username,
@@ -32,10 +24,11 @@ export default async function createCognitoUser(
     },
   };
 
-  await API.post("AdminQueries", "/createUser", params).catch((e) => {
+  await adminPost("/createUser", params).catch((e) => {
     throw e;
   });
-  await API.post("AdminQueries", "/updateUser", params).catch((e) => {
+
+  await adminPost("/updateUser", params).catch((e) => {
     throw e;
   });
 }

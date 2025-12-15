@@ -1,4 +1,3 @@
-import type { GraphQLResult } from "@aws-amplify/api";
 import {
   Alert,
   Chip,
@@ -20,11 +19,12 @@ import {
 } from "@mui/material";
 import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import type { GraphQLResult } from "aws-amplify/api";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 import {
   type AdminDailyReport,
@@ -67,13 +67,13 @@ export default function AdminDailyReportManagement() {
       let nextToken: string | null | undefined = undefined;
 
       do {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: listDailyReports,
           variables: {
             limit: 100,
             nextToken,
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<ListDailyReportsQuery>;
 
         if (response.errors?.length) {

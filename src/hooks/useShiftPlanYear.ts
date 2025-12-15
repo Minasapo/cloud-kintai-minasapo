@@ -1,12 +1,13 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import {
   ShiftPlanMonthSetting,
   ShiftPlanYearByTargetYearQuery,
   ShiftPlanYearByTargetYearQueryVariables,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 type UseShiftPlanYearResult = {
   plans: ShiftPlanMonthSetting[] | null;
@@ -58,13 +59,13 @@ const useShiftPlanYear = (
     setLoading(true);
     setError(null);
     try {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: shiftPlanYearByTargetYear,
         variables: {
           targetYear,
           limit: 1,
         } as ShiftPlanYearByTargetYearQueryVariables,
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<ShiftPlanYearByTargetYearQuery>;
 
       if (!isMountedRef.current) return;

@@ -11,13 +11,8 @@ import {
 
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 
-export type WorkflowCommentMessage = {
-  id: string;
-  sender: string;
-  staffId?: string;
-  text: string;
-  time: string;
-};
+import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
+import type { WorkflowCommentMessage } from "../types";
 
 type Props = {
   title?: string;
@@ -72,9 +67,8 @@ export default function WorkflowCommentThread({
               : isMine
               ? "primary.main"
               : "secondary.main";
-            const long =
-              (m.text.split("\n").length > 5 || m.text.length > 800) &&
-              !expandedMessages[m.id];
+            const expanded = Boolean(expandedMessages[m.id]);
+            const long = shouldTruncateWorkflowMessage(m.text, expanded);
 
             return (
               <Box
@@ -160,7 +154,7 @@ export default function WorkflowCommentThread({
                       onClick={() => onToggle(m.id)}
                       sx={{ mt: 0.5 }}
                     >
-                      {expandedMessages[m.id] ? "折りたたむ" : "もっと見る"}
+                      {expanded ? "折りたたむ" : "もっと見る"}
                     </Button>
                   )}
                 </Paper>

@@ -179,8 +179,8 @@ export default function JobTerm() {
               field: "closeDate",
               headerName: "集計対象月",
               width: 150,
-              valueGetter: (params) => {
-                const date = dayjs(params.row.closeDate);
+              valueGetter: (_value, row) => {
+                const date = dayjs(row.closeDate);
                 return date.format("YYYY年M月");
               },
             },
@@ -188,9 +188,9 @@ export default function JobTerm() {
               field: "expirationDate",
               headerName: "有効期間",
               width: 300,
-              valueGetter: (params) => {
-                const startDate = dayjs(params.row.startDate);
-                const endDate = dayjs(params.row.endDate);
+              valueGetter: (_value, row) => {
+                const startDate = dayjs(row.startDate);
+                const endDate = dayjs(row.endDate);
                 return `${startDate.format(
                   AttendanceDate.DisplayFormat
                 )} 〜 ${endDate.format(AttendanceDate.DisplayFormat)}`;
@@ -200,8 +200,8 @@ export default function JobTerm() {
               field: "createdAt",
               headerName: "作成日",
               width: 150,
-              valueGetter: (params) => {
-                const date = dayjs(params.row.createdAt);
+              valueGetter: (_value, row) => {
+                const date = dayjs(row.createdAt);
                 return date.format(AttendanceDate.DisplayFormat);
               },
             },

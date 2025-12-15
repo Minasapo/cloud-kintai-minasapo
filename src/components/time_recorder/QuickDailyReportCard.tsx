@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   createDailyReport,
   updateDailyReport,
@@ -10,10 +9,11 @@ import type {
   UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
 import { DailyReportStatus } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -61,14 +61,14 @@ export default function QuickDailyReportCard({
 
     const load = async () => {
       try {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: dailyReportsByStaffId,
           variables: {
             staffId,
             reportDate: { eq: date },
             limit: 1,
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<DailyReportsByStaffIdQuery>;
 
         if (!mounted) return;
@@ -133,7 +133,7 @@ export default function QuickDailyReportCard({
 
     try {
       if (reportId) {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: updateDailyReport,
           variables: {
             input: {
@@ -142,7 +142,7 @@ export default function QuickDailyReportCard({
               updatedAt: new Date().toISOString(),
             },
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<UpdateDailyReportMutation>;
 
         if (response.errors?.length) {
@@ -154,7 +154,7 @@ export default function QuickDailyReportCard({
         setSavedContent(updatedContent);
         setContent(updatedContent);
       } else {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: createDailyReport,
           variables: {
             input: {
@@ -168,7 +168,7 @@ export default function QuickDailyReportCard({
               comments: [],
             },
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<CreateDailyReportMutation>;
 
         if (response.errors?.length) {

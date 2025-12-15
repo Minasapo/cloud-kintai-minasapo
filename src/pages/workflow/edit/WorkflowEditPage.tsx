@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   Box,
   Button,
@@ -16,27 +15,33 @@ import {
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import {
   GetWorkflowQuery,
-  UpdateWorkflowInput,
   WorkflowCategory,
-  WorkflowComment,
   WorkflowStatus,
+  type WorkflowCommentInput,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import {
+  buildUpdateWorkflowInput,
+  validateWorkflowForm,
+  type WorkflowFormState,
+} from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
+import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { CATEGORY_LABELS, REVERSE_CATEGORY } from "@/lib/workflowLabels";
+import { CATEGORY_LABELS } from "@/lib/workflowLabels";
 
 export default function WorkflowEditPage() {
   const { id } = useParams();
@@ -51,6 +56,7 @@ export default function WorkflowEditPage() {
   const [absenceDateError, setAbsenceDateError] = useState("");
   const [paidReason, setPaidReason] = useState("");
   const [overtimeDate, setOvertimeDate] = useState("");
+  const [overtimeDateError, setOvertimeDateError] = useState("");
   const [overtimeStart, setOvertimeStart] = useState("");
   const [overtimeEnd, setOvertimeEnd] = useState("");
   const [overtimeError, setOvertimeError] = useState("");
@@ -63,16 +69,19 @@ export default function WorkflowEditPage() {
   const [applicant, setApplicant] = useState<StaffType | null | undefined>(
     undefined
   );
+  const [existingComments, setExistingComments] = useState<
+    WorkflowCommentInput[]
+  >([]);
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
     const fetch = async () => {
       if (!id) return;
       try {
-        const resp = (await API.graphql({
+        const resp = (await graphqlClient.graphql({
           query: getWorkflow,
           variables: { id },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<GetWorkflowQuery>;
 
         if (resp.errors) throw new Error(resp.errors[0].message);
@@ -102,14 +111,7 @@ export default function WorkflowEditPage() {
 
         // status -> draftMode
         setDraftMode(w.status === WorkflowStatus.DRAFT);
-
-        // store comments locally for potential append on submit
-        // we attach them to a ref-like state (simple state is fine here)
-        if (w.comments) {
-          // keep original comments in component state for later use
-          // 型は WorkflowComment だが API からの型は不明ここでは any として保持
-          // useState で定義 below
-        }
+        setExistingComments(extractExistingWorkflowComments(w));
 
         // applicant/staff from staffId
         if (w.staffId) {
@@ -141,98 +143,46 @@ export default function WorkflowEditPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    // 簡易バリデーション
-    if (category === "有給休暇申請") {
-      if (!startDate || !endDate) {
-        setDateError("開始日と終了日を入力してください");
-        return;
-      }
-      if (startDate > endDate) {
-        setDateError("開始日は終了日以前にしてください");
-        return;
-      }
-      setDateError("");
-    }
-    if (category === "欠勤申請") {
-      if (!absenceDate) {
-        setAbsenceDateError("欠勤日を入力してください");
-        return;
-      }
-      setAbsenceDateError("");
-    }
-    if (category === "残業申請") {
-      if (!overtimeDate) {
-        setOvertimeError("残業予定日を入力してください");
-        return;
-      }
-      if (!overtimeStart || !overtimeEnd) {
-        setOvertimeError("開始時刻と終了時刻を入力してください");
-        return;
-      }
-      if (overtimeStart >= overtimeEnd) {
-        setOvertimeError("開始時刻は終了時刻より前にしてください");
-        return;
-      }
-      setOvertimeError("");
-    }
+    const formState: WorkflowFormState = {
+      categoryLabel: category,
+      startDate,
+      endDate,
+      absenceDate,
+      overtimeDate,
+      overtimeStart,
+      overtimeEnd,
+      overtimeReason,
+    };
+
+    const validation = validateWorkflowForm(formState);
+    setDateError(validation.errors.dateError ?? "");
+    setAbsenceDateError(validation.errors.absenceDateError ?? "");
+    setOvertimeDateError(validation.errors.overtimeDateError ?? "");
+    setOvertimeError(validation.errors.overtimeError ?? "");
+    if (!validation.isValid) return;
 
     (async () => {
       try {
         if (!id) throw new Error("IDが不明です");
-        // map label -> enum
-        const mapCategory = (label: string): WorkflowCategory | undefined => {
-          const v = REVERSE_CATEGORY[label];
-          return (v as WorkflowCategory) || undefined;
-        };
-
-        const targetStatus = draftMode
-          ? WorkflowStatus.DRAFT
-          : WorkflowStatus.SUBMITTED;
-
-        const baseInput: UpdateWorkflowInput = {
-          id,
-          category: mapCategory(category) || undefined,
-          status: targetStatus,
-          overTimeDetails:
-            category === "残業申請"
-              ? {
-                  date: overtimeDate,
-                  startTime: overtimeStart,
-                  endTime: overtimeEnd,
-                  reason: overtimeReason || "",
-                }
-              : undefined,
-        };
-
-        // 提出済みに変わる場合は system コメントを既存コメントに追加して送信
-        if (targetStatus === WorkflowStatus.SUBMITTED) {
-          // get existing workflow to extract comments
-          const resp = (await API.graphql({
+        let normalizedComments = existingComments;
+        if (!draftMode) {
+          const resp = (await graphqlClient.graphql({
             query: getWorkflow,
             variables: { id },
-            authMode: "AMAZON_COGNITO_USER_POOLS",
+            authMode: "userPool",
           })) as GraphQLResult<GetWorkflowQuery>;
-
-          const existing = (resp.data?.getWorkflow?.comments ||
-            []) as Array<WorkflowComment | null>;
-          const newComment = {
-            id: `c-${Date.now()}`,
-            staffId: "system",
-            text: `${category || "申請"}が提出されました。`,
-            createdAt: new Date().toISOString(),
-          };
-
-          const filtered = existing.filter((c): c is WorkflowComment =>
-            Boolean(c)
+          normalizedComments = extractExistingWorkflowComments(
+            resp.data?.getWorkflow ?? null
           );
-          const commentsInput = filtered.map((c) => ({
-            id: c.id,
-            staffId: c.staffId,
-            text: c.text,
-            createdAt: c.createdAt,
-          }));
-          baseInput.comments = [...commentsInput, newComment];
+          setExistingComments(normalizedComments);
         }
+
+        const baseInput = buildUpdateWorkflowInput({
+          workflowId: id,
+          draftMode,
+          state: formState,
+          existingComments: normalizedComments,
+        });
 
         await updateWorkflow(baseInput);
         dispatch(setSnackbarSuccess("保存しました"));
@@ -359,7 +309,7 @@ export default function WorkflowEditPage() {
               absenceDateError={absenceDateError}
               overtimeDate={overtimeDate}
               setOvertimeDate={setOvertimeDate}
-              overtimeDateError={overtimeError}
+              overtimeDateError={overtimeDateError}
               overtimeStart={overtimeStart}
               setOvertimeStart={setOvertimeStart}
               overtimeEnd={overtimeEnd}

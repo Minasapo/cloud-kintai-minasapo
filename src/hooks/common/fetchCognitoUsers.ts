@@ -1,50 +1,71 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { API, Auth } from "aws-amplify";
 import dayjs from "dayjs";
+
+import { adminGet } from "@/lib/amplify/adminQueriesClient";
 
 import * as MESSAGE_CODE from "../../errors";
 import { Staff } from "../useStaffs/common";
 import { StaffRole } from "../useStaffs/useStaffs";
 
+type CognitoUserAttribute = {
+  Name?: string;
+  Value?: string;
+};
+
+type ListUsersUser = {
+  Attributes?: CognitoUserAttribute[];
+  Enabled?: boolean;
+  UserStatus?: string;
+  UserCreateDate?: string;
+  UserLastModifiedDate?: string;
+};
+
+type ListUsersResponse = {
+  Users?: ListUsersUser[];
+};
+
+type CognitoGroup = {
+  GroupName?: string;
+};
+
+type ListGroupsForUserResponse = {
+  Groups?: CognitoGroup[];
+};
+
 export default async function fetchCognitoUsers(): Promise<Staff[]> {
   const params = {
     headers: {
       "Content-Type": "application/json",
-      Authorization: (await Auth.currentSession())
-        .getAccessToken()
-        .getJwtToken(),
     },
   };
 
-  const response = await API.get("AdminQueries", "/listUsers", params);
+  const response = await adminGet<ListUsersResponse>("/listUsers", params);
+  const users = response?.Users ?? [];
 
   return await Promise.all(
-    response.Users.map(async (user: any) => {
-      const sub = user.Attributes.find(
-        (attr: any) => attr.Name === "sub"
-      )?.Value;
+    users.map(async (user) => {
+      const attributes = user.Attributes ?? [];
+      const sub = attributes.find((attr) => attr.Name === "sub")?.Value;
 
       if (!sub) {
         throw new Error(MESSAGE_CODE.E05007);
       }
 
-      let adminResponse;
+      let adminResponse: ListGroupsForUserResponse | undefined;
       // TODO: 暫定措置
       // 偶発的にエラーが発生するためリトライ処理を追加
       for (let i = 0; i < 3; i++) {
         try {
-          adminResponse = await API.get("AdminQueries", "/listGroupsForUser", {
-            ...params,
-            queryStringParameters: {
-              username: sub,
-            },
-          });
+          adminResponse = await adminGet<ListGroupsForUserResponse>(
+            "/listGroupsForUser",
+            {
+              ...params,
+              queryStringParameters: {
+                username: sub,
+              },
+            }
+          );
           break;
-        } catch (error) {
+        } catch {
           if (i === 2) {
             throw new Error(MESSAGE_CODE.E05008);
           }
@@ -52,12 +73,14 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
+      const groups = adminResponse?.Groups ?? [];
+
       // 権限
-      if (!adminResponse.Groups || adminResponse.Groups.length === 0) {
+      if (groups.length === 0) {
         throw new Error(MESSAGE_CODE.E05008);
       }
 
-      const roles = adminResponse.Groups.map((group: any) => {
+      const roles = groups.map((group) => {
         switch (group.GroupName as string) {
           case "Admin":
             return StaffRole.ADMIN;
@@ -75,8 +98,8 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
       });
 
       // オーナー権限
-      const ownerAttribute = user.Attributes.find(
-        (attr: any) => attr.Name === "custom:owner"
+      const ownerAttribute = attributes.find(
+        (attr) => attr.Name === "custom:owner"
       );
 
       const owner = (() => {
@@ -86,16 +109,12 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
 
       return {
         sub,
-        enabled: user.Enabled,
-        status: user.UserStatus,
-        givenName: user.Attributes.find(
-          (attr: any) => attr.Name === "given_name"
-        )?.Value,
-        familyName: user.Attributes.find(
-          (attr: any) => attr.Name === "family_name"
-        )?.Value,
-        mailAddress: user.Attributes.find((attr: any) => attr.Name === "email")
+        enabled: Boolean(user.Enabled),
+        status: user.UserStatus ?? "",
+        givenName: attributes.find((attr) => attr.Name === "given_name")?.Value,
+        familyName: attributes.find((attr) => attr.Name === "family_name")
           ?.Value,
+        mailAddress: attributes.find((attr) => attr.Name === "email")?.Value,
         owner,
         roles,
         createdAt: dayjs(user.UserCreateDate as string),

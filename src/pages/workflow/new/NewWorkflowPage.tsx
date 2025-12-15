@@ -18,9 +18,6 @@ import {
   ApprovalStepInput,
   ApproverMultipleMode,
   ApproverSettingMode,
-  CreateWorkflowInput,
-  WorkflowCategory,
-  WorkflowStatus,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import React, { useContext, useEffect, useState } from "react";
@@ -28,6 +25,11 @@ import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import {
+  buildCreateWorkflowInput,
+  validateWorkflowForm,
+  type WorkflowFormState,
+} from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
@@ -35,7 +37,6 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { REVERSE_CATEGORY } from "@/lib/workflowLabels";
 
 export default function NewWorkflowPage() {
   const navigate = useNavigate();
@@ -85,45 +86,23 @@ export default function NewWorkflowPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // バリデーション: 有給休暇申請なら開始日/終了日のチェック
-    if (category === "有給休暇申請") {
-      if (!startDate || !endDate) {
-        setDateError("開始日と終了日を入力してください");
-        return;
-      }
-      if (startDate > endDate) {
-        setDateError("開始日は終了日以前にしてください");
-        return;
-      }
-      setDateError("");
-    }
-    // バリデーション: 欠勤申請なら欠勤日チェック
-    if (category === "欠勤申請") {
-      if (!absenceDate) {
-        setAbsenceDateError("欠勤日を入力してください");
-        return;
-      }
-      setAbsenceDateError("");
-    }
+    const formState: WorkflowFormState = {
+      categoryLabel: category,
+      startDate,
+      endDate,
+      absenceDate,
+      overtimeDate,
+      overtimeStart,
+      overtimeEnd,
+      overtimeReason,
+    };
 
-    // バリデーション: 残業申請なら開始/終了時刻チェック
-    if (category === "残業申請") {
-      // 日付チェック
-      if (!overtimeDate) {
-        setOvertimeDateError("残業予定日を入力してください");
-        return;
-      }
-      setOvertimeDateError("");
-      if (!overtimeStart || !overtimeEnd) {
-        setOvertimeError("開始時刻と終了時刻を入力してください");
-        return;
-      }
-      if (overtimeStart >= overtimeEnd) {
-        setOvertimeError("開始時刻は終了時刻より前にしてください");
-        return;
-      }
-      setOvertimeError("");
-    }
+    const validation = validateWorkflowForm(formState);
+    setDateError(validation.errors.dateError ?? "");
+    setAbsenceDateError(validation.errors.absenceDateError ?? "");
+    setOvertimeDateError(validation.errors.overtimeDateError ?? "");
+    setOvertimeError(validation.errors.overtimeError ?? "");
+    if (!validation.isValid) return;
     // 申請者（staff）が取れていない場合はエラー
     if (!staff?.id) {
       dispatch(setSnackbarError("申請者情報が取得できませんでした。"));
@@ -138,48 +117,12 @@ export default function NewWorkflowPage() {
     const todaySlash = `${y}/${m}/${d}`;
     setApplicationDate(todaySlash);
 
-    // API の enum にマッピング（共有定義の逆引きを使う）
-    const mapCategory = (label: string): WorkflowCategory => {
-      const v = REVERSE_CATEGORY[label];
-      return (v as WorkflowCategory) || WorkflowCategory.CUSTOM;
-    };
-
-    const apiStatus = draftMode
-      ? WorkflowStatus.DRAFT
-      : WorkflowStatus.SUBMITTED;
-
-    // 残業申請で残業日が未入力なら今日を使う
-    const overtimeDateToUse =
-      category === "残業申請"
-        ? overtimeDate || new Date().toISOString().slice(0, 10)
-        : undefined;
-
-    const input: CreateWorkflowInput = {
+    const input = buildCreateWorkflowInput({
       staffId: staff.id,
-      status: apiStatus,
-      category: mapCategory(category),
-      overTimeDetails:
-        category === "残業申請"
-          ? {
-              date: overtimeDateToUse as string,
-              startTime: overtimeStart,
-              endTime: overtimeEnd,
-              reason: overtimeReason || "",
-            }
-          : undefined,
-      // 提出済みであればシステムコメントを追加
-      comments:
-        apiStatus === WorkflowStatus.SUBMITTED
-          ? [
-              {
-                id: `c-${Date.now()}`,
-                staffId: "system",
-                text: `${category || "申請"}が提出されました。`,
-                createdAt: new Date().toISOString(),
-              },
-            ]
-          : undefined,
-    };
+      draftMode,
+      state: formState,
+      overtimeDateFallbackFactory: () => new Date().toISOString().slice(0, 10),
+    });
 
     // --- 申請時に承認ステップをスナップショットとして保存する ---
     // staff の approverSetting を参照して approvalSteps / assignedApproverStaffIds を生成

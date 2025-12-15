@@ -1,5 +1,8 @@
 // cspell:words Noto
-import { createTheme, responsiveFontSizes } from "@mui/material";
+import { createTheme, responsiveFontSizes } from "@mui/material/styles";
+
+import { getDesignTokens } from "@/constants/designTokens";
+import { resolveThemeColor } from "@/constants/theme";
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -62,26 +65,33 @@ export type Color =
   | "delete";
 export type Variant = "text" | "outlined" | "contained";
 
-const palette = {
-  primary: { main: "#0FA85E", contrastText: "#fff" },
-  secondary: { main: "#fff", contrastText: "#0FA85E" },
-  success: { main: "#0FA85E", contrastText: "#fff" },
+const createPalette = (brandPrimary: string) => ({
+  primary: { main: brandPrimary, contrastText: "#fff" },
+  secondary: { main: "#fff", contrastText: brandPrimary },
+  success: { main: brandPrimary, contrastText: "#fff" },
   error: { main: "#B33D47", contrastText: "#fff" },
   warning: { main: "#B33D47", contrastText: "#fff" },
   cancel: { main: "#B33D47", contrastText: "#fff" },
   rest: { main: "#2ACEDB", contrastText: "#fff" },
-  clock_in: { main: "#0FA85E", contrastText: "#fff" },
+  clock_in: { main: brandPrimary, contrastText: "#fff" },
   clock_out: { main: "#B33D47", contrastText: "#fff" },
-  login: { main: "#0FA85E", contrastText: "#fff" },
+  login: { main: brandPrimary, contrastText: "#fff" },
   logout: { main: "#B33D47", contrastText: "#fff" },
   delete: { main: "#B33D47", contrastText: "#fff" },
-};
+});
 
-export const theme = responsiveFontSizes(
-  createTheme({
+const createThemeConfig = (brandPrimary?: string) => {
+  const tokens = getDesignTokens(brandPrimary ? { brandPrimary } : undefined);
+  const resolvedPrimary = resolveThemeColor(brandPrimary);
+  const palette = createPalette(resolvedPrimary);
+
+  return createTheme({
     palette,
     typography: {
-      fontFamily: ["Noto Sans JP"].join(","),
+      fontFamily: tokens.typography.fontFamily,
+    },
+    shape: {
+      borderRadius: tokens.radius.md,
     },
     components: {
       MuiTypography: {
@@ -135,5 +145,10 @@ export const theme = responsiveFontSizes(
         ],
       },
     },
-  })
-);
+  });
+};
+
+export const createAppTheme = (brandPrimary?: string) =>
+  responsiveFontSizes(createThemeConfig(brandPrimary));
+
+export const theme = createAppTheme();

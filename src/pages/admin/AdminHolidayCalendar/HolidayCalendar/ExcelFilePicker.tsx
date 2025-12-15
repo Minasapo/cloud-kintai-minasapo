@@ -16,7 +16,6 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useState } from "react";
-import * as xlsx from "xlsx";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { CompanyHolidayCalenderMessage } from "@/lib/message/CompanyHolidayCalenderMessage";
@@ -27,7 +26,59 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "../../../../lib/reducers/snackbarReducer";
-import company_holiday from "../../../../templates/company_holiday.xlsx";
+import company_holiday from "../../../../templates/company_holiday.csv";
+
+const CSV_DOWNLOAD_FILENAME = "company_holiday.csv";
+const CSV_PARSE_ERROR_MESSAGE =
+  "CSVファイルの読み込みに失敗しました。テンプレートの形式をご確認ください。";
+const CSV_EMPTY_DATA_MESSAGE = "CSVファイルに休日データが含まれていません。";
+
+const normalizeCell = (cell: string) => cell.replace(/^\uFEFF/, "").trim();
+
+const splitCsvLine = (line: string) =>
+  line.split(",").map((value) => normalizeCell(value));
+
+const parseHolidayCsv = (text: string): CreateCompanyHolidayCalendarInput[] => {
+  const sanitizedLines = text
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map(splitCsvLine);
+
+  if (sanitizedLines.length === 0) {
+    return [];
+  }
+
+  const header = sanitizedLines[0].map((cell) => cell.toLowerCase());
+  const dateIndex = header.indexOf("holiday_date");
+  const nameIndex = header.indexOf("name");
+
+  if (dateIndex === -1 || nameIndex === -1) {
+    throw new Error("missing-header");
+  }
+
+  return sanitizedLines
+    .slice(1)
+    .reduce<CreateCompanyHolidayCalendarInput[]>((acc, row) => {
+      const dateValue = row[dateIndex];
+      const nameValue = row[nameIndex];
+      if (!dateValue || !nameValue) {
+        return acc;
+      }
+
+      const parsedDate = dayjs(dateValue);
+      if (!parsedDate.isValid()) {
+        return acc;
+      }
+
+      acc.push({
+        holidayDate: parsedDate.format(AttendanceDate.DataFormat),
+        name: nameValue,
+      });
+      return acc;
+    }, []);
+};
 
 export function ExcelFilePicker({
   bulkCreateCompanyHolidayCalendar,
@@ -120,7 +171,7 @@ export function ExcelFilePicker({
                   const a = document.createElement("a");
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                   a.href = company_holiday;
-                  a.download = "company_holiday.xlsx";
+                  a.download = CSV_DOWNLOAD_FILENAME;
                   a.click();
                 }}
               >
@@ -128,7 +179,7 @@ export function ExcelFilePicker({
               </Button>
             </Box>
             <Typography variant="body1">
-              テンプレートに登録したい休日を入力し、ファイルを選択してください。
+              テンプレートに登録したい休日を入力し、CSVファイルを選択してください。
             </Typography>
             <FileInput setUploadedData={setUploadedData} />
             <Typography variant="body1">
@@ -155,6 +206,13 @@ function FileInput({
   >;
 }) {
   const [file, setFile] = useState<File | undefined>();
+  const dispatch = useAppDispatchV2();
+
+  const handleParseFailure = (message: string) => {
+    dispatch(setSnackbarError(message));
+    setUploadedData([]);
+    setFile(undefined);
+  };
 
   return (
     <Box>
@@ -163,7 +221,7 @@ function FileInput({
         <input
           type="file"
           hidden
-          accept=".xlsx"
+          accept=".csv"
           onChange={(event) => {
             const uploadFile = event.target.files?.item(0);
             if (!uploadFile) return;
@@ -171,23 +229,27 @@ function FileInput({
             setFile(uploadFile);
 
             const reader = new FileReader();
-            reader.readAsArrayBuffer(uploadFile);
+            reader.readAsText(uploadFile, "utf-8");
             reader.onload = (e) => {
-              if (!e.target?.result) return;
+              if (!e.target?.result) {
+                handleParseFailure(CSV_PARSE_ERROR_MESSAGE);
+                return;
+              }
 
-              const data = new Uint8Array(e.target.result as ArrayBuffer);
-              const workbook = xlsx.read(data, { type: "array" });
-              const csv = xlsx.utils.sheet_to_csv(workbook.Sheets.Sheet1);
-              const lines = csv.split("\n").map((line) => line.split(","));
-              const requestCompanyHolidayCalendars = lines
-                .slice(1)
-                .map((row) => ({
-                  holidayDate: dayjs(row[0]).format(AttendanceDate.DataFormat),
-                  name: String(row[1]),
-                }));
-
-              setUploadedData(requestCompanyHolidayCalendars);
+              try {
+                const parsed = parseHolidayCsv(e.target.result as string);
+                if (parsed.length === 0) {
+                  handleParseFailure(CSV_EMPTY_DATA_MESSAGE);
+                  return;
+                }
+                setUploadedData(parsed);
+              } catch (error) {
+                console.error(error);
+                handleParseFailure(CSV_PARSE_ERROR_MESSAGE);
+              }
             };
+            reader.onerror = () => handleParseFailure(CSV_PARSE_ERROR_MESSAGE);
+            event.target.value = "";
           }}
         />
       </Button>

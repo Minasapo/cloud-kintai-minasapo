@@ -1,11 +1,12 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import { operationLogsByStaffId } from "@shared/api/graphql/documents/queries";
 import {
   OperationLog,
   OperationLogsByStaffIdQuery,
   OperationLogsByStaffIdQueryVariables,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
+
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 export default async function fetchOperationLogsByStaffId(
   staffId: string,
@@ -18,10 +19,10 @@ export default async function fetchOperationLogsByStaffId(
     limit,
   };
 
-  const response = (await API.graphql({
+  const response = (await graphqlClient.graphql({
     query: operationLogsByStaffId,
     variables,
-    authMode: "AMAZON_COGNITO_USER_POOLS",
+    authMode: "userPool",
   })) as GraphQLResult<OperationLogsByStaffIdQuery>;
 
   if (response.errors) {

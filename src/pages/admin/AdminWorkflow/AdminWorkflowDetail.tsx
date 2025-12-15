@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   Avatar,
   Box,
@@ -24,7 +23,7 @@ import {
 } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -33,6 +32,7 @@ import { AuthContext } from "@/context/AuthContext";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
@@ -60,10 +60,10 @@ export default function AdminWorkflowDetail() {
       setLoading(true);
       setError(null);
       try {
-        const resp = (await API.graphql({
+        const resp = (await graphqlClient.graphql({
           query: getWorkflow,
           variables: { id },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<GetWorkflowQuery>;
 
         if (resp.errors) throw new Error(resp.errors[0].message);
@@ -288,6 +288,48 @@ export default function AdminWorkflowDetail() {
     setMessages(commentsToMessages(workflow?.comments || []));
   }, [workflow, staffs]);
 
+  const buildApprovalStepInputs = () => {
+    if (!workflow?.id) return [] as ApprovalStepInput[];
+    let steps: ApprovalStepInput[] = [];
+    if (workflow.approvalSteps && workflow.approvalSteps.length > 0) {
+      steps = (workflow.approvalSteps as ApprovalStep[]).map((s) => ({
+        id: s.id,
+        approverStaffId: s.approverStaffId,
+        decisionStatus: s.decisionStatus as ApprovalStatus,
+        approverComment: s.approverComment ?? null,
+        decisionTimestamp: s.decisionTimestamp ?? null,
+        stepOrder: s.stepOrder ?? 0,
+      }));
+    } else if (
+      workflow.assignedApproverStaffIds &&
+      workflow.assignedApproverStaffIds.length > 0
+    ) {
+      steps = (workflow.assignedApproverStaffIds || []).map((aid, idx) => ({
+        id: `s-${idx}-${workflow.id}`,
+        approverStaffId: aid || "",
+        decisionStatus: ApprovalStatus.PENDING,
+        approverComment: null,
+        decisionTimestamp: null,
+        stepOrder: idx,
+      }));
+    }
+
+    if (steps.length === 0) {
+      steps = [
+        {
+          id: `fallback-${workflow.id}`,
+          approverStaffId: "ADMINS",
+          decisionStatus: ApprovalStatus.PENDING,
+          approverComment: null,
+          decisionTimestamp: null,
+          stepOrder: 0,
+        },
+      ];
+    }
+
+    return steps;
+  };
+
   const sendMessage = () => void handleSend();
 
   const handleSend = async () => {
@@ -381,38 +423,25 @@ export default function AdminWorkflowDetail() {
 
     try {
       // prepare approvalSteps
-      let steps: ApprovalStepInput[] = [];
-      if (workflow.approvalSteps && workflow.approvalSteps.length > 0) {
-        steps = (workflow.approvalSteps as ApprovalStep[]).map((s) => ({
-          id: s.id,
-          approverStaffId: s.approverStaffId,
-          decisionStatus: s.decisionStatus as ApprovalStatus,
-          approverComment: s.approverComment ?? null,
-          decisionTimestamp: s.decisionTimestamp ?? null,
-          stepOrder: s.stepOrder ?? 0,
-        }));
-      } else if (
-        workflow.assignedApproverStaffIds &&
-        workflow.assignedApproverStaffIds.length > 0
-      ) {
-        steps = (workflow.assignedApproverStaffIds || []).map((aid, idx) => ({
-          id: `s-${idx}-${workflow.id}`,
-          approverStaffId: aid || "",
-          decisionStatus: ApprovalStatus.PENDING,
-          approverComment: null,
-          decisionTimestamp: null,
-          stepOrder: idx,
-        }));
-      }
+      const steps = buildApprovalStepInputs();
 
       // determine which step to update
       let idxToUpdate = -1;
+      const pendingIndex = steps.findIndex(
+        (st) => st.decisionStatus === ApprovalStatus.PENDING
+      );
       if (typeof workflow.nextApprovalStepIndex === "number") {
-        idxToUpdate = workflow.nextApprovalStepIndex;
-      } else {
-        idxToUpdate = steps.findIndex(
-          (st) => st.decisionStatus === ApprovalStatus.PENDING
-        );
+        const candidate = workflow.nextApprovalStepIndex;
+        if (
+          candidate >= 0 &&
+          candidate < steps.length &&
+          steps[candidate].decisionStatus === ApprovalStatus.PENDING
+        ) {
+          idxToUpdate = candidate;
+        }
+      }
+      if (idxToUpdate < 0) {
+        idxToUpdate = pendingIndex;
       }
       if (idxToUpdate < 0) {
         dispatch(
@@ -528,38 +557,25 @@ export default function AdminWorkflowDetail() {
 
     try {
       // prepare approvalSteps
-      let steps: ApprovalStepInput[] = [];
-      if (workflow.approvalSteps && workflow.approvalSteps.length > 0) {
-        steps = (workflow.approvalSteps as ApprovalStep[]).map((s) => ({
-          id: s.id,
-          approverStaffId: s.approverStaffId,
-          decisionStatus: s.decisionStatus as ApprovalStatus,
-          approverComment: s.approverComment ?? null,
-          decisionTimestamp: s.decisionTimestamp ?? null,
-          stepOrder: s.stepOrder ?? 0,
-        }));
-      } else if (
-        workflow.assignedApproverStaffIds &&
-        workflow.assignedApproverStaffIds.length > 0
-      ) {
-        steps = (workflow.assignedApproverStaffIds || []).map((aid, idx) => ({
-          id: `s-${idx}-${workflow.id}`,
-          approverStaffId: aid || "",
-          decisionStatus: ApprovalStatus.PENDING,
-          approverComment: null,
-          decisionTimestamp: null,
-          stepOrder: idx,
-        }));
-      }
+      const steps = buildApprovalStepInputs();
 
       // determine which step to update
       let idxToUpdate = -1;
+      const pendingIndex = steps.findIndex(
+        (st) => st.decisionStatus === ApprovalStatus.PENDING
+      );
       if (typeof workflow.nextApprovalStepIndex === "number") {
-        idxToUpdate = workflow.nextApprovalStepIndex;
-      } else {
-        idxToUpdate = steps.findIndex(
-          (st) => st.decisionStatus === ApprovalStatus.PENDING
-        );
+        const candidate = workflow.nextApprovalStepIndex;
+        if (
+          candidate >= 0 &&
+          candidate < steps.length &&
+          steps[candidate].decisionStatus === ApprovalStatus.PENDING
+        ) {
+          idxToUpdate = candidate;
+        }
+      }
+      if (idxToUpdate < 0) {
+        idxToUpdate = pendingIndex;
       }
       if (idxToUpdate < 0) {
         dispatch(

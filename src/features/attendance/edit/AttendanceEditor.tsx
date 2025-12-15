@@ -34,7 +34,6 @@ import {
 } from "@shared/api/graphql/types";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import Title from "@shared/ui/typography/Title";
-import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -49,6 +48,7 @@ import useStaffs, {
 } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { Logger } from "@/lib/logger";
 import { AttendanceEditMailSender } from "@/lib/mail/AttendanceEditMailSender";
 import {
   setSnackbarError,
@@ -316,7 +316,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       // apply latest (index 0) and ensure index reflects it
       applyHistory(0);
       setHistoryIndex(0);
-    } catch (e) {
+    } catch {
       // noop
     }
   }, [readOnly, sortedHistories.length, applyHistory]);
@@ -334,7 +334,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       try {
         applyHistory(0);
         setHistoryIndex(0);
-      } catch (e) {
+      } catch {
         // noop
       }
     }, 0);
@@ -716,7 +716,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         }
 
         dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
-      } catch (error) {
+      } catch {
         dispatch(setSnackbarError(MESSAGE_CODE.E04001));
       }
     },
@@ -754,7 +754,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       if (attendance.specialHolidayFlag) initTags.push("特別休暇");
       if (attendance.absentFlag) initTags.push("欠勤");
       setValue("remarkTags", initTags);
-    } catch (e) {
+    } catch {
       // noop
     }
     setValue("goDirectlyFlag", attendance.goDirectlyFlag || false);
@@ -911,7 +911,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
             setValue("rests", desiredRests);
           }
         }
-      } catch (e) {
+      } catch {
         // noop
       }
 
@@ -921,7 +921,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         if ((currentHourly as HourlyPaidHolidayTimeInputs[]).length > 0) {
           hourlyPaidHolidayTimeReplace([]);
         }
-      } catch (e) {
+      } catch {
         // noop
       }
 
@@ -931,7 +931,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         if (currentPaid) {
           setValue("paidHolidayFlag", false);
         }
-      } catch (e) {
+      } catch {
         // noop
       }
     } else {
@@ -965,7 +965,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           );
         }
       }
-    } catch (e) {
+    } catch {
       // noop
     }
   }, [paidHolidayFlagValue]);
@@ -1137,7 +1137,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                         setHistoryIndex(idx);
                         try {
                           applyHistory(idx);
-                        } catch (e) {
+                        } catch {
                           // noop
                         }
                       }}

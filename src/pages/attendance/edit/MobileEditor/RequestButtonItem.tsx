@@ -10,7 +10,7 @@ export function RequestButtonItem({
   isValid: _isValid,
   isSubmitting,
 }: {
-  handleSubmit: UseFormHandleSubmit<AttendanceEditInputs, undefined>;
+  handleSubmit: UseFormHandleSubmit<AttendanceEditInputs>;
   onSubmit: (data: AttendanceEditInputs) => Promise<void>;
   isDirty: boolean;
   isValid: boolean;

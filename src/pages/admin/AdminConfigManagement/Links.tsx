@@ -74,7 +74,7 @@ export default function Links() {
         dispatch(setSnackbarSuccess(S14001));
       }
       await fetchConfig();
-    } catch (error) {
+    } catch {
       dispatch(setSnackbarError(E14001));
     }
   };

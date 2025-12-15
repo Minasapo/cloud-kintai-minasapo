@@ -8,7 +8,7 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { getCheckForUpdate } from "@shared/api/graphql/documents/queries";
 import { updateCheckForUpdate } from "@shared/api/graphql/documents/mutations";
 export default function CheckForUpdateUpdateForm(props) {
@@ -42,7 +42,7 @@ export default function CheckForUpdateUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await API.graphql({
+            await graphqlClient.graphql({
               query: getCheckForUpdate.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -112,7 +112,7 @@ export default function CheckForUpdateUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: updateCheckForUpdate.replaceAll("__typename", ""),
             variables: {
               input: {

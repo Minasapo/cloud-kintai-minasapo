@@ -8,7 +8,7 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { getShiftPlanYear } from "@shared/api/graphql/documents/queries";
 import { updateShiftPlanYear } from "@shared/api/graphql/documents/mutations";
 export default function ShiftPlanYearUpdateForm(props) {
@@ -51,7 +51,7 @@ export default function ShiftPlanYearUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await API.graphql({
+            await graphqlClient.graphql({
               query: getShiftPlanYear.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -127,7 +127,7 @@ export default function ShiftPlanYearUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: updateShiftPlanYear.replaceAll("__typename", ""),
             variables: {
               input: {

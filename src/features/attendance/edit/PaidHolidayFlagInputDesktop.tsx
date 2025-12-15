@@ -85,7 +85,7 @@ export default function PaidHolidayFlagInputDesktop({
           if (special) {
             setValue("specialHolidayFlag", false);
           }
-        } catch (e) {
+        } catch {
           // noop
         }
 
@@ -94,7 +94,7 @@ export default function PaidHolidayFlagInputDesktop({
           setValue("remarkTags", [...tags, "有給休暇"]);
         }
       }
-    } catch (e) {
+    } catch {
       // noop
     }
   };

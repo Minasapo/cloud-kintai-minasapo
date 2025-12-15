@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -50,7 +49,7 @@ import {
   Staff,
   UpdateShiftRequestMutation,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { Dayjs } from "dayjs";
 import React, {
   useCallback,
@@ -64,6 +63,7 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -455,7 +455,7 @@ export default function ShiftRequestForm() {
         const staffData = await fetchStaff(cognitoUser.id);
         if (!isMounted) return;
         setStaff(staffData ?? null);
-      } catch (error) {
+      } catch {
         if (!isMounted) return;
         setStaff(null);
         dispatch(setSnackbarError(MESSAGE_CODE.E05001));
@@ -488,14 +488,14 @@ export default function ShiftRequestForm() {
       setIsLoadingShiftRequest(true);
       try {
         const targetMonthKey = monthStart.format("YYYY-MM");
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: shiftRequestsByStaffId,
           variables: {
             staffId: staff.id,
             targetMonth: { eq: targetMonthKey },
             limit: 1,
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<ShiftRequestsByStaffIdQuery>;
 
         if (!isMounted) return;
@@ -570,7 +570,7 @@ export default function ShiftRequestForm() {
         setHistories(
           sanitizedHistories.sort((a, b) => (a.version ?? 0) - (b.version ?? 0))
         );
-      } catch (error) {
+      } catch {
         if (isMounted) {
           dispatch(setSnackbarError(MESSAGE_CODE.E16002));
         }
@@ -682,7 +682,7 @@ export default function ShiftRequestForm() {
     try {
       const nextHistories = [...histories, historySnapshot];
       if (shiftRequestId) {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: updateShiftRequest,
           variables: {
             input: {
@@ -694,7 +694,7 @@ export default function ShiftRequestForm() {
               histories: nextHistories,
             },
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<UpdateShiftRequestMutation>;
 
         if (response.errors) {
@@ -706,7 +706,7 @@ export default function ShiftRequestForm() {
         );
         setHistories(nextHistories);
       } else {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: createShiftRequest,
           variables: {
             input: {
@@ -719,7 +719,7 @@ export default function ShiftRequestForm() {
               histories: nextHistories,
             },
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<CreateShiftRequestMutation>;
 
         if (response.errors) {
@@ -731,7 +731,7 @@ export default function ShiftRequestForm() {
       }
 
       dispatch(setSnackbarSuccess(MESSAGE_CODE.S16001));
-    } catch (error) {
+    } catch {
       dispatch(setSnackbarError(MESSAGE_CODE.E16001));
     } finally {
       setIsSaving(false);

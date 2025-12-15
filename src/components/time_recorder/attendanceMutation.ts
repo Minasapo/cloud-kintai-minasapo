@@ -1,8 +1,8 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance } from "@shared/api/graphql/types";
-import { Logger } from "aws-amplify";
 
 import { CognitoUser } from "@/hooks/useCognitoUser";
+import { Logger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,

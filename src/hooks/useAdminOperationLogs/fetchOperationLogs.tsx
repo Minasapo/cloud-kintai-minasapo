@@ -1,19 +1,20 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import { listOperationLogs } from "@shared/api/graphql/documents/queries";
 import {
   ListOperationLogsQuery,
   OperationLog,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
+
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 export default async function fetchOperationLogs(
   nextToken: string | null = null,
   limit = 30
 ) {
-  const response = (await API.graphql({
+  const response = (await graphqlClient.graphql({
     query: listOperationLogs,
     variables: { limit, nextToken },
-    authMode: "AMAZON_COGNITO_USER_POOLS",
+    authMode: "userPool",
   })) as GraphQLResult<ListOperationLogsQuery>;
 
   if (response.errors) {

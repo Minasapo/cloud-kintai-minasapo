@@ -5,6 +5,7 @@ import {
 import dayjs from "dayjs";
 import { createContext } from "react";
 
+import { DESIGN_TOKENS, type DesignTokens } from "@/constants/designTokens";
 import { DEFAULT_CONFIG } from "@/hooks/useAppConfig/useAppConfig";
 
 type AppConfigContextProps = {
@@ -52,6 +53,7 @@ type AppConfigContextProps = {
   getSpecialHolidayEnabled?: () => boolean;
   getAbsentEnabled?: () => boolean;
   getThemeColor: () => string;
+  getThemeTokens: (brandPrimaryOverride?: string) => DesignTokens;
 };
 
 export const AppConfigContext = createContext<AppConfigContextProps>({
@@ -83,4 +85,5 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getAbsentEnabled: () => false,
   // Ensure a string is always returned to satisfy the context type
   getThemeColor: () => DEFAULT_CONFIG.themeColor ?? "",
+  getThemeTokens: () => DESIGN_TOKENS,
 });

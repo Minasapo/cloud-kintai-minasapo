@@ -8,7 +8,7 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { getCloseDate } from "@shared/api/graphql/documents/queries";
 import { updateCloseDate } from "@shared/api/graphql/documents/mutations";
 export default function CloseDateUpdateForm(props) {
@@ -47,7 +47,7 @@ export default function CloseDateUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await API.graphql({
+            await graphqlClient.graphql({
               query: getCloseDate.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -121,7 +121,7 @@ export default function CloseDateUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await graphqlClient.graphql({
             query: updateCloseDate.replaceAll("__typename", ""),
             variables: {
               input: {

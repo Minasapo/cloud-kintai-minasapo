@@ -1,6 +1,15 @@
 import { Box, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
+
+import { DESIGN_TOKENS } from "@/constants/designTokens";
 
 import { statusVisualMap } from "../../lib/shiftStateMapping";
+
+const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
+const SHORTAGE_BG = DESIGN_TOKENS.color.feedback.danger.surface;
+const SHORTAGE_BORDER = alpha(DESIGN_TOKENS.color.feedback.danger.base, 0.5);
+const EXCESS_BG = DESIGN_TOKENS.color.feedback.warning.surface;
+const EXCESS_BORDER = alpha(DESIGN_TOKENS.color.feedback.warning.base, 0.5);
 
 export default function ShiftManagementLegend() {
   return (
@@ -62,10 +71,10 @@ export default function ShiftManagementLegend() {
             sx={{
               width: 16,
               height: 16,
-              borderRadius: 0.5,
-              bgcolor: "rgba(244, 67, 54, 0.18)",
+              borderRadius: `${shiftBoardTokens.cellRadius}px`,
+              bgcolor: SHORTAGE_BG,
               border: "1px solid",
-              borderColor: "rgba(244, 67, 54, 0.32)",
+              borderColor: SHORTAGE_BORDER,
             }}
           />
           <Typography variant="caption" color="text.secondary">
@@ -77,10 +86,10 @@ export default function ShiftManagementLegend() {
             sx={{
               width: 16,
               height: 16,
-              borderRadius: 0.5,
-              bgcolor: "rgba(255, 193, 7, 0.18)",
+              borderRadius: `${shiftBoardTokens.cellRadius}px`,
+              bgcolor: EXCESS_BG,
               border: "1px solid",
-              borderColor: "rgba(255, 193, 7, 0.4)",
+              borderColor: EXCESS_BORDER,
             }}
           />
           <Typography variant="caption" color="text.secondary">

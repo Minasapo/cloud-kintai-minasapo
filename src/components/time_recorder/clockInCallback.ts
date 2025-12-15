@@ -10,11 +10,11 @@ import {
   CreateOperationLogInput,
   Staff,
 } from "@shared/api/graphql/types";
-import { Logger } from "aws-amplify";
 
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
+import { Logger } from "@/lib/logger";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,

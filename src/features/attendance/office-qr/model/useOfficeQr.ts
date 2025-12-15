@@ -16,7 +16,7 @@ export function useOfficeQr() {
   const [timeLeft, setTimeLeft] = useState(TOTAL_DURATION);
   const [isRegisterMode, setIsRegisterMode] = useState(true);
   const [tooltipOpen, setTooltipOpen] = useState(false);
-  const tooltipTimeoutRef = useRef<number>();
+  const tooltipTimeoutRef = useRef<number | undefined>(undefined);
 
   const updateQrValue = useCallback(async () => {
     const timestamp = getUnixTimestamp();
@@ -84,7 +84,7 @@ export function useOfficeQr() {
     await navigator.clipboard.writeText(qrUrl);
     setTooltipOpen(true);
 
-    if (tooltipTimeoutRef.current) {
+    if (tooltipTimeoutRef.current !== undefined) {
       window.clearTimeout(tooltipTimeoutRef.current);
     }
 
@@ -95,7 +95,7 @@ export function useOfficeQr() {
 
   useEffect(() => {
     return () => {
-      if (tooltipTimeoutRef.current) {
+      if (tooltipTimeoutRef.current !== undefined) {
         window.clearTimeout(tooltipTimeoutRef.current);
       }
     };
