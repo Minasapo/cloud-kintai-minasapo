@@ -18,7 +18,6 @@ import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/u
 import { buildWorkflowCommentsUpdateInput } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
 import { deriveWorkflowDetailPermissions } from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
-import WorkflowApplicationDetails from "@/features/workflow/detail-panel/ui/WorkflowApplicationDetails";
 import WorkflowDetailActions from "@/features/workflow/detail-panel/ui/WorkflowDetailActions";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
@@ -212,11 +211,6 @@ export default function WorkflowDetailPage() {
                   status={workflow?.status ?? null}
                   overTimeDetails={workflow?.overTimeDetails ?? null}
                   approvalSteps={approvalSteps}
-                />
-                <WorkflowApplicationDetails
-                  category={workflow?.category ?? null}
-                  categoryLabel={categoryLabel}
-                  overTimeDetails={workflow?.overTimeDetails ?? null}
                 />
               </Stack>
             </Grid>
