@@ -24,6 +24,7 @@ import dayjs, { Dayjs } from "dayjs";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AuthContext } from "@/context/AuthContext";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
@@ -183,7 +184,13 @@ export default function WorkflowListPage() {
 
   return (
     <Page title="ワークフロー" maxWidth="lg">
-      <Paper sx={{ p: 3 }}>
+      <Paper
+        sx={{
+          p: 3,
+          borderRadius: DESIGN_TOKENS.component.workflowList.cardRadius,
+          boxShadow: DESIGN_TOKENS.component.workflowList.cardShadow,
+        }}
+      >
         <Box
           sx={{
             display: "flex",
