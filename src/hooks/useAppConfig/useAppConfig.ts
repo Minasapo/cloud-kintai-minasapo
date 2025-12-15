@@ -11,6 +11,7 @@ import type {
 import dayjs from "dayjs";
 import { useCallback, useMemo } from "react";
 
+import { DESIGN_TOKENS, getDesignTokens } from "@/constants/designTokens";
 import { resolveThemeColor } from "@/constants/theme";
 
 /**
@@ -245,6 +246,29 @@ const useAppConfig = () => {
     return resolveThemeColor(candidate || undefined);
   }, [config]);
 
+  const getThemeTokens = useCallback(
+    (brandPrimaryOverride?: string) => {
+      const hasRemoteThemeColor = Boolean(config?.themeColor);
+      const candidate =
+        brandPrimaryOverride ?? config?.themeColor ?? DEFAULT_CONFIG.themeColor;
+
+      if (!brandPrimaryOverride && !hasRemoteThemeColor) {
+        return DESIGN_TOKENS;
+      }
+
+      const resolved = resolveThemeColor(candidate || undefined);
+      if (
+        !brandPrimaryOverride &&
+        resolved === DESIGN_TOKENS.color.brand.primary.base
+      ) {
+        return DESIGN_TOKENS;
+      }
+
+      return getDesignTokens({ brandPrimary: resolved });
+    },
+    [config]
+  );
+
   const loading = useMemo(
     () => isLoading || isFetching || isCreating || isUpdating,
     [isLoading, isFetching, isCreating, isUpdating]
@@ -275,6 +299,7 @@ const useAppConfig = () => {
     getSpecialHolidayEnabled,
     getAbsentEnabled,
     getThemeColor,
+    getThemeTokens,
   };
 };
 

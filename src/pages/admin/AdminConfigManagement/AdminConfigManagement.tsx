@@ -12,7 +12,7 @@ import {
 } from "@shared/api/graphql/types";
 import Title from "@shared/ui/typography/Title";
 import dayjs, { Dayjs } from "dayjs";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -52,7 +52,10 @@ export default function AdminConfigManagement() {
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
     getAbsentEnabled,
+    getThemeTokens,
   } = useContext(AppConfigContext);
+  const adminPanelTokens = useMemo(() => getThemeTokens(), [getThemeTokens]);
+  const sectionSpacing = adminPanelTokens.component.adminPanel.sectionSpacing;
   const [startTime, setStartTime] = useState<Dayjs | null>(null);
   const [endTime, setEndTime] = useState<Dayjs | null>(null);
   const [quickInputStartTimes, setQuickInputStartTimes] = useState<
@@ -364,7 +367,7 @@ export default function AdminConfigManagement() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Stack spacing={2} sx={{ pb: 2 }}>
+      <Stack spacing={0} sx={{ pb: 2, gap: sectionSpacing }}>
         <Title>設定</Title>
         <GroupSection title="勤務時間">
           <Stack spacing={1}>

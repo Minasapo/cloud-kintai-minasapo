@@ -68,6 +68,7 @@ export default function Layout() {
     getSpecialHolidayEnabled,
     getAbsentEnabled,
     getThemeColor,
+    getThemeTokens,
   } = useAppConfig();
   const isAuthenticated = authStatus === "authenticated";
   const { data: holidayCalendars = [], isLoading: holidayCalendarLoading } =
@@ -245,6 +246,7 @@ export default function Layout() {
       getSpecialHolidayEnabled,
       getAbsentEnabled,
       getThemeColor,
+      getThemeTokens,
     }),
     [
       fetchConfig,
@@ -269,6 +271,7 @@ export default function Layout() {
       getSpecialHolidayEnabled,
       getAbsentEnabled,
       getThemeColor,
+      getThemeTokens,
     ]
   );
 
