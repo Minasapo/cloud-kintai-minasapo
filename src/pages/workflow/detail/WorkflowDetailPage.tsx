@@ -18,6 +18,7 @@ import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
+import { deriveWorkflowDetailPermissions } from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
 import WorkflowApplicationDetails from "@/features/workflow/detail-panel/ui/WorkflowApplicationDetails";
 import WorkflowDetailActions from "@/features/workflow/detail-panel/ui/WorkflowDetailActions";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
@@ -135,47 +136,15 @@ export default function WorkflowDetailPage() {
     notifyError,
   });
 
-  // helper flags for edit/withdraw permissions
-  const isSubmittedOrLater = useMemo(() => {
-    if (!workflow?.status) return false;
-    return [
-      WorkflowStatus.SUBMITTED,
-      WorkflowStatus.PENDING,
-      WorkflowStatus.APPROVED,
-      WorkflowStatus.REJECTED,
-      WorkflowStatus.CANCELLED,
-    ].includes(workflow.status as WorkflowStatus);
-  }, [workflow]);
-
-  const isFinalized = useMemo(() => {
-    if (!workflow?.status) return false;
-    return [WorkflowStatus.APPROVED, WorkflowStatus.REJECTED].includes(
-      workflow.status as WorkflowStatus
-    );
-  }, [workflow]);
-
-  const withdrawDisabled =
-    !workflow?.id ||
-    workflow?.status === WorkflowStatus.CANCELLED ||
-    isFinalized;
-  const withdrawTooltip =
-    workflow?.status === WorkflowStatus.CANCELLED
-      ? "キャンセル済みのワークフローは取り下げできません"
-      : isFinalized
-      ? "承認済みまたは却下済みの申請は取り下げできません"
-      : undefined;
-  const editDisabled = !workflow?.id || isSubmittedOrLater;
-  const editTooltip = isSubmittedOrLater
-    ? "提出済み以降の申請は編集できません"
-    : undefined;
+  const permissions = useMemo(
+    () => deriveWorkflowDetailPermissions(workflow),
+    [workflow]
+  );
 
   const handleWithdraw = async () => {
     if (!workflow?.id) return;
     // disallow withdraw after approval or rejection
-    if (
-      workflow?.status === WorkflowStatus.APPROVED ||
-      workflow?.status === WorkflowStatus.REJECTED
-    ) {
+    if (permissions.isFinalized) {
       dispatch(
         setSnackbarError("承認済みまたは却下済みの申請は取り下げできません")
       );
@@ -236,10 +205,10 @@ export default function WorkflowDetailPage() {
           onBack={() => navigate(-1)}
           onWithdraw={handleWithdraw}
           onEdit={() => navigate(`/workflow/${id}/edit`)}
-          withdrawDisabled={withdrawDisabled}
-          withdrawTooltip={withdrawTooltip}
-          editDisabled={editDisabled}
-          editTooltip={editTooltip}
+          withdrawDisabled={permissions.withdrawDisabled}
+          withdrawTooltip={permissions.withdrawTooltip}
+          editDisabled={permissions.editDisabled}
+          editTooltip={permissions.editTooltip}
         />
 
         {loading && <Typography>読み込み中...</Typography>}
