@@ -28,19 +28,14 @@ import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AuthContext } from "@/context/AuthContext";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import {
+  applyWorkflowFilters,
+  isWorkflowFilterActive,
+  mapWorkflowsToListItems,
+  type WorkflowListFilters,
+  type WorkflowListItem,
+} from "@/features/workflow/list/workflowListModel";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
-
-type WorkflowItem = {
-  name: string;
-  category: string;
-  status: string;
-  rawCategory?: string;
-  rawStatus?: string;
-  rawId?: string;
-  rawStaffId?: string;
-  createdAt: string;
-  applicationDate?: string;
-};
 
 export default function WorkflowListPage() {
   const navigate = useNavigate();
@@ -53,7 +48,7 @@ export default function WorkflowListPage() {
     if (!cognitoUser?.id) return undefined;
     return staffs.find((s) => s.cognitoUserId === cognitoUser.id)?.id;
   }, [cognitoUser, staffs]);
-  const [data, setData] = useState<WorkflowItem[]>([]);
+  const [data, setData] = useState<WorkflowListItem[]>([]);
   const [nameFilter, setNameFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -68,81 +63,39 @@ export default function WorkflowListPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const filtered = useMemo(() => {
-    return data.filter((w) => {
-      if (nameFilter && !w.name.includes(nameFilter)) return false;
-      if (categoryFilter) {
-        const matchesRaw = w.rawCategory
-          ? w.rawCategory === categoryFilter
-          : false;
-        const matchesLabel =
-          w.category === categoryFilter ||
-          w.category === CATEGORY_LABELS[categoryFilter as string];
-        if (!matchesRaw && !matchesLabel) return false;
-      }
-      if (statusFilter) {
-        const matchesRaw = w.rawStatus ? w.rawStatus === statusFilter : false;
-        const matchesLabel =
-          w.status === statusFilter ||
-          w.status === STATUS_LABELS[statusFilter as string];
-        if (!matchesRaw && !matchesLabel) return false;
-      }
-      if (
-        applicationFrom &&
-        (!w.applicationDate || w.applicationDate < applicationFrom)
-      )
-        return false;
-      if (
-        applicationTo &&
-        (!w.applicationDate || w.applicationDate > applicationTo)
-      )
-        return false;
-      if (createdFrom && w.createdAt < createdFrom) return false;
-      if (createdTo && w.createdAt > createdTo) return false;
-      return true;
-    });
-  }, [
-    data,
-    nameFilter,
-    categoryFilter,
-    statusFilter,
-    applicationFrom,
-    applicationTo,
-    createdFrom,
-    createdTo,
-  ]);
+  const workflowFilters = useMemo<WorkflowListFilters>(
+    () => ({
+      name: nameFilter,
+      category: categoryFilter,
+      status: statusFilter,
+      applicationFrom,
+      applicationTo,
+      createdFrom,
+      createdTo,
+    }),
+    [
+      nameFilter,
+      categoryFilter,
+      statusFilter,
+      applicationFrom,
+      applicationTo,
+      createdFrom,
+      createdTo,
+    ]
+  );
+
+  const filtered = useMemo(
+    () => applyWorkflowFilters(data, workflowFilters),
+    [data, workflowFilters]
+  );
 
   useEffect(() => {
     setPage(0);
   }, [filtered]);
 
   useEffect(() => {
-    if (!workflows) return;
-    const mapped: WorkflowItem[] = workflows.map((it) => ({
-      name: it.id || "",
-      rawStaffId: it.staffId || undefined,
-      rawId: it.id || undefined,
-      rawStatus: it.status || undefined,
-      status: it.status ? STATUS_LABELS[it.status] || it.status : "",
-      rawCategory: it.category || undefined,
-      category: it.category ? CATEGORY_LABELS[it.category] || it.category : "",
-      createdAt: it.createdAt ? it.createdAt.split("T")[0] : "",
-      applicationDate: it.overTimeDetails ? it.overTimeDetails.date : undefined,
-    }));
-    mapped.sort((a, b) => {
-      const aApp = a.applicationDate || "";
-      const bApp = b.applicationDate || "";
-      if (aApp && bApp) return bApp.localeCompare(aApp);
-      if (aApp && !bApp) return -1;
-      if (!aApp && bApp) return 1;
-      return (b.createdAt || "").localeCompare(a.createdAt || "");
-    });
-    if (currentStaffId) {
-      setData(mapped.filter((m) => m.rawStaffId === currentStaffId));
-    } else {
-      setData([]);
-    }
-  }, [workflows, cognitoUser, staffs]);
+    setData(mapWorkflowsToListItems(workflows, currentStaffId));
+  }, [workflows, currentStaffId]);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -155,15 +108,7 @@ export default function WorkflowListPage() {
     setPage(0);
   };
 
-  const anyFilterActive = Boolean(
-    nameFilter ||
-      categoryFilter ||
-      statusFilter ||
-      createdFrom ||
-      createdTo ||
-      applicationFrom ||
-      applicationTo
-  );
+  const anyFilterActive = isWorkflowFilterActive(workflowFilters);
 
   if (!isAuthenticated) {
     return (

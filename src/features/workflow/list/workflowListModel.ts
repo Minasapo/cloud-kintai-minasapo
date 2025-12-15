@@ -1,0 +1,167 @@
+import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
+
+import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
+
+const CATEGORY_LABELS_REVERSE = Object.entries(CATEGORY_LABELS).reduce(
+  (acc, [key, value]) => {
+    acc[value] = key;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+const STATUS_LABELS_REVERSE = Object.entries(STATUS_LABELS).reduce(
+  (acc, [key, value]) => {
+    acc[value] = key;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+export type WorkflowLike = {
+  id?: string | null;
+  staffId?: string | null;
+  status?: WorkflowStatus | null;
+  category?: WorkflowCategory | null;
+  createdAt?: string | null;
+  overTimeDetails?: { date?: string | null } | null;
+};
+
+export type WorkflowListItem = {
+  name: string;
+  category: string;
+  status: string;
+  rawCategory?: string;
+  rawStatus?: string;
+  rawId?: string;
+  rawStaffId?: string;
+  createdAt: string;
+  applicationDate?: string;
+};
+
+export type WorkflowListFilters = {
+  name?: string;
+  category?: string;
+  status?: string;
+  applicationFrom?: string;
+  applicationTo?: string;
+  createdFrom?: string;
+  createdTo?: string;
+};
+
+const formatIsoDate = (value?: string | null): string => {
+  if (!value) return "";
+  const [date] = value.split("T");
+  return date ?? "";
+};
+
+export function mapWorkflowsToListItems<T extends WorkflowLike>(
+  workflows: T[] | null | undefined,
+  currentStaffId?: string
+): WorkflowListItem[] {
+  if (!workflows || !currentStaffId) {
+    return [];
+  }
+
+  const mapped = workflows
+    .filter((workflow) => workflow.staffId === currentStaffId)
+    .map((workflow) => {
+      const status = workflow.status ?? undefined;
+      const category = workflow.category ?? undefined;
+      return {
+        name: workflow.id ?? "",
+        rawStaffId: workflow.staffId ?? undefined,
+        rawId: workflow.id ?? undefined,
+        rawStatus: status,
+        status: status ? STATUS_LABELS[status] ?? status : "",
+        rawCategory: category,
+        category: category ? CATEGORY_LABELS[category] ?? category : "",
+        createdAt: formatIsoDate(workflow.createdAt),
+        applicationDate: workflow.overTimeDetails?.date ?? undefined,
+      } satisfies WorkflowListItem;
+    });
+
+  return mapped.sort((a, b) => {
+    const aApp = a.applicationDate ?? "";
+    const bApp = b.applicationDate ?? "";
+    if (aApp && bApp) return bApp.localeCompare(aApp);
+    if (aApp && !bApp) return -1;
+    if (!aApp && bApp) return 1;
+    return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
+  });
+}
+
+export function applyWorkflowFilters(
+  items: WorkflowListItem[],
+  filters: WorkflowListFilters
+): WorkflowListItem[] {
+  return items.filter((item) => {
+    if (filters.name && !item.name.includes(filters.name)) return false;
+
+    if (filters.category) {
+      const categoryCandidates = new Set<string>();
+      categoryCandidates.add(filters.category);
+      const labelFromEnum =
+        CATEGORY_LABELS[filters.category as WorkflowCategory];
+      if (labelFromEnum) categoryCandidates.add(labelFromEnum);
+      const enumFromLabel = CATEGORY_LABELS_REVERSE[filters.category];
+      if (enumFromLabel) categoryCandidates.add(enumFromLabel);
+
+      const matches =
+        (item.rawCategory && categoryCandidates.has(item.rawCategory)) ||
+        categoryCandidates.has(item.category);
+
+      if (!matches) return false;
+    }
+
+    if (filters.status) {
+      const statusCandidates = new Set<string>();
+      statusCandidates.add(filters.status);
+      const labelFromEnum = STATUS_LABELS[filters.status as WorkflowStatus];
+      if (labelFromEnum) statusCandidates.add(labelFromEnum);
+      const enumFromLabel = STATUS_LABELS_REVERSE[filters.status];
+      if (enumFromLabel) statusCandidates.add(enumFromLabel);
+
+      const matches =
+        (item.rawStatus && statusCandidates.has(item.rawStatus)) ||
+        statusCandidates.has(item.status);
+
+      if (!matches) return false;
+    }
+
+    if (
+      filters.applicationFrom &&
+      (!item.applicationDate || item.applicationDate < filters.applicationFrom)
+    ) {
+      return false;
+    }
+    if (
+      filters.applicationTo &&
+      (!item.applicationDate || item.applicationDate > filters.applicationTo)
+    ) {
+      return false;
+    }
+    if (filters.createdFrom && item.createdAt < filters.createdFrom) {
+      return false;
+    }
+    if (filters.createdTo && item.createdAt > filters.createdTo) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+export const isWorkflowFilterActive = (
+  filters: WorkflowListFilters
+): boolean => {
+  return Boolean(
+    filters.name ||
+      filters.category ||
+      filters.status ||
+      filters.applicationFrom ||
+      filters.applicationTo ||
+      filters.createdFrom ||
+      filters.createdTo
+  );
+};
