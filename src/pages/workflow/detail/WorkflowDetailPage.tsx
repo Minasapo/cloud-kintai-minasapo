@@ -3,8 +3,6 @@ import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import {
   GetWorkflowQuery,
   UpdateWorkflowInput,
-  WorkflowComment,
-  WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
@@ -17,6 +15,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow/model/workflowApprovalTimeline";
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
+import { buildWorkflowCommentsUpdateInput } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
 import { deriveWorkflowDetailPermissions } from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
 import WorkflowApplicationDetails from "@/features/workflow/detail-panel/ui/WorkflowApplicationDetails";
@@ -159,25 +158,10 @@ export default function WorkflowDetailPage() {
       const afterStatus = await updateWorkflow(statusInput);
       setWorkflow(afterStatus as NonNullable<GetWorkflowQuery["getWorkflow"]>);
 
-      const existing = (afterStatus.comments || [])
-        .filter((c): c is WorkflowComment => Boolean(c))
-        .map((c) => ({
-          id: c.id,
-          staffId: c.staffId,
-          text: c.text,
-          createdAt: c.createdAt,
-        }));
-      const sysComment: WorkflowCommentInput = {
-        id: `c-${Date.now()}`,
-        staffId: "system",
-        text: "申請が取り下げされました",
-        createdAt: new Date().toISOString(),
-      };
-      const commentsInput = [...existing, sysComment];
-      const commentUpdate: UpdateWorkflowInput = {
-        id: workflow.id,
-        comments: commentsInput,
-      };
+      const commentUpdate = buildWorkflowCommentsUpdateInput(
+        afterStatus as NonNullable<GetWorkflowQuery["getWorkflow"]>,
+        "申請が取り下げされました"
+      );
       const afterComments = await updateWorkflow(commentUpdate);
       setWorkflow(
         afterComments as NonNullable<GetWorkflowQuery["getWorkflow"]>
