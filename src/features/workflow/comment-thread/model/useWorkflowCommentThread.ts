@@ -9,7 +9,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { CognitoUser } from "@/hooks/useCognitoUser";
 import type { StaffType } from "@/hooks/useStaffs/useStaffs";
 
-import type { WorkflowCommentMessage } from "../ui/WorkflowCommentThread";
+import type { WorkflowCommentMessage } from "../types";
+import {
+  commentsToWorkflowMessages,
+  formatWorkflowCommentSender,
+} from "./workflowCommentUtils";
 
 type UseWorkflowCommentThreadParams = {
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null;
@@ -58,48 +62,17 @@ const useWorkflowCommentThread = ({
     return staffs.find((s) => s.cognitoUserId === cognitoUser.id);
   }, [cognitoUser, staffs]);
 
-  const formatSender = useCallback((sender?: string) => {
-    const value = sender ?? "";
-    if (!value.trim()) return "システム";
-    const normalized = value.trim().toLowerCase();
-    if (
-      normalized === "system" ||
-      normalized.startsWith("system") ||
-      normalized.includes("bot")
-    ) {
-      return "システム";
-    }
-    return value;
-  }, []);
+  const formatSender = useCallback(formatWorkflowCommentSender, []);
 
-  const commentsToMessages = useCallback(
-    (comments?: Array<WorkflowComment | null> | null) => {
-      if (!comments) return [];
-      return comments
-        .filter((c): c is WorkflowComment => Boolean(c))
-        .map((c) => {
-          const staff = staffs.find((s) => s.id === c.staffId);
-          const sender = staff
-            ? `${staff.familyName} ${staff.givenName}`
-            : c.staffId || "システム";
-          const time = c.createdAt
-            ? new Date(c.createdAt).toLocaleString()
-            : "";
-          return {
-            id: c.id || `c-${Date.now()}`,
-            sender,
-            staffId: c.staffId,
-            text: c.text,
-            time,
-          };
-        });
-    },
+  const mapCommentsToMessages = useCallback(
+    (comments?: Array<WorkflowComment | null> | null) =>
+      commentsToWorkflowMessages(comments, staffs),
     [staffs]
   );
 
   useEffect(() => {
-    setMessages(commentsToMessages(workflow?.comments || []));
-  }, [workflow, commentsToMessages]);
+    setMessages(mapCommentsToMessages(workflow?.comments || []));
+  }, [workflow, mapCommentsToMessages]);
 
   useEffect(() => {
     setExpandedMessages({});
@@ -162,7 +135,7 @@ const useWorkflowCommentThread = ({
           onWorkflowChange(
             updated as NonNullable<GetWorkflowQuery["getWorkflow"]>
           );
-          setMessages(commentsToMessages(updated.comments || []));
+          setMessages(mapCommentsToMessages(updated.comments || []));
         }
         notifySuccess("コメントを送信しました");
       } catch (error) {
@@ -184,7 +157,7 @@ const useWorkflowCommentThread = ({
     cognitoUser,
     updateWorkflow,
     onWorkflowChange,
-    commentsToMessages,
+    mapCommentsToMessages,
     notifySuccess,
     notifyError,
   ]);
