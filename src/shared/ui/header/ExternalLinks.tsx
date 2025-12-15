@@ -1,5 +1,3 @@
-import { ClickAwayListener } from "@mui/base/ClickAwayListener";
-import { Unstable_Popup as BasePopup } from "@mui/base/Unstable_Popup";
 import AppsIcon from "@mui/icons-material/Apps";
 import {
   Box,
@@ -7,10 +5,12 @@ import {
   IconButton,
   Link,
   Paper,
+  Popper,
   Stack,
   Typography,
   useMediaQuery,
 } from "@mui/material";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 
@@ -54,11 +54,11 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
             }}
           />
         </IconButton>
-        <BasePopup
+        <Popper
           id={id}
           open={open}
-          anchor={anchor}
-          placement={(() => (isMobileSize ? "bottom-end" : "bottom"))()}
+          anchorEl={anchor}
+          placement={isMobileSize ? "bottom-end" : "bottom"}
         >
           <Paper
             elevation={3}
@@ -82,7 +82,7 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
               ))}
             </Grid>
           </Paper>
-        </BasePopup>
+        </Popper>
       </Box>
     </ClickAwayListener>
   );

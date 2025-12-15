@@ -11,6 +11,7 @@ import {
   CompanyHolidayCalendar,
   CreateCompanyHolidayCalendarInput,
 } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -109,19 +110,30 @@ export default function AddCompanyHolidayCalendar({
               name="holidayDate"
               control={control}
               rules={{ required: true }}
-              render={({ field }) => (
-                <DatePicker
-                  label="日付"
-                  format={AttendanceDate.DisplayFormat}
-                  {...field}
-                  slotProps={{
-                    textField: {
-                      required: true,
-                    },
-                  }}
-                  onChange={(date) => field.onChange(date)}
-                />
-              )}
+              render={({ field }) => {
+                const { ref, value, onChange, name, onBlur, ...rest } = field;
+                return (
+                  <DatePicker
+                    {...rest}
+                    label="日付"
+                    format={AttendanceDate.DisplayFormat}
+                    value={value ? dayjs(value) : null}
+                    onChange={(date) =>
+                      onChange(
+                        date ? date.format(AttendanceDate.DataFormat) : ""
+                      )
+                    }
+                    slotProps={{
+                      textField: {
+                        required: true,
+                        inputRef: ref,
+                        name,
+                        onBlur,
+                      },
+                    }}
+                  />
+                );
+              }}
             />
             <TextField
               label="休日名"
