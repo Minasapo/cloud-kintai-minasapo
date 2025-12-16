@@ -11,14 +11,19 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useRef, useState } from "react";
-import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+
 // Auth/role checks are intentionally not used here - visibility is driven by visibleMode prop
-import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
+import {
+  AttendanceFieldPath,
+  AttendanceFieldValue,
+  AttendanceGetValues,
+  AttendanceSetValue,
+} from "./types";
 
 type QuickInputButtonsProps = {
-  setValue: UseFormSetValue<AttendanceEditInputs>;
+  setValue: AttendanceSetValue;
   restReplace: (
     items: { startTime: string | null; endTime: string | null }[]
   ) => void;
@@ -31,7 +36,7 @@ type QuickInputButtonsProps = {
    * 親コンポーネントから渡された値に応じて表示を切り替えます。
    */
   visibleMode?: "all" | "admin" | "staff";
-  getValues?: UseFormGetValues<AttendanceEditInputs>;
+  getValues?: AttendanceGetValues;
   readOnly?: boolean;
   /**
    * ボタンごとの表示モード。プロパティを指定しない場合は `visibleMode` のルールを使用します。
@@ -91,6 +96,19 @@ export default function QuickInputButtons({
     getPmHolidayEndTime,
     getAmPmHolidayEnabled,
   } = useAppConfig();
+
+  const dirtyOptions = {
+    shouldDirty: true,
+    shouldTouch: true,
+    shouldValidate: true,
+  } as const;
+
+  const setFieldValue = <TFieldName extends AttendanceFieldPath>(
+    name: TFieldName,
+    value: AttendanceFieldValue<TFieldName>
+  ) => {
+    setValue(name, value, dirtyOptions);
+  };
 
   // どのボタンも表示されない場合はコンポーネントを非表示にする
   const anyButtonVisible =
@@ -161,15 +179,15 @@ export default function QuickInputButtons({
                     askConfirm(
                       "定型入力: 入力内容をクリアします。よろしいですか？",
                       () => {
-                        setValue("startTime", null);
-                        setValue("endTime", null);
+                        setFieldValue("startTime", null);
+                        setFieldValue("endTime", null);
                         restReplace([]);
                         hourlyPaidHolidayTimeReplace([]);
-                        setValue("paidHolidayFlag", false);
-                        setValue("remarkTags", []);
-                        setValue("remarks", "");
-                        setValue("goDirectlyFlag", false);
-                        setValue("returnDirectlyFlag", false);
+                        setFieldValue("paidHolidayFlag", false);
+                        setFieldValue("remarkTags", []);
+                        setFieldValue("remarks", "");
+                        setFieldValue("goDirectlyFlag", false);
+                        setFieldValue("returnDirectlyFlag", false);
                       }
                     )
                   }
@@ -190,8 +208,8 @@ export default function QuickInputButtons({
                     askConfirm(
                       "定型入力: 「通常勤務」を適用します。よろしいですか？",
                       () => {
-                        setValue("startTime", toISO(defaultStart));
-                        setValue("endTime", toISO(defaultEnd));
+                        setFieldValue("startTime", toISO(defaultStart));
+                        setFieldValue("endTime", toISO(defaultEnd));
                         restReplace([
                           {
                             startTime: toISO(defaultLunchStart),
@@ -199,10 +217,10 @@ export default function QuickInputButtons({
                           },
                         ]);
                         hourlyPaidHolidayTimeReplace([]);
-                        setValue("paidHolidayFlag", false);
+                        setFieldValue("paidHolidayFlag", false);
                         // clear tags and free-text remarks for normal work
-                        setValue("remarkTags", []);
-                        setValue("remarks", "");
+                        setFieldValue("remarkTags", []);
+                        setFieldValue("remarks", "");
                       }
                     )
                   }
@@ -223,7 +241,7 @@ export default function QuickInputButtons({
                     askConfirm(
                       "定型入力: 定時出勤を適用します。よろしいですか？",
                       () => {
-                        setValue("startTime", toISO(defaultStart));
+                        setFieldValue("startTime", toISO(defaultStart));
                       }
                     )
                   }
@@ -244,8 +262,8 @@ export default function QuickInputButtons({
                     askConfirm(
                       "定型入力: 定時退勤を適用します。よろしいですか？",
                       () => {
-                        setValue("endTime", toISO(defaultEnd));
-                        setValue("rests", [
+                        setFieldValue("endTime", toISO(defaultEnd));
+                        setFieldValue("rests", [
                           {
                             startTime: toISO(defaultLunchStart),
                             endTime: toISO(defaultLunchEnd),
@@ -273,18 +291,21 @@ export default function QuickInputButtons({
                         askConfirm(
                           "定型入力: 「午前半休」を適用します。よろしいですか？",
                           () => {
-                            setValue("startTime", toISO(defaultPmStart));
-                            setValue("endTime", toISO(defaultPmEnd));
+                            setFieldValue("startTime", toISO(defaultPmStart));
+                            setFieldValue("endTime", toISO(defaultPmEnd));
                             restReplace([]);
                             hourlyPaidHolidayTimeReplace([]);
-                            setValue("paidHolidayFlag", false);
+                            setFieldValue("paidHolidayFlag", false);
                             // set tag for 午前半休
                             try {
                               if (getValues) {
                                 const tags: string[] =
                                   (getValues("remarkTags") as string[]) || [];
                                 if (!tags.includes("午前半休")) {
-                                  setValue("remarkTags", [...tags, "午前半休"]);
+                                  setFieldValue("remarkTags", [
+                                    ...tags,
+                                    "午前半休",
+                                  ]);
                                 }
                               }
                             } catch {
@@ -310,17 +331,20 @@ export default function QuickInputButtons({
                         askConfirm(
                           "定型入力: 「午後半休」を適用します。よろしいですか？",
                           () => {
-                            setValue("startTime", toISO(defaultAmStart));
-                            setValue("endTime", toISO(defaultAmEnd));
+                            setFieldValue("startTime", toISO(defaultAmStart));
+                            setFieldValue("endTime", toISO(defaultAmEnd));
                             restReplace([]);
                             hourlyPaidHolidayTimeReplace([]);
-                            setValue("paidHolidayFlag", false);
+                            setFieldValue("paidHolidayFlag", false);
                             try {
                               if (getValues) {
                                 const tags: string[] =
                                   (getValues("remarkTags") as string[]) || [];
                                 if (!tags.includes("午後半休")) {
-                                  setValue("remarkTags", [...tags, "午後半休"]);
+                                  setFieldValue("remarkTags", [
+                                    ...tags,
+                                    "午後半休",
+                                  ]);
                                 }
                               }
                             } catch {
@@ -348,8 +372,8 @@ export default function QuickInputButtons({
                     askConfirm(
                       "定型入力: 「有給(1日)」を適用します。よろしいですか？",
                       () => {
-                        setValue("startTime", toISO(defaultStart));
-                        setValue("endTime", toISO(defaultEnd));
+                        setFieldValue("startTime", toISO(defaultStart));
+                        setFieldValue("endTime", toISO(defaultEnd));
                         restReplace([
                           {
                             startTime: toISO(defaultLunchStart),
@@ -357,14 +381,17 @@ export default function QuickInputButtons({
                           },
                         ]);
                         hourlyPaidHolidayTimeReplace([]);
-                        setValue("paidHolidayFlag", true);
+                        setFieldValue("paidHolidayFlag", true);
                         // mark paid holiday as a tag
                         try {
                           if (getValues) {
                             const tags: string[] =
                               (getValues("remarkTags") as string[]) || [];
                             if (!tags.includes("有給休暇")) {
-                              setValue("remarkTags", [...tags, "有給休暇"]);
+                              setFieldValue("remarkTags", [
+                                ...tags,
+                                "有給休暇",
+                              ]);
                             }
                           }
                         } catch {

@@ -3,7 +3,17 @@ import {
   useGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
-import { Box, LinearProgress } from "@mui/material";
+import { attendanceEditSchema } from "@entities/attendance/validation/attendanceEditSchema";
+import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  LinearProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -104,10 +114,11 @@ export default function AttendanceEdit() {
     watch,
     handleSubmit,
     reset,
-    formState: { isDirty, isValid, isSubmitting },
+    formState: { isDirty, isValid, isSubmitting, errors },
   } = useForm<AttendanceEditInputs>({
     mode: "onChange",
     defaultValues,
+    resolver: zodResolver(attendanceEditSchema),
   });
 
   const {
@@ -487,6 +498,10 @@ export default function AttendanceEdit() {
         .filter((item): item is NonNullable<typeof item> => item !== null)
         .filter((item) => !item.completed)
     : [];
+  const errorMessages = useMemo(
+    () => collectAttendanceErrorMessages(errors),
+    [errors]
+  );
 
   if (!targetWorkDate) {
     return null;
@@ -534,6 +549,20 @@ export default function AttendanceEdit() {
       }}
     >
       <Box data-testid="attendance-edit-root">
+        {errorMessages.length > 0 && (
+          <Box mb={2}>
+            <Alert severity="error">
+              <AlertTitle>入力内容に誤りがあります。</AlertTitle>
+              <Stack spacing={0.5}>
+                {errorMessages.map((message) => (
+                  <Typography key={message} variant="body2">
+                    {message}
+                  </Typography>
+                ))}
+              </Stack>
+            </Alert>
+          </Box>
+        )}
         <Box
           sx={{ display: { xs: "block", md: "none" } }}
           data-testid="attendance-mobile-editor"

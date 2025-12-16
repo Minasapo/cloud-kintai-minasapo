@@ -38,14 +38,14 @@ export type AttendanceEditInputs = {
 };
 
 export const defaultValues: AttendanceEditInputs = {
-  startTime: "",
+  startTime: null,
   isDeemedHoliday: false,
   specialHolidayFlag: false,
-  endTime: "",
+  endTime: null,
   paidHolidayFlag: false,
   // hourlyPaidHolidayHours: undefined,
   hourlyPaidHolidayTimes: [],
-  substituteHolidayDate: undefined,
+  substituteHolidayDate: null,
   absentFlag: false,
   goDirectlyFlag: false,
   returnDirectlyFlag: false,
