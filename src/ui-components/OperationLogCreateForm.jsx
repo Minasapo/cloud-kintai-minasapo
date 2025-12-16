@@ -8,8 +8,9 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { createOperationLog } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createOperationLog } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 export default function OperationLogCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -134,7 +135,7 @@ export default function OperationLogCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: createOperationLog.replaceAll("__typename", ""),
             variables: {
               input: {

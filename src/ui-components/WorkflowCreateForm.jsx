@@ -20,8 +20,9 @@ import {
   useTheme,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { createWorkflow } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createWorkflow } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 function ArrayField({
   items = [],
   onChange,
@@ -348,7 +349,7 @@ export default function WorkflowCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: createWorkflow.replaceAll("__typename", ""),
             variables: {
               input: {

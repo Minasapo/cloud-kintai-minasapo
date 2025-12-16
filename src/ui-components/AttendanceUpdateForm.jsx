@@ -14,9 +14,10 @@ import {
   TextField,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { getAttendance } from "@shared/api/graphql/documents/queries";
-import { updateAttendance } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { getAttendance } from "../shared/api/graphql/documents/queries";
+import { updateAttendance } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 export default function AttendanceUpdateForm(props) {
   const {
     id: idProp,
@@ -100,7 +101,7 @@ export default function AttendanceUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await graphqlClient.graphql({
+            await client.graphql({
               query: getAttendance.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -196,7 +197,7 @@ export default function AttendanceUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: updateAttendance.replaceAll("__typename", ""),
             variables: {
               input: {

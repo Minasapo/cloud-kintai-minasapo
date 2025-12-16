@@ -14,8 +14,9 @@ import {
   TextField,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { createAttendance } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createAttendance } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 export default function AttendanceCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -174,7 +175,7 @@ export default function AttendanceCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: createAttendance.replaceAll("__typename", ""),
             variables: {
               input: {

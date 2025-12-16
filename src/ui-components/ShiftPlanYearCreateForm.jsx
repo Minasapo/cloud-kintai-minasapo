@@ -8,8 +8,9 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { createShiftPlanYear } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createShiftPlanYear } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 export default function ShiftPlanYearCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -104,7 +105,7 @@ export default function ShiftPlanYearCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: createShiftPlanYear.replaceAll("__typename", ""),
             variables: {
               input: {

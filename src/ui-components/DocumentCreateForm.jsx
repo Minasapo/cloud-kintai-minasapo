@@ -19,8 +19,9 @@ import {
   useTheme,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { createDocument } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createDocument } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 function ArrayField({
   items = [],
   onChange,
@@ -282,7 +283,7 @@ export default function DocumentCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: createDocument.replaceAll("__typename", ""),
             variables: {
               input: {
