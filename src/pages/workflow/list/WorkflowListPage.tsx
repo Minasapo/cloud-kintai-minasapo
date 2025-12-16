@@ -26,8 +26,6 @@ import { useNavigate } from "react-router-dom";
 
 import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AuthContext } from "@/context/AuthContext";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import {
   applyWorkflowFilters,
   isWorkflowFilterActive,
@@ -35,6 +33,8 @@ import {
   type WorkflowListFilters,
   type WorkflowListItem,
 } from "@/features/workflow/list/workflowListModel";
+import useStaffs from "@/hooks/useStaffs/useStaffs";
+import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
 
 export default function WorkflowListPage() {

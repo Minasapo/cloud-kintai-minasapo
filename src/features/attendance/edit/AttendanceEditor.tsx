@@ -4,6 +4,9 @@ import {
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
+import { attendanceEditSchema } from "@entities/attendance/validation/attendanceEditSchema";
+import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
+import { zodResolver } from "@hookform/resolvers/zod";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
   Alert,
@@ -204,6 +207,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   } = useForm<AttendanceEditInputs>({
     mode: "onChange",
     defaultValues,
+    resolver: zodResolver(attendanceEditSchema),
   });
 
   const {
@@ -458,6 +462,10 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   );
 
   const watchedData = watch();
+  const errorMessages = useMemo(
+    () => collectAttendanceErrorMessages(errors),
+    [errors]
+  );
 
   const totalWorkTime = useMemo(() => {
     if (!watchedData.endTime) return 0;
@@ -1162,13 +1170,17 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           {/* 右: フォーム（常に表示） */}
           <Box sx={{ flexGrow: 1 }}>
             <Stack spacing={2} sx={{ px: 30 }}>
-              {errors.startTime && (
+              {errorMessages.length > 0 && (
                 <Box>
                   <Alert severity="error">
                     <AlertTitle>入力内容に誤りがあります。</AlertTitle>
-                    <Typography variant="body2">
-                      {errors.startTime?.message}
-                    </Typography>
+                    <Stack spacing={0.5}>
+                      {errorMessages.map((message) => (
+                        <Typography key={message} variant="body2">
+                          {message}
+                        </Typography>
+                      ))}
+                    </Stack>
                   </Alert>
                 </Box>
               )}

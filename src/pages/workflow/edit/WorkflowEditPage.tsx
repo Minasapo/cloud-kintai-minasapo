@@ -16,8 +16,8 @@ import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import {
   GetWorkflowQuery,
   WorkflowCategory,
-  WorkflowStatus,
   type WorkflowCommentInput,
+  WorkflowStatus,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import { GraphQLResult } from "aws-amplify/api";
