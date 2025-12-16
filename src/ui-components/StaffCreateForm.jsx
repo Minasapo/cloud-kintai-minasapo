@@ -21,8 +21,9 @@ import {
   useTheme,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { createStaff } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createStaff } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 function ArrayField({
   items = [],
   onChange,
@@ -355,7 +356,7 @@ export default function StaffCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: createStaff.replaceAll("__typename", ""),
             variables: {
               input: {

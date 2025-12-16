@@ -14,8 +14,9 @@ import {
   TextField,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { createAppConfig } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createAppConfig } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 export default function AppConfigCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -188,7 +189,7 @@ export default function AppConfigCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: createAppConfig.replaceAll("__typename", ""),
             variables: {
               input: {

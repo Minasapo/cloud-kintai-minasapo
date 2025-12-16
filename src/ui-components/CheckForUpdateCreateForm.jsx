@@ -8,8 +8,9 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { createCheckForUpdate } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createCheckForUpdate } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 export default function CheckForUpdateCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -89,7 +90,7 @@ export default function CheckForUpdateCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: createCheckForUpdate.replaceAll("__typename", ""),
             variables: {
               input: {

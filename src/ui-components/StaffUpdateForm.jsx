@@ -21,9 +21,10 @@ import {
   useTheme,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { getStaff } from "@shared/api/graphql/documents/queries";
-import { updateStaff } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { getStaff } from "../shared/api/graphql/documents/queries";
+import { updateStaff } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 function ArrayField({
   items = [],
   onChange,
@@ -271,7 +272,7 @@ export default function StaffUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await graphqlClient.graphql({
+            await client.graphql({
               query: getStaff.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -376,7 +377,7 @@ export default function StaffUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await graphqlClient.graphql({
+          await client.graphql({
             query: updateStaff.replaceAll("__typename", ""),
             variables: {
               input: {
