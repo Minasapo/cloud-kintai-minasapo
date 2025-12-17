@@ -1,10 +1,15 @@
-import { Paper } from "@mui/material";
-import { BarChart } from "@mui/x-charts/BarChart";
+import { Box, CircularProgress, Paper } from "@mui/material";
+import { lazy, Suspense } from "react";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+
+const LazyBarChart = lazy(async () => {
+  const module = await import("@mui/x-charts/BarChart");
+  return { default: module.BarChart };
+});
 
 export function AttendanceGraph({
   attendances,
@@ -59,15 +64,23 @@ export function AttendanceGraph({
 
   return (
     <Paper elevation={2}>
-      <BarChart
-        height={150}
-        grid={{ horizontal: true }}
-        series={[
-          { ...seriesA, stack: "time" },
-          { ...seriesB, stack: "time" },
-        ]}
-        {...props}
-      />
+      <Suspense
+        fallback={
+          <Box sx={{ py: 3, display: "flex", justifyContent: "center" }}>
+            <CircularProgress size={24} aria-label="グラフを読み込み中" />
+          </Box>
+        }
+      >
+        <LazyBarChart
+          height={150}
+          grid={{ horizontal: true }}
+          series={[
+            { ...seriesA, stack: "time" },
+            { ...seriesB, stack: "time" },
+          ]}
+          {...props}
+        />
+      </Suspense>
     </Paper>
   );
 }

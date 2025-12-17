@@ -1,16 +1,13 @@
 // cspell:ignore notistack
 import CloseIcon from "@mui/icons-material/Close";
-import { IconButton, styled } from "@mui/material";
 import {
-  closeSnackbar,
-  enqueueSnackbar,
-  MaterialDesignContent,
-  type OptionsObject,
-  type SnackbarKey,
-  SnackbarProvider,
-  type VariantType,
-} from "notistack";
-import { useCallback, useEffect } from "react";
+  Alert,
+  IconButton,
+  Snackbar,
+  type SnackbarCloseReason,
+  type SnackbarOrigin,
+} from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 
 import { useAppDispatchV2, useAppSelectorV2 } from "../../app/hooks";
 import {
@@ -20,34 +17,23 @@ import {
   setSnackbarWarn,
 } from "../../lib/reducers/snackbarReducer";
 
-const SNACKBAR_ANCHOR_ORIGIN: OptionsObject["anchorOrigin"] = {
+const SNACKBAR_ANCHOR_ORIGIN: SnackbarOrigin = {
   vertical: "top",
   horizontal: "right",
 };
 
-const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
-  "&.notistack-MuiContent-success": {
-    backgroundColor: "#7fff7f",
-    // 薄い黒
-    color: "#333333",
-  },
-  "&.notistack-MuiContent-error": {
-    backgroundColor: "#ff7f7f",
-    color: "#333333",
-  },
-  "&.notistack-MuiContent-warning": {
-    backgroundColor: "#ffff7f",
-    color: "#333333",
-  },
-}));
-
-type SnackbarOptions = Omit<Partial<OptionsObject>, "autoHideDuration"> & {
-  autoHideDuration?: OptionsObject["autoHideDuration"] | null;
-};
+const SNACKBAR_COLORS = {
+  success: "#7fff7f",
+  error: "#ff7f7f",
+  warn: "#ffff7f",
+} as const;
 
 export default function SnackbarGroup() {
   const { success, error, warn } = useAppSelectorV2(selectSnackbar);
   const dispatch = useAppDispatchV2();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [warnMessage, setWarnMessage] = useState<string | null>(null);
 
   const resetSuccess = useCallback(() => {
     dispatch(setSnackbarSuccess(null));
@@ -61,63 +47,95 @@ export default function SnackbarGroup() {
     dispatch(setSnackbarWarn(null));
   }, [dispatch]);
 
-  const showSnackbar = useCallback(
-    (
-      message: string | null,
-      variant: VariantType,
-      reset: () => void,
-      options: SnackbarOptions = {}
-    ) => {
-      if (!message) {
-        return;
-      }
+  useEffect(() => {
+    if (!success) {
+      return;
+    }
+    setSuccessMessage(success);
+    resetSuccess();
+  }, [resetSuccess, success]);
 
-      enqueueSnackbar(message, {
-        variant,
-        anchorOrigin: SNACKBAR_ANCHOR_ORIGIN,
-        ...options,
-      });
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+    setErrorMessage(error);
+    resetError();
+  }, [error, resetError]);
 
-      reset();
-    },
-    []
+  useEffect(() => {
+    if (!warn) {
+      return;
+    }
+    setWarnMessage(warn);
+    resetWarn();
+  }, [resetWarn, warn]);
+
+  const renderSnackbar = (
+    message: string | null,
+    severity: "success" | "error" | "warning",
+    autoHideDuration: number | null,
+    setMessage: React.Dispatch<React.SetStateAction<string | null>>
+  ) => (
+    <Snackbar
+      open={Boolean(message)}
+      anchorOrigin={SNACKBAR_ANCHOR_ORIGIN}
+      autoHideDuration={autoHideDuration ?? undefined}
+      onClose={(_event, reason?: SnackbarCloseReason) => {
+        if (reason === "clickaway") {
+          return;
+        }
+        setMessage(null);
+      }}
+    >
+      <Alert
+        variant="filled"
+        severity={severity}
+        icon={false}
+        sx={{
+          backgroundColor:
+            severity === "success"
+              ? SNACKBAR_COLORS.success
+              : severity === "error"
+              ? SNACKBAR_COLORS.error
+              : SNACKBAR_COLORS.warn,
+          color: "#333333",
+        }}
+        action={
+          <IconButton
+            color="inherit"
+            size="small"
+            onClick={() => setMessage(null)}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      >
+        {message}
+      </Alert>
+    </Snackbar>
   );
 
-  // スナックバーの各フィールドに依存関係を限定し、無関係な状態更新で副作用が発火しないようにする。
-  useEffect(() => {
-    showSnackbar(success, "success", resetSuccess, {
-      className: "snackbar-success",
-      autoHideDuration: 6000,
-    });
-
-    showSnackbar(error, "error", resetError, {
-      className: "snackbar-error",
-      // 既存の挙動を維持するため、自動クローズは無効化したままにする。
-      autoHideDuration: null,
-    });
-
-    showSnackbar(warn, "warning", resetWarn, {
-      className: "snackbar-warn",
-    });
-  }, [success, error, warn, showSnackbar, resetSuccess, resetError, resetWarn]);
-
-  // アイコンボタンが再生成されないよう、アクションのハンドラーを安定化させる。
-  const action = useCallback((snackbarKey: SnackbarKey) => {
-    return (
-      <IconButton color="inherit" onClick={() => closeSnackbar(snackbarKey)}>
-        <CloseIcon />
-      </IconButton>
-    );
-  }, []);
-
   return (
-    <SnackbarProvider
-      action={action}
-      Components={{
-        success: StyledMaterialDesignContent,
-        error: StyledMaterialDesignContent,
-        warning: StyledMaterialDesignContent,
-      }}
-    />
+    <>
+      {renderSnackbar(
+        successMessage,
+        "success",
+        6000,
+        setSuccessMessage
+      )}
+      {renderSnackbar(
+        errorMessage,
+        "error",
+        null,
+        setErrorMessage
+      )}
+      {renderSnackbar(
+        warnMessage,
+        "warning",
+        5000,
+        setWarnMessage
+      )}
+    </>
   );
 }
