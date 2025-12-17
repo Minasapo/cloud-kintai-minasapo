@@ -1,7 +1,6 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import {
   useCreateAttendanceMutation,
-  useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
 import { attendanceEditSchema } from "@entities/attendance/validation/attendanceEditSchema";
@@ -30,25 +29,19 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  AttendanceHistory,
   CreateAttendanceInput,
-  SystemCommentInput,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import useStaffs, {
-  mappingStaffRole,
-  StaffType,
-} from "@/hooks/useStaffs/useStaffs";
+import useStaffs from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { Logger } from "@/lib/logger";
@@ -97,6 +90,7 @@ import PaidHolidayFlagInputCommon from "./PaidHolidayFlagInput";
 import QuickInputButtons from "./QuickInputButtons";
 import ReturnDirectlyFlagInput from "./ReturnDirectlyFlagInput";
 import { SystemCommentList } from "./SystemCommentList";
+import { useAttendanceRecord } from "./hooks/useAttendanceRecord";
 
 const SaveButton = styled(Button)(({ theme }) => ({
   width: 150,
@@ -114,42 +108,6 @@ const SaveButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-type FetchStaffResult = Awaited<ReturnType<typeof fetchStaff>>;
-
-const mapFetchedStaffToStaffType = (staff: FetchStaffResult): StaffType => ({
-  id: staff.id,
-  cognitoUserId: staff.cognitoUserId,
-  familyName: staff.familyName,
-  givenName: staff.givenName,
-  mailAddress: staff.mailAddress,
-  owner: staff.owner ?? false,
-  role: mappingStaffRole(staff.role),
-  enabled: staff.enabled,
-  status: staff.status,
-  createdAt: staff.createdAt,
-  updatedAt: staff.updatedAt,
-  usageStartDate: staff.usageStartDate,
-  notifications: staff.notifications,
-  workType: staff.workType,
-});
-
-const hasSameStaffSnapshot = (
-  next: StaffType | null | undefined,
-  prev: StaffType | null | undefined
-) => {
-  if (!next || !prev) {
-    return false;
-  }
-
-  return (
-    next.id === prev.id &&
-    next.updatedAt === prev.updatedAt &&
-    next.status === prev.status &&
-    next.role === prev.role &&
-    next.mailAddress === prev.mailAddress
-  );
-};
-
 export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const {
     getLunchRestStartTime,
@@ -166,11 +124,8 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const { targetWorkDate, staffId: targetStaffId } = useParams();
   const navigate = useNavigate();
   const { loading: staffsLoading, error: staffSError } = useStaffs();
-  const [triggerGetAttendance, { data: attendanceData }] =
-    useLazyGetAttendanceByStaffAndDateQuery();
   const [createAttendanceMutation] = useCreateAttendanceMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
-  const attendance = attendanceData ?? null;
 
   const handleUpdateAttendance = useCallback(
     (input: UpdateAttendanceInput) => updateAttendanceMutation(input).unwrap(),
@@ -181,14 +136,8 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     (input: CreateAttendanceInput) => createAttendanceMutation(input).unwrap(),
     [createAttendanceMutation]
   );
-  const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
-  const [workDate, setWorkDate] = useState<dayjs.Dayjs | null>(null);
   const [enabledSendMail, setEnabledSendMail] = useState<boolean>(true);
   const [vacationTab, setVacationTab] = useState<number>(0);
-
-  const staffCacheRef = useRef<Map<string, StaffType | null>>(new Map());
-  const staffRequestIdRef = useRef(0);
-  const attendanceRequestIdRef = useRef(0);
 
   const logger = new Logger(
     "AttendanceEditor",
@@ -241,216 +190,29 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     name: "hourlyPaidHolidayTimes",
   });
 
-  // histories (sorted newest first) and navigation state
-  const sortedHistories = useMemo<AttendanceHistory[]>(() => {
-    if (!attendance?.histories) return [];
-    return attendance.histories
-      .filter((item): item is NonNullable<typeof item> => item !== null)
-      .sort((a, b) =>
-        dayjs(b.createdAt).isBefore(dayjs(a.createdAt)) ? -1 : 1
-      ) as AttendanceHistory[];
-  }, [attendance?.histories]);
-
-  const [historyIndex, setHistoryIndex] = useState<number>(0);
-  const [historiesLoading, setHistoriesLoading] = useState<boolean>(false);
-
-  // apply selected history to the form
-  const applyHistory = useCallback(
-    (index: number) => {
-      if (!sortedHistories || !sortedHistories[index]) return;
-      const h = sortedHistories[index];
-
-      try {
-        // set simple fields
-        setValue("startTime", h.startTime ?? "");
-        setValue("endTime", h.endTime ?? "");
-        setValue("goDirectlyFlag", h.goDirectlyFlag ?? false);
-        setValue("returnDirectlyFlag", h.returnDirectlyFlag ?? false);
-        setValue("paidHolidayFlag", h.paidHolidayFlag ?? false);
-        setValue("specialHolidayFlag", h.specialHolidayFlag ?? false);
-        setValue("remarks", h.remarks ?? "");
-        setValue("substituteHolidayDate", h.substituteHolidayDate ?? undefined);
-
-        // rests
-        const rests: RestInputs[] = h.rests
-          ? h.rests
-              .filter((r): r is NonNullable<typeof r> => r !== null)
-              .map((r) => ({
-                startTime: r.startTime ?? null,
-                endTime: r.endTime ?? null,
-              }))
-          : [];
-        restReplace(rests);
-
-        // hourly paid holiday times
-        const hourly: HourlyPaidHolidayTimeInputs[] = h.hourlyPaidHolidayTimes
-          ? h.hourlyPaidHolidayTimes
-              .filter((r): r is NonNullable<typeof r> => r !== null)
-              .map((r) => ({
-                startTime: r.startTime ?? null,
-                endTime: r.endTime ?? null,
-              }))
-          : [];
-        hourlyPaidHolidayTimeReplace(hourly);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to apply history to form:", e);
-      }
-    },
-    [sortedHistories, setValue, restReplace, hourlyPaidHolidayTimeReplace]
-  );
-
-  // reset history index when histories change
-  useEffect(() => {
-    if (!sortedHistories || sortedHistories.length === 0) return;
-    setHistoryIndex(0);
-  }, [sortedHistories.length]);
-
-  useEffect(() => {
-    if (!sortedHistories || sortedHistories.length === 0) return;
-    applyHistory(historyIndex);
-  }, [historyIndex, sortedHistories, applyHistory]);
-
-  // When opened in readOnly (履歴表示) mode, ensure the latest history is applied
-  // immediately even if historyIndex is already 0 (state may not change).
-  useEffect(() => {
-    if (!readOnly) return;
-    if (!sortedHistories || sortedHistories.length === 0) return;
-    try {
-      // apply latest (index 0) and ensure index reflects it
-      applyHistory(0);
-      setHistoryIndex(0);
-    } catch {
-      // noop
-    }
-  }, [readOnly, sortedHistories.length, applyHistory]);
-
-  // If attendance is fetched after mount, some effects may overwrite form values.
-  // Ensure that once attendance is available and we're in readOnly, we re-apply
-  // the latest history asynchronously so it wins over other setValue calls.
-  useEffect(() => {
-    if (!readOnly) return;
-    if (!attendance) return;
-    if (!sortedHistories || sortedHistories.length === 0) return;
-
-    // schedule after current tick so other attendance->setValue effects run first
-    const id = window.setTimeout(() => {
-      try {
-        applyHistory(0);
-        setHistoryIndex(0);
-      } catch {
-        // noop
-      }
-    }, 0);
-
-    return () => window.clearTimeout(id);
-  }, [attendance, readOnly, sortedHistories.length, applyHistory]);
-
-  useEffect(() => {
-    if (!targetStaffId) {
-      setStaff(null);
-      return;
-    }
-
-    const requestId = staffRequestIdRef.current + 1;
-    staffRequestIdRef.current = requestId;
-
-    if (staffCacheRef.current.has(targetStaffId)) {
-      setStaff(staffCacheRef.current.get(targetStaffId) ?? null);
-    } else {
-      setStaff(undefined);
-    }
-
-    fetchStaff(targetStaffId)
-      .then((res) => {
-        if (staffRequestIdRef.current !== requestId) {
-          return;
-        }
-
-        const nextStaff = mapFetchedStaffToStaffType(res);
-        const prevStaff = staffCacheRef.current.get(targetStaffId) ?? null;
-        staffCacheRef.current.set(targetStaffId, nextStaff);
-
-        if (hasSameStaffSnapshot(nextStaff, prevStaff)) {
-          return;
-        }
-
-        setStaff(nextStaff);
-      })
-      .catch((e) => {
-        logger.error(
-          `Failed to fetch staff with ID ${targetStaffId}: ${e.message}`
-        );
-
-        if (staffRequestIdRef.current !== requestId) {
-          return;
-        }
-
-        staffCacheRef.current.delete(targetStaffId);
-        setStaff(null);
-        dispatch(setSnackbarError(MESSAGE_CODE.E02001));
-      });
-  }, [dispatch, logger, targetStaffId]);
-
-  useEffect(() => {
-    if (!staff || !targetStaffId || !targetWorkDate) return;
-
-    setWorkDate(AttendanceDateTime.convertToDayjs(targetWorkDate));
-    const requestId = attendanceRequestIdRef.current + 1;
-    attendanceRequestIdRef.current = requestId;
-
-    setHistoriesLoading(true);
-    triggerGetAttendance({
-      staffId: staff.cognitoUserId,
-      workDate: new AttendanceDateTime()
-        .setDateString(targetWorkDate)
-        .toDataFormat(),
-    })
-      .unwrap()
-      .then((result) => {
-        if (attendanceRequestIdRef.current !== requestId) {
-          return;
-        }
-
-        if (!result) {
-          reset(defaultValues);
-          restReplace([]);
-          hourlyPaidHolidayTimeReplace([]);
-          systemCommentReplace([]);
-          setValue(
-            "workDate",
-            new AttendanceDateTime()
-              .setDateString(targetWorkDate)
-              .toDataFormat()
-          );
-          setValue("histories", []);
-          setValue("changeRequests", []);
-          setValue("revision", undefined);
-        }
-      })
-      .catch(() => {
-        if (attendanceRequestIdRef.current !== requestId) {
-          return;
-        }
-        dispatch(setSnackbarError(MESSAGE_CODE.E02001));
-      })
-      .finally(() => {
-        if (attendanceRequestIdRef.current === requestId) {
-          setHistoriesLoading(false);
-        }
-      });
-  }, [
+  const {
+    attendance,
     staff,
+    workDate,
+    historiesLoading,
+    sortedHistories,
+    historyIndex,
+    setHistoryIndex,
+    applyHistory,
+    refetchAttendance,
+    hasAttendanceFetched,
+  } = useAttendanceRecord({
     targetStaffId,
     targetWorkDate,
-    triggerGetAttendance,
-    dispatch,
+    readOnly,
+    setValue,
     reset,
     restReplace,
     hourlyPaidHolidayTimeReplace,
     systemCommentReplace,
-    setValue,
-  ]);
+    getValues,
+    logger,
+  });
 
   const lunchRestStartTime = useMemo(
     () => getLunchRestStartTime().format("HH:mm"),
@@ -613,21 +375,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
           // 更新後は最新の勤怠を再取得してフォームを最新化する
           if (staff && targetWorkDate) {
-            try {
-              setHistoriesLoading(true);
-              await triggerGetAttendance({
-                staffId: staff.cognitoUserId,
-                workDate: new AttendanceDateTime()
-                  .setDateString(targetWorkDate)
-                  .toDataFormat(),
-              }).unwrap();
-            } catch (refetchError) {
-              logger.debug(
-                `Failed to refetch attendance after update: ${refetchError}`
-              );
-            } finally {
-              setHistoriesLoading(false);
-            }
+            await refetchAttendance();
           }
 
           dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
@@ -737,95 +485,11 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       targetStaffId,
       targetWorkDate,
       dispatch,
-      triggerGetAttendance,
+      refetchAttendance,
       getStartTime,
       getEndTime,
     ]
   );
-
-  useEffect(() => {
-    if (!attendance) return;
-
-    setWorkDate(AttendanceDateTime.convertToDayjs(attendance.workDate));
-
-    setValue("workDate", attendance.workDate);
-    setValue("startTime", attendance.startTime);
-    setValue("isDeemedHoliday", attendance.isDeemedHoliday ?? false);
-    setValue("specialHolidayFlag", attendance.specialHolidayFlag ?? false);
-    setValue("endTime", attendance.endTime);
-    // 備考はそのまま表示する（タグと直接紐付けない）
-    setValue("remarks", attendance.remarks || "");
-    // remarkTags はフラグから初期化する（有給/特別/欠勤）
-    try {
-      const initTags: string[] = [];
-      if (attendance.paidHolidayFlag) initTags.push("有給休暇");
-      if (attendance.specialHolidayFlag) initTags.push("特別休暇");
-      if (attendance.absentFlag) initTags.push("欠勤");
-      setValue("remarkTags", initTags);
-    } catch {
-      // noop
-    }
-    setValue("goDirectlyFlag", attendance.goDirectlyFlag || false);
-    setValue("returnDirectlyFlag", attendance.returnDirectlyFlag || false);
-    setValue("paidHolidayFlag", attendance.paidHolidayFlag || false);
-    setValue("absentFlag", attendance.absentFlag || false);
-    setValue("substituteHolidayDate", attendance.substituteHolidayDate);
-    setValue("revision", attendance.revision);
-    // 追加: 既存のhourlyPaidHolidayTimesがあれば維持、なければ空配列
-    setValue(
-      "hourlyPaidHolidayTimes",
-      getValues("hourlyPaidHolidayTimes") ?? []
-    );
-
-    if (attendance.rests) {
-      const rests = attendance.rests
-        .filter((item): item is NonNullable<typeof item> => item !== null)
-        .map((item) => ({
-          startTime: item.startTime,
-          endTime: item.endTime,
-        }));
-      restReplace(rests);
-    }
-
-    if (attendance.histories) {
-      const histories = attendance.histories.filter(
-        (item): item is NonNullable<typeof item> => item !== null
-      );
-      setValue("histories", histories);
-    }
-
-    if (attendance.changeRequests) {
-      const changeRequests = attendance.changeRequests.filter(
-        (item): item is NonNullable<typeof item> => item !== null
-      );
-      setValue("changeRequests", changeRequests);
-    }
-
-    if (attendance.systemComments) {
-      const systemComments = attendance.systemComments
-        .filter((item): item is NonNullable<typeof item> => item !== null)
-        .map(
-          ({ comment, confirmed, createdAt }) =>
-            ({
-              comment,
-              confirmed,
-              createdAt,
-            } as SystemCommentInput)
-        );
-
-      systemCommentReplace(systemComments);
-    }
-
-    if (attendance.hourlyPaidHolidayTimes) {
-      const hourlyPaidHolidayTimes = attendance.hourlyPaidHolidayTimes
-        .filter((item): item is NonNullable<typeof item> => item !== null)
-        .map((item) => ({
-          startTime: item.startTime,
-          endTime: item.endTime,
-        }));
-      hourlyPaidHolidayTimeReplace(hourlyPaidHolidayTimes);
-    }
-  }, [attendance]);
 
   // absentFlag の変更に応じて備考欄を自動更新する
   const absentFlagValue = useWatch({ control, name: "absentFlag" });
@@ -978,7 +642,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     }
   }, [paidHolidayFlagValue]);
 
-  if (appConfigLoading || staffsLoading || attendance === undefined) {
+  if (appConfigLoading || staffsLoading || !hasAttendanceFetched) {
     return <LinearProgress />;
   }
 
