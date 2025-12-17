@@ -1,25 +1,42 @@
+import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import Layout from "./Layout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminLayout from "./pages/admin/AdminLayout";
-import DailyReport from "./pages/attendance/daily-report/DailyReport";
-import AttendanceEdit from "./pages/attendance/edit/AttendanceEdit";
-import AttendanceListPage from "./pages/attendance/list/AttendanceListPage";
-import Login from "./pages/Login/Login";
-import OfficeHomePage from "./pages/office/home/OfficeHomePage";
-import OfficeLayoutPage from "./pages/office/layout/OfficeLayoutPage";
-import OfficeQrPage from "./pages/office/qr/OfficeQrPage";
-import OfficeQrRegisterPage from "./pages/office/qr-register/OfficeQrRegisterPage";
-import DesignTokenPreviewPage from "./pages/preview/DesignTokenPreviewPage";
-import Profile from "./pages/Profile";
-import Register from "./pages/Register";
-import ShiftRequestPage from "./pages/shift/request";
-import WorkflowDetailPage from "./pages/workflow/detail/WorkflowDetailPage";
-import WorkflowEditPage from "./pages/workflow/edit/WorkflowEditPage";
-import WorkflowListPage from "./pages/workflow/list/WorkflowListPage";
-import NewWorkflowPage from "./pages/workflow/new/NewWorkflowPage";
 import { adminChildRoutes } from "./router/adminChildRoutes";
+import { withSuspense } from "./router/withSuspense";
+
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const DailyReport = lazy(() => import("./pages/attendance/daily-report/DailyReport"));
+const AttendanceEdit = lazy(() => import("./pages/attendance/edit/AttendanceEdit"));
+const AttendanceListPage = lazy(
+  () => import("./pages/attendance/list/AttendanceListPage")
+);
+const Login = lazy(() => import("./pages/Login/Login"));
+const OfficeHomePage = lazy(() => import("./pages/office/home/OfficeHomePage"));
+const OfficeLayoutPage = lazy(
+  () => import("./pages/office/layout/OfficeLayoutPage")
+);
+const OfficeQrPage = lazy(() => import("./pages/office/qr/OfficeQrPage"));
+const OfficeQrRegisterPage = lazy(
+  () => import("./pages/office/qr-register/OfficeQrRegisterPage")
+);
+const DesignTokenPreviewPage = lazy(
+  () => import("./pages/preview/DesignTokenPreviewPage")
+);
+const Profile = lazy(() => import("./pages/Profile"));
+const Register = lazy(() => import("./pages/Register"));
+const ShiftRequestPage = lazy(() => import("./pages/shift/request"));
+const WorkflowDetailPage = lazy(
+  () => import("./pages/workflow/detail/WorkflowDetailPage")
+);
+const WorkflowEditPage = lazy(
+  () => import("./pages/workflow/edit/WorkflowEditPage")
+);
+const WorkflowListPage = lazy(
+  () => import("./pages/workflow/list/WorkflowListPage")
+);
+const NewWorkflowPage = lazy(() => import("./pages/workflow/new/NewWorkflowPage"));
 
 const router = createBrowserRouter([
   {
@@ -28,59 +45,59 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Register />,
+        element: withSuspense(Register),
       },
       {
         path: "register",
-        element: <Register />,
+        element: withSuspense(Register),
       },
       {
         path: "preview/design-tokens",
-        element: <DesignTokenPreviewPage />,
+        element: withSuspense(DesignTokenPreviewPage),
       },
       {
         path: "attendance",
         children: [
           {
             path: "list",
-            element: <AttendanceListPage />,
+            element: withSuspense(AttendanceListPage),
           },
           {
             path: "report",
-            element: <DailyReport />,
+            element: withSuspense(DailyReport),
           },
           {
             path: ":targetWorkDate/edit",
-            element: <AttendanceEdit />,
+            element: withSuspense(AttendanceEdit),
           },
           {
             path: "*",
-            element: <AttendanceListPage />,
+            element: withSuspense(AttendanceListPage),
           },
         ],
       },
       {
         path: "login",
-        element: <Login />,
+        element: withSuspense(Login),
       },
       {
         path: "workflow",
         children: [
           {
             index: true,
-            element: <WorkflowListPage />,
+            element: withSuspense(WorkflowListPage),
           },
           {
             path: ":id",
-            element: <WorkflowDetailPage />,
+            element: withSuspense(WorkflowDetailPage),
           },
           {
             path: ":id/edit",
-            element: <WorkflowEditPage />,
+            element: withSuspense(WorkflowEditPage),
           },
           {
             path: "new",
-            element: <NewWorkflowPage />,
+            element: withSuspense(NewWorkflowPage),
           },
         ],
       },
@@ -89,21 +106,21 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ShiftRequestPage />,
+            element: withSuspense(ShiftRequestPage),
           },
         ],
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: withSuspense(Profile),
       },
       {
         path: "/admin",
-        element: <AdminLayout />,
+        element: withSuspense(AdminLayout),
         children: [
           {
             path: "",
-            element: <AdminDashboard />,
+            element: withSuspense(AdminDashboard),
             children: [
               {
                 index: true,
@@ -116,19 +133,19 @@ const router = createBrowserRouter([
       },
       {
         path: "office",
-        element: <OfficeLayoutPage />,
+        element: withSuspense(OfficeLayoutPage),
         children: [
           {
             index: true,
-            element: <OfficeHomePage />,
+            element: withSuspense(OfficeHomePage),
           },
           {
             path: "qr",
-            element: <OfficeQrPage />,
+            element: withSuspense(OfficeQrPage),
           },
           {
             path: "qr/register",
-            element: <OfficeQrRegisterPage />,
+            element: withSuspense(OfficeQrRegisterPage),
           },
         ],
       },
