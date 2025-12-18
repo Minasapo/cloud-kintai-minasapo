@@ -36,20 +36,6 @@ import {
   useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import {
-  createShiftRequest,
-  updateShiftRequest,
-} from "@shared/api/graphql/documents/mutations";
-import { shiftRequestsByStaffId } from "@shared/api/graphql/documents/queries";
-import {
-  CreateShiftRequestMutation,
-  ShiftRequestHistoryInput,
-  ShiftRequestsByStaffIdQuery,
-  ShiftRequestStatus,
-  Staff,
-  UpdateShiftRequestMutation,
-} from "@shared/api/graphql/types";
-import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { Dayjs } from "dayjs";
 import React, {
   useCallback,
@@ -62,53 +48,20 @@ import React, {
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import {
   loadShiftPatterns,
   saveShiftPatterns,
 } from "@/lib/storage/shiftPatternStorage";
 
-type Status = "work" | "fixedOff" | "requestedOff" | "auto";
+import {
+  normalizeStatus,
+  ShiftRequestDayStatus,
+} from "../model/statusMapping";
+import { useShiftRequestData } from "../model/useShiftRequestData";
+import { useShiftRequestPersist } from "../model/useShiftRequestPersist";
 
-const statusToShiftRequestStatus: Record<Status, ShiftRequestStatus> = {
-  work: ShiftRequestStatus.WORK,
-  fixedOff: ShiftRequestStatus.FIXED_OFF,
-  requestedOff: ShiftRequestStatus.REQUESTED_OFF,
-  auto: ShiftRequestStatus.AUTO,
-};
-
-const shiftRequestStatusToStatus = (
-  status?: ShiftRequestStatus | null
-): Status => {
-  switch (status) {
-    case ShiftRequestStatus.WORK:
-      return "work";
-    case ShiftRequestStatus.FIXED_OFF:
-      return "fixedOff";
-    case ShiftRequestStatus.REQUESTED_OFF:
-      return "requestedOff";
-    default:
-      return "auto";
-  }
-};
-
-const normalizeStatus = (value?: string): Status => {
-  if (
-    value === "work" ||
-    value === "fixedOff" ||
-    value === "requestedOff" ||
-    value === "auto"
-  ) {
-    return value;
-  }
-  if (value === "off") return "fixedOff";
-  return "auto";
-};
+type Status = ShiftRequestDayStatus;
 
 export default function ShiftRequestForm() {
   const dispatch = useAppDispatchV2();
@@ -116,12 +69,6 @@ export default function ShiftRequestForm() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
-  const [staff, setStaff] = useState<Staff | null>(null);
-  const [isLoadingStaff, setIsLoadingStaff] = useState(true);
-  const [isLoadingShiftRequest, setIsLoadingShiftRequest] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [shiftRequestId, setShiftRequestId] = useState<string | null>(null);
-  const [histories, setHistories] = useState<ShiftRequestHistoryInput[]>([]);
   const weekdayLabels = ["日", "月", "火", "水", "木", "金", "土"];
   const statusLabelMap: Record<Status, string> = {
     work: "出勤",
@@ -158,10 +105,6 @@ export default function ShiftRequestForm() {
     }),
     [theme]
   );
-  const [selectedDates, setSelectedDates] = useState<
-    Record<string, { status: Status }>
-  >({});
-  const [note, setNote] = useState("");
   const [focusedDateKey, setFocusedDateKey] = useState<string | null>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const dayDetailRef = useRef<HTMLDivElement | null>(null);
@@ -172,7 +115,7 @@ export default function ShiftRequestForm() {
     mapping: Record<number, Status>; // weekday (0=Sun) -> status
   };
   const [patterns, setPatterns] = useState<Pattern[]>([]);
-  const [isLoadingPatterns, setIsLoadingPatterns] = useState(true);
+  const [patternsLoading, setPatternsLoading] = useState(true);
   const [patternDialogOpen, setPatternDialogOpen] = useState(false);
   const [newPatternDialogOpen, setNewPatternDialogOpen] = useState(false);
   const [newPatternName, setNewPatternName] = useState("");
@@ -220,6 +163,34 @@ export default function ShiftRequestForm() {
     () => days.map((d) => d.format("YYYY-MM-DD")),
     [days]
   );
+
+  const {
+    staff,
+    isLoadingStaff,
+    isLoadingShiftRequest,
+    shiftRequestId,
+    histories,
+    selectedDates,
+    setSelectedDates,
+    note,
+    setNote,
+    setHistories,
+    setShiftRequestId,
+  } = useShiftRequestData({
+    cognitoUserId: cognitoUser?.id,
+    monthStart,
+  });
+
+  const { saveShiftRequest, isSaving } = useShiftRequestPersist({
+    staff,
+    monthStart,
+    selectedDates,
+    note,
+    histories,
+    shiftRequestId,
+    setShiftRequestId,
+    setHistories,
+  });
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [selectionAnchorKey, setSelectionAnchorKey] = useState<string | null>(
@@ -392,19 +363,17 @@ export default function ShiftRequestForm() {
 
   useEffect(() => {
     if (cognitoUserLoading) {
-      setIsLoadingPatterns(true);
       return;
     }
     if (!cognitoUser) {
       setPatterns([]);
-      setIsLoadingPatterns(false);
+      setPatternsLoading(false);
       return;
     }
 
+    setPatternsLoading(true);
     let isMounted = true;
-
     const fetchPatterns = async () => {
-      setIsLoadingPatterns(true);
       try {
         const stored = await loadShiftPatterns();
         if (!isMounted) return;
@@ -428,7 +397,7 @@ export default function ShiftRequestForm() {
         }
       } finally {
         if (isMounted) {
-          setIsLoadingPatterns(false);
+          setPatternsLoading(false);
         }
       }
     };
@@ -440,153 +409,6 @@ export default function ShiftRequestForm() {
     };
   }, [cognitoUser, cognitoUserLoading, dispatch]);
 
-  useEffect(() => {
-    if (cognitoUserLoading) return;
-    if (!cognitoUser?.id) {
-      setStaff(null);
-      setIsLoadingStaff(false);
-      return;
-    }
-
-    let isMounted = true;
-    const loadStaff = async () => {
-      setIsLoadingStaff(true);
-      try {
-        const staffData = await fetchStaff(cognitoUser.id);
-        if (!isMounted) return;
-        setStaff(staffData ?? null);
-      } catch {
-        if (!isMounted) return;
-        setStaff(null);
-        dispatch(setSnackbarError(MESSAGE_CODE.E05001));
-      } finally {
-        if (isMounted) {
-          setIsLoadingStaff(false);
-        }
-      }
-    };
-
-    loadStaff();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [cognitoUser, cognitoUserLoading, dispatch]);
-
-  useEffect(() => {
-    if (!staff?.id) {
-      setShiftRequestId(null);
-      setSelectedDates({});
-      setNote("");
-      setIsLoadingShiftRequest(false);
-      setHistories([]);
-      return;
-    }
-
-    let isMounted = true;
-    const fetchShiftRequest = async () => {
-      setIsLoadingShiftRequest(true);
-      try {
-        const targetMonthKey = monthStart.format("YYYY-MM");
-        const response = (await graphqlClient.graphql({
-          query: shiftRequestsByStaffId,
-          variables: {
-            staffId: staff.id,
-            targetMonth: { eq: targetMonthKey },
-            limit: 1,
-          },
-          authMode: "userPool",
-        })) as GraphQLResult<ShiftRequestsByStaffIdQuery>;
-
-        if (!isMounted) return;
-
-        if (response.errors) {
-          throw new Error(response.errors[0].message);
-        }
-
-        const items =
-          response.data?.shiftRequestsByStaffId?.items?.filter(
-            (item): item is NonNullable<typeof item> => item !== null
-          ) ?? [];
-
-        const existing = items[0];
-
-        if (!existing) {
-          setShiftRequestId(null);
-          setSelectedDates({});
-          setNote("");
-          setHistories([]);
-          return;
-        }
-
-        const nextSelected: Record<string, { status: Status }> = {};
-        existing.entries
-          ?.filter(
-            (entry): entry is NonNullable<typeof entry> => entry !== null
-          )
-          .forEach((entry) => {
-            nextSelected[entry.date] = {
-              status: shiftRequestStatusToStatus(entry.status),
-            };
-          });
-
-        setShiftRequestId(existing.id);
-        setSelectedDates(nextSelected);
-        setNote(existing.note ?? "");
-        const sanitizedHistories =
-          existing.histories
-            ?.filter(
-              (history): history is NonNullable<typeof history> =>
-                history !== null
-            )
-            .map((history) => ({
-              version: history.version,
-              note: history.note ?? undefined,
-              entries:
-                history.entries
-                  ?.filter(
-                    (entry): entry is NonNullable<typeof entry> =>
-                      entry !== null
-                  )
-                  .map((entry) => ({
-                    date: entry.date,
-                    status: entry.status,
-                  })) ?? undefined,
-              summary: history.summary
-                ? {
-                    workDays: history.summary.workDays ?? undefined,
-                    fixedOffDays: history.summary.fixedOffDays ?? undefined,
-                    requestedOffDays:
-                      history.summary.requestedOffDays ?? undefined,
-                  }
-                : undefined,
-              submittedAt: history.submittedAt ?? undefined,
-              updatedAt: history.updatedAt ?? undefined,
-              recordedAt: history.recordedAt,
-              recordedByStaffId: history.recordedByStaffId ?? undefined,
-              changeReason: history.changeReason ?? undefined,
-            })) ?? [];
-        // DynamoDBの戻り順序は保証されないため、バージョン昇順に整列して保持
-        setHistories(
-          sanitizedHistories.sort((a, b) => (a.version ?? 0) - (b.version ?? 0))
-        );
-      } catch {
-        if (isMounted) {
-          dispatch(setSnackbarError(MESSAGE_CODE.E16002));
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingShiftRequest(false);
-        }
-      }
-    };
-
-    fetchShiftRequest();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [dispatch, monthStart, staff?.id]);
 
   const serializePatterns = useCallback(
     (patternList: Pattern[]) =>
@@ -645,98 +467,6 @@ export default function ShiftRequestForm() {
   const nextMonth = () => setCurrentMonth((m) => m.add(1, "month"));
 
   // 一括で選択中の日にステータスを適用（未使用のため保持しない）
-
-  const handleSave = async () => {
-    if (!staff?.id) {
-      dispatch(setSnackbarError(MESSAGE_CODE.E05001));
-      return;
-    }
-
-    const entries = Object.entries(selectedDates)
-      .map(([date, value]) => ({
-        date,
-        status: statusToShiftRequestStatus[value.status],
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    if (entries.length === 0) return;
-
-    const submittedAt = dayjs().toISOString();
-    const targetMonthKey = monthStart.format("YYYY-MM");
-    const maxVersion = histories.reduce(
-      (acc, history) => Math.max(acc, history.version ?? 0),
-      0
-    );
-    const historySnapshot: ShiftRequestHistoryInput = {
-      version: maxVersion + 1,
-      note,
-      entries,
-      summary: { ...summary },
-      submittedAt,
-      updatedAt: submittedAt,
-      recordedAt: submittedAt,
-      recordedByStaffId: staff.id,
-    };
-
-    setIsSaving(true);
-    try {
-      const nextHistories = [...histories, historySnapshot];
-      if (shiftRequestId) {
-        const response = (await graphqlClient.graphql({
-          query: updateShiftRequest,
-          variables: {
-            input: {
-              id: shiftRequestId,
-              note,
-              entries,
-              summary,
-              submittedAt,
-              histories: nextHistories,
-            },
-          },
-          authMode: "userPool",
-        })) as GraphQLResult<UpdateShiftRequestMutation>;
-
-        if (response.errors) {
-          throw new Error(response.errors[0].message);
-        }
-
-        setShiftRequestId(
-          response.data?.updateShiftRequest?.id ?? shiftRequestId
-        );
-        setHistories(nextHistories);
-      } else {
-        const response = (await graphqlClient.graphql({
-          query: createShiftRequest,
-          variables: {
-            input: {
-              staffId: staff.id,
-              targetMonth: targetMonthKey,
-              note,
-              entries,
-              summary,
-              submittedAt,
-              histories: nextHistories,
-            },
-          },
-          authMode: "userPool",
-        })) as GraphQLResult<CreateShiftRequestMutation>;
-
-        if (response.errors) {
-          throw new Error(response.errors[0].message);
-        }
-
-        setShiftRequestId(response.data?.createShiftRequest?.id ?? null);
-        setHistories(nextHistories);
-      }
-
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S16001));
-    } catch {
-      dispatch(setSnackbarError(MESSAGE_CODE.E16001));
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   // カウント：出勤と休み
   const workCount = useMemo(
@@ -1179,7 +909,7 @@ export default function ShiftRequestForm() {
               >
                 <Button
                   variant="contained"
-                  onClick={handleSave}
+                  onClick={() => saveShiftRequest(summary)}
                   disabled={!hasSelection || interactionDisabled}
                 >
                   保存
@@ -1192,7 +922,7 @@ export default function ShiftRequestForm() {
         {isMobile && (
           <IconButton
             aria-label="保存"
-            onClick={handleSave}
+            onClick={() => saveShiftRequest(summary)}
             disabled={!hasSelection || interactionDisabled}
             sx={{
               position: "fixed",
@@ -1229,7 +959,7 @@ export default function ShiftRequestForm() {
         >
           <DialogTitle>マイパターン一覧</DialogTitle>
           <DialogContent>
-            {isLoadingPatterns ? (
+            {patternsLoading ? (
               <Box display="flex" justifyContent="center" py={3}>
                 <CircularProgress size={24} />
               </Box>
@@ -1306,7 +1036,7 @@ export default function ShiftRequestForm() {
                             <Button
                               size="small"
                               onClick={() => applyPattern(p)}
-                              disabled={isLoadingPatterns}
+                              disabled={patternsLoading}
                             >
                               適用
                             </Button>
@@ -1314,7 +1044,7 @@ export default function ShiftRequestForm() {
                               size="small"
                               color="error"
                               onClick={() => deletePattern(p.id)}
-                              disabled={isLoadingPatterns}
+                              disabled={patternsLoading}
                               startIcon={<DeleteIcon />}
                             >
                               削除
@@ -1339,7 +1069,7 @@ export default function ShiftRequestForm() {
                 setNewPatternDialogOpen(true);
               }}
               startIcon={<AddIcon />}
-              disabled={isLoadingPatterns}
+              disabled={patternsLoading}
             >
               新規作成
             </Button>
@@ -1404,7 +1134,7 @@ export default function ShiftRequestForm() {
                 if (!newPatternName) return;
                 createPattern(newPatternName, newPatternMapping);
               }}
-              disabled={isLoadingPatterns}
+              disabled={patternsLoading}
             >
               保存
             </Button>

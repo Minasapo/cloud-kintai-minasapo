@@ -285,6 +285,7 @@ export default function AdminStaffAttendanceList() {
     );
     if (targetAttendances.length === 0) return;
 
+    let mailErrorOccurred = false;
     setBulkApproving(true);
     try {
       for (const attendance of targetAttendances) {
@@ -296,10 +297,15 @@ export default function AdminStaffAttendanceList() {
           undefined
         );
 
-        new GenericMailSender(
-          staffForMail,
-          updatedAttendance
-        ).approveChangeRequest(undefined);
+        try {
+          new GenericMailSender(
+            staffForMail,
+            updatedAttendance
+          ).approveChangeRequest(undefined);
+        } catch (mailError) {
+          console.error("Failed to send approval notification mail:", mailError);
+          mailErrorOccurred = true;
+        }
 
         // eslint-disable-next-line no-await-in-loop
         await createOperationLogData({
@@ -323,6 +329,9 @@ export default function AdminStaffAttendanceList() {
       dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
       setSelectedAttendanceIds([]);
       await refetchAttendances();
+      if (mailErrorOccurred) {
+        dispatch(setSnackbarError(MESSAGE_CODE.E00002));
+      }
     } catch (error) {
       console.error("Bulk approve failed", error);
       dispatch(setSnackbarError(MESSAGE_CODE.E04006));

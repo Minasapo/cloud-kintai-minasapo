@@ -9,7 +9,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import {
   ApprovalStatus,
   ApprovalStep,
@@ -23,7 +22,6 @@ import {
 } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import { GraphQLResult } from "aws-amplify/api";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -32,13 +30,13 @@ import { AuthContext } from "@/context/AuthContext";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 import { CATEGORY_LABELS } from "@/lib/workflowLabels";
+import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
 
 export default function AdminWorkflowDetail() {
   const { id } = useParams() as { id?: string };
@@ -47,42 +45,8 @@ export default function AdminWorkflowDetail() {
   const { cognitoUser } = useContext(AuthContext);
   const { update: updateWorkflow } = useWorkflows();
 
-  const [workflow, setWorkflow] = useState<NonNullable<
-    GetWorkflowQuery["getWorkflow"]
-  > | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { workflow, setWorkflow, loading, error } = useWorkflowDetailData(id);
   const dispatch = useAppDispatchV2();
-
-  useEffect(() => {
-    const fetch = async () => {
-      if (!id) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const resp = (await graphqlClient.graphql({
-          query: getWorkflow,
-          variables: { id },
-          authMode: "userPool",
-        })) as GraphQLResult<GetWorkflowQuery>;
-
-        if (resp.errors) throw new Error(resp.errors[0].message);
-
-        if (!resp.data?.getWorkflow) {
-          setError("指定されたワークフローが見つかりませんでした");
-          setWorkflow(null);
-        } else {
-          setWorkflow(resp.data.getWorkflow);
-        }
-      } catch (err) {
-        console.error(err);
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, [id]);
 
   const staffName = (() => {
     if (!workflow?.staffId) return "—";
