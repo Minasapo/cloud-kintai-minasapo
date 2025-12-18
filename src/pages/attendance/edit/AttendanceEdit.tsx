@@ -185,8 +185,9 @@ export default function AttendanceEdit() {
               staffs,
               data.staffComment
             );
-          } catch (e) {
-            console.log(e);
+          } catch (mailError) {
+            console.error("Failed to send change request mail:", mailError);
+            dispatch(setSnackbarError(MESSAGE_CODE.E00002));
           }
 
           dispatch(setSnackbarSuccess(MESSAGE_CODE.S02005));
@@ -230,12 +231,17 @@ export default function AttendanceEdit() {
           dispatch(setSnackbarSuccess(MESSAGE_CODE.S02005));
 
           if (!cognitoUser) return;
-          void sendChangeRequestMail(
-            cognitoUser,
-            dayjs(targetWorkDate),
-            staffs,
-            data.staffComment
-          );
+          try {
+            void sendChangeRequestMail(
+              cognitoUser,
+              dayjs(targetWorkDate),
+              staffs,
+              data.staffComment
+            );
+          } catch (mailError) {
+            console.error("Failed to send change request mail:", mailError);
+            dispatch(setSnackbarError(MESSAGE_CODE.E00002));
+          }
           navigate("/attendance/list");
         })
         .catch((e) => {

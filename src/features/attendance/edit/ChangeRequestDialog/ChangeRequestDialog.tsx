@@ -177,10 +177,18 @@ export default function ChangeRequestDialog({
                   throw new Error(MESSAGE_CODE.E00002);
                 }
 
-                new GenericMailSender(
-                  staff,
-                  updatedAttendance
-                ).approveChangeRequest(comment);
+                try {
+                  new GenericMailSender(
+                    staff,
+                    updatedAttendance
+                  ).approveChangeRequest(comment);
+                } catch (mailError) {
+                  console.error(
+                    "Failed to send approval notification mail:",
+                    mailError
+                  );
+                  dispatch(setSnackbarError(MESSAGE_CODE.E00002));
+                }
 
                 // OperationLog を作成（失敗しても処理を止めない）
                 try {
