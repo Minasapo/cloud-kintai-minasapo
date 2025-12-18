@@ -28,6 +28,14 @@ const SNACKBAR_COLORS = {
   warn: "#ffff7f",
 } as const;
 
+const SNACKBAR_BASE_OFFSET_PX = 24;
+const SNACKBAR_STACK_GAP_PX = 12;
+const SNACKBAR_APPROX_HEIGHT_PX = 68;
+
+const getSnackbarTopOffset = (stackIndex: number) =>
+  SNACKBAR_BASE_OFFSET_PX +
+  stackIndex * (SNACKBAR_APPROX_HEIGHT_PX + SNACKBAR_STACK_GAP_PX);
+
 export default function SnackbarGroup() {
   const { success, error, warn } = useAppSelectorV2(selectSnackbar);
   const dispatch = useAppDispatchV2();
@@ -72,13 +80,16 @@ export default function SnackbarGroup() {
   }, [resetWarn, warn]);
 
   const renderSnackbar = (
-    message: string | null,
+    key: string,
+    message: string,
     severity: "success" | "error" | "warning",
     autoHideDuration: number | null,
-    setMessage: React.Dispatch<React.SetStateAction<string | null>>
+    setMessage: React.Dispatch<React.SetStateAction<string | null>>,
+    stackIndex: number
   ) => (
     <Snackbar
-      open={Boolean(message)}
+      key={key}
+      open
       anchorOrigin={SNACKBAR_ANCHOR_ORIGIN}
       autoHideDuration={autoHideDuration ?? undefined}
       onClose={(_event, reason?: SnackbarCloseReason) => {
@@ -86,6 +97,11 @@ export default function SnackbarGroup() {
           return;
         }
         setMessage(null);
+      }}
+      sx={{
+        "&.MuiSnackbar-anchorOriginTopRight": {
+          top: `${getSnackbarTopOffset(stackIndex)}px`,
+        },
       }}
     >
       <Alert
@@ -116,25 +132,50 @@ export default function SnackbarGroup() {
     </Snackbar>
   );
 
+  const snackbarConfigs = [
+    {
+      key: "success",
+      message: successMessage,
+      severity: "success" as const,
+      autoHideDuration: 6000,
+      setMessage: setSuccessMessage,
+    },
+    {
+      key: "error",
+      message: errorMessage,
+      severity: "error" as const,
+      autoHideDuration: null,
+      setMessage: setErrorMessage,
+    },
+    {
+      key: "warn",
+      message: warnMessage,
+      severity: "warning" as const,
+      autoHideDuration: 5000,
+      setMessage: setWarnMessage,
+    },
+  ];
+
+  let stackIndex = 0;
+
   return (
     <>
-      {renderSnackbar(
-        successMessage,
-        "success",
-        6000,
-        setSuccessMessage
-      )}
-      {renderSnackbar(
-        errorMessage,
-        "error",
-        null,
-        setErrorMessage
-      )}
-      {renderSnackbar(
-        warnMessage,
-        "warning",
-        5000,
-        setWarnMessage
+      {snackbarConfigs.map(
+        ({ key, message, severity, autoHideDuration, setMessage }) => {
+          if (!message) {
+            return null;
+          }
+          const element = renderSnackbar(
+            key,
+            message,
+            severity,
+            autoHideDuration,
+            setMessage,
+            stackIndex
+          );
+          stackIndex += 1;
+          return element;
+        }
       )}
     </>
   );
