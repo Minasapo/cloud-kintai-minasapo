@@ -241,6 +241,13 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
       workEnd
       __typename
     }
+    externalLinks {
+      label
+      url
+      enabled
+      icon
+      __typename
+    }
     sortKey
     workType
     developer
@@ -275,6 +282,13 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
       workEnd
       __typename
     }
+    externalLinks {
+      label
+      url
+      enabled
+      icon
+      __typename
+    }
     sortKey
     workType
     developer
@@ -307,6 +321,13 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
     notifications {
       workStart
       workEnd
+      __typename
+    }
+    externalLinks {
+      label
+      url
+      enabled
+      icon
       __typename
     }
     sortKey
@@ -809,11 +830,10 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument($fi
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnDeleteDocumentSubscriptionVariables,
-    APITypes.OnDeleteDocumentSubscription
-  >;
-export const onCreateShiftRequest =
-  /* GraphQL */ `subscription OnCreateShiftRequest(
+  APITypes.OnDeleteDocumentSubscriptionVariables,
+  APITypes.OnDeleteDocumentSubscription
+>;
+export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftRequest(
   $filter: ModelSubscriptionShiftRequestFilterInput
 ) {
   onCreateShiftRequest(filter: $filter) {
@@ -860,11 +880,10 @@ export const onCreateShiftRequest =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnCreateShiftRequestSubscriptionVariables,
-    APITypes.OnCreateShiftRequestSubscription
-  >;
-export const onUpdateShiftRequest =
-  /* GraphQL */ `subscription OnUpdateShiftRequest(
+  APITypes.OnCreateShiftRequestSubscriptionVariables,
+  APITypes.OnCreateShiftRequestSubscription
+>;
+export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftRequest(
   $filter: ModelSubscriptionShiftRequestFilterInput
 ) {
   onUpdateShiftRequest(filter: $filter) {
@@ -911,11 +930,10 @@ export const onUpdateShiftRequest =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnUpdateShiftRequestSubscriptionVariables,
-    APITypes.OnUpdateShiftRequestSubscription
-  >;
-export const onDeleteShiftRequest =
-  /* GraphQL */ `subscription OnDeleteShiftRequest(
+  APITypes.OnUpdateShiftRequestSubscriptionVariables,
+  APITypes.OnUpdateShiftRequestSubscription
+>;
+export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftRequest(
   $filter: ModelSubscriptionShiftRequestFilterInput
 ) {
   onDeleteShiftRequest(filter: $filter) {
@@ -962,11 +980,10 @@ export const onDeleteShiftRequest =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnDeleteShiftRequestSubscriptionVariables,
-    APITypes.OnDeleteShiftRequestSubscription
-  >;
-export const onCreateShiftPlanYear =
-  /* GraphQL */ `subscription OnCreateShiftPlanYear(
+  APITypes.OnDeleteShiftRequestSubscriptionVariables,
+  APITypes.OnDeleteShiftRequestSubscription
+>;
+export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPlanYear(
   $filter: ModelSubscriptionShiftPlanYearFilterInput
 ) {
   onCreateShiftPlanYear(filter: $filter) {
@@ -989,11 +1006,10 @@ export const onCreateShiftPlanYear =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnCreateShiftPlanYearSubscriptionVariables,
-    APITypes.OnCreateShiftPlanYearSubscription
-  >;
-export const onUpdateShiftPlanYear =
-  /* GraphQL */ `subscription OnUpdateShiftPlanYear(
+  APITypes.OnCreateShiftPlanYearSubscriptionVariables,
+  APITypes.OnCreateShiftPlanYearSubscription
+>;
+export const onUpdateShiftPlanYear = /* GraphQL */ `subscription OnUpdateShiftPlanYear(
   $filter: ModelSubscriptionShiftPlanYearFilterInput
 ) {
   onUpdateShiftPlanYear(filter: $filter) {
@@ -1016,11 +1032,10 @@ export const onUpdateShiftPlanYear =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnUpdateShiftPlanYearSubscriptionVariables,
-    APITypes.OnUpdateShiftPlanYearSubscription
-  >;
-export const onDeleteShiftPlanYear =
-  /* GraphQL */ `subscription OnDeleteShiftPlanYear(
+  APITypes.OnUpdateShiftPlanYearSubscriptionVariables,
+  APITypes.OnUpdateShiftPlanYearSubscription
+>;
+export const onDeleteShiftPlanYear = /* GraphQL */ `subscription OnDeleteShiftPlanYear(
   $filter: ModelSubscriptionShiftPlanYearFilterInput
 ) {
   onDeleteShiftPlanYear(filter: $filter) {
@@ -1043,11 +1058,10 @@ export const onDeleteShiftPlanYear =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnDeleteShiftPlanYearSubscriptionVariables,
-    APITypes.OnDeleteShiftPlanYearSubscription
-  >;
-export const onCreateWorkflow =
-  /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+  APITypes.OnDeleteShiftPlanYearSubscriptionVariables,
+  APITypes.OnDeleteShiftPlanYearSubscription
+>;
+export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onCreateWorkflow(filter: $filter) {
     id
     approvedStaffIds
@@ -1257,11 +1271,10 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnDeleteOperationLogSubscriptionVariables,
-    APITypes.OnDeleteOperationLogSubscription
-  >;
-export const onCreateDailyReport =
-  /* GraphQL */ `subscription OnCreateDailyReport(
+  APITypes.OnDeleteOperationLogSubscriptionVariables,
+  APITypes.OnDeleteOperationLogSubscription
+>;
+export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyReport(
   $filter: ModelSubscriptionDailyReportFilterInput
 ) {
   onCreateDailyReport(filter: $filter) {
@@ -1291,11 +1304,10 @@ export const onCreateDailyReport =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnCreateDailyReportSubscriptionVariables,
-    APITypes.OnCreateDailyReportSubscription
-  >;
-export const onUpdateDailyReport =
-  /* GraphQL */ `subscription OnUpdateDailyReport(
+  APITypes.OnCreateDailyReportSubscriptionVariables,
+  APITypes.OnCreateDailyReportSubscription
+>;
+export const onUpdateDailyReport = /* GraphQL */ `subscription OnUpdateDailyReport(
   $filter: ModelSubscriptionDailyReportFilterInput
 ) {
   onUpdateDailyReport(filter: $filter) {
@@ -1325,11 +1337,10 @@ export const onUpdateDailyReport =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnUpdateDailyReportSubscriptionVariables,
-    APITypes.OnUpdateDailyReportSubscription
-  >;
-export const onDeleteDailyReport =
-  /* GraphQL */ `subscription OnDeleteDailyReport(
+  APITypes.OnUpdateDailyReportSubscriptionVariables,
+  APITypes.OnUpdateDailyReportSubscription
+>;
+export const onDeleteDailyReport = /* GraphQL */ `subscription OnDeleteDailyReport(
   $filter: ModelSubscriptionDailyReportFilterInput
 ) {
   onDeleteDailyReport(filter: $filter) {
@@ -1359,6 +1370,6 @@ export const onDeleteDailyReport =
   }
 }
 ` as GeneratedSubscription<
-    APITypes.OnDeleteDailyReportSubscriptionVariables,
-    APITypes.OnDeleteDailyReportSubscription
-  >;
+  APITypes.OnDeleteDailyReportSubscriptionVariables,
+  APITypes.OnDeleteDailyReportSubscription
+>;

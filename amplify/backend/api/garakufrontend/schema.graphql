@@ -20,6 +20,7 @@ type Staff @model @auth(rules: [{ allow: private }]) {
   owner: Boolean
   usageStartDate: String
   notifications: Notification
+  externalLinks: [StaffExternalLink]
   sortKey: String
   workType: String
   developer: Boolean
@@ -44,6 +45,13 @@ enum ApproverMultipleMode {
 type Notification {
   workStart: Boolean
   workEnd: Boolean
+}
+
+type StaffExternalLink {
+  label: String!
+  url: String!
+  enabled: Boolean!
+  icon: String!
 }
 
 type HolidayCalendar @model @auth(rules: [{ allow: private }]) {
