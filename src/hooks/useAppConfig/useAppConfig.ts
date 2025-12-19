@@ -11,7 +11,8 @@ import type {
 import dayjs from "dayjs";
 import { useCallback, useMemo } from "react";
 
-import { DEFAULT_THEME_COLOR } from "@/constants/theme";
+import { DESIGN_TOKENS, getDesignTokens } from "@/constants/designTokens";
+import { resolveThemeColor } from "@/constants/theme";
 
 /**
  * アプリケーション設定の一部項目のみを抽出した型。
@@ -46,7 +47,7 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   reasons: [],
   quickInputStartTimes: [],
   quickInputEndTimes: [],
-  themeColor: DEFAULT_THEME_COLOR,
+  themeColor: resolveThemeColor(),
   shiftGroups: [],
 };
 
@@ -239,9 +240,32 @@ const useAppConfig = () => {
     [config]
   );
 
-  const getThemeColor = useCallback(
-    () =>
-      config?.themeColor ?? DEFAULT_CONFIG.themeColor ?? DEFAULT_THEME_COLOR,
+  const getThemeColor = useCallback(() => {
+    const fallbackColor = DEFAULT_CONFIG.themeColor;
+    const candidate = config?.themeColor ?? fallbackColor;
+    return resolveThemeColor(candidate || undefined);
+  }, [config]);
+
+  const getThemeTokens = useCallback(
+    (brandPrimaryOverride?: string) => {
+      const hasRemoteThemeColor = Boolean(config?.themeColor);
+      const candidate =
+        brandPrimaryOverride ?? config?.themeColor ?? DEFAULT_CONFIG.themeColor;
+
+      if (!brandPrimaryOverride && !hasRemoteThemeColor) {
+        return DESIGN_TOKENS;
+      }
+
+      const resolved = resolveThemeColor(candidate || undefined);
+      if (
+        !brandPrimaryOverride &&
+        resolved === DESIGN_TOKENS.color.brand.primary.base
+      ) {
+        return DESIGN_TOKENS;
+      }
+
+      return getDesignTokens({ brandPrimary: resolved });
+    },
     [config]
   );
 
@@ -275,6 +299,7 @@ const useAppConfig = () => {
     getSpecialHolidayEnabled,
     getAbsentEnabled,
     getThemeColor,
+    getThemeTokens,
   };
 };
 

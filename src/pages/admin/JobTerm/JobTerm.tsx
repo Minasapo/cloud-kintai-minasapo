@@ -1,5 +1,3 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import {
   Autocomplete,
   Box,
@@ -9,14 +7,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DataGrid, GridActionsCellItem, GridRowParams } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
 import { CloseDate } from "@shared/api/graphql/types";
-import Title from "@shared/ui/typography/Title";
+// Title removed per admin UI simplification
 import dayjs from "dayjs";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import PageLoader from "@/components/common/PageLoader";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
@@ -28,6 +26,8 @@ import {
 } from "../../../lib/reducers/snackbarReducer";
 import { defaultValues, Inputs } from "./common";
 import EditJobTermInputDialog from "./EditJobTermInputDialog";
+
+const JobTermTable = lazy(() => import("./JobTermTable"));
 
 export default function JobTerm() {
   const dispatch = useAppDispatchV2();
@@ -87,7 +87,6 @@ export default function JobTerm() {
   return (
     <>
       <Stack spacing={2}>
-        <Title>集計対象月</Title>
         <Typography>
           月ごとに勤怠を締める日付を指定します。
           <br />
@@ -166,84 +165,26 @@ export default function JobTerm() {
             </Box>
           </Stack>
         </Box>
-        <DataGrid
-          rows={closeDates}
-          sortModel={[
-            {
-              field: "closeDate",
-              sort: "desc",
-            },
-          ]}
-          autoHeight
-          columns={[
-            {
-              field: "closeDate",
-              headerName: "集計対象月",
-              width: 150,
-              valueGetter: (params) => {
-                const date = dayjs(params.row.closeDate);
-                return date.format("YYYY年M月");
-              },
-            },
-            {
-              field: "expirationDate",
-              headerName: "有効期間",
-              width: 300,
-              valueGetter: (params) => {
-                const startDate = dayjs(params.row.startDate);
-                const endDate = dayjs(params.row.endDate);
-                return `${startDate.format(
-                  AttendanceDate.DisplayFormat
-                )} 〜 ${endDate.format(AttendanceDate.DisplayFormat)}`;
-              },
-            },
-            {
-              field: "createdAt",
-              headerName: "作成日",
-              width: 150,
-              valueGetter: (params) => {
-                const date = dayjs(params.row.createdAt);
-                return date.format(AttendanceDate.DisplayFormat);
-              },
-            },
-            {
-              field: "actions",
-              type: "actions",
-              headerName: "操作",
-              getActions: (params: GridRowParams<CloseDate>) => [
-                <GridActionsCellItem
-                  key={params.row.id}
-                  icon={<EditIcon />}
-                  label="編集"
-                  onClick={() => {
-                    setEditRow(params.row);
-                    setEditDialogOpen(true);
-                  }}
-                />,
-                <GridActionsCellItem
-                  key={params.row.id}
-                  icon={<DeleteIcon />}
-                  label="削除"
-                  onClick={() => {
-                    // eslint-disable-next-line no-alert
-                    const result = window.confirm(
-                      "本当に削除しますか？この操作は取り消せません。"
-                    );
-                    if (!result) return;
+        <Suspense fallback={<PageLoader />}>
+          <JobTermTable
+            rows={closeDates}
+            onEdit={(row) => {
+              setEditRow(row);
+              setEditDialogOpen(true);
+            }}
+            onDelete={(row) => {
+              // eslint-disable-next-line no-alert
+              const result = window.confirm(
+                "本当に削除しますか？この操作は取り消せません。"
+              );
+              if (!result) return;
 
-                    deleteCloseDate({ id: params.row.id })
-                      .then(() =>
-                        dispatch(setSnackbarSuccess(MESSAGE_CODE.S09004))
-                      )
-                      .catch(() =>
-                        dispatch(setSnackbarError(MESSAGE_CODE.E09004))
-                      );
-                  }}
-                />,
-              ],
-            },
-          ]}
-        />
+              deleteCloseDate({ id: row.id })
+                .then(() => dispatch(setSnackbarSuccess(MESSAGE_CODE.S09004)))
+                .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E09004)));
+            }}
+          />
+        </Suspense>
       </Stack>
       <EditJobTermInputDialog
         targetData={editRow}

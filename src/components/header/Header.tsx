@@ -1,7 +1,7 @@
 import Logo from "@shared/ui/logo/Logo";
 import { useContext, useEffect, useMemo, useState } from "react";
 
-import { DEFAULT_THEME_COLOR } from "@/constants/theme";
+import { resolveThemeColor } from "@/constants/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { StaffRole } from "@/hooks/useStaffs/useStaffs";
@@ -17,11 +17,11 @@ export default function Header() {
   const { getThemeColor } = useContext(AppConfigContext);
   const [pathName, setPathName] = useState("/register");
 
-  const themeColor = useMemo(
+  const resolvedThemeColor = useMemo(
     () =>
-      typeof getThemeColor === "function"
-        ? getThemeColor()
-        : DEFAULT_THEME_COLOR,
+      resolveThemeColor(
+        typeof getThemeColor === "function" ? getThemeColor() : undefined
+      ),
     [getThemeColor]
   );
 
@@ -31,7 +31,6 @@ export default function Header() {
     setPathName(name);
   }, []); // location変更時に再実行したい場合はpopstateイベントを利用
 
-  const resolvedThemeColor = themeColor || DEFAULT_THEME_COLOR;
   const showExternalLinks = !isCognitoUserRole(StaffRole.OPERATOR);
 
   return (

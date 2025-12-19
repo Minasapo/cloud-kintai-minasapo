@@ -1,14 +1,7 @@
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import StatusChip from "@shared/ui/chips/StatusChip";
 
-export type WorkflowApprovalStepView = {
-  id: string;
-  name: string;
-  role: string;
-  state: string;
-  date?: string;
-  comment?: string;
-};
+import type { WorkflowApprovalStepView } from "../types";
 
 type Props = {
   title?: string;

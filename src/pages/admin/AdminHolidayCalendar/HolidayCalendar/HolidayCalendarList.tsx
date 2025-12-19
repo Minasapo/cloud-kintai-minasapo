@@ -122,7 +122,10 @@ export default function HolidayCalendarList() {
     <>
       <Stack direction="column" spacing={1}>
         <Stack direction="row" spacing={1} alignItems="center">
-          <AddHolidayCalendar createHolidayCalendar={createHolidayCalendar} />
+          <AddHolidayCalendar
+            createHolidayCalendar={createHolidayCalendar}
+            bulkCreateHolidayCalendar={bulkCreateHolidayCalendar}
+          />
           <CSVFilePicker
             bulkCreateHolidayCalendar={bulkCreateHolidayCalendar}
           />

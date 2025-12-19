@@ -14,6 +14,7 @@ import {
   CreateHolidayCalendarInput,
   HolidayCalendar,
 } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -26,15 +27,22 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "../../../../lib/reducers/snackbarReducer";
+import {
+  buildHolidayDateRange,
+  HolidayDateRangeError,
+  MAX_HOLIDAY_RANGE_DAYS,
+} from "./utils/buildHolidayDateRange";
 
 /**
  * AddHolidayCalendar コンポーネントのフォーム入力型
  *
- * holidayDate: 追加対象の休日の日付（表示/送信に使う文字列）
+ * startDate: 追加対象の休日の開始日（表示/送信に使う文字列）
+ * endDate: 追加対象の休日の終了日（任意）
  * name: 休日の名称
  */
 type Inputs = {
-  holidayDate: string;
+  startDate: string;
+  endDate: string;
   name: string;
 };
 
@@ -42,7 +50,8 @@ type Inputs = {
  * フォームの初期値
  */
 const defaultValues: Inputs = {
-  holidayDate: "",
+  startDate: "",
+  endDate: "",
   name: "",
 };
 
@@ -52,12 +61,20 @@ const defaultValues: Inputs = {
  * @param createHolidayCalendar - HolidayCalendar を作成する非同期関数。
  *   引数に CreateHolidayCalendarInput を取り、作成した HolidayCalendar または void を返す Promise を返す。
  */
+type CreateHolidayCalendarHandler = (
+  input: CreateHolidayCalendarInput
+) => Promise<void | HolidayCalendar>;
+
+type BulkCreateHolidayCalendarHandler = (
+  inputs: CreateHolidayCalendarInput[]
+) => Promise<void | HolidayCalendar[]>;
+
 export function AddHolidayCalendar({
   createHolidayCalendar,
+  bulkCreateHolidayCalendar,
 }: {
-  createHolidayCalendar: (
-    input: CreateHolidayCalendarInput
-  ) => Promise<void | HolidayCalendar>;
+  createHolidayCalendar: CreateHolidayCalendarHandler;
+  bulkCreateHolidayCalendar: BulkCreateHolidayCalendarHandler;
 }) {
   const dispatch = useAppDispatchV2();
   const [open, setOpen] = useState(false);
@@ -67,11 +84,14 @@ export function AddHolidayCalendar({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { isValid, isDirty, isSubmitting },
   } = useForm<Inputs>({
     mode: "onChange",
     defaultValues,
   });
+
+  const startDateValue = watch("startDate");
 
   /**
    * ダイアログを閉じる（表示フラグを false にする）。
@@ -86,24 +106,44 @@ export function AddHolidayCalendar({
    *
    * @param data - フォーム入力（Inputs）
    */
-  const onSubmit = async (data: Inputs) => {
+  const onSubmit = async ({ startDate, endDate, name }: Inputs) => {
     const holidayCalenderMessage = new HolidayCalenderMessage();
-    await createHolidayCalendar(data)
-      .then(() => {
+    const isRangeSubmission = Boolean(endDate);
+
+    try {
+      if (isRangeSubmission) {
+        const range = buildHolidayDateRange(startDate, endDate);
+        const inputs = range.map((holidayDate) => ({
+          holidayDate,
+          name,
+        }));
+        await bulkCreateHolidayCalendar(inputs);
+        const successMessage = `${holidayCalenderMessage.getCategoryName()}を${
+          range.length
+        }件作成しました`;
+        dispatch(setSnackbarSuccess(successMessage));
+      } else {
+        const [holidayDate] = buildHolidayDateRange(startDate);
+        await createHolidayCalendar({ holidayDate, name });
         dispatch(
           setSnackbarSuccess(
             holidayCalenderMessage.create(MessageStatus.SUCCESS)
           )
         );
-        // 登録成功後にフォームの入力値を初期化してダイアログを閉じる
-        reset(defaultValues);
-        setOpen(false);
-      })
-      .catch(() =>
-        dispatch(
-          setSnackbarError(holidayCalenderMessage.create(MessageStatus.ERROR))
-        )
+      }
+
+      reset(defaultValues);
+      setOpen(false);
+    } catch (error) {
+      if (error instanceof HolidayDateRangeError) {
+        dispatch(setSnackbarError(error.message));
+        return;
+      }
+
+      dispatch(
+        setSnackbarError(holidayCalenderMessage.create(MessageStatus.ERROR))
       );
+    }
   };
 
   return (
@@ -129,23 +169,100 @@ export function AddHolidayCalendar({
             <DialogContentText>
               休日としたい日付と休日名を入力してください。
             </DialogContentText>
+            <DialogContentText>
+              {`開始日のみ入力した場合は単日登録、終了日を指定すると開始日から終了日までをまとめて登録します（最大${MAX_HOLIDAY_RANGE_DAYS}日）。`}
+            </DialogContentText>
             <Controller
-              name="holidayDate"
+              name="startDate"
               control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <DatePicker
-                  label="日付"
-                  format={AttendanceDate.DisplayFormat}
-                  {...field}
-                  slotProps={{
-                    textField: {
-                      required: true,
-                    },
-                  }}
-                  onChange={(date) => field.onChange(date)}
-                />
-              )}
+              rules={{ required: "開始日は必須項目です。" }}
+              render={({ field, fieldState }) => {
+                const { ref, value, onChange, name, onBlur, ...rest } = field;
+                return (
+                  <DatePicker
+                    {...rest}
+                    label="開始日"
+                    format={AttendanceDate.DisplayFormat}
+                    value={value ? dayjs(value) : null}
+                    onChange={(date) =>
+                      onChange(
+                        date ? date.format(AttendanceDate.DataFormat) : ""
+                      )
+                    }
+                    slotProps={{
+                      textField: {
+                        required: true,
+                        inputRef: ref,
+                        name,
+                        onBlur,
+                        error: Boolean(fieldState.error),
+                        helperText: fieldState.error?.message,
+                      },
+                    }}
+                  />
+                );
+              }}
+            />
+            <Controller
+              name="endDate"
+              control={control}
+              rules={{
+                validate: (value) => {
+                  if (!value) {
+                    return true;
+                  }
+
+                  if (!startDateValue) {
+                    return "開始日を先に入力してください。";
+                  }
+
+                  const start = dayjs(
+                    startDateValue,
+                    AttendanceDate.DataFormat,
+                    true
+                  );
+                  const end = dayjs(value, AttendanceDate.DataFormat, true);
+
+                  if (!start.isValid()) {
+                    return "開始日はYYYY-MM-DD形式で入力してください。";
+                  }
+
+                  if (!end.isValid()) {
+                    return "終了日はYYYY-MM-DD形式で入力してください。";
+                  }
+
+                  if (end.isBefore(start)) {
+                    return "終了日は開始日以降の日付を指定してください。";
+                  }
+
+                  return true;
+                },
+              }}
+              render={({ field, fieldState }) => {
+                const { ref, value, onChange, name, onBlur, ...rest } = field;
+                return (
+                  <DatePicker
+                    {...rest}
+                    label="終了日 (任意)"
+                    format={AttendanceDate.DisplayFormat}
+                    value={value ? dayjs(value) : null}
+                    onChange={(date) =>
+                      onChange(
+                        date ? date.format(AttendanceDate.DataFormat) : ""
+                      )
+                    }
+                    slotProps={{
+                      textField: {
+                        inputRef: ref,
+                        name,
+                        onBlur,
+                        error: Boolean(fieldState.error),
+                        helperText: fieldState.error?.message,
+                      },
+                    }}
+                  />
+                );
+              }}
             />
             <TextField
               label="休日名"

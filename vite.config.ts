@@ -26,10 +26,6 @@ const chunkMatchers = [
     test: /node_modules\/@aws-sdk\//,
   },
   {
-    name: "vendor-xlsx",
-    test: /node_modules\/xlsx\//,
-  },
-  {
     name: "vendor-state",
     test: /node_modules\/(?:@reduxjs|redux|react-redux|xstate|immer|reselect)/,
   },
@@ -97,7 +93,7 @@ export default defineConfig({
       typescript: true,
     }),
   ],
-  assetsInclude: ["**/*.xlsx", "**/*.png"],
+  assetsInclude: ["**/*.csv", "**/*.png"],
   define: {
     global: "window",
   },

@@ -1,10 +1,10 @@
 import { sendMail } from "@shared/api/graphql/documents/queries";
-import { API } from "aws-amplify";
 import dayjs from "dayjs";
 
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { StaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 export default function sendChangeRequestMail(
@@ -74,7 +74,7 @@ export default function sendChangeRequestMail(
   };
 
   try {
-    void API.graphql(mailParams);
+    void graphqlClient.graphql(mailParams);
   } catch {
     throw new Error(MESSAGE_CODE.E00002);
   }

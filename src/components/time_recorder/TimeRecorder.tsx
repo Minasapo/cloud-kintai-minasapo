@@ -29,7 +29,6 @@ import {
   Staff,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
-import { Logger } from "aws-amplify";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
@@ -46,6 +45,7 @@ import {
 import { getWorkStatus } from "@/lib/attendance/workStatus";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import { Logger } from "@/lib/logger";
 import Clock from "@/shared/ui/clock/Clock";
 import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
 import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";

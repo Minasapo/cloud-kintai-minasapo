@@ -1,10 +1,9 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import { useTheme } from "@mui/material/styles";
 import MobileMenuView, { MobileMenuItem } from "@shared/ui/header/MobileMenu";
 import { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { theme } from "@/lib/theme";
 
 import { AuthContext } from "../../context/AuthContext";
 import { useMobileDrawer } from "../../hooks/useMobileDrawer";
@@ -17,6 +16,7 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
   const { signOut } = useContext(AuthContext);
   const navigate = useNavigate();
   const { isOpen, closeDrawer, openDrawer } = useMobileDrawer();
+  const theme = useTheme();
 
   const menuItems = useMemo<MobileMenuItem[]>(
     () => [
@@ -41,7 +41,12 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
         },
       },
     ],
-    [navigate, signOut]
+    [
+      navigate,
+      signOut,
+      theme.palette.error.contrastText,
+      theme.palette.error.main,
+    ]
   );
 
   if (pathName === "/login") return null;

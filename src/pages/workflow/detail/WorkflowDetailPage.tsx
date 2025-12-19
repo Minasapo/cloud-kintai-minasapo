@@ -1,30 +1,28 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import {
-  ApprovalStatus,
-  ApprovalStep,
   GetWorkflowQuery,
   UpdateWorkflowInput,
-  WorkflowComment,
-  WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
-import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/ui/WorkflowApprovalTimeline";
+import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow/model/workflowApprovalTimeline";
+import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
+import { buildWorkflowCommentsUpdateInput } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
-import WorkflowApplicationDetails from "@/features/workflow/detail-panel/ui/WorkflowApplicationDetails";
+import { deriveWorkflowDetailPermissions } from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
 import WorkflowDetailActions from "@/features/workflow/detail-panel/ui/WorkflowDetailActions";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
@@ -52,10 +50,10 @@ export default function WorkflowDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        const resp = (await API.graphql({
+        const resp = (await graphqlClient.graphql({
           query: getWorkflow,
           variables: { id },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<GetWorkflowQuery>;
 
         if (resp.errors) throw new Error(resp.errors[0].message);
@@ -82,42 +80,6 @@ export default function WorkflowDetailPage() {
     return s ? `${s.familyName} ${s.givenName}` : workflow.staffId;
   })();
 
-  const approverInfo = useMemo(() => {
-    // normalize to three modes: 'single' | 'any' | 'order'
-    if (!workflow?.staffId) return { mode: "any", items: [] as string[] };
-    const applicant = staffs.find((s) => s.id === workflow.staffId);
-    // applicant may carry approver config
-    const mode = applicant?.approverSetting ?? null;
-    // treat missing or ADMINS as 'any' (管理者全員)
-    if (!mode || mode === "ADMINS")
-      return { mode: "any", items: ["管理者全員"] };
-
-    if (mode === "SINGLE") {
-      const singleId = applicant?.approverSingle;
-      if (!singleId) return { mode: "single", items: ["未設定"] };
-      const st = staffs.find(
-        (s) => s.cognitoUserId === singleId || s.id === singleId
-      );
-      return {
-        mode: "single",
-        items: [st ? `${st.familyName} ${st.givenName}` : singleId],
-      };
-    }
-
-    if (mode === "MULTIPLE") {
-      const multiple = applicant?.approverMultiple ?? [];
-      if (multiple.length === 0) return { mode: "any", items: ["未設定"] };
-      const items = multiple.map((aid) => {
-        const st = staffs.find((s) => s.cognitoUserId === aid || s.id === aid);
-        return st ? `${st.familyName} ${st.givenName}` : aid || "";
-      });
-      const multipleMode = applicant?.approverMultipleMode ?? null;
-      return { mode: multipleMode === "ORDER" ? "order" : "any", items };
-    }
-
-    return { mode: "any", items: ["管理者全員"] };
-  }, [staffs, workflow]);
-
   const applicationDate =
     formatDateSlash(workflow?.overTimeDetails?.date) ||
     formatDateSlash(isoDateFromTimestamp(workflow?.createdAt));
@@ -126,101 +88,16 @@ export default function WorkflowDetailPage() {
     ? CATEGORY_LABELS[workflow.category] || workflow.category
     : "-";
 
-  const approvalSteps = useMemo<WorkflowApprovalStepView[]>(() => {
-    const base: WorkflowApprovalStepView[] = [
-      {
-        id: "s0",
-        name: staffName,
-        role: "申請者",
-        state: "",
-        date: applicationDate,
-        comment: "",
-      },
-    ];
-    if (!workflow) return base;
-    // If explicit approvalSteps exist on the workflow, display them with recorded decisions
-    if (workflow.approvalSteps && workflow.approvalSteps.length > 0) {
-      const steps = (workflow.approvalSteps as ApprovalStep[])
-        .slice()
-        .sort((a, b) => (a?.stepOrder ?? 0) - (b?.stepOrder ?? 0));
-      steps.forEach((st, idx) => {
-        const approverId = st.approverStaffId || "";
-        const staff = staffs.find((s) => s.id === approverId);
-        const name =
-          approverId === "ADMINS"
-            ? "管理者全員"
-            : staff
-            ? `${staff.familyName} ${staff.givenName}`
-            : approverId || "未設定";
-        const state = st.decisionStatus
-          ? st.decisionStatus === ApprovalStatus.APPROVED
-            ? "承認済み"
-            : st.decisionStatus === ApprovalStatus.REJECTED
-            ? "却下"
-            : st.decisionStatus === ApprovalStatus.SKIPPED
-            ? "スキップ"
-            : "未承認"
-          : "未承認";
-        const date = st.decisionTimestamp
-          ? new Date(st.decisionTimestamp).toLocaleString()
-          : "";
-        base.push({
-          id: st.id ?? `s${idx + 1}`,
-          name,
-          role: "承認者",
-          state,
-          date,
-          comment: st.approverComment ?? "",
-        });
-      });
-      return base;
-    }
-
-    // Fallback: derive from applicant's current approver settings
-    const isApproved = workflow.status === WorkflowStatus.APPROVED;
-    if (approverInfo.mode === "any") {
-      const hasSpecific =
-        approverInfo.items.length > 0 && approverInfo.items[0] !== "管理者全員";
-      base.push({
-        id: "s1",
-        name: hasSpecific ? approverInfo.items.join(" / ") : "管理者全員",
-        role: hasSpecific ? "承認者（複数）" : "承認者",
-        state: isApproved ? "承認済み" : "未承認",
-        date: isApproved ? applicationDate : "",
-        comment: "",
-      });
-      if (!isApproved) base[0].date = applicationDate;
-      return base;
-    }
-    if (approverInfo.mode === "single") {
-      base.push({
-        id: "s1",
-        name: approverInfo.items[0] ?? "未設定",
-        role: "承認者",
-        state: isApproved ? "承認済み" : "未承認",
-        date: isApproved ? applicationDate : "",
-        comment: "",
-      });
-      if (!isApproved) base[0].date = applicationDate;
-      return base;
-    }
-    if (approverInfo.mode === "order") {
-      approverInfo.items.forEach((it, idx) => {
-        base.push({
-          id: `s${idx + 1}`,
-          name: it,
-          role: `承認者`,
-          state: isApproved ? "承認済み" : "未承認",
-          date: isApproved ? applicationDate : "",
-          comment: "",
-        });
-      });
-      if (!isApproved) base[0].date = applicationDate;
-      return base;
-    }
-
-    return base;
-  }, [workflow, staffName, applicationDate, approverInfo]);
+  const approvalSteps = useMemo<WorkflowApprovalStepView[]>(
+    () =>
+      buildWorkflowApprovalTimeline({
+        workflow,
+        staffs,
+        applicantName: staffName,
+        applicationDate,
+      }),
+    [workflow, staffs, staffName, applicationDate]
+  );
 
   const notifySuccess = useCallback(
     (message: string) => dispatch(setSnackbarSuccess(message)),
@@ -257,47 +134,15 @@ export default function WorkflowDetailPage() {
     notifyError,
   });
 
-  // helper flags for edit/withdraw permissions
-  const isSubmittedOrLater = useMemo(() => {
-    if (!workflow?.status) return false;
-    return [
-      WorkflowStatus.SUBMITTED,
-      WorkflowStatus.PENDING,
-      WorkflowStatus.APPROVED,
-      WorkflowStatus.REJECTED,
-      WorkflowStatus.CANCELLED,
-    ].includes(workflow.status as WorkflowStatus);
-  }, [workflow]);
-
-  const isFinalized = useMemo(() => {
-    if (!workflow?.status) return false;
-    return [WorkflowStatus.APPROVED, WorkflowStatus.REJECTED].includes(
-      workflow.status as WorkflowStatus
-    );
-  }, [workflow]);
-
-  const withdrawDisabled =
-    !workflow?.id ||
-    workflow?.status === WorkflowStatus.CANCELLED ||
-    isFinalized;
-  const withdrawTooltip =
-    workflow?.status === WorkflowStatus.CANCELLED
-      ? "キャンセル済みのワークフローは取り下げできません"
-      : isFinalized
-      ? "承認済みまたは却下済みの申請は取り下げできません"
-      : undefined;
-  const editDisabled = !workflow?.id || isSubmittedOrLater;
-  const editTooltip = isSubmittedOrLater
-    ? "提出済み以降の申請は編集できません"
-    : undefined;
+  const permissions = useMemo(
+    () => deriveWorkflowDetailPermissions(workflow),
+    [workflow]
+  );
 
   const handleWithdraw = async () => {
     if (!workflow?.id) return;
     // disallow withdraw after approval or rejection
-    if (
-      workflow?.status === WorkflowStatus.APPROVED ||
-      workflow?.status === WorkflowStatus.REJECTED
-    ) {
+    if (permissions.isFinalized) {
       dispatch(
         setSnackbarError("承認済みまたは却下済みの申請は取り下げできません")
       );
@@ -312,25 +157,10 @@ export default function WorkflowDetailPage() {
       const afterStatus = await updateWorkflow(statusInput);
       setWorkflow(afterStatus as NonNullable<GetWorkflowQuery["getWorkflow"]>);
 
-      const existing = (afterStatus.comments || [])
-        .filter((c): c is WorkflowComment => Boolean(c))
-        .map((c) => ({
-          id: c.id,
-          staffId: c.staffId,
-          text: c.text,
-          createdAt: c.createdAt,
-        }));
-      const sysComment: WorkflowCommentInput = {
-        id: `c-${Date.now()}`,
-        staffId: "system",
-        text: "申請が取り下げされました",
-        createdAt: new Date().toISOString(),
-      };
-      const commentsInput = [...existing, sysComment];
-      const commentUpdate: UpdateWorkflowInput = {
-        id: workflow.id,
-        comments: commentsInput,
-      };
+      const commentUpdate = buildWorkflowCommentsUpdateInput(
+        afterStatus as NonNullable<GetWorkflowQuery["getWorkflow"]>,
+        "申請が取り下げされました"
+      );
       const afterComments = await updateWorkflow(commentUpdate);
       setWorkflow(
         afterComments as NonNullable<GetWorkflowQuery["getWorkflow"]>
@@ -358,10 +188,10 @@ export default function WorkflowDetailPage() {
           onBack={() => navigate(-1)}
           onWithdraw={handleWithdraw}
           onEdit={() => navigate(`/workflow/${id}/edit`)}
-          withdrawDisabled={withdrawDisabled}
-          withdrawTooltip={withdrawTooltip}
-          editDisabled={editDisabled}
-          editTooltip={editTooltip}
+          withdrawDisabled={permissions.withdrawDisabled}
+          withdrawTooltip={permissions.withdrawTooltip}
+          editDisabled={permissions.editDisabled}
+          editTooltip={permissions.editTooltip}
         />
 
         {loading && <Typography>読み込み中...</Typography>}
@@ -381,11 +211,6 @@ export default function WorkflowDetailPage() {
                   status={workflow?.status ?? null}
                   overTimeDetails={workflow?.overTimeDetails ?? null}
                   approvalSteps={approvalSteps}
-                />
-                <WorkflowApplicationDetails
-                  category={workflow?.category ?? null}
-                  categoryLabel={categoryLabel}
-                  overTimeDetails={workflow?.overTimeDetails ?? null}
                 />
               </Stack>
             </Grid>

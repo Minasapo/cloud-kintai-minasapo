@@ -14,8 +14,9 @@ import {
   TextField,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { API } from "aws-amplify";
-import { createDailyReport } from "@shared/api/graphql/documents/mutations";
+import { generateClient } from "aws-amplify/api";
+import { createDailyReport } from "../shared/api/graphql/documents/mutations";
+const client = generateClient();
 export default function DailyReportCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -120,7 +121,7 @@ export default function DailyReportCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await API.graphql({
+          await client.graphql({
             query: createDailyReport.replaceAll("__typename", ""),
             variables: {
               input: {

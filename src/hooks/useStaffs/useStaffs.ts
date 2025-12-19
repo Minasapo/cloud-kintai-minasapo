@@ -8,6 +8,7 @@ import {
 } from "@shared/api/graphql/types";
 import { useContext, useEffect, useState } from "react";
 
+import { StaffExternalLink } from "@/entities/staff/externalLink";
 import { AuthContext } from "@/context/AuthContext";
 
 import createStaffData from "./createStaffData";
@@ -48,6 +49,7 @@ export type StaffType = {
   updatedAt: Staff["updatedAt"];
   usageStartDate?: Staff["usageStartDate"];
   notifications?: Staff["notifications"];
+  externalLinks?: (StaffExternalLink | null)[] | null;
   sortKey?: Staff["sortKey"];
   workType?: string | null;
   developer?: Staff["developer"];
@@ -108,6 +110,7 @@ export default function useStaffs() {
             createdAt: staff.createdAt,
             updatedAt: staff.updatedAt,
             notifications: staff.notifications,
+            externalLinks: staff.externalLinks ?? null,
             sortKey: staff.sortKey,
             workType: (staff as unknown as Record<string, unknown>).workType as
               | string
@@ -150,6 +153,7 @@ export default function useStaffs() {
             createdAt: staff.createdAt,
             updatedAt: staff.updatedAt,
             notifications: staff.notifications,
+            externalLinks: staff.externalLinks ?? null,
             sortKey: staff.sortKey,
             usageStartDate: staff.usageStartDate,
             workType: staff.workType,
@@ -194,6 +198,7 @@ export default function useStaffs() {
             updatedAt: staff.updatedAt,
             usageStartDate: staff.usageStartDate,
             notifications: staff.notifications,
+            externalLinks: staff.externalLinks ?? null,
             sortKey: staff.sortKey,
             workType: staff.workType,
             developer: (staff as unknown as Record<string, unknown>)
@@ -232,6 +237,7 @@ export default function useStaffs() {
                 updatedAt: staff.updatedAt,
                 usageStartDate: staff.usageStartDate,
                 notifications: staff.notifications,
+                externalLinks: staff.externalLinks ?? null,
                 sortKey: staff.sortKey,
                 workType: staff.workType,
                 developer: (staff as unknown as Record<string, unknown>)
@@ -281,6 +287,7 @@ export default function useStaffs() {
       createdAt: staff.createdAt,
       updatedAt: staff.updatedAt,
       notifications: staff.notifications,
+      externalLinks: staff.externalLinks ?? null,
       sortKey: staff.sortKey,
       workType: staff.workType,
       developer: (staff as unknown as Record<string, unknown>).developer as

@@ -2,12 +2,13 @@ import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Container,
   LinearProgress,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { QRCodeCanvas } from "qrcode.react";
+import { lazy, Suspense } from "react";
 
 export type OfficeQrPanelProps = {
   showAdminAlert: boolean;
@@ -21,6 +22,11 @@ export type OfficeQrPanelProps = {
   onCopyUrl: () => void;
   onManualRefresh: () => void;
 };
+
+const LazyQRCodeCanvas = lazy(async () => {
+  const module = await import("qrcode.react");
+  return { default: module.QRCodeCanvas };
+});
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
@@ -92,12 +98,20 @@ export function OfficeQrPanel({
           以下のQRコードをスキャンしてください。
         </Typography>
         <Box sx={{ mt: 2 }}>
-          <QRCodeCanvas
-            value={qrUrl}
-            size={500}
-            data-testid="office-qr-code"
-            aria-label="office-qr-code"
-          />
+          <Suspense
+            fallback={
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <CircularProgress aria-label="QRコード生成中" />
+              </Box>
+            }
+          >
+            <LazyQRCodeCanvas
+              value={qrUrl}
+              size={500}
+              data-testid="office-qr-code"
+              aria-label="office-qr-code"
+            />
+          </Suspense>
         </Box>
         <Box sx={{ my: 2, display: "flex", justifyContent: "center", gap: 2 }}>
           <Tooltip

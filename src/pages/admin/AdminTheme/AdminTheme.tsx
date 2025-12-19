@@ -3,6 +3,8 @@ import {
   Box,
   Button,
   ButtonBase,
+  Divider,
+  Paper,
   Stack,
   TextField,
   Typography,
@@ -15,7 +17,7 @@ import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { DEFAULT_THEME_COLOR } from "@/constants/theme";
+import { resolveThemeColor } from "@/constants/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
 import {
@@ -61,10 +63,12 @@ const isDarkColor = (color: string) => {
   return brightness < 110;
 };
 
+const DEFAULT_BRAND_COLOR = resolveThemeColor();
+
 const paletteCandidates = [
-  DEFAULT_THEME_COLOR,
+  DEFAULT_BRAND_COLOR,
   ...basePalette.filter(
-    (color) => color.toLowerCase() !== DEFAULT_THEME_COLOR.toLowerCase()
+    (color) => color.toLowerCase() !== DEFAULT_BRAND_COLOR.toLowerCase()
   ),
 ];
 
@@ -76,19 +80,32 @@ const MAX_TILES_PER_ROW = 10;
 
 export default function AdminTheme() {
   const dispatch = useAppDispatchV2();
-  const { getThemeColor, getConfigId, saveConfig, fetchConfig } =
-    useContext(AppConfigContext);
-  const [colorCode, setColorCode] = useState(DEFAULT_THEME_COLOR);
-  const [currentColor, setCurrentColor] = useState(DEFAULT_THEME_COLOR);
+  const {
+    getThemeColor,
+    getConfigId,
+    saveConfig,
+    fetchConfig,
+    getThemeTokens,
+  } = useContext(AppConfigContext);
+  const [colorCode, setColorCode] = useState(DEFAULT_BRAND_COLOR);
+  const [currentColor, setCurrentColor] = useState(DEFAULT_BRAND_COLOR);
   const [customMode, setCustomMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const isValidHex = useMemo(
     () => /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(colorCode),
     [colorCode]
   );
+  const themeTokens = useMemo(() => getThemeTokens(), [getThemeTokens]);
+  const adminPanelTokens = themeTokens.component.adminPanel;
+  const panelSpacing = adminPanelTokens.sectionSpacing;
+  const panelDividerColor = adminPanelTokens.dividerColor;
+  const panelSurface = adminPanelTokens.surface;
 
   useEffect(() => {
-    const themeColor = getThemeColor ? getThemeColor() : DEFAULT_THEME_COLOR;
+    const themeColor =
+      typeof getThemeColor === "function"
+        ? getThemeColor()
+        : DEFAULT_BRAND_COLOR;
     if (!themeColor) return;
     setColorCode(themeColor);
     setCurrentColor(themeColor);
@@ -111,6 +128,17 @@ export default function AdminTheme() {
   const isDirty =
     normalizedColorCode !== "" &&
     normalizedColorCode !== normalizedCurrentColor;
+  const previewTokens = useMemo(
+    () => (isValidHex ? getThemeTokens(normalizedColorCode) : themeTokens),
+    [getThemeTokens, isValidHex, normalizedColorCode, themeTokens]
+  );
+  const previewPanelTokens = previewTokens.component.adminPanel;
+  const previewPanelSpacing = previewPanelTokens.sectionSpacing;
+  const previewPanelDividerColor = previewPanelTokens.dividerColor;
+  const previewPanelSurface = previewPanelTokens.surface;
+  const brandPrimary = previewTokens.color.brand.primary.base;
+  const focusRingColor = previewTokens.color.brand.primary.focusRing;
+  const paletteTileGap = panelSpacing / 2;
 
   const handleHexInput = (value: string) => {
     if (!value) {
@@ -163,110 +191,179 @@ export default function AdminTheme() {
   };
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={0} sx={{ gap: panelSpacing }}>
       <Title>テーマ</Title>
-      <Typography>
-        テーマを選択すると、ヘッダーとフッターの配色が変更されます。
-      </Typography>
-      <Stack spacing={1}>
-        <Typography variant="subtitle2">テーマ</Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gap: 1,
-            gridTemplateColumns: `repeat(auto-fill, minmax(${TILE_SIZE}px, 1fr))`,
-            maxWidth: `${
-              MAX_TILES_PER_ROW * TILE_SIZE + (MAX_TILES_PER_ROW - 1) * 8
-            }px`,
-          }}
-        >
-          {presetPalette.map((color) => {
-            const isSelected =
-              normalizedColorCode !== "" &&
-              normalizedColorCode === normalizeColor(color);
-            return (
+      <Paper
+        variant="outlined"
+        sx={{
+          p: panelSpacing,
+          borderColor: panelDividerColor,
+          backgroundColor: panelSurface,
+        }}
+      >
+        <Stack spacing={0} sx={{ gap: panelSpacing }}>
+          <Typography color="text.secondary">
+            テーマを選択すると、ヘッダーとフッターの配色が変更されます。
+          </Typography>
+          <Stack spacing={1}>
+            <Typography variant="subtitle2">テーマ</Typography>
+            <Box
+              sx={{
+                display: "grid",
+                gap: paletteTileGap,
+                gridTemplateColumns: `repeat(auto-fill, minmax(${TILE_SIZE}px, 1fr))`,
+                maxWidth: `${
+                  MAX_TILES_PER_ROW * TILE_SIZE +
+                  (MAX_TILES_PER_ROW - 1) * paletteTileGap
+                }px`,
+              }}
+            >
+              {presetPalette.map((color) => {
+                const isSelected =
+                  normalizedColorCode !== "" &&
+                  normalizedColorCode === normalizeColor(color);
+                return (
+                  <ButtonBase
+                    key={color}
+                    onClick={() => handlePresetSelect(color)}
+                    sx={{
+                      width: TILE_SIZE,
+                      height: TILE_SIZE,
+                      borderRadius: 1,
+                      border: "2px solid",
+                      borderColor: isSelected
+                        ? brandPrimary
+                        : previewPanelDividerColor,
+                      backgroundColor: color,
+                      boxShadow: isSelected
+                        ? `0 0 0 2px ${focusRingColor}`
+                        : "none",
+                      transition: "box-shadow 120ms ease",
+                      "&:focus-visible": {
+                        outline: "none",
+                        boxShadow: `0 0 0 3px ${focusRingColor}`,
+                      },
+                    }}
+                    aria-label={`テーマカラー ${color}`}
+                  />
+                );
+              })}
               <ButtonBase
-                key={color}
-                onClick={() => handlePresetSelect(color)}
+                onClick={() => setCustomMode(true)}
                 sx={{
                   width: TILE_SIZE,
                   height: TILE_SIZE,
                   borderRadius: 1,
-                  border: "2px solid",
-                  borderColor: isSelected ? "primary.main" : "rgba(0,0,0,0.12)",
-                  backgroundColor: color,
-                  boxShadow: isSelected
-                    ? "0 0 0 2px rgba(25,118,210,0.3)"
-                    : "none",
+                  border: "2px dashed",
+                  borderColor: customMode
+                    ? brandPrimary
+                    : previewPanelDividerColor,
+                  color: customMode ? brandPrimary : "text.secondary",
+                  backgroundColor: "transparent",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  "&:focus-visible": {
+                    outline: "none",
+                    boxShadow: `0 0 0 3px ${focusRingColor}`,
+                  },
                 }}
-                aria-label={`テーマカラー ${color}`}
+                aria-label="その他のカラーコードを入力"
+              >
+                <AddIcon />
+              </ButtonBase>
+            </Box>
+          </Stack>
+          {customMode && (
+            <Stack spacing={1}>
+              <Typography variant="subtitle2">
+                カラーコードを直接指定
+              </Typography>
+              <TextField
+                size="small"
+                label="#RRGGBB"
+                value={colorCode}
+                onChange={(e) => handleHexInput(e.target.value)}
+                error={!isValidHex}
+                helperText={
+                  isValidHex ? "" : "正しい16進数カラーコードを入力してください"
+                }
+                sx={{
+                  maxWidth: 240,
+                  "& .MuiOutlinedInput-root.Mui-focused": {
+                    boxShadow: `0 0 0 3px ${focusRingColor}`,
+                    borderRadius: 1,
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused fieldset": {
+                    borderColor: brandPrimary,
+                  },
+                }}
               />
-            );
-          })}
-          <ButtonBase
-            onClick={() => setCustomMode(true)}
-            sx={{
-              width: TILE_SIZE,
-              height: TILE_SIZE,
-              borderRadius: 1,
-              border: "2px dashed",
-              borderColor: customMode ? "primary.main" : "rgba(0,0,0,0.26)",
-              color: customMode ? "primary.main" : "text.secondary",
-              backgroundColor: "transparent",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            aria-label="その他のカラーコードを入力"
-          >
-            <AddIcon />
-          </ButtonBase>
-        </Box>
-      </Stack>
-      {customMode && (
-        <Stack spacing={1}>
-          <Typography variant="subtitle2">カラーコードを直接指定</Typography>
-          <TextField
-            size="small"
-            label="#RRGGBB"
-            value={colorCode}
-            onChange={(e) => handleHexInput(e.target.value)}
-            error={!isValidHex}
-            helperText={
-              isValidHex ? "" : "正しい16進数カラーコードを入力してください"
-            }
-          />
+            </Stack>
+          )}
+          <Stack spacing={1}>
+            <Typography variant="subtitle2">プレビュー</Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: previewPanelSpacing,
+                borderRadius: 2,
+                border: `1px solid ${previewPanelDividerColor}`,
+                backgroundColor: previewPanelSurface,
+                maxWidth: 360,
+              }}
+            >
+              <Stack spacing={0} sx={{ gap: previewPanelSpacing / 2 }}>
+                <Typography variant="subtitle1">
+                  管理パネルプレビュー
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  選択したカラーがフォーカスリングやボタンにどう反映されるかを確認できます。
+                </Typography>
+                <Divider sx={{ borderColor: previewPanelDividerColor }} />
+                <Button
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    alignSelf: "flex-start",
+                    textTransform: "none",
+                    backgroundColor: brandPrimary,
+                    color: previewTokens.color.brand.primary.contrastText,
+                    boxShadow: "none",
+                    "&:hover": {
+                      backgroundColor: previewTokens.color.brand.primary.dark,
+                      boxShadow: "none",
+                    },
+                    "&:focus-visible": {
+                      outline: "none",
+                      boxShadow: `0 0 0 3px ${focusRingColor}`,
+                    },
+                  }}
+                >
+                  プライマリボタン
+                </Button>
+              </Stack>
+            </Paper>
+          </Stack>
+          <Divider sx={{ borderColor: panelDividerColor }} />
+          <Stack direction="row" justifyContent="flex-end">
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={!isValidHex || saving || !isDirty}
+              sx={{
+                minWidth: 140,
+                "&:focus-visible": {
+                  outline: "none",
+                  boxShadow: `0 0 0 3px ${focusRingColor}`,
+                },
+              }}
+            >
+              {saving ? "保存中..." : "保存"}
+            </Button>
+          </Stack>
         </Stack>
-      )}
-      <Stack spacing={1}>
-        <Typography variant="subtitle2">プレビュー</Typography>
-        <Box
-          sx={{
-            width: 160,
-            height: 80,
-            borderRadius: 1,
-            border: "1px solid",
-            borderColor: "divider",
-            backgroundColor: isValidHex ? colorCode : "transparent",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography color={isValidHex ? "#fff" : "text.secondary"}>
-            {isValidHex ? colorCode.toUpperCase() : "色を選択"}
-          </Typography>
-        </Box>
-      </Stack>
-      <Stack direction="row" justifyContent="flex-end">
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={!isValidHex || saving || !isDirty}
-        >
-          {saving ? "保存中..." : "保存"}
-        </Button>
-      </Stack>
+      </Paper>
     </Stack>
   );
 }

@@ -15,7 +15,7 @@ export default function useAuthenticatedUser() {
   >(undefined);
 
   useEffect(() => {
-    const cognitoUserId = user?.attributes?.sub;
+    const cognitoUserId = user?.userId ?? user?.username ?? null;
 
     setLoading(true);
     setError(null);

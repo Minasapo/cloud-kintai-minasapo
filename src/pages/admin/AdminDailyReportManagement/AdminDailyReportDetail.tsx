@@ -1,4 +1,3 @@
-import type { GraphQLResult } from "@aws-amplify/api";
 import {
   Alert,
   Box,
@@ -19,15 +18,14 @@ import type {
   GetDailyReportQuery,
   UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import Title from "@shared/ui/typography/Title";
-import { API } from "aws-amplify";
+import type { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
 
 import {
@@ -110,10 +108,10 @@ export default function AdminDailyReportDetail() {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: getDailyReport,
         variables: { id },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<GetDailyReportQuery>;
 
       if (response.errors?.length) {
@@ -256,7 +254,7 @@ export default function AdminDailyReportDetail() {
         ];
 
     try {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
           input: {
@@ -269,7 +267,7 @@ export default function AdminDailyReportDetail() {
             updatedAt: timestamp,
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<UpdateDailyReportMutation>;
 
       if (response.errors?.length) {
@@ -332,7 +330,7 @@ export default function AdminDailyReportDetail() {
     const nextComments = [newCommentEntry, ...commentEntries];
 
     try {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
           input: {
@@ -355,7 +353,7 @@ export default function AdminDailyReportDetail() {
             updatedAt: timestamp,
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<UpdateDailyReportMutation>;
 
       if (response.errors?.length) {
@@ -400,17 +398,6 @@ export default function AdminDailyReportDetail() {
   return (
     <Container maxWidth="md" sx={{ py: 3 }}>
       <Stack spacing={3}>
-        <Box>
-          <CommonBreadcrumbs
-            items={[
-              { label: "TOP", href: "/" },
-              { label: "管理", href: "/admin" },
-              { label: "日報管理", href: "/admin/daily-report" },
-            ]}
-            current="日報詳細"
-          />
-        </Box>
-
         {loadError && <Alert severity="error">{loadError}</Alert>}
 
         {actionError && (
@@ -439,7 +426,9 @@ export default function AdminDailyReportDetail() {
           <Paper sx={{ p: 4 }}>
             <Stack spacing={3}>
               <Box>
-                <Title>{report.title}</Title>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  {report.title}
+                </Typography>
                 <Stack
                   direction="row"
                   spacing={1}

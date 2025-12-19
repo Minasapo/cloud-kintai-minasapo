@@ -57,7 +57,7 @@ export default function ShiftDayView() {
 
             const matched = list.find((a) => a.workDate === dateKey) ?? null;
             map.set(s.id, matched);
-          } catch (e) {
+          } catch {
             map.set(s.id, null);
           }
         })

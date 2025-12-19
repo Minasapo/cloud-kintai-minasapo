@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -20,25 +19,13 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import {
-  createShiftRequest,
-  updateShiftRequest,
-} from "@shared/api/graphql/documents/mutations";
-import { listShiftRequests } from "@shared/api/graphql/documents/queries";
-import {
-  CreateShiftRequestMutation,
-  ListShiftRequestsQuery,
-  ShiftRequestDayPreferenceInput,
-  ShiftRequestHistoryInput,
-  UpdateShiftRequestMutation,
-} from "@shared/api/graphql/types";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import { API } from "aws-amplify";
+import { alpha } from "@mui/material/styles";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
@@ -49,29 +36,54 @@ import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";
-import { buildSummaryFromAssignments } from "../lib/shiftAssignments";
 import {
   getGroupCoveragePresentation,
   ShiftGroupConstraints,
 } from "../lib/shiftGroups";
 import {
-  convertHistoryToInput,
-  ShiftRequestHistoryMeta,
-  ShiftRequestRecordSnapshot,
-} from "../lib/shiftRequests";
-import {
   defaultStatusVisual,
-  SHIFT_MANUAL_CHANGE_REASON,
-  shiftRequestStatusToShiftState,
-  shiftStateToShiftRequestStatus,
   statusVisualMap,
 } from "../lib/shiftStateMapping";
 import useShiftManagementDialogs from "../model/useShiftManagementDialogs";
 import useShiftSelection from "../model/useShiftSelection";
+import useShiftRequestAssignments from "../model/useShiftRequestAssignments";
 import ShiftBulkEditDialog from "./components/ShiftBulkEditDialog";
 import ShiftEditDialog from "./components/ShiftEditDialog";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
 import ShiftManagementSummaryRow from "./components/ShiftManagementSummaryRow";
+
+const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
+const toSpacingUnit = (value: number) => value / 8;
+
+const SHIFT_BOARD_PADDING_X = toSpacingUnit(shiftBoardTokens.columnGap);
+const SHIFT_BOARD_PADDING_Y = toSpacingUnit(shiftBoardTokens.rowGap);
+const SHIFT_BOARD_HALF_PADDING_X = SHIFT_BOARD_PADDING_X / 2;
+const SHIFT_BOARD_HALF_PADDING_Y = SHIFT_BOARD_PADDING_Y / 2;
+const SHIFT_BOARD_CELL_RADIUS = `${shiftBoardTokens.cellRadius}px`;
+const SHIFT_BOARD_TRANSITION = `${DESIGN_TOKENS.motion.duration.medium}ms ${DESIGN_TOKENS.motion.easing.standard}`;
+const SHIFT_BOARD_FOCUS_RING_COLOR =
+  DESIGN_TOKENS.color.brand.primary.focusRing;
+const SHIFT_BOARD_FOCUS_SHADOW = DESIGN_TOKENS.shadow.card;
+
+const SHIFT_BOARD_CELL_BASE_SX = {
+  borderRadius: SHIFT_BOARD_CELL_RADIUS,
+  transition: `background-color ${SHIFT_BOARD_TRANSITION}, box-shadow ${SHIFT_BOARD_TRANSITION}`,
+};
+
+const SHIFT_BOARD_INTERACTIVE_FOCUS_SX = {
+  "&:focus-visible": {
+    outline: `2px solid ${SHIFT_BOARD_FOCUS_RING_COLOR}`,
+    outlineOffset: 2,
+    boxShadow: SHIFT_BOARD_FOCUS_SHADOW,
+  },
+};
+
+const HOLIDAY_BG = alpha(DESIGN_TOKENS.color.brand.accent.base, 0.22);
+const COMPANY_HOLIDAY_BG = alpha(
+  DESIGN_TOKENS.color.brand.secondary.base,
+  0.18
+);
+const SATURDAY_BG = alpha(DESIGN_TOKENS.color.brand.primary.base, 0.12);
 
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
@@ -241,11 +253,10 @@ export default function ShiftManagementBoard() {
     const dateKey = d.format("YYYY-MM-DD");
     const day = d.day();
     if (holidaySet.has(dateKey) || day === 0)
-      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(244,67,54,0.18)" };
+      return { minWidth: DAY_COL_WIDTH, bgcolor: HOLIDAY_BG };
     if (companyHolidaySet.has(dateKey))
-      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(255,152,0,0.18)" };
-    if (day === 6)
-      return { minWidth: DAY_COL_WIDTH, bgcolor: "rgba(33,150,243,0.12)" };
+      return { minWidth: DAY_COL_WIDTH, bgcolor: COMPANY_HOLIDAY_BG };
+    if (day === 6) return { minWidth: DAY_COL_WIDTH, bgcolor: SATURDAY_BG };
     return { minWidth: DAY_COL_WIDTH };
   };
 
@@ -257,19 +268,18 @@ export default function ShiftManagementBoard() {
     Map<string, Record<string, ShiftState>>
   >(new Map());
 
-  const [shiftRequestAssignments, setShiftRequestAssignments] = React.useState<
-    Map<string, Record<string, ShiftState>>
-  >(new Map());
-  const [shiftRequestHistoryMeta, setShiftRequestHistoryMeta] = React.useState<
-    Map<string, ShiftRequestHistoryMeta>
-  >(new Map());
-  const [shiftRequestRecords, setShiftRequestRecords] = useState<
-    Map<string, ShiftRequestRecordSnapshot>
-  >(new Map());
-  const [shiftRequestsLoading, setShiftRequestsLoading] = useState(false);
-  const [shiftRequestsError, setShiftRequestsError] = useState<string | null>(
-    null
-  );
+  const {
+    shiftRequestAssignments,
+    shiftRequestHistoryMeta,
+    shiftRequestsLoading,
+    shiftRequestsError,
+    persistShiftRequestChanges,
+  } = useShiftRequestAssignments({
+    shiftStaffs,
+    monthStart,
+    cognitoUserId: cognitoUser?.id,
+    enabled: isAuthenticated,
+  });
 
   React.useEffect(() => {
     // 実績表示モードではモック生成は不要
@@ -289,119 +299,6 @@ export default function ShiftManagementBoard() {
     );
     setMockShifts(map);
   }, [shiftStaffs, days, scenario]);
-
-  React.useEffect(() => {
-    if (!shiftStaffs || shiftStaffs.length === 0) {
-      setShiftRequestAssignments(new Map());
-      setShiftRequestHistoryMeta(new Map());
-      setShiftRequestRecords(new Map());
-      return;
-    }
-
-    let isMounted = true;
-    const fetchShiftRequests = async () => {
-      setShiftRequestsLoading(true);
-      setShiftRequestsError(null);
-      try {
-        const staffIdSet = new Set(shiftStaffs.map((s) => s.id));
-        const targetMonthKey = monthStart.format("YYYY-MM");
-        const nextAssignments = new Map<string, Record<string, ShiftState>>();
-        const nextHistoryMeta = new Map<
-          string,
-          { changeCount: number; latestChangeAt: string | null }
-        >();
-        const nextRecords = new Map<string, ShiftRequestRecordSnapshot>();
-        let nextToken: string | null | undefined = undefined;
-
-        do {
-          const response = (await API.graphql({
-            query: listShiftRequests,
-            variables: {
-              filter: { targetMonth: { eq: targetMonthKey } },
-              limit: 500,
-              nextToken,
-            },
-            authMode: "AMAZON_COGNITO_USER_POOLS",
-          })) as GraphQLResult<ListShiftRequestsQuery>;
-
-          if (!isMounted) return;
-
-          if (response.errors) {
-            throw new Error(response.errors.map((e) => e.message).join(","));
-          }
-
-          const items =
-            response.data?.listShiftRequests?.items?.filter(
-              (item): item is NonNullable<typeof item> => item !== null
-            ) ?? [];
-
-          items.forEach((item) => {
-            if (!staffIdSet.has(item.staffId)) return;
-            const per: Record<string, ShiftState> = {};
-            item.entries
-              ?.filter(
-                (entry): entry is NonNullable<typeof entry> => entry !== null
-              )
-              .forEach((entry) => {
-                per[entry.date] = shiftRequestStatusToShiftState(entry.status);
-              });
-            nextAssignments.set(item.staffId, per);
-
-            const histories =
-              item.histories?.filter(
-                (history): history is NonNullable<typeof history> =>
-                  history !== null
-              ) ?? [];
-            const changeCount = histories.length;
-            let latestChangeAt: string | null = null;
-            histories.forEach((history) => {
-              const candidate = history.recordedAt ?? null;
-              if (!candidate) return;
-              if (!latestChangeAt || dayjs(candidate).isAfter(latestChangeAt)) {
-                latestChangeAt = candidate;
-              }
-            });
-            nextHistoryMeta.set(item.staffId, {
-              changeCount,
-              latestChangeAt,
-            });
-
-            const historyInputs = histories.map(convertHistoryToInput);
-            nextRecords.set(item.staffId, {
-              id: item.id,
-              histories: historyInputs,
-              note: item.note ?? undefined,
-              submittedAt: item.submittedAt ?? undefined,
-              targetMonth: item.targetMonth ?? targetMonthKey,
-            });
-          });
-
-          nextToken = response.data?.listShiftRequests?.nextToken ?? null;
-        } while (nextToken);
-
-        if (!isMounted) return;
-        setShiftRequestAssignments(nextAssignments);
-        setShiftRequestHistoryMeta(nextHistoryMeta);
-        setShiftRequestRecords(nextRecords);
-      } catch (err) {
-        console.error(err);
-        if (isMounted) {
-          setShiftRequestsError("希望シフトの取得に失敗しました。");
-        }
-      } finally {
-        if (isMounted) {
-          setShiftRequestsLoading(false);
-        }
-      }
-    };
-
-    fetchShiftRequests();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [shiftStaffs, monthStart]);
-
   const displayShifts = useMemo(() => {
     const next = new Map<string, Record<string, ShiftState>>();
     shiftStaffs.forEach((staff) => {
@@ -472,135 +369,6 @@ export default function ShiftManagementBoard() {
     });
     return map;
   }, [days, monthStart, shiftPlanPlans]);
-
-  const persistShiftRequestChanges = async (
-    staffId: string,
-    dayKeys: string[],
-    nextState: ShiftState
-  ) => {
-    const timestamp = dayjs().toISOString();
-    const targetMonthKey = monthStart.format("YYYY-MM");
-    const existingAssignments = shiftRequestAssignments.get(staffId) || {};
-    const updatedAssignments: Record<string, ShiftState> = {
-      ...existingAssignments,
-    };
-    dayKeys.forEach((key) => {
-      updatedAssignments[key] = nextState;
-    });
-
-    const entriesInput: ShiftRequestDayPreferenceInput[] = Object.entries(
-      updatedAssignments
-    )
-      .map(([date, state]) => ({
-        date,
-        status: shiftStateToShiftRequestStatus(state),
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    const summary = buildSummaryFromAssignments(updatedAssignments);
-    const record = shiftRequestRecords.get(staffId);
-    const baseHistories = record?.histories ?? [];
-    const maxVersion = baseHistories.reduce(
-      (acc, history) => Math.max(acc, history.version ?? 0),
-      0
-    );
-    const historyEntry: ShiftRequestHistoryInput = {
-      version: maxVersion + 1,
-      note: record?.note ?? undefined,
-      entries: entriesInput,
-      summary,
-      submittedAt: timestamp,
-      updatedAt: timestamp,
-      recordedAt: timestamp,
-      recordedByStaffId: cognitoUser?.id ?? undefined,
-      changeReason: SHIFT_MANUAL_CHANGE_REASON,
-    };
-    const historiesInput = [...baseHistories, historyEntry];
-
-    const inputBase = {
-      entries: entriesInput,
-      summary,
-      histories: historiesInput,
-      submittedAt: timestamp,
-      updatedAt: timestamp,
-    };
-
-    let responseShiftRequest:
-      | UpdateShiftRequestMutation["updateShiftRequest"]
-      | CreateShiftRequestMutation["createShiftRequest"]
-      | null
-      | undefined;
-
-    if (record?.id) {
-      const response = (await API.graphql({
-        query: updateShiftRequest,
-        variables: {
-          input: {
-            id: record.id,
-            ...inputBase,
-          },
-        },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-      })) as GraphQLResult<UpdateShiftRequestMutation>;
-
-      if (response.errors?.length) {
-        throw new Error(response.errors.map((e) => e.message).join(","));
-      }
-
-      responseShiftRequest = response.data?.updateShiftRequest;
-    } else {
-      const response = (await API.graphql({
-        query: createShiftRequest,
-        variables: {
-          input: {
-            staffId,
-            targetMonth: targetMonthKey,
-            ...inputBase,
-          },
-        },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-      })) as GraphQLResult<CreateShiftRequestMutation>;
-
-      if (response.errors?.length) {
-        throw new Error(response.errors.map((e) => e.message).join(","));
-      }
-
-      responseShiftRequest = response.data?.createShiftRequest;
-    }
-
-    if (!responseShiftRequest) {
-      throw new Error("Shift request mutation returned no data");
-    }
-
-    const ensuredShiftRequest = responseShiftRequest;
-
-    setShiftRequestAssignments((prev) => {
-      const next = new Map(prev);
-      next.set(staffId, updatedAssignments);
-      return next;
-    });
-
-    setShiftRequestRecords((prev) => {
-      const next = new Map(prev);
-      next.set(staffId, {
-        id: ensuredShiftRequest.id,
-        histories: historiesInput,
-        note: ensuredShiftRequest.note ?? record?.note ?? undefined,
-        submittedAt: ensuredShiftRequest.submittedAt ?? timestamp,
-        targetMonth: ensuredShiftRequest.targetMonth ?? targetMonthKey,
-      });
-      return next;
-    });
-
-    setShiftRequestHistoryMeta((prev) => {
-      const next = new Map(prev);
-      next.set(staffId, {
-        changeCount: historiesInput.length,
-        latestChangeAt: timestamp,
-      });
-      return next;
-    });
-  };
 
   const applyShiftState = async (
     staffIds: string[],
@@ -680,17 +448,6 @@ export default function ShiftManagementBoard() {
 
   return (
     <Container sx={{ py: 3 }}>
-      <Box sx={{ mb: 1 }}>
-        <CommonBreadcrumbs
-          items={[{ label: "TOP", href: "/" }]}
-          current="シフト管理"
-        />
-      </Box>
-
-      <Typography variant="h4" gutterBottom>
-        シフト管理
-      </Typography>
-
       <Box
         sx={{
           display: "flex",
@@ -771,7 +528,7 @@ export default function ShiftManagementBoard() {
               overflow: "auto",
               border: 1,
               borderColor: "divider",
-              borderRadius: 1,
+              borderRadius: SHIFT_BOARD_CELL_RADIUS,
             }}
           >
             <Table
@@ -790,13 +547,14 @@ export default function ShiftManagementBoard() {
                 <TableRow>
                   <TableCell
                     sx={{
+                      ...SHIFT_BOARD_CELL_BASE_SX,
                       bgcolor: "background.paper",
                       width: STAFF_COL_WIDTH,
                       minWidth: STAFF_COL_WIDTH,
                       maxWidth: STAFF_COL_WIDTH,
                       boxSizing: "border-box",
-                      pl: 0.25,
-                      py: 0.25,
+                      pl: SHIFT_BOARD_HALF_PADDING_X,
+                      py: SHIFT_BOARD_HALF_PADDING_Y,
                       borderRight: "1px solid",
                       borderColor: "divider",
                       // 左に固定してスクロールしても見えるようにする
@@ -817,6 +575,7 @@ export default function ShiftManagementBoard() {
                     aria-label="集計"
                     title="集計"
                     sx={{
+                      ...SHIFT_BOARD_CELL_BASE_SX,
                       bgcolor: "background.paper",
                       width: AGG_COL_WIDTH,
                       boxSizing: "border-box",
@@ -827,7 +586,8 @@ export default function ShiftManagementBoard() {
                       borderRight: "1px solid",
                       borderColor: "divider",
                       verticalAlign: "top",
-                      py: 0.25,
+                      px: SHIFT_BOARD_HALF_PADDING_X,
+                      py: SHIFT_BOARD_HALF_PADDING_Y,
                     }}
                   >
                     <Box
@@ -856,6 +616,7 @@ export default function ShiftManagementBoard() {
                     aria-label="最新変更 (回数)"
                     title="最新変更 (回数)"
                     sx={{
+                      ...SHIFT_BOARD_CELL_BASE_SX,
                       bgcolor: "background.paper",
                       width: HISTORY_COL_WIDTH,
                       boxSizing: "border-box",
@@ -867,7 +628,8 @@ export default function ShiftManagementBoard() {
                       borderRight: "1px solid",
                       borderColor: "divider",
                       verticalAlign: "top",
-                      py: 0.25,
+                      px: SHIFT_BOARD_HALF_PADDING_X,
+                      py: SHIFT_BOARD_HALF_PADDING_Y,
                     }}
                   >
                     <Typography
@@ -900,14 +662,15 @@ export default function ShiftManagementBoard() {
                         key={key}
                         align="center"
                         sx={{
+                          ...SHIFT_BOARD_CELL_BASE_SX,
                           ...getHeaderCellSx(d),
                           position: "relative",
                           top: 0,
                           zIndex: 0,
                           borderLeft: "1px solid",
                           borderColor: "divider",
-                          px: 0.2,
-                          py: 0.1,
+                          px: SHIFT_BOARD_PADDING_X,
+                          py: SHIFT_BOARD_HALF_PADDING_Y,
                           ...columnHighlightSx,
                         }}
                       >
@@ -1116,8 +879,10 @@ export default function ShiftManagementBoard() {
                             <TableCell
                               colSpan={3}
                               sx={{
+                                ...SHIFT_BOARD_CELL_BASE_SX,
                                 bgcolor: "background.paper",
-                                py: 0.25,
+                                px: SHIFT_BOARD_PADDING_X,
+                                py: SHIFT_BOARD_HALF_PADDING_Y,
                                 width:
                                   STAFF_COL_WIDTH +
                                   AGG_COL_WIDTH +
@@ -1164,7 +929,9 @@ export default function ShiftManagementBoard() {
                                 <TableCell
                                   key={`${groupName}-${key}-coverage`}
                                   sx={{
-                                    p: 0.25,
+                                    ...SHIFT_BOARD_CELL_BASE_SX,
+                                    px: SHIFT_BOARD_PADDING_X,
+                                    py: SHIFT_BOARD_HALF_PADDING_Y,
                                     width: DAY_COL_WIDTH,
                                     height: 40,
                                     position: "relative",
@@ -1210,11 +977,14 @@ export default function ShiftManagementBoard() {
                             <TableRow key={s.id}>
                               <TableCell
                                 sx={{
+                                  ...SHIFT_BOARD_CELL_BASE_SX,
                                   bgcolor: "background.paper",
                                   width: STAFF_COL_WIDTH,
                                   minWidth: STAFF_COL_WIDTH,
                                   maxWidth: STAFF_COL_WIDTH,
                                   boxSizing: "border-box",
+                                  px: SHIFT_BOARD_PADDING_X,
+                                  py: SHIFT_BOARD_HALF_PADDING_Y,
                                   borderRight: "1px solid",
                                   borderColor: "divider",
                                   position: "sticky",
@@ -1284,7 +1054,9 @@ export default function ShiftManagementBoard() {
                                   <>
                                     <TableCell
                                       sx={{
-                                        p: 0,
+                                        ...SHIFT_BOARD_CELL_BASE_SX,
+                                        px: SHIFT_BOARD_HALF_PADDING_X,
+                                        py: SHIFT_BOARD_HALF_PADDING_Y,
                                         width: AGG_COL_WIDTH,
                                         height: 40,
                                         bgcolor: "background.paper",
@@ -1314,7 +1086,9 @@ export default function ShiftManagementBoard() {
                                     </TableCell>
                                     <TableCell
                                       sx={{
-                                        p: 0,
+                                        ...SHIFT_BOARD_CELL_BASE_SX,
+                                        px: SHIFT_BOARD_HALF_PADDING_X,
+                                        py: SHIFT_BOARD_HALF_PADDING_Y,
                                         width: HISTORY_COL_WIDTH,
                                         height: 40,
                                         bgcolor: "background.paper",
@@ -1375,7 +1149,10 @@ export default function ShiftManagementBoard() {
                                   <TableCell
                                     key={key}
                                     sx={{
-                                      p: 0.25,
+                                      ...SHIFT_BOARD_CELL_BASE_SX,
+                                      ...SHIFT_BOARD_INTERACTIVE_FOCUS_SX,
+                                      px: SHIFT_BOARD_PADDING_X,
+                                      py: SHIFT_BOARD_HALF_PADDING_Y,
                                       width: DAY_COL_WIDTH,
                                       height: 40,
                                       position: "relative",

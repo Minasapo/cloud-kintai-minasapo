@@ -1,13 +1,14 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import { listStaff } from "@shared/api/graphql/documents/queries";
 import { ListStaffQuery, Staff } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
+
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 export default async function fetchStaffs() {
   const staffs: Staff[] = [];
-  const response = (await API.graphql({
+  const response = (await graphqlClient.graphql({
     query: listStaff,
-    authMode: "AMAZON_COGNITO_USER_POOLS",
+    authMode: "userPool",
   })) as GraphQLResult<ListStaffQuery>;
 
   if (response.errors) {

@@ -40,7 +40,7 @@ type AttendanceEditContextProps = {
   setValue?: UseFormSetValue<AttendanceEditInputs>;
   getValues?: UseFormGetValues<AttendanceEditInputs>;
   watch?: UseFormWatch<AttendanceEditInputs>;
-  handleSubmit?: UseFormHandleSubmit<AttendanceEditInputs, undefined>;
+  handleSubmit?: UseFormHandleSubmit<AttendanceEditInputs>;
   systemCommentFields: FieldArrayWithId<
     AttendanceEditInputs,
     "systemComments",

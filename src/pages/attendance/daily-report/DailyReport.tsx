@@ -1,4 +1,3 @@
-import { GraphQLResult } from "@aws-amplify/api";
 import {
   DailyReportCalendar,
   DailyReportFormChangeHandler,
@@ -17,6 +16,7 @@ import {
   Divider,
   Grid,
   Paper,
+  Skeleton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -38,12 +38,13 @@ import {
   DailyReportStatus,
   ModelSortDirection,
 } from "@shared/api/graphql/types";
-import { API } from "aws-amplify";
+import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
 
 type ReportStatus = DailyReportStatus;
@@ -166,7 +167,7 @@ const sortReports = (items: DailyReportItem[]) =>
   });
 
 export default function DailyReport() {
-  const { cognitoUser } = useCognitoUser();
+  const { cognitoUser, loading: isCognitoUserLoading } = useCognitoUser();
   const [reports, setReports] = useState<DailyReportItem[]>([]);
   const [createForm, setCreateForm] = useState<DailyReportForm>(() =>
     emptyForm()
@@ -181,11 +182,13 @@ export default function DailyReport() {
   >(null);
   const [authorName, setAuthorName] = useState<string>("");
   const [staffId, setStaffId] = useState<string | null>(null);
+  const [isInitialViewPending, setIsInitialViewPending] = useState(true);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const processedUserIdRef = useRef<string | null>(null);
   const { dateMap: reportsByDate, dateSet: reportedDateSet } = useMemo(() => {
     const dateMap = new Map<string, DailyReportItem>();
     const dateSet = new Set<string>();
@@ -205,6 +208,7 @@ export default function DailyReport() {
     selectedReportId && selectedReportId !== "create"
       ? reports.find((report) => report.id === selectedReportId) ?? null
       : null;
+  const showInitialLoading = isInitialViewPending;
   const isSelectedReportSubmitted =
     selectedReport?.status === DailyReportStatus.SUBMITTED;
   useEffect(() => {
@@ -223,10 +227,21 @@ export default function DailyReport() {
   }, [selectedReport, isCreateMode, createForm.date]);
 
   useEffect(() => {
+    if (isCognitoUserLoading) {
+      return;
+    }
+
     if (!cognitoUser?.id) {
       setAuthorName("スタッフ");
       setStaffId(null);
+      setIsInitialViewPending(false);
+      processedUserIdRef.current = null;
       return;
+    }
+
+    if (processedUserIdRef.current !== cognitoUser.id) {
+      setIsInitialViewPending(true);
+      processedUserIdRef.current = cognitoUser.id;
     }
 
     const currentUser = cognitoUser;
@@ -251,6 +266,9 @@ export default function DailyReport() {
         );
         setAuthorName(staffName || fallback || "スタッフ");
         setStaffId(staff?.id ?? null);
+        if (!staff?.id) {
+          setIsInitialViewPending(false);
+        }
       } catch {
         if (!mounted) return;
         const fallback = buildName(
@@ -259,6 +277,7 @@ export default function DailyReport() {
         );
         setAuthorName(fallback || "スタッフ");
         setStaffId(null);
+        setIsInitialViewPending(false);
       }
     }
 
@@ -266,7 +285,7 @@ export default function DailyReport() {
     return () => {
       mounted = false;
     };
-  }, [cognitoUser]);
+  }, [cognitoUser, isCognitoUserLoading]);
 
   useEffect(() => {
     if (!authorName) return;
@@ -285,6 +304,7 @@ export default function DailyReport() {
       setReports([]);
       setIsLoadingReports(false);
       setRequestError(null);
+      setIsInitialViewPending(false);
       return;
     }
 
@@ -295,7 +315,7 @@ export default function DailyReport() {
       let nextToken: string | null | undefined = undefined;
 
       do {
-        const response = (await API.graphql({
+        const response = (await graphqlClient.graphql({
           query: dailyReportsByStaffId,
           variables: {
             staffId,
@@ -303,7 +323,7 @@ export default function DailyReport() {
             limit: 50,
             nextToken,
           },
-          authMode: "AMAZON_COGNITO_USER_POOLS",
+          authMode: "userPool",
         })) as GraphQLResult<DailyReportsByStaffIdQuery>;
 
         if (response.errors?.length) {
@@ -331,6 +351,7 @@ export default function DailyReport() {
       );
     } finally {
       setIsLoadingReports(false);
+      setIsInitialViewPending(false);
     }
   }, [resolvedAuthorName, staffId]);
 
@@ -354,10 +375,18 @@ export default function DailyReport() {
       return;
     }
 
-    if (!selectedReportId) {
-      setSelectedReportId(reports[0].id);
+    const calendarKey = calendarDate.format("YYYY-MM-DD");
+    const reportForCalendarDate = reportsByDate.get(calendarKey) ?? null;
+
+    if (selectedReportId === "create" && reportForCalendarDate) {
+      setSelectedReportId(reportForCalendarDate.id);
+      return;
     }
-  }, [reports, selectedReportId]);
+
+    if (!selectedReportId) {
+      setSelectedReportId(reportForCalendarDate?.id ?? reports[0].id);
+    }
+  }, [calendarDate, reports, reportsByDate, selectedReportId]);
 
   useEffect(() => {
     setEditingReportId(null);
@@ -426,7 +455,7 @@ export default function DailyReport() {
       (createForm.author || resolvedAuthorName).trim() || resolvedAuthorName;
 
     try {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: createDailyReport,
         variables: {
           input: {
@@ -440,7 +469,7 @@ export default function DailyReport() {
             comments: [],
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<CreateDailyReportMutation>;
 
       if (response.errors?.length) {
@@ -500,7 +529,7 @@ export default function DailyReport() {
     setActionError(null);
 
     try {
-      const response = (await API.graphql({
+      const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
           input: {
@@ -512,7 +541,7 @@ export default function DailyReport() {
             updatedAt: new Date().toISOString(),
           },
         },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
+        authMode: "userPool",
       })) as GraphQLResult<UpdateDailyReportMutation>;
 
       if (response.errors?.length) {
@@ -588,7 +617,21 @@ export default function DailyReport() {
                       {actionError}
                     </Alert>
                   )}
-                  {isCreateMode ? (
+                  {showInitialLoading ? (
+                    <Stack spacing={2}>
+                      <Skeleton variant="text" width="40%" height={32} />
+                      <Skeleton variant="text" width="60%" height={48} />
+                      <Skeleton variant="rectangular" height={160} />
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={2}
+                      >
+                        <Skeleton variant="rounded" width={120} height={36} />
+                        <Skeleton variant="rounded" width={140} height={36} />
+                        <Skeleton variant="rounded" width={140} height={36} />
+                      </Stack>
+                    </Stack>
+                  ) : isCreateMode ? (
                     <Stack spacing={2}>
                       <Box>
                         <Typography variant="subtitle2" color="text.secondary">

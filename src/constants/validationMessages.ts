@@ -1,0 +1,27 @@
+export const validationMessages = {
+  common: {
+    required: "必須項目です。",
+    invalidDate: "日付の形式が正しくありません。",
+    invalidDateTime: "日時の形式が正しくありません。",
+  },
+  attendance: {
+    workTime: {
+      startRequired: "出勤時刻を入力してください。",
+      endRequired: "退勤時刻を入力してください。",
+      range: "退勤時刻は出勤時刻より後にしてください。",
+    },
+    rest: {
+      incomplete: "休憩時間は開始と終了を両方入力してください。",
+      range: "休憩終了は開始より後にしてください。",
+    },
+    hourlyPaidHoliday: {
+      incomplete: "時間単位休暇は開始と終了を両方入力してください。",
+      range: "時間単位休暇の終了時刻は開始より後にしてください。",
+    },
+    substituteHoliday: {
+      invalidDate: "振替休日の日付形式が正しくありません。",
+    },
+  },
+} as const;
+
+export type ValidationMessages = typeof validationMessages;

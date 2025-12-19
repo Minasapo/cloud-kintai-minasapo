@@ -56,7 +56,7 @@ export default function RestTimeItem() {
       if (typeof subscription === "function") {
         try {
           (subscription as () => void)();
-        } catch (e) {
+        } catch {
           /* ignore */
         }
         return;
@@ -69,7 +69,7 @@ export default function RestTimeItem() {
       ) {
         try {
           (subscription as { unsubscribe: () => void }).unsubscribe();
-        } catch (e) {
+        } catch {
           /* ignore */
         }
       }

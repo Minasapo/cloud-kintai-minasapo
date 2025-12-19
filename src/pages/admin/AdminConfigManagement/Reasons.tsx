@@ -69,7 +69,7 @@ export default function Reasons() {
         dispatch(setSnackbarSuccess(S14001));
       }
       await fetchConfig();
-    } catch (error) {
+    } catch {
       dispatch(setSnackbarError(E14001));
     }
   };

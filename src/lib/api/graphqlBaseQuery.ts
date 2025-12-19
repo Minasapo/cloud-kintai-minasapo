@@ -1,13 +1,8 @@
-import type { GraphQLResult } from "@aws-amplify/api";
+import type { GraphQLAuthMode } from "@aws-amplify/core/internals/utils";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
-import { API } from "aws-amplify";
+import type { GraphQLResult } from "aws-amplify/api";
 
-type GraphQLAuthMode =
-  | "API_KEY"
-  | "AWS_IAM"
-  | "AMAZON_COGNITO_USER_POOLS"
-  | "OPENID_CONNECT"
-  | "AWS_LAMBDA";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 export type SerializableValue =
   | string
@@ -188,7 +183,7 @@ const serializeUnknownError = (error: unknown): SerializableValue => {
 
 export const graphqlBaseQuery =
   <TVariables extends object = Record<string, unknown>>({
-    defaultAuthMode = "AMAZON_COGNITO_USER_POOLS",
+    defaultAuthMode = "userPool",
   }: {
     defaultAuthMode?: GraphQLAuthMode;
   } = {}): BaseQueryFn<
@@ -198,7 +193,7 @@ export const graphqlBaseQuery =
   > =>
   async ({ document, variables, authMode }) => {
     try {
-      const result = (await API.graphql({
+      const result = (await graphqlClient.graphql({
         query: document,
         variables,
         authMode: authMode ?? defaultAuthMode,

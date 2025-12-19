@@ -6,7 +6,6 @@
  * @returns メニューのReact要素
  */
 
-import { useAuthenticator } from "@aws-amplify/ui-react";
 import DesktopMenuView, {
   DesktopMenuItem,
 } from "@shared/ui/header/DesktopMenu";
@@ -14,12 +13,11 @@ import { useContext, useEffect, useMemo, useState } from "react";
 
 import { AppConfigContext } from "../../context/AppConfigContext";
 import { AuthContext } from "../../context/AuthContext";
-import useAuthenticatedUser from "../../hooks/useAuthenticatedUser";
 import fetchStaff from "../../hooks/useStaff/fetchStaff";
 import { StaffRole } from "../../hooks/useStaffs/useStaffs";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
-  const { isCognitoUserRole } = useContext(AuthContext);
+  const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);
   const { getOfficeMode } = useContext(AppConfigContext);
   const [officeMode, setOfficeMode] = useState<boolean>(false);
 
@@ -38,50 +36,33 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     []
   );
 
-  const adminMenuList = useMemo<DesktopMenuItem[]>(
-    () => [
-      { label: "スタッフ管理", href: "/admin/staff" },
-      { label: "勤怠管理", href: "/admin/attendances" },
-      { label: "シフト管理", href: "/admin/shift" },
-      { label: "シフト計画管理", href: "/admin/shift-plan" },
-      { label: "ログ管理", href: "/admin/logs" },
-      { label: "日報管理", href: "/admin/daily-report" },
-      { label: "ワークフロー管理", href: "/admin/workflow" },
-    ],
+  const adminLink = useMemo<DesktopMenuItem>(
+    () => ({ label: "管理", href: "/admin" }),
     []
   );
-
-  // 設定（マスタ管理）の独立表示（管理配下から外す）
-  const settingsMenu: DesktopMenuItem = {
-    label: "設定",
-    href: "/admin/master",
-  };
 
   const operatorMenuList: DesktopMenuItem[] = officeMode
     ? [{ label: "QR表示", href: "/office/qr" }]
     : [];
 
-  // システム管理者、スタッフ管理者
-  const { user } = useAuthenticator();
-  const isMailVerified = user?.attributes?.email_verified ? true : false;
+  const isMailVerified = Boolean(cognitoUser?.emailVerified);
 
   // developer flag for current staff (used to hide admin shift link)
-  const { authenticatedUser } = useAuthenticatedUser();
   const [isDeveloper, setIsDeveloper] = useState<boolean | null>(null);
 
   useEffect(() => {
     let mounted = true;
     async function load() {
-      if (!authenticatedUser?.cognitoUserId) {
+      if (!cognitoUser?.id) {
         if (mounted) setIsDeveloper(false);
         return;
       }
       try {
-        const staff = await fetchStaff(authenticatedUser.cognitoUserId);
+        const staff = await fetchStaff(cognitoUser.id);
         const developerFlag = (staff as unknown as Record<string, unknown>)
           .developer as boolean | undefined;
         if (mounted) setIsDeveloper(Boolean(developerFlag));
-      } catch (e) {
+      } catch {
         if (mounted) setIsDeveloper(false);
       }
     }
@@ -89,7 +70,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     return () => {
       mounted = false;
     };
-  }, [authenticatedUser]);
+  }, [cognitoUser]);
 
   const isAdminUser = useMemo(
     () =>
@@ -130,25 +111,12 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     isDeveloper,
   ]);
 
-  const filteredAdminMenuItems = useMemo(
-    () =>
-      adminMenuList.filter((menu) => {
-        if (menu.href === "/admin/shift") {
-          return isDeveloper === true;
-        }
-        return true;
-      }),
-    [adminMenuList, isDeveloper]
-  );
-
   return (
     <DesktopMenuView
       pathName={pathName}
       menuItems={menuItems}
-      adminMenuItems={filteredAdminMenuItems}
-      settingsMenu={settingsMenu}
+      adminLink={adminLink}
       showAdminMenu={isAdminUser}
-      showSettingsLink={isAdminUser}
     />
   );
 }

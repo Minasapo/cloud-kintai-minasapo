@@ -1,4 +1,4 @@
-import { Storage } from "aws-amplify";
+import { downloadData, uploadData } from "aws-amplify/storage";
 
 type ShiftPatternStorageRecord = {
   id: string;
@@ -8,6 +8,9 @@ type ShiftPatternStorageRecord = {
 
 const STORAGE_LEVEL = "private" as const;
 const STORAGE_KEY = "shift-request/patterns.json";
+
+type DownloadResult = Awaited<ReturnType<typeof downloadData>>;
+type DownloadBody = Awaited<DownloadResult["result"]>["body"] | undefined;
 
 const isNotFoundError = (error: unknown) => {
   if (typeof error !== "object" || error === null) {
@@ -36,7 +39,7 @@ const isNotFoundError = (error: unknown) => {
   return false;
 };
 
-const parseBodyText = async (body: unknown) => {
+const parseBodyText = async (body: DownloadBody) => {
   if (!body) {
     return "";
   }
@@ -64,7 +67,7 @@ const parseBodyText = async (body: unknown) => {
   return "";
 };
 
-const parseResponseBody = async (body: unknown) => {
+const parseResponseBody = async (body: DownloadBody) => {
   const text = await parseBodyText(body);
   if (!text) {
     return [] as ShiftPatternStorageRecord[];
@@ -86,11 +89,14 @@ export const loadShiftPatterns = async (): Promise<
   ShiftPatternStorageRecord[]
 > => {
   try {
-    const result = await Storage.get(STORAGE_KEY, {
-      level: STORAGE_LEVEL,
-      download: true,
+    const downloadResult = await downloadData({
+      key: STORAGE_KEY,
+      options: {
+        accessLevel: STORAGE_LEVEL,
+      },
     });
-    return await parseResponseBody((result as { Body?: unknown })?.Body);
+    const { body } = await downloadResult.result;
+    return await parseResponseBody(body);
   } catch (error) {
     if (isNotFoundError(error)) {
       return [];
@@ -102,10 +108,16 @@ export const loadShiftPatterns = async (): Promise<
 export const saveShiftPatterns = async (
   patterns: ShiftPatternStorageRecord[]
 ): Promise<void> => {
-  await Storage.put(STORAGE_KEY, JSON.stringify(patterns), {
-    level: STORAGE_LEVEL,
-    contentType: "application/json",
+  const uploadTask = await uploadData({
+    key: STORAGE_KEY,
+    data: JSON.stringify(patterns),
+    options: {
+      accessLevel: STORAGE_LEVEL,
+      contentType: "application/json",
+    },
   });
+
+  await uploadTask.result;
 };
 
 export type { ShiftPatternStorageRecord };

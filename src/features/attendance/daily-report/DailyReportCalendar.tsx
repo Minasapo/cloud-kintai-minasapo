@@ -25,15 +25,16 @@ export function DailyReportCalendar({
 }: DailyReportCalendarProps) {
   const CalendarDay = useMemo(
     () =>
-      function CalendarDay(dayProps: PickersDayProps<Dayjs>) {
+      function CalendarDay(dayProps: PickersDayProps) {
         const { day, outsideCurrentMonth, selected, ...other } = dayProps;
-        const dateKey = day.format("YYYY-MM-DD");
+        const typedDay = day as Dayjs;
+        const dateKey = typedDay.format("YYYY-MM-DD");
         const hasReport = reportedDateSet.has(dateKey);
 
         return (
           <PickersDay
             {...other}
-            day={day}
+            day={typedDay}
             outsideCurrentMonth={outsideCurrentMonth}
             selected={selected}
             sx={(theme) => {

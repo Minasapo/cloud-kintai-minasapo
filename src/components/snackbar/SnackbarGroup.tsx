@@ -1,16 +1,13 @@
 // cspell:ignore notistack
 import CloseIcon from "@mui/icons-material/Close";
-import { IconButton, styled } from "@mui/material";
 import {
-  closeSnackbar,
-  enqueueSnackbar,
-  MaterialDesignContent,
-  type OptionsObject,
-  type SnackbarKey,
-  SnackbarProvider,
-  type VariantType,
-} from "notistack";
-import { useCallback, useEffect } from "react";
+  Alert,
+  IconButton,
+  Snackbar,
+  type SnackbarCloseReason,
+  type SnackbarOrigin,
+} from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 
 import { useAppDispatchV2, useAppSelectorV2 } from "../../app/hooks";
 import {
@@ -20,34 +17,31 @@ import {
   setSnackbarWarn,
 } from "../../lib/reducers/snackbarReducer";
 
-const SNACKBAR_ANCHOR_ORIGIN: OptionsObject["anchorOrigin"] = {
+const SNACKBAR_ANCHOR_ORIGIN: SnackbarOrigin = {
   vertical: "top",
   horizontal: "right",
 };
 
-const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
-  "&.notistack-MuiContent-success": {
-    backgroundColor: "#7fff7f",
-    // 薄い黒
-    color: "#333333",
-  },
-  "&.notistack-MuiContent-error": {
-    backgroundColor: "#ff7f7f",
-    color: "#333333",
-  },
-  "&.notistack-MuiContent-warning": {
-    backgroundColor: "#ffff7f",
-    color: "#333333",
-  },
-}));
+const SNACKBAR_COLORS = {
+  success: "#7fff7f",
+  error: "#ff7f7f",
+  warn: "#ffff7f",
+} as const;
 
-type SnackbarOptions = Omit<Partial<OptionsObject>, "autoHideDuration"> & {
-  autoHideDuration?: OptionsObject["autoHideDuration"] | null;
-};
+const SNACKBAR_BASE_OFFSET_PX = 24;
+const SNACKBAR_STACK_GAP_PX = 12;
+const SNACKBAR_APPROX_HEIGHT_PX = 68;
+
+const getSnackbarTopOffset = (stackIndex: number) =>
+  SNACKBAR_BASE_OFFSET_PX +
+  stackIndex * (SNACKBAR_APPROX_HEIGHT_PX + SNACKBAR_STACK_GAP_PX);
 
 export default function SnackbarGroup() {
   const { success, error, warn } = useAppSelectorV2(selectSnackbar);
   const dispatch = useAppDispatchV2();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [warnMessage, setWarnMessage] = useState<string | null>(null);
 
   const resetSuccess = useCallback(() => {
     dispatch(setSnackbarSuccess(null));
@@ -61,63 +55,128 @@ export default function SnackbarGroup() {
     dispatch(setSnackbarWarn(null));
   }, [dispatch]);
 
-  const showSnackbar = useCallback(
-    (
-      message: string | null,
-      variant: VariantType,
-      reset: () => void,
-      options: SnackbarOptions = {}
-    ) => {
-      if (!message) {
-        return;
-      }
+  useEffect(() => {
+    if (!success) {
+      return;
+    }
+    setSuccessMessage(success);
+    resetSuccess();
+  }, [resetSuccess, success]);
 
-      enqueueSnackbar(message, {
-        variant,
-        anchorOrigin: SNACKBAR_ANCHOR_ORIGIN,
-        ...options,
-      });
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+    setErrorMessage(error);
+    resetError();
+  }, [error, resetError]);
 
-      reset();
-    },
-    []
+  useEffect(() => {
+    if (!warn) {
+      return;
+    }
+    setWarnMessage(warn);
+    resetWarn();
+  }, [resetWarn, warn]);
+
+  const renderSnackbar = (
+    key: string,
+    message: string,
+    severity: "success" | "error" | "warning",
+    autoHideDuration: number | null,
+    setMessage: React.Dispatch<React.SetStateAction<string | null>>,
+    stackIndex: number
+  ) => (
+    <Snackbar
+      key={key}
+      open
+      anchorOrigin={SNACKBAR_ANCHOR_ORIGIN}
+      autoHideDuration={autoHideDuration ?? undefined}
+      onClose={(_event, reason?: SnackbarCloseReason) => {
+        if (reason === "clickaway") {
+          return;
+        }
+        setMessage(null);
+      }}
+      sx={{
+        "&.MuiSnackbar-anchorOriginTopRight": {
+          top: `${getSnackbarTopOffset(stackIndex)}px`,
+        },
+      }}
+    >
+      <Alert
+        variant="filled"
+        severity={severity}
+        icon={false}
+        sx={{
+          backgroundColor:
+            severity === "success"
+              ? SNACKBAR_COLORS.success
+              : severity === "error"
+              ? SNACKBAR_COLORS.error
+              : SNACKBAR_COLORS.warn,
+          color: "#333333",
+        }}
+        action={
+          <IconButton
+            color="inherit"
+            size="small"
+            onClick={() => setMessage(null)}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      >
+        {message}
+      </Alert>
+    </Snackbar>
   );
 
-  // スナックバーの各フィールドに依存関係を限定し、無関係な状態更新で副作用が発火しないようにする。
-  useEffect(() => {
-    showSnackbar(success, "success", resetSuccess, {
-      className: "snackbar-success",
+  const snackbarConfigs = [
+    {
+      key: "success",
+      message: successMessage,
+      severity: "success" as const,
       autoHideDuration: 6000,
-    });
-
-    showSnackbar(error, "error", resetError, {
-      className: "snackbar-error",
-      // 既存の挙動を維持するため、自動クローズは無効化したままにする。
+      setMessage: setSuccessMessage,
+    },
+    {
+      key: "error",
+      message: errorMessage,
+      severity: "error" as const,
       autoHideDuration: null,
-    });
+      setMessage: setErrorMessage,
+    },
+    {
+      key: "warn",
+      message: warnMessage,
+      severity: "warning" as const,
+      autoHideDuration: 5000,
+      setMessage: setWarnMessage,
+    },
+  ];
 
-    showSnackbar(warn, "warning", resetWarn, {
-      className: "snackbar-warn",
-    });
-  }, [success, error, warn, showSnackbar, resetSuccess, resetError, resetWarn]);
-
-  // アイコンボタンが再生成されないよう、アクションのハンドラーを安定化させる。
-  const action = useCallback((snackbarKey: SnackbarKey) => {
-    return (
-      <IconButton color="inherit" onClick={() => closeSnackbar(snackbarKey)}>
-        <CloseIcon />
-      </IconButton>
-    );
-  }, []);
+  let stackIndex = 0;
 
   return (
-    <SnackbarProvider
-      action={action}
-      Components={{
-        success: StyledMaterialDesignContent,
-        error: StyledMaterialDesignContent,
-        warning: StyledMaterialDesignContent,
-      }}
-    />
+    <>
+      {snackbarConfigs.map(
+        ({ key, message, severity, autoHideDuration, setMessage }) => {
+          if (!message) {
+            return null;
+          }
+          const element = renderSnackbar(
+            key,
+            message,
+            severity,
+            autoHideDuration,
+            setMessage,
+            stackIndex
+          );
+          stackIndex += 1;
+          return element;
+        }
+      )}
+    </>
   );
 }
