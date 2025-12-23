@@ -8,14 +8,23 @@ type PageSectionProps = BoxProps & {
 };
 
 const SECTION_PADDING_X = {
-  xs: designTokenVar("spacing.lg", "16px"),
-  md: designTokenVar("spacing.xxl", "32px"),
+  xs: designTokenVar("component.pageSection.paddingX.xs", "16px"),
+  md: designTokenVar("component.pageSection.paddingX.md", "32px"),
 };
-const SECTION_PADDING_Y = designTokenVar("spacing.lg", "16px");
-const SECTION_GAP = designTokenVar("spacing.md", "12px");
-const SECTION_RADIUS = designTokenVar("radius.lg", "12px");
-const SECTION_BACKGROUND = designTokenVar("color.neutral.0", "#FFFFFF");
-const SECTION_SHADOW = "0 12px 24px rgba(17, 24, 39, 0.06)";
+const SECTION_PADDING_Y = designTokenVar(
+  "component.pageSection.paddingY",
+  "16px"
+);
+const SECTION_GAP = designTokenVar("component.pageSection.gap", "12px");
+const SECTION_RADIUS = designTokenVar("component.pageSection.radius", "12px");
+const SECTION_BACKGROUND = designTokenVar(
+  "component.pageSection.background",
+  "#FFFFFF"
+);
+const SECTION_SHADOW = designTokenVar(
+  "component.pageSection.shadow",
+  "0 12px 24px rgba(17, 24, 39, 0.06)"
+);
 
 const toArray = (value: BoxProps["sx"]) => {
   if (!value) return [] as BoxProps["sx"][];

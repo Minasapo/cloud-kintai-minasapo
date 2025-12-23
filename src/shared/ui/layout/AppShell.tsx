@@ -25,9 +25,18 @@ type AppShellProps = {
   slotProps?: SlotProps;
 };
 
-const APP_BACKGROUND = designTokenVar("color.neutral.50", "#F8FAF9");
-const APP_TEXT_COLOR = designTokenVar("color.neutral.900", "#1E2A25");
-const CONTENT_BACKGROUND = designTokenVar("color.neutral.50", "#F8FAF9");
+const APP_BACKGROUND = designTokenVar(
+  "component.appShell.background",
+  "#F8FAF9"
+);
+const APP_TEXT_COLOR = designTokenVar(
+  "component.appShell.textColor",
+  "#1E2A25"
+);
+const CONTENT_BACKGROUND = designTokenVar(
+  "component.appShell.contentBackground",
+  "#F8FAF9"
+);
 
 type MergeableSx = SxProps<Theme>;
 

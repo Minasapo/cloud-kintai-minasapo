@@ -262,6 +262,22 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       paddingLeft: spacing.sm,
       textColor: color.brand.primary.base,
     },
+    appShell: {
+      background: color.neutral[50],
+      textColor: color.neutral[900],
+      contentBackground: color.neutral[50],
+    },
+    pageSection: {
+      paddingX: {
+        xs: spacing.lg,
+        md: spacing.xxl,
+      },
+      paddingY: spacing.lg,
+      gap: spacing.md,
+      radius: radius.lg,
+      background: "#FFFFFF",
+      shadow: "0 12px 24px rgba(17, 24, 39, 0.06)",
+    },
   } as const;
 
   return {
