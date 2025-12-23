@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "./Layout";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
+import { workflowDetailLoader } from "./router/loaders/workflowDetailLoader";
 
 const AdminDashboardRoute = createLazyRoute(
   () => import("./pages/admin/AdminDashboard")
@@ -41,7 +42,10 @@ const ShiftRequestRoute = createLazyRoute(
   () => import("./pages/shift/request")
 );
 const WorkflowDetailRoute = createLazyRoute(
-  () => import("./pages/workflow/detail/WorkflowDetailPage")
+  () => import("./pages/workflow/detail/WorkflowDetailPage"),
+  {
+    loader: workflowDetailLoader,
+  }
 );
 const WorkflowEditRoute = createLazyRoute(
   () => import("./pages/workflow/edit/WorkflowEditPage")
