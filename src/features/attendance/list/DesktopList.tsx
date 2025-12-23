@@ -25,7 +25,6 @@ import { NavigateFunction } from "react-router-dom";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-import { getAttendanceRowClassName } from "./getAttendanceRowClassName";
 import { AttendanceGraph } from "@/pages/admin/AdminStaffAttendanceList/AttendanceGraph";
 import { CreatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/RestTimeTableCell";
@@ -35,6 +34,11 @@ import { WorkDateTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkDa
 import { WorkTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkTimeTableCell";
 
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+  getAttendanceRowVariant,
+} from "./getAttendanceRowClassName";
 
 const DesktopBox = styled(Box)(({ theme }) => ({
   padding: "0px 40px 40px 40px",
@@ -56,17 +60,17 @@ export default function DesktopList({
   companyHolidayCalendars: CompanyHolidayCalendar[];
   navigate: NavigateFunction;
 }) {
-  const getRowClass = (attendance: Attendance) => {
+  const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
     if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
-      return "table-row--sunday";
+      return "sunday";
     }
 
     // シフト勤務のスタッフは土日祝の色付けをしない
     if (staff?.workType === "shift") {
-      return "table-row--default";
+      return "default";
     }
 
-    return getAttendanceRowClassName(
+    return getAttendanceRowVariant(
       attendance,
       holidayCalendars,
       companyHolidayCalendars
@@ -143,56 +147,65 @@ export default function DesktopList({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {errorAttendances.map((attendance, index) => (
-                    <TableRow
-                      key={`error-${index}`}
-                      className={getRowClass(attendance)}
-                    >
-                      <TableCell>
-                        <Stack direction="row" spacing={0} alignItems="center">
-                          <AttendanceStatusTooltip
-                            staff={staff}
-                            attendance={attendance}
-                            holidayCalendars={holidayCalendars}
-                            companyHolidayCalendars={companyHolidayCalendars}
-                          />
-                          <IconButton onClick={() => handleEdit(attendance)}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
-                      </TableCell>
+                  {errorAttendances.map((attendance, index) => {
+                    const rowVariant = getRowVariant(attendance);
+                    return (
+                      <TableRow
+                        key={`error-${index}`}
+                        sx={attendanceRowVariantStyles[rowVariant]}
+                      >
+                        <TableCell>
+                          <Stack
+                            direction="row"
+                            spacing={0}
+                            alignItems="center"
+                          >
+                            <AttendanceStatusTooltip
+                              staff={staff}
+                              attendance={attendance}
+                              holidayCalendars={holidayCalendars}
+                              companyHolidayCalendars={companyHolidayCalendars}
+                            />
+                            <IconButton onClick={() => handleEdit(attendance)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
 
-                      {/* 勤務日 */}
-                      <WorkDateTableCell
-                        workDate={attendance.workDate}
-                        holidayCalendars={holidayCalendars}
-                        companyHolidayCalendars={companyHolidayCalendars}
-                      />
+                        {/* 勤務日 */}
+                        <WorkDateTableCell
+                          workDate={attendance.workDate}
+                          holidayCalendars={holidayCalendars}
+                          companyHolidayCalendars={companyHolidayCalendars}
+                        />
 
-                      {/* 勤務時間 */}
-                      <WorkTimeTableCell attendance={attendance} />
+                        {/* 勤務時間 */}
+                        <WorkTimeTableCell attendance={attendance} />
 
-                      {/* 休憩時間(最近) */}
-                      <RestTimeTableCell attendance={attendance} />
+                        {/* 休憩時間(最近) */}
+                        <RestTimeTableCell attendance={attendance} />
 
-                      {/* 摘要 */}
-                      <SummaryTableCell
-                        substituteHolidayDate={attendance.substituteHolidayDate}
-                        remarks={attendance.remarks}
-                        specialHolidayFlag={attendance.specialHolidayFlag}
-                        paidHolidayFlag={attendance.paidHolidayFlag}
-                        absentFlag={attendance.absentFlag}
-                      />
+                        {/* 摘要 */}
+                        <SummaryTableCell
+                          substituteHolidayDate={
+                            attendance.substituteHolidayDate
+                          }
+                          remarks={attendance.remarks}
+                          specialHolidayFlag={attendance.specialHolidayFlag}
+                          paidHolidayFlag={attendance.paidHolidayFlag}
+                          absentFlag={attendance.absentFlag}
+                        />
 
-                      {/* 作成日時 */}
-                      <CreatedAtTableCell createdAt={attendance.createdAt} />
+                        {/* 作成日時 */}
+                        <CreatedAtTableCell createdAt={attendance.createdAt} />
 
-                      {/* 更新日時 */}
-                      <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
+                        {/* 更新日時 */}
+                        <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
 
-                      <TableCell sx={{ width: 1 }} />
-                    </TableRow>
-                  ))}
+                        <TableCell sx={{ width: 1 }} />
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -216,53 +229,59 @@ export default function DesktopList({
             </TableRow>
           </TableHead>
           <TableBody>
-            {attendances.map((attendance, index) => (
-              <TableRow key={index} className={getRowClass(attendance)}>
-                <TableCell>
-                  <Stack direction="row" spacing={0} alignItems="center">
-                    <AttendanceStatusTooltip
-                      staff={staff}
-                      attendance={attendance}
-                      holidayCalendars={holidayCalendars}
-                      companyHolidayCalendars={companyHolidayCalendars}
-                    />
-                    <IconButton onClick={() => handleEdit(attendance)}>
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                  </Stack>
-                </TableCell>
+            {attendances.map((attendance, index) => {
+              const rowVariant = getRowVariant(attendance);
+              return (
+                <TableRow
+                  key={index}
+                  sx={attendanceRowVariantStyles[rowVariant]}
+                >
+                  <TableCell>
+                    <Stack direction="row" spacing={0} alignItems="center">
+                      <AttendanceStatusTooltip
+                        staff={staff}
+                        attendance={attendance}
+                        holidayCalendars={holidayCalendars}
+                        companyHolidayCalendars={companyHolidayCalendars}
+                      />
+                      <IconButton onClick={() => handleEdit(attendance)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  </TableCell>
 
-                {/* 勤務日 */}
-                <WorkDateTableCell
-                  workDate={attendance.workDate}
-                  holidayCalendars={holidayCalendars}
-                  companyHolidayCalendars={companyHolidayCalendars}
-                />
+                  {/* 勤務日 */}
+                  <WorkDateTableCell
+                    workDate={attendance.workDate}
+                    holidayCalendars={holidayCalendars}
+                    companyHolidayCalendars={companyHolidayCalendars}
+                  />
 
-                {/* 勤務時間 */}
-                <WorkTimeTableCell attendance={attendance} />
+                  {/* 勤務時間 */}
+                  <WorkTimeTableCell attendance={attendance} />
 
-                {/* 休憩時間(最近) */}
-                <RestTimeTableCell attendance={attendance} />
+                  {/* 休憩時間(最近) */}
+                  <RestTimeTableCell attendance={attendance} />
 
-                {/* 摘要 */}
-                <SummaryTableCell
-                  substituteHolidayDate={attendance.substituteHolidayDate}
-                  remarks={attendance.remarks}
-                  specialHolidayFlag={attendance.specialHolidayFlag}
-                  paidHolidayFlag={attendance.paidHolidayFlag}
-                  absentFlag={attendance.absentFlag}
-                />
+                  {/* 摘要 */}
+                  <SummaryTableCell
+                    substituteHolidayDate={attendance.substituteHolidayDate}
+                    remarks={attendance.remarks}
+                    specialHolidayFlag={attendance.specialHolidayFlag}
+                    paidHolidayFlag={attendance.paidHolidayFlag}
+                    absentFlag={attendance.absentFlag}
+                  />
 
-                {/* 作成日時 */}
-                <CreatedAtTableCell createdAt={attendance.createdAt} />
+                  {/* 作成日時 */}
+                  <CreatedAtTableCell createdAt={attendance.createdAt} />
 
-                {/* 更新日時 */}
-                <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
+                  {/* 更新日時 */}
+                  <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
 
-                <TableCell sx={{ width: 1 }} />
-              </TableRow>
-            ))}
+                  <TableCell sx={{ width: 1 }} />
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

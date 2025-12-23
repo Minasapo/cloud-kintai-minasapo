@@ -19,7 +19,10 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
-import { getAttendanceRowClassName } from "@/features/attendance/list/getAttendanceRowClassName";
+import {
+  AttendanceRowVariant,
+  getAttendanceRowVariant,
+} from "@/features/attendance/list/getAttendanceRowClassName";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
@@ -284,21 +287,21 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     );
   }, [pendingAttendances]);
 
-  const getTableRowClassName = useCallback(
+  const getTableRowVariant = useCallback(
     (
       attendance: Attendance,
       holidayList: HolidayCalendar[] = holidayCalendars,
       companyHolidayList: CompanyHolidayCalendar[] = companyHolidayCalendars
-    ) => {
+    ): AttendanceRowVariant => {
       if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
-        return "table-row--sunday";
+        return "sunday";
       }
 
       if (staff?.workType === "shift") {
-        return "table-row--default";
+        return "default";
       }
 
-      return getAttendanceRowClassName(
+      return getAttendanceRowVariant(
         attendance,
         holidayList,
         companyHolidayList
@@ -333,7 +336,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     bulkApproving,
     canBulkApprove,
     handleBulkApprove,
-    getTableRowClassName,
+    getTableRowVariant,
     getBadgeContent,
   } satisfies {
     staff: Staff | undefined | null;
@@ -355,11 +358,11 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     bulkApproving: boolean;
     canBulkApprove: boolean;
     handleBulkApprove: () => Promise<void> | void;
-    getTableRowClassName: (
+    getTableRowVariant: (
       attendance: Attendance,
       holidayList?: HolidayCalendar[],
       companyHolidayList?: CompanyHolidayCalendar[]
-    ) => string;
+    ) => AttendanceRowVariant;
     getBadgeContent: (attendance: Attendance) => number;
   };
 };

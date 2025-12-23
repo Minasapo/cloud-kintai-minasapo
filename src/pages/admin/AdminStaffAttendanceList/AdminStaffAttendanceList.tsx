@@ -1,40 +1,36 @@
-import "./styles.scss";
-
-import { AttendanceStatusTooltip } from "@features/attendance/list/AttendanceStatusTooltip";
-import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
-import EditIcon from "@mui/icons-material/Edit";
+import { AttendanceTableSection } from "@features/admin/staffAttendanceList/components/AttendanceTableSection";
 import {
-  Alert,
-  AlertTitle,
-  Box,
-  Button,
-  Checkbox,
-  Container,
-  IconButton,
-  LinearProgress,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+  pendingAttendanceContainerSx,
+  PendingAttendanceSection,
+} from "@features/admin/staffAttendanceList/components/PendingAttendanceSection";
+import { Box, LinearProgress, Stack, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
+import { Attendance } from "@shared/api/graphql/types";
+import dayjs, { Dayjs } from "dayjs";
+import type { ReactNode } from "react";
+import { useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
 import { AttendanceDate } from "@/lib/AttendanceDate";
+import { designTokenVar } from "@/shared/designSystem";
+import { PageSection } from "@/shared/ui/layout";
 
 import { AttendanceGraph } from "./AttendanceGraph";
 import ChangeRequestQuickViewDialog from "./ChangeRequestQuickViewDialog";
-import { CreatedAtTableCell } from "./CreatedAtTableCell";
-import { RestTimeTableCell } from "./RestTimeTableCell";
-import { SummaryTableCell } from "./SummaryTableCell";
-import { UpdatedAtTableCell } from "./UpdatedAtTableCell";
-import { WorkDateTableCell } from "./WorkDateTableCell";
-import { WorkTimeTableCell } from "./WorkTimeTableCell";
+
+const PAGE_PADDING_X = {
+  xs: designTokenVar("spacing.lg", "16px"),
+  md: designTokenVar("spacing.xxl", "32px"),
+};
+
+const PAGE_PADDING_Y = {
+  xs: designTokenVar("spacing.xl", "24px"),
+  md: designTokenVar("spacing.xxl", "32px"),
+};
+
+const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
+const SECTION_CONTENT_GAP = designTokenVar("spacing.md", "12px");
 
 export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();
@@ -60,35 +56,72 @@ export default function AdminStaffAttendanceList() {
     bulkApproving,
     canBulkApprove,
     handleBulkApprove,
-    getTableRowClassName,
+    getTableRowVariant,
     getBadgeContent,
   } = useAdminStaffAttendanceListViewModel(staffId);
 
-  const handleEdit = (workDate: string) => {
-    navigate(`/admin/attendances/edit/${workDate}/${staffId}`);
-  };
+  const handleEdit = useCallback(
+    (attendance: Attendance) => {
+      if (!staffId) return;
+      const workDate = dayjs(attendance.workDate).format(
+        AttendanceDate.QueryParamFormat
+      );
+      navigate(`/admin/attendances/edit/${workDate}/${staffId}`);
+    },
+    [navigate, staffId]
+  );
+
+  const handleDateNavigate = useCallback(
+    (date: Dayjs | null) => {
+      if (!date || !staffId) return;
+      navigate(
+        `/admin/attendances/edit/${date.format(
+          AttendanceDate.QueryParamFormat
+        )}/${staffId}`
+      );
+    },
+    [navigate, staffId]
+  );
+
+  const renderStandaloneSection = (content: ReactNode) => (
+    <Stack
+      component="section"
+      sx={{
+        flex: 1,
+        width: "100%",
+        boxSizing: "border-box",
+        px: PAGE_PADDING_X,
+        py: PAGE_PADDING_Y,
+      }}
+    >
+      <PageSection variant="surface">{content}</PageSection>
+    </Stack>
+  );
 
   if (staff === null || !staffId) {
-    return (
-      <Container maxWidth="xl" sx={{ pt: 2 }}>
-        <Typography>データ取得中に何らかの問題が発生しました</Typography>
-      </Container>
+    return renderStandaloneSection(
+      <Typography>データ取得中に何らかの問題が発生しました</Typography>
     );
   }
 
   if (attendanceLoading || calendarLoading) {
-    return (
-      <Container maxWidth="xl" sx={{ pt: 2 }}>
-        <LinearProgress />
-      </Container>
-    );
+    return renderStandaloneSection(<LinearProgress />);
   }
 
   return (
-    <Container maxWidth="xl">
-      <Stack spacing={1} sx={{ pt: 1 }}>
-        {/* breadcrumbs and main heading removed */}
-        <Box>
+    <>
+      <Stack
+        component="section"
+        sx={{
+          flex: 1,
+          width: "100%",
+          boxSizing: "border-box",
+          px: PAGE_PADDING_X,
+          py: PAGE_PADDING_Y,
+          gap: PAGE_SECTION_GAP,
+        }}
+      >
+        <PageSection variant="surface" sx={{ gap: SECTION_CONTENT_GAP }}>
           <DatePicker
             value={dayjs()}
             format={AttendanceDate.DisplayFormat}
@@ -96,334 +129,50 @@ export default function AdminStaffAttendanceList() {
             slotProps={{
               textField: { size: "small" },
             }}
-            onChange={(date) => {
-              if (date) {
-                navigate(
-                  `/admin/attendances/edit/${date.format(
-                    AttendanceDate.QueryParamFormat
-                  )}/${staffId}`
-                );
-              }
-            }}
+            onChange={handleDateNavigate}
           />
-        </Box>
-        <Box>
+        </PageSection>
+
+        <PageSection variant="surface" sx={{ gap: SECTION_CONTENT_GAP }}>
           <AttendanceGraph attendances={attendances} />
-        </Box>
+        </PageSection>
+
         {pendingAttendances.length > 0 && (
-          <Box sx={{ pb: 2 }}>
-            {/* 目立たせるために枠と背景で囲む */}
-            <Box
-              sx={{
-                border: "1px solid",
-                borderColor: "warning.main",
-                borderRadius: 2,
-                p: 2,
-                backgroundColor: "rgba(255,243,205,0.12)",
-              }}
-            >
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                justifyContent="space-between"
-                alignItems={{ xs: "flex-start", sm: "center" }}
-                sx={{ mb: 1 }}
-              >
-                <Typography variant="h6">
-                  承認待ち一覧 ({pendingAttendances.length})
-                </Typography>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Typography variant="body2" color="text.secondary">
-                    選択中: {selectedAttendanceIds.length} 件
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={
-                      bulkApproving ||
-                      selectedAttendanceIds.length === 0 ||
-                      !canBulkApprove
-                    }
-                    onClick={handleBulkApprove}
-                    data-testid="bulk-approve-button"
-                  >
-                    {bulkApproving ? "承認処理中..." : "選択を一括承認"}
-                  </Button>
-                </Stack>
-              </Stack>
-              <Alert severity="warning">
-                <AlertTitle sx={{ fontWeight: "bold" }}>
-                  確認してください
-                </AlertTitle>
-                未承認の変更リクエストがあります
-              </Alert>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          color="primary"
-                          indeterminate={
-                            selectedAttendanceIds.length > 0 &&
-                            selectedAttendanceIds.length <
-                              pendingAttendances.length
-                          }
-                          checked={
-                            pendingAttendances.length > 0 &&
-                            selectedAttendanceIds.length ===
-                              pendingAttendances.length
-                          }
-                          onChange={toggleSelectAllPending}
-                          inputProps={{
-                            "aria-label": "select all pending change requests",
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell />
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        勤務日
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        勤務時間
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        休憩時間(直近)
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        作成日時
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        更新日時
-                      </TableCell>
-                      <TableCell />
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {pendingAttendances.map((attendance, index) => {
-                      const pendingCount = getBadgeContent(attendance);
-                      return (
-                        <TableRow
-                          key={`pending-${index}`}
-                          className={getTableRowClassName(
-                            attendance,
-                            holidayCalendars,
-                            companyHolidayCalendars
-                          )}
-                          data-testid={
-                            index === pendingAttendances.length - 1
-                              ? "last-row-pending"
-                              : undefined
-                          }
-                        >
-                          <TableCell padding="checkbox">
-                            <Checkbox
-                              color="primary"
-                              checked={isAttendanceSelected(attendance.id)}
-                              onChange={() =>
-                                toggleAttendanceSelection(attendance.id)
-                              }
-                              inputProps={{
-                                "aria-label": "select change request",
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              alignItems="center"
-                            >
-                              <AttendanceStatusTooltip
-                                staff={staff}
-                                attendance={attendance}
-                                holidayCalendars={holidayCalendars}
-                                companyHolidayCalendars={
-                                  companyHolidayCalendars
-                                }
-                              />
-                              <IconButton
-                                size="small"
-                                onClick={() =>
-                                  handleEdit(
-                                    dayjs(attendance.workDate).format(
-                                      AttendanceDate.QueryParamFormat
-                                    )
-                                  )
-                                }
-                                data-testid="edit-attendance"
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                            </Stack>
-                          </TableCell>
-
-                          {/* 勤務日 */}
-                          <WorkDateTableCell
-                            workDate={attendance.workDate}
-                            holidayCalendars={holidayCalendars}
-                            companyHolidayCalendars={companyHolidayCalendars}
-                          />
-
-                          {/* 勤務時間 */}
-                          <WorkTimeTableCell attendance={attendance} />
-
-                          {/* 休憩時間(最近) */}
-                          <RestTimeTableCell attendance={attendance} />
-
-                          {/* 摘要 */}
-                          <SummaryTableCell
-                            substituteHolidayDate={
-                              attendance.substituteHolidayDate
-                            }
-                            remarks={attendance.remarks}
-                            specialHolidayFlag={attendance.specialHolidayFlag}
-                            paidHolidayFlag={attendance.paidHolidayFlag}
-                            absentFlag={attendance.absentFlag}
-                          />
-
-                          {/* 作成日時 */}
-                          <CreatedAtTableCell
-                            createdAt={attendance.createdAt}
-                          />
-
-                          {/* 更新日時 */}
-                          <UpdatedAtTableCell
-                            updatedAt={attendance.updatedAt}
-                          />
-
-                          <TableCell sx={{ width: 1 }} align="right">
-                            {pendingCount > 0 && (
-                              <Button
-                                size="small"
-                                variant="contained"
-                                color="warning"
-                                sx={{ fontWeight: "bold" }}
-                                onClick={() => handleOpenQuickView(attendance)}
-                                data-testid="quick-view-change-request"
-                              >
-                                申請確認
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+          <PageSection variant="surface" sx={{ gap: SECTION_CONTENT_GAP }}>
+            <Box sx={pendingAttendanceContainerSx}>
+              <PendingAttendanceSection
+                attendances={pendingAttendances}
+                staff={staff}
+                holidayCalendars={holidayCalendars}
+                companyHolidayCalendars={companyHolidayCalendars}
+                selectedAttendanceIds={selectedAttendanceIds}
+                isAttendanceSelected={isAttendanceSelected}
+                toggleAttendanceSelection={toggleAttendanceSelection}
+                toggleSelectAll={toggleSelectAllPending}
+                bulkApproving={bulkApproving}
+                canBulkApprove={canBulkApprove}
+                onBulkApprove={handleBulkApprove}
+                onOpenQuickView={handleOpenQuickView}
+                onEdit={handleEdit}
+                getBadgeContent={getBadgeContent}
+                getRowVariant={getTableRowVariant}
+              />
             </Box>
-          </Box>
+          </PageSection>
         )}
-        <Box sx={{ pb: 5 }}>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell />
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>勤務時間</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>
-                    休憩時間(直近)
-                  </TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>作成日時</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>更新日時</TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {attendances.map((attendance, index) => {
-                  const pendingCount = getBadgeContent(attendance);
-                  return (
-                    <TableRow
-                      key={index}
-                      className={getTableRowClassName(
-                        attendance,
-                        holidayCalendars,
-                        companyHolidayCalendars
-                      )}
-                      data-testid={
-                        index === attendances.length - 1
-                          ? "last-row"
-                          : undefined
-                      }
-                    >
-                      <TableCell>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <AttendanceStatusTooltip
-                            staff={staff}
-                            attendance={attendance}
-                            holidayCalendars={holidayCalendars}
-                            companyHolidayCalendars={companyHolidayCalendars}
-                          />
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              handleEdit(
-                                dayjs(attendance.workDate).format(
-                                  AttendanceDate.QueryParamFormat
-                                )
-                              )
-                            }
-                            data-testid="edit-attendance-button"
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
-                      </TableCell>
 
-                      {/* 勤務日 */}
-                      <WorkDateTableCell
-                        workDate={attendance.workDate}
-                        holidayCalendars={holidayCalendars}
-                        companyHolidayCalendars={companyHolidayCalendars}
-                      />
-
-                      {/* 勤務時間 */}
-                      <WorkTimeTableCell attendance={attendance} />
-
-                      {/* 休憩時間(最近) */}
-                      <RestTimeTableCell attendance={attendance} />
-
-                      {/* 摘要 */}
-                      <SummaryTableCell
-                        substituteHolidayDate={attendance.substituteHolidayDate}
-                        remarks={attendance.remarks}
-                        // 特別休暇フラグを渡す
-                        specialHolidayFlag={attendance.specialHolidayFlag}
-                        paidHolidayFlag={attendance.paidHolidayFlag}
-                        absentFlag={attendance.absentFlag}
-                      />
-
-                      {/* 作成日時 */}
-                      <CreatedAtTableCell createdAt={attendance.createdAt} />
-
-                      {/* 更新日時 */}
-                      <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
-
-                      <TableCell sx={{ width: 1 }} align="right">
-                        {pendingCount > 0 && (
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="warning"
-                            sx={{ fontWeight: "bold" }}
-                            onClick={() => handleOpenQuickView(attendance)}
-                            data-testid="quick-view-change-request"
-                          >
-                            申請確認
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
+        <PageSection variant="surface">
+          <AttendanceTableSection
+            attendances={attendances}
+            staff={staff}
+            holidayCalendars={holidayCalendars}
+            companyHolidayCalendars={companyHolidayCalendars}
+            onEdit={handleEdit}
+            getBadgeContent={getBadgeContent}
+            onOpenQuickView={handleOpenQuickView}
+            getRowVariant={getTableRowVariant}
+          />
+        </PageSection>
       </Stack>
       <ChangeRequestQuickViewDialog
         open={quickViewOpen}
@@ -431,6 +180,6 @@ export default function AdminStaffAttendanceList() {
         changeRequest={quickViewChangeRequest}
         onClose={handleCloseQuickView}
       />
-    </Container>
+    </>
   );
 }
