@@ -1,14 +1,12 @@
 import { Chip } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import { WorkflowStatus } from "@shared/api/graphql/types";
 
-import { DESIGN_TOKENS, designTokenVar } from "@/shared/designSystem";
 import { REVERSE_STATUS, STATUS_LABELS } from "@/lib/workflowLabels";
+import { designTokenVar } from "@/shared/designSystem";
 
-const STATUS_FEEDBACK_MAP: Record<
-  WorkflowStatus,
-  keyof typeof DESIGN_TOKENS.color.feedback
-> = {
+type FeedbackKey = "success" | "warning" | "danger" | "info";
+
+const STATUS_FEEDBACK_MAP: Record<WorkflowStatus, FeedbackKey> = {
   [WorkflowStatus.DRAFT]: "info",
   [WorkflowStatus.SUBMITTED]: "info",
   [WorkflowStatus.PENDING]: "warning",
@@ -17,39 +15,86 @@ const STATUS_FEEDBACK_MAP: Record<
   [WorkflowStatus.CANCELLED]: "danger",
 };
 
-const FALLBACK_COLORS = {
-  base: DESIGN_TOKENS.color.neutral[700],
-  surface: DESIGN_TOKENS.color.neutral[100],
+type PaletteVars = {
+  base: string;
+  surface: string;
+  border: string;
 };
 
-const statusChipTokens = DESIGN_TOKENS.component.workflowList.statusChip;
+const createFeedbackPalette = (
+  key: FeedbackKey,
+  defaults: PaletteVars
+): PaletteVars => ({
+  base: designTokenVar(`color.feedback.${key}.base`, defaults.base),
+  surface: designTokenVar(`color.feedback.${key}.surface`, defaults.surface),
+  border: designTokenVar(`color.feedback.${key}.border`, defaults.border),
+});
+
+const FEEDBACK_COLORS: Record<FeedbackKey, PaletteVars> = {
+  success: createFeedbackPalette("success", {
+    base: "#1EAA6A",
+    surface: "#ECF8F1",
+    border: "rgba(30, 170, 106, 0.4)",
+  }),
+  warning: createFeedbackPalette("warning", {
+    base: "#E8A447",
+    surface: "#FFF7EA",
+    border: "rgba(232, 164, 71, 0.4)",
+  }),
+  danger: createFeedbackPalette("danger", {
+    base: "#D7443E",
+    surface: "#FDECEC",
+    border: "rgba(215, 68, 62, 0.4)",
+  }),
+  info: createFeedbackPalette("info", {
+    base: "#3C7EDB",
+    surface: "#EDF2FC",
+    border: "rgba(60, 126, 219, 0.4)",
+  }),
+};
+
+const FALLBACK_COLORS: PaletteVars = {
+  base: designTokenVar(
+    "component.workflowList.statusChip.fallback.base",
+    "#45574F"
+  ),
+  surface: designTokenVar(
+    "component.workflowList.statusChip.fallback.surface",
+    "#EDF1EF"
+  ),
+  border: designTokenVar(
+    "component.workflowList.statusChip.fallback.border",
+    "rgba(69, 87, 79, 0.4)"
+  ),
+};
+
 const STATUS_CHIP_BORDER_RADIUS = designTokenVar(
   "component.workflowList.statusChip.borderRadius",
-  `${statusChipTokens.borderRadius}px`
+  "999px"
 );
 const STATUS_CHIP_FONT_SIZE = designTokenVar(
   "component.workflowList.statusChip.fontSize",
-  `${statusChipTokens.fontSize}px`
+  "14px"
 );
 const STATUS_CHIP_GAP = designTokenVar(
   "component.workflowList.statusChip.gap",
-  `${statusChipTokens.gap}px`
+  "4px"
 );
 const STATUS_CHIP_PADDING_X = designTokenVar(
-  "spacing.sm",
-  `${DESIGN_TOKENS.spacing.sm}px`
+  "component.workflowList.statusChip.paddingX",
+  "8px"
 );
 const STATUS_CHIP_FONT_WEIGHT = designTokenVar(
-  "typography.fontWeight.medium",
-  `${DESIGN_TOKENS.typography.fontWeight.medium}`
+  "component.workflowList.statusChip.fontWeight",
+  "500"
 );
 const STATUS_CHIP_EASING = designTokenVar(
-  "motion.easing.standard",
-  DESIGN_TOKENS.motion.easing.standard
+  "component.workflowList.statusChip.transitionEasing",
+  "cubic-bezier(0.2, 0.8, 0.4, 1)"
 );
 const STATUS_CHIP_DURATION = designTokenVar(
   "component.workflowList.statusChip.transitionMs",
-  `${statusChipTokens.transitionMs}ms`
+  "120ms"
 );
 
 const isWorkflowStatus = (value: string): value is WorkflowStatus =>
@@ -79,7 +124,7 @@ export default function StatusChip({ status }: StatusChipProps) {
     : "-";
 
   const feedbackPalette = resolvedStatus
-    ? DESIGN_TOKENS.color.feedback[STATUS_FEEDBACK_MAP[resolvedStatus]]
+    ? FEEDBACK_COLORS[STATUS_FEEDBACK_MAP[resolvedStatus]]
     : undefined;
   const palette = feedbackPalette ?? FALLBACK_COLORS;
 
@@ -96,7 +141,7 @@ export default function StatusChip({ status }: StatusChipProps) {
         transition: `background-color ${STATUS_CHIP_DURATION} ${STATUS_CHIP_EASING}, color ${STATUS_CHIP_DURATION} ${STATUS_CHIP_EASING}`,
         backgroundColor: palette.surface,
         color: palette.base,
-        border: `1px solid ${alpha(palette.base, 0.4)}`,
+        border: `1px solid ${palette.border}`,
       }}
     />
   );

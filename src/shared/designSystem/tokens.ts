@@ -34,6 +34,12 @@ const hexToRgb = (value: string): RGB => {
   };
 };
 
+const hexToRgba = (value: string, alpha: number) => {
+  const rgb = hexToRgb(value);
+  const clamped = Math.min(1, Math.max(0, alpha));
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${clamped})`;
+};
+
 const mixWithTarget = (value: string, amount: number, target: number) => {
   const rgb = hexToRgb(value);
   const ratio = Math.min(1, Math.max(0, Math.abs(amount)));
@@ -91,10 +97,26 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       900: "#1E2A25",
     },
     feedback: {
-      success: { base: "#1EAA6A", surface: "#ECF8F1" },
-      warning: { base: "#E8A447", surface: "#FFF7EA" },
-      danger: { base: "#D7443E", surface: "#FDECEC" },
-      info: { base: "#3C7EDB", surface: "#EDF2FC" },
+      success: {
+        base: "#1EAA6A",
+        surface: "#ECF8F1",
+        border: hexToRgba("#1EAA6A", 0.4),
+      },
+      warning: {
+        base: "#E8A447",
+        surface: "#FFF7EA",
+        border: hexToRgba("#E8A447", 0.4),
+      },
+      danger: {
+        base: "#D7443E",
+        surface: "#FDECEC",
+        border: hexToRgba("#D7443E", 0.4),
+      },
+      info: {
+        base: "#3C7EDB",
+        surface: "#EDF2FC",
+        border: hexToRgba("#3C7EDB", 0.4),
+      },
     },
   } as const;
 
@@ -171,7 +193,15 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
         borderRadius: radius.pill,
         fontSize: typography.fontSize.sm,
         gap: spacing.xs,
+        paddingX: spacing.sm,
         transitionMs: motion.duration.fast,
+        transitionEasing: motion.easing.standard,
+        fontWeight: typography.fontWeight.medium,
+        fallback: {
+          base: color.neutral[700],
+          surface: color.neutral[100],
+          border: hexToRgba(color.neutral[700], 0.4),
+        },
       },
     },
     adminPanel: {
