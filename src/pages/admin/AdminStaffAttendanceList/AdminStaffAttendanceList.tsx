@@ -1,16 +1,7 @@
 import "./styles.scss";
 
-import { useAppDispatchV2 } from "@app/hooks";
-import {
-  useListRecentAttendancesQuery,
-  useUpdateAttendanceMutation,
-} from "@entities/attendance/api/attendanceApi";
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@entities/calendar/api/calendarApi";
-import handleApproveChangeRequest from "@features/attendance/edit/ChangeRequestDialog/handleApproveChangeRequest";
 import { AttendanceStatusTooltip } from "@features/attendance/list/AttendanceStatusTooltip";
+import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
@@ -31,33 +22,10 @@ import {
   Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
-import {
-  Attendance,
-  AttendanceChangeRequest,
-  CompanyHolidayCalendar,
-  HolidayCalendar,
-  Staff,
-  UpdateAttendanceInput,
-} from "@shared/api/graphql/types";
-// Breadcrumbs removed per admin UI simplification
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import * as MESSAGE_CODE from "@/errors";
-import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
-import { ChangeRequest } from "@/lib/ChangeRequest";
-import { CompanyHoliday } from "@/lib/CompanyHoliday";
-import { DayOfWeek, DayOfWeekString } from "@/lib/DayOfWeek";
-import { Holiday } from "@/lib/Holiday";
-import { GenericMailSender } from "@/lib/mail/GenericMailSender";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
 
 import { AttendanceGraph } from "./AttendanceGraph";
 import ChangeRequestQuickViewDialog from "./ChangeRequestQuickViewDialog";
@@ -68,318 +36,37 @@ import { UpdatedAtTableCell } from "./UpdatedAtTableCell";
 import { WorkDateTableCell } from "./WorkDateTableCell";
 import { WorkTimeTableCell } from "./WorkTimeTableCell";
 
-export function getTableRowClassName(
-  attendance: Attendance,
-  holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[]
-) {
-  const { workDate } = attendance;
-
-  const today = dayjs().format(AttendanceDate.DataFormat);
-  if (workDate === today) {
-    return "table-row--today";
-  }
-
-  const isHoliday = new Holiday(holidayCalendars, workDate).isHoliday();
-  const isCompanyHoliday = new CompanyHoliday(
-    companyHolidayCalendars,
-    workDate
-  ).isHoliday();
-
-  if (isHoliday || isCompanyHoliday) {
-    return "table-row--sunday";
-  }
-
-  const dayOfWeek = new DayOfWeek(holidayCalendars).getLabel(workDate);
-  switch (dayOfWeek) {
-    case DayOfWeekString.Sat:
-      return "table-row--saturday";
-    case DayOfWeekString.Sun:
-    case DayOfWeekString.Holiday:
-      return "table-row--sunday";
-    default:
-      return "table-row--default";
-  }
-}
-
 export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();
   const navigate = useNavigate();
-  const dispatch = useAppDispatchV2();
-  const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
 
   const {
-    data: holidayCalendars = [],
-    isLoading: isHolidayCalendarsLoading,
-    isFetching: isHolidayCalendarsFetching,
-    error: holidayCalendarsError,
-  } = useGetHolidayCalendarsQuery();
-  const {
-    data: companyHolidayCalendars = [],
-    isLoading: isCompanyHolidayCalendarsLoading,
-    isFetching: isCompanyHolidayCalendarsFetching,
-    error: companyHolidayCalendarsError,
-  } = useGetCompanyHolidayCalendarsQuery();
-  const calendarLoading =
-    isHolidayCalendarsLoading ||
-    isHolidayCalendarsFetching ||
-    isCompanyHolidayCalendarsLoading ||
-    isCompanyHolidayCalendarsFetching;
-
-  const shouldFetchAttendances = Boolean(staffId);
-  const {
-    data: attendancesData,
-    isLoading: isAttendancesInitialLoading,
-    isFetching: isAttendancesFetching,
-    isUninitialized: isAttendancesUninitialized,
-    error: attendancesError,
-    refetch: refetchAttendances,
-  } = useListRecentAttendancesQuery(
-    { staffId: staffId ?? "" },
-    { skip: !shouldFetchAttendances }
-  );
-
-  const attendances = attendancesData ?? [];
-  const attendanceLoading =
-    !shouldFetchAttendances ||
-    isAttendancesInitialLoading ||
-    isAttendancesFetching ||
-    isAttendancesUninitialized;
-  const [quickViewAttendance, setQuickViewAttendance] =
-    useState<Attendance | null>(null);
-  const [quickViewChangeRequest, setQuickViewChangeRequest] =
-    useState<AttendanceChangeRequest | null>(null);
-  const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
-  const staffForMail = useMemo<StaffType | null>(() => {
-    if (!staff) return null;
-    return {
-      id: staff.id,
-      cognitoUserId: staff.cognitoUserId,
-      familyName: staff.familyName,
-      givenName: staff.givenName,
-      mailAddress: staff.mailAddress,
-      owner: staff.owner ?? false,
-      role: mappingStaffRole(staff.role),
-      enabled: staff.enabled,
-      status: staff.status,
-      createdAt: staff.createdAt,
-      updatedAt: staff.updatedAt,
-      usageStartDate: staff.usageStartDate,
-      notifications: staff.notifications,
-      workType: staff.workType,
-      sortKey: staff.sortKey,
-      developer: (staff as unknown as Record<string, unknown>).developer as
-        | boolean
-        | undefined,
-      approverSetting: staff.approverSetting ?? null,
-      approverSingle: staff.approverSingle ?? null,
-      approverMultiple: staff.approverMultiple ?? null,
-      approverMultipleMode: staff.approverMultipleMode ?? null,
-      shiftGroup: staff.shiftGroup ?? null,
-    };
-  }, [staff]);
-  const [selectedAttendanceIds, setSelectedAttendanceIds] = useState<string[]>(
-    []
-  );
-  const [bulkApproving, setBulkApproving] = useState(false);
-
-  useEffect(() => {
-    if (!staffId) return;
-
-    fetchStaff(staffId)
-      .then(setStaff)
-      .catch(() => {
-        dispatch(setSnackbarError(MESSAGE_CODE.E00001));
-      });
-  }, [staffId, dispatch]);
-
-  useEffect(() => {
-    if (attendancesError) {
-      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
-    }
-  }, [attendancesError, dispatch]);
-
-  useEffect(() => {
-    if (holidayCalendarsError || companyHolidayCalendarsError) {
-      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
-      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
-    }
-  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
-
-  const handleEdit = useCallback(
-    (workDate: string) => {
-      navigate(`/admin/attendances/edit/${workDate}/${staffId}`);
-    },
-    [navigate, staffId]
-  );
-
-  const getBadgeContent = useCallback((attendance: Attendance) => {
-    return new ChangeRequest(attendance.changeRequests).getUnapprovedCount();
-  }, []);
-
-  const pendingAttendances = useMemo(() => {
-    return attendances.filter(
-      (a) => new ChangeRequest(a.changeRequests).getUnapprovedCount() > 0
-    );
-  }, [attendances]);
-
-  const getPendingChangeRequest = useCallback((attendance: Attendance) => {
-    return new ChangeRequest(attendance.changeRequests).getFirstUnapproved();
-  }, []);
-
-  const handleOpenQuickView = useCallback(
-    (attendance: Attendance) => {
-      const pendingRequest = getPendingChangeRequest(attendance);
-      if (!pendingRequest) return;
-
-      setQuickViewAttendance(attendance);
-      setQuickViewChangeRequest(pendingRequest);
-      setQuickViewOpen(true);
-    },
-    [getPendingChangeRequest]
-  );
-
-  const handleCloseQuickView = useCallback(() => {
-    setQuickViewOpen(false);
-    setQuickViewAttendance(null);
-    setQuickViewChangeRequest(null);
-  }, []);
-
-  const isAttendanceSelected = useCallback(
-    (attendanceId: string) => selectedAttendanceIds.includes(attendanceId),
-    [selectedAttendanceIds]
-  );
-
-  const toggleAttendanceSelection = useCallback((attendanceId: string) => {
-    setSelectedAttendanceIds((prev) => {
-      if (prev.includes(attendanceId)) {
-        return prev.filter((id) => id !== attendanceId);
-      }
-      return [...prev, attendanceId];
-    });
-  }, []);
-
-  const toggleSelectAllPending = useCallback(() => {
-    if (pendingAttendances.length === 0) return;
-    setSelectedAttendanceIds((prev) => {
-      if (prev.length === pendingAttendances.length) {
-        return [];
-      }
-      return pendingAttendances.map((attendance) => attendance.id);
-    });
-  }, [pendingAttendances]);
-
-  const handleBulkApprove = useCallback(async () => {
-    if (
-      selectedAttendanceIds.length === 0 ||
-      !staffId ||
-      !staff ||
-      !staffForMail
-    ) {
-      return;
-    }
-
-    const targetAttendances = pendingAttendances.filter((attendance) =>
-      selectedAttendanceIds.includes(attendance.id)
-    );
-    if (targetAttendances.length === 0) return;
-
-    let mailErrorOccurred = false;
-    setBulkApproving(true);
-    try {
-      for (const attendance of targetAttendances) {
-        // eslint-disable-next-line no-await-in-loop
-        const updatedAttendance = await handleApproveChangeRequest(
-          attendance,
-          (input: UpdateAttendanceInput) =>
-            updateAttendanceMutation(input).unwrap(),
-          undefined
-        );
-
-        try {
-          new GenericMailSender(
-            staffForMail,
-            updatedAttendance
-          ).approveChangeRequest(undefined);
-        } catch (mailError) {
-          console.error("Failed to send approval notification mail:", mailError);
-          mailErrorOccurred = true;
-        }
-
-        // eslint-disable-next-line no-await-in-loop
-        await createOperationLogData({
-          staffId: staffForMail.id,
-          action: "approve_change_request",
-          resource: "attendance",
-          resourceId: updatedAttendance.id,
-          timestamp: new Date().toISOString(),
-          details: JSON.stringify({
-            workDate: updatedAttendance.workDate,
-            applicantStaffId: updatedAttendance.staffId,
-            result: "approved",
-            comment: null,
-            bulk: true,
-          }),
-        }).catch((error) => {
-          console.error("Failed to create operation log:", error);
-        });
-      }
-
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
-      setSelectedAttendanceIds([]);
-      await refetchAttendances();
-      if (mailErrorOccurred) {
-        dispatch(setSnackbarError(MESSAGE_CODE.E00002));
-      }
-    } catch (error) {
-      console.error("Bulk approve failed", error);
-      dispatch(setSnackbarError(MESSAGE_CODE.E04006));
-    } finally {
-      setBulkApproving(false);
-    }
-  }, [
-    dispatch,
-    refetchAttendances,
-    pendingAttendances,
-    selectedAttendanceIds,
     staff,
-    staffForMail,
-    staffId,
-    updateAttendanceMutation,
-  ]);
+    holidayCalendars,
+    companyHolidayCalendars,
+    calendarLoading,
+    attendances,
+    attendanceLoading,
+    pendingAttendances,
+    quickViewAttendance,
+    quickViewChangeRequest,
+    quickViewOpen,
+    handleOpenQuickView,
+    handleCloseQuickView,
+    selectedAttendanceIds,
+    isAttendanceSelected,
+    toggleAttendanceSelection,
+    toggleSelectAllPending,
+    bulkApproving,
+    canBulkApprove,
+    handleBulkApprove,
+    getTableRowClassName,
+    getBadgeContent,
+  } = useAdminStaffAttendanceListViewModel(staffId);
 
-  useEffect(() => {
-    setSelectedAttendanceIds((prev) =>
-      prev.filter((id) =>
-        pendingAttendances.some((attendance) => attendance.id === id)
-      )
-    );
-  }, [pendingAttendances]);
-
-  const getTableRowClassNameMemo = useCallback(
-    (
-      attendance: Attendance,
-      holidayCalendars: HolidayCalendar[],
-      companyHolidayCalendars: CompanyHolidayCalendar[]
-    ) => {
-      // 指定休日フラグが立っていれば日曜と同じスタイルにする
-      if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
-        return "table-row--sunday";
-      }
-
-      // Shift勤務のスタッフは土日祝の色付けをしない
-      if (staff?.workType === "shift") {
-        return "table-row--default";
-      }
-      return getTableRowClassName(
-        attendance,
-        holidayCalendars,
-        companyHolidayCalendars
-      );
-    },
-    [staff, holidayCalendars, companyHolidayCalendars]
-  );
+  const handleEdit = (workDate: string) => {
+    navigate(`/admin/attendances/edit/${workDate}/${staffId}`);
+  };
 
   if (staff === null || !staffId) {
     return (
@@ -455,7 +142,7 @@ export default function AdminStaffAttendanceList() {
                     disabled={
                       bulkApproving ||
                       selectedAttendanceIds.length === 0 ||
-                      !staffForMail
+                      !canBulkApprove
                     }
                     onClick={handleBulkApprove}
                     data-testid="bulk-approve-button"
@@ -519,7 +206,7 @@ export default function AdminStaffAttendanceList() {
                       return (
                         <TableRow
                           key={`pending-${index}`}
-                          className={getTableRowClassNameMemo(
+                          className={getTableRowClassName(
                             attendance,
                             holidayCalendars,
                             companyHolidayCalendars
@@ -652,7 +339,7 @@ export default function AdminStaffAttendanceList() {
                   return (
                     <TableRow
                       key={index}
-                      className={getTableRowClassNameMemo(
+                      className={getTableRowClassName(
                         attendance,
                         holidayCalendars,
                         companyHolidayCalendars

@@ -16,7 +16,7 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
-import { getTableRowClassName } from "@/pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
+import { getAttendanceRowClassName } from "../getAttendanceRowClassName";
 import { CreatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/RestTimeTableCell";
 import { SummaryTableCell } from "@/pages/admin/AdminStaffAttendanceList/SummaryTableCell";
@@ -52,7 +52,7 @@ export default function TableBodyRow({
       className={
         staff?.workType === "shift"
           ? "table-row--default"
-          : getTableRowClassName(
+          : getAttendanceRowClassName(
               attendance,
               holidayCalendars,
               companyHolidayCalendars

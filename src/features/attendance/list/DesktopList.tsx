@@ -25,7 +25,7 @@ import { NavigateFunction } from "react-router-dom";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-import { getTableRowClassName } from "@/pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
+import { getAttendanceRowClassName } from "./getAttendanceRowClassName";
 import { AttendanceGraph } from "@/pages/admin/AdminStaffAttendanceList/AttendanceGraph";
 import { CreatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/RestTimeTableCell";
@@ -66,7 +66,7 @@ export default function DesktopList({
       return "table-row--default";
     }
 
-    return getTableRowClassName(
+    return getAttendanceRowClassName(
       attendance,
       holidayCalendars,
       companyHolidayCalendars
