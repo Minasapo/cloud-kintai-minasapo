@@ -5,6 +5,11 @@ import CommonBreadcrumbs, {
 import Title from "@shared/ui/typography/Title";
 import type { ReactNode } from "react";
 
+import { designTokenVar } from "@/shared/designSystem";
+
+const PAGE_PADDING_TOP = designTokenVar("spacing.xl", "24px");
+const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
+
 interface PageProps {
   title: string;
   breadcrumbs?: BreadcrumbItem[];
@@ -19,8 +24,8 @@ export default function Page({
   maxWidth = "xl",
 }: PageProps) {
   return (
-    <Container maxWidth={maxWidth} disableGutters sx={{ pt: 2 }}>
-      <Stack direction="column" spacing={2}>
+    <Container maxWidth={maxWidth} disableGutters sx={{ pt: PAGE_PADDING_TOP }}>
+      <Stack direction="column" spacing={0} sx={{ gap: PAGE_SECTION_GAP }}>
         <CommonBreadcrumbs items={breadcrumbs} current={title} />
         <Title>{title}</Title>
         {children}

@@ -78,6 +78,31 @@ const buildCssVariableEntries = (
   return entries;
 };
 
+const normalizePathSegments = (path: string | string[]) => {
+  const segments = Array.isArray(path) ? path : path.split(".");
+  return segments.map((segment) => segment.trim()).filter(Boolean);
+};
+
+export const getDesignTokenVarName = (path: string | string[]) => {
+  const normalized = normalizePathSegments(path);
+  return `${CSS_VAR_PREFIX}-${normalized
+    .map((segment) => toKebabCase(segment))
+    .join("-")}`;
+};
+
+export const designTokenVar = (
+  path: string | string[],
+  fallback?: string | number
+) => {
+  const varName = getDesignTokenVarName(path);
+  if (fallback === undefined) {
+    return `var(${varName})`;
+  }
+  const fallbackValue =
+    typeof fallback === "number" ? String(fallback) : fallback;
+  return `var(${varName}, ${fallbackValue})`;
+};
+
 export const getDesignTokenCssVariableEntries = (tokens: DesignTokens) =>
   buildCssVariableEntries(tokens as unknown as Record<string, unknown>);
 

@@ -5,7 +5,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { type ReactNode, useContext, useMemo } from "react";
 
-import { DESIGN_TOKENS } from "@/shared/designSystem";
+import { DESIGN_TOKENS, designTokenVar } from "@/shared/designSystem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 type Props = {
@@ -32,23 +32,36 @@ export default function GroupSection({
   const dividerColor = adminPanelTokens.dividerColor;
   const brandAccent = tokens.color.brand.primary.base;
   const surfaceColor = adminPanelTokens.surface;
+  const dividerColorVar = designTokenVar(
+    "component.adminPanel.dividerColor",
+    dividerColor
+  );
+  const brandAccentVar = designTokenVar(
+    "color.brand.primary.base",
+    brandAccent
+  );
+  const surfaceColorVar = designTokenVar(
+    "component.adminPanel.surface",
+    surfaceColor
+  );
+  const titleColorVar = designTokenVar(
+    "color.brand.primary.dark",
+    tokens.color.brand.primary.dark ?? brandAccent
+  );
 
   return (
     <Paper
       variant="outlined"
       sx={{
         p: panelSpacing,
-        borderColor: dividerColor,
-        borderLeft: `6px solid ${brandAccent}`,
-        backgroundColor: surfaceColor,
+        borderColor: dividerColorVar,
+        borderLeft: `6px solid ${brandAccentVar}`,
+        backgroundColor: surfaceColorVar,
       }}
     >
       <Stack spacing={0} sx={{ gap: panelSpacing / 2 }}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography
-            variant="h6"
-            sx={{ color: tokens.color.brand.primary.dark ?? brandAccent }}
-          >
+          <Typography variant="h6" sx={{ color: titleColorVar }}>
             {title}
           </Typography>
           {actions && <Box>{actions}</Box>}
@@ -58,7 +71,7 @@ export default function GroupSection({
             {description}
           </Typography>
         )}
-        <Divider sx={{ borderColor: dividerColor }} />
+        <Divider sx={{ borderColor: dividerColorVar }} />
         <Box sx={{ pt: panelSpacing / 2 }}>{children}</Box>
       </Stack>
     </Paper>

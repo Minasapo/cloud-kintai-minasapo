@@ -1,12 +1,14 @@
 import { Typography, type TypographyProps } from "@mui/material";
 import { forwardRef } from "react";
 
+import { designTokenVar } from "@/shared/designSystem";
+
 type TitleProps = {
   borderColor?: string;
   color?: string;
 } & Omit<TypographyProps, "color">;
 
-const DEFAULT_COLOR = "#0FA85E";
+const DEFAULT_COLOR = designTokenVar("color.brand.primary.base", "#0FA85E");
 
 const Title = forwardRef<HTMLSpanElement, TitleProps>(function Title(
   {
