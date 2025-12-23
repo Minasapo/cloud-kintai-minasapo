@@ -1,4 +1,4 @@
-import { Grid, Paper, Stack, Typography } from "@mui/material";
+import { Grid, Stack, Typography } from "@mui/material";
 import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import { useCallback, useContext, useMemo } from "react";
@@ -10,14 +10,14 @@ import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
 import { buildWorkflowCommentsUpdateInput } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
-import {
-  useWorkflowLoaderWorkflow,
-  type WorkflowEntity,
-} from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
 import { deriveWorkflowDetailPermissions } from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
 import WorkflowDetailActions from "@/features/workflow/detail-panel/ui/WorkflowDetailActions";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
+import {
+  useWorkflowLoaderWorkflow,
+  type WorkflowEntity,
+} from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
@@ -27,6 +27,11 @@ import {
 } from "@/lib/reducers/snackbarReducer";
 import { CATEGORY_LABELS } from "@/lib/workflowLabels";
 import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
+import { designTokenVar } from "@/shared/designSystem";
+import { PageSection } from "@/shared/ui/layout";
+
+const SECTION_GAP = designTokenVar("spacing.xl", "24px");
+const PANEL_GAP = designTokenVar("spacing.lg", "16px");
 
 export default function WorkflowDetailPage() {
   const { id } = useParams();
@@ -146,7 +151,7 @@ export default function WorkflowDetailPage() {
       ]}
       maxWidth="lg"
     >
-      <Paper sx={{ p: 3 }}>
+      <PageSection layoutVariant="detail" sx={{ gap: SECTION_GAP }}>
         <WorkflowDetailActions
           onBack={() => navigate(-1)}
           onWithdraw={handleWithdraw}
@@ -164,7 +169,7 @@ export default function WorkflowDetailPage() {
         ) : (
           <Grid container spacing={2}>
             <Grid item xs={12} sm={7}>
-              <Stack spacing={3}>
+              <Stack spacing={0} sx={{ gap: PANEL_GAP }}>
                 <WorkflowMetadataPanel
                   workflowId={workflow.id}
                   fallbackId={id}
@@ -195,7 +200,7 @@ export default function WorkflowDetailPage() {
             </Grid>
           </Grid>
         )}
-      </Paper>
+      </PageSection>
     </Page>
   );
 }

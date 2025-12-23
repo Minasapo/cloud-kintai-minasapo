@@ -1,12 +1,10 @@
 import {
   Box,
   Button,
-  Container,
   FormControlLabel,
   Grid,
   ListSubheader,
   MenuItem,
-  Paper,
   Select,
   SelectChangeEvent,
   Switch,
@@ -37,6 +35,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import { PageSection } from "@/shared/ui/layout";
 
 export default function NewWorkflowPage() {
   const navigate = useNavigate();
@@ -238,180 +237,175 @@ export default function NewWorkflowPage() {
       ]}
       maxWidth="lg"
     >
-      <Container>
-        <Paper sx={{ p: 2 }}>
-          <Box component="form" onSubmit={handleSubmit}>
-            <Grid
-              container
-              rowSpacing={2}
-              columnSpacing={1}
-              alignItems="center"
+      <PageSection
+        component="form"
+        layoutVariant="detail"
+        onSubmit={handleSubmit}
+      >
+        <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
+          <Grid item xs={12} sm={3}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "left", pr: { sm: 1 } }}
             >
+              種別
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <Select
+              value={category}
+              displayEmpty
+              onChange={handleCategoryChange}
+              size="small"
+              fullWidth
+            >
+              <MenuItem value="">
+                <em>種別を選択</em>
+              </MenuItem>
+              <ListSubheader>勤怠</ListSubheader>
+              <MenuItem
+                value="有給休暇申請"
+                disabled
+                title="現在は残業申請のみ作成できます"
+              >
+                有給休暇申請
+              </MenuItem>
+              <MenuItem
+                value="欠勤申請"
+                disabled
+                title="現在は残業申請のみ作成できます"
+              >
+                欠勤申請
+              </MenuItem>
+              <MenuItem value="残業申請">残業申請</MenuItem>
+            </Select>
+          </Grid>
+
+          {/* プレビュー機能は廃止されました */}
+
+          {/* 申請者 */}
+          <Grid item xs={12} sm={3}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "left", pr: { sm: 1 } }}
+            >
+              申請者
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <Typography variant="body1">
+              {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
+            </Typography>
+          </Grid>
+
+          {/* 申請日 */}
+          <Grid item xs={12} sm={3}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "left", pr: { sm: 1 } }}
+            >
+              申請日
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <Typography variant="body1">{applicationDate}</Typography>
+          </Grid>
+
+          {/* タイトル入力は廃止されました（申請はテンプレート/種別で自動的にタイトルを決定します） */}
+
+          {/* 説明: 削除済み */}
+
+          {/* 種別固有フィールド（共通コンポーネント） */}
+          <WorkflowTypeFields
+            category={category}
+            disabled={category === ""}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            dateError={dateError}
+            paidReason={paidReason}
+            setPaidReason={setPaidReason}
+            absenceDate={absenceDate}
+            setAbsenceDate={setAbsenceDate}
+            absenceDateError={absenceDateError}
+            overtimeDate={overtimeDate}
+            setOvertimeDate={setOvertimeDate}
+            overtimeDateError={overtimeDateError}
+            overtimeStart={overtimeStart}
+            setOvertimeStart={setOvertimeStart}
+            overtimeEnd={overtimeEnd}
+            setOvertimeEnd={setOvertimeEnd}
+            overtimeError={overtimeError}
+            overtimeReason={overtimeReason}
+            setOvertimeReason={setOvertimeReason}
+          />
+          {category === "その他" && (
+            <>
               <Grid item xs={12} sm={3}>
                 <Typography
                   variant="body2"
                   color="text.secondary"
                   sx={{ textAlign: "left", pr: { sm: 1 } }}
                 >
-                  種別
+                  備考
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={9}>
-                <Select
-                  value={category}
-                  displayEmpty
-                  onChange={handleCategoryChange}
+                <TextField
                   size="small"
                   fullWidth
-                >
-                  <MenuItem value="">
-                    <em>種別を選択</em>
-                  </MenuItem>
-                  <ListSubheader>勤怠</ListSubheader>
-                  <MenuItem
-                    value="有給休暇申請"
-                    disabled
-                    title="現在は残業申請のみ作成できます"
-                  >
-                    有給休暇申請
-                  </MenuItem>
-                  <MenuItem
-                    value="欠勤申請"
-                    disabled
-                    title="現在は残業申請のみ作成できます"
-                  >
-                    欠勤申請
-                  </MenuItem>
-                  <MenuItem value="残業申請">残業申請</MenuItem>
-                </Select>
-              </Grid>
-
-              {/* プレビュー機能は廃止されました */}
-
-              {/* 申請者 */}
-              <Grid item xs={12} sm={3}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "left", pr: { sm: 1 } }}
-                >
-                  申請者
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={9}>
-                <Typography variant="body1">
-                  {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
-                </Typography>
-              </Grid>
-
-              {/* 申請日 */}
-              <Grid item xs={12} sm={3}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "left", pr: { sm: 1 } }}
-                >
-                  申請日
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={9}>
-                <Typography variant="body1">{applicationDate}</Typography>
-              </Grid>
-
-              {/* タイトル入力は廃止されました（申請はテンプレート/種別で自動的にタイトルを決定します） */}
-
-              {/* 説明: 削除済み */}
-
-              {/* 種別固有フィールド（共通コンポーネント） */}
-              <WorkflowTypeFields
-                category={category}
-                disabled={category === ""}
-                startDate={startDate}
-                setStartDate={setStartDate}
-                endDate={endDate}
-                setEndDate={setEndDate}
-                dateError={dateError}
-                paidReason={paidReason}
-                setPaidReason={setPaidReason}
-                absenceDate={absenceDate}
-                setAbsenceDate={setAbsenceDate}
-                absenceDateError={absenceDateError}
-                overtimeDate={overtimeDate}
-                setOvertimeDate={setOvertimeDate}
-                overtimeDateError={overtimeDateError}
-                overtimeStart={overtimeStart}
-                setOvertimeStart={setOvertimeStart}
-                overtimeEnd={overtimeEnd}
-                setOvertimeEnd={setOvertimeEnd}
-                overtimeError={overtimeError}
-                overtimeReason={overtimeReason}
-                setOvertimeReason={setOvertimeReason}
-              />
-              {category === "その他" && (
-                <>
-                  <Grid item xs={12} sm={3}>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ textAlign: "left", pr: { sm: 1 } }}
-                    >
-                      備考
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={9}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      sx={{ "& .MuiInputBase-input": { padding: "6px 10px" } }}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {/* 下書き */}
-              <Grid item xs={12} sm={3}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "left", pr: { sm: 1 } }}
-                >
-                  下書き
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={9}>
-                <FormControlLabel
-                  control={
-                    <Switch checked={draftMode} onChange={handleDraftToggle} />
-                  }
-                  label={draftMode ? "下書きとして保存" : ""}
+                  sx={{ "& .MuiInputBase-input": { padding: "6px 10px" } }}
                 />
               </Grid>
+            </>
+          )}
 
-              {/* ボタン（右カラムに詰める） */}
-              <Grid item xs={12} sm={3} />
-              <Grid item xs={12} sm={9}>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="small"
-                    disabled={category === ""}
-                  >
-                    作成
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => navigate(-1)}
-                    size="small"
-                  >
-                    キャンセル
-                  </Button>
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
-        </Paper>
-      </Container>
+          {/* 下書き */}
+          <Grid item xs={12} sm={3}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "left", pr: { sm: 1 } }}
+            >
+              下書き
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <FormControlLabel
+              control={
+                <Switch checked={draftMode} onChange={handleDraftToggle} />
+              }
+              label={draftMode ? "下書きとして保存" : ""}
+            />
+          </Grid>
+
+          {/* ボタン（右カラムに詰める） */}
+          <Grid item xs={12} sm={3} />
+          <Grid item xs={12} sm={9}>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="small"
+                disabled={category === ""}
+              >
+                作成
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => navigate(-1)}
+                size="small"
+              >
+                キャンセル
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </PageSection>
     </Page>
   );
 }
