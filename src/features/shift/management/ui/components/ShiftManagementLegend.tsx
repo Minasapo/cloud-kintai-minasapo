@@ -1,10 +1,11 @@
 import { Box, Typography } from "@mui/material";
 
-import { DESIGN_TOKENS, designTokenVar } from "@/shared/designSystem";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 import { statusVisualMap } from "../../lib/shiftStateMapping";
 
-const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
+const DEFAULT_THEME_TOKENS = getDesignTokens();
+const shiftBoardTokens = DEFAULT_THEME_TOKENS.component.shiftBoard;
 const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
 const SHIFT_INDICATOR_RADIUS = designTokenVar(
   `${SHIFT_BOARD_BASE_PATH}.cellRadius`,
@@ -25,20 +26,20 @@ const mixWithTransparent = (
 
 const SHORTAGE_BG = designTokenVar(
   "color.feedback.danger.surface",
-  DESIGN_TOKENS.color.feedback.danger.surface
+  DEFAULT_THEME_TOKENS.color.feedback.danger.surface
 );
 const SHORTAGE_BORDER = mixWithTransparent(
   "color.feedback.danger.base",
-  DESIGN_TOKENS.color.feedback.danger.base,
+  DEFAULT_THEME_TOKENS.color.feedback.danger.base,
   0.5
 );
 const EXCESS_BG = designTokenVar(
   "color.feedback.warning.surface",
-  DESIGN_TOKENS.color.feedback.warning.surface
+  DEFAULT_THEME_TOKENS.color.feedback.warning.surface
 );
 const EXCESS_BORDER = mixWithTransparent(
   "color.feedback.warning.base",
-  DESIGN_TOKENS.color.feedback.warning.base,
+  DEFAULT_THEME_TOKENS.color.feedback.warning.base,
   0.5
 );
 

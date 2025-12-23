@@ -5,8 +5,8 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { type ReactNode, useContext, useMemo } from "react";
 
-import { DESIGN_TOKENS, designTokenVar } from "@/shared/designSystem";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 type Props = {
   title: string;
@@ -24,7 +24,9 @@ export default function GroupSection({
   const { getThemeTokens } = useContext(AppConfigContext);
   const tokens = useMemo(
     () =>
-      typeof getThemeTokens === "function" ? getThemeTokens() : DESIGN_TOKENS,
+      typeof getThemeTokens === "function"
+        ? getThemeTokens()
+        : getDesignTokens(),
     [getThemeTokens]
   );
   const adminPanelTokens = tokens.component.adminPanel;

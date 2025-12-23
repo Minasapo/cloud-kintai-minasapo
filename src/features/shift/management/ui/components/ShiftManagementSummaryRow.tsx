@@ -2,11 +2,12 @@ import { TableCell, TableCellProps, TableRow, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { ReactNode } from "react";
 
-import { DESIGN_TOKENS, designTokenVar } from "@/shared/designSystem";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 import { getCellHighlightSx } from "../../lib/selectionHighlight";
 
-const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
+const DEFAULT_THEME_TOKENS = getDesignTokens();
+const shiftBoardTokens = DEFAULT_THEME_TOKENS.component.shiftBoard;
 const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
 const SHIFT_BOARD_PADDING_X = designTokenVar(
   `${SHIFT_BOARD_BASE_PATH}.columnGap`,
@@ -23,10 +24,10 @@ const SHIFT_BOARD_CELL_RADIUS = designTokenVar(
 );
 const SHIFT_BOARD_TRANSITION = `${designTokenVar(
   "motion.duration.medium",
-  `${DESIGN_TOKENS.motion.duration.medium}ms`
+  `${DEFAULT_THEME_TOKENS.motion.duration.medium}ms`
 )} ${designTokenVar(
   "motion.easing.standard",
-  DESIGN_TOKENS.motion.easing.standard
+  DEFAULT_THEME_TOKENS.motion.easing.standard
 )}`;
 const SHIFT_BOARD_CELL_BASE_SX = {
   borderRadius: SHIFT_BOARD_CELL_RADIUS,

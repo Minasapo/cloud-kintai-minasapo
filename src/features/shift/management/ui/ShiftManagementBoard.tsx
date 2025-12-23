@@ -30,8 +30,8 @@ import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
-import { DESIGN_TOKENS, designTokenVar } from "@/shared/designSystem";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";
@@ -48,7 +48,8 @@ import ShiftEditDialog from "./components/ShiftEditDialog";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
 import ShiftManagementSummaryRow from "./components/ShiftManagementSummaryRow";
 
-const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
+const DEFAULT_THEME_TOKENS = getDesignTokens();
+const shiftBoardTokens = DEFAULT_THEME_TOKENS.component.shiftBoard;
 const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
 
 const mixWithTransparent = (
@@ -79,18 +80,18 @@ const SHIFT_BOARD_CELL_RADIUS = designTokenVar(
 );
 const SHIFT_BOARD_TRANSITION = `${designTokenVar(
   "motion.duration.medium",
-  `${DESIGN_TOKENS.motion.duration.medium}ms`
+  `${DEFAULT_THEME_TOKENS.motion.duration.medium}ms`
 )} ${designTokenVar(
   "motion.easing.standard",
-  DESIGN_TOKENS.motion.easing.standard
+  DEFAULT_THEME_TOKENS.motion.easing.standard
 )}`;
 const SHIFT_BOARD_FOCUS_RING_COLOR = designTokenVar(
   "color.brand.primary.focusRing",
-  DESIGN_TOKENS.color.brand.primary.focusRing
+  DEFAULT_THEME_TOKENS.color.brand.primary.focusRing
 );
 const SHIFT_BOARD_FOCUS_SHADOW = designTokenVar(
   "shadow.card",
-  DESIGN_TOKENS.shadow.card
+  DEFAULT_THEME_TOKENS.shadow.card
 );
 
 const SHIFT_BOARD_CELL_BASE_SX = {
@@ -108,17 +109,17 @@ const SHIFT_BOARD_INTERACTIVE_FOCUS_SX = {
 
 const HOLIDAY_BG = mixWithTransparent(
   "color.brand.accent.base",
-  DESIGN_TOKENS.color.brand.accent.base,
+  DEFAULT_THEME_TOKENS.color.brand.accent.base,
   0.22
 );
 const COMPANY_HOLIDAY_BG = mixWithTransparent(
   "color.brand.secondary.base",
-  DESIGN_TOKENS.color.brand.secondary.base,
+  DEFAULT_THEME_TOKENS.color.brand.secondary.base,
   0.18
 );
 const SATURDAY_BG = mixWithTransparent(
   "color.brand.primary.base",
-  DESIGN_TOKENS.color.brand.primary.base,
+  DEFAULT_THEME_TOKENS.color.brand.primary.base,
   0.12
 );
 

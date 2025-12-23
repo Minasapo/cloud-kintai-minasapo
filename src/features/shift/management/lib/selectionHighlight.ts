@@ -1,6 +1,7 @@
-import { DESIGN_TOKENS, designTokenVar } from "@/shared/designSystem";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
-const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
+const DEFAULT_THEME_TOKENS = getDesignTokens();
+const shiftBoardTokens = DEFAULT_THEME_TOKENS.component.shiftBoard;
 const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
 const HIGHLIGHT_BACKGROUND = designTokenVar(
   `${SHIFT_BOARD_BASE_PATH}.highlightBackground`,
@@ -20,10 +21,10 @@ const HIGHLIGHT_RADIUS = designTokenVar(
 );
 const HIGHLIGHT_TRANSITION = `${designTokenVar(
   "motion.duration.medium",
-  `${DESIGN_TOKENS.motion.duration.medium}ms`
+  `${DEFAULT_THEME_TOKENS.motion.duration.medium}ms`
 )} ${designTokenVar(
   "motion.easing.standard",
-  DESIGN_TOKENS.motion.easing.standard
+  DEFAULT_THEME_TOKENS.motion.easing.standard
 )}`;
 
 const mixWithTransparent = (colorValue: string, opacity: number) => {
