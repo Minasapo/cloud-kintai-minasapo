@@ -16,7 +16,7 @@ import {
   useUpdateCompanyHolidayCalendarMutation,
   useUpdateHolidayCalendarMutation,
 } from "@entities/calendar/api/calendarApi";
-import { Box, LinearProgress, Stack } from "@mui/material";
+import { LinearProgress } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { useCallback, useEffect, useMemo } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -30,11 +30,8 @@ import { AuthContext } from "./context/AuthContext";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { createAppTheme } from "./lib/theme";
-import { designTokenVar } from "@/shared/designSystem";
+import { AppShell } from "@/shared/ui/layout";
 
-const APP_BACKGROUND = designTokenVar("color.neutral.50", "#F8FAF9");
-const APP_TEXT_COLOR = designTokenVar("color.neutral.900", "#1E2A25");
-const CONTENT_BACKGROUND = designTokenVar("color.neutral.50", "#F8FAF9");
 /**
  * アプリケーションのレイアウトコンポーネント。
  * 認証状態や各種設定・カレンダー情報の取得、各種コンテキストの提供を行う。
@@ -351,34 +348,19 @@ export default function Layout() {
       <AuthContext.Provider value={authContextValue}>
         <AppConfigContext.Provider value={appConfigContextValue}>
           <AppContext.Provider value={appContextValue}>
-            <Stack
-              sx={{
-                minHeight: "100vh",
-                backgroundColor: APP_BACKGROUND,
-                color: APP_TEXT_COLOR,
+            <AppShell
+              header={<Header />}
+              main={<Outlet />}
+              footer={<Footer />}
+              snackbar={<SnackbarGroup />}
+              slotProps={{
+                root: { "data-testid": "layout-stack" },
+                header: { "data-testid": "layout-header" },
+                main: { "data-testid": "layout-main" },
+                footer: { "data-testid": "layout-footer" },
+                snackbar: { "data-testid": "layout-snackbar" },
               }}
-              data-testid="layout-stack"
-            >
-              <Box data-testid="layout-header">
-                <Header />
-              </Box>
-              <Box
-                sx={{
-                  flex: 1,
-                  overflow: "auto",
-                  backgroundColor: CONTENT_BACKGROUND,
-                }}
-                data-testid="layout-main"
-              >
-                <Outlet />
-              </Box>
-              <Box data-testid="layout-footer">
-                <Footer />
-              </Box>
-              <Box data-testid="layout-snackbar">
-                <SnackbarGroup />
-              </Box>
-            </Stack>
+            />
           </AppContext.Provider>
         </AppConfigContext.Provider>
       </AuthContext.Provider>

@@ -4,7 +4,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
@@ -24,6 +24,7 @@ import { useCallback, useContext, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { DESIGN_TOKENS } from "@/shared/designSystem";
+import { PageSection } from "@/shared/ui/layout";
 import { AuthContext } from "@/context/AuthContext";
 import { useWorkflowListFilters } from "@/features/workflow/list/useWorkflowListFilters";
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
@@ -123,65 +124,71 @@ export default function WorkflowListPage() {
   if (!isAuthenticated) {
     return (
       <Page title="ワークフロー" maxWidth="lg">
-        <Box
+        <PageSection
+          variant="plain"
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
             minHeight: 240,
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <CircularProgress />
-        </Box>
+        </PageSection>
       </Page>
     );
   }
 
   return (
     <Page title="ワークフロー" maxWidth="lg">
-      <Paper
+      <PageSection
         sx={{
-          p: 3,
-          borderRadius: DESIGN_TOKENS.component.workflowList.cardRadius,
           boxShadow: DESIGN_TOKENS.component.workflowList.cardShadow,
+          borderRadius: DESIGN_TOKENS.component.workflowList.cardRadius,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
-        >
-          <Alert severity="warning" variant="standard" sx={{ mb: 2 }}>
+        <Stack spacing={2}>
+          <Alert severity="warning" variant="standard">
             現在この機能は開発中（ベータ）です。管理者より指示された場合を除き、ご利用はお控えください。
           </Alert>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {anyFilterActive && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<ClearIcon fontSize="small" />}
-                onClick={() => {
-                  clearFilters();
-                  filterRowRef.current?.closeAllPopovers();
-                }}
-              >
-                すべてのフィルターをクリア
-              </Button>
-            )}
-          </Box>
-          <Box>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => navigate("/workflow/new")}
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={2}
+            alignItems={{ xs: "stretch", md: "center" }}
+          >
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1.5,
+                alignItems: "center",
+              }}
             >
-              新規作成
-            </Button>
-          </Box>
-        </Box>
+              {anyFilterActive && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<ClearIcon fontSize="small" />}
+                  onClick={() => {
+                    clearFilters();
+                    filterRowRef.current?.closeAllPopovers();
+                  }}
+                >
+                  すべてのフィルターをクリア
+                </Button>
+              )}
+            </Box>
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => navigate("/workflow/new")}
+              >
+                新規作成
+              </Button>
+            </Box>
+          </Stack>
+        </Stack>
 
         {currentStaffId ? (
           <Box>
@@ -253,7 +260,7 @@ export default function WorkflowListPage() {
             )}
           </Box>
         )}
-      </Paper>
+      </PageSection>
     </Page>
   );
 }

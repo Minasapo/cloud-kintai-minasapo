@@ -1,2 +1,9 @@
 export * from "./tokens";
-export * from "./cssVariables";
+export {
+  applyDesignTokenCssVariables,
+  bootstrapDesignSystem,
+  DESIGN_SYSTEM_CSS_VAR_PREFIX,
+  designTokenVar,
+  getDesignTokenCssVariableEntries,
+  getDesignTokenVarName,
+} from "./cssVariables";
