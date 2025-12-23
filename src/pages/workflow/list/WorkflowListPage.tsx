@@ -6,27 +6,43 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import {
+  DataGrid,
+  type GridColDef,
+  type GridRenderCellParams,
+  type GridRowClassNameParams,
+  type GridRowParams,
+  type GridValueFormatter,
+} from "@mui/x-data-grid";
 import { WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AuthContext } from "@/context/AuthContext";
 import { useWorkflowListFilters } from "@/features/workflow/list/useWorkflowListFilters";
+import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { STATUS_LABELS } from "@/lib/workflowLabels";
+
 import WorkflowListFilters, {
   type WorkflowListFiltersHandle,
 } from "./components/WorkflowListFilters";
+
+const CANCELLED_LABEL = STATUS_LABELS[WorkflowStatus.CANCELLED];
+
+const formatWorkflowDate: GridValueFormatter<
+  WorkflowListItem,
+  string | undefined,
+  string,
+  string | undefined
+> = (value) => value ?? "-";
 
 export default function WorkflowListPage() {
   const navigate = useNavigate();
@@ -39,26 +55,70 @@ export default function WorkflowListPage() {
     if (!cognitoUser?.id) return undefined;
     return staffs.find((s) => s.cognitoUserId === cognitoUser.id)?.id;
   }, [cognitoUser, staffs]);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const { filteredItems, filters, anyFilterActive, setFilter, clearFilters } =
     useWorkflowListFilters({ workflows, currentStaffId });
   const filterRowRef = useRef<WorkflowListFiltersHandle>(null);
 
-  useEffect(() => {
-    setPage(0);
-  }, [filteredItems]);
+  const columns = useMemo<GridColDef<WorkflowListItem>[]>(
+    () => [
+      {
+        field: "category",
+        headerName: "種別",
+        flex: 1,
+        minWidth: 140,
+        sortable: false,
+      },
+      {
+        field: "applicationDate",
+        headerName: "申請日",
+        flex: 1,
+        minWidth: 160,
+        sortable: false,
+        valueFormatter: formatWorkflowDate,
+      },
+      {
+        field: "status",
+        headerName: "ステータス",
+        flex: 1,
+        minWidth: 160,
+        sortable: false,
+        renderCell: (
+          params: GridRenderCellParams<WorkflowListItem, string | undefined>
+        ) => <StatusChip status={params.row.rawStatus || params.value || ""} />,
+      },
+      {
+        field: "createdAt",
+        headerName: "作成日",
+        flex: 1,
+        minWidth: 160,
+        sortable: false,
+      },
+    ],
+    []
+  );
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+  const handleRowClick = useCallback(
+    (params: GridRowParams<WorkflowListItem>) => {
+      const key = params.row.rawId
+        ? params.row.rawId
+        : `${params.row.name}-${params.row.createdAt}`;
+      navigate(`/workflow/${encodeURIComponent(key)}`);
+    },
+    [navigate]
+  );
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  const getRowClassName = useCallback(
+    (params: GridRowClassNameParams<WorkflowListItem>) =>
+      params.row.rawStatus === WorkflowStatus.CANCELLED ||
+      params.row.status === CANCELLED_LABEL
+        ? "status-cancelled"
+        : "",
+    []
+  );
+
+  const getRowId = useCallback((row: WorkflowListItem) => {
+    return row.rawId ? row.rawId : `${row.name}-${row.createdAt}`;
+  }, []);
 
   if (!isAuthenticated) {
     return (
@@ -124,25 +184,17 @@ export default function WorkflowListPage() {
         </Box>
 
         {currentStaffId ? (
-          <TableContainer>
-            {loading && (
-              <Box
-                sx={{
-                  mb: 2,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <CircularProgress />
-              </Box>
-            )}
+          <Box>
             {error && (
               <Box sx={{ mb: 2 }}>
                 <Alert severity="error">{error}</Alert>
               </Box>
             )}
-            <Table>
+            <Table
+              size="small"
+              sx={{ mb: 1, tableLayout: "fixed" }}
+              aria-hidden
+            >
               <TableHead>
                 <TableRow>
                   <TableCell>種別</TableCell>
@@ -156,51 +208,38 @@ export default function WorkflowListPage() {
                   setFilter={setFilter}
                 />
               </TableHead>
-              <TableBody>
-                {filteredItems
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((w) => (
-                    <TableRow
-                      key={w.rawId ? w.rawId : `${w.name}-${w.createdAt}`}
-                      onClick={() =>
-                        navigate(
-                          `/workflow/${encodeURIComponent(
-                            w.rawId ? w.rawId : `${w.name}-${w.createdAt}`
-                          )}`
-                        )
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          navigate(
-                            `/workflow/${encodeURIComponent(
-                              w.rawId ? w.rawId : `${w.name}-${w.createdAt}`
-                            )}`
-                          );
-                        }
-                      }}
-                      tabIndex={0}
-                      role="button"
-                      sx={{
-                        cursor: "pointer",
-                        "&:hover": { backgroundColor: "action.hover" },
-                        ...(w.rawStatus === WorkflowStatus.CANCELLED ||
-                        w.status === STATUS_LABELS[WorkflowStatus.CANCELLED]
-                          ? { "& td, & th": { color: "text.disabled" } }
-                          : {}),
-                      }}
-                    >
-                      <TableCell>{w.category}</TableCell>
-                      <TableCell>{w.applicationDate}</TableCell>
-                      <TableCell>
-                        <StatusChip status={w.rawStatus || w.status} />
-                      </TableCell>
-                      <TableCell>{w.createdAt}</TableCell>
-                      <TableCell />
-                    </TableRow>
-                  ))}
-              </TableBody>
             </Table>
-          </TableContainer>
+            <Box sx={{ height: 520, width: "100%" }}>
+              <DataGrid
+                rows={filteredItems}
+                columns={columns}
+                getRowId={getRowId}
+                disableColumnMenu
+                disableColumnSelector
+                disableDensitySelector
+                disableRowSelectionOnClick
+                hideFooter
+                loading={loading}
+                onRowClick={handleRowClick}
+                rowHeight={56}
+                columnHeaderHeight={0}
+                getRowClassName={getRowClassName}
+                sx={{
+                  "& .MuiDataGrid-columnHeaders": { display: "none" },
+                  "& .status-cancelled .MuiDataGrid-cell": {
+                    color: "text.disabled",
+                  },
+                  "& .MuiDataGrid-row": {
+                    cursor: "pointer",
+                  },
+                  "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within":
+                    {
+                      outline: "none",
+                    },
+                }}
+              />
+            </Box>
+          </Box>
         ) : (
           <Box sx={{ my: 4, display: "flex", justifyContent: "center" }}>
             {loading ? (
@@ -214,15 +253,6 @@ export default function WorkflowListPage() {
             )}
           </Box>
         )}
-        <TablePagination
-          component="div"
-          count={filteredItems.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25]}
-        />
       </Paper>
     </Page>
   );
