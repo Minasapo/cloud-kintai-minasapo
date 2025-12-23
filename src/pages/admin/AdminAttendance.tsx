@@ -31,10 +31,10 @@ export default function AdminAttendance() {
         gap: PAGE_SECTION_GAP,
       }}
     >
-      <PageSection variant="surface" sx={{ gap: 0 }}>
+      <PageSection variant="surface" layoutVariant="dashboard" sx={{ gap: 0 }}>
         <DownloadForm />
       </PageSection>
-      <PageSection variant="surface" sx={{ gap: 0 }}>
+      <PageSection variant="surface" layoutVariant="dashboard" sx={{ gap: 0 }}>
         <AttendanceDailyList />
       </PageSection>
     </Stack>

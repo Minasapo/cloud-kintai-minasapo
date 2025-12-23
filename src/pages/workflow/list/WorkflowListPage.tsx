@@ -23,14 +23,13 @@ import Page from "@shared/ui/page/Page";
 import { useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { DESIGN_TOKENS } from "@/shared/designSystem";
-import { PageSection } from "@/shared/ui/layout";
 import {
   useWorkflowListViewModel,
   type WorkflowListViewModel,
 } from "@/features/workflow/list/useWorkflowListViewModel";
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
 import { STATUS_LABELS } from "@/lib/workflowLabels";
+import { PageSection } from "@/shared/ui/layout";
 
 import WorkflowListFilters, {
   type WorkflowListFiltersHandle,
@@ -126,8 +125,9 @@ export default function WorkflowListPage() {
     return (
       <Page title="ワークフロー" maxWidth="lg">
         <PageSection
-          variant="plain"
+          layoutVariant="detail"
           sx={{
+            display: "flex",
             minHeight: 240,
             alignItems: "center",
             justifyContent: "center",
@@ -141,12 +141,7 @@ export default function WorkflowListPage() {
 
   return (
     <Page title="ワークフロー" maxWidth="lg">
-      <PageSection
-        sx={{
-          boxShadow: DESIGN_TOKENS.component.workflowList.cardShadow,
-          borderRadius: DESIGN_TOKENS.component.workflowList.cardRadius,
-        }}
-      >
+      <PageSection layoutVariant="detail">
         <Stack spacing={2}>
           <Alert severity="warning" variant="standard">
             現在この機能は開発中（ベータ）です。管理者より指示された場合を除き、ご利用はお控えください。

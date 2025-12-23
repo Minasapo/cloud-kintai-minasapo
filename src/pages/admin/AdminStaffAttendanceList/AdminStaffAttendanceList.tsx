@@ -91,7 +91,9 @@ export default function AdminStaffAttendanceList() {
         py: PAGE_PADDING_Y,
       }}
     >
-      <PageSection variant="surface">{content}</PageSection>
+      <PageSection variant="surface" layoutVariant="dashboard">
+        {content}
+      </PageSection>
     </Stack>
   );
 
@@ -118,7 +120,11 @@ export default function AdminStaffAttendanceList() {
           gap: PAGE_SECTION_GAP,
         }}
       >
-        <PageSection variant="surface" sx={{ gap: SECTION_CONTENT_GAP }}>
+        <PageSection
+          variant="surface"
+          layoutVariant="dashboard"
+          sx={{ gap: SECTION_CONTENT_GAP }}
+        >
           <DatePicker
             value={dayjs()}
             format={AttendanceDate.DisplayFormat}
@@ -130,12 +136,20 @@ export default function AdminStaffAttendanceList() {
           />
         </PageSection>
 
-        <PageSection variant="surface" sx={{ gap: SECTION_CONTENT_GAP }}>
+        <PageSection
+          variant="surface"
+          layoutVariant="dashboard"
+          sx={{ gap: SECTION_CONTENT_GAP }}
+        >
           <AttendanceGraph attendances={attendances} />
         </PageSection>
 
         {pendingAttendances.length > 0 && (
-          <PageSection variant="surface" sx={{ gap: SECTION_CONTENT_GAP }}>
+          <PageSection
+            variant="surface"
+            layoutVariant="dashboard"
+            sx={{ gap: SECTION_CONTENT_GAP }}
+          >
             <Box sx={pendingAttendanceContainerSx}>
               <PendingAttendanceSection
                 attendances={pendingAttendances}
@@ -151,7 +165,7 @@ export default function AdminStaffAttendanceList() {
           </PageSection>
         )}
 
-        <PageSection variant="surface">
+        <PageSection variant="surface" layoutVariant="dashboard">
           <AttendanceTableSection
             attendances={attendances}
             staff={staff}

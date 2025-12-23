@@ -57,7 +57,7 @@ export default function AdminDashboard() {
         gap: PAGE_SECTION_GAP,
       }}
     >
-      <PageSection variant="surface" sx={{ gap: 0 }}>
+      <PageSection variant="surface" layoutVariant="dashboard" sx={{ gap: 0 }}>
         <AdminHeader
           actions={
             <AdminMenu
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
           }
         />
       </PageSection>
-      <PageSection variant="surface" sx={{ gap: 0 }}>
+      <PageSection variant="surface" layoutVariant="dashboard" sx={{ gap: 0 }}>
         <Outlet />
       </PageSection>
     </Stack>
