@@ -11,12 +11,13 @@ import type {
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
+import { resolveThemeColor } from "@/constants/theme";
 import {
-  DESIGN_TOKENS,
   applyDesignTokenCssVariables,
   getDesignTokens,
 } from "@/shared/designSystem";
-import { resolveThemeColor } from "@/constants/theme";
+
+const DEFAULT_THEME_TOKENS = getDesignTokens();
 
 /**
  * アプリケーション設定の一部項目のみを抽出した型。
@@ -257,15 +258,15 @@ const useAppConfig = () => {
         brandPrimaryOverride ?? config?.themeColor ?? DEFAULT_CONFIG.themeColor;
 
       if (!brandPrimaryOverride && !hasRemoteThemeColor) {
-        return DESIGN_TOKENS;
+        return DEFAULT_THEME_TOKENS;
       }
 
       const resolved = resolveThemeColor(candidate || undefined);
       if (
         !brandPrimaryOverride &&
-        resolved === DESIGN_TOKENS.color.brand.primary.base
+        resolved === DEFAULT_THEME_TOKENS.color.brand.primary.base
       ) {
-        return DESIGN_TOKENS;
+        return DEFAULT_THEME_TOKENS;
       }
 
       return getDesignTokens({ brandPrimary: resolved });

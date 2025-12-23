@@ -5,8 +5,10 @@ import {
 import dayjs from "dayjs";
 import { createContext } from "react";
 
-import { DESIGN_TOKENS, type DesignTokens } from "@/shared/designSystem";
 import { DEFAULT_CONFIG } from "@/hooks/useAppConfig/useAppConfig";
+import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
+
+const DEFAULT_THEME_TOKENS = getDesignTokens();
 
 type AppConfigContextProps = {
   fetchConfig: () => Promise<void>;
@@ -85,5 +87,5 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getAbsentEnabled: () => false,
   // Ensure a string is always returned to satisfy the context type
   getThemeColor: () => DEFAULT_CONFIG.themeColor ?? "",
-  getThemeTokens: () => DESIGN_TOKENS,
+  getThemeTokens: () => DEFAULT_THEME_TOKENS,
 });
