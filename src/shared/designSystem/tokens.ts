@@ -180,6 +180,14 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       dividerColor: color.neutral[200],
       surface: color.brand.secondary.surface,
     },
+    headerBar: {
+      minHeight: 56,
+      paddingX: spacing.lg,
+      paddingY: spacing.sm,
+      gap: spacing.md,
+      background: color.brand.primary.base,
+      textColor: color.brand.primary.contrastText,
+    },
   } as const;
 
   return {
