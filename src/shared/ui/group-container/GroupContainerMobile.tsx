@@ -1,18 +1,44 @@
-import { Box, Stack, styled, SxProps, Theme, Typography } from "@mui/material";
-import { ReactNode } from "react";
+import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
+import { ReactNode, useMemo } from "react";
 
-const Container = styled(Box)(({ theme }) => ({
-  border: `1px solid ${theme.palette.divider}`,
-  borderLeft: `4px solid ${theme.palette.primary.main}`,
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(1.5),
-  backgroundColor: theme.palette.background.paper,
-}));
+import { designTokenVar } from "@/shared/designSystem";
 
-const Title = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.text.primary,
-}));
+const GROUP_BORDER_WIDTH = designTokenVar(
+  "component.groupContainer.borderWidth",
+  "1px"
+);
+const GROUP_ACCENT_WIDTH = designTokenVar(
+  "component.groupContainer.accentWidthMobile",
+  "4px"
+);
+const GROUP_BORDER_COLOR = designTokenVar(
+  "component.groupContainer.borderColor",
+  "#D9E2DD"
+);
+const GROUP_ACCENT_COLOR = designTokenVar(
+  "component.groupContainer.accentColor",
+  "#0FA85E"
+);
+const GROUP_RADIUS = designTokenVar(
+  "component.groupContainer.borderRadius",
+  "12px"
+);
+const GROUP_PADDING = designTokenVar(
+  "component.groupContainer.paddingMobile",
+  "12px"
+);
+const GROUP_BACKGROUND = designTokenVar(
+  "component.groupContainer.background",
+  "#FFFFFF"
+);
+const GROUP_CONTENT_GAP = designTokenVar(
+  "component.groupContainer.contentGap",
+  "8px"
+);
+const GROUP_COUNT_COLOR = designTokenVar(
+  "component.groupContainer.countColor",
+  "#5E726A"
+);
 
 export interface GroupContainerMobileProps {
   title?: string;
@@ -26,21 +52,43 @@ const GroupContainerMobile = ({
   count,
   children,
   sx,
-}: GroupContainerMobileProps) => (
-  <Container sx={sx}>
-    {title ? (
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Title variant="subtitle1">{title}</Title>
-        {typeof count === "number" && (
-          <Typography variant="caption" color="text.secondary">
-            {`(${count}件)`}
-          </Typography>
-        )}
-      </Stack>
-    ) : null}
+}: GroupContainerMobileProps) => {
+  const containerSx = useMemo(
+    () => ({
+      borderStyle: "solid",
+      borderWidth: GROUP_BORDER_WIDTH,
+      borderColor: GROUP_BORDER_COLOR,
+      borderLeftColor: GROUP_ACCENT_COLOR,
+      borderLeftWidth: GROUP_ACCENT_WIDTH,
+      borderRadius: GROUP_RADIUS,
+      padding: GROUP_PADDING,
+      backgroundColor: GROUP_BACKGROUND,
+    }),
+    []
+  );
 
-    <Box sx={{ mt: 1 }}>{children}</Box>
-  </Container>
-);
+  return (
+    <Box sx={[containerSx, sx] as SxProps<Theme>}>
+      {title ? (
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Typography variant="subtitle1" fontWeight={700}>
+            {title}
+          </Typography>
+          {typeof count === "number" && (
+            <Typography variant="caption" sx={{ color: GROUP_COUNT_COLOR }}>
+              {`(${count}件)`}
+            </Typography>
+          )}
+        </Stack>
+      ) : null}
+
+      <Box sx={{ mt: GROUP_CONTENT_GAP }}>{children}</Box>
+    </Box>
+  );
+};
 
 export default GroupContainerMobile;

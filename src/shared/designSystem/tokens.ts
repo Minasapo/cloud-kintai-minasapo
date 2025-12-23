@@ -229,6 +229,21 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       fontSize: typography.fontSize.sm,
       fontWeight: typography.fontWeight.medium,
     },
+    groupContainer: {
+      borderWidth: 1,
+      accentWidth: 6,
+      accentWidthMobile: 4,
+      borderColor: color.neutral[200],
+      accentColor: color.brand.primary.base,
+      borderRadius: radius.md,
+      padding: spacing.lg,
+      paddingMobile: spacing.md,
+      background: "#FFFFFF",
+      shadow: shadow.card,
+      headerGap: spacing.sm,
+      contentGap: spacing.sm,
+      countColor: color.neutral[500],
+    },
   } as const;
 
   return {
