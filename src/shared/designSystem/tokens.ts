@@ -200,6 +200,27 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       hoverBackground: "rgba(255, 255, 255, 0.16)",
       transitionMs: motion.duration.fast,
     },
+    headerActions: {
+      iconColor: color.brand.primary.contrastText,
+      iconHoverBackground: "rgba(255, 255, 255, 0.16)",
+      iconSize: 40,
+      popoverWidth: 320,
+      popoverHeight: 400,
+      popoverPadding: spacing.md,
+      popoverGap: spacing.md,
+      popoverBorderWidth: 4,
+      popoverBorderColor: color.brand.primary.base,
+      gridGap: spacing.xs,
+      gridItemPadding: spacing.sm,
+      gridHoverBackground: color.neutral[100],
+      emptyStateColor: color.neutral[500],
+    },
+    headerSignButton: {
+      gap: spacing.sm,
+      paddingX: spacing.lg,
+      borderRadius: radius.sm,
+      fontWeight: typography.fontWeight.medium,
+    },
   } as const;
 
   return {

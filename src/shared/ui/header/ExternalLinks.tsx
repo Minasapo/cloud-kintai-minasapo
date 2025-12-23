@@ -15,6 +15,7 @@ import { useTheme } from "@mui/material/styles";
 import { MouseEvent, useMemo, useState } from "react";
 
 import { predefinedIcons } from "@/constants/icons";
+import { designTokenVar } from "@/shared/designSystem";
 
 export type ExternalLinkItem = {
   label: string;
@@ -28,6 +29,54 @@ export interface ExternalLinksProps {
   links: ExternalLinkItem[];
   staffName: string;
 }
+
+const ACTION_ICON_COLOR = designTokenVar(
+  "component.headerActions.iconColor",
+  "#FFFFFF"
+);
+const ACTION_ICON_SIZE = designTokenVar(
+  "component.headerActions.iconSize",
+  "40px"
+);
+const ACTION_ICON_HOVER_BG = designTokenVar(
+  "component.headerActions.iconHoverBackground",
+  "rgba(255, 255, 255, 0.16)"
+);
+const POPPER_WIDTH = designTokenVar(
+  "component.headerActions.popoverWidth",
+  "320px"
+);
+const POPPER_HEIGHT = designTokenVar(
+  "component.headerActions.popoverHeight",
+  "400px"
+);
+const POPPER_PADDING = designTokenVar(
+  "component.headerActions.popoverPadding",
+  "16px"
+);
+const POPPER_GAP = designTokenVar("component.headerActions.popoverGap", "16px");
+const POPPER_BORDER_WIDTH = designTokenVar(
+  "component.headerActions.popoverBorderWidth",
+  "4px"
+);
+const POPPER_BORDER_COLOR = designTokenVar(
+  "component.headerActions.popoverBorderColor",
+  "#0FA85E"
+);
+const GRID_GAP = designTokenVar("component.headerActions.gridGap", "8px");
+const GRID_ITEM_PADDING = designTokenVar(
+  "component.headerActions.gridItemPadding",
+  "8px"
+);
+const GRID_HOVER_BACKGROUND = designTokenVar(
+  "component.headerActions.gridHoverBackground",
+  "#EDF1EF"
+);
+const GRID_ITEM_RADIUS = designTokenVar("radius.sm", "8px");
+const EMPTY_STATE_COLOR = designTokenVar(
+  "component.headerActions.emptyStateColor",
+  "#7D9288"
+);
 
 const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
@@ -63,8 +112,20 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
   return (
     <ClickAwayListener onClickAway={handleClickAway}>
       <Box>
-        <IconButton onClick={handleClick}>
-          <AppsIcon sx={{ color: "white" }} />
+        <IconButton
+          onClick={handleClick}
+          sx={{
+            color: ACTION_ICON_COLOR,
+            width: ACTION_ICON_SIZE,
+            height: ACTION_ICON_SIZE,
+            borderRadius: "50%",
+            transition: `background-color 160ms ease`,
+            "&:hover": {
+              backgroundColor: ACTION_ICON_HOVER_BG,
+            },
+          }}
+        >
+          <AppsIcon />
         </IconButton>
         <Popper
           id={id}
@@ -75,17 +136,18 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
           <Paper
             elevation={3}
             sx={{
-              width: "300px",
-              height: "400px",
+              width: POPPER_WIDTH,
+              height: POPPER_HEIGHT,
               m: 2,
-              p: 2,
-              border: `5px solid ${theme.palette.primary.main}`,
+              p: POPPER_PADDING,
+              border: `${POPPER_BORDER_WIDTH} solid ${POPPER_BORDER_COLOR}`,
               display: "flex",
               flexDirection: "column",
+              gap: POPPER_GAP,
             }}
           >
             <Box sx={{ overflowY: "auto", pr: 1 }}>
-              <Stack spacing={2}>
+              <Stack sx={{ gap: POPPER_GAP }}>
                 {companyLinks.length > 0 && (
                   <LinksSection
                     title="共通"
@@ -103,7 +165,7 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
                 {companyLinks.length === 0 && personalLinks.length === 0 && (
                   <Typography
                     variant="body2"
-                    color="text.secondary"
+                    sx={{ color: EMPTY_STATE_COLOR }}
                     textAlign="center"
                   >
                     表示できるリンクがありません
@@ -137,7 +199,13 @@ const LinksSection = ({ title, links, staffName }: LinksSectionProps) => {
       >
         {title}
       </Typography>
-      <Grid container spacing={1}>
+      <Grid
+        container
+        sx={{
+          columnGap: GRID_GAP,
+          rowGap: GRID_GAP,
+        }}
+      >
         {links.map((link, index) => (
           <LinkGridItem
             key={`${link.url}-${index}`}
@@ -181,12 +249,14 @@ const LinkGridItem = ({
       >
         <Stack
           direction="column"
-          spacing={0}
           alignItems="center"
           sx={{
-            p: 1,
+            gap: GRID_GAP,
+            padding: GRID_ITEM_PADDING,
+            borderRadius: GRID_ITEM_RADIUS,
+            transition: "background-color 160ms ease",
             "&:hover": {
-              backgroundColor: "#f0f0f0",
+              backgroundColor: GRID_HOVER_BACKGROUND,
             },
           }}
         >

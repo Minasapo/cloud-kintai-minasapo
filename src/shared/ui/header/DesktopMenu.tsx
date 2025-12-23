@@ -66,9 +66,7 @@ const DesktopMenu = ({
     minHeight: MENU_ITEM_HEIGHT,
     paddingInline: MENU_ITEM_PADDING_X,
     color: isActive ? MENU_ITEM_ACTIVE_COLOR : MENU_ITEM_COLOR,
-    backgroundColor: isActive
-      ? MENU_ITEM_ACTIVE_BACKGROUND
-      : "transparent",
+    backgroundColor: isActive ? MENU_ITEM_ACTIVE_BACKGROUND : "transparent",
     borderRadius: MENU_ITEM_RADIUS,
     fontWeight: MENU_ITEM_FONT_WEIGHT,
     textDecoration: "none",
