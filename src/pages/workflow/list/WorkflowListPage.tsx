@@ -20,16 +20,16 @@ import {
 import { WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import { useCallback, useContext, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { DESIGN_TOKENS } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
-import { AuthContext } from "@/context/AuthContext";
-import { useWorkflowListFilters } from "@/features/workflow/list/useWorkflowListFilters";
+import {
+  useWorkflowListViewModel,
+  type WorkflowListViewModel,
+} from "@/features/workflow/list/useWorkflowListViewModel";
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { STATUS_LABELS } from "@/lib/workflowLabels";
 
 import WorkflowListFilters, {
@@ -48,16 +48,17 @@ const formatWorkflowDate: GridValueFormatter<
 export default function WorkflowListPage() {
   const navigate = useNavigate();
 
-  const { workflows, loading, error } = useWorkflows();
-  const { staffs } = useStaffs();
-  const { cognitoUser, authStatus } = useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
-  const currentStaffId = useMemo(() => {
-    if (!cognitoUser?.id) return undefined;
-    return staffs.find((s) => s.cognitoUserId === cognitoUser.id)?.id;
-  }, [cognitoUser, staffs]);
-  const { filteredItems, filters, anyFilterActive, setFilter, clearFilters } =
-    useWorkflowListFilters({ workflows, currentStaffId });
+  const {
+    isAuthenticated,
+    currentStaffId,
+    loading,
+    error,
+    filteredItems,
+    filters,
+    anyFilterActive,
+    setFilter,
+    clearFilters,
+  }: WorkflowListViewModel = useWorkflowListViewModel();
   const filterRowRef = useRef<WorkflowListFiltersHandle>(null);
 
   const columns = useMemo<GridColDef<WorkflowListItem>[]>(
