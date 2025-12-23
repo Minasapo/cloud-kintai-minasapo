@@ -2,17 +2,35 @@ import { TableCell, TableCellProps, TableRow, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { ReactNode } from "react";
 
-import { DESIGN_TOKENS } from "@/shared/designSystem";
+import { DESIGN_TOKENS, designTokenVar } from "@/shared/designSystem";
 
 import { getCellHighlightSx } from "../../lib/selectionHighlight";
 
 const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
-const toSpacingUnit = (value: number) => value / 8;
-const SHIFT_BOARD_PADDING_X = toSpacingUnit(shiftBoardTokens.columnGap);
-const SHIFT_BOARD_HALF_PADDING_Y = toSpacingUnit(shiftBoardTokens.rowGap) / 2;
+const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
+const SHIFT_BOARD_PADDING_X = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.columnGap`,
+  `${shiftBoardTokens.columnGap}px`
+);
+const SHIFT_BOARD_PADDING_Y = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.rowGap`,
+  `${shiftBoardTokens.rowGap}px`
+);
+const SHIFT_BOARD_HALF_PADDING_Y = `calc(${SHIFT_BOARD_PADDING_Y} / 2)`;
+const SHIFT_BOARD_CELL_RADIUS = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.cellRadius`,
+  `${shiftBoardTokens.cellRadius}px`
+);
+const SHIFT_BOARD_TRANSITION = `${designTokenVar(
+  "motion.duration.medium",
+  `${DESIGN_TOKENS.motion.duration.medium}ms`
+)} ${designTokenVar(
+  "motion.easing.standard",
+  DESIGN_TOKENS.motion.easing.standard
+)}`;
 const SHIFT_BOARD_CELL_BASE_SX = {
-  borderRadius: `${shiftBoardTokens.cellRadius}px`,
-  transition: `background-color ${DESIGN_TOKENS.motion.duration.medium}ms ${DESIGN_TOKENS.motion.easing.standard}, box-shadow ${DESIGN_TOKENS.motion.duration.medium}ms ${DESIGN_TOKENS.motion.easing.standard}`,
+  borderRadius: SHIFT_BOARD_CELL_RADIUS,
+  transition: `background-color ${SHIFT_BOARD_TRANSITION}, box-shadow ${SHIFT_BOARD_TRANSITION}`,
 };
 
 export type ShiftManagementSummaryRowProps = {
