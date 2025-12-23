@@ -4,6 +4,7 @@ import Layout from "./Layout";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
 import { workflowDetailLoader } from "./router/loaders/workflowDetailLoader";
+import { workflowEditLoader } from "./router/loaders/workflowEditLoader";
 
 const AdminDashboardRoute = createLazyRoute(
   () => import("./pages/admin/AdminDashboard")
@@ -48,7 +49,10 @@ const WorkflowDetailRoute = createLazyRoute(
   }
 );
 const WorkflowEditRoute = createLazyRoute(
-  () => import("./pages/workflow/edit/WorkflowEditPage")
+  () => import("./pages/workflow/edit/WorkflowEditPage"),
+  {
+    loader: workflowEditLoader,
+  }
 );
 const WorkflowListRoute = createLazyRoute(
   () => import("./pages/workflow/list/WorkflowListPage")

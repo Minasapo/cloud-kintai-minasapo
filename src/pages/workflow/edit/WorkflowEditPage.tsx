@@ -12,20 +12,16 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import {
-  GetWorkflowQuery,
   WorkflowCategory,
   type WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import { GraphQLResult } from "aws-amplify/api";
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { AuthContext } from "@/context/AuthContext";
 import {
   buildUpdateWorkflowInput,
   validateWorkflowForm,
@@ -35,17 +31,23 @@ import WorkflowTypeFields from "@/features/workflow/application-form/ui/Workflow
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 import { CATEGORY_LABELS } from "@/lib/workflowLabels";
+import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
+import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 
 export default function WorkflowEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { workflow } = useLoaderData() as WorkflowEditLoaderData;
+
+  const { staffs } = useStaffs();
+  const { update: updateWorkflow } = useWorkflows();
+  const dispatch = useAppDispatchV2();
 
   const [category, setCategory] = useState("");
   const [applicationDate, setApplicationDate] = useState("");
@@ -63,83 +65,54 @@ export default function WorkflowEditPage() {
   const [overtimeReason, setOvertimeReason] = useState("");
   const [draftMode, setDraftMode] = useState(true);
 
-  const { cognitoUser } = useContext(AuthContext);
-  const { staffs } = useStaffs();
-  const { update: updateWorkflow } = useWorkflows();
-  const [applicant, setApplicant] = useState<StaffType | null | undefined>(
-    undefined
-  );
+  const [applicant, setApplicant] = useState<StaffType | null>(null);
   const [existingComments, setExistingComments] = useState<
     WorkflowCommentInput[]
   >([]);
-  const dispatch = useAppDispatchV2();
 
   useEffect(() => {
-    const fetch = async () => {
-      if (!id) return;
-      try {
-        const resp = (await graphqlClient.graphql({
-          query: getWorkflow,
-          variables: { id },
-          authMode: "userPool",
-        })) as GraphQLResult<GetWorkflowQuery>;
+    const nextCategoryLabel = workflow.category
+      ? CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
+        workflow.category
+      : "";
+    setCategory(nextCategoryLabel);
 
-        if (resp.errors) throw new Error(resp.errors[0].message);
-        const w = resp.data?.getWorkflow;
-        if (!w) return;
+    const appDate =
+      workflow.overTimeDetails?.date ||
+      isoDateFromTimestamp(workflow.createdAt);
+    setApplicationDate(formatDateSlash(appDate));
 
-        // map category (enum -> label used in this form)
-        if (w.category) {
-          setCategory(
-            CATEGORY_LABELS[w.category as WorkflowCategory] || w.category
-          );
-        }
+    if (workflow.overTimeDetails) {
+      setOvertimeDate(isoDateFromTimestamp(workflow.overTimeDetails.date));
+      setOvertimeStart(workflow.overTimeDetails.startTime || "");
+      setOvertimeEnd(workflow.overTimeDetails.endTime || "");
+      setOvertimeReason(workflow.overTimeDetails.reason || "");
+    } else {
+      setOvertimeDate("");
+      setOvertimeStart("");
+      setOvertimeEnd("");
+      setOvertimeReason("");
+    }
 
-        // application date: prefer overtime date if present, otherwise createdAt
-        const appDate =
-          w.overTimeDetails?.date || isoDateFromTimestamp(w.createdAt);
-        setApplicationDate(formatDateSlash(appDate));
-
-        // overtime fields
-        if (w.overTimeDetails) {
-          // keep ISO format (YYYY-MM-DD) for <input type="date"> controls
-          setOvertimeDate(isoDateFromTimestamp(w.overTimeDetails.date));
-          setOvertimeStart(w.overTimeDetails.startTime || "");
-          setOvertimeEnd(w.overTimeDetails.endTime || "");
-          setOvertimeReason(w.overTimeDetails.reason || "");
-        }
-
-        // status -> draftMode
-        setDraftMode(w.status === WorkflowStatus.DRAFT);
-        setExistingComments(extractExistingWorkflowComments(w));
-
-        // applicant/staff from staffId
-        if (w.staffId) {
-          const s = staffs.find((st) => st.id === w.staffId);
-          setApplicant(
-            s || ({ id: w.staffId, familyName: "", givenName: "" } as StaffType)
-          );
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetch();
-    // we include staffs so that applicant can be resolved once staffs are loaded
-  }, [id, staffs]);
+    setDraftMode(workflow.status === WorkflowStatus.DRAFT);
+    setExistingComments(extractExistingWorkflowComments(workflow));
+  }, [workflow]);
 
   useEffect(() => {
-    // 申請日は初期で今日に
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    setApplicationDate(`${y}/${m}/${day}`);
-
-    if (!cognitoUser?.id) return;
-    const match = staffs.find((s) => s.cognitoUserId === cognitoUser.id);
-    setApplicant(match || null);
-  }, [cognitoUser, staffs]);
+    if (!workflow.staffId) {
+      setApplicant(null);
+      return;
+    }
+    const match = staffs.find((s) => s.id === workflow.staffId);
+    setApplicant(
+      match ||
+        ({
+          id: workflow.staffId,
+          familyName: "",
+          givenName: "",
+        } as StaffType)
+    );
+  }, [workflow.staffId, staffs]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,14 +139,8 @@ export default function WorkflowEditPage() {
         if (!id) throw new Error("IDが不明です");
         let normalizedComments = existingComments;
         if (!draftMode) {
-          const resp = (await graphqlClient.graphql({
-            query: getWorkflow,
-            variables: { id },
-            authMode: "userPool",
-          })) as GraphQLResult<GetWorkflowQuery>;
-          normalizedComments = extractExistingWorkflowComments(
-            resp.data?.getWorkflow ?? null
-          );
+          const latest = await fetchWorkflowById(id);
+          normalizedComments = extractExistingWorkflowComments(latest);
           setExistingComments(normalizedComments);
         }
 
