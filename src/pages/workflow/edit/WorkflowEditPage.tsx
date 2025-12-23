@@ -12,13 +12,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  WorkflowCategory,
-  type WorkflowCommentInput,
-  WorkflowStatus,
-} from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -29,14 +24,13 @@ import {
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
-import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
+import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { CATEGORY_LABELS } from "@/lib/workflowLabels";
 import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 
@@ -48,71 +42,36 @@ export default function WorkflowEditPage() {
   const { staffs } = useStaffs();
   const { update: updateWorkflow } = useWorkflows();
   const dispatch = useAppDispatchV2();
-
-  const [category, setCategory] = useState("");
-  const [applicationDate, setApplicationDate] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const {
+    category,
+    setCategory,
+    applicationDate,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    absenceDate,
+    setAbsenceDate,
+    paidReason,
+    setPaidReason,
+    overtimeDate,
+    setOvertimeDate,
+    overtimeStart,
+    setOvertimeStart,
+    overtimeEnd,
+    setOvertimeEnd,
+    overtimeReason,
+    setOvertimeReason,
+    draftMode,
+    setDraftMode,
+    applicant,
+    existingComments,
+    setExistingComments,
+  } = useWorkflowEditLoaderState(workflow, staffs);
   const [dateError, setDateError] = useState("");
-  const [absenceDate, setAbsenceDate] = useState("");
   const [absenceDateError, setAbsenceDateError] = useState("");
-  const [paidReason, setPaidReason] = useState("");
-  const [overtimeDate, setOvertimeDate] = useState("");
   const [overtimeDateError, setOvertimeDateError] = useState("");
-  const [overtimeStart, setOvertimeStart] = useState("");
-  const [overtimeEnd, setOvertimeEnd] = useState("");
   const [overtimeError, setOvertimeError] = useState("");
-  const [overtimeReason, setOvertimeReason] = useState("");
-  const [draftMode, setDraftMode] = useState(true);
-
-  const [applicant, setApplicant] = useState<StaffType | null>(null);
-  const [existingComments, setExistingComments] = useState<
-    WorkflowCommentInput[]
-  >([]);
-
-  useEffect(() => {
-    const nextCategoryLabel = workflow.category
-      ? CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
-        workflow.category
-      : "";
-    setCategory(nextCategoryLabel);
-
-    const appDate =
-      workflow.overTimeDetails?.date ||
-      isoDateFromTimestamp(workflow.createdAt);
-    setApplicationDate(formatDateSlash(appDate));
-
-    if (workflow.overTimeDetails) {
-      setOvertimeDate(isoDateFromTimestamp(workflow.overTimeDetails.date));
-      setOvertimeStart(workflow.overTimeDetails.startTime || "");
-      setOvertimeEnd(workflow.overTimeDetails.endTime || "");
-      setOvertimeReason(workflow.overTimeDetails.reason || "");
-    } else {
-      setOvertimeDate("");
-      setOvertimeStart("");
-      setOvertimeEnd("");
-      setOvertimeReason("");
-    }
-
-    setDraftMode(workflow.status === WorkflowStatus.DRAFT);
-    setExistingComments(extractExistingWorkflowComments(workflow));
-  }, [workflow]);
-
-  useEffect(() => {
-    if (!workflow.staffId) {
-      setApplicant(null);
-      return;
-    }
-    const match = staffs.find((s) => s.id === workflow.staffId);
-    setApplicant(
-      match ||
-        ({
-          id: workflow.staffId,
-          familyName: "",
-          givenName: "",
-        } as StaffType)
-    );
-  }, [workflow.staffId, staffs]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();

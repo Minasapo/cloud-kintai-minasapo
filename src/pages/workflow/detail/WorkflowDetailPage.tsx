@@ -1,11 +1,7 @@
 import { Grid, Paper, Stack, Typography } from "@mui/material";
-import {
-  GetWorkflowQuery,
-  UpdateWorkflowInput,
-  WorkflowStatus,
-} from "@shared/api/graphql/types";
+import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -14,6 +10,10 @@ import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
 import { buildWorkflowCommentsUpdateInput } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
+import {
+  useWorkflowLoaderWorkflow,
+  type WorkflowEntity,
+} from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
 import { deriveWorkflowDetailPermissions } from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
 import WorkflowDetailActions from "@/features/workflow/detail-panel/ui/WorkflowDetailActions";
@@ -36,15 +36,8 @@ export default function WorkflowDetailPage() {
   const { update: updateWorkflow } = useWorkflows();
   const { workflow: initialWorkflow } =
     useLoaderData() as WorkflowDetailLoaderData;
-
-  const [workflow, setWorkflow] = useState<NonNullable<
-    GetWorkflowQuery["getWorkflow"]
-  > | null>(initialWorkflow);
+  const { workflow, setWorkflow } = useWorkflowLoaderWorkflow(initialWorkflow);
   const dispatch = useAppDispatchV2();
-
-  useEffect(() => {
-    setWorkflow(initialWorkflow);
-  }, [initialWorkflow]);
 
   const staffName = (() => {
     if (!workflow?.staffId) return "—";
@@ -80,10 +73,10 @@ export default function WorkflowDetailPage() {
     [dispatch]
   );
   const handleWorkflowChange = useCallback(
-    (nextWorkflow: NonNullable<GetWorkflowQuery["getWorkflow"]>) => {
+    (nextWorkflow: WorkflowEntity) => {
       setWorkflow(nextWorkflow);
     },
-    []
+    [setWorkflow]
   );
 
   const {
@@ -127,16 +120,14 @@ export default function WorkflowDetailPage() {
         status: WorkflowStatus.CANCELLED,
       };
       const afterStatus = await updateWorkflow(statusInput);
-      setWorkflow(afterStatus as NonNullable<GetWorkflowQuery["getWorkflow"]>);
+      setWorkflow(afterStatus as WorkflowEntity);
 
       const commentUpdate = buildWorkflowCommentsUpdateInput(
-        afterStatus as NonNullable<GetWorkflowQuery["getWorkflow"]>,
+        afterStatus as WorkflowEntity,
         "申請が取り下げされました"
       );
       const afterComments = await updateWorkflow(commentUpdate);
-      setWorkflow(
-        afterComments as NonNullable<GetWorkflowQuery["getWorkflow"]>
-      );
+      setWorkflow(afterComments as WorkflowEntity);
       dispatch(setSnackbarSuccess("取り下げしました"));
       setTimeout(() => navigate(-1), 1000);
     } catch (err) {
