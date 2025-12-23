@@ -323,6 +323,10 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       background: "#FFFFFF",
       shadow: "0 12px 24px rgba(17, 24, 39, 0.06)",
     },
+    page: {
+      paddingTop: spacing.xl,
+      sectionGap: spacing.lg,
+    },
     footer: {
       background: color.brand.secondary.base,
       textColor: color.brand.secondary.contrastText,

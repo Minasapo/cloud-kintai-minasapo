@@ -7,8 +7,8 @@ import type { ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
-const PAGE_PADDING_TOP = designTokenVar("spacing.xl", "24px");
-const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
+const PAGE_PADDING_TOP = designTokenVar("component.page.paddingTop", "24px");
+const PAGE_SECTION_GAP = designTokenVar("component.page.sectionGap", "16px");
 
 interface PageProps {
   title: string;
