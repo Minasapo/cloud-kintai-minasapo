@@ -1,6 +1,8 @@
 import { Container, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 
+import { designTokenVar } from "@/shared/designSystem";
+
 interface HeaderBarProps {
   themeColor: string;
   logo: ReactNode;
@@ -18,6 +20,12 @@ export default function HeaderBar({
   mobileMenu,
   signInOutButton,
 }: HeaderBarProps) {
+  const headerTextColor = designTokenVar(
+    "color.brand.primary.contrastText",
+    "#FFFFFF"
+  );
+  const headerPadding = designTokenVar("spacing.sm", "8px");
+
   return (
     <header>
       <Container
@@ -29,8 +37,12 @@ export default function HeaderBar({
           <Stack
             direction="row"
             alignItems="center"
-            color="white"
-            sx={{ p: 1, height: "50px", boxSizing: "border-box" }}
+            color={headerTextColor}
+            sx={{
+              height: "50px",
+              boxSizing: "border-box",
+              padding: headerPadding,
+            }}
             spacing={{ xs: 0, md: 2 }}
           >
             {logo}

@@ -30,6 +30,11 @@ import { AuthContext } from "./context/AuthContext";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { createAppTheme } from "./lib/theme";
+import { designTokenVar } from "@/shared/designSystem";
+
+const APP_BACKGROUND = designTokenVar("color.neutral.50", "#F8FAF9");
+const APP_TEXT_COLOR = designTokenVar("color.neutral.900", "#1E2A25");
+const CONTENT_BACKGROUND = designTokenVar("color.neutral.50", "#F8FAF9");
 /**
  * アプリケーションのレイアウトコンポーネント。
  * 認証状態や各種設定・カレンダー情報の取得、各種コンテキストの提供を行う。
@@ -346,11 +351,25 @@ export default function Layout() {
       <AuthContext.Provider value={authContextValue}>
         <AppConfigContext.Provider value={appConfigContextValue}>
           <AppContext.Provider value={appContextValue}>
-            <Stack sx={{ minHeight: "100vh" }} data-testid="layout-stack">
+            <Stack
+              sx={{
+                minHeight: "100vh",
+                backgroundColor: APP_BACKGROUND,
+                color: APP_TEXT_COLOR,
+              }}
+              data-testid="layout-stack"
+            >
               <Box data-testid="layout-header">
                 <Header />
               </Box>
-              <Box sx={{ flex: 1, overflow: "auto" }} data-testid="layout-main">
+              <Box
+                sx={{
+                  flex: 1,
+                  overflow: "auto",
+                  backgroundColor: CONTENT_BACKGROUND,
+                }}
+                data-testid="layout-main"
+              >
                 <Outlet />
               </Box>
               <Box data-testid="layout-footer">

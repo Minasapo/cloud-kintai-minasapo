@@ -5,6 +5,7 @@ import MobileMenuView, { MobileMenuItem } from "@shared/ui/header/MobileMenu";
 import { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { designTokenVar } from "@/shared/designSystem";
 import { AuthContext } from "../../context/AuthContext";
 import { useMobileDrawer } from "../../hooks/useMobileDrawer";
 
@@ -17,6 +18,14 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
   const navigate = useNavigate();
   const { isOpen, closeDrawer, openDrawer } = useMobileDrawer();
   const theme = useTheme();
+  const signOutBackground = designTokenVar(
+    "color.feedback.danger.base",
+    theme.palette.error.main
+  );
+  const signOutText = designTokenVar(
+    "color.brand.primary.contrastText",
+    theme.palette.error.contrastText
+  );
 
   const menuItems = useMemo<MobileMenuItem[]>(
     () => [
@@ -32,21 +41,16 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
       },
       {
         label: "サインアウト",
-        icon: <LogoutIcon sx={{ color: theme.palette.error.contrastText }} />,
+        icon: <LogoutIcon sx={{ color: signOutText }} />,
         onClick: signOut,
         divider: true,
         styles: {
-          backgroundColor: theme.palette.error.main,
-          color: theme.palette.error.contrastText,
+          backgroundColor: signOutBackground,
+          color: signOutText,
         },
       },
     ],
-    [
-      navigate,
-      signOut,
-      theme.palette.error.contrastText,
-      theme.palette.error.main,
-    ]
+    [navigate, signOut, signOutBackground, signOutText]
   );
 
   if (pathName === "/login") return null;
