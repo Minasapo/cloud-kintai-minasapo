@@ -214,6 +214,15 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       gridItemPadding: spacing.sm,
       gridHoverBackground: color.neutral[100],
       emptyStateColor: color.neutral[500],
+      sectionTitle: {
+        fontWeight: typography.fontWeight.bold,
+        letterSpacing: 0.5,
+        marginBottom: spacing.sm,
+      },
+      interaction: {
+        transitionDuration: 160,
+        transitionEasing: "ease",
+      },
     },
     headerSignButton: {
       gap: spacing.sm,

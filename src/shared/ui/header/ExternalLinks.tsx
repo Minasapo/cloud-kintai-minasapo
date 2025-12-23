@@ -77,6 +77,26 @@ const EMPTY_STATE_COLOR = designTokenVar(
   "component.headerActions.emptyStateColor",
   "#7D9288"
 );
+const SECTION_TITLE_FONT_WEIGHT = designTokenVar(
+  "component.headerActions.sectionTitle.fontWeight",
+  "700"
+);
+const SECTION_TITLE_LETTER_SPACING = designTokenVar(
+  "component.headerActions.sectionTitle.letterSpacing",
+  "0.5px"
+);
+const SECTION_TITLE_MARGIN_BOTTOM = designTokenVar(
+  "component.headerActions.sectionTitle.marginBottom",
+  "8px"
+);
+const INTERACTION_TRANSITION_DURATION = designTokenVar(
+  "component.headerActions.interaction.transitionDuration",
+  "160ms"
+);
+const INTERACTION_TRANSITION_EASING = designTokenVar(
+  "component.headerActions.interaction.transitionEasing",
+  "ease"
+);
 
 const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
@@ -119,7 +139,7 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
             width: ACTION_ICON_SIZE,
             height: ACTION_ICON_SIZE,
             borderRadius: "50%",
-            transition: `background-color 160ms ease`,
+            transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
             "&:hover": {
               backgroundColor: ACTION_ICON_HOVER_BG,
             },
@@ -192,9 +212,9 @@ const LinksSection = ({ title, links, staffName }: LinksSectionProps) => {
       <Typography
         variant="subtitle2"
         sx={{
-          fontWeight: 700,
-          letterSpacing: 0.5,
-          mb: 1,
+          fontWeight: SECTION_TITLE_FONT_WEIGHT,
+          letterSpacing: SECTION_TITLE_LETTER_SPACING,
+          marginBottom: SECTION_TITLE_MARGIN_BOTTOM,
         }}
       >
         {title}
@@ -254,7 +274,7 @@ const LinkGridItem = ({
             gap: GRID_GAP,
             padding: GRID_ITEM_PADDING,
             borderRadius: GRID_ITEM_RADIUS,
-            transition: "background-color 160ms ease",
+            transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
             "&:hover": {
               backgroundColor: GRID_HOVER_BACKGROUND,
             },
