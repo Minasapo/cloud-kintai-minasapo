@@ -188,6 +188,18 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       background: color.brand.primary.base,
       textColor: color.brand.primary.contrastText,
     },
+    headerMenu: {
+      gap: spacing.sm,
+      itemHeight: 32,
+      paddingX: spacing.sm,
+      borderRadius: radius.sm,
+      fontWeight: typography.fontWeight.medium,
+      color: color.brand.primary.contrastText,
+      activeColor: color.brand.primary.base,
+      activeBackground: color.brand.primary.contrastText,
+      hoverBackground: "rgba(255, 255, 255, 0.16)",
+      transitionMs: motion.duration.fast,
+    },
   } as const;
 
   return {
