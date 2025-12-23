@@ -221,6 +221,14 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       borderRadius: radius.sm,
       fontWeight: typography.fontWeight.medium,
     },
+    breadcrumbs: {
+      gap: spacing.sm,
+      separatorColor: color.neutral[400],
+      linkColor: color.brand.primary.base,
+      textColor: color.neutral[700],
+      fontSize: typography.fontSize.sm,
+      fontWeight: typography.fontWeight.medium,
+    },
   } as const;
 
   return {
