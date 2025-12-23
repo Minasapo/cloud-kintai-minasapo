@@ -256,6 +256,12 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
         disabledBackground: color.neutral[200],
       },
     },
+    headline: {
+      accentColor: color.brand.primary.base,
+      borderWidth: 5,
+      paddingLeft: spacing.sm,
+      textColor: color.brand.primary.base,
+    },
   } as const;
 
   return {
