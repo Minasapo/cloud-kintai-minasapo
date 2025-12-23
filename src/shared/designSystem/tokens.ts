@@ -284,6 +284,13 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       background: "#FFFFFF",
       shadow: "0 12px 24px rgba(17, 24, 39, 0.06)",
     },
+    footer: {
+      background: color.brand.secondary.base,
+      textColor: color.brand.secondary.contrastText,
+      dividerColor: color.neutral[200],
+      paddingX: spacing.lg,
+      paddingY: spacing.md,
+    },
   } as const;
 
   return {

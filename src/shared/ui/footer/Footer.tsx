@@ -7,14 +7,16 @@ interface FooterProps {
 }
 
 const FOOTER_BACKGROUND = designTokenVar(
-  "color.brand.secondary.base",
+  "component.footer.background",
   "#0B6D53"
 );
-const FOOTER_TEXT = designTokenVar(
-  "color.brand.secondary.contrastText",
-  "#FFFFFF"
+const FOOTER_TEXT = designTokenVar("component.footer.textColor", "#FFFFFF");
+const FOOTER_DIVIDER = designTokenVar(
+  "component.footer.dividerColor",
+  "#D9E2DD"
 );
-const FOOTER_DIVIDER = designTokenVar("color.neutral.200", "#D9E2DD");
+const FOOTER_PADDING_X = designTokenVar("component.footer.paddingX", "16px");
+const FOOTER_PADDING_Y = designTokenVar("component.footer.paddingY", "12px");
 
 const Footer = ({ themeColor }: FooterProps) => (
   <Box
@@ -29,8 +31,8 @@ const Footer = ({ themeColor }: FooterProps) => (
     <Box
       textAlign="center"
       sx={{
-        py: 1.5,
-        px: 2,
+        py: FOOTER_PADDING_Y,
+        px: FOOTER_PADDING_X,
       }}
     >
       <Typography variant="body2" sx={{ fontWeight: 500 }}>
