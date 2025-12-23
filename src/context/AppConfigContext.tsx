@@ -5,7 +5,7 @@ import {
 import dayjs from "dayjs";
 import { createContext } from "react";
 
-import { DESIGN_TOKENS, type DesignTokens } from "@/constants/designTokens";
+import { DESIGN_TOKENS, type DesignTokens } from "@/shared/designSystem";
 import { DEFAULT_CONFIG } from "@/hooks/useAppConfig/useAppConfig";
 
 type AppConfigContextProps = {

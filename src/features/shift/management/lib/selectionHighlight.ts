@@ -1,6 +1,6 @@
 import { alpha } from "@mui/material/styles";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
+import { DESIGN_TOKENS } from "@/shared/designSystem";
 
 const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
 const HIGHLIGHT_BACKGROUND = shiftBoardTokens.highlightBackground;

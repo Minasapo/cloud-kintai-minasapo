@@ -25,7 +25,7 @@ import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { DESIGN_TOKENS } from "@/constants/designTokens";
+import { DESIGN_TOKENS } from "@/shared/designSystem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
@@ -40,10 +40,7 @@ import {
   getGroupCoveragePresentation,
   ShiftGroupConstraints,
 } from "../lib/shiftGroups";
-import {
-  defaultStatusVisual,
-  statusVisualMap,
-} from "../lib/shiftStateMapping";
+import { defaultStatusVisual, statusVisualMap } from "../lib/shiftStateMapping";
 import useShiftManagementDialogs from "../model/useShiftManagementDialogs";
 import useShiftSelection from "../model/useShiftSelection";
 import useShiftRequestAssignments from "../model/useShiftRequestAssignments";

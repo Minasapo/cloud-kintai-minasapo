@@ -1,7 +1,7 @@
 // cspell:words Noto
 import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 
-import { getDesignTokens } from "@/constants/designTokens";
+import { getDesignTokens } from "@/shared/designSystem";
 import { resolveThemeColor } from "@/constants/theme";
 
 declare module "@mui/material/styles" {

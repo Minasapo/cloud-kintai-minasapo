@@ -2,7 +2,7 @@ import { TableCell, TableCellProps, TableRow, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { ReactNode } from "react";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
+import { DESIGN_TOKENS } from "@/shared/designSystem";
 
 import { getCellHighlightSx } from "../../lib/selectionHighlight";
 

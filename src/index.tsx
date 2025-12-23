@@ -10,6 +10,8 @@ import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { RouterProvider } from "react-router-dom";
 
+import { bootstrapDesignSystem } from "@/shared/designSystem";
+
 import { store } from "./app/store";
 import config from "./aws-exports";
 import PageLoader from "./components/common/PageLoader";
@@ -21,6 +23,8 @@ Amplify.configure(config);
 
 I18n.putVocabularies(vocabularies);
 I18n.setLanguage("ja");
+
+bootstrapDesignSystem();
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
+import { DESIGN_TOKENS } from "@/shared/designSystem";
 
 import { statusVisualMap } from "../../lib/shiftStateMapping";
 

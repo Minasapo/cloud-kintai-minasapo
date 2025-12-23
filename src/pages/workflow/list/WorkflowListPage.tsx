@@ -23,7 +23,7 @@ import Page from "@shared/ui/page/Page";
 import { useCallback, useContext, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
+import { DESIGN_TOKENS } from "@/shared/designSystem";
 import { AuthContext } from "@/context/AuthContext";
 import { useWorkflowListFilters } from "@/features/workflow/list/useWorkflowListFilters";
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";

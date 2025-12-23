@@ -9,9 +9,13 @@ import type {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
-import { DESIGN_TOKENS, getDesignTokens } from "@/constants/designTokens";
+import {
+  DESIGN_TOKENS,
+  applyDesignTokenCssVariables,
+  getDesignTokens,
+} from "@/shared/designSystem";
 import { resolveThemeColor } from "@/constants/theme";
 
 /**
@@ -268,6 +272,11 @@ const useAppConfig = () => {
     },
     [config]
   );
+
+  useEffect(() => {
+    const tokens = getThemeTokens();
+    applyDesignTokenCssVariables(tokens);
+  }, [getThemeTokens]);
 
   const loading = useMemo(
     () => isLoading || isFetching || isCreating || isUpdating,

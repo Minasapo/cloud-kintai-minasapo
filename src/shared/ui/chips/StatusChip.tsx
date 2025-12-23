@@ -2,7 +2,7 @@ import { Chip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { WorkflowStatus } from "@shared/api/graphql/types";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
+import { DESIGN_TOKENS } from "@/shared/designSystem";
 import { REVERSE_STATUS, STATUS_LABELS } from "@/lib/workflowLabels";
 
 const STATUS_FEEDBACK_MAP: Record<
