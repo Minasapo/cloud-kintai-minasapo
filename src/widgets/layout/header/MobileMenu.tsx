@@ -6,8 +6,8 @@ import { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { designTokenVar } from "@/shared/designSystem";
-import { AuthContext } from "../../context/AuthContext";
-import { useMobileDrawer } from "../../hooks/useMobileDrawer";
+import { AuthContext } from "@/context/AuthContext";
+import { useMobileDrawer } from "@/hooks/useMobileDrawer";
 
 interface MobileMenuProps {
   pathName: string;

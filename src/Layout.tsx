@@ -21,9 +21,9 @@ import { ThemeProvider } from "@mui/material/styles";
 import { useCallback, useEffect, useMemo } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import Footer from "./components/footer/Footer";
-import Header from "./components/header/Header";
-import SnackbarGroup from "./components/snackbar/SnackbarGroup";
+import Footer from "@/widgets/layout/footer/Footer";
+import Header from "@/widgets/layout/header/Header";
+import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";

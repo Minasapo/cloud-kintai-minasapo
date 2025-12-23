@@ -14,7 +14,7 @@ import { bootstrapDesignSystem } from "@/shared/designSystem";
 
 import { store } from "./app/store";
 import config from "./aws-exports";
-import PageLoader from "./components/common/PageLoader";
+import PageLoader from "@/shared/ui/feedback/PageLoader";
 import reportWebVitals from "./reportWebVitals";
 import router from "./router";
 import vocabularies from "./vocabularies";

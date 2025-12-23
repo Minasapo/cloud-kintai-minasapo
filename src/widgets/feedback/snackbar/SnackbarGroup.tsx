@@ -9,13 +9,13 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 
-import { useAppDispatchV2, useAppSelectorV2 } from "../../app/hooks";
+import { useAppDispatchV2, useAppSelectorV2 } from "@/app/hooks";
 import {
   selectSnackbar,
   setSnackbarError,
   setSnackbarSuccess,
   setSnackbarWarn,
-} from "../../lib/reducers/snackbarReducer";
+} from "@/lib/reducers/snackbarReducer";
 
 const SNACKBAR_ANCHOR_ORIGIN: SnackbarOrigin = {
   vertical: "top",

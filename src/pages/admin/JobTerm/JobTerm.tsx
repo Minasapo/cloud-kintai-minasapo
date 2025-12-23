@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 import { lazy, Suspense, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import PageLoader from "@/components/common/PageLoader";
+import PageLoader from "@/shared/ui/feedback/PageLoader";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import { useAppDispatchV2 } from "../../../app/hooks";

@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 
-import PageLoader from "../components/common/PageLoader";
+import PageLoader from "@/shared/ui/feedback/PageLoader";
 
 export function withSuspense<T extends ComponentType<any>>(
   Component: LazyExoticComponent<T>,
@@ -18,4 +18,3 @@ export function withSuspense<T extends ComponentType<any>>(
     </Suspense>
   );
 }
-

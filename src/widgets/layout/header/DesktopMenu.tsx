@@ -11,10 +11,10 @@ import DesktopMenuView, {
 } from "@shared/ui/header/DesktopMenu";
 import { useContext, useEffect, useMemo, useState } from "react";
 
-import { AppConfigContext } from "../../context/AppConfigContext";
-import { AuthContext } from "../../context/AuthContext";
-import fetchStaff from "../../hooks/useStaff/fetchStaff";
-import { StaffRole } from "../../hooks/useStaffs/useStaffs";
+import { AppConfigContext } from "@/context/AppConfigContext";
+import { AuthContext } from "@/context/AuthContext";
+import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
   const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);
