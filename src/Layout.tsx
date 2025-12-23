@@ -19,7 +19,7 @@ import {
 import { Box, LinearProgress, Stack } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { useCallback, useEffect, useMemo } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
@@ -38,6 +38,7 @@ import { createAppTheme } from "./lib/theme";
  */
 export default function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, signOut, authStatus } = useAuthenticator();
   const {
     cognitoUser,
@@ -170,9 +171,12 @@ export default function Layout() {
     [deleteCompanyHolidayCalendarMutation]
   );
 
+  const isLoginRoute = location.pathname === "/login";
+
   useEffect(() => {
-    const url = new URL(window.location.href);
-    if (url.pathname === "/login") return;
+    if (isLoginRoute) {
+      return;
+    }
 
     if (authStatus === "configuring") {
       return;
@@ -204,7 +208,14 @@ export default function Layout() {
     } catch (error) {
       console.error(error);
     }
-  }, [authStatus, cognitoUser, cognitoUserLoading, navigate, signOut]);
+  }, [
+    authStatus,
+    cognitoUser,
+    cognitoUserLoading,
+    isLoginRoute,
+    navigate,
+    signOut,
+  ]);
 
   useEffect(() => {
     void fetchConfig();
@@ -312,12 +323,16 @@ export default function Layout() {
     [configuredThemeColor]
   );
 
+  const shouldBlockUnauthenticated =
+    authStatus === "unauthenticated" && !isLoginRoute;
+
   if (
     authStatus === "configuring" ||
     cognitoUserLoading ||
     appConfigLoading ||
     holidayCalendarLoading ||
-    companyHolidayCalendarLoading
+    companyHolidayCalendarLoading ||
+    shouldBlockUnauthenticated
   ) {
     return (
       <ThemeProvider theme={appTheme}>

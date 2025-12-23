@@ -12,6 +12,7 @@ import { RouterProvider } from "react-router-dom";
 
 import { store } from "./app/store";
 import config from "./aws-exports";
+import PageLoader from "./components/common/PageLoader";
 import reportWebVitals from "./reportWebVitals";
 import router from "./router";
 import vocabularies from "./vocabularies";
@@ -29,7 +30,7 @@ root.render(
     <Provider store={store}>
       <Authenticator.Provider>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <RouterProvider router={router} />
+          <RouterProvider router={router} fallbackElement={<PageLoader />} />
         </LocalizationProvider>
       </Authenticator.Provider>
     </Provider>

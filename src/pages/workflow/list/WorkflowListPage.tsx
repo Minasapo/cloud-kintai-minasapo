@@ -26,13 +26,7 @@ import { useNavigate } from "react-router-dom";
 
 import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AuthContext } from "@/context/AuthContext";
-import {
-  applyWorkflowFilters,
-  isWorkflowFilterActive,
-  mapWorkflowsToListItems,
-  type WorkflowListFilters,
-  type WorkflowListItem,
-} from "@/features/workflow/list/workflowListModel";
+import { useWorkflowListFilters } from "@/features/workflow/list/useWorkflowListFilters";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
@@ -48,54 +42,27 @@ export default function WorkflowListPage() {
     if (!cognitoUser?.id) return undefined;
     return staffs.find((s) => s.cognitoUserId === cognitoUser.id)?.id;
   }, [cognitoUser, staffs]);
-  const [data, setData] = useState<WorkflowListItem[]>([]);
-  const [nameFilter, setNameFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [createdFrom, setCreatedFrom] = useState("");
-  const [createdTo, setCreatedTo] = useState("");
-  const [applicationFrom, setApplicationFrom] = useState("");
-  const [applicationTo, setApplicationTo] = useState("");
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [createdAnchorEl, setCreatedAnchorEl] = useState<HTMLElement | null>(
     null
   );
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const { filteredItems, filters, anyFilterActive, setFilter, clearFilters } =
+    useWorkflowListFilters({ workflows, currentStaffId });
 
-  const workflowFilters = useMemo<WorkflowListFilters>(
-    () => ({
-      name: nameFilter,
-      category: categoryFilter,
-      status: statusFilter,
-      applicationFrom,
-      applicationTo,
-      createdFrom,
-      createdTo,
-    }),
-    [
-      nameFilter,
-      categoryFilter,
-      statusFilter,
-      applicationFrom,
-      applicationTo,
-      createdFrom,
-      createdTo,
-    ]
-  );
-
-  const filtered = useMemo(
-    () => applyWorkflowFilters(data, workflowFilters),
-    [data, workflowFilters]
-  );
+  const {
+    category: categoryFilter,
+    status: statusFilter,
+    applicationFrom,
+    applicationTo,
+    createdFrom,
+    createdTo,
+  } = filters;
 
   useEffect(() => {
     setPage(0);
-  }, [filtered]);
-
-  useEffect(() => {
-    setData(mapWorkflowsToListItems(workflows, currentStaffId));
-  }, [workflows, currentStaffId]);
+  }, [filteredItems]);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -107,8 +74,6 @@ export default function WorkflowListPage() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
-  const anyFilterActive = isWorkflowFilterActive(workflowFilters);
 
   if (!isAuthenticated) {
     return (
@@ -154,13 +119,7 @@ export default function WorkflowListPage() {
                 size="small"
                 startIcon={<ClearIcon fontSize="small" />}
                 onClick={() => {
-                  setNameFilter("");
-                  setCategoryFilter("");
-                  setStatusFilter("");
-                  setCreatedFrom("");
-                  setCreatedTo("");
-                  setApplicationFrom("");
-                  setApplicationTo("");
+                  clearFilters();
                   setAnchorEl(null);
                   setCreatedAnchorEl(null);
                 }}
@@ -213,7 +172,7 @@ export default function WorkflowListPage() {
                       size="small"
                       displayEmpty
                       value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      onChange={(e) => setFilter("category", e.target.value)}
                     >
                       <MenuItem value="">すべて</MenuItem>
                       <MenuItem value={WorkflowCategory.PAID_LEAVE}>
@@ -254,7 +213,7 @@ export default function WorkflowListPage() {
                           }
                           onChange={(v: Dayjs | null) => {
                             const str = v ? v.format("YYYY-MM-DD") : "";
-                            setApplicationFrom(str);
+                            setFilter("applicationFrom", str);
                           }}
                           slotProps={{ textField: { size: "small" } }}
                         />
@@ -263,7 +222,7 @@ export default function WorkflowListPage() {
                           value={applicationTo ? dayjs(applicationTo) : null}
                           onChange={(v: Dayjs | null) => {
                             const str = v ? v.format("YYYY-MM-DD") : "";
-                            setApplicationTo(str);
+                            setFilter("applicationTo", str);
                           }}
                           slotProps={{ textField: { size: "small" } }}
                         />
@@ -277,8 +236,8 @@ export default function WorkflowListPage() {
                           <Button
                             size="small"
                             onClick={() => {
-                              setApplicationFrom("");
-                              setApplicationTo("");
+                              setFilter("applicationFrom", "");
+                              setFilter("applicationTo", "");
                               setAnchorEl(null);
                             }}
                           >
@@ -293,7 +252,7 @@ export default function WorkflowListPage() {
                       size="small"
                       displayEmpty
                       value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
+                      onChange={(e) => setFilter("status", e.target.value)}
                     >
                       <MenuItem value="">すべて</MenuItem>
                       <MenuItem value={WorkflowStatus.DRAFT}>
@@ -341,7 +300,7 @@ export default function WorkflowListPage() {
                           value={createdFrom ? dayjs(createdFrom) : null}
                           onChange={(v: Dayjs | null) => {
                             const str = v ? v.format("YYYY-MM-DD") : "";
-                            setCreatedFrom(str);
+                            setFilter("createdFrom", str);
                           }}
                           slotProps={{ textField: { size: "small" } }}
                         />
@@ -350,7 +309,7 @@ export default function WorkflowListPage() {
                           value={createdTo ? dayjs(createdTo) : null}
                           onChange={(v: Dayjs | null) => {
                             const str = v ? v.format("YYYY-MM-DD") : "";
-                            setCreatedTo(str);
+                            setFilter("createdTo", str);
                           }}
                           slotProps={{ textField: { size: "small" } }}
                         />
@@ -364,8 +323,8 @@ export default function WorkflowListPage() {
                           <Button
                             size="small"
                             onClick={() => {
-                              setCreatedFrom("");
-                              setCreatedTo("");
+                              setFilter("createdFrom", "");
+                              setFilter("createdTo", "");
                               setCreatedAnchorEl(null);
                             }}
                           >
@@ -379,7 +338,7 @@ export default function WorkflowListPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filtered
+                {filteredItems
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((w) => (
                     <TableRow
@@ -438,7 +397,7 @@ export default function WorkflowListPage() {
         )}
         <TablePagination
           component="div"
-          count={filtered.length}
+          count={filteredItems.length}
           page={page}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
