@@ -1,14 +1,14 @@
 import AttendanceList from "@features/attendance/list/AttendanceList";
-import { Box, Container, Stack } from "@mui/material";
+import Page from "@shared/ui/page/Page";
+
+import { PageSection } from "@/shared/ui/layout";
 
 export default function AttendanceListPage() {
   return (
-    <Container maxWidth="xl">
-      <Stack direction="column" sx={{ height: 1, pt: 2, display: "flex" }}>
-        <Box sx={{ height: 1 }}>
-          <AttendanceList />
-        </Box>
-      </Stack>
-    </Container>
+    <Page title="勤怠一覧" maxWidth="xl">
+      <PageSection layoutVariant="detail" sx={{ height: 1, minHeight: 480 }}>
+        <AttendanceList />
+      </PageSection>
+    </Page>
   );
 }
