@@ -9,7 +9,6 @@ import {
 } from "@entities/calendar/api/calendarApi";
 import {
   Attendance,
-  AttendanceChangeRequest,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
@@ -138,20 +137,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     );
   }, [attendances]);
 
-  const {
-    quickViewAttendance,
-    quickViewChangeRequest,
-    quickViewOpen,
-    handleOpenQuickView,
-    handleCloseQuickView,
-    selectedAttendanceIds,
-    isAttendanceSelected,
-    toggleAttendanceSelection,
-    toggleSelectAllPending,
-    bulkApproving,
-    canBulkApprove,
-    handleBulkApprove,
-  } = useAdminAttendanceChangeRequests({
+  const changeRequestHooks = useAdminAttendanceChangeRequests({
     staffId,
     staff,
     staffForMail,
@@ -160,6 +146,24 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     updateAttendance: (input: UpdateAttendanceInput) =>
       updateAttendanceMutation(input).unwrap(),
   });
+
+  const changeRequestControls = useMemo(
+    () => ({
+      quickViewAttendance: changeRequestHooks.quickViewAttendance,
+      quickViewChangeRequest: changeRequestHooks.quickViewChangeRequest,
+      quickViewOpen: changeRequestHooks.quickViewOpen,
+      handleOpenQuickView: changeRequestHooks.handleOpenQuickView,
+      handleCloseQuickView: changeRequestHooks.handleCloseQuickView,
+      selectedAttendanceIds: changeRequestHooks.selectedAttendanceIds,
+      isAttendanceSelected: changeRequestHooks.isAttendanceSelected,
+      toggleAttendanceSelection: changeRequestHooks.toggleAttendanceSelection,
+      toggleSelectAllPending: changeRequestHooks.toggleSelectAllPending,
+      bulkApproving: changeRequestHooks.bulkApproving,
+      canBulkApprove: changeRequestHooks.canBulkApprove,
+      handleBulkApprove: changeRequestHooks.handleBulkApprove,
+    }),
+    [changeRequestHooks]
+  );
 
   const getTableRowVariant = useCallback(
     (
@@ -196,18 +200,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     attendances,
     attendanceLoading,
     pendingAttendances,
-    quickViewAttendance,
-    quickViewChangeRequest,
-    quickViewOpen,
-    handleOpenQuickView,
-    handleCloseQuickView,
-    selectedAttendanceIds,
-    isAttendanceSelected,
-    toggleAttendanceSelection,
-    toggleSelectAllPending,
-    bulkApproving,
-    canBulkApprove,
-    handleBulkApprove,
+    changeRequestControls,
     getTableRowVariant,
     getBadgeContent,
   } satisfies {
@@ -218,18 +211,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     attendances: Attendance[];
     attendanceLoading: boolean;
     pendingAttendances: Attendance[];
-    quickViewAttendance: Attendance | null;
-    quickViewChangeRequest: AttendanceChangeRequest | null;
-    quickViewOpen: boolean;
-    handleOpenQuickView: (attendance: Attendance) => void;
-    handleCloseQuickView: () => void;
-    selectedAttendanceIds: string[];
-    isAttendanceSelected: (attendanceId: string) => boolean;
-    toggleAttendanceSelection: (attendanceId: string) => void;
-    toggleSelectAllPending: () => void;
-    bulkApproving: boolean;
-    canBulkApprove: boolean;
-    handleBulkApprove: () => Promise<void> | void;
+    changeRequestControls: ReturnType<typeof useAdminAttendanceChangeRequests>;
     getTableRowVariant: (
       attendance: Attendance,
       holidayList?: HolidayCalendar[],

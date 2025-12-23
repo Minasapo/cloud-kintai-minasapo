@@ -29,6 +29,8 @@ import { UpdatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/Updat
 import { WorkDateTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkDateTableCell";
 import { WorkTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkTimeTableCell";
 
+import type { PendingAttendanceControls } from "./PendingAttendanceSection";
+
 export type AttendanceTableSectionProps = {
   attendances: Attendance[];
   staff: Staff | null | undefined;
@@ -36,7 +38,7 @@ export type AttendanceTableSectionProps = {
   companyHolidayCalendars: CompanyHolidayCalendar[];
   onEdit: (attendance: Attendance) => void;
   getBadgeContent: (attendance: Attendance) => number;
-  onOpenQuickView: (attendance: Attendance) => void;
+  changeRequestControls: Pick<PendingAttendanceControls, "onOpenQuickView">;
   getRowVariant: (
     attendance: Attendance,
     holidayCalendars?: HolidayCalendar[],
@@ -51,9 +53,10 @@ export function AttendanceTableSection({
   companyHolidayCalendars,
   onEdit,
   getBadgeContent,
-  onOpenQuickView,
+  changeRequestControls,
   getRowVariant,
 }: AttendanceTableSectionProps) {
+  const { onOpenQuickView } = changeRequestControls;
   return (
     <TableContainer>
       <Table size="small">

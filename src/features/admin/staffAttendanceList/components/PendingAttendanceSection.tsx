@@ -49,14 +49,7 @@ export type PendingAttendanceSectionProps = {
   staff: Staff | null | undefined;
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
-  selectedAttendanceIds: string[];
-  isAttendanceSelected: (attendanceId: string) => boolean;
-  toggleAttendanceSelection: (attendanceId: string) => void;
-  toggleSelectAll: () => void;
-  bulkApproving: boolean;
-  canBulkApprove: boolean;
-  onBulkApprove: () => void;
-  onOpenQuickView: (attendance: Attendance) => void;
+  changeRequestControls: PendingAttendanceControls;
   onEdit: (attendance: Attendance) => void;
   getBadgeContent: (attendance: Attendance) => number;
   getRowVariant: (
@@ -66,23 +59,37 @@ export type PendingAttendanceSectionProps = {
   ) => AttendanceRowVariant;
 };
 
+export type PendingAttendanceControls = {
+  selectedAttendanceIds: string[];
+  isAttendanceSelected: (attendanceId: string) => boolean;
+  toggleAttendanceSelection: (attendanceId: string) => void;
+  toggleSelectAll: () => void;
+  bulkApproving: boolean;
+  canBulkApprove: boolean;
+  onBulkApprove: () => Promise<void> | void;
+  onOpenQuickView: (attendance: Attendance) => void;
+};
+
 export function PendingAttendanceSection({
   attendances,
   staff,
   holidayCalendars,
   companyHolidayCalendars,
-  selectedAttendanceIds,
-  isAttendanceSelected,
-  toggleAttendanceSelection,
-  toggleSelectAll,
-  bulkApproving,
-  canBulkApprove,
-  onBulkApprove,
-  onOpenQuickView,
+  changeRequestControls,
   onEdit,
   getBadgeContent,
   getRowVariant,
 }: PendingAttendanceSectionProps) {
+  const {
+    selectedAttendanceIds,
+    isAttendanceSelected,
+    toggleAttendanceSelection,
+    toggleSelectAll,
+    bulkApproving,
+    canBulkApprove,
+    onBulkApprove,
+    onOpenQuickView,
+  } = changeRequestControls;
   if (attendances.length === 0) {
     return null;
   }
