@@ -2,14 +2,13 @@ import { AttendanceTableSection } from "@features/admin/staffAttendanceList/comp
 import {
   pendingAttendanceContainerSx,
   PendingAttendanceSection,
-  type PendingAttendanceControls,
 } from "@features/admin/staffAttendanceList/components/PendingAttendanceSection";
 import { Box, LinearProgress, Stack, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 import type { ReactNode } from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
@@ -46,6 +45,7 @@ export default function AdminStaffAttendanceList() {
     attendanceLoading,
     pendingAttendances,
     changeRequestControls,
+    pendingAttendanceControls,
     getTableRowVariant,
     getBadgeContent,
   } = useAdminStaffAttendanceListViewModel(staffId);
@@ -54,39 +54,8 @@ export default function AdminStaffAttendanceList() {
     quickViewAttendance,
     quickViewChangeRequest,
     quickViewOpen,
-    handleOpenQuickView,
     handleCloseQuickView,
-    selectedAttendanceIds,
-    isAttendanceSelected,
-    toggleAttendanceSelection,
-    toggleSelectAllPending,
-    bulkApproving,
-    canBulkApprove,
-    handleBulkApprove,
   } = changeRequestControls;
-
-  const pendingAttendanceControls = useMemo<PendingAttendanceControls>(
-    () => ({
-      selectedAttendanceIds,
-      isAttendanceSelected,
-      toggleAttendanceSelection,
-      toggleSelectAll: toggleSelectAllPending,
-      bulkApproving,
-      canBulkApprove,
-      onBulkApprove: handleBulkApprove,
-      onOpenQuickView: handleOpenQuickView,
-    }),
-    [
-      selectedAttendanceIds,
-      isAttendanceSelected,
-      toggleAttendanceSelection,
-      toggleSelectAllPending,
-      bulkApproving,
-      canBulkApprove,
-      handleBulkApprove,
-      handleOpenQuickView,
-    ]
-  );
 
   const handleEdit = useCallback(
     (attendance: Attendance) => {

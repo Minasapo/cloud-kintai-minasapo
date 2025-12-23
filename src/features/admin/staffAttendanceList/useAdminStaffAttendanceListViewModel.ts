@@ -26,6 +26,7 @@ import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
 import { ChangeRequest } from "@/lib/ChangeRequest";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
+import type { PendingAttendanceControls } from "./components/PendingAttendanceSection";
 import { useAdminAttendanceChangeRequests } from "./useAdminAttendanceChangeRequests";
 
 export type AdminStaffAttendanceListViewModel = ReturnType<
@@ -147,6 +148,30 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
       updateAttendanceMutation(input).unwrap(),
   });
 
+  const pendingAttendanceControls = useMemo<PendingAttendanceControls>(
+    () => ({
+      selectedAttendanceIds: changeRequestControls.selectedAttendanceIds,
+      isAttendanceSelected: changeRequestControls.isAttendanceSelected,
+      toggleAttendanceSelection:
+        changeRequestControls.toggleAttendanceSelection,
+      toggleSelectAll: changeRequestControls.toggleSelectAllPending,
+      bulkApproving: changeRequestControls.bulkApproving,
+      canBulkApprove: changeRequestControls.canBulkApprove,
+      onBulkApprove: changeRequestControls.handleBulkApprove,
+      onOpenQuickView: changeRequestControls.handleOpenQuickView,
+    }),
+    [
+      changeRequestControls.selectedAttendanceIds,
+      changeRequestControls.isAttendanceSelected,
+      changeRequestControls.toggleAttendanceSelection,
+      changeRequestControls.toggleSelectAllPending,
+      changeRequestControls.bulkApproving,
+      changeRequestControls.canBulkApprove,
+      changeRequestControls.handleBulkApprove,
+      changeRequestControls.handleOpenQuickView,
+    ]
+  );
+
   const getTableRowVariant = useCallback(
     (
       attendance: Attendance,
@@ -183,6 +208,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     attendanceLoading,
     pendingAttendances,
     changeRequestControls,
+    pendingAttendanceControls,
     getTableRowVariant,
     getBadgeContent,
   } satisfies {
@@ -194,6 +220,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     attendanceLoading: boolean;
     pendingAttendances: Attendance[];
     changeRequestControls: ReturnType<typeof useAdminAttendanceChangeRequests>;
+    pendingAttendanceControls: PendingAttendanceControls;
     getTableRowVariant: (
       attendance: Attendance,
       holidayList?: HolidayCalendar[],
