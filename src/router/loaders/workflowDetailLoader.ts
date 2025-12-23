@@ -45,9 +45,9 @@ export async function fetchWorkflowById(
   return workflow;
 }
 
-export async function workflowDetailLoader({
-  params,
-}: LoaderFunctionArgs): Promise<WorkflowDetailLoaderData> {
+export async function resolveWorkflowLoaderData(
+  params: LoaderFunctionArgs["params"]
+): Promise<WorkflowDetailLoaderData> {
   const id = params?.id;
   if (!id) {
     throw new Response("Workflow ID is required", { status: 404 });
@@ -66,4 +66,10 @@ export async function workflowDetailLoader({
       { status: 500 }
     );
   }
+}
+
+export async function workflowDetailLoader({
+  params,
+}: LoaderFunctionArgs): Promise<WorkflowDetailLoaderData> {
+  return resolveWorkflowLoaderData(params);
 }
