@@ -4,10 +4,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
-import Popover from "@mui/material/Popover";
-import Select from "@mui/material/Select";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -15,13 +12,10 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import TextField from "@mui/material/TextField";
-import { DatePicker } from "@mui/x-date-pickers";
-import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
+import { WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import dayjs, { Dayjs } from "dayjs";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { DESIGN_TOKENS } from "@/constants/designTokens";
@@ -29,7 +23,10 @@ import { AuthContext } from "@/context/AuthContext";
 import { useWorkflowListFilters } from "@/features/workflow/list/useWorkflowListFilters";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
+import { STATUS_LABELS } from "@/lib/workflowLabels";
+import WorkflowListFilters, {
+  type WorkflowListFiltersHandle,
+} from "./components/WorkflowListFilters";
 
 export default function WorkflowListPage() {
   const navigate = useNavigate();
@@ -42,23 +39,11 @@ export default function WorkflowListPage() {
     if (!cognitoUser?.id) return undefined;
     return staffs.find((s) => s.cognitoUserId === cognitoUser.id)?.id;
   }, [cognitoUser, staffs]);
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [createdAnchorEl, setCreatedAnchorEl] = useState<HTMLElement | null>(
-    null
-  );
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const { filteredItems, filters, anyFilterActive, setFilter, clearFilters } =
     useWorkflowListFilters({ workflows, currentStaffId });
-
-  const {
-    category: categoryFilter,
-    status: statusFilter,
-    applicationFrom,
-    applicationTo,
-    createdFrom,
-    createdTo,
-  } = filters;
+  const filterRowRef = useRef<WorkflowListFiltersHandle>(null);
 
   useEffect(() => {
     setPage(0);
@@ -120,8 +105,7 @@ export default function WorkflowListPage() {
                 startIcon={<ClearIcon fontSize="small" />}
                 onClick={() => {
                   clearFilters();
-                  setAnchorEl(null);
-                  setCreatedAnchorEl(null);
+                  filterRowRef.current?.closeAllPopovers();
                 }}
               >
                 すべてのフィルターをクリア
@@ -166,176 +150,11 @@ export default function WorkflowListPage() {
                   <TableCell>ステータス</TableCell>
                   <TableCell>作成日</TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Select
-                      size="small"
-                      displayEmpty
-                      value={categoryFilter}
-                      onChange={(e) => setFilter("category", e.target.value)}
-                    >
-                      <MenuItem value="">すべて</MenuItem>
-                      <MenuItem value={WorkflowCategory.PAID_LEAVE}>
-                        {CATEGORY_LABELS[WorkflowCategory.PAID_LEAVE]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowCategory.ABSENCE}>
-                        {CATEGORY_LABELS[WorkflowCategory.ABSENCE]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowCategory.OVERTIME}>
-                        {CATEGORY_LABELS[WorkflowCategory.OVERTIME]}
-                      </MenuItem>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={
-                        applicationFrom && applicationTo
-                          ? `${applicationFrom} → ${applicationTo}`
-                          : "申請日で絞込"
-                      }
-                      onClick={(e) =>
-                        setAnchorEl(e.currentTarget as HTMLElement)
-                      }
-                      InputProps={{ readOnly: true }}
-                    />
-                    <Popover
-                      open={Boolean(anchorEl)}
-                      anchorEl={anchorEl}
-                      onClose={() => setAnchorEl(null)}
-                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                    >
-                      <Box sx={{ p: 2, display: "flex", gap: 2 }}>
-                        <DatePicker
-                          label="From"
-                          value={
-                            applicationFrom ? dayjs(applicationFrom) : null
-                          }
-                          onChange={(v: Dayjs | null) => {
-                            const str = v ? v.format("YYYY-MM-DD") : "";
-                            setFilter("applicationFrom", str);
-                          }}
-                          slotProps={{ textField: { size: "small" } }}
-                        />
-                        <DatePicker
-                          label="To"
-                          value={applicationTo ? dayjs(applicationTo) : null}
-                          onChange={(v: Dayjs | null) => {
-                            const str = v ? v.format("YYYY-MM-DD") : "";
-                            setFilter("applicationTo", str);
-                          }}
-                          slotProps={{ textField: { size: "small" } }}
-                        />
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setFilter("applicationFrom", "");
-                              setFilter("applicationTo", "");
-                              setAnchorEl(null);
-                            }}
-                          >
-                            クリア
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Popover>
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      size="small"
-                      displayEmpty
-                      value={statusFilter}
-                      onChange={(e) => setFilter("status", e.target.value)}
-                    >
-                      <MenuItem value="">すべて</MenuItem>
-                      <MenuItem value={WorkflowStatus.DRAFT}>
-                        {STATUS_LABELS[WorkflowStatus.DRAFT]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.SUBMITTED}>
-                        {STATUS_LABELS[WorkflowStatus.SUBMITTED]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.PENDING}>
-                        {STATUS_LABELS[WorkflowStatus.PENDING]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.APPROVED}>
-                        {STATUS_LABELS[WorkflowStatus.APPROVED]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.REJECTED}>
-                        {STATUS_LABELS[WorkflowStatus.REJECTED]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.CANCELLED}>
-                        {STATUS_LABELS[WorkflowStatus.CANCELLED]}
-                      </MenuItem>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={
-                        createdFrom && createdTo
-                          ? `${createdFrom} → ${createdTo}`
-                          : "作成日で絞込"
-                      }
-                      onClick={(e) =>
-                        setCreatedAnchorEl(e.currentTarget as HTMLElement)
-                      }
-                      InputProps={{ readOnly: true }}
-                    />
-                    <Popover
-                      open={Boolean(createdAnchorEl)}
-                      anchorEl={createdAnchorEl}
-                      onClose={() => setCreatedAnchorEl(null)}
-                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                    >
-                      <Box sx={{ p: 2, display: "flex", gap: 2 }}>
-                        <DatePicker
-                          label="From"
-                          value={createdFrom ? dayjs(createdFrom) : null}
-                          onChange={(v: Dayjs | null) => {
-                            const str = v ? v.format("YYYY-MM-DD") : "";
-                            setFilter("createdFrom", str);
-                          }}
-                          slotProps={{ textField: { size: "small" } }}
-                        />
-                        <DatePicker
-                          label="To"
-                          value={createdTo ? dayjs(createdTo) : null}
-                          onChange={(v: Dayjs | null) => {
-                            const str = v ? v.format("YYYY-MM-DD") : "";
-                            setFilter("createdTo", str);
-                          }}
-                          slotProps={{ textField: { size: "small" } }}
-                        />
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setFilter("createdFrom", "");
-                              setFilter("createdTo", "");
-                              setCreatedAnchorEl(null);
-                            }}
-                          >
-                            クリア
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Popover>
-                  </TableCell>
-                  <TableCell />
-                </TableRow>
+                <WorkflowListFilters
+                  ref={filterRowRef}
+                  filters={filters}
+                  setFilter={setFilter}
+                />
               </TableHead>
               <TableBody>
                 {filteredItems
