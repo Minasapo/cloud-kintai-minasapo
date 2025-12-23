@@ -244,6 +244,18 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       contentGap: spacing.sm,
       countColor: color.neutral[500],
     },
+    timeRecorder: {
+      actionButton: {
+        size: 120,
+        borderWidth: 3,
+        borderRadius: radius.pill,
+        disabledBorderColor: color.neutral[300],
+        disabledBackground: color.neutral[200],
+      },
+      restButton: {
+        disabledBackground: color.neutral[200],
+      },
+    },
   } as const;
 
   return {

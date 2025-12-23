@@ -1,6 +1,13 @@
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 
+import { designTokenVar } from "@/shared/designSystem";
+
+const REST_DISABLED_BACKGROUND = designTokenVar(
+  "component.timeRecorder.restButton.disabledBackground",
+  "#D9E2DD"
+);
+
 const StyledRestEndButton = styled(Button)(({ theme }) => ({
   color: theme.palette.rest.main,
   "&:hover": {
@@ -8,7 +15,7 @@ const StyledRestEndButton = styled(Button)(({ theme }) => ({
     backgroundColor: theme.palette.rest.main,
   },
   "&:disabled": {
-    backgroundColor: "#E0E0E0",
+    backgroundColor: REST_DISABLED_BACKGROUND,
   },
 }));
 
