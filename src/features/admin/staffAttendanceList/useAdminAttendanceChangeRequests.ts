@@ -183,18 +183,37 @@ export const useAdminAttendanceChangeRequests = ({
 
   const canBulkApprove = useMemo(() => Boolean(staffForMail), [staffForMail]);
 
-  return {
-    quickViewAttendance,
-    quickViewChangeRequest,
-    quickViewOpen,
-    handleOpenQuickView,
-    handleCloseQuickView,
-    selectedAttendanceIds,
-    isAttendanceSelected,
-    toggleAttendanceSelection,
-    toggleSelectAllPending,
-    bulkApproving,
-    canBulkApprove,
-    handleBulkApprove,
-  } as const;
+  const controls = useMemo(
+    () =>
+      ({
+        quickViewAttendance,
+        quickViewChangeRequest,
+        quickViewOpen,
+        handleOpenQuickView,
+        handleCloseQuickView,
+        selectedAttendanceIds,
+        isAttendanceSelected,
+        toggleAttendanceSelection,
+        toggleSelectAllPending,
+        bulkApproving,
+        canBulkApprove,
+        handleBulkApprove,
+      } as const),
+    [
+      quickViewAttendance,
+      quickViewChangeRequest,
+      quickViewOpen,
+      handleOpenQuickView,
+      handleCloseQuickView,
+      selectedAttendanceIds,
+      isAttendanceSelected,
+      toggleAttendanceSelection,
+      toggleSelectAllPending,
+      bulkApproving,
+      canBulkApprove,
+      handleBulkApprove,
+    ]
+  );
+
+  return controls;
 };

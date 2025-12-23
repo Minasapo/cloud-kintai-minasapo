@@ -137,7 +137,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     );
   }, [attendances]);
 
-  const changeRequestHooks = useAdminAttendanceChangeRequests({
+  const changeRequestControls = useAdminAttendanceChangeRequests({
     staffId,
     staff,
     staffForMail,
@@ -146,24 +146,6 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     updateAttendance: (input: UpdateAttendanceInput) =>
       updateAttendanceMutation(input).unwrap(),
   });
-
-  const changeRequestControls = useMemo(
-    () => ({
-      quickViewAttendance: changeRequestHooks.quickViewAttendance,
-      quickViewChangeRequest: changeRequestHooks.quickViewChangeRequest,
-      quickViewOpen: changeRequestHooks.quickViewOpen,
-      handleOpenQuickView: changeRequestHooks.handleOpenQuickView,
-      handleCloseQuickView: changeRequestHooks.handleCloseQuickView,
-      selectedAttendanceIds: changeRequestHooks.selectedAttendanceIds,
-      isAttendanceSelected: changeRequestHooks.isAttendanceSelected,
-      toggleAttendanceSelection: changeRequestHooks.toggleAttendanceSelection,
-      toggleSelectAllPending: changeRequestHooks.toggleSelectAllPending,
-      bulkApproving: changeRequestHooks.bulkApproving,
-      canBulkApprove: changeRequestHooks.canBulkApprove,
-      handleBulkApprove: changeRequestHooks.handleBulkApprove,
-    }),
-    [changeRequestHooks]
-  );
 
   const getTableRowVariant = useCallback(
     (
