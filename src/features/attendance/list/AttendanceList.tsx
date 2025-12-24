@@ -10,15 +10,10 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import { Box, LinearProgress, Stack, styled, Typography } from "@mui/material";
-/**
- * MaterialUIのDatePickerコンポーネント。
- */
-import { DatePicker } from "@mui/x-date-pickers";
 import { Staff } from "@shared/api/graphql/types";
 /**
  * 日付操作ライブラリ。日付のフォーマットや計算に使用。
  */
-import dayjs from "dayjs";
 /**
  * ReactのContext, Hooks。
  */
@@ -28,7 +23,6 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { AttendanceDate } from "@/lib/AttendanceDate";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
@@ -37,6 +31,7 @@ import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 import { designTokenVar } from "@/shared/designSystem";
+
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";
 
@@ -210,23 +205,6 @@ export default function AttendanceTable() {
         <DescriptionTypography variant="body1">
           今日から30日前までの勤怠情報を表示しています
         </DescriptionTypography>
-        <DatePicker
-          value={dayjs()}
-          format={AttendanceDate.DisplayFormat}
-          label="日付を指定して移動"
-          slotProps={{
-            textField: { size: "small" },
-          }}
-          onChange={(date) => {
-            if (date) {
-              navigate(
-                `/attendance/${date.format(
-                  AttendanceDate.QueryParamFormat
-                )}/edit`
-              );
-            }
-          }}
-        />
       </Box>
       <DesktopList
         attendances={attendances}
