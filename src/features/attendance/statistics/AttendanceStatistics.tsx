@@ -7,11 +7,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { Attendance } from "@shared/api/graphql/types";
+import { Attendance, CloseDate } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import useCloseDates from "@/hooks/useCloseDates/useCloseDates";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
@@ -55,9 +56,67 @@ type MonthlyStat = {
   workDays: number;
 };
 
-function buildMonthlyStats(attendances: Attendance[]): MonthlyStat[] {
-  const monthly: MonthlyStat[] = Array.from(
-    { length: 12 },
+type MonthlyTerm = {
+  start: dayjs.Dayjs;
+  end: dayjs.Dayjs;
+  closeMonth: dayjs.Dayjs;
+  source: "closeDate" | "fallback";
+};
+
+function buildMonthlyTerms(
+  year: number,
+  closeDates: CloseDate[]
+): MonthlyTerm[] {
+  const fallback = Array.from({ length: 12 }, (_, index): MonthlyTerm => {
+    const closeMonth = dayjs().year(year).month(index).startOf("month");
+    return {
+      start: closeMonth.startOf("month"),
+      end: closeMonth.endOf("month"),
+      closeMonth,
+      source: "fallback",
+    };
+  });
+
+  const latestByMonth: Array<{ item: CloseDate; updatedAt: number } | null> =
+    Array.from({ length: 12 }, () => null);
+
+  closeDates.forEach((item) => {
+    const close = dayjs(item.closeDate);
+    if (!close.isValid() || close.year() !== year) return;
+
+    const monthIndex = close.month();
+    const updatedAt = dayjs(item.updatedAt ?? item.closeDate).valueOf();
+    const existing = latestByMonth[monthIndex];
+
+    if (!existing || updatedAt > existing.updatedAt) {
+      latestByMonth[monthIndex] = { item, updatedAt };
+    }
+  });
+
+  latestByMonth.forEach((payload, index) => {
+    if (!payload) return;
+
+    const { item } = payload;
+    const start = dayjs(item.startDate).startOf("day");
+    const end = dayjs(item.endDate).startOf("day");
+    if (!start.isValid() || !end.isValid()) return;
+
+    fallback[index] = {
+      start,
+      end,
+      closeMonth: dayjs(item.closeDate).startOf("month"),
+      source: "closeDate",
+    };
+  });
+
+  return fallback;
+}
+
+function buildMonthlyStats(
+  attendances: Attendance[],
+  monthlyTerms: MonthlyTerm[]
+): MonthlyStat[] {
+  const monthly: MonthlyStat[] = monthlyTerms.map(
     (): MonthlyStat => ({
       workHours: 0,
       paidDays: 0,
@@ -68,8 +127,18 @@ function buildMonthlyStats(attendances: Attendance[]): MonthlyStat[] {
   );
 
   attendances.forEach((attendance) => {
-    const monthIndex = dayjs(attendance.workDate).month();
-    const stat = monthly[monthIndex];
+    const workDate = dayjs(attendance.workDate).startOf("day");
+    if (!workDate.isValid()) return;
+
+    const monthIndex = monthlyTerms.findIndex(
+      (term) =>
+        !workDate.isBefore(term.start, "day") &&
+        !workDate.isAfter(term.end, "day")
+    );
+
+    const targetIndex = monthIndex === -1 ? workDate.month() : monthIndex;
+    const stat = monthly[targetIndex];
+    if (!stat) return;
 
     if (attendance.paidHolidayFlag) {
       stat.paidDays += 1;
@@ -101,24 +170,60 @@ function buildMonthlyStats(attendances: Attendance[]): MonthlyStat[] {
   return monthly;
 }
 
-function formatRangeLabel(year: number) {
-  const start = dayjs().year(year).startOf("year").format("YYYY/MM/DD");
-  const end = dayjs().year(year).endOf("year").format("YYYY/MM/DD");
-  return `${start} - ${end}`;
+function formatRangeLabel(start: dayjs.Dayjs, end: dayjs.Dayjs) {
+  return `${start.format("YYYY/MM/DD")} - ${end.format("YYYY/MM/DD")}`;
 }
 
 export default function AttendanceStatistics() {
   const { cognitoUser } = useContext(AuthContext);
+  const {
+    closeDates,
+    loading: closeDatesLoading,
+    error: closeDatesError,
+  } = useCloseDates();
   const [year, setYear] = useState<number>(dayjs().year());
 
+  const monthlyTerms = useMemo(
+    () => buildMonthlyTerms(year, closeDates),
+    [closeDates, year]
+  );
+
+  const { rangeStart, rangeEnd } = useMemo(() => {
+    if (monthlyTerms.length === 0) {
+      const start = dayjs().year(year).startOf("year");
+      const end = dayjs().year(year).endOf("year");
+      return { rangeStart: start, rangeEnd: end };
+    }
+
+    const start = monthlyTerms
+      .map((term) => term.start)
+      .reduce((earliest, current) =>
+        current.isBefore(earliest) ? current : earliest
+      );
+
+    const end = monthlyTerms
+      .map((term) => term.end)
+      .reduce((latest, current) =>
+        current.isAfter(latest) ? current : latest
+      );
+
+    return { rangeStart: start, rangeEnd: end };
+  }, [monthlyTerms, year]);
+
   const startDate = useMemo(
-    () => dayjs().year(year).startOf("year").format(AttendanceDate.DataFormat),
-    [year]
+    () => rangeStart.format(AttendanceDate.DataFormat),
+    [rangeStart]
   );
   const endDate = useMemo(
-    () => dayjs().year(year).endOf("year").format(AttendanceDate.DataFormat),
-    [year]
+    () => rangeEnd.format(AttendanceDate.DataFormat),
+    [rangeEnd]
   );
+
+  const closeDatesStatusKnown =
+    closeDatesLoading || closeDatesError !== null || closeDates.length > 0;
+
+  const skipAttendanceFetch =
+    !closeDatesStatusKnown || closeDatesLoading || !cognitoUser?.id;
 
   const shouldFetch = Boolean(cognitoUser?.id);
   const {
@@ -133,12 +238,24 @@ export default function AttendanceStatistics() {
       startDate,
       endDate,
     },
-    { skip: !shouldFetch }
+    { skip: skipAttendanceFetch }
   );
 
   const monthlyStats = useMemo(
-    () => buildMonthlyStats(attendances),
-    [attendances]
+    () => buildMonthlyStats(attendances, monthlyTerms),
+    [attendances, monthlyTerms]
+  );
+
+  const monthSummaries = useMemo(
+    () =>
+      monthlyTerms.map((term, index) => ({
+        label: `${index + 1}月`,
+        rangeText: `${term.start.format(
+          AttendanceDate.DisplayFormat
+        )} 〜 ${term.end.format(AttendanceDate.DisplayFormat)}`,
+        isFallback: term.source === "fallback",
+      })),
+    [monthlyTerms]
   );
   const totalHours = useMemo(
     () => monthlyStats.reduce((sum, value) => sum + value.workHours, 0),
@@ -161,7 +278,13 @@ export default function AttendanceStatistics() {
     () => monthlyStats.reduce((sum, value) => sum + value.workDays, 0),
     [monthlyStats]
   );
-  const loading = isLoading || isFetching;
+  const loading =
+    isLoading || isFetching || closeDatesLoading || !closeDatesStatusKnown;
+
+  const hasFallbackTerms = useMemo(
+    () => monthlyTerms.some((term) => term.source === "fallback"),
+    [monthlyTerms]
+  );
 
   const errorMessage = isError
     ? typeof error === "object" &&
@@ -180,11 +303,6 @@ export default function AttendanceStatistics() {
     );
   }
 
-  const monthLabels = Array.from(
-    { length: 12 },
-    (_, index) => `${index + 1}月`
-  );
-
   return (
     <Stack spacing={2} sx={{ height: 1 }}>
       <Stack
@@ -196,8 +314,19 @@ export default function AttendanceStatistics() {
         <Stack spacing={0.5}>
           <Typography variant="h1">稼働統計</Typography>
           <Typography variant="body2" color="text.secondary">
-            {formatRangeLabel(year)} の稼働時間を月別に集計しています。
+            {formatRangeLabel(rangeStart, rangeEnd)}{" "}
+            を集計期間として月別に集計しています。
           </Typography>
+          {hasFallbackTerms && (
+            <Typography variant="body2" color="text.secondary">
+              集計対象月が未登録の期間は、暫定で月初〜月末を集計期間として使用しています。
+            </Typography>
+          )}
+          {closeDatesError && (
+            <Typography variant="body2" color="error">
+              集計対象月の取得に失敗したため、暫定の集計期間で表示しています。
+            </Typography>
+          )}
         </Stack>
         <ButtonGroup variant="outlined" size="small">
           <Button onClick={() => setYear((prev) => prev - 1)}>前年</Button>
@@ -257,7 +386,7 @@ export default function AttendanceStatistics() {
         <Stack spacing={1.5}>
           <Typography variant="subtitle1">月別サマリー</Typography>
           <Stack spacing={1}>
-            {monthLabels.map((label, index) => {
+            {monthSummaries.map(({ label, rangeText, isFallback }, index) => {
               const stat = monthlyStats[index];
               return (
                 <Stack
@@ -270,9 +399,15 @@ export default function AttendanceStatistics() {
                   }}
                 >
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      {label}
-                    </Typography>
+                    <Stack spacing={0.25}>
+                      <Typography variant="body2" color="text.secondary">
+                        {label}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {rangeText}
+                        {isFallback ? "（暫定）" : ""}
+                      </Typography>
+                    </Stack>
                     <Typography variant="body1" sx={{ fontWeight: 600 }}>
                       {stat.workHours.toFixed(1)} 時間
                     </Typography>
