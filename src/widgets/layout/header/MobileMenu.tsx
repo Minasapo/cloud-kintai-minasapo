@@ -1,4 +1,5 @@
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import MobileMenuView, { MobileMenuItem } from "@shared/ui/header/MobileMenu";
 import { useMemo } from "react";
@@ -20,6 +21,11 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
         label: "勤怠一覧",
         icon: <ViewListIcon />,
         onClick: () => navigate("/attendance/list"),
+      },
+      {
+        label: "稼働統計",
+        icon: <QueryStatsIcon />,
+        onClick: () => navigate("/attendance/stats"),
       },
       {
         label: "日報",

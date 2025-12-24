@@ -21,6 +21,9 @@ const AttendanceEditRoute = createLazyRoute(
 const AttendanceListRoute = createLazyRoute(
   () => import("./pages/attendance/list/AttendanceListPage")
 );
+const AttendanceStatisticsRoute = createLazyRoute(
+  () => import("./pages/attendance/statistics/AttendanceStatisticsPage")
+);
 const LoginRoute = createLazyRoute(() => import("./pages/Login/Login"));
 const OfficeHomeRoute = createLazyRoute(
   () => import("./pages/office/home/OfficeHomePage")
@@ -84,6 +87,10 @@ const router = createBrowserRouter([
           {
             path: "list",
             lazy: AttendanceListRoute,
+          },
+          {
+            path: "stats",
+            lazy: AttendanceStatisticsRoute,
           },
           {
             path: "report",

@@ -29,6 +29,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     () => [
       { label: "勤怠打刻", href: "/register" },
       { label: "勤怠一覧", href: "/attendance/list" },
+      { label: "稼働統計", href: "/attendance/stats" },
       { label: "日報", href: "/attendance/report" },
       { label: "シフト", href: "/shift" },
       { label: "ワークフロー", href: "/workflow" },
