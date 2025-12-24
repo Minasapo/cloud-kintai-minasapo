@@ -3,9 +3,8 @@ import {
   PendingAttendanceSection,
 } from "@features/admin/staffAttendanceList/components/PendingAttendanceSection";
 import { Box, LinearProgress, Stack, Typography } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
 import { Attendance } from "@shared/api/graphql/types";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import type { ReactNode } from "react";
 import { useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -68,18 +67,6 @@ export default function AdminStaffAttendanceList() {
     [navigate, staffId]
   );
 
-  const handleDateNavigate = useCallback(
-    (date: Dayjs | null) => {
-      if (!date || !staffId) return;
-      navigate(
-        `/admin/attendances/edit/${date.format(
-          AttendanceDate.QueryParamFormat
-        )}/${staffId}`
-      );
-    },
-    [navigate, staffId]
-  );
-
   const buildCalendarNavigatePath = useCallback(
     (formattedWorkDate: string) => {
       if (!staffId) {
@@ -130,22 +117,6 @@ export default function AdminStaffAttendanceList() {
           gap: PAGE_SECTION_GAP,
         }}
       >
-        <PageSection
-          variant="surface"
-          layoutVariant="dashboard"
-          sx={{ gap: SECTION_CONTENT_GAP }}
-        >
-          <DatePicker
-            value={dayjs()}
-            format={AttendanceDate.DisplayFormat}
-            label="日付を指定して移動"
-            slotProps={{
-              textField: { size: "small" },
-            }}
-            onChange={handleDateNavigate}
-          />
-        </PageSection>
-
         <PageSection
           variant="surface"
           layoutVariant="dashboard"
