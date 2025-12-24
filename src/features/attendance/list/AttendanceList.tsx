@@ -46,7 +46,6 @@ import MobileList from "./MobileList/MobileList";
  * 勤怠一覧ページの説明文用Typographyコンポーネント。
  */
 const DescriptionTypography = styled(Typography)(({ theme }) => ({
-  padding: "0px 40px",
   [theme.breakpoints.down("md")]: {
     padding: "0px 10px",
   },
@@ -205,11 +204,9 @@ export default function AttendanceTable() {
         }}
       >
         <Stack spacing={0.5}>
-          <Typography variant="subtitle2" color="text.secondary">
-            直近30日の合計勤務時間
-          </Typography>
-          <Typography variant="h5" component="p">
-            {totalTime.toFixed(1)}h
+          <Typography variant="h1">勤怠一覧</Typography>
+          <Typography variant="body1" color="text.secondary">
+            直近30日の合計勤務時間: {totalTime.toFixed(1)}h
           </Typography>
         </Stack>
         <DescriptionTypography variant="body1">
@@ -233,13 +230,6 @@ export default function AttendanceTable() {
           }}
         />
       </Box>
-      {/* <DesktopCalendarView
-        attendances={attendances}
-        holidayCalendars={holidayCalendars}
-        companyHolidayCalendars={companyHolidayCalendars}
-        navigate={navigate}
-        staff={staff}
-      /> */}
       <DesktopList
         attendances={attendances}
         holidayCalendars={holidayCalendars}

@@ -581,9 +581,7 @@ export default function DailyReport() {
       <PageSection layoutVariant="dashboard">
         <Stack spacing={3}>
           <Box>
-            <Typography variant="h4" component="h1">
-              日報
-            </Typography>
+            <Typography variant="h1">日報</Typography>
           </Box>
 
           {requestError && (
