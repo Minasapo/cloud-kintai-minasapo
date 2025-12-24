@@ -6,7 +6,7 @@ import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
 
 export default function AttendanceListPage() {
   return (
-    <Page title="勤怠一覧" maxWidth="xl">
+    <Page title="勤怠一覧" maxWidth="xl" showDefaultHeader={false}>
       <PageSection layoutVariant="dashboard">
         <Box sx={{ ...dashboardInnerSurfaceSx, height: 1, minHeight: 480 }}>
           <AttendanceList />

@@ -9,7 +9,14 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
-import { Box, LinearProgress, Stack, styled, Typography } from "@mui/material";
+import {
+  Box,
+  Breadcrumbs,
+  LinearProgress,
+  Stack,
+  styled,
+  Typography,
+} from "@mui/material";
 /**
  * MaterialUIのDatePickerコンポーネント。
  */
@@ -24,7 +31,7 @@ import dayjs from "dayjs";
  * ReactのContext, Hooks。
  */
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
@@ -37,6 +44,7 @@ import { Logger } from "@/lib/logger";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+import { designTokenVar } from "@/shared/designSystem";
 
 // import DesktopCalendarView from "./DesktopCalendarView";
 import DesktopList from "./DesktopList";
@@ -177,21 +185,41 @@ export default function AttendanceTable() {
     return <LinearProgress />;
   }
 
+  const headerBackground = designTokenVar(
+    "component.pageSection.background",
+    "#FFFFFF"
+  );
+  const headerShadow = designTokenVar(
+    "component.pageSection.shadow",
+    "0 12px 24px rgba(17, 24, 39, 0.06)"
+  );
+  const headerRadius = designTokenVar("component.pageSection.radius", "12px");
+  const headerPaddingX = designTokenVar("spacing.lg", "16px");
+  const headerPaddingY = designTokenVar("spacing.md", "12px");
+  const headerGap = designTokenVar("spacing.sm", "8px");
+
   return (
     <Stack spacing={2}>
-      <Box>
-        <Title>{`直近30日の合計勤務時間: ${totalTime.toFixed(1)}h`}</Title>
-      </Box>
-      <DescriptionTypography variant="body1">
-        今日から30日前までの勤怠情報を表示しています
-      </DescriptionTypography>
       <Box
         sx={{
-          pl: {
-            md: 5,
-          },
+          backgroundColor: headerBackground,
+          boxShadow: headerShadow,
+          borderRadius: headerRadius,
+          px: headerPaddingX,
+          py: headerPaddingY,
+          display: "flex",
+          flexDirection: "column",
+          gap: headerGap,
         }}
       >
+        <Breadcrumbs>
+          <Link to="/">TOP</Link>
+          <Typography color="text.primary">勤怠一覧</Typography>
+        </Breadcrumbs>
+        <Title>{`直近30日の合計勤務時間: ${totalTime.toFixed(1)}h`}</Title>
+        <DescriptionTypography variant="body1">
+          今日から30日前までの勤怠情報を表示しています
+        </DescriptionTypography>
         <DatePicker
           value={dayjs()}
           format={AttendanceDate.DisplayFormat}

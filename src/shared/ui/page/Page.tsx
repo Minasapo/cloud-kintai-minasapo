@@ -15,6 +15,7 @@ interface PageProps {
   breadcrumbs?: BreadcrumbItem[];
   children: ReactNode;
   maxWidth?: "xl" | "lg" | "md" | "sm" | false;
+  showDefaultHeader?: boolean;
 }
 
 export default function Page({
@@ -22,12 +23,17 @@ export default function Page({
   breadcrumbs = [{ label: "TOP", href: "/" }],
   children,
   maxWidth = "xl",
+  showDefaultHeader = true,
 }: PageProps) {
   return (
     <Container maxWidth={maxWidth} disableGutters sx={{ pt: PAGE_PADDING_TOP }}>
       <Stack direction="column" spacing={0} sx={{ gap: PAGE_SECTION_GAP }}>
-        <CommonBreadcrumbs items={breadcrumbs} current={title} />
-        <Title>{title}</Title>
+        {showDefaultHeader && (
+          <>
+            <CommonBreadcrumbs items={breadcrumbs} current={title} />
+            <Title>{title}</Title>
+          </>
+        )}
         {children}
       </Stack>
     </Container>
