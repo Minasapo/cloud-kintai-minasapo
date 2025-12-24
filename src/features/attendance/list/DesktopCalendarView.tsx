@@ -216,6 +216,7 @@ type Props = {
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
   navigate: NavigateFunction;
+  buildNavigatePath?: (formattedWorkDate: string) => string;
 };
 
 export default function DesktopCalendarView({
@@ -224,6 +225,7 @@ export default function DesktopCalendarView({
   holidayCalendars,
   companyHolidayCalendars,
   navigate,
+  buildNavigatePath,
 }: Props) {
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
 
@@ -244,7 +246,10 @@ export default function DesktopCalendarView({
 
   const handleDayClick = (date: Dayjs) => {
     const formatted = date.format(AttendanceDate.QueryParamFormat);
-    navigate(`/attendance/${formatted}/edit`);
+    const path = buildNavigatePath
+      ? buildNavigatePath(formatted)
+      : `/attendance/${formatted}/edit`;
+    navigate(path);
   };
 
   return (

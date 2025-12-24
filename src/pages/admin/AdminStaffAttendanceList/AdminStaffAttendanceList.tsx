@@ -1,4 +1,3 @@
-import { AttendanceTableSection } from "@features/admin/staffAttendanceList/components/AttendanceTableSection";
 import {
   pendingAttendanceContainerSx,
   PendingAttendanceSection,
@@ -12,6 +11,7 @@ import { useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
+import DesktopCalendarView from "@/features/attendance/list/DesktopCalendarView";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
@@ -78,6 +78,16 @@ export default function AdminStaffAttendanceList() {
       );
     },
     [navigate, staffId]
+  );
+
+  const buildCalendarNavigatePath = useCallback(
+    (formattedWorkDate: string) => {
+      if (!staffId) {
+        return "/admin/attendances";
+      }
+      return `/admin/attendances/edit/${formattedWorkDate}/${staffId}`;
+    },
+    [staffId]
   );
 
   const renderStandaloneSection = (content: ReactNode) => (
@@ -166,15 +176,13 @@ export default function AdminStaffAttendanceList() {
         )}
 
         <PageSection variant="surface" layoutVariant="dashboard">
-          <AttendanceTableSection
+          <DesktopCalendarView
             attendances={attendances}
             staff={staff}
             holidayCalendars={holidayCalendars}
             companyHolidayCalendars={companyHolidayCalendars}
-            onEdit={handleEdit}
-            getBadgeContent={getBadgeContent}
-            changeRequestControls={pendingAttendanceControls}
-            getRowVariant={getTableRowVariant}
+            navigate={navigate}
+            buildNavigatePath={buildCalendarNavigatePath}
           />
         </PageSection>
       </Stack>
