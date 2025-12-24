@@ -1,13 +1,16 @@
 import AttendanceList from "@features/attendance/list/AttendanceList";
+import Box from "@mui/material/Box";
 import Page from "@shared/ui/page/Page";
 
-import { PageSection } from "@/shared/ui/layout";
+import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
 
 export default function AttendanceListPage() {
   return (
     <Page title="勤怠一覧" maxWidth="xl">
-      <PageSection layoutVariant="dashboard" sx={{ height: 1, minHeight: 480 }}>
-        <AttendanceList />
+      <PageSection layoutVariant="dashboard">
+        <Box sx={{ ...dashboardInnerSurfaceSx, height: 1, minHeight: 480 }}>
+          <AttendanceList />
+        </Box>
       </PageSection>
     </Page>
   );
