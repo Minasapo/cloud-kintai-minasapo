@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
+import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
@@ -44,6 +45,8 @@ const LOADING_SECTION_MIN_HEIGHT = `calc(${designTokenVar(
 )} * 7.5)`;
 const FILTER_ACTION_GAP = `calc(${designTokenVar("spacing.md", "12px")} * 0.5)`;
 const EMPTY_STATE_PADDING_Y = designTokenVar("spacing.lg", "16px");
+const DATA_GRID_HEIGHT_SPACING_UNITS = 130;
+const DATA_GRID_ROW_HEIGHT_SPACING_UNITS = 14;
 
 const formatWorkflowDate: GridValueFormatter<
   WorkflowListItem,
@@ -53,6 +56,19 @@ const formatWorkflowDate: GridValueFormatter<
 > = (value) => value ?? "-";
 
 export default function WorkflowListPage() {
+  const theme = useTheme();
+  const spacingToNumber = useCallback(
+    (units: number) => parseFloat(theme.spacing(units)),
+    [theme]
+  );
+  const dataGridContainerHeight = useMemo(
+    () => theme.spacing(DATA_GRID_HEIGHT_SPACING_UNITS),
+    [theme]
+  );
+  const dataGridRowHeight = useMemo(
+    () => spacingToNumber(DATA_GRID_ROW_HEIGHT_SPACING_UNITS),
+    [spacingToNumber]
+  );
   const navigate = useNavigate();
 
   const {
@@ -216,7 +232,7 @@ export default function WorkflowListPage() {
                     />
                   </TableHead>
                 </Table>
-                <Box sx={{ height: 520, width: "100%" }}>
+                <Box sx={{ height: dataGridContainerHeight, width: "100%" }}>
                   <DataGrid
                     rows={filteredItems}
                     columns={columns}
@@ -228,7 +244,7 @@ export default function WorkflowListPage() {
                     hideFooter
                     loading={loading}
                     onRowClick={handleRowClick}
-                    rowHeight={56}
+                    rowHeight={dataGridRowHeight}
                     columnHeaderHeight={0}
                     getRowClassName={getRowClassName}
                     sx={{
