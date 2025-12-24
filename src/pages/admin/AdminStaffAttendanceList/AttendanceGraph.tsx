@@ -17,23 +17,12 @@ export function AttendanceGraph({
 }: {
   attendances: Attendance[];
 }) {
-  const {
-    getStartTime,
-    getEndTime,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-  } = useContext(AppConfigContext);
+  const { getStandardWorkHours } = useContext(AppConfigContext);
 
-  const standardWorkHours = useMemo(() => {
-    const start = getStartTime();
-    const end = getEndTime();
-    const lunchStart = getLunchRestStartTime();
-    const lunchEnd = getLunchRestEndTime();
-
-    const baseHours = end.diff(start, "hour", true);
-    const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
-    return Math.max(baseHours - lunchHours, 0);
-  }, [getStartTime, getEndTime, getLunchRestStartTime, getLunchRestEndTime]);
+  const standardWorkHours = useMemo(
+    () => getStandardWorkHours(),
+    [getStandardWorkHours]
+  );
 
   const { workTimeData, restTimeData, overtimeData } = attendances.reduce(
     (acc, attendance) => {

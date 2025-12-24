@@ -291,6 +291,15 @@ export default function AdminConfigManagement() {
       pmHolidayStartTime &&
       pmHolidayEndTime
     ) {
+      const standardWorkHours = (() => {
+        const baseHours = endTime.diff(startTime, "hour", true);
+        const lunchHours = Math.max(
+          lunchRestEndTime.diff(lunchRestStartTime, "hour", true),
+          0
+        );
+        return Math.max(baseHours - lunchHours, 0);
+      })();
+
       try {
         if (id) {
           // backend の GraphQL スキーマにフィールドがない場合を考慮し any にキャストして送る
@@ -298,6 +307,7 @@ export default function AdminConfigManagement() {
             id,
             workStartTime: startTime.format("HH:mm"),
             workEndTime: endTime.format("HH:mm"),
+            standardWorkHours,
             links: links.map((link) => ({
               label: link.label,
               url: link.url,
@@ -334,6 +344,7 @@ export default function AdminConfigManagement() {
             name: "default",
             workStartTime: startTime.format("HH:mm"),
             workEndTime: endTime.format("HH:mm"),
+            standardWorkHours,
             links: links.map((link) => ({
               label: link.label,
               url: link.url,

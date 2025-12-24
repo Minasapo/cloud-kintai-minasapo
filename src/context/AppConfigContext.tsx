@@ -17,6 +17,7 @@ type AppConfigContextProps = {
   ) => Promise<void>;
   getStartTime: () => dayjs.Dayjs;
   getEndTime: () => dayjs.Dayjs;
+  getStandardWorkHours: () => number;
   getConfigId: () => string | null;
   getLinks: () => {
     label: string;
@@ -67,6 +68,15 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   },
   getStartTime: () => dayjs(DEFAULT_CONFIG.workStartTime, "HH:mm"),
   getEndTime: () => dayjs(DEFAULT_CONFIG.workEndTime, "HH:mm"),
+  getStandardWorkHours: () => {
+    const start = dayjs(DEFAULT_CONFIG.workStartTime, "HH:mm");
+    const end = dayjs(DEFAULT_CONFIG.workEndTime, "HH:mm");
+    const lunchStart = dayjs(DEFAULT_CONFIG.lunchRestStartTime, "HH:mm");
+    const lunchEnd = dayjs(DEFAULT_CONFIG.lunchRestEndTime, "HH:mm");
+    const baseHours = end.diff(start, "hour", true);
+    const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
+    return Math.max(baseHours - lunchHours, 0);
+  },
   getConfigId: () => null,
   getLinks: () => [],
   getReasons: () => [],

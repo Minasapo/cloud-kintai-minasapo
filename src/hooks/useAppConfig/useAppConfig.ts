@@ -104,6 +104,45 @@ const useAppConfig = () => {
     [config]
   );
 
+  const getLunchRestStartTime = useCallback(
+    () =>
+      dayjs(
+        config?.lunchRestStartTime ?? DEFAULT_CONFIG.lunchRestStartTime,
+        "HH:mm"
+      ),
+    [config]
+  );
+
+  const getLunchRestEndTime = useCallback(
+    () =>
+      dayjs(
+        config?.lunchRestEndTime ?? DEFAULT_CONFIG.lunchRestEndTime,
+        "HH:mm"
+      ),
+    [config]
+  );
+
+  const getStandardWorkHours = useCallback(() => {
+    const configured = config?.standardWorkHours;
+    if (typeof configured === "number") {
+      return Math.max(configured, 0);
+    }
+
+    const start = getStartTime();
+    const end = getEndTime();
+    const lunchStart = getLunchRestStartTime();
+    const lunchEnd = getLunchRestEndTime();
+    const baseHours = end.diff(start, "hour", true);
+    const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
+    return Math.max(baseHours - lunchHours, 0);
+  }, [
+    config?.standardWorkHours,
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  ]);
+
   const getLinks = useCallback(() => {
     if (!config?.links) {
       return [];
@@ -186,24 +225,6 @@ const useAppConfig = () => {
         fixed: group.fixed ?? null,
       }));
   }, [config]);
-
-  const getLunchRestStartTime = useCallback(
-    () =>
-      dayjs(
-        config?.lunchRestStartTime ?? DEFAULT_CONFIG.lunchRestStartTime,
-        "HH:mm"
-      ),
-    [config]
-  );
-
-  const getLunchRestEndTime = useCallback(
-    () =>
-      dayjs(
-        config?.lunchRestEndTime ?? DEFAULT_CONFIG.lunchRestEndTime,
-        "HH:mm"
-      ),
-    [config]
-  );
 
   const getHourlyPaidHolidayEnabled = useCallback(
     () => config?.hourlyPaidHolidayEnabled ?? false,
@@ -291,6 +312,7 @@ const useAppConfig = () => {
     saveConfig,
     getStartTime,
     getEndTime,
+    getStandardWorkHours,
     getConfigId,
     getLinks,
     getReasons,
