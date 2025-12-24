@@ -104,7 +104,6 @@ export default function DesktopList({
   })();
   return (
     <DesktopBox>
-      <AttendanceGraph attendances={attendances} />
       {errorAttendances.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
           <Box
@@ -220,6 +219,7 @@ export default function DesktopList({
         companyHolidayCalendars={companyHolidayCalendars}
         navigate={navigate}
       />
+      <AttendanceGraph attendances={attendances} />
     </DesktopBox>
   );
 }
