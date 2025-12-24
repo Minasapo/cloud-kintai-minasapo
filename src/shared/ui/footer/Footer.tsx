@@ -35,7 +35,7 @@ const Footer = ({ themeColor }: FooterProps) => (
         px: FOOTER_PADDING_X,
       }}
     >
-      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+      <Typography variant="body1" sx={{ fontWeight: 500 }}>
         © 2025 Virtual Tech Japan Inc.
       </Typography>
     </Box>
