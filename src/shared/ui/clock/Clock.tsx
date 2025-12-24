@@ -14,7 +14,7 @@ const Clock = () => {
 
   return (
     <Box bgcolor="black" textAlign="center" sx={{ p: 3 }} borderRadius="5px">
-      <Typography variant="h4" color="white">
+      <Typography variant="h1" color="white">
         {time}
       </Typography>
     </Box>
