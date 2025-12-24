@@ -175,7 +175,7 @@ export default function JobTermBulkRegister({
       )
     );
 
-    return Array.from({ length: monthCount }).map((_, index) => {
+    const baseItems = Array.from({ length: monthCount }).map((_, index) => {
       const closeMonth = startOfMonth.add(index, "month");
       const endDay = Math.min(closingDay, closeMonth.daysInMonth());
       const baseEndDate = closeMonth.date(endDay);
@@ -197,6 +197,29 @@ export default function JobTermBulkRegister({
         isDuplicate,
       };
     });
+
+    // 前月を前倒しした場合、次月の開始日をスライドして隙間を埋める
+    return baseItems.reduce<PreviewItem[]>((acc, current, index) => {
+      if (index === 0) return [current];
+
+      const prev = acc[index - 1];
+      const desiredStart = prev.endDate.add(1, "day");
+
+      if (current.startDate.isAfter(desiredStart, "day")) {
+        const slideDays = current.startDate.diff(desiredStart, "day");
+        acc.push({
+          ...current,
+          startDate: desiredStart,
+          adjustmentReason: current.adjustmentReason
+            ? `${current.adjustmentReason} / 前月前倒し分${slideDays}日開始日スライド`
+            : `前月前倒し分${slideDays}日開始日スライド`,
+        });
+        return acc;
+      }
+
+      acc.push(current);
+      return acc;
+    }, []);
   }, [
     startMonth,
     closingDay,
