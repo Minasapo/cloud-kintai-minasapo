@@ -8,11 +8,7 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardActions,
-  CardContent,
   Chip,
-  Container,
   Divider,
   Grid,
   Paper,
@@ -38,6 +34,7 @@ import {
   DailyReportStatus,
   ModelSortDirection,
 } from "@shared/api/graphql/types";
+import Page from "@shared/ui/page/Page";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -46,6 +43,7 @@ import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
+import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 type ReportStatus = DailyReportStatus;
 type EditableStatus = Extract<ReportStatus, "DRAFT" | "SUBMITTED">;
@@ -579,39 +577,40 @@ export default function DailyReport() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Stack spacing={3}>
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom>
-            日報
-          </Typography>
-        </Box>
+    <Page title="日報" maxWidth="xl">
+      <PageSection layoutVariant="dashboard">
+        <Stack spacing={3}>
+          <Box>
+            <Typography variant="h4" component="h1">
+              日報
+            </Typography>
+          </Box>
 
-        {requestError && (
-          <Alert severity="error" onClose={() => setRequestError(null)}>
-            {requestError}
-          </Alert>
-        )}
+          {requestError && (
+            <Alert severity="error" onClose={() => setRequestError(null)}>
+              {requestError}
+            </Alert>
+          )}
 
-        <Grid container spacing={3} alignItems="flex-start">
-          <Grid item xs={12} md={3}>
-            <DailyReportCalendar
-              value={calendarDate}
-              onChange={handleCalendarChange}
-              reportedDateSet={reportedDateSet}
-              isLoadingReports={isLoadingReports}
-              hasReports={reports.length > 0}
-            />
-          </Grid>
+          <Grid container spacing={3} alignItems="flex-start">
+            <Grid item xs={12} md={3}>
+              <Box sx={dashboardInnerSurfaceSx}>
+                <DailyReportCalendar
+                  value={calendarDate}
+                  onChange={handleCalendarChange}
+                  reportedDateSet={reportedDateSet}
+                  isLoadingReports={isLoadingReports}
+                  hasReports={reports.length > 0}
+                />
+              </Box>
+            </Grid>
 
-          <Grid item xs={12} md={9}>
-            <Stack spacing={3}>
-              <Card variant="outlined">
-                <CardContent>
+            <Grid item xs={12} md={9}>
+              <Box sx={dashboardInnerSurfaceSx}>
+                <Stack spacing={3}>
                   {actionError && (
                     <Alert
                       severity="error"
-                      sx={{ mb: 2 }}
                       onClose={() => setActionError(null)}
                     >
                       {actionError}
@@ -852,59 +851,67 @@ export default function DailyReport() {
                       左側のリストから日報を選択してください。
                     </Typography>
                   )}
-                </CardContent>
-                {!isCreateMode && selectedReportId && (
-                  <CardActions sx={{ px: 3, pb: 3 }}>
-                    {editingReportId && editDraft ? (
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={1}
-                        alignItems={{ xs: "stretch", sm: "center" }}
-                      >
-                        <Button
-                          variant="outlined"
-                          disabled={
-                            !canEditSubmit ||
-                            isUpdating ||
-                            isSelectedReportSubmitted
-                          }
-                          onClick={() => {
-                            void handleSaveEdit(DailyReportStatus.DRAFT);
-                          }}
+
+                  {!isCreateMode && selectedReportId && (
+                    <Stack spacing={2}>
+                      <Divider />
+                      {editingReportId && editDraft ? (
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          spacing={1}
+                          alignItems={{ xs: "stretch", sm: "center" }}
                         >
-                          下書き保存
-                        </Button>
-                        <Button
-                          variant="contained"
-                          disabled={!canEditSubmit || isUpdating}
-                          onClick={() => {
-                            void handleSaveEdit(DailyReportStatus.SUBMITTED);
-                          }}
+                          <Button
+                            variant="outlined"
+                            disabled={
+                              !canEditSubmit ||
+                              isUpdating ||
+                              isSelectedReportSubmitted
+                            }
+                            onClick={() => {
+                              void handleSaveEdit(DailyReportStatus.DRAFT);
+                            }}
+                          >
+                            下書き保存
+                          </Button>
+                          <Button
+                            variant="contained"
+                            disabled={!canEditSubmit || isUpdating}
+                            onClick={() => {
+                              void handleSaveEdit(DailyReportStatus.SUBMITTED);
+                            }}
+                          >
+                            提出する
+                          </Button>
+                          <Button variant="text" onClick={handleCancelEdit}>
+                            キャンセル
+                          </Button>
+                        </Stack>
+                      ) : (
+                        <Box
+                          sx={{ display: "flex", justifyContent: "flex-end" }}
                         >
-                          提出する
-                        </Button>
-                        <Button variant="text" onClick={handleCancelEdit}>
-                          キャンセル
-                        </Button>
-                      </Stack>
-                    ) : (
-                      <Button
-                        variant="outlined"
-                        disabled={isUpdating}
-                        onClick={() => {
-                          if (selectedReport) handleStartEdit(selectedReport);
-                        }}
-                      >
-                        編集
-                      </Button>
-                    )}
-                  </CardActions>
-                )}
-              </Card>
-            </Stack>
+                          <Button
+                            variant="outlined"
+                            disabled={isUpdating}
+                            onClick={() => {
+                              if (selectedReport) {
+                                handleStartEdit(selectedReport);
+                              }
+                            }}
+                          >
+                            編集
+                          </Button>
+                        </Box>
+                      )}
+                    </Stack>
+                  )}
+                </Stack>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-      </Stack>
-    </Container>
+        </Stack>
+      </PageSection>
+    </Page>
   );
 }

@@ -6,7 +6,7 @@ import { PageSection } from "@/shared/ui/layout";
 export default function AttendanceListPage() {
   return (
     <Page title="勤怠一覧" maxWidth="xl">
-      <PageSection layoutVariant="detail" sx={{ height: 1, minHeight: 480 }}>
+      <PageSection layoutVariant="dashboard" sx={{ height: 1, minHeight: 480 }}>
         <AttendanceList />
       </PageSection>
     </Page>

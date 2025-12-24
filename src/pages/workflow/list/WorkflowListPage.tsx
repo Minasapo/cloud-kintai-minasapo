@@ -125,7 +125,7 @@ export default function WorkflowListPage() {
     return (
       <Page title="ワークフロー" maxWidth="lg">
         <PageSection
-          layoutVariant="detail"
+          layoutVariant="dashboard"
           sx={{
             display: "flex",
             minHeight: 240,
@@ -141,7 +141,7 @@ export default function WorkflowListPage() {
 
   return (
     <Page title="ワークフロー" maxWidth="lg">
-      <PageSection layoutVariant="detail">
+      <PageSection layoutVariant="dashboard">
         <Stack spacing={2}>
           <Alert severity="warning" variant="standard">
             現在この機能は開発中（ベータ）です。管理者より指示された場合を除き、ご利用はお控えください。
