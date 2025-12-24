@@ -1,21 +1,10 @@
-import {
-  Autocomplete,
-  Box,
-  Button,
-  LinearProgress,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
+import { LinearProgress, Stack, Typography } from "@mui/material";
 import { CloseDate } from "@shared/api/graphql/types";
 // Title removed per admin UI simplification
 import dayjs from "dayjs";
-import { lazy, Suspense, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { lazy, Suspense, useMemo, useState } from "react";
 
 import PageLoader from "@/shared/ui/feedback/PageLoader";
-import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
@@ -24,18 +13,13 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "../../../lib/reducers/snackbarReducer";
-import { defaultValues, Inputs } from "./common";
 import EditJobTermInputDialog from "./EditJobTermInputDialog";
+import JobTermBulkRegister from "./JobTermBulkRegister";
 
 const JobTermTable = lazy(() => import("./JobTermTable"));
 
 export default function JobTerm() {
   const dispatch = useAppDispatchV2();
-  const candidateCloseDates = Array.from(Array(12).keys()).map((i) => {
-    const date = dayjs().add(i, "month").date(1);
-    return date;
-  });
-
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editRow, setEditRow] = useState<CloseDate | null>(null);
 
@@ -48,29 +32,25 @@ export default function JobTerm() {
     deleteCloseDate,
   } = useCloseDates();
 
-  const {
-    control,
-    handleSubmit,
-    formState: { isDirty, isValid, isSubmitting },
-    reset,
-  } = useForm<Inputs>({
-    mode: "onChange",
-    defaultValues,
-  });
+  const candidateCloseDates = useMemo(() => {
+    const upcoming = Array.from(Array(12).keys()).map((i) =>
+      dayjs().add(i, "month").startOf("month")
+    );
+    const existing = closeDates.map((item) =>
+      dayjs(item.closeDate).startOf("month")
+    );
 
-  const onSubmit = (data: Inputs) => {
-    if (!data.closeDate || !data.startDate || !data.endDate) {
-      throw new Error("Please fill in all fields.");
-    }
+    const merged = [...upcoming, ...existing];
+    const uniqueByMonth = merged.reduce<dayjs.Dayjs[]>((acc, current) => {
+      const exists = acc.some((item) => item.isSame(current, "month"));
+      if (!exists) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
 
-    void createCloseDate({
-      closeDate: data.closeDate.toISOString(),
-      startDate: data.startDate?.toISOString(),
-      endDate: data.endDate?.toISOString(),
-    }).then(() => {
-      reset(defaultValues);
-    });
-  };
+    return uniqueByMonth.sort((a, b) => a.valueOf() - b.valueOf());
+  }, [closeDates]);
 
   if (closeDateLoading) {
     return <LinearProgress />;
@@ -92,79 +72,10 @@ export default function JobTerm() {
           <br />
           こちらで集計対象月を作成するとファイル出力時に選択して簡単に日付入力ができるようになります。
         </Typography>
-        <Box>
-          <Stack spacing={2}>
-            <Box>
-              <Controller
-                name="closeDate"
-                control={control}
-                rules={{ required: true }}
-                render={({ field: { value, onChange } }) => (
-                  <Autocomplete
-                    options={candidateCloseDates}
-                    value={value}
-                    getOptionLabel={(option) => option.format("YYYY/MM")}
-                    onChange={(_, v) => {
-                      if (!v) return;
-                      onChange(v);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="集計対象月" size="small" />
-                    )}
-                  />
-                )}
-              />
-            </Box>
-            <Box>
-              <Stack spacing={2} direction="row" alignItems="center">
-                <Box>
-                  <Controller
-                    name="startDate"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <DatePicker
-                        label="開始日"
-                        format={AttendanceDate.DisplayFormat}
-                        slotProps={{
-                          textField: { size: "small" },
-                        }}
-                        {...field}
-                      />
-                    )}
-                  />
-                </Box>
-                <Box>〜</Box>
-                <Box>
-                  <Controller
-                    name="endDate"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <DatePicker
-                        label="終了日"
-                        format={AttendanceDate.DisplayFormat}
-                        slotProps={{
-                          textField: { size: "small" },
-                        }}
-                        {...field}
-                      />
-                    )}
-                  />
-                </Box>
-              </Stack>
-            </Box>
-            <Box>
-              <Button
-                variant="contained"
-                disabled={!isDirty || !isValid || isSubmitting}
-                onClick={handleSubmit(onSubmit)}
-              >
-                追加
-              </Button>
-            </Box>
-          </Stack>
-        </Box>
+        <JobTermBulkRegister
+          existingCloseDates={closeDates}
+          createCloseDate={createCloseDate}
+        />
         <Suspense fallback={<PageLoader />}>
           <JobTermTable
             rows={closeDates}

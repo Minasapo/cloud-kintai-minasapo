@@ -16,9 +16,18 @@ import {
   useUpdateCompanyHolidayCalendarMutation,
   useUpdateHolidayCalendarMutation,
 } from "@entities/calendar/api/calendarApi";
-import { LinearProgress } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  LinearProgress,
+} from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { useCallback, useEffect, useMemo } from "react";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Footer from "@/widgets/layout/footer/Footer";
@@ -27,10 +36,83 @@ import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
+import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
+import { StaffRole } from "./hooks/useStaffs/useStaffs";
 import { createAppTheme } from "./lib/theme";
 import { AppShell } from "@/shared/ui/layout";
+
+type MissingCloseDateAlertProps = {
+  onConfirm: () => void;
+};
+
+function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
+  const {
+    closeDates,
+    loading: closeDatesLoading,
+    error: closeDatesError,
+  } = useCloseDates();
+  const [fetchStarted, setFetchStarted] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  const isCurrentDateCovered = useMemo(() => {
+    const today = dayjs().startOf("day").valueOf();
+    return closeDates.some((item) => {
+      const start = dayjs(item.startDate).startOf("day").valueOf();
+      const end = dayjs(item.endDate).startOf("day").valueOf();
+      return today >= start && today <= end;
+    });
+  }, [closeDates]);
+
+  useEffect(() => {
+    if (closeDatesLoading) {
+      setFetchStarted(true);
+    }
+  }, [closeDatesLoading]);
+
+  useEffect(() => {
+    if (!fetchStarted || closeDatesLoading) return;
+    if (closeDatesError || dismissed) return;
+
+    setOpen(!isCurrentDateCovered);
+  }, [
+    closeDatesError,
+    closeDatesLoading,
+    dismissed,
+    fetchStarted,
+    isCurrentDateCovered,
+  ]);
+
+  const handleLater = useCallback(() => {
+    setOpen(false);
+    setDismissed(true);
+  }, []);
+
+  const handleConfirm = useCallback(() => {
+    setOpen(false);
+    setDismissed(true);
+    onConfirm();
+  }, [onConfirm]);
+
+  return (
+    <Dialog open={open} onClose={handleLater} maxWidth="xs" fullWidth>
+      <DialogTitle>集計対象月の未登録</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          現在日付を含む集計対象月が登録されていません。設定画面で登録を確認してください。
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleLater}>あとで</Button>
+        <Button variant="contained" onClick={handleConfirm}>
+          確認する
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 /**
  * アプリケーションのレイアウトコンポーネント。
@@ -172,6 +254,11 @@ export default function Layout() {
       return result;
     },
     [deleteCompanyHolidayCalendarMutation]
+  );
+
+  const isAdminUser = useMemo(
+    () => isCognitoUserRole(StaffRole.ADMIN),
+    [isCognitoUserRole]
   );
 
   const isLoginRoute = location.pathname === "/login";
@@ -364,6 +451,11 @@ export default function Layout() {
                 snackbar: { "data-testid": "layout-snackbar" },
               }}
             />
+            {isAdminUser && (
+              <MissingCloseDateAlert
+                onConfirm={() => navigate("/admin/master/job_term")}
+              />
+            )}
           </AppContext.Provider>
         </AppConfigContext.Provider>
       </AuthContext.Provider>
