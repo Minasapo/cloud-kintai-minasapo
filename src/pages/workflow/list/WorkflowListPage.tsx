@@ -145,120 +145,120 @@ export default function WorkflowListPage() {
     <Page title="ワークフロー" maxWidth="lg">
       <PageSection layoutVariant="dashboard">
         <Box sx={dashboardInnerSurfaceSx}>
-          <Stack spacing={2}>
-            <Alert severity="warning" variant="standard">
-              現在この機能は開発中（ベータ）です。管理者より指示された場合を除き、ご利用はお控えください。
-            </Alert>
-            <Stack
-              direction={{ xs: "column", md: "row" }}
-              spacing={2}
-              alignItems={{ xs: "stretch", md: "center" }}
-            >
+          <Stack spacing={3}>
+            <Stack spacing={2}>
+              <Alert severity="warning" variant="standard">
+                現在この機能は開発中（ベータ）です。管理者より指示された場合を除き、ご利用はお控えください。
+              </Alert>
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={2}
+                alignItems={{ xs: "stretch", md: "center" }}
+              >
+                <Box
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 1.5,
+                    alignItems: "center",
+                  }}
+                >
+                  {anyFilterActive && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<ClearIcon fontSize="small" />}
+                      onClick={() => {
+                        clearFilters();
+                        filterRowRef.current?.closeAllPopovers();
+                      }}
+                    >
+                      すべてのフィルターをクリア
+                    </Button>
+                  )}
+                </Box>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => navigate("/workflow/new")}
+                  >
+                    新規作成
+                  </Button>
+                </Box>
+              </Stack>
+            </Stack>
+
+            {currentStaffId ? (
+              <Stack spacing={2}>
+                {error && <Alert severity="error">{error}</Alert>}
+                <Table size="small" sx={{ tableLayout: "fixed" }} aria-hidden>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>種別</TableCell>
+                      <TableCell>申請日</TableCell>
+                      <TableCell>ステータス</TableCell>
+                      <TableCell>作成日</TableCell>
+                    </TableRow>
+                    <WorkflowListFilters
+                      ref={filterRowRef}
+                      filters={filters}
+                      setFilter={setFilter}
+                    />
+                  </TableHead>
+                </Table>
+                <Box sx={{ height: 520, width: "100%" }}>
+                  <DataGrid
+                    rows={filteredItems}
+                    columns={columns}
+                    getRowId={getRowId}
+                    disableColumnMenu
+                    disableColumnSelector
+                    disableDensitySelector
+                    disableRowSelectionOnClick
+                    hideFooter
+                    loading={loading}
+                    onRowClick={handleRowClick}
+                    rowHeight={56}
+                    columnHeaderHeight={0}
+                    getRowClassName={getRowClassName}
+                    sx={{
+                      "& .MuiDataGrid-columnHeaders": { display: "none" },
+                      "& .status-cancelled .MuiDataGrid-cell": {
+                        color: "text.disabled",
+                      },
+                      "& .MuiDataGrid-row": {
+                        cursor: "pointer",
+                      },
+                      "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within":
+                        {
+                          outline: "none",
+                        },
+                    }}
+                  />
+                </Box>
+              </Stack>
+            ) : (
               <Box
                 sx={{
-                  flex: 1,
                   display: "flex",
-                  flexWrap: "wrap",
-                  gap: 1.5,
-                  alignItems: "center",
+                  justifyContent: "center",
+                  py: 4,
                 }}
               >
-                {anyFilterActive && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<ClearIcon fontSize="small" />}
-                    onClick={() => {
-                      clearFilters();
-                      filterRowRef.current?.closeAllPopovers();
-                    }}
-                  >
-                    すべてのフィルターをクリア
-                  </Button>
+                {loading ? (
+                  <CircularProgress />
+                ) : (
+                  <Alert severity="info">
+                    ログイン中のアカウントに紐づくスタッフ情報が見つからないため、一覧を表示できません。
+                    <br />
+                    スタッフアカウントが未登録の場合は管理者にお問い合わせください。
+                  </Alert>
                 )}
               </Box>
-              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => navigate("/workflow/new")}
-                >
-                  新規作成
-                </Button>
-              </Box>
-            </Stack>
+            )}
           </Stack>
-
-          {currentStaffId ? (
-            <Box sx={{ mt: 3 }}>
-              {error && (
-                <Box sx={{ mb: 2 }}>
-                  <Alert severity="error">{error}</Alert>
-                </Box>
-              )}
-              <Table
-                size="small"
-                sx={{ mb: 1, tableLayout: "fixed" }}
-                aria-hidden
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell>種別</TableCell>
-                    <TableCell>申請日</TableCell>
-                    <TableCell>ステータス</TableCell>
-                    <TableCell>作成日</TableCell>
-                  </TableRow>
-                  <WorkflowListFilters
-                    ref={filterRowRef}
-                    filters={filters}
-                    setFilter={setFilter}
-                  />
-                </TableHead>
-              </Table>
-              <Box sx={{ height: 520, width: "100%" }}>
-                <DataGrid
-                  rows={filteredItems}
-                  columns={columns}
-                  getRowId={getRowId}
-                  disableColumnMenu
-                  disableColumnSelector
-                  disableDensitySelector
-                  disableRowSelectionOnClick
-                  hideFooter
-                  loading={loading}
-                  onRowClick={handleRowClick}
-                  rowHeight={56}
-                  columnHeaderHeight={0}
-                  getRowClassName={getRowClassName}
-                  sx={{
-                    "& .MuiDataGrid-columnHeaders": { display: "none" },
-                    "& .status-cancelled .MuiDataGrid-cell": {
-                      color: "text.disabled",
-                    },
-                    "& .MuiDataGrid-row": {
-                      cursor: "pointer",
-                    },
-                    "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within":
-                      {
-                        outline: "none",
-                      },
-                  }}
-                />
-              </Box>
-            </Box>
-          ) : (
-            <Box sx={{ my: 4, display: "flex", justifyContent: "center" }}>
-              {loading ? (
-                <CircularProgress />
-              ) : (
-                <Alert severity="info">
-                  ログイン中のアカウントに紐づくスタッフ情報が見つからないため、一覧を表示できません。
-                  <br />
-                  スタッフアカウントが未登録の場合は管理者にお問い合わせください。
-                </Alert>
-              )}
-            </Box>
-          )}
         </Box>
       </PageSection>
     </Page>
