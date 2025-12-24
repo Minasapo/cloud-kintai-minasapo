@@ -9,14 +9,7 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
-import {
-  Box,
-  Breadcrumbs,
-  LinearProgress,
-  Stack,
-  styled,
-  Typography,
-} from "@mui/material";
+import { Box, LinearProgress, Stack, styled, Typography } from "@mui/material";
 /**
  * MaterialUIのDatePickerコンポーネント。
  */
@@ -31,7 +24,7 @@ import dayjs from "dayjs";
  * ReactのContext, Hooks。
  */
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
@@ -187,15 +180,7 @@ export default function AttendanceTable() {
   return (
     <Stack spacing={2}>
       <Box>
-        <Breadcrumbs>
-          <Link to="/" color="inherit">
-            TOP
-          </Link>
-          <Typography color="text.primary">勤怠一覧</Typography>
-        </Breadcrumbs>
-      </Box>
-      <Box>
-        <Title>{`勤怠一覧(${totalTime.toFixed(1)}h)`}</Title>
+        <Title>{`直近30日の合計勤務時間: ${totalTime.toFixed(1)}h`}</Title>
       </Box>
       <DescriptionTypography variant="body1">
         今日から30日前までの勤怠情報を表示しています
