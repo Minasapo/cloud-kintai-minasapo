@@ -117,14 +117,6 @@ export default function AdminStaffAttendanceList() {
           gap: PAGE_SECTION_GAP,
         }}
       >
-        <PageSection
-          variant="surface"
-          layoutVariant="dashboard"
-          sx={{ gap: SECTION_CONTENT_GAP }}
-        >
-          <AttendanceGraph attendances={attendances} />
-        </PageSection>
-
         {pendingAttendances.length > 0 && (
           <PageSection
             variant="surface"
@@ -155,6 +147,14 @@ export default function AdminStaffAttendanceList() {
             navigate={navigate}
             buildNavigatePath={buildCalendarNavigatePath}
           />
+        </PageSection>
+
+        <PageSection
+          variant="surface"
+          layoutVariant="dashboard"
+          sx={{ gap: SECTION_CONTENT_GAP }}
+        >
+          <AttendanceGraph attendances={attendances} />
         </PageSection>
       </Stack>
       <ChangeRequestQuickViewDialog
