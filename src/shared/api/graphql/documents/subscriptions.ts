@@ -61,6 +61,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     workEndTime
     lunchRestStartTime
     lunchRestEndTime
+    standardWorkHours
     amHolidayStartTime
     amHolidayEndTime
     pmHolidayStartTime
@@ -118,6 +119,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     workEndTime
     lunchRestStartTime
     lunchRestEndTime
+    standardWorkHours
     amHolidayStartTime
     amHolidayEndTime
     pmHolidayStartTime
@@ -175,6 +177,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     workEndTime
     lunchRestStartTime
     lunchRestEndTime
+    standardWorkHours
     amHolidayStartTime
     amHolidayEndTime
     pmHolidayStartTime

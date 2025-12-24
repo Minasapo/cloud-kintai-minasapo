@@ -28,6 +28,7 @@ export declare type AppConfigUpdateFormInputValues = {
     workEndTime?: string;
     lunchRestStartTime?: string;
     lunchRestEndTime?: string;
+    standardWorkHours?: number;
     amHolidayStartTime?: string;
     amHolidayEndTime?: string;
     pmHolidayStartTime?: string;
@@ -45,6 +46,7 @@ export declare type AppConfigUpdateFormValidationValues = {
     workEndTime?: ValidationFunction<string>;
     lunchRestStartTime?: ValidationFunction<string>;
     lunchRestEndTime?: ValidationFunction<string>;
+    standardWorkHours?: ValidationFunction<number>;
     amHolidayStartTime?: ValidationFunction<string>;
     amHolidayEndTime?: ValidationFunction<string>;
     pmHolidayStartTime?: ValidationFunction<string>;
@@ -64,6 +66,7 @@ export declare type AppConfigUpdateFormOverridesProps = {
     workEndTime?: PrimitiveOverrideProps<TextFieldProps>;
     lunchRestStartTime?: PrimitiveOverrideProps<TextFieldProps>;
     lunchRestEndTime?: PrimitiveOverrideProps<TextFieldProps>;
+    standardWorkHours?: PrimitiveOverrideProps<TextFieldProps>;
     amHolidayStartTime?: PrimitiveOverrideProps<TextFieldProps>;
     amHolidayEndTime?: PrimitiveOverrideProps<TextFieldProps>;
     pmHolidayStartTime?: PrimitiveOverrideProps<TextFieldProps>;
