@@ -210,8 +210,13 @@ const createComponents = (
   tokens: DesignTokens,
   palette: AppPalette
 ): ThemeOptions["components"] => {
-  const { spacing, radius, typography, component, shadow } = tokens;
+  const { spacing, radius, typography, component, shadow, color } = tokens;
   const buttonPadding = `${toPx(spacing.xs)} ${toPx(spacing.lg)}`;
+  const pageSectionRadius = component.pageSection.radius ?? radius.lg;
+  const pageSectionBackground = component.pageSection.background;
+  const surfaceBorderColor = color.neutral[200];
+  const cardShadow = component.pageSection.shadow ?? shadow.card;
+  const cardPadding = `${toPx(spacing.md)} ${toPx(spacing.lg)}`;
 
   return {
     MuiCssBaseline: {
@@ -261,6 +266,35 @@ const createComponents = (
         },
         containedSecondary: {
           color: palette.secondary.contrastText,
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: pageSectionBackground,
+          color: component.appShell.textColor,
+        },
+        rounded: {
+          borderRadius: toPx(pageSectionRadius),
+        },
+        outlined: {
+          border: `1px solid ${surfaceBorderColor}`,
+          boxShadow: "none",
+        },
+      },
+    },
+    MuiCard: {
+      defaultProps: {
+        elevation: 0,
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: toPx(pageSectionRadius),
+          boxShadow: cardShadow,
+          padding: cardPadding,
+          backgroundColor: pageSectionBackground,
+          border: `1px solid ${surfaceBorderColor}`,
         },
       },
     },
