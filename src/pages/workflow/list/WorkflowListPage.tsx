@@ -147,7 +147,7 @@ export default function WorkflowListPage() {
 
   if (!isAuthenticated) {
     return (
-      <Page title="ワークフロー" maxWidth="lg">
+      <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
         <PageSection layoutVariant="dashboard">
           <Box
             sx={{
@@ -166,7 +166,7 @@ export default function WorkflowListPage() {
   }
 
   return (
-    <Page title="ワークフロー" maxWidth="lg">
+    <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
       <PageSection layoutVariant="dashboard">
         <Box sx={dashboardInnerSurfaceSx}>
           <Stack spacing={3}>

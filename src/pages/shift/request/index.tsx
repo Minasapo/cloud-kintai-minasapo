@@ -6,7 +6,7 @@ import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
 
 export default function ShiftRequestPage() {
   return (
-    <Page title="希望シフト" maxWidth="xl">
+    <Page title="希望シフト" maxWidth="xl" showDefaultHeader={false}>
       <PageSection layoutVariant="dashboard">
         <Box sx={{ ...dashboardInnerSurfaceSx, minHeight: 480 }}>
           <ShiftRequestForm />

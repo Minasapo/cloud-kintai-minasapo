@@ -577,7 +577,7 @@ export default function DailyReport() {
   };
 
   return (
-    <Page title="日報" maxWidth="xl">
+    <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
       <PageSection layoutVariant="dashboard">
         <Stack spacing={3}>
           <Box>
