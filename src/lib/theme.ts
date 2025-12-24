@@ -1,8 +1,7 @@
 // cspell:words Noto
 import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 
-import { getDesignTokens } from "@/shared/designSystem";
-import { resolveThemeColor } from "@/constants/theme";
+import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -65,25 +64,72 @@ export type Color =
   | "delete";
 export type Variant = "text" | "outlined" | "contained";
 
-const createPalette = (brandPrimary: string) => ({
-  primary: { main: brandPrimary, contrastText: "#fff" },
-  secondary: { main: "#fff", contrastText: brandPrimary },
-  success: { main: brandPrimary, contrastText: "#fff" },
-  error: { main: "#B33D47", contrastText: "#fff" },
-  warning: { main: "#B33D47", contrastText: "#fff" },
-  cancel: { main: "#B33D47", contrastText: "#fff" },
-  rest: { main: "#2ACEDB", contrastText: "#fff" },
-  clock_in: { main: brandPrimary, contrastText: "#fff" },
-  clock_out: { main: "#B33D47", contrastText: "#fff" },
-  login: { main: brandPrimary, contrastText: "#fff" },
-  logout: { main: "#B33D47", contrastText: "#fff" },
-  delete: { main: "#B33D47", contrastText: "#fff" },
-});
+const createPalette = (tokens: DesignTokens) => {
+  const {
+    color: { brand, feedback, neutral },
+  } = tokens;
+  const lightOnPrimary = brand.primary.contrastText;
+  const darkText = neutral[900];
+
+  return {
+    primary: {
+      main: brand.primary.base,
+      contrastText: lightOnPrimary,
+    },
+    secondary: {
+      main: brand.primary.contrastText,
+      contrastText: brand.primary.base,
+    },
+    success: {
+      main: feedback.success.base,
+      contrastText: lightOnPrimary,
+    },
+    error: {
+      main: feedback.danger.base,
+      contrastText: lightOnPrimary,
+    },
+    warning: {
+      main: feedback.warning.base,
+      contrastText: lightOnPrimary,
+    },
+    cancel: {
+      main: feedback.danger.base,
+      contrastText: lightOnPrimary,
+    },
+    rest: {
+      main: brand.primary.surface,
+      contrastText: brand.primary.base,
+    },
+    clock_in: {
+      main: brand.primary.base,
+      contrastText: lightOnPrimary,
+    },
+    clock_out: {
+      main: feedback.danger.base,
+      contrastText: lightOnPrimary,
+    },
+    login: {
+      main: brand.primary.base,
+      contrastText: lightOnPrimary,
+    },
+    logout: {
+      main: feedback.danger.base,
+      contrastText: lightOnPrimary,
+    },
+    delete: {
+      main: feedback.danger.base,
+      contrastText: lightOnPrimary,
+    },
+    info: {
+      main: feedback.info.base,
+      contrastText: darkText,
+    },
+  };
+};
 
 const createThemeConfig = (brandPrimary?: string) => {
   const tokens = getDesignTokens(brandPrimary ? { brandPrimary } : undefined);
-  const resolvedPrimary = resolveThemeColor(brandPrimary);
-  const palette = createPalette(resolvedPrimary);
+  const palette = createPalette(tokens);
 
   return createTheme({
     palette,
