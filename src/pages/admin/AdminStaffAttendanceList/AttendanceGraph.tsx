@@ -1,8 +1,9 @@
 import { Box, CircularProgress, Paper } from "@mui/material";
-import { lazy, Suspense } from "react";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
+import { lazy, Suspense, useContext, useMemo } from "react";
 
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 
@@ -16,29 +17,61 @@ export function AttendanceGraph({
 }: {
   attendances: Attendance[];
 }) {
-  const workTimeData = attendances.map((attendance) => {
-    if (!attendance.startTime || !attendance.endTime) return 0;
+  const {
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useContext(AppConfigContext);
 
-    const workTime = calcTotalWorkTime(
-      attendance.startTime,
-      attendance.endTime
-    );
-    return workTime;
-  });
+  const standardWorkHours = useMemo(() => {
+    const start = getStartTime();
+    const end = getEndTime();
+    const lunchStart = getLunchRestStartTime();
+    const lunchEnd = getLunchRestEndTime();
 
-  const restTimeData = attendances.map((attendance) => {
-    if (!attendance.rests) return 0;
+    const baseHours = end.diff(start, "hour", true);
+    const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
+    return Math.max(baseHours - lunchHours, 0);
+  }, [getStartTime, getEndTime, getLunchRestStartTime, getLunchRestEndTime]);
 
-    const restTime = attendance.rests
-      .filter((item): item is NonNullable<typeof item> => !!item)
-      .reduce((acc, rest) => {
-        if (!rest.startTime || !rest.endTime) return acc;
+  const { workTimeData, restTimeData, overtimeData } = attendances.reduce(
+    (acc, attendance) => {
+      if (!attendance.startTime || !attendance.endTime) {
+        acc.workTimeData.push(0);
+        acc.restTimeData.push(0);
+        acc.overtimeData.push(0);
+        return acc;
+      }
 
-        return acc + calcTotalRestTime(rest.startTime, rest.endTime);
-      }, 0);
+      const grossWork = calcTotalWorkTime(
+        attendance.startTime,
+        attendance.endTime
+      );
 
-    return restTime;
-  });
+      const totalRest = (attendance.rests ?? [])
+        .filter((item): item is NonNullable<typeof item> => !!item)
+        .reduce((sum, rest) => {
+          if (!rest.startTime || !rest.endTime) return sum;
+          return sum + calcTotalRestTime(rest.startTime, rest.endTime);
+        }, 0);
+
+      const netWork = Math.max(grossWork - totalRest, 0);
+      const overtime = Math.max(netWork - standardWorkHours, 0);
+      const regularWork = Math.max(netWork - overtime, 0);
+
+      acc.workTimeData.push(regularWork);
+      acc.restTimeData.push(totalRest);
+      acc.overtimeData.push(overtime);
+
+      return acc;
+    },
+    {
+      workTimeData: [] as number[],
+      restTimeData: [] as number[],
+      overtimeData: [] as number[],
+    }
+  );
 
   const seriesA = {
     data: workTimeData,
@@ -47,6 +80,10 @@ export function AttendanceGraph({
   const seriesB = {
     data: restTimeData,
     label: "休憩時間",
+  };
+  const seriesC = {
+    data: overtimeData,
+    label: "残業時間",
   };
 
   const props = {
@@ -77,6 +114,7 @@ export function AttendanceGraph({
           series={[
             { ...seriesA, stack: "time" },
             { ...seriesB, stack: "time" },
+            { ...seriesC, stack: "time" },
           ]}
           {...props}
         />
