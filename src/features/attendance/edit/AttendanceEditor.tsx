@@ -64,6 +64,7 @@ import ChangeRequestDialog from "./ChangeRequestDialog/ChangeRequestDialog";
 // eslint-disable-next-line import/no-cycle
 import EditAttendanceHistoryList from "./EditAttendanceHistoryList/EditAttendanceHistoryList";
 import { GoDirectlyFlagCheckbox } from "./GoDirectlyFlagCheckbox";
+import { useAttendanceRecord } from "./hooks/useAttendanceRecord";
 import IsDeemedHolidayFlagInput from "./IsDeemedHolidayFlagInput";
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
@@ -90,7 +91,6 @@ import PaidHolidayFlagInputCommon from "./PaidHolidayFlagInput";
 import QuickInputButtons from "./QuickInputButtons";
 import ReturnDirectlyFlagInput from "./ReturnDirectlyFlagInput";
 import { SystemCommentList } from "./SystemCommentList";
-import { useAttendanceRecord } from "./hooks/useAttendanceRecord";
 
 const SaveButton = styled(Button)(({ theme }) => ({
   width: 150,
@@ -139,9 +139,10 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const [enabledSendMail, setEnabledSendMail] = useState<boolean>(true);
   const [vacationTab, setVacationTab] = useState<number>(0);
 
-  const logger = new Logger(
-    "AttendanceEditor",
-    import.meta.env.DEV ? "DEBUG" : "ERROR"
+  const logger = useMemo(
+    () =>
+      new Logger("AttendanceEditor", import.meta.env.DEV ? "DEBUG" : "ERROR"),
+    []
   );
 
   const {
