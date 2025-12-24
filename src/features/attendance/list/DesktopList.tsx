@@ -34,12 +34,12 @@ import { WorkDateTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkDa
 import { WorkTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkTimeTableCell";
 
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
+import DesktopCalendarView from "./DesktopCalendarView";
 import {
   AttendanceRowVariant,
   attendanceRowVariantStyles,
   getAttendanceRowVariant,
 } from "./getAttendanceRowClassName";
-import DesktopCalendarView from "./DesktopCalendarView";
 
 const DesktopBox = styled(Box)(({ theme }) => ({
   padding: "0px 40px 40px 40px",
@@ -219,7 +219,9 @@ export default function DesktopList({
         companyHolidayCalendars={companyHolidayCalendars}
         navigate={navigate}
       />
-      <AttendanceGraph attendances={attendances} />
+      <Box sx={{ mt: 3 }}>
+        <AttendanceGraph attendances={attendances} />
+      </Box>
     </DesktopBox>
   );
 }
