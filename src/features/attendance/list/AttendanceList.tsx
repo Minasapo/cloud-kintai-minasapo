@@ -37,8 +37,6 @@ import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 import { designTokenVar } from "@/shared/designSystem";
-
-// import DesktopCalendarView from "./DesktopCalendarView";
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";
 

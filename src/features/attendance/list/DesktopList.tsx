@@ -39,6 +39,7 @@ import {
   attendanceRowVariantStyles,
   getAttendanceRowVariant,
 } from "./getAttendanceRowClassName";
+import DesktopCalendarView from "./DesktopCalendarView";
 
 const DesktopBox = styled(Box)(({ theme }) => ({
   padding: "0px 40px 40px 40px",
@@ -212,79 +213,13 @@ export default function DesktopList({
           </Box>
         </Box>
       )}
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>勤務時間</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>
-                休憩時間(直近)
-              </TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>作成日時</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>更新日時</TableCell>
-              <TableCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {attendances.map((attendance, index) => {
-              const rowVariant = getRowVariant(attendance);
-              return (
-                <TableRow
-                  key={index}
-                  sx={attendanceRowVariantStyles[rowVariant]}
-                >
-                  <TableCell>
-                    <Stack direction="row" spacing={0} alignItems="center">
-                      <AttendanceStatusTooltip
-                        staff={staff}
-                        attendance={attendance}
-                        holidayCalendars={holidayCalendars}
-                        companyHolidayCalendars={companyHolidayCalendars}
-                      />
-                      <IconButton onClick={() => handleEdit(attendance)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
-
-                  {/* 勤務日 */}
-                  <WorkDateTableCell
-                    workDate={attendance.workDate}
-                    holidayCalendars={holidayCalendars}
-                    companyHolidayCalendars={companyHolidayCalendars}
-                  />
-
-                  {/* 勤務時間 */}
-                  <WorkTimeTableCell attendance={attendance} />
-
-                  {/* 休憩時間(最近) */}
-                  <RestTimeTableCell attendance={attendance} />
-
-                  {/* 摘要 */}
-                  <SummaryTableCell
-                    substituteHolidayDate={attendance.substituteHolidayDate}
-                    remarks={attendance.remarks}
-                    specialHolidayFlag={attendance.specialHolidayFlag}
-                    paidHolidayFlag={attendance.paidHolidayFlag}
-                    absentFlag={attendance.absentFlag}
-                  />
-
-                  {/* 作成日時 */}
-                  <CreatedAtTableCell createdAt={attendance.createdAt} />
-
-                  {/* 更新日時 */}
-                  <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
-
-                  <TableCell sx={{ width: 1 }} />
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <DesktopCalendarView
+        attendances={attendances}
+        staff={staff}
+        holidayCalendars={holidayCalendars}
+        companyHolidayCalendars={companyHolidayCalendars}
+        navigate={navigate}
+      />
     </DesktopBox>
   );
 }
