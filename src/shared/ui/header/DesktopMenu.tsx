@@ -30,6 +30,10 @@ const DesktopMenu = ({
     "component.headerMenu.paddingX",
     "8px"
   );
+  const MENU_ITEM_PADDING_Y = designTokenVar(
+    "component.headerMenu.paddingY",
+    "4px"
+  );
   const MENU_ITEM_RADIUS = designTokenVar(
     "component.headerMenu.borderRadius",
     "8px"
@@ -62,9 +66,9 @@ const DesktopMenu = ({
   const buildLinkSx = (isActive: boolean) => ({
     display: "flex",
     alignItems: "center",
-    height: "100%",
     minHeight: MENU_ITEM_HEIGHT,
     paddingInline: MENU_ITEM_PADDING_X,
+    paddingBlock: MENU_ITEM_PADDING_Y,
     color: isActive ? MENU_ITEM_ACTIVE_COLOR : MENU_ITEM_COLOR,
     backgroundColor: isActive ? MENU_ITEM_ACTIVE_BACKGROUND : "transparent",
     borderRadius: MENU_ITEM_RADIUS,
@@ -86,7 +90,6 @@ const DesktopMenu = ({
     <Box
       sx={{
         width: 1,
-        height: 1,
         display: {
           xs: "none",
           md: "flex",
@@ -98,7 +101,6 @@ const DesktopMenu = ({
         direction="row"
         sx={{
           width: "auto",
-          height: 1,
           columnGap: MENU_GAP,
         }}
       >
