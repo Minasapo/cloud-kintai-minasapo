@@ -46,6 +46,7 @@ import { getWorkStatus } from "@/lib/attendance/workStatus";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { Logger } from "@/lib/logger";
+import { designTokenVar } from "@/shared/designSystem";
 import Clock from "@/shared/ui/clock/Clock";
 import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
 import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
@@ -280,24 +281,45 @@ export default function TimeRecorder(): JSX.Element {
     return `${dayjs(attendance.endTime).format("HH:mm")} 退勤`;
   }, [attendance?.endTime]);
 
+  const BADGE_PADDING_X = designTokenVar("spacing.sm", "8px");
+  const BADGE_PADDING_Y = designTokenVar("spacing.xs", "4px");
+  const BADGE_RADIUS = designTokenVar("radius.sm", "4px");
+  const BADGE_FONT_WEIGHT = designTokenVar("typography.fontWeight.bold", "600");
+  const CLOCK_IN_BADGE_BG = designTokenVar(
+    "color.feedback.success.surface",
+    "#E4F8C9"
+  );
+  const CLOCK_IN_BADGE_TEXT = designTokenVar(
+    "color.feedback.success.base",
+    "#1EAA6A"
+  );
+  const CLOCK_OUT_BADGE_BG = designTokenVar(
+    "color.feedback.danger.surface",
+    "#FDE0E0"
+  );
+  const CLOCK_OUT_BADGE_TEXT = designTokenVar(
+    "color.feedback.danger.base",
+    "#B33D47"
+  );
+
   const clockInBadgeStyles: SxProps<Theme> = {
     display: "inline-block",
-    px: 1.5,
-    py: 0.25,
-    borderRadius: 1,
-    bgcolor: "#E4F8C9",
-    color: (theme) => theme.palette.success.dark,
-    fontWeight: 700,
+    px: BADGE_PADDING_X,
+    py: BADGE_PADDING_Y,
+    borderRadius: BADGE_RADIUS,
+    bgcolor: CLOCK_IN_BADGE_BG,
+    color: CLOCK_IN_BADGE_TEXT,
+    fontWeight: BADGE_FONT_WEIGHT,
   };
 
   const clockOutBadgeStyles: SxProps<Theme> = {
     display: "inline-block",
-    px: 1.5,
-    py: 0.25,
-    borderRadius: 1,
-    bgcolor: "#FDE0E0",
-    color: (theme) => theme.palette.error.dark,
-    fontWeight: 700,
+    px: BADGE_PADDING_X,
+    py: BADGE_PADDING_Y,
+    borderRadius: BADGE_RADIUS,
+    bgcolor: CLOCK_OUT_BADGE_BG,
+    color: CLOCK_OUT_BADGE_TEXT,
+    fontWeight: BADGE_FONT_WEIGHT,
   };
 
   const handleClockIn = useCallback(
@@ -480,7 +502,7 @@ export default function TimeRecorder(): JSX.Element {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Typography
-            variant="h6"
+            variant="h3"
             textAlign="center"
             data-testid="work-status-text"
           >
@@ -490,7 +512,7 @@ export default function TimeRecorder(): JSX.Element {
             <Box display="flex" justifyContent="center" gap={1} mt={0.5}>
               {clockInDisplayText && (
                 <Typography
-                  variant="body2"
+                  variant="body1"
                   textAlign="center"
                   data-testid="clock-in-time-text"
                   sx={clockInBadgeStyles}
@@ -500,7 +522,7 @@ export default function TimeRecorder(): JSX.Element {
               )}
               {clockOutDisplayText && (
                 <Typography
-                  variant="body2"
+                  variant="body1"
                   textAlign="center"
                   data-testid="clock-out-time-text"
                   sx={clockOutBadgeStyles}
@@ -557,24 +579,6 @@ export default function TimeRecorder(): JSX.Element {
         <Grid item xs={6}>
           <RestEndItem workStatus={workStatus} onClick={handleRestEnd} />
         </Grid>
-
-        {/* <Grid item xs={12}>
-          <TimeRecorderRemarks
-            attendance={attendance}
-            onSave={(remarks) => {
-              if (!cognitoUser) return;
-
-              updateRemarks(cognitoUser.id, today, remarks || "")
-                .then(() => {
-                  dispatch(setSnackbarSuccess(MESSAGE_CODE.S02003));
-                })
-                .catch((e) => {
-                  logger.debug(e);
-                  dispatch(setSnackbarError(MESSAGE_CODE.E02003));
-                });
-            }}
-          />
-        </Grid> */}
         <Grid item xs={12}>
           <QuickDailyReportCard staffId={staff?.id ?? null} date={today} />
         </Grid>
