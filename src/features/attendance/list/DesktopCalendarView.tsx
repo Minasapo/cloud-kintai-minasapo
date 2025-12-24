@@ -482,6 +482,7 @@ export default function DesktopCalendarView({
                 holidayCalendars,
                 companyHolidayCalendars
               );
+              const isWeekend = date.day() === 0 || date.day() === 6;
               const { holidayName, companyHolidayName } = getHolidayNames(
                 date,
                 holidayCalendars,
@@ -499,14 +500,17 @@ export default function DesktopCalendarView({
                   !date.isBefore(term.start, "day") &&
                   !date.isAfter(term.end, "day")
               );
-              const primaryTerm = termsForDay[0];
+              const allowTermHighlight = !holidayLike && !isWeekend;
+              const primaryTerm = allowTermHighlight
+                ? termsForDay[0]
+                : undefined;
               const termBackground = primaryTerm
                 ? alpha(primaryTerm.color, 0.08)
                 : undefined;
               const termBorder = primaryTerm
                 ? `3px solid ${alpha(primaryTerm.color, 0.35)}`
                 : undefined;
-              const hasOverlap = termsForDay.length > 1;
+              const hasOverlap = allowTermHighlight && termsForDay.length > 1;
 
               return (
                 <DayCell
