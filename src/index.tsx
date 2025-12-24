@@ -11,6 +11,7 @@ import { Provider } from "react-redux";
 import { RouterProvider } from "react-router-dom";
 
 import { bootstrapDesignSystem } from "@/shared/designSystem";
+import "@/lib/dayjs-locale";
 
 import { store } from "./app/store";
 import config from "./aws-exports";
@@ -33,7 +34,7 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <Authenticator.Provider>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
           <RouterProvider router={router} fallbackElement={<PageLoader />} />
         </LocalizationProvider>
       </Authenticator.Provider>
