@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import {
   Attendance,
+  CloseDate,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
@@ -54,12 +55,18 @@ export default function DesktopList({
   holidayCalendars,
   companyHolidayCalendars,
   navigate,
+  closeDates,
+  closeDatesLoading,
+  closeDatesError,
 }: {
   attendances: Attendance[];
   staff: Staff | null | undefined;
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
   navigate: NavigateFunction;
+  closeDates?: CloseDate[];
+  closeDatesLoading?: boolean;
+  closeDatesError?: Error | null;
 }) {
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
     if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
@@ -218,6 +225,9 @@ export default function DesktopList({
         holidayCalendars={holidayCalendars}
         companyHolidayCalendars={companyHolidayCalendars}
         navigate={navigate}
+        closeDates={closeDates}
+        closeDatesLoading={closeDatesLoading}
+        closeDatesError={closeDatesError}
       />
       <Box sx={{ mt: 3 }}>
         <AttendanceGraph attendances={attendances} />

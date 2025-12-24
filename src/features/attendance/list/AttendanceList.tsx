@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
+import useCloseDates from "@/hooks/useCloseDates/useCloseDates";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
@@ -78,6 +79,11 @@ export default function AttendanceTable() {
     isFetching: isCompanyHolidayCalendarsFetching,
     error: companyHolidayCalendarsError,
   } = useGetCompanyHolidayCalendarsQuery();
+  const {
+    closeDates,
+    loading: closeDatesLoading,
+    error: closeDatesError,
+  } = useCloseDates();
   const calendarLoading =
     isHolidayCalendarsLoading ||
     isHolidayCalendarsFetching ||
@@ -133,6 +139,13 @@ export default function AttendanceTable() {
   }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch, logger]);
 
   useEffect(() => {
+    if (closeDatesError) {
+      logger.debug(closeDatesError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [closeDatesError, dispatch, logger]);
+
+  useEffect(() => {
     if (attendancesError) {
       logger.debug(attendancesError);
       dispatch(setSnackbarError(MESSAGE_CODE.E02001));
@@ -165,7 +178,7 @@ export default function AttendanceTable() {
     return totalWorkTime - totalRestTime;
   }, [attendances]);
 
-  if (attendanceLoading || calendarLoading) {
+  if (attendanceLoading || calendarLoading || closeDatesLoading) {
     return <LinearProgress />;
   }
 
@@ -212,6 +225,9 @@ export default function AttendanceTable() {
         companyHolidayCalendars={companyHolidayCalendars}
         navigate={navigate}
         staff={staff}
+        closeDates={closeDates}
+        closeDatesLoading={closeDatesLoading}
+        closeDatesError={closeDatesError}
       />
       <MobileList
         attendances={attendances}

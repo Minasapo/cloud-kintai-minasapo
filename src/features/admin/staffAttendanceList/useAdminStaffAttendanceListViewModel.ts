@@ -9,6 +9,7 @@ import {
 } from "@entities/calendar/api/calendarApi";
 import {
   Attendance,
+  CloseDate,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
@@ -21,6 +22,7 @@ import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
 } from "@/features/attendance/list/getAttendanceRowClassName";
+import useCloseDates from "@/hooks/useCloseDates/useCloseDates";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
 import { ChangeRequest } from "@/lib/ChangeRequest";
@@ -56,6 +58,12 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     isHolidayCalendarsFetching ||
     isCompanyHolidayCalendarsLoading ||
     isCompanyHolidayCalendarsFetching;
+
+  const {
+    closeDates,
+    loading: closeDatesLoading,
+    error: closeDatesError,
+  } = useCloseDates();
 
   const shouldFetchAttendances = Boolean(staffId);
   const {
@@ -204,6 +212,9 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     holidayCalendars,
     companyHolidayCalendars,
     calendarLoading,
+    closeDates,
+    closeDatesLoading,
+    closeDatesError,
     attendances,
     attendanceLoading,
     pendingAttendances,
@@ -216,6 +227,9 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     holidayCalendars: HolidayCalendar[];
     companyHolidayCalendars: CompanyHolidayCalendar[];
     calendarLoading: boolean;
+    closeDates: CloseDate[];
+    closeDatesLoading: boolean;
+    closeDatesError: Error | null;
     attendances: Attendance[];
     attendanceLoading: boolean;
     pendingAttendances: Attendance[];

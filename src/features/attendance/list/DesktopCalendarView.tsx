@@ -10,8 +10,10 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
 import {
   Attendance,
+  CloseDate,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
@@ -68,6 +70,7 @@ const DayCell = styled(Box, {
   gap: theme.spacing(1),
   transition: "background-color 0.2s ease",
   cursor: "pointer",
+  position: "relative",
   "&:hover": {
     backgroundColor: theme.palette.action.hover,
   },
@@ -217,7 +220,77 @@ type Props = {
   companyHolidayCalendars: CompanyHolidayCalendar[];
   navigate: NavigateFunction;
   buildNavigatePath?: (formattedWorkDate: string) => string;
+  closeDates?: CloseDate[];
+  closeDatesLoading?: boolean;
+  closeDatesError?: Error | null;
 };
+
+type MonthTerm = {
+  start: Dayjs;
+  end: Dayjs;
+  source: "closeDate" | "fallback";
+  label: string;
+  color: string;
+};
+
+function resolveMonthlyTerms(
+  currentMonth: Dayjs,
+  closeDates: CloseDate[] = [],
+  palette: string[]
+): MonthTerm[] {
+  const monthStart = currentMonth.startOf("month");
+  const monthEnd = currentMonth.endOf("month");
+
+  const fallback: MonthTerm = {
+    start: monthStart,
+    end: monthEnd,
+    source: "fallback",
+    label: `${currentMonth
+      .startOf("month")
+      .format(AttendanceDate.DisplayFormat)} 〜 ${currentMonth
+      .endOf("month")
+      .format(AttendanceDate.DisplayFormat)}`,
+    color: palette[0] ?? "#90CAF9",
+  };
+
+  if (closeDates.length === 0) {
+    return [fallback];
+  }
+
+  const terms = closeDates
+    .map((item) => {
+      const closeDate = dayjs(item.closeDate);
+      const start = dayjs(item.startDate);
+      const end = dayjs(item.endDate);
+      const updatedAt = dayjs(item.updatedAt ?? item.closeDate);
+      return { item, closeDate, start, end, updatedAt };
+    })
+    .filter(({ closeDate, start, end }) => {
+      return (
+        closeDate.isValid() &&
+        start.isValid() &&
+        end.isValid() &&
+        // 月の範囲と少しでも重なれば対象
+        !end.isBefore(monthStart, "day") &&
+        !start.isAfter(monthEnd, "day")
+      );
+    })
+    .sort((a, b) => a.start.valueOf() - b.start.valueOf())
+    .map(
+      ({ start, end }, index): MonthTerm => ({
+        start: start.startOf("day"),
+        end: end.startOf("day"),
+        source: "closeDate",
+        label: `${start.format(AttendanceDate.DisplayFormat)} 〜 ${end.format(
+          AttendanceDate.DisplayFormat
+        )}`,
+        color: palette[index % palette.length] ?? palette[0] ?? "#90CAF9",
+      })
+    );
+
+  if (terms.length === 0) return [fallback];
+  return terms;
+}
 
 export default function DesktopCalendarView({
   attendances,
@@ -226,7 +299,11 @@ export default function DesktopCalendarView({
   companyHolidayCalendars,
   navigate,
   buildNavigatePath,
+  closeDates,
+  closeDatesLoading,
+  closeDatesError,
 }: Props) {
+  const theme = useTheme();
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
 
   const attendanceMap = useMemo(() => {
@@ -252,41 +329,112 @@ export default function DesktopCalendarView({
     navigate(path);
   };
 
+  const termPalette = useMemo(
+    () => [
+      theme.palette.info.main,
+      theme.palette.success.main,
+      theme.palette.warning.main,
+      theme.palette.secondary.main,
+    ],
+    [
+      theme.palette.info.main,
+      theme.palette.success.main,
+      theme.palette.warning.main,
+      theme.palette.secondary.main,
+    ]
+  );
+
+  const monthlyTerms = useMemo(
+    () => resolveMonthlyTerms(currentMonth, closeDates, termPalette),
+    [closeDates, currentMonth, termPalette]
+  );
+  const hasCloseDateContext =
+    closeDates !== undefined ||
+    closeDatesLoading !== undefined ||
+    closeDatesError !== undefined;
+
+  const showFallbackNotice =
+    hasCloseDateContext &&
+    monthlyTerms.length === 1 &&
+    monthlyTerms[0]?.source === "fallback" &&
+    !closeDatesLoading;
+  const showCloseDateError = hasCloseDateContext && Boolean(closeDatesError);
+
   return (
     <CalendarWrapper>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ mb: 2 }}
-      >
-        <Stack direction="row" spacing={1} alignItems="center">
-          <IconButton
-            aria-label="previous-month"
-            onClick={() => handleMoveMonth(-1)}
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-          <IconButton
-            aria-label="next-month"
-            onClick={() => handleMoveMonth(1)}
-          >
-            <ChevronRightIcon />
-          </IconButton>
-          <Divider orientation="vertical" flexItem />
-          <Typography variant="h6">
-            {currentMonth.format("YYYY年M月")}
-          </Typography>
-        </Stack>
-        <Box>
-          <Tooltip title="今月に戻る">
+      <Stack spacing={0.75} sx={{ mb: 2 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Stack direction="row" spacing={1} alignItems="center">
             <IconButton
-              onClick={() => setCurrentMonth(dayjs().startOf("month"))}
+              aria-label="previous-month"
+              onClick={() => handleMoveMonth(-1)}
             >
-              <Typography variant="body2">今月</Typography>
+              <ChevronLeftIcon />
             </IconButton>
-          </Tooltip>
-        </Box>
+            <IconButton
+              aria-label="next-month"
+              onClick={() => handleMoveMonth(1)}
+            >
+              <ChevronRightIcon />
+            </IconButton>
+            <Divider orientation="vertical" flexItem />
+            <Typography variant="h6">
+              {currentMonth.format("YYYY年M月")}
+            </Typography>
+          </Stack>
+          <Box>
+            <Tooltip title="今月に戻る">
+              <IconButton
+                onClick={() => setCurrentMonth(dayjs().startOf("month"))}
+              >
+                <Typography variant="body2">今月</Typography>
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Stack>
+
+        <Stack spacing={0.5}>
+          <Stack
+            direction="row"
+            spacing={0.5}
+            alignItems="center"
+            flexWrap="wrap"
+            useFlexGap
+          >
+            <Typography variant="body2" color="text.secondary">
+              集計期間:
+            </Typography>
+            {monthlyTerms.map((term, index) => (
+              <Chip
+                key={`${term.label}-${index}`}
+                size="small"
+                label={term.label}
+                variant="outlined"
+                sx={{
+                  bgcolor: alpha(term.color, 0.06),
+                  color: term.color,
+                  borderColor: alpha(term.color, 0.5),
+                  borderStyle: "solid",
+                  borderWidth: 1,
+                }}
+              />
+            ))}
+          </Stack>
+          {showFallbackNotice && (
+            <Typography variant="caption" color="text.secondary">
+              集計対象月が未登録のため、暫定で月初〜月末を表示しています。
+            </Typography>
+          )}
+          {showCloseDateError && (
+            <Typography variant="caption" color="error">
+              集計対象月の取得に失敗したため、暫定の期間で表示しています。
+            </Typography>
+          )}
+        </Stack>
       </Stack>
 
       <CalendarGrid sx={{ mb: 1 }}>
@@ -346,6 +494,20 @@ export default function DesktopCalendarView({
                   : undefined,
               ].filter((label): label is string => Boolean(label));
 
+              const termsForDay = monthlyTerms.filter(
+                (term) =>
+                  !date.isBefore(term.start, "day") &&
+                  !date.isAfter(term.end, "day")
+              );
+              const primaryTerm = termsForDay[0];
+              const termBackground = primaryTerm
+                ? alpha(primaryTerm.color, 0.08)
+                : undefined;
+              const termBorder = primaryTerm
+                ? `3px solid ${alpha(primaryTerm.color, 0.35)}`
+                : undefined;
+              const hasOverlap = termsForDay.length > 1;
+
               return (
                 <DayCell
                   key={workDate}
@@ -353,7 +515,28 @@ export default function DesktopCalendarView({
                   $isCurrentMonth={isCurrentMonth}
                   $isToday={isToday}
                   $isHoliday={holidayLike}
+                  sx={{
+                    backgroundColor: termBackground,
+                    borderLeft: termBorder,
+                  }}
                 >
+                  {hasOverlap && primaryTerm && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 6,
+                        right: 6,
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        bgcolor: alpha(primaryTerm.color, 0.9),
+                        border: `1px solid ${alpha(
+                          theme.palette.common.white,
+                          0.9
+                        )}`,
+                      }}
+                    />
+                  )}
                   <Stack
                     direction="row"
                     justifyContent="space-between"

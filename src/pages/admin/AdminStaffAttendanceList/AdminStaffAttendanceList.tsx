@@ -40,6 +40,9 @@ export default function AdminStaffAttendanceList() {
     holidayCalendars,
     companyHolidayCalendars,
     calendarLoading,
+    closeDates,
+    closeDatesLoading,
+    closeDatesError,
     attendances,
     attendanceLoading,
     pendingAttendances,
@@ -146,6 +149,9 @@ export default function AdminStaffAttendanceList() {
             companyHolidayCalendars={companyHolidayCalendars}
             navigate={navigate}
             buildNavigatePath={buildCalendarNavigatePath}
+            closeDates={closeDates}
+            closeDatesLoading={closeDatesLoading}
+            closeDatesError={closeDatesError}
           />
         </PageSection>
 
