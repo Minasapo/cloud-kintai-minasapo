@@ -1,12 +1,9 @@
-import LogoutIcon from "@mui/icons-material/Logout";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ViewListIcon from "@mui/icons-material/ViewList";
-import { useTheme } from "@mui/material/styles";
 import MobileMenuView, { MobileMenuItem } from "@shared/ui/header/MobileMenu";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { designTokenVar } from "@/shared/designSystem";
-import { AuthContext } from "@/context/AuthContext";
 import { useMobileDrawer } from "@/hooks/useMobileDrawer";
 
 interface MobileMenuProps {
@@ -14,18 +11,8 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ pathName }: MobileMenuProps) {
-  const { signOut } = useContext(AuthContext);
   const navigate = useNavigate();
   const { isOpen, closeDrawer, openDrawer } = useMobileDrawer();
-  const theme = useTheme();
-  const signOutBackground = designTokenVar(
-    "color.feedback.danger.base",
-    theme.palette.error.main
-  );
-  const signOutText = designTokenVar(
-    "color.brand.primary.contrastText",
-    theme.palette.error.contrastText
-  );
 
   const menuItems = useMemo<MobileMenuItem[]>(
     () => [
@@ -40,17 +27,12 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
         onClick: () => navigate("/attendance/report"),
       },
       {
-        label: "サインアウト",
-        icon: <LogoutIcon sx={{ color: signOutText }} />,
-        onClick: signOut,
-        divider: true,
-        styles: {
-          backgroundColor: signOutBackground,
-          color: signOutText,
-        },
+        label: "個人設定",
+        icon: <AccountCircleIcon />,
+        onClick: () => navigate("/profile"),
       },
     ],
-    [navigate, signOut, signOutBackground, signOutText]
+    [navigate]
   );
 
   if (pathName === "/login") return null;
