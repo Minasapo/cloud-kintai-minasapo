@@ -281,6 +281,43 @@ export default function TimeRecorder(): JSX.Element {
     return `${dayjs(attendance.endTime).format("HH:mm")} 退勤`;
   }, [attendance?.endTime]);
 
+  const TIME_RECORDER_WIDTH_MD = designTokenVar(
+    "component.timeRecorder.layout.widthMd",
+    "400px"
+  );
+  const TIME_RECORDER_MARGIN_XS = designTokenVar(
+    "component.timeRecorder.layout.marginXMobile",
+    "24px"
+  );
+  const TIME_RECORDER_SURFACE_BG = designTokenVar(
+    "component.timeRecorder.surface.background",
+    "#FFFFFF"
+  );
+  const TIME_RECORDER_BORDER_COLOR = designTokenVar(
+    "component.timeRecorder.surface.borderColor",
+    "#E5E7EB"
+  );
+  const TIME_RECORDER_BORDER_WIDTH = designTokenVar(
+    "component.timeRecorder.surface.borderWidth",
+    "1px"
+  );
+  const TIME_RECORDER_BORDER_RADIUS = designTokenVar(
+    "component.timeRecorder.surface.borderRadius",
+    "12px"
+  );
+  const TIME_RECORDER_SURFACE_SHADOW = designTokenVar(
+    "component.timeRecorder.surface.shadow",
+    "0 12px 24px rgba(17, 24, 39, 0.08)"
+  );
+  const TIME_RECORDER_PADDING_XS = designTokenVar(
+    "component.timeRecorder.surface.padding.xs",
+    "16px"
+  );
+  const TIME_RECORDER_PADDING_MD = designTokenVar(
+    "component.timeRecorder.surface.padding.md",
+    "24px"
+  );
+
   const BADGE_PADDING_X = designTokenVar("spacing.sm", "8px");
   const BADGE_PADDING_Y = designTokenVar("spacing.xs", "4px");
   const BADGE_RADIUS = designTokenVar("radius.sm", "4px");
@@ -479,7 +516,8 @@ export default function TimeRecorder(): JSX.Element {
     return (
       <Box
         sx={{
-          width: { xs: "100%", md: "400px" },
+          width: { xs: "100%", md: TIME_RECORDER_WIDTH_MD },
+          mx: { xs: TIME_RECORDER_MARGIN_XS, md: 0 },
         }}
       >
         <LinearProgress />
@@ -495,105 +533,117 @@ export default function TimeRecorder(): JSX.Element {
   return (
     <Box
       sx={{
-        width: { xs: "100%", md: "400px" },
-        mx: { xs: 3, md: 0 },
+        width: { xs: "100%", md: TIME_RECORDER_WIDTH_MD },
+        mx: { xs: TIME_RECORDER_MARGIN_XS, md: 0 },
       }}
     >
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <Typography
-            variant="h3"
-            textAlign="center"
-            data-testid="work-status-text"
-          >
-            {workStatus.text || "読み込み中..."}
-          </Typography>
-          {(clockInDisplayText || clockOutDisplayText) && (
-            <Box display="flex" justifyContent="center" gap={1} mt={0.5}>
-              {clockInDisplayText && (
-                <Typography
-                  variant="body1"
-                  textAlign="center"
-                  data-testid="clock-in-time-text"
-                  sx={clockInBadgeStyles}
-                >
-                  {clockInDisplayText}
-                </Typography>
-              )}
-              {clockOutDisplayText && (
-                <Typography
-                  variant="body1"
-                  textAlign="center"
-                  data-testid="clock-out-time-text"
-                  sx={clockOutBadgeStyles}
-                >
-                  {clockOutDisplayText}
-                </Typography>
-              )}
-            </Box>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          <Clock />
-        </Grid>
-        <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <DirectSwitch
-                onChange={() => setDirectMode(!directMode)}
-                inputProps={
-                  {
-                    "data-testid": "direct-mode-switch",
-                  } as React.InputHTMLAttributes<HTMLInputElement>
-                }
-              />
-            }
-            label="直行/直帰モード"
-          />
-        </Grid>
-        <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
-          {directMode ? (
-            <GoDirectlyItem
-              workStatus={workStatus}
-              onClick={handleGoDirectly}
-            />
-          ) : (
-            <ClockInItem workStatus={workStatus} onClick={handleClockIn} />
-          )}
-        </Grid>
-        <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
-          {directMode ? (
-            <ReturnDirectly
-              workStatus={workStatus}
-              onClick={handleReturnDirectly}
-            />
-          ) : (
-            <ClockOutItem workStatus={workStatus} onClick={handleClockOut} />
-          )}
-        </Grid>
-
-        {/* 休憩 */}
-        <Grid item xs={6}>
-          <RestStartItem workStatus={workStatus} onClick={handleRestStart} />
-        </Grid>
-        <Grid item xs={6}>
-          <RestEndItem workStatus={workStatus} onClick={handleRestEnd} />
-        </Grid>
-        <Grid item xs={12}>
-          <QuickDailyReportCard staffId={staff?.id ?? null} date={today} />
-        </Grid>
-        {isAttendanceError && (
+      <Box
+        sx={{
+          backgroundColor: TIME_RECORDER_SURFACE_BG,
+          borderRadius: TIME_RECORDER_BORDER_RADIUS,
+          borderColor: TIME_RECORDER_BORDER_COLOR,
+          borderWidth: TIME_RECORDER_BORDER_WIDTH,
+          borderStyle: "solid",
+          boxShadow: TIME_RECORDER_SURFACE_SHADOW,
+          p: { xs: TIME_RECORDER_PADDING_XS, md: TIME_RECORDER_PADDING_MD },
+        }}
+      >
+        <Grid container spacing={1}>
           <Grid item xs={12}>
-            <AttendanceErrorAlert />
+            <Typography
+              variant="h3"
+              textAlign="center"
+              data-testid="work-status-text"
+            >
+              {workStatus.text || "読み込み中..."}
+            </Typography>
+            {(clockInDisplayText || clockOutDisplayText) && (
+              <Box display="flex" justifyContent="center" gap={1} mt={0.5}>
+                {clockInDisplayText && (
+                  <Typography
+                    variant="body1"
+                    textAlign="center"
+                    data-testid="clock-in-time-text"
+                    sx={clockInBadgeStyles}
+                  >
+                    {clockInDisplayText}
+                  </Typography>
+                )}
+                {clockOutDisplayText && (
+                  <Typography
+                    variant="body1"
+                    textAlign="center"
+                    data-testid="clock-out-time-text"
+                    sx={clockOutBadgeStyles}
+                  >
+                    {clockOutDisplayText}
+                  </Typography>
+                )}
+              </Box>
+            )}
           </Grid>
-        )}
+          <Grid item xs={12}>
+            <Clock />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <DirectSwitch
+                  onChange={() => setDirectMode(!directMode)}
+                  inputProps={
+                    {
+                      "data-testid": "direct-mode-switch",
+                    } as React.InputHTMLAttributes<HTMLInputElement>
+                  }
+                />
+              }
+              label="直行/直帰モード"
+            />
+          </Grid>
+          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
+            {directMode ? (
+              <GoDirectlyItem
+                workStatus={workStatus}
+                onClick={handleGoDirectly}
+              />
+            ) : (
+              <ClockInItem workStatus={workStatus} onClick={handleClockIn} />
+            )}
+          </Grid>
+          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
+            {directMode ? (
+              <ReturnDirectly
+                workStatus={workStatus}
+                onClick={handleReturnDirectly}
+              />
+            ) : (
+              <ClockOutItem workStatus={workStatus} onClick={handleClockOut} />
+            )}
+          </Grid>
 
-        <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
+          {/* 休憩 */}
+          <Grid item xs={6}>
+            <RestStartItem workStatus={workStatus} onClick={handleRestStart} />
+          </Grid>
+          <Grid item xs={6}>
+            <RestEndItem workStatus={workStatus} onClick={handleRestEnd} />
+          </Grid>
+          <Grid item xs={12}>
+            <QuickDailyReportCard staffId={staff?.id ?? null} date={today} />
+          </Grid>
+          {isAttendanceError && (
+            <Grid item xs={12}>
+              <AttendanceErrorAlert />
+            </Grid>
+          )}
 
-        <Grid item xs={12}>
-          <RestTimeMessage />
+          <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
+
+          <Grid item xs={12}>
+            <RestTimeMessage />
+          </Grid>
         </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 }

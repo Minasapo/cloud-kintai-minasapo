@@ -294,6 +294,21 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       restButton: {
         disabledBackground: color.neutral[200],
       },
+      surface: {
+        background: "#FFFFFF",
+        borderColor: color.neutral[200],
+        borderWidth: 1,
+        borderRadius: radius.lg,
+        shadow: shadow.card,
+        padding: {
+          xs: spacing.lg,
+          md: spacing.xl,
+        },
+      },
+      layout: {
+        widthMd: 400,
+        marginXMobile: spacing.lg,
+      },
     },
     headline: {
       accentColor: color.brand.primary.base,
