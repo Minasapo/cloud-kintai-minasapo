@@ -9,20 +9,12 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
-import {
-  Box,
-  Breadcrumbs,
-  LinearProgress,
-  Stack,
-  styled,
-  Typography,
-} from "@mui/material";
+import { Box, LinearProgress, Stack, styled, Typography } from "@mui/material";
 /**
  * MaterialUIのDatePickerコンポーネント。
  */
 import { DatePicker } from "@mui/x-date-pickers";
 import { Staff } from "@shared/api/graphql/types";
-import Title from "@shared/ui/typography/Title";
 /**
  * 日付操作ライブラリ。日付のフォーマットや計算に使用。
  */
@@ -31,7 +23,7 @@ import dayjs from "dayjs";
  * ReactのContext, Hooks。
  */
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
@@ -212,11 +204,14 @@ export default function AttendanceTable() {
           gap: headerGap,
         }}
       >
-        <Breadcrumbs>
-          <Link to="/">TOP</Link>
-          <Typography color="text.primary">勤怠一覧</Typography>
-        </Breadcrumbs>
-        <Title>{`直近30日の合計勤務時間: ${totalTime.toFixed(1)}h`}</Title>
+        <Stack spacing={0.5}>
+          <Typography variant="subtitle2" color="text.secondary">
+            直近30日の合計勤務時間
+          </Typography>
+          <Typography variant="h5" component="p">
+            {totalTime.toFixed(1)}h
+          </Typography>
+        </Stack>
         <DescriptionTypography variant="body1">
           今日から30日前までの勤怠情報を表示しています
         </DescriptionTypography>
