@@ -29,13 +29,21 @@ import {
 } from "@/features/workflow/list/useWorkflowListViewModel";
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
 import { STATUS_LABELS } from "@/lib/workflowLabels";
-import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
+import { designTokenVar } from "@/shared/designSystem";
+import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 import WorkflowListFilters, {
   type WorkflowListFiltersHandle,
 } from "./components/WorkflowListFilters";
 
 const CANCELLED_LABEL = STATUS_LABELS[WorkflowStatus.CANCELLED];
+
+const LOADING_SECTION_MIN_HEIGHT = `calc(${designTokenVar(
+  "spacing.xxl",
+  "32px"
+)} * 7.5)`;
+const FILTER_ACTION_GAP = `calc(${designTokenVar("spacing.md", "12px")} * 0.5)`;
+const EMPTY_STATE_PADDING_Y = designTokenVar("spacing.lg", "16px");
 
 const formatWorkflowDate: GridValueFormatter<
   WorkflowListItem,
@@ -129,7 +137,7 @@ export default function WorkflowListPage() {
             sx={{
               ...dashboardInnerSurfaceSx,
               display: "flex",
-              minHeight: 240,
+              minHeight: LOADING_SECTION_MIN_HEIGHT,
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -160,7 +168,7 @@ export default function WorkflowListPage() {
                     flex: 1,
                     display: "flex",
                     flexWrap: "wrap",
-                    gap: 1.5,
+                    gap: FILTER_ACTION_GAP,
                     alignItems: "center",
                   }}
                 >
@@ -244,7 +252,7 @@ export default function WorkflowListPage() {
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  py: 4,
+                  py: EMPTY_STATE_PADDING_Y,
                 }}
               >
                 {loading ? (

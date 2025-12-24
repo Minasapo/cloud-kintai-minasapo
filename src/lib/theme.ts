@@ -68,6 +68,69 @@ export type Color =
   | "delete";
 export type Variant = "text" | "outlined" | "contained";
 
+type FontSizeTokenKey = keyof DesignTokens["typography"]["fontSize"];
+
+export type TypographyMode = "balanced" | "comfortable";
+
+export type ThemeOverrideOptions = {
+  brandPrimary?: string;
+  typographyMode?: TypographyMode;
+};
+
+type ThemeFactoryInput = string | ThemeOverrideOptions | undefined;
+
+const TYPOGRAPHY_MODE_ADJUSTMENTS: Record<
+  TypographyMode,
+  Record<FontSizeTokenKey, number>
+> = {
+  balanced: {
+    xs: -1,
+    sm: -1,
+    md: -2,
+    lg: -2,
+    xl: -3,
+    display: -4,
+  },
+  comfortable: {
+    xs: 0,
+    sm: 0,
+    md: 0,
+    lg: 0,
+    xl: 0,
+    display: 0,
+  },
+};
+
+const LINE_HEIGHT_SCALE: Record<TypographyMode, number> = {
+  balanced: 0.95,
+  comfortable: 1,
+};
+
+const MIN_FONT_SIZE = 10;
+
+const createTypographyHelpers = (
+  tokens: DesignTokens,
+  mode: TypographyMode
+) => {
+  const adjustments = TYPOGRAPHY_MODE_ADJUSTMENTS[mode];
+  const scale = LINE_HEIGHT_SCALE[mode];
+
+  const getFontSize = (key: FontSizeTokenKey) => {
+    const base = tokens.typography.fontSize[key];
+    const delta = adjustments[key] ?? 0;
+    return Math.max(MIN_FONT_SIZE, base + delta);
+  };
+
+  const getLineHeight = (value: number) => {
+    const scaled = Number((value * scale).toFixed(2));
+    return Math.max(1.1, scaled);
+  };
+
+  return { getFontSize, getLineHeight };
+};
+
+type TypographyHelpers = ReturnType<typeof createTypographyHelpers>;
+
 const toPx = (value: number) => `${value}px`;
 
 const createPalette = (tokens: DesignTokens) => {
@@ -133,73 +196,79 @@ const createPalette = (tokens: DesignTokens) => {
   };
 };
 
-const buildTypography = (tokens: DesignTokens): ThemeOptions["typography"] => {
-  const { fontFamily, fontSize, fontWeight, lineHeight } = tokens.typography;
+const buildTypography = (
+  tokens: DesignTokens,
+  helpers: TypographyHelpers
+): ThemeOptions["typography"] => {
+  const { fontFamily, fontWeight, lineHeight } = tokens.typography;
+  const { getFontSize, getLineHeight } = helpers;
+
   return {
     fontFamily,
-    fontSize: fontSize.md,
+    fontSize: getFontSize("md"),
     h1: {
-      fontSize: fontSize.display,
+      fontSize: getFontSize("display"),
       fontWeight: fontWeight.bold,
-      lineHeight: lineHeight.comfy,
+      lineHeight: getLineHeight(lineHeight.comfy),
     },
     h2: {
-      fontSize: fontSize.xl,
+      fontSize: getFontSize("xl"),
       fontWeight: fontWeight.bold,
-      lineHeight: lineHeight.comfy,
+      lineHeight: getLineHeight(lineHeight.comfy),
     },
     h3: {
-      fontSize: fontSize.lg,
+      fontSize: getFontSize("lg"),
       fontWeight: fontWeight.bold,
-      lineHeight: lineHeight.comfy,
+      lineHeight: getLineHeight(lineHeight.comfy),
     },
     h4: {
-      fontSize: fontSize.md,
+      fontSize: getFontSize("md"),
       fontWeight: fontWeight.bold,
-      lineHeight: lineHeight.comfy,
+      lineHeight: getLineHeight(lineHeight.comfy),
     },
     h5: {
-      fontSize: fontSize.sm,
+      fontSize: getFontSize("sm"),
       fontWeight: fontWeight.medium,
-      lineHeight: lineHeight.relaxed,
+      lineHeight: getLineHeight(lineHeight.relaxed),
     },
     h6: {
-      fontSize: fontSize.xs,
+      fontSize: getFontSize("xs"),
       fontWeight: fontWeight.medium,
-      lineHeight: lineHeight.relaxed,
+      lineHeight: getLineHeight(lineHeight.relaxed),
     },
     subtitle1: {
-      fontSize: fontSize.md,
+      fontSize: getFontSize("md"),
       fontWeight: fontWeight.medium,
-      lineHeight: lineHeight.comfy,
+      lineHeight: getLineHeight(lineHeight.comfy),
     },
     subtitle2: {
-      fontSize: fontSize.sm,
+      fontSize: getFontSize("sm"),
       fontWeight: fontWeight.medium,
-      lineHeight: lineHeight.comfy,
+      lineHeight: getLineHeight(lineHeight.comfy),
     },
     body1: {
-      fontSize: fontSize.md,
-      lineHeight: lineHeight.relaxed,
+      fontSize: getFontSize("md"),
+      lineHeight: getLineHeight(lineHeight.relaxed),
     },
     body2: {
-      fontSize: fontSize.sm,
-      lineHeight: lineHeight.relaxed,
+      fontSize: getFontSize("sm"),
+      lineHeight: getLineHeight(lineHeight.relaxed),
     },
     button: {
-      fontSize: fontSize.md,
+      fontSize: getFontSize("md"),
       fontWeight: fontWeight.medium,
-      lineHeight: lineHeight.comfy,
+      lineHeight: getLineHeight(lineHeight.comfy),
       textTransform: "none",
     },
     caption: {
-      fontSize: fontSize.xs,
-      lineHeight: lineHeight.tight,
+      fontSize: getFontSize("xs"),
+      lineHeight: getLineHeight(lineHeight.tight),
     },
     overline: {
-      fontSize: fontSize.xs,
+      fontSize: getFontSize("xs"),
       letterSpacing: 0.8,
       textTransform: "uppercase",
+      lineHeight: getLineHeight(lineHeight.tight),
     },
   };
 };
@@ -208,15 +277,19 @@ type AppPalette = ReturnType<typeof createPalette>;
 
 const createComponents = (
   tokens: DesignTokens,
-  palette: AppPalette
+  palette: AppPalette,
+  helpers: TypographyHelpers
 ): ThemeOptions["components"] => {
   const { spacing, radius, typography, component, shadow, color } = tokens;
+  const { getLineHeight } = helpers;
   const buttonPadding = `${toPx(spacing.xs)} ${toPx(spacing.lg)}`;
   const pageSectionRadius = component.pageSection.radius ?? radius.lg;
   const pageSectionBackground = component.pageSection.background;
   const surfaceBorderColor = color.neutral[200];
   const cardShadow = component.pageSection.shadow ?? shadow.card;
   const cardPadding = `${toPx(spacing.md)} ${toPx(spacing.lg)}`;
+  const rootLineHeight = getLineHeight(typography.lineHeight.relaxed);
+  const buttonLineHeight = getLineHeight(typography.lineHeight.comfy);
 
   return {
     MuiCssBaseline: {
@@ -225,7 +298,7 @@ const createComponents = (
           backgroundColor: component.appShell.background,
           color: component.appShell.textColor,
           fontFamily: typography.fontFamily,
-          lineHeight: typography.lineHeight.relaxed,
+          lineHeight: rootLineHeight,
         },
         "#root": {
           backgroundColor: component.appShell.contentBackground,
@@ -241,16 +314,6 @@ const createComponents = (
         ],
       },
     },
-    MuiTypography: {
-      styleOverrides: {
-        h2: {
-          lineHeight: typography.lineHeight.comfy,
-        },
-        h4: {
-          lineHeight: typography.lineHeight.comfy,
-        },
-      },
-    },
     MuiButton: {
       styleOverrides: {
         root: {
@@ -260,6 +323,7 @@ const createComponents = (
           gap: toPx(spacing.xs),
           textTransform: "none",
           boxShadow: "none",
+          lineHeight: buttonLineHeight,
           "&:hover": {
             boxShadow: shadow.card,
           },
@@ -337,22 +401,38 @@ const createComponents = (
   };
 };
 
-const createThemeConfig = (brandPrimary?: string) => {
+const normalizeThemeOverrides = (input?: ThemeFactoryInput) => {
+  if (!input || typeof input === "string") {
+    return {
+      brandPrimary: typeof input === "string" ? input : undefined,
+      typographyMode: "balanced" as TypographyMode,
+    };
+  }
+
+  return {
+    brandPrimary: input.brandPrimary,
+    typographyMode: input.typographyMode ?? "balanced",
+  };
+};
+
+const createThemeConfig = (overrides?: ThemeFactoryInput) => {
+  const { brandPrimary, typographyMode } = normalizeThemeOverrides(overrides);
   const tokens = getDesignTokens(brandPrimary ? { brandPrimary } : undefined);
   const palette = createPalette(tokens);
+  const typographyHelpers = createTypographyHelpers(tokens, typographyMode);
 
   return createTheme({
     palette,
     spacing: tokens.spacing.unit,
-    typography: buildTypography(tokens),
+    typography: buildTypography(tokens, typographyHelpers),
     shape: {
       borderRadius: tokens.radius.md,
     },
-    components: createComponents(tokens, palette),
+    components: createComponents(tokens, palette, typographyHelpers),
   });
 };
 
-export const createAppTheme = (brandPrimary?: string) =>
-  responsiveFontSizes(createThemeConfig(brandPrimary));
+export const createAppTheme = (overrides?: ThemeFactoryInput) =>
+  responsiveFontSizes(createThemeConfig(overrides));
 
 export const theme = createAppTheme();

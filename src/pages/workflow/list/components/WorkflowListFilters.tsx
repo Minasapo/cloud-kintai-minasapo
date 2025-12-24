@@ -19,6 +19,7 @@ import {
 
 import type { UseWorkflowListFiltersResult } from "@/features/workflow/list/useWorkflowListFilters";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
+import { designTokenVar } from "@/shared/designSystem";
 
 export type WorkflowListFiltersHandle = {
   closeAllPopovers: () => void;
@@ -31,6 +32,10 @@ type WorkflowListFiltersProps = {
 
 const DISPLAY_LABEL_APPLICATION = "申請日で絞込";
 const DISPLAY_LABEL_CREATED = "作成日で絞込";
+
+const FILTER_PANEL_PADDING = designTokenVar("spacing.lg", "16px");
+const FILTER_PANEL_GAP = designTokenVar("spacing.md", "12px");
+const FILTER_PANEL_BUTTON_GAP = designTokenVar("spacing.sm", "8px");
 
 function WorkflowListFilters(
   { filters, setFilter }: WorkflowListFiltersProps,
@@ -123,7 +128,13 @@ function WorkflowListFilters(
           onClose={() => setApplicationAnchorEl(null)}
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         >
-          <Box sx={{ p: 2, display: "flex", gap: 2 }}>
+          <Box
+            sx={{
+              p: FILTER_PANEL_PADDING,
+              display: "flex",
+              gap: FILTER_PANEL_GAP,
+            }}
+          >
             <DatePicker
               label="From"
               value={applicationFrom ? dayjs(applicationFrom) : null}
@@ -141,6 +152,7 @@ function WorkflowListFilters(
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "flex-end",
+                gap: FILTER_PANEL_BUTTON_GAP,
               }}
             >
               <Button
@@ -202,7 +214,13 @@ function WorkflowListFilters(
           onClose={() => setCreatedAnchorEl(null)}
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         >
-          <Box sx={{ p: 2, display: "flex", gap: 2 }}>
+          <Box
+            sx={{
+              p: FILTER_PANEL_PADDING,
+              display: "flex",
+              gap: FILTER_PANEL_GAP,
+            }}
+          >
             <DatePicker
               label="From"
               value={createdFrom ? dayjs(createdFrom) : null}
@@ -220,6 +238,7 @@ function WorkflowListFilters(
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "flex-end",
+                gap: FILTER_PANEL_BUTTON_GAP,
               }}
             >
               <Button
