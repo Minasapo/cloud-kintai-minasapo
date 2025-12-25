@@ -81,7 +81,7 @@ export default function Links() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>
         外部リンク
       </Typography>
       <Stack spacing={2} sx={{ mb: 2 }}>

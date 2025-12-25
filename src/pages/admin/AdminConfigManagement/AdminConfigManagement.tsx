@@ -22,6 +22,7 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
+import AttendanceStatisticsSection from "./AttendanceStatisticsSection";
 import GroupSection from "./GroupSection";
 import LinkListSection from "./LinkListSection";
 import OfficeModeSection from "./OfficeModeSection";
@@ -52,6 +53,7 @@ export default function AdminConfigManagement() {
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
     getAbsentEnabled,
+    getAttendanceStatisticsEnabled,
     getThemeTokens,
   } = useContext(AppConfigContext);
   const adminPanelTokens = useMemo(() => getThemeTokens(), [getThemeTokens]);
@@ -90,6 +92,8 @@ export default function AdminConfigManagement() {
   const [pmHolidayEndTime, setPmHolidayEndTime] = useState<Dayjs | null>(
     dayjs("18:00", "HH:mm")
   );
+  const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
+    useState<boolean>(false);
   const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
   const [specialHolidayEnabled, setSpecialHolidayEnabled] =
     useState<boolean>(false);
@@ -125,6 +129,7 @@ export default function AdminConfigManagement() {
     if (typeof getAbsentEnabled === "function") {
       setAbsentEnabled(getAbsentEnabled());
     }
+    setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
     // fetchConfigで午前休・午後休の時間帯があればセット
     if (typeof getAmHolidayStartTime === "function" && getAmHolidayStartTime())
       setAmHolidayStartTime(getAmHolidayStartTime());
@@ -154,6 +159,7 @@ export default function AdminConfigManagement() {
     getPmHolidayStartTime,
     getPmHolidayEndTime,
     getAmPmHolidayEnabled,
+    getAttendanceStatisticsEnabled,
   ]);
 
   const handleAddLink = () => {
@@ -280,6 +286,13 @@ export default function AdminConfigManagement() {
     setAbsentEnabled(event.target.checked);
   };
 
+  const handleAttendanceStatisticsEnabledChange = (
+    _: React.ChangeEvent<HTMLInputElement>,
+    checked: boolean
+  ) => {
+    setAttendanceStatisticsEnabled(checked);
+  };
+
   const handleSave = async () => {
     if (
       startTime &&
@@ -291,6 +304,15 @@ export default function AdminConfigManagement() {
       pmHolidayStartTime &&
       pmHolidayEndTime
     ) {
+      const standardWorkHours = (() => {
+        const baseHours = endTime.diff(startTime, "hour", true);
+        const lunchHours = Math.max(
+          lunchRestEndTime.diff(lunchRestStartTime, "hour", true),
+          0
+        );
+        return Math.max(baseHours - lunchHours, 0);
+      })();
+
       try {
         if (id) {
           // backend の GraphQL スキーマにフィールドがない場合を考慮し any にキャストして送る
@@ -298,6 +320,7 @@ export default function AdminConfigManagement() {
             id,
             workStartTime: startTime.format("HH:mm"),
             workEndTime: endTime.format("HH:mm"),
+            standardWorkHours,
             links: links.map((link) => ({
               label: link.label,
               url: link.url,
@@ -327,6 +350,7 @@ export default function AdminConfigManagement() {
             pmHolidayEndTime: pmHolidayEndTime.format("HH:mm"),
             amPmHolidayEnabled,
             specialHolidayEnabled,
+            attendanceStatisticsEnabled,
           } as unknown as UpdateAppConfigInput);
           dispatch(setSnackbarSuccess(S14002));
         } else {
@@ -334,6 +358,7 @@ export default function AdminConfigManagement() {
             name: "default",
             workStartTime: startTime.format("HH:mm"),
             workEndTime: endTime.format("HH:mm"),
+            standardWorkHours,
             links: links.map((link) => ({
               label: link.label,
               url: link.url,
@@ -353,6 +378,7 @@ export default function AdminConfigManagement() {
             pmHolidayEndTime: pmHolidayEndTime.format("HH:mm"),
             amPmHolidayEnabled,
             specialHolidayEnabled,
+            attendanceStatisticsEnabled,
           } as unknown as CreateAppConfigInput);
           dispatch(setSnackbarSuccess(S14001));
         }
@@ -367,7 +393,16 @@ export default function AdminConfigManagement() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Stack spacing={0} sx={{ pb: 2, gap: sectionSpacing }}>
+      <Stack
+        spacing={0}
+        sx={{
+          pb: 2,
+          gap: sectionSpacing,
+          alignItems: "flex-start",
+          maxWidth: 1040,
+          width: "100%",
+        }}
+      >
         <Title>設定</Title>
         <GroupSection title="勤務時間">
           <Stack spacing={1}>
@@ -407,7 +442,12 @@ export default function AdminConfigManagement() {
               label={amPmHolidayEnabled ? "有効" : "無効"}
               sx={{ mb: 1 }}
             />
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+            >
               <Typography variant="subtitle1">午前</Typography>
               <TimePicker
                 label="開始"
@@ -416,6 +456,7 @@ export default function AdminConfigManagement() {
                 ampm={false}
                 format="HH:mm"
                 slotProps={{ textField: { size: "small" } }}
+                sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
               <Typography>〜</Typography>
@@ -426,10 +467,16 @@ export default function AdminConfigManagement() {
                 ampm={false}
                 format="HH:mm"
                 slotProps={{ textField: { size: "small" } }}
+                sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
             </Stack>
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+            >
               <Typography variant="subtitle1">午後</Typography>
               <TimePicker
                 label="開始"
@@ -438,6 +485,7 @@ export default function AdminConfigManagement() {
                 ampm={false}
                 format="HH:mm"
                 slotProps={{ textField: { size: "small" } }}
+                sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
               <Typography>〜</Typography>
@@ -448,6 +496,7 @@ export default function AdminConfigManagement() {
                 ampm={false}
                 format="HH:mm"
                 slotProps={{ textField: { size: "small" } }}
+                sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
             </Stack>
@@ -470,6 +519,15 @@ export default function AdminConfigManagement() {
               sx={{ mb: 1 }}
             />
           </Stack>
+        </GroupSection>
+        <GroupSection
+          title="稼働統計"
+          description="勤怠メニュー内の稼働統計の表示・非表示を切り替えます。"
+        >
+          <AttendanceStatisticsSection
+            enabled={attendanceStatisticsEnabled}
+            onChange={handleAttendanceStatisticsEnabledChange}
+          />
         </GroupSection>
         <GroupSection title="欠勤">
           <Stack spacing={1}>

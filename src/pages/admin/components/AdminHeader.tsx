@@ -7,10 +7,10 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ actions }: AdminHeaderProps) => (
   <Stack spacing={2} component="header">
-    <Typography variant="h4" component="h1">
+    <Typography variant="h1" component="h1">
       管理メニュー
     </Typography>
-    <Typography variant="body2" color="text.secondary">
+    <Typography variant="body1" color="text.secondary">
       各カテゴリを選択して詳細な管理画面に移動してください。
     </Typography>
     {actions}

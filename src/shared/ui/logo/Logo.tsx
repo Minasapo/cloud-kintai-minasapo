@@ -1,11 +1,18 @@
 import { Box, Link } from "@mui/material";
 
 import LogoImage from "@/images/logo.png";
+import { designTokenVar } from "@/shared/designSystem";
+
+const HEADER_LOGO_MAX_HEIGHT = designTokenVar(
+  "component.headerBar.logoMaxHeight",
+  "32px"
+);
 
 const Logo = () => (
   <Box
     sx={{
-      height: 1,
+      height: HEADER_LOGO_MAX_HEIGHT,
+      display: "flex",
       justifyContent: "center",
       alignItems: "center",
       flexGrow: {
@@ -14,11 +21,23 @@ const Logo = () => (
       },
     }}
   >
-    <Link href="/">
+    <Link
+      href="/"
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        height: HEADER_LOGO_MAX_HEIGHT,
+      }}
+    >
       <img
         src={LogoImage}
         alt="クラウド勤怠のロゴ"
-        style={{ height: "100%" }}
+        style={{
+          height: HEADER_LOGO_MAX_HEIGHT,
+          maxHeight: HEADER_LOGO_MAX_HEIGHT,
+          width: "auto",
+          display: "block",
+        }}
       />
     </Link>
   </Box>

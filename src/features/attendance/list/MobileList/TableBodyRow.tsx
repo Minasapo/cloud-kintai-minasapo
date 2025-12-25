@@ -16,7 +16,6 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
-import { getTableRowClassName } from "@/pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList";
 import { CreatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/RestTimeTableCell";
 import { SummaryTableCell } from "@/pages/admin/AdminStaffAttendanceList/SummaryTableCell";
@@ -25,6 +24,11 @@ import { WorkDateTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkDa
 import { WorkTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkTimeTableCell";
 
 import { AttendanceStatusTooltip } from "../AttendanceStatusTooltip";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+  getAttendanceRowVariant,
+} from "../getAttendanceRowClassName";
 
 export default function TableBodyRow({
   attendance,
@@ -47,18 +51,22 @@ export default function TableBodyRow({
     navigate(`/attendance/${formattedWorkDate}/edit`);
   };
 
+  const rowVariant: AttendanceRowVariant = (() => {
+    if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
+      return "sunday";
+    }
+    if (staff?.workType === "shift") {
+      return "default";
+    }
+    return getAttendanceRowVariant(
+      attendance,
+      holidayCalendars,
+      companyHolidayCalendars
+    );
+  })();
+
   return (
-    <TableRow
-      className={
-        staff?.workType === "shift"
-          ? "table-row--default"
-          : getTableRowClassName(
-              attendance,
-              holidayCalendars,
-              companyHolidayCalendars
-            )
-      }
-    >
+    <TableRow sx={attendanceRowVariantStyles[rowVariant]}>
       <MuiTableCell>
         <Stack direction="row" spacing={1} alignItems="center">
           <AttendanceStatusTooltip

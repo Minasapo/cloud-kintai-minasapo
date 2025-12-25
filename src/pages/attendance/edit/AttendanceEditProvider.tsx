@@ -27,6 +27,7 @@ type AttendanceEditContextProps = {
   isDirty: boolean;
   isValid: boolean;
   isSubmitting: boolean;
+  errorMessages?: string[];
   restFields: FieldArrayWithId<AttendanceEditInputs, "rests", "id">[];
   changeRequests: AttendanceChangeRequest[];
   // 表示専用モードかどうか
@@ -85,6 +86,7 @@ export const AttendanceEditContext = createContext<AttendanceEditContextProps>({
   isDirty: false,
   isValid: false,
   isSubmitting: false,
+  errorMessages: [],
   restFields: [],
   changeRequests: [],
   readOnly: false,

@@ -20,6 +20,8 @@ export const validationMessages = {
     },
     substituteHoliday: {
       invalidDate: "振替休日の日付形式が正しくありません。",
+      workTimeNotAllowed:
+        "振替休日を設定している場合は勤務時間や休憩を入力できません。クリアしてください。",
     },
   },
 } as const;

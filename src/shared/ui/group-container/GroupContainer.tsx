@@ -5,32 +5,58 @@ import {
   Collapse,
   IconButton,
   Stack,
-  styled,
   SxProps,
   Theme,
   Typography,
 } from "@mui/material";
-import { ReactNode, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 
-const Container = styled(Box)(({ theme }) => ({
-  border: `1px solid ${theme.palette.divider}`,
-  borderLeft: `6px solid ${theme.palette.primary.main}`,
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(2),
-  backgroundColor: theme.palette.background.paper,
-  boxShadow: theme.shadows[1],
-}));
+import { designTokenVar } from "@/shared/designSystem";
 
-const Header = styled(Stack)(() => ({
-  alignItems: "center",
-  justifyContent: "space-between",
-  flexDirection: "row",
-}));
-
-const Title = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.text.primary,
-}));
+const GROUP_BORDER_WIDTH = designTokenVar(
+  "component.groupContainer.borderWidth",
+  "1px"
+);
+const GROUP_ACCENT_WIDTH = designTokenVar(
+  "component.groupContainer.accentWidth",
+  "6px"
+);
+const GROUP_BORDER_COLOR = designTokenVar(
+  "component.groupContainer.borderColor",
+  "#D9E2DD"
+);
+const GROUP_ACCENT_COLOR = designTokenVar(
+  "component.groupContainer.accentColor",
+  "#0FA85E"
+);
+const GROUP_RADIUS = designTokenVar(
+  "component.groupContainer.borderRadius",
+  "12px"
+);
+const GROUP_PADDING = designTokenVar(
+  "component.groupContainer.padding",
+  "16px"
+);
+const GROUP_BACKGROUND = designTokenVar(
+  "component.groupContainer.background",
+  "#FFFFFF"
+);
+const GROUP_SHADOW = designTokenVar(
+  "component.groupContainer.shadow",
+  "0 6px 16px rgba(15, 168, 94, 0.08)"
+);
+const GROUP_HEADER_GAP = designTokenVar(
+  "component.groupContainer.headerGap",
+  "8px"
+);
+const GROUP_CONTENT_GAP = designTokenVar(
+  "component.groupContainer.contentGap",
+  "8px"
+);
+const GROUP_COUNT_COLOR = designTokenVar(
+  "component.groupContainer.countColor",
+  "#5E726A"
+);
 
 export interface GroupContainerProps {
   title?: string;
@@ -50,17 +76,43 @@ const GroupContainer = ({
   sx,
 }: GroupContainerProps) => {
   const [collapsed, setCollapsed] = useState<boolean>(defaultCollapsed);
+  const containerSx = useMemo(
+    () => ({
+      borderStyle: "solid",
+      borderWidth: GROUP_BORDER_WIDTH,
+      borderColor: GROUP_BORDER_COLOR,
+      borderLeftColor: GROUP_ACCENT_COLOR,
+      borderLeftWidth: GROUP_ACCENT_WIDTH,
+      borderRadius: GROUP_RADIUS,
+      padding: GROUP_PADDING,
+      backgroundColor: GROUP_BACKGROUND,
+      boxShadow: GROUP_SHADOW,
+    }),
+    []
+  );
 
   return (
-    <Container sx={sx}>
+    <Box sx={[containerSx, sx] as SxProps<Theme>}>
       {(title || collapsible) && (
-        <Header>
-          <Stack direction="row" alignItems="center" spacing={1}>
-            {title ? <Title variant="subtitle1">{title}</Title> : null}
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Stack
+            direction="row"
+            alignItems="center"
+            sx={{ columnGap: GROUP_HEADER_GAP, rowGap: GROUP_HEADER_GAP }}
+          >
+            {title ? (
+              <Typography variant="subtitle1" fontWeight={700}>
+                {title}
+              </Typography>
+            ) : null}
             {typeof count === "number" && (
               <Typography
                 variant="caption"
-                color="text.secondary"
+                sx={{ color: GROUP_COUNT_COLOR }}
               >{`(${count}件)`}</Typography>
             )}
           </Stack>
@@ -73,13 +125,13 @@ const GroupContainer = ({
               {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
             </IconButton>
           )}
-        </Header>
+        </Stack>
       )}
 
       <Collapse in={!collapsed}>
-        <Box sx={{ mt: 1 }}>{children}</Box>
+        <Box sx={{ mt: GROUP_CONTENT_GAP }}>{children}</Box>
       </Collapse>
-    </Container>
+    </Box>
   );
 };
 

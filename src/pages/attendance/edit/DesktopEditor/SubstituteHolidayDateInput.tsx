@@ -36,94 +36,108 @@ export function SubstituteHolidayDateInput() {
       <Controller
         name="substituteHolidayDate"
         control={control}
-        render={({ field }) => (
-          <>
-            <DatePicker
-              {...field}
-              label="勤務した日"
-              format={AttendanceDate.DisplayFormat}
-              value={field.value ? dayjs(field.value) : null}
-              slotProps={{
-                textField: { size: "small" },
-              }}
-              disabled={changeRequests.length > 0 || !!readOnly}
-              onAccept={(date) => {
-                if (readOnly) return;
-                // 新しい日付が設定された場合は確認ダイアログを表示し、
-                // ユーザーが承認したときのみフォーム値とフラグをクリアする
-                if (date) {
-                  setPendingDate(date);
-                  setConfirmOpen(true);
-                } else {
-                  // クリアした場合はそのまま反映
-                  field.onChange(date);
-                }
-              }}
-            />
+        render={({ field, fieldState }) => {
+          const { value, onChange, ...restField } = field;
 
-            <Dialog
-              open={confirmOpen}
-              onClose={() => {
-                setConfirmOpen(false);
-                setPendingDate(null);
-              }}
-              aria-labelledby="confirm-clear-dialog"
-            >
-              <DialogTitle id="confirm-clear-dialog">
-                一部の入力内容をクリアします
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  振替休日を設定すると、以下の入力内容がクリアされます。
-                  <ul>
-                    <li>勤務開始・終了時刻</li>
-                    <li>休憩時間</li>
-                    <li>有給フラグ</li>
-                    <li>直行フラグ</li>
-                    <li>直帰フラグ</li>
-                  </ul>
-                  よろしいですか？
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button
-                  onClick={() => {
-                    setConfirmOpen(false);
-                    setPendingDate(null);
-                  }}
-                >
-                  クリアせず設定
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (readOnly) {
+          return (
+            <>
+              <DatePicker
+                {...restField}
+                label="勤務した日"
+                format={AttendanceDate.DisplayFormat}
+                value={value ? dayjs(value) : null}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    error: !!fieldState.error,
+                    helperText: fieldState.error?.message,
+                  },
+                }}
+                disabled={changeRequests.length > 0 || !!readOnly}
+                onChange={(date) => {
+                  // ピッカー内で一時的に Dayjs が渡されるのを防ぎ、明示的なクリアのみ即時反映
+                  if (!date) {
+                    onChange(null);
+                  }
+                }}
+                onAccept={(date) => {
+                  if (readOnly) return;
+                  // 新しい日付が設定された場合は確認ダイアログを表示し、
+                  // ユーザーが承認したときのみフォーム値とフラグをクリアする
+                  if (date) {
+                    setPendingDate(date);
+                    setConfirmOpen(true);
+                  } else {
+                    // クリアした場合はそのまま反映
+                    onChange(null);
+                  }
+                }}
+              />
+
+              <Dialog
+                open={confirmOpen}
+                onClose={() => {
+                  setConfirmOpen(false);
+                  setPendingDate(null);
+                }}
+                aria-labelledby="confirm-clear-dialog"
+              >
+                <DialogTitle id="confirm-clear-dialog">
+                  一部の入力内容をクリアします
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    振替休日を設定すると、以下の入力内容がクリアされます。
+                    <ul>
+                      <li>勤務開始・終了時刻</li>
+                      <li>休憩時間</li>
+                      <li>有給フラグ</li>
+                      <li>直行フラグ</li>
+                      <li>直帰フラグ</li>
+                    </ul>
+                    よろしいですか？
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    onClick={() => {
                       setConfirmOpen(false);
                       setPendingDate(null);
-                      return;
-                    }
+                    }}
+                  >
+                    クリアせず設定
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (readOnly) {
+                        setConfirmOpen(false);
+                        setPendingDate(null);
+                        return;
+                      }
 
-                    if (pendingDate) {
-                      field.onChange(pendingDate);
+                      if (pendingDate) {
+                        onChange(pendingDate.format(AttendanceDate.DataFormat));
 
-                      setValue("paidHolidayFlag", false);
-                      setValue("goDirectlyFlag", false);
-                      setValue("returnDirectlyFlag", false);
-                      setValue("startTime", null);
-                      setValue("endTime", null);
-                      restReplace([]);
-                    }
+                        setValue("paidHolidayFlag", false);
+                        setValue("goDirectlyFlag", false);
+                        setValue("returnDirectlyFlag", false);
+                        setValue("startTime", null);
+                        setValue("endTime", null);
+                        restReplace([]);
+                      }
 
-                    setConfirmOpen(false);
-                    setPendingDate(null);
-                  }}
-                  autoFocus
-                >
-                  クリアして設定
-                </Button>
-              </DialogActions>
-            </Dialog>
-          </>
-        )}
+                      setConfirmOpen(false);
+                      setPendingDate(null);
+                    }}
+                    autoFocus
+                  >
+                    クリアして設定
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </>
+          );
+        }}
       />
     </Stack>
   );

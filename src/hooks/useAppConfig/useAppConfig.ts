@@ -9,10 +9,15 @@ import type {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
-import { DESIGN_TOKENS, getDesignTokens } from "@/constants/designTokens";
 import { resolveThemeColor } from "@/constants/theme";
+import {
+  applyDesignTokenCssVariables,
+  getDesignTokens,
+} from "@/shared/designSystem";
+
+const DEFAULT_THEME_TOKENS = getDesignTokens();
 
 /**
  * アプリケーション設定の一部項目のみを抽出した型。
@@ -31,6 +36,7 @@ export type DefaultAppConfig = Pick<
   | "quickInputEndTimes"
   | "themeColor"
   | "shiftGroups"
+  | "attendanceStatisticsEnabled"
 >;
 
 /**
@@ -49,6 +55,7 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   quickInputEndTimes: [],
   themeColor: resolveThemeColor(),
   shiftGroups: [],
+  attendanceStatisticsEnabled: false,
 };
 
 const useAppConfig = () => {
@@ -99,6 +106,45 @@ const useAppConfig = () => {
     [config]
   );
 
+  const getLunchRestStartTime = useCallback(
+    () =>
+      dayjs(
+        config?.lunchRestStartTime ?? DEFAULT_CONFIG.lunchRestStartTime,
+        "HH:mm"
+      ),
+    [config]
+  );
+
+  const getLunchRestEndTime = useCallback(
+    () =>
+      dayjs(
+        config?.lunchRestEndTime ?? DEFAULT_CONFIG.lunchRestEndTime,
+        "HH:mm"
+      ),
+    [config]
+  );
+
+  const getStandardWorkHours = useCallback(() => {
+    const configured = config?.standardWorkHours;
+    if (typeof configured === "number") {
+      return Math.max(configured, 0);
+    }
+
+    const start = getStartTime();
+    const end = getEndTime();
+    const lunchStart = getLunchRestStartTime();
+    const lunchEnd = getLunchRestEndTime();
+    const baseHours = end.diff(start, "hour", true);
+    const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
+    return Math.max(baseHours - lunchHours, 0);
+  }, [
+    config?.standardWorkHours,
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  ]);
+
   const getLinks = useCallback(() => {
     if (!config?.links) {
       return [];
@@ -129,6 +175,11 @@ const useAppConfig = () => {
 
   const getOfficeMode = useCallback(
     () => config?.officeMode ?? false,
+    [config]
+  );
+
+  const getAttendanceStatisticsEnabled = useCallback(
+    () => config?.attendanceStatisticsEnabled ?? false,
     [config]
   );
 
@@ -181,24 +232,6 @@ const useAppConfig = () => {
         fixed: group.fixed ?? null,
       }));
   }, [config]);
-
-  const getLunchRestStartTime = useCallback(
-    () =>
-      dayjs(
-        config?.lunchRestStartTime ?? DEFAULT_CONFIG.lunchRestStartTime,
-        "HH:mm"
-      ),
-    [config]
-  );
-
-  const getLunchRestEndTime = useCallback(
-    () =>
-      dayjs(
-        config?.lunchRestEndTime ?? DEFAULT_CONFIG.lunchRestEndTime,
-        "HH:mm"
-      ),
-    [config]
-  );
 
   const getHourlyPaidHolidayEnabled = useCallback(
     () => config?.hourlyPaidHolidayEnabled ?? false,
@@ -253,21 +286,26 @@ const useAppConfig = () => {
         brandPrimaryOverride ?? config?.themeColor ?? DEFAULT_CONFIG.themeColor;
 
       if (!brandPrimaryOverride && !hasRemoteThemeColor) {
-        return DESIGN_TOKENS;
+        return DEFAULT_THEME_TOKENS;
       }
 
       const resolved = resolveThemeColor(candidate || undefined);
       if (
         !brandPrimaryOverride &&
-        resolved === DESIGN_TOKENS.color.brand.primary.base
+        resolved === DEFAULT_THEME_TOKENS.color.brand.primary.base
       ) {
-        return DESIGN_TOKENS;
+        return DEFAULT_THEME_TOKENS;
       }
 
       return getDesignTokens({ brandPrimary: resolved });
     },
     [config]
   );
+
+  useEffect(() => {
+    const tokens = getThemeTokens();
+    applyDesignTokenCssVariables(tokens);
+  }, [getThemeTokens]);
 
   const loading = useMemo(
     () => isLoading || isFetching || isCreating || isUpdating,
@@ -281,10 +319,12 @@ const useAppConfig = () => {
     saveConfig,
     getStartTime,
     getEndTime,
+    getStandardWorkHours,
     getConfigId,
     getLinks,
     getReasons,
     getOfficeMode,
+    getAttendanceStatisticsEnabled,
     getQuickInputStartTimes,
     getQuickInputEndTimes,
     getShiftGroups,

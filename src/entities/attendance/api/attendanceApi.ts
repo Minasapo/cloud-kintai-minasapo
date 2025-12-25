@@ -275,6 +275,68 @@ export const attendanceApi = createApi({
         ];
       },
     }),
+    listAttendancesByDateRange: builder.query<
+      Attendance[],
+      { staffId: string; startDate: string; endDate: string }
+    >({
+      async queryFn(
+        { staffId, startDate, endDate },
+        _queryApi,
+        _extraOptions,
+        baseQuery
+      ) {
+        const attendances: Attendance[] = [];
+        let nextToken: string | null = null;
+
+        do {
+          const result = await baseQuery({
+            document: attendancesByStaffId,
+            variables: {
+              staffId,
+              workDate: {
+                between: [startDate, endDate],
+              },
+              sortDirection: "ASC",
+              nextToken,
+            },
+          });
+
+          if (result.error) {
+            return { error: result.error };
+          }
+
+          const data = result.data as AttendancesByStaffIdQuery | null;
+          const connection = data?.attendancesByStaffId;
+
+          if (!connection) {
+            return { error: { message: "Failed to fetch attendance" } };
+          }
+
+          attendances.push(...connection.items.filter(nonNullable));
+          nextToken = connection.nextToken ?? null;
+        } while (nextToken);
+
+        return { data: attendances };
+      },
+      providesTags: (result, _error, arg) => {
+        const listTag = {
+          type: "Attendance" as const,
+          id: `RANGE-${arg.startDate}-${arg.endDate}`,
+        };
+
+        if (!result) return [listTag];
+
+        return [
+          listTag,
+          ...result.map((attendance) => ({
+            type: "Attendance" as const,
+            id:
+              attendance.id ||
+              buildAttendanceCacheId(attendance.staffId, attendance.workDate),
+          })),
+        ];
+      },
+    }),
     createAttendance: builder.mutation<Attendance, CreateAttendanceInput>({
       async queryFn(input, _queryApi, _extraOptions, baseQuery) {
         const payload: CreateAttendanceInput = {
@@ -401,6 +463,7 @@ export const attendanceApi = createApi({
 export const {
   useGetAttendanceByStaffAndDateQuery,
   useLazyGetAttendanceByStaffAndDateQuery,
+  useListAttendancesByDateRangeQuery,
   useListRecentAttendancesQuery,
   useLazyListRecentAttendancesQuery,
   useCreateAttendanceMutation,

@@ -1,10 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap');
 @import url('https://use.typekit.net/cfv5jmz.css');
 
+:root {
+  color-scheme: light;
+}
+
 body {
   margin: 0;
-  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont,
-    sans-serif;
+  font-family: var(
+      --ds-typography-font-family,
+      'Noto Sans JP',
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif
+    );
+  color: var(--ds-color-neutral-900, #1e2a25);
+  background-color: var(--ds-color-neutral-50, #f8faf9);
+  line-height: var(--ds-typography-line-height-relaxed, 1.6);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

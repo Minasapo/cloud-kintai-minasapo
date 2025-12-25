@@ -112,7 +112,7 @@ export default function AmPmHoliday() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box>
-        <Typography variant="h5" sx={{ mb: 1 }}>
+        <Typography variant="h4" sx={{ mb: 1 }}>
           午前/午後休
         </Typography>
         <Stack spacing={2} sx={{ mb: 2 }}>

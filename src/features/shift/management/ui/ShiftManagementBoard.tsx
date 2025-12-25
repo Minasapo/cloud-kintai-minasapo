@@ -19,19 +19,18 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
@@ -40,30 +39,60 @@ import {
   getGroupCoveragePresentation,
   ShiftGroupConstraints,
 } from "../lib/shiftGroups";
-import {
-  defaultStatusVisual,
-  statusVisualMap,
-} from "../lib/shiftStateMapping";
+import { defaultStatusVisual, statusVisualMap } from "../lib/shiftStateMapping";
 import useShiftManagementDialogs from "../model/useShiftManagementDialogs";
-import useShiftSelection from "../model/useShiftSelection";
 import useShiftRequestAssignments from "../model/useShiftRequestAssignments";
+import useShiftSelection from "../model/useShiftSelection";
 import ShiftBulkEditDialog from "./components/ShiftBulkEditDialog";
 import ShiftEditDialog from "./components/ShiftEditDialog";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
 import ShiftManagementSummaryRow from "./components/ShiftManagementSummaryRow";
 
-const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
-const toSpacingUnit = (value: number) => value / 8;
+const DEFAULT_THEME_TOKENS = getDesignTokens();
+const shiftBoardTokens = DEFAULT_THEME_TOKENS.component.shiftBoard;
+const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
 
-const SHIFT_BOARD_PADDING_X = toSpacingUnit(shiftBoardTokens.columnGap);
-const SHIFT_BOARD_PADDING_Y = toSpacingUnit(shiftBoardTokens.rowGap);
-const SHIFT_BOARD_HALF_PADDING_X = SHIFT_BOARD_PADDING_X / 2;
-const SHIFT_BOARD_HALF_PADDING_Y = SHIFT_BOARD_PADDING_Y / 2;
-const SHIFT_BOARD_CELL_RADIUS = `${shiftBoardTokens.cellRadius}px`;
-const SHIFT_BOARD_TRANSITION = `${DESIGN_TOKENS.motion.duration.medium}ms ${DESIGN_TOKENS.motion.easing.standard}`;
-const SHIFT_BOARD_FOCUS_RING_COLOR =
-  DESIGN_TOKENS.color.brand.primary.focusRing;
-const SHIFT_BOARD_FOCUS_SHADOW = DESIGN_TOKENS.shadow.card;
+const mixWithTransparent = (
+  tokenPath: string,
+  fallback: string,
+  opacity: number
+) => {
+  const percentage = Math.round(Math.min(Math.max(opacity, 0), 1) * 100);
+  return `color-mix(in srgb, ${designTokenVar(
+    tokenPath,
+    fallback
+  )} ${percentage}%, transparent)`;
+};
+
+const SHIFT_BOARD_PADDING_X = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.columnGap`,
+  `${shiftBoardTokens.columnGap}px`
+);
+const SHIFT_BOARD_PADDING_Y = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.rowGap`,
+  `${shiftBoardTokens.rowGap}px`
+);
+const SHIFT_BOARD_HALF_PADDING_X = `calc(${SHIFT_BOARD_PADDING_X} / 2)`;
+const SHIFT_BOARD_HALF_PADDING_Y = `calc(${SHIFT_BOARD_PADDING_Y} / 2)`;
+const SHIFT_BOARD_CELL_RADIUS = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.cellRadius`,
+  `${shiftBoardTokens.cellRadius}px`
+);
+const SHIFT_BOARD_TRANSITION = `${designTokenVar(
+  "motion.duration.medium",
+  `${DEFAULT_THEME_TOKENS.motion.duration.medium}ms`
+)} ${designTokenVar(
+  "motion.easing.standard",
+  DEFAULT_THEME_TOKENS.motion.easing.standard
+)}`;
+const SHIFT_BOARD_FOCUS_RING_COLOR = designTokenVar(
+  "color.brand.primary.focusRing",
+  DEFAULT_THEME_TOKENS.color.brand.primary.focusRing
+);
+const SHIFT_BOARD_FOCUS_SHADOW = designTokenVar(
+  "shadow.card",
+  DEFAULT_THEME_TOKENS.shadow.card
+);
 
 const SHIFT_BOARD_CELL_BASE_SX = {
   borderRadius: SHIFT_BOARD_CELL_RADIUS,
@@ -78,12 +107,21 @@ const SHIFT_BOARD_INTERACTIVE_FOCUS_SX = {
   },
 };
 
-const HOLIDAY_BG = alpha(DESIGN_TOKENS.color.brand.accent.base, 0.22);
-const COMPANY_HOLIDAY_BG = alpha(
-  DESIGN_TOKENS.color.brand.secondary.base,
+const HOLIDAY_BG = mixWithTransparent(
+  "color.brand.accent.base",
+  DEFAULT_THEME_TOKENS.color.brand.accent.base,
+  0.22
+);
+const COMPANY_HOLIDAY_BG = mixWithTransparent(
+  "color.brand.secondary.base",
+  DEFAULT_THEME_TOKENS.color.brand.secondary.base,
   0.18
 );
-const SATURDAY_BG = alpha(DESIGN_TOKENS.color.brand.primary.base, 0.12);
+const SATURDAY_BG = mixWithTransparent(
+  "color.brand.primary.base",
+  DEFAULT_THEME_TOKENS.color.brand.primary.base,
+  0.12
+);
 
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {

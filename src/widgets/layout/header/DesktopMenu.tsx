@@ -11,24 +11,29 @@ import DesktopMenuView, {
 } from "@shared/ui/header/DesktopMenu";
 import { useContext, useEffect, useMemo, useState } from "react";
 
-import { AppConfigContext } from "../../context/AppConfigContext";
-import { AuthContext } from "../../context/AuthContext";
-import fetchStaff from "../../hooks/useStaff/fetchStaff";
-import { StaffRole } from "../../hooks/useStaffs/useStaffs";
+import { AppConfigContext } from "@/context/AppConfigContext";
+import { AuthContext } from "@/context/AuthContext";
+import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
   const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);
-  const { getOfficeMode } = useContext(AppConfigContext);
+  const { getOfficeMode, getAttendanceStatisticsEnabled } =
+    useContext(AppConfigContext);
   const [officeMode, setOfficeMode] = useState<boolean>(false);
+  const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
+    useState<boolean>(true);
 
   useEffect(() => {
     setOfficeMode(getOfficeMode());
-  }, [getOfficeMode]);
+    setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
+  }, [getAttendanceStatisticsEnabled, getOfficeMode]);
 
   const menuList = useMemo<DesktopMenuItem[]>(
     () => [
       { label: "勤怠打刻", href: "/register" },
       { label: "勤怠一覧", href: "/attendance/list" },
+      { label: "稼働統計", href: "/attendance/stats" },
       { label: "日報", href: "/attendance/report" },
       { label: "シフト", href: "/shift" },
       { label: "ワークフロー", href: "/workflow" },
@@ -84,6 +89,9 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
       if (menu.href === "/shift") {
         return isDeveloper === true;
       }
+      if (menu.href === "/attendance/stats") {
+        return attendanceStatisticsEnabled;
+      }
       return true;
     });
 
@@ -109,6 +117,7 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     operatorMenuList,
     menuList,
     isDeveloper,
+    attendanceStatisticsEnabled,
   ]);
 
   return (

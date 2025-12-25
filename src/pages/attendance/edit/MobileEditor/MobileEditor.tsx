@@ -3,6 +3,8 @@ import PaidHolidayFlagInputMobile from "@features/attendance/edit/PaidHolidayFla
 import QuickInputButtonsMobile from "@features/attendance/edit/QuickInputButtonsMobile";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
   Checkbox,
@@ -10,13 +12,15 @@ import {
   Stack,
   Tab,
   Tabs,
+  Typography,
 } from "@mui/material";
 import GroupContainerMobile from "@shared/ui/group-container/GroupContainerMobile";
 import Title from "@shared/ui/typography/Title";
-import React, { useContext, useState } from "react";
-import { Controller } from "react-hook-form";
+import React, { useContext, useMemo, useState } from "react";
+import { Controller, useFormState } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
@@ -60,12 +64,35 @@ export function MobileEditor() {
     workDate,
   } = ctx;
   const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
+  const { errors } = useFormState({ control });
+  const contextErrorMessages = ctx.errorMessages;
+  const derivedMessages = useMemo(
+    () => collectAttendanceErrorMessages(errors),
+    [errors]
+  );
+  const errorMessages = contextErrorMessages?.length
+    ? contextErrorMessages
+    : derivedMessages;
 
   if (changeRequests.length > 0) {
     return (
       <Stack direction="column" spacing={1} sx={{ p: 1 }}>
         <AttendanceEditBreadcrumb />
         <Title>勤怠編集</Title>
+        {errorMessages.length > 0 && (
+          <Box mb={1}>
+            <Alert severity="error">
+              <AlertTitle>入力内容に誤りがあります。</AlertTitle>
+              <Stack spacing={0.5}>
+                {errorMessages.map((message) => (
+                  <Typography key={message} variant="body2">
+                    {message}
+                  </Typography>
+                ))}
+              </Stack>
+            </Alert>
+          </Box>
+        )}
         <ChangeRequestingAlert changeRequests={changeRequests} />
       </Stack>
     );
@@ -237,6 +264,20 @@ export function MobileEditor() {
     <Stack direction="column" spacing={1} sx={{ p: 1, pb: 10 }}>
       <AttendanceEditBreadcrumb />
       <Title>勤怠編集</Title>
+      {errorMessages.length > 0 && (
+        <Box mb={1}>
+          <Alert severity="error">
+            <AlertTitle>入力内容に誤りがあります。</AlertTitle>
+            <Stack spacing={0.5}>
+              {errorMessages.map((message) => (
+                <Typography key={message} variant="body2">
+                  {message}
+                </Typography>
+              ))}
+            </Stack>
+          </Alert>
+        </Box>
+      )}
       <Stack direction="column" spacing={2} sx={{ p: 1 }}>
         <NoDataAlert />
         {setValue && restReplace && hourlyPaidHolidayTimeReplace && (

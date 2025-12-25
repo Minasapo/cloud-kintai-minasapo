@@ -4,448 +4,287 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import MenuItem from "@mui/material/MenuItem";
-import Paper from "@mui/material/Paper";
-import Popover from "@mui/material/Popover";
-import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
+import { useTheme } from "@mui/material/styles";
 import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import TextField from "@mui/material/TextField";
-import { DatePicker } from "@mui/x-date-pickers";
-import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
+import {
+  DataGrid,
+  type GridColDef,
+  type GridRenderCellParams,
+  type GridRowClassNameParams,
+  type GridRowParams,
+  type GridValueFormatter,
+} from "@mui/x-data-grid";
+import { WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import dayjs, { Dayjs } from "dayjs";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
-import { AuthContext } from "@/context/AuthContext";
 import {
-  applyWorkflowFilters,
-  isWorkflowFilterActive,
-  mapWorkflowsToListItems,
-  type WorkflowListFilters,
-  type WorkflowListItem,
-} from "@/features/workflow/list/workflowListModel";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
+  useWorkflowListViewModel,
+  type WorkflowListViewModel,
+} from "@/features/workflow/list/useWorkflowListViewModel";
+import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
+import { STATUS_LABELS } from "@/lib/workflowLabels";
+import { designTokenVar } from "@/shared/designSystem";
+import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+
+import WorkflowListFilters, {
+  type WorkflowListFiltersHandle,
+} from "./components/WorkflowListFilters";
+
+const CANCELLED_LABEL = STATUS_LABELS[WorkflowStatus.CANCELLED];
+
+const LOADING_SECTION_MIN_HEIGHT = `calc(${designTokenVar(
+  "spacing.xxl",
+  "32px"
+)} * 7.5)`;
+const FILTER_ACTION_GAP = `calc(${designTokenVar("spacing.md", "12px")} * 0.5)`;
+const EMPTY_STATE_PADDING_Y = designTokenVar("spacing.lg", "16px");
+const DATA_GRID_HEIGHT_SPACING_UNITS = 130;
+const DATA_GRID_ROW_HEIGHT_SPACING_UNITS = 14;
+
+const formatWorkflowDate: GridValueFormatter<
+  WorkflowListItem,
+  string | undefined,
+  string,
+  string | undefined
+> = (value) => value ?? "-";
 
 export default function WorkflowListPage() {
+  const theme = useTheme();
+  const spacingToNumber = useCallback(
+    (units: number) => parseFloat(theme.spacing(units)),
+    [theme]
+  );
+  const dataGridContainerHeight = useMemo(
+    () => theme.spacing(DATA_GRID_HEIGHT_SPACING_UNITS),
+    [theme]
+  );
+  const dataGridRowHeight = useMemo(
+    () => spacingToNumber(DATA_GRID_ROW_HEIGHT_SPACING_UNITS),
+    [spacingToNumber]
+  );
   const navigate = useNavigate();
 
-  const { workflows, loading, error } = useWorkflows();
-  const { staffs } = useStaffs();
-  const { cognitoUser, authStatus } = useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
-  const currentStaffId = useMemo(() => {
-    if (!cognitoUser?.id) return undefined;
-    return staffs.find((s) => s.cognitoUserId === cognitoUser.id)?.id;
-  }, [cognitoUser, staffs]);
-  const [data, setData] = useState<WorkflowListItem[]>([]);
-  const [nameFilter, setNameFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [createdFrom, setCreatedFrom] = useState("");
-  const [createdTo, setCreatedTo] = useState("");
-  const [applicationFrom, setApplicationFrom] = useState("");
-  const [applicationTo, setApplicationTo] = useState("");
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [createdAnchorEl, setCreatedAnchorEl] = useState<HTMLElement | null>(
-    null
+  const {
+    isAuthenticated,
+    currentStaffId,
+    loading,
+    error,
+    filteredItems,
+    filters,
+    anyFilterActive,
+    setFilter,
+    clearFilters,
+  }: WorkflowListViewModel = useWorkflowListViewModel();
+  const filterRowRef = useRef<WorkflowListFiltersHandle>(null);
+
+  const columns = useMemo<GridColDef<WorkflowListItem>[]>(
+    () => [
+      {
+        field: "category",
+        headerName: "種別",
+        flex: 1,
+        minWidth: 140,
+        sortable: false,
+      },
+      {
+        field: "applicationDate",
+        headerName: "申請日",
+        flex: 1,
+        minWidth: 160,
+        sortable: false,
+        valueFormatter: formatWorkflowDate,
+      },
+      {
+        field: "status",
+        headerName: "ステータス",
+        flex: 1,
+        minWidth: 160,
+        sortable: false,
+        renderCell: (
+          params: GridRenderCellParams<WorkflowListItem, string | undefined>
+        ) => <StatusChip status={params.row.rawStatus || params.value || ""} />,
+      },
+      {
+        field: "createdAt",
+        headerName: "作成日",
+        flex: 1,
+        minWidth: 160,
+        sortable: false,
+      },
+    ],
+    []
   );
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const workflowFilters = useMemo<WorkflowListFilters>(
-    () => ({
-      name: nameFilter,
-      category: categoryFilter,
-      status: statusFilter,
-      applicationFrom,
-      applicationTo,
-      createdFrom,
-      createdTo,
-    }),
-    [
-      nameFilter,
-      categoryFilter,
-      statusFilter,
-      applicationFrom,
-      applicationTo,
-      createdFrom,
-      createdTo,
-    ]
+  const handleRowClick = useCallback(
+    (params: GridRowParams<WorkflowListItem>) => {
+      const key = params.row.rawId
+        ? params.row.rawId
+        : `${params.row.name}-${params.row.createdAt}`;
+      navigate(`/workflow/${encodeURIComponent(key)}`);
+    },
+    [navigate]
   );
 
-  const filtered = useMemo(
-    () => applyWorkflowFilters(data, workflowFilters),
-    [data, workflowFilters]
+  const getRowClassName = useCallback(
+    (params: GridRowClassNameParams<WorkflowListItem>) =>
+      params.row.rawStatus === WorkflowStatus.CANCELLED ||
+      params.row.status === CANCELLED_LABEL
+        ? "status-cancelled"
+        : "",
+    []
   );
 
-  useEffect(() => {
-    setPage(0);
-  }, [filtered]);
-
-  useEffect(() => {
-    setData(mapWorkflowsToListItems(workflows, currentStaffId));
-  }, [workflows, currentStaffId]);
-
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const anyFilterActive = isWorkflowFilterActive(workflowFilters);
+  const getRowId = useCallback((row: WorkflowListItem) => {
+    return row.rawId ? row.rawId : `${row.name}-${row.createdAt}`;
+  }, []);
 
   if (!isAuthenticated) {
     return (
-      <Page title="ワークフロー" maxWidth="lg">
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: 240,
-          }}
-        >
-          <CircularProgress />
-        </Box>
+      <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
+        <PageSection layoutVariant="dashboard">
+          <Box
+            sx={{
+              ...dashboardInnerSurfaceSx,
+              display: "flex",
+              minHeight: LOADING_SECTION_MIN_HEIGHT,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        </PageSection>
       </Page>
     );
   }
 
   return (
-    <Page title="ワークフロー" maxWidth="lg">
-      <Paper
-        sx={{
-          p: 3,
-          borderRadius: DESIGN_TOKENS.component.workflowList.cardRadius,
-          boxShadow: DESIGN_TOKENS.component.workflowList.cardShadow,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
-        >
-          <Alert severity="warning" variant="standard" sx={{ mb: 2 }}>
-            現在この機能は開発中（ベータ）です。管理者より指示された場合を除き、ご利用はお控えください。
-          </Alert>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {anyFilterActive && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<ClearIcon fontSize="small" />}
-                onClick={() => {
-                  setNameFilter("");
-                  setCategoryFilter("");
-                  setStatusFilter("");
-                  setCreatedFrom("");
-                  setCreatedTo("");
-                  setApplicationFrom("");
-                  setApplicationTo("");
-                  setAnchorEl(null);
-                  setCreatedAnchorEl(null);
-                }}
+    <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
+      <PageSection layoutVariant="dashboard">
+        <Box sx={dashboardInnerSurfaceSx}>
+          <Stack spacing={3}>
+            <Stack spacing={2}>
+              <Alert severity="warning" variant="standard">
+                現在この機能は開発中（ベータ）です。管理者より指示された場合を除き、ご利用はお控えください。
+              </Alert>
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={2}
+                alignItems={{ xs: "stretch", md: "center" }}
               >
-                すべてのフィルターをクリア
-              </Button>
-            )}
-          </Box>
-          <Box>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => navigate("/workflow/new")}
-            >
-              新規作成
-            </Button>
-          </Box>
-        </Box>
+                <Box
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: FILTER_ACTION_GAP,
+                    alignItems: "center",
+                  }}
+                >
+                  {anyFilterActive && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<ClearIcon fontSize="small" />}
+                      onClick={() => {
+                        clearFilters();
+                        filterRowRef.current?.closeAllPopovers();
+                      }}
+                    >
+                      すべてのフィルターをクリア
+                    </Button>
+                  )}
+                </Box>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => navigate("/workflow/new")}
+                  >
+                    新規作成
+                  </Button>
+                </Box>
+              </Stack>
+            </Stack>
 
-        {currentStaffId ? (
-          <TableContainer>
-            {loading && (
+            {currentStaffId ? (
+              <Stack spacing={2}>
+                {error && <Alert severity="error">{error}</Alert>}
+                <Table size="small" sx={{ tableLayout: "fixed" }} aria-hidden>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>種別</TableCell>
+                      <TableCell>申請日</TableCell>
+                      <TableCell>ステータス</TableCell>
+                      <TableCell>作成日</TableCell>
+                    </TableRow>
+                    <WorkflowListFilters
+                      ref={filterRowRef}
+                      filters={filters}
+                      setFilter={setFilter}
+                    />
+                  </TableHead>
+                </Table>
+                <Box sx={{ height: dataGridContainerHeight, width: "100%" }}>
+                  <DataGrid
+                    rows={filteredItems}
+                    columns={columns}
+                    getRowId={getRowId}
+                    disableColumnMenu
+                    disableColumnSelector
+                    disableDensitySelector
+                    disableRowSelectionOnClick
+                    hideFooter
+                    loading={loading}
+                    onRowClick={handleRowClick}
+                    rowHeight={dataGridRowHeight}
+                    columnHeaderHeight={0}
+                    getRowClassName={getRowClassName}
+                    sx={{
+                      "& .MuiDataGrid-columnHeaders": { display: "none" },
+                      "& .status-cancelled .MuiDataGrid-cell": {
+                        color: "text.disabled",
+                      },
+                      "& .MuiDataGrid-row": {
+                        cursor: "pointer",
+                      },
+                      "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within":
+                        {
+                          outline: "none",
+                        },
+                    }}
+                  />
+                </Box>
+              </Stack>
+            ) : (
               <Box
                 sx={{
-                  mb: 2,
                   display: "flex",
                   justifyContent: "center",
-                  alignItems: "center",
+                  py: EMPTY_STATE_PADDING_Y,
                 }}
               >
-                <CircularProgress />
+                {loading ? (
+                  <CircularProgress />
+                ) : (
+                  <Alert severity="info">
+                    ログイン中のアカウントに紐づくスタッフ情報が見つからないため、一覧を表示できません。
+                    <br />
+                    スタッフアカウントが未登録の場合は管理者にお問い合わせください。
+                  </Alert>
+                )}
               </Box>
             )}
-            {error && (
-              <Box sx={{ mb: 2 }}>
-                <Alert severity="error">{error}</Alert>
-              </Box>
-            )}
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>種別</TableCell>
-                  <TableCell>申請日</TableCell>
-                  <TableCell>ステータス</TableCell>
-                  <TableCell>作成日</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Select
-                      size="small"
-                      displayEmpty
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                    >
-                      <MenuItem value="">すべて</MenuItem>
-                      <MenuItem value={WorkflowCategory.PAID_LEAVE}>
-                        {CATEGORY_LABELS[WorkflowCategory.PAID_LEAVE]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowCategory.ABSENCE}>
-                        {CATEGORY_LABELS[WorkflowCategory.ABSENCE]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowCategory.OVERTIME}>
-                        {CATEGORY_LABELS[WorkflowCategory.OVERTIME]}
-                      </MenuItem>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={
-                        applicationFrom && applicationTo
-                          ? `${applicationFrom} → ${applicationTo}`
-                          : "申請日で絞込"
-                      }
-                      onClick={(e) =>
-                        setAnchorEl(e.currentTarget as HTMLElement)
-                      }
-                      InputProps={{ readOnly: true }}
-                    />
-                    <Popover
-                      open={Boolean(anchorEl)}
-                      anchorEl={anchorEl}
-                      onClose={() => setAnchorEl(null)}
-                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                    >
-                      <Box sx={{ p: 2, display: "flex", gap: 2 }}>
-                        <DatePicker
-                          label="From"
-                          value={
-                            applicationFrom ? dayjs(applicationFrom) : null
-                          }
-                          onChange={(v: Dayjs | null) => {
-                            const str = v ? v.format("YYYY-MM-DD") : "";
-                            setApplicationFrom(str);
-                          }}
-                          slotProps={{ textField: { size: "small" } }}
-                        />
-                        <DatePicker
-                          label="To"
-                          value={applicationTo ? dayjs(applicationTo) : null}
-                          onChange={(v: Dayjs | null) => {
-                            const str = v ? v.format("YYYY-MM-DD") : "";
-                            setApplicationTo(str);
-                          }}
-                          slotProps={{ textField: { size: "small" } }}
-                        />
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setApplicationFrom("");
-                              setApplicationTo("");
-                              setAnchorEl(null);
-                            }}
-                          >
-                            クリア
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Popover>
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      size="small"
-                      displayEmpty
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                      <MenuItem value="">すべて</MenuItem>
-                      <MenuItem value={WorkflowStatus.DRAFT}>
-                        {STATUS_LABELS[WorkflowStatus.DRAFT]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.SUBMITTED}>
-                        {STATUS_LABELS[WorkflowStatus.SUBMITTED]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.PENDING}>
-                        {STATUS_LABELS[WorkflowStatus.PENDING]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.APPROVED}>
-                        {STATUS_LABELS[WorkflowStatus.APPROVED]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.REJECTED}>
-                        {STATUS_LABELS[WorkflowStatus.REJECTED]}
-                      </MenuItem>
-                      <MenuItem value={WorkflowStatus.CANCELLED}>
-                        {STATUS_LABELS[WorkflowStatus.CANCELLED]}
-                      </MenuItem>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={
-                        createdFrom && createdTo
-                          ? `${createdFrom} → ${createdTo}`
-                          : "作成日で絞込"
-                      }
-                      onClick={(e) =>
-                        setCreatedAnchorEl(e.currentTarget as HTMLElement)
-                      }
-                      InputProps={{ readOnly: true }}
-                    />
-                    <Popover
-                      open={Boolean(createdAnchorEl)}
-                      anchorEl={createdAnchorEl}
-                      onClose={() => setCreatedAnchorEl(null)}
-                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                    >
-                      <Box sx={{ p: 2, display: "flex", gap: 2 }}>
-                        <DatePicker
-                          label="From"
-                          value={createdFrom ? dayjs(createdFrom) : null}
-                          onChange={(v: Dayjs | null) => {
-                            const str = v ? v.format("YYYY-MM-DD") : "";
-                            setCreatedFrom(str);
-                          }}
-                          slotProps={{ textField: { size: "small" } }}
-                        />
-                        <DatePicker
-                          label="To"
-                          value={createdTo ? dayjs(createdTo) : null}
-                          onChange={(v: Dayjs | null) => {
-                            const str = v ? v.format("YYYY-MM-DD") : "";
-                            setCreatedTo(str);
-                          }}
-                          slotProps={{ textField: { size: "small" } }}
-                        />
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setCreatedFrom("");
-                              setCreatedTo("");
-                              setCreatedAnchorEl(null);
-                            }}
-                          >
-                            クリア
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Popover>
-                  </TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filtered
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((w) => (
-                    <TableRow
-                      key={w.rawId ? w.rawId : `${w.name}-${w.createdAt}`}
-                      onClick={() =>
-                        navigate(
-                          `/workflow/${encodeURIComponent(
-                            w.rawId ? w.rawId : `${w.name}-${w.createdAt}`
-                          )}`
-                        )
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          navigate(
-                            `/workflow/${encodeURIComponent(
-                              w.rawId ? w.rawId : `${w.name}-${w.createdAt}`
-                            )}`
-                          );
-                        }
-                      }}
-                      tabIndex={0}
-                      role="button"
-                      sx={{
-                        cursor: "pointer",
-                        "&:hover": { backgroundColor: "action.hover" },
-                        ...(w.rawStatus === WorkflowStatus.CANCELLED ||
-                        w.status === STATUS_LABELS[WorkflowStatus.CANCELLED]
-                          ? { "& td, & th": { color: "text.disabled" } }
-                          : {}),
-                      }}
-                    >
-                      <TableCell>{w.category}</TableCell>
-                      <TableCell>{w.applicationDate}</TableCell>
-                      <TableCell>
-                        <StatusChip status={w.rawStatus || w.status} />
-                      </TableCell>
-                      <TableCell>{w.createdAt}</TableCell>
-                      <TableCell />
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Box sx={{ my: 4, display: "flex", justifyContent: "center" }}>
-            {loading ? (
-              <CircularProgress />
-            ) : (
-              <Alert severity="info">
-                ログイン中のアカウントに紐づくスタッフ情報が見つからないため、一覧を表示できません。
-                <br />
-                スタッフアカウントが未登録の場合は管理者にお問い合わせください。
-              </Alert>
-            )}
-          </Box>
-        )}
-        <TablePagination
-          component="div"
-          count={filtered.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25]}
-        />
-      </Paper>
+          </Stack>
+        </Box>
+      </PageSection>
     </Page>
   );
 }

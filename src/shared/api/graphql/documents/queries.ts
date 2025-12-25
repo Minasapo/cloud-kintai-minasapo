@@ -59,6 +59,7 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     workEndTime
     lunchRestStartTime
     lunchRestEndTime
+    standardWorkHours
     amHolidayStartTime
     amHolidayEndTime
     pmHolidayStartTime
@@ -66,6 +67,7 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    attendanceStatisticsEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -121,6 +123,7 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       workEndTime
       lunchRestStartTime
       lunchRestEndTime
+      standardWorkHours
       amHolidayStartTime
       amHolidayEndTime
       pmHolidayStartTime
@@ -128,6 +131,7 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       specialHolidayEnabled
       amPmHolidayEnabled
       officeMode
+      attendanceStatisticsEnabled
       absentEnabled
       hourlyPaidHolidayEnabled
       links {

@@ -1,15 +1,47 @@
 import { Box, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 import { statusVisualMap } from "../../lib/shiftStateMapping";
 
-const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
-const SHORTAGE_BG = DESIGN_TOKENS.color.feedback.danger.surface;
-const SHORTAGE_BORDER = alpha(DESIGN_TOKENS.color.feedback.danger.base, 0.5);
-const EXCESS_BG = DESIGN_TOKENS.color.feedback.warning.surface;
-const EXCESS_BORDER = alpha(DESIGN_TOKENS.color.feedback.warning.base, 0.5);
+const DEFAULT_THEME_TOKENS = getDesignTokens();
+const shiftBoardTokens = DEFAULT_THEME_TOKENS.component.shiftBoard;
+const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
+const SHIFT_INDICATOR_RADIUS = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.cellRadius`,
+  `${shiftBoardTokens.cellRadius}px`
+);
+
+const mixWithTransparent = (
+  tokenPath: string,
+  fallback: string,
+  opacity: number
+) => {
+  const percentage = Math.round(Math.min(Math.max(opacity, 0), 1) * 100);
+  return `color-mix(in srgb, ${designTokenVar(
+    tokenPath,
+    fallback
+  )} ${percentage}%, transparent)`;
+};
+
+const SHORTAGE_BG = designTokenVar(
+  "color.feedback.danger.surface",
+  DEFAULT_THEME_TOKENS.color.feedback.danger.surface
+);
+const SHORTAGE_BORDER = mixWithTransparent(
+  "color.feedback.danger.base",
+  DEFAULT_THEME_TOKENS.color.feedback.danger.base,
+  0.5
+);
+const EXCESS_BG = designTokenVar(
+  "color.feedback.warning.surface",
+  DEFAULT_THEME_TOKENS.color.feedback.warning.surface
+);
+const EXCESS_BORDER = mixWithTransparent(
+  "color.feedback.warning.base",
+  DEFAULT_THEME_TOKENS.color.feedback.warning.base,
+  0.5
+);
 
 export default function ShiftManagementLegend() {
   return (
@@ -71,7 +103,7 @@ export default function ShiftManagementLegend() {
             sx={{
               width: 16,
               height: 16,
-              borderRadius: `${shiftBoardTokens.cellRadius}px`,
+              borderRadius: SHIFT_INDICATOR_RADIUS,
               bgcolor: SHORTAGE_BG,
               border: "1px solid",
               borderColor: SHORTAGE_BORDER,
@@ -86,7 +118,7 @@ export default function ShiftManagementLegend() {
             sx={{
               width: 16,
               height: 16,
-              borderRadius: `${shiftBoardTokens.cellRadius}px`,
+              borderRadius: SHIFT_INDICATOR_RADIUS,
               bgcolor: EXCESS_BG,
               border: "1px solid",
               borderColor: EXCESS_BORDER,

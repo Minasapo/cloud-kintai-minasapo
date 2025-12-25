@@ -59,7 +59,7 @@ export default function SpecialHoliday() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>
         特別休暇
       </Typography>
       <Stack spacing={2} sx={{ mb: 2 }}>
