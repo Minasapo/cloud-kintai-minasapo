@@ -22,7 +22,7 @@ const Title = forwardRef<HTMLSpanElement, TitleProps>(function Title(
     borderColor,
     color = TITLE_TEXT_COLOR,
     sx,
-    variant = "h4",
+    variant = "h1",
     ...typographyProps
   },
   ref
