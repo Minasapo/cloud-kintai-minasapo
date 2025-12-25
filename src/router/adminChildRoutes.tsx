@@ -27,6 +27,9 @@ const AmPmHolidayRoute = createLazyRoute(
 const LinksRoute = createLazyRoute(
   () => import("../pages/admin/AdminConfigManagement/Links")
 );
+const AttendanceStatisticsRoute = createLazyRoute(
+  () => import("@pages/admin/AdminConfigManagement/AttendanceStatistics")
+);
 const OfficeModeRoute = createLazyRoute(
   () => import("../pages/admin/AdminConfigManagement/OfficeMode")
 );
@@ -218,6 +221,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "feature_management/office_mode",
         lazy: OfficeModeRoute,
+      },
+      {
+        path: "feature_management/attendance_statistics",
+        lazy: AttendanceStatisticsRoute,
       },
       {
         path: "feature_management/links",

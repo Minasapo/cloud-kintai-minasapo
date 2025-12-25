@@ -30,6 +30,7 @@ type AppConfigContextProps = {
     enabled: boolean;
   }[];
   getOfficeMode: () => boolean;
+  getAttendanceStatisticsEnabled: () => boolean;
   getQuickInputStartTimes: (onlyEnabled?: boolean) => {
     time: string;
     enabled: boolean;
@@ -81,6 +82,7 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getLinks: () => [],
   getReasons: () => [],
   getOfficeMode: () => false,
+  getAttendanceStatisticsEnabled: () => false,
   getQuickInputStartTimes: () => [],
   getQuickInputEndTimes: () => [],
   getShiftGroups: () => [],

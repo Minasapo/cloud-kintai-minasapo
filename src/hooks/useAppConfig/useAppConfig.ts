@@ -36,6 +36,7 @@ export type DefaultAppConfig = Pick<
   | "quickInputEndTimes"
   | "themeColor"
   | "shiftGroups"
+  | "attendanceStatisticsEnabled"
 >;
 
 /**
@@ -54,6 +55,7 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   quickInputEndTimes: [],
   themeColor: resolveThemeColor(),
   shiftGroups: [],
+  attendanceStatisticsEnabled: false,
 };
 
 const useAppConfig = () => {
@@ -173,6 +175,11 @@ const useAppConfig = () => {
 
   const getOfficeMode = useCallback(
     () => config?.officeMode ?? false,
+    [config]
+  );
+
+  const getAttendanceStatisticsEnabled = useCallback(
+    () => config?.attendanceStatisticsEnabled ?? false,
     [config]
   );
 
@@ -317,6 +324,7 @@ const useAppConfig = () => {
     getLinks,
     getReasons,
     getOfficeMode,
+    getAttendanceStatisticsEnabled,
     getQuickInputStartTimes,
     getQuickInputEndTimes,
     getShiftGroups,

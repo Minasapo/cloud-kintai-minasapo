@@ -153,6 +153,7 @@ export default function Layout() {
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
     getAbsentEnabled,
+    getAttendanceStatisticsEnabled,
     getThemeColor,
     getThemeTokens,
   } = useAppConfig();
@@ -347,6 +348,7 @@ export default function Layout() {
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
       getAbsentEnabled,
+      getAttendanceStatisticsEnabled,
       getThemeColor,
       getThemeTokens,
     }),
@@ -373,6 +375,7 @@ export default function Layout() {
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
       getAbsentEnabled,
+      getAttendanceStatisticsEnabled,
       getThemeColor,
       getThemeTokens,
     ]
