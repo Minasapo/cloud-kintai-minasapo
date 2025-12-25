@@ -8,7 +8,7 @@ describe("Holiday", () => {
       __typename: "HolidayCalendar",
       id: "holiday-1",
       holidayDate: "2024-01-01",
-      holidayName: "元日",
+      name: "元日",
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
@@ -16,7 +16,7 @@ describe("Holiday", () => {
       __typename: "HolidayCalendar",
       id: "holiday-2",
       holidayDate: "2024-01-08",
-      holidayName: "成人の日",
+      name: "成人の日",
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
@@ -24,7 +24,7 @@ describe("Holiday", () => {
       __typename: "HolidayCalendar",
       id: "holiday-3",
       holidayDate: "2024-12-31",
-      holidayName: "大晦日",
+      name: "大晦日",
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
@@ -61,7 +61,7 @@ describe("Holiday", () => {
       const holidayInfo = holiday.getHoliday();
 
       expect(holidayInfo).toBeDefined();
-      expect(holidayInfo?.holidayName).toBe("元日");
+      expect(holidayInfo?.name).toBe("元日");
       expect(holidayInfo?.id).toBe("holiday-1");
     });
 
@@ -75,11 +75,11 @@ describe("Holiday", () => {
     it("複数の祝日のうち該当する祝日情報を正しく取得できる", () => {
       const holiday1 = new Holiday(mockHolidayCalendars, "2024-01-08");
       const holidayInfo1 = holiday1.getHoliday();
-      expect(holidayInfo1?.holidayName).toBe("成人の日");
+      expect(holidayInfo1?.name).toBe("成人の日");
 
       const holiday2 = new Holiday(mockHolidayCalendars, "2024-12-31");
       const holidayInfo2 = holiday2.getHoliday();
-      expect(holidayInfo2?.holidayName).toBe("大晦日");
+      expect(holidayInfo2?.name).toBe("大晦日");
     });
   });
 

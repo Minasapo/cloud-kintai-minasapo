@@ -8,7 +8,7 @@ describe("CompanyHoliday", () => {
       __typename: "CompanyHolidayCalendar",
       id: "company-holiday-1",
       holidayDate: "2024-08-13",
-      holidayName: "夏季休暇",
+      name: "夏季休暇",
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
@@ -16,7 +16,7 @@ describe("CompanyHoliday", () => {
       __typename: "CompanyHolidayCalendar",
       id: "company-holiday-2",
       holidayDate: "2024-08-14",
-      holidayName: "夏季休暇",
+      name: "夏季休暇",
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
@@ -24,7 +24,7 @@ describe("CompanyHoliday", () => {
       __typename: "CompanyHolidayCalendar",
       id: "company-holiday-3",
       holidayDate: "2024-12-29",
-      holidayName: "年末休暇",
+      name: "年末休暇",
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
@@ -76,7 +76,7 @@ describe("CompanyHoliday", () => {
       const holidayInfo = companyHoliday.getHoliday();
 
       expect(holidayInfo).toBeDefined();
-      expect(holidayInfo?.holidayName).toBe("夏季休暇");
+      expect(holidayInfo?.name).toBe("夏季休暇");
       expect(holidayInfo?.id).toBe("company-holiday-1");
     });
 
@@ -96,14 +96,14 @@ describe("CompanyHoliday", () => {
         "2024-08-14"
       );
       const holidayInfo1 = companyHoliday1.getHoliday();
-      expect(holidayInfo1?.holidayName).toBe("夏季休暇");
+      expect(holidayInfo1?.name).toBe("夏季休暇");
 
       const companyHoliday2 = new CompanyHoliday(
         mockCompanyHolidayCalendars,
         "2024-12-29"
       );
       const holidayInfo2 = companyHoliday2.getHoliday();
-      expect(holidayInfo2?.holidayName).toBe("年末休暇");
+      expect(holidayInfo2?.name).toBe("年末休暇");
     });
 
     it("同じ名前の複数の休日がある場合、最初に一致するものを返す", () => {

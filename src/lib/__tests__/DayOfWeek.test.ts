@@ -9,7 +9,7 @@ describe("DayOfWeek", () => {
       __typename: "HolidayCalendar",
       id: "holiday-1",
       holidayDate: "2024-01-01", // 元日
-      holidayName: "元日",
+      name: "元日",
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
@@ -17,7 +17,7 @@ describe("DayOfWeek", () => {
       __typename: "HolidayCalendar",
       id: "holiday-2",
       holidayDate: "2024-01-08", // 成人の日（月曜日）
-      holidayName: "成人の日",
+      name: "成人の日",
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
