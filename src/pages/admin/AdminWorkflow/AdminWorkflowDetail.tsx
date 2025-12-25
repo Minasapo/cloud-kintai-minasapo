@@ -41,7 +41,10 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 import { AttendanceTime } from "@/lib/time/AttendanceTime";
-import { CATEGORY_LABELS } from "@/lib/workflowLabels";
+import {
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  getWorkflowCategoryLabel,
+} from "@/lib/workflowLabels";
 
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
 
@@ -501,6 +504,10 @@ export default function AdminWorkflowDetail() {
       if (isFinal && updated.category === WorkflowCategory.CLOCK_CORRECTION) {
         try {
           const overtimeDetails = updated.overTimeDetails;
+          const correctionReason = overtimeDetails?.reason;
+          const isClockOutCorrection =
+            correctionReason === CLOCK_CORRECTION_CHECK_OUT_LABEL;
+          const timeLabel = isClockOutCorrection ? "退勤" : "出勤";
 
           // 修正対象スタッフIDの判定
           // 打刻修正ワークフロー（CLOCK_CORRECTION）では、申請者自身が自分の打刻修正を申請する
@@ -543,10 +550,11 @@ export default function AdminWorkflowDetail() {
           if (!overtimeDetails?.date) {
             validationErrors.push("overtimeDetails.date が null/undefined");
           }
-          if (!overtimeDetails?.startTime) {
-            validationErrors.push(
-              "overtimeDetails.startTime が null/undefined"
-            );
+          const targetTime = isClockOutCorrection
+            ? overtimeDetails?.endTime || overtimeDetails?.startTime
+            : overtimeDetails?.startTime;
+          if (!targetTime) {
+            validationErrors.push("対象の時刻が null/undefined");
           }
 
           // workDate の形式チェック
@@ -566,13 +574,10 @@ export default function AdminWorkflowDetail() {
             );
           }
 
-          // startTime の形式チェック
-          if (
-            overtimeDetails?.startTime &&
-            !/^\d{2}:\d{2}$/.test(overtimeDetails.startTime)
-          ) {
+          // startTime / endTime の形式チェック
+          if (targetTime && !/^\d{2}:\d{2}$/.test(targetTime)) {
             validationErrors.push(
-              `startTime が正しい形式ではありません: "${overtimeDetails.startTime}" (HH:mm の形式が必要)`
+              `${timeLabel}時刻が正しい形式ではありません: "${targetTime}" (HH:mm の形式が必要)`
             );
           }
 
@@ -588,18 +593,16 @@ export default function AdminWorkflowDetail() {
 
           // validation を通った時点で overtimeDetails は確実に存在
           // AttendanceTime クラスを使用して、HH:mm → ISO 8601 に統一的に変換
-          let attendanceStartTime: string;
+          let attendanceTimeISO: string;
           try {
             const attendanceTime = new AttendanceTime(
-              overtimeDetails!.startTime,
+              targetTime!,
               overtimeDetails!.date
             );
-            attendanceStartTime = attendanceTime.toAPI();
+            attendanceTimeISO = attendanceTime.toAPI();
             console.log("✅ 時刻変換成功:", {
-              input: `${overtimeDetails!.startTime} on ${
-                overtimeDetails!.date
-              }`,
-              output: attendanceStartTime,
+              input: `${targetTime} on ${overtimeDetails!.date}`,
+              output: attendanceTimeISO,
               displayFormat: attendanceTime.toDisplay(),
             });
           } catch (timeError) {
@@ -615,8 +618,8 @@ export default function AdminWorkflowDetail() {
           const attendanceInput = {
             staffId: targetStaffId,
             workDate: overtimeDetails!.date,
-            startTime: attendanceStartTime,
-            endTime: null,
+            startTime: isClockOutCorrection ? null : attendanceTimeISO,
+            endTime: isClockOutCorrection ? attendanceTimeISO : null,
             goDirectlyFlag: false,
             returnDirectlyFlag: false,
             absentFlag: false,
@@ -685,6 +688,15 @@ export default function AdminWorkflowDetail() {
             workDate: attendanceInput.workDate,
           }).unwrap();
 
+          if (isClockOutCorrection && !existingAttendance) {
+            dispatch(
+              setSnackbarError(
+                "対応する出勤打刻がありません。先に出勤打刻を登録してください。"
+              )
+            );
+            return;
+          }
+
           if (existingAttendance) {
             // 既存レコードがある場合は UPDATE
             console.log(
@@ -701,15 +713,30 @@ export default function AdminWorkflowDetail() {
               id: existingAttendance.id,
               staffId: attendanceInput.staffId,
               workDate: attendanceInput.workDate,
-              startTime: attendanceInput.startTime,
-              endTime: attendanceInput.endTime,
-              goDirectlyFlag: attendanceInput.goDirectlyFlag,
-              returnDirectlyFlag: attendanceInput.returnDirectlyFlag,
-              absentFlag: attendanceInput.absentFlag,
-              paidHolidayFlag: attendanceInput.paidHolidayFlag,
-              specialHolidayFlag: attendanceInput.specialHolidayFlag,
-              rests: attendanceInput.rests,
-              hourlyPaidHolidayTimes: attendanceInput.hourlyPaidHolidayTimes,
+              startTime: isClockOutCorrection
+                ? existingAttendance.startTime || attendanceInput.startTime
+                : attendanceInput.startTime,
+              endTime: isClockOutCorrection
+                ? attendanceInput.endTime
+                : existingAttendance.endTime ?? attendanceInput.endTime,
+              goDirectlyFlag:
+                existingAttendance.goDirectlyFlag ??
+                attendanceInput.goDirectlyFlag,
+              returnDirectlyFlag:
+                existingAttendance.returnDirectlyFlag ??
+                attendanceInput.returnDirectlyFlag,
+              absentFlag:
+                existingAttendance.absentFlag ?? attendanceInput.absentFlag,
+              paidHolidayFlag:
+                existingAttendance.paidHolidayFlag ??
+                attendanceInput.paidHolidayFlag,
+              specialHolidayFlag:
+                existingAttendance.specialHolidayFlag ??
+                attendanceInput.specialHolidayFlag,
+              rests: existingAttendance.rests ?? attendanceInput.rests,
+              hourlyPaidHolidayTimes:
+                existingAttendance.hourlyPaidHolidayTimes ??
+                attendanceInput.hourlyPaidHolidayTimes,
               revision: existingAttendance.revision,
             };
 
@@ -1015,13 +1042,7 @@ export default function AdminWorkflowDetail() {
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={9}>
-                  <Typography>
-                    {workflow?.category
-                      ? CATEGORY_LABELS[
-                          workflow.category as WorkflowCategory
-                        ] || workflow.category
-                      : "-"}
-                  </Typography>
+                  <Typography>{getWorkflowCategoryLabel(workflow)}</Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={3}>

@@ -24,7 +24,11 @@ import { useNavigate } from "react-router-dom";
 
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
+import {
+  CATEGORY_LABELS,
+  getWorkflowCategoryLabel,
+  STATUS_LABELS,
+} from "@/lib/workflowLabels";
 
 const STATUS_ALL_VALUE = "__ALL__";
 const STATUS_EXCLUDED_FROM_DEFAULT: WorkflowStatus[] = [
@@ -181,6 +185,7 @@ export default function AdminWorkflow() {
                   const staffName = staff
                     ? `${staff.familyName || ""}${staff.givenName || ""}`
                     : w.staffId || "不明";
+                  const categoryLabel = getWorkflowCategoryLabel(w);
 
                   return (
                     <TableRow
@@ -189,12 +194,7 @@ export default function AdminWorkflow() {
                       onClick={() => navigate(`/admin/workflow/${w.id}`)}
                       sx={{ cursor: "pointer" }}
                     >
-                      <TableCell>
-                        {w.category
-                          ? CATEGORY_LABELS[w.category as WorkflowCategory] ||
-                            w.category
-                          : "-"}
-                      </TableCell>
+                      <TableCell>{categoryLabel}</TableCell>
                       <TableCell>{staffName}</TableCell>
                       <TableCell>
                         <StatusChip status={w.status} />

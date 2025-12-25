@@ -1,13 +1,22 @@
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 
-import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
+import {
+  CATEGORY_LABELS,
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  CLOCK_CORRECTION_LABEL,
+  getWorkflowCategoryLabel,
+  STATUS_LABELS,
+} from "@/lib/workflowLabels";
 
 const CATEGORY_LABELS_REVERSE = Object.entries(CATEGORY_LABELS).reduce(
   (acc, [key, value]) => {
     acc[value] = key;
     return acc;
   },
-  {} as Record<string, string>
+  {
+    [CLOCK_CORRECTION_LABEL]: WorkflowCategory.CLOCK_CORRECTION,
+    [CLOCK_CORRECTION_CHECK_OUT_LABEL]: WorkflowCategory.CLOCK_CORRECTION,
+  } as Record<string, string>
 );
 
 const STATUS_LABELS_REVERSE = Object.entries(STATUS_LABELS).reduce(
@@ -24,7 +33,7 @@ export type WorkflowLike = {
   status?: WorkflowStatus | null;
   category?: WorkflowCategory | null;
   createdAt?: string | null;
-  overTimeDetails?: { date?: string | null } | null;
+  overTimeDetails?: { date?: string | null; reason?: string | null } | null;
 };
 
 export type WorkflowListItem = {
@@ -75,6 +84,7 @@ export function mapWorkflowsToListItems<T extends WorkflowLike>(
     .map((workflow) => {
       const status = workflow.status ?? undefined;
       const category = workflow.category ?? undefined;
+      const categoryLabel = category ? getWorkflowCategoryLabel(workflow) : "";
       return {
         name: workflow.id ?? "",
         rawStaffId: workflow.staffId ?? undefined,
@@ -82,7 +92,7 @@ export function mapWorkflowsToListItems<T extends WorkflowLike>(
         rawStatus: status,
         status: status ? STATUS_LABELS[status] ?? status : "",
         rawCategory: category,
-        category: category ? CATEGORY_LABELS[category] ?? category : "",
+        category: categoryLabel,
         createdAt: formatIsoDate(workflow.createdAt),
         applicationDate: workflow.overTimeDetails?.date ?? undefined,
       } satisfies WorkflowListItem;

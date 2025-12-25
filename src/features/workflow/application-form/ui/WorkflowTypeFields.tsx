@@ -1,6 +1,9 @@
 import { Box, Grid, TextField, Typography } from "@mui/material";
 
-import { CLOCK_CORRECTION_LABEL } from "@/features/workflow/application-form/model/workflowFormModel";
+import {
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  CLOCK_CORRECTION_LABEL,
+} from "@/features/workflow/application-form/model/workflowFormModel";
 import { TimeInput } from "@/shared/ui/TimeInput";
 
 type Props = {
@@ -244,6 +247,47 @@ export default function WorkflowTypeFields({
             <TimeInput
               value={overtimeStart}
               onChange={setOvertimeStart}
+              baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
+              size="small"
+              error={Boolean(overtimeError)}
+              helperText={overtimeError}
+              disabled={disabled}
+              sx={{ maxWidth: 160 }}
+            />
+          </Grid>
+        </>
+      )}
+
+      {category === CLOCK_CORRECTION_CHECK_OUT_LABEL && (
+        <>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" color="text.secondary">
+              対象日
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <TextField
+              type="date"
+              size="small"
+              value={overtimeDate}
+              onChange={(e) => setOvertimeDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              error={Boolean(overtimeDateError)}
+              helperText={overtimeDateError}
+              disabled={disabled}
+              sx={{ maxWidth: 200 }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" color="text.secondary">
+              退勤時間
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <TimeInput
+              value={overtimeEnd}
+              onChange={setOvertimeEnd}
               baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
               size="small"
               error={Boolean(overtimeError)}

@@ -9,7 +9,10 @@ import { extractExistingWorkflowComments } from "@/features/workflow/comment-thr
 import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import type { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
-import { CATEGORY_LABELS } from "@/lib/workflowLabels";
+import {
+  CATEGORY_LABELS,
+  resolveClockCorrectionLabel,
+} from "@/lib/workflowLabels";
 import { parseTimeToISO } from "@/shared/lib/time";
 
 export type WorkflowEditLoaderState = {
@@ -61,8 +64,10 @@ export function useWorkflowEditLoaderState(
 
   useEffect(() => {
     const nextCategoryLabel = workflow.category
-      ? CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
-        workflow.category
+      ? workflow.category === WorkflowCategory.CLOCK_CORRECTION
+        ? resolveClockCorrectionLabel(workflow.overTimeDetails?.reason)
+        : CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
+          workflow.category
       : "";
     setCategory(nextCategoryLabel);
 

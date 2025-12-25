@@ -39,7 +39,8 @@ export const validationMessages = {
     },
     clockCorrection: {
       dateRequired: "対象日を入力してください",
-      timeRequired: "出勤時間を入力してください",
+      clockInRequired: "出勤時間を入力してください",
+      clockOutRequired: "退勤時間を入力してください",
     },
   },
 } as const;

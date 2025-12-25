@@ -12,13 +12,18 @@ import {
 import { z } from "zod";
 
 import { validationMessages } from "@/constants/validationMessages";
-import { REVERSE_CATEGORY } from "@/lib/workflowLabels";
+import {
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  CLOCK_CORRECTION_LABEL,
+  REVERSE_CATEGORY,
+} from "@/lib/workflowLabels";
 import { formatISOToTime } from "@/shared/lib/time";
+
+export { CLOCK_CORRECTION_CHECK_OUT_LABEL, CLOCK_CORRECTION_LABEL };
 
 const VACATION_LABEL = "有給休暇申請";
 const ABSENCE_LABEL = "欠勤申請";
 const OVERTIME_LABEL = "残業申請";
-export const CLOCK_CORRECTION_LABEL = "打刻修正(出勤忘れ)";
 
 const defaultOvertimeDateFactory = () => new Date().toISOString().slice(0, 10);
 
@@ -111,7 +116,10 @@ const workflowFormSchema = z
     }
 
     // 打刻修正のバリデーション
-    if (data.categoryLabel === CLOCK_CORRECTION_LABEL) {
+    const isClockInCorrection = data.categoryLabel === CLOCK_CORRECTION_LABEL;
+    const isClockOutCorrection =
+      data.categoryLabel === CLOCK_CORRECTION_CHECK_OUT_LABEL;
+    if (isClockInCorrection || isClockOutCorrection) {
       if (!data.overtimeDate) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -119,11 +127,18 @@ const workflowFormSchema = z
           message: validationMessages.workflow.clockCorrection.dateRequired,
         });
       }
-      if (!data.overtimeStart) {
+      if (isClockInCorrection && !data.overtimeStart) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["overtimeError"],
-          message: validationMessages.workflow.clockCorrection.timeRequired,
+          message: validationMessages.workflow.clockCorrection.clockInRequired,
+        });
+      }
+      if (isClockOutCorrection && !data.overtimeEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["overtimeError"],
+          message: validationMessages.workflow.clockCorrection.clockOutRequired,
         });
       }
     }
@@ -193,7 +208,10 @@ const buildWorkflowOvertimeDetails = (
   options?: OvertimeDetailsOptions
 ): CreateWorkflowInput["overTimeDetails"] | undefined => {
   const isOvertime = state.categoryLabel === OVERTIME_LABEL;
-  const isClockCorrection = state.categoryLabel === CLOCK_CORRECTION_LABEL;
+  const isClockInCorrection = state.categoryLabel === CLOCK_CORRECTION_LABEL;
+  const isClockOutCorrection =
+    state.categoryLabel === CLOCK_CORRECTION_CHECK_OUT_LABEL;
+  const isClockCorrection = isClockInCorrection || isClockOutCorrection;
   if (!isOvertime && !isClockCorrection) return undefined;
   const resolveDate = () =>
     state.overtimeDate ||
@@ -212,11 +230,23 @@ const buildWorkflowOvertimeDetails = (
   const startTime = state.overtimeStart
     ? formatISOToTime(state.overtimeStart)
     : "";
+  const endTime = state.overtimeEnd ? formatISOToTime(state.overtimeEnd) : "";
+
+  if (isClockInCorrection) {
+    return {
+      date: resolveDate(),
+      startTime,
+      endTime: startTime, // 出勤打刻修正では開始と終了を同じ値で保持
+      reason: state.overtimeReason || CLOCK_CORRECTION_LABEL,
+    };
+  }
+
+  const clockOutTime = endTime || startTime;
   return {
     date: resolveDate(),
-    startTime,
-    endTime: startTime, // 打刻修正では開始時刻と同じ
-    reason: state.overtimeReason || CLOCK_CORRECTION_LABEL,
+    startTime: clockOutTime,
+    endTime: clockOutTime,
+    reason: state.overtimeReason || CLOCK_CORRECTION_CHECK_OUT_LABEL,
   };
 };
 

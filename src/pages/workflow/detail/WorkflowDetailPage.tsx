@@ -25,7 +25,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { CATEGORY_LABELS } from "@/lib/workflowLabels";
+import { getWorkflowCategoryLabel } from "@/lib/workflowLabels";
 import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
@@ -54,9 +54,7 @@ export default function WorkflowDetailPage() {
     formatDateSlash(workflow?.overTimeDetails?.date) ||
     formatDateSlash(isoDateFromTimestamp(workflow?.createdAt));
 
-  const categoryLabel = workflow?.category
-    ? CATEGORY_LABELS[workflow.category] || workflow.category
-    : "-";
+  const categoryLabel = getWorkflowCategoryLabel(workflow);
 
   const approvalSteps = useMemo<WorkflowApprovalStepView[]>(
     () =>
