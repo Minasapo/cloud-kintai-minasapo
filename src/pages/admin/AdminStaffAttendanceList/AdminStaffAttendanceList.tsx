@@ -6,7 +6,7 @@ import { Box, LinearProgress, Stack, Typography } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import type { ReactNode } from "react";
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
@@ -51,6 +51,22 @@ export default function AdminStaffAttendanceList() {
     getTableRowVariant,
     getBadgeContent,
   } = useAdminStaffAttendanceListViewModel(staffId);
+
+  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
+
+  const monthlyAttendances = useMemo(() => {
+    return attendances
+      .filter((attendance) =>
+        attendance.workDate
+          ? dayjs(attendance.workDate).isSame(currentMonth, "month")
+          : false
+      )
+      .sort((a, b) => {
+        const aValue = a.workDate ? dayjs(a.workDate).valueOf() : 0;
+        const bValue = b.workDate ? dayjs(b.workDate).valueOf() : 0;
+        return aValue - bValue;
+      });
+  }, [attendances, currentMonth]);
 
   const {
     quickViewAttendance,
@@ -152,6 +168,8 @@ export default function AdminStaffAttendanceList() {
             closeDates={closeDates}
             closeDatesLoading={closeDatesLoading}
             closeDatesError={closeDatesError}
+            currentMonth={currentMonth}
+            onMonthChange={setCurrentMonth}
           />
         </PageSection>
 
@@ -160,7 +178,10 @@ export default function AdminStaffAttendanceList() {
           layoutVariant="dashboard"
           sx={{ gap: SECTION_CONTENT_GAP }}
         >
-          <AttendanceGraph attendances={attendances} />
+          <AttendanceGraph
+            attendances={monthlyAttendances}
+            month={currentMonth}
+          />
         </PageSection>
       </Stack>
       <ChangeRequestQuickViewDialog

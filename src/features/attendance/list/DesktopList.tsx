@@ -22,6 +22,7 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
+import { useMemo, useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
@@ -68,6 +69,22 @@ export default function DesktopList({
   closeDatesLoading?: boolean;
   closeDatesError?: Error | null;
 }) {
+  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
+
+  const monthlyAttendances = useMemo(() => {
+    return attendances
+      .filter((attendance) =>
+        attendance.workDate
+          ? dayjs(attendance.workDate).isSame(currentMonth, "month")
+          : false
+      )
+      .sort((a, b) => {
+        const aValue = a.workDate ? dayjs(a.workDate).valueOf() : 0;
+        const bValue = b.workDate ? dayjs(b.workDate).valueOf() : 0;
+        return aValue - bValue;
+      });
+  }, [attendances, currentMonth]);
+
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
     if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
       return "sunday";
@@ -228,9 +245,14 @@ export default function DesktopList({
         closeDates={closeDates}
         closeDatesLoading={closeDatesLoading}
         closeDatesError={closeDatesError}
+        currentMonth={currentMonth}
+        onMonthChange={setCurrentMonth}
       />
       <Box sx={{ mt: 3 }}>
-        <AttendanceGraph attendances={attendances} />
+        <AttendanceGraph
+          attendances={monthlyAttendances}
+          month={currentMonth}
+        />
       </Box>
     </DesktopBox>
   );

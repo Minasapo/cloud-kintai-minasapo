@@ -223,6 +223,8 @@ type Props = {
   closeDates?: CloseDate[];
   closeDatesLoading?: boolean;
   closeDatesError?: Error | null;
+  currentMonth?: Dayjs;
+  onMonthChange?: (nextMonth: Dayjs) => void;
 };
 
 type MonthTerm = {
@@ -302,9 +304,23 @@ export default function DesktopCalendarView({
   closeDates,
   closeDatesLoading,
   closeDatesError,
+  currentMonth,
+  onMonthChange,
 }: Props) {
   const theme = useTheme();
-  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
+  const [internalMonth, setInternalMonth] = useState(
+    () => currentMonth ?? dayjs().startOf("month")
+  );
+  const resolvedCurrentMonth = currentMonth ?? internalMonth;
+
+  const updateMonth = (updater: (prev: Dayjs) => Dayjs) => {
+    const nextMonth = updater(resolvedCurrentMonth);
+    if (onMonthChange) {
+      onMonthChange(nextMonth);
+      return;
+    }
+    setInternalMonth(nextMonth);
+  };
 
   const attendanceMap = useMemo(() => {
     return attendances.reduce((map, attendance) => {
@@ -315,11 +331,10 @@ export default function DesktopCalendarView({
     }, new Map<string, Attendance>());
   }, [attendances]);
 
-  const weeks = useMemo(() => buildWeeks(currentMonth), [currentMonth]);
-
-  const handleMoveMonth = (offset: number) => {
-    setCurrentMonth((prev) => prev.add(offset, "month"));
-  };
+  const weeks = useMemo(
+    () => buildWeeks(resolvedCurrentMonth),
+    [resolvedCurrentMonth]
+  );
 
   const handleDayClick = (date: Dayjs) => {
     const formatted = date.format(AttendanceDate.QueryParamFormat);
@@ -345,8 +360,8 @@ export default function DesktopCalendarView({
   );
 
   const monthlyTerms = useMemo(
-    () => resolveMonthlyTerms(currentMonth, closeDates, termPalette),
-    [closeDates, currentMonth, termPalette]
+    () => resolveMonthlyTerms(resolvedCurrentMonth, closeDates, termPalette),
+    [closeDates, resolvedCurrentMonth, termPalette]
   );
   const hasCloseDateContext =
     closeDates !== undefined ||
@@ -371,25 +386,25 @@ export default function DesktopCalendarView({
           <Stack direction="row" spacing={1} alignItems="center">
             <IconButton
               aria-label="previous-month"
-              onClick={() => handleMoveMonth(-1)}
+              onClick={() => updateMonth((prev) => prev.add(-1, "month"))}
             >
               <ChevronLeftIcon />
             </IconButton>
             <IconButton
               aria-label="next-month"
-              onClick={() => handleMoveMonth(1)}
+              onClick={() => updateMonth((prev) => prev.add(1, "month"))}
             >
               <ChevronRightIcon />
             </IconButton>
             <Divider orientation="vertical" flexItem />
             <Typography variant="h6">
-              {currentMonth.format("YYYY年M月")}
+              {resolvedCurrentMonth.format("YYYY年M月")}
             </Typography>
           </Stack>
           <Box>
             <Tooltip title="今月に戻る">
               <IconButton
-                onClick={() => setCurrentMonth(dayjs().startOf("month"))}
+                onClick={() => updateMonth(() => dayjs().startOf("month"))}
               >
                 <Typography variant="body2">今月</Typography>
               </IconButton>
@@ -475,7 +490,7 @@ export default function DesktopCalendarView({
                 ? formatTimeRange(attendance)
                 : undefined;
               const isToday = date.isSame(dayjs(), "day");
-              const isCurrentMonth = date.isSame(currentMonth, "month");
+              const isCurrentMonth = date.isSame(resolvedCurrentMonth, "month");
               const holidayLike = isHolidayLike(
                 date,
                 staff,

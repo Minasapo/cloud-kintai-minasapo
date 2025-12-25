@@ -1,9 +1,10 @@
 import { Box, CircularProgress, Paper } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { lazy, Suspense, useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { AttendanceDate } from "@/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 
@@ -14,8 +15,10 @@ const LazyBarChart = lazy(async () => {
 
 export function AttendanceGraph({
   attendances,
+  month,
 }: {
   attendances: Attendance[];
+  month?: Dayjs;
 }) {
   const { getStandardWorkHours } = useContext(AppConfigContext);
 
@@ -24,21 +27,41 @@ export function AttendanceGraph({
     [getStandardWorkHours]
   );
 
-  const { workTimeData, restTimeData, overtimeData } = attendances.reduce(
-    (acc, attendance) => {
-      if (!attendance.startTime || !attendance.endTime) {
-        acc.workTimeData.push(0);
-        acc.restTimeData.push(0);
-        acc.overtimeData.push(0);
-        return acc;
+  const targetMonth = useMemo(
+    () => (month ? month.startOf("month") : dayjs().startOf("month")),
+    [month]
+  );
+
+  const attendanceByDate = useMemo(() => {
+    return attendances.reduce((map, attendance) => {
+      if (attendance.workDate) {
+        const key = dayjs(attendance.workDate).format(
+          AttendanceDate.DataFormat
+        );
+        map.set(key, attendance);
       }
+      return map;
+    }, new Map<string, Attendance>());
+  }, [attendances]);
 
-      const grossWork = calcTotalWorkTime(
-        attendance.startTime,
-        attendance.endTime
-      );
+  const daysInMonth = useMemo(() => targetMonth.daysInMonth(), [targetMonth]);
 
-      const totalRest = (attendance.rests ?? [])
+  const { workTimeData, restTimeData, overtimeData, labels } = useMemo(() => {
+    const workTime: number[] = [];
+    const restTime: number[] = [];
+    const overtime: number[] = [];
+    const dateLabels: string[] = [];
+
+    for (let i = 0; i < daysInMonth; i += 1) {
+      const date = targetMonth.add(i, "day");
+      const key = date.format(AttendanceDate.DataFormat);
+      const attendance = attendanceByDate.get(key);
+
+      const grossWork = attendance?.startTime
+        ? calcTotalWorkTime(attendance.startTime, attendance.endTime)
+        : 0;
+
+      const totalRest = (attendance?.rests ?? [])
         .filter((item): item is NonNullable<typeof item> => !!item)
         .reduce((sum, rest) => {
           if (!rest.startTime || !rest.endTime) return sum;
@@ -46,21 +69,22 @@ export function AttendanceGraph({
         }, 0);
 
       const netWork = Math.max(grossWork - totalRest, 0);
-      const overtime = Math.max(netWork - standardWorkHours, 0);
-      const regularWork = Math.max(netWork - overtime, 0);
+      const overtimeHours = Math.max(netWork - standardWorkHours, 0);
+      const regularWork = Math.max(netWork - overtimeHours, 0);
 
-      acc.workTimeData.push(regularWork);
-      acc.restTimeData.push(totalRest);
-      acc.overtimeData.push(overtime);
-
-      return acc;
-    },
-    {
-      workTimeData: [] as number[],
-      restTimeData: [] as number[],
-      overtimeData: [] as number[],
+      workTime.push(regularWork);
+      restTime.push(totalRest);
+      overtime.push(overtimeHours);
+      dateLabels.push(date.format("M/D"));
     }
-  );
+
+    return {
+      workTimeData: workTime,
+      restTimeData: restTime,
+      overtimeData: overtime,
+      labels: dateLabels,
+    };
+  }, [attendanceByDate, daysInMonth, standardWorkHours, targetMonth]);
 
   const seriesA = {
     data: workTimeData,
@@ -78,11 +102,7 @@ export function AttendanceGraph({
   const props = {
     xAxis: [
       {
-        data: [
-          ...attendances.map((attendance) =>
-            dayjs(attendance.workDate).format("M/D")
-          ),
-        ],
+        data: labels,
         scaleType: "band" as const,
       },
     ],
