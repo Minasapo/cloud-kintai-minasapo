@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   createAttendance,
+  deleteAttendance as deleteAttendanceDocument,
   updateAttendance,
 } from "@shared/api/graphql/documents/mutations";
 import {
@@ -23,9 +24,9 @@ import type {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
+import { E02004 } from "@/errors";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
-import { E02004 } from "@/errors";
 
 // 重複データの詳細情報
 export type DuplicateAttendanceInfo = {
@@ -245,6 +246,26 @@ export const attendanceApi = createApi({
           },
         ];
       },
+    }),
+    deleteAttendance: builder.mutation<Attendance, { id: string }>({
+      async queryFn({ id }, _queryApi, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: deleteAttendanceDocument,
+          variables: { input: { id } },
+        });
+        if (result.error) {
+          return { error: result.error };
+        }
+        const data = result.data as {
+          deleteAttendance?: Attendance | null;
+        } | null;
+        const deleted = data?.deleteAttendance;
+        if (!deleted) {
+          return { error: { message: "Failed to delete attendance" } };
+        }
+        return { data: deleted };
+      },
+      invalidatesTags: ["Attendance"],
     }),
     getAttendanceById: builder.query<Attendance | null, { id: string }>({
       async queryFn({ id }, _queryApi, _extraOptions, baseQuery) {
@@ -706,4 +727,5 @@ export const {
   useListRecentAttendancesWithWarningsQuery,
   useCreateAttendanceMutation,
   useUpdateAttendanceMutation,
+  useDeleteAttendanceMutation,
 } = attendanceApi;

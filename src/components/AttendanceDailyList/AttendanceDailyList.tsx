@@ -1,6 +1,7 @@
 import "./styles.scss";
 
 import {
+  useDeleteAttendanceMutation,
   useLazyGetAttendanceByIdQuery,
   useLazyListRecentAttendancesQuery,
 } from "@entities/attendance/api/attendanceApi";
@@ -12,14 +13,12 @@ import {
   Alert,
   AlertTitle,
   Box,
+  Button,
   Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  ToggleButton,
-  ToggleButtonGroup,
   Stack,
   Table,
   TableBody,
@@ -28,6 +27,8 @@ import {
   TableHead,
   TableRow,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -41,7 +42,10 @@ import MoveDateItem from "@/components/AttendanceDailyList/MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import * as MESSAGE_CODE from "@/errors";
 import { AttendanceDate } from "@/lib/AttendanceDate";
-import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/lib/reducers/snackbarReducer";
 
 import useAttendanceDaily, {
   AttendanceDaily,
@@ -227,6 +231,7 @@ export default function AttendanceDailyList() {
     number | null
   >(null);
   const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
+  const [deleteAttendance] = useDeleteAttendanceMutation();
 
   const overtimeMinutesMap = useMemo(() => {
     return Object.entries(attendanceMap).reduce(
@@ -871,6 +876,52 @@ export default function AttendanceDailyList() {
           )}
         </DialogContent>
         <DialogActions>
+          {selectionMode === "record" && selectedRecordIndex !== null && (
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={async () => {
+                const selected = confirmRecords[selectedRecordIndex!];
+                const toDelete = confirmRecords
+                  .filter((_, idx) => idx !== selectedRecordIndex)
+                  .map((r) => r.id)
+                  .filter(Boolean) as string[];
+                if (toDelete.length === 0) return;
+                const ok = window.confirm(
+                  `選択以外の重複レコードを削除します。対象件数: ${
+                    toDelete.length
+                  }\n削除対象ID: ${toDelete.join(
+                    ", "
+                  )}\nこの操作は取り消せません。実行しますか？`
+                );
+                if (!ok) return;
+                setConfirmLoading(true);
+                try {
+                  for (const id of toDelete) {
+                    try {
+                      await deleteAttendance({ id }).unwrap();
+                    } catch (e) {
+                      console.error("Failed to delete attendance:", id, e);
+                      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+                    }
+                  }
+                  // ダイアログ内の表示を選択済みの1件に更新
+                  setConfirmRecords(selected ? [selected] : []);
+                  dispatch(
+                    setSnackbarSuccess(
+                      `重複レコードの削除が完了しました（残件数: ${
+                        selected ? 1 : 0
+                      }）`
+                    )
+                  );
+                } finally {
+                  setConfirmLoading(false);
+                }
+              }}
+            >
+              選択以外を削除
+            </Button>
+          )}
           <Button onClick={handleCloseConfirm} color="inherit">
             閉じる
           </Button>
