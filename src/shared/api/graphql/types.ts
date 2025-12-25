@@ -79,6 +79,7 @@ export type CreateAppConfigInput = {
   workEndTime?: string | null;
   lunchRestStartTime?: string | null;
   lunchRestEndTime?: string | null;
+  standardWorkHours?: number | null;
   amHolidayStartTime?: string | null;
   amHolidayEndTime?: string | null;
   pmHolidayStartTime?: string | null;
@@ -86,6 +87,7 @@ export type CreateAppConfigInput = {
   specialHolidayEnabled?: boolean | null;
   amPmHolidayEnabled?: boolean | null;
   officeMode?: boolean | null;
+  attendanceStatisticsEnabled?: boolean | null;
   absentEnabled?: boolean | null;
   hourlyPaidHolidayEnabled?: boolean | null;
   links?: Array<LinkInput | null> | null;
@@ -127,6 +129,7 @@ export type ModelAppConfigConditionInput = {
   workEndTime?: ModelStringInput | null;
   lunchRestStartTime?: ModelStringInput | null;
   lunchRestEndTime?: ModelStringInput | null;
+  standardWorkHours?: ModelFloatInput | null;
   amHolidayStartTime?: ModelStringInput | null;
   amHolidayEndTime?: ModelStringInput | null;
   pmHolidayStartTime?: ModelStringInput | null;
@@ -134,6 +137,7 @@ export type ModelAppConfigConditionInput = {
   specialHolidayEnabled?: ModelBooleanInput | null;
   amPmHolidayEnabled?: ModelBooleanInput | null;
   officeMode?: ModelBooleanInput | null;
+  attendanceStatisticsEnabled?: ModelBooleanInput | null;
   absentEnabled?: ModelBooleanInput | null;
   hourlyPaidHolidayEnabled?: ModelBooleanInput | null;
   themeColor?: ModelStringInput | null;
@@ -142,6 +146,18 @@ export type ModelAppConfigConditionInput = {
   not?: ModelAppConfigConditionInput | null;
   createdAt?: ModelStringInput | null;
   updatedAt?: ModelStringInput | null;
+};
+
+export type ModelFloatInput = {
+  ne?: number | null;
+  eq?: number | null;
+  le?: number | null;
+  lt?: number | null;
+  ge?: number | null;
+  gt?: number | null;
+  between?: Array<number | null> | null;
+  attributeExists?: boolean | null;
+  attributeType?: ModelAttributeTypes | null;
 };
 
 export type ModelBooleanInput = {
@@ -159,6 +175,7 @@ export type AppConfig = {
   workEndTime?: string | null;
   lunchRestStartTime?: string | null;
   lunchRestEndTime?: string | null;
+  standardWorkHours?: number | null;
   amHolidayStartTime?: string | null;
   amHolidayEndTime?: string | null;
   pmHolidayStartTime?: string | null;
@@ -166,6 +183,7 @@ export type AppConfig = {
   specialHolidayEnabled?: boolean | null;
   amPmHolidayEnabled?: boolean | null;
   officeMode?: boolean | null;
+  attendanceStatisticsEnabled?: boolean | null;
   absentEnabled?: boolean | null;
   hourlyPaidHolidayEnabled?: boolean | null;
   links?: Array<Link | null> | null;
@@ -214,6 +232,7 @@ export type UpdateAppConfigInput = {
   workEndTime?: string | null;
   lunchRestStartTime?: string | null;
   lunchRestEndTime?: string | null;
+  standardWorkHours?: number | null;
   amHolidayStartTime?: string | null;
   amHolidayEndTime?: string | null;
   pmHolidayStartTime?: string | null;
@@ -221,6 +240,7 @@ export type UpdateAppConfigInput = {
   specialHolidayEnabled?: boolean | null;
   amPmHolidayEnabled?: boolean | null;
   officeMode?: boolean | null;
+  attendanceStatisticsEnabled?: boolean | null;
   absentEnabled?: boolean | null;
   hourlyPaidHolidayEnabled?: boolean | null;
   links?: Array<LinkInput | null> | null;
@@ -1322,6 +1342,7 @@ export type ModelAppConfigFilterInput = {
   workEndTime?: ModelStringInput | null;
   lunchRestStartTime?: ModelStringInput | null;
   lunchRestEndTime?: ModelStringInput | null;
+  standardWorkHours?: ModelFloatInput | null;
   amHolidayStartTime?: ModelStringInput | null;
   amHolidayEndTime?: ModelStringInput | null;
   pmHolidayStartTime?: ModelStringInput | null;
@@ -1329,6 +1350,7 @@ export type ModelAppConfigFilterInput = {
   specialHolidayEnabled?: ModelBooleanInput | null;
   amPmHolidayEnabled?: ModelBooleanInput | null;
   officeMode?: ModelBooleanInput | null;
+  attendanceStatisticsEnabled?: ModelBooleanInput | null;
   absentEnabled?: ModelBooleanInput | null;
   hourlyPaidHolidayEnabled?: ModelBooleanInput | null;
   themeColor?: ModelStringInput | null;
@@ -1659,6 +1681,7 @@ export type ModelSubscriptionAppConfigFilterInput = {
   workEndTime?: ModelSubscriptionStringInput | null;
   lunchRestStartTime?: ModelSubscriptionStringInput | null;
   lunchRestEndTime?: ModelSubscriptionStringInput | null;
+  standardWorkHours?: ModelSubscriptionFloatInput | null;
   amHolidayStartTime?: ModelSubscriptionStringInput | null;
   amHolidayEndTime?: ModelSubscriptionStringInput | null;
   pmHolidayStartTime?: ModelSubscriptionStringInput | null;
@@ -1666,6 +1689,7 @@ export type ModelSubscriptionAppConfigFilterInput = {
   specialHolidayEnabled?: ModelSubscriptionBooleanInput | null;
   amPmHolidayEnabled?: ModelSubscriptionBooleanInput | null;
   officeMode?: ModelSubscriptionBooleanInput | null;
+  attendanceStatisticsEnabled?: ModelSubscriptionBooleanInput | null;
   absentEnabled?: ModelSubscriptionBooleanInput | null;
   hourlyPaidHolidayEnabled?: ModelSubscriptionBooleanInput | null;
   themeColor?: ModelSubscriptionStringInput | null;
@@ -1673,6 +1697,18 @@ export type ModelSubscriptionAppConfigFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null;
   and?: Array<ModelSubscriptionAppConfigFilterInput | null> | null;
   or?: Array<ModelSubscriptionAppConfigFilterInput | null> | null;
+};
+
+export type ModelSubscriptionFloatInput = {
+  ne?: number | null;
+  eq?: number | null;
+  le?: number | null;
+  lt?: number | null;
+  ge?: number | null;
+  gt?: number | null;
+  between?: Array<number | null> | null;
+  in?: Array<number | null> | null;
+  notIn?: Array<number | null> | null;
 };
 
 export type ModelSubscriptionBooleanInput = {
@@ -1917,6 +1953,7 @@ export type CreateAppConfigMutation = {
     workEndTime?: string | null;
     lunchRestStartTime?: string | null;
     lunchRestEndTime?: string | null;
+    standardWorkHours?: number | null;
     amHolidayStartTime?: string | null;
     amHolidayEndTime?: string | null;
     pmHolidayStartTime?: string | null;
@@ -1924,6 +1961,7 @@ export type CreateAppConfigMutation = {
     specialHolidayEnabled?: boolean | null;
     amPmHolidayEnabled?: boolean | null;
     officeMode?: boolean | null;
+    attendanceStatisticsEnabled?: boolean | null;
     absentEnabled?: boolean | null;
     hourlyPaidHolidayEnabled?: boolean | null;
     links?: Array<{
@@ -1976,6 +2014,7 @@ export type UpdateAppConfigMutation = {
     workEndTime?: string | null;
     lunchRestStartTime?: string | null;
     lunchRestEndTime?: string | null;
+    standardWorkHours?: number | null;
     amHolidayStartTime?: string | null;
     amHolidayEndTime?: string | null;
     pmHolidayStartTime?: string | null;
@@ -1983,6 +2022,7 @@ export type UpdateAppConfigMutation = {
     specialHolidayEnabled?: boolean | null;
     amPmHolidayEnabled?: boolean | null;
     officeMode?: boolean | null;
+    attendanceStatisticsEnabled?: boolean | null;
     absentEnabled?: boolean | null;
     hourlyPaidHolidayEnabled?: boolean | null;
     links?: Array<{
@@ -2035,6 +2075,7 @@ export type DeleteAppConfigMutation = {
     workEndTime?: string | null;
     lunchRestStartTime?: string | null;
     lunchRestEndTime?: string | null;
+    standardWorkHours?: number | null;
     amHolidayStartTime?: string | null;
     amHolidayEndTime?: string | null;
     pmHolidayStartTime?: string | null;
@@ -2042,6 +2083,7 @@ export type DeleteAppConfigMutation = {
     specialHolidayEnabled?: boolean | null;
     amPmHolidayEnabled?: boolean | null;
     officeMode?: boolean | null;
+    attendanceStatisticsEnabled?: boolean | null;
     absentEnabled?: boolean | null;
     hourlyPaidHolidayEnabled?: boolean | null;
     links?: Array<{
@@ -3312,6 +3354,7 @@ export type GetAppConfigQuery = {
     workEndTime?: string | null;
     lunchRestStartTime?: string | null;
     lunchRestEndTime?: string | null;
+    standardWorkHours?: number | null;
     amHolidayStartTime?: string | null;
     amHolidayEndTime?: string | null;
     pmHolidayStartTime?: string | null;
@@ -3319,6 +3362,7 @@ export type GetAppConfigQuery = {
     specialHolidayEnabled?: boolean | null;
     amPmHolidayEnabled?: boolean | null;
     officeMode?: boolean | null;
+    attendanceStatisticsEnabled?: boolean | null;
     absentEnabled?: boolean | null;
     hourlyPaidHolidayEnabled?: boolean | null;
     links?: Array<{
@@ -3374,6 +3418,7 @@ export type ListAppConfigsQuery = {
       workEndTime?: string | null;
       lunchRestStartTime?: string | null;
       lunchRestEndTime?: string | null;
+      standardWorkHours?: number | null;
       amHolidayStartTime?: string | null;
       amHolidayEndTime?: string | null;
       pmHolidayStartTime?: string | null;
@@ -3381,6 +3426,7 @@ export type ListAppConfigsQuery = {
       specialHolidayEnabled?: boolean | null;
       amPmHolidayEnabled?: boolean | null;
       officeMode?: boolean | null;
+      attendanceStatisticsEnabled?: boolean | null;
       absentEnabled?: boolean | null;
       hourlyPaidHolidayEnabled?: boolean | null;
       links?: Array<{
@@ -4680,6 +4726,7 @@ export type OnCreateAppConfigSubscription = {
     workEndTime?: string | null;
     lunchRestStartTime?: string | null;
     lunchRestEndTime?: string | null;
+    standardWorkHours?: number | null;
     amHolidayStartTime?: string | null;
     amHolidayEndTime?: string | null;
     pmHolidayStartTime?: string | null;
@@ -4687,6 +4734,7 @@ export type OnCreateAppConfigSubscription = {
     specialHolidayEnabled?: boolean | null;
     amPmHolidayEnabled?: boolean | null;
     officeMode?: boolean | null;
+    attendanceStatisticsEnabled?: boolean | null;
     absentEnabled?: boolean | null;
     hourlyPaidHolidayEnabled?: boolean | null;
     links?: Array<{
@@ -4738,6 +4786,7 @@ export type OnUpdateAppConfigSubscription = {
     workEndTime?: string | null;
     lunchRestStartTime?: string | null;
     lunchRestEndTime?: string | null;
+    standardWorkHours?: number | null;
     amHolidayStartTime?: string | null;
     amHolidayEndTime?: string | null;
     pmHolidayStartTime?: string | null;
@@ -4745,6 +4794,7 @@ export type OnUpdateAppConfigSubscription = {
     specialHolidayEnabled?: boolean | null;
     amPmHolidayEnabled?: boolean | null;
     officeMode?: boolean | null;
+    attendanceStatisticsEnabled?: boolean | null;
     absentEnabled?: boolean | null;
     hourlyPaidHolidayEnabled?: boolean | null;
     links?: Array<{
@@ -4796,6 +4846,7 @@ export type OnDeleteAppConfigSubscription = {
     workEndTime?: string | null;
     lunchRestStartTime?: string | null;
     lunchRestEndTime?: string | null;
+    standardWorkHours?: number | null;
     amHolidayStartTime?: string | null;
     amHolidayEndTime?: string | null;
     pmHolidayStartTime?: string | null;
@@ -4803,6 +4854,7 @@ export type OnDeleteAppConfigSubscription = {
     specialHolidayEnabled?: boolean | null;
     amPmHolidayEnabled?: boolean | null;
     officeMode?: boolean | null;
+    attendanceStatisticsEnabled?: boolean | null;
     absentEnabled?: boolean | null;
     hourlyPaidHolidayEnabled?: boolean | null;
     links?: Array<{

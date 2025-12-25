@@ -76,7 +76,7 @@ export default function MobileList({
               backgroundColor: "rgba(255,243,205,0.12)",
             }}
           >
-            <Typography variant="h6" sx={{ mb: 1 }}>
+            <Typography variant="h4" sx={{ mb: 1 }}>
               打刻エラー一覧 ({errorAttendances.length})
             </Typography>
             <Alert severity="warning">

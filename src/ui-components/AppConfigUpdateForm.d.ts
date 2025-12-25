@@ -28,6 +28,7 @@ export declare type AppConfigUpdateFormInputValues = {
     workEndTime?: string;
     lunchRestStartTime?: string;
     lunchRestEndTime?: string;
+    standardWorkHours?: number;
     amHolidayStartTime?: string;
     amHolidayEndTime?: string;
     pmHolidayStartTime?: string;
@@ -35,6 +36,7 @@ export declare type AppConfigUpdateFormInputValues = {
     specialHolidayEnabled?: boolean;
     amPmHolidayEnabled?: boolean;
     officeMode?: boolean;
+    attendanceStatisticsEnabled?: boolean;
     absentEnabled?: boolean;
     hourlyPaidHolidayEnabled?: boolean;
     themeColor?: string;
@@ -45,6 +47,7 @@ export declare type AppConfigUpdateFormValidationValues = {
     workEndTime?: ValidationFunction<string>;
     lunchRestStartTime?: ValidationFunction<string>;
     lunchRestEndTime?: ValidationFunction<string>;
+    standardWorkHours?: ValidationFunction<number>;
     amHolidayStartTime?: ValidationFunction<string>;
     amHolidayEndTime?: ValidationFunction<string>;
     pmHolidayStartTime?: ValidationFunction<string>;
@@ -52,6 +55,7 @@ export declare type AppConfigUpdateFormValidationValues = {
     specialHolidayEnabled?: ValidationFunction<boolean>;
     amPmHolidayEnabled?: ValidationFunction<boolean>;
     officeMode?: ValidationFunction<boolean>;
+    attendanceStatisticsEnabled?: ValidationFunction<boolean>;
     absentEnabled?: ValidationFunction<boolean>;
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
     themeColor?: ValidationFunction<string>;
@@ -64,6 +68,7 @@ export declare type AppConfigUpdateFormOverridesProps = {
     workEndTime?: PrimitiveOverrideProps<TextFieldProps>;
     lunchRestStartTime?: PrimitiveOverrideProps<TextFieldProps>;
     lunchRestEndTime?: PrimitiveOverrideProps<TextFieldProps>;
+    standardWorkHours?: PrimitiveOverrideProps<TextFieldProps>;
     amHolidayStartTime?: PrimitiveOverrideProps<TextFieldProps>;
     amHolidayEndTime?: PrimitiveOverrideProps<TextFieldProps>;
     pmHolidayStartTime?: PrimitiveOverrideProps<TextFieldProps>;
@@ -71,6 +76,7 @@ export declare type AppConfigUpdateFormOverridesProps = {
     specialHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     amPmHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     officeMode?: PrimitiveOverrideProps<SwitchFieldProps>;
+    attendanceStatisticsEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     absentEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     themeColor?: PrimitiveOverrideProps<TextFieldProps>;

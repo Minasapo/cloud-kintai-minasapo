@@ -96,7 +96,7 @@ const QuickDailyReportCardView = ({
             onClick={onToggle}
             sx={{ cursor: "pointer" }}
           >
-            <Typography variant="subtitle2">今日の日報メモ</Typography>
+            <Typography variant="subtitle1">今日の日報メモ</Typography>
             <Typography variant="caption" color="text.secondary">
               {date} / {reportId ? "既存データを更新" : "新規作成"}
             </Typography>

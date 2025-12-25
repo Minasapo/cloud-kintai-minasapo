@@ -45,28 +45,34 @@ const LinkListSection = ({
       URL内で<code>{"{staffName}"}</code>
       を使用すると、スタッフ名が動的に挿入されます。
     </Typography>
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
       {links.map((link, index) => (
-        <Stack direction="row" spacing={2} alignItems="center" key={index}>
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          key={index}
+          sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+        >
           <TextField
             label="ラベル"
             value={link.label}
             onChange={(e) => onLinkChange(index, "label", e.target.value)}
             size="small"
-            sx={{ flex: 1 }}
+            sx={{ width: 200 }}
           />
           <TextField
             label="URL"
             value={link.url}
             onChange={(e) => onLinkChange(index, "url", e.target.value)}
             size="small"
-            sx={{ flex: 2 }}
+            sx={{ minWidth: 260, width: 360, maxWidth: "100%" }}
           />
           <Select
             value={link.icon}
             onChange={(e) => onLinkChange(index, "icon", e.target.value)}
             size="small"
-            sx={{ flex: 1 }}
+            sx={{ width: 200, minWidth: 160 }}
           >
             {predefinedIcons.map((icon) => (
               <MenuItem key={icon.value} value={icon.value}>
@@ -87,6 +93,7 @@ const LinkListSection = ({
               />
             }
             label="有効"
+            sx={{ minWidth: 88 }}
           />
           <IconButton onClick={() => onRemoveLink(index)} color="error">
             <DeleteIcon />

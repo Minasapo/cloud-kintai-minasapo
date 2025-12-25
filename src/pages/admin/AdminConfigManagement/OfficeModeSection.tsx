@@ -16,8 +16,13 @@ const OfficeModeSection = ({
   onHourlyPaidHolidayEnabledChange,
 }: OfficeModeSectionProps) => (
   <>
-    <Stack direction="row" spacing={4} alignItems="center">
-      <Stack sx={{ flex: 1 }}>
+    <Stack
+      direction="row"
+      spacing={3}
+      alignItems="flex-start"
+      sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+    >
+      <Stack sx={{ flex: 1, minWidth: 280, maxWidth: 640 }}>
         <Typography variant="h6">オフィスモード(β版)</Typography>
         <Typography variant="body2" color="textSecondary">
           オフィスモードを有効にすると、オフィスに設置した端末からQRコードを読み込み出退勤が可能になります。
@@ -34,11 +39,16 @@ const OfficeModeSection = ({
           />
         }
         label={officeMode ? "有効" : "無効"}
-        sx={{ minWidth: 120 }}
+        sx={{ minWidth: 140 }}
       />
     </Stack>
-    <Stack direction="row" spacing={4} alignItems="center" sx={{ mt: 1 }}>
-      <Stack sx={{ flex: 1 }}>
+    <Stack
+      direction="row"
+      spacing={3}
+      alignItems="flex-start"
+      sx={{ flexWrap: "wrap", rowGap: 1.5, mt: 1 }}
+    >
+      <Stack sx={{ flex: 1, minWidth: 280, maxWidth: 640 }}>
         <Typography variant="h6">時間単位休暇(β版)</Typography>
         <Typography variant="body2" color="textSecondary">
           時間単位で休暇を取得できる機能を有効にします。
@@ -54,7 +64,7 @@ const OfficeModeSection = ({
           />
         }
         label={hourlyPaidHolidayEnabled ? "有効" : "無効"}
-        sx={{ minWidth: 120 }}
+        sx={{ minWidth: 140 }}
       />
     </Stack>
   </>

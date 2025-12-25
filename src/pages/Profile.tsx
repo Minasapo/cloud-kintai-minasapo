@@ -111,9 +111,19 @@ const sanitizeExternalLinks = (links: StaffExternalLink[]) =>
 
 const isValidUrl = (value: string) => /^https?:\/\//i.test(value.trim());
 
+const ProfileLogoutButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.logout.contrastText,
+  backgroundColor: theme.palette.logout.main,
+  border: `3px solid ${theme.palette.logout.main}`,
+  "&:hover": {
+    color: theme.palette.logout.main,
+    backgroundColor: theme.palette.logout.contrastText,
+  },
+}));
+
 export default function Profile() {
   const dispatch = useAppDispatchV2();
-  const { cognitoUser } = useContext(AuthContext);
+  const { cognitoUser, signOut } = useContext(AuthContext);
   const [staff, setStaff] = useState<StaffType | null | undefined>(undefined);
 
   const {
@@ -439,6 +449,18 @@ export default function Profile() {
                       )}
                     </Stack>
                   </Stack>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                    ログアウト
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <ProfileLogoutButton onClick={signOut}>
+                    ログアウト
+                  </ProfileLogoutButton>
                 </TableCell>
               </TableRow>
             </TableBody>

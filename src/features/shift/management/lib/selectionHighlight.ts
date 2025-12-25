@@ -1,13 +1,36 @@
-import { alpha } from "@mui/material/styles";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
+const DEFAULT_THEME_TOKENS = getDesignTokens();
+const shiftBoardTokens = DEFAULT_THEME_TOKENS.component.shiftBoard;
+const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
+const HIGHLIGHT_BACKGROUND = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.highlightBackground`,
+  shiftBoardTokens.highlightBackground
+);
+const HIGHLIGHT_BORDER = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.highlightBorder`,
+  shiftBoardTokens.highlightBorder
+);
+const HIGHLIGHT_DROP_SHADOW = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.dropShadow`,
+  shiftBoardTokens.dropShadow
+);
+const HIGHLIGHT_RADIUS = designTokenVar(
+  `${SHIFT_BOARD_BASE_PATH}.cellRadius`,
+  `${shiftBoardTokens.cellRadius}px`
+);
+const HIGHLIGHT_TRANSITION = `${designTokenVar(
+  "motion.duration.medium",
+  `${DEFAULT_THEME_TOKENS.motion.duration.medium}ms`
+)} ${designTokenVar(
+  "motion.easing.standard",
+  DEFAULT_THEME_TOKENS.motion.easing.standard
+)}`;
 
-const shiftBoardTokens = DESIGN_TOKENS.component.shiftBoard;
-const HIGHLIGHT_BACKGROUND = shiftBoardTokens.highlightBackground;
-const HIGHLIGHT_BORDER = shiftBoardTokens.highlightBorder;
-const HIGHLIGHT_DROP_SHADOW = shiftBoardTokens.dropShadow;
-const HIGHLIGHT_RADIUS = shiftBoardTokens.cellRadius;
-const HIGHLIGHT_TRANSITION = `${DESIGN_TOKENS.motion.duration.medium}ms ${DESIGN_TOKENS.motion.easing.standard}`;
+const mixWithTransparent = (colorValue: string, opacity: number) => {
+  const percentage = Math.round(Math.min(Math.max(opacity, 0), 1) * 100);
+  return `color-mix(in srgb, ${colorValue} ${percentage}%, transparent)`;
+};
 
 const getBackgroundOpacity = (
   isRowSelected: boolean,
@@ -28,7 +51,7 @@ export const getCellHighlightSx = (
   if (!isRowSelected && !isColumnSelected) return null;
   const borderWidth = isRowSelected && isColumnSelected ? 2 : 1;
   const borderOpacity = getBorderOpacity(isRowSelected, isColumnSelected);
-  const highlightOverlay = `inset 0 0 0 ${borderWidth}px ${alpha(
+  const highlightOverlay = `inset 0 0 0 ${borderWidth}px ${mixWithTransparent(
     HIGHLIGHT_BORDER,
     borderOpacity
   )}`;
@@ -38,8 +61,8 @@ export const getCellHighlightSx = (
       : highlightOverlay;
 
   return {
-    borderRadius: `${HIGHLIGHT_RADIUS}px`,
-    backgroundColor: alpha(
+    borderRadius: HIGHLIGHT_RADIUS,
+    backgroundColor: mixWithTransparent(
       HIGHLIGHT_BACKGROUND,
       getBackgroundOpacity(isRowSelected, isColumnSelected)
     ),

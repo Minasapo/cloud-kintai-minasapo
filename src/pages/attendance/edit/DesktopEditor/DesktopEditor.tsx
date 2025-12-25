@@ -8,6 +8,8 @@ import WorkTypeItem from "@features/attendance/edit/items/WorkTypeItem";
 import QuickInputButtons from "@features/attendance/edit/QuickInputButtons";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
   Checkbox,
@@ -20,16 +22,19 @@ import {
   styled,
   Tab,
   Tabs,
+  Typography,
 } from "@mui/material";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import Title from "@shared/ui/typography/Title";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { useFormState } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useOperationLog from "@/hooks/useOperationLog/useOperationLog";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
+import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
@@ -75,6 +80,7 @@ const RequestButton = styled(Button)(({ theme }) => ({
 }));
 
 export default function DesktopEditor() {
+  const ctx = useContext(AttendanceEditContext);
   const {
     attendance,
     staff,
@@ -95,7 +101,9 @@ export default function DesktopEditor() {
     hourlyPaidHolidayTimeReplace,
     workDate,
     readOnly,
-  } = useContext(AttendanceEditContext);
+    errorMessages: contextErrorMessages,
+  } = ctx;
+  const { errors } = useFormState({ control });
 
   // OperationLog を作成するためのフック
   const { create: createOperationLog } = useOperationLog();
@@ -106,6 +114,12 @@ export default function DesktopEditor() {
   const [totalProductionTime, setTotalProductionTime] = useState<number>(0);
   const [totalHourlyPaidHolidayTime, setTotalHourlyPaidHolidayTime] =
     useState<number>(0);
+  const errorMessages = useMemo(() => {
+    if (contextErrorMessages && contextErrorMessages.length > 0) {
+      return contextErrorMessages;
+    }
+    return collectAttendanceErrorMessages(errors || {});
+  }, [contextErrorMessages, errors]);
 
   useEffect(() => {
     if (!watch) return;
@@ -162,6 +176,18 @@ export default function DesktopEditor() {
         <AttendanceEditBreadcrumb />
         <BodyStack spacing={2}>
           <Title>勤怠編集</Title>
+          {errorMessages.length > 0 && (
+            <Alert severity="error">
+              <AlertTitle>入力内容に誤りがあります。</AlertTitle>
+              <Stack spacing={0.5}>
+                {errorMessages.map((message: string) => (
+                  <Typography key={message} variant="body2">
+                    {message}
+                  </Typography>
+                ))}
+              </Stack>
+            </Alert>
+          )}
           <Stack direction="column" spacing={2}>
             <AttendanceEditBreadcrumb />
             <ChangeRequestingAlert changeRequests={changeRequests} />

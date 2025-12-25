@@ -88,7 +88,7 @@ export default function WorkingTime() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box>
-        <Typography variant="h5" sx={{ mb: 1 }}>
+        <Typography variant="h4" sx={{ mb: 1 }}>
           勤務時間設定
         </Typography>
         <Stack spacing={2} sx={{ mb: 2 }}>

@@ -47,6 +47,10 @@ export default function AdminMasterLayout() {
           name: "出勤モード",
           path: "/admin/master/feature_management/office_mode",
         },
+        {
+          name: "稼働統計",
+          path: "/admin/master/feature_management/attendance_statistics",
+        },
         { name: "外部リンク", path: "/admin/master/feature_management/links" },
         { name: "打刻理由", path: "/admin/master/feature_management/reasons" },
         {

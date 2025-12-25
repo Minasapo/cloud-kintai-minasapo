@@ -9,34 +9,21 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
-import {
-  Box,
-  Breadcrumbs,
-  LinearProgress,
-  Stack,
-  styled,
-  Typography,
-} from "@mui/material";
-/**
- * MaterialUIのDatePickerコンポーネント。
- */
-import { DatePicker } from "@mui/x-date-pickers";
+import { Box, LinearProgress, Stack, styled, Typography } from "@mui/material";
 import { Staff } from "@shared/api/graphql/types";
-import Title from "@shared/ui/typography/Title";
 /**
  * 日付操作ライブラリ。日付のフォーマットや計算に使用。
  */
-import dayjs from "dayjs";
 /**
  * ReactのContext, Hooks。
  */
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
+import useCloseDates from "@/hooks/useCloseDates/useCloseDates";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { AttendanceDate } from "@/lib/AttendanceDate";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
@@ -44,8 +31,8 @@ import { Logger } from "@/lib/logger";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+import { designTokenVar } from "@/shared/designSystem";
 
-// import DesktopCalendarView from "./DesktopCalendarView";
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";
 
@@ -53,7 +40,6 @@ import MobileList from "./MobileList/MobileList";
  * 勤怠一覧ページの説明文用Typographyコンポーネント。
  */
 const DescriptionTypography = styled(Typography)(({ theme }) => ({
-  padding: "0px 40px",
   [theme.breakpoints.down("md")]: {
     padding: "0px 10px",
   },
@@ -93,6 +79,11 @@ export default function AttendanceTable() {
     isFetching: isCompanyHolidayCalendarsFetching,
     error: companyHolidayCalendarsError,
   } = useGetCompanyHolidayCalendarsQuery();
+  const {
+    closeDates,
+    loading: closeDatesLoading,
+    error: closeDatesError,
+  } = useCloseDates();
   const calendarLoading =
     isHolidayCalendarsLoading ||
     isHolidayCalendarsFetching ||
@@ -148,6 +139,13 @@ export default function AttendanceTable() {
   }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch, logger]);
 
   useEffect(() => {
+    if (closeDatesError) {
+      logger.debug(closeDatesError);
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    }
+  }, [closeDatesError, dispatch, logger]);
+
+  useEffect(() => {
     if (attendancesError) {
       logger.debug(attendancesError);
       dispatch(setSnackbarError(MESSAGE_CODE.E02001));
@@ -180,64 +178,56 @@ export default function AttendanceTable() {
     return totalWorkTime - totalRestTime;
   }, [attendances]);
 
-  if (attendanceLoading || calendarLoading) {
+  if (attendanceLoading || calendarLoading || closeDatesLoading) {
     return <LinearProgress />;
   }
 
+  const headerBackground = designTokenVar(
+    "component.pageSection.background",
+    "#FFFFFF"
+  );
+  const headerShadow = designTokenVar(
+    "component.pageSection.shadow",
+    "0 12px 24px rgba(17, 24, 39, 0.06)"
+  );
+  const headerRadius = designTokenVar("component.pageSection.radius", "12px");
+  const headerPaddingX = designTokenVar("spacing.lg", "16px");
+  const headerPaddingY = designTokenVar("spacing.md", "12px");
+  const headerGap = designTokenVar("spacing.sm", "8px");
+
   return (
     <Stack spacing={2}>
-      <Box>
-        <Breadcrumbs>
-          <Link to="/" color="inherit">
-            TOP
-          </Link>
-          <Typography color="text.primary">勤怠一覧</Typography>
-        </Breadcrumbs>
-      </Box>
-      <Box>
-        <Title>{`勤怠一覧(${totalTime.toFixed(1)}h)`}</Title>
-      </Box>
-      <DescriptionTypography variant="body1">
-        今日から30日前までの勤怠情報を表示しています
-      </DescriptionTypography>
       <Box
         sx={{
-          pl: {
-            md: 5,
-          },
+          backgroundColor: headerBackground,
+          boxShadow: headerShadow,
+          borderRadius: headerRadius,
+          px: headerPaddingX,
+          py: headerPaddingY,
+          display: "flex",
+          flexDirection: "column",
+          gap: headerGap,
         }}
       >
-        <DatePicker
-          value={dayjs()}
-          format={AttendanceDate.DisplayFormat}
-          label="日付を指定して移動"
-          slotProps={{
-            textField: { size: "small" },
-          }}
-          onChange={(date) => {
-            if (date) {
-              navigate(
-                `/attendance/${date.format(
-                  AttendanceDate.QueryParamFormat
-                )}/edit`
-              );
-            }
-          }}
-        />
+        <Stack spacing={0.5}>
+          <Typography variant="h1">勤怠一覧</Typography>
+          <Typography variant="body1" color="text.secondary">
+            直近30日の合計勤務時間: {totalTime.toFixed(1)}h
+          </Typography>
+        </Stack>
+        <DescriptionTypography variant="body1">
+          今日から30日前までの勤怠情報を表示しています
+        </DescriptionTypography>
       </Box>
-      {/* <DesktopCalendarView
-        attendances={attendances}
-        holidayCalendars={holidayCalendars}
-        companyHolidayCalendars={companyHolidayCalendars}
-        navigate={navigate}
-        staff={staff}
-      /> */}
       <DesktopList
         attendances={attendances}
         holidayCalendars={holidayCalendars}
         companyHolidayCalendars={companyHolidayCalendars}
         navigate={navigate}
         staff={staff}
+        closeDates={closeDates}
+        closeDatesLoading={closeDatesLoading}
+        closeDatesError={closeDatesError}
       />
       <MobileList
         attendances={attendances}
