@@ -100,7 +100,7 @@ export default function AttendanceTable() {
     { skip: !shouldFetchAttendances }
   );
 
-  const attendances = attendancesData ?? [];
+  const attendances = attendancesData?.attendances ?? [];
   const attendanceLoading =
     !shouldFetchAttendances ||
     isAttendancesInitialLoading ||

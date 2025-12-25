@@ -1,4 +1,7 @@
-import { useLazyGetAttendanceByStaffAndDateQuery } from "@entities/attendance/api/attendanceApi";
+import {
+  DuplicateAttendanceInfo,
+  useLazyGetAttendanceByStaffAndDateQuery,
+} from "@entities/attendance/api/attendanceApi";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
@@ -15,11 +18,21 @@ export interface AttendanceDaily {
   attendance: Attendance | null;
 }
 
+export interface DuplicateAttendanceDaily {
+  staffId: string;
+  staffName: string;
+  workDate: string;
+  ids: string[];
+}
+
 export default function useAttendanceDaily() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [attendanceDailyList, setAttendanceDailyList] = useState<
     AttendanceDaily[]
+  >([]);
+  const [duplicateAttendances, setDuplicateAttendances] = useState<
+    DuplicateAttendanceDaily[]
   >([]);
 
   const { staffs, loading: staffLoading, error: staffError } = useStaffs();
@@ -30,19 +43,45 @@ export default function useAttendanceDaily() {
 
   const fetchAllByWorkDate = useCallback(
     async (targetDate: string) => {
+      const duplicateBuffer: DuplicateAttendanceDaily[] = [];
+
       const results = await Promise.all(
         staffs.map(
           async ({ cognitoUserId, givenName, familyName, sortKey }) => {
-            const attendance = await triggerGetAttendance({
+            const response = await triggerGetAttendance({
               staffId: cognitoUserId,
               workDate: targetDate,
-            }).unwrap();
+            });
+
+            if (response.error) {
+              throw response.error as Error;
+            }
+
+            const attendance =
+              "data" in response ? response.data ?? null : null;
+
+            const duplicates = (
+              (
+                response as {
+                  meta?: { duplicates?: DuplicateAttendanceInfo[] };
+                }
+              ).meta?.duplicates ?? []
+            ).filter((d) => d.ids.length > 1 || d.ids.length === 1);
+
+            duplicates.forEach((dup) => {
+              duplicateBuffer.push({
+                staffId: cognitoUserId,
+                staffName: `${familyName} ${givenName}`.trim(),
+                workDate: dup.workDate,
+                ids: dup.ids,
+              });
+            });
 
             return {
               sub: cognitoUserId,
               givenName,
               familyName,
-              attendance: attendance ?? null,
+              attendance,
               sortKey: sortKey || "",
             } as AttendanceDaily;
           }
@@ -50,6 +89,7 @@ export default function useAttendanceDaily() {
       );
 
       setAttendanceDailyList(results);
+      setDuplicateAttendances(duplicateBuffer);
       return results;
     },
     [staffs, triggerGetAttendance]
@@ -75,6 +115,7 @@ export default function useAttendanceDaily() {
     loading,
     error,
     attendanceDailyList,
+    duplicateAttendances,
     fetchAllByWorkDate,
   };
 }

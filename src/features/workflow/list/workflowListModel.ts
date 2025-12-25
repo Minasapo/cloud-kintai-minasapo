@@ -42,12 +42,19 @@ export type WorkflowListItem = {
 export type WorkflowListFilters = {
   name?: string;
   category?: string;
-  status?: string;
+  status?: string[];
   applicationFrom?: string;
   applicationTo?: string;
   createdFrom?: string;
   createdTo?: string;
 };
+
+export const DEFAULT_STATUS_FILTERS: WorkflowStatus[] = [
+  WorkflowStatus.DRAFT,
+  WorkflowStatus.SUBMITTED,
+  WorkflowStatus.PENDING,
+  WorkflowStatus.REJECTED,
+];
 
 const formatIsoDate = (value?: string | null): string => {
   if (!value) return "";
@@ -114,13 +121,16 @@ export function applyWorkflowFilters(
       if (!matches) return false;
     }
 
-    if (filters.status) {
+    const statusFilters = filters.status?.filter(Boolean) ?? [];
+    if (statusFilters.length > 0) {
       const statusCandidates = new Set<string>();
-      statusCandidates.add(filters.status);
-      const labelFromEnum = STATUS_LABELS[filters.status as WorkflowStatus];
-      if (labelFromEnum) statusCandidates.add(labelFromEnum);
-      const enumFromLabel = STATUS_LABELS_REVERSE[filters.status];
-      if (enumFromLabel) statusCandidates.add(enumFromLabel);
+      statusFilters.forEach((status) => {
+        statusCandidates.add(status);
+        const labelFromEnum = STATUS_LABELS[status as WorkflowStatus];
+        if (labelFromEnum) statusCandidates.add(labelFromEnum);
+        const enumFromLabel = STATUS_LABELS_REVERSE[status];
+        if (enumFromLabel) statusCandidates.add(enumFromLabel);
+      });
 
       const matches =
         (item.rawStatus && statusCandidates.has(item.rawStatus)) ||
@@ -155,10 +165,15 @@ export function applyWorkflowFilters(
 export const isWorkflowFilterActive = (
   filters: WorkflowListFilters
 ): boolean => {
+  const statusFilters = filters.status?.filter(Boolean) ?? [];
+  const statusDiffersFromDefault =
+    statusFilters.length !== DEFAULT_STATUS_FILTERS.length ||
+    DEFAULT_STATUS_FILTERS.some((status) => !statusFilters.includes(status));
+
   return Boolean(
     filters.name ||
       filters.category ||
-      filters.status ||
+      (statusFilters.length > 0 && statusDiffersFromDefault) ||
       filters.applicationFrom ||
       filters.applicationTo ||
       filters.createdFrom ||

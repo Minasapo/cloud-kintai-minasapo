@@ -130,7 +130,7 @@ export default function TimeRecorder(): JSX.Element {
   );
 
   const attendance = attendanceData;
-  const attendances: Attendance[] = attendancesData ?? [];
+  const attendances: Attendance[] = attendancesData?.attendances ?? [];
 
   const attendanceLoading =
     !shouldFetchAttendance ||

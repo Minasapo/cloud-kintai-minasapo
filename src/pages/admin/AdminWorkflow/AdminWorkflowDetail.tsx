@@ -27,6 +27,11 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import {
+  useCreateAttendanceMutation,
+  useLazyGetAttendanceByStaffAndDateQuery,
+  useUpdateAttendanceMutation,
+} from "@/entities/attendance/api/attendanceApi";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
@@ -35,7 +40,9 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import { AttendanceTime } from "@/lib/time/AttendanceTime";
 import { CATEGORY_LABELS } from "@/lib/workflowLabels";
+
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
 
 export default function AdminWorkflowDetail() {
@@ -44,6 +51,10 @@ export default function AdminWorkflowDetail() {
   const { staffs } = useStaffs();
   const { cognitoUser } = useContext(AuthContext);
   const { update: updateWorkflow } = useWorkflows();
+  const [createAttendance] = useCreateAttendanceMutation();
+  const [getAttendanceByStaffAndDate] =
+    useLazyGetAttendanceByStaffAndDateQuery();
+  const [updateAttendance] = useUpdateAttendanceMutation();
 
   const { workflow, setWorkflow, loading, error } = useWorkflowDetailData(id);
   const dispatch = useAppDispatchV2();
@@ -475,8 +486,312 @@ export default function AdminWorkflowDetail() {
       const updated = (await updateWorkflow(inputForUpdate)) as NonNullable<
         GetWorkflowQuery["getWorkflow"]
       >;
+
+      console.log("===== UpdateWorkflow 結果 =====");
+      console.log("updated オブジェクト全体:", updated);
+      console.log("updated.category:", updated.category);
+      console.log("updated.staffId:", updated.staffId);
+      console.log("updated.overTimeDetails:", updated.overTimeDetails);
+      console.log("isFinal:", isFinal);
+
       setWorkflow(updated);
       setMessages(commentsToMessages(updated.comments || []));
+
+      // 打刻修正申請の場合、承認時に勤怠データを作成/更新
+      if (isFinal && updated.category === WorkflowCategory.CLOCK_CORRECTION) {
+        try {
+          const overtimeDetails = updated.overTimeDetails;
+
+          // 修正対象スタッフIDの判定
+          // 打刻修正ワークフロー（CLOCK_CORRECTION）では、申請者自身が自分の打刻修正を申請する
+          // API には cognitoUserId を優先して渡し、なければ従来の staff.id をフォールバックする
+          const applicantStaff = staffs.find((s) => s.id === updated.staffId);
+          const targetStaffId =
+            applicantStaff?.cognitoUserId || updated.staffId;
+
+          if (!applicantStaff) {
+            console.warn(
+              `⚠️ ワークフロー申請者（staffId: ${updated.staffId}）が見つかりません。staffsリストを確認してください。`
+            );
+          } else {
+            console.log(
+              `✅ ワークフロー申請者確認: ${applicantStaff.familyName} ${applicantStaff.givenName} (staffId: ${updated.staffId}, cognitoUserId: ${applicantStaff.cognitoUserId})`
+            );
+          }
+          console.log("📌 スタッフIDマッピング:", {
+            submitterStaffId: updated.staffId,
+            cognitoUserId: applicantStaff?.cognitoUserId,
+            targetStaffId,
+          });
+
+          console.log("=== 打刻修正処理 開始 ===");
+          console.log("workflow情報:", {
+            id: updated.id,
+            category: updated.category,
+            submitterStaffId: updated.staffId,
+            targetStaffId: targetStaffId,
+            overTimeDetails: overtimeDetails,
+            status: updated.status,
+          });
+          console.log("📌 打刻修正の修正対象：staffId =", targetStaffId);
+
+          // データ検証
+          const validationErrors: string[] = [];
+          if (!targetStaffId) {
+            validationErrors.push("修正対象のstaffId が null/undefined");
+          }
+          if (!overtimeDetails?.date) {
+            validationErrors.push("overtimeDetails.date が null/undefined");
+          }
+          if (!overtimeDetails?.startTime) {
+            validationErrors.push(
+              "overtimeDetails.startTime が null/undefined"
+            );
+          }
+
+          // workDate の形式チェック
+          if (
+            overtimeDetails?.date &&
+            !/^\d{4}-\d{2}-\d{2}$/.test(overtimeDetails.date)
+          ) {
+            validationErrors.push(
+              `workDate が正しい形式ではありません: "${overtimeDetails.date}" (YYYY-MM-DD の形式が必要)`
+            );
+          }
+
+          // staffId の形式チェック（cognitoUserId 優先）
+          if (targetStaffId && typeof targetStaffId !== "string") {
+            validationErrors.push(
+              `staffId が文字列ではありません: ${typeof targetStaffId}`
+            );
+          }
+
+          // startTime の形式チェック
+          if (
+            overtimeDetails?.startTime &&
+            !/^\d{2}:\d{2}$/.test(overtimeDetails.startTime)
+          ) {
+            validationErrors.push(
+              `startTime が正しい形式ではありません: "${overtimeDetails.startTime}" (HH:mm の形式が必要)`
+            );
+          }
+
+          if (validationErrors.length > 0) {
+            console.warn("⚠️ データ検証エラー:", validationErrors);
+            dispatch(
+              setSnackbarError(
+                `勤怠データの作成に失敗しました: ${validationErrors.join(", ")}`
+              )
+            );
+            return;
+          }
+
+          // validation を通った時点で overtimeDetails は確実に存在
+          // AttendanceTime クラスを使用して、HH:mm → ISO 8601 に統一的に変換
+          let attendanceStartTime: string;
+          try {
+            const attendanceTime = new AttendanceTime(
+              overtimeDetails!.startTime,
+              overtimeDetails!.date
+            );
+            attendanceStartTime = attendanceTime.toAPI();
+            console.log("✅ 時刻変換成功:", {
+              input: `${overtimeDetails!.startTime} on ${
+                overtimeDetails!.date
+              }`,
+              output: attendanceStartTime,
+              displayFormat: attendanceTime.toDisplay(),
+            });
+          } catch (timeError) {
+            console.error("❌ 時刻変換失敗:", timeError);
+            dispatch(
+              setSnackbarError(
+                "時刻の形式が正しくありません。勤怠データを作成できません。"
+              )
+            );
+            return;
+          }
+
+          const attendanceInput = {
+            staffId: targetStaffId,
+            workDate: overtimeDetails!.date,
+            startTime: attendanceStartTime,
+            endTime: null,
+            goDirectlyFlag: false,
+            returnDirectlyFlag: false,
+            absentFlag: false,
+            paidHolidayFlag: false,
+            specialHolidayFlag: false,
+            rests: [],
+            hourlyPaidHolidayTimes: [],
+          };
+
+          console.log("📤 勤怠APIに送信するデータ詳細:", {
+            staffId: {
+              value: attendanceInput.staffId,
+              type: typeof attendanceInput.staffId,
+              length:
+                typeof attendanceInput.staffId === "string"
+                  ? attendanceInput.staffId.length
+                  : "N/A",
+              staffName:
+                staffs.find((s) => s.cognitoUserId === attendanceInput.staffId)
+                  ?.familyName +
+                  " " +
+                  staffs.find(
+                    (s) => s.cognitoUserId === attendanceInput.staffId
+                  )?.givenName || "不明",
+            },
+            workDate: {
+              value: attendanceInput.workDate,
+              type: typeof attendanceInput.workDate,
+              format: /^\d{4}-\d{2}-\d{2}$/.test(attendanceInput.workDate)
+                ? "✅ YYYY-MM-DD"
+                : "❌ 不正",
+            },
+            startTime: {
+              value: attendanceInput.startTime,
+              type: typeof attendanceInput.startTime,
+              format:
+                attendanceInput.startTime &&
+                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(
+                  attendanceInput.startTime
+                )
+                  ? "✅ ISO 8601"
+                  : "❌ 不正",
+            },
+            otherFields: {
+              endTime: attendanceInput.endTime,
+              flags: {
+                goDirectly: attendanceInput.goDirectlyFlag,
+                returnDirectly: attendanceInput.returnDirectlyFlag,
+                absent: attendanceInput.absentFlag,
+                paidHoliday: attendanceInput.paidHolidayFlag,
+                specialHoliday: attendanceInput.specialHolidayFlag,
+              },
+              rests: attendanceInput.rests,
+              hourlyPaidHolidayTimes: attendanceInput.hourlyPaidHolidayTimes,
+            },
+          });
+
+          // 既存の勤務データを確認
+          console.log("🔍 既存勤務データの確認を開始:", {
+            staffId: attendanceInput.staffId,
+            workDate: attendanceInput.workDate,
+          });
+
+          const existingAttendance = await getAttendanceByStaffAndDate({
+            staffId: attendanceInput.staffId,
+            workDate: attendanceInput.workDate,
+          }).unwrap();
+
+          if (existingAttendance) {
+            // 既存レコードがある場合は UPDATE
+            console.log(
+              "📝 既存勤務データが見つかりました。UPDATE を実行します:",
+              {
+                existingId: existingAttendance.id,
+                existingStartTime: existingAttendance.startTime,
+                newStartTime: attendanceInput.startTime,
+                revision: existingAttendance.revision,
+              }
+            );
+
+            const updateInput = {
+              id: existingAttendance.id,
+              staffId: attendanceInput.staffId,
+              workDate: attendanceInput.workDate,
+              startTime: attendanceInput.startTime,
+              endTime: attendanceInput.endTime,
+              goDirectlyFlag: attendanceInput.goDirectlyFlag,
+              returnDirectlyFlag: attendanceInput.returnDirectlyFlag,
+              absentFlag: attendanceInput.absentFlag,
+              paidHolidayFlag: attendanceInput.paidHolidayFlag,
+              specialHolidayFlag: attendanceInput.specialHolidayFlag,
+              rests: attendanceInput.rests,
+              hourlyPaidHolidayTimes: attendanceInput.hourlyPaidHolidayTimes,
+              revision: existingAttendance.revision,
+            };
+
+            const updateResult = await updateAttendance(updateInput).unwrap();
+            console.log("✅ 勤怠データを更新しました:", {
+              resultId: updateResult.id,
+              staffId: updateResult.staffId,
+              workDate: updateResult.workDate,
+              startTime: updateResult.startTime,
+              revision: updateResult.revision,
+            });
+
+            dispatch(
+              setSnackbarSuccess("打刻修正を承認し、勤怠データを更新しました")
+            );
+          } else {
+            // 既存レコードがない場合は CREATE
+            console.log(
+              "✨ 既存勤務データが見つかりません。CREATE を実行します"
+            );
+
+            const result = await createAttendance(attendanceInput).unwrap();
+            console.log("✅ 勤怠データを作成しました:", {
+              resultId: result.id,
+              staffId: result.staffId,
+              workDate: result.workDate,
+              startTime: result.startTime,
+              result,
+            });
+
+            dispatch(
+              setSnackbarSuccess("打刻修正を承認し、勤怠データを作成しました")
+            );
+          }
+        } catch (attendanceError) {
+          console.error("❌ 勤怠データの処理に失敗しました:", attendanceError);
+          // エラーの詳細をログ出力
+          if (attendanceError instanceof Error) {
+            console.error("エラーメッセージ:", attendanceError.message);
+            console.error("スタックトレース:", attendanceError.stack);
+          }
+          // GraphQL エラー構造を確認
+          const attendanceApiError = (() => {
+            if (
+              typeof attendanceError === "object" &&
+              attendanceError !== null &&
+              ("data" in attendanceError || "graphQLErrors" in attendanceError)
+            ) {
+              return attendanceError as {
+                data?: {
+                  data?: {
+                    createAttendance?: { errors?: unknown };
+                    updateAttendance?: { errors?: unknown };
+                  };
+                };
+                graphQLErrors?: { message?: string }[];
+              };
+            }
+            return null;
+          })();
+
+          const errorData =
+            attendanceApiError?.data?.data?.createAttendance?.errors ||
+            attendanceApiError?.data?.data?.updateAttendance?.errors;
+          const gqlError = attendanceApiError?.graphQLErrors?.[0];
+          if (errorData) {
+            console.error("GraphQL バリデーションエラー:", errorData);
+          }
+          if (gqlError) {
+            console.error("GraphQL エラーメッセージ:", gqlError.message);
+          } else {
+            console.error("エラーオブジェクト:", attendanceError);
+          }
+          // 勤怠処理エラーは承認処理自体は成功しているので警告のみ
+          dispatch(
+            setSnackbarSuccess(
+              "打刻修正を承認しました（勤怠データの処理に失敗）"
+            )
+          );
+        }
+      }
+
       dispatch(setSnackbarSuccess("承認しました"));
       try {
         await createOperationLogData({

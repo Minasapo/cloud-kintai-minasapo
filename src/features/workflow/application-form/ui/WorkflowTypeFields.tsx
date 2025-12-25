@@ -1,5 +1,8 @@
 import { Box, Grid, TextField, Typography } from "@mui/material";
 
+import { CLOCK_CORRECTION_LABEL } from "@/features/workflow/application-form/model/workflowFormModel";
+import { TimeInput } from "@/shared/ui/TimeInput";
+
 type Props = {
   category: string;
   disabled?: boolean;
@@ -16,10 +19,10 @@ type Props = {
   overtimeDate: string;
   setOvertimeDate: (v: string) => void;
   overtimeDateError: string;
-  overtimeStart: string;
-  setOvertimeStart: (v: string) => void;
-  overtimeEnd: string;
-  setOvertimeEnd: (v: string) => void;
+  overtimeStart: string | null;
+  setOvertimeStart: (v: string | null) => void;
+  overtimeEnd: string | null;
+  setOvertimeEnd: (v: string | null) => void;
   overtimeError: string;
   overtimeReason?: string;
   setOvertimeReason?: (v: string) => void;
@@ -165,25 +168,24 @@ export default function WorkflowTypeFields({
           </Grid>
           <Grid item xs={12} sm={9}>
             <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              <TextField
-                type="time"
-                size="small"
+              <TimeInput
                 value={overtimeStart}
-                onChange={(e) => setOvertimeStart(e.target.value)}
-                InputLabelProps={{ shrink: true }}
+                onChange={setOvertimeStart}
+                baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
+                size="small"
                 error={Boolean(overtimeError)}
                 disabled={disabled}
                 sx={{ maxWidth: 160 }}
               />
               <Typography>-</Typography>
-              <TextField
-                type="time"
-                size="small"
+              <TimeInput
                 value={overtimeEnd}
-                onChange={(e) => setOvertimeEnd(e.target.value)}
-                InputLabelProps={{ shrink: true }}
+                onChange={setOvertimeEnd}
+                baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
+                size="small"
                 error={Boolean(overtimeError)}
                 disabled={disabled}
+                sx={{ maxWidth: 160 }}
               />
               {overtimeError && (
                 <Typography color="error" variant="caption" sx={{ ml: 2 }}>
@@ -207,6 +209,47 @@ export default function WorkflowTypeFields({
                 setOvertimeReason && setOvertimeReason(e.target.value)
               }
               disabled={disabled}
+            />
+          </Grid>
+        </>
+      )}
+
+      {category === CLOCK_CORRECTION_LABEL && (
+        <>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" color="text.secondary">
+              対象日
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <TextField
+              type="date"
+              size="small"
+              value={overtimeDate}
+              onChange={(e) => setOvertimeDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              error={Boolean(overtimeDateError)}
+              helperText={overtimeDateError}
+              disabled={disabled}
+              sx={{ maxWidth: 200 }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" color="text.secondary">
+              出勤時間
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <TimeInput
+              value={overtimeStart}
+              onChange={setOvertimeStart}
+              baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
+              size="small"
+              error={Boolean(overtimeError)}
+              helperText={overtimeError}
+              disabled={disabled}
+              sx={{ maxWidth: 160 }}
             />
           </Grid>
         </>

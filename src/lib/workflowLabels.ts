@@ -4,6 +4,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   [WorkflowCategory.PAID_LEAVE]: "有給休暇申請",
   [WorkflowCategory.ABSENCE]: "欠勤申請",
   [WorkflowCategory.OVERTIME]: "残業申請",
+  [WorkflowCategory.CLOCK_CORRECTION]: "打刻修正(出勤忘れ)",
   [WorkflowCategory.CUSTOM]: "その他",
 };
 

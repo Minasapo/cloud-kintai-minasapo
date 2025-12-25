@@ -18,6 +18,7 @@ import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatchV2 } from "@/app/hooks";
 import {
   buildUpdateWorkflowInput,
+  CLOCK_CORRECTION_LABEL,
   validateWorkflowForm,
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
@@ -191,6 +192,9 @@ export default function WorkflowEditPage() {
                 <MenuItem value="有給休暇申請">有給休暇申請</MenuItem>
                 <MenuItem value="欠勤申請">欠勤申請</MenuItem>
                 <MenuItem value="残業申請">残業申請</MenuItem>
+                <MenuItem value={CLOCK_CORRECTION_LABEL}>
+                  {CLOCK_CORRECTION_LABEL}
+                </MenuItem>
                 <MenuItem value="その他">その他</MenuItem>
               </Select>
             )}

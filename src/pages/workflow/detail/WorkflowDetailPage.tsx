@@ -111,13 +111,6 @@ export default function WorkflowDetailPage() {
 
   const handleWithdraw = async () => {
     if (!workflow?.id) return;
-    // disallow withdraw after approval or rejection
-    if (permissions.isFinalized) {
-      dispatch(
-        setSnackbarError("承認済みまたは却下済みの申請は取り下げできません")
-      );
-      return;
-    }
     if (!window.confirm("本当に取り下げますか？")) return;
     try {
       const statusInput: UpdateWorkflowInput = {

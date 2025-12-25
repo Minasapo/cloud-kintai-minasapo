@@ -1,3 +1,6 @@
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   Box,
   Button,
@@ -18,30 +21,30 @@ import {
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import {
   buildCreateWorkflowInput,
+  CLOCK_CORRECTION_LABEL,
   validateWorkflowForm,
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
+import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import { parseTimeToISO } from "@/shared/lib/time";
+import { PageSection } from "@/shared/ui/layout";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { PageSection } from "@/shared/ui/layout";
 
 export default function NewWorkflowPage() {
   const navigate = useNavigate();
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
-
   const [applicationDate, setApplicationDate] = useState(() => {
     const d = new Date();
     const y = d.getFullYear();
@@ -55,8 +58,8 @@ export default function NewWorkflowPage() {
   const [absenceDate, setAbsenceDate] = useState("");
   const [absenceDateError, setAbsenceDateError] = useState("");
   const [paidReason, setPaidReason] = useState("");
-  const [overtimeStart, setOvertimeStart] = useState("");
-  const [overtimeEnd, setOvertimeEnd] = useState("");
+  const [overtimeStart, setOvertimeStart] = useState<string | null>(null);
+  const [overtimeEnd, setOvertimeEnd] = useState<string | null>(null);
   const [overtimeError, setOvertimeError] = useState("");
   const [overtimeDate, setOvertimeDate] = useState("");
   const [overtimeDateError, setOvertimeDateError] = useState("");
@@ -67,6 +70,7 @@ export default function NewWorkflowPage() {
   const [staff, setStaff] = useState<StaffType | null | undefined>(undefined);
   const { create: createWorkflow } = useWorkflows();
   const dispatch = useAppDispatchV2();
+  const { getStartTime } = useAppConfig();
 
   useEffect(() => {
     if (!cognitoUser?.id) return;
@@ -202,9 +206,45 @@ export default function NewWorkflowPage() {
         dispatch(setSnackbarSuccess("ワークフローを作成しました。"));
         navigate("/workflow", { replace: true });
       } catch (err) {
-        console.error(err);
-        const msg = err instanceof Error ? err.message : String(err);
-        dispatch(setSnackbarError(msg));
+        console.error("Workflow creation error:", err);
+        let errorMessage = "ワークフローの作成に失敗しました。";
+
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (typeof err === "object" && err !== null) {
+          // RTK Query error format
+          if (
+            "data" in err &&
+            typeof err.data === "object" &&
+            err.data !== null
+          ) {
+            const data = err.data as Record<string, unknown>;
+            if ("message" in data && typeof data.message === "string") {
+              errorMessage = data.message;
+            } else if (
+              "errors" in data &&
+              Array.isArray(data.errors) &&
+              data.errors.length > 0
+            ) {
+              const firstError = data.errors[0];
+              if (
+                typeof firstError === "object" &&
+                firstError !== null &&
+                "message" in firstError
+              ) {
+                errorMessage = String(firstError.message);
+              }
+            }
+          } else if ("message" in err && typeof err.message === "string") {
+            errorMessage = err.message;
+          } else if ("error" in err && typeof err.error === "string") {
+            errorMessage = err.error;
+          }
+        } else if (typeof err === "string") {
+          errorMessage = err;
+        }
+
+        dispatch(setSnackbarError(errorMessage));
       }
     })();
   };
@@ -225,6 +265,12 @@ export default function NewWorkflowPage() {
       setEndDate(today);
       // 申請理由のデフォルト
       if (!paidReason) setPaidReason("私用のため");
+    } else if (v === CLOCK_CORRECTION_LABEL) {
+      // 打刻修正の場合は対象日を今日に、出勤時間を既定の勤務開始時刻に初期化
+      setOvertimeDate(today);
+      const defaultStartTime = getStartTime();
+      const isoTime = parseTimeToISO(defaultStartTime.format("HH:mm"), today);
+      setOvertimeStart(isoTime);
     }
   };
 
@@ -277,6 +323,9 @@ export default function NewWorkflowPage() {
                 title="現在は残業申請のみ作成できます"
               >
                 欠勤申請
+              </MenuItem>
+              <MenuItem value={CLOCK_CORRECTION_LABEL}>
+                {CLOCK_CORRECTION_LABEL}
               </MenuItem>
               <MenuItem value="残業申請">残業申請</MenuItem>
             </Select>

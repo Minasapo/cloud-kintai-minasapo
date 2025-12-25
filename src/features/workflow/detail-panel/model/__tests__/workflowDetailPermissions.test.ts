@@ -39,9 +39,7 @@ describe("deriveWorkflowDetailPermissions", () => {
       status: WorkflowStatus.APPROVED,
     });
     expect(result.withdrawDisabled).toBe(true);
-    expect(result.withdrawTooltip).toBe(
-      "承認済みまたは却下済みの申請は取り下げできません"
-    );
+    expect(result.withdrawTooltip).toBe("承認済みの申請は取り下げできません");
   });
 
   it("disables all actions when id missing", () => {

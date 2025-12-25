@@ -2,7 +2,18 @@ import {
   pendingAttendanceContainerSx,
   PendingAttendanceSection,
 } from "@features/admin/staffAttendanceList/components/PendingAttendanceSection";
-import { Box, LinearProgress, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  LinearProgress,
+  Stack,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import type { ReactNode } from "react";
@@ -44,7 +55,9 @@ export default function AdminStaffAttendanceList() {
     closeDatesLoading,
     closeDatesError,
     attendances,
+    duplicateAttendances,
     attendanceLoading,
+    attendancesError,
     pendingAttendances,
     changeRequestControls,
     pendingAttendanceControls,
@@ -56,12 +69,12 @@ export default function AdminStaffAttendanceList() {
 
   const monthlyAttendances = useMemo(() => {
     return attendances
-      .filter((attendance) =>
+      .filter((attendance: Attendance) =>
         attendance.workDate
           ? dayjs(attendance.workDate).isSame(currentMonth, "month")
           : false
       )
-      .sort((a, b) => {
+      .sort((a: Attendance, b: Attendance) => {
         const aValue = a.workDate ? dayjs(a.workDate).valueOf() : 0;
         const bValue = b.workDate ? dayjs(b.workDate).valueOf() : 0;
         return aValue - bValue;
@@ -113,7 +126,19 @@ export default function AdminStaffAttendanceList() {
     </Stack>
   );
 
-  if (staff === null || !staffId) {
+  // エラーがある場合は、エラーメッセージが既にsnackbarで表示されているため、
+  // データが存在する場合は表示を続ける
+  if (attendancesError && attendances.length === 0) {
+    // データが全く取得できなかった場合のみエラーUIを表示
+    return renderStandaloneSection(
+      <Typography>
+        勤怠データの読み込みに失敗しました。エラーメッセージをご確認ください。
+      </Typography>
+    );
+  }
+
+  // staffIdがない場合のみエラーとする（staffがnullでもattendancesがあれば表示）
+  if (!staffId) {
     return renderStandaloneSection(
       <Typography>データ取得中に何らかの問題が発生しました</Typography>
     );
@@ -136,6 +161,42 @@ export default function AdminStaffAttendanceList() {
           gap: PAGE_SECTION_GAP,
         }}
       >
+        {duplicateAttendances.length > 0 && (
+          <PageSection
+            variant="surface"
+            layoutVariant="dashboard"
+            sx={{ gap: SECTION_CONTENT_GAP }}
+          >
+            <Alert severity="warning">
+              重複データが検出されたスタッフです。データ統合を実施してください。
+            </Alert>
+            <Table size="small" aria-label="duplicate-attendance-table">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: "30%" }}>対象日</TableCell>
+                  <TableCell sx={{ width: "20%" }}>重複件数</TableCell>
+                  <TableCell>レコードID一覧</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {duplicateAttendances.map((duplicate) => (
+                  <TableRow
+                    key={`${duplicate.workDate}-${duplicate.ids.join("-")}`}
+                  >
+                    <TableCell>
+                      {duplicate.workDate
+                        ? dayjs(duplicate.workDate).format("YYYY/MM/DD")
+                        : "-"}
+                    </TableCell>
+                    <TableCell>{duplicate.ids.length}</TableCell>
+                    <TableCell>{duplicate.ids.join(", ") || "-"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </PageSection>
+        )}
+
         {pendingAttendances.length > 0 && (
           <PageSection
             variant="surface"

@@ -9,12 +9,16 @@ import {
   type WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
+import { z } from "zod";
 
+import { validationMessages } from "@/constants/validationMessages";
 import { REVERSE_CATEGORY } from "@/lib/workflowLabels";
+import { formatISOToTime } from "@/shared/lib/time";
 
 const VACATION_LABEL = "有給休暇申請";
 const ABSENCE_LABEL = "欠勤申請";
 const OVERTIME_LABEL = "残業申請";
+export const CLOCK_CORRECTION_LABEL = "打刻修正(出勤忘れ)";
 
 const defaultOvertimeDateFactory = () => new Date().toISOString().slice(0, 10);
 
@@ -24,8 +28,10 @@ export type WorkflowFormState = {
   endDate: string;
   absenceDate: string;
   overtimeDate: string;
-  overtimeStart: string;
-  overtimeEnd: string;
+  /** ISO 8601形式の日時文字列 (例: "2024-01-15T09:00:00+09:00") または空文字列 */
+  overtimeStart: string | null;
+  /** ISO 8601形式の日時文字列 (例: "2024-01-15T18:00:00+09:00") または空文字列 */
+  overtimeEnd: string | null;
   overtimeReason: string;
 };
 
@@ -41,41 +47,107 @@ export type WorkflowFormValidationResult = {
   errors: WorkflowFormErrors;
 };
 
+// Zodスキーマによるバリデーション定義
+const workflowFormSchema = z
+  .object({
+    categoryLabel: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+    absenceDate: z.string(),
+    overtimeDate: z.string(),
+    overtimeStart: z.string().nullable(),
+    overtimeEnd: z.string().nullable(),
+    overtimeReason: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    // 有給休暇のバリデーション
+    if (data.categoryLabel === VACATION_LABEL) {
+      if (!data.startDate || !data.endDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["dateError"],
+          message: validationMessages.workflow.paidLeave.dateRequired,
+        });
+      } else if (data.startDate > data.endDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["dateError"],
+          message: validationMessages.workflow.paidLeave.dateRange,
+        });
+      }
+    }
+
+    // 欠勤のバリデーション
+    if (data.categoryLabel === ABSENCE_LABEL && !data.absenceDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["absenceDateError"],
+        message: validationMessages.workflow.absence.dateRequired,
+      });
+    }
+
+    // 残業のバリデーション
+    if (data.categoryLabel === OVERTIME_LABEL) {
+      if (!data.overtimeDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["overtimeDateError"],
+          message: validationMessages.workflow.overtime.dateRequired,
+        });
+      }
+      if (!data.overtimeStart || !data.overtimeEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["overtimeError"],
+          message: validationMessages.workflow.overtime.timeRequired,
+        });
+      } else if (data.overtimeStart >= data.overtimeEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["overtimeError"],
+          message: validationMessages.workflow.overtime.timeRange,
+        });
+      }
+    }
+
+    // 打刻修正のバリデーション
+    if (data.categoryLabel === CLOCK_CORRECTION_LABEL) {
+      if (!data.overtimeDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["overtimeDateError"],
+          message: validationMessages.workflow.clockCorrection.dateRequired,
+        });
+      }
+      if (!data.overtimeStart) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["overtimeError"],
+          message: validationMessages.workflow.clockCorrection.timeRequired,
+        });
+      }
+    }
+  });
+
 export const validateWorkflowForm = (
   state: WorkflowFormState
 ): WorkflowFormValidationResult => {
+  const result = workflowFormSchema.safeParse(state);
+
+  if (result.success) {
+    return { isValid: true, errors: {} };
+  }
+
+  // Zodのエラーを既存のエラー形式に変換
   const errors: WorkflowFormErrors = {};
-
-  if (state.categoryLabel === VACATION_LABEL) {
-    if (!state.startDate || !state.endDate) {
-      errors.dateError = "開始日と終了日を入力してください";
-    } else if (state.startDate > state.endDate) {
-      errors.dateError = "開始日は終了日以前にしてください";
+  result.error.issues.forEach((issue) => {
+    const path = issue.path[0] as keyof WorkflowFormErrors;
+    if (path && !errors[path]) {
+      errors[path] = issue.message;
     }
-  }
+  });
 
-  if (state.categoryLabel === ABSENCE_LABEL && !state.absenceDate) {
-    errors.absenceDateError = "欠勤日を入力してください";
-  }
-
-  if (state.categoryLabel === OVERTIME_LABEL) {
-    if (!state.overtimeDate) {
-      errors.overtimeDateError = "残業予定日を入力してください";
-    }
-    if (!state.overtimeStart || !state.overtimeEnd) {
-      errors.overtimeError = "開始時刻と終了時刻を入力してください";
-    } else if (state.overtimeStart >= state.overtimeEnd) {
-      errors.overtimeError = "開始時刻は終了時刻より前にしてください";
-    }
-  }
-
-  const isValid =
-    !errors.dateError &&
-    !errors.absenceDateError &&
-    !errors.overtimeDateError &&
-    !errors.overtimeError;
-
-  return { isValid, errors };
+  return { isValid: false, errors };
 };
 
 const normalizeCategory = (label: string): WorkflowCategory => {
@@ -120,15 +192,31 @@ const buildWorkflowOvertimeDetails = (
   state: WorkflowFormState,
   options?: OvertimeDetailsOptions
 ): CreateWorkflowInput["overTimeDetails"] | undefined => {
-  if (state.categoryLabel !== OVERTIME_LABEL) return undefined;
+  const isOvertime = state.categoryLabel === OVERTIME_LABEL;
+  const isClockCorrection = state.categoryLabel === CLOCK_CORRECTION_LABEL;
+  if (!isOvertime && !isClockCorrection) return undefined;
   const resolveDate = () =>
     state.overtimeDate ||
     (options?.fallbackDateFactory ?? defaultOvertimeDateFactory)();
+  if (isOvertime) {
+    return {
+      date: resolveDate(),
+      startTime: state.overtimeStart
+        ? formatISOToTime(state.overtimeStart)
+        : "",
+      endTime: state.overtimeEnd ? formatISOToTime(state.overtimeEnd) : "",
+      reason: state.overtimeReason || "",
+    };
+  }
+  // 打刻修正の場合
+  const startTime = state.overtimeStart
+    ? formatISOToTime(state.overtimeStart)
+    : "";
   return {
     date: resolveDate(),
-    startTime: state.overtimeStart,
-    endTime: state.overtimeEnd,
-    reason: state.overtimeReason || "",
+    startTime,
+    endTime: startTime, // 打刻修正では開始時刻と同じ
+    reason: state.overtimeReason || CLOCK_CORRECTION_LABEL,
   };
 };
 

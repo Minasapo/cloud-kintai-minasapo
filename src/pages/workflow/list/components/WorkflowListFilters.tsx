@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Popover from "@mui/material/Popover";
 import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
@@ -32,6 +33,16 @@ type WorkflowListFiltersProps = {
 
 const DISPLAY_LABEL_APPLICATION = "申請日で絞込";
 const DISPLAY_LABEL_CREATED = "作成日で絞込";
+const STATUS_ALL_VALUE = "__ALL__";
+const SELECT_SX = {
+  width: "100%",
+  ".MuiSelect-select": {
+    display: "block",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+} as const;
 
 const FILTER_PANEL_PADDING = designTokenVar("spacing.lg", "16px");
 const FILTER_PANEL_GAP = designTokenVar("spacing.md", "12px");
@@ -90,11 +101,24 @@ function WorkflowListFilters(
     setCreatedAnchorEl(event.currentTarget);
   };
 
+  const handleStatusChange = (event: SelectChangeEvent<string[]>) => {
+    const value = event.target.value;
+    const nextValue = typeof value === "string" ? value.split(",") : value;
+
+    if (nextValue.includes(STATUS_ALL_VALUE)) {
+      setFilter("status", []);
+      return;
+    }
+
+    setFilter("status", nextValue);
+  };
+
   return (
     <TableRow>
       <TableCell>
         <Select
           size="small"
+          sx={SELECT_SX}
           displayEmpty
           value={categoryFilter}
           onChange={(e) => setFilter("category", e.target.value)}
@@ -114,6 +138,7 @@ function WorkflowListFilters(
       <TableCell>
         <TextField
           size="small"
+          fullWidth
           value={
             applicationFrom && applicationTo
               ? `${applicationFrom} → ${applicationTo}`
@@ -172,11 +197,23 @@ function WorkflowListFilters(
       <TableCell>
         <Select
           size="small"
+          multiple
+          sx={SELECT_SX}
           displayEmpty
-          value={statusFilter}
-          onChange={(e) => setFilter("status", e.target.value)}
+          value={statusFilter ?? []}
+          onChange={handleStatusChange}
+          renderValue={(selected) =>
+            selected.length === 0
+              ? "すべて"
+              : selected
+                  .map(
+                    (status) =>
+                      STATUS_LABELS[status as WorkflowStatus] || String(status)
+                  )
+                  .join("、")
+          }
         >
-          <MenuItem value="">すべて</MenuItem>
+          <MenuItem value={STATUS_ALL_VALUE}>すべて</MenuItem>
           <MenuItem value={WorkflowStatus.DRAFT}>
             {STATUS_LABELS[WorkflowStatus.DRAFT]}
           </MenuItem>
@@ -200,6 +237,7 @@ function WorkflowListFilters(
       <TableCell>
         <TextField
           size="small"
+          fullWidth
           value={
             createdFrom && createdTo
               ? `${createdFrom} → ${createdTo}`

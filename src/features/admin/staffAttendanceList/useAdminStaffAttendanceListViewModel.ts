@@ -1,6 +1,6 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import {
-  useListRecentAttendancesQuery,
+  useListRecentAttendancesWithWarningsQuery,
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
 import {
@@ -66,24 +66,28 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
   } = useCloseDates();
 
   const shouldFetchAttendances = Boolean(staffId);
+  const queryResult = useListRecentAttendancesWithWarningsQuery(
+    { staffId: staffId ?? "" },
+    { skip: !shouldFetchAttendances }
+  );
+
   const {
-    data: attendancesData,
+    data: attendancesResponse,
     isLoading: isAttendancesInitialLoading,
     isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
     refetch: refetchAttendances,
-  } = useListRecentAttendancesQuery(
-    { staffId: staffId ?? "" },
-    { skip: !shouldFetchAttendances }
-  );
+  } = queryResult;
 
-  const attendances = attendancesData ?? [];
+  const attendances: Attendance[] = attendancesResponse?.attendances ?? [];
+  const duplicateAttendances = attendancesResponse?.duplicates ?? [];
   const attendanceLoading =
-    !shouldFetchAttendances ||
-    isAttendancesInitialLoading ||
-    isAttendancesFetching ||
-    isAttendancesUninitialized;
+    (!shouldFetchAttendances ||
+      isAttendancesInitialLoading ||
+      isAttendancesFetching ||
+      isAttendancesUninitialized) &&
+    !attendancesError;
 
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 
@@ -93,13 +97,33 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     fetchStaff(staffId)
       .then(setStaff)
       .catch(() => {
-        dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+        // staffの取得に失敗しても、勤怠データがあれば表示できるように警告として扱う
+        setStaff(null);
+        dispatch(
+          setSnackbarError(
+            "スタッフ情報の取得に失敗しましたが、勤怠データは表示されます。(エラーコード: E00001)"
+          )
+        );
       });
   }, [staffId, dispatch]);
 
   useEffect(() => {
     if (attendancesError) {
-      dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+      // エラーメッセージから重複データエラー（E02004）かどうかを判定
+      const errorMessage =
+        typeof attendancesError === "object" &&
+        attendancesError !== null &&
+        "message" in attendancesError
+          ? (attendancesError as { message?: string }).message
+          : undefined;
+
+      // 重複データエラーの場合は詳細なエラーメッセージを表示
+      if (errorMessage && errorMessage.includes("E02004")) {
+        dispatch(setSnackbarError(errorMessage));
+      } else {
+        // その他のエラーの場合は汎用的なエラーメッセージを表示
+        dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+      }
     }
   }, [attendancesError, dispatch]);
 
@@ -141,7 +165,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
 
   const pendingAttendances = useMemo(() => {
     return attendances.filter(
-      (attendance) =>
+      (attendance: Attendance) =>
         new ChangeRequest(attendance.changeRequests).getUnapprovedCount() > 0
     );
   }, [attendances]);
@@ -216,7 +240,9 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     closeDatesLoading,
     closeDatesError,
     attendances,
+    duplicateAttendances,
     attendanceLoading,
+    attendancesError,
     pendingAttendances,
     changeRequestControls,
     pendingAttendanceControls,
@@ -231,7 +257,9 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     closeDatesLoading: boolean;
     closeDatesError: Error | null;
     attendances: Attendance[];
+    duplicateAttendances: typeof duplicateAttendances;
     attendanceLoading: boolean;
+    attendancesError: unknown;
     pendingAttendances: Attendance[];
     changeRequestControls: ReturnType<typeof useAdminAttendanceChangeRequests>;
     pendingAttendanceControls: PendingAttendanceControls;
