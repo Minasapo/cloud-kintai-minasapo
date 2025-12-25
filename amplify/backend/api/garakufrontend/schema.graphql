@@ -310,6 +310,7 @@ enum WorkflowCategory {
   PAID_LEAVE
   ABSENCE
   OVERTIME
+  CLOCK_CORRECTION
   CUSTOM
 }
 
