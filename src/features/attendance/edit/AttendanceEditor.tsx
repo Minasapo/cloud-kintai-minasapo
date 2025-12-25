@@ -713,6 +713,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         hourlyPaidHolidayTimeUpdate,
         hourlyPaidHolidayTimeReplace,
         hourlyPaidHolidayEnabled: getHourlyPaidHolidayEnabled(),
+        errorMessages,
         readOnly,
       }}
     >

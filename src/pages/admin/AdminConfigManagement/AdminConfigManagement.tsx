@@ -393,7 +393,16 @@ export default function AdminConfigManagement() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Stack spacing={0} sx={{ pb: 2, gap: sectionSpacing }}>
+      <Stack
+        spacing={0}
+        sx={{
+          pb: 2,
+          gap: sectionSpacing,
+          alignItems: "flex-start",
+          maxWidth: 1040,
+          width: "100%",
+        }}
+      >
         <Title>設定</Title>
         <GroupSection title="勤務時間">
           <Stack spacing={1}>
@@ -433,7 +442,12 @@ export default function AdminConfigManagement() {
               label={amPmHolidayEnabled ? "有効" : "無効"}
               sx={{ mb: 1 }}
             />
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+            >
               <Typography variant="subtitle1">午前</Typography>
               <TimePicker
                 label="開始"
@@ -442,6 +456,7 @@ export default function AdminConfigManagement() {
                 ampm={false}
                 format="HH:mm"
                 slotProps={{ textField: { size: "small" } }}
+                sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
               <Typography>〜</Typography>
@@ -452,10 +467,16 @@ export default function AdminConfigManagement() {
                 ampm={false}
                 format="HH:mm"
                 slotProps={{ textField: { size: "small" } }}
+                sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
             </Stack>
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+            >
               <Typography variant="subtitle1">午後</Typography>
               <TimePicker
                 label="開始"
@@ -464,6 +485,7 @@ export default function AdminConfigManagement() {
                 ampm={false}
                 format="HH:mm"
                 slotProps={{ textField: { size: "small" } }}
+                sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
               <Typography>〜</Typography>
@@ -474,6 +496,7 @@ export default function AdminConfigManagement() {
                 ampm={false}
                 format="HH:mm"
                 slotProps={{ textField: { size: "small" } }}
+                sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
             </Stack>

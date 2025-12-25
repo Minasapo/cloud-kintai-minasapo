@@ -36,15 +36,21 @@ const ReasonListSection = ({
     <Typography variant="body1" color="textSecondary">
       修正理由のテキスト一覧を管理してください。
     </Typography>
-    <Stack spacing={2}>
+      <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
       {reasons.map((reason, index) => (
-        <Stack direction="row" spacing={2} alignItems="center" key={index}>
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            key={index}
+            sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+          >
           <TextField
             label={`理由 ${index + 1}`}
             value={reason.reason}
             onChange={(e) => onReasonChange(index, "reason", e.target.value)}
             size="small"
-            sx={{ flex: 1 }}
+              sx={{ width: 320, maxWidth: "100%" }}
           />
           <FormControlLabel
             control={
@@ -56,6 +62,7 @@ const ReasonListSection = ({
               />
             }
             label="有効"
+              sx={{ minWidth: 88 }}
           />
           <IconButton onClick={() => onRemoveReason(index)} color="error">
             <DeleteIcon />
