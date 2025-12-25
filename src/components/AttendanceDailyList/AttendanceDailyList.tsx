@@ -888,7 +888,7 @@ export default function AttendanceDailyList() {
                   .filter(Boolean) as string[];
                 if (toDelete.length === 0) return;
                 const ok = window.confirm(
-                  `選択以外の重複レコードを削除します。対象件数: ${
+                  `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${
                     toDelete.length
                   }\n削除対象ID: ${toDelete.join(
                     ", "
@@ -909,7 +909,7 @@ export default function AttendanceDailyList() {
                   setConfirmRecords(selected ? [selected] : []);
                   dispatch(
                     setSnackbarSuccess(
-                      `重複レコードの削除が完了しました（残件数: ${
+                      `選択したデータのみ残しました（残件数: ${
                         selected ? 1 : 0
                       }）`
                     )
@@ -919,7 +919,7 @@ export default function AttendanceDailyList() {
                 }
               }}
             >
-              選択以外を削除
+              選択したデータを残す
             </Button>
           )}
           <Button onClick={handleCloseConfirm} color="inherit">
