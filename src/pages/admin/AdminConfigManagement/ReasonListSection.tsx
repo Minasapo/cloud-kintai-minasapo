@@ -32,8 +32,8 @@ const ReasonListSection = ({
   onRemoveReason,
 }: ReasonListSectionProps) => (
   <>
-    <Typography variant="h6">修正理由</Typography>
-    <Typography variant="body2" color="textSecondary">
+    <Typography variant="h4">修正理由</Typography>
+    <Typography variant="body1" color="textSecondary">
       修正理由のテキスト一覧を管理してください。
     </Typography>
     <Stack spacing={2}>

@@ -58,7 +58,7 @@ export default function Absent() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>
         欠勤
       </Typography>
       <Stack spacing={2} sx={{ mb: 2 }}>

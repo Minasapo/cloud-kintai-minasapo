@@ -75,7 +75,7 @@ export default function OfficeMode() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>
         出勤モード / 時間単位休暇
       </Typography>
       <Stack spacing={2} sx={{ mb: 2 }}>

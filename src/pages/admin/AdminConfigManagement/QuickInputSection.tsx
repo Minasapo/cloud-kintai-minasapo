@@ -41,8 +41,8 @@ const QuickInputSection = ({
   onRemoveQuickInputEndTime,
 }: QuickInputSectionProps) => (
   <>
-    <Typography variant="h6">簡単時間入力</Typography>
-    <Typography variant="body2" color="textSecondary">
+    <Typography variant="h5">簡単時間入力</Typography>
+    <Typography variant="body1" color="textSecondary">
       勤怠編集画面でボタンを押すと時刻が簡単に入力されます。
       <br />
       この機能は、勤務開始時刻と勤務終了時刻のみを設定できます。

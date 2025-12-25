@@ -129,7 +129,7 @@ export default function QuickInput() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>
         クイック入力(打刻)
       </Typography>
       <Stack spacing={2} sx={{ mb: 2 }}>
