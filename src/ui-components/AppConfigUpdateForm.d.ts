@@ -36,6 +36,7 @@ export declare type AppConfigUpdateFormInputValues = {
     specialHolidayEnabled?: boolean;
     amPmHolidayEnabled?: boolean;
     officeMode?: boolean;
+    attendanceStatisticsEnabled?: boolean;
     absentEnabled?: boolean;
     hourlyPaidHolidayEnabled?: boolean;
     themeColor?: string;
@@ -54,6 +55,7 @@ export declare type AppConfigUpdateFormValidationValues = {
     specialHolidayEnabled?: ValidationFunction<boolean>;
     amPmHolidayEnabled?: ValidationFunction<boolean>;
     officeMode?: ValidationFunction<boolean>;
+    attendanceStatisticsEnabled?: ValidationFunction<boolean>;
     absentEnabled?: ValidationFunction<boolean>;
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
     themeColor?: ValidationFunction<string>;
@@ -74,6 +76,7 @@ export declare type AppConfigUpdateFormOverridesProps = {
     specialHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     amPmHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     officeMode?: PrimitiveOverrideProps<SwitchFieldProps>;
+    attendanceStatisticsEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     absentEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     themeColor?: PrimitiveOverrideProps<TextFieldProps>;

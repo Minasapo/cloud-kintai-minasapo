@@ -42,6 +42,7 @@ export default function AppConfigCreateForm(props) {
     specialHolidayEnabled: false,
     amPmHolidayEnabled: false,
     officeMode: false,
+    attendanceStatisticsEnabled: false,
     absentEnabled: false,
     hourlyPaidHolidayEnabled: false,
     themeColor: "",
@@ -81,6 +82,8 @@ export default function AppConfigCreateForm(props) {
     initialValues.amPmHolidayEnabled
   );
   const [officeMode, setOfficeMode] = React.useState(initialValues.officeMode);
+  const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
+    React.useState(initialValues.attendanceStatisticsEnabled);
   const [absentEnabled, setAbsentEnabled] = React.useState(
     initialValues.absentEnabled
   );
@@ -102,6 +105,7 @@ export default function AppConfigCreateForm(props) {
     setSpecialHolidayEnabled(initialValues.specialHolidayEnabled);
     setAmPmHolidayEnabled(initialValues.amPmHolidayEnabled);
     setOfficeMode(initialValues.officeMode);
+    setAttendanceStatisticsEnabled(initialValues.attendanceStatisticsEnabled);
     setAbsentEnabled(initialValues.absentEnabled);
     setHourlyPaidHolidayEnabled(initialValues.hourlyPaidHolidayEnabled);
     setThemeColor(initialValues.themeColor);
@@ -121,6 +125,7 @@ export default function AppConfigCreateForm(props) {
     specialHolidayEnabled: [],
     amPmHolidayEnabled: [],
     officeMode: [],
+    attendanceStatisticsEnabled: [],
     absentEnabled: [],
     hourlyPaidHolidayEnabled: [],
     themeColor: [],
@@ -164,6 +169,7 @@ export default function AppConfigCreateForm(props) {
           specialHolidayEnabled,
           amPmHolidayEnabled,
           officeMode,
+          attendanceStatisticsEnabled,
           absentEnabled,
           hourlyPaidHolidayEnabled,
           themeColor,
@@ -242,6 +248,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -281,6 +288,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -320,6 +328,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -359,6 +368,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -400,6 +410,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -443,6 +454,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -484,6 +496,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -525,6 +538,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -564,6 +578,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -605,6 +620,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -644,6 +660,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled: value,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -685,6 +702,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled: value,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -726,6 +744,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode: value,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -742,6 +761,51 @@ export default function AppConfigCreateForm(props) {
         errorMessage={errors.officeMode?.errorMessage}
         hasError={errors.officeMode?.hasError}
         {...getOverrideProps(overrides, "officeMode")}
+      ></SwitchField>
+      <SwitchField
+        label="Attendance statistics enabled"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={attendanceStatisticsEnabled}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled: value,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+            };
+            const result = onChange(modelFields);
+            value = result?.attendanceStatisticsEnabled ?? value;
+          }
+          if (errors.attendanceStatisticsEnabled?.hasError) {
+            runValidationTasks("attendanceStatisticsEnabled", value);
+          }
+          setAttendanceStatisticsEnabled(value);
+        }}
+        onBlur={() =>
+          runValidationTasks(
+            "attendanceStatisticsEnabled",
+            attendanceStatisticsEnabled
+          )
+        }
+        errorMessage={errors.attendanceStatisticsEnabled?.errorMessage}
+        hasError={errors.attendanceStatisticsEnabled?.hasError}
+        {...getOverrideProps(overrides, "attendanceStatisticsEnabled")}
       ></SwitchField>
       <SwitchField
         label="Absent enabled"
@@ -765,6 +829,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled: value,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -804,6 +869,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled: value,
               themeColor,
@@ -848,6 +914,7 @@ export default function AppConfigCreateForm(props) {
               specialHolidayEnabled,
               amPmHolidayEnabled,
               officeMode,
+              attendanceStatisticsEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor: value,
