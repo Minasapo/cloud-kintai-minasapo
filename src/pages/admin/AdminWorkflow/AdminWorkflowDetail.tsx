@@ -972,7 +972,7 @@ export default function AdminWorkflowDetail() {
             <Button
               size="small"
               variant="contained"
-              color="warning"
+              color="error"
               sx={{ mr: 1 }}
               onClick={handleReject}
               disabled={
