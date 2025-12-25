@@ -8,7 +8,8 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
-export const onCreateCheckForUpdate = /* GraphQL */ `subscription OnCreateCheckForUpdate(
+export const onCreateCheckForUpdate =
+  /* GraphQL */ `subscription OnCreateCheckForUpdate(
   $filter: ModelSubscriptionCheckForUpdateFilterInput
 ) {
   onCreateCheckForUpdate(filter: $filter) {
@@ -20,10 +21,11 @@ export const onCreateCheckForUpdate = /* GraphQL */ `subscription OnCreateCheckF
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateCheckForUpdateSubscriptionVariables,
-  APITypes.OnCreateCheckForUpdateSubscription
->;
-export const onUpdateCheckForUpdate = /* GraphQL */ `subscription OnUpdateCheckForUpdate(
+    APITypes.OnCreateCheckForUpdateSubscriptionVariables,
+    APITypes.OnCreateCheckForUpdateSubscription
+  >;
+export const onUpdateCheckForUpdate =
+  /* GraphQL */ `subscription OnUpdateCheckForUpdate(
   $filter: ModelSubscriptionCheckForUpdateFilterInput
 ) {
   onUpdateCheckForUpdate(filter: $filter) {
@@ -35,10 +37,11 @@ export const onUpdateCheckForUpdate = /* GraphQL */ `subscription OnUpdateCheckF
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateCheckForUpdateSubscriptionVariables,
-  APITypes.OnUpdateCheckForUpdateSubscription
->;
-export const onDeleteCheckForUpdate = /* GraphQL */ `subscription OnDeleteCheckForUpdate(
+    APITypes.OnUpdateCheckForUpdateSubscriptionVariables,
+    APITypes.OnUpdateCheckForUpdateSubscription
+  >;
+export const onDeleteCheckForUpdate =
+  /* GraphQL */ `subscription OnDeleteCheckForUpdate(
   $filter: ModelSubscriptionCheckForUpdateFilterInput
 ) {
   onDeleteCheckForUpdate(filter: $filter) {
@@ -50,10 +53,11 @@ export const onDeleteCheckForUpdate = /* GraphQL */ `subscription OnDeleteCheckF
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteCheckForUpdateSubscriptionVariables,
-  APITypes.OnDeleteCheckForUpdateSubscription
->;
-export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
+    APITypes.OnDeleteCheckForUpdateSubscriptionVariables,
+    APITypes.OnDeleteCheckForUpdateSubscription
+  >;
+export const onCreateAppConfig =
+  /* GraphQL */ `subscription OnCreateAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
   onCreateAppConfig(filter: $filter) {
     id
     name
@@ -109,10 +113,11 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateAppConfigSubscriptionVariables,
-  APITypes.OnCreateAppConfigSubscription
->;
-export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
+    APITypes.OnCreateAppConfigSubscriptionVariables,
+    APITypes.OnCreateAppConfigSubscription
+  >;
+export const onUpdateAppConfig =
+  /* GraphQL */ `subscription OnUpdateAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
   onUpdateAppConfig(filter: $filter) {
     id
     name
@@ -168,10 +173,11 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateAppConfigSubscriptionVariables,
-  APITypes.OnUpdateAppConfigSubscription
->;
-export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
+    APITypes.OnUpdateAppConfigSubscriptionVariables,
+    APITypes.OnUpdateAppConfigSubscription
+  >;
+export const onDeleteAppConfig =
+  /* GraphQL */ `subscription OnDeleteAppConfig($filter: ModelSubscriptionAppConfigFilterInput) {
   onDeleteAppConfig(filter: $filter) {
     id
     name
@@ -227,10 +233,11 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteAppConfigSubscriptionVariables,
-  APITypes.OnDeleteAppConfigSubscription
->;
-export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: ModelSubscriptionStaffFilterInput) {
+    APITypes.OnDeleteAppConfigSubscriptionVariables,
+    APITypes.OnDeleteAppConfigSubscription
+  >;
+export const onCreateStaff =
+  /* GraphQL */ `subscription OnCreateStaff($filter: ModelSubscriptionStaffFilterInput) {
   onCreateStaff(filter: $filter) {
     id
     cognitoUserId
@@ -268,10 +275,11 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateStaffSubscriptionVariables,
-  APITypes.OnCreateStaffSubscription
->;
-export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: ModelSubscriptionStaffFilterInput) {
+    APITypes.OnCreateStaffSubscriptionVariables,
+    APITypes.OnCreateStaffSubscription
+  >;
+export const onUpdateStaff =
+  /* GraphQL */ `subscription OnUpdateStaff($filter: ModelSubscriptionStaffFilterInput) {
   onUpdateStaff(filter: $filter) {
     id
     cognitoUserId
@@ -309,10 +317,11 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateStaffSubscriptionVariables,
-  APITypes.OnUpdateStaffSubscription
->;
-export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: ModelSubscriptionStaffFilterInput) {
+    APITypes.OnUpdateStaffSubscriptionVariables,
+    APITypes.OnUpdateStaffSubscription
+  >;
+export const onDeleteStaff =
+  /* GraphQL */ `subscription OnDeleteStaff($filter: ModelSubscriptionStaffFilterInput) {
   onDeleteStaff(filter: $filter) {
     id
     cognitoUserId
@@ -350,10 +359,11 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteStaffSubscriptionVariables,
-  APITypes.OnDeleteStaffSubscription
->;
-export const onCreateHolidayCalendar = /* GraphQL */ `subscription OnCreateHolidayCalendar(
+    APITypes.OnDeleteStaffSubscriptionVariables,
+    APITypes.OnDeleteStaffSubscription
+  >;
+export const onCreateHolidayCalendar =
+  /* GraphQL */ `subscription OnCreateHolidayCalendar(
   $filter: ModelSubscriptionHolidayCalendarFilterInput
 ) {
   onCreateHolidayCalendar(filter: $filter) {
@@ -366,10 +376,11 @@ export const onCreateHolidayCalendar = /* GraphQL */ `subscription OnCreateHolid
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateHolidayCalendarSubscriptionVariables,
-  APITypes.OnCreateHolidayCalendarSubscription
->;
-export const onUpdateHolidayCalendar = /* GraphQL */ `subscription OnUpdateHolidayCalendar(
+    APITypes.OnCreateHolidayCalendarSubscriptionVariables,
+    APITypes.OnCreateHolidayCalendarSubscription
+  >;
+export const onUpdateHolidayCalendar =
+  /* GraphQL */ `subscription OnUpdateHolidayCalendar(
   $filter: ModelSubscriptionHolidayCalendarFilterInput
 ) {
   onUpdateHolidayCalendar(filter: $filter) {
@@ -382,10 +393,11 @@ export const onUpdateHolidayCalendar = /* GraphQL */ `subscription OnUpdateHolid
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateHolidayCalendarSubscriptionVariables,
-  APITypes.OnUpdateHolidayCalendarSubscription
->;
-export const onDeleteHolidayCalendar = /* GraphQL */ `subscription OnDeleteHolidayCalendar(
+    APITypes.OnUpdateHolidayCalendarSubscriptionVariables,
+    APITypes.OnUpdateHolidayCalendarSubscription
+  >;
+export const onDeleteHolidayCalendar =
+  /* GraphQL */ `subscription OnDeleteHolidayCalendar(
   $filter: ModelSubscriptionHolidayCalendarFilterInput
 ) {
   onDeleteHolidayCalendar(filter: $filter) {
@@ -398,10 +410,11 @@ export const onDeleteHolidayCalendar = /* GraphQL */ `subscription OnDeleteHolid
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteHolidayCalendarSubscriptionVariables,
-  APITypes.OnDeleteHolidayCalendarSubscription
->;
-export const onCreateCompanyHolidayCalendar = /* GraphQL */ `subscription OnCreateCompanyHolidayCalendar(
+    APITypes.OnDeleteHolidayCalendarSubscriptionVariables,
+    APITypes.OnDeleteHolidayCalendarSubscription
+  >;
+export const onCreateCompanyHolidayCalendar =
+  /* GraphQL */ `subscription OnCreateCompanyHolidayCalendar(
   $filter: ModelSubscriptionCompanyHolidayCalendarFilterInput
 ) {
   onCreateCompanyHolidayCalendar(filter: $filter) {
@@ -414,10 +427,11 @@ export const onCreateCompanyHolidayCalendar = /* GraphQL */ `subscription OnCrea
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateCompanyHolidayCalendarSubscriptionVariables,
-  APITypes.OnCreateCompanyHolidayCalendarSubscription
->;
-export const onUpdateCompanyHolidayCalendar = /* GraphQL */ `subscription OnUpdateCompanyHolidayCalendar(
+    APITypes.OnCreateCompanyHolidayCalendarSubscriptionVariables,
+    APITypes.OnCreateCompanyHolidayCalendarSubscription
+  >;
+export const onUpdateCompanyHolidayCalendar =
+  /* GraphQL */ `subscription OnUpdateCompanyHolidayCalendar(
   $filter: ModelSubscriptionCompanyHolidayCalendarFilterInput
 ) {
   onUpdateCompanyHolidayCalendar(filter: $filter) {
@@ -430,10 +444,11 @@ export const onUpdateCompanyHolidayCalendar = /* GraphQL */ `subscription OnUpda
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateCompanyHolidayCalendarSubscriptionVariables,
-  APITypes.OnUpdateCompanyHolidayCalendarSubscription
->;
-export const onDeleteCompanyHolidayCalendar = /* GraphQL */ `subscription OnDeleteCompanyHolidayCalendar(
+    APITypes.OnUpdateCompanyHolidayCalendarSubscriptionVariables,
+    APITypes.OnUpdateCompanyHolidayCalendarSubscription
+  >;
+export const onDeleteCompanyHolidayCalendar =
+  /* GraphQL */ `subscription OnDeleteCompanyHolidayCalendar(
   $filter: ModelSubscriptionCompanyHolidayCalendarFilterInput
 ) {
   onDeleteCompanyHolidayCalendar(filter: $filter) {
@@ -446,10 +461,11 @@ export const onDeleteCompanyHolidayCalendar = /* GraphQL */ `subscription OnDele
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteCompanyHolidayCalendarSubscriptionVariables,
-  APITypes.OnDeleteCompanyHolidayCalendarSubscription
->;
-export const onCreateCloseDate = /* GraphQL */ `subscription OnCreateCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
+    APITypes.OnDeleteCompanyHolidayCalendarSubscriptionVariables,
+    APITypes.OnDeleteCompanyHolidayCalendarSubscription
+  >;
+export const onCreateCloseDate =
+  /* GraphQL */ `subscription OnCreateCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
   onCreateCloseDate(filter: $filter) {
     id
     closeDate
@@ -461,10 +477,11 @@ export const onCreateCloseDate = /* GraphQL */ `subscription OnCreateCloseDate($
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateCloseDateSubscriptionVariables,
-  APITypes.OnCreateCloseDateSubscription
->;
-export const onUpdateCloseDate = /* GraphQL */ `subscription OnUpdateCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
+    APITypes.OnCreateCloseDateSubscriptionVariables,
+    APITypes.OnCreateCloseDateSubscription
+  >;
+export const onUpdateCloseDate =
+  /* GraphQL */ `subscription OnUpdateCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
   onUpdateCloseDate(filter: $filter) {
     id
     closeDate
@@ -476,10 +493,11 @@ export const onUpdateCloseDate = /* GraphQL */ `subscription OnUpdateCloseDate($
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateCloseDateSubscriptionVariables,
-  APITypes.OnUpdateCloseDateSubscription
->;
-export const onDeleteCloseDate = /* GraphQL */ `subscription OnDeleteCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
+    APITypes.OnUpdateCloseDateSubscriptionVariables,
+    APITypes.OnUpdateCloseDateSubscription
+  >;
+export const onDeleteCloseDate =
+  /* GraphQL */ `subscription OnDeleteCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
   onDeleteCloseDate(filter: $filter) {
     id
     closeDate
@@ -491,10 +509,11 @@ export const onDeleteCloseDate = /* GraphQL */ `subscription OnDeleteCloseDate($
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteCloseDateSubscriptionVariables,
-  APITypes.OnDeleteCloseDateSubscription
->;
-export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance(
+    APITypes.OnDeleteCloseDateSubscriptionVariables,
+    APITypes.OnDeleteCloseDateSubscription
+  >;
+export const onCreateAttendance =
+  /* GraphQL */ `subscription OnCreateAttendance(
   $filter: ModelSubscriptionAttendanceFilterInput
 ) {
   onCreateAttendance(filter: $filter) {
@@ -589,10 +608,11 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateAttendanceSubscriptionVariables,
-  APITypes.OnCreateAttendanceSubscription
->;
-export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance(
+    APITypes.OnCreateAttendanceSubscriptionVariables,
+    APITypes.OnCreateAttendanceSubscription
+  >;
+export const onUpdateAttendance =
+  /* GraphQL */ `subscription OnUpdateAttendance(
   $filter: ModelSubscriptionAttendanceFilterInput
 ) {
   onUpdateAttendance(filter: $filter) {
@@ -687,10 +707,11 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateAttendanceSubscriptionVariables,
-  APITypes.OnUpdateAttendanceSubscription
->;
-export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance(
+    APITypes.OnUpdateAttendanceSubscriptionVariables,
+    APITypes.OnUpdateAttendanceSubscription
+  >;
+export const onDeleteAttendance =
+  /* GraphQL */ `subscription OnDeleteAttendance(
   $filter: ModelSubscriptionAttendanceFilterInput
 ) {
   onDeleteAttendance(filter: $filter) {
@@ -785,10 +806,11 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteAttendanceSubscriptionVariables,
-  APITypes.OnDeleteAttendanceSubscription
->;
-export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument($filter: ModelSubscriptionDocumentFilterInput) {
+    APITypes.OnDeleteAttendanceSubscriptionVariables,
+    APITypes.OnDeleteAttendanceSubscription
+  >;
+export const onCreateDocument =
+  /* GraphQL */ `subscription OnCreateDocument($filter: ModelSubscriptionDocumentFilterInput) {
   onCreateDocument(filter: $filter) {
     id
     title
@@ -802,10 +824,11 @@ export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument($fi
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateDocumentSubscriptionVariables,
-  APITypes.OnCreateDocumentSubscription
->;
-export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument($filter: ModelSubscriptionDocumentFilterInput) {
+    APITypes.OnCreateDocumentSubscriptionVariables,
+    APITypes.OnCreateDocumentSubscription
+  >;
+export const onUpdateDocument =
+  /* GraphQL */ `subscription OnUpdateDocument($filter: ModelSubscriptionDocumentFilterInput) {
   onUpdateDocument(filter: $filter) {
     id
     title
@@ -819,10 +842,11 @@ export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument($fi
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateDocumentSubscriptionVariables,
-  APITypes.OnUpdateDocumentSubscription
->;
-export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument($filter: ModelSubscriptionDocumentFilterInput) {
+    APITypes.OnUpdateDocumentSubscriptionVariables,
+    APITypes.OnUpdateDocumentSubscription
+  >;
+export const onDeleteDocument =
+  /* GraphQL */ `subscription OnDeleteDocument($filter: ModelSubscriptionDocumentFilterInput) {
   onDeleteDocument(filter: $filter) {
     id
     title
@@ -836,10 +860,11 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument($fi
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteDocumentSubscriptionVariables,
-  APITypes.OnDeleteDocumentSubscription
->;
-export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftRequest(
+    APITypes.OnDeleteDocumentSubscriptionVariables,
+    APITypes.OnDeleteDocumentSubscription
+  >;
+export const onCreateShiftRequest =
+  /* GraphQL */ `subscription OnCreateShiftRequest(
   $filter: ModelSubscriptionShiftRequestFilterInput
 ) {
   onCreateShiftRequest(filter: $filter) {
@@ -886,10 +911,11 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateShiftRequestSubscriptionVariables,
-  APITypes.OnCreateShiftRequestSubscription
->;
-export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftRequest(
+    APITypes.OnCreateShiftRequestSubscriptionVariables,
+    APITypes.OnCreateShiftRequestSubscription
+  >;
+export const onUpdateShiftRequest =
+  /* GraphQL */ `subscription OnUpdateShiftRequest(
   $filter: ModelSubscriptionShiftRequestFilterInput
 ) {
   onUpdateShiftRequest(filter: $filter) {
@@ -936,10 +962,11 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateShiftRequestSubscriptionVariables,
-  APITypes.OnUpdateShiftRequestSubscription
->;
-export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftRequest(
+    APITypes.OnUpdateShiftRequestSubscriptionVariables,
+    APITypes.OnUpdateShiftRequestSubscription
+  >;
+export const onDeleteShiftRequest =
+  /* GraphQL */ `subscription OnDeleteShiftRequest(
   $filter: ModelSubscriptionShiftRequestFilterInput
 ) {
   onDeleteShiftRequest(filter: $filter) {
@@ -986,10 +1013,11 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteShiftRequestSubscriptionVariables,
-  APITypes.OnDeleteShiftRequestSubscription
->;
-export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPlanYear(
+    APITypes.OnDeleteShiftRequestSubscriptionVariables,
+    APITypes.OnDeleteShiftRequestSubscription
+  >;
+export const onCreateShiftPlanYear =
+  /* GraphQL */ `subscription OnCreateShiftPlanYear(
   $filter: ModelSubscriptionShiftPlanYearFilterInput
 ) {
   onCreateShiftPlanYear(filter: $filter) {
@@ -1012,10 +1040,11 @@ export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPl
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateShiftPlanYearSubscriptionVariables,
-  APITypes.OnCreateShiftPlanYearSubscription
->;
-export const onUpdateShiftPlanYear = /* GraphQL */ `subscription OnUpdateShiftPlanYear(
+    APITypes.OnCreateShiftPlanYearSubscriptionVariables,
+    APITypes.OnCreateShiftPlanYearSubscription
+  >;
+export const onUpdateShiftPlanYear =
+  /* GraphQL */ `subscription OnUpdateShiftPlanYear(
   $filter: ModelSubscriptionShiftPlanYearFilterInput
 ) {
   onUpdateShiftPlanYear(filter: $filter) {
@@ -1038,10 +1067,11 @@ export const onUpdateShiftPlanYear = /* GraphQL */ `subscription OnUpdateShiftPl
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateShiftPlanYearSubscriptionVariables,
-  APITypes.OnUpdateShiftPlanYearSubscription
->;
-export const onDeleteShiftPlanYear = /* GraphQL */ `subscription OnDeleteShiftPlanYear(
+    APITypes.OnUpdateShiftPlanYearSubscriptionVariables,
+    APITypes.OnUpdateShiftPlanYearSubscription
+  >;
+export const onDeleteShiftPlanYear =
+  /* GraphQL */ `subscription OnDeleteShiftPlanYear(
   $filter: ModelSubscriptionShiftPlanYearFilterInput
 ) {
   onDeleteShiftPlanYear(filter: $filter) {
@@ -1064,10 +1094,11 @@ export const onDeleteShiftPlanYear = /* GraphQL */ `subscription OnDeleteShiftPl
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteShiftPlanYearSubscriptionVariables,
-  APITypes.OnDeleteShiftPlanYearSubscription
->;
-export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+    APITypes.OnDeleteShiftPlanYearSubscriptionVariables,
+    APITypes.OnDeleteShiftPlanYearSubscription
+  >;
+export const onCreateWorkflow =
+  /* GraphQL */ `subscription OnCreateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onCreateWorkflow(filter: $filter) {
     id
     approvedStaffIds
@@ -1111,10 +1142,11 @@ export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($fi
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateWorkflowSubscriptionVariables,
-  APITypes.OnCreateWorkflowSubscription
->;
-export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+    APITypes.OnCreateWorkflowSubscriptionVariables,
+    APITypes.OnCreateWorkflowSubscription
+  >;
+export const onUpdateWorkflow =
+  /* GraphQL */ `subscription OnUpdateWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onUpdateWorkflow(filter: $filter) {
     id
     approvedStaffIds
@@ -1158,10 +1190,11 @@ export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($fi
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateWorkflowSubscriptionVariables,
-  APITypes.OnUpdateWorkflowSubscription
->;
-export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
+    APITypes.OnUpdateWorkflowSubscriptionVariables,
+    APITypes.OnUpdateWorkflowSubscription
+  >;
+export const onDeleteWorkflow =
+  /* GraphQL */ `subscription OnDeleteWorkflow($filter: ModelSubscriptionWorkflowFilterInput) {
   onDeleteWorkflow(filter: $filter) {
     id
     approvedStaffIds
@@ -1205,10 +1238,11 @@ export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($fi
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteWorkflowSubscriptionVariables,
-  APITypes.OnDeleteWorkflowSubscription
->;
-export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperationLog(
+    APITypes.OnDeleteWorkflowSubscriptionVariables,
+    APITypes.OnDeleteWorkflowSubscription
+  >;
+export const onCreateOperationLog =
+  /* GraphQL */ `subscription OnCreateOperationLog(
   $filter: ModelSubscriptionOperationLogFilterInput
 ) {
   onCreateOperationLog(filter: $filter) {
@@ -1229,10 +1263,11 @@ export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperatio
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateOperationLogSubscriptionVariables,
-  APITypes.OnCreateOperationLogSubscription
->;
-export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperationLog(
+    APITypes.OnCreateOperationLogSubscriptionVariables,
+    APITypes.OnCreateOperationLogSubscription
+  >;
+export const onUpdateOperationLog =
+  /* GraphQL */ `subscription OnUpdateOperationLog(
   $filter: ModelSubscriptionOperationLogFilterInput
 ) {
   onUpdateOperationLog(filter: $filter) {
@@ -1253,10 +1288,11 @@ export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperatio
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateOperationLogSubscriptionVariables,
-  APITypes.OnUpdateOperationLogSubscription
->;
-export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperationLog(
+    APITypes.OnUpdateOperationLogSubscriptionVariables,
+    APITypes.OnUpdateOperationLogSubscription
+  >;
+export const onDeleteOperationLog =
+  /* GraphQL */ `subscription OnDeleteOperationLog(
   $filter: ModelSubscriptionOperationLogFilterInput
 ) {
   onDeleteOperationLog(filter: $filter) {
@@ -1277,10 +1313,11 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteOperationLogSubscriptionVariables,
-  APITypes.OnDeleteOperationLogSubscription
->;
-export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyReport(
+    APITypes.OnDeleteOperationLogSubscriptionVariables,
+    APITypes.OnDeleteOperationLogSubscription
+  >;
+export const onCreateDailyReport =
+  /* GraphQL */ `subscription OnCreateDailyReport(
   $filter: ModelSubscriptionDailyReportFilterInput
 ) {
   onCreateDailyReport(filter: $filter) {
@@ -1310,10 +1347,11 @@ export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyRepo
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateDailyReportSubscriptionVariables,
-  APITypes.OnCreateDailyReportSubscription
->;
-export const onUpdateDailyReport = /* GraphQL */ `subscription OnUpdateDailyReport(
+    APITypes.OnCreateDailyReportSubscriptionVariables,
+    APITypes.OnCreateDailyReportSubscription
+  >;
+export const onUpdateDailyReport =
+  /* GraphQL */ `subscription OnUpdateDailyReport(
   $filter: ModelSubscriptionDailyReportFilterInput
 ) {
   onUpdateDailyReport(filter: $filter) {
@@ -1343,10 +1381,11 @@ export const onUpdateDailyReport = /* GraphQL */ `subscription OnUpdateDailyRepo
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateDailyReportSubscriptionVariables,
-  APITypes.OnUpdateDailyReportSubscription
->;
-export const onDeleteDailyReport = /* GraphQL */ `subscription OnDeleteDailyReport(
+    APITypes.OnUpdateDailyReportSubscriptionVariables,
+    APITypes.OnUpdateDailyReportSubscription
+  >;
+export const onDeleteDailyReport =
+  /* GraphQL */ `subscription OnDeleteDailyReport(
   $filter: ModelSubscriptionDailyReportFilterInput
 ) {
   onDeleteDailyReport(filter: $filter) {
@@ -1376,6 +1415,6 @@ export const onDeleteDailyReport = /* GraphQL */ `subscription OnDeleteDailyRepo
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteDailyReportSubscriptionVariables,
-  APITypes.OnDeleteDailyReportSubscription
->;
+    APITypes.OnDeleteDailyReportSubscriptionVariables,
+    APITypes.OnDeleteDailyReportSubscription
+  >;
