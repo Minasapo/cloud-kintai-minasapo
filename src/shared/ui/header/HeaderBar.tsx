@@ -17,10 +17,10 @@ const HEADER_BACKGROUND = designTokenVar(
   "#0FA85E"
 );
 const HEADER_TEXT = designTokenVar("component.headerBar.textColor", "#FFFFFF");
-const HEADER_HEIGHT = designTokenVar("component.headerBar.minHeight", "56px");
+const HEADER_HEIGHT = designTokenVar("component.headerBar.minHeight", "48px");
 const HEADER_PADDING_X = designTokenVar("component.headerBar.paddingX", "16px");
 const HEADER_PADDING_Y = designTokenVar("component.headerBar.paddingY", "8px");
-const HEADER_GAP = designTokenVar("component.headerBar.gap", "12px");
+const HEADER_GAP = designTokenVar("component.headerBar.gap", "8px");
 const HEADER_SIDE_GAP = designTokenVar("spacing.md", "12px");
 const HEADER_CONTENT_MAX_WIDTH = designTokenVar(
   "component.headerBar.contentMaxWidth",

@@ -177,6 +177,10 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
     },
   } as const;
 
+  const headerLogoMaxHeight = 32;
+  const headerPaddingY = spacing.sm;
+  const headerMinHeight = headerLogoMaxHeight + headerPaddingY * 2;
+
   const component = {
     shiftBoard: {
       rowGap: spacing.md,
@@ -211,12 +215,13 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       surface: color.brand.secondary.surface,
     },
     headerBar: {
-      minHeight: 56,
+      minHeight: headerMinHeight,
       paddingX: spacing.lg,
-      paddingY: spacing.sm,
-      gap: spacing.md,
+      paddingY: headerPaddingY,
+      gap: spacing.sm,
       background: color.brand.primary.base,
       textColor: color.brand.primary.contrastText,
+      logoMaxHeight: headerLogoMaxHeight,
     },
     headerMenu: {
       gap: spacing.sm,
