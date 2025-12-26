@@ -4,7 +4,7 @@
  * MaterialUIを使用し、日付選択や合計勤務時間の表示も行う。
  */
 import { useAppDispatchV2 } from "@app/hooks";
-import { useListRecentAttendancesQuery } from "@entities/attendance/api/attendanceApi";
+import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -17,6 +17,7 @@ import { Staff } from "@shared/api/graphql/types";
 /**
  * ReactのContext, Hooks。
  */
+import dayjs, { Dayjs } from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +25,7 @@ import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import useCloseDates from "@/hooks/useCloseDates/useCloseDates";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { AttendanceDate } from "@/lib/AttendanceDate";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
@@ -67,6 +69,15 @@ export default function AttendanceTable() {
    * 勤怠情報取得用カスタムフック。
    */
   const shouldFetchAttendances = Boolean(cognitoUser?.id);
+  const [currentMonth, setCurrentMonth] = useState<Dayjs>(() =>
+    dayjs().startOf("month")
+  );
+
+  const startDate = currentMonth
+    .startOf("month")
+    .format(AttendanceDate.DataFormat);
+  const endDate = currentMonth.endOf("month").format(AttendanceDate.DataFormat);
+
   const {
     data: holidayCalendars = [],
     isLoading: isHolidayCalendarsLoading,
@@ -90,17 +101,20 @@ export default function AttendanceTable() {
     isCompanyHolidayCalendarsLoading ||
     isCompanyHolidayCalendarsFetching;
   const {
-    data: attendancesData,
+    data: attendances = [],
     isLoading: isAttendancesInitialLoading,
     isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
-  } = useListRecentAttendancesQuery(
-    { staffId: cognitoUser?.id ?? "" },
+  } = useListAttendancesByDateRangeQuery(
+    {
+      staffId: cognitoUser?.id ?? "",
+      startDate,
+      endDate,
+    },
     { skip: !shouldFetchAttendances }
   );
 
-  const attendances = attendancesData?.attendances ?? [];
   const attendanceLoading =
     !shouldFetchAttendances ||
     isAttendancesInitialLoading ||
@@ -178,6 +192,8 @@ export default function AttendanceTable() {
     return totalWorkTime - totalRestTime;
   }, [attendances]);
 
+  const monthLabel = currentMonth.format("YYYY年M月");
+
   if (attendanceLoading || calendarLoading || closeDatesLoading) {
     return <LinearProgress />;
   }
@@ -212,11 +228,11 @@ export default function AttendanceTable() {
         <Stack spacing={0.5}>
           <Typography variant="h1">勤怠一覧</Typography>
           <Typography variant="body1" color="text.secondary">
-            直近30日の合計勤務時間: {totalTime.toFixed(1)}h
+            {monthLabel}の合計勤務時間: {totalTime.toFixed(1)}h
           </Typography>
         </Stack>
         <DescriptionTypography variant="body1">
-          今日から30日前までの勤怠情報を表示しています
+          月を選択して勤怠情報を表示・編集できます
         </DescriptionTypography>
       </Box>
       <DesktopList
@@ -228,6 +244,8 @@ export default function AttendanceTable() {
         closeDates={closeDates}
         closeDatesLoading={closeDatesLoading}
         closeDatesError={closeDatesError}
+        currentMonth={currentMonth}
+        onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
       />
       <MobileList
         attendances={attendances}

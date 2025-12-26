@@ -61,8 +61,13 @@ import { StartTimeTableCell } from "./StartTimeTableCell";
 
 export default function AttendanceDailyList() {
   const { targetWorkDate } = useParams();
-  const { attendanceDailyList, error, loading, duplicateAttendances } =
-    useAttendanceDaily();
+  const {
+    attendanceDailyList,
+    error,
+    loading,
+    duplicateAttendances,
+    loadAttendanceDataByMonth,
+  } = useAttendanceDaily();
   const { getEndTime } = useContext(AppConfigContext);
   const today = dayjs().format(AttendanceDate.QueryParamFormat);
   const dispatch = useAppDispatchV2();
@@ -92,6 +97,15 @@ export default function AttendanceDailyList() {
   }, [getEndTime]);
   const scheduledHour = scheduledEnd.hour;
   const scheduledMinute = scheduledEnd.minute;
+
+  // targetWorkDateが変わった時に、新しい月のデータをロード
+  useEffect(() => {
+    if (!targetWorkDate && !today) return;
+    const dateToLoad = targetWorkDate || today;
+    loadAttendanceDataByMonth(dateToLoad).catch((e) => {
+      console.error("Failed to load attendance data for month:", e);
+    });
+  }, [targetWorkDate, today, loadAttendanceDataByMonth]);
 
   useEffect(() => {
     if (error) {
