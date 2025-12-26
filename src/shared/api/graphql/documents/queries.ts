@@ -1314,6 +1314,64 @@ export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffI
   APITypes.OperationLogsByStaffIdQueryVariables,
   APITypes.OperationLogsByStaffIdQuery
 >;
+export const getAuditLog = /* GraphQL */ `query GetAuditLog($id: ID!) {
+  getAuditLog(id: $id) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetAuditLogQueryVariables,
+  APITypes.GetAuditLogQuery
+>;
+export const listAuditLogs = /* GraphQL */ `query ListAuditLogs(
+  $filter: ModelAuditLogFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listAuditLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      resourceType
+      resourceId
+      action
+      actorId
+      actorRole
+      requestId
+      ip
+      userAgent
+      before
+      after
+      diff
+      createdAt
+      ttl
+      reason
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListAuditLogsQueryVariables,
+  APITypes.ListAuditLogsQuery
+>;
 export const getDailyReport = /* GraphQL */ `query GetDailyReport($id: ID!) {
   getDailyReport(id: $id) {
     id

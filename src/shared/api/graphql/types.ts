@@ -1196,6 +1196,103 @@ export type DeleteOperationLogInput = {
   id: string,
 };
 
+export type CreateAuditLogInput = {
+  id?: string | null,
+  resourceType: string,
+  resourceId: string,
+  action: string,
+  actorId: string,
+  actorRole?: string | null,
+  requestId: string,
+  ip?: string | null,
+  userAgent?: string | null,
+  before?: string | null,
+  after?: string | null,
+  diff?: string | null,
+  createdAt?: string | null,
+  ttl?: number | null,
+  reason?: string | null,
+};
+
+export type ModelAuditLogConditionInput = {
+  resourceType?: ModelStringInput | null,
+  resourceId?: ModelStringInput | null,
+  action?: ModelStringInput | null,
+  actorId?: ModelIDInput | null,
+  actorRole?: ModelStringInput | null,
+  requestId?: ModelStringInput | null,
+  ip?: ModelStringInput | null,
+  userAgent?: ModelStringInput | null,
+  before?: ModelStringInput | null,
+  after?: ModelStringInput | null,
+  diff?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  ttl?: ModelIntInput | null,
+  reason?: ModelStringInput | null,
+  and?: Array< ModelAuditLogConditionInput | null > | null,
+  or?: Array< ModelAuditLogConditionInput | null > | null,
+  not?: ModelAuditLogConditionInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelIDInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
+};
+
+export type AuditLog = {
+  __typename: "AuditLog",
+  id: string,
+  resourceType: string,
+  resourceId: string,
+  action: string,
+  actorId: string,
+  actorRole?: string | null,
+  requestId: string,
+  ip?: string | null,
+  userAgent?: string | null,
+  before?: string | null,
+  after?: string | null,
+  diff?: string | null,
+  createdAt: string,
+  ttl?: number | null,
+  reason?: string | null,
+  updatedAt: string,
+};
+
+export type UpdateAuditLogInput = {
+  id: string,
+  resourceType?: string | null,
+  resourceId?: string | null,
+  action?: string | null,
+  actorId?: string | null,
+  actorRole?: string | null,
+  requestId?: string | null,
+  ip?: string | null,
+  userAgent?: string | null,
+  before?: string | null,
+  after?: string | null,
+  diff?: string | null,
+  createdAt?: string | null,
+  ttl?: number | null,
+  reason?: string | null,
+};
+
+export type DeleteAuditLogInput = {
+  id: string,
+};
+
 export type CreateDailyReportInput = {
   id?: string | null,
   staffId: string,
@@ -1321,22 +1418,6 @@ export type ModelCheckForUpdateFilterInput = {
   and?: Array< ModelCheckForUpdateFilterInput | null > | null,
   or?: Array< ModelCheckForUpdateFilterInput | null > | null,
   not?: ModelCheckForUpdateFilterInput | null,
-};
-
-export type ModelIDInput = {
-  ne?: string | null,
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  contains?: string | null,
-  notContains?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  size?: ModelSizeInput | null,
 };
 
 export type ModelCheckForUpdateConnection = {
@@ -1626,6 +1707,34 @@ export type ModelOperationLogConnection = {
   nextToken?: string | null,
 };
 
+export type ModelAuditLogFilterInput = {
+  id?: ModelIDInput | null,
+  resourceType?: ModelStringInput | null,
+  resourceId?: ModelStringInput | null,
+  action?: ModelStringInput | null,
+  actorId?: ModelIDInput | null,
+  actorRole?: ModelStringInput | null,
+  requestId?: ModelStringInput | null,
+  ip?: ModelStringInput | null,
+  userAgent?: ModelStringInput | null,
+  before?: ModelStringInput | null,
+  after?: ModelStringInput | null,
+  diff?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  ttl?: ModelIntInput | null,
+  reason?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAuditLogFilterInput | null > | null,
+  or?: Array< ModelAuditLogFilterInput | null > | null,
+  not?: ModelAuditLogFilterInput | null,
+};
+
+export type ModelAuditLogConnection = {
+  __typename: "ModelAuditLogConnection",
+  items:  Array<AuditLog | null >,
+  nextToken?: string | null,
+};
+
 export type ModelDailyReportFilterInput = {
   id?: ModelIDInput | null,
   staffId?: ModelStringInput | null,
@@ -1890,6 +1999,27 @@ export type ModelSubscriptionOperationLogFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
   or?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
+};
+
+export type ModelSubscriptionAuditLogFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  resourceType?: ModelSubscriptionStringInput | null,
+  resourceId?: ModelSubscriptionStringInput | null,
+  action?: ModelSubscriptionStringInput | null,
+  actorId?: ModelSubscriptionIDInput | null,
+  actorRole?: ModelSubscriptionStringInput | null,
+  requestId?: ModelSubscriptionStringInput | null,
+  ip?: ModelSubscriptionStringInput | null,
+  userAgent?: ModelSubscriptionStringInput | null,
+  before?: ModelSubscriptionStringInput | null,
+  after?: ModelSubscriptionStringInput | null,
+  diff?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  ttl?: ModelSubscriptionIntInput | null,
+  reason?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionAuditLogFilterInput | null > | null,
+  or?: Array< ModelSubscriptionAuditLogFilterInput | null > | null,
 };
 
 export type ModelSubscriptionDailyReportFilterInput = {
@@ -3203,6 +3333,87 @@ export type DeleteOperationLogMutation = {
     metadata?: string | null,
     severity?: string | null,
     createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateAuditLogMutationVariables = {
+  input: CreateAuditLogInput,
+  condition?: ModelAuditLogConditionInput | null,
+};
+
+export type CreateAuditLogMutation = {
+  createAuditLog?:  {
+    __typename: "AuditLog",
+    id: string,
+    resourceType: string,
+    resourceId: string,
+    action: string,
+    actorId: string,
+    actorRole?: string | null,
+    requestId: string,
+    ip?: string | null,
+    userAgent?: string | null,
+    before?: string | null,
+    after?: string | null,
+    diff?: string | null,
+    createdAt: string,
+    ttl?: number | null,
+    reason?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateAuditLogMutationVariables = {
+  input: UpdateAuditLogInput,
+  condition?: ModelAuditLogConditionInput | null,
+};
+
+export type UpdateAuditLogMutation = {
+  updateAuditLog?:  {
+    __typename: "AuditLog",
+    id: string,
+    resourceType: string,
+    resourceId: string,
+    action: string,
+    actorId: string,
+    actorRole?: string | null,
+    requestId: string,
+    ip?: string | null,
+    userAgent?: string | null,
+    before?: string | null,
+    after?: string | null,
+    diff?: string | null,
+    createdAt: string,
+    ttl?: number | null,
+    reason?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteAuditLogMutationVariables = {
+  input: DeleteAuditLogInput,
+  condition?: ModelAuditLogConditionInput | null,
+};
+
+export type DeleteAuditLogMutation = {
+  deleteAuditLog?:  {
+    __typename: "AuditLog",
+    id: string,
+    resourceType: string,
+    resourceId: string,
+    action: string,
+    actorId: string,
+    actorRole?: string | null,
+    requestId: string,
+    ip?: string | null,
+    userAgent?: string | null,
+    before?: string | null,
+    after?: string | null,
+    diff?: string | null,
+    createdAt: string,
+    ttl?: number | null,
+    reason?: string | null,
     updatedAt: string,
   } | null,
 };
@@ -4565,6 +4776,64 @@ export type OperationLogsByStaffIdQuery = {
       metadata?: string | null,
       severity?: string | null,
       createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetAuditLogQueryVariables = {
+  id: string,
+};
+
+export type GetAuditLogQuery = {
+  getAuditLog?:  {
+    __typename: "AuditLog",
+    id: string,
+    resourceType: string,
+    resourceId: string,
+    action: string,
+    actorId: string,
+    actorRole?: string | null,
+    requestId: string,
+    ip?: string | null,
+    userAgent?: string | null,
+    before?: string | null,
+    after?: string | null,
+    diff?: string | null,
+    createdAt: string,
+    ttl?: number | null,
+    reason?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListAuditLogsQueryVariables = {
+  filter?: ModelAuditLogFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAuditLogsQuery = {
+  listAuditLogs?:  {
+    __typename: "ModelAuditLogConnection",
+    items:  Array< {
+      __typename: "AuditLog",
+      id: string,
+      resourceType: string,
+      resourceId: string,
+      action: string,
+      actorId: string,
+      actorRole?: string | null,
+      requestId: string,
+      ip?: string | null,
+      userAgent?: string | null,
+      before?: string | null,
+      after?: string | null,
+      diff?: string | null,
+      createdAt: string,
+      ttl?: number | null,
+      reason?: string | null,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -5944,6 +6213,84 @@ export type OnDeleteOperationLogSubscription = {
     metadata?: string | null,
     severity?: string | null,
     createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateAuditLogSubscriptionVariables = {
+  filter?: ModelSubscriptionAuditLogFilterInput | null,
+};
+
+export type OnCreateAuditLogSubscription = {
+  onCreateAuditLog?:  {
+    __typename: "AuditLog",
+    id: string,
+    resourceType: string,
+    resourceId: string,
+    action: string,
+    actorId: string,
+    actorRole?: string | null,
+    requestId: string,
+    ip?: string | null,
+    userAgent?: string | null,
+    before?: string | null,
+    after?: string | null,
+    diff?: string | null,
+    createdAt: string,
+    ttl?: number | null,
+    reason?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateAuditLogSubscriptionVariables = {
+  filter?: ModelSubscriptionAuditLogFilterInput | null,
+};
+
+export type OnUpdateAuditLogSubscription = {
+  onUpdateAuditLog?:  {
+    __typename: "AuditLog",
+    id: string,
+    resourceType: string,
+    resourceId: string,
+    action: string,
+    actorId: string,
+    actorRole?: string | null,
+    requestId: string,
+    ip?: string | null,
+    userAgent?: string | null,
+    before?: string | null,
+    after?: string | null,
+    diff?: string | null,
+    createdAt: string,
+    ttl?: number | null,
+    reason?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteAuditLogSubscriptionVariables = {
+  filter?: ModelSubscriptionAuditLogFilterInput | null,
+};
+
+export type OnDeleteAuditLogSubscription = {
+  onDeleteAuditLog?:  {
+    __typename: "AuditLog",
+    id: string,
+    resourceType: string,
+    resourceId: string,
+    action: string,
+    actorId: string,
+    actorRole?: string | null,
+    requestId: string,
+    ip?: string | null,
+    userAgent?: string | null,
+    before?: string | null,
+    after?: string | null,
+    diff?: string | null,
+    createdAt: string,
+    ttl?: number | null,
+    reason?: string | null,
     updatedAt: string,
   } | null,
 };

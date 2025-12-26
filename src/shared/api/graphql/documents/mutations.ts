@@ -1346,6 +1346,90 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
   APITypes.DeleteOperationLogMutationVariables,
   APITypes.DeleteOperationLogMutation
 >;
+export const createAuditLog = /* GraphQL */ `mutation CreateAuditLog(
+  $input: CreateAuditLogInput!
+  $condition: ModelAuditLogConditionInput
+) {
+  createAuditLog(input: $input, condition: $condition) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAuditLogMutationVariables,
+  APITypes.CreateAuditLogMutation
+>;
+export const updateAuditLog = /* GraphQL */ `mutation UpdateAuditLog(
+  $input: UpdateAuditLogInput!
+  $condition: ModelAuditLogConditionInput
+) {
+  updateAuditLog(input: $input, condition: $condition) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAuditLogMutationVariables,
+  APITypes.UpdateAuditLogMutation
+>;
+export const deleteAuditLog = /* GraphQL */ `mutation DeleteAuditLog(
+  $input: DeleteAuditLogInput!
+  $condition: ModelAuditLogConditionInput
+) {
+  deleteAuditLog(input: $input, condition: $condition) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAuditLogMutationVariables,
+  APITypes.DeleteAuditLogMutation
+>;
 export const createDailyReport = /* GraphQL */ `mutation CreateDailyReport(
   $input: CreateDailyReportInput!
   $condition: ModelDailyReportConditionInput
