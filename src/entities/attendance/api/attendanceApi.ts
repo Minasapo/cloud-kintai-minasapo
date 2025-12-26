@@ -56,7 +56,8 @@ const dispatchDuplicateWarning = (message: string) => {
 const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
 
-const sanitizeRests = (
+// Exported for testing
+export const sanitizeRests = (
   rests?: Array<{
     startTime?: string | null;
     endTime?: string | null;
@@ -67,7 +68,8 @@ const sanitizeRests = (
     endTime: endTime ?? undefined,
   })) ?? [];
 
-const sanitizeHourlyPaidHolidayTimes = (
+// Exported for testing
+export const sanitizeHourlyPaidHolidayTimes = (
   hourlyTimes?: Array<{
     startTime?: string | null;
     endTime?: string | null;
@@ -83,7 +85,8 @@ const sanitizeHourlyPaidHolidayTimes = (
       return acc;
     }, []) ?? [];
 
-const buildAttendanceHistoryInput = (
+// Exported for testing
+export const buildAttendanceHistoryInput = (
   attendance: Attendance,
   createdAt: string
 ): AttendanceHistoryInput => ({
