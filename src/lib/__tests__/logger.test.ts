@@ -1,9 +1,13 @@
 import { Logger } from "../logger";
 
 describe("Logger", () => {
-  const consoleDebug = jest.spyOn(console, "debug").mockImplementation(() => {});
+  const consoleDebug = jest
+    .spyOn(console, "debug")
+    .mockImplementation(() => {});
   const consoleWarn = jest.spyOn(console, "warn").mockImplementation(() => {});
-  const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+  const consoleError = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
 
   afterEach(() => {
     jest.clearAllMocks();
