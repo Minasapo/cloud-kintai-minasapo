@@ -37,6 +37,7 @@ describe("AttendanceState", () => {
   ) => {
     const staff: Staff = {
       ...baseStaff,
+      workType: "weekday",
       ...staffOverrides,
     };
 
@@ -65,5 +66,183 @@ describe("AttendanceState", () => {
     setMockToday(state, today);
 
     expect(state.get()).toBe(AttendanceStatus.Error);
+  });
+
+  it("returns None when staff usageStartDate is after workDate", () => {
+    const state = buildState(
+      { workDate: "2024-01-10" },
+      { usageStartDate: "2024-02-01" }
+    );
+
+    setMockToday(state, "2024-02-10");
+
+    expect(state.get()).toBe(AttendanceStatus.None);
+  });
+
+  it("returns Ok when paidHolidayFlag is true", () => {
+    const state = buildState({ workDate: "2024-01-10", paidHolidayFlag: true });
+
+    setMockToday(state, "2024-02-01");
+
+    expect(state.get()).toBe(AttendanceStatus.Ok);
+  });
+
+  it("returns Ok when substituteHolidayDate is valid", () => {
+    const state = buildState({
+      workDate: "2024-01-10",
+      substituteHolidayDate: "2024-01-05",
+    });
+
+    setMockToday(state, "2024-02-01");
+
+    expect(state.get()).toBe(AttendanceStatus.Ok);
+  });
+
+  it("returns Requesting when there is an incomplete change request", () => {
+    const state = buildState({
+      workDate: "2024-01-10",
+      changeRequests: [
+        {
+          __typename: "AttendanceChangeRequest",
+          completed: false,
+        },
+      ],
+    });
+
+    setMockToday(state, "2024-02-01");
+
+    expect(state.get()).toBe(AttendanceStatus.Requesting);
+  });
+
+  it("returns Ok when there are only completed change requests", () => {
+    const state = buildState({
+      workDate: "2024-01-10",
+      changeRequests: [
+        {
+          __typename: "AttendanceChangeRequest",
+          completed: true,
+        },
+      ],
+    });
+
+    setMockToday(state, "2024-02-01");
+
+    expect(state.get()).toBe(AttendanceStatus.Ok);
+  });
+
+  it("returns None on weekend with no start/end time", () => {
+    const state = buildState({
+      workDate: "2024-01-06", // Saturday
+      startTime: "",
+      endTime: "",
+    });
+
+    setMockToday(state, "2024-01-10");
+
+    expect(state.get()).toBe(AttendanceStatus.None);
+  });
+
+  it("returns Ok on weekend with start/end time entered", () => {
+    const state = buildState({ workDate: "2024-01-07" }); // Sunday
+
+    setMockToday(state, "2024-01-10");
+
+    expect(state.get()).toBe(AttendanceStatus.Ok);
+  });
+
+  it("returns Error on weekday when startTime is missing", () => {
+    const state = buildState({
+      workDate: "2024-01-09",
+      startTime: undefined,
+      endTime: "18:00",
+    });
+
+    setMockToday(state, "2024-01-10");
+
+    expect(state.get()).toBe(AttendanceStatus.Error);
+  });
+
+  it("returns Error on weekday when endTime is missing", () => {
+    const state = buildState({
+      workDate: "2024-01-09",
+      startTime: "09:00",
+      endTime: undefined,
+    });
+
+    setMockToday(state, "2024-01-10");
+
+    expect(state.get()).toBe(AttendanceStatus.Error);
+  });
+
+  it("returns None for shift worker on deemed holiday", () => {
+    const state = buildState(
+      {
+        workDate: "2024-01-09",
+        isDeemedHoliday: true,
+      },
+      { workType: "shift" }
+    );
+
+    setMockToday(state, "2024-01-10");
+
+    expect(state.get()).toBe(AttendanceStatus.None);
+  });
+
+  it("treats shift worker as weekday even on weekend", () => {
+    const state = buildState(
+      {
+        workDate: "2024-01-06", // Saturday
+        startTime: undefined,
+      },
+      { workType: "shift" }
+    );
+
+    setMockToday(state, "2024-01-10");
+
+    expect(state.get()).toBe(AttendanceStatus.Error);
+  });
+
+  it("returns None when non-shift staff has a holiday calendar entry", () => {
+    const state = new AttendanceState(
+      { ...baseStaff, workType: "weekday" },
+      { ...baseAttendance, workDate: "2024-01-10" },
+      [
+        {
+          __typename: "HolidayCalendar",
+          id: "h1",
+          holidayDate: "2024-01-10",
+          name: "祝日",
+          createdAt: "2024-01-01T00:00:00.000Z",
+          updatedAt: "2024-01-01T00:00:00.000Z",
+        },
+      ],
+      []
+    );
+
+    setMockToday(state, "2024-02-01");
+
+    expect(state.get()).toBe(AttendanceStatus.None);
+  });
+
+  it("returns None when non-shift staff has a company holiday", () => {
+    const state = new AttendanceState(
+      { ...baseStaff, workType: "weekday" },
+      { ...baseAttendance, workDate: "2024-01-10" },
+      [],
+      [
+        {
+          __typename: "CompanyHolidayCalendar",
+          id: "c1",
+          holidayDate: "2024-01-10",
+          name: "会社休日",
+          createdAt: "2024-01-01T00:00:00.000Z",
+          updatedAt: "2024-01-01T00:00:00.000Z",
+        },
+      ]
+    );
+
+    setMockToday(state, "2024-02-01");
+
+    expect(state.get()).toBe(AttendanceStatus.None);
   });
 });
