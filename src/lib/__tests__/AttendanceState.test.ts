@@ -258,4 +258,86 @@ describe("AttendanceState", () => {
 
     expect(state.get()).toBe(AttendanceStatus.None);
   });
+
+  it("prioritizes holiday over change requests for non-shift staff", () => {
+    const state = new AttendanceState(
+      { ...baseStaff, workType: "weekday" },
+      {
+        ...baseAttendance,
+        workDate: "2024-02-11",
+        changeRequests: [
+          {
+            __typename: "AttendanceChangeRequest",
+            completed: false,
+          },
+        ],
+      },
+      [
+        {
+          __typename: "HolidayCalendar",
+          id: "h1",
+          holidayDate: "2024-02-11",
+          name: "祝日",
+          createdAt: "2024-01-01T00:00:00.000Z",
+          updatedAt: "2024-01-01T00:00:00.000Z",
+        },
+      ],
+      []
+    );
+
+    setMockToday(state, "2024-03-01");
+
+    expect(state.get()).toBe(AttendanceStatus.None);
+  });
+
+  it("returns Error when substituteHolidayDate is invalid and startTime is missing", () => {
+    const state = buildState({
+      workDate: "2024-03-05",
+      substituteHolidayDate: "not-a-date",
+      startTime: undefined,
+    });
+
+    setMockToday(state, "2024-03-06");
+
+    expect(state.get()).toBe(AttendanceStatus.Error);
+  });
+
+  it("still returns None when usageStartDate is after workDate even with change requests", () => {
+    const state = buildState(
+      {
+        workDate: "2024-04-01",
+        changeRequests: [
+          {
+            __typename: "AttendanceChangeRequest",
+            completed: false,
+          },
+        ],
+      },
+      { usageStartDate: "2024-05-01" }
+    );
+
+    setMockToday(state, "2024-05-10");
+
+    expect(state.get()).toBe(AttendanceStatus.None);
+  });
+
+  it("returns Requesting for shift worker with incomplete change request before late/working checks", () => {
+    const state = buildState(
+      {
+        workDate: "2024-06-10",
+        startTime: undefined,
+        changeRequests: [
+          {
+            __typename: "AttendanceChangeRequest",
+            completed: false,
+          },
+        ],
+      },
+      { workType: "shift" }
+    );
+
+    setMockToday(state, "2024-06-20");
+
+    expect(state.get()).toBe(AttendanceStatus.Requesting);
+  });
 });
