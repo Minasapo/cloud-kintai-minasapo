@@ -322,13 +322,7 @@ export default function NewWorkflowPage() {
                   <em>種別を選択</em>
                 </MenuItem>
                 <ListSubheader>勤怠</ListSubheader>
-                <MenuItem
-                  value="有給休暇申請"
-                  disabled
-                  title="現在は残業申請のみ作成できます"
-                >
-                  有給休暇申請
-                </MenuItem>
+                <MenuItem value="有給休暇申請">有給休暇申請</MenuItem>
                 <MenuItem
                   value="欠勤申請"
                   disabled

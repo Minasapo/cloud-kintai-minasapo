@@ -22,10 +22,12 @@ import {
 } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
+import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import {
   useCreateAttendanceMutation,
@@ -53,6 +55,12 @@ export default function AdminWorkflowDetail() {
   const navigate = useNavigate();
   const { staffs } = useStaffs();
   const { cognitoUser } = useContext(AuthContext);
+  const {
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useContext(AppConfigContext);
   const { update: updateWorkflow } = useWorkflows();
   const [createAttendance] = useCreateAttendanceMutation();
   const [getAttendanceByStaffAndDate] =
@@ -489,16 +497,131 @@ export default function AdminWorkflowDetail() {
       const updated = (await updateWorkflow(inputForUpdate)) as NonNullable<
         GetWorkflowQuery["getWorkflow"]
       >;
-
-      console.log("===== UpdateWorkflow 結果 =====");
-      console.log("updated オブジェクト全体:", updated);
-      console.log("updated.category:", updated.category);
-      console.log("updated.staffId:", updated.staffId);
-      console.log("updated.overTimeDetails:", updated.overTimeDetails);
-      console.log("isFinal:", isFinal);
-
       setWorkflow(updated);
       setMessages(commentsToMessages(updated.comments || []));
+
+      // 有給休暇申請の場合、承認時に申請期間の勤怠データへ有給フラグを立て、規定勤務時刻を設定する
+      if (isFinal && updated.category === WorkflowCategory.PAID_LEAVE) {
+        try {
+          // overTimeDetails.startTime / endTime に 'YYYY-MM-DD' 形式で期間が格納されている
+          const startDateStr = updated.overTimeDetails?.startTime ?? null;
+          const endDateStr = updated.overTimeDetails?.endTime ?? null;
+
+          if (!startDateStr || !endDateStr) {
+            console.warn("有給期間が不明のため勤怠設定をスキップします");
+            dispatch(
+              setSnackbarSuccess(
+                "有給申請を承認しました（勤怠情報の更新はスキップ）"
+              )
+            );
+            return;
+          }
+
+          const applicantStaff = staffs.find((s) => s.id === updated.staffId);
+          const targetStaffId =
+            applicantStaff?.cognitoUserId || updated.staffId;
+
+          if (!applicantStaff) {
+            console.warn(
+              `⚠️ ワークフロー申請者（staffId: ${updated.staffId}）が見つかりません。`
+            );
+          }
+
+          // AppConfig 規定の勤務開始・終了・休憩時刻を取得
+          const stdStartTime = getStartTime().format("HH:mm");
+          const stdEndTime = getEndTime().format("HH:mm");
+          const stdLunchStartTime = getLunchRestStartTime().format("HH:mm");
+          const stdLunchEndTime = getLunchRestEndTime().format("HH:mm");
+
+          // 有給期間中の全日を列挙
+          const start = dayjs(startDateStr);
+          const end = dayjs(endDateStr);
+          if (!start.isValid() || !end.isValid()) {
+            console.warn("有給期間の日付が不正なため処理をスキップします");
+            dispatch(
+              setSnackbarSuccess(
+                "有給申請を承認しました（日付が不正なため勤怠更新をスキップ）"
+              )
+            );
+            return;
+          }
+
+          const dayCount = end.diff(start, "day") + 1;
+
+          for (let i = 0; i < dayCount; i++) {
+            const targetDay = start.add(i, "day");
+            const targetDayStr = targetDay.format("YYYY-MM-DD");
+
+            // HH:mm → ISO8601へ変換
+            const buildISO = (time: string) => {
+              const [h, m] = time.split(":").map(Number);
+              return targetDay
+                .hour(h || 0)
+                .minute(m || 0)
+                .second(0)
+                .millisecond(0)
+                .toISOString();
+            };
+
+            const attendanceInput = {
+              staffId: targetStaffId,
+              workDate: targetDayStr,
+              startTime: buildISO(stdStartTime),
+              endTime: buildISO(stdEndTime),
+              goDirectlyFlag: false,
+              returnDirectlyFlag: false,
+              absentFlag: false,
+              paidHolidayFlag: true,
+              specialHolidayFlag: false,
+              rests: [
+                {
+                  startTime: buildISO(stdLunchStartTime),
+                  endTime: buildISO(stdLunchEndTime),
+                },
+              ],
+              hourlyPaidHolidayTimes: [],
+            };
+
+            const existingAttendance = await getAttendanceByStaffAndDate({
+              staffId: targetStaffId,
+              workDate: targetDayStr,
+            }).unwrap();
+
+            if (existingAttendance) {
+              // UPDATE (既存あり)
+              await updateAttendance({
+                id: existingAttendance.id,
+                staffId: targetStaffId,
+                workDate: targetDayStr,
+                startTime: attendanceInput.startTime,
+                endTime: attendanceInput.endTime,
+                goDirectlyFlag: attendanceInput.goDirectlyFlag,
+                returnDirectlyFlag: attendanceInput.returnDirectlyFlag,
+                absentFlag: attendanceInput.absentFlag,
+                paidHolidayFlag: attendanceInput.paidHolidayFlag,
+                specialHolidayFlag: attendanceInput.specialHolidayFlag,
+                rests: attendanceInput.rests,
+                hourlyPaidHolidayTimes: attendanceInput.hourlyPaidHolidayTimes,
+                revision: existingAttendance.revision,
+              }).unwrap();
+            } else {
+              // CREATE (新規作成)
+              await createAttendance(attendanceInput).unwrap();
+            }
+          }
+
+          dispatch(
+            setSnackbarSuccess("有給休暇申請を承認し、勤怠データを更新しました")
+          );
+        } catch (paidLeaveError) {
+          console.error("❌ 有給勤怠の処理に失敗:", paidLeaveError);
+          dispatch(
+            setSnackbarSuccess(
+              "有給申請を承認しました（勤怠データの処理に失敗）"
+            )
+          );
+        }
+      }
 
       // 打刻修正申請の場合、承認時に勤怠データを作成/更新
       if (isFinal && updated.category === WorkflowCategory.CLOCK_CORRECTION) {

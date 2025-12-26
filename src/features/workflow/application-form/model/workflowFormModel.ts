@@ -208,11 +208,23 @@ const buildWorkflowOvertimeDetails = (
   options?: OvertimeDetailsOptions
 ): CreateWorkflowInput["overTimeDetails"] | undefined => {
   const isOvertime = state.categoryLabel === OVERTIME_LABEL;
+  const isVacation = state.categoryLabel === VACATION_LABEL;
   const isClockInCorrection = state.categoryLabel === CLOCK_CORRECTION_LABEL;
   const isClockOutCorrection =
     state.categoryLabel === CLOCK_CORRECTION_CHECK_OUT_LABEL;
   const isClockCorrection = isClockInCorrection || isClockOutCorrection;
-  if (!isOvertime && !isClockCorrection) return undefined;
+  if (!isOvertime && !isClockCorrection && !isVacation) return undefined;
+
+  // 有給休暇申請の場合
+  if (isVacation) {
+    return {
+      date: state.startDate || "",
+      startTime: state.startDate || "",
+      endTime: state.endDate || "",
+      reason: "", // 有給休暇の理由は別フィールドで管理される可能性があるため空文字
+    };
+  }
+
   const resolveDate = () =>
     state.overtimeDate ||
     (options?.fallbackDateFactory ?? defaultOvertimeDateFactory)();
