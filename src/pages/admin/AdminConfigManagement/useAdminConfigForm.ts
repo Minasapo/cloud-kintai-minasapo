@@ -23,6 +23,39 @@ export type LinkItem = {
 };
 export type ReasonItem = { reason: string; enabled: boolean };
 
+type RequiredTimes = {
+  startTime: Dayjs;
+  endTime: Dayjs;
+  lunchRestStartTime: Dayjs;
+  lunchRestEndTime: Dayjs;
+  amHolidayStartTime: Dayjs;
+  amHolidayEndTime: Dayjs;
+  pmHolidayStartTime: Dayjs;
+  pmHolidayEndTime: Dayjs;
+};
+
+type BaseAppConfigPayload = {
+  workStartTime: string;
+  workEndTime: string;
+  standardWorkHours: number;
+  links: { label: string; url: string; enabled: boolean; icon: string }[];
+  reasons: { reason: string; enabled: boolean }[];
+  officeMode: boolean;
+  absentEnabled: boolean;
+  quickInputStartTimes: { time: string; enabled: boolean }[];
+  quickInputEndTimes: { time: string; enabled: boolean }[];
+  lunchRestStartTime: string;
+  lunchRestEndTime: string;
+  hourlyPaidHolidayEnabled: boolean;
+  amHolidayStartTime: string;
+  amHolidayEndTime: string;
+  pmHolidayStartTime: string;
+  pmHolidayEndTime: string;
+  amPmHolidayEnabled: boolean;
+  specialHolidayEnabled: boolean;
+  attendanceStatisticsEnabled: boolean;
+};
+
 export function useAdminConfigForm() {
   const {
     fetchConfig,
@@ -150,6 +183,62 @@ export function useAdminConfigForm() {
     }
   };
 
+  const formatTime = (time: Dayjs) => time.format("HH:mm");
+
+  const buildStandardWorkHours = (
+    start: Dayjs,
+    end: Dayjs,
+    restStart: Dayjs,
+    restEnd: Dayjs
+  ) => {
+    const baseHours = end.diff(start, "hour", true);
+    const lunchHours = Math.max(restEnd.diff(restStart, "hour", true), 0);
+    return Math.max(baseHours - lunchHours, 0);
+  };
+
+  const buildBasePayload = (
+    requiredTimes: RequiredTimes
+  ): BaseAppConfigPayload => ({
+    workStartTime: formatTime(requiredTimes.startTime),
+    workEndTime: formatTime(requiredTimes.endTime),
+    standardWorkHours: buildStandardWorkHours(
+      requiredTimes.startTime,
+      requiredTimes.endTime,
+      requiredTimes.lunchRestStartTime,
+      requiredTimes.lunchRestEndTime
+    ),
+    links: links.map((link) => ({
+      label: link.label,
+      url: link.url,
+      enabled: link.enabled,
+      icon: link.icon,
+    })),
+    reasons: reasons.map((reason) => ({
+      reason: reason.reason,
+      enabled: reason.enabled,
+    })),
+    officeMode,
+    absentEnabled,
+    quickInputStartTimes: quickInputStartTimes.map((entry) => ({
+      time: formatTime(entry.time),
+      enabled: entry.enabled,
+    })),
+    quickInputEndTimes: quickInputEndTimes.map((entry) => ({
+      time: formatTime(entry.time),
+      enabled: entry.enabled,
+    })),
+    lunchRestStartTime: formatTime(requiredTimes.lunchRestStartTime),
+    lunchRestEndTime: formatTime(requiredTimes.lunchRestEndTime),
+    hourlyPaidHolidayEnabled,
+    amHolidayStartTime: formatTime(requiredTimes.amHolidayStartTime),
+    amHolidayEndTime: formatTime(requiredTimes.amHolidayEndTime),
+    pmHolidayStartTime: formatTime(requiredTimes.pmHolidayStartTime),
+    pmHolidayEndTime: formatTime(requiredTimes.pmHolidayEndTime),
+    amPmHolidayEnabled,
+    specialHolidayEnabled,
+    attendanceStatisticsEnabled,
+  });
+
   useEffect(() => {
     hydrateFromContext();
   }, []);
@@ -275,98 +364,48 @@ export function useAdminConfigForm() {
 
   const handleSave = async () => {
     if (
-      startTime &&
-      endTime &&
-      lunchRestStartTime &&
-      lunchRestEndTime &&
-      amHolidayStartTime &&
-      amHolidayEndTime &&
-      pmHolidayStartTime &&
-      pmHolidayEndTime
+      !startTime ||
+      !endTime ||
+      !lunchRestStartTime ||
+      !lunchRestEndTime ||
+      !amHolidayStartTime ||
+      !amHolidayEndTime ||
+      !pmHolidayStartTime ||
+      !pmHolidayEndTime
     ) {
-      const standardWorkHours = (() => {
-        const baseHours = endTime.diff(startTime, "hour", true);
-        const lunchHours = Math.max(
-          lunchRestEndTime.diff(lunchRestStartTime, "hour", true),
-          0
-        );
-        return Math.max(baseHours - lunchHours, 0);
-      })();
-
-      try {
-        if (id) {
-          await saveConfig({
-            id,
-            workStartTime: startTime.format("HH:mm"),
-            workEndTime: endTime.format("HH:mm"),
-            standardWorkHours,
-            links: links.map((link) => ({
-              label: link.label,
-              url: link.url,
-              enabled: link.enabled,
-              icon: link.icon,
-            })),
-            reasons: reasons.map((reason) => ({
-              reason: reason.reason,
-              enabled: reason.enabled,
-            })),
-            officeMode,
-            absentEnabled,
-            quickInputStartTimes: quickInputStartTimes.map((entry) => ({
-              time: entry.time.format("HH:mm"),
-              enabled: entry.enabled,
-            })),
-            quickInputEndTimes: quickInputEndTimes.map((entry) => ({
-              time: entry.time.format("HH:mm"),
-              enabled: entry.enabled,
-            })),
-            lunchRestStartTime: lunchRestStartTime.format("HH:mm"),
-            lunchRestEndTime: lunchRestEndTime.format("HH:mm"),
-            hourlyPaidHolidayEnabled,
-            amHolidayStartTime: amHolidayStartTime.format("HH:mm"),
-            amHolidayEndTime: amHolidayEndTime.format("HH:mm"),
-            pmHolidayStartTime: pmHolidayStartTime.format("HH:mm"),
-            pmHolidayEndTime: pmHolidayEndTime.format("HH:mm"),
-            amPmHolidayEnabled,
-            specialHolidayEnabled,
-            attendanceStatisticsEnabled,
-          } as unknown as UpdateAppConfigInput);
-          dispatch(setSnackbarSuccess(S14002));
-        } else {
-          await saveConfig({
-            name: "default",
-            workStartTime: startTime.format("HH:mm"),
-            workEndTime: endTime.format("HH:mm"),
-            standardWorkHours,
-            links: links.map((link) => ({
-              label: link.label,
-              url: link.url,
-              enabled: link.enabled,
-              icon: link.icon,
-            })),
-            reasons: reasons.map((reason) => ({
-              reason: reason.reason,
-              enabled: reason.enabled,
-            })),
-            officeMode,
-            absentEnabled,
-            hourlyPaidHolidayEnabled,
-            amHolidayStartTime: amHolidayStartTime.format("HH:mm"),
-            amHolidayEndTime: amHolidayEndTime.format("HH:mm"),
-            pmHolidayStartTime: pmHolidayStartTime.format("HH:mm"),
-            pmHolidayEndTime: pmHolidayEndTime.format("HH:mm"),
-            amPmHolidayEnabled,
-            specialHolidayEnabled,
-            attendanceStatisticsEnabled,
-          } as unknown as CreateAppConfigInput);
-          dispatch(setSnackbarSuccess(S14001));
-        }
-        await fetchConfig();
-      } catch {
-        dispatch(setSnackbarError(E14001));
-      }
-    } else {
       dispatch(setSnackbarError(E14002));
+      return;
+    }
+
+    const requiredTimes: RequiredTimes = {
+      startTime,
+      endTime,
+      lunchRestStartTime,
+      lunchRestEndTime,
+      amHolidayStartTime,
+      amHolidayEndTime,
+      pmHolidayStartTime,
+      pmHolidayEndTime,
+    };
+
+    const basePayload = buildBasePayload(requiredTimes);
+
+    try {
+      if (id) {
+        const updatePayload: UpdateAppConfigInput = { id, ...basePayload };
+        await saveConfig(updatePayload);
+        dispatch(setSnackbarSuccess(S14002));
+      } else {
+        const createPayload: CreateAppConfigInput = {
+          name: "default",
+          ...basePayload,
+        };
+        await saveConfig(createPayload);
+        dispatch(setSnackbarSuccess(S14001));
+      }
+      await fetchConfig();
+    } catch {
+      dispatch(setSnackbarError(E14001));
     }
   };
 
