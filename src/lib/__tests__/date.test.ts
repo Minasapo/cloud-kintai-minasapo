@@ -1,6 +1,10 @@
 import dayjs from "dayjs";
 
-import { formatDateSlash, formatDateTimeReadable, isoDateFromTimestamp } from "../date";
+import {
+  formatDateSlash,
+  formatDateTimeReadable,
+  isoDateFromTimestamp,
+} from "../date";
 
 describe("date helpers", () => {
   it("formats dash-separated date to slash-separated", () => {
