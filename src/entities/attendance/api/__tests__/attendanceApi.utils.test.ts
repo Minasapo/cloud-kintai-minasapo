@@ -60,10 +60,21 @@ describe("attendanceApi utils", () => {
       goDirectlyFlag: false,
       absentFlag: false,
       returnDirectlyFlag: false,
-      rests: [{ startTime: "12:00", endTime: "13:00" }, null],
+      rests: [
+        { __typename: "Rest" as const, startTime: "12:00", endTime: "13:00" },
+        null,
+      ],
       hourlyPaidHolidayTimes: [
-        { startTime: "15:00", endTime: "16:00" },
-        { startTime: "17:00", endTime: null },
+        {
+          __typename: "HourlyPaidHolidayTime" as const,
+          startTime: "15:00",
+          endTime: "16:00",
+        },
+        {
+          __typename: "HourlyPaidHolidayTime" as const,
+          startTime: "17:00",
+          endTime: null as any,
+        },
       ],
       remarks: "memo",
       paidHolidayFlag: false,

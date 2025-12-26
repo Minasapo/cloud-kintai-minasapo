@@ -12,7 +12,8 @@ describe("createLazyRoute", () => {
     const lazy = createLazyRoute(async () => ({ default: Component }));
 
     const route = await lazy();
-    render(<route.Component />);
+    const RouteComponent = route.Component!;
+    render(<RouteComponent />);
 
     expect(screen.getByTestId("content")).toHaveTextContent("hello");
   });
@@ -27,7 +28,8 @@ describe("createLazyRoute", () => {
     });
 
     const route = await lazy();
-    render(<route.Component />);
+    const RouteComponent = route.Component!;
+    render(<RouteComponent />);
 
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();
     expect(screen.getByTestId("content")).toHaveTextContent("hello");

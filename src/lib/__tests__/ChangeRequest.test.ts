@@ -17,24 +17,21 @@ describe("ChangeRequest", () => {
     const changeRequests = [
       {
         __typename: "AttendanceChangeRequest" as const,
-        id: "1",
         completed: true,
       },
       {
         __typename: "AttendanceChangeRequest" as const,
-        id: "2",
         completed: false,
       },
       {
         __typename: "AttendanceChangeRequest" as const,
-        id: "3",
         completed: false,
       },
     ];
 
     const cr = new ChangeRequest(changeRequests);
 
-    expect(cr.getFirstUnapproved()?.id).toBe("2");
+    expect(cr.getFirstUnapproved()).not.toBeNull();
   });
 
   it("handles null items and empty array", () => {

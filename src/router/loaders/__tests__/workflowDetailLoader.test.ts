@@ -26,8 +26,7 @@ const ensureResponse = () => {
       }
     }
 
-    // @ts-expect-error Node環境用の最小限ポリフィル
-    global.Response = SimpleResponse as typeof Response;
+    (global as any).Response = SimpleResponse as typeof Response;
   }
 };
 
@@ -59,7 +58,8 @@ describe("workflowDetailLoader", () => {
 
   it("fetchWorkflowById throws when GraphQL returns errors", async () => {
     mockGraphql.mockResolvedValue({
-      errors: [{ message: "boom" }],
+      data: null,
+      errors: [{ message: "boom" }] as any,
     } satisfies GraphQLResult);
 
     await expect(fetchWorkflowById("wf-1")).rejects.toThrow(
@@ -97,7 +97,9 @@ describe("workflowDetailLoader", () => {
   it("workflowDetailLoader delegates to resolver", async () => {
     mockGraphql.mockResolvedValue({ data: { getWorkflow: workflow } });
 
-    const result = await workflowDetailLoader({ params: { id: "wf-1" } });
+    const result = await workflowDetailLoader({
+      params: { id: "wf-1" },
+    } as any);
 
     expect(result.workflow).toEqual(workflow);
   });

@@ -2,7 +2,7 @@ import { Remarks } from "../Remarks";
 
 const holidayCalendar = [
   {
-    __typename: "HolidayCalendar",
+    __typename: "HolidayCalendar" as const,
     id: "h1",
     holidayDate: "2024-05-01",
     name: "祝日A",
@@ -13,7 +13,7 @@ const holidayCalendar = [
 
 const companyHolidayCalendar = [
   {
-    __typename: "CompanyHolidayCalendar",
+    __typename: "CompanyHolidayCalendar" as const,
     id: "c1",
     holidayDate: "2024-05-02",
     name: "会社休日B",
