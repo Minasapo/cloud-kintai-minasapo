@@ -14,7 +14,8 @@ import type {
   UpdateAppConfigMutation,
 } from "@shared/api/graphql/types";
 
-const nonNullable = <T>(value: T | null | undefined): value is T =>
+// Exported for testing
+export const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
 
 export const appConfigApi = createApi({
