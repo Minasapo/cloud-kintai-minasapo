@@ -68,6 +68,19 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Error);
   });
 
+  it("keeps None when mocked today (UTC) matches workDate after local conversion", () => {
+    const workDate = "2024-01-02";
+    const state = buildState({ workDate, startTime: undefined });
+
+    // Mock today as 2024-01-01T15:00:00Z (~2024-01-02 00:00+ in many timezones)
+    (state as unknown as { today: Dayjs }).today = dayjs(
+      "2024-01-01T15:00:00Z"
+    );
+
+    // Current implementation compares formatted date strings; if they match, returns None
+    expect(state.get()).toBe(AttendanceStatus.None);
+  });
+
   it("returns None when staff usageStartDate is after workDate", () => {
     const state = buildState(
       { workDate: "2024-01-10" },
