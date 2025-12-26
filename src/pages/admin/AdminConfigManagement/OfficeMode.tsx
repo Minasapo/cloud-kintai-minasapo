@@ -36,7 +36,8 @@ export default function OfficeMode() {
     setOfficeMode(getOfficeMode());
     setHourlyPaidHolidayEnabled(getHourlyPaidHolidayEnabled());
     setId(getConfigId());
-  }, [getOfficeMode, getHourlyPaidHolidayEnabled, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleOfficeModeChange = (
     event: React.ChangeEvent<HTMLInputElement>

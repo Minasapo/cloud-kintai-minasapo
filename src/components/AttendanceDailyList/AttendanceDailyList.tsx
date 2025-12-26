@@ -91,10 +91,11 @@ export default function AttendanceDailyList() {
     isCompanyHolidayCalendarsLoading ||
     isCompanyHolidayCalendarsFetching;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const scheduledEnd = useMemo(() => {
     const parsed = getEndTime();
     return { hour: parsed.hour(), minute: parsed.minute() };
-  }, [getEndTime]);
+  }, []);
   const scheduledHour = scheduledEnd.hour;
   const scheduledMinute = scheduledEnd.minute;
 

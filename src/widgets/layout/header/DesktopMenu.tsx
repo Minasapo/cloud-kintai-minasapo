@@ -27,7 +27,8 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
   useEffect(() => {
     setOfficeMode(getOfficeMode());
     setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
-  }, [getAttendanceStatisticsEnabled, getOfficeMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const menuList = useMemo<DesktopMenuItem[]>(
     () => [

@@ -29,7 +29,8 @@ export default function Absent() {
     if (typeof getAbsentEnabled === "function")
       setAbsentEnabled(getAbsentEnabled());
     setId(getConfigId());
-  }, [getAbsentEnabled, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAbsentEnabled(event.target.checked);

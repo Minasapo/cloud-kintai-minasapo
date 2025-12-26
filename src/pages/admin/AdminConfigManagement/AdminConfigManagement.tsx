@@ -56,7 +56,8 @@ export default function AdminConfigManagement() {
     getAttendanceStatisticsEnabled,
     getThemeTokens,
   } = useContext(AppConfigContext);
-  const adminPanelTokens = useMemo(() => getThemeTokens(), [getThemeTokens]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const adminPanelTokens = useMemo(() => getThemeTokens(), []);
   const sectionSpacing = adminPanelTokens.component.adminPanel.sectionSpacing;
   const [startTime, setStartTime] = useState<Dayjs | null>(null);
   const [endTime, setEndTime] = useState<Dayjs | null>(null);
@@ -142,25 +143,8 @@ export default function AdminConfigManagement() {
     // 取得時に有効無効もセット（configに値があれば）
     if (typeof getAmPmHolidayEnabled === "function")
       setAmPmHolidayEnabled(getAmPmHolidayEnabled());
-  }, [
-    getStartTime,
-    getEndTime,
-    getConfigId,
-    getLinks,
-    getReasons,
-    getOfficeMode,
-    getQuickInputStartTimes,
-    getQuickInputEndTimes,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-    getHourlyPaidHolidayEnabled,
-    getAmHolidayStartTime,
-    getAmHolidayEndTime,
-    getPmHolidayStartTime,
-    getPmHolidayEndTime,
-    getAmPmHolidayEnabled,
-    getAttendanceStatisticsEnabled,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAddLink = () => {
     setLinks([...links, { label: "", url: "", enabled: true, icon: "" }]);

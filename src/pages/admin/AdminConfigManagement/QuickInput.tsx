@@ -48,7 +48,8 @@ export default function QuickInput() {
       }))
     );
     setId(getConfigId());
-  }, [getQuickInputStartTimes, getQuickInputEndTimes, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAddQuickInputStartTime = () =>
     setQuickInputStartTimes([

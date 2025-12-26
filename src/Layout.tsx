@@ -415,7 +415,8 @@ export default function Layout() {
 
   const configuredThemeColor = useMemo(
     () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
-    [getThemeColor]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const appTheme = useMemo(

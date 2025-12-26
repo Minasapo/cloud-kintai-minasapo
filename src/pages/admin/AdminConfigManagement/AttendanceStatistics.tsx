@@ -32,7 +32,8 @@ export default function AttendanceStatistics() {
   useEffect(() => {
     setEnabled(getAttendanceStatisticsEnabled());
     setId(getConfigId());
-  }, [getAttendanceStatisticsEnabled, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (
     _: React.ChangeEvent<HTMLInputElement>,

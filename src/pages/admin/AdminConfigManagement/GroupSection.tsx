@@ -22,12 +22,13 @@ export default function GroupSection({
   children,
 }: Props) {
   const { getThemeTokens } = useContext(AppConfigContext);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const tokens = useMemo(
     () =>
       typeof getThemeTokens === "function"
         ? getThemeTokens()
         : getDesignTokens(),
-    [getThemeTokens]
+    []
   );
   const adminPanelTokens = tokens.component.adminPanel;
   const panelSpacing = adminPanelTokens.sectionSpacing;

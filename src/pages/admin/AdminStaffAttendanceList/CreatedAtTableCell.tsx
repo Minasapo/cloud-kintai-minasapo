@@ -6,6 +6,7 @@ const TableCell = styled(MuiTableCell)(({ theme }) => ({
   width: theme.spacing(18),
   minWidth: theme.spacing(18),
   textAlign: "right",
+  whiteSpace: "nowrap",
 }));
 
 export function CreatedAtTableCell({

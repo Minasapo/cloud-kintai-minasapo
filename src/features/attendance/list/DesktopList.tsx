@@ -230,7 +230,6 @@ export default function DesktopList({
                           substituteHolidayDate={
                             attendance.substituteHolidayDate
                           }
-                          remarks={attendance.remarks}
                           specialHolidayFlag={attendance.specialHolidayFlag}
                           paidHolidayFlag={attendance.paidHolidayFlag}
                           absentFlag={attendance.absentFlag}

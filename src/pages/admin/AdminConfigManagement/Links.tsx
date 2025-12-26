@@ -30,7 +30,8 @@ export default function Links() {
   useEffect(() => {
     setLinks(getLinks());
     setId(getConfigId());
-  }, [getLinks, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAddLink = () =>
     setLinks([...links, { label: "", url: "", enabled: true, icon: "" }]);

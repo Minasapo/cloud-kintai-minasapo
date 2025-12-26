@@ -53,8 +53,6 @@ export default function useAttendanceDaily() {
   const { staffs, loading: staffLoading, error: staffError } = useStaffs();
   const [triggerGetAttendance] = useLazyGetAttendanceByStaffAndDateQuery();
 
-  const now = dayjs();
-
   /**
    * 年月をYYYY-MMフォーマットで取得
    */
@@ -175,10 +173,14 @@ export default function useAttendanceDaily() {
     if (staffs.length === 0) return;
 
     // 当月と前月をロード
+    const now = dayjs();
     const currentMonth = now.format(AttendanceDate.DataFormat);
     const previousMonth = now
       .subtract(1, "month")
       .format(AttendanceDate.DataFormat);
+
+    // staffsが変わった場合はキャッシュをクリア
+    monthlyDataCache.current = {};
 
     (async () => {
       try {
@@ -190,7 +192,8 @@ export default function useAttendanceDaily() {
         console.error("Failed to load initial attendance data", e);
       }
     })();
-  }, [staffs, staffLoading, staffError, loadAttendanceDataByMonth, now]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staffs.length, staffLoading, staffError]);
 
   return {
     loading,
