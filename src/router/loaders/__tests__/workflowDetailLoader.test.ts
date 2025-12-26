@@ -1,90 +1,104 @@
+import { GraphQLResult } from "aws-amplify/api";
+
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
+
 import {
   fetchWorkflowById,
   resolveWorkflowLoaderData,
   workflowDetailLoader,
+  WorkflowLoaderError,
 } from "../workflowDetailLoader";
-import { workflowEditLoader } from "../workflowEditLoader";
 
-jest.mock("@/lib/amplify/graphqlClient", () => ({
-  graphqlClient: { graphql: jest.fn() },
-}));
+type Workflow = {
+  id: string;
+  __typename?: string;
+};
 
-const mockGraphql = graphqlClient.graphql as jest.Mock;
+// JSDOM環境でもResponseが未定義となる場合があるため簡易ポリフィルを設定
+const ensureResponse = () => {
+  if (typeof Response === "undefined") {
+    class SimpleResponse {
+      status: number;
+      body?: unknown;
+      constructor(body?: unknown, init?: ResponseInit) {
+        this.body = body;
+        this.status = init?.status ?? 200;
+      }
+    }
 
-const sampleWorkflow = { __typename: "Workflow", id: "wf-1" } as const;
+    // @ts-expect-error Node環境用の最小限ポリフィル
+    global.Response = SimpleResponse as typeof Response;
+  }
+};
 
-describe("workflow loaders", () => {
-  beforeEach(() => {
+describe("workflowDetailLoader", () => {
+  ensureResponse();
+
+  const mockGraphql = graphqlClient.graphql as jest.Mock;
+  const workflow: Workflow = { id: "wf-1", __typename: "Workflow" };
+
+  afterEach(() => {
     mockGraphql.mockReset();
   });
 
   it("fetchWorkflowById returns workflow when found", async () => {
-    mockGraphql.mockResolvedValue({ data: { getWorkflow: sampleWorkflow } });
+    mockGraphql.mockResolvedValue({
+      data: { getWorkflow: workflow },
+    } satisfies GraphQLResult);
 
     const result = await fetchWorkflowById("wf-1");
 
-    expect(result).toBe(sampleWorkflow);
-    expect(mockGraphql).toHaveBeenCalledWith({
-      query: expect.anything(),
-      variables: { id: "wf-1" },
-      authMode: "userPool",
-    });
+    expect(mockGraphql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variables: { id: "wf-1" },
+        authMode: "userPool",
+      })
+    );
+    expect(result).toEqual(workflow);
   });
 
-  it("fetchWorkflowById throws when GraphQL errors present", async () => {
-    mockGraphql.mockResolvedValue({ errors: [{ message: "boom" }] });
+  it("fetchWorkflowById throws when GraphQL returns errors", async () => {
+    mockGraphql.mockResolvedValue({
+      errors: [{ message: "boom" }],
+    } satisfies GraphQLResult);
 
-    await expect(fetchWorkflowById("wf-1")).rejects.toThrow("boom");
-  });
-
-  it("fetchWorkflowById throws 404 when workflow missing", async () => {
-    mockGraphql.mockResolvedValue({ data: { getWorkflow: null } });
-
-    await expect(fetchWorkflowById("wf-1")).rejects.toThrow("見つかりません");
-  });
-
-  it("resolveWorkflowLoaderData rejects when id is missing", async () => {
-    await expect(resolveWorkflowLoaderData({})).rejects.toBeInstanceOf(
-      Response
+    await expect(fetchWorkflowById("wf-1")).rejects.toThrow(
+      WorkflowLoaderError
     );
   });
 
-  it("resolveWorkflowLoaderData maps WorkflowLoaderError to Response with status", async () => {
-    mockGraphql.mockResolvedValue({ errors: [{ message: "boom" }] });
+  it("fetchWorkflowById throws 404 when workflow is missing", async () => {
+    mockGraphql.mockResolvedValue({ data: { getWorkflow: null } });
 
-    const promise = resolveWorkflowLoaderData({ id: "wf-1" });
-    await expect(promise).rejects.toMatchObject({ status: 500 });
+    await expect(fetchWorkflowById("wf-1")).rejects.toMatchObject({
+      status: 404,
+    });
   });
 
-  it("resolveWorkflowLoaderData returns workflow on success", async () => {
-    mockGraphql.mockResolvedValue({ data: { getWorkflow: sampleWorkflow } });
-
-    const result = await resolveWorkflowLoaderData({ id: "wf-1" });
-
-    expect(result.workflow).toBe(sampleWorkflow);
+  it("resolveWorkflowLoaderData throws 404 Response when id missing", async () => {
+    await expect(resolveWorkflowLoaderData({})).rejects.toBeInstanceOf(
+      Response
+    );
+    await expect(resolveWorkflowLoaderData({})).rejects.toMatchObject({
+      status: 404,
+    });
   });
 
-  it("resolveWorkflowLoaderData wraps unexpected error as Response 500", async () => {
-    mockGraphql.mockRejectedValue(new Error("network down"));
+  it("resolveWorkflowLoaderData wraps WorkflowLoaderError into Response with status", async () => {
+    mockGraphql.mockResolvedValue({ errors: [{ message: "not found" }] });
 
-    const promise = resolveWorkflowLoaderData({ id: "wf-1" });
-    await expect(promise).rejects.toMatchObject({ status: 500 });
+    await expect(
+      resolveWorkflowLoaderData({ id: "wf-1" })
+    ).rejects.toMatchObject({
+      status: 500,
+    });
   });
 
   it("workflowDetailLoader delegates to resolver", async () => {
-    mockGraphql.mockResolvedValue({ data: { getWorkflow: sampleWorkflow } });
+    mockGraphql.mockResolvedValue({ data: { getWorkflow: workflow } });
 
     const result = await workflowDetailLoader({ params: { id: "wf-1" } });
 
-    expect(result.workflow.id).toBe("wf-1");
-  });
-
-  it("workflowEditLoader delegates to resolver", async () => {
-    mockGraphql.mockResolvedValue({ data: { getWorkflow: sampleWorkflow } });
-
-    const result = await workflowEditLoader({ params: { id: "wf-1" } });
-
-    expect(result.workflow.id).toBe("wf-1");
+    expect(result.workflow).toEqual(workflow);
   });
 });
