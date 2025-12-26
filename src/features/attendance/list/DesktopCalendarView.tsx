@@ -70,7 +70,9 @@ const DayCell = styled(Box, {
   gap: theme.spacing(1),
   transition: "background-color 0.2s ease",
   cursor: "pointer",
-  position: "relative",  overflow: "hidden",  "&:hover": {
+  position: "relative",
+  overflow: "hidden",
+  "&:hover": {
     backgroundColor: theme.palette.action.hover,
   },
 }));
