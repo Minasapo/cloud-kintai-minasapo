@@ -52,6 +52,26 @@ export default defineConfig({
       dependencies: process.env.CI ? ["setup"] : undefined,
     },
 
+    // スタッフユーザー（通常）として認証した状態でテスト実行
+    {
+      name: "chromium-staff",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.auth/user.json",
+      },
+      dependencies: ["setup"],
+    },
+
+    // 管理者ユーザーとして認証した状態でテスト実行
+    {
+      name: "chromium-admin",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.auth/admin.json",
+      },
+      dependencies: ["setup"],
+    },
+
     // {
     //   name: "firefox",
     //   use: {
