@@ -35,7 +35,7 @@ export default function TimeInputBase<
   quickInputTimes,
   chipColor = (enabled) => (enabled ? "success" : "default"),
   disabled = false,
-    highlight = false,
+  highlight = false,
 }: TimeInputBaseProps<TFieldName>) {
   const { readOnly } = useContext(AttendanceEditContext);
   if (!workDate || !control || !setValue) return null;
@@ -44,7 +44,7 @@ export default function TimeInputBase<
     <Stack direction="row" spacing={1}>
       <Stack spacing={1}>
         <Controller
-            key={highlight ? "highlight-on" : "highlight-off"}
+          key={highlight ? "highlight-on" : "highlight-off"}
           name={name}
           control={control}
           render={({ field }) => (
@@ -52,32 +52,32 @@ export default function TimeInputBase<
               ampm={false}
               value={(() => (field.value ? dayjs(field.value) : null))()}
               slotProps={{
-                  textField: {
-                    size: "small",
-                    sx: highlight
-                      ? {
-                          "& .MuiOutlinedInput-root": {
-                            animation: "highlightPulse 2.5s ease-in-out",
-                            "@keyframes highlightPulse": {
-                              "0%, 100%": {
-                                backgroundColor: "transparent",
-                                borderColor: "rgba(0, 0, 0, 0.23)",
-                              },
-                              "15%, 50%": {
-                                backgroundColor: "#FFE082",
-                                borderColor: "#FFC107",
-                                boxShadow: "0 0 12px rgba(255, 193, 7, 0.6)",
-                              },
-                              "85%": {
-                                backgroundColor: "#FFF9C4",
-                                borderColor: "#FFC107",
-                                boxShadow: "0 0 8px rgba(255, 193, 7, 0.4)",
-                              },
+                textField: {
+                  size: "small",
+                  sx: highlight
+                    ? {
+                        "& .MuiOutlinedInput-root": {
+                          animation: "highlightPulse 2.5s ease-in-out",
+                          "@keyframes highlightPulse": {
+                            "0%, 100%": {
+                              backgroundColor: "transparent",
+                              borderColor: "rgba(0, 0, 0, 0.23)",
+                            },
+                            "15%, 50%": {
+                              backgroundColor: "#FFE082",
+                              borderColor: "#FFC107",
+                              boxShadow: "0 0 12px rgba(255, 193, 7, 0.6)",
+                            },
+                            "85%": {
+                              backgroundColor: "#FFF9C4",
+                              borderColor: "#FFC107",
+                              boxShadow: "0 0 8px rgba(255, 193, 7, 0.4)",
                             },
                           },
-                        }
-                      : undefined,
-                  },
+                        },
+                      }
+                    : undefined,
+                },
               }}
               disabled={!!readOnly || disabled}
               onChange={(value) => {

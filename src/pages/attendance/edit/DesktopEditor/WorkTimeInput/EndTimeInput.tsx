@@ -39,7 +39,7 @@ export default function EndTimeInput({
     <Stack direction="row" spacing={1}>
       <Stack spacing={1}>
         <Controller
-            key={highlight ? "highlight-on" : "highlight-off"}
+          key={highlight ? "highlight-on" : "highlight-off"}
           name="endTime"
           control={control}
           render={({ field }) => (
