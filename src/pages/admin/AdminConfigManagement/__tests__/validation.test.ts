@@ -2,7 +2,6 @@ import dayjs, { Dayjs } from "dayjs";
 
 import {
   validateAdminConfigForm,
-  validateRequiredFields,
   validateTimeRange,
   validateTimeWithinRange,
   validateWorkTimeConfig,
@@ -17,57 +16,6 @@ const parseTime = (time: string): Dayjs => {
 };
 
 describe("AdminConfigManagement Validation", () => {
-  describe("validateRequiredFields", () => {
-    it("should return valid when all fields are provided", () => {
-      const result = validateRequiredFields({
-        startTime: parseTime("09:00"),
-        endTime: parseTime("18:00"),
-        lunchRestStartTime: parseTime("12:00"),
-        lunchRestEndTime: parseTime("13:00"),
-        amHolidayStartTime: parseTime("09:00"),
-        amHolidayEndTime: parseTime("12:00"),
-        pmHolidayStartTime: parseTime("13:00"),
-        pmHolidayEndTime: parseTime("18:00"),
-      });
-
-      expect(result.isValid).toBe(true);
-      expect(result.errorMessage).toBeUndefined();
-    });
-
-    it("should return invalid when startTime is missing", () => {
-      const result = validateRequiredFields({
-        startTime: null,
-        endTime: parseTime("18:00"),
-        lunchRestStartTime: parseTime("12:00"),
-        lunchRestEndTime: parseTime("13:00"),
-        amHolidayStartTime: parseTime("09:00"),
-        amHolidayEndTime: parseTime("12:00"),
-        pmHolidayStartTime: parseTime("13:00"),
-        pmHolidayEndTime: parseTime("18:00"),
-      });
-
-      expect(result.isValid).toBe(false);
-      expect(result.errorMessage).toBe(
-        VALIDATION_ERRORS.REQUIRED_FIELDS_MISSING
-      );
-    });
-
-    it("should return invalid when any time field is missing", () => {
-      const result = validateRequiredFields({
-        startTime: parseTime("09:00"),
-        endTime: parseTime("18:00"),
-        lunchRestStartTime: parseTime("12:00"),
-        lunchRestEndTime: null,
-        amHolidayStartTime: parseTime("09:00"),
-        amHolidayEndTime: parseTime("12:00"),
-        pmHolidayStartTime: parseTime("13:00"),
-        pmHolidayEndTime: parseTime("18:00"),
-      });
-
-      expect(result.isValid).toBe(false);
-    });
-  });
-
   describe("validateTimeRange", () => {
     it("should return valid when start is before end", () => {
       const start = parseTime("09:00");
@@ -189,6 +137,36 @@ describe("AdminConfigManagement Validation", () => {
       expect(result.isValid).toBe(true);
     });
 
+    it("should return valid when all fields are null", () => {
+      const result = validateWorkTimeConfig({
+        startTime: null,
+        endTime: null,
+        lunchRestStartTime: null,
+        lunchRestEndTime: null,
+        amHolidayStartTime: null,
+        amHolidayEndTime: null,
+        pmHolidayStartTime: null,
+        pmHolidayEndTime: null,
+      });
+
+      expect(result.isValid).toBe(true);
+    });
+
+    it("should return valid when only start time is set", () => {
+      const result = validateWorkTimeConfig({
+        startTime: parseTime("09:00"),
+        endTime: null,
+        lunchRestStartTime: null,
+        lunchRestEndTime: null,
+        amHolidayStartTime: null,
+        amHolidayEndTime: null,
+        pmHolidayStartTime: null,
+        pmHolidayEndTime: null,
+      });
+
+      expect(result.isValid).toBe(true);
+    });
+
     it("should return invalid when work end time is before start time", () => {
       const result = validateWorkTimeConfig({
         ...validConfig,
@@ -291,25 +269,37 @@ describe("AdminConfigManagement Validation", () => {
       expect(result.isValid).toBe(true);
     });
 
-    it("should fail on required fields first", () => {
+    it("should return valid for form with only start time", () => {
       const result = validateAdminConfigForm({
-        startTime: null,
-        endTime: parseTime("18:00"),
-        lunchRestStartTime: parseTime("12:00"),
-        lunchRestEndTime: parseTime("13:00"),
-        amHolidayStartTime: parseTime("09:00"),
-        amHolidayEndTime: parseTime("12:00"),
-        pmHolidayStartTime: parseTime("13:00"),
-        pmHolidayEndTime: parseTime("18:00"),
+        startTime: parseTime("09:00"),
+        endTime: null,
+        lunchRestStartTime: null,
+        lunchRestEndTime: null,
+        amHolidayStartTime: null,
+        amHolidayEndTime: null,
+        pmHolidayStartTime: null,
+        pmHolidayEndTime: null,
       });
 
-      expect(result.isValid).toBe(false);
-      expect(result.errorMessage).toBe(
-        VALIDATION_ERRORS.REQUIRED_FIELDS_MISSING
-      );
+      expect(result.isValid).toBe(true);
     });
 
-    it("should validate time logic after required fields", () => {
+    it("should return valid when all fields are null", () => {
+      const result = validateAdminConfigForm({
+        startTime: null,
+        endTime: null,
+        lunchRestStartTime: null,
+        lunchRestEndTime: null,
+        amHolidayStartTime: null,
+        amHolidayEndTime: null,
+        pmHolidayStartTime: null,
+        pmHolidayEndTime: null,
+      });
+
+      expect(result.isValid).toBe(true);
+    });
+
+    it("should validate time logic when fields are present", () => {
       const result = validateAdminConfigForm({
         startTime: parseTime("18:00"),
         endTime: parseTime("09:00"),

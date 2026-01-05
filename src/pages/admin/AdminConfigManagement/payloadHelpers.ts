@@ -6,28 +6,30 @@ import { Dayjs } from "dayjs";
 
 import { DEFAULT_CONFIG_NAME, TIME_FORMAT } from "./constants";
 
-export const formatTime = (time: Dayjs) => time.format(TIME_FORMAT);
+export const formatTime = (time: Dayjs | null): string | null =>
+  time ? time.format(TIME_FORMAT) : null;
 
 export const buildStandardWorkHours = (
-  start: Dayjs,
-  end: Dayjs,
-  restStart: Dayjs,
-  restEnd: Dayjs
-) => {
+  start: Dayjs | null,
+  end: Dayjs | null,
+  restStart: Dayjs | null,
+  restEnd: Dayjs | null
+): number | null => {
+  if (!start || !end || !restStart || !restEnd) return null;
   const baseHours = end.diff(start, "hour", true);
   const lunchHours = Math.max(restEnd.diff(restStart, "hour", true), 0);
   return Math.max(baseHours - lunchHours, 0);
 };
 
-type RequiredTimes = {
-  startTime: Dayjs;
-  endTime: Dayjs;
-  lunchRestStartTime: Dayjs;
-  lunchRestEndTime: Dayjs;
-  amHolidayStartTime: Dayjs;
-  amHolidayEndTime: Dayjs;
-  pmHolidayStartTime: Dayjs;
-  pmHolidayEndTime: Dayjs;
+type OptionalTimes = {
+  startTime: Dayjs | null;
+  endTime: Dayjs | null;
+  lunchRestStartTime: Dayjs | null;
+  lunchRestEndTime: Dayjs | null;
+  amHolidayStartTime: Dayjs | null;
+  amHolidayEndTime: Dayjs | null;
+  pmHolidayStartTime: Dayjs | null;
+  pmHolidayEndTime: Dayjs | null;
 };
 
 type BuildBasePayloadOptions = {
@@ -44,38 +46,38 @@ type BuildBasePayloadOptions = {
 };
 
 export type BaseAppConfigPayload = {
-  workStartTime: string;
-  workEndTime: string;
-  standardWorkHours: number;
+  workStartTime?: string | null;
+  workEndTime?: string | null;
+  standardWorkHours?: number | null;
   links: { label: string; url: string; enabled: boolean; icon: string }[];
   reasons: { reason: string; enabled: boolean }[];
   officeMode: boolean;
   absentEnabled: boolean;
   quickInputStartTimes: { time: string; enabled: boolean }[];
   quickInputEndTimes: { time: string; enabled: boolean }[];
-  lunchRestStartTime: string;
-  lunchRestEndTime: string;
+  lunchRestStartTime?: string | null;
+  lunchRestEndTime?: string | null;
   hourlyPaidHolidayEnabled: boolean;
-  amHolidayStartTime: string;
-  amHolidayEndTime: string;
-  pmHolidayStartTime: string;
-  pmHolidayEndTime: string;
+  amHolidayStartTime?: string | null;
+  amHolidayEndTime?: string | null;
+  pmHolidayStartTime?: string | null;
+  pmHolidayEndTime?: string | null;
   amPmHolidayEnabled: boolean;
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
 };
 
 export const buildBasePayload = (
-  requiredTimes: RequiredTimes,
+  times: OptionalTimes,
   opts: BuildBasePayloadOptions
 ): BaseAppConfigPayload => ({
-  workStartTime: formatTime(requiredTimes.startTime),
-  workEndTime: formatTime(requiredTimes.endTime),
+  workStartTime: formatTime(times.startTime),
+  workEndTime: formatTime(times.endTime),
   standardWorkHours: buildStandardWorkHours(
-    requiredTimes.startTime,
-    requiredTimes.endTime,
-    requiredTimes.lunchRestStartTime,
-    requiredTimes.lunchRestEndTime
+    times.startTime,
+    times.endTime,
+    times.lunchRestStartTime,
+    times.lunchRestEndTime
   ),
   links: opts.links.map((link) => ({
     label: link.label,
@@ -90,20 +92,20 @@ export const buildBasePayload = (
   officeMode: opts.officeMode,
   absentEnabled: opts.absentEnabled,
   quickInputStartTimes: opts.quickInputStartTimes.map((entry) => ({
-    time: formatTime(entry.time),
+    time: formatTime(entry.time)!,
     enabled: entry.enabled,
   })),
   quickInputEndTimes: opts.quickInputEndTimes.map((entry) => ({
-    time: formatTime(entry.time),
+    time: formatTime(entry.time)!,
     enabled: entry.enabled,
   })),
-  lunchRestStartTime: formatTime(requiredTimes.lunchRestStartTime),
-  lunchRestEndTime: formatTime(requiredTimes.lunchRestEndTime),
+  lunchRestStartTime: formatTime(times.lunchRestStartTime),
+  lunchRestEndTime: formatTime(times.lunchRestEndTime),
   hourlyPaidHolidayEnabled: opts.hourlyPaidHolidayEnabled,
-  amHolidayStartTime: formatTime(requiredTimes.amHolidayStartTime),
-  amHolidayEndTime: formatTime(requiredTimes.amHolidayEndTime),
-  pmHolidayStartTime: formatTime(requiredTimes.pmHolidayStartTime),
-  pmHolidayEndTime: formatTime(requiredTimes.pmHolidayEndTime),
+  amHolidayStartTime: formatTime(times.amHolidayStartTime),
+  amHolidayEndTime: formatTime(times.amHolidayEndTime),
+  pmHolidayStartTime: formatTime(times.pmHolidayStartTime),
+  pmHolidayEndTime: formatTime(times.pmHolidayEndTime),
   amPmHolidayEnabled: opts.amPmHolidayEnabled,
   specialHolidayEnabled: opts.specialHolidayEnabled,
   attendanceStatisticsEnabled: opts.attendanceStatisticsEnabled,
@@ -125,14 +127,14 @@ export type ConfigFormState = {
   amPmHolidayEnabled: boolean;
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
-  startTime: Dayjs;
-  endTime: Dayjs;
-  lunchRestStartTime: Dayjs;
-  lunchRestEndTime: Dayjs;
-  amHolidayStartTime: Dayjs;
-  amHolidayEndTime: Dayjs;
-  pmHolidayStartTime: Dayjs;
-  pmHolidayEndTime: Dayjs;
+  startTime: Dayjs | null;
+  endTime: Dayjs | null;
+  lunchRestStartTime: Dayjs | null;
+  lunchRestEndTime: Dayjs | null;
+  amHolidayStartTime: Dayjs | null;
+  amHolidayEndTime: Dayjs | null;
+  pmHolidayStartTime: Dayjs | null;
+  pmHolidayEndTime: Dayjs | null;
 };
 
 /**

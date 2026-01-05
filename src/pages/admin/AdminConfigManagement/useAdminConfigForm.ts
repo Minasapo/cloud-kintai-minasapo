@@ -329,14 +329,14 @@ export function useAdminConfigForm() {
       amPmHolidayEnabled,
       specialHolidayEnabled,
       attendanceStatisticsEnabled,
-      startTime: startTime!,
-      endTime: endTime!,
-      lunchRestStartTime: lunchRestStartTime!,
-      lunchRestEndTime: lunchRestEndTime!,
-      amHolidayStartTime: amHolidayStartTime!,
-      amHolidayEndTime: amHolidayEndTime!,
-      pmHolidayStartTime: pmHolidayStartTime!,
-      pmHolidayEndTime: pmHolidayEndTime!,
+      startTime,
+      endTime,
+      lunchRestStartTime,
+      lunchRestEndTime,
+      amHolidayStartTime,
+      amHolidayEndTime,
+      pmHolidayStartTime,
+      pmHolidayEndTime,
     };
 
     try {
