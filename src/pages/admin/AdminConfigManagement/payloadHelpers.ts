@@ -107,6 +107,10 @@ export const buildBasePayload = (
   attendanceStatisticsEnabled: opts.attendanceStatisticsEnabled,
 });
 
+/**
+ * フォーム内部で扱う状態の型
+ * GraphQLのCreateAppConfigInput/UpdateAppConfigInputに対応
+ */
 export type ConfigFormState = {
   id: string | null;
   links: { label: string; url: string; enabled: boolean; icon: string }[];
@@ -130,12 +134,13 @@ export type ConfigFormState = {
 };
 
 /**
- * フォーム状態から CreateAppConfigInput を生成
+ * フォーム状態からGraphQL入力型への共通変換ロジック
+ * CreateとUpdateで共通のフィールド変換を行う
  */
-export const buildCreatePayload = (
+const transformFormStateToPayload = (
   state: Omit<ConfigFormState, "id">
-): CreateAppConfigInput => {
-  const basePayload = buildBasePayload(
+): Omit<CreateAppConfigInput, "name" | "id"> => {
+  return buildBasePayload(
     {
       startTime: state.startTime,
       endTime: state.endTime,
@@ -159,15 +164,24 @@ export const buildCreatePayload = (
       attendanceStatisticsEnabled: state.attendanceStatisticsEnabled,
     }
   );
+};
 
+/**
+ * フォーム状態から CreateAppConfigInput を生成
+ * 新規作成時に使用。nameフィールドは"default"固定
+ */
+export const buildCreatePayload = (
+  state: Omit<ConfigFormState, "id">
+): CreateAppConfigInput => {
   return {
     name: "default",
-    ...basePayload,
+    ...transformFormStateToPayload(state),
   };
 };
 
 /**
  * フォーム状態から UpdateAppConfigInput を生成
+ * 更新時に使用。idは必須
  */
 export const buildUpdatePayload = (
   state: ConfigFormState
@@ -176,33 +190,8 @@ export const buildUpdatePayload = (
     throw new Error("ID is required for update payload");
   }
 
-  const basePayload = buildBasePayload(
-    {
-      startTime: state.startTime,
-      endTime: state.endTime,
-      lunchRestStartTime: state.lunchRestStartTime,
-      lunchRestEndTime: state.lunchRestEndTime,
-      amHolidayStartTime: state.amHolidayStartTime,
-      amHolidayEndTime: state.amHolidayEndTime,
-      pmHolidayStartTime: state.pmHolidayStartTime,
-      pmHolidayEndTime: state.pmHolidayEndTime,
-    },
-    {
-      links: state.links,
-      reasons: state.reasons,
-      quickInputStartTimes: state.quickInputStartTimes,
-      quickInputEndTimes: state.quickInputEndTimes,
-      officeMode: state.officeMode,
-      absentEnabled: state.absentEnabled,
-      hourlyPaidHolidayEnabled: state.hourlyPaidHolidayEnabled,
-      amPmHolidayEnabled: state.amPmHolidayEnabled,
-      specialHolidayEnabled: state.specialHolidayEnabled,
-      attendanceStatisticsEnabled: state.attendanceStatisticsEnabled,
-    }
-  );
-
   return {
     id: state.id,
-    ...basePayload,
+    ...transformFormStateToPayload(state),
   };
 };
