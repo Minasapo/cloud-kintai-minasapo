@@ -35,7 +35,7 @@ const WorkingTimeSection = ({
         views={["hours", "minutes"]}
         format="HH:mm"
         slotProps={{
-          textField: { size: "small" },
+          textField: { size: "small", clearable: true },
         }}
         sx={{ maxWidth: 200 }}
         onChange={setStartTime}
@@ -48,7 +48,7 @@ const WorkingTimeSection = ({
         views={["hours", "minutes"]}
         format="HH:mm"
         slotProps={{
-          textField: { size: "small" },
+          textField: { size: "small", clearable: true },
         }}
         sx={{ maxWidth: 200 }}
         onChange={setEndTime}
@@ -65,7 +65,7 @@ const WorkingTimeSection = ({
         views={["hours", "minutes"]}
         format="HH:mm"
         slotProps={{
-          textField: { size: "small" },
+          textField: { size: "small", clearable: true },
         }}
         sx={{ maxWidth: 200 }}
         onChange={setLunchRestStartTime}
@@ -78,7 +78,7 @@ const WorkingTimeSection = ({
         views={["hours", "minutes"]}
         format="HH:mm"
         slotProps={{
-          textField: { size: "small" },
+          textField: { size: "small", clearable: true },
         }}
         sx={{ maxWidth: 200 }}
         onChange={setLunchRestEndTime}
