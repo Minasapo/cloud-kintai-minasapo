@@ -20,6 +20,7 @@ import {
   toggleEnabledAt,
   updateItem,
 } from "./arrayHelpers";
+import { buildBasePayload } from "./payloadHelpers";
 
 export type QuickInputEntry = { time: Dayjs; enabled: boolean };
 export type LinkItem = {
@@ -39,28 +40,6 @@ type RequiredTimes = {
   amHolidayEndTime: Dayjs;
   pmHolidayStartTime: Dayjs;
   pmHolidayEndTime: Dayjs;
-};
-
-type BaseAppConfigPayload = {
-  workStartTime: string;
-  workEndTime: string;
-  standardWorkHours: number;
-  links: { label: string; url: string; enabled: boolean; icon: string }[];
-  reasons: { reason: string; enabled: boolean }[];
-  officeMode: boolean;
-  absentEnabled: boolean;
-  quickInputStartTimes: { time: string; enabled: boolean }[];
-  quickInputEndTimes: { time: string; enabled: boolean }[];
-  lunchRestStartTime: string;
-  lunchRestEndTime: string;
-  hourlyPaidHolidayEnabled: boolean;
-  amHolidayStartTime: string;
-  amHolidayEndTime: string;
-  pmHolidayStartTime: string;
-  pmHolidayEndTime: string;
-  amPmHolidayEnabled: boolean;
-  specialHolidayEnabled: boolean;
-  attendanceStatisticsEnabled: boolean;
 };
 
 export function useAdminConfigForm() {
@@ -189,62 +168,6 @@ export function useAdminConfigForm() {
       setAmPmHolidayEnabled(getAmPmHolidayEnabled());
     }
   };
-
-  const formatTime = (time: Dayjs) => time.format("HH:mm");
-
-  const buildStandardWorkHours = (
-    start: Dayjs,
-    end: Dayjs,
-    restStart: Dayjs,
-    restEnd: Dayjs
-  ) => {
-    const baseHours = end.diff(start, "hour", true);
-    const lunchHours = Math.max(restEnd.diff(restStart, "hour", true), 0);
-    return Math.max(baseHours - lunchHours, 0);
-  };
-
-  const buildBasePayload = (
-    requiredTimes: RequiredTimes
-  ): BaseAppConfigPayload => ({
-    workStartTime: formatTime(requiredTimes.startTime),
-    workEndTime: formatTime(requiredTimes.endTime),
-    standardWorkHours: buildStandardWorkHours(
-      requiredTimes.startTime,
-      requiredTimes.endTime,
-      requiredTimes.lunchRestStartTime,
-      requiredTimes.lunchRestEndTime
-    ),
-    links: links.map((link) => ({
-      label: link.label,
-      url: link.url,
-      enabled: link.enabled,
-      icon: link.icon,
-    })),
-    reasons: reasons.map((reason) => ({
-      reason: reason.reason,
-      enabled: reason.enabled,
-    })),
-    officeMode,
-    absentEnabled,
-    quickInputStartTimes: quickInputStartTimes.map((entry) => ({
-      time: formatTime(entry.time),
-      enabled: entry.enabled,
-    })),
-    quickInputEndTimes: quickInputEndTimes.map((entry) => ({
-      time: formatTime(entry.time),
-      enabled: entry.enabled,
-    })),
-    lunchRestStartTime: formatTime(requiredTimes.lunchRestStartTime),
-    lunchRestEndTime: formatTime(requiredTimes.lunchRestEndTime),
-    hourlyPaidHolidayEnabled,
-    amHolidayStartTime: formatTime(requiredTimes.amHolidayStartTime),
-    amHolidayEndTime: formatTime(requiredTimes.amHolidayEndTime),
-    pmHolidayStartTime: formatTime(requiredTimes.pmHolidayStartTime),
-    pmHolidayEndTime: formatTime(requiredTimes.pmHolidayEndTime),
-    amPmHolidayEnabled,
-    specialHolidayEnabled,
-    attendanceStatisticsEnabled,
-  });
 
   useEffect(() => {
     hydrateFromContext();
@@ -410,7 +333,18 @@ export function useAdminConfigForm() {
       pmHolidayEndTime,
     };
 
-    const basePayload = buildBasePayload(requiredTimes);
+    const basePayload = buildBasePayload(requiredTimes, {
+      links,
+      reasons,
+      quickInputStartTimes,
+      quickInputEndTimes,
+      officeMode,
+      absentEnabled,
+      hourlyPaidHolidayEnabled,
+      amPmHolidayEnabled,
+      specialHolidayEnabled,
+      attendanceStatisticsEnabled,
+    });
 
     try {
       if (id) {
