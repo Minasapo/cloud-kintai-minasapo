@@ -40,6 +40,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
@@ -60,6 +61,8 @@ import {
 import { SubstituteHolidayDateInput } from "@/pages/attendance/edit/DesktopEditor/SubstituteHolidayDateInput";
 
 import ChangeRequestDialog from "./ChangeRequestDialog/ChangeRequestDialog";
+import { AttendanceEditFormSkeleton } from "./components/AttendanceEditFormSkeleton";
+import { VacationTabs } from "./components/VacationTabs";
 // eslint-disable-next-line import/no-cycle
 import EditAttendanceHistoryList from "./EditAttendanceHistoryList/EditAttendanceHistoryList";
 import { useAttendanceRecord } from "./hooks/useAttendanceRecord";
@@ -77,8 +80,6 @@ import MoveDateItem from "./MoveDateItem";
 import PaidHolidayFlagInputCommon from "./PaidHolidayFlagInput";
 import QuickInputButtons from "./QuickInputButtons";
 import { SystemCommentList } from "./SystemCommentList";
-import { AttendanceEditFormSkeleton } from "./components/AttendanceEditFormSkeleton";
-import { VacationTabs } from "./components/VacationTabs";
 
 const SaveButton = styled(Button)(({ theme }) => ({
   width: 150,
@@ -128,6 +129,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     loading: appConfigLoading,
   } = useAppConfig();
   const dispatch = useAppDispatchV2();
+  const { authenticatedUser } = useAuthenticatedUser();
 
   const { targetWorkDate, staffId: targetStaffId } = useParams();
   const navigate = useNavigate();
@@ -375,9 +377,14 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         try {
           const res = await handleUpdateAttendance(payload);
 
-          // 成功時は可能ならメール送信
+          // 管理者が他のスタッフの勤怠を編集した場合のみメール送信
           try {
-            if (staff && res && res.histories && enabledSendMail) {
+            const isEditingOtherStaff =
+              staff &&
+              authenticatedUser &&
+              staff.cognitoUserId !== authenticatedUser.cognitoUserId;
+
+            if (isEditingOtherStaff && res && enabledSendMail) {
               await new AttendanceEditMailSender(staff, res).changeRequest();
             }
           } catch (mailError) {
@@ -470,9 +477,16 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           return;
         }
 
+        // 管理者が他のスタッフの勤怠を作成した場合のみメール送信
         if (enabledSendMail) {
           try {
-            await new AttendanceEditMailSender(staff, res).changeRequest();
+            const isEditingOtherStaff =
+              authenticatedUser &&
+              staff.cognitoUserId !== authenticatedUser.cognitoUserId;
+
+            if (isEditingOtherStaff) {
+              await new AttendanceEditMailSender(staff, res).changeRequest();
+            }
           } catch (mailError) {
             // メール送信に失敗しても作成処理自体は成功扱いにする
             logger.error(`Failed to send create mail: ${mailError}`);

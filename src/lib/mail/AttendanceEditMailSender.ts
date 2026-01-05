@@ -26,11 +26,11 @@ export class AttendanceEditMailSender extends MailSender {
     throw new Error("Method not implemented.");
   }
 
-  private getLatestHistory(): AttendanceHistory {
+  private getLatestHistory(): AttendanceHistory | null {
     const { histories } = this.attendance;
 
-    if (!histories) {
-      throw new Error("histories is empty");
+    if (!histories || histories.length === 0) {
+      return null;
     }
 
     const latestHistory = histories
@@ -40,7 +40,7 @@ export class AttendanceEditMailSender extends MailSender {
         return a.createdAt < b.createdAt ? 1 : -1;
       })[0];
 
-    return latestHistory;
+    return latestHistory ?? null;
   }
 
   changeRequest() {
