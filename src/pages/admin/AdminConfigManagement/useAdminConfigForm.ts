@@ -1,7 +1,3 @@
-import {
-  CreateAppConfigInput,
-  UpdateAppConfigInput,
-} from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 import type { ChangeEvent } from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -20,7 +16,7 @@ import {
   toggleEnabledAt,
   updateItem,
 } from "./arrayHelpers";
-import { buildBasePayload } from "./payloadHelpers";
+import { buildCreatePayload, buildUpdatePayload } from "./payloadHelpers";
 
 export type QuickInputEntry = { time: Dayjs; enabled: boolean };
 export type LinkItem = {
@@ -30,17 +26,6 @@ export type LinkItem = {
   icon: string;
 };
 export type ReasonItem = { reason: string; enabled: boolean };
-
-type RequiredTimes = {
-  startTime: Dayjs;
-  endTime: Dayjs;
-  lunchRestStartTime: Dayjs;
-  lunchRestEndTime: Dayjs;
-  amHolidayStartTime: Dayjs;
-  amHolidayEndTime: Dayjs;
-  pmHolidayStartTime: Dayjs;
-  pmHolidayEndTime: Dayjs;
-};
 
 export function useAdminConfigForm() {
   const {
@@ -322,18 +307,8 @@ export function useAdminConfigForm() {
       return;
     }
 
-    const requiredTimes: RequiredTimes = {
-      startTime,
-      endTime,
-      lunchRestStartTime,
-      lunchRestEndTime,
-      amHolidayStartTime,
-      amHolidayEndTime,
-      pmHolidayStartTime,
-      pmHolidayEndTime,
-    };
-
-    const basePayload = buildBasePayload(requiredTimes, {
+    const formState = {
+      id,
       links,
       reasons,
       quickInputStartTimes,
@@ -344,19 +319,24 @@ export function useAdminConfigForm() {
       amPmHolidayEnabled,
       specialHolidayEnabled,
       attendanceStatisticsEnabled,
-    });
+      startTime,
+      endTime,
+      lunchRestStartTime,
+      lunchRestEndTime,
+      amHolidayStartTime,
+      amHolidayEndTime,
+      pmHolidayStartTime,
+      pmHolidayEndTime,
+    };
 
     try {
       if (id) {
-        const updatePayload: UpdateAppConfigInput = { id, ...basePayload };
-        await saveConfig(updatePayload);
+        const payload = buildUpdatePayload(formState);
+        await saveConfig(payload);
         dispatch(setSnackbarSuccess(S14002));
       } else {
-        const createPayload: CreateAppConfigInput = {
-          name: "default",
-          ...basePayload,
-        };
-        await saveConfig(createPayload);
+        const payload = buildCreatePayload(formState);
+        await saveConfig(payload);
         dispatch(setSnackbarSuccess(S14001));
       }
       await fetchConfig();

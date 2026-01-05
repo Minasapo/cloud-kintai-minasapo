@@ -1,3 +1,7 @@
+import {
+  CreateAppConfigInput,
+  UpdateAppConfigInput,
+} from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
 
 export const formatTime = (time: Dayjs) => time.format("HH:mm");
@@ -102,3 +106,103 @@ export const buildBasePayload = (
   specialHolidayEnabled: opts.specialHolidayEnabled,
   attendanceStatisticsEnabled: opts.attendanceStatisticsEnabled,
 });
+
+export type ConfigFormState = {
+  id: string | null;
+  links: { label: string; url: string; enabled: boolean; icon: string }[];
+  reasons: { reason: string; enabled: boolean }[];
+  quickInputStartTimes: { time: Dayjs; enabled: boolean }[];
+  quickInputEndTimes: { time: Dayjs; enabled: boolean }[];
+  officeMode: boolean;
+  absentEnabled: boolean;
+  hourlyPaidHolidayEnabled: boolean;
+  amPmHolidayEnabled: boolean;
+  specialHolidayEnabled: boolean;
+  attendanceStatisticsEnabled: boolean;
+  startTime: Dayjs;
+  endTime: Dayjs;
+  lunchRestStartTime: Dayjs;
+  lunchRestEndTime: Dayjs;
+  amHolidayStartTime: Dayjs;
+  amHolidayEndTime: Dayjs;
+  pmHolidayStartTime: Dayjs;
+  pmHolidayEndTime: Dayjs;
+};
+
+/**
+ * フォーム状態から CreateAppConfigInput を生成
+ */
+export const buildCreatePayload = (
+  state: Omit<ConfigFormState, "id">
+): CreateAppConfigInput => {
+  const basePayload = buildBasePayload(
+    {
+      startTime: state.startTime,
+      endTime: state.endTime,
+      lunchRestStartTime: state.lunchRestStartTime,
+      lunchRestEndTime: state.lunchRestEndTime,
+      amHolidayStartTime: state.amHolidayStartTime,
+      amHolidayEndTime: state.amHolidayEndTime,
+      pmHolidayStartTime: state.pmHolidayStartTime,
+      pmHolidayEndTime: state.pmHolidayEndTime,
+    },
+    {
+      links: state.links,
+      reasons: state.reasons,
+      quickInputStartTimes: state.quickInputStartTimes,
+      quickInputEndTimes: state.quickInputEndTimes,
+      officeMode: state.officeMode,
+      absentEnabled: state.absentEnabled,
+      hourlyPaidHolidayEnabled: state.hourlyPaidHolidayEnabled,
+      amPmHolidayEnabled: state.amPmHolidayEnabled,
+      specialHolidayEnabled: state.specialHolidayEnabled,
+      attendanceStatisticsEnabled: state.attendanceStatisticsEnabled,
+    }
+  );
+
+  return {
+    name: "default",
+    ...basePayload,
+  };
+};
+
+/**
+ * フォーム状態から UpdateAppConfigInput を生成
+ */
+export const buildUpdatePayload = (
+  state: ConfigFormState
+): UpdateAppConfigInput => {
+  if (!state.id) {
+    throw new Error("ID is required for update payload");
+  }
+
+  const basePayload = buildBasePayload(
+    {
+      startTime: state.startTime,
+      endTime: state.endTime,
+      lunchRestStartTime: state.lunchRestStartTime,
+      lunchRestEndTime: state.lunchRestEndTime,
+      amHolidayStartTime: state.amHolidayStartTime,
+      amHolidayEndTime: state.amHolidayEndTime,
+      pmHolidayStartTime: state.pmHolidayStartTime,
+      pmHolidayEndTime: state.pmHolidayEndTime,
+    },
+    {
+      links: state.links,
+      reasons: state.reasons,
+      quickInputStartTimes: state.quickInputStartTimes,
+      quickInputEndTimes: state.quickInputEndTimes,
+      officeMode: state.officeMode,
+      absentEnabled: state.absentEnabled,
+      hourlyPaidHolidayEnabled: state.hourlyPaidHolidayEnabled,
+      amPmHolidayEnabled: state.amPmHolidayEnabled,
+      specialHolidayEnabled: state.specialHolidayEnabled,
+      attendanceStatisticsEnabled: state.attendanceStatisticsEnabled,
+    }
+  );
+
+  return {
+    id: state.id,
+    ...basePayload,
+  };
+};
