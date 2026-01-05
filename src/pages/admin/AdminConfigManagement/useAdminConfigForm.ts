@@ -4,7 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { E14001, E14002, S14001, S14002 } from "@/errors";
+import { E14001, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -24,6 +24,7 @@ import {
   TIME_FORMAT,
 } from "./constants";
 import { buildCreatePayload, buildUpdatePayload } from "./payloadHelpers";
+import { validateAdminConfigForm } from "./validation";
 
 export type QuickInputEntry = { time: Dayjs; enabled: boolean };
 export type LinkItem = {
@@ -300,17 +301,19 @@ export function useAdminConfigForm() {
   };
 
   const handleSave = async () => {
-    if (
-      !startTime ||
-      !endTime ||
-      !lunchRestStartTime ||
-      !lunchRestEndTime ||
-      !amHolidayStartTime ||
-      !amHolidayEndTime ||
-      !pmHolidayStartTime ||
-      !pmHolidayEndTime
-    ) {
-      dispatch(setSnackbarError(E14002));
+    const validationResult = validateAdminConfigForm({
+      startTime,
+      endTime,
+      lunchRestStartTime,
+      lunchRestEndTime,
+      amHolidayStartTime,
+      amHolidayEndTime,
+      pmHolidayStartTime,
+      pmHolidayEndTime,
+    });
+
+    if (!validationResult.isValid) {
+      dispatch(setSnackbarError(validationResult.errorMessage!));
       return;
     }
 
@@ -326,14 +329,14 @@ export function useAdminConfigForm() {
       amPmHolidayEnabled,
       specialHolidayEnabled,
       attendanceStatisticsEnabled,
-      startTime,
-      endTime,
-      lunchRestStartTime,
-      lunchRestEndTime,
-      amHolidayStartTime,
-      amHolidayEndTime,
-      pmHolidayStartTime,
-      pmHolidayEndTime,
+      startTime: startTime!,
+      endTime: endTime!,
+      lunchRestStartTime: lunchRestStartTime!,
+      lunchRestEndTime: lunchRestEndTime!,
+      amHolidayStartTime: amHolidayStartTime!,
+      amHolidayEndTime: amHolidayEndTime!,
+      pmHolidayStartTime: pmHolidayStartTime!,
+      pmHolidayEndTime: pmHolidayEndTime!,
     };
 
     try {
