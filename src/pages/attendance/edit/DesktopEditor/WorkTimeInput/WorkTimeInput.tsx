@@ -18,7 +18,15 @@ export function calcTotalWorkTime(
   return diff;
 }
 
-export function WorkTimeInput() {
+interface WorkTimeInputProps {
+  highlightStartTime?: boolean;
+  highlightEndTime?: boolean;
+}
+
+export function WorkTimeInput({
+  highlightStartTime = false,
+  highlightEndTime = false,
+}: WorkTimeInputProps) {
   const { workDate: targetWorkDate, watch } = useContext(AttendanceEditContext);
   const [totalWorkTime, setTotalWorkTime] = useState<number>(0);
 
@@ -53,7 +61,10 @@ export function WorkTimeInput() {
           <Box>
             <Stack direction="row" spacing={1}>
               <Box>
-                <StartTimeInput dataTestId="desktop-start-time-input" />
+                <StartTimeInput
+                  dataTestId="desktop-start-time-input"
+                  highlight={highlightStartTime}
+                />
               </Box>
               <Box>
                 <Typography variant="body1" sx={{ py: 1 }}>
@@ -61,7 +72,10 @@ export function WorkTimeInput() {
                 </Typography>
               </Box>
               <Box>
-                <EndTimeInput dataTestId="desktop-end-time-input" />
+                <EndTimeInput
+                  dataTestId="desktop-end-time-input"
+                  highlight={highlightEndTime}
+                />
               </Box>
             </Stack>
           </Box>

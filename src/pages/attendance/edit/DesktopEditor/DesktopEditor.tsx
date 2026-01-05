@@ -114,6 +114,8 @@ export default function DesktopEditor() {
   const [totalProductionTime, setTotalProductionTime] = useState<number>(0);
   const [totalHourlyPaidHolidayTime, setTotalHourlyPaidHolidayTime] =
     useState<number>(0);
+  const [highlightStartTime, setHighlightStartTime] = useState(false);
+  const [highlightEndTime, setHighlightEndTime] = useState(false);
   const errorMessages = useMemo(() => {
     if (contextErrorMessages && contextErrorMessages.length > 0) {
       return contextErrorMessages;
@@ -215,7 +217,10 @@ export default function DesktopEditor() {
             </Stack>
           </GroupContainer>
           <GroupContainer>
-            <WorkTimeInput />
+            <WorkTimeInput
+              highlightStartTime={highlightStartTime}
+              highlightEndTime={highlightEndTime}
+            />
             <GoDirectlyFlagCheckbox
               name="goDirectlyFlag"
               control={control}
@@ -231,10 +236,13 @@ export default function DesktopEditor() {
                       attendance?.workDate
                     )
                   );
+                  // トリガーハイライトアニメーション
+                  setHighlightStartTime(true);
+                  setTimeout(() => setHighlightStartTime(false), 2500);
                 }
               }}
             />
-            <ReturnDirectlyFlagInput />
+            <ReturnDirectlyFlagInput onHighlightEndTime={setHighlightEndTime} />
             <RestTimeItem />
             <Divider />
             <ProductionTimeItem

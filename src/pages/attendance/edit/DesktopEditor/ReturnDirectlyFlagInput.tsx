@@ -5,7 +5,13 @@ import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
-export default function ReturnDirectlyFlagInput() {
+interface ReturnDirectlyFlagInputProps {
+  onHighlightEndTime?: (highlight: boolean) => void;
+}
+
+export default function ReturnDirectlyFlagInput({
+  onHighlightEndTime,
+}: ReturnDirectlyFlagInputProps) {
   const { workDate, control, setValue } = useContext(AttendanceEditContext);
   const { getEndTime } = useAppConfig();
   if (!workDate || !control || !setValue) return null;
@@ -27,6 +33,11 @@ export default function ReturnDirectlyFlagInput() {
       onChangeFlag={(checked) => {
         if (checked) {
           setValue("endTime", computeEndTimeIso());
+          // トリガーハイライトアニメーション
+          if (onHighlightEndTime) {
+            onHighlightEndTime(true);
+            setTimeout(() => onHighlightEndTime(false), 2000);
+          }
         }
       }}
     />

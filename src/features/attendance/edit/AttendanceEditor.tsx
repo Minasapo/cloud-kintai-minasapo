@@ -138,6 +138,8 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   );
   const [enabledSendMail, setEnabledSendMail] = useState<boolean>(true);
   const [vacationTab, setVacationTab] = useState<number>(0);
+  const [highlightStartTime, setHighlightStartTime] = useState(false);
+  const [highlightEndTime, setHighlightEndTime] = useState(false);
 
   const logger = useMemo(
     () =>
@@ -910,13 +912,16 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
               </GroupContainer>
 
               <GroupContainer>
-                <WorkTimeItem />
+                <WorkTimeItem
+                  highlightStartTime={highlightStartTime}
+                  highlightEndTime={highlightEndTime}
+                />
                 <GoDirectlyFlagCheckbox
                   name="goDirectlyFlag"
                   control={control}
                   disabled={changeRequests.length > 0 || !!readOnly}
                   onChangeExtra={(checked: boolean) => {
-                    if (checked)
+                    if (checked) {
                       setValue(
                         "startTime",
                         resolveConfigTimeOnDate(
@@ -926,9 +931,15 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                           targetWorkDate
                         )
                       );
+                      // トリガーハイライトアニメーション
+                      setHighlightStartTime(true);
+                      setTimeout(() => setHighlightStartTime(false), 2500);
+                    }
                   }}
                 />
-                <ReturnDirectlyFlagInput />
+                <ReturnDirectlyFlagInput
+                  onHighlightEndTime={setHighlightEndTime}
+                />
 
                 <Stack direction="row">
                   <Box

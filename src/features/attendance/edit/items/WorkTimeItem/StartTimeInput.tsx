@@ -5,7 +5,9 @@ import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditPro
 
 import TimeInputBase from "./TimeInputBase";
 
-export default function StartTimeInput() {
+export default function StartTimeInput({
+  highlight = false,
+}: { highlight?: boolean } = {}) {
   const { workDate, control, setValue } = useContext(AttendanceEditContext);
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
   const [quickInputStartTimes, setQuickInputStartTimes] = useState<
@@ -34,6 +36,7 @@ export default function StartTimeInput() {
       workDate={workDate}
       quickInputTimes={quickInputStartTimes}
       chipColor={() => "success"}
+      highlight={highlight}
     />
   );
 }

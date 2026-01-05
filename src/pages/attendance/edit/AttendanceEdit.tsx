@@ -598,6 +598,21 @@ export default function AttendanceEdit() {
     [errors]
   );
 
+  // 休憩中かどうかを判定（勤務開始時間と最初の休憩時間が入力されている状態）
+  const startTimeValue = useWatch({ control, name: "startTime" });
+  const restsValue = useWatch({ control, name: "rests" });
+  const isOnBreak = useMemo(
+    () =>
+      !!(
+        startTimeValue &&
+        restsValue &&
+        restsValue.length > 0 &&
+        restsValue[0]?.startTime &&
+        !restsValue[0]?.endTime
+      ),
+    [startTimeValue, restsValue]
+  );
+
   if (!targetWorkDate) {
     return null;
   }
@@ -641,6 +656,7 @@ export default function AttendanceEdit() {
         hourlyPaidHolidayTimeUpdate,
         hourlyPaidHolidayTimeReplace,
         hourlyPaidHolidayEnabled,
+        isOnBreak,
       }}
     >
       <Box data-testid="attendance-edit-root">

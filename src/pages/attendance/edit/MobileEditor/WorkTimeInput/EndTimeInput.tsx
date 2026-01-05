@@ -40,7 +40,7 @@ export default function EndTimeInput({
     }
   }, [getQuickInputEndTimes]);
 
-  const { watch, readOnly } = useContext(AttendanceEditContext);
+  const { watch, readOnly, isOnBreak } = useContext(AttendanceEditContext);
   if (!workDate) return null;
 
   const endTime = watch ? watch("endTime") : null;
@@ -51,6 +51,7 @@ export default function EndTimeInput({
         <TextField
           type="time"
           size="small"
+          disabled={!!readOnly || isOnBreak}
           value={endTime ? dayjs(endTime).format("HH:mm") : ""}
           onChange={(e) => {
             const v = e.target.value;
@@ -70,9 +71,9 @@ export default function EndTimeInput({
           <QuickInputChips
             quickInputTimes={quickInputEndTimes}
             workDate={workDate}
-            disabled={!!readOnly}
+            disabled={!!readOnly || isOnBreak}
             onSelectTime={(endTime) => {
-              if (readOnly) return;
+              if (readOnly || isOnBreak) return;
               setValue("endTime", endTime);
             }}
           />
