@@ -14,6 +14,13 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
+import {
+  appendItem,
+  removeItemAt,
+  toggleEnabledAt,
+  updateItem,
+} from "./arrayHelpers";
+
 export type QuickInputEntry = { time: Dayjs; enabled: boolean };
 export type LinkItem = {
   label: string;
@@ -244,7 +251,9 @@ export function useAdminConfigForm() {
   }, []);
 
   const handleAddLink = () => {
-    setLinks([...links, { label: "", url: "", enabled: true, icon: "" }]);
+    setLinks(
+      appendItem(links, { label: "", url: "", enabled: true, icon: "" })
+    );
   };
 
   const handleLinkChange = (
@@ -252,17 +261,25 @@ export function useAdminConfigForm() {
     field: keyof LinkItem,
     value: string | boolean
   ) => {
-    const updatedLinks = [...links];
-    updatedLinks[index][field] = value as never;
-    setLinks(updatedLinks);
+    setLinks(
+      updateItem(
+        links,
+        index,
+        (link) =>
+          ({
+            ...link,
+            [field]: value,
+          } as LinkItem)
+      )
+    );
   };
 
   const handleRemoveLink = (index: number) => {
-    setLinks(links.filter((_, i) => i !== index));
+    setLinks(removeItemAt(links, index));
   };
 
   const handleAddReason = () => {
-    setReasons([...reasons, { reason: "", enabled: true }]);
+    setReasons(appendItem(reasons, { reason: "", enabled: true }));
   };
 
   const handleReasonChange = (
@@ -270,13 +287,21 @@ export function useAdminConfigForm() {
     field: keyof ReasonItem,
     value: string | boolean
   ) => {
-    const updatedReasons = [...reasons];
-    updatedReasons[index][field] = value as never;
-    setReasons(updatedReasons);
+    setReasons(
+      updateItem(
+        reasons,
+        index,
+        (reason) =>
+          ({
+            ...reason,
+            [field]: value,
+          } as ReasonItem)
+      )
+    );
   };
 
   const handleRemoveReason = (index: number) => {
-    setReasons(reasons.filter((_, i) => i !== index));
+    setReasons(removeItemAt(reasons, index));
   };
 
   const handleOfficeModeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -284,59 +309,56 @@ export function useAdminConfigForm() {
   };
 
   const handleAddQuickInputStartTime = () => {
-    setQuickInputStartTimes([
-      ...quickInputStartTimes,
-      { time: dayjs(), enabled: true },
-    ]);
+    setQuickInputStartTimes(
+      appendItem(quickInputStartTimes, { time: dayjs(), enabled: true })
+    );
   };
 
   const handleQuickInputStartTimeChange = (
     index: number,
     newValue: Dayjs | null
   ) => {
-    const updatedStartTimes = [...quickInputStartTimes];
-    if (newValue) {
-      updatedStartTimes[index].time = newValue;
-    }
-    setQuickInputStartTimes(updatedStartTimes);
+    if (!newValue) return;
+    setQuickInputStartTimes(
+      updateItem(quickInputStartTimes, index, (entry) => ({
+        ...entry,
+        time: newValue,
+      }))
+    );
   };
 
   const handleQuickInputStartTimeToggle = (index: number) => {
-    const updatedStartTimes = [...quickInputStartTimes];
-    updatedStartTimes[index].enabled = !updatedStartTimes[index].enabled;
-    setQuickInputStartTimes(updatedStartTimes);
+    setQuickInputStartTimes(toggleEnabledAt(quickInputStartTimes, index));
   };
 
   const handleRemoveQuickInputStartTime = (index: number) => {
-    setQuickInputStartTimes(quickInputStartTimes.filter((_, i) => i !== index));
+    setQuickInputStartTimes(removeItemAt(quickInputStartTimes, index));
   };
 
   const handleAddQuickInputEndTime = () => {
-    setQuickInputEndTimes([
-      ...quickInputEndTimes,
-      { time: dayjs(), enabled: true },
-    ]);
+    setQuickInputEndTimes(
+      appendItem(quickInputEndTimes, { time: dayjs(), enabled: true })
+    );
   };
-
   const handleQuickInputEndTimeChange = (
     index: number,
     newValue: Dayjs | null
   ) => {
-    const updatedEndTimes = [...quickInputEndTimes];
-    if (newValue) {
-      updatedEndTimes[index].time = newValue;
-    }
-    setQuickInputEndTimes(updatedEndTimes);
+    if (!newValue) return;
+    setQuickInputEndTimes(
+      updateItem(quickInputEndTimes, index, (entry) => ({
+        ...entry,
+        time: newValue,
+      }))
+    );
   };
 
   const handleQuickInputEndTimeToggle = (index: number) => {
-    const updatedEndTimes = [...quickInputEndTimes];
-    updatedEndTimes[index].enabled = !updatedEndTimes[index].enabled;
-    setQuickInputEndTimes(updatedEndTimes);
+    setQuickInputEndTimes(toggleEnabledAt(quickInputEndTimes, index));
   };
 
   const handleRemoveQuickInputEndTime = (index: number) => {
-    setQuickInputEndTimes(quickInputEndTimes.filter((_, i) => i !== index));
+    setQuickInputEndTimes(removeItemAt(quickInputEndTimes, index));
   };
 
   const handleHourlyPaidHolidayEnabledChange = (
