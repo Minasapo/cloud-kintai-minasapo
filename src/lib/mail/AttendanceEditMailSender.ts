@@ -52,6 +52,6 @@ export class AttendanceEditMailSender extends MailSender {
       this.getLatestHistory()
     ).join("\n");
 
-    this.send([mailAddress], subject, body);
+    return this.send([mailAddress], subject, body);
   }
 }

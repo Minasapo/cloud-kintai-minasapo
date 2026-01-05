@@ -1,7 +1,8 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import {
-  useListRecentAttendancesWithWarningsQuery,
+  useListAttendancesByDateRangeQuery,
   useUpdateAttendanceMutation,
+  type DuplicateAttendanceInfo,
 } from "@entities/attendance/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
@@ -16,6 +17,7 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
 
 import * as MESSAGE_CODE from "@/errors";
 import {
@@ -35,7 +37,10 @@ export type AdminStaffAttendanceListViewModel = ReturnType<
   typeof useAdminStaffAttendanceListViewModel
 >;
 
-export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
+export const useAdminStaffAttendanceListViewModel = (
+  staffId?: string,
+  currentMonth?: Dayjs
+) => {
   const dispatch = useAppDispatchV2();
   const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
 
@@ -65,14 +70,29 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     error: closeDatesError,
   } = useCloseDates();
 
+  // カレンダー表示月の開始日と終了日を計算（前後1ヶ月を含む）
+  const dateRange = useMemo(() => {
+    const month = currentMonth ?? dayjs().startOf("month");
+    const startDate = month.subtract(1, "month").startOf("month");
+    const endDate = month.add(1, "month").endOf("month");
+    return {
+      startDate: startDate.format("YYYY-MM-DD"),
+      endDate: endDate.format("YYYY-MM-DD"),
+    };
+  }, [currentMonth]);
+
   const shouldFetchAttendances = Boolean(staffId);
-  const queryResult = useListRecentAttendancesWithWarningsQuery(
-    { staffId: staffId ?? "" },
+  const queryResult = useListAttendancesByDateRangeQuery(
+    {
+      staffId: staffId ?? "",
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate,
+    },
     { skip: !shouldFetchAttendances }
   );
 
   const {
-    data: attendancesResponse,
+    data: attendancesData,
     isLoading: isAttendancesInitialLoading,
     isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
@@ -80,8 +100,9 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string) => {
     refetch: refetchAttendances,
   } = queryResult;
 
-  const attendances: Attendance[] = attendancesResponse?.attendances ?? [];
-  const duplicateAttendances = attendancesResponse?.duplicates ?? [];
+  const attendances: Attendance[] = attendancesData ?? [];
+  // useListAttendancesByDateRangeQueryは重複を返さないが、型の互換性のため空配列を返す
+  const duplicateAttendances: DuplicateAttendanceInfo[] = [];
   const attendanceLoading =
     (!shouldFetchAttendances ||
       isAttendancesInitialLoading ||

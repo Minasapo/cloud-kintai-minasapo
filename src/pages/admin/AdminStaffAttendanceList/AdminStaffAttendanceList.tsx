@@ -46,6 +46,8 @@ export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();
   const navigate = useNavigate();
 
+  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
+
   const {
     staff,
     holidayCalendars,
@@ -63,9 +65,7 @@ export default function AdminStaffAttendanceList() {
     pendingAttendanceControls,
     getTableRowVariant,
     getBadgeContent,
-  } = useAdminStaffAttendanceListViewModel(staffId);
-
-  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
+  } = useAdminStaffAttendanceListViewModel(staffId, currentMonth);
 
   const monthlyAttendances = useMemo(() => {
     return attendances

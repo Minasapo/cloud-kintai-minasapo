@@ -28,6 +28,7 @@ import {
 } from "@mui/material";
 import {
   CreateAttendanceInput,
+  HourlyPaidHolidayTimeInput,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
@@ -94,6 +95,26 @@ const SaveButton = styled(Button)(({ theme }) => ({
     border: "3px solid #E0E0E0",
   },
 }));
+
+// ヘルパー関数：時間単位休暇データを安全に変換
+function buildHourlyPaidHolidayTimes(
+  data: HourlyPaidHolidayTimeInputs[] | undefined
+): HourlyPaidHolidayTimeInput[] {
+  if (!data) {
+    return [];
+  }
+
+  return data.reduce<HourlyPaidHolidayTimeInput[]>((acc, item) => {
+    // 必須フィールドが両方揃っている場合のみ追加
+    if (item.startTime && item.endTime) {
+      acc.push({
+        startTime: item.startTime,
+        endTime: item.endTime,
+      });
+    }
+    return acc;
+  }, []);
+}
 
 export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const {
@@ -348,19 +369,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           ),
           hourlyPaidHolidayTimes: data.paidHolidayFlag
             ? []
-            : (data.hourlyPaidHolidayTimes
-                ?.map((item) =>
-                  item.startTime && item.endTime
-                    ? {
-                        startTime: item.startTime,
-                        endTime: item.endTime,
-                      }
-                    : null
-                )
-                .filter((item) => item !== null) as {
-                startTime: string;
-                endTime: string;
-              }[]) ?? [],
+            : buildHourlyPaidHolidayTimes(data.hourlyPaidHolidayTimes),
         };
 
         try {
@@ -369,7 +378,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           // 成功時は可能ならメール送信
           try {
             if (staff && res && res.histories && enabledSendMail) {
-              new AttendanceEditMailSender(staff, res).changeRequest();
+              await new AttendanceEditMailSender(staff, res).changeRequest();
             }
           } catch (mailError) {
             // メール送信に失敗しても更新処理自体は成功扱いにする
@@ -383,7 +392,10 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
           dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
         } catch (error) {
-          console.log(error);
+          logger.error(`Update attendance error:`, error);
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          logger.error(`Error details: ${errorMessage}`);
           dispatch(setSnackbarError(MESSAGE_CODE.E04001));
         }
 
@@ -451,19 +463,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           ),
           hourlyPaidHolidayTimes: data.paidHolidayFlag
             ? []
-            : (data.hourlyPaidHolidayTimes
-                ?.map((item) =>
-                  item.startTime && item.endTime
-                    ? {
-                        startTime: item.startTime,
-                        endTime: item.endTime,
-                      }
-                    : null
-                )
-                .filter((item) => item !== null) as {
-                startTime: string;
-                endTime: string;
-              }[]) ?? [],
+            : buildHourlyPaidHolidayTimes(data.hourlyPaidHolidayTimes),
         });
 
         if (!staff) {
@@ -471,11 +471,20 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         }
 
         if (enabledSendMail) {
-          new AttendanceEditMailSender(staff, res).changeRequest();
+          try {
+            await new AttendanceEditMailSender(staff, res).changeRequest();
+          } catch (mailError) {
+            // メール送信に失敗しても作成処理自体は成功扱いにする
+            logger.error(`Failed to send create mail: ${mailError}`);
+          }
         }
 
         dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
-      } catch {
+      } catch (error) {
+        logger.error(`Create attendance error:`, error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        logger.error(`Error details: ${errorMessage}`);
         dispatch(setSnackbarError(MESSAGE_CODE.E04001));
       }
     },
