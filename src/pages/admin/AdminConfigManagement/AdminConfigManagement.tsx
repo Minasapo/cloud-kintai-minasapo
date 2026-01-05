@@ -133,7 +133,7 @@ export default function AdminConfigManagement() {
                 onChange={setAmHolidayStartTime}
                 ampm={false}
                 format="HH:mm"
-                slotProps={{ textField: { size: "small", clearable: true } }}
+                slotProps={{ textField: { size: "small" } }}
                 sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
@@ -144,7 +144,7 @@ export default function AdminConfigManagement() {
                 onChange={setAmHolidayEndTime}
                 ampm={false}
                 format="HH:mm"
-                slotProps={{ textField: { size: "small", clearable: true } }}
+                slotProps={{ textField: { size: "small" } }}
                 sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
@@ -162,7 +162,7 @@ export default function AdminConfigManagement() {
                 onChange={setPmHolidayStartTime}
                 ampm={false}
                 format="HH:mm"
-                slotProps={{ textField: { size: "small", clearable: true } }}
+                slotProps={{ textField: { size: "small" } }}
                 sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
@@ -173,7 +173,7 @@ export default function AdminConfigManagement() {
                 onChange={setPmHolidayEndTime}
                 ampm={false}
                 format="HH:mm"
-                slotProps={{ textField: { size: "small", clearable: true } }}
+                slotProps={{ textField: { size: "small" } }}
                 sx={{ width: 160 }}
                 disabled={!amPmHolidayEnabled}
               />
