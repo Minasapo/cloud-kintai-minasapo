@@ -53,7 +53,10 @@ export default function EndTimeInput({
                 },
               }}
               onChange={(value) => {
-                if (!value) return null;
+                if (!value) {
+                  field.onChange(null);
+                  return;
+                }
                 if (!value.isValid()) return;
 
                 const formattedEndTime = value

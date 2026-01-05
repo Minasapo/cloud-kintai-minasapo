@@ -32,6 +32,8 @@ type AttendanceEditContextProps = {
   changeRequests: AttendanceChangeRequest[];
   // 表示専用モードかどうか
   readOnly?: boolean;
+  // 休憩中かどうか（勤務開始時間と最初の休憩時間が入力されている状態）
+  isOnBreak?: boolean;
   restAppend?: UseFieldArrayAppend<AttendanceEditInputs, "rests">;
   restRemove?: UseFieldArrayRemove;
   restUpdate?: UseFieldArrayUpdate<AttendanceEditInputs, "rests">;
@@ -90,6 +92,7 @@ export const AttendanceEditContext = createContext<AttendanceEditContextProps>({
   restFields: [],
   changeRequests: [],
   readOnly: false,
+  isOnBreak: false,
   systemCommentFields: [],
   hourlyPaidHolidayTimeFields: [],
   hourlyPaidHolidayTimeAppend: () => {},

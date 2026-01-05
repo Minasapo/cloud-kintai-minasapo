@@ -279,6 +279,19 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     [watchedData.startTime, watchedData.endTime, totalWorkTime, totalRestTime]
   );
 
+  // 休憩中かどうかを判定（勤務開始時間と最初の休憩時間が入力されている状態）
+  const isOnBreak = useMemo(
+    () =>
+      !!(
+        watchedData.startTime &&
+        watchedData.rests &&
+        watchedData.rests.length > 0 &&
+        watchedData.rests[0]?.startTime &&
+        !watchedData.rests[0]?.endTime
+      ),
+    [watchedData.startTime, watchedData.rests]
+  );
+
   const onSubmit = useCallback(
     async (data: AttendanceEditInputs) => {
       // 備考はユーザー入力の値（data.remarks）をそのまま保存します。
@@ -715,6 +728,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         hourlyPaidHolidayEnabled: getHourlyPaidHolidayEnabled(),
         errorMessages,
         readOnly,
+        isOnBreak,
       }}
     >
       <Stack spacing={2} sx={{ pb: 5 }}>
@@ -947,7 +961,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                         onClick={() =>
                           restAppend({ startTime: null, endTime: null })
                         }
-                        disabled={!!readOnly}
+                        disabled={!!readOnly || isOnBreak}
                       >
                         <AddAlarmIcon />
                       </IconButton>

@@ -51,7 +51,11 @@ export default function StartTimeInput({
               },
             }}
             onChange={(value) => {
-              if (!value || !value.isValid()) {
+              if (!value) {
+                field.onChange(null);
+                return;
+              }
+              if (!value.isValid()) {
                 return;
               }
 

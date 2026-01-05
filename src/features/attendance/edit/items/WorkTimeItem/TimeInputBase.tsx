@@ -21,6 +21,7 @@ interface TimeInputBaseProps<TFieldName extends AttendanceTimeFieldName> {
   workDate: dayjs.Dayjs;
   quickInputTimes: { time: string; enabled: boolean }[];
   chipColor?: (enabled: boolean) => "success" | "default";
+  disabled?: boolean;
 }
 
 export default function TimeInputBase<
@@ -32,6 +33,7 @@ export default function TimeInputBase<
   workDate,
   quickInputTimes,
   chipColor = (enabled) => (enabled ? "success" : "default"),
+  disabled = false,
 }: TimeInputBaseProps<TFieldName>) {
   const { readOnly } = useContext(AttendanceEditContext);
   if (!workDate || !control || !setValue) return null;
@@ -49,7 +51,7 @@ export default function TimeInputBase<
               slotProps={{
                 textField: { size: "small" },
               }}
-              disabled={!!readOnly}
+              disabled={!!readOnly || disabled}
               onChange={(value) => {
                 if (value && !value.isValid()) return;
                 const formatted = (() => {
@@ -81,7 +83,7 @@ export default function TimeInputBase<
               variant="outlined"
               icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
               onClick={() => {
-                if (readOnly) return;
+                if (readOnly || disabled) return;
                 const time = dayjs(
                   `${workDate.format("YYYY-MM-DD")} ${entry.time}`
                 ).toISOString();
