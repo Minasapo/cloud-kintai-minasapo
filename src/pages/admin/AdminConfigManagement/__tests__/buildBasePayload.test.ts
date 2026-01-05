@@ -19,8 +19,7 @@ describe("buildBasePayload helpers", () => {
     const restEnd = dayjs("2020-01-01T13:00:00");
     const hours = buildStandardWorkHours(start, end, restStart, restEnd);
     // 9 hours total - 1 hour lunch = 8
-    expect(hours).not.toBeNull();
-    expect(Math.round(hours!)).toBe(8);
+    expect(Math.round(hours)).toBe(8);
   });
 
   test("buildBasePayload contains formatted times and mapped arrays", () => {
