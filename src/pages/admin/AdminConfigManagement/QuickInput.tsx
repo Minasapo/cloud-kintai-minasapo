@@ -17,6 +17,12 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
+import {
+  appendItem,
+  removeItemAt,
+  toggleEnabledAt,
+  updateItem,
+} from "./arrayHelpers";
 import QuickInputSection from "./QuickInputSection";
 
 type Entry = { time: Dayjs; enabled: boolean };
@@ -52,46 +58,40 @@ export default function QuickInput() {
   }, []);
 
   const handleAddQuickInputStartTime = () =>
-    setQuickInputStartTimes([
-      ...quickInputStartTimes,
-      { time: dayjs(), enabled: true },
-    ]);
+    setQuickInputStartTimes(
+      appendItem(quickInputStartTimes, { time: dayjs(), enabled: true })
+    );
   const handleQuickInputStartTimeChange = (
     index: number,
     newValue: Dayjs | null
   ) => {
-    const updated = [...quickInputStartTimes];
-    if (newValue) updated[index].time = newValue;
-    setQuickInputStartTimes(updated);
+    if (!newValue) return;
+    setQuickInputStartTimes(
+      updateItem(quickInputStartTimes, index, (e) => ({ ...e, time: newValue }))
+    );
   };
-  const handleQuickInputStartTimeToggle = (index: number) => {
-    const updated = [...quickInputStartTimes];
-    updated[index].enabled = !updated[index].enabled;
-    setQuickInputStartTimes(updated);
-  };
+  const handleQuickInputStartTimeToggle = (index: number) =>
+    setQuickInputStartTimes(toggleEnabledAt(quickInputStartTimes, index));
   const handleRemoveQuickInputStartTime = (index: number) =>
-    setQuickInputStartTimes(quickInputStartTimes.filter((_, i) => i !== index));
+    setQuickInputStartTimes(removeItemAt(quickInputStartTimes, index));
 
   const handleAddQuickInputEndTime = () =>
-    setQuickInputEndTimes([
-      ...quickInputEndTimes,
-      { time: dayjs(), enabled: true },
-    ]);
+    setQuickInputEndTimes(
+      appendItem(quickInputEndTimes, { time: dayjs(), enabled: true })
+    );
   const handleQuickInputEndTimeChange = (
     index: number,
     newValue: Dayjs | null
   ) => {
-    const updated = [...quickInputEndTimes];
-    if (newValue) updated[index].time = newValue;
-    setQuickInputEndTimes(updated);
+    if (!newValue) return;
+    setQuickInputEndTimes(
+      updateItem(quickInputEndTimes, index, (e) => ({ ...e, time: newValue }))
+    );
   };
-  const handleQuickInputEndTimeToggle = (index: number) => {
-    const updated = [...quickInputEndTimes];
-    updated[index].enabled = !updated[index].enabled;
-    setQuickInputEndTimes(updated);
-  };
+  const handleQuickInputEndTimeToggle = (index: number) =>
+    setQuickInputEndTimes(toggleEnabledAt(quickInputEndTimes, index));
   const handleRemoveQuickInputEndTime = (index: number) =>
-    setQuickInputEndTimes(quickInputEndTimes.filter((_, i) => i !== index));
+    setQuickInputEndTimes(removeItemAt(quickInputEndTimes, index));
 
   const handleSave = async () => {
     try {

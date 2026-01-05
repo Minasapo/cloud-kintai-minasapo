@@ -15,6 +15,7 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
+import { appendItem, removeItemAt, updateItem } from "./arrayHelpers";
 import ReasonListSection from "./ReasonListSection";
 
 export default function Reasons() {
@@ -33,20 +34,20 @@ export default function Reasons() {
   }, []);
 
   const handleAddReason = () =>
-    setReasons([...reasons, { reason: "", enabled: true }]);
+    setReasons(appendItem(reasons, { reason: "", enabled: true }));
 
   const handleReasonChange = (
     index: number,
     field: "reason" | "enabled",
     value: string | boolean
   ) => {
-    const updated = [...reasons];
-    updated[index][field as keyof (typeof updated)[number]] = value as never;
-    setReasons(updated);
+    setReasons(
+      updateItem(reasons, index, (r) => ({ ...r, [field]: value } as typeof r))
+    );
   };
 
   const handleRemoveReason = (index: number) =>
-    setReasons(reasons.filter((_, i) => i !== index));
+    setReasons(removeItemAt(reasons, index));
 
   const handleSave = async () => {
     try {

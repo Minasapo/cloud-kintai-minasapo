@@ -16,6 +16,7 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
+import { appendItem, removeItemAt, updateItem } from "./arrayHelpers";
 import LinkListSection from "./LinkListSection";
 
 export default function Links() {
@@ -34,20 +35,22 @@ export default function Links() {
   }, []);
 
   const handleAddLink = () =>
-    setLinks([...links, { label: "", url: "", enabled: true, icon: "" }]);
+    setLinks(
+      appendItem(links, { label: "", url: "", enabled: true, icon: "" })
+    );
 
   const handleLinkChange = (
     index: number,
     field: "label" | "url" | "enabled" | "icon",
     value: string | boolean
   ) => {
-    const updated = [...links];
-    updated[index][field as keyof (typeof updated)[number]] = value as never;
-    setLinks(updated);
+    setLinks(
+      updateItem(links, index, (l) => ({ ...l, [field]: value } as typeof l))
+    );
   };
 
   const handleRemoveLink = (index: number) =>
-    setLinks(links.filter((_, i) => i !== index));
+    setLinks(removeItemAt(links, index));
 
   const handleSave = async () => {
     try {
