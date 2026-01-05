@@ -101,66 +101,23 @@ export const useAdminStaffAttendanceListViewModel = (
     refetch: refetchAttendances,
   } = queryResult;
 
-  // 取得したデータから日付ごとのマップを作成
-  const attendanceMap = useMemo(() => {
-    const map = new Map<string, Attendance[]>();
-    (attendancesData ?? []).forEach((attendance) => {
-      const existing = map.get(attendance.workDate) ?? [];
-      existing.push(attendance);
-      map.set(attendance.workDate, existing);
-    });
-    return map;
-  }, [attendancesData]);
-
   // 日付範囲内のすべての日付に対してAttendanceを生成（空の日も含む）
   const attendances: Attendance[] = useMemo(() => {
-    const result: Attendance[] = [];
-    const start = dayjs(dateRange.startDate);
-    const end = dayjs(dateRange.endDate);
-    let current = start;
-
-    while (current.isBefore(end) || current.isSame(end, "day")) {
-      const dateStr = current.format("YYYY-MM-DD");
-      const matches = attendanceMap.get(dateStr) ?? [];
-
-      if (matches.length > 0) {
-        // 実際のデータがある場合は最初のレコードを使用
-        result.push(matches[0]);
-      } else {
-        // データがない場合は空のAttendanceを生成
-        result.push({
-          __typename: "Attendance",
-          id: "",
-          staffId: staffId ?? "",
-          workDate: dateStr,
-          startTime: "",
-          endTime: "",
-          absentFlag: false,
-          goDirectlyFlag: false,
-          returnDirectlyFlag: false,
-          rests: [],
-          remarks: "",
-          paidHolidayFlag: false,
-          specialHolidayFlag: false,
-          isDeemedHoliday: false,
-          substituteHolidayDate: null,
-          changeRequests: [],
-          createdAt: "",
-          updatedAt: "",
-        });
-      }
-
-      current = current.add(1, "day");
-    }
-
-    return result;
-  }, [attendancesData, attendanceMap, dateRange, staffId]);
+    // 実際にデータがあるAttendanceのみを返す（登録なしは含めない）
+    return attendancesData ?? [];
+  }, [attendancesData]);
 
   // 重複チェック
   const duplicateAttendances: DuplicateAttendanceInfo[] = useMemo(() => {
-    const duplicates: DuplicateAttendanceInfo[] = [];
+    const duplicateMap = new Map<string, Attendance[]>();
+    (attendancesData ?? []).forEach((attendance) => {
+      const existing = duplicateMap.get(attendance.workDate) ?? [];
+      existing.push(attendance);
+      duplicateMap.set(attendance.workDate, existing);
+    });
 
-    attendanceMap.forEach((matches, workDate) => {
+    const duplicates: DuplicateAttendanceInfo[] = [];
+    duplicateMap.forEach((matches, workDate) => {
       if (matches.length > 1) {
         duplicates.push({
           workDate,
@@ -171,7 +128,7 @@ export const useAdminStaffAttendanceListViewModel = (
     });
 
     return duplicates;
-  }, [attendanceMap, staffId]);
+  }, [attendancesData, staffId]);
 
   const attendanceLoading =
     (!shouldFetchAttendances ||
