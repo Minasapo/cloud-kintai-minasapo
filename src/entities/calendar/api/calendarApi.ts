@@ -36,10 +36,12 @@ type CalendarTag = {
   id: string;
 };
 
-const nonNullable = <T>(value: T | null | undefined): value is T =>
+// Exported for testing
+export const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
 
-const buildCalendarTagId = (calendar: {
+// Exported for testing
+export const buildCalendarTagId = (calendar: {
   id?: string | null;
   holidayDate?: string | null;
 }) => calendar.id ?? calendar.holidayDate ?? "unknown";

@@ -74,7 +74,11 @@ export async function returnDirectlyCallback(
     }
 
     dispatch(setSnackbarSuccess(MESSAGE_CODE.S01004));
-    new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
+    try {
+      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
+    } catch (mailErr) {
+      logger.error("Failed to send return directly mail", mailErr);
+    }
   } catch (error) {
     logger.debug(error);
     dispatch(setSnackbarError(MESSAGE_CODE.E01006));

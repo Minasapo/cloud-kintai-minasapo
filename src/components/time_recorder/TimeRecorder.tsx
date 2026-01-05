@@ -130,7 +130,7 @@ export default function TimeRecorder(): JSX.Element {
   );
 
   const attendance = attendanceData;
-  const attendances: Attendance[] = attendancesData ?? [];
+  const attendances: Attendance[] = attendancesData?.attendances ?? [];
 
   const attendanceLoading =
     !shouldFetchAttendance ||
@@ -388,7 +388,8 @@ export default function TimeRecorder(): JSX.Element {
       logger,
       startIso
     );
-  }, [cognitoUser, clockIn, dispatch, staff, getStartTime, today, logger]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cognitoUser, clockIn, dispatch, staff, today, logger]);
 
   const handleReturnDirectly = useCallback(() => {
     const configured = getEndTime();
@@ -408,7 +409,8 @@ export default function TimeRecorder(): JSX.Element {
       logger,
       endIso
     );
-  }, [cognitoUser, staff, dispatch, clockOut, getEndTime, today, logger]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cognitoUser, staff, dispatch, clockOut, today, logger]);
 
   const handleRestStart = useCallback(
     () => restStartCallback(cognitoUser, today, dispatch, restStart, logger),

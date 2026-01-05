@@ -1,9 +1,11 @@
-import { Switch } from "@mui/material";
+import { Switch, Alert } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ReturnDirectlyFlagInputBase from "@shared/ui/form/flags/ReturnDirectlyFlagInputBase";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
+import { pulseAnimationStyles } from "@/shared/ui/animations/highlightAnimation";
 
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 
@@ -12,6 +14,7 @@ export function ReturnDirectlyFlagInput() {
     AttendanceEditContext
   );
   const { getEndTime } = useAppConfig();
+  const [highlightEndTime, setHighlightEndTime] = useState(false);
 
   if (!control || !setValue) {
     return null;
@@ -25,17 +28,38 @@ export function ReturnDirectlyFlagInput() {
       attendance?.workDate
     );
 
+  const handleChangeFlag = (checked: boolean) => {
+    if (checked) {
+      setValue("returnDirectlyFlag", true);
+      setValue("endTime", computeEndTimeIso());
+      // トリガーハイライトアニメーション
+      setHighlightEndTime(true);
+      setTimeout(() => setHighlightEndTime(false), 2500);
+    }
+  };
+
   return (
-    <ReturnDirectlyFlagInputBase
-      control={control}
-      inputComponent={Switch}
-      layout="inline"
-      onChangeFlag={(checked) => {
-        if (checked) {
-          setValue("returnDirectlyFlag", true);
-          setValue("endTime", computeEndTimeIso());
-        }
-      }}
-    />
+    <>
+      <ReturnDirectlyFlagInputBase
+        control={control}
+        inputComponent={Switch}
+        layout="inline"
+        onChangeFlag={handleChangeFlag}
+      />
+      {highlightEndTime && (
+        <Alert
+          icon={<CheckCircleIcon fontSize="inherit" />}
+          severity="success"
+          sx={{
+            mt: 1,
+            mb: 1,
+            ...pulseAnimationStyles,
+            fontWeight: "bold",
+          }}
+        >
+          勤務終了時間が自動設定されました
+        </Alert>
+      )}
+    </>
   );
 }

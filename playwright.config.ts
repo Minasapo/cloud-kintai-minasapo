@@ -24,7 +24,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: [["html", { open: "never" }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL: process.env.VITE_BASE_PATH || "http://localhost:5173",
@@ -36,6 +36,16 @@ export default defineConfig({
       password: "kintaidev",
     },
     screenshot: "only-on-failure",
+  },
+
+  /* Start dev server before running tests */
+  webServer: {
+    command: "npm start",
+    url: "http://localhost:5173",
+    reuseExistingServer: !process.env.CI,
+    env: {
+      VITE_CHECKER_OVERLAY: "false",
+    },
   },
 
   /* Configure projects for major browsers */
@@ -50,6 +60,26 @@ export default defineConfig({
       // Run the `setup` project as a dependency only on CI.
       // In development, avoid automatically running setup to keep iteration fast.
       dependencies: process.env.CI ? ["setup"] : undefined,
+    },
+
+    // スタッフユーザー（通常）として認証した状態でテスト実行
+    {
+      name: "chromium-staff",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.auth/user.json",
+      },
+      dependencies: ["setup"],
+    },
+
+    // 管理者ユーザーとして認証した状態でテスト実行
+    {
+      name: "chromium-admin",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.auth/admin.json",
+      },
+      dependencies: ["setup"],
     },
 
     // {

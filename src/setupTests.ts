@@ -3,3 +3,23 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
+
+// Mock AWS Amplify to avoid configuration warnings in tests
+jest.mock("./lib/amplify/graphqlClient", () => ({
+  graphqlClient: {
+    graphql: jest.fn(),
+  },
+}));
+
+jest.mock("./lib/amplify/adminQueriesClient", () => ({
+  adminQueriesClient: {
+    graphql: jest.fn(),
+  },
+}));
+
+// Mock aws-amplify/api to prevent initialization warnings
+jest.mock("aws-amplify/api", () => ({
+  generateClient: jest.fn(() => ({
+    graphql: jest.fn(),
+  })),
+}));

@@ -8,6 +8,8 @@ export { default as AppConfigCreateForm } from "./AppConfigCreateForm";
 export { default as AppConfigUpdateForm } from "./AppConfigUpdateForm";
 export { default as AttendanceCreateForm } from "./AttendanceCreateForm";
 export { default as AttendanceUpdateForm } from "./AttendanceUpdateForm";
+export { default as AuditLogCreateForm } from "./AuditLogCreateForm";
+export { default as AuditLogUpdateForm } from "./AuditLogUpdateForm";
 export { default as CheckForUpdateCreateForm } from "./CheckForUpdateCreateForm";
 export { default as CheckForUpdateUpdateForm } from "./CheckForUpdateUpdateForm";
 export { default as CloseDateCreateForm } from "./CloseDateCreateForm";

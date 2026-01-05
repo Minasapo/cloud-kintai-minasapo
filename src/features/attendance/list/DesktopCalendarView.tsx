@@ -71,6 +71,7 @@ const DayCell = styled(Box, {
   transition: "background-color 0.2s ease",
   cursor: "pointer",
   position: "relative",
+  overflow: "hidden",
   "&:hover": {
     backgroundColor: theme.palette.action.hover,
   },
@@ -117,7 +118,7 @@ function buildWeeks(targetMonth: Dayjs) {
 
 function getNetWorkingHours(attendance: Attendance | undefined) {
   if (!attendance) return 0;
-  if (!attendance.startTime) return 0;
+  if (!attendance.startTime || !attendance.endTime) return 0;
 
   const workTime = calcTotalWorkTime(attendance.startTime, attendance.endTime);
   const totalRest = getTotalRestHours(attendance);
@@ -126,12 +127,12 @@ function getNetWorkingHours(attendance: Attendance | undefined) {
 }
 
 function getTotalRestHours(attendance: Attendance | undefined) {
-  if (!attendance?.rests) return 0;
+  if (!attendance?.rests || !attendance.endTime) return 0;
 
   const totalRest = (attendance.rests || [])
     .filter((rest): rest is NonNullable<typeof rest> => !!rest)
     .reduce((acc, rest) => {
-      if (!rest.startTime) return acc;
+      if (!rest.startTime || !rest.endTime) return acc;
       return acc + calcTotalRestTime(rest.startTime, rest.endTime);
     }, 0);
 
@@ -573,7 +574,7 @@ export default function DesktopCalendarView({
                     )}
                   </Stack>
                   {timeRangeLabel && (
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" noWrap>
                       {timeRangeLabel}
                     </Typography>
                   )}
@@ -595,11 +596,6 @@ export default function DesktopCalendarView({
                         {`休憩 ${totalRestHours.toFixed(1)}h`}
                       </Typography>
                     )}
-                  {attendance?.remarks && (
-                    <Typography variant="caption" color="text.secondary" noWrap>
-                      {attendance.remarks}
-                    </Typography>
-                  )}
                   {holidayLabels.map((label) => (
                     <Typography
                       key={label}

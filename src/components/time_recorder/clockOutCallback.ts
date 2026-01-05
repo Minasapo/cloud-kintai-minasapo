@@ -97,7 +97,11 @@ export async function clockOutCallback(
     }
 
     dispatch(setSnackbarSuccess(MESSAGE_CODE.S01002));
-    new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
+    try {
+      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
+    } catch (mailErr) {
+      logger.error("Failed to send clock out mail", mailErr);
+    }
   } catch (error) {
     logger.error("Failed to clock out", error);
     dispatch(setSnackbarError(MESSAGE_CODE.E01002));

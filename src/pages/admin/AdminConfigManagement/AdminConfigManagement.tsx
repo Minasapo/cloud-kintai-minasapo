@@ -6,21 +6,7 @@ import Typography from "@mui/material/Typography";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import {
-  CreateAppConfigInput,
-  UpdateAppConfigInput,
-} from "@shared/api/graphql/types";
 import Title from "@shared/ui/typography/Title";
-import dayjs, { Dayjs } from "dayjs";
-import React, { useContext, useEffect, useMemo, useState } from "react";
-
-import { useAppDispatchV2 } from "@/app/hooks";
-import { AppConfigContext } from "@/context/AppConfigContext";
-import { E14001, E14002, S14001, S14002 } from "@/errors";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
 
 import AttendanceStatisticsSection from "./AttendanceStatisticsSection";
 import GroupSection from "./GroupSection";
@@ -28,368 +14,60 @@ import LinkListSection from "./LinkListSection";
 import OfficeModeSection from "./OfficeModeSection";
 import QuickInputSection from "./QuickInputSection";
 import ReasonListSection from "./ReasonListSection";
+import { useAdminConfigForm } from "./useAdminConfigForm";
 import WorkingTimeSection from "./WorkingTimeSection";
 
 export default function AdminConfigManagement() {
-  // AppConfigContextからamPmHolidayEnabledのgetterを取得
   const {
-    fetchConfig,
-    saveConfig,
-    getStartTime,
-    getEndTime,
-    getConfigId,
-    getLinks,
-    getReasons,
-    getOfficeMode,
-    getQuickInputStartTimes,
-    getQuickInputEndTimes,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-    getHourlyPaidHolidayEnabled,
-    getAmHolidayStartTime,
-    getAmHolidayEndTime,
-    getPmHolidayStartTime,
-    getPmHolidayEndTime,
-    getAmPmHolidayEnabled,
-    getSpecialHolidayEnabled,
-    getAbsentEnabled,
-    getAttendanceStatisticsEnabled,
-    getThemeTokens,
-  } = useContext(AppConfigContext);
-  const adminPanelTokens = useMemo(() => getThemeTokens(), [getThemeTokens]);
-  const sectionSpacing = adminPanelTokens.component.adminPanel.sectionSpacing;
-  const [startTime, setStartTime] = useState<Dayjs | null>(null);
-  const [endTime, setEndTime] = useState<Dayjs | null>(null);
-  const [quickInputStartTimes, setQuickInputStartTimes] = useState<
-    { time: Dayjs; enabled: boolean }[]
-  >([]);
-  const [quickInputEndTimes, setQuickInputEndTimes] = useState<
-    { time: Dayjs; enabled: boolean }[]
-  >([]);
-  const [id, setId] = useState<string | null>(null);
-  const [links, setLinks] = useState<
-    { label: string; url: string; enabled: boolean; icon: string }[]
-  >([]);
-  const [reasons, setReasons] = useState<
-    { reason: string; enabled: boolean }[]
-  >([]);
-  const [officeMode, setOfficeMode] = useState<boolean>(false);
-  const [lunchRestStartTime, setLunchRestStartTime] = useState<Dayjs | null>(
-    null
-  );
-  const [lunchRestEndTime, setLunchRestEndTime] = useState<Dayjs | null>(null);
-  const [hourlyPaidHolidayEnabled, setHourlyPaidHolidayEnabled] =
-    useState<boolean>(false);
-  const [amHolidayStartTime, setAmHolidayStartTime] = useState<Dayjs | null>(
-    dayjs("09:00", "HH:mm")
-  );
-  const [amHolidayEndTime, setAmHolidayEndTime] = useState<Dayjs | null>(
-    dayjs("12:00", "HH:mm")
-  );
-  const [pmHolidayStartTime, setPmHolidayStartTime] = useState<Dayjs | null>(
-    dayjs("13:00", "HH:mm")
-  );
-  const [pmHolidayEndTime, setPmHolidayEndTime] = useState<Dayjs | null>(
-    dayjs("18:00", "HH:mm")
-  );
-  const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
-    useState<boolean>(false);
-  const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
-  const [specialHolidayEnabled, setSpecialHolidayEnabled] =
-    useState<boolean>(false);
-  const [absentEnabled, setAbsentEnabled] = useState<boolean>(false);
-  const dispatch = useAppDispatchV2();
-
-  useEffect(() => {
-    setStartTime(getStartTime());
-    setEndTime(getEndTime());
-    setId(getConfigId());
-    setLinks(getLinks());
-    setReasons(getReasons());
-    setOfficeMode(getOfficeMode());
-    const quickInputStartTimes = getQuickInputStartTimes();
-    setQuickInputStartTimes(
-      quickInputStartTimes.map((entry) => ({
-        time: dayjs(entry.time, "HH:mm"),
-        enabled: entry.enabled,
-      }))
-    );
-    setQuickInputEndTimes(
-      getQuickInputEndTimes().map((entry) => ({
-        time: dayjs(entry.time, "HH:mm"),
-        enabled: entry.enabled,
-      }))
-    );
-    setLunchRestStartTime(getLunchRestStartTime());
-    setLunchRestEndTime(getLunchRestEndTime());
-    setHourlyPaidHolidayEnabled(getHourlyPaidHolidayEnabled());
-    if (typeof getSpecialHolidayEnabled === "function") {
-      setSpecialHolidayEnabled(getSpecialHolidayEnabled());
-    }
-    if (typeof getAbsentEnabled === "function") {
-      setAbsentEnabled(getAbsentEnabled());
-    }
-    setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
-    // fetchConfigで午前休・午後休の時間帯があればセット
-    if (typeof getAmHolidayStartTime === "function" && getAmHolidayStartTime())
-      setAmHolidayStartTime(getAmHolidayStartTime());
-    if (typeof getAmHolidayEndTime === "function" && getAmHolidayEndTime())
-      setAmHolidayEndTime(getAmHolidayEndTime());
-    if (typeof getPmHolidayStartTime === "function" && getPmHolidayStartTime())
-      setPmHolidayStartTime(getPmHolidayStartTime());
-    if (typeof getPmHolidayEndTime === "function" && getPmHolidayEndTime())
-      setPmHolidayEndTime(getPmHolidayEndTime());
-    // 取得時に有効無効もセット（configに値があれば）
-    if (typeof getAmPmHolidayEnabled === "function")
-      setAmPmHolidayEnabled(getAmPmHolidayEnabled());
-  }, [
-    getStartTime,
-    getEndTime,
-    getConfigId,
-    getLinks,
-    getReasons,
-    getOfficeMode,
-    getQuickInputStartTimes,
-    getQuickInputEndTimes,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-    getHourlyPaidHolidayEnabled,
-    getAmHolidayStartTime,
-    getAmHolidayEndTime,
-    getPmHolidayStartTime,
-    getPmHolidayEndTime,
-    getAmPmHolidayEnabled,
-    getAttendanceStatisticsEnabled,
-  ]);
-
-  const handleAddLink = () => {
-    setLinks([...links, { label: "", url: "", enabled: true, icon: "" }]);
-  };
-
-  const handleLinkChange = (
-    index: number,
-    field: "label" | "url" | "enabled" | "icon",
-    value: string | boolean
-  ) => {
-    const updatedLinks = [...links];
-    updatedLinks[index][field as keyof (typeof updatedLinks)[number]] =
-      value as never;
-    setLinks(updatedLinks);
-  };
-
-  const handleRemoveLink = (index: number) => {
-    const updatedLinks = links.filter((_, i) => i !== index);
-    setLinks(updatedLinks);
-  };
-
-  const handleAddReason = () => {
-    setReasons([...reasons, { reason: "", enabled: true }]);
-  };
-
-  const handleReasonChange = (
-    index: number,
-    field: "reason" | "enabled",
-    value: string | boolean
-  ) => {
-    const updatedReasons = [...reasons];
-    updatedReasons[index][field as keyof (typeof updatedReasons)[number]] =
-      value as never;
-    setReasons(updatedReasons);
-  };
-
-  const handleRemoveReason = (index: number) => {
-    const updatedReasons = reasons.filter((_, i) => i !== index);
-    setReasons(updatedReasons);
-  };
-
-  const handleOfficeModeChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setOfficeMode(event.target.checked);
-  };
-
-  const handleAddQuickInputStartTime = () => {
-    setQuickInputStartTimes([
-      ...quickInputStartTimes,
-      { time: dayjs(), enabled: true },
-    ]);
-  };
-
-  const handleQuickInputStartTimeChange = (
-    index: number,
-    newValue: Dayjs | null
-  ) => {
-    const updatedStartTimes = [...quickInputStartTimes];
-    if (newValue) {
-      updatedStartTimes[index].time = newValue;
-    }
-    setQuickInputStartTimes(updatedStartTimes);
-  };
-
-  const handleQuickInputStartTimeToggle = (index: number) => {
-    const updatedStartTimes = [...quickInputStartTimes];
-    updatedStartTimes[index].enabled = !updatedStartTimes[index].enabled;
-    setQuickInputStartTimes(updatedStartTimes);
-  };
-
-  const handleRemoveQuickInputStartTime = (index: number) => {
-    const updatedStartTimes = quickInputStartTimes.filter(
-      (_, i) => i !== index
-    );
-    setQuickInputStartTimes(updatedStartTimes);
-  };
-
-  const handleAddQuickInputEndTime = () => {
-    setQuickInputEndTimes([
-      ...quickInputEndTimes,
-      { time: dayjs(), enabled: true },
-    ]);
-  };
-
-  const handleQuickInputEndTimeChange = (
-    index: number,
-    newValue: Dayjs | null
-  ) => {
-    const updatedEndTimes = [...quickInputEndTimes];
-    if (newValue) {
-      updatedEndTimes[index].time = newValue;
-    }
-    setQuickInputEndTimes(updatedEndTimes);
-  };
-
-  const handleQuickInputEndTimeToggle = (index: number) => {
-    const updatedEndTimes = [...quickInputEndTimes];
-    updatedEndTimes[index].enabled = !updatedEndTimes[index].enabled;
-    setQuickInputEndTimes(updatedEndTimes);
-  };
-
-  const handleRemoveQuickInputEndTime = (index: number) => {
-    const updatedEndTimes = quickInputEndTimes.filter((_, i) => i !== index);
-    setQuickInputEndTimes(updatedEndTimes);
-  };
-
-  const handleHourlyPaidHolidayEnabledChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setHourlyPaidHolidayEnabled(event.target.checked);
-  };
-
-  const handleSpecialHolidayEnabledChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setSpecialHolidayEnabled(event.target.checked);
-  };
-
-  const handleAbsentEnabledChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setAbsentEnabled(event.target.checked);
-  };
-
-  const handleAttendanceStatisticsEnabledChange = (
-    _: React.ChangeEvent<HTMLInputElement>,
-    checked: boolean
-  ) => {
-    setAttendanceStatisticsEnabled(checked);
-  };
-
-  const handleSave = async () => {
-    if (
-      startTime &&
-      endTime &&
-      lunchRestStartTime &&
-      lunchRestEndTime &&
-      amHolidayStartTime &&
-      amHolidayEndTime &&
-      pmHolidayStartTime &&
-      pmHolidayEndTime
-    ) {
-      const standardWorkHours = (() => {
-        const baseHours = endTime.diff(startTime, "hour", true);
-        const lunchHours = Math.max(
-          lunchRestEndTime.diff(lunchRestStartTime, "hour", true),
-          0
-        );
-        return Math.max(baseHours - lunchHours, 0);
-      })();
-
-      try {
-        if (id) {
-          // backend の GraphQL スキーマにフィールドがない場合を考慮し any にキャストして送る
-          await saveConfig({
-            id,
-            workStartTime: startTime.format("HH:mm"),
-            workEndTime: endTime.format("HH:mm"),
-            standardWorkHours,
-            links: links.map((link) => ({
-              label: link.label,
-              url: link.url,
-              enabled: link.enabled,
-              icon: link.icon,
-            })),
-            reasons: reasons.map((reason) => ({
-              reason: reason.reason,
-              enabled: reason.enabled,
-            })),
-            officeMode,
-            absentEnabled,
-            quickInputStartTimes: quickInputStartTimes.map((entry) => ({
-              time: entry.time.format("HH:mm"),
-              enabled: entry.enabled,
-            })),
-            quickInputEndTimes: quickInputEndTimes.map((entry) => ({
-              time: entry.time.format("HH:mm"),
-              enabled: entry.enabled,
-            })),
-            lunchRestStartTime: lunchRestStartTime.format("HH:mm"),
-            lunchRestEndTime: lunchRestEndTime.format("HH:mm"),
-            hourlyPaidHolidayEnabled,
-            amHolidayStartTime: amHolidayStartTime.format("HH:mm"),
-            amHolidayEndTime: amHolidayEndTime.format("HH:mm"),
-            pmHolidayStartTime: pmHolidayStartTime.format("HH:mm"),
-            pmHolidayEndTime: pmHolidayEndTime.format("HH:mm"),
-            amPmHolidayEnabled,
-            specialHolidayEnabled,
-            attendanceStatisticsEnabled,
-          } as unknown as UpdateAppConfigInput);
-          dispatch(setSnackbarSuccess(S14002));
-        } else {
-          await saveConfig({
-            name: "default",
-            workStartTime: startTime.format("HH:mm"),
-            workEndTime: endTime.format("HH:mm"),
-            standardWorkHours,
-            links: links.map((link) => ({
-              label: link.label,
-              url: link.url,
-              enabled: link.enabled,
-              icon: link.icon,
-            })),
-            reasons: reasons.map((reason) => ({
-              reason: reason.reason,
-              enabled: reason.enabled,
-            })),
-            officeMode,
-            absentEnabled,
-            hourlyPaidHolidayEnabled,
-            amHolidayStartTime: amHolidayStartTime.format("HH:mm"),
-            amHolidayEndTime: amHolidayEndTime.format("HH:mm"),
-            pmHolidayStartTime: pmHolidayStartTime.format("HH:mm"),
-            pmHolidayEndTime: pmHolidayEndTime.format("HH:mm"),
-            amPmHolidayEnabled,
-            specialHolidayEnabled,
-            attendanceStatisticsEnabled,
-          } as unknown as CreateAppConfigInput);
-          dispatch(setSnackbarSuccess(S14001));
-        }
-        await fetchConfig();
-      } catch {
-        dispatch(setSnackbarError(E14001));
-      }
-    } else {
-      dispatch(setSnackbarError(E14002));
-    }
-  };
+    sectionSpacing,
+    startTime,
+    endTime,
+    lunchRestStartTime,
+    lunchRestEndTime,
+    quickInputStartTimes,
+    quickInputEndTimes,
+    links,
+    reasons,
+    officeMode,
+    hourlyPaidHolidayEnabled,
+    amHolidayStartTime,
+    amHolidayEndTime,
+    pmHolidayStartTime,
+    pmHolidayEndTime,
+    amPmHolidayEnabled,
+    specialHolidayEnabled,
+    absentEnabled,
+    attendanceStatisticsEnabled,
+    setStartTime,
+    setEndTime,
+    setLunchRestStartTime,
+    setLunchRestEndTime,
+    setAmHolidayStartTime,
+    setAmHolidayEndTime,
+    setPmHolidayStartTime,
+    setPmHolidayEndTime,
+    setAmPmHolidayEnabled,
+    handleOfficeModeChange,
+    handleHourlyPaidHolidayEnabledChange,
+    handleSpecialHolidayEnabledChange,
+    handleAbsentEnabledChange,
+    handleAttendanceStatisticsEnabledChange,
+    handleAddLink,
+    handleLinkChange,
+    handleRemoveLink,
+    handleAddReason,
+    handleReasonChange,
+    handleRemoveReason,
+    handleAddQuickInputStartTime,
+    handleQuickInputStartTimeChange,
+    handleQuickInputStartTimeToggle,
+    handleRemoveQuickInputStartTime,
+    handleAddQuickInputEndTime,
+    handleQuickInputEndTimeChange,
+    handleQuickInputEndTimeToggle,
+    handleRemoveQuickInputEndTime,
+    handleSave,
+  } = useAdminConfigForm();
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

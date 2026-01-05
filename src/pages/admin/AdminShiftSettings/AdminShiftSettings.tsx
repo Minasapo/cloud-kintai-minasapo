@@ -148,7 +148,8 @@ export default function AdminShiftSettings() {
       )
     );
     setConfigId(getConfigId());
-  }, [getShiftGroups, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hasValidationError = useMemo(
     () => shiftGroups.some((group) => getGroupValidation(group).hasError),

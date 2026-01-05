@@ -11,8 +11,10 @@ import { AttendanceEditContext } from "../../AttendanceEditProvider";
 
 export default function StartTimeInput({
   dataTestId = "start-time-input",
+  highlight = false,
 }: {
   dataTestId?: string;
+  highlight?: boolean;
 } = {}) {
   const { workDate, control, setValue, changeRequests, readOnly } = useContext(
     AttendanceEditContext
@@ -37,6 +39,7 @@ export default function StartTimeInput({
   return (
     <Stack spacing={1}>
       <Controller
+        key={highlight ? "highlight-on" : "highlight-off"}
         name="startTime"
         control={control}
         render={({ field }) => (
@@ -48,10 +51,37 @@ export default function StartTimeInput({
               textField: {
                 size: "small",
                 inputProps: { "data-testid": dataTestId },
+                sx: highlight
+                  ? {
+                      "& .MuiOutlinedInput-root": {
+                        animation: "highlightPulse 2.5s ease-in-out",
+                        "@keyframes highlightPulse": {
+                          "0%, 100%": {
+                            backgroundColor: "transparent",
+                            borderColor: "rgba(0, 0, 0, 0.23)",
+                          },
+                          "15%, 50%": {
+                            backgroundColor: "#FFE082",
+                            borderColor: "#FFC107",
+                            boxShadow: "0 0 12px rgba(255, 193, 7, 0.6)",
+                          },
+                          "85%": {
+                            backgroundColor: "#FFF9C4",
+                            borderColor: "#FFC107",
+                            boxShadow: "0 0 8px rgba(255, 193, 7, 0.4)",
+                          },
+                        },
+                      },
+                    }
+                  : undefined,
               },
             }}
             onChange={(value) => {
-              if (!value || !value.isValid()) {
+              if (!value) {
+                field.onChange(null);
+                return;
+              }
+              if (!value.isValid()) {
                 return;
               }
 

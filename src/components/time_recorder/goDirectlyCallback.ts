@@ -75,7 +75,11 @@ export async function goDirectlyCallback(
     }
 
     dispatch(setSnackbarSuccess(MESSAGE_CODE.S01003));
-    new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();
+    try {
+      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();
+    } catch (mailErr) {
+      logger.error("Failed to send go directly mail", mailErr);
+    }
   } catch (error) {
     logger.error("Failed to clock in with go directly flag", error);
     dispatch(setSnackbarError(MESSAGE_CODE.E01005));

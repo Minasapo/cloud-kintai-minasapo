@@ -127,7 +127,7 @@ export const useAdminAttendanceChangeRequests = ({
         );
 
         try {
-          new GenericMailSender(
+          await new GenericMailSender(
             staffForMail,
             updatedAttendance
           ).approveChangeRequest(undefined);

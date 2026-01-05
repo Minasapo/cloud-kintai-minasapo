@@ -69,7 +69,8 @@ export function useOfficeQrRegister() {
 
   useEffect(() => {
     setIsOfficeModeEnabled(getOfficeMode());
-  }, [getOfficeMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     let isMounted = true;

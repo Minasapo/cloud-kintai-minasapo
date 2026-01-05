@@ -49,7 +49,10 @@ export default function RestStartTimeInput({
               },
             }}
             onChange={(newStartTime) => {
-              if (!newStartTime) return null;
+              if (!newStartTime) {
+                field.onChange(null);
+                return;
+              }
 
               if (!newStartTime.isValid()) {
                 return;

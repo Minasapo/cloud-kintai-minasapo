@@ -7,6 +7,7 @@ import {
   type WorkflowLike,
   type WorkflowListFilters,
   type WorkflowListItem,
+  DEFAULT_STATUS_FILTERS,
 } from "./workflowListModel";
 
 type UseWorkflowListFiltersArgs<T extends WorkflowLike> = {
@@ -29,7 +30,7 @@ export type UseWorkflowListFiltersResult = {
 const createInitialFilters = (): WorkflowListFilters => ({
   name: "",
   category: "",
-  status: "",
+  status: DEFAULT_STATUS_FILTERS,
   applicationFrom: "",
   applicationTo: "",
   createdFrom: "",
@@ -65,10 +66,17 @@ export function useWorkflowListFilters<T extends WorkflowLike>(
       value: WorkflowListFilters[K]
     ) => {
       setFilters((prev) => {
-        const nextValue = value ?? "";
-        if (prev[key] === nextValue) {
-          return prev;
-        }
+        const prevValue = prev[key];
+        const nextValue = (value ?? "") as WorkflowListFilters[K];
+
+        const isSame =
+          Array.isArray(prevValue) && Array.isArray(nextValue)
+            ? prevValue.length === nextValue.length &&
+              prevValue.every((item) => nextValue.includes(item))
+            : prevValue === nextValue;
+
+        if (isSame) return prev;
+
         return { ...prev, [key]: nextValue };
       });
     },

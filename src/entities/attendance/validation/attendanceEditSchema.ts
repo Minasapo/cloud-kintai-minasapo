@@ -86,37 +86,17 @@ export const attendanceEditSchema: ZodType<AttendanceEditInputs> = z
     revision: z.number().optional().nullable(),
   })
   .superRefine((data, ctx) => {
-    // 振替休日・有給・欠勤はいずれも勤務時間入力を必須にしない
-    const shouldRequireWorkTime =
-      !data.paidHolidayFlag && !data.absentFlag && !data.substituteHolidayDate;
-    if (shouldRequireWorkTime) {
-      if (!data.startTime) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: validationMessages.attendance.workTime.startRequired,
-          path: ["startTime"],
-        });
-      }
-
-      if (!data.endTime) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: validationMessages.attendance.workTime.endRequired,
-          path: ["endTime"],
-        });
-      }
-
-      if (
-        data.startTime &&
-        data.endTime &&
-        !dayjs(data.endTime).isAfter(dayjs(data.startTime))
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: validationMessages.attendance.workTime.range,
-          path: ["endTime"],
-        });
-      }
+    // 勤務時間の前後関係チェック（両方入力されている場合のみ）
+    if (
+      data.startTime &&
+      data.endTime &&
+      !dayjs(data.endTime).isAfter(dayjs(data.startTime))
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: validationMessages.attendance.workTime.range,
+        path: ["endTime"],
+      });
     }
 
     if (

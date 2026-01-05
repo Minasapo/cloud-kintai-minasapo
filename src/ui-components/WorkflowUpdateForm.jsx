@@ -600,9 +600,14 @@ export default function WorkflowUpdateForm(props) {
           {...getOverrideProps(overrides, "categoryoption2")}
         ></option>
         <option
+          children="Clock correction"
+          value="CLOCK_CORRECTION"
+          {...getOverrideProps(overrides, "categoryoption3")}
+        ></option>
+        <option
           children="Custom"
           value="CUSTOM"
-          {...getOverrideProps(overrides, "categoryoption3")}
+          {...getOverrideProps(overrides, "categoryoption4")}
         ></option>
       </SelectField>
       <TextField

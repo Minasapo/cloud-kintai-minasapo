@@ -17,7 +17,15 @@ export function calcTotalWorkTime(
   return diff;
 }
 
-export function WorkTimeItem() {
+interface WorkTimeItemProps {
+  highlightStartTime?: boolean;
+  highlightEndTime?: boolean;
+}
+
+export function WorkTimeItem({
+  highlightStartTime = false,
+  highlightEndTime = false,
+}: WorkTimeItemProps) {
   const { workDate, control, watch, setValue, getValues } = useContext(
     AttendanceEditContext
   );
@@ -47,7 +55,7 @@ export function WorkTimeItem() {
           <Box>
             <Stack direction="row" spacing={1}>
               <Box>
-                <StartTimeInput />
+                <StartTimeInput highlight={highlightStartTime} />
               </Box>
               <Box>
                 <Typography variant="body1" sx={{ py: 1 }}>
@@ -55,7 +63,7 @@ export function WorkTimeItem() {
                 </Typography>
               </Box>
               <Box>
-                <EndTimeInput />
+                <EndTimeInput highlight={highlightEndTime} />
               </Box>
             </Stack>
           </Box>

@@ -9,7 +9,11 @@ import { extractExistingWorkflowComments } from "@/features/workflow/comment-thr
 import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import type { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
-import { CATEGORY_LABELS } from "@/lib/workflowLabels";
+import {
+  CATEGORY_LABELS,
+  resolveClockCorrectionLabel,
+} from "@/lib/workflowLabels";
+import { parseTimeToISO } from "@/shared/lib/time";
 
 export type WorkflowEditLoaderState = {
   category: string;
@@ -25,10 +29,10 @@ export type WorkflowEditLoaderState = {
   setPaidReason: (value: string) => void;
   overtimeDate: string;
   setOvertimeDate: (value: string) => void;
-  overtimeStart: string;
-  setOvertimeStart: (value: string) => void;
-  overtimeEnd: string;
-  setOvertimeEnd: (value: string) => void;
+  overtimeStart: string | null;
+  setOvertimeStart: (value: string | null) => void;
+  overtimeEnd: string | null;
+  setOvertimeEnd: (value: string | null) => void;
   overtimeReason: string;
   setOvertimeReason: (value: string) => void;
   draftMode: boolean;
@@ -49,8 +53,8 @@ export function useWorkflowEditLoaderState(
   const [absenceDate, setAbsenceDate] = useState("");
   const [paidReason, setPaidReason] = useState("");
   const [overtimeDate, setOvertimeDate] = useState("");
-  const [overtimeStart, setOvertimeStart] = useState("");
-  const [overtimeEnd, setOvertimeEnd] = useState("");
+  const [overtimeStart, setOvertimeStart] = useState<string | null>(null);
+  const [overtimeEnd, setOvertimeEnd] = useState<string | null>(null);
   const [overtimeReason, setOvertimeReason] = useState("");
   const [draftMode, setDraftMode] = useState(true);
   const [applicant, setApplicant] = useState<StaffType | null>(null);
@@ -60,8 +64,10 @@ export function useWorkflowEditLoaderState(
 
   useEffect(() => {
     const nextCategoryLabel = workflow.category
-      ? CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
-        workflow.category
+      ? workflow.category === WorkflowCategory.CLOCK_CORRECTION
+        ? resolveClockCorrectionLabel(workflow.overTimeDetails?.reason)
+        : CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
+          workflow.category
       : "";
     setCategory(nextCategoryLabel);
 
@@ -71,14 +77,21 @@ export function useWorkflowEditLoaderState(
     setApplicationDate(formatDateSlash(appDate));
 
     if (workflow.overTimeDetails) {
-      setOvertimeDate(isoDateFromTimestamp(workflow.overTimeDetails.date));
-      setOvertimeStart(workflow.overTimeDetails.startTime || "");
-      setOvertimeEnd(workflow.overTimeDetails.endTime || "");
+      const overtimeDate = isoDateFromTimestamp(workflow.overTimeDetails.date);
+      setOvertimeDate(overtimeDate);
+
+      // HH:mm形式をISO形式に変換
+      const startTime = workflow.overTimeDetails.startTime;
+      const endTime = workflow.overTimeDetails.endTime;
+      setOvertimeStart(
+        startTime ? parseTimeToISO(startTime, overtimeDate) : null
+      );
+      setOvertimeEnd(endTime ? parseTimeToISO(endTime, overtimeDate) : null);
       setOvertimeReason(workflow.overTimeDetails.reason || "");
     } else {
       setOvertimeDate("");
-      setOvertimeStart("");
-      setOvertimeEnd("");
+      setOvertimeStart(null);
+      setOvertimeEnd(null);
       setOvertimeReason("");
     }
 

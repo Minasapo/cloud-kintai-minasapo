@@ -38,18 +38,19 @@ export default function HeaderBar({
   const headerBackground = themeColor ?? HEADER_BACKGROUND;
 
   return (
-    <header>
+    <header style={{ overflow: "hidden", width: "100%" }}>
       <Container
         maxWidth={false}
         disableGutters
-        sx={{ p: 0, backgroundColor: headerBackground }}
+        sx={{ p: 0, backgroundColor: headerBackground, overflow: "hidden" }}
       >
         <Box
           sx={{
             width: "100%",
-            maxWidth: HEADER_CONTENT_MAX_WIDTH,
-            mx: "auto",
-            px: HEADER_PADDING_X,
+            maxWidth: { xs: "100%", md: HEADER_CONTENT_MAX_WIDTH },
+            mx: { xs: 0, md: "auto" },
+            px: { xs: "8px", md: HEADER_PADDING_X },
+            overflow: "hidden",
           }}
         >
           <Stack
@@ -58,18 +59,21 @@ export default function HeaderBar({
             color={HEADER_TEXT}
             sx={{
               width: "100%",
+              maxWidth: "100%",
               height: HEADER_HEIGHT,
               minHeight: HEADER_HEIGHT,
               boxSizing: "border-box",
               py: HEADER_PADDING_Y,
-              gap: HEADER_GAP,
+              gap: { xs: "4px", md: HEADER_GAP },
+              overflow: "hidden",
             }}
           >
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                flexShrink: 0,
+                justifyContent: "flex-start",
+                flexShrink: { xs: 2, md: 0 },
                 minWidth: 0,
                 height: "100%",
               }}
@@ -95,11 +99,11 @@ export default function HeaderBar({
               alignItems="center"
               justifyContent="flex-end"
               sx={{
+                flexGrow: { xs: 1, md: 0 },
                 flexShrink: 0,
-                minWidth: 0,
-                ml: "auto",
-                columnGap: HEADER_GAP,
-                rowGap: HEADER_GAP,
+                minWidth: "fit-content",
+                columnGap: { xs: "4px", md: HEADER_GAP },
+                rowGap: { xs: "4px", md: HEADER_GAP },
               }}
             >
               {externalLinks}

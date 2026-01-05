@@ -98,10 +98,10 @@ describe("applyWorkflowFilters", () => {
   });
 
   it("filters by status label or raw value", () => {
-    expect(filter({ status: WorkflowStatus.PENDING })).toEqual(["wf-b"]);
-    expect(filter({ status: STATUS_LABELS[WorkflowStatus.APPROVED] })).toEqual([
-      "wf-a",
-    ]);
+    expect(filter({ status: [WorkflowStatus.PENDING] })).toEqual(["wf-b"]);
+    expect(
+      filter({ status: [STATUS_LABELS[WorkflowStatus.APPROVED]] })
+    ).toEqual(["wf-a"]);
   });
 
   it("filters by application date range", () => {
@@ -120,6 +120,8 @@ describe("applyWorkflowFilters", () => {
 describe("isWorkflowFilterActive", () => {
   it("detects when any filter is populated", () => {
     expect(isWorkflowFilterActive({})).toBe(false);
-    expect(isWorkflowFilterActive({ status: WorkflowStatus.DRAFT })).toBe(true);
+    expect(isWorkflowFilterActive({ status: [WorkflowStatus.DRAFT] })).toBe(
+      true
+    );
   });
 });
