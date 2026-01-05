@@ -24,8 +24,6 @@ import {
   Stack,
   styled,
   Switch,
-  Tab,
-  Tabs,
   Typography,
 } from "@mui/material";
 import {
@@ -63,34 +61,23 @@ import { SubstituteHolidayDateInput } from "@/pages/attendance/edit/DesktopEdito
 import ChangeRequestDialog from "./ChangeRequestDialog/ChangeRequestDialog";
 // eslint-disable-next-line import/no-cycle
 import EditAttendanceHistoryList from "./EditAttendanceHistoryList/EditAttendanceHistoryList";
-import { GoDirectlyFlagCheckbox } from "./GoDirectlyFlagCheckbox";
 import { useAttendanceRecord } from "./hooks/useAttendanceRecord";
 import IsDeemedHolidayFlagInput from "./IsDeemedHolidayFlagInput";
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
 } from "./items/HourlyPaidHolidayTimeItem";
-import ProductionTimeItem from "./items/ProductionTimeItem";
 // eslint-disable-next-line import/no-cycle
 import RemarksItem from "./items/RemarksItem";
 // eslint-disable-next-line import/no-cycle
-import {
-  calcTotalRestTime,
-  RestTimeItem,
-} from "./items/RestTimeItem/RestTimeItem";
-import SeparatorItem from "./items/SeparatorItem";
-import StaffNameItem from "./items/StaffNameItem";
+import { calcTotalRestTime } from "./items/RestTimeItem/RestTimeItem";
 import WorkDateItem from "./items/WorkDateItem";
-import {
-  calcTotalWorkTime,
-  WorkTimeItem,
-} from "./items/WorkTimeItem/WorkTimeItem";
-import WorkTypeItem from "./items/WorkTypeItem";
-import { LunchRestTimeNotSetWarning } from "./LunchRestTimeNotSetWarning";
+import { calcTotalWorkTime } from "./items/WorkTimeItem/WorkTimeItem";
 import MoveDateItem from "./MoveDateItem";
 import PaidHolidayFlagInputCommon from "./PaidHolidayFlagInput";
 import QuickInputButtons from "./QuickInputButtons";
-import ReturnDirectlyFlagInput from "./ReturnDirectlyFlagInput";
 import { SystemCommentList } from "./SystemCommentList";
+import { AttendanceEditFormSkeleton } from "./components/AttendanceEditFormSkeleton";
+import { VacationTabs } from "./components/VacationTabs";
 
 const SaveButton = styled(Button)(({ theme }) => ({
   width: 150,
@@ -686,18 +673,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         .filter((item) => !item.completed)
     : [];
 
-  function TabPanel({
-    children,
-    value,
-    index,
-  }: {
-    children: React.ReactNode;
-    value: number;
-    index: number;
-  }) {
-    return <>{value === index ? <Box sx={{ pt: 2 }}>{children}</Box> : null}</>;
-  }
-
   return (
     <AttendanceEditProvider
       value={{
@@ -904,329 +879,244 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                 </Box>
               </GroupContainer>
 
-              <GroupContainer>
-                <Stack spacing={2}>
-                  <StaffNameItem />
-                  <WorkTypeItem />
-                </Stack>
-              </GroupContainer>
-
-              <GroupContainer>
-                <WorkTimeItem
-                  highlightStartTime={highlightStartTime}
-                  highlightEndTime={highlightEndTime}
-                />
-                <GoDirectlyFlagCheckbox
-                  name="goDirectlyFlag"
-                  control={control}
-                  disabled={changeRequests.length > 0 || !!readOnly}
-                  onChangeExtra={(checked: boolean) => {
-                    if (checked) {
-                      setValue(
-                        "startTime",
-                        resolveConfigTimeOnDate(
-                          getStartTime(),
-                          getValues("startTime") as string | null | undefined,
-                          workDate,
-                          targetWorkDate
-                        )
-                      );
-                      // トリガーハイライトアニメーション
-                      setHighlightStartTime(true);
-                      setTimeout(() => setHighlightStartTime(false), 2500);
-                    }
-                  }}
-                />
-                <ReturnDirectlyFlagInput
-                  onHighlightEndTime={setHighlightEndTime}
-                />
-
-                <Stack direction="row">
-                  <Box
-                    sx={{ fontWeight: "bold", width: "150px" }}
-                  >{`休憩時間(${restFields.length}件)`}</Box>
-                  <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                    {restFields.length === 0 && (
-                      <Stack direction="column" spacing={1}>
-                        <Alert severity="info">
-                          昼休憩はスタッフが退勤打刻時に{lunchRestStartTime}〜
-                          {lunchRestEndTime}で自動打刻されます。
-                        </Alert>
-                        {visibleRestWarning && (
-                          <Box>
-                            <LunchRestTimeNotSetWarning
-                              targetWorkDate={targetWorkDate}
-                            />
-                          </Box>
-                        )}
-                      </Stack>
-                    )}
-
-                    {restFields.map((rest, index) => (
-                      <RestTimeItem key={index} rest={rest} index={index} />
-                    ))}
-
-                    <Box>
-                      <IconButton
-                        aria-label="staff-search"
-                        onClick={() =>
-                          restAppend({ startTime: null, endTime: null })
-                        }
-                        disabled={!!readOnly || isOnBreak}
-                      >
-                        <AddAlarmIcon />
-                      </IconButton>
-                    </Box>
-                  </Stack>
-                </Stack>
-
-                <Box>
-                  <SeparatorItem />
-                </Box>
-
-                <Box>
-                  <ProductionTimeItem
-                    time={totalProductionTime}
-                    hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
-                  />
-                </Box>
-              </GroupContainer>
-
-              {/* 休暇タブ群（長いので省略せず既存ロジックを再利用） */}
-              <GroupContainer>
-                {(() => {
-                  const tabs: { label: string; panel: JSX.Element }[] = [];
-                  // 振替休日
-                  tabs.push({
+              <AttendanceEditFormSkeleton
+                control={control}
+                setValue={setValue}
+                getValues={getValues}
+                highlightStartTime={highlightStartTime}
+                highlightEndTime={highlightEndTime}
+                onHighlightStartTime={setHighlightStartTime}
+                onHighlightEndTime={setHighlightEndTime}
+                restFields={restFields}
+                restAppend={restAppend}
+                lunchRestStartTime={lunchRestStartTime}
+                lunchRestEndTime={lunchRestEndTime}
+                visibleRestWarning={visibleRestWarning}
+                totalProductionTime={totalProductionTime}
+                totalHourlyPaidHolidayTime={totalHourlyPaidHolidayTime}
+                readOnly={readOnly}
+                changeRequests={changeRequests}
+                isOnBreak={isOnBreak}
+                targetWorkDate={targetWorkDate}
+                onGoDirectlyChange={(checked) => {
+                  if (checked) {
+                    setValue(
+                      "startTime",
+                      resolveConfigTimeOnDate(
+                        getStartTime(),
+                        getValues("startTime") as string | null | undefined,
+                        workDate,
+                        targetWorkDate
+                      )
+                    );
+                    setHighlightStartTime(true);
+                    setTimeout(() => setHighlightStartTime(false), 2500);
+                  }
+                }}
+                vacationTabsContent={(() => {
+                  const items: { label: string; content: JSX.Element }[] = [];
+                  items.push({
                     label: "振替休日",
-                    panel: (
-                      <TabPanel value={vacationTab} index={tabs.length}>
-                        <SubstituteHolidayDateInput />
-                      </TabPanel>
-                    ),
+                    content: <SubstituteHolidayDateInput />,
                   });
-                  // 有給(1日)
-                  tabs.push({
+                  items.push({
                     label: "有給(1日)",
-                    panel: (
-                      <TabPanel value={vacationTab} index={tabs.length}>
-                        <PaidHolidayFlagInputCommon
-                          label="有給休暇(1日)"
-                          control={control}
-                          setValue={setValue}
-                          workDate={
-                            workDate ? workDate.toISOString() : undefined
-                          }
-                          setPaidHolidayTimes={true}
-                          disabled={changeRequests.length > 0 || !!readOnly}
-                          restReplace={restReplace}
-                          getValues={getValues}
-                        />
-                      </TabPanel>
+                    content: (
+                      <PaidHolidayFlagInputCommon
+                        label="有給休暇(1日)"
+                        control={control}
+                        setValue={setValue}
+                        workDate={workDate ? workDate.toISOString() : undefined}
+                        setPaidHolidayTimes={true}
+                        disabled={changeRequests.length > 0 || !!readOnly}
+                        restReplace={restReplace}
+                        getValues={getValues}
+                      />
                     ),
                   });
                   if (getAbsentEnabled && getAbsentEnabled()) {
-                    tabs.push({
+                    items.push({
                       label: "欠勤",
-                      panel: (
-                        <TabPanel value={vacationTab} index={tabs.length}>
-                          <Box sx={{ mt: 1 }}>
-                            <Stack direction="row" alignItems={"center"}>
-                              <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                                欠勤
-                              </Box>
-                              <Box>
-                                <Controller
-                                  name="absentFlag"
-                                  control={control}
-                                  render={({ field }) => (
-                                    <Checkbox
-                                      {...field}
-                                      checked={field.value || false}
-                                      disabled={
-                                        changeRequests.length > 0 || !!readOnly
-                                      }
-                                    />
-                                  )}
-                                />
-                              </Box>
-                            </Stack>
-                          </Box>
-                        </TabPanel>
+                      content: (
+                        <Box sx={{ mt: 1 }}>
+                          <Stack direction="row" alignItems={"center"}>
+                            <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                              欠勤
+                            </Box>
+                            <Box>
+                              <Controller
+                                name="absentFlag"
+                                control={control}
+                                render={({ field }) => (
+                                  <Checkbox
+                                    {...field}
+                                    checked={field.value || false}
+                                    disabled={
+                                      changeRequests.length > 0 || !!readOnly
+                                    }
+                                  />
+                                )}
+                              />
+                            </Box>
+                          </Stack>
+                        </Box>
                       ),
                     });
                   }
                   if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
-                    tabs.push({
+                    items.push({
                       label: "特別休暇",
-                      panel: (
-                        <TabPanel value={vacationTab} index={tabs.length}>
-                          <Box sx={{ mt: 1 }}>
-                            <Stack direction="row" alignItems={"center"}>
-                              <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                                特別休暇
-                              </Box>
-                              <Box>
-                                <Controller
-                                  name="specialHolidayFlag"
-                                  control={control}
-                                  render={({ field }) => (
-                                    <Checkbox
-                                      {...field}
-                                      checked={field.value || false}
-                                      disabled={
-                                        changeRequests.length > 0 || !!readOnly
-                                      }
-                                    />
-                                  )}
-                                />
-                              </Box>
-                            </Stack>
-                          </Box>
-                        </TabPanel>
+                      content: (
+                        <Box sx={{ mt: 1 }}>
+                          <Stack direction="row" alignItems={"center"}>
+                            <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                              特別休暇
+                            </Box>
+                            <Box>
+                              <Controller
+                                name="specialHolidayFlag"
+                                control={control}
+                                render={({ field }) => (
+                                  <Checkbox
+                                    {...field}
+                                    checked={field.value || false}
+                                    disabled={
+                                      changeRequests.length > 0 || !!readOnly
+                                    }
+                                  />
+                                )}
+                              />
+                            </Box>
+                          </Stack>
+                        </Box>
                       ),
                     });
                   }
                   if (getHourlyPaidHolidayEnabled()) {
-                    tabs.push({
+                    items.push({
                       label: `時間単位(${hourlyPaidHolidayTimeFields.length}件)`,
-                      panel: (
-                        <TabPanel value={vacationTab} index={tabs.length}>
-                          <Stack spacing={1}>
-                            <Stack direction="row">
-                              <Box
-                                sx={{ fontWeight: "bold", width: "150px" }}
-                              >{`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}</Box>
-                              <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                                {hourlyPaidHolidayTimeFields.length === 0 && (
-                                  <Box
-                                    sx={{
-                                      color: "text.secondary",
-                                      fontSize: 14,
-                                    }}
-                                  >
-                                    時間単位休暇の時間帯を追加してください。
-                                  </Box>
-                                )}
-                                {hourlyPaidHolidayTimeFields.map(
-                                  (hourlyPaidHolidayTime, index) => (
-                                    <HourlyPaidHolidayTimeItem
-                                      key={hourlyPaidHolidayTime.id}
-                                      time={hourlyPaidHolidayTime}
-                                      index={index}
-                                    />
-                                  )
-                                )}
-                                <Box>
-                                  <IconButton
-                                    aria-label="add-hourly-paid-holiday-time"
-                                    onClick={() =>
-                                      hourlyPaidHolidayTimeAppend({
-                                        startTime: null,
-                                        endTime: null,
-                                      })
-                                    }
-                                    disabled={!!readOnly}
-                                  >
-                                    <AddAlarmIcon />
-                                  </IconButton>
+                      content: (
+                        <Stack spacing={1}>
+                          <Stack direction="row">
+                            <Box
+                              sx={{ fontWeight: "bold", width: "150px" }}
+                            >{`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}</Box>
+                            <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                              {hourlyPaidHolidayTimeFields.length === 0 && (
+                                <Box
+                                  sx={{ color: "text.secondary", fontSize: 14 }}
+                                >
+                                  時間単位休暇の時間帯を追加してください。
                                 </Box>
-                              </Stack>
+                              )}
+                              {hourlyPaidHolidayTimeFields.map(
+                                (hourlyPaidHolidayTime, index) => (
+                                  <HourlyPaidHolidayTimeItem
+                                    key={hourlyPaidHolidayTime.id}
+                                    time={hourlyPaidHolidayTime}
+                                    index={index}
+                                  />
+                                )
+                              )}
+                              <Box>
+                                <IconButton
+                                  aria-label="add-hourly-paid-holiday-time"
+                                  onClick={() =>
+                                    hourlyPaidHolidayTimeAppend({
+                                      startTime: null,
+                                      endTime: null,
+                                    })
+                                  }
+                                  disabled={!!readOnly}
+                                >
+                                  <AddAlarmIcon />
+                                </IconButton>
+                              </Box>
                             </Stack>
                           </Stack>
-                        </TabPanel>
+                        </Stack>
                       ),
                     });
                   }
-                  // 指定休日
-                  tabs.push({
+                  items.push({
                     label: "指定休日",
-                    panel: (
-                      <TabPanel value={vacationTab} index={tabs.length}>
-                        <Box sx={{ mt: 1 }}>
-                          <IsDeemedHolidayFlagInput
-                            control={control}
-                            name="isDeemedHoliday"
-                            disabled={
-                              !(staff?.workType === "shift") || !!readOnly
-                            }
-                            helperText={
-                              staff?.workType === "shift"
-                                ? undefined
-                                : "※シフト勤務のスタッフのみ設定できます"
-                            }
-                          />
-                        </Box>
-                      </TabPanel>
+                    content: (
+                      <Box sx={{ mt: 1 }}>
+                        <IsDeemedHolidayFlagInput
+                          control={control}
+                          name="isDeemedHoliday"
+                          disabled={
+                            !(staff?.workType === "shift") || !!readOnly
+                          }
+                          helperText={
+                            staff?.workType === "shift"
+                              ? undefined
+                              : "※シフト勤務のスタッフのみ設定できます"
+                          }
+                        />
+                      </Box>
                     ),
                   });
 
                   return (
-                    <>
-                      <Tabs
-                        value={vacationTab}
-                        onChange={(_, v) => setVacationTab(v)}
-                        aria-label="vacation-tabs"
-                        sx={{ borderBottom: 1, borderColor: "divider" }}
-                      >
-                        {tabs.map((t, i) => (
-                          <Tab key={i} label={t.label} />
-                        ))}
-                      </Tabs>
-                      {tabs.map((t, i) => (
-                        <div key={`panel-${i}`}>{t.panel}</div>
-                      ))}
-                    </>
+                    <VacationTabs
+                      value={vacationTab}
+                      onChange={setVacationTab}
+                      items={items}
+                      panelPadding={2}
+                      tabsProps={{
+                        "aria-label": "vacation-tabs",
+                        sx: { borderBottom: 1, borderColor: "divider" },
+                      }}
+                    />
                   );
                 })()}
-              </GroupContainer>
-
-              <GroupContainer title="備考">
-                <RemarksItem />
-              </GroupContainer>
-
-              {!readOnly && (
-                <GroupContainer>
-                  {attendance?.updatedAt && (
-                    <Stack direction="row" alignItems={"center"}>
-                      <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                        最終更新日時
-                      </Box>
-                      <Box sx={{ flexGrow: 2 }}>
-                        <Typography
-                          variant="body1"
-                          color="text.secondary"
-                          sx={{ pl: 1 }}
-                        >
-                          {dayjs(attendance.updatedAt).format(
-                            "YYYY/MM/DD HH:mm:ss"
-                          )}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  )}
-                  <Box>
-                    <Stack direction="row" alignItems={"center"}>
-                      <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                        メール設定
-                      </Box>
+                remarksContent={<RemarksItem />}
+                additionalBottomContent={
+                  !readOnly ? (
+                    <GroupContainer>
+                      {attendance?.updatedAt && (
+                        <Stack direction="row" alignItems={"center"}>
+                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                            最終更新日時
+                          </Box>
+                          <Box sx={{ flexGrow: 2 }}>
+                            <Typography
+                              variant="body1"
+                              color="text.secondary"
+                              sx={{ pl: 1 }}
+                            >
+                              {dayjs(attendance.updatedAt).format(
+                                "YYYY/MM/DD HH:mm:ss"
+                              )}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      )}
                       <Box>
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={enabledSendMail}
-                              onChange={() =>
-                                setEnabledSendMail(!enabledSendMail)
+                        <Stack direction="row" alignItems={"center"}>
+                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                            メール設定
+                          </Box>
+                          <Box>
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={enabledSendMail}
+                                  onChange={() =>
+                                    setEnabledSendMail(!enabledSendMail)
+                                  }
+                                />
                               }
+                              label="スタッフに変更通知メールを送信する"
                             />
-                          }
-                          label="スタッフに変更通知メールを送信する"
-                        />
+                          </Box>
+                        </Stack>
                       </Box>
-                    </Stack>
-                  </Box>
-                </GroupContainer>
-              )}
+                    </GroupContainer>
+                  ) : undefined
+                }
+              />
 
               <Stack
                 direction="row"

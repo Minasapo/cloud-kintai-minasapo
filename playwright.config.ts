@@ -38,6 +38,16 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
 
+  /* Start dev server before running tests */
+  webServer: {
+    command: "npm start",
+    url: "http://localhost:5173",
+    reuseExistingServer: !process.env.CI,
+    env: {
+      VITE_CHECKER_OVERLAY: "false",
+    },
+  },
+
   /* Configure projects for major browsers */
   projects: [
     { name: "setup", testMatch: /.*\.setup\.ts/ },
