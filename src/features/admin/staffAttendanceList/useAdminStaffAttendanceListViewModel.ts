@@ -1,8 +1,8 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import {
+  type DuplicateAttendanceInfo,
   useListAttendancesByDateRangeQuery,
   useUpdateAttendanceMutation,
-  type DuplicateAttendanceInfo,
 } from "@entities/attendance/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
@@ -16,8 +16,8 @@ import {
   Staff,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
 import {
@@ -70,11 +70,12 @@ export const useAdminStaffAttendanceListViewModel = (
     error: closeDatesError,
   } = useCloseDates();
 
-  // カレンダー表示月の開始日と終了日を計算（前後1ヶ月を含む）
+  // カレンダー表示月の初期データは前月と当月の2ヶ月分を取得
   const dateRange = useMemo(() => {
     const month = currentMonth ?? dayjs().startOf("month");
+    // 前月の月初から当月の月末までを取得
     const startDate = month.subtract(1, "month").startOf("month");
-    const endDate = month.add(1, "month").endOf("month");
+    const endDate = month.endOf("month");
     return {
       startDate: startDate.format("YYYY-MM-DD"),
       endDate: endDate.format("YYYY-MM-DD"),
@@ -100,9 +101,78 @@ export const useAdminStaffAttendanceListViewModel = (
     refetch: refetchAttendances,
   } = queryResult;
 
-  const attendances: Attendance[] = attendancesData ?? [];
-  // useListAttendancesByDateRangeQueryは重複を返さないが、型の互換性のため空配列を返す
-  const duplicateAttendances: DuplicateAttendanceInfo[] = [];
+  // 取得したデータから日付ごとのマップを作成
+  const attendanceMap = useMemo(() => {
+    const map = new Map<string, Attendance[]>();
+    (attendancesData ?? []).forEach((attendance) => {
+      const existing = map.get(attendance.workDate) ?? [];
+      existing.push(attendance);
+      map.set(attendance.workDate, existing);
+    });
+    return map;
+  }, [attendancesData]);
+
+  // 日付範囲内のすべての日付に対してAttendanceを生成（空の日も含む）
+  const attendances: Attendance[] = useMemo(() => {
+    const result: Attendance[] = [];
+    const start = dayjs(dateRange.startDate);
+    const end = dayjs(dateRange.endDate);
+    let current = start;
+
+    while (current.isBefore(end) || current.isSame(end, "day")) {
+      const dateStr = current.format("YYYY-MM-DD");
+      const matches = attendanceMap.get(dateStr) ?? [];
+
+      if (matches.length > 0) {
+        // 実際のデータがある場合は最初のレコードを使用
+        result.push(matches[0]);
+      } else {
+        // データがない場合は空のAttendanceを生成
+        result.push({
+          __typename: "Attendance",
+          id: "",
+          staffId: staffId ?? "",
+          workDate: dateStr,
+          startTime: "",
+          endTime: "",
+          absentFlag: false,
+          goDirectlyFlag: false,
+          returnDirectlyFlag: false,
+          rests: [],
+          remarks: "",
+          paidHolidayFlag: false,
+          specialHolidayFlag: false,
+          isDeemedHoliday: false,
+          substituteHolidayDate: null,
+          changeRequests: [],
+          createdAt: "",
+          updatedAt: "",
+        });
+      }
+
+      current = current.add(1, "day");
+    }
+
+    return result;
+  }, [attendancesData, attendanceMap, dateRange, staffId]);
+
+  // 重複チェック
+  const duplicateAttendances: DuplicateAttendanceInfo[] = useMemo(() => {
+    const duplicates: DuplicateAttendanceInfo[] = [];
+
+    attendanceMap.forEach((matches, workDate) => {
+      if (matches.length > 1) {
+        duplicates.push({
+          workDate,
+          ids: matches.map((a) => a.id).filter(Boolean),
+          staffId: staffId ?? "",
+        });
+      }
+    });
+
+    return duplicates;
+  }, [attendanceMap, staffId]);
+
   const attendanceLoading =
     (!shouldFetchAttendances ||
       isAttendancesInitialLoading ||
