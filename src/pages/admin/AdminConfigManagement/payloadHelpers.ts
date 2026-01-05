@@ -4,7 +4,9 @@ import {
 } from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
 
-export const formatTime = (time: Dayjs) => time.format("HH:mm");
+import { DEFAULT_CONFIG_NAME, TIME_FORMAT } from "./constants";
+
+export const formatTime = (time: Dayjs) => time.format(TIME_FORMAT);
 
 export const buildStandardWorkHours = (
   start: Dayjs,
@@ -174,7 +176,7 @@ export const buildCreatePayload = (
   state: Omit<ConfigFormState, "id">
 ): CreateAppConfigInput => {
   return {
-    name: "default",
+    name: DEFAULT_CONFIG_NAME,
     ...transformFormStateToPayload(state),
   };
 };

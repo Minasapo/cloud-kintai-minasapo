@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+import { DEFAULT_CONFIG_NAME } from "../constants";
 import {
   buildCreatePayload,
   buildUpdatePayload,
@@ -41,7 +42,7 @@ describe("Payload Builders", () => {
     it("should generate CreateAppConfigInput with name field", () => {
       const payload = buildCreatePayload(baseFormState);
 
-      expect(payload.name).toBe("default");
+      expect(payload.name).toBe(DEFAULT_CONFIG_NAME);
       expect(payload.workStartTime).toBe("09:00");
       expect(payload.workEndTime).toBe("18:00");
       expect(payload.lunchRestStartTime).toBe("12:00");

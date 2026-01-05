@@ -23,6 +23,7 @@ import {
   toggleEnabledAt,
   updateItem,
 } from "./arrayHelpers";
+import { TIME_FORMAT } from "./constants";
 import QuickInputSection from "./QuickInputSection";
 
 type Entry = { time: Dayjs; enabled: boolean };
@@ -43,13 +44,13 @@ export default function QuickInput() {
   useEffect(() => {
     setQuickInputStartTimes(
       getQuickInputStartTimes().map((entry) => ({
-        time: dayjs(entry.time, "HH:mm"),
+        time: dayjs(entry.time, TIME_FORMAT),
         enabled: entry.enabled,
       }))
     );
     setQuickInputEndTimes(
       getQuickInputEndTimes().map((entry) => ({
-        time: dayjs(entry.time, "HH:mm"),
+        time: dayjs(entry.time, TIME_FORMAT),
         enabled: entry.enabled,
       }))
     );

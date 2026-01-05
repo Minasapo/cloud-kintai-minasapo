@@ -16,6 +16,13 @@ import {
   toggleEnabledAt,
   updateItem,
 } from "./arrayHelpers";
+import {
+  DEFAULT_AM_HOLIDAY_END,
+  DEFAULT_AM_HOLIDAY_START,
+  DEFAULT_PM_HOLIDAY_END,
+  DEFAULT_PM_HOLIDAY_START,
+  TIME_FORMAT,
+} from "./constants";
 import { buildCreatePayload, buildUpdatePayload } from "./payloadHelpers";
 
 export type QuickInputEntry = { time: Dayjs; enabled: boolean };
@@ -75,16 +82,16 @@ export function useAdminConfigForm() {
   const [hourlyPaidHolidayEnabled, setHourlyPaidHolidayEnabled] =
     useState<boolean>(false);
   const [amHolidayStartTime, setAmHolidayStartTime] = useState<Dayjs | null>(
-    dayjs("09:00", "HH:mm")
+    dayjs(DEFAULT_AM_HOLIDAY_START, TIME_FORMAT)
   );
   const [amHolidayEndTime, setAmHolidayEndTime] = useState<Dayjs | null>(
-    dayjs("12:00", "HH:mm")
+    dayjs(DEFAULT_AM_HOLIDAY_END, TIME_FORMAT)
   );
   const [pmHolidayStartTime, setPmHolidayStartTime] = useState<Dayjs | null>(
-    dayjs("13:00", "HH:mm")
+    dayjs(DEFAULT_PM_HOLIDAY_START, TIME_FORMAT)
   );
   const [pmHolidayEndTime, setPmHolidayEndTime] = useState<Dayjs | null>(
-    dayjs("18:00", "HH:mm")
+    dayjs(DEFAULT_PM_HOLIDAY_END, TIME_FORMAT)
   );
   const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
     useState<boolean>(false);
@@ -106,13 +113,13 @@ export function useAdminConfigForm() {
     const startTimes = getQuickInputStartTimes();
     setQuickInputStartTimes(
       startTimes.map((entry) => ({
-        time: dayjs(entry.time, "HH:mm"),
+        time: dayjs(entry.time, TIME_FORMAT),
         enabled: entry.enabled,
       }))
     );
     setQuickInputEndTimes(
       getQuickInputEndTimes().map((entry) => ({
-        time: dayjs(entry.time, "HH:mm"),
+        time: dayjs(entry.time, TIME_FORMAT),
         enabled: entry.enabled,
       }))
     );
