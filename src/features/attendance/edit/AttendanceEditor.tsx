@@ -732,6 +732,14 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       }}
     >
       <Stack spacing={2} sx={{ pb: 5 }}>
+        {isSubmitting && (
+          <Box sx={{ mt: 1 }}>
+            <LinearProgress />
+            <Typography variant="body2" sx={{ mt: 1, textAlign: "center" }}>
+              保存中...
+            </Typography>
+          </Box>
+        )}
         <Box>
           <Breadcrumbs>
             <Link to="/" color="inherit">
@@ -1153,10 +1161,12 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                       onClick={handleSubmit(onSubmit)}
                       disabled={!isValid || !isDirty || isSubmitting}
                       startIcon={
-                        isSubmitting ? <CircularProgress size={"24"} /> : null
+                        isSubmitting ? (
+                          <CircularProgress size={24} sx={{ mr: 1 }} />
+                        ) : null
                       }
                     >
-                      保存
+                      {isSubmitting ? "保存中..." : "保存"}
                     </SaveButton>
                   )}
                 </Box>

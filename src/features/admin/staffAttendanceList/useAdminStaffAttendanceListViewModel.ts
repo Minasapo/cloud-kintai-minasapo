@@ -70,10 +70,12 @@ export const useAdminStaffAttendanceListViewModel = (
     error: closeDatesError,
   } = useCloseDates();
 
-  // カレンダー表示月の初期データは前月と当月の2ヶ月分を取得
+  // データ取得範囲の計算
+  // 表示月に対して、その前月の1日から当月の末日までのデータを取得する
+  // 例：今日が1月1日で1月を表示している場合 → 12月1日～1月31日のデータを取得
+  // 例：2月を表示している場合 → 1月1日～2月28日のデータを取得
   const dateRange = useMemo(() => {
     const month = currentMonth ?? dayjs().startOf("month");
-    // 前月の月初から当月の月末までを取得
     const startDate = month.subtract(1, "month").startOf("month");
     const endDate = month.endOf("month");
     return {
