@@ -8,7 +8,7 @@ on:
 jobs:
   lint-check:
     if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
-    name: Run ESLint
+    name: Run Lint Checks
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
@@ -32,7 +32,7 @@ jobs:
   jest-test:
     needs: lint-check
     if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
-    name: Run Jest unit tests
+    name: Run Unit Tests
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
@@ -56,7 +56,7 @@ jobs:
   playwright-test:
     needs: jest-test
     if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
-    name: Run Playwright tests daily
+    name: Run E2E Playwright tests
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
