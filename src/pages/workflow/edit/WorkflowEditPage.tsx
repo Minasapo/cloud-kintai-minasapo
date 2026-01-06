@@ -57,6 +57,8 @@ export default function WorkflowEditPage() {
     setEndDate,
     absenceDate,
     setAbsenceDate,
+    absenceReason,
+    setAbsenceReason,
     paidReason,
     setPaidReason,
     overtimeDate,
@@ -85,6 +87,8 @@ export default function WorkflowEditPage() {
       startDate,
       endDate,
       absenceDate,
+      paidReason,
+      absenceReason,
       overtimeDate,
       overtimeStart,
       overtimeEnd,
@@ -249,6 +253,8 @@ export default function WorkflowEditPage() {
               absenceDate={absenceDate}
               setAbsenceDate={setAbsenceDate}
               absenceDateError={absenceDateError}
+              absenceReason={absenceReason}
+              setAbsenceReason={setAbsenceReason}
               overtimeDate={overtimeDate}
               setOvertimeDate={setOvertimeDate}
               overtimeDateError={overtimeDateError}

@@ -13,6 +13,8 @@ const baseState = (
   startDate: "",
   endDate: "",
   absenceDate: "",
+  paidReason: "",
+  absenceReason: "",
   overtimeDate: "",
   overtimeStart: "",
   overtimeEnd: "",

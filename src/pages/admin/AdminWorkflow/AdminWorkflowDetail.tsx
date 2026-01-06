@@ -26,6 +26,8 @@ import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
+
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
@@ -1144,84 +1146,24 @@ export default function AdminWorkflowDetail() {
         {!loading && !error && (
           <Grid container spacing={2}>
             <Grid item xs={12} sm={7}>
+              <WorkflowMetadataPanel
+                workflowId={workflow?.id ?? undefined}
+                fallbackId={id}
+                category={workflow?.category ?? null}
+                categoryLabel={getWorkflowCategoryLabel(workflow)}
+                staffName={staffName}
+                applicationDate={applicationDate}
+                status={workflow?.status ?? null}
+                overTimeDetails={workflow?.overTimeDetails ?? null}
+                approvalSteps={approvalSteps}
+              />
+
               <Grid
                 container
                 rowSpacing={2}
                 columnSpacing={1}
                 alignItems="center"
               >
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    ID
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{workflow?.id ?? id}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    種別
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{getWorkflowCategoryLabel(workflow)}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    申請者
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{staffName}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    申請日
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{applicationDate}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    ステータス
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <StatusChip status={workflow?.status} />
-                </Grid>
-
-                {workflow?.category === WorkflowCategory.OVERTIME && (
-                  <>
-                    <Grid item xs={12} sm={3}>
-                      <Typography variant="body2" color="text.secondary">
-                        残業予定日
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={9}>
-                      <Typography>
-                        {formatDateSlash(workflow?.overTimeDetails?.date)}
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12} sm={3}>
-                      <Typography variant="body2" color="text.secondary">
-                        残業予定時間
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={9}>
-                      <Typography>
-                        {workflow?.overTimeDetails?.startTime} -{" "}
-                        {workflow?.overTimeDetails?.endTime}
-                      </Typography>
-                    </Grid>
-                  </>
-                )}
-
                 <Grid item xs={12}>
                   <Box sx={{ mt: 3 }}>
                     <Typography variant="h6" sx={{ mb: 1 }}>
