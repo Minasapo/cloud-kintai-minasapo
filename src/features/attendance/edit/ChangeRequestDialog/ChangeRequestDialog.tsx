@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { Attendance, UpdateAttendanceInput } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
@@ -42,9 +42,10 @@ export default function ChangeRequestDialog({
   const dispatch = useAppDispatchV2();
   const navigate = useNavigate();
   const [comment, setComment] = useState<string | undefined>(undefined);
+  const [manualClose, setManualClose] = useState(false);
 
   // 派生状態として計算：未完了の変更リクエストがあれば表示
-  const { open, changeRequest } = useMemo(() => {
+  const { open: shouldOpen, changeRequest } = useMemo(() => {
     if (!attendance?.changeRequests) {
       return { open: false, changeRequest: null };
     }
@@ -60,9 +61,16 @@ export default function ChangeRequestDialog({
     return { open: true, changeRequest: changeRequests[0] };
   }, [attendance?.changeRequests]);
 
+  // 実際の表示状態（手動で閉じられていない場合のみ表示）
+  const open = shouldOpen && !manualClose;
+
+  // changeRequestが変わったらmanualCloseをリセット
+  useEffect(() => {
+    setManualClose(false);
+  }, [changeRequest]);
+
   const handleClose = () => {
-    // openは派生状態のため、ダイアログは自動的に閉じる
-    // （changeRequestが完了/却下されると自動的に閉じる）
+    setManualClose(true);
   };
 
   const getWorkDate = () => {
