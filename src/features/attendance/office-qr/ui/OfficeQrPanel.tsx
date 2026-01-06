@@ -46,6 +46,8 @@ export function OfficeQrPanel({
   onCopyUrl,
   onManualRefresh,
 }: OfficeQrPanelProps) {
+  "use memo";
+
   if (!isOfficeModeEnabled) {
     return (
       <Container>

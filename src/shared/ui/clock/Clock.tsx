@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import React from "react";
 
 const Clock = () => {
+  "use memo";
+
   const [time, setTime] = React.useState(dayjs().format("YYYY/MM/DD HH:mm:ss"));
 
   React.useEffect(() => {
