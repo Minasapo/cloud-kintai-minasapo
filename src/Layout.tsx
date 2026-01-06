@@ -55,8 +55,6 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
     loading: closeDatesLoading,
     error: closeDatesError,
   } = useCloseDates();
-  const [fetchStarted, setFetchStarted] = useState(false);
-  const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   const isCurrentDateCovered = useMemo(() => {
@@ -68,32 +66,17 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
     });
   }, [closeDates]);
 
-  useEffect(() => {
-    if (closeDatesLoading) {
-      setFetchStarted(true);
-    }
-  }, [closeDatesLoading]);
-
-  useEffect(() => {
-    if (!fetchStarted || closeDatesLoading) return;
-    if (closeDatesError || dismissed) return;
-
-    setOpen(!isCurrentDateCovered);
-  }, [
-    closeDatesError,
-    closeDatesLoading,
-    dismissed,
-    fetchStarted,
-    isCurrentDateCovered,
-  ]);
+  // 派生状態として計算：ローディングが完了し、エラーがなく、却下されておらず、日付がカバーされていない場合のみ表示
+  const open = useMemo(() => {
+    if (closeDatesLoading || closeDatesError || dismissed) return false;
+    return !isCurrentDateCovered;
+  }, [closeDatesLoading, closeDatesError, dismissed, isCurrentDateCovered]);
 
   const handleLater = useCallback(() => {
-    setOpen(false);
     setDismissed(true);
   }, []);
 
   const handleConfirm = useCallback(() => {
-    setOpen(false);
     setDismissed(true);
     onConfirm();
   }, [onConfirm]);

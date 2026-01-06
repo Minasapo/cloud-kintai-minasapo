@@ -7,6 +7,7 @@ import type {
   ShouldRevalidateFunction,
 } from "react-router-dom";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LazyModule<T extends ComponentType<any>> = { default: T };
 
 type LazyRouteOptions = {
@@ -19,6 +20,7 @@ type LazyRouteOptions = {
   hydrateFallback?: ReactNode | ComponentType;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createLazyRoute<T extends ComponentType<any>>(
   loader: () => Promise<LazyModule<T>>,
   options?: LazyRouteOptions

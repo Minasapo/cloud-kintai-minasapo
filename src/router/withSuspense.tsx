@@ -8,6 +8,7 @@ import {
 
 import PageLoader from "@/shared/ui/feedback/PageLoader";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withSuspense<T extends ComponentType<any>>(
   Component: LazyExoticComponent<T>,
   props?: ComponentProps<T>

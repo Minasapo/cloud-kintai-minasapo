@@ -9,13 +9,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  Attendance,
-  AttendanceChangeRequest,
-  UpdateAttendanceInput,
-} from "@shared/api/graphql/types";
+import { Attendance, UpdateAttendanceInput } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
@@ -45,15 +41,12 @@ export default function ChangeRequestDialog({
 
   const dispatch = useAppDispatchV2();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [changeRequest, setChangeRequest] =
-    useState<AttendanceChangeRequest | null>(null);
   const [comment, setComment] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
+  // 派生状態として計算：未完了の変更リクエストがあれば表示
+  const { open, changeRequest } = useMemo(() => {
     if (!attendance?.changeRequests) {
-      setOpen(false);
-      return;
+      return { open: false, changeRequest: null };
     }
 
     const changeRequests = attendance.changeRequests
@@ -61,16 +54,15 @@ export default function ChangeRequestDialog({
       .filter((item) => !item.completed);
 
     if (changeRequests.length === 0) {
-      setOpen(false);
-      return;
+      return { open: false, changeRequest: null };
     }
 
-    setChangeRequest(changeRequests[0]);
-    setOpen(true);
+    return { open: true, changeRequest: changeRequests[0] };
   }, [attendance?.changeRequests]);
 
   const handleClose = () => {
-    setOpen(false);
+    // openは派生状態のため、ダイアログは自動的に閉じる
+    // （changeRequestが完了/却下されると自動的に閉じる）
   };
 
   const getWorkDate = () => {
