@@ -95,7 +95,49 @@ export default function NewWorkflowPage() {
     setApplicationDate(`${y}/${m}/${day}`);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const extractErrorMessage = (err: unknown): string => {
+    if (err instanceof Error) {
+      return err.message;
+    }
+
+    if (typeof err === "string") {
+      return err;
+    }
+
+    if (typeof err === "object" && err !== null) {
+      // RTK Query error format
+      if ("data" in err && typeof err.data === "object" && err.data !== null) {
+        const data = err.data as Record<string, unknown>;
+        if ("message" in data && typeof data.message === "string") {
+          return data.message;
+        }
+        if (
+          "errors" in data &&
+          Array.isArray(data.errors) &&
+          data.errors.length > 0
+        ) {
+          const firstError = data.errors[0];
+          if (
+            typeof firstError === "object" &&
+            firstError !== null &&
+            "message" in firstError
+          ) {
+            return String(firstError.message);
+          }
+        }
+      }
+      if ("message" in err && typeof err.message === "string") {
+        return err.message;
+      }
+      if ("error" in err && typeof err.error === "string") {
+        return err.error;
+      }
+    }
+
+    return "ワークフローの作成に失敗しました。";
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formState: WorkflowFormState = {
       categoryLabel: category,
@@ -210,53 +252,15 @@ export default function NewWorkflowPage() {
       }
     }
 
-    (async () => {
-      try {
-        await createWorkflow(input);
-        dispatch(setSnackbarSuccess("ワークフローを作成しました。"));
-        navigate("/workflow", { replace: true });
-      } catch (err) {
-        console.error("Workflow creation error:", err);
-        let errorMessage = "ワークフローの作成に失敗しました。";
-
-        if (err instanceof Error) {
-          errorMessage = err.message;
-        } else if (typeof err === "object" && err !== null) {
-          // RTK Query error format
-          if (
-            "data" in err &&
-            typeof err.data === "object" &&
-            err.data !== null
-          ) {
-            const data = err.data as Record<string, unknown>;
-            if ("message" in data && typeof data.message === "string") {
-              errorMessage = data.message;
-            } else if (
-              "errors" in data &&
-              Array.isArray(data.errors) &&
-              data.errors.length > 0
-            ) {
-              const firstError = data.errors[0];
-              if (
-                typeof firstError === "object" &&
-                firstError !== null &&
-                "message" in firstError
-              ) {
-                errorMessage = String(firstError.message);
-              }
-            }
-          } else if ("message" in err && typeof err.message === "string") {
-            errorMessage = err.message;
-          } else if ("error" in err && typeof err.error === "string") {
-            errorMessage = err.error;
-          }
-        } else if (typeof err === "string") {
-          errorMessage = err;
-        }
-
-        dispatch(setSnackbarError(errorMessage));
-      }
-    })();
+    try {
+      await createWorkflow(input);
+      dispatch(setSnackbarSuccess("ワークフローを作成しました。"));
+      navigate("/workflow", { replace: true });
+    } catch (err) {
+      console.error("Workflow creation error:", err);
+      const errorMessage = extractErrorMessage(err);
+      dispatch(setSnackbarError(errorMessage));
+    }
   };
 
   const handleDraftToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
