@@ -2,7 +2,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip, CircularProgress, Stack } from "@mui/material";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
@@ -47,12 +47,17 @@ export default function DownloadForm() {
   // derive workDates from watched start/end date so we can pass to ExportButton
   const startDate = watch("startDate") ?? dayjs();
   const endDate = watch("endDate") ?? dayjs();
-  const workDates: string[] = [];
-  let date = startDate;
-  while (date.isBefore(endDate) || date.isSame(endDate)) {
-    workDates.push(date.format(AttendanceDate.DataFormat));
-    date = date.add(1, "day");
-  }
+
+  // Derived state: compute workDates from startDate and endDate
+  const workDates = useMemo(() => {
+    const dates: string[] = [];
+    let date = startDate;
+    while (date.isBefore(endDate) || date.isSame(endDate)) {
+      dates.push(date.format(AttendanceDate.DataFormat));
+      date = date.add(1, "day");
+    }
+    return dates;
+  }, [startDate, endDate]);
 
   if (staffLoading || closeDateLoading) {
     return <CircularProgress />;

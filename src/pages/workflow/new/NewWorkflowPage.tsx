@@ -18,7 +18,7 @@ import {
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -40,7 +40,7 @@ import {
 } from "@/lib/reducers/snackbarReducer";
 import { designTokenVar } from "@/shared/designSystem";
 import { parseTimeToISO } from "@/shared/lib/time";
-import { dashboardInnerSurfaceSx,PageSection } from "@/shared/ui/layout";
+import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 export default function NewWorkflowPage() {
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
@@ -75,11 +75,16 @@ export default function NewWorkflowPage() {
   const dispatch = useAppDispatchV2();
   const { getStartTime, getEndTime } = useAppConfig();
 
-  useEffect(() => {
-    if (!cognitoUser?.id) return;
-    const match = staffs.find((s) => s.cognitoUserId === cognitoUser.id);
-    setStaff(match || null);
+  // Derived state: find matching staff from staffs
+  const derivedStaff = useMemo(() => {
+    if (!cognitoUser?.id) return undefined;
+    return staffs.find((s) => s.cognitoUserId === cognitoUser.id) || null;
   }, [staffs, cognitoUser]);
+
+  // Update staff state when derived staff changes
+  useEffect(() => {
+    setStaff(derivedStaff);
+  }, [derivedStaff]);
 
   // 申請日は常に当日で自動設定する（スラッシュ区切り: YYYY/MM/DD）
   useEffect(() => {

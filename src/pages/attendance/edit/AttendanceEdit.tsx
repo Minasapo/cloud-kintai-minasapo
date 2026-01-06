@@ -251,12 +251,17 @@ export default function AttendanceEdit() {
     }
   };
 
-  useEffect(() => {
-    if (!cognitoUser?.id) return;
+  // Derived state: find matching staff from staffs
+  const derivedStaff = useMemo(() => {
+    if (!cognitoUser?.id) return undefined;
     const { id: staffId } = cognitoUser;
-    const matchStaff = staffs.find((s) => s.cognitoUserId === staffId);
-    setStaff(matchStaff || null);
+    return staffs.find((s) => s.cognitoUserId === staffId) || null;
   }, [staffs, cognitoUser]);
+
+  // Update staff state when derived staff changes
+  useEffect(() => {
+    setStaff(derivedStaff);
+  }, [derivedStaff]);
 
   useEffect(() => {
     if (!staffId || !targetWorkDateISO) {

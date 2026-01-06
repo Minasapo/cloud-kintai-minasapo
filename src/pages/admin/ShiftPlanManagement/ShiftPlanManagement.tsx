@@ -160,15 +160,15 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
+  // Sync draft to value when not editing
   useEffect(() => {
     if (!isEditing) {
       setDraft(value);
     }
-  }, [isEditing, value]);
+  }, [value, isEditing]);
 
   const handleCommit = useCallback(() => {
     const normalized = sanitizeCapacityValue(draft);
-    setDraft(normalized);
     onCommit(normalized);
     setIsEditing(false);
   }, [draft, onCommit]);
