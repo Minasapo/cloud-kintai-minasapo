@@ -29,7 +29,7 @@ import {
 } from "@shared/api/graphql/types";
 // Breadcrumbs/Title removed per admin UI simplification
 import dayjs from "dayjs";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { Activity, useContext, useEffect, useMemo, useState } from "react";
 import {
   Control,
   Controller,
@@ -207,7 +207,7 @@ export default function AdminStaffEditor() {
         <TableContainer>
           <Table>
             <TableBody>
-              {tabIndex === 0 && (
+              <Activity mode={tabIndex === 0 ? "visible" : "hidden"}>
                 <>
                   <TableRow>
                     <TableCell>スタッフID</TableCell>
@@ -430,10 +430,9 @@ export default function AdminStaffEditor() {
                     currentCognitoUserId={cognitoUser?.id}
                   />
                 </>
-              )}
+              </Activity>
 
-              {/* 開発者フラグ: 高度設定タブでのみ表示 */}
-              {tabIndex === 1 && (
+              <Activity mode={tabIndex === 1 ? "visible" : "hidden"}>
                 <TableRow>
                   <TableCell>
                     <Controller
@@ -457,7 +456,7 @@ export default function AdminStaffEditor() {
                     <Typography variant="body1">開発者フラグ</Typography>
                   </TableCell>
                 </TableRow>
-              )}
+              </Activity>
             </TableBody>
           </Table>
         </TableContainer>
