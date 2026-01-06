@@ -87,7 +87,20 @@ export default defineConfig({
     },
   },
   plugins: [
-    react(),
+    react({
+      babel: {
+        babelrc: false,
+        configFile: false,
+        plugins: [
+          [
+            "babel-plugin-react-compiler",
+            {
+              compilationMode: "annotation",
+            },
+          ],
+        ],
+      },
+    }),
     splitVendorChunkPlugin(),
     tsconfigPaths(),
     checker({

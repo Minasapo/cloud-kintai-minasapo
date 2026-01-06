@@ -50,9 +50,9 @@ export default function WorkflowDetailPage() {
     return s ? `${s.familyName} ${s.givenName}` : workflow.staffId;
   })();
 
-  const applicationDate =
-    formatDateSlash(workflow?.overTimeDetails?.date) ||
-    formatDateSlash(isoDateFromTimestamp(workflow?.createdAt));
+  const applicationDate = formatDateSlash(
+    isoDateFromTimestamp(workflow?.createdAt)
+  );
 
   const categoryLabel = getWorkflowCategoryLabel(workflow);
 

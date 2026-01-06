@@ -19,6 +19,8 @@ type Props = {
   absenceDate: string;
   setAbsenceDate: (v: string) => void;
   absenceDateError: string;
+  absenceReason: string;
+  setAbsenceReason: (v: string) => void;
   overtimeDate: string;
   setOvertimeDate: (v: string) => void;
   overtimeDateError: string;
@@ -44,6 +46,8 @@ export default function WorkflowTypeFields({
   absenceDate,
   setAbsenceDate,
   absenceDateError,
+  absenceReason,
+  setAbsenceReason,
   overtimeDate,
   setOvertimeDate,
   overtimeDateError,
@@ -55,6 +59,8 @@ export default function WorkflowTypeFields({
   overtimeReason,
   setOvertimeReason,
 }: Props) {
+  "use memo";
+
   return (
     <>
       {category === "有給休暇申請" && (
@@ -137,6 +143,8 @@ export default function WorkflowTypeFields({
               size="small"
               fullWidth
               sx={{ "& .MuiInputBase-input": { padding: "6px 10px" } }}
+              value={absenceReason}
+              onChange={(e) => setAbsenceReason(e.target.value)}
               disabled={disabled}
             />
           </Grid>

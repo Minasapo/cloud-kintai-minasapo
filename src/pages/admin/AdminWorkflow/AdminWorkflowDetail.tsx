@@ -20,7 +20,6 @@ import {
   WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
-import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -34,6 +33,7 @@ import {
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@/entities/attendance/api/attendanceApi";
+import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
@@ -109,9 +109,9 @@ export default function AdminWorkflowDetail() {
     return { mode: "any", items: ["管理者全員"] };
   }, [staffs, workflow]);
 
-  const applicationDate =
-    formatDateSlash(workflow?.overTimeDetails?.date) ||
-    formatDateSlash(isoDateFromTimestamp(workflow?.createdAt));
+  const applicationDate = formatDateSlash(
+    isoDateFromTimestamp(workflow?.createdAt)
+  );
 
   const approvalSteps = useMemo(() => {
     const base = [
@@ -1144,160 +1144,17 @@ export default function AdminWorkflowDetail() {
         {!loading && !error && (
           <Grid container spacing={2}>
             <Grid item xs={12} sm={7}>
-              <Grid
-                container
-                rowSpacing={2}
-                columnSpacing={1}
-                alignItems="center"
-              >
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    ID
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{workflow?.id ?? id}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    種別
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{getWorkflowCategoryLabel(workflow)}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    申請者
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{staffName}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    申請日
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{applicationDate}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    ステータス
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <StatusChip status={workflow?.status} />
-                </Grid>
-
-                {workflow?.category === WorkflowCategory.OVERTIME && (
-                  <>
-                    <Grid item xs={12} sm={3}>
-                      <Typography variant="body2" color="text.secondary">
-                        残業予定日
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={9}>
-                      <Typography>
-                        {formatDateSlash(workflow?.overTimeDetails?.date)}
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12} sm={3}>
-                      <Typography variant="body2" color="text.secondary">
-                        残業予定時間
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={9}>
-                      <Typography>
-                        {workflow?.overTimeDetails?.startTime} -{" "}
-                        {workflow?.overTimeDetails?.endTime}
-                      </Typography>
-                    </Grid>
-                  </>
-                )}
-
-                <Grid item xs={12}>
-                  <Box sx={{ mt: 3 }}>
-                    <Typography variant="h6" sx={{ mb: 1 }}>
-                      承認フロー
-                    </Typography>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Stack spacing={2}>
-                        {approvalSteps.map((s, idx) => {
-                          const isApplicant = s.role === "申請者";
-                          const active =
-                            s.state === "承認済み"
-                              ? "done"
-                              : s.state === "未承認"
-                              ? "pending"
-                              : "";
-                          return (
-                            <Box
-                              key={s.id}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 2,
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 2,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    bgcolor: isApplicant
-                                      ? "grey.300"
-                                      : active === "done"
-                                      ? "success.main"
-                                      : "primary.main",
-                                    color: "common.white",
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {idx === 0 ? "申" : idx}
-                                </Box>
-                                <Box>
-                                  <Typography sx={{ fontWeight: 700 }}>
-                                    {s.name}
-                                  </Typography>
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                  >
-                                    {s.role} {s.date ? `・${s.date}` : ""}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Box sx={{ flexGrow: 1 }} />
-                              {!isApplicant && (
-                                <Box>
-                                  <StatusChip status={s.state} />
-                                </Box>
-                              )}
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                    </Paper>
-                  </Box>
-                </Grid>
-              </Grid>
+              <WorkflowMetadataPanel
+                workflowId={workflow?.id ?? undefined}
+                fallbackId={id}
+                category={workflow?.category ?? null}
+                categoryLabel={getWorkflowCategoryLabel(workflow)}
+                staffName={staffName}
+                applicationDate={applicationDate}
+                status={workflow?.status ?? null}
+                overTimeDetails={workflow?.overTimeDetails ?? null}
+                approvalSteps={approvalSteps}
+              />
             </Grid>
 
             <Grid item xs={12} sm={5}>

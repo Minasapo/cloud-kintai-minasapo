@@ -51,6 +51,8 @@ const ReturnDirectlyButton = ({
   isWorking,
   onReturnDirectly,
 }: ReturnDirectlyButtonProps) => {
+  "use memo";
+
   const [disabled, setDisabled] = useState(!isWorking);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs, TabsProps } from "@mui/material";
-import { ReactNode } from "react";
+import { Activity, ReactNode } from "react";
 
 type TabItem = {
   label: string;
@@ -22,6 +22,8 @@ export function VacationTabs({
   tabsProps,
   panelPadding = 2,
 }: VacationTabsProps) {
+  "use memo";
+
   return (
     <>
       <Tabs
@@ -34,13 +36,14 @@ export function VacationTabs({
           <Tab key={idx} label={tab.label} disabled={tab.disabled} />
         ))}
       </Tabs>
-      {items.map((tab, idx) =>
-        value === idx ? (
-          <Box key={`panel-${idx}`} sx={{ pt: panelPadding }}>
-            {tab.content}
-          </Box>
-        ) : null
-      )}
+      {items.map((tab, idx) => (
+        <Activity
+          key={`panel-${idx}`}
+          mode={value === idx ? "visible" : "hidden"}
+        >
+          <Box sx={{ pt: panelPadding }}>{tab.content}</Box>
+        </Activity>
+      ))}
     </>
   );
 }

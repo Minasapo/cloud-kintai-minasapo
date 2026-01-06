@@ -41,6 +41,8 @@ export default function ShiftEditDialog({
   onStateChange,
   onSubmit,
 }: ShiftEditDialogProps) {
+  "use memo";
+
   const editingDialogDateLabel = editingCell
     ? dayjs(editingCell.dateKey).format("YYYY年M月D日 (dd)")
     : "";
