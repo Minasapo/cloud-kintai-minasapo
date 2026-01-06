@@ -1,8 +1,8 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
-import { FieldArrayWithId } from "react-hook-form";
+import { useContext, useMemo } from "react";
+import { FieldArrayWithId, useWatch } from "react-hook-form";
 
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
@@ -28,24 +28,22 @@ export function RestTimeInput({
   rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;
   index: number;
 }) {
-  const { restRemove, changeRequests, watch } = useContext(
+  const { restRemove, changeRequests, control } = useContext(
     AttendanceEditContext
   );
-  const [totalRestTime, setTotalRestTime] = useState<number>(0);
+  
+  // Watch the form data to compute total rest time
+  const rests = useWatch({
+    control,
+    name: "rests",
+  });
 
-  useEffect(() => {
-    if (!watch) return;
-
-    watch((data) => {
-      if (!data.rests) return;
-
-      const rest = data.rests[index];
-      if (!rest) return;
-
-      const diff = calcTotalRestTime(rest.startTime, rest.endTime);
-      setTotalRestTime(diff);
-    });
-  }, [watch]);
+  // Derive total rest time from watched form data
+  const totalRestTime = useMemo(() => {
+    if (!rests || !rests[index]) return 0;
+    const rest = rests[index];
+    return calcTotalRestTime(rest.startTime, rest.endTime);
+  }, [rests, index]);
 
   if (!restRemove) return null;
 
