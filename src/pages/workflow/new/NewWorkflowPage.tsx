@@ -60,6 +60,7 @@ export default function NewWorkflowPage() {
   const [dateError, setDateError] = useState("");
   const [absenceDate, setAbsenceDate] = useState("");
   const [absenceDateError, setAbsenceDateError] = useState("");
+  const [absenceReason, setAbsenceReason] = useState("");
   const [paidReason, setPaidReason] = useState("");
   const [overtimeStart, setOvertimeStart] = useState<string | null>(null);
   const [overtimeEnd, setOvertimeEnd] = useState<string | null>(null);
@@ -97,6 +98,8 @@ export default function NewWorkflowPage() {
       startDate,
       endDate,
       absenceDate,
+      paidReason,
+      absenceReason,
       overtimeDate,
       overtimeStart,
       overtimeEnd,
@@ -387,6 +390,8 @@ export default function NewWorkflowPage() {
               absenceDate={absenceDate}
               setAbsenceDate={setAbsenceDate}
               absenceDateError={absenceDateError}
+              absenceReason={absenceReason}
+              setAbsenceReason={setAbsenceReason}
               overtimeDate={overtimeDate}
               setOvertimeDate={setOvertimeDate}
               overtimeDateError={overtimeDateError}

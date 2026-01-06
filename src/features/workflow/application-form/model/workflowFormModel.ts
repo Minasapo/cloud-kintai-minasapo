@@ -32,6 +32,8 @@ export type WorkflowFormState = {
   startDate: string;
   endDate: string;
   absenceDate: string;
+  paidReason: string;
+  absenceReason: string;
   overtimeDate: string;
   /** ISO 8601形式の日時文字列 (例: "2024-01-15T09:00:00+09:00") または空文字列 */
   overtimeStart: string | null;
@@ -59,6 +61,8 @@ const workflowFormSchema = z
     startDate: z.string(),
     endDate: z.string(),
     absenceDate: z.string(),
+    paidReason: z.string(),
+    absenceReason: z.string(),
     overtimeDate: z.string(),
     overtimeStart: z.string().nullable(),
     overtimeEnd: z.string().nullable(),
@@ -209,11 +213,13 @@ const buildWorkflowOvertimeDetails = (
 ): CreateWorkflowInput["overTimeDetails"] | undefined => {
   const isOvertime = state.categoryLabel === OVERTIME_LABEL;
   const isVacation = state.categoryLabel === VACATION_LABEL;
+  const isAbsence = state.categoryLabel === ABSENCE_LABEL;
   const isClockInCorrection = state.categoryLabel === CLOCK_CORRECTION_LABEL;
   const isClockOutCorrection =
     state.categoryLabel === CLOCK_CORRECTION_CHECK_OUT_LABEL;
   const isClockCorrection = isClockInCorrection || isClockOutCorrection;
-  if (!isOvertime && !isClockCorrection && !isVacation) return undefined;
+  if (!isOvertime && !isClockCorrection && !isVacation && !isAbsence)
+    return undefined;
 
   // 有給休暇申請の場合
   if (isVacation) {
@@ -221,7 +227,17 @@ const buildWorkflowOvertimeDetails = (
       date: state.startDate || "",
       startTime: state.startDate || "",
       endTime: state.endDate || "",
-      reason: "", // 有給休暇の理由は別フィールドで管理される可能性があるため空文字
+      reason: state.paidReason || "",
+    };
+  }
+
+  // 欠勤申請の場合
+  if (isAbsence) {
+    return {
+      date: state.absenceDate || "",
+      startTime: state.absenceDate || "",
+      endTime: state.absenceDate || "",
+      reason: state.absenceReason || "",
     };
   }
 

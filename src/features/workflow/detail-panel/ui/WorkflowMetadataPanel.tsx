@@ -19,6 +19,7 @@ type WorkflowMetadataPanelProps = {
     date?: string | null;
     startTime?: string | null;
     endTime?: string | null;
+    reason?: string | null;
   } | null;
   approvalSteps: WorkflowApprovalStepView[];
 };
@@ -36,6 +37,10 @@ export default function WorkflowMetadataPanel({
 }: WorkflowMetadataPanelProps) {
   const displayId = workflowId ?? fallbackId ?? "-";
   const isOvertime = category === WorkflowCategory.OVERTIME;
+  const isPaidLeave = category === WorkflowCategory.PAID_LEAVE;
+  const isAbsence = category === WorkflowCategory.ABSENCE;
+  const isClockCorrection = category === WorkflowCategory.CLOCK_CORRECTION;
+
   const overtimeDate = formatDateSlash(overTimeDetails?.date);
   const overtimeTimeRange = overTimeDetails?.startTime
     ? `${overTimeDetails.startTime} - ${overTimeDetails?.endTime ?? ""}`
@@ -88,6 +93,64 @@ export default function WorkflowMetadataPanel({
         <StatusChip status={status} />
       </Grid>
 
+      {isPaidLeave && (
+        <>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" color="text.secondary">
+              取得期間
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <Typography>
+              {overTimeDetails?.startTime && overTimeDetails?.endTime
+                ? `${formatDateSlash(
+                    overTimeDetails.startTime
+                  )} ～ ${formatDateSlash(overTimeDetails.endTime)}`
+                : "-"}
+            </Typography>
+          </Grid>
+          {overTimeDetails?.reason && (
+            <>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="body2" color="text.secondary">
+                  申請理由
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={9}>
+                <Typography>{overTimeDetails.reason}</Typography>
+              </Grid>
+            </>
+          )}
+        </>
+      )}
+
+      {isAbsence && (
+        <>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" color="text.secondary">
+              欠勤日
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <Typography>
+              {formatDateSlash(overTimeDetails?.date) || "-"}
+            </Typography>
+          </Grid>
+          {overTimeDetails?.reason && (
+            <>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="body2" color="text.secondary">
+                  申請理由
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={9}>
+                <Typography>{overTimeDetails.reason}</Typography>
+              </Grid>
+            </>
+          )}
+        </>
+      )}
+
       {isOvertime && (
         <>
           <Grid item xs={12} sm={3}>
@@ -107,6 +170,58 @@ export default function WorkflowMetadataPanel({
           <Grid item xs={12} sm={9}>
             <Typography>{overtimeTimeRange}</Typography>
           </Grid>
+          {overTimeDetails?.reason && (
+            <>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="body2" color="text.secondary">
+                  残業理由
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={9}>
+                <Typography>{overTimeDetails.reason}</Typography>
+              </Grid>
+            </>
+          )}
+        </>
+      )}
+
+      {isClockCorrection && (
+        <>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" color="text.secondary">
+              対象日
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <Typography>
+              {formatDateSlash(overTimeDetails?.date) || "-"}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" color="text.secondary">
+              修正時刻
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={9}>
+            <Typography>
+              {overTimeDetails?.startTime || overTimeDetails?.endTime
+                ? `${overTimeDetails.startTime || overTimeDetails.endTime}`
+                : "-"}
+            </Typography>
+          </Grid>
+          {overTimeDetails?.reason && (
+            <>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="body2" color="text.secondary">
+                  修正理由
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={9}>
+                <Typography>{overTimeDetails.reason}</Typography>
+              </Grid>
+            </>
+          )}
         </>
       )}
 
