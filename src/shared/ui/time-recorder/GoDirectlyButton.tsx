@@ -50,6 +50,8 @@ const GoDirectlyButton = ({
   isBeforeWork,
   onGoDirectly,
 }: GoDirectlyButtonProps) => {
+  "use memo";
+
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
