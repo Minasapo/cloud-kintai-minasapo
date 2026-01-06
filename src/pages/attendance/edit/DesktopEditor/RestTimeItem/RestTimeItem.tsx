@@ -17,7 +17,7 @@ const Label = styled(Typography)(() => ({
 }));
 
 export default function RestTimeItem() {
-  const { restFields, restAppend, changeRequests, watch, workDate } =
+  const { restFields, restAppend, changeRequests, watch, workDate, isOnBreak } =
     useContext(AttendanceEditContext);
 
   const [visibleRestWarning, setVisibleRestWarning] = useState(false);
@@ -101,7 +101,7 @@ export default function RestTimeItem() {
           <IconButton
             aria-label="staff-search"
             data-testid="add-rest-time"
-            disabled={changeRequests.length > 0}
+            disabled={changeRequests.length > 0 || isOnBreak}
             onClick={() =>
               restAppend({
                 startTime: null,

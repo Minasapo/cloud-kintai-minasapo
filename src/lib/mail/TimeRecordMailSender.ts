@@ -87,13 +87,13 @@ export class TimeRecordMailSender extends MailSender {
         "本日も1日よろしくお願いします。",
       ].join("\n");
 
-      this.send([mailAddress], subject, body);
+      return this.send([mailAddress], subject, body);
     }
 
-    this.clockInForAdmin();
+    return this.clockInForAdmin();
   }
 
-  private clockInForAdmin(): void {
+  private clockInForAdmin() {
     const { startTime, goDirectlyFlag } = this.attendance;
 
     const subject = `[出勤]勤怠連絡(${this.getStaffName()}) - ${this.getWorkDate()}`;
@@ -112,7 +112,7 @@ export class TimeRecordMailSender extends MailSender {
       "",
     ].join("\n");
 
-    this.send([this.getAdminAuditMailAddress()], subject, body);
+    return this.send([this.getAdminAuditMailAddress()], subject, body);
   }
 
   clockOut() {
@@ -140,13 +140,13 @@ export class TimeRecordMailSender extends MailSender {
         "",
         "1日お疲れ様でした。気をつけて帰ってくださいね。",
       ].join("\n");
-      this.send([mailAddress], subject, body);
+      return this.send([mailAddress], subject, body);
     }
 
-    this.clockOutForAdmin();
+    return this.clockOutForAdmin();
   }
 
-  private clockOutForAdmin(): void {
+  private clockOutForAdmin() {
     const { endTime, returnDirectlyFlag } = this.attendance;
     const subject = `[退勤]勤怠連絡(${this.getStaffName()}) - ${this.getWorkDate()}`;
     const body = [
@@ -164,6 +164,6 @@ export class TimeRecordMailSender extends MailSender {
       "",
     ].join("\n");
 
-    this.send([this.getAdminAuditMailAddress()], subject, body);
+    return this.send([this.getAdminAuditMailAddress()], subject, body);
   }
 }

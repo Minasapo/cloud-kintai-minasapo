@@ -486,6 +486,95 @@ export default function AttendanceEdit() {
         if (!tags.includes("有給休暇")) {
           setValue("remarkTags", [...tags, "有給休暇"]);
         }
+
+        // 有給ON時は規定の出退勤・休憩で上書きする
+        try {
+          const desiredStart = resolveConfigTimeOnDate(
+            getStartTime(),
+            getValues("startTime") as string | null | undefined,
+            targetWorkDate,
+            attendance?.workDate
+          );
+          const desiredEnd = resolveConfigTimeOnDate(
+            getEndTime(),
+            getValues("endTime") as string | null | undefined,
+            targetWorkDate,
+            attendance?.workDate
+          );
+          if (getValues("startTime") !== desiredStart) {
+            setValue("startTime", desiredStart);
+          }
+          if (getValues("endTime") !== desiredEnd) {
+            setValue("endTime", desiredEnd);
+          }
+        } catch {
+          // noop
+        }
+
+        // 昼休憩をAppConfigの規定で単一に置き換える（他の休憩は強制上書き）
+        try {
+          const dateStr = (getValues("workDate") as string) || "";
+          const lunchStartCfg = getLunchRestStartTime();
+          const lunchEndCfg = getLunchRestEndTime();
+          const baseDay = dateStr
+            ? dayjs(dateStr)
+            : targetWorkDate
+            ? dayjs(targetWorkDate)
+            : dayjs();
+          const desiredRests = [
+            {
+              startTime: baseDay
+                .hour(lunchStartCfg.hour())
+                .minute(lunchStartCfg.minute())
+                .second(0)
+                .millisecond(0)
+                .toISOString(),
+              endTime: baseDay
+                .hour(lunchEndCfg.hour())
+                .minute(lunchEndCfg.minute())
+                .second(0)
+                .millisecond(0)
+                .toISOString(),
+            },
+          ];
+          const currentRests = getValues("rests") || [];
+          if (JSON.stringify(currentRests) !== JSON.stringify(desiredRests)) {
+            if (restReplace && typeof restReplace === "function") {
+              restReplace(desiredRests);
+            } else {
+              setValue("rests", desiredRests);
+            }
+          }
+        } catch {
+          // noop
+        }
+
+        // 時間単位休暇はクリア
+        try {
+          const currentHourly = (getValues("hourlyPaidHolidayTimes") || []) as
+            | HourlyPaidHolidayTimeInputs[]
+            | undefined;
+          if (
+            currentHourly &&
+            currentHourly.length > 0 &&
+            hourlyPaidHolidayTimeReplace &&
+            typeof hourlyPaidHolidayTimeReplace === "function"
+          ) {
+            hourlyPaidHolidayTimeReplace([]);
+          }
+        } catch {
+          // noop
+        }
+
+        // 有給ON時は特別休暇フラグを落とす（相互排他）
+        try {
+          const currentSpecial = getValues("specialHolidayFlag");
+          if (currentSpecial) {
+            setValue("specialHolidayFlag", false);
+          }
+        } catch {
+          // noop
+        }
       } else {
         if (tags.includes("有給休暇")) {
           setValue(
@@ -507,6 +596,21 @@ export default function AttendanceEdit() {
   const errorMessages = useMemo(
     () => collectAttendanceErrorMessages(errors),
     [errors]
+  );
+
+  // 休憩中かどうかを判定（勤務開始時間と最初の休憩時間が入力されている状態）
+  const startTimeValue = useWatch({ control, name: "startTime" });
+  const restsValue = useWatch({ control, name: "rests" });
+  const isOnBreak = useMemo(
+    () =>
+      !!(
+        startTimeValue &&
+        restsValue &&
+        restsValue.length > 0 &&
+        restsValue[0]?.startTime &&
+        !restsValue[0]?.endTime
+      ),
+    [startTimeValue, restsValue]
   );
 
   if (!targetWorkDate) {
@@ -552,6 +656,7 @@ export default function AttendanceEdit() {
         hourlyPaidHolidayTimeUpdate,
         hourlyPaidHolidayTimeReplace,
         hourlyPaidHolidayEnabled,
+        isOnBreak,
       }}
     >
       <Box data-testid="attendance-edit-root">

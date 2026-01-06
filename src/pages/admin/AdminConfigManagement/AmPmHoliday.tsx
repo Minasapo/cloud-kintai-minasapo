@@ -22,6 +22,14 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
+import {
+  DEFAULT_AM_HOLIDAY_END,
+  DEFAULT_AM_HOLIDAY_START,
+  DEFAULT_PM_HOLIDAY_END,
+  DEFAULT_PM_HOLIDAY_START,
+  TIME_FORMAT,
+} from "./constants";
+
 export default function AmPmHoliday() {
   const {
     getAmHolidayStartTime,
@@ -35,16 +43,16 @@ export default function AmPmHoliday() {
   } = useContext(AppConfigContext);
 
   const [amHolidayStartTime, setAmHolidayStartTime] = useState<Dayjs | null>(
-    dayjs("09:00", "HH:mm")
+    dayjs(DEFAULT_AM_HOLIDAY_START, TIME_FORMAT)
   );
   const [amHolidayEndTime, setAmHolidayEndTime] = useState<Dayjs | null>(
-    dayjs("12:00", "HH:mm")
+    dayjs(DEFAULT_AM_HOLIDAY_END, TIME_FORMAT)
   );
   const [pmHolidayStartTime, setPmHolidayStartTime] = useState<Dayjs | null>(
-    dayjs("13:00", "HH:mm")
+    dayjs(DEFAULT_PM_HOLIDAY_START, TIME_FORMAT)
   );
   const [pmHolidayEndTime, setPmHolidayEndTime] = useState<Dayjs | null>(
-    dayjs("18:00", "HH:mm")
+    dayjs(DEFAULT_PM_HOLIDAY_END, TIME_FORMAT)
   );
   const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
   const [id, setId] = useState<string | null>(null);

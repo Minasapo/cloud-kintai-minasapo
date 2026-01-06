@@ -18,7 +18,8 @@ export function ExternalLinks() {
     const resolvedLinks =
       typeof getLinks === "function" ? filterEnabledLinks(getLinks()) : [];
     setCompanyLinks(resolvedLinks);
-  }, [getLinks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!cognitoUser) {

@@ -60,7 +60,7 @@ export class GenericMailSender extends MailSender {
       "疑問点などがあれば、スタッフ管理者にお問い合わせください。",
     ].join("\n");
 
-    this.send([mailAddress], subject, body);
+    return this.send([mailAddress], subject, body);
   }
 
   approveChangeRequest(comment: string | null | undefined) {
@@ -85,6 +85,6 @@ export class GenericMailSender extends MailSender {
       "疑問点などがあれば、スタッフ管理者にお問い合わせください。",
     ].join("\n");
 
-    this.send([mailAddress], subject, body);
+    return this.send([mailAddress], subject, body);
   }
 }

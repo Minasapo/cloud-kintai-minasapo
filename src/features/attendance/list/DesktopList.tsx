@@ -21,7 +21,7 @@ import {
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 
@@ -59,6 +59,8 @@ export default function DesktopList({
   closeDates,
   closeDatesLoading,
   closeDatesError,
+  currentMonth: externalCurrentMonth,
+  onMonthChange,
 }: {
   attendances: Attendance[];
   staff: Staff | null | undefined;
@@ -68,8 +70,22 @@ export default function DesktopList({
   closeDates?: CloseDate[];
   closeDatesLoading?: boolean;
   closeDatesError?: Error | null;
+  currentMonth?: Dayjs;
+  onMonthChange?: (nextMonth: Dayjs) => void;
 }) {
-  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
+  const [internalMonth, setInternalMonth] = useState(() =>
+    dayjs().startOf("month")
+  );
+  const currentMonth = externalCurrentMonth ?? internalMonth;
+
+  const handleMonthChange = (updater: (prev: Dayjs) => Dayjs) => {
+    const nextMonth = updater(currentMonth);
+    if (onMonthChange) {
+      onMonthChange(nextMonth);
+      return;
+    }
+    setInternalMonth(nextMonth);
+  };
 
   const monthlyAttendances = useMemo(() => {
     return attendances
@@ -214,7 +230,6 @@ export default function DesktopList({
                           substituteHolidayDate={
                             attendance.substituteHolidayDate
                           }
-                          remarks={attendance.remarks}
                           specialHolidayFlag={attendance.specialHolidayFlag}
                           paidHolidayFlag={attendance.paidHolidayFlag}
                           absentFlag={attendance.absentFlag}
@@ -246,7 +261,7 @@ export default function DesktopList({
         closeDatesLoading={closeDatesLoading}
         closeDatesError={closeDatesError}
         currentMonth={currentMonth}
-        onMonthChange={setCurrentMonth}
+        onMonthChange={(nextMonth) => handleMonthChange(() => nextMonth)}
       />
       <Box sx={{ mt: 3 }}>
         <AttendanceGraph

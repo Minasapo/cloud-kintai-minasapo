@@ -11,14 +11,13 @@ const HEADER_LOGO_MAX_HEIGHT = designTokenVar(
 const Logo = () => (
   <Box
     sx={{
-      height: HEADER_LOGO_MAX_HEIGHT,
+      height: { xs: "18px", md: HEADER_LOGO_MAX_HEIGHT },
+      maxWidth: { xs: "100px", md: "none" },
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      flexGrow: {
-        xs: 1,
-        md: 0,
-      },
+      flexGrow: 0,
+      overflow: "hidden",
     }}
   >
     <Link
@@ -26,17 +25,20 @@ const Logo = () => (
       sx={{
         display: "inline-flex",
         alignItems: "center",
-        height: HEADER_LOGO_MAX_HEIGHT,
+        height: { xs: "18px", md: HEADER_LOGO_MAX_HEIGHT },
+        maxWidth: "100%",
       }}
     >
       <img
         src={LogoImage}
         alt="クラウド勤怠のロゴ"
         style={{
-          height: HEADER_LOGO_MAX_HEIGHT,
-          maxHeight: HEADER_LOGO_MAX_HEIGHT,
+          height: "100%",
+          maxHeight: "100%",
+          maxWidth: "100%",
           width: "auto",
           display: "block",
+          objectFit: "contain",
         }}
       />
     </Link>

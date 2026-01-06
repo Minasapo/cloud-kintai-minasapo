@@ -39,6 +39,7 @@ import { AuthContext } from "./context/AuthContext";
 import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
+import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
 import { StaffRole } from "./hooks/useStaffs/useStaffs";
 import { createAppTheme } from "./lib/theme";
 import { AppShell } from "@/shared/ui/layout";
@@ -129,6 +130,10 @@ export default function Layout() {
     isCognitoUserRole,
     loading: cognitoUserLoading,
   } = useCognitoUser();
+
+  // 重複勤怠データの警告をリッスン
+  useDuplicateAttendanceWarning();
+
   const {
     fetchConfig,
     saveConfig,
@@ -410,7 +415,8 @@ export default function Layout() {
 
   const configuredThemeColor = useMemo(
     () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
-    [getThemeColor]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const appTheme = useMemo(

@@ -8,8 +8,7 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const createCheckForUpdate =
-  /* GraphQL */ `mutation CreateCheckForUpdate(
+export const createCheckForUpdate = /* GraphQL */ `mutation CreateCheckForUpdate(
   $input: CreateCheckForUpdateInput!
   $condition: ModelCheckForUpdateConditionInput
 ) {
@@ -22,11 +21,10 @@ export const createCheckForUpdate =
   }
 }
 ` as GeneratedMutation<
-    APITypes.CreateCheckForUpdateMutationVariables,
-    APITypes.CreateCheckForUpdateMutation
-  >;
-export const updateCheckForUpdate =
-  /* GraphQL */ `mutation UpdateCheckForUpdate(
+  APITypes.CreateCheckForUpdateMutationVariables,
+  APITypes.CreateCheckForUpdateMutation
+>;
+export const updateCheckForUpdate = /* GraphQL */ `mutation UpdateCheckForUpdate(
   $input: UpdateCheckForUpdateInput!
   $condition: ModelCheckForUpdateConditionInput
 ) {
@@ -39,11 +37,10 @@ export const updateCheckForUpdate =
   }
 }
 ` as GeneratedMutation<
-    APITypes.UpdateCheckForUpdateMutationVariables,
-    APITypes.UpdateCheckForUpdateMutation
-  >;
-export const deleteCheckForUpdate =
-  /* GraphQL */ `mutation DeleteCheckForUpdate(
+  APITypes.UpdateCheckForUpdateMutationVariables,
+  APITypes.UpdateCheckForUpdateMutation
+>;
+export const deleteCheckForUpdate = /* GraphQL */ `mutation DeleteCheckForUpdate(
   $input: DeleteCheckForUpdateInput!
   $condition: ModelCheckForUpdateConditionInput
 ) {
@@ -56,9 +53,9 @@ export const deleteCheckForUpdate =
   }
 }
 ` as GeneratedMutation<
-    APITypes.DeleteCheckForUpdateMutationVariables,
-    APITypes.DeleteCheckForUpdateMutation
-  >;
+  APITypes.DeleteCheckForUpdateMutationVariables,
+  APITypes.DeleteCheckForUpdateMutation
+>;
 export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
   $input: CreateAppConfigInput!
   $condition: ModelAppConfigConditionInput
@@ -377,8 +374,7 @@ export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
   APITypes.DeleteStaffMutationVariables,
   APITypes.DeleteStaffMutation
 >;
-export const createHolidayCalendar =
-  /* GraphQL */ `mutation CreateHolidayCalendar(
+export const createHolidayCalendar = /* GraphQL */ `mutation CreateHolidayCalendar(
   $input: CreateHolidayCalendarInput!
   $condition: ModelHolidayCalendarConditionInput
 ) {
@@ -392,11 +388,10 @@ export const createHolidayCalendar =
   }
 }
 ` as GeneratedMutation<
-    APITypes.CreateHolidayCalendarMutationVariables,
-    APITypes.CreateHolidayCalendarMutation
-  >;
-export const updateHolidayCalendar =
-  /* GraphQL */ `mutation UpdateHolidayCalendar(
+  APITypes.CreateHolidayCalendarMutationVariables,
+  APITypes.CreateHolidayCalendarMutation
+>;
+export const updateHolidayCalendar = /* GraphQL */ `mutation UpdateHolidayCalendar(
   $input: UpdateHolidayCalendarInput!
   $condition: ModelHolidayCalendarConditionInput
 ) {
@@ -410,11 +405,10 @@ export const updateHolidayCalendar =
   }
 }
 ` as GeneratedMutation<
-    APITypes.UpdateHolidayCalendarMutationVariables,
-    APITypes.UpdateHolidayCalendarMutation
-  >;
-export const deleteHolidayCalendar =
-  /* GraphQL */ `mutation DeleteHolidayCalendar(
+  APITypes.UpdateHolidayCalendarMutationVariables,
+  APITypes.UpdateHolidayCalendarMutation
+>;
+export const deleteHolidayCalendar = /* GraphQL */ `mutation DeleteHolidayCalendar(
   $input: DeleteHolidayCalendarInput!
   $condition: ModelHolidayCalendarConditionInput
 ) {
@@ -428,11 +422,10 @@ export const deleteHolidayCalendar =
   }
 }
 ` as GeneratedMutation<
-    APITypes.DeleteHolidayCalendarMutationVariables,
-    APITypes.DeleteHolidayCalendarMutation
-  >;
-export const createCompanyHolidayCalendar =
-  /* GraphQL */ `mutation CreateCompanyHolidayCalendar(
+  APITypes.DeleteHolidayCalendarMutationVariables,
+  APITypes.DeleteHolidayCalendarMutation
+>;
+export const createCompanyHolidayCalendar = /* GraphQL */ `mutation CreateCompanyHolidayCalendar(
   $input: CreateCompanyHolidayCalendarInput!
   $condition: ModelCompanyHolidayCalendarConditionInput
 ) {
@@ -446,11 +439,10 @@ export const createCompanyHolidayCalendar =
   }
 }
 ` as GeneratedMutation<
-    APITypes.CreateCompanyHolidayCalendarMutationVariables,
-    APITypes.CreateCompanyHolidayCalendarMutation
-  >;
-export const updateCompanyHolidayCalendar =
-  /* GraphQL */ `mutation UpdateCompanyHolidayCalendar(
+  APITypes.CreateCompanyHolidayCalendarMutationVariables,
+  APITypes.CreateCompanyHolidayCalendarMutation
+>;
+export const updateCompanyHolidayCalendar = /* GraphQL */ `mutation UpdateCompanyHolidayCalendar(
   $input: UpdateCompanyHolidayCalendarInput!
   $condition: ModelCompanyHolidayCalendarConditionInput
 ) {
@@ -464,11 +456,10 @@ export const updateCompanyHolidayCalendar =
   }
 }
 ` as GeneratedMutation<
-    APITypes.UpdateCompanyHolidayCalendarMutationVariables,
-    APITypes.UpdateCompanyHolidayCalendarMutation
-  >;
-export const deleteCompanyHolidayCalendar =
-  /* GraphQL */ `mutation DeleteCompanyHolidayCalendar(
+  APITypes.UpdateCompanyHolidayCalendarMutationVariables,
+  APITypes.UpdateCompanyHolidayCalendarMutation
+>;
+export const deleteCompanyHolidayCalendar = /* GraphQL */ `mutation DeleteCompanyHolidayCalendar(
   $input: DeleteCompanyHolidayCalendarInput!
   $condition: ModelCompanyHolidayCalendarConditionInput
 ) {
@@ -482,9 +473,9 @@ export const deleteCompanyHolidayCalendar =
   }
 }
 ` as GeneratedMutation<
-    APITypes.DeleteCompanyHolidayCalendarMutationVariables,
-    APITypes.DeleteCompanyHolidayCalendarMutation
-  >;
+  APITypes.DeleteCompanyHolidayCalendarMutationVariables,
+  APITypes.DeleteCompanyHolidayCalendarMutation
+>;
 export const createCloseDate = /* GraphQL */ `mutation CreateCloseDate(
   $input: CreateCloseDateInput!
   $condition: ModelCloseDateConditionInput
@@ -1354,6 +1345,90 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
 ` as GeneratedMutation<
   APITypes.DeleteOperationLogMutationVariables,
   APITypes.DeleteOperationLogMutation
+>;
+export const createAuditLog = /* GraphQL */ `mutation CreateAuditLog(
+  $input: CreateAuditLogInput!
+  $condition: ModelAuditLogConditionInput
+) {
+  createAuditLog(input: $input, condition: $condition) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAuditLogMutationVariables,
+  APITypes.CreateAuditLogMutation
+>;
+export const updateAuditLog = /* GraphQL */ `mutation UpdateAuditLog(
+  $input: UpdateAuditLogInput!
+  $condition: ModelAuditLogConditionInput
+) {
+  updateAuditLog(input: $input, condition: $condition) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAuditLogMutationVariables,
+  APITypes.UpdateAuditLogMutation
+>;
+export const deleteAuditLog = /* GraphQL */ `mutation DeleteAuditLog(
+  $input: DeleteAuditLogInput!
+  $condition: ModelAuditLogConditionInput
+) {
+  deleteAuditLog(input: $input, condition: $condition) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAuditLogMutationVariables,
+  APITypes.DeleteAuditLogMutation
 >;
 export const createDailyReport = /* GraphQL */ `mutation CreateDailyReport(
   $input: CreateDailyReportInput!

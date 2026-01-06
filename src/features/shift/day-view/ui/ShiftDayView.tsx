@@ -51,11 +51,13 @@ export default function ShiftDayView() {
       await Promise.all(
         shiftStaffs.map(async (s) => {
           try {
-            const list = await triggerListAttendances({
+            const response = await triggerListAttendances({
               staffId: String(s.id),
             }).unwrap();
 
-            const matched = list.find((a) => a.workDate === dateKey) ?? null;
+            const attendances = response.attendances ?? [];
+            const matched =
+              attendances.find((a) => a.workDate === dateKey) ?? null;
             map.set(s.id, matched);
           } catch {
             map.set(s.id, null);

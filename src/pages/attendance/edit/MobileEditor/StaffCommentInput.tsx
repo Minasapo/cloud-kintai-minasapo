@@ -18,7 +18,8 @@ export default function StaffCommentInput() {
 
   useEffect(() => {
     setReasons(getReasons().filter((reason) => reason.enabled)); // 有効な理由のみ設定
-  }, [getReasons]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!register || !setValue) {
     return null;

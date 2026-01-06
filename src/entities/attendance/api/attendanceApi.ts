@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   createAttendance,
+  deleteAttendance as deleteAttendanceDocument,
   updateAttendance,
 } from "@shared/api/graphql/documents/mutations";
 import {
@@ -23,13 +24,40 @@ import type {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
+import { E02004 } from "@/errors";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+
+// 重複データの詳細情報
+export type DuplicateAttendanceInfo = {
+  workDate: string;
+  ids: string[];
+  staffId?: string;
+};
+
+// 警告情報を含むレスポンス型
+export type AttendanceListResponse = {
+  attendances: Attendance[];
+  warnings?: string[];
+  duplicates?: DuplicateAttendanceInfo[];
+};
+
+// 重複データ警告を通知するカスタムイベント
+const dispatchDuplicateWarning = (message: string) => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("attendance-duplicate-warning", {
+        detail: { message },
+      })
+    );
+  }
+};
 
 const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
 
-const sanitizeRests = (
+// Exported for testing
+export const sanitizeRests = (
   rests?: Array<{
     startTime?: string | null;
     endTime?: string | null;
@@ -40,7 +68,8 @@ const sanitizeRests = (
     endTime: endTime ?? undefined,
   })) ?? [];
 
-const sanitizeHourlyPaidHolidayTimes = (
+// Exported for testing
+export const sanitizeHourlyPaidHolidayTimes = (
   hourlyTimes?: Array<{
     startTime?: string | null;
     endTime?: string | null;
@@ -56,7 +85,8 @@ const sanitizeHourlyPaidHolidayTimes = (
       return acc;
     }, []) ?? [];
 
-const buildAttendanceHistoryInput = (
+// Exported for testing
+export const buildAttendanceHistoryInput = (
   attendance: Attendance,
   createdAt: string
 ): AttendanceHistoryInput => ({
@@ -146,6 +176,8 @@ export const attendanceApi = createApi({
         baseQuery
       ) {
         const attendances: Attendance[] = [];
+        const duplicateDetails: DuplicateAttendanceInfo[] = [];
+        const duplicateWarnings: string[] = [];
         let nextToken: string | null = null;
 
         do {
@@ -181,15 +213,24 @@ export const attendanceApi = createApi({
         }
 
         if (attendances.length > 1) {
-          const ids = attendances.map((attendance) => attendance.id).join(", ");
-          return {
-            error: {
-              message: `Multiple attendances found with IDs: ${ids}`,
-            },
-          };
+          duplicateWarnings.push(E02004);
+          duplicateDetails.push({
+            workDate,
+            ids: attendances.map((attendance) => attendance.id).filter(Boolean),
+            staffId,
+          });
+          // コンソールに警告を出力し、カスタムイベントで通知
+          console.warn(E02004);
+          dispatchDuplicateWarning(E02004);
         }
 
-        return { data: attendances[0] };
+        return {
+          data: attendances[0],
+          meta:
+            duplicateWarnings.length > 0
+              ? { warnings: duplicateWarnings, duplicates: duplicateDetails }
+              : undefined,
+        };
       },
       providesTags: (result, _error, arg) => {
         if (!result) {
@@ -209,8 +250,49 @@ export const attendanceApi = createApi({
         ];
       },
     }),
+    deleteAttendance: builder.mutation<Attendance, { id: string }>({
+      async queryFn({ id }, _queryApi, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: deleteAttendanceDocument,
+          variables: { input: { id } },
+        });
+        if (result.error) {
+          return { error: result.error };
+        }
+        const data = result.data as {
+          deleteAttendance?: Attendance | null;
+        } | null;
+        const deleted = data?.deleteAttendance;
+        if (!deleted) {
+          return { error: { message: "Failed to delete attendance" } };
+        }
+        return { data: deleted };
+      },
+      invalidatesTags: ["Attendance"],
+    }),
+    getAttendanceById: builder.query<Attendance | null, { id: string }>({
+      async queryFn({ id }, _queryApi, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: getAttendance,
+          variables: { id },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as GetAttendanceQuery | null;
+        return { data: data?.getAttendance ?? null };
+      },
+      providesTags: (result, _error, arg) => [
+        {
+          type: "Attendance" as const,
+          id: result?.id || arg.id,
+        },
+      ],
+    }),
     listRecentAttendances: builder.query<
-      Attendance[],
+      AttendanceListResponse,
       { staffId: string; days?: number }
     >({
       async queryFn(
@@ -248,25 +330,160 @@ export const attendanceApi = createApi({
 
         const fetchedAttendances = connection.items.filter(nonNullable);
 
-        return {
-          data: dateList.map((targetDate) => {
-            const match = fetchedAttendances.find(
-              (attendance) => attendance.workDate === targetDate
-            );
+        const duplicateCheck = new Map<string, Attendance[]>();
+        const duplicateWarnings: string[] = [];
+        const duplicateDetails: DuplicateAttendanceInfo[] = [];
 
-            return buildAttendanceForList(targetDate, match ?? null);
-          }),
+        fetchedAttendances.forEach((attendance) =>
+          duplicateCheck.set(attendance.workDate, [
+            ...(duplicateCheck.get(attendance.workDate) ?? []),
+            attendance,
+          ])
+        );
+
+        for (const attendances of duplicateCheck.values()) {
+          if (attendances.length > 1) {
+            duplicateWarnings.push(E02004);
+            duplicateDetails.push({
+              workDate: attendances[0]?.workDate ?? "",
+              ids: attendances
+                .map((attendance) => attendance.id)
+                .filter(Boolean),
+              staffId,
+            });
+            dispatchDuplicateWarning(E02004);
+          }
+        }
+
+        const attendanceList = dateList.map((targetDate) => {
+          const matches = duplicateCheck.get(targetDate) ?? [];
+          const match = matches[0] ?? null;
+
+          return buildAttendanceForList(targetDate, match);
+        });
+
+        return {
+          data: {
+            attendances: attendanceList,
+            warnings:
+              duplicateWarnings.length > 0 ? duplicateWarnings : undefined,
+            duplicates:
+              duplicateDetails.length > 0 ? duplicateDetails : undefined,
+          },
         };
       },
       providesTags: (result) => {
         const listTag = { type: "Attendance" as const, id: "LIST" };
-        if (!result) {
+        const attendances = result?.attendances ?? [];
+        if (!attendances.length) {
           return [listTag];
         }
 
         return [
           listTag,
-          ...result.map((attendance) => ({
+          ...attendances.map((attendance) => ({
+            type: "Attendance" as const,
+            id:
+              attendance.id ||
+              buildAttendanceCacheId(attendance.staffId, attendance.workDate),
+          })),
+        ];
+      },
+    }),
+    listRecentAttendancesWithWarnings: builder.query<
+      AttendanceListResponse,
+      { staffId: string; days?: number }
+    >({
+      async queryFn(
+        { staffId, days = 30 },
+        _queryApi,
+        _extraOptions,
+        baseQuery
+      ) {
+        const safeDays = Math.max(1, days);
+        const now = dayjs();
+        const dateList = Array.from({ length: safeDays }, (_, index) =>
+          now.subtract(index, "day").format(AttendanceDate.DataFormat)
+        ).sort();
+
+        const result = await baseQuery({
+          document: attendancesByStaffId,
+          variables: {
+            staffId,
+            workDate: {
+              between: [dateList[0], dateList[dateList.length - 1]],
+            },
+          },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as AttendancesByStaffIdQuery | null;
+        const connection = data?.attendancesByStaffId;
+
+        if (!connection) {
+          return { error: { message: "Failed to fetch attendance" } };
+        }
+
+        const fetchedAttendances = connection.items.filter(nonNullable);
+
+        // 重複チェック: 同一日付に複数のレコードがないか確認
+        const duplicateCheck = new Map<string, Attendance[]>();
+        const duplicateWarnings: string[] = [];
+        const duplicateDetails: DuplicateAttendanceInfo[] = [];
+        fetchedAttendances.forEach((attendance) => {
+          const existing = duplicateCheck.get(attendance.workDate) ?? [];
+          existing.push(attendance);
+          duplicateCheck.set(attendance.workDate, existing);
+        });
+
+        // 重複が見つかった場合、警告メッセージを生成（エラーとしては返さない）
+        for (const attendances of duplicateCheck.values()) {
+          if (attendances.length > 1) {
+            duplicateWarnings.push(E02004);
+            duplicateDetails.push({
+              workDate: attendances[0]?.workDate ?? "",
+              ids: attendances
+                .map((attendance) => attendance.id)
+                .filter(Boolean),
+              staffId,
+            });
+            // カスタムイベントで通知
+            dispatchDuplicateWarning(E02004);
+          }
+        }
+
+        // 重複があっても最初のレコードを使用してデータを返す
+        const attendanceList = dateList.map((targetDate) => {
+          const matches = duplicateCheck.get(targetDate) ?? [];
+          // 最初のレコードを使用
+          const match = matches[0] ?? null;
+
+          return buildAttendanceForList(targetDate, match);
+        });
+
+        // 警告がある場合は、警告情報を含めて返す
+        return {
+          data: {
+            attendances: attendanceList,
+            warnings:
+              duplicateWarnings.length > 0 ? duplicateWarnings : undefined,
+            duplicates:
+              duplicateDetails.length > 0 ? duplicateDetails : undefined,
+          },
+        };
+      },
+      providesTags: (result) => {
+        const listTag = { type: "Attendance" as const, id: "LIST" };
+        if (!result || !result.attendances) {
+          return [listTag];
+        }
+
+        return [
+          listTag,
+          ...result.attendances.map((attendance) => ({
             type: "Attendance" as const,
             id:
               attendance.id ||
@@ -316,7 +533,49 @@ export const attendanceApi = createApi({
           nextToken = connection.nextToken ?? null;
         } while (nextToken);
 
-        return { data: attendances };
+        // 重複チェック: 同一日付に複数のレコードがないか確認
+        const duplicateCheck = new Map<string, Attendance[]>();
+        const duplicateWarnings: string[] = [];
+        const duplicateDetails: DuplicateAttendanceInfo[] = [];
+        attendances.forEach((attendance) => {
+          const existing = duplicateCheck.get(attendance.workDate) ?? [];
+          existing.push(attendance);
+          duplicateCheck.set(attendance.workDate, existing);
+        });
+
+        // 重複が見つかった場合、警告メッセージを生成（エラーとしては返さない）
+        for (const attendancesForDate of duplicateCheck.values()) {
+          if (attendancesForDate.length > 1) {
+            duplicateWarnings.push(E02004);
+            duplicateDetails.push({
+              workDate: attendancesForDate[0]?.workDate ?? "",
+              ids: attendancesForDate
+                .map((attendance) => attendance.id)
+                .filter(Boolean),
+              staffId,
+            });
+            // カスタムイベントで通知
+            dispatchDuplicateWarning(E02004);
+          }
+        }
+
+        // 重複があっても最初のレコードだけを返す
+        const uniqueAttendances = Array.from(duplicateCheck.values()).map(
+          (attendancesForDate) => attendancesForDate[0]
+        );
+
+        // 警告がある場合は、meta情報として返す
+        if (duplicateWarnings.length > 0) {
+          return {
+            data: uniqueAttendances,
+            meta: {
+              warnings: duplicateWarnings,
+              duplicates: duplicateDetails,
+            },
+          };
+        }
+
+        return { data: uniqueAttendances };
       },
       providesTags: (result, _error, arg) => {
         const listTag = {
@@ -463,9 +722,13 @@ export const attendanceApi = createApi({
 export const {
   useGetAttendanceByStaffAndDateQuery,
   useLazyGetAttendanceByStaffAndDateQuery,
+  useGetAttendanceByIdQuery,
+  useLazyGetAttendanceByIdQuery,
   useListAttendancesByDateRangeQuery,
   useListRecentAttendancesQuery,
   useLazyListRecentAttendancesQuery,
+  useListRecentAttendancesWithWarningsQuery,
   useCreateAttendanceMutation,
   useUpdateAttendanceMutation,
+  useDeleteAttendanceMutation,
 } = attendanceApi;

@@ -30,4 +30,25 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  // Coverage configuration
+  coverageReporters: ["text", "lcov", "html"],
+  collectCoverageFrom: [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/index.ts",
+    "!src/ui-components/**",
+    "!src/aws-exports.js",
+    "!src/amplifyconfiguration.json",
+    "!src/graphql/**",
+    "!src/**/*.test.{ts,tsx}",
+    "!src/**/*.spec.{ts,tsx}",
+  ],
+  coverageThreshold: {
+    global: {
+      statements: 50,
+      branches: 40,
+      functions: 50,
+      lines: 50,
+    },
+  },
 };

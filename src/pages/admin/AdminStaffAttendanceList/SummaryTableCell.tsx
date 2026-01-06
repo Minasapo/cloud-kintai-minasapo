@@ -4,20 +4,17 @@ import dayjs from "dayjs";
 
 export function SummaryTableCell({
   substituteHolidayDate,
-  remarks,
   specialHolidayFlag,
   paidHolidayFlag,
   absentFlag,
 }: {
   substituteHolidayDate: Attendance["substituteHolidayDate"];
-  remarks: Attendance["remarks"];
   specialHolidayFlag?: Attendance["specialHolidayFlag"];
   paidHolidayFlag?: Attendance["paidHolidayFlag"];
   absentFlag?: Attendance["absentFlag"];
 }) {
   const full = getSummaryText(
     substituteHolidayDate,
-    remarks,
     specialHolidayFlag,
     paidHolidayFlag,
     absentFlag
@@ -76,7 +73,6 @@ export function SummaryTableCell({
 
 function getSummaryText(
   substituteHolidayDate: Attendance["substituteHolidayDate"],
-  remarks: string | null | undefined,
   _specialHolidayFlag?: Attendance["specialHolidayFlag"],
   _paidHolidayFlag?: Attendance["paidHolidayFlag"],
   _absentFlag?: Attendance["absentFlag"]
@@ -92,7 +88,6 @@ function getSummaryText(
     // paidHolidayFlag と absentFlag はここで扱われていないが、
     // SummaryTableCell に Chip 表示用に props を渡す際に参照できます。
     if (isSubstituteHoliday) summaryMessage.push("振替休日");
-    if (remarks) summaryMessage.push(remarks);
 
     return summaryMessage.join(" ");
   })();

@@ -32,18 +32,23 @@ export const deriveWorkflowDetailPermissions = (
       (status === WorkflowStatus.APPROVED || status === WorkflowStatus.REJECTED)
   );
   const isCancelled = status === WorkflowStatus.CANCELLED;
+  const isRejected = status === WorkflowStatus.REJECTED;
+  const isApproved = status === WorkflowStatus.APPROVED;
   const hasIdentifier = Boolean(workflow?.id);
 
-  const editDisabled = !hasIdentifier || isSubmittedOrLater;
-  const editTooltip = isSubmittedOrLater
-    ? "提出済み以降の申請は編集できません"
-    : undefined;
+  // 却下済み(REJECTED)の申請は再度編集可能にする
+  const editDisabled = !hasIdentifier || (isSubmittedOrLater && !isRejected);
+  const editTooltip =
+    isSubmittedOrLater && !isRejected
+      ? "提出済み以降の申請は編集できません"
+      : undefined;
 
-  const withdrawDisabled = !hasIdentifier || isCancelled || isFinalized;
+  // 却下済み(REJECTED)の申請は取り下げ可能にする（承認済みは不可）
+  const withdrawDisabled = !hasIdentifier || isCancelled || isApproved;
   const withdrawTooltip = isCancelled
     ? "キャンセル済みのワークフローは取り下げできません"
-    : isFinalized
-    ? "承認済みまたは却下済みの申請は取り下げできません"
+    : isApproved
+    ? "承認済みの申請は取り下げできません"
     : undefined;
 
   return {

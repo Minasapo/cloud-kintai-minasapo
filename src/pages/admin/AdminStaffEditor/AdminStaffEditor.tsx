@@ -54,6 +54,7 @@ import WORK_TYPE_OPTIONS from "../AdminStaff/workTypeOptions";
 
 type Inputs = {
   staffId?: string | null;
+  internalId?: string | null;
   familyName?: string | null;
   givenName?: string | null;
   mailAddress?: string | null;
@@ -103,6 +104,7 @@ export default function AdminStaffEditor() {
     const staff = staffs.find((s) => s.cognitoUserId === staffId);
     if (!staff) return;
     setValue("staffId", staff.cognitoUserId as any);
+    setValue("internalId", staff.id as any);
     setValue("familyName", staff.familyName ?? null);
     setValue("givenName", staff.givenName ?? null);
     setValue("mailAddress", staff.mailAddress ?? null);
@@ -210,9 +212,24 @@ export default function AdminStaffEditor() {
                   <TableRow>
                     <TableCell>スタッフID</TableCell>
                     <TableCell>
-                      <Typography variant="body1">
-                        {getValues("staffId")}
-                      </Typography>
+                      <Stack spacing={1}>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">
+                            Cognito ID:
+                          </Typography>
+                          <Typography variant="body1">
+                            {getValues("staffId")}
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">
+                            Internal ID:
+                          </Typography>
+                          <Typography variant="body1">
+                            {getValues("internalId")}
+                          </Typography>
+                        </Box>
+                      </Stack>
                     </TableCell>
                   </TableRow>
 

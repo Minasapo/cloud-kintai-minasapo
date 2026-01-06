@@ -30,7 +30,8 @@ export default function SpecialHoliday() {
     if (typeof getSpecialHolidayEnabled === "function")
       setSpecialHolidayEnabled(getSpecialHolidayEnabled());
     setId(getConfigId());
-  }, [getSpecialHolidayEnabled, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSpecialHolidayEnabled(event.target.checked);

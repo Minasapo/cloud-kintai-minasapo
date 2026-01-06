@@ -4,7 +4,7 @@
  * MaterialUIを使用し、日付選択や合計勤務時間の表示も行う。
  */
 import { useAppDispatchV2 } from "@app/hooks";
-import { useListRecentAttendancesQuery } from "@entities/attendance/api/attendanceApi";
+import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -17,6 +17,7 @@ import { Staff } from "@shared/api/graphql/types";
 /**
  * ReactのContext, Hooks。
  */
+import dayjs, { Dayjs } from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +25,7 @@ import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import useCloseDates from "@/hooks/useCloseDates/useCloseDates";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { AttendanceDate } from "@/lib/AttendanceDate";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
@@ -67,6 +69,15 @@ export default function AttendanceTable() {
    * 勤怠情報取得用カスタムフック。
    */
   const shouldFetchAttendances = Boolean(cognitoUser?.id);
+  const [currentMonth, setCurrentMonth] = useState<Dayjs>(() =>
+    dayjs().startOf("month")
+  );
+
+  const startDate = currentMonth
+    .startOf("month")
+    .format(AttendanceDate.DataFormat);
+  const endDate = currentMonth.endOf("month").format(AttendanceDate.DataFormat);
+
   const {
     data: holidayCalendars = [],
     isLoading: isHolidayCalendarsLoading,
@@ -90,17 +101,20 @@ export default function AttendanceTable() {
     isCompanyHolidayCalendarsLoading ||
     isCompanyHolidayCalendarsFetching;
   const {
-    data: attendancesData,
+    data: attendances = [],
     isLoading: isAttendancesInitialLoading,
     isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
-  } = useListRecentAttendancesQuery(
-    { staffId: cognitoUser?.id ?? "" },
+  } = useListAttendancesByDateRangeQuery(
+    {
+      staffId: cognitoUser?.id ?? "",
+      startDate,
+      endDate,
+    },
     { skip: !shouldFetchAttendances }
   );
 
-  const attendances = attendancesData ?? [];
   const attendanceLoading =
     !shouldFetchAttendances ||
     isAttendancesInitialLoading ||
@@ -153,10 +167,67 @@ export default function AttendanceTable() {
   }, [attendancesError, dispatch, logger]);
 
   /**
+   * 現在有効期間中の集計期間を解決する。
+   * closeDatesから該当月の有効期間を取得し、フォールバックは月初〜月末。
+   */
+  const effectiveDateRange = useMemo(() => {
+    const monthStart = currentMonth.startOf("month");
+    const monthEnd = currentMonth.endOf("month");
+
+    // 該当月と重複する有効期間を探す
+    const applicableCloseDates = closeDates.filter((closeDate) => {
+      const start = dayjs(closeDate.startDate);
+      const end = dayjs(closeDate.endDate);
+      return (
+        start.isValid() &&
+        end.isValid() &&
+        // 月の範囲と少しでも重なれば対象
+        !end.isBefore(monthStart, "day") &&
+        !start.isAfter(monthEnd, "day")
+      );
+    });
+
+    if (applicableCloseDates.length > 0) {
+      // 有効期間が複数ある場合は、最新の更新日時を優先
+      const latest = applicableCloseDates.reduce((prev, current) => {
+        const prevUpdatedAt = dayjs(prev.updatedAt ?? prev.closeDate).valueOf();
+        const currentUpdatedAt = dayjs(
+          current.updatedAt ?? current.closeDate
+        ).valueOf();
+        return currentUpdatedAt > prevUpdatedAt ? current : prev;
+      });
+
+      return {
+        start: dayjs(latest.startDate),
+        end: dayjs(latest.endDate),
+        hasValidPeriod: true,
+      };
+    }
+
+    // フォールバック: 月初〜月末
+    return {
+      start: monthStart,
+      end: monthEnd,
+      hasValidPeriod: false,
+    };
+  }, [currentMonth, closeDates]);
+
+  /**
    * 勤怠データから合計勤務時間（休憩時間を除く）を計算する。
+   * 有効期間内のデータのみを対象とする。
    */
   const totalTime = useMemo(() => {
-    const totalWorkTime = attendances.reduce((acc, attendance) => {
+    // 有効期間内のデータのみをフィルター
+    const filteredAttendances = attendances.filter((attendance) => {
+      if (!attendance.workDate) return false;
+      const workDate = dayjs(attendance.workDate);
+      return (
+        !workDate.isBefore(effectiveDateRange.start, "day") &&
+        !workDate.isAfter(effectiveDateRange.end, "day")
+      );
+    });
+
+    const totalWorkTime = filteredAttendances.reduce((acc, attendance) => {
       if (!attendance.startTime || !attendance.endTime) return acc;
       const workTime = calcTotalWorkTime(
         attendance.startTime,
@@ -165,7 +236,7 @@ export default function AttendanceTable() {
       return acc + workTime;
     }, 0);
 
-    const totalRestTime = attendances.reduce((acc, attendance) => {
+    const totalRestTime = filteredAttendances.reduce((acc, attendance) => {
       if (!attendance.rests) return acc;
       const restTime = attendance.rests
         .filter((item): item is NonNullable<typeof item> => !!item)
@@ -176,7 +247,20 @@ export default function AttendanceTable() {
       return acc + restTime;
     }, 0);
     return totalWorkTime - totalRestTime;
-  }, [attendances]);
+  }, [attendances, effectiveDateRange]);
+
+  /**
+   * 集計期間のラベルを生成する。
+   */
+  const rangeLabelForDisplay = useMemo(() => {
+    const startLabel = effectiveDateRange.start.format(
+      AttendanceDate.DisplayFormat
+    );
+    const endLabel = effectiveDateRange.end.format(
+      AttendanceDate.DisplayFormat
+    );
+    return `${startLabel} 〜 ${endLabel}`;
+  }, [effectiveDateRange]);
 
   if (attendanceLoading || calendarLoading || closeDatesLoading) {
     return <LinearProgress />;
@@ -212,11 +296,11 @@ export default function AttendanceTable() {
         <Stack spacing={0.5}>
           <Typography variant="h1">勤怠一覧</Typography>
           <Typography variant="body1" color="text.secondary">
-            直近30日の合計勤務時間: {totalTime.toFixed(1)}h
+            {rangeLabelForDisplay}の合計勤務時間: {totalTime.toFixed(1)}h
           </Typography>
         </Stack>
         <DescriptionTypography variant="body1">
-          今日から30日前までの勤怠情報を表示しています
+          月を選択して勤怠情報を表示・編集できます
         </DescriptionTypography>
       </Box>
       <DesktopList
@@ -228,6 +312,8 @@ export default function AttendanceTable() {
         closeDates={closeDates}
         closeDatesLoading={closeDatesLoading}
         closeDatesError={closeDatesError}
+        currentMonth={currentMonth}
+        onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
       />
       <MobileList
         attendances={attendances}
