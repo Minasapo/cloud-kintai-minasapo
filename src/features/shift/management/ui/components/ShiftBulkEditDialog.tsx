@@ -45,6 +45,8 @@ export default function ShiftBulkEditDialog({
   onStateChange,
   onSubmit,
 }: ShiftBulkEditDialogProps) {
+  "use memo";
+
   const handleClose = (_event: unknown, _reason?: string) => {
     if (isSaving) return;
     onClose();

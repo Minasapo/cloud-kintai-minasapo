@@ -19,6 +19,8 @@ export default function WorkflowDetailActions({
   editDisabled,
   editTooltip,
 }: WorkflowDetailActionsProps) {
+  "use memo";
+
   return (
     <Box
       sx={{
