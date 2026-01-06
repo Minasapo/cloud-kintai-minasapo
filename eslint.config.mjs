@@ -113,6 +113,7 @@ export default [
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/preserve-manual-memoization": "warn",
       "react-hooks/incompatible-library": "warn",
+      "react-hooks/static-components": "warn", // render中のコンポーネント定義を警告レベルに
       "boundaries/element-types": [
         "error",
         {
