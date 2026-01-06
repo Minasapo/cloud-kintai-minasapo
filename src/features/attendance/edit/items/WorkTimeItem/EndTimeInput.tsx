@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
@@ -13,18 +13,13 @@ export default function EndTimeInput({
     AttendanceEditContext
   );
 
-  const [quickInputEndTimes, setQuickInputEndTimes] = useState<
-    { time: string; enabled: boolean }[]
-  >([]);
-
-  useEffect(() => {
-    const quickInputEndTimes = getQuickInputEndTimes(true);
-    setQuickInputEndTimes(
-      quickInputEndTimes.map((entry) => ({
-        time: entry.time,
-        enabled: entry.enabled,
-      }))
-    );
+  // Derived state: compute quickInputEndTimes from getQuickInputEndTimes
+  const quickInputEndTimes = useMemo(() => {
+    const times = getQuickInputEndTimes(true);
+    return times.map((entry) => ({
+      time: entry.time,
+      enabled: entry.enabled,
+    }));
   }, [getQuickInputEndTimes]);
 
   if (!workDate || !control || !setValue) {

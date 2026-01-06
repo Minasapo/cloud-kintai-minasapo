@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -54,9 +54,10 @@ const GoDirectlyButton = ({
 
   const [isPending, setIsPending] = useState(false);
 
-  useEffect(() => {
-    setIsPending(false);
-  }, [isBeforeWork]);
+  // Derived state: reset isPending when isBeforeWork changes
+  const actualIsPending = useMemo(() => {
+    return isBeforeWork ? false : isPending;
+  }, [isBeforeWork, isPending]);
 
   return (
     <StyledGoDirectlyButton
@@ -65,7 +66,7 @@ const GoDirectlyButton = ({
         setIsPending(true);
         onGoDirectly();
       }}
-      disabled={!isBeforeWork || isPending}
+      disabled={!isBeforeWork || actualIsPending}
     >
       直行
     </StyledGoDirectlyButton>

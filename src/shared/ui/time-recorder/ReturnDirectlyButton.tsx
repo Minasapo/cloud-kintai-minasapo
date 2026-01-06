@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -53,17 +53,18 @@ const ReturnDirectlyButton = ({
 }: ReturnDirectlyButtonProps) => {
   "use memo";
 
-  const [disabled, setDisabled] = useState(!isWorking);
+  const [isClicking, setIsClicking] = useState(false);
 
-  useEffect(() => {
-    setDisabled(!isWorking);
-  }, [isWorking]);
+  // Derived state: button is disabled when not working or user clicked
+  const disabled = useMemo(() => {
+    return !isWorking || isClicking;
+  }, [isWorking, isClicking]);
 
   return (
     <StyledReturnDirectlyButton
       data-testid="return-directly-button"
       onClick={() => {
-        setDisabled(true);
+        setIsClicking(true);
         onReturnDirectly();
       }}
       disabled={disabled}

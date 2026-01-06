@@ -55,29 +55,29 @@ export default function SnackbarGroup() {
     dispatch(setSnackbarWarn(null));
   }, [dispatch]);
 
+  // Update success message and dispatch reset when success changes
   useEffect(() => {
-    if (!success) {
-      return;
+    if (success) {
+      setSuccessMessage(success);
+      resetSuccess();
     }
-    setSuccessMessage(success);
-    resetSuccess();
-  }, [resetSuccess, success]);
+  }, [success, resetSuccess]);
 
+  // Update error message and dispatch reset when error changes
   useEffect(() => {
-    if (!error) {
-      return;
+    if (error) {
+      setErrorMessage(error);
+      resetError();
     }
-    setErrorMessage(error);
-    resetError();
   }, [error, resetError]);
 
+  // Update warn message and dispatch reset when warn changes
   useEffect(() => {
-    if (!warn) {
-      return;
+    if (warn) {
+      setWarnMessage(warn);
+      resetWarn();
     }
-    setWarnMessage(warn);
-    resetWarn();
-  }, [resetWarn, warn]);
+  }, [warn, resetWarn]);
 
   const renderSnackbar = (
     key: string,

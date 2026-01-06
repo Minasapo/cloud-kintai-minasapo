@@ -2,7 +2,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip, Stack } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { Controller } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -20,18 +20,14 @@ export default function StartTimeInput({
     AttendanceEditContext
   );
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
-  const [quickInputStartTimes, setQuickInputStartTimes] = useState<
-    { time: string; enabled: boolean }[]
-  >([]);
 
-  useEffect(() => {
-    const quickInputStartTimes = getQuickInputStartTimes(true);
-    setQuickInputStartTimes(
-      quickInputStartTimes.map((entry) => ({
-        time: entry.time,
-        enabled: entry.enabled,
-      }))
-    );
+  // Derived state: compute quickInputStartTimes from getQuickInputStartTimes
+  const quickInputStartTimes = useMemo(() => {
+    const times = getQuickInputStartTimes(true);
+    return times.map((entry) => ({
+      time: entry.time,
+      enabled: entry.enabled,
+    }));
   }, [getQuickInputStartTimes]);
 
   if (!workDate || !control || !setValue) return null;

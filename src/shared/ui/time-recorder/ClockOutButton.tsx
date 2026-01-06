@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -48,16 +48,17 @@ export interface ClockOutButtonProps {
 }
 
 const ClockOutButton = ({ isWorking, onClockOut }: ClockOutButtonProps) => {
-  const [isDisabled, setIsDisabled] = useState(!isWorking);
+  const [isClicked, setIsClicked] = useState(false);
 
-  useEffect(() => {
-    setIsDisabled(!isWorking);
-  }, [isWorking]);
+  // Derived state: button is disabled when not working or user clicked
+  const isDisabled = useMemo(() => {
+    return !isWorking || isClicked;
+  }, [isWorking, isClicked]);
 
   const handleClick = useCallback(() => {
     if (isDisabled) return;
 
-    setIsDisabled(true);
+    setIsClicked(true);
     onClockOut();
   }, [isDisabled, onClockOut]);
 
