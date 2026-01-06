@@ -220,13 +220,15 @@ export default function ShiftManagementBoard() {
     [currentMonth]
   );
   const daysInMonth = monthStart.daysInMonth();
+  const monthYear = monthStart.year();
+  const monthMonth = monthStart.month();
 
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
         monthStart.add(i, "day")
       ),
-    [monthStart.year(), monthStart.month(), daysInMonth]
+    [monthYear, monthMonth, daysInMonth]
   );
 
   const dayKeyList = useMemo(

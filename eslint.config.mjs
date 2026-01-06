@@ -43,6 +43,7 @@ export default [
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended",
       "plugin:react/recommended",
+      "plugin:react-hooks/recommended",
     ],
     overrides: [
       {
@@ -63,6 +64,7 @@ export default [
     plugins: [
       "@typescript-eslint",
       "react",
+      "react-hooks",
       "import",
       "simple-import-sort",
       "unused-imports",
@@ -106,6 +108,11 @@ export default [
       ],
       "@typescript-eslint/no-explicit-any": "warn",
       "unused-imports/no-unused-imports": "error",
+      "react-hooks/exhaustive-deps": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/incompatible-library": "warn",
       "boundaries/element-types": [
         "error",
         {

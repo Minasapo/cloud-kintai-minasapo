@@ -39,13 +39,14 @@ export default function PaidHolidayFlagInputMobile({
   restReplace,
   getValues,
 }: PaidHolidayFlagInputProps) {
-  if (!control || !setValue) return null;
   const {
     getStartTime,
     getEndTime,
     getLunchRestStartTime,
     getLunchRestEndTime,
   } = useAppConfig();
+
+  if (!control || !setValue) return null;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,

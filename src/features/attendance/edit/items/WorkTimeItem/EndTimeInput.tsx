@@ -12,7 +12,6 @@ export default function EndTimeInput({
   const { workDate, control, setValue, isOnBreak } = useContext(
     AttendanceEditContext
   );
-  if (!workDate) return null;
 
   const [quickInputEndTimes, setQuickInputEndTimes] = useState<
     { time: string; enabled: boolean }[]
@@ -28,7 +27,7 @@ export default function EndTimeInput({
     );
   }, [getQuickInputEndTimes]);
 
-  if (!control || !setValue) {
+  if (!workDate || !control || !setValue) {
     return null;
   }
 
