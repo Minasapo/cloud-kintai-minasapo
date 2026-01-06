@@ -52,6 +52,8 @@ jobs:
         run: npm ci
       - name: Run jest unit tests
         run: npm run test:unit
+        env:
+          TZ: Asia/Tokyo
 
   playwright-test:
     needs: jest-test
