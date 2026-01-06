@@ -103,9 +103,11 @@ export default function WorkflowMetadataPanel({
           <Grid item xs={12} sm={9}>
             <Typography>
               {overTimeDetails?.startTime && overTimeDetails?.endTime
-                ? `${formatDateSlash(
-                    overTimeDetails.startTime
-                  )} ～ ${formatDateSlash(overTimeDetails.endTime)}`
+                ? overTimeDetails.startTime === overTimeDetails.endTime
+                  ? formatDateSlash(overTimeDetails.startTime)
+                  : `${formatDateSlash(
+                      overTimeDetails.startTime
+                    )} ～ ${formatDateSlash(overTimeDetails.endTime)}`
                 : "-"}
             </Typography>
           </Grid>
