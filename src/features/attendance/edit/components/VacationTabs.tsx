@@ -22,6 +22,8 @@ export function VacationTabs({
   tabsProps,
   panelPadding = 2,
 }: VacationTabsProps) {
+  "use memo";
+
   return (
     <>
       <Tabs
