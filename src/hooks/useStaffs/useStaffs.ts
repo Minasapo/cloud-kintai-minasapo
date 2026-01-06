@@ -8,8 +8,8 @@ import {
 } from "@shared/api/graphql/types";
 import { useContext, useEffect, useState } from "react";
 
-import { StaffExternalLink } from "@/entities/staff/externalLink";
 import { AuthContext } from "@/context/AuthContext";
+import { StaffExternalLink } from "@/entities/staff/externalLink";
 
 import createStaffData from "./createStaffData";
 import deleteStaffData from "./deleteStaffData";

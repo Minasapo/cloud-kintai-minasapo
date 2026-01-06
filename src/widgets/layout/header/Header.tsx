@@ -5,8 +5,8 @@ import { resolveThemeColor } from "@/constants/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { StaffRole } from "@/hooks/useStaffs/useStaffs";
-import HeaderBar from "@/shared/ui/header/HeaderBar";
 import { designTokenVar } from "@/shared/designSystem";
+import HeaderBar from "@/shared/ui/header/HeaderBar";
 
 import DesktopMenu from "./DesktopMenu";
 import { ExternalLinks } from "./ExternalLinks/ExternalLinks";

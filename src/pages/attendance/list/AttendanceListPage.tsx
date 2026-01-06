@@ -2,7 +2,7 @@ import AttendanceList from "@features/attendance/list/AttendanceList";
 import Box from "@mui/material/Box";
 import Page from "@shared/ui/page/Page";
 
-import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
+import { dashboardInnerSurfaceSx,PageSection } from "@/shared/ui/layout";
 
 export default function AttendanceListPage() {
   return (

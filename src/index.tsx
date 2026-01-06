@@ -1,4 +1,5 @@
 import "./index.css";
+import "@/lib/dayjs-locale";
 
 import { Authenticator } from "@aws-amplify/ui-react";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -11,11 +12,10 @@ import { Provider } from "react-redux";
 import { RouterProvider } from "react-router-dom";
 
 import { bootstrapDesignSystem } from "@/shared/designSystem";
-import "@/lib/dayjs-locale";
+import PageLoader from "@/shared/ui/feedback/PageLoader";
 
 import { store } from "./app/store";
 import config from "./aws-exports";
-import PageLoader from "@/shared/ui/feedback/PageLoader";
 import reportWebVitals from "./reportWebVitals";
 import router from "./router";
 import vocabularies from "./vocabularies";

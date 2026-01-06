@@ -30,19 +30,20 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import { AppShell } from "@/shared/ui/layout";
+import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";
-import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
+
 import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
-import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
+import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
 import { StaffRole } from "./hooks/useStaffs/useStaffs";
 import { createAppTheme } from "./lib/theme";
-import { AppShell } from "@/shared/ui/layout";
 
 type MissingCloseDateAlertProps = {
   onConfirm: () => void;

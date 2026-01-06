@@ -30,8 +30,8 @@ import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import useStaffs from "@/hooks/useStaffs/useStaffs";
-import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";

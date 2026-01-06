@@ -1,6 +1,3 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 import {
   Box,
   Button,
@@ -21,6 +18,8 @@ import {
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
@@ -35,13 +34,13 @@ import WorkflowTypeFields from "@/features/workflow/application-form/ui/Workflow
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { parseTimeToISO } from "@/shared/lib/time";
-import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
-import { designTokenVar } from "@/shared/designSystem";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import { designTokenVar } from "@/shared/designSystem";
+import { parseTimeToISO } from "@/shared/lib/time";
+import { dashboardInnerSurfaceSx,PageSection } from "@/shared/ui/layout";
 
 export default function NewWorkflowPage() {
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");

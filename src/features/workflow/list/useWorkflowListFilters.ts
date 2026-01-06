@@ -2,12 +2,12 @@ import { useCallback, useMemo, useState } from "react";
 
 import {
   applyWorkflowFilters,
+  DEFAULT_STATUS_FILTERS,
   isWorkflowFilterActive,
   mapWorkflowsToListItems,
   type WorkflowLike,
   type WorkflowListFilters,
   type WorkflowListItem,
-  DEFAULT_STATUS_FILTERS,
 } from "./workflowListModel";
 
 type UseWorkflowListFiltersArgs<T extends WorkflowLike> = {

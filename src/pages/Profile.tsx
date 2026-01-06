@@ -27,13 +27,13 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { predefinedIcons } from "@/constants/icons";
+import {
+  STAFF_EXTERNAL_LINKS_LIMIT,
+  StaffExternalLink,
+} from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
 import updateStaff from "@/hooks/useStaff/updateStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
-import {
-  StaffExternalLink,
-  STAFF_EXTERNAL_LINKS_LIMIT,
-} from "@/entities/staff/externalLink";
 import {
   setSnackbarError,
   setSnackbarSuccess,

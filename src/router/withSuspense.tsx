@@ -1,9 +1,9 @@
 import {
-  Suspense,
   type ComponentProps,
   type ComponentType,
   type LazyExoticComponent,
   type ReactNode,
+  Suspense,
 } from "react";
 
 import PageLoader from "@/shared/ui/feedback/PageLoader";
