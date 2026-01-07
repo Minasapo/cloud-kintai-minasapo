@@ -38,6 +38,7 @@ import createOperationLogData from "@/hooks/useOperationLog/createOperationLogDa
 import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -49,6 +50,8 @@ import {
 } from "@/lib/workflowLabels";
 
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
+
+const logger = createLogger("AdminWorkflowDetail");
 
 export default function AdminWorkflowDetail() {
   const { id } = useParams() as { id?: string };
@@ -380,9 +383,9 @@ export default function AdminWorkflowDetail() {
       setMessages(commentsToMessages(updated.comments || []));
       dispatch(setSnackbarSuccess("コメントを送信しました"));
     } catch (err) {
-      console.error(err);
-      const msg = err instanceof Error ? err.message : String(err);
-      dispatch(setSnackbarError(msg));
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Failed to send comment:", message);
+      dispatch(setSnackbarError(message));
       // remove optimistic message on error
       setMessages((m) => m.filter((mm) => mm.id !== optimisticMsg.id));
     } finally {
@@ -614,7 +617,11 @@ export default function AdminWorkflowDetail() {
             setSnackbarSuccess("有給休暇申請を承認し、勤怠データを更新しました")
           );
         } catch (paidLeaveError) {
-          console.error("❌ 有給勤怠の処理に失敗:", paidLeaveError);
+          const message =
+            paidLeaveError instanceof Error
+              ? paidLeaveError.message
+              : "有給勤怠の処理に失敗しました";
+          logger.error("Paid leave attendance processing failed:", message);
           dispatch(
             setSnackbarSuccess(
               "有給申請を承認しました（勤怠データの処理に失敗）"
@@ -895,13 +902,17 @@ export default function AdminWorkflowDetail() {
             );
           }
         } catch (attendanceError) {
-          console.error("❌ 勤怠データの処理に失敗しました:", attendanceError);
-          // エラーの詳細をログ出力
+          // Attendance processing error - log details and continue
           if (attendanceError instanceof Error) {
-            console.error("エラーメッセージ:", attendanceError.message);
-            console.error("スタックトレース:", attendanceError.stack);
+            logger.error("Attendance data processing failed:", {
+              message: attendanceError.message,
+              stack: attendanceError.stack,
+            });
+          } else {
+            logger.error("Attendance data processing failed:", attendanceError);
           }
-          // GraphQL エラー構造を確認
+
+          // Try to extract GraphQL error details
           const attendanceApiError = (() => {
             if (
               typeof attendanceError === "object" &&
@@ -925,15 +936,15 @@ export default function AdminWorkflowDetail() {
             attendanceApiError?.data?.data?.createAttendance?.errors ||
             attendanceApiError?.data?.data?.updateAttendance?.errors;
           const gqlError = attendanceApiError?.graphQLErrors?.[0];
+
           if (errorData) {
-            console.error("GraphQL バリデーションエラー:", errorData);
+            logger.warn("GraphQL validation error:", errorData);
           }
           if (gqlError) {
-            console.error("GraphQL エラーメッセージ:", gqlError.message);
-          } else {
-            console.error("エラーオブジェクト:", attendanceError);
+            logger.warn("GraphQL error message:", gqlError.message);
           }
-          // 勤怠処理エラーは承認処理自体は成功しているので警告のみ
+
+          // Attendance processing error is non-critical, show partial success message
           dispatch(
             setSnackbarSuccess(
               "打刻修正を承認しました（勤怠データの処理に失敗）"
@@ -958,12 +969,12 @@ export default function AdminWorkflowDetail() {
           }),
         });
       } catch (err) {
-        console.error("Failed to create operation log for approve:", err);
+        logger.error("Failed to create operation log for approve:", err);
       }
     } catch (err) {
-      console.error(err);
-      const msg = err instanceof Error ? err.message : String(err);
-      dispatch(setSnackbarError(msg));
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Workflow approval failed:", message);
+      dispatch(setSnackbarError(message));
     }
   };
 
@@ -1071,12 +1082,12 @@ export default function AdminWorkflowDetail() {
           }),
         });
       } catch (err) {
-        console.error("Failed to create operation log for reject:", err);
+        logger.error("Failed to create operation log for reject:", err);
       }
     } catch (err) {
-      console.error(err);
-      const msg = err instanceof Error ? err.message : String(err);
-      dispatch(setSnackbarError(msg));
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Workflow rejection failed:", message);
+      dispatch(setSnackbarError(message));
     }
   };
 

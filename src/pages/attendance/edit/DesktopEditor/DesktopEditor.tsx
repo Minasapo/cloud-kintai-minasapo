@@ -33,7 +33,10 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useOperationLog from "@/hooks/useOperationLog/useOperationLog";
+import { createLogger } from "@/lib/logger";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
+
+const logger = createLogger("DesktopEditor");
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
@@ -399,8 +402,7 @@ export default function DesktopEditor() {
                       });
                     } catch (e) {
                       // ログ作成失敗は握りつぶす。ただしデバッグに出す
-                      // eslint-disable-next-line no-console
-                      console.log("createOperationLog failed", e);
+                      logger.error("createOperationLog failed:", e);
                     }
                   }}
                   disabled={

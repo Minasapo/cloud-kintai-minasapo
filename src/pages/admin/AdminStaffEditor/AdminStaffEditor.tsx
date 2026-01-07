@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Autocomplete,
   Box,
@@ -44,7 +43,10 @@ import { AuthContext } from "@/context/AuthContext";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
-import useStaffs, { StaffRole } from "../../../hooks/useStaffs/useStaffs";
+import useStaffs, {
+  StaffRole,
+  StaffType,
+} from "../../../hooks/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -66,8 +68,19 @@ type Inputs = {
   role?: string | null;
   approverSetting?: ApproverSettingMode | null;
   approverSingle?: string | null;
-  approverMultiple?: (string | null)[] | null;
+  approverMultiple?: string[] | null;
   approverMultipleMode?: ApproverMultipleMode | null;
+  developer?: boolean;
+};
+
+type AutocompleteOption = {
+  value: string;
+  label: string;
+  description?: string;
+};
+
+type ExtendedStaff = StaffType & {
+  workType?: string;
   developer?: boolean;
 };
 
@@ -103,26 +116,20 @@ export default function AdminStaffEditor() {
     if (!staffId) return;
     const staff = staffs.find((s) => s.cognitoUserId === staffId);
     if (!staff) return;
-    setValue("staffId", staff.cognitoUserId as any);
-    setValue("internalId", staff.id as any);
+
+    const extendedStaff = staff as ExtendedStaff;
+
+    setValue("staffId", staff.cognitoUserId ?? null);
+    setValue("internalId", staff.id ?? null);
     setValue("familyName", staff.familyName ?? null);
     setValue("givenName", staff.givenName ?? null);
     setValue("mailAddress", staff.mailAddress ?? null);
     setValue("owner", staff.owner ?? false);
     setValue("sortKey", staff.sortKey ?? null);
     setValue("usageStartDate", staff.usageStartDate ?? null);
-    setValue(
-      "workType",
-      (staff as unknown as Record<string, unknown>).workType as string | null
-    );
+    setValue("workType", extendedStaff.workType ?? null);
     setValue("shiftGroup", staff.shiftGroup ?? null);
-    // permissive read in case backend schema hasn't added developer yet
-    setValue(
-      "developer",
-      ((staff as unknown as Record<string, unknown>).developer as
-        | boolean
-        | undefined) ?? false
-    );
+    setValue("developer", extendedStaff.developer ?? false);
   }, [staffId, staffs, setValue]);
 
   const shiftGroupOptions = useMemo(
@@ -145,8 +152,30 @@ export default function AdminStaffEditor() {
     if (!staffId) return;
     setSaving(true);
     try {
-      const payload: Record<string, unknown> = {
-        id: staffs.find((s) => s.cognitoUserId === staffId)?.id,
+      const staff = staffs.find((s) => s.cognitoUserId === staffId);
+      if (!staff) {
+        dispatch(setSnackbarError("スタッフが見つかりません"));
+        return;
+      }
+
+      type PayloadType = {
+        id: string;
+        mailAddress: string | null | undefined;
+        familyName: string | null | undefined;
+        givenName: string | null | undefined;
+        owner: boolean;
+        sortKey: string | null | undefined;
+        usageStartDate: string | null | undefined;
+        workType: string | null | undefined;
+        shiftGroup: string | null | undefined;
+        approverSingle?: string | null;
+        approverMultiple?: string[] | null;
+        approverMultipleMode?: ApproverMultipleMode | null;
+        developer?: boolean;
+      };
+
+      const payload: PayloadType = {
+        id: staff.id,
         mailAddress: data.mailAddress,
         familyName: data.familyName,
         givenName: data.givenName,
@@ -159,23 +188,24 @@ export default function AdminStaffEditor() {
 
       // approver related
       const approverSetting = watch("approverSetting");
-      const approverMultiple =
-        (watch("approverMultiple") as (string | null)[]) ?? [];
+      const approverMultiple = watch("approverMultiple") ?? [];
       const approverMultipleMode = watch("approverMultipleMode");
 
       if (approverSetting === ApproverSettingMode.SINGLE) {
-        payload.approverSingle = watch("approverSingle");
+        payload.approverSingle = watch("approverSingle") as string | null;
       }
       if (approverSetting === ApproverSettingMode.MULTIPLE) {
-        payload.approverMultiple = approverMultiple;
-        payload.approverMultipleMode = approverMultipleMode;
+        payload.approverMultiple = approverMultiple as string[];
+        payload.approverMultipleMode =
+          approverMultipleMode as ApproverMultipleMode | null;
       }
 
       // only include developer if explicitly present (defensive for backend schema)
-      if (typeof data.developer !== "undefined")
+      if (typeof data.developer !== "undefined") {
         payload.developer = data.developer;
+      }
 
-      await updateStaff(payload as any);
+      await updateStaff(payload);
       dispatch(setSnackbarSuccess("保存しました"));
     } catch {
       dispatch(setSnackbarError(MESSAGE_CODE.E05002));
@@ -257,10 +287,7 @@ export default function AdminStaffEditor() {
 
                   <TableRow>
                     <TableCell>権限</TableCell>
-                    <StaffRoleTableCell
-                      control={control as unknown as Control<Inputs, any>}
-                      setValue={setValue}
-                    />
+                    <StaffRoleTableCell control={control} setValue={setValue} />
                   </TableRow>
 
                   {cognitoUser?.owner && (
@@ -269,7 +296,7 @@ export default function AdminStaffEditor() {
                       <TableCell>
                         <Controller
                           name="owner"
-                          control={control as unknown as Control<Inputs, any>}
+                          control={control}
                           render={({ field }) => (
                             <Switch
                               checked={field.value}
@@ -289,7 +316,7 @@ export default function AdminStaffEditor() {
                     <TableCell>
                       <Controller
                         name="usageStartDate"
-                        control={control as unknown as Control<Inputs, any>}
+                        control={control}
                         render={({ field }) => (
                           <DatePicker
                             value={field.value ? dayjs(field.value) : null}
@@ -316,7 +343,7 @@ export default function AdminStaffEditor() {
                     <TableCell>
                       <Controller
                         name="workType"
-                        control={control as unknown as Control<Inputs, any>}
+                        control={control}
                         render={({ field }) => (
                           <Autocomplete
                             {...field}
@@ -354,7 +381,7 @@ export default function AdminStaffEditor() {
                       ) : (
                         <Controller
                           name="shiftGroup"
-                          control={control as unknown as Control<Inputs, any>}
+                          control={control}
                           render={({ field }) => {
                             const selectedOption =
                               shiftGroupOptions.find(
@@ -392,7 +419,7 @@ export default function AdminStaffEditor() {
                     <TableCell>
                       <Controller
                         name="approverSetting"
-                        control={control as unknown as Control<Inputs, any>}
+                        control={control}
                         render={({ field }) => (
                           <RadioGroup
                             row
@@ -437,7 +464,7 @@ export default function AdminStaffEditor() {
                   <TableCell>
                     <Controller
                       name="developer"
-                      control={control as unknown as Control<Inputs, any>}
+                      control={control}
                       render={({ field }) => (
                         <Switch
                           data-testid="developer-flag-checkbox"
@@ -486,12 +513,12 @@ function ApproverSettingTableRows({
   staffs,
   currentCognitoUserId,
 }: {
-  control: Control<Inputs, any>;
-  watch: (name: string) => unknown;
-  staffs: any[];
+  control: Control<Inputs>;
+  watch: <K extends keyof Inputs>(name: K) => Inputs[K];
+  staffs: StaffType[];
   currentCognitoUserId?: string | null;
 }) {
-  const adminOptions = useMemo(() => {
+  const adminOptions = useMemo<AutocompleteOption[]>(() => {
     return staffs
       .filter(
         (staff) =>
@@ -499,27 +526,25 @@ function ApproverSettingTableRows({
           staff.cognitoUserId !== currentCognitoUserId
       )
       .map((staff) => ({
-        value: staff.cognitoUserId,
+        value: staff.cognitoUserId ?? "",
         label:
           [staff.familyName, staff.givenName]
-            .filter((n: any) => Boolean(n))
-            .join(" ") || staff.mailAddress,
-        description: staff.mailAddress,
+            .filter((n) => Boolean(n))
+            .join(" ") ||
+          staff.mailAddress ||
+          "",
+        description: staff.mailAddress ?? "",
       }));
   }, [staffs, currentCognitoUserId]);
 
-  const approverSetting = watch("approverSetting") as
-    | ApproverSettingMode
-    | undefined;
-  const approverMultiple =
-    (watch("approverMultiple") as (string | null)[]) ?? [];
+  const approverSetting = watch("approverSetting");
+  const approverMultiple = watch("approverMultiple") ?? [];
   const approverMultipleMode = watch("approverMultipleMode");
 
-  const selectedMultipleOptions = (approverMultiple as (string | null)[])
+  const selectedMultipleOptions = approverMultiple
+    .filter((value): value is string => Boolean(value))
     .map((value) => adminOptions.find((option) => option.value === value))
-    .filter((o): o is { value: string; label: string; description: string } =>
-      Boolean(o)
-    );
+    .filter((o): o is AutocompleteOption => Boolean(o));
 
   return (
     <>
@@ -548,8 +573,8 @@ function ApproverSettingTableRows({
                     onChange={(_, newValue) => {
                       field.onChange(newValue?.value ?? null);
                     }}
-                    getOptionLabel={(option: any) => option.label}
-                    isOptionEqualToValue={(option: any, value: any) =>
+                    getOptionLabel={(option) => option.label}
+                    isOptionEqualToValue={(option, value) =>
                       option.value === value.value
                     }
                     renderInput={(params) => (
@@ -588,32 +613,29 @@ function ApproverSettingTableRows({
                     if (approverSetting !== ApproverSettingMode.MULTIPLE)
                       return true;
                     return (
-                      ((value as any[])?.length ?? 0) > 0 ||
-                      "承認者を選択してください"
+                      (value?.length ?? 0) > 0 || "承認者を選択してください"
                     );
                   },
                 }}
                 render={({ field, fieldState }) => {
                   const valueOptions = (field.value ?? [])
-                    .map((v: any) => adminOptions.find((o) => o.value === v))
-                    .filter(Boolean);
+                    .map((v) => adminOptions.find((o) => o.value === v))
+                    .filter((opt): opt is AutocompleteOption => Boolean(opt));
                   return (
-                    <Autocomplete
+                    <Autocomplete<AutocompleteOption, true>
                       multiple
                       options={adminOptions}
-                      value={valueOptions as any}
+                      value={valueOptions}
                       onChange={(_, newValue) => {
-                        field.onChange(
-                          newValue.map((option: any) => option.value)
-                        );
+                        field.onChange(newValue.map((option) => option.value));
                       }}
                       disableCloseOnSelect
-                      getOptionLabel={(option: any) => option.label}
-                      isOptionEqualToValue={(option: any, value: any) =>
+                      getOptionLabel={(option) => option.label}
+                      isOptionEqualToValue={(option, value) =>
                         option.value === value.value
                       }
-                      renderTags={(tagValue: any, getTagProps: any) =>
-                        tagValue.map((option: any, index: number) => (
+                      renderTags={(tagValue, getTagProps) =>
+                        tagValue.map((option, index) => (
                           <Chip
                             {...getTagProps({ index })}
                             key={option.value}
@@ -724,7 +746,7 @@ function StaffRoleTableCell({
   control,
   setValue,
 }: {
-  control: Control<Inputs, any>;
+  control: Control<Inputs>;
   setValue: UseFormSetValue<Inputs>;
 }) {
   return (

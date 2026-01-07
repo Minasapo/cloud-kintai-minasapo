@@ -24,7 +24,10 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
+import { createLogger } from "@/lib/logger";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
+
+const logger = createLogger("AttendanceEdit");
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import {
   setSnackbarError,
@@ -186,7 +189,7 @@ export default function AttendanceEdit() {
               data.staffComment
             );
           } catch (mailError) {
-            console.error("Failed to send change request mail:", mailError);
+            logger.error("Failed to send change request mail:", mailError);
             dispatch(setSnackbarError(MESSAGE_CODE.E00002));
           }
 
@@ -245,7 +248,7 @@ export default function AttendanceEdit() {
           navigate("/attendance/list");
         })
         .catch((e) => {
-          console.log("error", e);
+          logger.error("Failed to update attendance:", e);
           dispatch(setSnackbarError(MESSAGE_CODE.E02005));
         });
     }

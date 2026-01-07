@@ -38,9 +38,12 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import { createLogger } from "@/lib/logger";
 import { designTokenVar } from "@/shared/designSystem";
 import { parseTimeToISO } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+
+const logger = createLogger("NewWorkflowPage");
 
 export default function NewWorkflowPage() {
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
@@ -257,7 +260,8 @@ export default function NewWorkflowPage() {
       dispatch(setSnackbarSuccess("ワークフローを作成しました。"));
       navigate("/workflow", { replace: true });
     } catch (err) {
-      console.error("Workflow creation error:", err);
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Workflow creation failed:", message);
       const errorMessage = extractErrorMessage(err);
       dispatch(setSnackbarError(errorMessage));
     }

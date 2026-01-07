@@ -34,6 +34,7 @@ import {
 import * as MESSAGE_CODE from "@/errors";
 import updateStaff from "@/hooks/useStaff/updateStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -46,6 +47,8 @@ import {
   roleLabelMap,
   StaffType,
 } from "../hooks/useStaffs/useStaffs";
+
+const logger = createLogger("Profile");
 
 const NotificationSwitch = styled(Switch)(({ theme }) => ({
   padding: 8,
@@ -196,7 +199,7 @@ export default function Profile() {
         });
       })
       .catch((e: Error) => {
-        console.log(e);
+        logger.error("Failed to load staff data:", e);
       });
   }, []);
 

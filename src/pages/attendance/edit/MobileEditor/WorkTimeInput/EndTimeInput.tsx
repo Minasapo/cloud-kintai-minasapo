@@ -14,12 +14,9 @@ import { AttendanceEditInputs } from "../../common";
  */
 export default function EndTimeInput({
   workDate,
-  control: _control,
   setValue,
 }: {
   workDate: dayjs.Dayjs | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: any;
   setValue: UseFormSetValue<AttendanceEditInputs>;
 }) {
   const { getQuickInputEndTimes } = useContext(AppConfigContext);

@@ -32,12 +32,14 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import { createLogger } from "@/lib/logger";
 import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 import { designTokenVar } from "@/shared/designSystem";
-import { dashboardInnerSurfaceSx,PageSection } from "@/shared/ui/layout";
+import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
+const logger = createLogger("WorkflowEditPage");
 
 export default function WorkflowEditPage() {
   const { id } = useParams();
@@ -123,9 +125,9 @@ export default function WorkflowEditPage() {
         dispatch(setSnackbarSuccess("保存しました"));
         setTimeout(() => navigate(`/workflow/${id}`), 1000);
       } catch (err) {
-        console.error(err);
-        const msg = err instanceof Error ? err.message : String(err);
-        dispatch(setSnackbarError(msg));
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error("Workflow update failed:", message);
+        dispatch(setSnackbarError(message));
       }
     })();
   };

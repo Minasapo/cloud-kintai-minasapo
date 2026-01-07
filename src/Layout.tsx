@@ -50,7 +50,10 @@ import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
 import { StaffRole } from "./hooks/useStaffs/useStaffs";
+import { createLogger } from "./lib/logger";
 import { createAppTheme } from "./lib/theme";
+
+const logger = createLogger("Layout");
 
 type MissingCloseDateAlertProps = {
   onConfirm: () => void;
@@ -331,7 +334,7 @@ export default function Layout() {
     try {
       void signOut();
     } catch (error) {
-      console.error(error);
+      logger.error("Failed to sign out:", error);
     }
   }, [
     authStatus,
