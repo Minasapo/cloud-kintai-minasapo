@@ -65,6 +65,7 @@ const manualChunks = (id: string) => {
 };
 
 const shouldUseManualChunks = process.env.ENABLE_MANUAL_CHUNKS === "true";
+const checkerOverlayEnabled = process.env.VITE_CHECKER_OVERLAY !== "false";
 
 export default defineConfig({
   server: {
@@ -91,6 +92,7 @@ export default defineConfig({
     tsconfigPaths(),
     checker({
       typescript: true,
+      overlay: checkerOverlayEnabled,
     }),
   ],
   assetsInclude: ["**/*.csv", "**/*.png"],

@@ -54,10 +54,7 @@ import {
   saveShiftPatterns,
 } from "@/lib/storage/shiftPatternStorage";
 
-import {
-  normalizeStatus,
-  ShiftRequestDayStatus,
-} from "../model/statusMapping";
+import { normalizeStatus, ShiftRequestDayStatus } from "../model/statusMapping";
 import { useShiftRequestData } from "../model/useShiftRequestData";
 import { useShiftRequestPersist } from "../model/useShiftRequestPersist";
 
@@ -409,7 +406,6 @@ export default function ShiftRequestForm() {
     };
   }, [cognitoUser, cognitoUserLoading, dispatch]);
 
-
   const serializePatterns = useCallback(
     (patternList: Pattern[]) =>
       patternList.map((pattern) => ({
@@ -694,9 +690,7 @@ export default function ShiftRequestForm() {
   return (
     <Container sx={{ py: 3, pb: isMobile ? 10 : 3 }}>
       <Paper sx={{ p: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          希望シフト
-        </Typography>
+        <Typography variant="h1">希望シフト</Typography>
         <Box
           sx={{
             display: "flex",

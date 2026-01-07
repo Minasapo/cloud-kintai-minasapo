@@ -24,7 +24,8 @@ export function OfficeQrExperience() {
 
   useEffect(() => {
     setIsOfficeModeEnabled(getOfficeMode());
-  }, [getOfficeMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isCognitoUserRole(StaffRole.ADMIN)) {

@@ -1,42 +1,68 @@
-import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import Layout from "./Layout";
 import { adminChildRoutes } from "./router/adminChildRoutes";
-import { withSuspense } from "./router/withSuspense";
+import { createLazyRoute } from "./router/lazyRoute";
+import { workflowDetailLoader } from "./router/loaders/workflowDetailLoader";
+import { workflowEditLoader } from "./router/loaders/workflowEditLoader";
 
-const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
-const DailyReport = lazy(() => import("./pages/attendance/daily-report/DailyReport"));
-const AttendanceEdit = lazy(() => import("./pages/attendance/edit/AttendanceEdit"));
-const AttendanceListPage = lazy(
+const AdminDashboardRoute = createLazyRoute(
+  () => import("./pages/admin/AdminDashboard")
+);
+const AdminLayoutRoute = createLazyRoute(
+  () => import("./pages/admin/AdminLayout")
+);
+const DailyReportRoute = createLazyRoute(
+  () => import("./pages/attendance/daily-report/DailyReport")
+);
+const AttendanceEditRoute = createLazyRoute(
+  () => import("./pages/attendance/edit/AttendanceEdit")
+);
+const AttendanceListRoute = createLazyRoute(
   () => import("./pages/attendance/list/AttendanceListPage")
 );
-const Login = lazy(() => import("./pages/Login/Login"));
-const OfficeHomePage = lazy(() => import("./pages/office/home/OfficeHomePage"));
-const OfficeLayoutPage = lazy(
+const AttendanceStatisticsRoute = createLazyRoute(
+  () => import("./pages/attendance/statistics/AttendanceStatisticsPage")
+);
+const LoginRoute = createLazyRoute(() => import("./pages/Login/Login"));
+const OfficeHomeRoute = createLazyRoute(
+  () => import("./pages/office/home/OfficeHomePage")
+);
+const OfficeLayoutRoute = createLazyRoute(
   () => import("./pages/office/layout/OfficeLayoutPage")
 );
-const OfficeQrPage = lazy(() => import("./pages/office/qr/OfficeQrPage"));
-const OfficeQrRegisterPage = lazy(
+const OfficeQrRoute = createLazyRoute(
+  () => import("./pages/office/qr/OfficeQrPage")
+);
+const OfficeQrRegisterRoute = createLazyRoute(
   () => import("./pages/office/qr-register/OfficeQrRegisterPage")
 );
-const DesignTokenPreviewPage = lazy(
+const DesignTokenPreviewRoute = createLazyRoute(
   () => import("./pages/preview/DesignTokenPreviewPage")
 );
-const Profile = lazy(() => import("./pages/Profile"));
-const Register = lazy(() => import("./pages/Register"));
-const ShiftRequestPage = lazy(() => import("./pages/shift/request"));
-const WorkflowDetailPage = lazy(
-  () => import("./pages/workflow/detail/WorkflowDetailPage")
+const ProfileRoute = createLazyRoute(() => import("./pages/Profile"));
+const RegisterRoute = createLazyRoute(() => import("./pages/Register"));
+const ShiftRequestRoute = createLazyRoute(
+  () => import("./pages/shift/request")
 );
-const WorkflowEditPage = lazy(
-  () => import("./pages/workflow/edit/WorkflowEditPage")
+const WorkflowDetailRoute = createLazyRoute(
+  () => import("./pages/workflow/detail/WorkflowDetailPage"),
+  {
+    loader: workflowDetailLoader,
+  }
 );
-const WorkflowListPage = lazy(
+const WorkflowEditRoute = createLazyRoute(
+  () => import("./pages/workflow/edit/WorkflowEditPage"),
+  {
+    loader: workflowEditLoader,
+  }
+);
+const WorkflowListRoute = createLazyRoute(
   () => import("./pages/workflow/list/WorkflowListPage")
 );
-const NewWorkflowPage = lazy(() => import("./pages/workflow/new/NewWorkflowPage"));
+const NewWorkflowRoute = createLazyRoute(
+  () => import("./pages/workflow/new/NewWorkflowPage")
+);
 
 const router = createBrowserRouter([
   {
@@ -45,59 +71,63 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: withSuspense(Register),
+        lazy: RegisterRoute,
       },
       {
         path: "register",
-        element: withSuspense(Register),
+        lazy: RegisterRoute,
       },
       {
         path: "preview/design-tokens",
-        element: withSuspense(DesignTokenPreviewPage),
+        lazy: DesignTokenPreviewRoute,
       },
       {
         path: "attendance",
         children: [
           {
             path: "list",
-            element: withSuspense(AttendanceListPage),
+            lazy: AttendanceListRoute,
+          },
+          {
+            path: "stats",
+            lazy: AttendanceStatisticsRoute,
           },
           {
             path: "report",
-            element: withSuspense(DailyReport),
+            lazy: DailyReportRoute,
           },
           {
             path: ":targetWorkDate/edit",
-            element: withSuspense(AttendanceEdit),
+            lazy: AttendanceEditRoute,
           },
           {
             path: "*",
-            element: withSuspense(AttendanceListPage),
+            lazy: AttendanceListRoute,
           },
         ],
       },
       {
         path: "login",
-        element: withSuspense(Login),
+        lazy: LoginRoute,
       },
       {
         path: "workflow",
         children: [
           {
             index: true,
-            element: withSuspense(WorkflowListPage),
+            lazy: WorkflowListRoute,
           },
           {
             path: ":id",
-            element: withSuspense(WorkflowDetailPage),
+            lazy: WorkflowDetailRoute,
           },
           {
             path: ":id/edit",
-            element: withSuspense(WorkflowEditPage),
+            lazy: WorkflowEditRoute,
           },
           {
             path: "new",
-            element: withSuspense(NewWorkflowPage),
+            lazy: NewWorkflowRoute,
           },
         ],
       },
@@ -106,21 +136,21 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: withSuspense(ShiftRequestPage),
+            lazy: ShiftRequestRoute,
           },
         ],
       },
       {
         path: "profile",
-        element: withSuspense(Profile),
+        lazy: ProfileRoute,
       },
       {
         path: "/admin",
-        element: withSuspense(AdminLayout),
+        lazy: AdminLayoutRoute,
         children: [
           {
             path: "",
-            element: withSuspense(AdminDashboard),
+            lazy: AdminDashboardRoute,
             children: [
               {
                 index: true,
@@ -133,19 +163,19 @@ const router = createBrowserRouter([
       },
       {
         path: "office",
-        element: withSuspense(OfficeLayoutPage),
+        lazy: OfficeLayoutRoute,
         children: [
           {
             index: true,
-            element: withSuspense(OfficeHomePage),
+            lazy: OfficeHomeRoute,
           },
           {
             path: "qr",
-            element: withSuspense(OfficeQrPage),
+            lazy: OfficeQrRoute,
           },
           {
             path: "qr/register",
-            element: withSuspense(OfficeQrRegisterPage),
+            lazy: OfficeQrRegisterRoute,
           },
         ],
       },

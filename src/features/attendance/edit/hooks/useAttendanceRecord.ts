@@ -1,3 +1,11 @@
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  UseFormGetValues,
+  UseFormReset,
+  UseFormSetValue,
+} from "react-hook-form";
+
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
@@ -11,20 +19,11 @@ import {
   RestInputs,
   defaultValues,
 } from "@/pages/attendance/edit/common";
-import {
-  useLazyGetAttendanceByStaffAndDateQuery,
-} from "@entities/attendance/api/attendanceApi";
+import { useLazyGetAttendanceByStaffAndDateQuery } from "@entities/attendance/api/attendanceApi";
 import {
   AttendanceHistory,
   SystemCommentInput,
 } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  UseFormGetValues,
-  UseFormReset,
-  UseFormSetValue,
-} from "react-hook-form";
 
 type ReplaceFn<T> = (value: T[]) => void;
 
@@ -268,7 +267,9 @@ export const useAttendanceRecord = ({
           systemCommentReplace([]);
           setValue(
             "workDate",
-            new AttendanceDateTime().setDateString(targetWorkDate).toDataFormat()
+            new AttendanceDateTime()
+              .setDateString(targetWorkDate)
+              .toDataFormat()
           );
           setValue("histories", []);
           setValue("changeRequests", []);

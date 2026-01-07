@@ -30,7 +30,8 @@ export default function SpecialHoliday() {
     if (typeof getSpecialHolidayEnabled === "function")
       setSpecialHolidayEnabled(getSpecialHolidayEnabled());
     setId(getConfigId());
-  }, [getSpecialHolidayEnabled, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSpecialHolidayEnabled(event.target.checked);
@@ -59,7 +60,7 @@ export default function SpecialHoliday() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>
         特別休暇
       </Typography>
       <Stack spacing={2} sx={{ mb: 2 }}>

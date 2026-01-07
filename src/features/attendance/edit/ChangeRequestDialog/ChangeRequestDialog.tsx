@@ -131,10 +131,17 @@ export default function ChangeRequestDialog({
                   throw new Error(MESSAGE_CODE.E00002);
                 }
 
-                new GenericMailSender(
-                  staff,
-                  updatedAttendance
-                ).rejectChangeRequest(comment);
+                try {
+                  await new GenericMailSender(
+                    staff,
+                    updatedAttendance
+                  ).rejectChangeRequest(comment);
+                } catch (mailError) {
+                  console.error(
+                    "Failed to send rejection notification mail:",
+                    mailError
+                  );
+                }
 
                 // OperationLog を作成（失敗しても処理を止めない）
                 try {
@@ -178,7 +185,7 @@ export default function ChangeRequestDialog({
                 }
 
                 try {
-                  new GenericMailSender(
+                  await new GenericMailSender(
                     staff,
                     updatedAttendance
                   ).approveChangeRequest(comment);
@@ -187,7 +194,6 @@ export default function ChangeRequestDialog({
                     "Failed to send approval notification mail:",
                     mailError
                   );
-                  dispatch(setSnackbarError(MESSAGE_CODE.E00002));
                 }
 
                 // OperationLog を作成（失敗しても処理を止めない）

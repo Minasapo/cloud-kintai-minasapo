@@ -1,12 +1,13 @@
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   Box,
   Button,
-  Container,
   FormControlLabel,
   Grid,
   ListSubheader,
   MenuItem,
-  Paper,
   Select,
   SelectChangeEvent,
   Switch,
@@ -20,29 +21,33 @@ import {
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import {
   buildCreateWorkflowInput,
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  CLOCK_CORRECTION_LABEL,
   validateWorkflowForm,
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
+import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import { parseTimeToISO } from "@/shared/lib/time";
+import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
+import { designTokenVar } from "@/shared/designSystem";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
 export default function NewWorkflowPage() {
+  const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
   const navigate = useNavigate();
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
-
   const [applicationDate, setApplicationDate] = useState(() => {
     const d = new Date();
     const y = d.getFullYear();
@@ -56,8 +61,8 @@ export default function NewWorkflowPage() {
   const [absenceDate, setAbsenceDate] = useState("");
   const [absenceDateError, setAbsenceDateError] = useState("");
   const [paidReason, setPaidReason] = useState("");
-  const [overtimeStart, setOvertimeStart] = useState("");
-  const [overtimeEnd, setOvertimeEnd] = useState("");
+  const [overtimeStart, setOvertimeStart] = useState<string | null>(null);
+  const [overtimeEnd, setOvertimeEnd] = useState<string | null>(null);
   const [overtimeError, setOvertimeError] = useState("");
   const [overtimeDate, setOvertimeDate] = useState("");
   const [overtimeDateError, setOvertimeDateError] = useState("");
@@ -68,6 +73,7 @@ export default function NewWorkflowPage() {
   const [staff, setStaff] = useState<StaffType | null | undefined>(undefined);
   const { create: createWorkflow } = useWorkflows();
   const dispatch = useAppDispatchV2();
+  const { getStartTime, getEndTime } = useAppConfig();
 
   useEffect(() => {
     if (!cognitoUser?.id) return;
@@ -203,9 +209,45 @@ export default function NewWorkflowPage() {
         dispatch(setSnackbarSuccess("ワークフローを作成しました。"));
         navigate("/workflow", { replace: true });
       } catch (err) {
-        console.error(err);
-        const msg = err instanceof Error ? err.message : String(err);
-        dispatch(setSnackbarError(msg));
+        console.error("Workflow creation error:", err);
+        let errorMessage = "ワークフローの作成に失敗しました。";
+
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (typeof err === "object" && err !== null) {
+          // RTK Query error format
+          if (
+            "data" in err &&
+            typeof err.data === "object" &&
+            err.data !== null
+          ) {
+            const data = err.data as Record<string, unknown>;
+            if ("message" in data && typeof data.message === "string") {
+              errorMessage = data.message;
+            } else if (
+              "errors" in data &&
+              Array.isArray(data.errors) &&
+              data.errors.length > 0
+            ) {
+              const firstError = data.errors[0];
+              if (
+                typeof firstError === "object" &&
+                firstError !== null &&
+                "message" in firstError
+              ) {
+                errorMessage = String(firstError.message);
+              }
+            }
+          } else if ("message" in err && typeof err.message === "string") {
+            errorMessage = err.message;
+          } else if ("error" in err && typeof err.error === "string") {
+            errorMessage = err.error;
+          }
+        } else if (typeof err === "string") {
+          errorMessage = err;
+        }
+
+        dispatch(setSnackbarError(errorMessage));
       }
     })();
   };
@@ -226,6 +268,23 @@ export default function NewWorkflowPage() {
       setEndDate(today);
       // 申請理由のデフォルト
       if (!paidReason) setPaidReason("私用のため");
+    } else if (v === CLOCK_CORRECTION_LABEL) {
+      // 打刻修正の場合は対象日を今日に、出勤時間を既定の勤務開始時刻に初期化
+      setOvertimeDate(today);
+      const defaultStartTime = getStartTime();
+      const isoTime = parseTimeToISO(defaultStartTime.format("HH:mm"), today);
+      setOvertimeStart(isoTime);
+      setOvertimeEnd(null);
+    } else if (v === CLOCK_CORRECTION_CHECK_OUT_LABEL) {
+      setOvertimeDate(today);
+      const defaultEndTime = getEndTime();
+      if (defaultEndTime) {
+        const isoTime = parseTimeToISO(defaultEndTime.format("HH:mm"), today);
+        setOvertimeEnd(isoTime);
+      } else {
+        setOvertimeEnd(null);
+      }
+      setOvertimeStart(null);
     }
   };
 
@@ -238,180 +297,144 @@ export default function NewWorkflowPage() {
       ]}
       maxWidth="lg"
     >
-      <Container>
-        <Paper sx={{ p: 2 }}>
-          <Box component="form" onSubmit={handleSubmit}>
-            <Grid
-              container
-              rowSpacing={2}
-              columnSpacing={1}
-              alignItems="center"
-            >
-              <Grid item xs={12} sm={3}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "left", pr: { sm: 1 } }}
-                >
-                  種別
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={9}>
-                <Select
-                  value={category}
-                  displayEmpty
-                  onChange={handleCategoryChange}
-                  size="small"
-                  fullWidth
-                >
-                  <MenuItem value="">
-                    <em>種別を選択</em>
-                  </MenuItem>
-                  <ListSubheader>勤怠</ListSubheader>
-                  <MenuItem
-                    value="有給休暇申請"
-                    disabled
-                    title="現在は残業申請のみ作成できます"
-                  >
-                    有給休暇申請
-                  </MenuItem>
-                  <MenuItem
-                    value="欠勤申請"
-                    disabled
-                    title="現在は残業申請のみ作成できます"
-                  >
-                    欠勤申請
-                  </MenuItem>
-                  <MenuItem value="残業申請">残業申請</MenuItem>
-                </Select>
-              </Grid>
-
-              {/* プレビュー機能は廃止されました */}
-
-              {/* 申請者 */}
-              <Grid item xs={12} sm={3}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "left", pr: { sm: 1 } }}
-                >
-                  申請者
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={9}>
-                <Typography variant="body1">
-                  {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
-                </Typography>
-              </Grid>
-
-              {/* 申請日 */}
-              <Grid item xs={12} sm={3}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "left", pr: { sm: 1 } }}
-                >
-                  申請日
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={9}>
-                <Typography variant="body1">{applicationDate}</Typography>
-              </Grid>
-
-              {/* タイトル入力は廃止されました（申請はテンプレート/種別で自動的にタイトルを決定します） */}
-
-              {/* 説明: 削除済み */}
-
-              {/* 種別固有フィールド（共通コンポーネント） */}
-              <WorkflowTypeFields
-                category={category}
-                disabled={category === ""}
-                startDate={startDate}
-                setStartDate={setStartDate}
-                endDate={endDate}
-                setEndDate={setEndDate}
-                dateError={dateError}
-                paidReason={paidReason}
-                setPaidReason={setPaidReason}
-                absenceDate={absenceDate}
-                setAbsenceDate={setAbsenceDate}
-                absenceDateError={absenceDateError}
-                overtimeDate={overtimeDate}
-                setOvertimeDate={setOvertimeDate}
-                overtimeDateError={overtimeDateError}
-                overtimeStart={overtimeStart}
-                setOvertimeStart={setOvertimeStart}
-                overtimeEnd={overtimeEnd}
-                setOvertimeEnd={setOvertimeEnd}
-                overtimeError={overtimeError}
-                overtimeReason={overtimeReason}
-                setOvertimeReason={setOvertimeReason}
-              />
-              {category === "その他" && (
-                <>
-                  <Grid item xs={12} sm={3}>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ textAlign: "left", pr: { sm: 1 } }}
-                    >
-                      備考
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={9}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      sx={{ "& .MuiInputBase-input": { padding: "6px 10px" } }}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {/* 下書き */}
-              <Grid item xs={12} sm={3}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "left", pr: { sm: 1 } }}
-                >
-                  下書き
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={9}>
-                <FormControlLabel
-                  control={
-                    <Switch checked={draftMode} onChange={handleDraftToggle} />
-                  }
-                  label={draftMode ? "下書きとして保存" : ""}
-                />
-              </Grid>
-
-              {/* ボタン（右カラムに詰める） */}
-              <Grid item xs={12} sm={3} />
-              <Grid item xs={12} sm={9}>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="small"
-                    disabled={category === ""}
-                  >
-                    作成
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => navigate(-1)}
-                    size="small"
-                  >
-                    キャンセル
-                  </Button>
-                </Box>
-              </Grid>
+      <PageSection
+        component="form"
+        layoutVariant="dashboard"
+        onSubmit={handleSubmit}
+        sx={{ gap: 0 }}
+      >
+        <Box sx={dashboardInnerSurfaceSx}>
+          <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
+            <Grid item xs={12} sm={3}>
+              <Typography variant="body2" color="text.secondary">
+                種別
+              </Typography>
             </Grid>
-          </Box>
-        </Paper>
-      </Container>
+            <Grid item xs={12} sm={9}>
+              <Select
+                value={category}
+                displayEmpty
+                onChange={handleCategoryChange}
+                size="small"
+                fullWidth
+              >
+                <MenuItem value="">
+                  <em>種別を選択</em>
+                </MenuItem>
+                <ListSubheader>勤怠</ListSubheader>
+                <MenuItem value="有給休暇申請">有給休暇申請</MenuItem>
+                <MenuItem
+                  value="欠勤申請"
+                  disabled
+                  title="現在は残業申請のみ作成できます"
+                >
+                  欠勤申請
+                </MenuItem>
+                <MenuItem value={CLOCK_CORRECTION_LABEL}>
+                  {CLOCK_CORRECTION_LABEL}
+                </MenuItem>
+                <MenuItem value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
+                  {CLOCK_CORRECTION_CHECK_OUT_LABEL}
+                </MenuItem>
+                <MenuItem value="残業申請">残業申請</MenuItem>
+              </Select>
+            </Grid>
+
+            {/* プレビュー機能は廃止されました */}
+
+            {/* 申請者 */}
+            <Grid item xs={12} sm={3}>
+              <Typography variant="body2" color="text.secondary">
+                申請者
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={9}>
+              <Typography variant="body1">
+                {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
+              </Typography>
+            </Grid>
+
+            {/* 申請日 */}
+            <Grid item xs={12} sm={3}>
+              <Typography variant="body2" color="text.secondary">
+                申請日
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={9}>
+              <TextField
+                value={applicationDate}
+                InputProps={{ readOnly: true }}
+                size="small"
+                fullWidth
+              />
+            </Grid>
+
+            {/* タイトル入力は廃止されました（申請はテンプレート/種別で自動的にタイトルを決定します） */}
+
+            {/* 説明: 削除済み */}
+
+            {/* 種別固有フィールド（共通コンポーネント） */}
+            <WorkflowTypeFields
+              category={category}
+              disabled={category === ""}
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
+              dateError={dateError}
+              paidReason={paidReason}
+              setPaidReason={setPaidReason}
+              absenceDate={absenceDate}
+              setAbsenceDate={setAbsenceDate}
+              absenceDateError={absenceDateError}
+              overtimeDate={overtimeDate}
+              setOvertimeDate={setOvertimeDate}
+              overtimeDateError={overtimeDateError}
+              overtimeStart={overtimeStart}
+              setOvertimeStart={setOvertimeStart}
+              overtimeEnd={overtimeEnd}
+              setOvertimeEnd={setOvertimeEnd}
+              overtimeError={overtimeError}
+              overtimeReason={overtimeReason}
+              setOvertimeReason={setOvertimeReason}
+            />
+            {/* 新規作成では "その他" は選択不可のため備考UIは表示しない */}
+
+            {/* 下書き */}
+            <Grid item xs={12} sm={3}>
+              <Typography variant="body2" color="text.secondary">
+                下書き
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={9}>
+              <FormControlLabel
+                control={
+                  <Switch checked={draftMode} onChange={handleDraftToggle} />
+                }
+                label={draftMode ? "下書きとして保存" : ""}
+              />
+            </Grid>
+
+            {/* ボタン（右カラムに詰める） */}
+            <Grid item xs={12} sm={3} />
+            <Grid item xs={12} sm={9}>
+              <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
+                <Button size="small" onClick={() => navigate(-1)}>
+                  戻る
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="small"
+                  disabled={category === ""}
+                >
+                  作成
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </PageSection>
     </Page>
   );
 }

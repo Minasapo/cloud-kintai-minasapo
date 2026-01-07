@@ -86,35 +86,17 @@ export const attendanceEditSchema: ZodType<AttendanceEditInputs> = z
     revision: z.number().optional().nullable(),
   })
   .superRefine((data, ctx) => {
-    const shouldRequireWorkTime = !data.paidHolidayFlag && !data.absentFlag;
-    if (shouldRequireWorkTime) {
-      if (!data.startTime) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: validationMessages.attendance.workTime.startRequired,
-          path: ["startTime"],
-        });
-      }
-
-      if (!data.endTime) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: validationMessages.attendance.workTime.endRequired,
-          path: ["endTime"],
-        });
-      }
-
-      if (
-        data.startTime &&
-        data.endTime &&
-        !dayjs(data.endTime).isAfter(dayjs(data.startTime))
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: validationMessages.attendance.workTime.range,
-          path: ["endTime"],
-        });
-      }
+    // 勤務時間の前後関係チェック（両方入力されている場合のみ）
+    if (
+      data.startTime &&
+      data.endTime &&
+      !dayjs(data.endTime).isAfter(dayjs(data.startTime))
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: validationMessages.attendance.workTime.range,
+        path: ["endTime"],
+      });
     }
 
     if (
@@ -126,5 +108,21 @@ export const attendanceEditSchema: ZodType<AttendanceEditInputs> = z
         message: validationMessages.attendance.substituteHoliday.invalidDate,
         path: ["substituteHolidayDate"],
       });
+    }
+
+    // 振替休日指定時は勤務時間/休憩を入力不可とする（差し戻し防止）
+    if (data.substituteHolidayDate) {
+      const hasWorkTime = data.startTime || data.endTime;
+      const hasRest = data.rests?.some(
+        (rest) => rest?.startTime || rest?.endTime
+      );
+      if (hasWorkTime || hasRest) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            validationMessages.attendance.substituteHoliday.workTimeNotAllowed,
+          path: hasWorkTime ? ["startTime"] : ["rests"],
+        });
+      }
     }
   });

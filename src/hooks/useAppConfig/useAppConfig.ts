@@ -9,10 +9,15 @@ import type {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
-import { DESIGN_TOKENS, getDesignTokens } from "@/constants/designTokens";
 import { resolveThemeColor } from "@/constants/theme";
+import {
+  applyDesignTokenCssVariables,
+  getDesignTokens,
+} from "@/shared/designSystem";
+
+const DEFAULT_THEME_TOKENS = getDesignTokens();
 
 /**
  * アプリケーション設定の一部項目のみを抽出した型。
@@ -31,6 +36,7 @@ export type DefaultAppConfig = Pick<
   | "quickInputEndTimes"
   | "themeColor"
   | "shiftGroups"
+  | "attendanceStatisticsEnabled"
 >;
 
 /**
@@ -49,6 +55,7 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   quickInputEndTimes: [],
   themeColor: resolveThemeColor(),
   shiftGroups: [],
+  attendanceStatisticsEnabled: false,
 };
 
 const useAppConfig = () => {
@@ -87,17 +94,56 @@ const useAppConfig = () => {
     [createAppConfig, updateAppConfig]
   );
 
-  const getConfigId = useCallback(() => config?.id ?? null, [config]);
+  const getConfigId = useCallback(() => config?.id ?? null, [config?.id]);
 
   const getStartTime = useCallback(
     () => dayjs(config?.workStartTime ?? DEFAULT_CONFIG.workStartTime, "HH:mm"),
-    [config]
+    [config?.workStartTime]
   );
 
   const getEndTime = useCallback(
     () => dayjs(config?.workEndTime ?? DEFAULT_CONFIG.workEndTime, "HH:mm"),
-    [config]
+    [config?.workEndTime]
   );
+
+  const getLunchRestStartTime = useCallback(
+    () =>
+      dayjs(
+        config?.lunchRestStartTime ?? DEFAULT_CONFIG.lunchRestStartTime,
+        "HH:mm"
+      ),
+    [config?.lunchRestStartTime]
+  );
+
+  const getLunchRestEndTime = useCallback(
+    () =>
+      dayjs(
+        config?.lunchRestEndTime ?? DEFAULT_CONFIG.lunchRestEndTime,
+        "HH:mm"
+      ),
+    [config?.lunchRestEndTime]
+  );
+
+  const getStandardWorkHours = useCallback(() => {
+    const configured = config?.standardWorkHours;
+    if (typeof configured === "number") {
+      return Math.max(configured, 0);
+    }
+
+    const start = getStartTime();
+    const end = getEndTime();
+    const lunchStart = getLunchRestStartTime();
+    const lunchEnd = getLunchRestEndTime();
+    const baseHours = end.diff(start, "hour", true);
+    const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
+    return Math.max(baseHours - lunchHours, 0);
+  }, [
+    config?.standardWorkHours,
+    config?.workStartTime,
+    config?.workEndTime,
+    config?.lunchRestStartTime,
+    config?.lunchRestEndTime,
+  ]);
 
   const getLinks = useCallback(() => {
     if (!config?.links) {
@@ -112,7 +158,7 @@ const useAppConfig = () => {
         enabled: link.enabled ?? false,
         icon: link.icon ?? "",
       }));
-  }, [config]);
+  }, [config?.links]);
 
   const getReasons = useCallback(() => {
     if (!config?.reasons) {
@@ -125,11 +171,16 @@ const useAppConfig = () => {
         reason: reason.reason ?? "",
         enabled: reason.enabled ?? false,
       }));
-  }, [config]);
+  }, [config?.reasons]);
 
   const getOfficeMode = useCallback(
     () => config?.officeMode ?? false,
-    [config]
+    [config?.officeMode]
+  );
+
+  const getAttendanceStatisticsEnabled = useCallback(
+    () => config?.attendanceStatisticsEnabled ?? false,
+    [config?.attendanceStatisticsEnabled]
   );
 
   const getQuickInputStartTimes = useCallback(
@@ -146,7 +197,7 @@ const useAppConfig = () => {
           enabled: time.enabled ?? false,
         }));
     },
-    [config]
+    [config?.quickInputStartTimes]
   );
 
   const getQuickInputEndTimes = useCallback(
@@ -163,7 +214,7 @@ const useAppConfig = () => {
           enabled: time.enabled ?? false,
         }));
     },
-    [config]
+    [config?.quickInputEndTimes]
   );
 
   const getShiftGroups = useCallback(() => {
@@ -180,71 +231,53 @@ const useAppConfig = () => {
         max: group.max ?? null,
         fixed: group.fixed ?? null,
       }));
-  }, [config]);
-
-  const getLunchRestStartTime = useCallback(
-    () =>
-      dayjs(
-        config?.lunchRestStartTime ?? DEFAULT_CONFIG.lunchRestStartTime,
-        "HH:mm"
-      ),
-    [config]
-  );
-
-  const getLunchRestEndTime = useCallback(
-    () =>
-      dayjs(
-        config?.lunchRestEndTime ?? DEFAULT_CONFIG.lunchRestEndTime,
-        "HH:mm"
-      ),
-    [config]
-  );
+  }, [config?.shiftGroups]);
 
   const getHourlyPaidHolidayEnabled = useCallback(
     () => config?.hourlyPaidHolidayEnabled ?? false,
-    [config]
+    [config?.hourlyPaidHolidayEnabled]
   );
 
   const getAmHolidayStartTime = useCallback(
     () => dayjs(config?.amHolidayStartTime ?? "09:00", "HH:mm"),
-    [config]
+    [config?.amHolidayStartTime]
   );
 
   const getAmHolidayEndTime = useCallback(
     () => dayjs(config?.amHolidayEndTime ?? "12:00", "HH:mm"),
-    [config]
+    [config?.amHolidayEndTime]
   );
 
   const getPmHolidayStartTime = useCallback(
     () => dayjs(config?.pmHolidayStartTime ?? "13:00", "HH:mm"),
-    [config]
+    [config?.pmHolidayStartTime]
   );
 
   const getPmHolidayEndTime = useCallback(
     () => dayjs(config?.pmHolidayEndTime ?? "18:00", "HH:mm"),
-    [config]
+    [config?.pmHolidayEndTime]
   );
 
   const getAmPmHolidayEnabled = useCallback(
     () => config?.amPmHolidayEnabled ?? false,
-    [config]
+    [config?.amPmHolidayEnabled]
   );
 
   const getSpecialHolidayEnabled = useCallback(
     () => config?.specialHolidayEnabled ?? false,
-    [config]
+    [config?.specialHolidayEnabled]
   );
 
   const getAbsentEnabled = useCallback(
     () => config?.absentEnabled ?? false,
-    [config]
+    [config?.absentEnabled]
   );
 
   const getThemeColor = useCallback(() => {
     const fallbackColor = DEFAULT_CONFIG.themeColor;
     const candidate = config?.themeColor ?? fallbackColor;
     return resolveThemeColor(candidate || undefined);
-  }, [config]);
+  }, [config?.themeColor]);
 
   const getThemeTokens = useCallback(
     (brandPrimaryOverride?: string) => {
@@ -253,21 +286,26 @@ const useAppConfig = () => {
         brandPrimaryOverride ?? config?.themeColor ?? DEFAULT_CONFIG.themeColor;
 
       if (!brandPrimaryOverride && !hasRemoteThemeColor) {
-        return DESIGN_TOKENS;
+        return DEFAULT_THEME_TOKENS;
       }
 
       const resolved = resolveThemeColor(candidate || undefined);
       if (
         !brandPrimaryOverride &&
-        resolved === DESIGN_TOKENS.color.brand.primary.base
+        resolved === DEFAULT_THEME_TOKENS.color.brand.primary.base
       ) {
-        return DESIGN_TOKENS;
+        return DEFAULT_THEME_TOKENS;
       }
 
       return getDesignTokens({ brandPrimary: resolved });
     },
-    [config]
+    [config?.themeColor]
   );
+
+  useEffect(() => {
+    const tokens = getThemeTokens();
+    applyDesignTokenCssVariables(tokens);
+  }, [config?.themeColor]);
 
   const loading = useMemo(
     () => isLoading || isFetching || isCreating || isUpdating,
@@ -281,10 +319,12 @@ const useAppConfig = () => {
     saveConfig,
     getStartTime,
     getEndTime,
+    getStandardWorkHours,
     getConfigId,
     getLinks,
     getReasons,
     getOfficeMode,
+    getAttendanceStatisticsEnabled,
     getQuickInputStartTimes,
     getQuickInputEndTimes,
     getShiftGroups,

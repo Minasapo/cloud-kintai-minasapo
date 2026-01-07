@@ -29,7 +29,8 @@ export default function Absent() {
     if (typeof getAbsentEnabled === "function")
       setAbsentEnabled(getAbsentEnabled());
     setId(getConfigId());
-  }, [getAbsentEnabled, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAbsentEnabled(event.target.checked);
@@ -58,7 +59,7 @@ export default function Absent() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>
         欠勤
       </Typography>
       <Stack spacing={2} sx={{ mb: 2 }}>

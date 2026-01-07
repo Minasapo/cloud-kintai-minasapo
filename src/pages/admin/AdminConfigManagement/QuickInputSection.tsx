@@ -41,17 +41,27 @@ const QuickInputSection = ({
   onRemoveQuickInputEndTime,
 }: QuickInputSectionProps) => (
   <>
-    <Typography variant="h6">簡単時間入力</Typography>
-    <Typography variant="body2" color="textSecondary">
+    <Typography variant="h5">簡単時間入力</Typography>
+    <Typography variant="body1" color="textSecondary">
       勤怠編集画面でボタンを押すと時刻が簡単に入力されます。
       <br />
       この機能は、勤務開始時刻と勤務終了時刻のみを設定できます。
     </Typography>
-    <Stack direction="row" spacing={4}>
-      <Stack spacing={2} sx={{ flex: 1 }}>
+    <Stack
+      direction="row"
+      spacing={4}
+      sx={{ flexWrap: "wrap", rowGap: 3, alignItems: "flex-start" }}
+    >
+      <Stack spacing={2} sx={{ flex: 1, minWidth: 320, maxWidth: 420 }}>
         <Typography variant="subtitle1">出勤時間</Typography>
         {quickInputStartTimes.map((entry, index) => (
-          <Stack direction="row" spacing={2} alignItems="center" key={index}>
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            key={index}
+            sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+          >
             <TimePicker
               label={`出勤時間 ${index + 1}`}
               ampm={false}
@@ -61,7 +71,7 @@ const QuickInputSection = ({
               slotProps={{
                 textField: { size: "small" },
               }}
-              sx={{ flex: 1 }}
+              sx={{ width: 160 }}
               onChange={(newValue) =>
                 onQuickInputStartTimeChange(index, newValue)
               }
@@ -74,6 +84,7 @@ const QuickInputSection = ({
                 />
               }
               label="有効"
+              sx={{ minWidth: 88 }}
             />
             <IconButton
               onClick={() => onRemoveQuickInputStartTime(index)}
@@ -92,10 +103,16 @@ const QuickInputSection = ({
           出勤時間を追加
         </Button>
       </Stack>
-      <Stack spacing={2} sx={{ flex: 1 }}>
+      <Stack spacing={2} sx={{ flex: 1, minWidth: 320, maxWidth: 420 }}>
         <Typography variant="subtitle1">退勤時間</Typography>
         {quickInputEndTimes.map((entry, index) => (
-          <Stack direction="row" spacing={2} alignItems="center" key={index}>
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            key={index}
+            sx={{ flexWrap: "wrap", rowGap: 1.5 }}
+          >
             <TimePicker
               label={`退勤時間 ${index + 1}`}
               ampm={false}
@@ -105,7 +122,7 @@ const QuickInputSection = ({
               slotProps={{
                 textField: { size: "small" },
               }}
-              sx={{ flex: 1 }}
+              sx={{ width: 160 }}
               onChange={(newValue) =>
                 onQuickInputEndTimeChange(index, newValue)
               }
@@ -118,6 +135,7 @@ const QuickInputSection = ({
                 />
               }
               label="有効"
+              sx={{ minWidth: 88 }}
             />
             <IconButton
               onClick={() => onRemoveQuickInputEndTime(index)}

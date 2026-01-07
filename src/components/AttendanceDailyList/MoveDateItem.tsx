@@ -14,19 +14,24 @@ type MoveDateItemProps = {
 export default function MoveDateItem(props: MoveDateItemProps) {
   const navigate = useNavigate();
 
+  const handlePrevMonth = () => {
+    const prevMonth = props.workDate.subtract(1, "month").startOf("month");
+    navigate(
+      `/admin/attendances/${prevMonth.format(AttendanceDate.QueryParamFormat)}`
+    );
+  };
+
+  const handleNextMonth = () => {
+    const nextMonth = props.workDate.add(1, "month").startOf("month");
+    navigate(
+      `/admin/attendances/${nextMonth.format(AttendanceDate.QueryParamFormat)}`
+    );
+  };
+
   return (
     <Stack direction="row" spacing={2} alignItems="center">
       <Box>
-        <IconButton
-          onClick={() => {
-            const prevDate = props.workDate.add(-1, "day");
-            navigate(
-              `/admin/attendances/${prevDate.format(
-                AttendanceDate.QueryParamFormat
-              )}`
-            );
-          }}
-        >
+        <IconButton onClick={handlePrevMonth}>
           <ArrowBackIcon />
         </IconButton>
       </Box>
@@ -38,8 +43,10 @@ export default function MoveDateItem(props: MoveDateItemProps) {
         }}
         onChange={(date) => {
           if (date) {
+            // 日付選択時は月の最初の日に統一
+            const firstDay = date.startOf("month");
             navigate(
-              `/admin/attendances/${date.format(
+              `/admin/attendances/${firstDay.format(
                 AttendanceDate.QueryParamFormat
               )}`
             );
@@ -47,16 +54,7 @@ export default function MoveDateItem(props: MoveDateItemProps) {
         }}
       />
       <Box>
-        <IconButton
-          onClick={() => {
-            const nextDate = props.workDate.add(1, "day");
-            navigate(
-              `/admin/attendances/${nextDate.format(
-                AttendanceDate.QueryParamFormat
-              )}`
-            );
-          }}
-        >
+        <IconButton onClick={handleNextMonth}>
           <ArrowForwardIcon />
         </IconButton>
       </Box>

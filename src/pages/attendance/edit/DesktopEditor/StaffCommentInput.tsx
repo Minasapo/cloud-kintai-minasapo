@@ -28,7 +28,8 @@ export default function StaffCommentInput({
 
   useEffect(() => {
     setReasons(getReasons().filter((reason) => reason.enabled));
-  }, [getReasons]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Stack direction="row" alignItems={"center"}>

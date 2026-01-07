@@ -1,13 +1,22 @@
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 
-import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
+import {
+  CATEGORY_LABELS,
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  CLOCK_CORRECTION_LABEL,
+  getWorkflowCategoryLabel,
+  STATUS_LABELS,
+} from "@/lib/workflowLabels";
 
 const CATEGORY_LABELS_REVERSE = Object.entries(CATEGORY_LABELS).reduce(
   (acc, [key, value]) => {
     acc[value] = key;
     return acc;
   },
-  {} as Record<string, string>
+  {
+    [CLOCK_CORRECTION_LABEL]: WorkflowCategory.CLOCK_CORRECTION,
+    [CLOCK_CORRECTION_CHECK_OUT_LABEL]: WorkflowCategory.CLOCK_CORRECTION,
+  } as Record<string, string>
 );
 
 const STATUS_LABELS_REVERSE = Object.entries(STATUS_LABELS).reduce(
@@ -24,7 +33,7 @@ export type WorkflowLike = {
   status?: WorkflowStatus | null;
   category?: WorkflowCategory | null;
   createdAt?: string | null;
-  overTimeDetails?: { date?: string | null } | null;
+  overTimeDetails?: { date?: string | null; reason?: string | null } | null;
 };
 
 export type WorkflowListItem = {
@@ -42,12 +51,19 @@ export type WorkflowListItem = {
 export type WorkflowListFilters = {
   name?: string;
   category?: string;
-  status?: string;
+  status?: string[];
   applicationFrom?: string;
   applicationTo?: string;
   createdFrom?: string;
   createdTo?: string;
 };
+
+export const DEFAULT_STATUS_FILTERS: WorkflowStatus[] = [
+  WorkflowStatus.DRAFT,
+  WorkflowStatus.SUBMITTED,
+  WorkflowStatus.PENDING,
+  WorkflowStatus.REJECTED,
+];
 
 const formatIsoDate = (value?: string | null): string => {
   if (!value) return "";
@@ -68,6 +84,7 @@ export function mapWorkflowsToListItems<T extends WorkflowLike>(
     .map((workflow) => {
       const status = workflow.status ?? undefined;
       const category = workflow.category ?? undefined;
+      const categoryLabel = category ? getWorkflowCategoryLabel(workflow) : "";
       return {
         name: workflow.id ?? "",
         rawStaffId: workflow.staffId ?? undefined,
@@ -75,7 +92,7 @@ export function mapWorkflowsToListItems<T extends WorkflowLike>(
         rawStatus: status,
         status: status ? STATUS_LABELS[status] ?? status : "",
         rawCategory: category,
-        category: category ? CATEGORY_LABELS[category] ?? category : "",
+        category: categoryLabel,
         createdAt: formatIsoDate(workflow.createdAt),
         applicationDate: workflow.overTimeDetails?.date ?? undefined,
       } satisfies WorkflowListItem;
@@ -114,13 +131,16 @@ export function applyWorkflowFilters(
       if (!matches) return false;
     }
 
-    if (filters.status) {
+    const statusFilters = filters.status?.filter(Boolean) ?? [];
+    if (statusFilters.length > 0) {
       const statusCandidates = new Set<string>();
-      statusCandidates.add(filters.status);
-      const labelFromEnum = STATUS_LABELS[filters.status as WorkflowStatus];
-      if (labelFromEnum) statusCandidates.add(labelFromEnum);
-      const enumFromLabel = STATUS_LABELS_REVERSE[filters.status];
-      if (enumFromLabel) statusCandidates.add(enumFromLabel);
+      statusFilters.forEach((status) => {
+        statusCandidates.add(status);
+        const labelFromEnum = STATUS_LABELS[status as WorkflowStatus];
+        if (labelFromEnum) statusCandidates.add(labelFromEnum);
+        const enumFromLabel = STATUS_LABELS_REVERSE[status];
+        if (enumFromLabel) statusCandidates.add(enumFromLabel);
+      });
 
       const matches =
         (item.rawStatus && statusCandidates.has(item.rawStatus)) ||
@@ -155,10 +175,15 @@ export function applyWorkflowFilters(
 export const isWorkflowFilterActive = (
   filters: WorkflowListFilters
 ): boolean => {
+  const statusFilters = filters.status?.filter(Boolean) ?? [];
+  const statusDiffersFromDefault =
+    statusFilters.length !== DEFAULT_STATUS_FILTERS.length ||
+    DEFAULT_STATUS_FILTERS.some((status) => !statusFilters.includes(status));
+
   return Boolean(
     filters.name ||
       filters.category ||
-      filters.status ||
+      (statusFilters.length > 0 && statusDiffersFromDefault) ||
       filters.applicationFrom ||
       filters.applicationTo ||
       filters.createdFrom ||

@@ -13,7 +13,8 @@ export type TimeRangeMessages = {
 
 /**
  * 共通の時間帯バリデーションを付与した Zod スキーマを生成します。
- * 個別フィールドで重複していた「開始/終了の両入力チェック」と「終了時刻が開始より後」判定を集約します。
+ * 開始・終了は片方のみの入力も許可し、両方入力されている場合のみ「終了時刻が開始より後」をチェックします。
+ * 休憩中や時間単位休暇の利用中など、部分的な入力状態を許容します。
  */
 export const createTimeRangeValidator = <T extends TimeRangeShape>(
   schema: z.ZodType<T>,
@@ -23,15 +24,7 @@ export const createTimeRangeValidator = <T extends TimeRangeShape>(
     const hasStart = Boolean(value.startTime);
     const hasEnd = Boolean(value.endTime);
 
-    if (hasStart !== hasEnd) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: messages.incomplete,
-        path: [hasStart ? "endTime" : "startTime"],
-      });
-      return;
-    }
-
+    // 両方入力されている場合のみ、開始 < 終了をチェック
     if (
       hasStart &&
       hasEnd &&

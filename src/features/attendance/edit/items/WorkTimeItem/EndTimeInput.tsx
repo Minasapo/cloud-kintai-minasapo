@@ -5,9 +5,13 @@ import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditPro
 
 import TimeInputBase from "./TimeInputBase";
 
-export default function EndTimeInput() {
+export default function EndTimeInput({
+  highlight = false,
+}: { highlight?: boolean } = {}) {
   const { getQuickInputEndTimes } = useContext(AppConfigContext);
-  const { workDate, control, setValue } = useContext(AttendanceEditContext);
+  const { workDate, control, setValue, isOnBreak } = useContext(
+    AttendanceEditContext
+  );
   if (!workDate) return null;
 
   const [quickInputEndTimes, setQuickInputEndTimes] = useState<
@@ -36,6 +40,8 @@ export default function EndTimeInput() {
       workDate={workDate}
       quickInputTimes={quickInputEndTimes}
       chipColor={(enabled) => (enabled ? "success" : "default")}
+      disabled={isOnBreak}
+      highlight={highlight}
     />
   );
 }

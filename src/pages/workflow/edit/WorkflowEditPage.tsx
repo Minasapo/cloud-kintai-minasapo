@@ -5,141 +5,78 @@ import {
   Grid,
   ListSubheader,
   MenuItem,
-  Paper,
   Select,
   SelectChangeEvent,
   Switch,
   TextField,
   Typography,
 } from "@mui/material";
-import { getWorkflow } from "@shared/api/graphql/documents/queries";
-import {
-  GetWorkflowQuery,
-  WorkflowCategory,
-  type WorkflowCommentInput,
-  WorkflowStatus,
-} from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import { GraphQLResult } from "aws-amplify/api";
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { AuthContext } from "@/context/AuthContext";
 import {
   buildUpdateWorkflowInput,
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  CLOCK_CORRECTION_LABEL,
   validateWorkflowForm,
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
-import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
+import useStaffs from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { CATEGORY_LABELS } from "@/lib/workflowLabels";
+import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
+import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
+import { designTokenVar } from "@/shared/designSystem";
+import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
+
+const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
 
 export default function WorkflowEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { workflow } = useLoaderData() as WorkflowEditLoaderData;
 
-  const [category, setCategory] = useState("");
-  const [applicationDate, setApplicationDate] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [dateError, setDateError] = useState("");
-  const [absenceDate, setAbsenceDate] = useState("");
-  const [absenceDateError, setAbsenceDateError] = useState("");
-  const [paidReason, setPaidReason] = useState("");
-  const [overtimeDate, setOvertimeDate] = useState("");
-  const [overtimeDateError, setOvertimeDateError] = useState("");
-  const [overtimeStart, setOvertimeStart] = useState("");
-  const [overtimeEnd, setOvertimeEnd] = useState("");
-  const [overtimeError, setOvertimeError] = useState("");
-  const [overtimeReason, setOvertimeReason] = useState("");
-  const [draftMode, setDraftMode] = useState(true);
-
-  const { cognitoUser } = useContext(AuthContext);
   const { staffs } = useStaffs();
   const { update: updateWorkflow } = useWorkflows();
-  const [applicant, setApplicant] = useState<StaffType | null | undefined>(
-    undefined
-  );
-  const [existingComments, setExistingComments] = useState<
-    WorkflowCommentInput[]
-  >([]);
   const dispatch = useAppDispatchV2();
-
-  useEffect(() => {
-    const fetch = async () => {
-      if (!id) return;
-      try {
-        const resp = (await graphqlClient.graphql({
-          query: getWorkflow,
-          variables: { id },
-          authMode: "userPool",
-        })) as GraphQLResult<GetWorkflowQuery>;
-
-        if (resp.errors) throw new Error(resp.errors[0].message);
-        const w = resp.data?.getWorkflow;
-        if (!w) return;
-
-        // map category (enum -> label used in this form)
-        if (w.category) {
-          setCategory(
-            CATEGORY_LABELS[w.category as WorkflowCategory] || w.category
-          );
-        }
-
-        // application date: prefer overtime date if present, otherwise createdAt
-        const appDate =
-          w.overTimeDetails?.date || isoDateFromTimestamp(w.createdAt);
-        setApplicationDate(formatDateSlash(appDate));
-
-        // overtime fields
-        if (w.overTimeDetails) {
-          // keep ISO format (YYYY-MM-DD) for <input type="date"> controls
-          setOvertimeDate(isoDateFromTimestamp(w.overTimeDetails.date));
-          setOvertimeStart(w.overTimeDetails.startTime || "");
-          setOvertimeEnd(w.overTimeDetails.endTime || "");
-          setOvertimeReason(w.overTimeDetails.reason || "");
-        }
-
-        // status -> draftMode
-        setDraftMode(w.status === WorkflowStatus.DRAFT);
-        setExistingComments(extractExistingWorkflowComments(w));
-
-        // applicant/staff from staffId
-        if (w.staffId) {
-          const s = staffs.find((st) => st.id === w.staffId);
-          setApplicant(
-            s || ({ id: w.staffId, familyName: "", givenName: "" } as StaffType)
-          );
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetch();
-    // we include staffs so that applicant can be resolved once staffs are loaded
-  }, [id, staffs]);
-
-  useEffect(() => {
-    // 申請日は初期で今日に
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    setApplicationDate(`${y}/${m}/${day}`);
-
-    if (!cognitoUser?.id) return;
-    const match = staffs.find((s) => s.cognitoUserId === cognitoUser.id);
-    setApplicant(match || null);
-  }, [cognitoUser, staffs]);
+  const {
+    category,
+    setCategory,
+    applicationDate,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    absenceDate,
+    setAbsenceDate,
+    paidReason,
+    setPaidReason,
+    overtimeDate,
+    setOvertimeDate,
+    overtimeStart,
+    setOvertimeStart,
+    overtimeEnd,
+    setOvertimeEnd,
+    overtimeReason,
+    setOvertimeReason,
+    draftMode,
+    setDraftMode,
+    applicant,
+    existingComments,
+    setExistingComments,
+  } = useWorkflowEditLoaderState(workflow, staffs);
+  const [dateError, setDateError] = useState("");
+  const [absenceDateError, setAbsenceDateError] = useState("");
+  const [overtimeDateError, setOvertimeDateError] = useState("");
+  const [overtimeError, setOvertimeError] = useState("");
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,14 +103,8 @@ export default function WorkflowEditPage() {
         if (!id) throw new Error("IDが不明です");
         let normalizedComments = existingComments;
         if (!draftMode) {
-          const resp = (await graphqlClient.graphql({
-            query: getWorkflow,
-            variables: { id },
-            authMode: "userPool",
-          })) as GraphQLResult<GetWorkflowQuery>;
-          normalizedComments = extractExistingWorkflowComments(
-            resp.data?.getWorkflow ?? null
-          );
+          const latest = await fetchWorkflowById(id);
+          normalizedComments = extractExistingWorkflowComments(latest);
           setExistingComments(normalizedComments);
         }
 
@@ -220,8 +151,13 @@ export default function WorkflowEditPage() {
       ]}
       maxWidth="lg"
     >
-      <Paper sx={{ p: 3 }}>
-        <Box component="form" onSubmit={handleSave}>
+      <PageSection
+        component="form"
+        layoutVariant="dashboard"
+        onSubmit={handleSave}
+        sx={{ gap: 0 }}
+      >
+        <Box sx={dashboardInnerSurfaceSx}>
           <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
             <Grid item xs={12} sm={3}>
               <Typography variant="body2" color="text.secondary">
@@ -258,6 +194,12 @@ export default function WorkflowEditPage() {
                   <MenuItem value="有給休暇申請">有給休暇申請</MenuItem>
                   <MenuItem value="欠勤申請">欠勤申請</MenuItem>
                   <MenuItem value="残業申請">残業申請</MenuItem>
+                  <MenuItem value={CLOCK_CORRECTION_LABEL}>
+                    {CLOCK_CORRECTION_LABEL}
+                  </MenuItem>
+                  <MenuItem value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
+                    {CLOCK_CORRECTION_CHECK_OUT_LABEL}
+                  </MenuItem>
                   <MenuItem value="その他">その他</MenuItem>
                 </Select>
               )}
@@ -335,12 +277,8 @@ export default function WorkflowEditPage() {
 
             <Grid item xs={12} sm={3} />
             <Grid item xs={12} sm={9}>
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Button
-                  size="small"
-                  sx={{ mr: 1 }}
-                  onClick={() => navigate(-1)}
-                >
+              <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
+                <Button size="small" onClick={() => navigate(-1)}>
                   戻る
                 </Button>
                 <Button type="submit" variant="contained" size="small">
@@ -350,7 +288,7 @@ export default function WorkflowEditPage() {
             </Grid>
           </Grid>
         </Box>
-      </Paper>
+      </PageSection>
       {/* notifications are handled globally by SnackbarGroup */}
     </Page>
   );

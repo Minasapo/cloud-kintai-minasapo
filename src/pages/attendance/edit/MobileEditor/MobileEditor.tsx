@@ -1,22 +1,25 @@
+import { VacationTabs } from "@features/attendance/edit/components/VacationTabs";
 import HourlyPaidHolidayTimeItemMobile from "@features/attendance/edit/items/HourlyPaidHolidayTimeItemMobile";
 import PaidHolidayFlagInputMobile from "@features/attendance/edit/PaidHolidayFlagInputMobile";
 import QuickInputButtonsMobile from "@features/attendance/edit/QuickInputButtonsMobile";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
   Checkbox,
   FormControlLabel,
   Stack,
-  Tab,
-  Tabs,
+  Typography,
 } from "@mui/material";
 import GroupContainerMobile from "@shared/ui/group-container/GroupContainerMobile";
 import Title from "@shared/ui/typography/Title";
-import React, { useContext, useState } from "react";
-import { Controller } from "react-hook-form";
+import { useContext, useMemo, useState } from "react";
+import { Controller, useFormState } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
@@ -60,12 +63,35 @@ export function MobileEditor() {
     workDate,
   } = ctx;
   const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
+  const { errors } = useFormState({ control });
+  const contextErrorMessages = ctx.errorMessages;
+  const derivedMessages = useMemo(
+    () => collectAttendanceErrorMessages(errors),
+    [errors]
+  );
+  const errorMessages = contextErrorMessages?.length
+    ? contextErrorMessages
+    : derivedMessages;
 
   if (changeRequests.length > 0) {
     return (
       <Stack direction="column" spacing={1} sx={{ p: 1 }}>
         <AttendanceEditBreadcrumb />
         <Title>勤怠編集</Title>
+        {errorMessages.length > 0 && (
+          <Box mb={1}>
+            <Alert severity="error">
+              <AlertTitle>入力内容に誤りがあります。</AlertTitle>
+              <Stack spacing={0.5}>
+                {errorMessages.map((message) => (
+                  <Typography key={message} variant="body2">
+                    {message}
+                  </Typography>
+                ))}
+              </Stack>
+            </Alert>
+          </Box>
+        )}
         <ChangeRequestingAlert changeRequests={changeRequests} />
       </Stack>
     );
@@ -88,47 +114,28 @@ export function MobileEditor() {
 
   const [holidayTab, setHolidayTab] = useState<number>(0);
 
-  // タブパネル
-  const TabPanel = ({
-    children,
-    value,
-    index,
-  }: {
-    children?: React.ReactNode;
-    value: number;
-    index: number;
-  }) => {
-    return value === index ? <Box sx={{ pt: 1 }}>{children}</Box> : null;
-  };
-  TabPanel.displayName = "TabPanel";
-
   // 休暇タブ（AppConfigのフラグで特別休暇タブを表示制御）
   const TabbedPaidHoliday = () => {
-    const tabs: { label: string; panel: JSX.Element }[] = [];
-    // 有給
-    tabs.push({
+    const items: { label: string; content: JSX.Element }[] = [];
+    items.push({
       label: "有給休暇",
-      panel: (
-        <TabPanel value={holidayTab} index={tabs.length}>
-          <PaidHolidayFlagInputMobile
-            control={control}
-            setValue={setValue}
-            workDate={workDate ? workDate.format("YYYY-MM-DD") : undefined}
-            setPaidHolidayTimes={true}
-            restReplace={restReplace}
-            getValues={getValues}
-          />
-        </TabPanel>
+      content: (
+        <PaidHolidayFlagInputMobile
+          control={control}
+          setValue={setValue}
+          workDate={workDate ? workDate.format("YYYY-MM-DD") : undefined}
+          setPaidHolidayTimes={true}
+          restReplace={restReplace}
+          getValues={getValues}
+        />
       ),
     });
 
-    // 特別休暇（フラグが有効な場合のみ）
     if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
-      tabs.push({
+      items.push({
         label: "特別休暇",
-        panel: (
-          <TabPanel value={holidayTab} index={tabs.length}>
-            {/* 他の休暇項目と同様にラベルを上に配置し、内容は縦並びにする */}
+        content: (
+          <>
             <Label>特別休暇</Label>
             <Stack direction="column" alignItems={"flex-start"} spacing={1}>
               <Box sx={{ color: "text.secondary", fontSize: 14 }}>
@@ -152,83 +159,65 @@ export function MobileEditor() {
                 )}
               />
             </Stack>
-          </TabPanel>
+          </>
         ),
       });
     }
 
-    // 時間休暇
-    tabs.push({
+    items.push({
       label: "時間休暇",
-      panel: (
-        <TabPanel value={holidayTab} index={tabs.length}>
-          {!hourlyPaidHolidayEnabled ? (
+      content: !hourlyPaidHolidayEnabled ? (
+        <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
+          時間単位休暇は無効です。
+        </Stack>
+      ) : (
+        <>
+          <Label>時間単位休暇</Label>
+          {hourlyPaidHolidayTimeFields.length === 0 && (
             <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
-              時間単位休暇は無効です。
+              時間帯を追加してください。
             </Stack>
-          ) : (
-            <>
-              <Label>時間単位休暇</Label>
-              {hourlyPaidHolidayTimeFields.length === 0 && (
-                <Stack sx={{ color: "text.secondary", fontSize: 14 }}>
-                  時間帯を追加してください。
-                </Stack>
-              )}
-              {hourlyPaidHolidayTimeFields.map((time, index) => (
-                <HourlyPaidHolidayTimeItemMobile
-                  key={time.id}
-                  time={time}
-                  index={index}
-                />
-              ))}
-              <Stack>
-                <Button
-                  variant="outlined"
-                  size="medium"
-                  startIcon={<AddCircleOutlineOutlinedIcon />}
-                  fullWidth
-                  onClick={() =>
-                    hourlyPaidHolidayTimeAppend({
-                      startTime: null,
-                      endTime: null,
-                    })
-                  }
-                >
-                  追加
-                </Button>
-              </Stack>
-            </>
           )}
-        </TabPanel>
+          {hourlyPaidHolidayTimeFields.map((time, index) => (
+            <HourlyPaidHolidayTimeItemMobile
+              key={time.id}
+              time={time}
+              index={index}
+            />
+          ))}
+          <Stack>
+            <Button
+              variant="outlined"
+              size="medium"
+              startIcon={<AddCircleOutlineOutlinedIcon />}
+              fullWidth
+              onClick={() =>
+                hourlyPaidHolidayTimeAppend({
+                  startTime: null,
+                  endTime: null,
+                })
+              }
+            >
+              追加
+            </Button>
+          </Stack>
+        </>
       ),
     });
 
-    // 振替休暇
-    tabs.push({
+    items.push({
       label: "振替休暇",
-      panel: (
-        <TabPanel value={holidayTab} index={tabs.length}>
-          <SubstituteHolidayDateInput />
-        </TabPanel>
-      ),
+      content: <SubstituteHolidayDateInput />,
     });
 
     return (
-      <>
-        <Tabs
-          value={holidayTab}
-          onChange={(_, v) => setHolidayTab(v)}
-          variant="fullWidth"
-          sx={{ mb: 1 }}
-        >
-          {tabs.map((t, i) => (
-            <Tab key={i} label={t.label} />
-          ))}
-        </Tabs>
-        {tabs.map((t, i) => (
-          <div key={`panel-${i}`}>{t.panel}</div>
-        ))}
-      </>
+      <VacationTabs
+        value={holidayTab}
+        onChange={setHolidayTab}
+        items={items}
+        panelPadding={1}
+        tabsProps={{ variant: "fullWidth", sx: { mb: 1 } }}
+      />
     );
   };
   TabbedPaidHoliday.displayName = "TabbedPaidHoliday";
@@ -237,6 +226,20 @@ export function MobileEditor() {
     <Stack direction="column" spacing={1} sx={{ p: 1, pb: 10 }}>
       <AttendanceEditBreadcrumb />
       <Title>勤怠編集</Title>
+      {errorMessages.length > 0 && (
+        <Box mb={1}>
+          <Alert severity="error">
+            <AlertTitle>入力内容に誤りがあります。</AlertTitle>
+            <Stack spacing={0.5}>
+              {errorMessages.map((message) => (
+                <Typography key={message} variant="body2">
+                  {message}
+                </Typography>
+              ))}
+            </Stack>
+          </Alert>
+        </Box>
+      )}
       <Stack direction="column" spacing={2} sx={{ p: 1 }}>
         <NoDataAlert />
         {setValue && restReplace && hourlyPaidHolidayTimeReplace && (

@@ -5,8 +5,10 @@ import {
 import dayjs from "dayjs";
 import { createContext } from "react";
 
-import { DESIGN_TOKENS, type DesignTokens } from "@/constants/designTokens";
 import { DEFAULT_CONFIG } from "@/hooks/useAppConfig/useAppConfig";
+import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
+
+const DEFAULT_THEME_TOKENS = getDesignTokens();
 
 type AppConfigContextProps = {
   fetchConfig: () => Promise<void>;
@@ -15,6 +17,7 @@ type AppConfigContextProps = {
   ) => Promise<void>;
   getStartTime: () => dayjs.Dayjs;
   getEndTime: () => dayjs.Dayjs;
+  getStandardWorkHours: () => number;
   getConfigId: () => string | null;
   getLinks: () => {
     label: string;
@@ -27,6 +30,7 @@ type AppConfigContextProps = {
     enabled: boolean;
   }[];
   getOfficeMode: () => boolean;
+  getAttendanceStatisticsEnabled: () => boolean;
   getQuickInputStartTimes: (onlyEnabled?: boolean) => {
     time: string;
     enabled: boolean;
@@ -65,10 +69,20 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   },
   getStartTime: () => dayjs(DEFAULT_CONFIG.workStartTime, "HH:mm"),
   getEndTime: () => dayjs(DEFAULT_CONFIG.workEndTime, "HH:mm"),
+  getStandardWorkHours: () => {
+    const start = dayjs(DEFAULT_CONFIG.workStartTime, "HH:mm");
+    const end = dayjs(DEFAULT_CONFIG.workEndTime, "HH:mm");
+    const lunchStart = dayjs(DEFAULT_CONFIG.lunchRestStartTime, "HH:mm");
+    const lunchEnd = dayjs(DEFAULT_CONFIG.lunchRestEndTime, "HH:mm");
+    const baseHours = end.diff(start, "hour", true);
+    const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
+    return Math.max(baseHours - lunchHours, 0);
+  },
   getConfigId: () => null,
   getLinks: () => [],
   getReasons: () => [],
   getOfficeMode: () => false,
+  getAttendanceStatisticsEnabled: () => false,
   getQuickInputStartTimes: () => [],
   getQuickInputEndTimes: () => [],
   getShiftGroups: () => [],
@@ -85,5 +99,5 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getAbsentEnabled: () => false,
   // Ensure a string is always returned to satisfy the context type
   getThemeColor: () => DEFAULT_CONFIG.themeColor ?? "",
-  getThemeTokens: () => DESIGN_TOKENS,
+  getThemeTokens: () => DEFAULT_THEME_TOKENS,
 });

@@ -4,7 +4,7 @@ import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 export abstract class MailSender {
-  protected send(to: string[], subject: string, body: string) {
+  protected async send(to: string[], subject: string, body: string) {
     const params = {
       query: sendMail,
       variables: {
@@ -17,7 +17,7 @@ export abstract class MailSender {
     };
 
     try {
-      void graphqlClient.graphql(params);
+      await graphqlClient.graphql(params);
     } catch {
       throw new Error(MESSAGE_CODE.E00001);
     }

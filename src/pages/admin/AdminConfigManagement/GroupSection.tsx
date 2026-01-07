@@ -1,12 +1,12 @@
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { type ReactNode, useContext, useMemo } from "react";
 
-import { DESIGN_TOKENS } from "@/constants/designTokens";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
+import { PageSection } from "@/shared/ui/layout";
 
 type Props = {
   title: string;
@@ -22,33 +22,69 @@ export default function GroupSection({
   children,
 }: Props) {
   const { getThemeTokens } = useContext(AppConfigContext);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const tokens = useMemo(
     () =>
-      typeof getThemeTokens === "function" ? getThemeTokens() : DESIGN_TOKENS,
-    [getThemeTokens]
+      typeof getThemeTokens === "function"
+        ? getThemeTokens()
+        : getDesignTokens(),
+    []
   );
   const adminPanelTokens = tokens.component.adminPanel;
   const panelSpacing = adminPanelTokens.sectionSpacing;
   const dividerColor = adminPanelTokens.dividerColor;
   const brandAccent = tokens.color.brand.primary.base;
   const surfaceColor = adminPanelTokens.surface;
+  const groupContainerTokens = tokens.component.groupContainer;
+  const panelSpacingVar = designTokenVar(
+    "component.adminPanel.sectionSpacing",
+    `${panelSpacing}px`
+  );
+  const PANEL_HALF_GAP = `calc(${panelSpacingVar} / 2)`;
+  const dividerColorVar = designTokenVar(
+    "component.adminPanel.dividerColor",
+    dividerColor
+  );
+  const brandAccentVar = designTokenVar(
+    "color.brand.primary.base",
+    brandAccent
+  );
+  const surfaceColorVar = designTokenVar(
+    "component.adminPanel.surface",
+    surfaceColor
+  );
+  const titleColorVar = designTokenVar(
+    "color.brand.primary.dark",
+    tokens.color.brand.primary.dark ?? brandAccent
+  );
+  const accentWidthVar = designTokenVar(
+    "component.groupContainer.accentWidth",
+    `${groupContainerTokens.accentWidth}px`
+  );
+  const titleSpacingVar = designTokenVar("spacing.sm", "8px");
 
   return (
-    <Paper
-      variant="outlined"
+    <PageSection
+      variant="surface"
+      layoutVariant="detail"
       sx={{
-        p: panelSpacing,
-        borderColor: dividerColor,
-        borderLeft: `6px solid ${brandAccent}`,
-        backgroundColor: surfaceColor,
+        gap: PANEL_HALF_GAP,
+        border: `1px solid ${dividerColorVar}`,
+        borderLeft: `${accentWidthVar} solid ${brandAccentVar}`,
+        backgroundColor: surfaceColorVar,
+        boxShadow: "none",
+        px: panelSpacingVar,
+        py: panelSpacingVar,
       }}
     >
-      <Stack spacing={0} sx={{ gap: panelSpacing / 2 }}>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography
-            variant="h6"
-            sx={{ color: tokens.color.brand.primary.dark ?? brandAccent }}
-          >
+      <Stack spacing={0} sx={{ gap: PANEL_HALF_GAP }}>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ gap: titleSpacingVar }}
+        >
+          <Typography variant="h6" sx={{ color: titleColorVar }}>
             {title}
           </Typography>
           {actions && <Box>{actions}</Box>}
@@ -58,9 +94,9 @@ export default function GroupSection({
             {description}
           </Typography>
         )}
-        <Divider sx={{ borderColor: dividerColor }} />
-        <Box sx={{ pt: panelSpacing / 2 }}>{children}</Box>
+        <Divider sx={{ borderColor: dividerColorVar }} />
+        <Box sx={{ pt: PANEL_HALF_GAP }}>{children}</Box>
       </Stack>
-    </Paper>
+    </PageSection>
   );
 }

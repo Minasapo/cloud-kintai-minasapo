@@ -1,16 +1,42 @@
 import { Typography } from "@mui/material";
+import type { ReactNode } from "react";
 
-interface HeadlineProps {
-  text: string;
-}
+import { designTokenVar } from "@/shared/designSystem";
 
-export default function Headline({ text }: HeadlineProps) {
+type HeadlineProps = {
+  children: ReactNode;
+};
+
+export const Headline = ({ children }: HeadlineProps) => {
+  const HEADLINE_ACCENT_COLOR = designTokenVar(
+    "component.headline.accentColor",
+    "#0FA85E"
+  );
+  const HEADLINE_BORDER_WIDTH = designTokenVar(
+    "component.headline.borderWidth",
+    "5px"
+  );
+  const HEADLINE_PADDING_LEFT = designTokenVar(
+    "component.headline.paddingLeft",
+    "8px"
+  );
+  const HEADLINE_TEXT_COLOR = designTokenVar(
+    "component.headline.textColor",
+    "#0FA85E"
+  );
   return (
     <Typography
+      component="h2"
       variant="h4"
-      sx={{ pl: 1, borderBottom: "solid 5px #0FA85E", color: "#0FA85E" }}
+      sx={{
+        borderLeft: `solid ${HEADLINE_BORDER_WIDTH} ${HEADLINE_ACCENT_COLOR}`,
+        borderBottom: `solid ${HEADLINE_BORDER_WIDTH} ${HEADLINE_ACCENT_COLOR}`,
+        paddingLeft: HEADLINE_PADDING_LEFT,
+        fontWeight: 700,
+        color: HEADLINE_TEXT_COLOR,
+      }}
     >
-      {text}
+      {children}
     </Typography>
   );
-}
+};

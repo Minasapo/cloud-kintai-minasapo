@@ -38,7 +38,7 @@ export function RestTimeInput({
   restRemove,
   restUpdate,
 }: RestTimeInputProps) {
-  const { workDate } = useContext(AttendanceEditContext);
+  const { workDate, isOnBreak } = useContext(AttendanceEditContext);
 
   if (!workDate) return null;
 
@@ -86,6 +86,7 @@ export function RestTimeInput({
         size="medium"
         startIcon={<AddCircleOutlineOutlinedIcon />}
         fullWidth
+        disabled={isOnBreak}
         onClick={() =>
           restAppend({
             startTime: null,

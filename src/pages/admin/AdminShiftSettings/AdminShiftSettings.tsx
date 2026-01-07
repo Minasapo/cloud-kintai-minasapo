@@ -121,19 +121,14 @@ export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
     useContext(AppConfigContext);
   const dispatch = useAppDispatchV2();
-  const [shiftGroups, setShiftGroups] = useState<ShiftGroupFormValue[]>([
-    createShiftGroup(),
-  ]);
+  const [shiftGroups, setShiftGroups] = useState<ShiftGroupFormValue[]>([]);
   const [configId, setConfigId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const initialGroups = getShiftGroups();
-    setShiftGroups(() => {
-      if (!initialGroups.length) {
-        return [createShiftGroup()];
-      }
-      return initialGroups.map((group) =>
+    setShiftGroups(() =>
+      initialGroups.map((group) =>
         createShiftGroup({
           label: group.label ?? "",
           description: group.description ?? "",
@@ -150,10 +145,11 @@ export default function AdminShiftSettings() {
               ? String(group.fixed)
               : "",
         })
-      );
-    });
+      )
+    );
     setConfigId(getConfigId());
-  }, [getShiftGroups, getConfigId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hasValidationError = useMemo(
     () => shiftGroups.some((group) => getGroupValidation(group).hasError),
@@ -182,10 +178,7 @@ export default function AdminShiftSettings() {
   };
 
   const handleDeleteGroup = (id: string) => {
-    setShiftGroups((prev) => {
-      const updated = prev.filter((group) => group.id !== id);
-      return updated.length ? updated : [createShiftGroup()];
-    });
+    setShiftGroups((prev) => prev.filter((group) => group.id !== id));
   };
 
   const handleSave = async () => {
@@ -240,148 +233,165 @@ export default function AdminShiftSettings() {
         <Stack spacing={3}>
           <Typography variant="h6">シフトグループ</Typography>
           <Stack spacing={1.5}>
-            {shiftGroups.map((group) => {
-              const validation = getGroupValidation(group);
-              const labelError = validation.labelError;
-              const minHelperText = validation.minInputError
-                ? "0以上の整数で入力してください。"
-                : validation.fixedWithRangeConflict
-                ? "固定人数と同時に設定できません。"
-                : "任意";
-              const maxHelperText = validation.maxInputError
-                ? "0以上の整数で入力してください。"
-                : validation.rangeError
-                ? "最大人数は最小人数以上にしてください。"
-                : validation.fixedWithRangeConflict
-                ? "固定人数と同時に設定できません。"
-                : "任意";
-              const fixedHelperText = validation.fixedInputError
-                ? "0以上の整数で入力してください。"
-                : validation.fixedBelowMin
-                ? "最小人数以上を入力してください。"
-                : validation.fixedAboveMax
-                ? "最大人数以下を入力してください。"
-                : validation.fixedWithRangeConflict
-                ? "固定人数を使う場合は最小/最大を空欄にしてください。"
-                : "任意";
-              return (
-                <Paper
-                  key={group.id}
-                  variant="outlined"
-                  sx={{ p: 1.5, borderRadius: 2 }}
-                >
-                  <Stack spacing={1}>
-                    <Stack
-                      direction={{ xs: "column", sm: "row" }}
-                      spacing={1}
-                      alignItems={{ xs: "stretch", sm: "center" }}
-                    >
-                      <TextField
-                        required
-                        size="small"
-                        label="ラベル名"
-                        value={group.label}
-                        onChange={(event) =>
-                          handleGroupChange(
-                            group.id,
-                            "label",
-                            event.target.value
-                          )
-                        }
-                        error={labelError}
-                        helperText={
-                          labelError ? "ラベル名は必須です" : undefined
-                        }
-                        sx={{ flexGrow: 1 }}
-                      />
-                      <IconButton
-                        aria-label={`${group.label || "未設定"}を削除`}
-                        onClick={() => handleDeleteGroup(group.id)}
-                        size="small"
+            {shiftGroups.length === 0 ? (
+              <Alert severity="info" variant="outlined">
+                現在登録されているシフトグループはありません。「グループを追加」から新規に追加できます。
+              </Alert>
+            ) : (
+              shiftGroups.map((group) => {
+                const validation = getGroupValidation(group);
+                const labelError = validation.labelError;
+                const minHelperText = validation.minInputError
+                  ? "0以上の整数で入力してください。"
+                  : validation.fixedWithRangeConflict
+                  ? "固定人数と同時に設定できません。"
+                  : "任意";
+                const maxHelperText = validation.maxInputError
+                  ? "0以上の整数で入力してください。"
+                  : validation.rangeError
+                  ? "最大人数は最小人数以上にしてください。"
+                  : validation.fixedWithRangeConflict
+                  ? "固定人数と同時に設定できません。"
+                  : "任意";
+                const fixedHelperText = validation.fixedInputError
+                  ? "0以上の整数で入力してください。"
+                  : validation.fixedBelowMin
+                  ? "最小人数以上を入力してください。"
+                  : validation.fixedAboveMax
+                  ? "最大人数以下を入力してください。"
+                  : validation.fixedWithRangeConflict
+                  ? "固定人数を使う場合は最小/最大を空欄にしてください。"
+                  : "任意";
+                return (
+                  <Paper
+                    key={group.id}
+                    variant="outlined"
+                    sx={{ p: 1.5, borderRadius: 2 }}
+                  >
+                    <Stack spacing={1}>
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={1}
+                        alignItems={{ xs: "stretch", sm: "center" }}
                       >
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                    <TextField
-                      size="small"
-                      label="説明"
-                      value={group.description}
-                      onChange={(event) =>
-                        handleGroupChange(
-                          group.id,
-                          "description",
-                          event.target.value
-                        )
-                      }
-                      inputProps={{ maxLength: 48 }}
-                      helperText="50文字以内を目安に入力"
-                      fullWidth
-                    />
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                        <TextField
+                          required
+                          size="small"
+                          label="ラベル名"
+                          value={group.label}
+                          onChange={(event) =>
+                            handleGroupChange(
+                              group.id,
+                              "label",
+                              event.target.value
+                            )
+                          }
+                          error={labelError}
+                          helperText={
+                            labelError ? "ラベル名は必須です" : undefined
+                          }
+                          sx={{ flexGrow: 1 }}
+                        />
+                        <IconButton
+                          aria-label={`${group.label || "未設定"}を削除`}
+                          onClick={() => handleDeleteGroup(group.id)}
+                          size="small"
+                        >
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </Stack>
                       <TextField
                         size="small"
-                        type="number"
-                        label="最小人数 (min)"
-                        value={group.min}
-                        onChange={(event) =>
-                          handleGroupChange(group.id, "min", event.target.value)
-                        }
-                        inputProps={{ min: 0 }}
-                        error={
-                          validation.minInputError ||
-                          validation.fixedWithRangeConflict
-                        }
-                        helperText={minHelperText}
-                        sx={{ flexGrow: 1 }}
-                      />
-                      <TextField
-                        size="small"
-                        type="number"
-                        label="最大人数 (max)"
-                        value={group.max}
-                        onChange={(event) =>
-                          handleGroupChange(group.id, "max", event.target.value)
-                        }
-                        inputProps={{ min: 0 }}
-                        error={
-                          validation.maxInputError ||
-                          validation.rangeError ||
-                          validation.fixedWithRangeConflict
-                        }
-                        helperText={maxHelperText}
-                        sx={{ flexGrow: 1 }}
-                      />
-                      <TextField
-                        size="small"
-                        type="number"
-                        label="固定人数 (fixed)"
-                        value={group.fixed}
+                        label="説明"
+                        value={group.description}
                         onChange={(event) =>
                           handleGroupChange(
                             group.id,
-                            "fixed",
+                            "description",
                             event.target.value
                           )
                         }
-                        inputProps={{ min: 0 }}
-                        error={
-                          validation.fixedInputError ||
-                          validation.fixedBelowMin ||
-                          validation.fixedAboveMax ||
-                          validation.fixedWithRangeConflict
-                        }
-                        helperText={fixedHelperText}
-                        sx={{ flexGrow: 1 }}
+                        inputProps={{ maxLength: 48 }}
+                        helperText="50文字以内を目安に入力"
+                        fullWidth
                       />
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={1}
+                      >
+                        <TextField
+                          size="small"
+                          type="number"
+                          label="最小人数 (min)"
+                          value={group.min}
+                          onChange={(event) =>
+                            handleGroupChange(
+                              group.id,
+                              "min",
+                              event.target.value
+                            )
+                          }
+                          inputProps={{ min: 0 }}
+                          error={
+                            validation.minInputError ||
+                            validation.fixedWithRangeConflict
+                          }
+                          helperText={minHelperText}
+                          sx={{ flexGrow: 1 }}
+                        />
+                        <TextField
+                          size="small"
+                          type="number"
+                          label="最大人数 (max)"
+                          value={group.max}
+                          onChange={(event) =>
+                            handleGroupChange(
+                              group.id,
+                              "max",
+                              event.target.value
+                            )
+                          }
+                          inputProps={{ min: 0 }}
+                          error={
+                            validation.maxInputError ||
+                            validation.rangeError ||
+                            validation.fixedWithRangeConflict
+                          }
+                          helperText={maxHelperText}
+                          sx={{ flexGrow: 1 }}
+                        />
+                        <TextField
+                          size="small"
+                          type="number"
+                          label="固定人数 (fixed)"
+                          value={group.fixed}
+                          onChange={(event) =>
+                            handleGroupChange(
+                              group.id,
+                              "fixed",
+                              event.target.value
+                            )
+                          }
+                          inputProps={{ min: 0 }}
+                          error={
+                            validation.fixedInputError ||
+                            validation.fixedBelowMin ||
+                            validation.fixedAboveMax ||
+                            validation.fixedWithRangeConflict
+                          }
+                          helperText={fixedHelperText}
+                          sx={{ flexGrow: 1 }}
+                        />
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary">
+                        最小/最大 (レンジ指定)
+                        と固定人数は併用できません。いずれか一方のみ入力してください。
+                      </Typography>
                     </Stack>
-                    <Typography variant="caption" color="text.secondary">
-                      最小/最大 (レンジ指定)
-                      と固定人数は併用できません。いずれか一方のみ入力してください。
-                    </Typography>
-                  </Stack>
-                </Paper>
-              );
-            })}
+                  </Paper>
+                );
+              })
+            )}
           </Stack>
           <Button
             variant="outlined"

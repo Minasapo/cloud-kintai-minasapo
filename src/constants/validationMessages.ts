@@ -20,6 +20,27 @@ export const validationMessages = {
     },
     substituteHoliday: {
       invalidDate: "振替休日の日付形式が正しくありません。",
+      workTimeNotAllowed:
+        "振替休日を設定している場合は勤務時間や休憩を入力できません。クリアしてください。",
+    },
+  },
+  workflow: {
+    paidLeave: {
+      dateRequired: "開始日と終了日を入力してください",
+      dateRange: "開始日は終了日以前にしてください",
+    },
+    absence: {
+      dateRequired: "欠勤日を入力してください",
+    },
+    overtime: {
+      dateRequired: "残業予定日を入力してください",
+      timeRequired: "開始時刻と終了時刻を入力してください",
+      timeRange: "開始時刻は終了時刻より前にしてください",
+    },
+    clockCorrection: {
+      dateRequired: "対象日を入力してください",
+      clockInRequired: "出勤時間を入力してください",
+      clockOutRequired: "退勤時間を入力してください",
     },
   },
 } as const;

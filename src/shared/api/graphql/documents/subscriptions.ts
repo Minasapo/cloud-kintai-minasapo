@@ -61,6 +61,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     workEndTime
     lunchRestStartTime
     lunchRestEndTime
+    standardWorkHours
     amHolidayStartTime
     amHolidayEndTime
     pmHolidayStartTime
@@ -68,6 +69,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    attendanceStatisticsEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -118,6 +120,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     workEndTime
     lunchRestStartTime
     lunchRestEndTime
+    standardWorkHours
     amHolidayStartTime
     amHolidayEndTime
     pmHolidayStartTime
@@ -125,6 +128,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    attendanceStatisticsEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -175,6 +179,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     workEndTime
     lunchRestStartTime
     lunchRestEndTime
+    standardWorkHours
     amHolidayStartTime
     amHolidayEndTime
     pmHolidayStartTime
@@ -182,6 +187,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     specialHolidayEnabled
     amPmHolidayEnabled
     officeMode
+    attendanceStatisticsEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -1273,6 +1279,81 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
 ` as GeneratedSubscription<
   APITypes.OnDeleteOperationLogSubscriptionVariables,
   APITypes.OnDeleteOperationLogSubscription
+>;
+export const onCreateAuditLog = /* GraphQL */ `subscription OnCreateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+  onCreateAuditLog(filter: $filter) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateAuditLogSubscriptionVariables,
+  APITypes.OnCreateAuditLogSubscription
+>;
+export const onUpdateAuditLog = /* GraphQL */ `subscription OnUpdateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+  onUpdateAuditLog(filter: $filter) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateAuditLogSubscriptionVariables,
+  APITypes.OnUpdateAuditLogSubscription
+>;
+export const onDeleteAuditLog = /* GraphQL */ `subscription OnDeleteAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+  onDeleteAuditLog(filter: $filter) {
+    id
+    resourceType
+    resourceId
+    action
+    actorId
+    actorRole
+    requestId
+    ip
+    userAgent
+    before
+    after
+    diff
+    createdAt
+    ttl
+    reason
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteAuditLogSubscriptionVariables,
+  APITypes.OnDeleteAuditLogSubscription
 >;
 export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyReport(
   $filter: ModelSubscriptionDailyReportFilterInput

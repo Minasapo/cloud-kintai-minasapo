@@ -44,7 +44,7 @@ export default function AdminStaff() {
     deleteStaff,
   } = useStaffs();
 
-  const [searchName, setSearchName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   if (staffLoading) {
     return <LinearProgress />;
@@ -77,11 +77,11 @@ export default function AdminStaff() {
             まれにユーザー情報が同期されない場合があります。その際は適宜同期を行ってください。
           </Typography>
           <TextField
-            label="スタッフ名で検索"
+            label="スタッフ名またはスタッフIDで検索"
             variant="outlined"
             size="small"
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <TableContainer>
             <Table size="small">
@@ -105,7 +105,11 @@ export default function AdminStaff() {
                     const fullName = `${staff.familyName || ""}${
                       staff.givenName || ""
                     }`;
-                    return fullName.includes(searchName);
+                    const staffId = staff.id || "";
+                    return (
+                      fullName.includes(searchQuery) ||
+                      staffId.includes(searchQuery)
+                    );
                   })
                   .sort((a, b) => {
                     const aSortKey = a.sortKey || "";

@@ -16,20 +16,105 @@ import {
   useUpdateCompanyHolidayCalendarMutation,
   useUpdateHolidayCalendarMutation,
 } from "@entities/calendar/api/calendarApi";
-import { Box, LinearProgress, Stack } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  LinearProgress,
+} from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { useCallback, useEffect, useMemo } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import Footer from "./components/footer/Footer";
-import Header from "./components/header/Header";
-import SnackbarGroup from "./components/snackbar/SnackbarGroup";
+import Footer from "@/widgets/layout/footer/Footer";
+import Header from "@/widgets/layout/header/Header";
+import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
+import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
+import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
+import { StaffRole } from "./hooks/useStaffs/useStaffs";
 import { createAppTheme } from "./lib/theme";
+import { AppShell } from "@/shared/ui/layout";
+
+type MissingCloseDateAlertProps = {
+  onConfirm: () => void;
+};
+
+function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
+  const {
+    closeDates,
+    loading: closeDatesLoading,
+    error: closeDatesError,
+  } = useCloseDates();
+  const [fetchStarted, setFetchStarted] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  const isCurrentDateCovered = useMemo(() => {
+    const today = dayjs().startOf("day").valueOf();
+    return closeDates.some((item) => {
+      const start = dayjs(item.startDate).startOf("day").valueOf();
+      const end = dayjs(item.endDate).startOf("day").valueOf();
+      return today >= start && today <= end;
+    });
+  }, [closeDates]);
+
+  useEffect(() => {
+    if (closeDatesLoading) {
+      setFetchStarted(true);
+    }
+  }, [closeDatesLoading]);
+
+  useEffect(() => {
+    if (!fetchStarted || closeDatesLoading) return;
+    if (closeDatesError || dismissed) return;
+
+    setOpen(!isCurrentDateCovered);
+  }, [
+    closeDatesError,
+    closeDatesLoading,
+    dismissed,
+    fetchStarted,
+    isCurrentDateCovered,
+  ]);
+
+  const handleLater = useCallback(() => {
+    setOpen(false);
+    setDismissed(true);
+  }, []);
+
+  const handleConfirm = useCallback(() => {
+    setOpen(false);
+    setDismissed(true);
+    onConfirm();
+  }, [onConfirm]);
+
+  return (
+    <Dialog open={open} onClose={handleLater} maxWidth="xs" fullWidth>
+      <DialogTitle>集計対象月の未登録</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          現在日付を含む集計対象月が登録されていません。設定画面で登録を確認してください。
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleLater}>あとで</Button>
+        <Button variant="contained" onClick={handleConfirm}>
+          確認する
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 /**
  * アプリケーションのレイアウトコンポーネント。
  * 認証状態や各種設定・カレンダー情報の取得、各種コンテキストの提供を行う。
@@ -38,12 +123,17 @@ import { createAppTheme } from "./lib/theme";
  */
 export default function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, signOut, authStatus } = useAuthenticator();
   const {
     cognitoUser,
     isCognitoUserRole,
     loading: cognitoUserLoading,
   } = useCognitoUser();
+
+  // 重複勤怠データの警告をリッスン
+  useDuplicateAttendanceWarning();
+
   const {
     fetchConfig,
     saveConfig,
@@ -59,6 +149,7 @@ export default function Layout() {
     getLunchRestStartTime,
     getLunchRestEndTime,
     loading: appConfigLoading,
+    getStandardWorkHours,
     getHourlyPaidHolidayEnabled,
     getAmHolidayStartTime,
     getAmHolidayEndTime,
@@ -67,6 +158,7 @@ export default function Layout() {
     getAmPmHolidayEnabled,
     getSpecialHolidayEnabled,
     getAbsentEnabled,
+    getAttendanceStatisticsEnabled,
     getThemeColor,
     getThemeTokens,
   } = useAppConfig();
@@ -170,9 +262,17 @@ export default function Layout() {
     [deleteCompanyHolidayCalendarMutation]
   );
 
+  const isAdminUser = useMemo(
+    () => isCognitoUserRole(StaffRole.ADMIN),
+    [isCognitoUserRole]
+  );
+
+  const isLoginRoute = location.pathname === "/login";
+
   useEffect(() => {
-    const url = new URL(window.location.href);
-    if (url.pathname === "/login") return;
+    if (isLoginRoute) {
+      return;
+    }
 
     if (authStatus === "configuring") {
       return;
@@ -204,7 +304,14 @@ export default function Layout() {
     } catch (error) {
       console.error(error);
     }
-  }, [authStatus, cognitoUser, cognitoUserLoading, navigate, signOut]);
+  }, [
+    authStatus,
+    cognitoUser,
+    cognitoUserLoading,
+    isLoginRoute,
+    navigate,
+    signOut,
+  ]);
 
   useEffect(() => {
     void fetchConfig();
@@ -228,6 +335,7 @@ export default function Layout() {
       saveConfig,
       getStartTime,
       getEndTime,
+      getStandardWorkHours,
       getConfigId,
       getLinks,
       getReasons,
@@ -245,6 +353,7 @@ export default function Layout() {
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
       getAbsentEnabled,
+      getAttendanceStatisticsEnabled,
       getThemeColor,
       getThemeTokens,
     }),
@@ -253,6 +362,7 @@ export default function Layout() {
       saveConfig,
       getStartTime,
       getEndTime,
+      getStandardWorkHours,
       getConfigId,
       getLinks,
       getReasons,
@@ -270,6 +380,7 @@ export default function Layout() {
       getAmPmHolidayEnabled,
       getSpecialHolidayEnabled,
       getAbsentEnabled,
+      getAttendanceStatisticsEnabled,
       getThemeColor,
       getThemeTokens,
     ]
@@ -304,7 +415,8 @@ export default function Layout() {
 
   const configuredThemeColor = useMemo(
     () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
-    [getThemeColor]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const appTheme = useMemo(
@@ -312,12 +424,16 @@ export default function Layout() {
     [configuredThemeColor]
   );
 
+  const shouldBlockUnauthenticated =
+    authStatus === "unauthenticated" && !isLoginRoute;
+
   if (
     authStatus === "configuring" ||
     cognitoUserLoading ||
     appConfigLoading ||
     holidayCalendarLoading ||
-    companyHolidayCalendarLoading
+    companyHolidayCalendarLoading ||
+    shouldBlockUnauthenticated
   ) {
     return (
       <ThemeProvider theme={appTheme}>
@@ -331,20 +447,24 @@ export default function Layout() {
       <AuthContext.Provider value={authContextValue}>
         <AppConfigContext.Provider value={appConfigContextValue}>
           <AppContext.Provider value={appContextValue}>
-            <Stack sx={{ minHeight: "100vh" }} data-testid="layout-stack">
-              <Box data-testid="layout-header">
-                <Header />
-              </Box>
-              <Box sx={{ flex: 1, overflow: "auto" }} data-testid="layout-main">
-                <Outlet />
-              </Box>
-              <Box data-testid="layout-footer">
-                <Footer />
-              </Box>
-              <Box data-testid="layout-snackbar">
-                <SnackbarGroup />
-              </Box>
-            </Stack>
+            <AppShell
+              header={<Header />}
+              main={<Outlet />}
+              footer={<Footer />}
+              snackbar={<SnackbarGroup />}
+              slotProps={{
+                root: { "data-testid": "layout-stack" },
+                header: { "data-testid": "layout-header" },
+                main: { "data-testid": "layout-main" },
+                footer: { "data-testid": "layout-footer" },
+                snackbar: { "data-testid": "layout-snackbar" },
+              }}
+            />
+            {isAdminUser && (
+              <MissingCloseDateAlert
+                onConfirm={() => navigate("/admin/master/job_term")}
+              />
+            )}
           </AppContext.Provider>
         </AppConfigContext.Provider>
       </AuthContext.Provider>

@@ -266,6 +266,7 @@ type AppConfig @model {
   workEndTime: String
   lunchRestStartTime: String
   lunchRestEndTime: String
+  standardWorkHours: Float
   amHolidayStartTime: String
   amHolidayEndTime: String
   pmHolidayStartTime: String
@@ -273,6 +274,7 @@ type AppConfig @model {
   specialHolidayEnabled: Boolean
   amPmHolidayEnabled: Boolean
   officeMode: Boolean
+  attendanceStatisticsEnabled: Boolean
   absentEnabled: Boolean
   hourlyPaidHolidayEnabled: Boolean
   links: [Link]
@@ -308,6 +310,7 @@ enum WorkflowCategory {
   PAID_LEAVE
   ABSENCE
   OVERTIME
+  CLOCK_CORRECTION
   CUSTOM
 }
 
@@ -395,6 +398,24 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
   metadata: String
   # 重大度レベル（例: INFO, WARN, ERROR）
   severity: String
+}
+
+type AuditLog @model @auth(rules: [{ allow: groups, groups: ["Admin"] }]) {
+  id: ID!
+  resourceType: String!
+  resourceId: String!
+  action: String!
+  actorId: ID!
+  actorRole: String
+  requestId: String!
+  ip: String
+  userAgent: String
+  before: AWSJSON
+  after: AWSJSON
+  diff: AWSJSON
+  createdAt: AWSDateTime!
+  ttl: AWSTimestamp
+  reason: String
 }
 
 enum DailyReportStatus {

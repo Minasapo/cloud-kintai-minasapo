@@ -1,4 +1,6 @@
 import { Box, ButtonBase, Stack } from "@mui/material";
+import type { MouseEvent } from "react";
+import { Link as RouterLink } from "react-router-dom";
 
 import type { AdminHeaderMenuItem } from "./useHeaderMenu";
 
@@ -10,6 +12,26 @@ interface AdminMenuProps {
 
 const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
   const isActivePath = (href: string) => selectedHref === href;
+
+  const handleClick = (
+    event: MouseEvent<HTMLElement>,
+    item: AdminHeaderMenuItem
+  ) => {
+    // Let modified or non-left clicks fall back to the browser so Cmd/Ctrl+Click opens a new tab.
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    onSelect(item);
+  };
 
   return (
     <Stack
@@ -29,7 +51,9 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
           <ButtonBase
             key={item.href}
             focusRipple
-            onClick={() => onSelect(item)}
+            component={RouterLink}
+            to={item.href}
+            onClick={(event) => handleClick(event, item)}
             sx={{
               borderRadius: 2,
               border: "1px solid",
