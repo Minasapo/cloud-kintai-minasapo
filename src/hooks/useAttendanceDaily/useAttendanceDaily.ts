@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import useStaffs from "../useStaffs/useStaffs";
+import { useStaffs } from "../useStaffs/useStaffs";
 
 dayjs.extend(isBetween);
 

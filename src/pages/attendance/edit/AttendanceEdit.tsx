@@ -24,11 +24,9 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { createLogger } from "@/lib/logger";
-import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
-
-const logger = createLogger("AttendanceEdit");
+import { StaffType, useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -44,6 +42,8 @@ import {
 import DesktopEditor from "./DesktopEditor/DesktopEditor";
 import { MobileEditor } from "./MobileEditor/MobileEditor";
 import sendChangeRequestMail from "./sendChangeRequestMail";
+
+const logger = createLogger("AttendanceEdit");
 
 export default function AttendanceEdit() {
   const { cognitoUser } = useContext(AuthContext);

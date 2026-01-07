@@ -27,7 +27,7 @@ import { useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 export default function StaffShiftList() {

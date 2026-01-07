@@ -22,7 +22,7 @@ import StatusChip from "@shared/ui/chips/StatusChip";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import {
   CATEGORY_LABELS,

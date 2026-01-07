@@ -29,7 +29,7 @@ import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 

@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import useCloseDates from "../../hooks/useCloseDates/useCloseDates";
-import useStaffs, { StaffType } from "../../hooks/useStaffs/useStaffs";
+import { StaffType, useStaffs } from "../../hooks/useStaffs/useStaffs";
 import AggregateExportButton from "./AggregateExportButton";
 import ExportButton from "./ExportButton";
 import StaffSelector from "./StaffSelector";

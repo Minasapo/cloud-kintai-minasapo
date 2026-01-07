@@ -35,7 +35,7 @@ import {
 } from "@/entities/attendance/api/attendanceApi";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import { createLogger } from "@/lib/logger";

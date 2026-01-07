@@ -41,7 +41,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import * as MESSAGE_CODE from "@/errors";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { Logger } from "@/lib/logger";

@@ -77,7 +77,7 @@ export function mappingStaffRole(role: Staff["role"]): StaffRole {
   }
 }
 
-export default function useStaffs() {
+export function useStaffs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [staffs, setStaffs] = useState<StaffType[]>([]);
