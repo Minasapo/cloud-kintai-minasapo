@@ -20,15 +20,6 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
   const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);
   const { getOfficeMode, getAttendanceStatisticsEnabled } =
     useContext(AppConfigContext);
-  const [officeMode, setOfficeMode] = useState<boolean>(false);
-  const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
-    useState<boolean>(true);
-
-  useEffect(() => {
-    setOfficeMode(getOfficeMode());
-    setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const menuList = useMemo<DesktopMenuItem[]>(
     () => [
@@ -46,6 +37,9 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     () => ({ label: "管理", href: "/admin" }),
     []
   );
+
+  const officeMode = getOfficeMode();
+  const attendanceStatisticsEnabled = getAttendanceStatisticsEnabled();
 
   const operatorMenuList: DesktopMenuItem[] = officeMode
     ? [{ label: "QR表示", href: "/office/qr" }]

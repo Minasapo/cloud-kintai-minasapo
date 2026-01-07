@@ -47,8 +47,6 @@ export interface ClockInButtonProps {
 }
 
 const ClockInButton = ({ isBeforeWork, onClockIn }: ClockInButtonProps) => {
-  "use memo";
-
   const [clicked, setClicked] = useState(false);
 
   // Derived state: reset clicked when isBeforeWork changes

@@ -95,8 +95,7 @@ export default function AdminTheme() {
     () => /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(colorCode),
     [colorCode]
   );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const themeTokens = useMemo(() => getThemeTokens(), []);
+  const themeTokens = getThemeTokens();
   const adminPanelTokens = themeTokens.component.adminPanel;
   const panelSpacing = adminPanelTokens.sectionSpacing;
   const panelDividerColor = adminPanelTokens.dividerColor;
@@ -114,8 +113,7 @@ export default function AdminTheme() {
       (color) => color.toLowerCase() === themeColor.toLowerCase()
     );
     setCustomMode(!matchesPreset);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getThemeColor]);
 
   const normalizeColor = (value: string) => {
     if (!value) return "";
@@ -132,8 +130,7 @@ export default function AdminTheme() {
     normalizedColorCode !== normalizedCurrentColor;
   const previewTokens = useMemo(
     () => (isValidHex ? getThemeTokens(normalizedColorCode) : themeTokens),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isValidHex, normalizedColorCode, themeTokens]
+    [isValidHex, normalizedColorCode, themeTokens, getThemeTokens]
   );
   const previewPanelTokens = previewTokens.component.adminPanel;
   const previewPanelSpacing = previewPanelTokens.sectionSpacing;

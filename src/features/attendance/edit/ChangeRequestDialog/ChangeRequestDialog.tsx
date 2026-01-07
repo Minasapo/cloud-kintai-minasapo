@@ -37,8 +37,6 @@ export default function ChangeRequestDialog({
   updateAttendance: (input: UpdateAttendanceInput) => Promise<Attendance>;
   staff: StaffType | null | undefined;
 }) {
-  "use memo";
-
   const dispatch = useAppDispatchV2();
   const navigate = useNavigate();
   const [comment, setComment] = useState<string | undefined>(undefined);

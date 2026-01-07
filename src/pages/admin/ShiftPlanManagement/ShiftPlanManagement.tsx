@@ -246,7 +246,7 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
 
 export default function ShiftPlanManagement() {
   const dispatch = useAppDispatchV2();
-  const initialYear = useMemo(() => dayjs().year(), []);
+  const initialYear = dayjs().year();
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [yearlyPlans, setYearlyPlans] = useState<
     Record<number, ShiftPlanRow[]>

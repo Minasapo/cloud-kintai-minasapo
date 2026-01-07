@@ -25,8 +25,6 @@ export function OfficeQrRegisterPanel({
   onClockIn,
   onClockOut,
 }: OfficeQrRegisterPanelProps) {
-  "use memo";
-
   if (!isOfficeModeEnabled) {
     return (
       <Container>

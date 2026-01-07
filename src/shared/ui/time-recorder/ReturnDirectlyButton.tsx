@@ -51,8 +51,6 @@ const ReturnDirectlyButton = ({
   isWorking,
   onReturnDirectly,
 }: ReturnDirectlyButtonProps) => {
-  "use memo";
-
   const [isClicking, setIsClicking] = useState(false);
 
   // Derived state: button is disabled when not working or user clicked

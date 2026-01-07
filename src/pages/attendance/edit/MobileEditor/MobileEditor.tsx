@@ -37,8 +37,6 @@ import { WorkTimeInput } from "./WorkTimeInput/WorkTimeInput";
 import WorkTypeItemMobile from "./WorkTypeItemMobile";
 
 export function MobileEditor() {
-  "use memo";
-
   const ctx = useContext(AttendanceEditContext);
   const {
     staff,

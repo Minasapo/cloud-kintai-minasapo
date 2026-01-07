@@ -27,7 +27,14 @@ import {
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ComponentProps,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { AppShell } from "@/shared/ui/layout";
@@ -111,6 +118,29 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
         </Button>
       </DialogActions>
     </Dialog>
+  );
+}
+
+type AuthContextValue = ComponentProps<typeof AuthContext.Provider>["value"];
+type AppConfigContextValue = ComponentProps<
+  typeof AppConfigContext.Provider
+>["value"];
+type AppContextValue = ComponentProps<typeof AppContext.Provider>["value"];
+
+type AppProvidersProps = {
+  children: ReactNode;
+  auth: AuthContextValue;
+  config: AppConfigContextValue;
+  app: AppContextValue;
+};
+
+function AppProviders({ children, auth, config, app }: AppProvidersProps) {
+  return (
+    <AuthContext.Provider value={auth}>
+      <AppConfigContext.Provider value={config}>
+        <AppContext.Provider value={app}>{children}</AppContext.Provider>
+      </AppConfigContext.Provider>
+    </AuthContext.Provider>
   );
 }
 
@@ -414,8 +444,7 @@ export default function Layout() {
 
   const configuredThemeColor = useMemo(
     () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [getThemeColor]
   );
 
   const appTheme = useMemo(
@@ -443,30 +472,30 @@ export default function Layout() {
 
   return (
     <ThemeProvider theme={appTheme}>
-      <AuthContext.Provider value={authContextValue}>
-        <AppConfigContext.Provider value={appConfigContextValue}>
-          <AppContext.Provider value={appContextValue}>
-            <AppShell
-              header={<Header />}
-              main={<Outlet />}
-              footer={<Footer />}
-              snackbar={<SnackbarGroup />}
-              slotProps={{
-                root: { "data-testid": "layout-stack" },
-                header: { "data-testid": "layout-header" },
-                main: { "data-testid": "layout-main" },
-                footer: { "data-testid": "layout-footer" },
-                snackbar: { "data-testid": "layout-snackbar" },
-              }}
-            />
-            {isAdminUser && (
-              <MissingCloseDateAlert
-                onConfirm={() => navigate("/admin/master/job_term")}
-              />
-            )}
-          </AppContext.Provider>
-        </AppConfigContext.Provider>
-      </AuthContext.Provider>
+      <AppProviders
+        auth={authContextValue}
+        config={appConfigContextValue}
+        app={appContextValue}
+      >
+        <AppShell
+          header={<Header />}
+          main={<Outlet />}
+          footer={<Footer />}
+          snackbar={<SnackbarGroup />}
+          slotProps={{
+            root: { "data-testid": "layout-stack" },
+            header: { "data-testid": "layout-header" },
+            main: { "data-testid": "layout-main" },
+            footer: { "data-testid": "layout-footer" },
+            snackbar: { "data-testid": "layout-snackbar" },
+          }}
+        />
+        {isAdminUser && (
+          <MissingCloseDateAlert
+            onConfirm={() => navigate("/admin/master/job_term")}
+          />
+        )}
+      </AppProviders>
     </ThemeProvider>
   );
 }

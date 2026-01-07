@@ -23,8 +23,7 @@ export default function Header() {
       resolveThemeColor(
         typeof getThemeColor === "function" ? getThemeColor() : undefined
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [getThemeColor]
   );
   const headerThemeColor = designTokenVar(
     "color.brand.primary.base",

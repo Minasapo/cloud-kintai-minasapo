@@ -30,8 +30,7 @@ export default function Reasons() {
   useEffect(() => {
     setReasons(getReasons());
     setId(getConfigId());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getReasons, getConfigId]);
 
   const handleAddReason = () =>
     setReasons(appendItem(reasons, { reason: "", enabled: true }));
