@@ -4,6 +4,7 @@ import Page from "@shared/ui/page/Page";
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 
+import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
@@ -21,7 +22,7 @@ export default function AttendanceStatisticsPage() {
         <Box
           sx={{
             ...dashboardInnerSurfaceSx,
-            minHeight: 480,
+            minHeight: PANEL_HEIGHTS.STATISTICS_MIN,
             p: { xs: 2, sm: 3 },
           }}
         >

@@ -36,8 +36,6 @@ import useOperationLog from "@/hooks/useOperationLog/useOperationLog";
 import { createLogger } from "@/lib/logger";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 
-const logger = createLogger("DesktopEditor");
-
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
@@ -55,6 +53,8 @@ import {
   calcTotalWorkTime,
   WorkTimeInput,
 } from "./WorkTimeInput/WorkTimeInput";
+
+const logger = createLogger("DesktopEditor");
 
 const DesktopContainer = styled(Container)(() => ({
   pt: 1,

@@ -46,6 +46,7 @@ import React, {
 } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import * as MESSAGE_CODE from "@/errors";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
@@ -841,7 +842,7 @@ export default function ShiftRequestForm() {
                       }
                       sx={{
                         position: "relative",
-                        minHeight: 52,
+                        minHeight: PANEL_HEIGHTS.FORM_ITEM_MIN,
                         px: 0.5,
                         py: 0.5,
                         borderRadius: 1,

@@ -10,6 +10,12 @@ import {
 } from "@mui/material";
 import { Control, Controller, UseFormSetValue } from "react-hook-form";
 
+import {
+  MARGINS,
+  SELECTOR_MAX_WIDTH,
+  SELECTOR_MIN_WIDTH,
+} from "@/constants/uiDimensions";
+
 import { StaffType } from "../../hooks/useStaffs/useStaffs";
 import { Inputs } from "./DownloadForm";
 
@@ -55,7 +61,7 @@ export default function StaffSelector({
                   <Checkbox
                     icon={icon}
                     checkedIcon={checkedIcon}
-                    style={{ marginRight: 8 }}
+                    style={{ marginRight: MARGINS.CHECKBOX_MARGIN }}
                     checked={selected}
                   />
                   {`${option?.familyName || ""} ${option?.givenName || ""}`}
@@ -69,7 +75,11 @@ export default function StaffSelector({
                   size="small"
                 />
               )}
-              sx={{ width: "100%", minWidth: 300, maxWidth: 500 }}
+              sx={{
+                width: "100%",
+                minWidth: SELECTOR_MIN_WIDTH,
+                maxWidth: SELECTOR_MAX_WIDTH,
+              }}
               onChange={(_, value) => {
                 setSelectedStaff(value);
                 setValue("staffs", value);

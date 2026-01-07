@@ -26,6 +26,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import {
@@ -1175,7 +1176,11 @@ export default function AdminWorkflowDetail() {
                 </Typography>
                 <Paper
                   variant="outlined"
-                  sx={{ p: 2, maxHeight: 480, overflow: "auto" }}
+                  sx={{
+                    p: 2,
+                    maxHeight: PANEL_HEIGHTS.SCROLLABLE_MAX,
+                    overflow: "auto",
+                  }}
                 >
                   <Stack spacing={2}>
                     {messages.map((m) => {

@@ -27,6 +27,7 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { predefinedIcons } from "@/constants/icons";
+import { MARGINS } from "@/constants/uiDimensions";
 import {
   STAFF_EXTERNAL_LINKS_LIMIT,
   StaffExternalLink,
@@ -51,7 +52,7 @@ import {
 const logger = createLogger("Profile");
 
 const NotificationSwitch = styled(Switch)(({ theme }) => ({
-  padding: 8,
+  padding: MARGINS.PADDING_STANDARD,
   "& .MuiSwitch-track": {
     borderRadius: 22 / 2,
     "&::before, &::after": {
@@ -79,7 +80,7 @@ const NotificationSwitch = styled(Switch)(({ theme }) => ({
     boxShadow: "none",
     width: 16,
     height: 16,
-    margin: 2,
+    margin: MARGINS.FORM_MARGIN,
   },
 }));
 

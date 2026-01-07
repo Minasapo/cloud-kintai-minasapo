@@ -7,6 +7,12 @@ import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 // ...existing code
+import {
+  CARD_BORDER_WIDTH,
+  LIST_WIDTHS,
+  SELECTOR_MAX_WIDTH,
+  STANDARD_PADDING,
+} from "@/constants/uiDimensions";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import useCloseDates from "../../hooks/useCloseDates/useCloseDates";
@@ -72,16 +78,16 @@ export default function DownloadForm() {
       spacing={4}
       alignItems="center"
       sx={{
-        border: 1,
+        border: CARD_BORDER_WIDTH,
         borderColor: "primary.main",
         borderRadius: "5px",
-        pb: 3,
+        pb: STANDARD_PADDING.CARD,
       }}
     >
       <Box
         sx={{
-          p: 1,
-          width: 1,
+          p: STANDARD_PADDING.SMALL,
+          width: LIST_WIDTHS.FULL,
           boxSizing: "border-box",
           textAlign: "center",
           backgroundColor: "primary.main",
@@ -133,7 +139,10 @@ export default function DownloadForm() {
                   />
                 </Box>
               </Stack>
-              <Stack spacing={2} sx={{ maxWidth: 500, overflowX: "auto" }}>
+              <Stack
+                spacing={2}
+                sx={{ maxWidth: SELECTOR_MAX_WIDTH, overflowX: "auto" }}
+              >
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Box sx={{ whiteSpace: "nowrap" }}>集計対象月から:</Box>
                   <Chip
