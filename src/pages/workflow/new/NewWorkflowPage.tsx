@@ -45,18 +45,25 @@ import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 const logger = createLogger("NewWorkflowPage");
 
+/**
+ * 今日の日付をスラッシュ区切り形式（YYYY/MM/DD）で取得
+ */
+const getTodayAsSlash = (): string => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}/${m}/${day}`;
+};
+
 export default function NewWorkflowPage() {
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
   const navigate = useNavigate();
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
-  const [applicationDate, setApplicationDate] = useState(() => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}/${m}/${day}`;
-  });
+  const [applicationDate, setApplicationDate] = useState(() =>
+    getTodayAsSlash()
+  );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [dateError, setDateError] = useState("");
@@ -91,11 +98,7 @@ export default function NewWorkflowPage() {
 
   // 申請日は常に当日で自動設定する（スラッシュ区切り: YYYY/MM/DD）
   useEffect(() => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    setApplicationDate(`${y}/${m}/${day}`);
+    setApplicationDate(getTodayAsSlash());
   }, []);
 
   const extractErrorMessage = (err: unknown): string => {
@@ -168,11 +171,7 @@ export default function NewWorkflowPage() {
     }
 
     // 送信時の申請日は今日に固定する
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, "0");
-    const d = String(today.getDate()).padStart(2, "0");
-    const todaySlash = `${y}/${m}/${d}`;
+    const todaySlash = getTodayAsSlash();
     setApplicationDate(todaySlash);
 
     const input = buildCreateWorkflowInput({
