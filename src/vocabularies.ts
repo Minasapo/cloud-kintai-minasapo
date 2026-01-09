@@ -29,6 +29,7 @@ const vocabularies = {
     "Attempt limit exceeded, please try after some time.":
       "試行回数の上限を超えました。しばらくしてからもう一度お試しください。",
     "Resend Code": "コードを再送信",
+    "A network error has occurred.": "ネットワークエラーが発生しました。",
   },
 };
 
