@@ -7,7 +7,7 @@ import {
   type SnackbarCloseReason,
   type SnackbarOrigin,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useAppDispatchV2, useAppSelectorV2 } from "@/app/hooks";
 import { SNACKBAR_AUTO_HIDE_DURATION } from "@/constants/timeouts";
@@ -44,41 +44,43 @@ export default function SnackbarGroup() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [warnMessage, setWarnMessage] = useState<string | null>(null);
 
-  const resetSuccess = useCallback(() => {
-    dispatch(setSnackbarSuccess(null));
-  }, [dispatch]);
+  // Capture Redux state and reset immediately when new message arrives
+  const handleSuccessMessage = useCallback(
+    (message: string) => {
+      setSuccessMessage(message);
+      dispatch(setSnackbarSuccess(null));
+    },
+    [dispatch]
+  );
 
-  const resetError = useCallback(() => {
-    dispatch(setSnackbarError(null));
-  }, [dispatch]);
+  const handleErrorMessage = useCallback(
+    (message: string) => {
+      setErrorMessage(message);
+      dispatch(setSnackbarError(null));
+    },
+    [dispatch]
+  );
 
-  const resetWarn = useCallback(() => {
-    dispatch(setSnackbarWarn(null));
-  }, [dispatch]);
+  const handleWarnMessage = useCallback(
+    (message: string) => {
+      setWarnMessage(message);
+      dispatch(setSnackbarWarn(null));
+    },
+    [dispatch]
+  );
 
-  // Update success message and dispatch reset when success changes
-  useEffect(() => {
-    if (success) {
-      setSuccessMessage(success);
-      resetSuccess();
-    }
-  }, [success, resetSuccess]);
+  // Trigger message capture when Redux state changes
+  if (success && success !== successMessage) {
+    handleSuccessMessage(success);
+  }
 
-  // Update error message and dispatch reset when error changes
-  useEffect(() => {
-    if (error) {
-      setErrorMessage(error);
-      resetError();
-    }
-  }, [error, resetError]);
+  if (error && error !== errorMessage) {
+    handleErrorMessage(error);
+  }
 
-  // Update warn message and dispatch reset when warn changes
-  useEffect(() => {
-    if (warn) {
-      setWarnMessage(warn);
-      resetWarn();
-    }
-  }, [warn, resetWarn]);
+  if (warn && warn !== warnMessage) {
+    handleWarnMessage(warn);
+  }
 
   const renderSnackbar = (
     key: string,

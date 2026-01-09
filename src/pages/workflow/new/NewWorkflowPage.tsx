@@ -18,7 +18,7 @@ import {
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -143,26 +143,15 @@ export default function NewWorkflowPage() {
 
   const { cognitoUser } = useContext(AuthContext);
   const { staffs } = useStaffs();
-  const [staff, setStaff] = useState<StaffType | null | undefined>(undefined);
   const { create: createWorkflow } = useWorkflows();
   const dispatch = useAppDispatchV2();
   const { getStartTime, getEndTime } = useAppConfig();
 
   // Derived state: find matching staff from staffs
-  const derivedStaff = useMemo(() => {
+  const staff = useMemo(() => {
     if (!cognitoUser?.id) return undefined;
     return staffs.find((s) => s.cognitoUserId === cognitoUser.id) || null;
   }, [staffs, cognitoUser]);
-
-  // Update staff state when derived staff changes
-  useEffect(() => {
-    setStaff(derivedStaff);
-  }, [derivedStaff]);
-
-  // 申請日は常に当日で自動設定する（スラッシュ区切り: YYYY/MM/DD）
-  useEffect(() => {
-    setApplicationDate(getTodayAsSlash());
-  }, []);
 
   const extractErrorMessage = (err: unknown): string => {
     if (err instanceof Error) {
