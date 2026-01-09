@@ -70,6 +70,12 @@ export default function AttendanceDailyList() {
   } = useAttendanceDaily();
   const { getEndTime } = useContext(AppConfigContext);
   const today = dayjs().format(AttendanceDate.QueryParamFormat);
+  const displayDate = targetWorkDate || today;
+  const displayDateFormatted = displayDate
+    ? dayjs(displayDate, AttendanceDate.QueryParamFormat).format(
+        AttendanceDate.DataFormat
+      )
+    : undefined;
   const dispatch = useAppDispatchV2();
   const [searchName, setSearchName] = useState("");
   const [triggerListAttendances] = useLazyListRecentAttendancesQuery();
@@ -1015,8 +1021,10 @@ export default function AttendanceDailyList() {
                       <StartTimeTableCell
                         row={row}
                         attendances={attendanceMap[row.sub]}
+                        targetWorkDate={displayDateFormatted}
                       />
                       <EndTimeTableCell
+                        targetWorkDate={displayDateFormatted}
                         row={row}
                         attendances={attendanceMap[row.sub]}
                       />
@@ -1075,10 +1083,12 @@ export default function AttendanceDailyList() {
                 <StartTimeTableCell
                   row={row}
                   attendances={attendanceMap[row.sub]}
+                  targetWorkDate={displayDateFormatted}
                 />
                 <EndTimeTableCell
                   row={row}
                   attendances={attendanceMap[row.sub]}
+                  targetWorkDate={displayDateFormatted}
                 />
                 <TableCell sx={{ textAlign: "right" }}>
                   {renderOvertimeValue(row)}
