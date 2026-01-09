@@ -40,7 +40,7 @@
     "react-hook-form": "^7.53.1",
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.21.0",
-    "sass": "^1.91.0",
+    "sass": "^1.97.2",
     "typescript": "~5.6.3",
     "vite": "^6.4.1",
     "vite-plugin-checker": "^0.11.0",
