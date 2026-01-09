@@ -1012,8 +1012,14 @@ export default function AttendanceDailyList() {
                         {renderDuplicateBadge(row)}
                       </TableCell>
                       <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
-                      <StartTimeTableCell row={row} />
-                      <EndTimeTableCell row={row} />
+                      <StartTimeTableCell
+                        row={row}
+                        attendances={attendanceMap[row.sub]}
+                      />
+                      <EndTimeTableCell
+                        row={row}
+                        attendances={attendanceMap[row.sub]}
+                      />
                       <TableCell sx={{ textAlign: "right" }}>
                         {renderOvertimeValue(row)}
                       </TableCell>
@@ -1066,8 +1072,14 @@ export default function AttendanceDailyList() {
                   {renderDuplicateBadge(row)}
                 </TableCell>
                 <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
-                <StartTimeTableCell row={row} />
-                <EndTimeTableCell row={row} />
+                <StartTimeTableCell
+                  row={row}
+                  attendances={attendanceMap[row.sub]}
+                />
+                <EndTimeTableCell
+                  row={row}
+                  attendances={attendanceMap[row.sub]}
+                />
                 <TableCell sx={{ textAlign: "right" }}>
                   {renderOvertimeValue(row)}
                 </TableCell>
