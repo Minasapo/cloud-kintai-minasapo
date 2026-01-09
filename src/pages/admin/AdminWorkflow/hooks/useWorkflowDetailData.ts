@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { GraphQLResult } from "aws-amplify/api";
-
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import { GetWorkflowQuery } from "@shared/api/graphql/types";
+import { GraphQLResult } from "aws-amplify/api";
+import { useCallback, useEffect, useState } from "react";
 
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 

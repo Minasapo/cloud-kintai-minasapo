@@ -91,11 +91,10 @@ export default function AttendanceDailyList() {
     isCompanyHolidayCalendarsLoading ||
     isCompanyHolidayCalendarsFetching;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const scheduledEnd = useMemo(() => {
     const parsed = getEndTime();
     return { hour: parsed.hour(), minute: parsed.minute() };
-  }, []);
+  }, [getEndTime]);
   const scheduledHour = scheduledEnd.hour;
   const scheduledMinute = scheduledEnd.minute;
 
@@ -1013,8 +1012,14 @@ export default function AttendanceDailyList() {
                         {renderDuplicateBadge(row)}
                       </TableCell>
                       <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
-                      <StartTimeTableCell row={row} />
-                      <EndTimeTableCell row={row} />
+                      <StartTimeTableCell
+                        row={row}
+                        attendances={attendanceMap[row.sub]}
+                      />
+                      <EndTimeTableCell
+                        row={row}
+                        attendances={attendanceMap[row.sub]}
+                      />
                       <TableCell sx={{ textAlign: "right" }}>
                         {renderOvertimeValue(row)}
                       </TableCell>
@@ -1067,8 +1072,14 @@ export default function AttendanceDailyList() {
                   {renderDuplicateBadge(row)}
                 </TableCell>
                 <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
-                <StartTimeTableCell row={row} />
-                <EndTimeTableCell row={row} />
+                <StartTimeTableCell
+                  row={row}
+                  attendances={attendanceMap[row.sub]}
+                />
+                <EndTimeTableCell
+                  row={row}
+                  attendances={attendanceMap[row.sub]}
+                />
                 <TableCell sx={{ textAlign: "right" }}>
                   {renderOvertimeValue(row)}
                 </TableCell>

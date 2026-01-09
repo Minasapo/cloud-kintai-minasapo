@@ -18,9 +18,10 @@ import {
   useWorkflowLoaderWorkflow,
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -32,6 +33,7 @@ import { PageSection } from "@/shared/ui/layout";
 
 const SECTION_GAP = designTokenVar("spacing.xl", "24px");
 const PANEL_GAP = designTokenVar("spacing.lg", "16px");
+const logger = createLogger("WorkflowDetailPage");
 
 export default function WorkflowDetailPage() {
   const { id } = useParams();
@@ -127,9 +129,9 @@ export default function WorkflowDetailPage() {
       dispatch(setSnackbarSuccess("取り下げしました"));
       setTimeout(() => navigate(-1), 1000);
     } catch (err) {
-      console.error(err);
-      const msg = err instanceof Error ? err.message : String(err);
-      dispatch(setSnackbarError(msg));
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Workflow withdrawal failed:", message);
+      dispatch(setSnackbarError(message));
     }
   };
 

@@ -37,8 +37,6 @@ import { WorkTimeInput } from "./WorkTimeInput/WorkTimeInput";
 import WorkTypeItemMobile from "./WorkTypeItemMobile";
 
 export function MobileEditor() {
-  "use memo";
-
   const ctx = useContext(AttendanceEditContext);
   const {
     staff,
@@ -74,6 +72,7 @@ export function MobileEditor() {
   const errorMessages = contextErrorMessages?.length
     ? contextErrorMessages
     : derivedMessages;
+  const [holidayTab, setHolidayTab] = useState<number>(0);
 
   if (changeRequests.length > 0) {
     return (
@@ -113,8 +112,6 @@ export function MobileEditor() {
   ) {
     return null;
   }
-
-  const [holidayTab, setHolidayTab] = useState<number>(0);
 
   // 休暇タブ（AppConfigのフラグで特別休暇タブを表示制御）
   const TabbedPaidHoliday = () => {
@@ -222,7 +219,6 @@ export function MobileEditor() {
       />
     );
   };
-  TabbedPaidHoliday.displayName = "TabbedPaidHoliday";
 
   return (
     <Stack direction="column" spacing={1} sx={{ p: 1, pb: 10 }}>

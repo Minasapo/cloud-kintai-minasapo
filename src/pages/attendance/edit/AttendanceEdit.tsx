@@ -24,8 +24,9 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { StaffType, useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -41,6 +42,8 @@ import {
 import DesktopEditor from "./DesktopEditor/DesktopEditor";
 import { MobileEditor } from "./MobileEditor/MobileEditor";
 import sendChangeRequestMail from "./sendChangeRequestMail";
+
+const logger = createLogger("AttendanceEdit");
 
 export default function AttendanceEdit() {
   const { cognitoUser } = useContext(AuthContext);
@@ -186,7 +189,7 @@ export default function AttendanceEdit() {
               data.staffComment
             );
           } catch (mailError) {
-            console.error("Failed to send change request mail:", mailError);
+            logger.error("Failed to send change request mail:", mailError);
             dispatch(setSnackbarError(MESSAGE_CODE.E00002));
           }
 
@@ -245,18 +248,23 @@ export default function AttendanceEdit() {
           navigate("/attendance/list");
         })
         .catch((e) => {
-          console.log("error", e);
+          logger.error("Failed to update attendance:", e);
           dispatch(setSnackbarError(MESSAGE_CODE.E02005));
         });
     }
   };
 
-  useEffect(() => {
-    if (!cognitoUser?.id) return;
+  // Derived state: find matching staff from staffs
+  const derivedStaff = useMemo(() => {
+    if (!cognitoUser?.id) return undefined;
     const { id: staffId } = cognitoUser;
-    const matchStaff = staffs.find((s) => s.cognitoUserId === staffId);
-    setStaff(matchStaff || null);
+    return staffs.find((s) => s.cognitoUserId === staffId) || null;
   }, [staffs, cognitoUser]);
+
+  // Update staff state when derived staff changes
+  useEffect(() => {
+    setStaff(derivedStaff);
+  }, [derivedStaff]);
 
   useEffect(() => {
     if (!staffId || !targetWorkDateISO) {

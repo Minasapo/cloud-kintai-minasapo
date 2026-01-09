@@ -2,7 +2,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import MobileMenuView, { MobileMenuItem } from "@shared/ui/header/MobileMenu";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -16,12 +16,8 @@ export default function MobileMenu({ pathName }: MobileMenuProps) {
   const navigate = useNavigate();
   const { isOpen, closeDrawer, openDrawer } = useMobileDrawer();
   const { getAttendanceStatisticsEnabled } = useContext(AppConfigContext);
-  const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
-    useState<boolean>(true);
 
-  useEffect(() => {
-    setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
-  }, [getAttendanceStatisticsEnabled]);
+  const attendanceStatisticsEnabled = getAttendanceStatisticsEnabled();
 
   const menuItems = useMemo<MobileMenuItem[]>(
     () =>

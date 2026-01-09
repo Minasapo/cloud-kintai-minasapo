@@ -12,8 +12,8 @@ import {
 import dayjs from "dayjs";
 import { useRef, useState } from "react";
 
-import { AttendanceGetValues, AttendanceSetValue } from "./types";
 import { useQuickInputActions } from "./hooks/useQuickInputActions";
+import { AttendanceGetValues, AttendanceSetValue } from "./types";
 
 type QuickInputButtonsProps = {
   setValue: AttendanceSetValue;
@@ -52,13 +52,13 @@ export default function QuickInputButtons({
     readOnly,
   });
 
-  // どのボタンも表示されない場合はコンポーネントを非表示にする
-  if (actions.length === 0) return null;
-
   // 確認ダイアログ用のstate
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmLabel, setConfirmLabel] = useState<string | null>(null);
   const pendingActionRef = useRef<(() => void) | null>(null);
+
+  // どのボタンも表示されない場合はコンポーネントを非表示にする
+  if (actions.length === 0) return null;
 
   const askConfirm = (label: string, action: () => void) => {
     setConfirmLabel(label);

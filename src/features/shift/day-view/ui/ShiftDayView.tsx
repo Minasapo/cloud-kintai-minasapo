@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 
 // 日付ごとの時間軸ビュー（デモ用のモック表示）
 export default function ShiftDayView() {

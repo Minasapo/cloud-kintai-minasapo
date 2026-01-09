@@ -1,7 +1,7 @@
 import { Box, Stack, TextField } from "@mui/material";
 import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { UseFormSetValue } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -14,30 +14,23 @@ import { AttendanceEditInputs } from "../../common";
  */
 export default function EndTimeInput({
   workDate,
-  control: _control,
   setValue,
 }: {
   workDate: dayjs.Dayjs | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: any;
   setValue: UseFormSetValue<AttendanceEditInputs>;
 }) {
   const { getQuickInputEndTimes } = useContext(AppConfigContext);
 
-  const [quickInputEndTimes, setQuickInputEndTimes] = useState<
-    { time: string; enabled: boolean }[]
-  >([]);
-
-  useEffect(() => {
+  // Derived state: compute quickInputEndTimes from getQuickInputEndTimes
+  const quickInputEndTimes = useMemo(() => {
     const quickInputTimes = getQuickInputEndTimes(true);
     if (quickInputTimes.length > 0) {
-      setQuickInputEndTimes(
-        quickInputTimes.map((entry) => ({
-          time: entry.time,
-          enabled: entry.enabled,
-        }))
-      );
+      return quickInputTimes.map((entry) => ({
+        time: entry.time,
+        enabled: entry.enabled,
+      }));
     }
+    return [];
   }, [getQuickInputEndTimes]);
 
   const { watch, readOnly, isOnBreak } = useContext(AttendanceEditContext);

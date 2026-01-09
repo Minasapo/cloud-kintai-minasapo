@@ -2,8 +2,6 @@ import { useOfficeQrRegister } from "../model/useOfficeQrRegister";
 import { OfficeQrRegisterPanel } from "./OfficeQrRegisterPanel";
 
 export function OfficeQrRegister() {
-  "use memo";
-
   const {
     isOfficeModeEnabled,
     errorMessage,

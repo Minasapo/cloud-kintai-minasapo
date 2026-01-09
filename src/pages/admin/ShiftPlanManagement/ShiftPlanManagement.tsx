@@ -160,15 +160,15 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
+  // Sync draft to value when not editing
   useEffect(() => {
     if (!isEditing) {
       setDraft(value);
     }
-  }, [isEditing, value]);
+  }, [value, isEditing]);
 
   const handleCommit = useCallback(() => {
     const normalized = sanitizeCapacityValue(draft);
-    setDraft(normalized);
     onCommit(normalized);
     setIsEditing(false);
   }, [draft, onCommit]);
@@ -246,7 +246,7 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
 
 export default function ShiftPlanManagement() {
   const dispatch = useAppDispatchV2();
-  const initialYear = useMemo(() => dayjs().year(), []);
+  const initialYear = dayjs().year();
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [yearlyPlans, setYearlyPlans] = useState<
     Record<number, ShiftPlanRow[]>

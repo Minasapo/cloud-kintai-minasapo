@@ -5,6 +5,8 @@ import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
+import { FLAG_VALUES } from "@/constants/businessLogic";
+import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
@@ -123,13 +125,19 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
                     totalRestTime.toFixed(2),
                     startTime ? dayjs(startTime).format("HH:mm") : "",
                     endTime ? dayjs(endTime).format("HH:mm") : "",
-                    goDirectlyFlag ? 1 : 0,
-                    returnDirectlyFlag ? 1 : 0,
-                    absentFlag ? 1 : 0,
-                    paidHolidayFlag ? 1 : 0,
-                    substituteHolidayDate ? 1 : 0,
+                    goDirectlyFlag ? FLAG_VALUES.TRUE : FLAG_VALUES.FALSE,
+                    returnDirectlyFlag ? FLAG_VALUES.TRUE : FLAG_VALUES.FALSE,
+                    absentFlag ? FLAG_VALUES.TRUE : FLAG_VALUES.FALSE,
+                    paidHolidayFlag ? FLAG_VALUES.TRUE : FLAG_VALUES.FALSE,
+                    substituteHolidayDate
+                      ? FLAG_VALUES.TRUE
+                      : FLAG_VALUES.FALSE,
                     ...(includeSpecialHoliday
-                      ? [specialHolidayFlag ? 1 : 0]
+                      ? [
+                          specialHolidayFlag
+                            ? FLAG_VALUES.TRUE
+                            : FLAG_VALUES.FALSE,
+                        ]
                       : []),
                     ...(hourlyPaidHolidayEnabled
                       ? [hourlyPaidHolidayHours ?? ""]
@@ -184,7 +192,7 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
       disabled={disabled}
       disableElevation
       sx={{
-        minWidth: 160,
+        minWidth: BUTTON_MIN_WIDTH,
         fontWeight: "bold",
         transition: "transform 150ms ease",
         "&:hover": {

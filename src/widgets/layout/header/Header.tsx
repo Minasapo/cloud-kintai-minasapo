@@ -5,8 +5,8 @@ import { resolveThemeColor } from "@/constants/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { StaffRole } from "@/hooks/useStaffs/useStaffs";
-import HeaderBar from "@/shared/ui/header/HeaderBar";
 import { designTokenVar } from "@/shared/designSystem";
+import HeaderBar from "@/shared/ui/header/HeaderBar";
 
 import DesktopMenu from "./DesktopMenu";
 import { ExternalLinks } from "./ExternalLinks/ExternalLinks";
@@ -23,8 +23,7 @@ export default function Header() {
       resolveThemeColor(
         typeof getThemeColor === "function" ? getThemeColor() : undefined
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [getThemeColor]
   );
   const headerThemeColor = designTokenVar(
     "color.brand.primary.base",

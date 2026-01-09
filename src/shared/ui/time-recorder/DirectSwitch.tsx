@@ -1,7 +1,9 @@
 import { styled, Switch } from "@mui/material";
 
+import { MARGINS } from "@/constants/uiDimensions";
+
 const DirectSwitch = styled(Switch)(({ theme }) => ({
-  padding: 8,
+  padding: MARGINS.PADDING_STANDARD,
   "& .MuiSwitch-track": {
     borderRadius: 22 / 2,
     "&::before, &::after": {
@@ -29,7 +31,7 @@ const DirectSwitch = styled(Switch)(({ theme }) => ({
     boxShadow: "none",
     width: 16,
     height: 16,
-    margin: 2,
+    margin: MARGINS.FORM_MARGIN,
   },
 }));
 

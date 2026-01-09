@@ -23,8 +23,6 @@ export default function BeforeCard({
 }: {
   attendance: Attendance | null;
 }) {
-  "use memo";
-
   return (
     <Card sx={{ p: 2 }}>
       <Typography variant="body1" sx={{ fontWeight: "bold" }}>

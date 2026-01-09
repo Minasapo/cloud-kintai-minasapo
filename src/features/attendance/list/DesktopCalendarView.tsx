@@ -22,6 +22,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 
+import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { CompanyHoliday } from "@/lib/CompanyHoliday";
@@ -55,7 +56,7 @@ const DayCell = styled(Box, {
   $isToday: boolean;
   $isHoliday: boolean;
 }>(({ theme, $isCurrentMonth, $isToday, $isHoliday }) => ({
-  minHeight: 140,
+  minHeight: PANEL_HEIGHTS.CALENDAR_MIN,
   borderRadius: 12,
   padding: theme.spacing(1.5),
   border: `1px solid ${theme.palette.divider}`,

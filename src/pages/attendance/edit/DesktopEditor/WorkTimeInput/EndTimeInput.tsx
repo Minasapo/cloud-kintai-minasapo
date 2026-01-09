@@ -2,7 +2,7 @@ import { Box, Stack } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
 import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { Controller } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -17,20 +17,16 @@ export default function EndTimeInput({
   const { workDate, control, setValue, changeRequests, readOnly, isOnBreak } =
     useContext(AttendanceEditContext);
 
-  const [quickInputEndTimes, setQuickInputEndTimes] = useState<
-    { time: string; enabled: boolean }[]
-  >([]);
-
-  useEffect(() => {
+  // Derived state: compute quickInputEndTimes from getQuickInputEndTimes
+  const quickInputEndTimes = useMemo(() => {
     const quickInputTimes = getQuickInputEndTimes(true);
     if (quickInputTimes.length > 0) {
-      setQuickInputEndTimes(
-        quickInputTimes.map((entry) => ({
-          time: entry.time,
-          enabled: entry.enabled,
-        }))
-      );
+      return quickInputTimes.map((entry) => ({
+        time: entry.time,
+        enabled: entry.enabled,
+      }));
     }
+    return [];
   }, [getQuickInputEndTimes]);
 
   if (!workDate || !control || !setValue) return null;

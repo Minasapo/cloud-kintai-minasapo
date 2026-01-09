@@ -30,7 +30,7 @@ export function WorkTimeInput() {
       </Typography>
       {/* 直帰 */}
       <ReturnDirectlyFlagInput />
-      <EndTimeInput workDate={workDate} control={control} setValue={setValue} />
+      <EndTimeInput workDate={workDate} setValue={setValue} />
     </>
   );
 }

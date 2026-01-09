@@ -5,8 +5,6 @@ import dayjs from "dayjs";
 import { AttendanceTime } from "@/lib/AttendanceTime";
 
 export default function RestTableRow({ rests }: { rests: Rest[] }) {
-  "use memo";
-
   return (
     <TableRow>
       <TableCell>休憩時間</TableCell>

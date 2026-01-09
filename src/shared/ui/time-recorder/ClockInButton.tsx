@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -47,15 +47,12 @@ export interface ClockInButtonProps {
 }
 
 const ClockInButton = ({ isBeforeWork, onClockIn }: ClockInButtonProps) => {
-  "use memo";
-
   const [clicked, setClicked] = useState(false);
 
-  useEffect(() => {
-    if (isBeforeWork) {
-      setClicked(false);
-    }
-  }, [isBeforeWork]);
+  // Derived state: reset clicked when isBeforeWork changes
+  const actualClicked = useMemo(() => {
+    return isBeforeWork ? false : clicked;
+  }, [isBeforeWork, clicked]);
 
   const handleClick = useCallback(() => {
     setClicked(true);
@@ -66,7 +63,7 @@ const ClockInButton = ({ isBeforeWork, onClockIn }: ClockInButtonProps) => {
     <StyledClockInButton
       data-testid="clock-in-button"
       onClick={handleClick}
-      disabled={!isBeforeWork || clicked}
+      disabled={!isBeforeWork || actualClicked}
     >
       勤務開始
     </StyledClockInButton>

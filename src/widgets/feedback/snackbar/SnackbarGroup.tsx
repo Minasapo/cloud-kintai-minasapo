@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 
 import { useAppDispatchV2, useAppSelectorV2 } from "@/app/hooks";
+import { SNACKBAR_AUTO_HIDE_DURATION } from "@/constants/timeouts";
 import {
   selectSnackbar,
   setSnackbarError,
@@ -55,29 +56,29 @@ export default function SnackbarGroup() {
     dispatch(setSnackbarWarn(null));
   }, [dispatch]);
 
+  // Update success message and dispatch reset when success changes
   useEffect(() => {
-    if (!success) {
-      return;
+    if (success) {
+      setSuccessMessage(success);
+      resetSuccess();
     }
-    setSuccessMessage(success);
-    resetSuccess();
-  }, [resetSuccess, success]);
+  }, [success, resetSuccess]);
 
+  // Update error message and dispatch reset when error changes
   useEffect(() => {
-    if (!error) {
-      return;
+    if (error) {
+      setErrorMessage(error);
+      resetError();
     }
-    setErrorMessage(error);
-    resetError();
   }, [error, resetError]);
 
+  // Update warn message and dispatch reset when warn changes
   useEffect(() => {
-    if (!warn) {
-      return;
+    if (warn) {
+      setWarnMessage(warn);
+      resetWarn();
     }
-    setWarnMessage(warn);
-    resetWarn();
-  }, [resetWarn, warn]);
+  }, [warn, resetWarn]);
 
   const renderSnackbar = (
     key: string,
@@ -137,7 +138,7 @@ export default function SnackbarGroup() {
       key: "success",
       message: successMessage,
       severity: "success" as const,
-      autoHideDuration: 6000,
+      autoHideDuration: SNACKBAR_AUTO_HIDE_DURATION.SUCCESS,
       setMessage: setSuccessMessage,
     },
     {
@@ -151,7 +152,7 @@ export default function SnackbarGroup() {
       key: "warn",
       message: warnMessage,
       severity: "warning" as const,
-      autoHideDuration: 5000,
+      autoHideDuration: SNACKBAR_AUTO_HIDE_DURATION.ERROR,
       setMessage: setWarnMessage,
     },
   ];

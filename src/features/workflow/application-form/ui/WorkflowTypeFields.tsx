@@ -59,8 +59,6 @@ export default function WorkflowTypeFields({
   overtimeReason,
   setOvertimeReason,
 }: Props) {
-  "use memo";
-
   return (
     <>
       {category === "有給休暇申請" && (
