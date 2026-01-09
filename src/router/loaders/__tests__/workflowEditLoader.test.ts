@@ -27,7 +27,7 @@ describe("workflowEditLoader", () => {
     const result = await workflowEditLoader({
       params: { id: "wf-1" },
       request: new Request("http://localhost"),
-    } as Parameters<typeof workflowEditLoader>[0]);
+    } as unknown as Parameters<typeof workflowEditLoader>[0]);
 
     expect(result.workflow.id).toBe("wf-1");
     expect(resolveWorkflowLoaderData).toHaveBeenCalledWith({ id: "wf-1" });

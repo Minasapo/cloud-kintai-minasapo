@@ -113,7 +113,7 @@ describe("workflowDetailLoader", () => {
     const result = await workflowDetailLoader({
       params: { id: "wf-1" },
       request: new Request("http://localhost"),
-    } as Parameters<typeof workflowDetailLoader>[0]);
+    } as unknown as Parameters<typeof workflowDetailLoader>[0]);
 
     expect(result.workflow).toEqual(workflow);
   });
