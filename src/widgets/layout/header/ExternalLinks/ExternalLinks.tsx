@@ -1,48 +1,23 @@
 import ExternalLinksView, {
   ExternalLinkItem,
 } from "@shared/ui/header/ExternalLinks";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { StaffExternalLink } from "@/entities/staff/externalLink";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import { usePersonalExternalLinks } from "@/hooks/useStaff/usePersonalExternalLinks";
 
 export function ExternalLinks() {
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const { getLinks } = useContext(AppConfigContext);
-  const [companyLinks, setCompanyLinks] = useState<ExternalLinkItem[]>([]);
-  const [personalLinks, setPersonalLinks] = useState<ExternalLinkItem[]>([]);
 
-  useEffect(() => {
+  const companyLinks = useMemo<ExternalLinkItem[]>(() => {
     const resolvedLinks =
       typeof getLinks === "function" ? filterEnabledLinks(getLinks()) : [];
-    setCompanyLinks(resolvedLinks);
+    return resolvedLinks;
   }, [getLinks]);
 
-  useEffect(() => {
-    if (!cognitoUser) {
-      setPersonalLinks([]);
-      return;
-    }
-
-    let cancelled = false;
-    fetchStaff(cognitoUser.id)
-      .then((staff) => {
-        if (cancelled) return;
-        const links = normalizeStaffExternalLinks(staff?.externalLinks);
-        setPersonalLinks(links);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setPersonalLinks([]);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [cognitoUser?.id]);
+  const personalLinks = usePersonalExternalLinks(cognitoUser?.id);
 
   const { familyName = "", givenName = "" } = cognitoUser ?? {};
 
@@ -74,23 +49,3 @@ const filterEnabledLinks = (links: ExternalLinkItem[]) =>
       typeof link.url === "string" &&
       link.url.trim() !== ""
   );
-
-const normalizeStaffExternalLinks = (
-  links?: (StaffExternalLink | null)[] | null
-): ExternalLinkItem[] => {
-  if (!links) {
-    return [];
-  }
-
-  return filterEnabledLinks(
-    links
-      .filter((link): link is NonNullable<typeof link> => Boolean(link))
-      .map((link) => ({
-        label: link.label.trim(),
-        url: link.url.trim(),
-        enabled: link.enabled,
-        icon: link.icon || "LinkIcons",
-        isPersonal: true,
-      }))
-  );
-};

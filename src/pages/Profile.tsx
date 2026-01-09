@@ -202,7 +202,7 @@ export default function Profile() {
       .catch((e: Error) => {
         logger.error("Failed to load staff data:", e);
       });
-  }, []);
+  }, [cognitoUser, setValue]);
 
   if (!cognitoUser || staff === undefined) {
     return null;

@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 // モック群
 jest.mock("@app/hooks", () => ({ useAppDispatchV2: () => jest.fn() }));
