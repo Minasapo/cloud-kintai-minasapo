@@ -56,6 +56,69 @@ const getTodayAsSlash = (): string => {
   return `${y}/${m}/${day}`;
 };
 
+/**
+ * スタッフの承認者設定に基づいて承認ステップを生成
+ */
+const generateApprovalSteps = (
+  staff: StaffType,
+  staffs: StaffType[]
+): {
+  approvalSteps: ApprovalStepInput[];
+  assignedApproverStaffIds: string[];
+} => {
+  const approvalSteps: ApprovalStepInput[] = [];
+  const assignedApproverStaffIds: string[] = [];
+
+  if (staff?.approverSetting === ApproverSettingMode.SINGLE) {
+    const target = staff.approverSingle;
+    if (target) {
+      const mapped = staffs.find(
+        (s) => s.cognitoUserId === target || s.id === target
+      );
+      const approverId = mapped ? mapped.id : target;
+      approvalSteps.push({
+        id: `s-0-${Date.now()}`,
+        approverStaffId: approverId,
+        decisionStatus: ApprovalStatus.PENDING,
+        approverComment: null,
+        decisionTimestamp: null,
+        stepOrder: 0,
+      });
+      assignedApproverStaffIds.push(approverId);
+    }
+  } else if (staff?.approverSetting === ApproverSettingMode.MULTIPLE) {
+    const multiple = staff.approverMultiple || [];
+    multiple.forEach((aid, idx) => {
+      if (!aid) return;
+      const mapped = staffs.find(
+        (s) => s.cognitoUserId === aid || s.id === aid
+      );
+      const approverId = mapped ? mapped.id : aid;
+      approvalSteps.push({
+        id: `s-${idx}-${Date.now()}`,
+        approverStaffId: approverId,
+        decisionStatus: ApprovalStatus.PENDING,
+        approverComment: null,
+        decisionTimestamp: null,
+        stepOrder: idx,
+      });
+      assignedApproverStaffIds.push(approverId);
+    });
+  } else if (staff?.approverSetting === ApproverSettingMode.ADMINS) {
+    approvalSteps.push({
+      id: `s-admin-${Date.now()}`,
+      approverStaffId: "ADMINS",
+      decisionStatus: ApprovalStatus.PENDING,
+      approverComment: null,
+      decisionTimestamp: null,
+      stepOrder: 0,
+    });
+    assignedApproverStaffIds.push("ADMINS");
+  }
+
+  return { approvalSteps, assignedApproverStaffIds };
+};
+
 export default function NewWorkflowPage() {
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
   const navigate = useNavigate();
@@ -183,56 +246,10 @@ export default function NewWorkflowPage() {
 
     // --- 申請時に承認ステップをスナップショットとして保存する ---
     // staff の approverSetting を参照して approvalSteps / assignedApproverStaffIds を生成
-    const approvalSteps: ApprovalStepInput[] = [];
-    const assignedApproverStaffIds: Array<string> = [];
-
-    if (staff?.approverSetting === ApproverSettingMode.SINGLE) {
-      const target = staff.approverSingle;
-      if (target) {
-        const mapped = staffs.find(
-          (s) => s.cognitoUserId === target || s.id === target
-        );
-        const approverId = mapped ? mapped.id : target;
-        approvalSteps.push({
-          id: `s-0-${Date.now()}`,
-          approverStaffId: approverId,
-          decisionStatus: ApprovalStatus.PENDING,
-          approverComment: null,
-          decisionTimestamp: null,
-          stepOrder: 0,
-        });
-        assignedApproverStaffIds.push(approverId);
-      }
-    } else if (staff?.approverSetting === ApproverSettingMode.MULTIPLE) {
-      const multiple = staff.approverMultiple || [];
-      multiple.forEach((aid, idx) => {
-        if (!aid) return;
-        const mapped = staffs.find(
-          (s) => s.cognitoUserId === aid || s.id === aid
-        );
-        const approverId = mapped ? mapped.id : aid;
-        approvalSteps.push({
-          id: `s-${idx}-${Date.now()}`,
-          approverStaffId: approverId,
-          decisionStatus: ApprovalStatus.PENDING,
-          approverComment: null,
-          decisionTimestamp: null,
-          stepOrder: idx,
-        });
-        assignedApproverStaffIds.push(approverId);
-      });
-    } else if (staff?.approverSetting === ApproverSettingMode.ADMINS) {
-      // 管理者全員モードは特別扱いとして 'ADMINS' を approverStaffId に入れておく
-      approvalSteps.push({
-        id: `s-admin-${Date.now()}`,
-        approverStaffId: "ADMINS",
-        decisionStatus: ApprovalStatus.PENDING,
-        approverComment: null,
-        decisionTimestamp: null,
-        stepOrder: 0,
-      });
-      assignedApproverStaffIds.push("ADMINS");
-    }
+    const { approvalSteps, assignedApproverStaffIds } = generateApprovalSteps(
+      staff,
+      staffs
+    );
 
     if (approvalSteps.length > 0) {
       input.approvalSteps = approvalSteps;
