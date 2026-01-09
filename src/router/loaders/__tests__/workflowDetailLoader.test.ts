@@ -8,6 +8,7 @@ import {
   workflowDetailLoader,
   WorkflowLoaderError,
 } from "../workflowDetailLoader";
+import { createLoaderArgs } from "./loaderTestUtils";
 
 type Workflow = {
   id: string;
@@ -110,10 +111,9 @@ describe("workflowDetailLoader", () => {
   it("workflowDetailLoader delegates to resolver", async () => {
     mockGraphql.mockResolvedValue({ data: { getWorkflow: workflow } });
 
-    const result = await workflowDetailLoader({
-      params: { id: "wf-1" },
-      request: new Request("http://localhost"),
-    } as unknown as Parameters<typeof workflowDetailLoader>[0]);
+    const result = await workflowDetailLoader(
+      createLoaderArgs({ params: { id: "wf-1" } })
+    );
 
     expect(result.workflow).toEqual(workflow);
   });

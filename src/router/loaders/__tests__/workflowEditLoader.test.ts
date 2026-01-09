@@ -2,6 +2,8 @@ import { resolveWorkflowLoaderData } from "@/router/loaders/workflowDetailLoader
 import * as workflowDetailLoaderModule from "@/router/loaders/workflowDetailLoader";
 import { workflowEditLoader } from "@/router/loaders/workflowEditLoader";
 
+import { createLoaderArgs } from "./loaderTestUtils";
+
 // Requestのポリフィル
 if (typeof Request === "undefined") {
   class SimpleRequest {
@@ -24,10 +26,9 @@ describe("workflowEditLoader", () => {
       ReturnType<typeof resolveWorkflowLoaderData>
     >);
 
-    const result = await workflowEditLoader({
-      params: { id: "wf-1" },
-      request: new Request("http://localhost"),
-    } as unknown as Parameters<typeof workflowEditLoader>[0]);
+    const result = await workflowEditLoader(
+      createLoaderArgs({ params: { id: "wf-1" } })
+    );
 
     expect(result.workflow.id).toBe("wf-1");
     expect(resolveWorkflowLoaderData).toHaveBeenCalledWith({ id: "wf-1" });
