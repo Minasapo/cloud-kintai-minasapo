@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -27,11 +27,10 @@ export interface RestStartButtonProps {
 const RestStartButton = ({ isWorking, onRestStart }: RestStartButtonProps) => {
   const [isPending, setIsPending] = useState(false);
 
-  useEffect(() => {
-    if (isWorking) {
-      setIsPending(false);
-    }
-  }, [isWorking]);
+  // Derived state: reset isPending when isWorking changes
+  const actualIsPending = useMemo(() => {
+    return isWorking ? false : isPending;
+  }, [isWorking, isPending]);
 
   const handleClick = useCallback(() => {
     setIsPending(true);
@@ -42,7 +41,7 @@ const RestStartButton = ({ isWorking, onRestStart }: RestStartButtonProps) => {
     <StyledRestStartButton
       fullWidth
       onClick={handleClick}
-      disabled={!isWorking || isPending}
+      disabled={!isWorking || actualIsPending}
       data-testid="rest-start-button"
     >
       休憩開始

@@ -83,7 +83,7 @@ export default function TimeRecorder(): JSX.Element {
 
   const { getStartTime, getEndTime } = useContext(AppConfigContext);
 
-  const today = useMemo(() => dayjs().format(AttendanceDate.DataFormat), []);
+  const today = dayjs().format(AttendanceDate.DataFormat);
 
   const shouldFetchAttendance = Boolean(cognitoUser?.id);
 
@@ -258,7 +258,7 @@ export default function TimeRecorder(): JSX.Element {
   const [directMode, setDirectMode] = useState(false);
   const [lastActiveTime, setLastActiveTime] = useState(dayjs());
 
-  const logger = useMemo(() => new Logger("TimeRecorder", "DEBUG"), []);
+  const logger = new Logger("TimeRecorder", "DEBUG");
 
   useEffect(() => {
     if (holidayCalendarsError || companyHolidayCalendarsError) {
@@ -388,8 +388,16 @@ export default function TimeRecorder(): JSX.Element {
       logger,
       startIso
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cognitoUser, clockIn, dispatch, staff, today, logger]);
+  }, [
+    cognitoUser,
+    clockIn,
+    dispatch,
+    staff,
+    today,
+    logger,
+    getStartTime,
+    goDirectlyCallback,
+  ]);
 
   const handleReturnDirectly = useCallback(() => {
     const configured = getEndTime();
@@ -409,8 +417,16 @@ export default function TimeRecorder(): JSX.Element {
       logger,
       endIso
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cognitoUser, staff, dispatch, clockOut, today, logger]);
+  }, [
+    cognitoUser,
+    staff,
+    dispatch,
+    clockOut,
+    today,
+    logger,
+    getEndTime,
+    returnDirectlyCallback,
+  ]);
 
   const handleRestStart = useCallback(
     () => restStartCallback(cognitoUser, today, dispatch, restStart, logger),

@@ -1,5 +1,5 @@
 import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
-// Title removed per admin UI simplification
+import { Activity } from "react";
 import { type ReactNode, type SyntheticEvent, useState } from "react";
 
 import CompanyHolidayCalendarList from "../CompanyHolidayCalendar/CompanyHolidayCalendarList";
@@ -15,15 +15,17 @@ function CustomTabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
+    <Activity mode={value === index ? "visible" : "hidden"}>
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        <Box sx={{ p: 3 }}>{children}</Box>
+      </div>
+    </Activity>
   );
 }
 

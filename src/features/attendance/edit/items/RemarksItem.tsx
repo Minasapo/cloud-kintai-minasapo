@@ -2,6 +2,7 @@ import { Box, Chip, Stack, TextField } from "@mui/material";
 import { useContext } from "react";
 import { Controller } from "react-hook-form";
 
+import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 export default function RemarksItem() {
@@ -26,7 +27,7 @@ export default function RemarksItem() {
             borderRadius: 1,
             px: 1,
             py: 1,
-            minHeight: 48,
+            minHeight: PANEL_HEIGHTS.TEXTAREA_MIN,
             display: "flex",
             flexDirection: "row",
             alignItems: "center",

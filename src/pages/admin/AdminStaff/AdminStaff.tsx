@@ -17,7 +17,7 @@ import { useState } from "react";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
-import useStaffs from "../../../hooks/useStaffs/useStaffs";
+import { useStaffs } from "../../../hooks/useStaffs/useStaffs";
 import { setSnackbarError } from "../../../lib/reducers/snackbarReducer";
 import { AccountStatusTableCell } from "./AccountStatusTableCell";
 import { CreatedAtTableCell } from "./CreatedAtTableCell";

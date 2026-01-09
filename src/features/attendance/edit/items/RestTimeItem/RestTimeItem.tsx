@@ -1,7 +1,7 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { FieldArrayWithId } from "react-hook-form";
 
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
@@ -29,17 +29,14 @@ export function RestTimeItem({
   index: number;
 }) {
   const { restRemove, readOnly } = useContext(AttendanceEditContext);
-  const [totalRestTime, setTotalRestTime] = useState<number>(0);
 
-  useEffect(() => {
+  // 派生状態として計算：休憩時間の合計
+  const totalRestTime = useMemo(() => {
     if (!rest.endTime) {
-      setTotalRestTime(0);
-      return;
+      return 0;
     }
-
-    const diff = calcTotalRestTime(rest.startTime, rest.endTime);
-    setTotalRestTime(diff);
-  }, [rest]);
+    return calcTotalRestTime(rest.startTime, rest.endTime);
+  }, [rest.startTime, rest.endTime]);
 
   if (!restRemove) {
     return null;

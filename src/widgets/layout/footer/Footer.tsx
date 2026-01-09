@@ -11,8 +11,7 @@ export default function Footer() {
       resolveThemeColor(
         typeof getThemeColor === "function" ? getThemeColor() : undefined
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [getThemeColor]
   );
 
   return <FooterView themeColor={themeColor} />;

@@ -1,12 +1,64 @@
 name: Playwright Daily Test
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * 1-5" # 平日09:00(JST)に実行（GitHub ActionsはUTC、1-5は月曜〜金曜）
+  push:
+    branches:
+      - develop
+      - feature/**
 jobs:
+  lint-check:
+    if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
+    name: Run Lint Checks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Cache npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+
+  jest-test:
+    needs: lint-check
+    if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
+    name: Run Unit Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Cache npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm ci
+      - name: Run jest unit tests
+        run: npm run test:unit
+        env:
+          TZ: Asia/Tokyo
+
   playwright-test:
-    if: github.ref == 'refs/heads/develop'
-    name: Run Playwright tests daily
+    needs: jest-test
+    if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
+    name: Run E2E Playwright tests
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
@@ -26,8 +78,8 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      - name: Run Playwright tests
-        run: npx playwright test
+      - name: Run Playwright smoke tests
+        run: npm run test:e2e -- smoke-test --project=chromium-staff && npm run test:e2e -- smoke-test --project=chromium-admin
         env:
           VITE_BASE_PATH: ${{ secrets.VITE_BASE_PATH }}
           PLAYWRIGHT_LAZY_USER_EMAIL: ${{ secrets.PLAYWRIGHT_LAZY_USER_EMAIL }}
@@ -56,26 +108,3 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report
-
-  jest-test:
-    if: github.ref == 'refs/heads/develop'
-    name: Run Jest unit tests
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Cache npm
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Install dependencies
-        run: npm ci
-      - name: Run jest unit tests
-        run: npm run test:unit

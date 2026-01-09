@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import useStaffs from "../useStaffs/useStaffs";
+import { useStaffs } from "../useStaffs/useStaffs";
 
 dayjs.extend(isBetween);
 
@@ -115,7 +115,7 @@ export default function useAttendanceDaily() {
                     meta?: { duplicates?: DuplicateAttendanceInfo[] };
                   }
                 ).meta?.duplicates ?? []
-              ).filter((d) => d.ids.length > 1 || d.ids.length === 1);
+              ).filter((d) => d.ids.length > 1);
 
               duplicates.forEach((dup) => {
                 // 月範囲内のみを対象

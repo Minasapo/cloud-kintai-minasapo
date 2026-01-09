@@ -2,15 +2,21 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip, CircularProgress, Stack } from "@mui/material";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 // ...existing code
+import {
+  CARD_BORDER_WIDTH,
+  LIST_WIDTHS,
+  SELECTOR_MAX_WIDTH,
+  STANDARD_PADDING,
+} from "@/constants/uiDimensions";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import useCloseDates from "../../hooks/useCloseDates/useCloseDates";
-import useStaffs, { StaffType } from "../../hooks/useStaffs/useStaffs";
+import { StaffType, useStaffs } from "../../hooks/useStaffs/useStaffs";
 import AggregateExportButton from "./AggregateExportButton";
 import ExportButton from "./ExportButton";
 import StaffSelector from "./StaffSelector";
@@ -47,12 +53,17 @@ export default function DownloadForm() {
   // derive workDates from watched start/end date so we can pass to ExportButton
   const startDate = watch("startDate") ?? dayjs();
   const endDate = watch("endDate") ?? dayjs();
-  const workDates: string[] = [];
-  let date = startDate;
-  while (date.isBefore(endDate) || date.isSame(endDate)) {
-    workDates.push(date.format(AttendanceDate.DataFormat));
-    date = date.add(1, "day");
-  }
+
+  // Derived state: compute workDates from startDate and endDate
+  const workDates = useMemo(() => {
+    const dates: string[] = [];
+    let date = startDate;
+    while (date.isBefore(endDate) || date.isSame(endDate)) {
+      dates.push(date.format(AttendanceDate.DataFormat));
+      date = date.add(1, "day");
+    }
+    return dates;
+  }, [startDate, endDate]);
 
   if (staffLoading || closeDateLoading) {
     return <CircularProgress />;
@@ -67,16 +78,16 @@ export default function DownloadForm() {
       spacing={4}
       alignItems="center"
       sx={{
-        border: 1,
+        border: CARD_BORDER_WIDTH,
         borderColor: "primary.main",
         borderRadius: "5px",
-        pb: 3,
+        pb: STANDARD_PADDING.CARD,
       }}
     >
       <Box
         sx={{
-          p: 1,
-          width: 1,
+          p: STANDARD_PADDING.SMALL,
+          width: LIST_WIDTHS.FULL,
           boxSizing: "border-box",
           textAlign: "center",
           backgroundColor: "primary.main",
@@ -128,7 +139,10 @@ export default function DownloadForm() {
                   />
                 </Box>
               </Stack>
-              <Stack spacing={2} sx={{ maxWidth: 500, overflowX: "auto" }}>
+              <Stack
+                spacing={2}
+                sx={{ maxWidth: SELECTOR_MAX_WIDTH, overflowX: "auto" }}
+              >
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Box sx={{ whiteSpace: "nowrap" }}>集計対象月から:</Box>
                   <Chip

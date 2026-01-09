@@ -1,7 +1,7 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Box, Chip, Stack, TextField } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 
@@ -16,18 +16,14 @@ export default function StartTimeInputMobile({
     AttendanceEditContext
   );
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
-  const [quickInputStartTimes, setQuickInputStartTimes] = useState<
-    { time: string; enabled: boolean }[]
-  >([]);
 
-  useEffect(() => {
-    const quickInputStartTimes = getQuickInputStartTimes(true);
-    setQuickInputStartTimes(
-      quickInputStartTimes.map((entry) => ({
-        time: entry.time,
-        enabled: entry.enabled,
-      }))
-    );
+  // Derived state: compute quickInputStartTimes from getQuickInputStartTimes
+  const quickInputStartTimes = useMemo(() => {
+    const times = getQuickInputStartTimes(true);
+    return times.map((entry) => ({
+      time: entry.time,
+      enabled: entry.enabled,
+    }));
   }, [getQuickInputStartTimes]);
 
   if (!workDate || !setValue) return null;

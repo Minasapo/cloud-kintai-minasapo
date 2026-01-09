@@ -1,7 +1,7 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { FieldArrayWithId } from "react-hook-form";
 
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
@@ -43,21 +43,17 @@ export default function HourlyPaidHolidayTimeItem({
     AttendanceEditContext
   );
 
-  const [totalHourlyPaidHolidayTime, setTotalHourlyPaidHolidayTime] =
-    useState<number>(0);
-
-  useEffect(() => {
+  // 派生状態として計算：時給有給休暇の合計時間
+  const totalHourlyPaidHolidayTime = useMemo(() => {
     const start = time.startTime;
     const end = time.endTime;
 
     if (!start || !end) {
-      setTotalHourlyPaidHolidayTime(0);
-      return;
+      return 0;
     }
 
-    const diff = calcTotalHourlyPaidHolidayTime(start, end);
-    setTotalHourlyPaidHolidayTime(diff);
-  }, [time.startTime, time.endTime, index]);
+    return calcTotalHourlyPaidHolidayTime(start, end);
+  }, [time.startTime, time.endTime]);
 
   return (
     <Box>

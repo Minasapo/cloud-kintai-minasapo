@@ -26,7 +26,20 @@ const ensureResponse = () => {
       }
     }
 
-    (global as any).Response = SimpleResponse as typeof Response;
+    (global as unknown as Record<string, unknown>).Response =
+      SimpleResponse as typeof Response;
+  }
+
+  // Requestのポリフィルも追加
+  if (typeof Request === "undefined") {
+    class SimpleRequest {
+      url: string;
+      constructor(url: string) {
+        this.url = url;
+      }
+    }
+    (global as unknown as Record<string, unknown>).Request =
+      SimpleRequest as typeof Request;
   }
 };
 
@@ -59,7 +72,7 @@ describe("workflowDetailLoader", () => {
   it("fetchWorkflowById throws when GraphQL returns errors", async () => {
     mockGraphql.mockResolvedValue({
       data: null,
-      errors: [{ message: "boom" }] as any,
+      errors: [{ message: "boom" }] as GraphQLResult["errors"],
     } satisfies GraphQLResult);
 
     await expect(fetchWorkflowById("wf-1")).rejects.toThrow(
@@ -99,7 +112,8 @@ describe("workflowDetailLoader", () => {
 
     const result = await workflowDetailLoader({
       params: { id: "wf-1" },
-    } as any);
+      request: new Request("http://localhost"),
+    } as Parameters<typeof workflowDetailLoader>[0]);
 
     expect(result.workflow).toEqual(workflow);
   });

@@ -26,8 +26,9 @@ import {
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -35,9 +36,10 @@ import {
 import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 import { designTokenVar } from "@/shared/designSystem";
-import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
+import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
+const logger = createLogger("WorkflowEditPage");
 
 export default function WorkflowEditPage() {
   const { id } = useParams();
@@ -57,6 +59,8 @@ export default function WorkflowEditPage() {
     setEndDate,
     absenceDate,
     setAbsenceDate,
+    absenceReason,
+    setAbsenceReason,
     paidReason,
     setPaidReason,
     overtimeDate,
@@ -85,6 +89,8 @@ export default function WorkflowEditPage() {
       startDate,
       endDate,
       absenceDate,
+      paidReason,
+      absenceReason,
       overtimeDate,
       overtimeStart,
       overtimeEnd,
@@ -119,9 +125,9 @@ export default function WorkflowEditPage() {
         dispatch(setSnackbarSuccess("保存しました"));
         setTimeout(() => navigate(`/workflow/${id}`), 1000);
       } catch (err) {
-        console.error(err);
-        const msg = err instanceof Error ? err.message : String(err);
-        dispatch(setSnackbarError(msg));
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error("Workflow update failed:", message);
+        dispatch(setSnackbarError(message));
       }
     })();
   };
@@ -249,6 +255,8 @@ export default function WorkflowEditPage() {
               absenceDate={absenceDate}
               setAbsenceDate={setAbsenceDate}
               absenceDateError={absenceDateError}
+              absenceReason={absenceReason}
+              setAbsenceReason={setAbsenceReason}
               overtimeDate={overtimeDate}
               setOvertimeDate={setOvertimeDate}
               overtimeDateError={overtimeDateError}

@@ -27,22 +27,33 @@ import {
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ComponentProps,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import { AppShell } from "@/shared/ui/layout";
+import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";
-import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
+
 import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
-import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
+import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
 import { StaffRole } from "./hooks/useStaffs/useStaffs";
+import { createLogger } from "./lib/logger";
 import { createAppTheme } from "./lib/theme";
-import { AppShell } from "@/shared/ui/layout";
+
+const logger = createLogger("Layout");
 
 type MissingCloseDateAlertProps = {
   onConfirm: () => void;
@@ -54,9 +65,15 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
     loading: closeDatesLoading,
     error: closeDatesError,
   } = useCloseDates();
-  const [fetchStarted, setFetchStarted] = useState(false);
-  const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  // ローディング完了を追跡
+  useEffect(() => {
+    if (!closeDatesLoading && !hasLoaded) {
+      setHasLoaded(true);
+    }
+  }, [closeDatesLoading, hasLoaded]);
 
   const isCurrentDateCovered = useMemo(() => {
     const today = dayjs().startOf("day").valueOf();
@@ -67,32 +84,24 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
     });
   }, [closeDates]);
 
-  useEffect(() => {
-    if (closeDatesLoading) {
-      setFetchStarted(true);
-    }
-  }, [closeDatesLoading]);
-
-  useEffect(() => {
-    if (!fetchStarted || closeDatesLoading) return;
-    if (closeDatesError || dismissed) return;
-
-    setOpen(!isCurrentDateCovered);
+  // 派生状態として計算：データロード完了後、エラーがなく、却下されておらず、日付がカバーされていない場合のみ表示
+  const open = useMemo(() => {
+    if (!hasLoaded || closeDatesLoading || closeDatesError || dismissed)
+      return false;
+    return !isCurrentDateCovered;
   }, [
-    closeDatesError,
+    hasLoaded,
     closeDatesLoading,
+    closeDatesError,
     dismissed,
-    fetchStarted,
     isCurrentDateCovered,
   ]);
 
   const handleLater = useCallback(() => {
-    setOpen(false);
     setDismissed(true);
   }, []);
 
   const handleConfirm = useCallback(() => {
-    setOpen(false);
     setDismissed(true);
     onConfirm();
   }, [onConfirm]);
@@ -112,6 +121,29 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
         </Button>
       </DialogActions>
     </Dialog>
+  );
+}
+
+type AuthContextValue = ComponentProps<typeof AuthContext.Provider>["value"];
+type AppConfigContextValue = ComponentProps<
+  typeof AppConfigContext.Provider
+>["value"];
+type AppContextValue = ComponentProps<typeof AppContext.Provider>["value"];
+
+type AppProvidersProps = {
+  children: ReactNode;
+  auth: AuthContextValue;
+  config: AppConfigContextValue;
+  app: AppContextValue;
+};
+
+function AppProviders({ children, auth, config, app }: AppProvidersProps) {
+  return (
+    <AuthContext.Provider value={auth}>
+      <AppConfigContext.Provider value={config}>
+        <AppContext.Provider value={app}>{children}</AppContext.Provider>
+      </AppConfigContext.Provider>
+    </AuthContext.Provider>
   );
 }
 
@@ -302,7 +334,7 @@ export default function Layout() {
     try {
       void signOut();
     } catch (error) {
-      console.error(error);
+      logger.error("Failed to sign out:", error);
     }
   }, [
     authStatus,
@@ -415,8 +447,7 @@ export default function Layout() {
 
   const configuredThemeColor = useMemo(
     () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [getThemeColor]
   );
 
   const appTheme = useMemo(
@@ -444,30 +475,30 @@ export default function Layout() {
 
   return (
     <ThemeProvider theme={appTheme}>
-      <AuthContext.Provider value={authContextValue}>
-        <AppConfigContext.Provider value={appConfigContextValue}>
-          <AppContext.Provider value={appContextValue}>
-            <AppShell
-              header={<Header />}
-              main={<Outlet />}
-              footer={<Footer />}
-              snackbar={<SnackbarGroup />}
-              slotProps={{
-                root: { "data-testid": "layout-stack" },
-                header: { "data-testid": "layout-header" },
-                main: { "data-testid": "layout-main" },
-                footer: { "data-testid": "layout-footer" },
-                snackbar: { "data-testid": "layout-snackbar" },
-              }}
-            />
-            {isAdminUser && (
-              <MissingCloseDateAlert
-                onConfirm={() => navigate("/admin/master/job_term")}
-              />
-            )}
-          </AppContext.Provider>
-        </AppConfigContext.Provider>
-      </AuthContext.Provider>
+      <AppProviders
+        auth={authContextValue}
+        config={appConfigContextValue}
+        app={appContextValue}
+      >
+        <AppShell
+          header={<Header />}
+          main={<Outlet />}
+          footer={<Footer />}
+          snackbar={<SnackbarGroup />}
+          slotProps={{
+            root: { "data-testid": "layout-stack" },
+            header: { "data-testid": "layout-header" },
+            main: { "data-testid": "layout-main" },
+            footer: { "data-testid": "layout-footer" },
+            snackbar: { "data-testid": "layout-snackbar" },
+          }}
+        />
+        {isAdminUser && (
+          <MissingCloseDateAlert
+            onConfirm={() => navigate("/admin/master/job_term")}
+          />
+        )}
+      </AppProviders>
     </ThemeProvider>
   );
 }

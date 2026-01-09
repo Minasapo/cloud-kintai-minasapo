@@ -4,6 +4,20 @@
 // learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
 
+// Mock import.meta.env for Jest
+Object.defineProperty(globalThis, "import", {
+  value: {
+    meta: {
+      env: {
+        DEV: false,
+        VITE_LOG_LEVEL: undefined,
+      },
+    },
+  },
+  writable: true,
+  configurable: true,
+});
+
 // Mock AWS Amplify to avoid configuration warnings in tests
 jest.mock("./lib/amplify/graphqlClient", () => ({
   graphqlClient: {

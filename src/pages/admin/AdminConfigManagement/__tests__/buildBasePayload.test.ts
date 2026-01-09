@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 import {
   buildBasePayload,
@@ -23,7 +23,16 @@ describe("buildBasePayload helpers", () => {
   });
 
   test("buildBasePayload contains formatted times and mapped arrays", () => {
-    const requiredTimes = {
+    const requiredTimes: {
+      startTime: Dayjs;
+      endTime: Dayjs;
+      lunchRestStartTime: Dayjs;
+      lunchRestEndTime: Dayjs;
+      amHolidayStartTime: Dayjs;
+      amHolidayEndTime: Dayjs;
+      pmHolidayStartTime: Dayjs;
+      pmHolidayEndTime: Dayjs;
+    } = {
       startTime: dayjs("2020-01-01T09:00:00"),
       endTime: dayjs("2020-01-01T18:00:00"),
       lunchRestStartTime: dayjs("2020-01-01T12:00:00"),
@@ -34,7 +43,7 @@ describe("buildBasePayload helpers", () => {
       pmHolidayEndTime: dayjs("2020-01-01T18:00:00"),
     };
 
-    const payload = buildBasePayload(requiredTimes as any, {
+    const payload = buildBasePayload(requiredTimes, {
       links: [
         { label: "a", url: "https://example.com", enabled: true, icon: "home" },
       ],

@@ -1,3 +1,9 @@
+import { shiftRequestsByStaffId } from "@shared/api/graphql/documents/queries";
+import {
+  ShiftRequestHistoryInput,
+  ShiftRequestsByStaffIdQuery,
+  Staff,
+} from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 import { Dayjs } from "dayjs";
 import {
@@ -14,12 +20,6 @@ import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
-import { shiftRequestsByStaffId } from "@shared/api/graphql/documents/queries";
-import {
-  ShiftRequestHistoryInput,
-  ShiftRequestsByStaffIdQuery,
-  Staff,
-} from "@shared/api/graphql/types";
 
 import { SelectedDateMap, shiftRequestStatusToStatus } from "./statusMapping";
 

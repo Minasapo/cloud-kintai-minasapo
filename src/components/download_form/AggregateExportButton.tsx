@@ -5,6 +5,7 @@ import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
+import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
@@ -143,7 +144,7 @@ export default function AggregateExportButton({
       disabled={workDates.length === 0 || selectedStaff.length === 0}
       disableElevation
       sx={{
-        minWidth: 160,
+        minWidth: BUTTON_MIN_WIDTH,
         fontWeight: "bold",
         transition: "transform 150ms ease",
         "&:hover": {

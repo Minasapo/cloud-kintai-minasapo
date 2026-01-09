@@ -14,24 +14,24 @@ type MoveDateItemProps = {
 export default function MoveDateItem(props: MoveDateItemProps) {
   const navigate = useNavigate();
 
-  const handlePrevMonth = () => {
-    const prevMonth = props.workDate.subtract(1, "month").startOf("month");
+  const handlePrevDay = () => {
+    const prevDay = props.workDate.subtract(1, "day");
     navigate(
-      `/admin/attendances/${prevMonth.format(AttendanceDate.QueryParamFormat)}`
+      `/admin/attendances/${prevDay.format(AttendanceDate.QueryParamFormat)}`
     );
   };
 
-  const handleNextMonth = () => {
-    const nextMonth = props.workDate.add(1, "month").startOf("month");
+  const handleNextDay = () => {
+    const nextDay = props.workDate.add(1, "day");
     navigate(
-      `/admin/attendances/${nextMonth.format(AttendanceDate.QueryParamFormat)}`
+      `/admin/attendances/${nextDay.format(AttendanceDate.QueryParamFormat)}`
     );
   };
 
   return (
     <Stack direction="row" spacing={2} alignItems="center">
       <Box>
-        <IconButton onClick={handlePrevMonth}>
+        <IconButton onClick={handlePrevDay}>
           <ArrowBackIcon />
         </IconButton>
       </Box>
@@ -43,10 +43,8 @@ export default function MoveDateItem(props: MoveDateItemProps) {
         }}
         onChange={(date) => {
           if (date) {
-            // 日付選択時は月の最初の日に統一
-            const firstDay = date.startOf("month");
             navigate(
-              `/admin/attendances/${firstDay.format(
+              `/admin/attendances/${date.format(
                 AttendanceDate.QueryParamFormat
               )}`
             );
@@ -54,7 +52,7 @@ export default function MoveDateItem(props: MoveDateItemProps) {
         }}
       />
       <Box>
-        <IconButton onClick={handleNextMonth}>
+        <IconButton onClick={handleNextDay}>
           <ArrowForwardIcon />
         </IconButton>
       </Box>

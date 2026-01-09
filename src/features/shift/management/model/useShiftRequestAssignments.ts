@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useState } from "react";
-import dayjs, { Dayjs } from "dayjs";
 import {
   createShiftRequest,
   updateShiftRequest,
@@ -13,8 +11,13 @@ import {
   UpdateShiftRequestMutation,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
+import dayjs, { Dayjs } from "dayjs";
+import { useCallback, useEffect, useState } from "react";
 
+import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
+
+import { ShiftState } from "../lib/generateMockShifts";
 import { buildSummaryFromAssignments } from "../lib/shiftAssignments";
 import {
   convertHistoryToInput,
@@ -26,8 +29,6 @@ import {
   shiftRequestStatusToShiftState,
   shiftStateToShiftRequestStatus,
 } from "../lib/shiftStateMapping";
-import { ShiftState } from "../lib/generateMockShifts";
-import { StaffType } from "@/hooks/useStaffs/useStaffs";
 
 type UseShiftRequestAssignmentsParams = {
   shiftStaffs: StaffType[];

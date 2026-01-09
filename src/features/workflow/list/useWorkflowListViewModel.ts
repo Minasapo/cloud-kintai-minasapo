@@ -1,7 +1,7 @@
 import { useContext, useMemo } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 
 import { useWorkflowListFilters } from "./useWorkflowListFilters";

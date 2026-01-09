@@ -87,7 +87,23 @@ export default defineConfig({
     },
   },
   plugins: [
-    react(),
+    react({
+      // React Compilerは一時的に無効化
+      // 理由: 既存コードベースの大規模な修正が必要
+      // TODO: コードの安定後、段階的に再導入を検討
+      // babel: {
+      //   babelrc: false,
+      //   configFile: false,
+      //   plugins: [
+      //     [
+      //       "babel-plugin-react-compiler",
+      //       {
+      //         compilationMode: "annotation",
+      //       },
+      //     ],
+      //   ],
+      // },
+    }),
     splitVendorChunkPlugin(),
     tsconfigPaths(),
     checker({

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
@@ -10,18 +10,14 @@ export default function StartTimeInput({
 }: { highlight?: boolean } = {}) {
   const { workDate, control, setValue } = useContext(AttendanceEditContext);
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
-  const [quickInputStartTimes, setQuickInputStartTimes] = useState<
-    { time: string; enabled: boolean }[]
-  >([]);
 
-  useEffect(() => {
-    const quickInputStartTimes = getQuickInputStartTimes(true);
-    setQuickInputStartTimes(
-      quickInputStartTimes.map((entry) => ({
-        time: entry.time,
-        enabled: entry.enabled,
-      }))
-    );
+  // Derived state: compute quickInputStartTimes from getQuickInputStartTimes
+  const quickInputStartTimes = useMemo(() => {
+    const times = getQuickInputStartTimes(true);
+    return times.map((entry) => ({
+      time: entry.time,
+      enabled: entry.enabled,
+    }));
   }, [getQuickInputStartTimes]);
 
   if (!workDate || !control || !setValue) {

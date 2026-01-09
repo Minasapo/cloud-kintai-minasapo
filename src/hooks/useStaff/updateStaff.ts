@@ -9,7 +9,6 @@ import { GraphQLResult } from "aws-amplify/api";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 export default async function updateStaff(input: UpdateStaffInput) {
-  console.log({ input });
   const response = (await graphqlClient.graphql({
     query: mutations.updateStaff,
     variables: { input },

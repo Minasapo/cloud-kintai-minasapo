@@ -20,13 +20,13 @@ import {
   WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
-import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import {
@@ -34,10 +34,12 @@ import {
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@/entities/attendance/api/attendanceApi";
+import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -49,6 +51,8 @@ import {
 } from "@/lib/workflowLabels";
 
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
+
+const logger = createLogger("AdminWorkflowDetail");
 
 export default function AdminWorkflowDetail() {
   const { id } = useParams() as { id?: string };
@@ -109,9 +113,9 @@ export default function AdminWorkflowDetail() {
     return { mode: "any", items: ["管理者全員"] };
   }, [staffs, workflow]);
 
-  const applicationDate =
-    formatDateSlash(workflow?.overTimeDetails?.date) ||
-    formatDateSlash(isoDateFromTimestamp(workflow?.createdAt));
+  const applicationDate = formatDateSlash(
+    isoDateFromTimestamp(workflow?.createdAt)
+  );
 
   const approvalSteps = useMemo(() => {
     const base = [
@@ -380,9 +384,9 @@ export default function AdminWorkflowDetail() {
       setMessages(commentsToMessages(updated.comments || []));
       dispatch(setSnackbarSuccess("コメントを送信しました"));
     } catch (err) {
-      console.error(err);
-      const msg = err instanceof Error ? err.message : String(err);
-      dispatch(setSnackbarError(msg));
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Failed to send comment:", message);
+      dispatch(setSnackbarError(message));
       // remove optimistic message on error
       setMessages((m) => m.filter((mm) => mm.id !== optimisticMsg.id));
     } finally {
@@ -614,7 +618,11 @@ export default function AdminWorkflowDetail() {
             setSnackbarSuccess("有給休暇申請を承認し、勤怠データを更新しました")
           );
         } catch (paidLeaveError) {
-          console.error("❌ 有給勤怠の処理に失敗:", paidLeaveError);
+          const message =
+            paidLeaveError instanceof Error
+              ? paidLeaveError.message
+              : "有給勤怠の処理に失敗しました";
+          logger.error("Paid leave attendance processing failed:", message);
           dispatch(
             setSnackbarSuccess(
               "有給申請を承認しました（勤怠データの処理に失敗）"
@@ -895,13 +903,17 @@ export default function AdminWorkflowDetail() {
             );
           }
         } catch (attendanceError) {
-          console.error("❌ 勤怠データの処理に失敗しました:", attendanceError);
-          // エラーの詳細をログ出力
+          // Attendance processing error - log details and continue
           if (attendanceError instanceof Error) {
-            console.error("エラーメッセージ:", attendanceError.message);
-            console.error("スタックトレース:", attendanceError.stack);
+            logger.error("Attendance data processing failed:", {
+              message: attendanceError.message,
+              stack: attendanceError.stack,
+            });
+          } else {
+            logger.error("Attendance data processing failed:", attendanceError);
           }
-          // GraphQL エラー構造を確認
+
+          // Try to extract GraphQL error details
           const attendanceApiError = (() => {
             if (
               typeof attendanceError === "object" &&
@@ -925,15 +937,15 @@ export default function AdminWorkflowDetail() {
             attendanceApiError?.data?.data?.createAttendance?.errors ||
             attendanceApiError?.data?.data?.updateAttendance?.errors;
           const gqlError = attendanceApiError?.graphQLErrors?.[0];
+
           if (errorData) {
-            console.error("GraphQL バリデーションエラー:", errorData);
+            logger.warn("GraphQL validation error:", errorData);
           }
           if (gqlError) {
-            console.error("GraphQL エラーメッセージ:", gqlError.message);
-          } else {
-            console.error("エラーオブジェクト:", attendanceError);
+            logger.warn("GraphQL error message:", gqlError.message);
           }
-          // 勤怠処理エラーは承認処理自体は成功しているので警告のみ
+
+          // Attendance processing error is non-critical, show partial success message
           dispatch(
             setSnackbarSuccess(
               "打刻修正を承認しました（勤怠データの処理に失敗）"
@@ -958,12 +970,12 @@ export default function AdminWorkflowDetail() {
           }),
         });
       } catch (err) {
-        console.error("Failed to create operation log for approve:", err);
+        logger.error("Failed to create operation log for approve:", err);
       }
     } catch (err) {
-      console.error(err);
-      const msg = err instanceof Error ? err.message : String(err);
-      dispatch(setSnackbarError(msg));
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Workflow approval failed:", message);
+      dispatch(setSnackbarError(message));
     }
   };
 
@@ -1071,12 +1083,12 @@ export default function AdminWorkflowDetail() {
           }),
         });
       } catch (err) {
-        console.error("Failed to create operation log for reject:", err);
+        logger.error("Failed to create operation log for reject:", err);
       }
     } catch (err) {
-      console.error(err);
-      const msg = err instanceof Error ? err.message : String(err);
-      dispatch(setSnackbarError(msg));
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Workflow rejection failed:", message);
+      dispatch(setSnackbarError(message));
     }
   };
 
@@ -1144,160 +1156,17 @@ export default function AdminWorkflowDetail() {
         {!loading && !error && (
           <Grid container spacing={2}>
             <Grid item xs={12} sm={7}>
-              <Grid
-                container
-                rowSpacing={2}
-                columnSpacing={1}
-                alignItems="center"
-              >
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    ID
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{workflow?.id ?? id}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    種別
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{getWorkflowCategoryLabel(workflow)}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    申請者
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{staffName}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    申請日
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{applicationDate}</Typography>
-                </Grid>
-
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    ステータス
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <StatusChip status={workflow?.status} />
-                </Grid>
-
-                {workflow?.category === WorkflowCategory.OVERTIME && (
-                  <>
-                    <Grid item xs={12} sm={3}>
-                      <Typography variant="body2" color="text.secondary">
-                        残業予定日
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={9}>
-                      <Typography>
-                        {formatDateSlash(workflow?.overTimeDetails?.date)}
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12} sm={3}>
-                      <Typography variant="body2" color="text.secondary">
-                        残業予定時間
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={9}>
-                      <Typography>
-                        {workflow?.overTimeDetails?.startTime} -{" "}
-                        {workflow?.overTimeDetails?.endTime}
-                      </Typography>
-                    </Grid>
-                  </>
-                )}
-
-                <Grid item xs={12}>
-                  <Box sx={{ mt: 3 }}>
-                    <Typography variant="h6" sx={{ mb: 1 }}>
-                      承認フロー
-                    </Typography>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Stack spacing={2}>
-                        {approvalSteps.map((s, idx) => {
-                          const isApplicant = s.role === "申請者";
-                          const active =
-                            s.state === "承認済み"
-                              ? "done"
-                              : s.state === "未承認"
-                              ? "pending"
-                              : "";
-                          return (
-                            <Box
-                              key={s.id}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 2,
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 2,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    bgcolor: isApplicant
-                                      ? "grey.300"
-                                      : active === "done"
-                                      ? "success.main"
-                                      : "primary.main",
-                                    color: "common.white",
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {idx === 0 ? "申" : idx}
-                                </Box>
-                                <Box>
-                                  <Typography sx={{ fontWeight: 700 }}>
-                                    {s.name}
-                                  </Typography>
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                  >
-                                    {s.role} {s.date ? `・${s.date}` : ""}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Box sx={{ flexGrow: 1 }} />
-                              {!isApplicant && (
-                                <Box>
-                                  <StatusChip status={s.state} />
-                                </Box>
-                              )}
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                    </Paper>
-                  </Box>
-                </Grid>
-              </Grid>
+              <WorkflowMetadataPanel
+                workflowId={workflow?.id ?? undefined}
+                fallbackId={id}
+                category={workflow?.category ?? null}
+                categoryLabel={getWorkflowCategoryLabel(workflow)}
+                staffName={staffName}
+                applicationDate={applicationDate}
+                status={workflow?.status ?? null}
+                overTimeDetails={workflow?.overTimeDetails ?? null}
+                approvalSteps={approvalSteps}
+              />
             </Grid>
 
             <Grid item xs={12} sm={5}>
@@ -1307,7 +1176,11 @@ export default function AdminWorkflowDetail() {
                 </Typography>
                 <Paper
                   variant="outlined"
-                  sx={{ p: 2, maxHeight: 480, overflow: "auto" }}
+                  sx={{
+                    p: 2,
+                    maxHeight: PANEL_HEIGHTS.SCROLLABLE_MAX,
+                    overflow: "auto",
+                  }}
                 >
                   <Stack spacing={2}>
                     {messages.map((m) => {

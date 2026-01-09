@@ -1,6 +1,3 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 import {
   Box,
   Button,
@@ -21,6 +18,8 @@ import {
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
@@ -33,33 +32,107 @@ import {
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
-import useStaffs, { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { StaffType, useStaffs } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { parseTimeToISO } from "@/shared/lib/time";
-import { PageSection, dashboardInnerSurfaceSx } from "@/shared/ui/layout";
-import { designTokenVar } from "@/shared/designSystem";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import { designTokenVar } from "@/shared/designSystem";
+import { parseTimeToISO } from "@/shared/lib/time";
+import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+
+const logger = createLogger("NewWorkflowPage");
+
+/**
+ * 今日の日付をスラッシュ区切り形式（YYYY/MM/DD）で取得
+ */
+const getTodayAsSlash = (): string => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}/${m}/${day}`;
+};
+
+/**
+ * スタッフの承認者設定に基づいて承認ステップを生成
+ */
+const generateApprovalSteps = (
+  staff: StaffType,
+  staffs: StaffType[]
+): {
+  approvalSteps: ApprovalStepInput[];
+  assignedApproverStaffIds: string[];
+} => {
+  const approvalSteps: ApprovalStepInput[] = [];
+  const assignedApproverStaffIds: string[] = [];
+
+  if (staff?.approverSetting === ApproverSettingMode.SINGLE) {
+    const target = staff.approverSingle;
+    if (target) {
+      const mapped = staffs.find(
+        (s) => s.cognitoUserId === target || s.id === target
+      );
+      const approverId = mapped ? mapped.id : target;
+      approvalSteps.push({
+        id: `s-0-${Date.now()}`,
+        approverStaffId: approverId,
+        decisionStatus: ApprovalStatus.PENDING,
+        approverComment: null,
+        decisionTimestamp: null,
+        stepOrder: 0,
+      });
+      assignedApproverStaffIds.push(approverId);
+    }
+  } else if (staff?.approverSetting === ApproverSettingMode.MULTIPLE) {
+    const multiple = staff.approverMultiple || [];
+    multiple.forEach((aid, idx) => {
+      if (!aid) return;
+      const mapped = staffs.find(
+        (s) => s.cognitoUserId === aid || s.id === aid
+      );
+      const approverId = mapped ? mapped.id : aid;
+      approvalSteps.push({
+        id: `s-${idx}-${Date.now()}`,
+        approverStaffId: approverId,
+        decisionStatus: ApprovalStatus.PENDING,
+        approverComment: null,
+        decisionTimestamp: null,
+        stepOrder: idx,
+      });
+      assignedApproverStaffIds.push(approverId);
+    });
+  } else if (staff?.approverSetting === ApproverSettingMode.ADMINS) {
+    approvalSteps.push({
+      id: `s-admin-${Date.now()}`,
+      approverStaffId: "ADMINS",
+      decisionStatus: ApprovalStatus.PENDING,
+      approverComment: null,
+      decisionTimestamp: null,
+      stepOrder: 0,
+    });
+    assignedApproverStaffIds.push("ADMINS");
+  }
+
+  return { approvalSteps, assignedApproverStaffIds };
+};
 
 export default function NewWorkflowPage() {
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
   const navigate = useNavigate();
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
-  const [applicationDate, setApplicationDate] = useState(() => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}/${m}/${day}`;
-  });
+  const [applicationDate, setApplicationDate] = useState(() =>
+    getTodayAsSlash()
+  );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [dateError, setDateError] = useState("");
   const [absenceDate, setAbsenceDate] = useState("");
   const [absenceDateError, setAbsenceDateError] = useState("");
+  const [absenceReason, setAbsenceReason] = useState("");
   const [paidReason, setPaidReason] = useState("");
   const [overtimeStart, setOvertimeStart] = useState<string | null>(null);
   const [overtimeEnd, setOvertimeEnd] = useState<string | null>(null);
@@ -75,28 +148,73 @@ export default function NewWorkflowPage() {
   const dispatch = useAppDispatchV2();
   const { getStartTime, getEndTime } = useAppConfig();
 
-  useEffect(() => {
-    if (!cognitoUser?.id) return;
-    const match = staffs.find((s) => s.cognitoUserId === cognitoUser.id);
-    setStaff(match || null);
+  // Derived state: find matching staff from staffs
+  const derivedStaff = useMemo(() => {
+    if (!cognitoUser?.id) return undefined;
+    return staffs.find((s) => s.cognitoUserId === cognitoUser.id) || null;
   }, [staffs, cognitoUser]);
+
+  // Update staff state when derived staff changes
+  useEffect(() => {
+    setStaff(derivedStaff);
+  }, [derivedStaff]);
 
   // 申請日は常に当日で自動設定する（スラッシュ区切り: YYYY/MM/DD）
   useEffect(() => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    setApplicationDate(`${y}/${m}/${day}`);
+    setApplicationDate(getTodayAsSlash());
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const extractErrorMessage = (err: unknown): string => {
+    if (err instanceof Error) {
+      return err.message;
+    }
+
+    if (typeof err === "string") {
+      return err;
+    }
+
+    if (typeof err === "object" && err !== null) {
+      // RTK Query error format
+      if ("data" in err && typeof err.data === "object" && err.data !== null) {
+        const data = err.data as Record<string, unknown>;
+        if ("message" in data && typeof data.message === "string") {
+          return data.message;
+        }
+        if (
+          "errors" in data &&
+          Array.isArray(data.errors) &&
+          data.errors.length > 0
+        ) {
+          const firstError = data.errors[0];
+          if (
+            typeof firstError === "object" &&
+            firstError !== null &&
+            "message" in firstError
+          ) {
+            return String(firstError.message);
+          }
+        }
+      }
+      if ("message" in err && typeof err.message === "string") {
+        return err.message;
+      }
+      if ("error" in err && typeof err.error === "string") {
+        return err.error;
+      }
+    }
+
+    return "ワークフローの作成に失敗しました。";
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formState: WorkflowFormState = {
       categoryLabel: category,
       startDate,
       endDate,
       absenceDate,
+      paidReason,
+      absenceReason,
       overtimeDate,
       overtimeStart,
       overtimeEnd,
@@ -116,11 +234,7 @@ export default function NewWorkflowPage() {
     }
 
     // 送信時の申請日は今日に固定する
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, "0");
-    const d = String(today.getDate()).padStart(2, "0");
-    const todaySlash = `${y}/${m}/${d}`;
+    const todaySlash = getTodayAsSlash();
     setApplicationDate(todaySlash);
 
     const input = buildCreateWorkflowInput({
@@ -132,56 +246,10 @@ export default function NewWorkflowPage() {
 
     // --- 申請時に承認ステップをスナップショットとして保存する ---
     // staff の approverSetting を参照して approvalSteps / assignedApproverStaffIds を生成
-    const approvalSteps: ApprovalStepInput[] = [];
-    const assignedApproverStaffIds: Array<string> = [];
-
-    if (staff?.approverSetting === ApproverSettingMode.SINGLE) {
-      const target = staff.approverSingle;
-      if (target) {
-        const mapped = staffs.find(
-          (s) => s.cognitoUserId === target || s.id === target
-        );
-        const approverId = mapped ? mapped.id : target;
-        approvalSteps.push({
-          id: `s-0-${Date.now()}`,
-          approverStaffId: approverId,
-          decisionStatus: ApprovalStatus.PENDING,
-          approverComment: null,
-          decisionTimestamp: null,
-          stepOrder: 0,
-        });
-        assignedApproverStaffIds.push(approverId);
-      }
-    } else if (staff?.approverSetting === ApproverSettingMode.MULTIPLE) {
-      const multiple = staff.approverMultiple || [];
-      multiple.forEach((aid, idx) => {
-        if (!aid) return;
-        const mapped = staffs.find(
-          (s) => s.cognitoUserId === aid || s.id === aid
-        );
-        const approverId = mapped ? mapped.id : aid;
-        approvalSteps.push({
-          id: `s-${idx}-${Date.now()}`,
-          approverStaffId: approverId,
-          decisionStatus: ApprovalStatus.PENDING,
-          approverComment: null,
-          decisionTimestamp: null,
-          stepOrder: idx,
-        });
-        assignedApproverStaffIds.push(approverId);
-      });
-    } else if (staff?.approverSetting === ApproverSettingMode.ADMINS) {
-      // 管理者全員モードは特別扱いとして 'ADMINS' を approverStaffId に入れておく
-      approvalSteps.push({
-        id: `s-admin-${Date.now()}`,
-        approverStaffId: "ADMINS",
-        decisionStatus: ApprovalStatus.PENDING,
-        approverComment: null,
-        decisionTimestamp: null,
-        stepOrder: 0,
-      });
-      assignedApproverStaffIds.push("ADMINS");
-    }
+    const { approvalSteps, assignedApproverStaffIds } = generateApprovalSteps(
+      staff,
+      staffs
+    );
 
     if (approvalSteps.length > 0) {
       input.approvalSteps = approvalSteps;
@@ -203,53 +271,16 @@ export default function NewWorkflowPage() {
       }
     }
 
-    (async () => {
-      try {
-        await createWorkflow(input);
-        dispatch(setSnackbarSuccess("ワークフローを作成しました。"));
-        navigate("/workflow", { replace: true });
-      } catch (err) {
-        console.error("Workflow creation error:", err);
-        let errorMessage = "ワークフローの作成に失敗しました。";
-
-        if (err instanceof Error) {
-          errorMessage = err.message;
-        } else if (typeof err === "object" && err !== null) {
-          // RTK Query error format
-          if (
-            "data" in err &&
-            typeof err.data === "object" &&
-            err.data !== null
-          ) {
-            const data = err.data as Record<string, unknown>;
-            if ("message" in data && typeof data.message === "string") {
-              errorMessage = data.message;
-            } else if (
-              "errors" in data &&
-              Array.isArray(data.errors) &&
-              data.errors.length > 0
-            ) {
-              const firstError = data.errors[0];
-              if (
-                typeof firstError === "object" &&
-                firstError !== null &&
-                "message" in firstError
-              ) {
-                errorMessage = String(firstError.message);
-              }
-            }
-          } else if ("message" in err && typeof err.message === "string") {
-            errorMessage = err.message;
-          } else if ("error" in err && typeof err.error === "string") {
-            errorMessage = err.error;
-          }
-        } else if (typeof err === "string") {
-          errorMessage = err;
-        }
-
-        dispatch(setSnackbarError(errorMessage));
-      }
-    })();
+    try {
+      await createWorkflow(input);
+      dispatch(setSnackbarSuccess("ワークフローを作成しました。"));
+      navigate("/workflow", { replace: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Workflow creation failed:", message);
+      const errorMessage = extractErrorMessage(err);
+      dispatch(setSnackbarError(errorMessage));
+    }
   };
 
   const handleDraftToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -387,6 +418,8 @@ export default function NewWorkflowPage() {
               absenceDate={absenceDate}
               setAbsenceDate={setAbsenceDate}
               absenceDateError={absenceDateError}
+              absenceReason={absenceReason}
+              setAbsenceReason={setAbsenceReason}
               overtimeDate={overtimeDate}
               setOvertimeDate={setOvertimeDate}
               overtimeDateError={overtimeDateError}

@@ -1,4 +1,3 @@
-export * from "./tokens";
 export {
   applyDesignTokenCssVariables,
   bootstrapDesignSystem,
@@ -7,3 +6,4 @@ export {
   getDesignTokenCssVariableEntries,
   getDesignTokenVarName,
 } from "./cssVariables";
+export * from "./tokens";
