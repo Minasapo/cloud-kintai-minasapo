@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import Button from "@mui/material/Button";
+import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
   title: "UI Components/Button",
@@ -15,7 +15,15 @@ const meta = {
     },
     color: {
       control: "select",
-      options: ["inherit", "primary", "secondary", "error", "warning", "info", "success"],
+      options: [
+        "inherit",
+        "primary",
+        "secondary",
+        "error",
+        "warning",
+        "info",
+        "success",
+      ],
     },
     size: {
       control: "select",

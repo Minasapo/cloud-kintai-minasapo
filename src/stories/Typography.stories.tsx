@@ -1,5 +1,5 @@
+import { Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { Box, Stack, Typography } from "@mui/material";
 
 const meta = {
   title: "Shared UI/Typography",
@@ -11,11 +11,27 @@ const meta = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["h1", "h2", "h3", "h4", "h5", "h6", "body1", "body2", "caption"],
+      options: [
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "body1",
+        "body2",
+        "caption",
+      ],
     },
     color: {
       control: "select",
-      options: ["primary", "secondary", "error", "textPrimary", "textSecondary"],
+      options: [
+        "primary",
+        "secondary",
+        "error",
+        "textPrimary",
+        "textSecondary",
+      ],
     },
   },
 } satisfies Meta<typeof Typography>;
@@ -40,7 +56,8 @@ export const Heading2: Story = {
 export const Body1: Story = {
   args: {
     variant: "body1",
-    children: "このは本文テキストです。通常のテキストコンテンツに使用されます。",
+    children:
+      "このは本文テキストです。通常のテキストコンテンツに使用されます。",
   },
 };
 
@@ -64,7 +81,9 @@ export const AllTypographies: Story = {
       <Typography variant="h1">Heading 1</Typography>
       <Typography variant="h2">Heading 2</Typography>
       <Typography variant="h3">Heading 3</Typography>
-      <Typography variant="body1">Body 1 - これはデフォルトの本文テキストです</Typography>
+      <Typography variant="body1">
+        Body 1 - これはデフォルトの本文テキストです
+      </Typography>
       <Typography variant="body2">Body 2 - より小さい本文テキスト</Typography>
       <Typography variant="caption">Caption - キャプションテキスト</Typography>
     </Stack>
