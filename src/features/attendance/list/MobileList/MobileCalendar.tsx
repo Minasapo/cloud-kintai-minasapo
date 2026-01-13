@@ -2,28 +2,34 @@
  * モバイル用カレンダー表示コンポーネント
  * スタッフの勤怠情報をカレンダー形式で表示する
  */
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
+  alpha,
   Box,
   Button,
+  Chip,
   IconButton,
   Stack,
   styled,
   Typography,
+  useTheme,
 } from "@mui/material";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
   Attendance,
+  CloseDate,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceStatus } from "@/lib/AttendanceState";
+
+import { getStatus, isHolidayLike } from "./attendanceStatusUtils";
 
 const CalendarContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(1),
@@ -61,10 +67,11 @@ interface CalendarDayProps {
 
 interface CalendarDayCellFullProps extends CalendarDayProps {
   isSelected?: boolean;
+  termColor?: string;
 }
 
 const CalendarDayCell = styled(Box)<CalendarDayCellFullProps>(
-  ({ theme, isCurrentMonth, hasError, status, isSelected }) => {
+  ({ theme, isCurrentMonth, hasError, status, isSelected, termColor }) => {
     let backgroundColor = isCurrentMonth
       ? theme.palette.background.paper
       : theme.palette.grey[50];
@@ -74,14 +81,14 @@ const CalendarDayCell = styled(Box)<CalendarDayCellFullProps>(
       : theme.palette.text.secondary;
 
     if (status === AttendanceStatus.Error || hasError) {
-      backgroundColor = theme.palette.error.light;
+      // エラー系：枠線なし、テキスト色のみ
       color = theme.palette.error.dark;
-      borderColor = theme.palette.error.main;
     } else if (status === AttendanceStatus.Late) {
-      backgroundColor = theme.palette.warning.light;
-      color = theme.palette.warning.dark;
+      // 遅刻系：背景色なし、枠線のみ
       borderColor = theme.palette.warning.main;
+      color = theme.palette.warning.dark;
     } else if (status === AttendanceStatus.None) {
+      // ステータスなし：背景色なし
       backgroundColor = theme.palette.grey[200];
       color = theme.palette.text.secondary;
     }
@@ -91,12 +98,14 @@ const CalendarDayCell = styled(Box)<CalendarDayCellFullProps>(
     }
 
     return {
+      position: "relative",
       minHeight: "48px",
       border: isSelected
         ? `2px solid ${borderColor}`
         : `1px solid ${borderColor}`,
       borderRadius: "4px",
       padding: "2px",
+      paddingBottom: termColor ? "6px" : "2px",
       display: "flex",
       flexDirection: "column",
       justifyContent: "flex-start",
@@ -106,6 +115,19 @@ const CalendarDayCell = styled(Box)<CalendarDayCellFullProps>(
       color,
       transition: "all 0.2s ease",
       overflow: "hidden",
+      // 集計期間の色を下側の横帯として表示
+      ...(termColor && {
+        "::after": {
+          content: '""',
+          position: "absolute",
+          bottom: "2px",
+          left: "2px",
+          right: "2px",
+          height: "4px",
+          backgroundColor: termColor,
+          borderRadius: "2px",
+        },
+      }),
       "&:hover": isCurrentMonth
         ? {
             boxShadow: theme.shadows[1],
@@ -133,36 +155,81 @@ const HolidayName = styled(Typography)({
   marginBottom: "2px",
 });
 
-const TimeDisplay = styled(Typography)({
-  fontSize: "0.5rem",
-  lineHeight: 1.2,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-});
+const statusLabelMap: Record<AttendanceStatus, string> = {
+  [AttendanceStatus.Ok]: "OK",
+  [AttendanceStatus.Error]: "要確認",
+  [AttendanceStatus.Requesting]: "申請中",
+  [AttendanceStatus.Late]: "遅刻",
+  [AttendanceStatus.Working]: "勤務中",
+  [AttendanceStatus.None]: "",
+};
 
-const StatusIndicator = styled(Box)<{ status?: AttendanceStatus }>(
-  ({ theme, status }) => ({
-    width: "3px",
-    height: "3px",
-    borderRadius: "50%",
-    flexShrink: 0,
-    backgroundColor: (() => {
-      switch (status) {
-        case AttendanceStatus.Error:
-          return theme.palette.error.main;
-        case AttendanceStatus.Late:
-          return theme.palette.warning.main;
-        case AttendanceStatus.None:
-          return theme.palette.grey[400];
-        case AttendanceStatus.Ok:
-          return theme.palette.success.main;
-        default:
-          return theme.palette.grey[300];
-      }
-    })(),
-  })
-);
+const statusTextColorMap: Partial<Record<AttendanceStatus, string>> = {
+  [AttendanceStatus.Ok]: "success.main",
+  [AttendanceStatus.Error]: "error.main",
+  [AttendanceStatus.Late]: "warning.main",
+  [AttendanceStatus.Requesting]: "info.main",
+  [AttendanceStatus.Working]: "info.main",
+};
+
+type MonthTerm = {
+  start: Dayjs;
+  end: Dayjs;
+  source: "closeDate" | "fallback";
+  label: string;
+  color: string;
+};
+
+const resolveMonthlyTerms = (
+  currentMonth: Dayjs,
+  closeDates: CloseDate[] = [],
+  palette: string[]
+): MonthTerm[] => {
+  const monthStart = currentMonth.startOf("month");
+  const monthEnd = currentMonth.endOf("month");
+
+  const fallback: MonthTerm = {
+    start: monthStart,
+    end: monthEnd,
+    source: "fallback",
+    label: `${monthStart.format(
+      AttendanceDate.DisplayFormat
+    )} 〜 ${monthEnd.format(AttendanceDate.DisplayFormat)}`,
+    color: palette[0] ?? "#90CAF9",
+  };
+
+  if (closeDates.length === 0) return [fallback];
+
+  const terms = closeDates
+    .map((item) => {
+      const start = dayjs(item.startDate);
+      const end = dayjs(item.endDate);
+      return { start, end };
+    })
+    .filter(({ start, end }) => {
+      return (
+        start.isValid() &&
+        end.isValid() &&
+        !end.isBefore(monthStart, "day") &&
+        !start.isAfter(monthEnd, "day")
+      );
+    })
+    .sort((a, b) => a.start.valueOf() - b.start.valueOf())
+    .map(
+      ({ start, end }, index): MonthTerm => ({
+        start: start.startOf("day"),
+        end: end.startOf("day"),
+        source: "closeDate",
+        label: `${start.format(AttendanceDate.DisplayFormat)} 〜 ${end.format(
+          AttendanceDate.DisplayFormat
+        )}`,
+        color: palette[index % palette.length] ?? palette[0] ?? "#90CAF9",
+      })
+    );
+
+  if (terms.length === 0) return [fallback];
+  return terms;
+};
 
 interface MobileCalendarProps {
   attendances: Attendance[];
@@ -171,6 +238,7 @@ interface MobileCalendarProps {
   staff: Staff | null | undefined;
   currentMonth: Dayjs;
   onMonthChange?: (newMonth: Dayjs) => void;
+  closeDates?: CloseDate[];
 }
 
 export default function MobileCalendar({
@@ -180,7 +248,9 @@ export default function MobileCalendar({
   staff,
   currentMonth,
   onMonthChange,
+  closeDates,
 }: MobileCalendarProps) {
+  const theme = useTheme();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<string | null>(() => {
     const today = dayjs();
@@ -215,6 +285,26 @@ export default function MobileCalendar({
     const dateKey = dayjs(a.workDate).format("YYYY-MM-DD");
     attendanceMap.set(dateKey, a);
   });
+
+  const termPalette = useMemo(
+    () => [
+      theme.palette.info.main,
+      theme.palette.success.main,
+      theme.palette.warning.main,
+      theme.palette.secondary.main,
+    ],
+    [
+      theme.palette.info.main,
+      theme.palette.success.main,
+      theme.palette.warning.main,
+      theme.palette.secondary.main,
+    ]
+  );
+
+  const monthlyTerms = useMemo(
+    () => resolveMonthlyTerms(currentMonth, closeDates ?? [], termPalette),
+    [closeDates, currentMonth, termPalette]
+  );
 
   // カレンダーの日付配列を生成
   const days: { date: Dayjs; isCurrentMonth: boolean }[] = [];
@@ -264,15 +354,15 @@ export default function MobileCalendar({
   const selectedAttendance = selectedDate
     ? attendanceMap.get(selectedDate)
     : null;
-  const selectedDateStatus =
-    selectedAttendance && staff
-      ? new AttendanceState(
-          staff,
-          selectedAttendance,
-          holidayCalendars,
-          companyHolidayCalendars
-        ).get()
-      : undefined;
+  const selectedDateStatus = selectedDate
+    ? getStatus(
+        selectedAttendance ?? undefined,
+        staff,
+        holidayCalendars,
+        companyHolidayCalendars,
+        dayjs(selectedDate)
+      )
+    : AttendanceStatus.None;
 
   const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -318,6 +408,33 @@ export default function MobileCalendar({
         </Stack>
       </Stack>
 
+      {monthlyTerms.length > 0 && (
+        <Stack
+          direction="row"
+          spacing={0.5}
+          flexWrap="wrap"
+          useFlexGap
+          sx={{ mb: 0.5 }}
+        >
+          {monthlyTerms.map((term, index) => (
+            <Chip
+              key={`${term.label}-${index}`}
+              size="small"
+              label={term.label}
+              sx={{
+                bgcolor: alpha(term.color, 0.1),
+                color: term.color,
+                borderColor: alpha(term.color, 0.4),
+                borderStyle: "solid",
+                borderWidth: 1,
+                fontSize: "0.625rem",
+                height: 22,
+              }}
+            />
+          ))}
+        </Stack>
+      )}
+
       <DayOfWeekHeader>
         {weekDays.map((day, index) => (
           <DayOfWeekCell key={`dow-${index}`}>{day}</DayOfWeekCell>
@@ -330,23 +447,35 @@ export default function MobileCalendar({
           const attendance = attendanceMap.get(dateKey);
           const holidayInfo = getHolidayInfo(day.date);
 
-          let status: AttendanceStatus | undefined;
-          let hasError = false;
+          const status = getStatus(
+            attendance,
+            staff,
+            holidayCalendars,
+            companyHolidayCalendars,
+            day.date
+          );
+          const hasError =
+            (Array.isArray(attendance?.systemComments) &&
+              attendance.systemComments.length > 0) ||
+            status === AttendanceStatus.Error ||
+            status === AttendanceStatus.Late;
 
-          if (attendance && staff) {
-            status = new AttendanceState(
-              staff,
-              attendance,
-              holidayCalendars,
-              companyHolidayCalendars
-            ).get();
-
-            hasError =
-              (Array.isArray(attendance.systemComments) &&
-                attendance.systemComments.length > 0) ||
-              status === AttendanceStatus.Error ||
-              status === AttendanceStatus.Late;
-          }
+          const isWeekend = [0, 6].includes(day.date.day());
+          const holidayLike = isHolidayLike(
+            day.date,
+            staff,
+            holidayCalendars,
+            companyHolidayCalendars
+          );
+          const termsForDay = monthlyTerms.filter(
+            (term) =>
+              !day.date.isBefore(term.start, "day") &&
+              !day.date.isAfter(term.end, "day")
+          );
+          const allowTermHighlight =
+            staff?.workType === "shift" ? true : !holidayLike && !isWeekend;
+          const primaryTerm = allowTermHighlight ? termsForDay[0] : undefined;
+          const termColor = primaryTerm?.color;
 
           return (
             <CalendarDayCell
@@ -355,23 +484,24 @@ export default function MobileCalendar({
               hasError={hasError}
               status={status}
               isSelected={selectedDate === dateKey}
+              termColor={termColor}
               onClick={() => day.isCurrentMonth && handleDateClick(day.date)}
             >
               <Stack spacing={0.25} sx={{ height: "100%" }}>
                 <DayNumber>{day.date.format("D")}</DayNumber>
-                {holidayInfo && <HolidayName>{holidayInfo.name}</HolidayName>}
-                {attendance && (
-                  <Stack direction="row" spacing={0.25} alignItems="center">
-                    <StatusIndicator status={status} />
-                    <TimeDisplay>
-                      {attendance.startTime && attendance.endTime
-                        ? `${dayjs(attendance.startTime).format(
-                            "HH:mm"
-                          )}-${dayjs(attendance.endTime).format("HH:mm")}`
-                        : "-"}
-                    </TimeDisplay>
-                  </Stack>
+                {status !== undefined && status !== AttendanceStatus.None && (
+                  <Typography
+                    sx={{
+                      fontSize: "0.6rem",
+                      fontWeight: "bold",
+                      color: statusTextColorMap[status] ?? "text.secondary",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {statusLabelMap[status]}
+                  </Typography>
                 )}
+                {holidayInfo && <HolidayName>{holidayInfo.name}</HolidayName>}
               </Stack>
             </CalendarDayCell>
           );

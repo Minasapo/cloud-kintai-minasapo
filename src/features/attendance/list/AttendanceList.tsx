@@ -322,6 +322,7 @@ export default function AttendanceTable() {
         staff={staff}
         currentMonth={currentMonth}
         onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
+        closeDates={closeDates}
       />
     </Stack>
   );
