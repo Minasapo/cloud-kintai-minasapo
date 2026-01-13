@@ -145,7 +145,7 @@ export default function NewWorkflowPage() {
   const { staffs } = useStaffs();
   const { create: createWorkflow } = useWorkflows();
   const dispatch = useAppDispatchV2();
-  const { getStartTime, getEndTime } = useAppConfig();
+  const { getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
 
   // Derived state: find matching staff from staffs
   const staff = useMemo(() => {
@@ -343,13 +343,9 @@ export default function NewWorkflowPage() {
                 </MenuItem>
                 <ListSubheader>勤怠</ListSubheader>
                 <MenuItem value="有給休暇申請">有給休暇申請</MenuItem>
-                <MenuItem
-                  value="欠勤申請"
-                  disabled
-                  title="現在は残業申請のみ作成できます"
-                >
-                  欠勤申請
-                </MenuItem>
+                {getAbsentEnabled() && (
+                  <MenuItem value="欠勤申請">欠勤申請</MenuItem>
+                )}
                 <MenuItem value={CLOCK_CORRECTION_LABEL}>
                   {CLOCK_CORRECTION_LABEL}
                 </MenuItem>
