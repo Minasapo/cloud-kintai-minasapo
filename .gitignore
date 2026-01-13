@@ -12,6 +12,10 @@ coverage-summary.json
 *.coverage.json
 .nyc_output
 
+# storybook
+/storybook-static
+.storybook-presets
+
 # production
 /build
 
