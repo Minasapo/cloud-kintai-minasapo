@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
+import type { StoryObj } from "@storybook/react";
 
 const meta = {
   title: "Widgets/Layout/Header",
@@ -7,7 +7,8 @@ const meta = {
     layout: "fullscreen",
     docs: {
       description: {
-        component: "アプリケーション共通ヘッダー。認証情報とテーマ設定に依存するため、Storybookでは基本的なレイアウトのみを表示します。",
+        component:
+          "アプリケーション共通ヘッダー。認証情報とテーマ設定に依存するため、Storybookでは基本的なレイアウトのみを表示します。",
       },
     },
   },

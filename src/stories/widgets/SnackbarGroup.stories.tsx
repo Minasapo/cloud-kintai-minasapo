@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import { Box, Container, Typography } from "@mui/material";
+import type { StoryObj } from "@storybook/react";
 
 const meta = {
   title: "Widgets/Feedback/SnackbarGroup",
@@ -7,7 +7,8 @@ const meta = {
     layout: "fullscreen",
     docs: {
       description: {
-        component: "Redux ベースのグローバル Snackbar スタック。Redux store に依存するため、Storybookでは情報のみ表示します。",
+        component:
+          "Redux ベースのグローバル Snackbar スタック。Redux store に依存するため、Storybookでは情報のみ表示します。",
       },
     },
   },

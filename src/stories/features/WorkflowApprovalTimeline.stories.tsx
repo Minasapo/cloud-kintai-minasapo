@@ -1,7 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Box, Stack, Typography } from "@mui/material";
-import WorkflowApprovalTimeline from "@features/workflow/approval-flow/ui/WorkflowApprovalTimeline";
 import type { WorkflowApprovalStepView } from "@features/workflow/approval-flow/types";
+import WorkflowApprovalTimeline from "@features/workflow/approval-flow/ui/WorkflowApprovalTimeline";
+import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
   title: "Features/Workflow/ApprovalTimeline",

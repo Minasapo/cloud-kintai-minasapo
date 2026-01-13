@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import { Box, Container, Typography } from "@mui/material";
+import type { StoryObj } from "@storybook/react";
 
 const meta = {
   title: "Features/Shift/RequestForm",
@@ -7,7 +7,8 @@ const meta = {
     layout: "fullscreen",
     docs: {
       description: {
-        component: "シフト希望申請フォーム。複雑な状態管理を含むため、Storybookでは基本的なレイアウトのみを表示します。",
+        component:
+          "シフト希望申請フォーム。複雑な状態管理を含むため、Storybookでは基本的なレイアウトのみを表示します。",
       },
     },
   },
@@ -42,7 +43,8 @@ export const Placeholder: Story = {
           </Typography>
         </Box>
         <Typography variant="caption" sx={{ mt: 2, display: "block" }}>
-          関連コンポーネント: src/features/shift/request-form/ui/ShiftRequestForm.tsx
+          関連コンポーネント:
+          src/features/shift/request-form/ui/ShiftRequestForm.tsx
         </Typography>
       </Box>
     </Container>

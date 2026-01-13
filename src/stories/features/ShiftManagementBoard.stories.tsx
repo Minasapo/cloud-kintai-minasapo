@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import { Box, Container, Typography } from "@mui/material";
+import type { StoryObj } from "@storybook/react";
 
 const meta = {
   title: "Features/Shift/ManagementBoard",
@@ -7,7 +7,8 @@ const meta = {
     layout: "fullscreen",
     docs: {
       description: {
-        component: "シフト管理ボード。カレンダービュー、ドラッグアンドドロップ、複雑な状態管理を含むため、Storybookでは基本的なレイアウトのみを表示します。",
+        component:
+          "シフト管理ボード。カレンダービュー、ドラッグアンドドロップ、複雑な状態管理を含むため、Storybookでは基本的なレイアウトのみを表示します。",
       },
     },
   },
@@ -50,7 +51,8 @@ export const Placeholder: Story = {
           </Box>
         </Box>
         <Typography variant="caption" sx={{ mt: 2, display: "block" }}>
-          関連コンポーネント: src/features/shift/management/ui/ShiftManagementBoard.tsx
+          関連コンポーネント:
+          src/features/shift/management/ui/ShiftManagementBoard.tsx
         </Typography>
       </Box>
     </Container>

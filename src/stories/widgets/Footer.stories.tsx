@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import { Box, Container, Typography } from "@mui/material";
+import type { StoryObj } from "@storybook/react";
 
 const meta = {
   title: "Widgets/Layout/Footer",
@@ -7,7 +7,8 @@ const meta = {
     layout: "fullscreen",
     docs: {
       description: {
-        component: "アプリケーション共通フッター。テーマ設定に依存するため、Storybookでは基本的なレイアウトのみを表示します。",
+        component:
+          "アプリケーション共通フッター。テーマ設定に依存するため、Storybookでは基本的なレイアウトのみを表示します。",
       },
     },
   },
@@ -29,7 +30,8 @@ export const Info: Story = {
           </Typography>
           <Box sx={{ p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
             <Typography variant="body2" color="textSecondary">
-              Footer は AppConfigContext に依存して、テーマカラーを動的に適用します。
+              Footer は AppConfigContext
+              に依存して、テーマカラーを動的に適用します。
             </Typography>
           </Box>
         </Box>
