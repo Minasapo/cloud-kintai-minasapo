@@ -17,3 +17,8 @@ npm run test:unit
 npm run test:e2e -- smoke-test --project=chromium-staff
 npm run test:e2e -- smoke-test --project=chromium-admin
 ```
+
+## コミットメッセージ
+
+コミットメッセージは英語で記述してください。
+例: "Add Storybook stories for HeaderBar component"

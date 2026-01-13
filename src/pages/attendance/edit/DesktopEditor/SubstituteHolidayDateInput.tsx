@@ -101,6 +101,10 @@ export function SubstituteHolidayDateInput() {
                 <DialogActions>
                   <Button
                     onClick={() => {
+                      if (pendingDate) {
+                        onChange(pendingDate.format(AttendanceDate.DataFormat));
+                      }
+
                       setConfirmOpen(false);
                       setPendingDate(null);
                     }}

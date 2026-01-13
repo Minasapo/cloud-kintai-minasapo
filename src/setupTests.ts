@@ -4,6 +4,13 @@
 // learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
 
+// Polyfill for TextEncoder/TextDecoder
+// Some modules like react-router require these APIs
+import { TextDecoder,TextEncoder } from "util";
+
+globalThis.TextEncoder = TextEncoder;
+globalThis.TextDecoder = TextDecoder as any;
+
 // Mock import.meta.env for Jest
 Object.defineProperty(globalThis, "import", {
   value: {
