@@ -320,6 +320,8 @@ export default function AttendanceTable() {
         holidayCalendars={holidayCalendars}
         companyHolidayCalendars={companyHolidayCalendars}
         staff={staff}
+        currentMonth={currentMonth}
+        onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
       />
     </Stack>
   );

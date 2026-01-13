@@ -1,29 +1,17 @@
 import "./styles.scss";
 
-import {
-  Alert,
-  AlertTitle,
-  Box,
-  styled,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Alert, AlertTitle, Box, styled } from "@mui/material";
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
+import { Dayjs } from "dayjs";
 
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-import { AttendanceGraph } from "@/pages/admin/AdminStaffAttendanceList/AttendanceGraph";
 
-import TableBodyRow from "./TableBodyRow";
+import MobileCalendar from "./MobileCalendar";
 
 const MobileBox = styled(Box)(({ theme }) => ({
   padding: "0px 0px 40px 0px",
@@ -37,11 +25,15 @@ export default function MobileList({
   holidayCalendars,
   companyHolidayCalendars,
   staff,
+  currentMonth,
+  onMonthChange,
 }: {
   attendances: Attendance[];
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
   staff: Staff | null | undefined;
+  currentMonth: Dayjs;
+  onMonthChange?: (newMonth: Dayjs) => void;
 }) {
   const errorAttendances = (() => {
     if (!staff) return [] as Attendance[];
@@ -63,95 +55,24 @@ export default function MobileList({
 
   return (
     <MobileBox>
-      <AttendanceGraph attendances={attendances} />
+      <MobileCalendar
+        attendances={attendances}
+        holidayCalendars={holidayCalendars}
+        companyHolidayCalendars={companyHolidayCalendars}
+        staff={staff}
+        currentMonth={currentMonth}
+        onMonthChange={onMonthChange}
+      />
       {errorAttendances.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
-          {/* 目立たせるために枠と背景で囲む */}
-          <Box
-            sx={{
-              border: "1px solid",
-              borderColor: "warning.main",
-              borderRadius: 2,
-              p: 2,
-              backgroundColor: "rgba(255,243,205,0.12)",
-            }}
-          >
-            <Typography variant="h4" sx={{ mb: 1 }}>
-              打刻エラー一覧 ({errorAttendances.length})
-            </Typography>
-            <Alert severity="warning">
-              <AlertTitle sx={{ fontWeight: "bold" }}>
-                確認してください
-              </AlertTitle>
-              打刻エラーがあります
-            </Alert>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell />
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      勤務時間
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      休憩時間(直近)
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      作成日時
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      更新日時
-                    </TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {errorAttendances.map((attendance, index) => (
-                    <TableBodyRow
-                      key={`error-${index}`}
-                      attendance={attendance}
-                      holidayCalendars={holidayCalendars}
-                      companyHolidayCalendars={companyHolidayCalendars}
-                      staff={staff}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+          <Alert severity="warning">
+            <AlertTitle sx={{ fontWeight: "bold" }}>
+              打刻エラー ({errorAttendances.length}件)
+            </AlertTitle>
+            カレンダー上で赤色の日付をタップして確認してください
+          </Alert>
         </Box>
       )}
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>勤務時間</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>
-                休憩時間(直近)
-              </TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>作成日時</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>更新日時</TableCell>
-              <TableCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {attendances.map((attendance, index) => (
-              <TableBodyRow
-                key={index}
-                attendance={attendance}
-                holidayCalendars={holidayCalendars}
-                companyHolidayCalendars={companyHolidayCalendars}
-                staff={staff}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
     </MobileBox>
   );
 }
