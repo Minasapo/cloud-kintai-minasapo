@@ -19,7 +19,11 @@ npm run test:e2e -- visual-regression --project=chromium-admin --update-snapshot
 ```
 
 ベースラインファイルは以下の場所に保存されます：
-- `playwright/tests/__snapshots__/visual-regression.spec.ts-snapshots/`
+- `playwright/tests/visual-regression.spec.ts-snapshots/`
+- `playwright/tests/visual-regression-advanced.spec.ts-snapshots/`
+
+⚠️ **セキュリティ上の注意**  
+スナップショット画像には実際の画面が含まれるため、個人名・メールアドレスなどの機微情報が写り込む可能性があります。これらのファイルは `.gitignore` で管理対象外としており、各開発者がローカル環境でのみ保持します。
 
 ### 2. テスト実行
 
@@ -188,6 +192,24 @@ await page.setViewportSize({ width: 1440, height: 900 });
 ```bash
 npm run test:e2e -- visual-regression --project=chromium-staff -g "ファーストビュー"
 ```
+
+## CI/CDでの実行について
+
+スナップショット画像は機微情報を含む可能性があるため、Git管理していません。CI/CD環境で実行する場合：
+
+1. **初回実行時にベースライン生成**
+   ```bash
+   npm run test:e2e -- visual-regression --update-snapshots
+   ```
+
+2. **2回目以降は通常実行**
+   ```bash
+   npm run test:e2e visual-regression
+   ```
+
+3. **代替案**: テストデータを匿名化し、機微情報を含まないダミーデータでテストを実行
+
+4. **別の代替案**: ビジュアルテストはローカル開発のみで実行し、CI/CDでは実行しない（`skip` を使用）
 
 ## 参考資料
 
