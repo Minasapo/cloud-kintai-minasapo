@@ -556,7 +556,9 @@ export default function DesktopCalendarView({
                   !date.isBefore(term.start, "day") &&
                   !date.isAfter(term.end, "day")
               );
-              const allowTermHighlight = !holidayLike && !isWeekend;
+              // シフト勤務の場合は休日関係なく集計期間の色を表示
+              const allowTermHighlight =
+                staff?.workType === "shift" ? true : !holidayLike && !isWeekend;
               const primaryTerm = allowTermHighlight
                 ? termsForDay[0]
                 : undefined;
