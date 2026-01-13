@@ -33,6 +33,7 @@ export const WithLongText: Story = {
 };
 
 export const MultilineExample: Story = {
+  args: { children: "" },
   render: () => (
     <div>
       <Headline>最初のセクション</Headline>
