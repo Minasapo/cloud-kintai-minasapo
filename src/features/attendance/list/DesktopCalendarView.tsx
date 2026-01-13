@@ -160,9 +160,51 @@ function getStatus(
   attendance: Attendance | undefined,
   staff: Staff | null | undefined,
   holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[]
+  companyHolidayCalendars: CompanyHolidayCalendar[],
+  date: Dayjs
 ) {
-  if (!attendance || !staff) return AttendanceStatus.None;
+  if (!staff) return AttendanceStatus.None;
+
+  // 打刻がない場合の処理
+  if (!attendance) {
+    const workDate = date.format(AttendanceDate.DataFormat);
+    const today = dayjs();
+
+    // 今日または未来日の場合はステータスなし
+    if (date.isSame(today, "day") || date.isAfter(today, "day")) {
+      return AttendanceStatus.None;
+    }
+
+    // 利用開始日より前の場合はステータスなし
+    if (
+      staff.usageStartDate &&
+      date.isBefore(dayjs(staff.usageStartDate), "day")
+    ) {
+      return AttendanceStatus.None;
+    }
+
+    // 休日の場合はステータスなし
+    const isHoliday = new Holiday(holidayCalendars, workDate).isHoliday();
+    const isCompanyHoliday = new CompanyHoliday(
+      companyHolidayCalendars,
+      workDate
+    ).isHoliday();
+
+    if (staff.workType === "shift") {
+      // シフトタイプの場合は休日のみチェック
+      if (isHoliday || isCompanyHoliday) {
+        return AttendanceStatus.None;
+      }
+    } else {
+      // シフトタイプ以外の場合は休日と土日をチェック
+      if (isHoliday || isCompanyHoliday || [0, 6].includes(date.day())) {
+        return AttendanceStatus.None;
+      }
+    }
+
+    // 過去日で休日以外の場合はエラー
+    return AttendanceStatus.Error;
+  }
 
   return new AttendanceState(
     staff,
@@ -178,21 +220,17 @@ function isHolidayLike(
   holidayCalendars: HolidayCalendar[],
   companyHolidayCalendars: CompanyHolidayCalendar[]
 ) {
-  if (staff?.workType === "shift") {
-    return Boolean(
-      new CompanyHoliday(
-        companyHolidayCalendars,
-        date.format(AttendanceDate.DataFormat)
-      ).isHoliday()
-    );
-  }
-
   const workDate = date.format(AttendanceDate.DataFormat);
   const isHoliday = new Holiday(holidayCalendars, workDate).isHoliday();
   const isCompanyHoliday = new CompanyHoliday(
     companyHolidayCalendars,
     workDate
   ).isHoliday();
+
+  if (staff?.workType === "shift") {
+    // シフトタイプの場合も法定休日と会社休日の両方をチェック
+    return isHoliday || isCompanyHoliday;
+  }
 
   return isHoliday || isCompanyHoliday || [0, 6].includes(date.day());
 }
@@ -484,7 +522,8 @@ export default function DesktopCalendarView({
                 attendance,
                 staff,
                 holidayCalendars,
-                companyHolidayCalendars
+                companyHolidayCalendars,
+                date
               );
               const netHours = getNetWorkingHours(attendance);
               const totalRestHours = getTotalRestHours(attendance);
