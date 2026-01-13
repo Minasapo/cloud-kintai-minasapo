@@ -41,6 +41,7 @@ yarn-error.log*
 /**/*.log
 
 playwright/.auth/
+playwright/tests/screenshots/
 test-results/
 .env*
 .flaskenv*
