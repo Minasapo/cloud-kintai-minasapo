@@ -16,6 +16,7 @@
 npm run test:unit
 npm run test:e2e -- smoke-test --project=chromium-staff
 npm run test:e2e -- smoke-test --project=chromium-admin
+npm run test:e2e visual-regression
 ```
 
 ## コミットメッセージ
