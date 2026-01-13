@@ -6,7 +6,7 @@ import "@testing-library/jest-dom";
 
 // Polyfill for TextEncoder/TextDecoder
 // Some modules like react-router require these APIs
-import { TextEncoder, TextDecoder } from "util";
+import { TextDecoder,TextEncoder } from "util";
 
 globalThis.TextEncoder = TextEncoder;
 globalThis.TextDecoder = TextDecoder as any;
