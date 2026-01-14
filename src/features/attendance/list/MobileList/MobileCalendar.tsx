@@ -63,80 +63,97 @@ interface CalendarDayProps {
   isCurrentMonth: boolean;
   hasError: boolean;
   status?: AttendanceStatus;
-}
-
-interface CalendarDayCellFullProps extends CalendarDayProps {
   isSelected?: boolean;
   termColor?: string;
 }
 
-const CalendarDayCell = styled(Box)<CalendarDayCellFullProps>(
-  ({ theme, isCurrentMonth, hasError, status, isSelected, termColor }) => {
-    let backgroundColor = isCurrentMonth
-      ? theme.palette.background.paper
-      : theme.palette.grey[50];
-    let borderColor = theme.palette.divider;
-    let color = isCurrentMonth
-      ? theme.palette.text.primary
-      : theme.palette.text.secondary;
+const CalendarDayBase = styled(Box)(() => {
+  return {
+    position: "relative",
+    minHeight: "48px",
+    borderRadius: "4px",
+    padding: "2px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "stretch",
+    transition: "all 0.2s ease",
+    overflow: "hidden",
+  };
+});
 
-    if (status === AttendanceStatus.Error || hasError) {
-      // エラー系：枠線なし、テキスト色のみ
-      color = theme.palette.error.dark;
-    } else if (status === AttendanceStatus.Late) {
-      // 遅刻系：背景色なし、枠線のみ
-      borderColor = theme.palette.warning.main;
-      color = theme.palette.warning.dark;
-    } else if (status === AttendanceStatus.None) {
-      // ステータスなし：背景色なし
-      backgroundColor = theme.palette.grey[200];
-      color = theme.palette.text.secondary;
-    }
+const CalendarDayCell = ({
+  isCurrentMonth,
+  hasError,
+  status,
+  isSelected,
+  termColor,
+  children,
+  onClick,
+}: CalendarDayProps & { children: React.ReactNode; onClick?: () => void }) => {
+  const theme = useTheme();
 
-    if (isSelected) {
-      borderColor = theme.palette.primary.main;
-    }
+  let backgroundColor = isCurrentMonth
+    ? theme.palette.background.paper
+    : theme.palette.grey[50];
+  let borderColor = theme.palette.divider;
+  let color = isCurrentMonth
+    ? theme.palette.text.primary
+    : theme.palette.text.secondary;
 
-    return {
-      position: "relative",
-      minHeight: "48px",
-      border: isSelected
-        ? `2px solid ${borderColor}`
-        : `1px solid ${borderColor}`,
-      borderRadius: "4px",
-      padding: "2px",
-      paddingBottom: termColor ? "6px" : "2px",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "flex-start",
-      alignItems: "stretch",
-      cursor: isCurrentMonth ? "pointer" : "default",
-      backgroundColor,
-      color,
-      transition: "all 0.2s ease",
-      overflow: "hidden",
-      // 集計期間の色を下側の横帯として表示
-      ...(termColor && {
-        "::after": {
-          content: '""',
-          position: "absolute",
-          bottom: "2px",
-          left: "2px",
-          right: "2px",
-          height: "4px",
-          backgroundColor: termColor,
-          borderRadius: "2px",
-        },
-      }),
-      "&:hover": isCurrentMonth
-        ? {
-            boxShadow: theme.shadows[1],
-            transform: "scale(1.02)",
-          }
-        : {},
-    };
+  if (status === AttendanceStatus.Error || hasError) {
+    // エラー系：枠線なし、テキスト色のみ
+    color = theme.palette.error.dark;
+  } else if (status === AttendanceStatus.Late) {
+    // 遅刻系：背景色なし、枠線のみ
+    borderColor = theme.palette.warning.main;
+    color = theme.palette.warning.dark;
+  } else if (status === AttendanceStatus.None) {
+    // ステータスなし：背景色なし
+    backgroundColor = theme.palette.grey[200];
+    color = theme.palette.text.secondary;
   }
-);
+
+  if (isSelected) {
+    borderColor = theme.palette.primary.main;
+  }
+
+  return (
+    <CalendarDayBase
+      sx={{
+        border: isSelected
+          ? `2px solid ${borderColor}`
+          : `1px solid ${borderColor}`,
+        paddingBottom: termColor ? "6px" : "2px",
+        cursor: isCurrentMonth ? "pointer" : "default",
+        backgroundColor,
+        color,
+        // 集計期間の色を下側の横帯として表示
+        ...(termColor && {
+          "::after": {
+            content: '""',
+            position: "absolute",
+            bottom: "2px",
+            left: "2px",
+            right: "2px",
+            height: "4px",
+            backgroundColor: termColor,
+            borderRadius: "2px",
+          },
+        }),
+        "&:hover": isCurrentMonth
+          ? {
+              boxShadow: theme.shadows[1],
+              transform: "scale(1.02)",
+            }
+          : {},
+      }}
+      onClick={onClick}
+    >
+      {children}
+    </CalendarDayBase>
+  );
+};
 
 const DayNumber = styled(Typography)({
   fontSize: "0.75rem",
