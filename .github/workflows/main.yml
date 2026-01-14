@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - feature/**
+      - dependabot/**
 jobs:
   lint-check:
     if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
@@ -17,15 +18,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Cache npm
+          cache: "npm"
+      - name: Cache node_modules
         uses: actions/cache@v3
+        id: cache-node-modules
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node-modules-
       - name: Install dependencies
-        run: npm ci
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline
       - name: Run ESLint
         run: npm run lint
 
@@ -41,25 +45,31 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Cache npm
+          cache: "npm"
+      - name: Cache node_modules
         uses: actions/cache@v3
+        id: cache-node-modules
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node-modules-
       - name: Install dependencies
-        run: npm ci
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline
       - name: Run jest unit tests
         run: npm run test:unit
         env:
           TZ: Asia/Tokyo
 
   playwright-test:
-    needs: jest-test
+    needs: lint-check
     if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
-    name: Run E2E Playwright tests
+    name: Run E2E Playwright tests (${{ matrix.project }})
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        project: [chromium-staff, chromium-admin]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -67,19 +77,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Cache npm
+          cache: "npm"
+      - name: Cache node_modules
         uses: actions/cache@v3
+        id: cache-node-modules
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node-modules-
       - name: Install dependencies
-        run: npm ci
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright smoke tests
-        run: npm run test:e2e -- smoke-test --project=chromium-staff && npm run test:e2e -- smoke-test --project=chromium-admin
+        run: npm run test:e2e -- smoke-test --project=${{ matrix.project }}
         env:
           VITE_BASE_PATH: ${{ secrets.VITE_BASE_PATH }}
           PLAYWRIGHT_LAZY_USER_EMAIL: ${{ secrets.PLAYWRIGHT_LAZY_USER_EMAIL }}
@@ -94,17 +107,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ matrix.project }}
           path: test-results
       - name: Upload playwright-logs artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-logs
+          name: playwright-logs-${{ matrix.project }}
           path: playwright-logs
       - name: Upload playwright-report artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: playwright-report

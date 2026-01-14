@@ -1,5 +1,5 @@
 import Logo from "@shared/ui/logo/Logo";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 
 import { resolveThemeColor } from "@/constants/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -16,7 +16,9 @@ import { SignInOutButton } from "./SignInOutButton";
 export default function Header() {
   const { isCognitoUserRole } = useContext(AuthContext);
   const { getThemeColor } = useContext(AppConfigContext);
-  const [pathName, setPathName] = useState("/register");
+
+  const pathName =
+    window.location.pathname === "/" ? "/register" : window.location.pathname;
 
   const resolvedThemeColor = useMemo(
     () =>
@@ -29,12 +31,6 @@ export default function Header() {
     "color.brand.primary.base",
     resolvedThemeColor
   );
-
-  useEffect(() => {
-    const name =
-      window.location.pathname === "/" ? "/register" : window.location.pathname;
-    setPathName(name);
-  }, []); // location変更時に再実行したい場合はpopstateイベントを利用
 
   const showExternalLinks = !isCognitoUserRole(StaffRole.OPERATOR);
 

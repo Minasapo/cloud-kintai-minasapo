@@ -12,6 +12,10 @@ coverage-summary.json
 *.coverage.json
 .nyc_output
 
+# storybook
+/storybook-static
+.storybook-presets
+
 # production
 /build
 
@@ -37,6 +41,8 @@ yarn-error.log*
 /**/*.log
 
 playwright/.auth/
+playwright/tests/screenshots/
+playwright/tests/**/*-snapshots/
 test-results/
 .env*
 .flaskenv*

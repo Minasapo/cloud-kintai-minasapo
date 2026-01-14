@@ -77,19 +77,11 @@ export function SubstituteHolidayDateInput() {
                 aria-labelledby="confirm-clear-dialog-mobile"
               >
                 <DialogTitle id="confirm-clear-dialog-mobile">
-                  一部の入力内容をクリアします
+                  振替休日を設定します
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText>
-                    振替休日を設定すると、以下の入力内容がクリアされます。
-                    <ul>
-                      <li>勤務開始・終了時刻</li>
-                      <li>休憩時間</li>
-                      <li>有給フラグ</li>
-                      <li>直行フラグ</li>
-                      <li>直帰フラグ</li>
-                    </ul>
-                    よろしいですか？
+                    以下の方法を選択してください。
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -100,6 +92,18 @@ export function SubstituteHolidayDateInput() {
                     }}
                   >
                     キャンセル
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (pendingDate) {
+                        onChange(pendingDate.format(AttendanceDate.DataFormat));
+                      }
+
+                      setConfirmOpen(false);
+                      setPendingDate(null);
+                    }}
+                  >
+                    クリアせず設定
                   </Button>
                   <Button
                     onClick={() => {
@@ -119,7 +123,7 @@ export function SubstituteHolidayDateInput() {
                     }}
                     autoFocus
                   >
-                    クリアする
+                    クリアして設定
                   </Button>
                 </DialogActions>
               </Dialog>
