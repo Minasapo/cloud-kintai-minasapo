@@ -21,12 +21,38 @@ import {
 } from "@/lib/reducers/snackbarReducer";
 import QuickDailyReportCardView from "@/shared/ui/time-recorder/QuickDailyReportCard";
 
+/**
+ * 定数定義
+ */
+const AUTO_SAVE_DELAY = 3000; // 3秒後に自動保存
+const TIME_FORMAT = "HH:mm:ss"; // 保存時刻の表示形式
+const QUERY_LIMIT = 1; // 日報取得時のクエリ制限
+
+/**
+ * エラーメッセージ
+ */
+const ERROR_MESSAGES = {
+  FETCH_FAILED: "日報の取得に失敗しました。",
+  SAVE_FAILED: "日報の保存に失敗しました。",
+  SAVE_SUCCESS: "日報を保存しました",
+} as const;
+
+/**
+ * Props型定義
+ */
 interface QuickDailyReportCardProps {
   staffId: string | null | undefined;
   date: string;
 }
 
-const AUTO_SAVE_DELAY = 3000; // 3秒後に自動保存
+/**
+ * GraphQLレスポンスからエラーメッセージを抽出するヘルパー関数
+ */
+const extractErrorMessage = (
+  errors: readonly { message: string }[]
+): string => {
+  return errors.map((err) => err.message).join("\n");
+};
 
 export default function QuickDailyReportCard({
   staffId,
@@ -50,7 +76,10 @@ export default function QuickDailyReportCard({
   const isDirty = content !== savedContent;
   const contentPanelId = useMemo(() => `quick-daily-report-${date}`, [date]);
 
-  // ページ離脱時の警告
+  /**
+   * ページ離脱時の警告
+   * 保存中または未保存の変更がある場合、ユーザーに確認を促す
+   */
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isSaving || isDirty) {
@@ -67,6 +96,10 @@ export default function QuickDailyReportCard({
     };
   }, [isSaving, isDirty]);
 
+  /**
+   * 日報データの初期読み込み
+   * staffIdまたはdateが変更されたときに実行
+   */
   useEffect(() => {
     if (!staffId) {
       setReportId(null);
@@ -88,7 +121,7 @@ export default function QuickDailyReportCard({
           variables: {
             staffId,
             reportDate: { eq: date },
-            limit: 1,
+            limit: QUERY_LIMIT,
           },
           authMode: "userPool",
         })) as GraphQLResult<DailyReportsByStaffIdQuery>;
@@ -96,7 +129,7 @@ export default function QuickDailyReportCard({
         if (!mounted) return;
 
         if (response.errors?.length) {
-          throw new Error(response.errors.map((err) => err.message).join("\n"));
+          throw new Error(extractErrorMessage(response.errors));
         }
 
         const report =
@@ -112,6 +145,7 @@ export default function QuickDailyReportCard({
           setContent(nextContent);
           setSavedContent(nextContent);
         } else {
+          // 既存の日報がない場合は空の状態にリセット
           setReportId(null);
           setContent("");
           setSavedContent("");
@@ -119,7 +153,7 @@ export default function QuickDailyReportCard({
       } catch (err) {
         if (!mounted) return;
         setError(
-          err instanceof Error ? err.message : "日報の取得に失敗しました。"
+          err instanceof Error ? err.message : ERROR_MESSAGES.FETCH_FAILED
         );
       } finally {
         if (mounted) {
@@ -135,20 +169,31 @@ export default function QuickDailyReportCard({
     };
   }, [staffId, date]);
 
+  /**
+   * エラー発生時に自動的にカードを展開して表示
+   */
   useEffect(() => {
     if (error) {
       setIsOpen(true);
     }
   }, [error]);
 
+  /**
+   * staffIdがない場合はダイアログを閉じる
+   */
   useEffect(() => {
     if (!staffId) {
       setIsDialogOpen(false);
     }
   }, [staffId]);
 
+  /**
+   * 日報の保存処理
+   * @param showNotification - 保存完了時に通知を表示するかどうか
+   */
   const handleSave = useCallback(
     async (showNotification = true) => {
+      // 保存が不要な場合は早期リターン
       if (!staffId || content === savedContent) return;
 
       setIsSaving(true);
@@ -156,6 +201,7 @@ export default function QuickDailyReportCard({
 
       try {
         if (reportId) {
+          // 既存の日報を更新
           const response = (await graphqlClient.graphql({
             query: updateDailyReport,
             variables: {
@@ -169,9 +215,7 @@ export default function QuickDailyReportCard({
           })) as GraphQLResult<UpdateDailyReportMutation>;
 
           if (response.errors?.length) {
-            throw new Error(
-              response.errors.map((err) => err.message).join("\n")
-            );
+            throw new Error(extractErrorMessage(response.errors));
           }
 
           const updatedContent =
@@ -179,6 +223,7 @@ export default function QuickDailyReportCard({
           setSavedContent(updatedContent);
           setContent(updatedContent);
         } else {
+          // 新規日報を作成
           const response = (await graphqlClient.graphql({
             query: createDailyReport,
             variables: {
@@ -197,9 +242,7 @@ export default function QuickDailyReportCard({
           })) as GraphQLResult<CreateDailyReportMutation>;
 
           if (response.errors?.length) {
-            throw new Error(
-              response.errors.map((err) => err.message).join("\n")
-            );
+            throw new Error(extractErrorMessage(response.errors));
           }
 
           const created = response.data?.createDailyReport;
@@ -209,9 +252,10 @@ export default function QuickDailyReportCard({
           setContent(nextContent);
         }
 
-        setLastSavedAt(dayjs().format("HH:mm:ss"));
+        // 保存時刻を記録
+        setLastSavedAt(dayjs().format(TIME_FORMAT));
         if (showNotification) {
-          dispatch(setSnackbarSuccess("日報を保存しました"));
+          dispatch(setSnackbarSuccess(ERROR_MESSAGES.SAVE_SUCCESS));
         }
       } catch (err) {
         const message =
@@ -227,21 +271,24 @@ export default function QuickDailyReportCard({
     [staffId, content, savedContent, reportId, date, defaultTitle, dispatch]
   );
 
-  // 自動保存
+  /**
+   * 自動保存機能
+   * デバウンス処理により、入力停止後AUTO_SAVE_DELAY(3秒)経過後に自動保存
+   */
   useEffect(() => {
-    // タイマーをクリア
+    // 既存のタイマーをクリア（デバウンス処理）
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
     }
 
-    // 内容が変更され、保存が必要な場合のみタイマーをセット
+    // 保存条件: staffIdが存在、内容が変更されている、空ではない
     if (staffId && content !== savedContent && content.trim() !== "") {
       autoSaveTimerRef.current = setTimeout(() => {
         void handleSave(false); // 自動保存時は通知を表示しない
       }, AUTO_SAVE_DELAY);
     }
 
-    // クリーンアップ
+    // クリーンアップ: コンポーネントのアンマウント時やdependenciesの変更時
     return () => {
       if (autoSaveTimerRef.current) {
         clearTimeout(autoSaveTimerRef.current);
@@ -249,20 +296,32 @@ export default function QuickDailyReportCard({
     };
   }, [content, savedContent, staffId, handleSave]);
 
+  /**
+   * 入力内容をクリアして保存済みの状態に戻す
+   */
   const handleClear = () => {
     setContent(savedContent);
     setError(null);
   };
 
+  /**
+   * カードの展開/折りたたみを切り替え
+   */
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
   };
 
+  /**
+   * 拡大表示ダイアログを開く
+   */
   const handleDialogOpen = () => {
     if (!staffId) return;
     setIsDialogOpen(true);
   };
 
+  /**
+   * 拡大表示ダイアログを閉じる
+   */
   const handleDialogClose = () => {
     setIsDialogOpen(false);
   };
