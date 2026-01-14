@@ -57,7 +57,7 @@ jobs:
           TZ: Asia/Tokyo
 
   playwright-test:
-    needs: jest-test
+    needs: lint-check
     if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
     name: Run E2E Playwright tests
     runs-on: ubuntu-22.04
