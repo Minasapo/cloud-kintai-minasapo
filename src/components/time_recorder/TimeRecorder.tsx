@@ -26,6 +26,7 @@ import { Theme } from "@mui/material/styles";
 import {
   Attendance,
   CreateAttendanceInput,
+  OnUpdateAttendanceSubscription,
   Staff,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
@@ -34,6 +35,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import {
   clockInAction,
   clockOutAction,
@@ -46,6 +48,7 @@ import { getWorkStatus } from "@/lib/attendance/workStatus";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { Logger } from "@/lib/logger";
+import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
 import { designTokenVar } from "@/shared/designSystem";
 import Clock from "@/shared/ui/clock/Clock";
 import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
@@ -257,6 +260,7 @@ export default function TimeRecorder(): JSX.Element {
   const [isTimeElapsedError, setIsTimeElapsedError] = useState(false);
   const [directMode, setDirectMode] = useState(false);
   const [lastActiveTime, setLastActiveTime] = useState(dayjs());
+  const [showReloadDialog, setShowReloadDialog] = useState(false);
 
   const logger = new Logger("TimeRecorder", "DEBUG");
 
@@ -530,6 +534,41 @@ export default function TimeRecorder(): JSX.Element {
     setWorkStatus(getWorkStatus(attendance));
   }, [attendance]);
 
+  // 勤怠データ更新のサブスクリプション
+  useEffect(() => {
+    if (!cognitoUser?.id) {
+      return;
+    }
+
+    const subscription = graphqlClient
+      .graphql({
+        query: onUpdateAttendance,
+        variables: {
+          filter: {
+            staffId: { eq: cognitoUser.id },
+            workDate: { eq: today },
+          },
+        },
+      })
+      .subscribe({
+        next: (event) => {
+          const updatedAttendance =
+            event.data as OnUpdateAttendanceSubscription;
+          if (updatedAttendance?.onUpdateAttendance) {
+            // 自分自身の操作でない外部からの更新の場合にダイアログを表示
+            setShowReloadDialog(true);
+          }
+        },
+        error: (error) => {
+          logger.debug("Subscription error:", error);
+        },
+      });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [cognitoUser?.id, today, logger]);
+
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return (
       <Box
@@ -656,6 +695,34 @@ export default function TimeRecorder(): JSX.Element {
           )}
 
           <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
+
+          <Dialog
+            open={showReloadDialog}
+            onClose={() => setShowReloadDialog(false)}
+          >
+            <DialogTitle>勤怠データが更新されました</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                勤怠データが別のデバイスまたは管理者によって更新されました。最新の情報を表示するため、ページをリロードしてください。
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => setShowReloadDialog(false)}
+                color="primary"
+              >
+                後で
+              </Button>
+              <Button
+                onClick={() => window.location.reload()}
+                color="primary"
+                variant="contained"
+                autoFocus
+              >
+                リロード
+              </Button>
+            </DialogActions>
+          </Dialog>
 
           <Grid item xs={12}>
             <RestTimeMessage />
