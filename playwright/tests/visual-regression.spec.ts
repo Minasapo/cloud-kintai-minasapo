@@ -1,6 +1,15 @@
-import { devices, expect, test } from "@playwright/test";
+import {
+  devices,
+  expect,
+  type Locator,
+  type Page,
+  test,
+} from "@playwright/test";
+import dotenv from "dotenv";
 
 import { ADMIN_TEST_PAGES, STAFF_TEST_PAGES } from "./visual-regression.config";
+
+dotenv.config({ path: ".env.local" });
 
 /**
  * ビジュアルリグレッションテスト: 画面全体のスクリーンショット検証
@@ -27,7 +36,7 @@ import { ADMIN_TEST_PAGES, STAFF_TEST_PAGES } from "./visual-regression.config";
 /**
  * ページが完全にロードされるまで待機する
  */
-async function waitForPageReady(page: any) {
+async function waitForPageReady(page: Page) {
   // ページの読み込み完了を待つ
   await page.waitForLoadState("networkidle");
 
@@ -73,9 +82,31 @@ async function waitForPageReady(page: any) {
 }
 
 /**
+ * ログイン処理を実行する
+ */
+async function performLogin(page: Page, username: string, password: string) {
+  const baseURL = process.env.VITE_BASE_PATH || "http://localhost:5173";
+  await page.goto(`${baseURL}/login`);
+
+  // ログインフォームに入力
+  await page.fill('input[name="username"]', username);
+  await page.fill('input[name="password"]', password);
+
+  // ログインボタンをクリック
+  const loginButton = page.locator('button[type="submit"]');
+  await loginButton.click();
+
+  // ログイン完了を待機（ホームページへのリダイレクト）
+  await page.waitForURL(`${baseURL}/`);
+
+  // ページが完全にロードされるまで待機
+  await page.waitForLoadState("networkidle");
+}
+
+/**
  * スクリーンショット取得時に必要な調整を行う
  */
-async function preparePageForScreenshot(page: any) {
+async function preparePageForScreenshot(page: Page) {
   // ホバー状態を解除
   await page.evaluate(() => {
     document.body.style.pointerEvents = "none";
@@ -100,6 +131,13 @@ async function preparePageForScreenshot(page: any) {
 test.describe("ビジュアルリグレッション - 画面全体スクリーンショット", () => {
   // スタッフユーザー向けテスト
   test.describe("スタッフユーザー", () => {
+    // 各テストの前にログイン処理を実行
+    test.beforeEach(async ({ page }) => {
+      const username = process.env.PLAYWRIGHT_LOGIN_EMAIL || "";
+      const password = process.env.PLAYWRIGHT_LOGIN_PASSWORD || "";
+      await performLogin(page, username, password);
+    });
+
     for (const page of STAFF_TEST_PAGES) {
       test(`${page.name} (${page.path}) - 画面全体`, async ({
         page: playwrightPage,
@@ -109,18 +147,19 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
             const fixed = new Date("2024-01-13T12:00:00Z").valueOf();
             const OriginalDate = Date;
             class MockDate extends OriginalDate {
-              constructor(...args: any[]) {
-                if (args.length === 0) {
+              constructor(...args: ConstructorParameters<typeof OriginalDate>) {
+                const [firstArg] = args;
+                if (typeof firstArg === "undefined") {
                   super(fixed);
                 } else {
-                  super(...args);
+                  super(firstArg);
                 }
               }
               static now() {
                 return fixed;
               }
             }
-            // @ts-ignore
+            // @ts-expect-error Overriding Date for deterministic snapshots
             globalThis.Date = MockDate;
           });
         }
@@ -134,7 +173,7 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
         // スクリーンショット準備
         await preparePageForScreenshot(playwrightPage);
 
-        const masks = [] as any[];
+        const masks: Locator[] = [];
         if (page.path === "/register") {
           const clock = playwrightPage
             .locator(
@@ -164,18 +203,19 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
             const fixed = new Date("2024-01-13T12:00:00Z").valueOf();
             const OriginalDate = Date;
             class MockDate extends OriginalDate {
-              constructor(...args: any[]) {
-                if (args.length === 0) {
+              constructor(...args: ConstructorParameters<typeof OriginalDate>) {
+                const [firstArg] = args;
+                if (typeof firstArg === "undefined") {
                   super(fixed);
                 } else {
-                  super(...args);
+                  super(firstArg);
                 }
               }
               static now() {
                 return fixed;
               }
             }
-            // @ts-ignore
+            // @ts-expect-error Overriding Date for deterministic snapshots
             globalThis.Date = MockDate;
           });
         }
@@ -184,7 +224,7 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
         await waitForPageReady(playwrightPage);
         await preparePageForScreenshot(playwrightPage);
 
-        const masks = [] as any[];
+        const masks: Locator[] = [];
         if (page.path === "/register") {
           const clock = playwrightPage
             .locator(
@@ -209,6 +249,16 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
 
   // 管理者ユーザー向けテスト
   test.describe("管理者ユーザー", () => {
+    // 各テストの前にログイン処理を実行
+    test.beforeEach(async ({ page }, testInfo) => {
+      // スタッフプロジェクトの場合はスキップ
+      if (testInfo.project.name === "chromium-staff") return;
+
+      const username = process.env.PLAYWRIGHT_ADMIN_EMAIL || "";
+      const password = process.env.PLAYWRIGHT_ADMIN_PASSWORD || "";
+      await performLogin(page, username, password);
+    });
+
     for (const page of ADMIN_TEST_PAGES) {
       test(`${page.name} (${page.path}) - 画面全体`, async ({
         page: playwrightPage,
@@ -256,6 +306,13 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
 
   // レスポンシブデザイン検証（デスクトップとモバイル）
   test.describe("レスポンシブデザイン検証 - モバイル (iPhone 12 Pro)", () => {
+    // 各テストの前にログイン処理を実行
+    test.beforeEach(async ({ page }) => {
+      const username = process.env.PLAYWRIGHT_LOGIN_EMAIL || "";
+      const password = process.env.PLAYWRIGHT_LOGIN_PASSWORD || "";
+      await performLogin(page, username, password);
+    });
+
     test("勤怠一覧 - モバイル表示", async ({ page: playwrightPage }) => {
       // iPhone 12 Proのビューポートとユーザーエージェントを設定
       await playwrightPage.setViewportSize(devices["iPhone 12 Pro"].viewport);
@@ -326,6 +383,13 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
   });
 
   test.describe("レスポンシブデザイン検証 - デスクトップ", () => {
+    // 各テストの前にログイン処理を実行
+    test.beforeEach(async ({ page }) => {
+      const username = process.env.PLAYWRIGHT_LOGIN_EMAIL || "";
+      const password = process.env.PLAYWRIGHT_LOGIN_PASSWORD || "";
+      await performLogin(page, username, password);
+    });
+
     test("勤怠一覧 - デスクトップ表示", async ({ page: playwrightPage }) => {
       // デスクトップビューポートに設定
       await playwrightPage.setViewportSize({ width: 1440, height: 900 });
