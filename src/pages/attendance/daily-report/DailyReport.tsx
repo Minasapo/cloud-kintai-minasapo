@@ -49,8 +49,12 @@ import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 /**
  * 定数定義
  */
-const AUTO_SAVE_DELAY = 1000; // 1秒後に自動保存
+// 自動保存の遅延時間（ミリ秒）
+const AUTO_SAVE_DELAY = 1000;
+// 保存時刻の表示フォーマット
 const TIME_FORMAT = "HH:mm:ss";
+// 日付のフォーマット（YYYY-MM-DD）
+const DATE_FORMAT = "YYYY-MM-DD";
 
 type ReportStatus = DailyReportStatus;
 type EditableStatus = Extract<ReportStatus, "DRAFT" | "SUBMITTED">;
@@ -100,8 +104,17 @@ const REACTION_META: Record<ReactionType, { label: string; emoji: string }> = {
   LOOK: { label: "見ました", emoji: "👀" },
 };
 
+/**
+ * ヘルパー関数
+ */
+
+/** DateオブジェクトをYYYY-MM-DD形式の文字列に変換 */
 const formatDateInput = (value: Date) => value.toISOString().slice(0, 10);
+
+/** 日付から日報のデフォルトタイトルを生成 */
 const buildDefaultTitle = (date: string) => (date ? `${date}の日報` : "日報");
+
+/** 空の日報フォームを作成 */
 const emptyForm = (
   initialDate?: string,
   initialAuthor?: string
@@ -115,6 +128,7 @@ const emptyForm = (
   };
 };
 
+/** リアクション配列を集計してタイプごとのカウントに変換 */
 const aggregateReactions = (
   entries?: (DailyReportReaction | null)[] | null
 ): ReportReaction[] => {
@@ -129,6 +143,7 @@ const aggregateReactions = (
   return Array.from(counts.entries()).map(([type, count]) => ({ type, count }));
 };
 
+/** コメント配列を整形し、作成日時の降順でソート */
 const mapComments = (
   entries?: (DailyReportComment | null)[] | null
 ): AdminComment[] => {
@@ -144,6 +159,7 @@ const mapComments = (
     }));
 };
 
+/** GraphQLレスポンスの日報データを内部形式に変換 */
 const mapDailyReport = (
   record: DailyReportModel,
   authorFallback: string
@@ -161,6 +177,7 @@ const mapDailyReport = (
   comments: mapComments(record.comments),
 });
 
+/** 日報を日付の降順、同日の場合は更新日時の降順でソート */
 const sortReports = (items: DailyReportItem[]) =>
   [...items].sort((a, b) => {
     if (a.date === b.date) {
@@ -242,29 +259,34 @@ export default function DailyReport() {
   const showInitialLoading = isInitialViewPending;
   const isSelectedReportSubmitted =
     selectedReport?.status === DailyReportStatus.SUBMITTED;
+
+  /**
+   * URLパラメータから日付を初期化（マウント時のみ実行）
+   * URLに日付がある場合はその日付を、ない場合は当日を表示する
+   */
   useEffect(() => {
-    // マウント時にURLパラメータから日付を読み込む（一度だけ実行）
     if (isInitializedFromUrl) return;
 
     const dateParam = searchParams.get("date");
-    let targetDate = dayjs().startOf("day"); // デフォルトは当日
+    let targetDate = dayjs().startOf("day");
 
+    // URLパラメータから日付を取得
     if (dateParam) {
-      const parsed = dayjs(dateParam, "YYYY-MM-DD");
+      const parsed = dayjs(dateParam, DATE_FORMAT);
       if (parsed.isValid()) {
         targetDate = parsed.startOf("day");
       }
     }
 
-    // 日付を設定
+    // カレンダー日付と作成フォームを初期化
     setCalendarDate(targetDate);
-    const dateKey = targetDate.format("YYYY-MM-DD");
+    const dateKey = targetDate.format(DATE_FORMAT);
     setCreateForm((prev) =>
       emptyForm(dateKey, prev.author || resolvedAuthorName)
     );
 
     // URLパラメータがない、または無効な場合は当日をURLに設定
-    if (!dateParam || !dayjs(dateParam, "YYYY-MM-DD").isValid()) {
+    if (!dateParam || !dayjs(dateParam, DATE_FORMAT).isValid()) {
       setSearchParams({ date: dateKey }, { replace: true });
     }
 
@@ -461,24 +483,32 @@ export default function DailyReport() {
     setActionError(null);
   }, [selectedReportId]);
 
+  /**
+   * カレンダーで日付を変更したときの処理
+   * - 選択した日付をURLパラメータに反映
+   * - 日報がある場合は詳細表示、ない場合は作成ボタンを表示
+   * - フォーム内容と自動保存状態をリセット
+   */
   const handleCalendarChange = (value: Dayjs | null) => {
     if (!value) return;
     const normalized = value.startOf("day");
     setCalendarDate(normalized);
-    const dateKey = normalized.format("YYYY-MM-DD");
-    // URLに日付パラメータを追加
+    const dateKey = normalized.format(DATE_FORMAT);
+
+    // URLに日付パラメータを反映
     setSearchParams({ date: dateKey });
+
     const reportForDate = reportsByDate.get(dateKey);
     if (reportForDate) {
+      // 既存の日報がある場合は詳細表示
       setSelectedReportId(reportForDate.id);
       return;
     }
-    // 日報がない日を選択した場合は何も表示しない
+
+    // 日報がない場合は作成ボタン表示状態にリセット
     setSelectedReportId(null);
-    // 日付を移動したときはフォーム内容をクリア
     setCreateFormLastSavedAt(null);
     setCreateForm(emptyForm(dateKey, resolvedAuthorName));
-    // 作成済みレポートIDもクリア
     createdReportIdRef.current = null;
   };
 
@@ -753,7 +783,9 @@ export default function DailyReport() {
 
   /**
    * 作成フォーム用の自動保存
-   * デバウンス処理により、入力停止後AUTO_SAVE_DELAY(3秒)経過後に自動保存
+   * - 入力停止後AUTO_SAVE_DELAY（1秒）経過後に自動保存を実行
+   * - デバウンス処理により、連続入力中は保存しない
+   * - タイトルと内容の両方が入力されている場合のみ保存
    */
   useEffect(() => {
     // 既存のタイマーをクリア（デバウンス処理）
@@ -761,7 +793,7 @@ export default function DailyReport() {
       clearTimeout(createFormAutoSaveTimerRef.current);
     }
 
-    // 保存条件: 作成モード、内容が変更されている、タイトルと内容の両方が空ではない
+    // 保存条件: 作成モード、内容が変更されている、タイトルと内容が両方とも空ではない
     if (
       isCreateMode &&
       isCreateFormDirty &&
