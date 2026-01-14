@@ -208,6 +208,7 @@ export default function DailyReport() {
     useState<DailyReportForm>(() => emptyForm());
   const [editDraftSavedState, setEditDraftSavedState] =
     useState<DailyReportForm | null>(null);
+  const createdReportIdRef = useRef<string | null>(null);
   const processedUserIdRef = useRef<string | null>(null);
   const { dateMap: reportsByDate, dateSet: reportedDateSet } = useMemo(() => {
     const dateMap = new Map<string, DailyReportItem>();
@@ -243,30 +244,35 @@ export default function DailyReport() {
     selectedReport?.status === DailyReportStatus.SUBMITTED;
   useEffect(() => {
     // マウント時にURLパラメータから日付を読み込む（一度だけ実行）
+    if (isInitializedFromUrl) return;
+
     const dateParam = searchParams.get("date");
-    if (dateParam && !isInitializedFromUrl) {
+    let targetDate = dayjs().startOf("day"); // デフォルトは当日
+
+    if (dateParam) {
       const parsed = dayjs(dateParam, "YYYY-MM-DD");
       if (parsed.isValid()) {
-        setCalendarDate(parsed.startOf("day"));
-        setCreateForm((prev) =>
-          emptyForm(
-            parsed.format("YYYY-MM-DD"),
-            prev.author || resolvedAuthorName
-          )
-        );
-        setIsInitializedFromUrl(true);
+        targetDate = parsed.startOf("day");
       }
-    } else if (!dateParam && !isInitializedFromUrl) {
-      setIsInitializedFromUrl(true);
     }
+
+    // 日付を設定
+    setCalendarDate(targetDate);
+    const dateKey = targetDate.format("YYYY-MM-DD");
+    setCreateForm((prev) =>
+      emptyForm(dateKey, prev.author || resolvedAuthorName)
+    );
+
+    // URLパラメータがない、または無効な場合は当日をURLに設定
+    if (!dateParam || !dayjs(dateParam, "YYYY-MM-DD").isValid()) {
+      setSearchParams({ date: dateKey }, { replace: true });
+    }
+
+    setIsInitializedFromUrl(true);
   }, []);
 
   useEffect(() => {
-    const nextDateString = selectedReport
-      ? selectedReport.date
-      : isCreateMode
-      ? createForm.date
-      : null;
+    const nextDateString = selectedReport ? selectedReport.date : null;
 
     if (!nextDateString) return;
 
@@ -280,7 +286,7 @@ export default function DailyReport() {
       const nextDate = dayjs(nextDateString).startOf("day");
       return current.isSame(nextDate, "day") ? current : nextDate;
     });
-  }, [selectedReport, isCreateMode, createForm.date, searchParams]);
+  }, [selectedReport, searchParams]);
 
   useEffect(() => {
     if (isCognitoUserLoading) {
@@ -435,24 +441,15 @@ export default function DailyReport() {
     const calendarKey = calendarDate.format("YYYY-MM-DD");
     const reportForCalendarDate = reportsByDate.get(calendarKey) ?? null;
 
-    // 自動保存中は自動遷移しない
-    // createモード中で、reportForCalendarDateが存在しても、isAutoSavingの間は遷移しない
-    if (
-      selectedReportId === "create" &&
-      reportForCalendarDate &&
-      !isAutoSaving
-    ) {
-      setSelectedReportId(reportForCalendarDate.id);
-      return;
-    }
-
     // selectedReportIdが明示的に"create"の場合は作成フォームを保持
+    // 自動保存によってreportForCalendarDateが作成されても遷移しない
     if (selectedReportId === "create") {
       return;
     }
 
-    if (!selectedReportId) {
-      setSelectedReportId(reportForCalendarDate?.id ?? reports[0].id);
+    // 初回ロード時や日付変更時：データがある場合のみ詳細画面を表示
+    if (!selectedReportId && reportForCalendarDate) {
+      setSelectedReportId(reportForCalendarDate.id);
     }
   }, [calendarDate, reports, reportsByDate, selectedReportId, isAutoSaving]);
 
@@ -481,6 +478,8 @@ export default function DailyReport() {
     // 日付を移動したときはフォーム内容をクリア
     setCreateFormLastSavedAt(null);
     setCreateForm(emptyForm(dateKey, resolvedAuthorName));
+    // 作成済みレポートIDもクリア
+    createdReportIdRef.current = null;
   };
 
   const handleCreateChange: DailyReportFormChangeHandler = (field, value) => {
@@ -527,60 +526,124 @@ export default function DailyReport() {
       (createForm.author || resolvedAuthorName).trim() || resolvedAuthorName;
 
     try {
-      const response = (await graphqlClient.graphql({
-        query: createDailyReport,
-        variables: {
-          input: {
-            staffId,
-            reportDate: createForm.date,
-            title: createForm.title.trim(),
-            content: createForm.content,
-            status,
-            updatedAt: new Date().toISOString(),
-            reactions: [],
-            comments: [],
+      // 既に作成済みのレポートIDがある場合は更新、ない場合は新規作成
+      if (createdReportIdRef.current) {
+        // 更新処理
+        const response = (await graphqlClient.graphql({
+          query: updateDailyReport,
+          variables: {
+            input: {
+              id: createdReportIdRef.current,
+              reportDate: createForm.date,
+              title: createForm.title.trim(),
+              content: createForm.content,
+              status,
+              updatedAt: new Date().toISOString(),
+            },
           },
-        },
-        authMode: "userPool",
-      })) as GraphQLResult<CreateDailyReportMutation>;
+          authMode: "userPool",
+        })) as GraphQLResult<UpdateDailyReportMutation>;
 
-      if (response.errors?.length) {
-        throw new Error(
-          response.errors.map((error) => error.message).join("\n")
+        if (response.errors?.length) {
+          throw new Error(
+            response.errors.map((error) => error.message).join("\n")
+          );
+        }
+
+        const updated = response.data?.updateDailyReport;
+        if (!updated) {
+          throw new Error("日報の更新に失敗しました。");
+        }
+
+        const mapped = mapDailyReport(updated, resolvedAuthor);
+        setReports((prev) =>
+          sortReports([
+            mapped,
+            ...prev.filter((report) => report.id !== mapped.id),
+          ])
         );
-      }
 
-      const created = response.data?.createDailyReport;
-      if (!created) {
-        throw new Error("日報の作成に失敗しました。");
-      }
+        // 保存時刻を記録
+        setCreateFormLastSavedAt(dayjs().format(TIME_FORMAT));
+        // 保存済み状態を更新
+        setCreateFormSavedState(createForm);
 
-      const mapped = mapDailyReport(created, resolvedAuthor);
-      setReports((prev) =>
-        sortReports([
-          mapped,
-          ...prev.filter((report) => report.id !== mapped.id),
-        ])
-      );
+        // 手動保存時のみ詳細画面に遷移
+        if (showNotification) {
+          setSelectedReportId(mapped.id);
+          // 手動保存時：作成済みレポートIDをクリア
+          createdReportIdRef.current = null;
+        } else {
+          // 自動保存時：selectedReportIdを"create"に固定して詳細画面への遷移を防ぐ
+          setSelectedReportId("create");
+        }
 
-      // 保存時刻を記録
-      setCreateFormLastSavedAt(dayjs().format(TIME_FORMAT));
-      // 保存済み状態を更新
-      setCreateFormSavedState(createForm);
-
-      // 手動保存時のみ詳細画面に遷移
-      // 自動保存時（showNotification=false）は作成フォームのまま
-      if (showNotification) {
-        setSelectedReportId(mapped.id);
+        // 手動保存時のみフォームをリセット
+        if (showNotification) {
+          const resetDate = formatDateInput(new Date());
+          setCreateForm(() => emptyForm(resetDate, resolvedAuthorName));
+        }
       } else {
-        // 自動保存時：selectedReportIdを"create"に固定して詳細画面への遷移を防ぐ
-        setSelectedReportId("create");
-      }
+        // 新規作成処理
+        const response = (await graphqlClient.graphql({
+          query: createDailyReport,
+          variables: {
+            input: {
+              staffId,
+              reportDate: createForm.date,
+              title: createForm.title.trim(),
+              content: createForm.content,
+              status,
+              updatedAt: new Date().toISOString(),
+              reactions: [],
+              comments: [],
+            },
+          },
+          authMode: "userPool",
+        })) as GraphQLResult<CreateDailyReportMutation>;
 
-      // 手動保存時のみフォームをリセット
-      if (showNotification) {
-        const resetDate = formatDateInput(new Date());
-        setCreateForm(() => emptyForm(resetDate, resolvedAuthorName));
+        if (response.errors?.length) {
+          throw new Error(
+            response.errors.map((error) => error.message).join("\n")
+          );
+        }
+
+        const created = response.data?.createDailyReport;
+        if (!created) {
+          throw new Error("日報の作成に失敗しました。");
+        }
+
+        const mapped = mapDailyReport(created, resolvedAuthor);
+        setReports((prev) =>
+          sortReports([
+            mapped,
+            ...prev.filter((report) => report.id !== mapped.id),
+          ])
+        );
+
+        // 作成されたレポートIDを保持（自動保存時のみ）
+        if (!showNotification) {
+          createdReportIdRef.current = created.id;
+        }
+
+        // 保存時刻を記録
+        setCreateFormLastSavedAt(dayjs().format(TIME_FORMAT));
+        // 保存済み状態を更新
+        setCreateFormSavedState(createForm);
+
+        // 手動保存時のみ詳細画面に遷移
+        if (showNotification) {
+          setSelectedReportId(mapped.id);
+        } else {
+          // 自動保存時：selectedReportIdを"create"に固定して詳細画面への遷移を防ぐ
+          setSelectedReportId("create");
+        }
+
+        // 手動保存時のみフォームをリセット
+        if (showNotification) {
+          const resetDate = formatDateInput(new Date());
+          setCreateForm(() => emptyForm(resetDate, resolvedAuthorName));
+        }
       }
     } catch (error) {
       const errorMessage =
@@ -815,6 +878,9 @@ export default function DailyReport() {
                         </Typography>
                         <Typography variant="h5">日報作成フォーム</Typography>
                       </Box>
+                      <Alert severity="warning" sx={{ mt: 2 }}>
+                        この日報はまだ提出されていません。下書き保存後、必ず「提出する」ボタンをクリックしてください。
+                      </Alert>
                       <Divider />
                       <Box
                         component="form"
@@ -941,6 +1007,12 @@ export default function DailyReport() {
 
                           <Divider />
 
+                          {report.status === DailyReportStatus.DRAFT && (
+                            <Alert severity="warning">
+                              この日報はまだ提出されていません。内容を確認して「提出する」ボタンをクリックしてください。
+                            </Alert>
+                          )}
+
                           {isEditing && editDraft ? (
                             <Stack spacing={2}>
                               <DailyReportFormFields
@@ -1061,6 +1133,8 @@ export default function DailyReport() {
                               resolvedAuthorName
                             )
                           );
+                          // 新規作成ボタンを押したときは作成済みレポートIDをクリア
+                          createdReportIdRef.current = null;
                         }}
                       >
                         この日の日報を作成する
