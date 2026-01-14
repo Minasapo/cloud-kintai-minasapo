@@ -59,8 +59,11 @@ jobs:
   playwright-test:
     needs: lint-check
     if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
-    name: Run E2E Playwright tests
+    name: Run E2E Playwright tests (${{ matrix.project }})
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        project: [chromium-staff, chromium-admin]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -80,7 +83,7 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright smoke tests
-        run: npm run test:e2e -- smoke-test --project=chromium-staff && npm run test:e2e -- smoke-test --project=chromium-admin
+        run: npm run test:e2e -- smoke-test --project=${{ matrix.project }}
         env:
           VITE_BASE_PATH: ${{ secrets.VITE_BASE_PATH }}
           PLAYWRIGHT_LAZY_USER_EMAIL: ${{ secrets.PLAYWRIGHT_LAZY_USER_EMAIL }}
@@ -95,17 +98,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ matrix.project }}
           path: test-results
       - name: Upload playwright-logs artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-logs
+          name: playwright-logs-${{ matrix.project }}
           path: playwright-logs
       - name: Upload playwright-report artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: playwright-report
