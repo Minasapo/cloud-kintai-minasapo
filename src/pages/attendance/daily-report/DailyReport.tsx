@@ -16,6 +16,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+
+/**
+ * 定数定義
+ */
+const AUTO_SAVE_DELAY = 3000; // 3秒後に自動保存
+const TIME_FORMAT = "HH:mm:ss"; // 保存時刻の表示形式
 import {
   createDailyReport,
   updateDailyReport,
@@ -186,6 +192,18 @@ export default function DailyReport() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [createFormLastSavedAt, setCreateFormLastSavedAt] = useState<
+    string | null
+  >(null);
+  const [editDraftLastSavedAt, setEditDraftLastSavedAt] = useState<
+    string | null
+  >(null);
+  const createFormAutoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const editDraftAutoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [createFormSavedState, setCreateFormSavedState] =
+    useState<DailyReportForm>(() => emptyForm());
+  const [editDraftSavedState, setEditDraftSavedState] =
+    useState<DailyReportForm | null>(null);
   const processedUserIdRef = useRef<string | null>(null);
   const { dateMap: reportsByDate, dateSet: reportedDateSet } = useMemo(() => {
     const dateMap = new Map<string, DailyReportItem>();
@@ -200,6 +218,16 @@ export default function DailyReport() {
   }, [reports]);
   const isCreateMode = selectedReportId === "create";
   const resolvedAuthorName = authorName || "スタッフ";
+  const isCreateFormDirty = useMemo(
+    () => JSON.stringify(createForm) !== JSON.stringify(createFormSavedState),
+    [createForm, createFormSavedState]
+  );
+  const isEditDraftDirty = useMemo(
+    () =>
+      editDraft &&
+      JSON.stringify(editDraft) !== JSON.stringify(editDraftSavedState),
+    [editDraft, editDraftSavedState]
+  );
   const canSubmit = Boolean(staffId && createForm.title.trim());
   const canEditSubmit = Boolean(editDraft && editDraft.title.trim());
   const selectedReport =
@@ -389,6 +417,8 @@ export default function DailyReport() {
   useEffect(() => {
     setEditingReportId(null);
     setEditDraft(null);
+    setEditDraftSavedState(null);
+    setEditDraftLastSavedAt(null);
     setActionError(null);
   }, [selectedReportId]);
 
@@ -437,7 +467,10 @@ export default function DailyReport() {
     });
   };
 
-  const handleCreateSubmit = async (status: EditableStatus) => {
+  const handleCreateSubmit = async (
+    status: EditableStatus,
+    showNotification = true
+  ) => {
     if (!createForm.title.trim()) {
       setActionError("タイトルを入力してください。");
       return;
@@ -490,12 +523,20 @@ export default function DailyReport() {
       );
       setSelectedReportId(mapped.id);
 
+      // 保存時刻を記録
+      setCreateFormLastSavedAt(dayjs().format(TIME_FORMAT));
+      // 保存済み状態を更新
+      setCreateFormSavedState(createForm);
+
       const resetDate = formatDateInput(new Date());
       setCreateForm(() => emptyForm(resetDate, resolvedAuthorName));
+      if (showNotification && status === DailyReportStatus.SUBMITTED) {
+        setActionError(null);
+      }
     } catch (error) {
-      setActionError(
-        error instanceof Error ? error.message : "日報の作成に失敗しました。"
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "日報の作成に失敗しました。";
+      setActionError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -504,19 +545,25 @@ export default function DailyReport() {
   const handleStartEdit = (report: DailyReportItem) => {
     setActionError(null);
     setEditingReportId(report.id);
-    setEditDraft({
+    const editDraftForm = {
       date: report.date,
       author: report.author || resolvedAuthorName,
       title: report.title,
       content: report.content,
-    });
+    };
+    setEditDraft(editDraftForm);
+    setEditDraftSavedState(editDraftForm);
+    setEditDraftLastSavedAt(null);
   };
 
   const handleEditChange: DailyReportFormChangeHandler = (field, value) => {
     setEditDraft((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
-  const handleSaveEdit = async (status: EditableStatus) => {
+  const handleSaveEdit = async (
+    status: EditableStatus,
+    showNotification = true
+  ) => {
     if (!editingReportId || !editDraft) return;
     if (!editDraft.title.trim()) {
       setActionError("タイトルを入力してください。");
@@ -559,12 +606,20 @@ export default function DailyReport() {
           prev.map((report) => (report.id === mapped.id ? mapped : report))
         )
       );
-      setEditingReportId(null);
-      setEditDraft(null);
+
+      // 保存時刻を記録
+      setEditDraftLastSavedAt(dayjs().format(TIME_FORMAT));
+      // 保存済み状態を更新
+      setEditDraftSavedState(editDraft);
+
+      if (showNotification && status === DailyReportStatus.SUBMITTED) {
+        setEditingReportId(null);
+        setEditDraft(null);
+      }
     } catch (error) {
-      setActionError(
-        error instanceof Error ? error.message : "日報の更新に失敗しました。"
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "日報の更新に失敗しました。";
+      setActionError(errorMessage);
     } finally {
       setIsUpdating(false);
     }
@@ -575,6 +630,68 @@ export default function DailyReport() {
     setEditDraft(null);
     setActionError(null);
   };
+
+  /**
+   * 作成フォーム用の自動保存
+   * デバウンス処理により、入力停止後AUTO_SAVE_DELAY(3秒)経過後に自動保存
+   */
+  useEffect(() => {
+    // 既存のタイマーをクリア（デバウンス処理）
+    if (createFormAutoSaveTimerRef.current) {
+      clearTimeout(createFormAutoSaveTimerRef.current);
+    }
+
+    // 保存条件: 作成モード、内容が変更されている、タイトルが空ではない
+    if (isCreateMode && isCreateFormDirty && createForm.title.trim() !== "") {
+      createFormAutoSaveTimerRef.current = setTimeout(() => {
+        void handleCreateSubmit(DailyReportStatus.DRAFT, false);
+      }, AUTO_SAVE_DELAY);
+    }
+
+    // クリーンアップ: コンポーネントのアンマウント時やdependenciesの変更時
+    return () => {
+      if (createFormAutoSaveTimerRef.current) {
+        clearTimeout(createFormAutoSaveTimerRef.current);
+      }
+    };
+  }, [createForm, isCreateFormDirty, isCreateMode, handleCreateSubmit]);
+
+  /**
+   * 編集フォーム用の自動保存
+   * デバウンス処理により、入力停止後AUTO_SAVE_DELAY(3秒)経過後に自動保存
+   */
+  useEffect(() => {
+    // 既存のタイマーをクリア（デバウンス処理）
+    if (editDraftAutoSaveTimerRef.current) {
+      clearTimeout(editDraftAutoSaveTimerRef.current);
+    }
+
+    // 保存条件: 編集中、内容が変更されている、提出済みではない、タイトルが空ではない
+    if (
+      editingReportId &&
+      editDraft &&
+      isEditDraftDirty &&
+      !isSelectedReportSubmitted &&
+      editDraft.title.trim() !== ""
+    ) {
+      editDraftAutoSaveTimerRef.current = setTimeout(() => {
+        void handleSaveEdit(DailyReportStatus.DRAFT, false);
+      }, AUTO_SAVE_DELAY);
+    }
+
+    // クリーンアップ: コンポーネントのアンマウント時やdependenciesの変更時
+    return () => {
+      if (editDraftAutoSaveTimerRef.current) {
+        clearTimeout(editDraftAutoSaveTimerRef.current);
+      }
+    };
+  }, [
+    editDraft,
+    isEditDraftDirty,
+    editingReportId,
+    isSelectedReportSubmitted,
+    handleSaveEdit,
+  ]);
 
   return (
     <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
@@ -647,6 +764,14 @@ export default function DailyReport() {
                             onChange={handleCreateChange}
                             resolvedAuthorName={resolvedAuthorName}
                           />
+                          {createFormLastSavedAt && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              最終保存: {createFormLastSavedAt}
+                            </Typography>
+                          )}
                           <Stack
                             direction={{ xs: "column", sm: "row" }}
                             justifyContent="flex-end"
@@ -657,9 +782,13 @@ export default function DailyReport() {
                               variant="text"
                               onClick={() => {
                                 setActionError(null);
-                                setCreateForm(() =>
-                                  emptyForm(undefined, resolvedAuthorName)
+                                const newForm = emptyForm(
+                                  undefined,
+                                  resolvedAuthorName
                                 );
+                                setCreateForm(() => newForm);
+                                setCreateFormSavedState(newForm);
+                                setCreateFormLastSavedAt(null);
                               }}
                             >
                               クリア
@@ -670,7 +799,8 @@ export default function DailyReport() {
                               disabled={!canSubmit || isSubmitting}
                               onClick={() => {
                                 void handleCreateSubmit(
-                                  DailyReportStatus.DRAFT
+                                  DailyReportStatus.DRAFT,
+                                  true
                                 );
                               }}
                             >
@@ -682,7 +812,8 @@ export default function DailyReport() {
                               disabled={!canSubmit || isSubmitting}
                               onClick={() => {
                                 void handleCreateSubmit(
-                                  DailyReportStatus.SUBMITTED
+                                  DailyReportStatus.SUBMITTED,
+                                  true
                                 );
                               }}
                             >
@@ -755,6 +886,14 @@ export default function DailyReport() {
                                 onChange={handleEditChange}
                                 resolvedAuthorName={resolvedAuthorName}
                               />
+                              {editDraftLastSavedAt && (
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  最終保存: {editDraftLastSavedAt}
+                                </Typography>
+                              )}
                             </Stack>
                           ) : (
                             <Typography
@@ -867,7 +1006,10 @@ export default function DailyReport() {
                               isSelectedReportSubmitted
                             }
                             onClick={() => {
-                              void handleSaveEdit(DailyReportStatus.DRAFT);
+                              void handleSaveEdit(
+                                DailyReportStatus.DRAFT,
+                                true
+                              );
                             }}
                           >
                             下書き保存
@@ -876,7 +1018,10 @@ export default function DailyReport() {
                             variant="contained"
                             disabled={!canEditSubmit || isUpdating}
                             onClick={() => {
-                              void handleSaveEdit(DailyReportStatus.SUBMITTED);
+                              void handleSaveEdit(
+                                DailyReportStatus.SUBMITTED,
+                                true
+                              );
                             }}
                           >
                             提出する
