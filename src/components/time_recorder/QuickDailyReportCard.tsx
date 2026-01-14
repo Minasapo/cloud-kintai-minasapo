@@ -10,7 +10,8 @@ import type {
 } from "@shared/api/graphql/types";
 import { DailyReportStatus } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-import { useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
@@ -25,6 +26,8 @@ interface QuickDailyReportCardProps {
   date: string;
 }
 
+const AUTO_SAVE_DELAY = 3000; // 3秒後に自動保存
+
 export default function QuickDailyReportCard({
   staffId,
   date,
@@ -38,12 +41,31 @@ export default function QuickDailyReportCard({
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const defaultTitle = useMemo(() => `${date}の日報`, [date]);
   const hasStaff = Boolean(staffId);
   const isEditable = hasStaff && !isLoading;
   const isDirty = content !== savedContent;
   const contentPanelId = useMemo(() => `quick-daily-report-${date}`, [date]);
+
+  // ページ離脱時の警告
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isSaving || isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isSaving, isDirty]);
 
   useEffect(() => {
     if (!staffId) {
@@ -125,73 +147,107 @@ export default function QuickDailyReportCard({
     }
   }, [staffId]);
 
-  const handleSave = async () => {
-    if (!staffId || !isDirty) return;
+  const handleSave = useCallback(
+    async (showNotification = true) => {
+      if (!staffId || content === savedContent) return;
 
-    setIsSaving(true);
-    setError(null);
+      setIsSaving(true);
+      setError(null);
 
-    try {
-      if (reportId) {
-        const response = (await graphqlClient.graphql({
-          query: updateDailyReport,
-          variables: {
-            input: {
-              id: reportId,
-              content,
-              updatedAt: new Date().toISOString(),
+      try {
+        if (reportId) {
+          const response = (await graphqlClient.graphql({
+            query: updateDailyReport,
+            variables: {
+              input: {
+                id: reportId,
+                content,
+                updatedAt: new Date().toISOString(),
+              },
             },
-          },
-          authMode: "userPool",
-        })) as GraphQLResult<UpdateDailyReportMutation>;
+            authMode: "userPool",
+          })) as GraphQLResult<UpdateDailyReportMutation>;
 
-        if (response.errors?.length) {
-          throw new Error(response.errors.map((err) => err.message).join("\n"));
+          if (response.errors?.length) {
+            throw new Error(
+              response.errors.map((err) => err.message).join("\n")
+            );
+          }
+
+          const updatedContent =
+            response.data?.updateDailyReport?.content ?? content;
+          setSavedContent(updatedContent);
+          setContent(updatedContent);
+        } else {
+          const response = (await graphqlClient.graphql({
+            query: createDailyReport,
+            variables: {
+              input: {
+                staffId,
+                reportDate: date,
+                title: defaultTitle,
+                content,
+                status: DailyReportStatus.DRAFT,
+                updatedAt: new Date().toISOString(),
+                reactions: [],
+                comments: [],
+              },
+            },
+            authMode: "userPool",
+          })) as GraphQLResult<CreateDailyReportMutation>;
+
+          if (response.errors?.length) {
+            throw new Error(
+              response.errors.map((err) => err.message).join("\n")
+            );
+          }
+
+          const created = response.data?.createDailyReport;
+          const nextContent = created?.content ?? content;
+          setReportId(created?.id ?? null);
+          setSavedContent(nextContent);
+          setContent(nextContent);
         }
 
-        const updatedContent =
-          response.data?.updateDailyReport?.content ?? content;
-        setSavedContent(updatedContent);
-        setContent(updatedContent);
-      } else {
-        const response = (await graphqlClient.graphql({
-          query: createDailyReport,
-          variables: {
-            input: {
-              staffId,
-              reportDate: date,
-              title: defaultTitle,
-              content,
-              status: DailyReportStatus.DRAFT,
-              updatedAt: new Date().toISOString(),
-              reactions: [],
-              comments: [],
-            },
-          },
-          authMode: "userPool",
-        })) as GraphQLResult<CreateDailyReportMutation>;
-
-        if (response.errors?.length) {
-          throw new Error(response.errors.map((err) => err.message).join("\n"));
+        setLastSavedAt(dayjs().format("HH:mm:ss"));
+        if (showNotification) {
+          dispatch(setSnackbarSuccess("日報を保存しました"));
         }
-
-        const created = response.data?.createDailyReport;
-        const nextContent = created?.content ?? content;
-        setReportId(created?.id ?? null);
-        setSavedContent(nextContent);
-        setContent(nextContent);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "日報の保存に失敗しました。";
+        setError(message);
+        if (showNotification) {
+          dispatch(setSnackbarError("日報の保存に失敗しました"));
+        }
+      } finally {
+        setIsSaving(false);
       }
+    },
+    [staffId, content, savedContent, reportId, date, defaultTitle, dispatch]
+  );
 
-      dispatch(setSnackbarSuccess("日報を保存しました"));
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "日報の保存に失敗しました。";
-      setError(message);
-      dispatch(setSnackbarError("日報の保存に失敗しました"));
-    } finally {
-      setIsSaving(false);
+  // 自動保存
+  useEffect(() => {
+    // タイマーをクリア
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
     }
-  };
+
+    // 内容が変更され、保存が必要な場合のみタイマーをセット
+    if (staffId && content !== savedContent && content.trim() !== "") {
+      autoSaveTimerRef.current = setTimeout(() => {
+        void handleSave(false); // 自動保存時は通知を表示しない
+      }, AUTO_SAVE_DELAY);
+    }
+
+    // クリーンアップ
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [content, savedContent, staffId, handleSave]);
 
   const handleClear = () => {
     setContent(savedContent);
@@ -224,12 +280,13 @@ export default function QuickDailyReportCard({
       isSaving={isSaving}
       hasStaff={hasStaff}
       error={error}
+      lastSavedAt={lastSavedAt}
       contentPanelId={contentPanelId}
       onToggle={handleToggle}
       onDialogOpen={handleDialogOpen}
       onDialogClose={handleDialogClose}
       onClear={handleClear}
-      onSave={() => void handleSave()}
+      onSave={() => void handleSave(true)}
       onContentChange={(value) => setContent(value)}
     />
   );
