@@ -7,14 +7,22 @@ import { WorkStatus, WorkStatusCodes } from "../common";
 export default function RestEndItem({
   workStatus,
   onClick,
+  disabled = false,
 }: {
   workStatus: WorkStatus | null;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   const isResting = useMemo(
     () => workStatus?.code === WorkStatusCodes.RESTING,
     [workStatus]
   );
 
-  return <RestEndButton isResting={Boolean(isResting)} onRestEnd={onClick} />;
+  return (
+    <RestEndButton
+      isResting={Boolean(isResting)}
+      onRestEnd={onClick}
+      disabled={disabled}
+    />
+  );
 }

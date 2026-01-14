@@ -16,24 +16,24 @@ export type HourlyPaidHolidayTimeInputs = {
 
 export type AttendanceEditInputs = {
   workDate?: UpdateAttendanceInput["workDate"] | null;
-  startTime: UpdateAttendanceInput["startTime"] | null;
-  endTime: UpdateAttendanceInput["endTime"] | null;
+  startTime?: UpdateAttendanceInput["startTime"] | null;
+  endTime?: UpdateAttendanceInput["endTime"] | null;
   isDeemedHoliday?: UpdateAttendanceInput["isDeemedHoliday"];
   specialHolidayFlag?: UpdateAttendanceInput["specialHolidayFlag"];
-  paidHolidayFlag: UpdateAttendanceInput["paidHolidayFlag"];
+  paidHolidayFlag?: UpdateAttendanceInput["paidHolidayFlag"];
   absentFlag?: UpdateAttendanceInput["absentFlag"];
   // hourlyPaidHolidayHours: UpdateAttendanceInput["hourlyPaidHolidayHours"];
   hourlyPaidHolidayTimes?: HourlyPaidHolidayTimeInputs[];
-  substituteHolidayDate: UpdateAttendanceInput["substituteHolidayDate"];
-  goDirectlyFlag: UpdateAttendanceInput["goDirectlyFlag"];
-  returnDirectlyFlag: UpdateAttendanceInput["returnDirectlyFlag"];
-  remarks: UpdateAttendanceInput["remarks"];
+  substituteHolidayDate?: UpdateAttendanceInput["substituteHolidayDate"];
+  goDirectlyFlag?: UpdateAttendanceInput["goDirectlyFlag"];
+  returnDirectlyFlag?: UpdateAttendanceInput["returnDirectlyFlag"];
+  remarks?: UpdateAttendanceInput["remarks"];
   remarkTags?: string[];
-  rests: RestInputs[];
+  rests?: RestInputs[];
   staffComment?: string;
   histories?: UpdateAttendanceInput["histories"];
   changeRequests?: UpdateAttendanceInput["changeRequests"];
-  systemComments: SystemCommentInput[];
+  systemComments?: SystemCommentInput[];
   revision?: UpdateAttendanceInput["revision"];
 };
 
