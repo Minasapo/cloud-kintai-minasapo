@@ -1,29 +1,19 @@
 import "./styles.scss";
 
-import {
-  Alert,
-  AlertTitle,
-  Box,
-  styled,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Alert, AlertTitle, Box, styled } from "@mui/material";
 import {
   Attendance,
+  CloseDate,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
+import dayjs, { Dayjs } from "dayjs";
 
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-import { AttendanceGraph } from "@/pages/admin/AdminStaffAttendanceList/AttendanceGraph";
+import { AttendanceStatus } from "@/lib/AttendanceState";
 
-import TableBodyRow from "./TableBodyRow";
+import { getStatus } from "./attendanceStatusUtils";
+import MobileCalendar from "./MobileCalendar";
 
 const MobileBox = styled(Box)(({ theme }) => ({
   padding: "0px 0px 40px 0px",
@@ -37,121 +27,82 @@ export default function MobileList({
   holidayCalendars,
   companyHolidayCalendars,
   staff,
+  currentMonth,
+  onMonthChange,
+  closeDates,
 }: {
   attendances: Attendance[];
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
   staff: Staff | null | undefined;
+  currentMonth: Dayjs;
+  onMonthChange?: (newMonth: Dayjs) => void;
+  closeDates?: CloseDate[];
 }) {
-  const errorAttendances = (() => {
-    if (!staff) return [] as Attendance[];
-    return attendances.filter((a) => {
-      const hasSystemComment =
-        Array.isArray(a.systemComments) && a.systemComments.length > 0;
-      if (hasSystemComment) return true;
-      const status = new AttendanceState(
-        staff,
-        a,
-        holidayCalendars,
-        companyHolidayCalendars
-      ).get();
-      return (
-        status === AttendanceStatus.Error || status === AttendanceStatus.Late
+  const hasErrorStatus = (() => {
+    if (!staff) return false;
+    const today = dayjs();
+
+    // 月の最初と最後を取得
+    const monthStart = currentMonth.startOf("month");
+    const monthEnd = currentMonth.endOf("month");
+
+    // 該当月のすべての日付をチェック
+    let current = monthStart;
+
+    while (current.isBefore(monthEnd) || current.isSame(monthEnd, "day")) {
+      // 未来の日付はスキップ
+      if (current.isAfter(today, "day")) {
+        current = current.add(1, "day");
+        continue;
+      }
+
+      // その日付の打刻データを探す
+      const attendance = attendances.find((a) =>
+        dayjs(a.workDate).isSame(current, "day")
       );
-    });
+
+      // カレンダーと同じロジックで状態を判定
+      const status = getStatus(
+        attendance,
+        staff,
+        holidayCalendars,
+        companyHolidayCalendars,
+        current
+      );
+
+      if (
+        status === AttendanceStatus.Error ||
+        status === AttendanceStatus.Late
+      ) {
+        return true;
+      }
+
+      current = current.add(1, "day");
+    }
+
+    return false;
   })();
 
   return (
     <MobileBox>
-      <AttendanceGraph attendances={attendances} />
-      {errorAttendances.length > 0 && (
-        <Box sx={{ pb: 2, pt: 2 }}>
-          {/* 目立たせるために枠と背景で囲む */}
-          <Box
-            sx={{
-              border: "1px solid",
-              borderColor: "warning.main",
-              borderRadius: 2,
-              p: 2,
-              backgroundColor: "rgba(255,243,205,0.12)",
-            }}
-          >
-            <Typography variant="h4" sx={{ mb: 1 }}>
-              打刻エラー一覧 ({errorAttendances.length})
-            </Typography>
-            <Alert severity="warning">
-              <AlertTitle sx={{ fontWeight: "bold" }}>
-                確認してください
-              </AlertTitle>
-              打刻エラーがあります
-            </Alert>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell />
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      勤務時間
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      休憩時間(直近)
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      作成日時
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      更新日時
-                    </TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {errorAttendances.map((attendance, index) => (
-                    <TableBodyRow
-                      key={`error-${index}`}
-                      attendance={attendance}
-                      holidayCalendars={holidayCalendars}
-                      companyHolidayCalendars={companyHolidayCalendars}
-                      staff={staff}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+      {hasErrorStatus && (
+        <Box sx={{ pb: 2 }}>
+          <Alert severity="warning">
+            <AlertTitle sx={{ fontWeight: "bold" }}>打刻エラー</AlertTitle>
+            カレンダー上で赤色の日付をタップして確認してください
+          </Alert>
         </Box>
       )}
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>勤務時間</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>
-                休憩時間(直近)
-              </TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>作成日時</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>更新日時</TableCell>
-              <TableCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {attendances.map((attendance, index) => (
-              <TableBodyRow
-                key={index}
-                attendance={attendance}
-                holidayCalendars={holidayCalendars}
-                companyHolidayCalendars={companyHolidayCalendars}
-                staff={staff}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <MobileCalendar
+        attendances={attendances}
+        holidayCalendars={holidayCalendars}
+        companyHolidayCalendars={companyHolidayCalendars}
+        staff={staff}
+        currentMonth={currentMonth}
+        onMonthChange={onMonthChange}
+        closeDates={closeDates}
+      />
     </MobileBox>
   );
 }
