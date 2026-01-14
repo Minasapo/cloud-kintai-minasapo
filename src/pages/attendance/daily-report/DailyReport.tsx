@@ -15,13 +15,7 @@ import {
   Skeleton,
   Stack,
   Typography,
-} from "@mui/material";
-
-/**
- * 定数定義
- */
-const AUTO_SAVE_DELAY = 3000; // 3秒後に自動保存
-const TIME_FORMAT = "HH:mm:ss"; // 保存時刻の表示形式
+} from "@mui/material"; // 保存時刻の表示形式
 import {
   createDailyReport,
   updateDailyReport,
@@ -50,6 +44,12 @@ import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+
+/**
+ * 定数定義
+ */
+const AUTO_SAVE_DELAY = 3000; // 3秒後に自動保存
+const TIME_FORMAT = "HH:mm:ss";
 
 type ReportStatus = DailyReportStatus;
 type EditableStatus = Extract<ReportStatus, "DRAFT" | "SUBMITTED">;
@@ -433,6 +433,8 @@ export default function DailyReport() {
       return;
     }
     setSelectedReportId("create");
+    // 日付を移動したときは保存時刻をリセット
+    setCreateFormLastSavedAt(null);
     setCreateForm((prev) => {
       const prevDefaultTitle = buildDefaultTitle(prev.date);
       const nextDefaultTitle = buildDefaultTitle(dateKey);
@@ -521,18 +523,23 @@ export default function DailyReport() {
           ...prev.filter((report) => report.id !== mapped.id),
         ])
       );
-      setSelectedReportId(mapped.id);
 
       // 保存時刻を記録
       setCreateFormLastSavedAt(dayjs().format(TIME_FORMAT));
       // 保存済み状態を更新
       setCreateFormSavedState(createForm);
 
+      // 手動保存時（提出時）のみ詳細画面に遷移
+      if (showNotification && status === DailyReportStatus.SUBMITTED) {
+        setSelectedReportId(mapped.id);
+      } else if (showNotification) {
+        // 手動保存（下書き保存）時も詳細画面に遷移
+        setSelectedReportId(mapped.id);
+      }
+      // 自動保存時（showNotification=false）は遷移しない
+
       const resetDate = formatDateInput(new Date());
       setCreateForm(() => emptyForm(resetDate, resolvedAuthorName));
-      if (showNotification && status === DailyReportStatus.SUBMITTED) {
-        setActionError(null);
-      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "日報の作成に失敗しました。";
@@ -641,8 +648,13 @@ export default function DailyReport() {
       clearTimeout(createFormAutoSaveTimerRef.current);
     }
 
-    // 保存条件: 作成モード、内容が変更されている、タイトルが空ではない
-    if (isCreateMode && isCreateFormDirty && createForm.title.trim() !== "") {
+    // 保存条件: 作成モード、内容が変更されている、タイトルと内容の両方が空ではない
+    if (
+      isCreateMode &&
+      isCreateFormDirty &&
+      createForm.title.trim() !== "" &&
+      createForm.content.trim() !== ""
+    ) {
       createFormAutoSaveTimerRef.current = setTimeout(() => {
         void handleCreateSubmit(DailyReportStatus.DRAFT, false);
       }, AUTO_SAVE_DELAY);
