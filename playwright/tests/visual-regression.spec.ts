@@ -45,7 +45,7 @@ async function waitForPageReady(page: Page) {
     return new Promise<void>((resolve) => {
       // すべてのアニメーションが完了するまで待機
       const startTime = Date.now();
-      const maxWait = 3000; // 最大3秒待機
+      const maxWait = 2000; // 最大2秒待機
 
       const checkAnimations = () => {
         if (Date.now() - startTime > maxWait) {
@@ -73,7 +73,7 @@ async function waitForPageReady(page: Page) {
           } else {
             resolve();
           }
-        }, 500);
+        }, 300);
       };
 
       checkAnimations();
@@ -81,27 +81,8 @@ async function waitForPageReady(page: Page) {
   });
 }
 
-/**
- * ログイン処理を実行する
- */
-async function performLogin(page: Page, username: string, password: string) {
-  const baseURL = process.env.VITE_BASE_PATH || "http://localhost:5173";
-  await page.goto(`${baseURL}/login`);
-
-  // ログインフォームに入力
-  await page.fill('input[name="username"]', username);
-  await page.fill('input[name="password"]', password);
-
-  // ログインボタンをクリック
-  const loginButton = page.locator('button[type="submit"]');
-  await loginButton.click();
-
-  // ログイン完了を待機（ホームページへのリダイレクト）
-  await page.waitForURL(`${baseURL}/`);
-
-  // ページが完全にロードされるまで待機
-  await page.waitForLoadState("networkidle");
-}
+// ログイン処理はsetup時に行われるため、各テストでは不要
+// storageState を使用してログイン状態を保持
 
 /**
  * スクリーンショット取得時に必要な調整を行う
@@ -131,17 +112,10 @@ async function preparePageForScreenshot(page: Page) {
 test.describe("ビジュアルリグレッション - 画面全体スクリーンショット", () => {
   // スタッフユーザー向けテスト
   test.describe("スタッフユーザー", () => {
-    // 各テストの前にログイン処理を実行
-    test.beforeEach(async ({ page }) => {
-      const username = process.env.PLAYWRIGHT_LOGIN_EMAIL || "";
-      const password = process.env.PLAYWRIGHT_LOGIN_PASSWORD || "";
-      await performLogin(page, username, password);
-    });
+    // storageStateを使用するため、ログイン処理は不要
 
     for (const page of STAFF_TEST_PAGES) {
-      test(`${page.name} (${page.path}) - 画面全体`, async ({
-        page: playwrightPage,
-      }) => {
+      test(`${page.name} (${page.path})`, async ({ page: playwrightPage }) => {
         if (page.path === "/register") {
           await playwrightPage.addInitScript(() => {
             const fixed = new Date("2024-01-13T12:00:00Z").valueOf();
@@ -185,7 +159,7 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
 
         // フルページスクリーンショットで検証
         await expect(playwrightPage).toHaveScreenshot(
-          `staff-${page.path.replace(/\//g, "-")}-full.png`,
+          `staff-${page.path.replace(/\//g, "-")}.png`,
           {
             fullPage: true,
             maxDiffPixels: 100, // 許容差異ピクセル数
@@ -193,79 +167,21 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
           }
         );
       });
-
-      // ビューポートスクリーンショット（ファーストビュー）も取得
-      test(`${page.name} (${page.path}) - ファーストビュー`, async ({
-        page: playwrightPage,
-      }) => {
-        if (page.path === "/register") {
-          await playwrightPage.addInitScript(() => {
-            const fixed = new Date("2024-01-13T12:00:00Z").valueOf();
-            const OriginalDate = Date;
-            class MockDate extends OriginalDate {
-              constructor(...args: ConstructorParameters<typeof OriginalDate>) {
-                const [firstArg] = args;
-                if (typeof firstArg === "undefined") {
-                  super(fixed);
-                } else {
-                  super(firstArg);
-                }
-              }
-              static now() {
-                return fixed;
-              }
-            }
-            // @ts-expect-error Overriding Date for deterministic snapshots
-            globalThis.Date = MockDate;
-          });
-        }
-
-        await playwrightPage.goto(page.path);
-        await waitForPageReady(playwrightPage);
-        await preparePageForScreenshot(playwrightPage);
-
-        const masks: Locator[] = [];
-        if (page.path === "/register") {
-          const clock = playwrightPage
-            .locator(
-              "[data-testid='clock'], [data-testid='time'], .clock, .time-display, [class*='clock']"
-            )
-            .first();
-          masks.push(clock);
-        }
-
-        // ビューポート領域のみのスクリーンショット
-        await expect(playwrightPage).toHaveScreenshot(
-          `staff-${page.path.replace(/\//g, "-")}-viewport.png`,
-          {
-            fullPage: false,
-            maxDiffPixels: 50,
-            mask: masks,
-          }
-        );
-      });
     }
   });
 
-  // 管理者ユーザー向けテスト
+  // 管理者ユーザー向けテスト（chromium-adminプロジェクトでのみ実行）
   test.describe("管理者ユーザー", () => {
-    // 各テストの前にログイン処理を実行
-    test.beforeEach(async ({ page }, testInfo) => {
-      // スタッフプロジェクトの場合はスキップ
-      if (testInfo.project.name === "chromium-staff") return;
-
-      const username = process.env.PLAYWRIGHT_ADMIN_EMAIL || "";
-      const password = process.env.PLAYWRIGHT_ADMIN_PASSWORD || "";
-      await performLogin(page, username, password);
-    });
+    // storageStateを使用するため、ログイン処理は不要
 
     for (const page of ADMIN_TEST_PAGES) {
-      test(`${page.name} (${page.path}) - 画面全体`, async ({
+      test(`${page.name} (${page.path})`, async ({
         page: playwrightPage,
       }, testInfo) => {
+        // chromium-adminプロジェクト以外ではスキップ
         test.skip(
-          testInfo.project.name === "chromium-staff",
-          "スタッフ権限ではスキップ"
+          testInfo.project.name !== "chromium-admin",
+          "管理者プロジェクトでのみ実行"
         );
 
         await playwrightPage.goto(page.path);
@@ -273,31 +189,10 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
         await preparePageForScreenshot(playwrightPage);
 
         await expect(playwrightPage).toHaveScreenshot(
-          `admin-${page.path.replace(/\//g, "-")}-full.png`,
+          `admin-${page.path.replace(/\//g, "-")}.png`,
           {
             fullPage: true,
             maxDiffPixels: 100,
-          }
-        );
-      });
-
-      test(`${page.name} (${page.path}) - ファーストビュー`, async ({
-        page: playwrightPage,
-      }, testInfo) => {
-        test.skip(
-          testInfo.project.name === "chromium-staff",
-          "スタッフ権限ではスキップ"
-        );
-
-        await playwrightPage.goto(page.path);
-        await waitForPageReady(playwrightPage);
-        await preparePageForScreenshot(playwrightPage);
-
-        await expect(playwrightPage).toHaveScreenshot(
-          `admin-${page.path.replace(/\//g, "-")}-viewport.png`,
-          {
-            fullPage: false,
-            maxDiffPixels: 50,
           }
         );
       });
@@ -306,12 +201,7 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
 
   // レスポンシブデザイン検証（デスクトップとモバイル）
   test.describe("レスポンシブデザイン検証 - モバイル (iPhone 12 Pro)", () => {
-    // 各テストの前にログイン処理を実行
-    test.beforeEach(async ({ page }) => {
-      const username = process.env.PLAYWRIGHT_LOGIN_EMAIL || "";
-      const password = process.env.PLAYWRIGHT_LOGIN_PASSWORD || "";
-      await performLogin(page, username, password);
-    });
+    // storageStateを使用するため、ログイン処理は不要
 
     test("勤怠一覧 - モバイル表示", async ({ page: playwrightPage }) => {
       // iPhone 12 Proのビューポートとユーザーエージェントを設定
@@ -327,7 +217,7 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
       await waitForPageReady(playwrightPage);
 
       // ビューポート変更後のレイアウト調整を待つ
-      await playwrightPage.waitForTimeout(1000);
+      await playwrightPage.waitForTimeout(500); // 1秒→500msに短縮
 
       // ビューポートサイズを確認（デバッグ用）
       const viewport = playwrightPage.viewportSize();
@@ -362,7 +252,7 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
       await waitForPageReady(playwrightPage);
 
       // ビューポート変更後のレイアウト調整を待つ
-      await playwrightPage.waitForTimeout(1000);
+      await playwrightPage.waitForTimeout(500); // 1秒→500msに短縮
 
       // ビューポートサイズを確認（デバッグ用）
       const viewport = playwrightPage.viewportSize();
@@ -383,12 +273,7 @@ test.describe("ビジュアルリグレッション - 画面全体スクリー�
   });
 
   test.describe("レスポンシブデザイン検証 - デスクトップ", () => {
-    // 各テストの前にログイン処理を実行
-    test.beforeEach(async ({ page }) => {
-      const username = process.env.PLAYWRIGHT_LOGIN_EMAIL || "";
-      const password = process.env.PLAYWRIGHT_LOGIN_PASSWORD || "";
-      await performLogin(page, username, password);
-    });
+    // storageStateを使用するため、ログイン処理は不要
 
     test("勤怠一覧 - デスクトップ表示", async ({ page: playwrightPage }) => {
       // デスクトップビューポートに設定
