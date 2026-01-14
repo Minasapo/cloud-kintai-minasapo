@@ -1,14 +1,8 @@
 import { createTimeRangeValidator } from "@entities/attendance/validation/validators";
-import { SystemCommentInput } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { z, type ZodType } from "zod";
+import { z } from "zod";
 
 import { validationMessages } from "@/constants/validationMessages";
-import {
-  AttendanceEditInputs,
-  HourlyPaidHolidayTimeInputs,
-  RestInputs,
-} from "@/pages/attendance/edit/common";
 
 const isoDateTimeSchema = z
   .string({
@@ -19,10 +13,7 @@ const isoDateTimeSchema = z
     message: validationMessages.common.invalidDateTime,
   });
 
-const dateTimeField: ZodType<string | null> = z.union([
-  isoDateTimeSchema,
-  z.null(),
-]);
+const dateTimeField = z.union([isoDateTimeSchema, z.null()]);
 
 const isoDateSchema = z
   .string({
@@ -32,9 +23,9 @@ const isoDateSchema = z
     message: validationMessages.common.invalidDate,
   });
 
-const dateField: ZodType<string | null> = z.union([isoDateSchema, z.null()]);
+const dateField = z.union([isoDateSchema, z.null()]);
 
-const restIntervalSchema: ZodType<RestInputs> = createTimeRangeValidator(
+const restIntervalSchema = createTimeRangeValidator(
   z.object({
     startTime: dateTimeField,
     endTime: dateTimeField,
@@ -45,25 +36,24 @@ const restIntervalSchema: ZodType<RestInputs> = createTimeRangeValidator(
   }
 );
 
-const hourlyPaidHolidayTimeSchema: ZodType<HourlyPaidHolidayTimeInputs> =
-  createTimeRangeValidator(
-    z.object({
-      startTime: dateTimeField,
-      endTime: dateTimeField,
-    }),
-    {
-      incomplete: validationMessages.attendance.hourlyPaidHoliday.incomplete,
-      range: validationMessages.attendance.hourlyPaidHoliday.range,
-    }
-  );
+const hourlyPaidHolidayTimeSchema = createTimeRangeValidator(
+  z.object({
+    startTime: dateTimeField,
+    endTime: dateTimeField,
+  }),
+  {
+    incomplete: validationMessages.attendance.hourlyPaidHoliday.incomplete,
+    range: validationMessages.attendance.hourlyPaidHoliday.range,
+  }
+);
 
-const systemCommentSchema: ZodType<SystemCommentInput> = z.object({
+const systemCommentSchema = z.object({
   comment: z.string(),
   confirmed: z.boolean(),
   createdAt: isoDateTimeSchema,
 });
 
-export const attendanceEditSchema: ZodType<AttendanceEditInputs> = z
+export const attendanceEditSchema = z
   .object({
     workDate: dateField.optional(),
     startTime: dateTimeField,
