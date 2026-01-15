@@ -7,11 +7,13 @@ import { WorkStatus, WorkStatusCodes } from "../common";
 type RestStartItemProps = {
   workStatus: WorkStatus | null;
   onClick: () => void;
+  disabled?: boolean;
 };
 
 export default function RestStartItem({
   workStatus,
   onClick,
+  disabled = false,
 }: RestStartItemProps) {
   const isWorking = useMemo(
     () => workStatus?.code === WorkStatusCodes.WORKING,
@@ -19,6 +21,10 @@ export default function RestStartItem({
   );
 
   return (
-    <RestStartButton isWorking={Boolean(isWorking)} onRestStart={onClick} />
+    <RestStartButton
+      isWorking={Boolean(isWorking)}
+      onRestStart={onClick}
+      disabled={disabled}
+    />
   );
 }

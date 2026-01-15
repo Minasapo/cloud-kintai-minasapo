@@ -8,9 +8,16 @@ import {
 
 export function RoleTableCell({ staff }: { staff: StaffType }) {
   const { role, owner } = staff;
+
+  // オーナー権限が設定されている場合は優先的に表示
   if (owner) {
-    return <TableCell>{roleLabelMap.get(StaffRole.OWNER) || "***"}</TableCell>;
+    return (
+      <TableCell>{roleLabelMap.get(StaffRole.OWNER) ?? "オーナー"}</TableCell>
+    );
   }
 
-  return <TableCell>{roleLabelMap.get(role) || "***"}</TableCell>;
+  // role に対応するラベルを取得、なければ未設定を表示
+  const roleLabel =
+    roleLabelMap.get(role) ?? roleLabelMap.get(StaffRole.NONE) ?? "未設定";
+  return <TableCell>{roleLabel}</TableCell>;
 }

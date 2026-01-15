@@ -7,13 +7,24 @@ import { WorkStatus, WorkStatusCodes } from "../common";
 type ClockInItemProps = {
   workStatus: WorkStatus;
   onClick: () => void;
+  disabled?: boolean;
 };
 
-export default function ClockInItem({ workStatus, onClick }: ClockInItemProps) {
+export default function ClockInItem({
+  workStatus,
+  onClick,
+  disabled = false,
+}: ClockInItemProps) {
   const isBeforeWork = useMemo(
     () => workStatus.code === WorkStatusCodes.BEFORE_WORK,
     [workStatus.code]
   );
 
-  return <ClockInButton isBeforeWork={isBeforeWork} onClockIn={onClick} />;
+  return (
+    <ClockInButton
+      isBeforeWork={isBeforeWork}
+      onClockIn={onClick}
+      disabled={disabled}
+    />
+  );
 }

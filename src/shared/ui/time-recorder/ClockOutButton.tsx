@@ -45,15 +45,20 @@ const StyledClockOutButton = styled(Button)(({ theme }) => ({
 export interface ClockOutButtonProps {
   isWorking: boolean;
   onClockOut: () => void;
+  disabled?: boolean;
 }
 
-const ClockOutButton = ({ isWorking, onClockOut }: ClockOutButtonProps) => {
+const ClockOutButton = ({
+  isWorking,
+  onClockOut,
+  disabled = false,
+}: ClockOutButtonProps) => {
   const [isClicked, setIsClicked] = useState(false);
 
   // Derived state: button is disabled when not working or user clicked
   const isDisabled = useMemo(() => {
-    return !isWorking || isClicked;
-  }, [isWorking, isClicked]);
+    return !isWorking || isClicked || disabled;
+  }, [isWorking, isClicked, disabled]);
 
   const handleClick = useCallback(() => {
     if (isDisabled) return;

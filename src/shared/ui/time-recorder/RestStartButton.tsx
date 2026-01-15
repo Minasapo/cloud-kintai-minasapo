@@ -22,9 +22,14 @@ const StyledRestStartButton = styled(Button)(({ theme }) => ({
 export interface RestStartButtonProps {
   isWorking: boolean;
   onRestStart: () => void;
+  disabled?: boolean;
 }
 
-const RestStartButton = ({ isWorking, onRestStart }: RestStartButtonProps) => {
+const RestStartButton = ({
+  isWorking,
+  onRestStart,
+  disabled = false,
+}: RestStartButtonProps) => {
   const [isPending, setIsPending] = useState(false);
 
   // Derived state: reset isPending when isWorking changes
@@ -41,7 +46,7 @@ const RestStartButton = ({ isWorking, onRestStart }: RestStartButtonProps) => {
     <StyledRestStartButton
       fullWidth
       onClick={handleClick}
-      disabled={!isWorking || actualIsPending}
+      disabled={!isWorking || actualIsPending || disabled}
       data-testid="rest-start-button"
     >
       休憩開始

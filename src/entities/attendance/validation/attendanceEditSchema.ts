@@ -1,14 +1,11 @@
-import { createTimeRangeValidator } from "@entities/attendance/validation/validators";
-import { SystemCommentInput } from "@shared/api/graphql/types";
+import {
+  createTimeRangeValidator,
+  TimeRangeShape,
+} from "@entities/attendance/validation/validators";
 import dayjs from "dayjs";
-import { z, type ZodType } from "zod";
+import { z } from "zod";
 
 import { validationMessages } from "@/constants/validationMessages";
-import {
-  AttendanceEditInputs,
-  HourlyPaidHolidayTimeInputs,
-  RestInputs,
-} from "@/pages/attendance/edit/common";
 
 const isoDateTimeSchema = z
   .string({
@@ -19,10 +16,7 @@ const isoDateTimeSchema = z
     message: validationMessages.common.invalidDateTime,
   });
 
-const dateTimeField: ZodType<string | null> = z.union([
-  isoDateTimeSchema,
-  z.null(),
-]);
+const dateTimeField = z.union([isoDateTimeSchema, z.null(), z.undefined()]);
 
 const isoDateSchema = z
   .string({
@@ -32,57 +26,60 @@ const isoDateSchema = z
     message: validationMessages.common.invalidDate,
   });
 
-const dateField: ZodType<string | null> = z.union([isoDateSchema, z.null()]);
+const dateField = z.union([isoDateSchema, z.null(), z.undefined()]);
 
-const restIntervalSchema: ZodType<RestInputs> = createTimeRangeValidator(
+const restIntervalSchema = createTimeRangeValidator(
   z.object({
-    startTime: dateTimeField,
-    endTime: dateTimeField,
-  }),
+    startTime: dateTimeField.optional(),
+    endTime: dateTimeField.optional(),
+  }) as z.ZodType<TimeRangeShape, z.ZodTypeDef, TimeRangeShape>,
   {
     incomplete: validationMessages.attendance.rest.incomplete,
     range: validationMessages.attendance.rest.range,
   }
 );
 
-const hourlyPaidHolidayTimeSchema: ZodType<HourlyPaidHolidayTimeInputs> =
-  createTimeRangeValidator(
-    z.object({
-      startTime: dateTimeField,
-      endTime: dateTimeField,
-    }),
-    {
-      incomplete: validationMessages.attendance.hourlyPaidHoliday.incomplete,
-      range: validationMessages.attendance.hourlyPaidHoliday.range,
-    }
-  );
+const hourlyPaidHolidayTimeSchema = createTimeRangeValidator(
+  z.object({
+    startTime: dateTimeField.optional(),
+    endTime: dateTimeField.optional(),
+  }) as z.ZodType<TimeRangeShape, z.ZodTypeDef, TimeRangeShape>,
+  {
+    incomplete: validationMessages.attendance.hourlyPaidHoliday.incomplete,
+    range: validationMessages.attendance.hourlyPaidHoliday.range,
+  }
+);
 
-const systemCommentSchema: ZodType<SystemCommentInput> = z.object({
+const systemCommentSchema = z.object({
   comment: z.string(),
   confirmed: z.boolean(),
   createdAt: isoDateTimeSchema,
 });
 
-export const attendanceEditSchema: ZodType<AttendanceEditInputs> = z
+export const attendanceEditSchema = z
   .object({
     workDate: dateField.optional(),
-    startTime: dateTimeField,
-    endTime: dateTimeField,
-    isDeemedHoliday: z.boolean().optional(),
-    specialHolidayFlag: z.boolean().optional(),
-    paidHolidayFlag: z.boolean(),
-    absentFlag: z.boolean().optional(),
+    startTime: dateTimeField.optional(),
+    endTime: dateTimeField.optional(),
+    isDeemedHoliday: z.union([z.boolean(), z.null(), z.undefined()]).optional(),
+    specialHolidayFlag: z
+      .union([z.boolean(), z.null(), z.undefined()])
+      .optional(),
+    paidHolidayFlag: z.union([z.boolean(), z.null(), z.undefined()]).optional(),
+    absentFlag: z.union([z.boolean(), z.null(), z.undefined()]).optional(),
     hourlyPaidHolidayTimes: z.array(hourlyPaidHolidayTimeSchema).optional(),
-    substituteHolidayDate: dateField,
-    goDirectlyFlag: z.boolean(),
-    returnDirectlyFlag: z.boolean(),
-    remarks: z.union([z.string(), z.null()]),
+    substituteHolidayDate: dateField.optional(),
+    goDirectlyFlag: z.union([z.boolean(), z.null(), z.undefined()]).optional(),
+    returnDirectlyFlag: z
+      .union([z.boolean(), z.null(), z.undefined()])
+      .optional(),
+    remarks: z.union([z.string(), z.null()]).optional(),
     remarkTags: z.array(z.string()).optional(),
-    rests: z.array(restIntervalSchema),
+    rests: z.array(restIntervalSchema).optional(),
     staffComment: z.string().optional(),
     histories: z.any().optional(),
     changeRequests: z.any().optional(),
-    systemComments: z.array(systemCommentSchema),
+    systemComments: z.array(systemCommentSchema).optional(),
     revision: z.number().optional().nullable(),
   })
   .superRefine((data, ctx) => {
