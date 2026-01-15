@@ -67,10 +67,10 @@ export default function QuickInputButtons({
   };
 
   const handleConfirm = () => {
-    setConfirmOpen(false);
     try {
       pendingActionRef.current?.();
     } finally {
+      setConfirmOpen(false);
       pendingActionRef.current = null;
       setConfirmLabel(null);
     }
