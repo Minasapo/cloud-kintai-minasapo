@@ -130,6 +130,7 @@ export default function AdminStaffEditor() {
     setValue("usageStartDate", staff.usageStartDate ?? null);
     setValue("workType", extendedStaff.workType ?? null);
     setValue("shiftGroup", staff.shiftGroup ?? null);
+    setValue("role", staff.role ?? null);
     setValue("developer", extendedStaff.developer ?? false);
   }, [staffId, staffs, setValue]);
 
@@ -765,6 +766,7 @@ function StaffRoleTableCell({
                 ) ?? null
               }
               options={ROLE_OPTIONS}
+              getOptionLabel={(option) => option.label}
               renderInput={(params) => (
                 <TextField {...params} size="small" sx={{ width: 400 }} />
               )}

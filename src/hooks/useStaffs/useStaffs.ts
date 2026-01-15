@@ -33,6 +33,7 @@ export const roleLabelMap = new Map<StaffRole, string>([
   [StaffRole.STAFF, "スタッフ"],
   [StaffRole.GUEST, "ゲスト"],
   [StaffRole.OPERATOR, "オペレーター"],
+  [StaffRole.NONE, "未設定"],
 ]);
 
 export type StaffType = {
