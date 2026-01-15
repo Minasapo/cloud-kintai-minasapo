@@ -39,19 +39,13 @@ export default function HourlyPaidHolidayTimeItemMobile({
           backgroundColor: "background.paper",
         }}
       >
-        {/* 1行目: 開始 / 終了 */}
-        <Stack direction="row" spacing={1} alignItems="center">
-          <HourlyPaidHolidayStartTimeInput index={index} time={time} />
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography variant="body1" sx={{ mx: 0.5 }}>
-              ～
-            </Typography>
-          </Box>
-          <HourlyPaidHolidayEndTimeInput index={index} time={time} />
-          <Box sx={{ flexGrow: 1 }} />
-        </Stack>
+        {/* 開始時刻 */}
+        <HourlyPaidHolidayStartTimeInput index={index} time={time} />
 
-        {/* 2行目: 削除ボタン + 合計時間 */}
+        {/* 終了時刻 */}
+        <HourlyPaidHolidayEndTimeInput index={index} time={time} />
+
+        {/* 削除ボタン + 合計時間 */}
         <Stack
           direction="row"
           alignItems="center"
