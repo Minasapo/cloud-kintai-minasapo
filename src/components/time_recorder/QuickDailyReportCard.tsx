@@ -24,7 +24,7 @@ import QuickDailyReportCardView from "@/shared/ui/time-recorder/QuickDailyReport
 /**
  * 定数定義
  */
-const AUTO_SAVE_DELAY = 3000; // 3秒後に自動保存
+const AUTO_SAVE_DELAY = 1000; // 1秒後に自動保存
 const TIME_FORMAT = "HH:mm:ss"; // 保存時刻の表示形式
 const QUERY_LIMIT = 1; // 日報取得時のクエリ制限
 
