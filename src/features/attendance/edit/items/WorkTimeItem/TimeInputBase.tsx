@@ -118,8 +118,8 @@ export default function TimeInputBase<
                 const nextValue = time as AttendanceFieldValue<TFieldName>;
                 setValue(
                   name as AttendanceTimeFieldName,
-                   nextValue as AttendanceFieldValue<AttendanceTimeFieldName>,
-                   { shouldDirty: true }
+                  nextValue as AttendanceFieldValue<AttendanceTimeFieldName>,
+                  { shouldDirty: true }
                 );
               }}
               sx={{ mr: 1, mb: 1 }}
