@@ -67,7 +67,7 @@ export default function EndTimeInput({
             disabled={!!readOnly || isOnBreak}
             onSelectTime={(endTime) => {
               if (readOnly || isOnBreak) return;
-              setValue("endTime", endTime);
+              setValue("endTime", endTime, { shouldDirty: true });
             }}
           />
         </Box>
