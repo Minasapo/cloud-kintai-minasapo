@@ -10,13 +10,28 @@ import HourlyPaidHolidayEndTimeInput from "./HourlyPaidHolidayEndTimeInput";
 import HourlyPaidHolidayStartTimeInput from "./HourlyPaidHolidayStartTimeInput";
 import { calcTotalHourlyPaidHolidayTime } from "./HourlyPaidHolidayTimeItem";
 
+/**
+ * 時間単位休暇の入力項目を表示するモバイル用コンポーネント。
+ * 開始時刻、終了時刻、削除ボタン、合計時間を縦並びで表示します。
+ */
+
+interface HourlyPaidHolidayTimeItemMobileProps {
+  /** 時間単位休暇の時間帯データ */
+  time: FieldArrayWithId<AttendanceEditInputs, "hourlyPaidHolidayTimes", "id">;
+  /** 配列内のインデックス */
+  index: number;
+}
+
+/** 時間表示の小数点以下の桁数 */
+const HOURS_DECIMAL_PLACES = 1;
+
+/** アクセシビリティ用のラベル */
+const ARIA_LABEL_DELETE = "時間単位休暇を削除";
+
 export default function HourlyPaidHolidayTimeItemMobile({
   time,
   index,
-}: {
-  time: FieldArrayWithId<AttendanceEditInputs, "hourlyPaidHolidayTimes", "id">;
-  index: number;
-}) {
+}: HourlyPaidHolidayTimeItemMobileProps) {
   const { hourlyPaidHolidayTimeRemove, readOnly } = useContext(
     AttendanceEditContext
   );
@@ -52,7 +67,7 @@ export default function HourlyPaidHolidayTimeItemMobile({
           justifyContent="space-between"
         >
           <IconButton
-            aria-label="delete-hourly-paid-holiday-time"
+            aria-label={ARIA_LABEL_DELETE}
             onClick={() => hourlyPaidHolidayTimeRemove(index)}
             size="small"
             disabled={!!readOnly}
@@ -60,8 +75,12 @@ export default function HourlyPaidHolidayTimeItemMobile({
             <DeleteIcon />
           </IconButton>
           <Box textAlign="right">
-            <Typography variant="body2">
-              {`${totalHourlyPaidHolidayTime.toFixed(1)} 時間`}
+            <Typography variant="body2" color="text.secondary">
+              {totalHourlyPaidHolidayTime > 0
+                ? `${totalHourlyPaidHolidayTime.toFixed(
+                    HOURS_DECIMAL_PLACES
+                  )} 時間`
+                : "―"}
             </Typography>
           </Box>
         </Stack>
