@@ -282,7 +282,7 @@ export default function ShiftPlanManagement() {
   >({
     [initialYear]: createDefaultRows(initialYear),
   });
-  const cellRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
+  const cellRefs = useRef<Map<string, HTMLElement | null>>(new Map());
   const { data: holidayCalendars = [], error: holidayCalendarsError } =
     useGetHolidayCalendarsQuery();
   useEffect(() => {
@@ -836,8 +836,10 @@ export default function ShiftPlanManagement() {
                           >
                             <Box
                               ref={(ref) => {
-                                if (ref) {
-                                  cellRefs.current.set(cellId, ref as any);
+                                if (ref instanceof HTMLElement) {
+                                  cellRefs.current.set(cellId, ref);
+                                } else {
+                                  cellRefs.current.delete(cellId);
                                 }
                               }}
                             >

@@ -126,6 +126,7 @@ export default function AttendanceEdit() {
   } = useForm<AttendanceEditInputs>({
     mode: "onChange",
     defaultValues,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(attendanceEditSchema) as any,
   });
 

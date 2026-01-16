@@ -1,4 +1,6 @@
 import { render, screen } from "@testing-library/react";
+import type { PropsWithChildren, ReactElement } from "react";
+import type { Control, FieldValues } from "react-hook-form";
 
 // モック群
 jest.mock("@app/hooks", () => ({ useAppDispatchV2: () => jest.fn() }));
@@ -23,7 +25,7 @@ jest.mock("@/hooks/useStaffs/useStaffs", () => ({
   useStaffs: () => ({ loading: false, error: null }),
 }));
 jest.mock("react-router-dom", () => ({
-  Link: ({ children }: any) => <>{children}</>,
+  Link: ({ children }: PropsWithChildren) => <>{children}</>,
   useNavigate: () => jest.fn(),
   useParams: () => ({ targetWorkDate: "20240115", staffId: "dummy" }),
 }));
@@ -47,7 +49,7 @@ const makeUseFormMock =
   (opts: { isDirty: boolean; isValid: boolean; isSubmitting: boolean }) =>
   () => ({
     register: jest.fn(),
-    control: {} as any,
+    control: {} as unknown as Control<FieldValues>,
     watch: jest.fn(),
     setValue: jest.fn(),
     getValues: jest.fn(),
@@ -82,8 +84,15 @@ describe.skip("AttendanceEditor SaveButton", () => {
     jest.doMock("react-hook-form", () => ({
       useForm: makeUseFormMock(state),
       useFieldArray: makeUseFieldArrayMock(),
-      Controller: ({ render }: any) =>
-        render({ field: {}, fieldState: {}, formState: {} }),
+      Controller: ({
+        render,
+      }: {
+        render: (params: {
+          field: Record<string, unknown>;
+          fieldState: Record<string, unknown>;
+          formState: Record<string, unknown>;
+        }) => ReactElement;
+      }) => render({ field: {}, fieldState: {}, formState: {} }),
       useWatch: jest.fn(),
     }));
     const AttendanceEditor = (await import("../AttendanceEditor")).default;

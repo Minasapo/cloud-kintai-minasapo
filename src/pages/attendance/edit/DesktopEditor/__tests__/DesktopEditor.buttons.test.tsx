@@ -1,15 +1,32 @@
+import type { AttendanceChangeRequest } from "@shared/api/graphql/types";
 import { render, screen } from "@testing-library/react";
-import React from "react";
+import React, { type ReactElement } from "react";
+import type {
+  Control,
+  UseFormGetValues,
+  UseFormHandleSubmit,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from "react-hook-form";
 
 import AttendanceEditProvider, {
   AttendanceEditContext,
 } from "../../AttendanceEditProvider";
+import type { AttendanceEditInputs } from "../../common";
 
 // react-hook-formのuseFormState/Controllerを軽量モック
 jest.mock("react-hook-form", () => ({
   useFormState: () => ({ errors: {} }),
-  Controller: ({ render }: any) =>
-    render({ field: {}, fieldState: {}, formState: {} }),
+  Controller: ({
+    render,
+  }: {
+    render: (params: {
+      field: Record<string, unknown>;
+      fieldState: Record<string, unknown>;
+      formState: Record<string, unknown>;
+    }) => ReactElement;
+  }) => render({ field: {}, fieldState: {}, formState: {} }),
 }));
 jest.mock("@/hooks/useAppConfig/useAppConfig", () => () => ({
   getStartTime: () => undefined,
@@ -22,7 +39,7 @@ describe("DesktopEditor buttons", () => {
   const renderWithContext = async (
     ctx: Partial<React.ContextType<typeof AttendanceEditContext>>
   ) => {
-    const watchMock = (arg: any) => {
+    const watchMock = (arg: unknown) => {
       if (typeof arg === "string") return [];
       if (typeof arg === "function") return () => {};
       return undefined;
@@ -31,7 +48,7 @@ describe("DesktopEditor buttons", () => {
     const value: React.ContextType<typeof AttendanceEditContext> = {
       workDate: null,
       attendance: null,
-      staff: {} as any,
+      staff: null,
       onSubmit: async () => {},
       isDirty: false,
       isValid: false,
@@ -41,12 +58,16 @@ describe("DesktopEditor buttons", () => {
       changeRequests: [],
       readOnly: false,
       isOnBreak: false,
-      register: jest.fn() as any,
-      control: {} as any,
-      setValue: jest.fn() as any,
-      getValues: ((name: any) => (name === "remarkTags" ? [] : null)) as any,
-      watch: watchMock as any,
-      handleSubmit: jest.fn() as any,
+      register: jest.fn() as unknown as UseFormRegister<AttendanceEditInputs>,
+      control: {} as unknown as Control<AttendanceEditInputs>,
+      setValue: jest.fn() as unknown as UseFormSetValue<AttendanceEditInputs>,
+      getValues: ((name: keyof AttendanceEditInputs) =>
+        name === "remarkTags"
+          ? []
+          : null) as unknown as UseFormGetValues<AttendanceEditInputs>,
+      watch: watchMock as unknown as UseFormWatch<AttendanceEditInputs>,
+      handleSubmit:
+        jest.fn() as unknown as UseFormHandleSubmit<AttendanceEditInputs>,
       systemCommentFields: [],
       systemCommentUpdate: undefined,
       systemCommentReplace: undefined,
@@ -102,7 +123,7 @@ describe("DesktopEditor buttons", () => {
       isDirty: true,
       isValid: true,
       isSubmitting: false,
-      changeRequests: [{} as any],
+      changeRequests: [{} as unknown as AttendanceChangeRequest],
     });
     const btn = screen.getByTestId("attendance-submit-button");
     expect(btn).toBeDisabled();
