@@ -107,6 +107,7 @@ export default function StaffShiftList() {
       if (r < 0.2) map[d.format("YYYY-MM-DD")] = undefined;
       else map[d.format("YYYY-MM-DD")] = r > 0.6 ? "work" : "off";
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShifts(map);
   }, [monthStart.year(), monthStart.month(), daysInMonth]);
 

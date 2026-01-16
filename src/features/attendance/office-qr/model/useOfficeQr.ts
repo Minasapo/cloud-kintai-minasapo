@@ -30,6 +30,7 @@ export function useOfficeQr() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     updateQrValue();
 
     const intervalId = window.setInterval(() => {

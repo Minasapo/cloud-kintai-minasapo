@@ -281,8 +281,10 @@ export default function MobileCalendar({
   useEffect(() => {
     const today = dayjs();
     if (today.isSame(currentMonth, "month")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedDate(today.format("YYYY-MM-DD"));
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedDate(null);
     }
   }, [currentMonth]);

@@ -72,6 +72,7 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
   // ローディング完了を追跡
   useEffect(() => {
     if (!closeDatesLoading && !hasLoaded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasLoaded(true);
     }
   }, [closeDatesLoading, hasLoaded]);

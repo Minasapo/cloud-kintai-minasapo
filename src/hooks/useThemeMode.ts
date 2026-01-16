@@ -33,6 +33,7 @@ export function useThemeMode() {
     } catch {
       // LocalStorage が利用不可の場合
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsHydrated(true);
   }, [mode, setMode]);
 

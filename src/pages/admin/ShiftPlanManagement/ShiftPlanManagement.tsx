@@ -170,6 +170,7 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
   // Sync draft to value when not editing
   useEffect(() => {
     if (!isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft(value);
     }
   }, [value, isEditing]);

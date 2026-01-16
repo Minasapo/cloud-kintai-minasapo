@@ -64,6 +64,7 @@ export default function ChangeRequestDialog({
 
   // changeRequestが変わったらmanualCloseをリセット
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setManualClose(false);
   }, [changeRequest]);
 

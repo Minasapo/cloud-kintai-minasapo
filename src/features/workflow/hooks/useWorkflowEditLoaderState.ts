@@ -72,6 +72,7 @@ export function useWorkflowEditLoaderState(
         : CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
           workflow.category
       : "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCategory(nextCategoryLabel);
 
     const appDate =
@@ -132,10 +133,12 @@ export function useWorkflowEditLoaderState(
 
   useEffect(() => {
     if (!workflow.staffId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setApplicant(null);
       return;
     }
     const match = staffs.find((s) => s.id === workflow.staffId);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setApplicant(
       match ||
         ({

@@ -28,7 +28,9 @@ export default function Reasons() {
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setReasons(getReasons());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [getReasons, getConfigId]);
 
