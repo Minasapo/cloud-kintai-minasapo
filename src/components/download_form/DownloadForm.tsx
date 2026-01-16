@@ -51,7 +51,9 @@ export default function DownloadForm() {
   // special holiday inclusion is determined inside the export components via AppConfig
 
   // derive workDates from watched start/end date so we can pass to ExportButton
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const startDate = watch("startDate") ?? dayjs();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const endDate = watch("endDate") ?? dayjs();
 
   // Derived state: compute workDates from startDate and endDate

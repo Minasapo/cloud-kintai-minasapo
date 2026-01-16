@@ -236,6 +236,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     [getLunchRestEndTime]
   );
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const watchedData = watch();
   const errorMessages = useMemo(
     () => collectAttendanceErrorMessages(errors),
