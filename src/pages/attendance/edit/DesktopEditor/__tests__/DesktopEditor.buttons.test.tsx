@@ -10,6 +10,8 @@ import type {
   UseFormWatch,
 } from "react-hook-form";
 
+import type { StaffType } from "@/hooks/useStaffs/useStaffs";
+
 import AttendanceEditProvider, {
   AttendanceEditContext,
 } from "../../AttendanceEditProvider";
@@ -48,7 +50,7 @@ describe("DesktopEditor buttons", () => {
     const value: React.ContextType<typeof AttendanceEditContext> = {
       workDate: null,
       attendance: null,
-      staff: null,
+      staff: { cognitoUserId: "staff-id" } as StaffType,
       onSubmit: async () => {},
       isDirty: false,
       isValid: false,
