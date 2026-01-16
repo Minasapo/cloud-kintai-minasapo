@@ -128,8 +128,9 @@ export default function AdminStaffEditor() {
     setValue("owner", staff.owner ?? false);
     setValue("sortKey", staff.sortKey ?? null);
     setValue("usageStartDate", staff.usageStartDate ?? null);
-    setValue("workType", extendedStaff.workType ?? null);
+    setValue("workType", extendedStaff.workType ?? "weekday");
     setValue("shiftGroup", staff.shiftGroup ?? null);
+    setValue("role", staff.role ?? null);
     setValue("developer", extendedStaff.developer ?? false);
   }, [staffId, staffs, setValue]);
 
@@ -354,6 +355,7 @@ export default function AdminStaffEditor() {
                               ) ?? null
                             }
                             options={WORK_TYPE_OPTIONS}
+                            getOptionLabel={(option) => option.label}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -765,6 +767,7 @@ function StaffRoleTableCell({
                 ) ?? null
               }
               options={ROLE_OPTIONS}
+              getOptionLabel={(option) => option.label}
               renderInput={(params) => (
                 <TextField {...params} size="small" sx={{ width: 400 }} />
               )}

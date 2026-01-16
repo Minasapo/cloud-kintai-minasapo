@@ -33,6 +33,7 @@ export const roleLabelMap = new Map<StaffRole, string>([
   [StaffRole.STAFF, "スタッフ"],
   [StaffRole.GUEST, "ゲスト"],
   [StaffRole.OPERATOR, "オペレーター"],
+  [StaffRole.NONE, "未設定"],
 ]);
 
 export type StaffType = {
@@ -86,12 +87,17 @@ export function useStaffs() {
 
   useEffect(() => {
     if (!isAuthenticated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStaffs([]);
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null);
     fetchStaffs()
       .then((res) =>

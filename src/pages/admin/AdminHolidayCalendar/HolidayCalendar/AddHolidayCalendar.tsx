@@ -91,6 +91,7 @@ export function AddHolidayCalendar({
     defaultValues,
   });
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const startDateValue = watch("startDate");
 
   /**

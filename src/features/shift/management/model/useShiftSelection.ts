@@ -126,6 +126,7 @@ export default function useShiftSelection({
   }, [dayKeyList]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedStaffIds((prev) => {
       let changed = false;
       const next = new Set<string>();
@@ -142,6 +143,7 @@ export default function useShiftSelection({
 
   useEffect(() => {
     const dayKeySet = new Set(dayKeyList);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedDayKeys((prev) => {
       let changed = false;
       const next = new Set<string>();

@@ -171,9 +171,6 @@ export default function WorkflowListPage() {
         <Box sx={dashboardInnerSurfaceSx}>
           <Stack spacing={3}>
             <Stack spacing={2}>
-              <Alert severity="warning" variant="standard">
-                現在この機能は開発中（ベータ）です。管理者より指示された場合を除き、ご利用はお控えください。
-              </Alert>
               <Stack
                 direction={{ xs: "column", md: "row" }}
                 spacing={2}

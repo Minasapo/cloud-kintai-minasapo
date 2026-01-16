@@ -13,7 +13,6 @@ import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { useDeveloperFlag } from "@/hooks/useStaff/useDeveloperFlag";
 import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
@@ -47,9 +46,6 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
 
   const isMailVerified = Boolean(cognitoUser?.emailVerified);
 
-  // developer flag for current staff (used to hide admin shift link)
-  const { isDeveloper } = useDeveloperFlag(cognitoUser?.id);
-
   const isAdminUser = useMemo(
     () =>
       isCognitoUserRole(StaffRole.ADMIN) ||
@@ -59,9 +55,6 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
 
   const menuItems = useMemo(() => {
     const filteredMenuList = menuList.filter((menu) => {
-      if (menu.href === "/shift") {
-        return isDeveloper === true;
-      }
       if (menu.href === "/attendance/stats") {
         return attendanceStatisticsEnabled;
       }
@@ -89,7 +82,6 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     isCognitoUserRole,
     operatorMenuList,
     menuList,
-    isDeveloper,
     attendanceStatisticsEnabled,
   ]);
 

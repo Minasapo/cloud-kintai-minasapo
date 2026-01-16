@@ -1,5 +1,5 @@
-applyTo: - "src/shared/api/graphql/**" - "src/ui-components/**"
-
+---
+applyTo: "src/shared/api/graphql/**,src/ui-components/**"
 ---
 
 # Amplify 自動生成ファイル

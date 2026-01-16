@@ -108,8 +108,8 @@ const CalendarDayCell = ({
     // 遅刻系：背景色なし、枠線のみ
     borderColor = theme.palette.warning.main;
     color = theme.palette.warning.dark;
-  } else if (status === AttendanceStatus.None) {
-    // ステータスなし：背景色なし
+  } else if (status === AttendanceStatus.None && !isCurrentMonth) {
+    // 月外のステータスなし：グレーアウト
     backgroundColor = theme.palette.grey[200];
     color = theme.palette.text.secondary;
   }
@@ -281,8 +281,10 @@ export default function MobileCalendar({
   useEffect(() => {
     const today = dayjs();
     if (today.isSame(currentMonth, "month")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedDate(today.format("YYYY-MM-DD"));
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedDate(null);
     }
   }, [currentMonth]);
@@ -302,6 +304,24 @@ export default function MobileCalendar({
     const dateKey = dayjs(a.workDate).format("YYYY-MM-DD");
     attendanceMap.set(dateKey, a);
   });
+
+  // デバッグ：attendancesのデータを確認
+  if (process.env.NODE_ENV === "development") {
+    const today = dayjs().format("YYYY-MM-DD");
+    const todayData = attendanceMap.get(today);
+    const attendanceDates = Array.from(attendanceMap.keys()).sort();
+    console.log(
+      `[MobileCalendar] currentMonth=${currentMonth.format(
+        "YYYY-MM-DD"
+      )}, today=${today}, attendanceDates=${
+        attendanceDates.length
+      }件, todayData=${todayData ? "○" : "✗"}`,
+      {
+        attendanceDates: attendanceDates.slice(0, 10),
+        todayData,
+      }
+    );
+  }
 
   const termPalette = useMemo(
     () => [
@@ -409,7 +429,6 @@ export default function MobileCalendar({
             onClick={() => {
               const today = dayjs();
               onMonthChange?.(today);
-              setSelectedDate(today.format("YYYY-MM-DD"));
             }}
             sx={{ fontSize: "0.75rem", py: 0.5, px: 1 }}
           >
@@ -628,6 +647,27 @@ export default function MobileCalendar({
                 }
                 return null;
               })()}
+
+              {!selectedAttendance &&
+                dayjs(selectedDate).isSame(dayjs(), "day") && (
+                  <Box
+                    sx={{
+                      p: 1,
+                      borderRadius: 1,
+                      backgroundColor: "#fff3cd",
+                      border: "1px solid",
+                      borderColor: "#ffc107",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "#856404", fontWeight: 500 }}
+                    >
+                      本日の勤務データはまだ記録されていません
+                    </Typography>
+                  </Box>
+                )}
+
               <Box>
                 <Typography variant="caption" color="text.secondary">
                   勤務時間

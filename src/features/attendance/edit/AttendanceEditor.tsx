@@ -169,7 +169,8 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   } = useForm<AttendanceEditInputs>({
     mode: "onChange",
     defaultValues,
-    resolver: zodResolver(attendanceEditSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(attendanceEditSchema) as any,
   });
 
   const {
@@ -236,6 +237,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     [getLunchRestEndTime]
   );
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const watchedData = watch();
   const errorMessages = useMemo(
     () => collectAttendanceErrorMessages(errors),
@@ -358,11 +360,11 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                     .toISOString(),
                 },
               ]
-            : data.rests.map((rest) => ({
+            : (data.rests || []).map((rest) => ({
                 startTime: rest.startTime,
                 endTime: rest.endTime,
               })),
-          systemComments: data.systemComments.map(
+          systemComments: (data.systemComments || []).map(
             ({ comment, confirmed, createdAt }) => ({
               comment,
               confirmed,
@@ -457,11 +459,11 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                     .toISOString(),
                 },
               ]
-            : data.rests.map((rest) => ({
+            : (data.rests || []).map((rest) => ({
                 startTime: rest.startTime,
                 endTime: rest.endTime,
               })),
-          systemComments: data.systemComments.map(
+          systemComments: (data.systemComments || []).map(
             ({ comment, confirmed, createdAt }) => ({
               comment,
               confirmed,

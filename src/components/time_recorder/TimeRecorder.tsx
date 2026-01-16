@@ -9,6 +9,7 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -26,6 +27,7 @@ import { Theme } from "@mui/material/styles";
 import {
   Attendance,
   CreateAttendanceInput,
+  OnUpdateAttendanceSubscription,
   Staff,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
@@ -34,6 +36,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import {
   clockInAction,
   clockOutAction,
@@ -46,6 +49,7 @@ import { getWorkStatus } from "@/lib/attendance/workStatus";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { Logger } from "@/lib/logger";
+import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
 import { designTokenVar } from "@/shared/designSystem";
 import Clock from "@/shared/ui/clock/Clock";
 import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
@@ -83,7 +87,7 @@ export default function TimeRecorder(): JSX.Element {
 
   const { getStartTime, getEndTime } = useContext(AppConfigContext);
 
-  const today = dayjs().format(AttendanceDate.DataFormat);
+  const today = useMemo(() => dayjs().format(AttendanceDate.DataFormat), []);
 
   const shouldFetchAttendance = Boolean(cognitoUser?.id);
 
@@ -257,6 +261,14 @@ export default function TimeRecorder(): JSX.Element {
   const [isTimeElapsedError, setIsTimeElapsedError] = useState(false);
   const [directMode, setDirectMode] = useState(false);
   const [lastActiveTime, setLastActiveTime] = useState(dayjs());
+
+  // 変更リクエスト中かどうか
+  const hasChangeRequest = useMemo(() => {
+    if (!attendance?.changeRequests) return false;
+    return attendance.changeRequests
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .some((item) => !item.completed);
+  }, [attendance?.changeRequests]);
 
   const logger = new Logger("TimeRecorder", "DEBUG");
 
@@ -530,6 +542,39 @@ export default function TimeRecorder(): JSX.Element {
     setWorkStatus(getWorkStatus(attendance));
   }, [attendance]);
 
+  // 勤怠データ更新のサブスクリプション
+  useEffect(() => {
+    if (!cognitoUser?.id) {
+      return;
+    }
+
+    const subscription = graphqlClient
+      .graphql({
+        query: onUpdateAttendance,
+        variables: {},
+        authMode: "userPool",
+      })
+      .subscribe({
+        next: async (event) => {
+          const updatedAttendance =
+            event.data as OnUpdateAttendanceSubscription;
+          if (updatedAttendance?.onUpdateAttendance) {
+            await Promise.allSettled([
+              refetchAttendance(),
+              refetchAttendances(),
+            ]);
+          }
+        },
+        error: (error: unknown) => {
+          logger.error("Subscription error:", error);
+        },
+      });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [cognitoUser?.id, refetchAttendance, refetchAttendances, logger]);
+
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return (
       <Box
@@ -625,7 +670,11 @@ export default function TimeRecorder(): JSX.Element {
                 onClick={handleGoDirectly}
               />
             ) : (
-              <ClockInItem workStatus={workStatus} onClick={handleClockIn} />
+              <ClockInItem
+                workStatus={workStatus}
+                onClick={handleClockIn}
+                disabled={hasChangeRequest}
+              />
             )}
           </Grid>
           <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
@@ -635,17 +684,38 @@ export default function TimeRecorder(): JSX.Element {
                 onClick={handleReturnDirectly}
               />
             ) : (
-              <ClockOutItem workStatus={workStatus} onClick={handleClockOut} />
+              <ClockOutItem
+                workStatus={workStatus}
+                onClick={handleClockOut}
+                disabled={hasChangeRequest}
+              />
             )}
           </Grid>
 
           {/* 休憩 */}
           <Grid item xs={6}>
-            <RestStartItem workStatus={workStatus} onClick={handleRestStart} />
+            <RestStartItem
+              workStatus={workStatus}
+              onClick={handleRestStart}
+              disabled={hasChangeRequest}
+            />
           </Grid>
           <Grid item xs={6}>
-            <RestEndItem workStatus={workStatus} onClick={handleRestEnd} />
+            <RestEndItem
+              workStatus={workStatus}
+              onClick={handleRestEnd}
+              disabled={hasChangeRequest}
+            />
           </Grid>
+
+          {hasChangeRequest && (
+            <Grid item xs={12}>
+              <Alert severity="warning">
+                変更リクエスト申請中です。承認されるまで打刻はできません。
+              </Alert>
+            </Grid>
+          )}
+
           <Grid item xs={12}>
             <QuickDailyReportCard staffId={staff?.id ?? null} date={today} />
           </Grid>

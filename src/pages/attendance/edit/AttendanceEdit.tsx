@@ -17,7 +17,12 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  UseFormHandleSubmit,
+  useWatch,
+} from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -121,7 +126,8 @@ export default function AttendanceEdit() {
   } = useForm<AttendanceEditInputs>({
     mode: "onChange",
     defaultValues,
-    resolver: zodResolver(attendanceEditSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(attendanceEditSchema) as any,
   });
 
   const {
@@ -165,7 +171,7 @@ export default function AttendanceEdit() {
             // hourlyPaidHolidayHours is deprecated here; send times array instead
             substituteHolidayDate: data.substituteHolidayDate,
             staffComment: data.staffComment,
-            rests: data.rests.map((rest) => ({
+            rests: (data.rests || []).map((rest) => ({
               startTime: rest.startTime,
               endTime: rest.endTime,
             })),
@@ -218,7 +224,7 @@ export default function AttendanceEdit() {
             // hourlyPaidHolidayHours is deprecated here; send times array instead
             substituteHolidayDate: data.substituteHolidayDate,
             staffComment: data.staffComment,
-            rests: data.rests.map((rest) => ({
+            rests: (data.rests || []).map((rest) => ({
               startTime: rest.startTime,
               endTime: rest.endTime,
             })),
@@ -646,7 +652,8 @@ export default function AttendanceEdit() {
         setValue,
         getValues,
         watch,
-        handleSubmit,
+        handleSubmit:
+          handleSubmit as unknown as UseFormHandleSubmit<AttendanceEditInputs>,
         isDirty,
         isValid,
         isSubmitting,

@@ -428,6 +428,9 @@ const createThemeConfig = (overrides?: ThemeFactoryInput) => {
     shape: {
       borderRadius: tokens.radius.md,
     },
+    cssVariables: {
+      colorSchemeSelector: "class",
+    },
     components: createComponents(tokens, palette, typographyHelpers),
   });
 };

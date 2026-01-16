@@ -2,8 +2,8 @@ import dayjs from "dayjs";
 import { z } from "zod";
 
 export type TimeRangeShape = {
-  startTime: string | null;
-  endTime: string | null;
+  startTime?: string | null | undefined;
+  endTime?: string | null | undefined;
 };
 
 export type TimeRangeMessages = {
@@ -16,8 +16,8 @@ export type TimeRangeMessages = {
  * 開始・終了は片方のみの入力も許可し、両方入力されている場合のみ「終了時刻が開始より後」をチェックします。
  * 休憩中や時間単位休暇の利用中など、部分的な入力状態を許容します。
  */
-export const createTimeRangeValidator = <T extends TimeRangeShape>(
-  schema: z.ZodType<T>,
+export const createTimeRangeValidator = <T extends Partial<TimeRangeShape>>(
+  schema: z.ZodType<T, z.ZodTypeDef, T>,
   messages: TimeRangeMessages
 ) =>
   schema.superRefine((value, ctx) => {

@@ -44,9 +44,14 @@ const StyledClockInButton = styled(Button)(({ theme }) => ({
 export interface ClockInButtonProps {
   isBeforeWork: boolean;
   onClockIn: () => void;
+  disabled?: boolean;
 }
 
-const ClockInButton = ({ isBeforeWork, onClockIn }: ClockInButtonProps) => {
+const ClockInButton = ({
+  isBeforeWork,
+  onClockIn,
+  disabled = false,
+}: ClockInButtonProps) => {
   const [clicked, setClicked] = useState(false);
 
   // Derived state: reset clicked when isBeforeWork changes
@@ -63,7 +68,7 @@ const ClockInButton = ({ isBeforeWork, onClockIn }: ClockInButtonProps) => {
     <StyledClockInButton
       data-testid="clock-in-button"
       onClick={handleClick}
-      disabled={!isBeforeWork || actualClicked}
+      disabled={!isBeforeWork || actualClicked || disabled}
     >
       勤務開始
     </StyledClockInButton>

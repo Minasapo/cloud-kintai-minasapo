@@ -22,9 +22,14 @@ const StyledRestEndButton = styled(Button)(({ theme }) => ({
 export interface RestEndButtonProps {
   isResting: boolean;
   onRestEnd: () => void;
+  disabled?: boolean;
 }
 
-const RestEndButton = ({ isResting, onRestEnd }: RestEndButtonProps) => {
+const RestEndButton = ({
+  isResting,
+  onRestEnd,
+  disabled = false,
+}: RestEndButtonProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Derived state: reset isProcessing when isResting changes
@@ -41,7 +46,7 @@ const RestEndButton = ({ isResting, onRestEnd }: RestEndButtonProps) => {
     <StyledRestEndButton
       fullWidth
       onClick={handleClick}
-      disabled={!isResting || actualIsProcessing}
+      disabled={!isResting || actualIsProcessing || disabled}
       data-testid="rest-end-button"
     >
       休憩終了

@@ -34,6 +34,7 @@ export interface QuickDailyReportCardViewProps {
   isSaving: boolean;
   hasStaff: boolean;
   error: string | null;
+  lastSavedAt: string | null;
   contentPanelId: string;
   onToggle: () => void;
   onDialogOpen: () => void;
@@ -55,6 +56,7 @@ const QuickDailyReportCardView = ({
   isSaving,
   hasStaff,
   error,
+  lastSavedAt,
   contentPanelId,
   onToggle,
   onDialogOpen,
@@ -100,6 +102,11 @@ const QuickDailyReportCardView = ({
             <Typography variant="caption" color="text.secondary">
               {date} / {reportId ? "既存データを更新" : "新規作成"}
             </Typography>
+            {lastSavedAt && (
+              <Typography variant="caption" color="success.main">
+                {isSaving ? "保存中..." : `最終保存: ${lastSavedAt}`}
+              </Typography>
+            )}
           </Stack>
           <Tooltip title="拡大表示">
             <span>
@@ -158,7 +165,7 @@ const QuickDailyReportCardView = ({
               disabled={!hasStaff || isLoading}
             />
             <Typography variant="caption" color="text.secondary">
-              他の日報は、日報ページから編集・閲覧できます。
+              入力を停止して1秒後に自動保存されます。他の日報は、日報ページから編集・閲覧できます。
             </Typography>
             {error && <Alert severity="error">{error}</Alert>}
           </Stack>
@@ -192,7 +199,7 @@ const QuickDailyReportCardView = ({
               disabled={!hasStaff || isLoading}
             />
             <Typography variant="caption" color="text.secondary">
-              保存すると標準のカードにも内容が反映されます。
+              入力を停止して1秒後に自動保存されます。保存すると標準のカードにも内容が反映されます。
             </Typography>
             {error && <Alert severity="error">{error}</Alert>}
           </Stack>

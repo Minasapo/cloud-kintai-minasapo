@@ -45,6 +45,7 @@ import Header from "@/widgets/layout/header/Header";
 import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
+import { ThemeContextProvider } from "./context/ThemeContext";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useCognitoUser from "./hooks/useCognitoUser";
@@ -71,6 +72,7 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
   // ローディング完了を追跡
   useEffect(() => {
     if (!closeDatesLoading && !hasLoaded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasLoaded(true);
     }
   }, [closeDatesLoading, hasLoaded]);
@@ -467,38 +469,42 @@ export default function Layout() {
     shouldBlockUnauthenticated
   ) {
     return (
-      <ThemeProvider theme={appTheme}>
-        <LinearProgress data-testid="layout-linear-progress" />
-      </ThemeProvider>
+      <ThemeContextProvider>
+        <ThemeProvider theme={appTheme}>
+          <LinearProgress data-testid="layout-linear-progress" />
+        </ThemeProvider>
+      </ThemeContextProvider>
     );
   }
 
   return (
-    <ThemeProvider theme={appTheme}>
-      <AppProviders
-        auth={authContextValue}
-        config={appConfigContextValue}
-        app={appContextValue}
-      >
-        <AppShell
-          header={<Header />}
-          main={<Outlet />}
-          footer={<Footer />}
-          snackbar={<SnackbarGroup />}
-          slotProps={{
-            root: { "data-testid": "layout-stack" },
-            header: { "data-testid": "layout-header" },
-            main: { "data-testid": "layout-main" },
-            footer: { "data-testid": "layout-footer" },
-            snackbar: { "data-testid": "layout-snackbar" },
-          }}
-        />
-        {isAdminUser && (
-          <MissingCloseDateAlert
-            onConfirm={() => navigate("/admin/master/job_term")}
+    <ThemeContextProvider>
+      <ThemeProvider theme={appTheme}>
+        <AppProviders
+          auth={authContextValue}
+          config={appConfigContextValue}
+          app={appContextValue}
+        >
+          <AppShell
+            header={<Header />}
+            main={<Outlet />}
+            footer={<Footer />}
+            snackbar={<SnackbarGroup />}
+            slotProps={{
+              root: { "data-testid": "layout-stack" },
+              header: { "data-testid": "layout-header" },
+              main: { "data-testid": "layout-main" },
+              footer: { "data-testid": "layout-footer" },
+              snackbar: { "data-testid": "layout-snackbar" },
+            }}
           />
-        )}
-      </AppProviders>
-    </ThemeProvider>
+          {isAdminUser && (
+            <MissingCloseDateAlert
+              onConfirm={() => navigate("/admin/master/job_term")}
+            />
+          )}
+        </AppProviders>
+      </ThemeProvider>
+    </ThemeContextProvider>
   );
 }

@@ -43,6 +43,7 @@ export default function ChangeRequestDialog({
   const [manualClose, setManualClose] = useState(false);
 
   // 派生状態として計算：未完了の変更リクエストがあれば表示
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { open: shouldOpen, changeRequest } = useMemo(() => {
     if (!attendance?.changeRequests) {
       return { open: false, changeRequest: null };
@@ -64,6 +65,7 @@ export default function ChangeRequestDialog({
 
   // changeRequestが変わったらmanualCloseをリセット
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setManualClose(false);
   }, [changeRequest]);
 
