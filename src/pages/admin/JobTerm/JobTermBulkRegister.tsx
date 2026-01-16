@@ -254,7 +254,7 @@ export default function JobTermBulkRegister({
           `${creatableItems.length}件の集計対象月を登録しました`
         )
       );
-    } catch (e) {
+    } catch {
       dispatch(setSnackbarError("集計対象月の登録に失敗しました"));
     } finally {
       setSubmitting(false);

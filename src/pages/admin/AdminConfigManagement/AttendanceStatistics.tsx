@@ -30,7 +30,9 @@ export default function AttendanceStatistics() {
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEnabled(getAttendanceStatisticsEnabled());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [getAttendanceStatisticsEnabled, getConfigId]);
 

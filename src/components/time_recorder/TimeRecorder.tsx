@@ -565,7 +565,7 @@ export default function TimeRecorder(): JSX.Element {
             ]);
           }
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           logger.error("Subscription error:", error);
         },
       });

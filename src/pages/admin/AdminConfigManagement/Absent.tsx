@@ -27,7 +27,9 @@ export default function Absent() {
 
   useEffect(() => {
     if (typeof getAbsentEnabled === "function")
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAbsentEnabled(getAbsentEnabled());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [getAbsentEnabled, getConfigId]);
 

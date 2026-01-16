@@ -36,7 +36,7 @@ const Footer = ({ themeColor }: FooterProps) => (
       }}
     >
       <Typography variant="body1" sx={{ fontWeight: 500 }}>
-        © 2025 Virtual Tech Japan Inc.
+        © 2026 Virtual Tech Japan Inc.
       </Typography>
     </Box>
   </Box>

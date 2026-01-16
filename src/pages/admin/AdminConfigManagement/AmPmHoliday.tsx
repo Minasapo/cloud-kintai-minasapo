@@ -60,15 +60,21 @@ export default function AmPmHoliday() {
 
   useEffect(() => {
     if (typeof getAmHolidayStartTime === "function" && getAmHolidayStartTime())
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAmHolidayStartTime(getAmHolidayStartTime());
     if (typeof getAmHolidayEndTime === "function" && getAmHolidayEndTime())
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAmHolidayEndTime(getAmHolidayEndTime());
     if (typeof getPmHolidayStartTime === "function" && getPmHolidayStartTime())
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPmHolidayStartTime(getPmHolidayStartTime());
     if (typeof getPmHolidayEndTime === "function" && getPmHolidayEndTime())
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPmHolidayEndTime(getPmHolidayEndTime());
     if (typeof getAmPmHolidayEnabled === "function")
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAmPmHolidayEnabled(getAmPmHolidayEnabled());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [
     getAmHolidayStartTime,

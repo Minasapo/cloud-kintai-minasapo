@@ -25,6 +25,7 @@ export function OfficeQrExperience() {
 
   useEffect(() => {
     if (isCognitoUserRole(StaffRole.ADMIN)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowAdminAlert(true);
     }
   }, [isCognitoUserRole]);
