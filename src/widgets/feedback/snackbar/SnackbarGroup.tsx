@@ -7,9 +7,10 @@ import {
   type SnackbarCloseReason,
   type SnackbarOrigin,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useAppDispatchV2, useAppSelectorV2 } from "@/app/hooks";
+import { SNACKBAR_AUTO_HIDE_DURATION } from "@/constants/timeouts";
 import {
   selectSnackbar,
   setSnackbarError,
@@ -43,41 +44,43 @@ export default function SnackbarGroup() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [warnMessage, setWarnMessage] = useState<string | null>(null);
 
-  const resetSuccess = useCallback(() => {
-    dispatch(setSnackbarSuccess(null));
-  }, [dispatch]);
+  // Capture Redux state and reset immediately when new message arrives
+  const handleSuccessMessage = useCallback(
+    (message: string) => {
+      setSuccessMessage(message);
+      dispatch(setSnackbarSuccess(null));
+    },
+    [dispatch]
+  );
 
-  const resetError = useCallback(() => {
-    dispatch(setSnackbarError(null));
-  }, [dispatch]);
+  const handleErrorMessage = useCallback(
+    (message: string) => {
+      setErrorMessage(message);
+      dispatch(setSnackbarError(null));
+    },
+    [dispatch]
+  );
 
-  const resetWarn = useCallback(() => {
-    dispatch(setSnackbarWarn(null));
-  }, [dispatch]);
+  const handleWarnMessage = useCallback(
+    (message: string) => {
+      setWarnMessage(message);
+      dispatch(setSnackbarWarn(null));
+    },
+    [dispatch]
+  );
 
-  useEffect(() => {
-    if (!success) {
-      return;
-    }
-    setSuccessMessage(success);
-    resetSuccess();
-  }, [resetSuccess, success]);
+  // Trigger message capture when Redux state changes
+  if (success && success !== successMessage) {
+    handleSuccessMessage(success);
+  }
 
-  useEffect(() => {
-    if (!error) {
-      return;
-    }
-    setErrorMessage(error);
-    resetError();
-  }, [error, resetError]);
+  if (error && error !== errorMessage) {
+    handleErrorMessage(error);
+  }
 
-  useEffect(() => {
-    if (!warn) {
-      return;
-    }
-    setWarnMessage(warn);
-    resetWarn();
-  }, [resetWarn, warn]);
+  if (warn && warn !== warnMessage) {
+    handleWarnMessage(warn);
+  }
 
   const renderSnackbar = (
     key: string,
@@ -137,7 +140,7 @@ export default function SnackbarGroup() {
       key: "success",
       message: successMessage,
       severity: "success" as const,
-      autoHideDuration: 6000,
+      autoHideDuration: SNACKBAR_AUTO_HIDE_DURATION.SUCCESS,
       setMessage: setSuccessMessage,
     },
     {
@@ -151,7 +154,7 @@ export default function SnackbarGroup() {
       key: "warn",
       message: warnMessage,
       severity: "warning" as const,
-      autoHideDuration: 5000,
+      autoHideDuration: SNACKBAR_AUTO_HIDE_DURATION.ERROR,
       setMessage: setWarnMessage,
     },
   ];

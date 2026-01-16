@@ -42,6 +42,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -76,6 +77,10 @@ const SATURDAY_BG = "#e3f2fd";
 const HOLIDAY_BG = "#fff8e1";
 const CELL_NOWRAP_SX = { whiteSpace: "nowrap" as const };
 const INPUT_PLACEHOLDER = "入力";
+// 自動保存の遅延時間（ミリ秒）
+const AUTO_SAVE_DELAY = 1000;
+// 保存時刻の表示フォーマット
+const TIME_FORMAT = "HH:mm:ss";
 
 const sanitizeCapacityValue = (value: string): string => {
   if (!value.trim()) return "";
@@ -149,6 +154,7 @@ type EditableCapacityCellProps = {
   labelText: string;
   labelColor: string;
   onCommit: (value: string) => void;
+  onTabNextDay?: () => void;
 };
 
 const EditableCapacityCell = memo(function EditableCapacityCell({
@@ -156,19 +162,21 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
   labelText,
   labelColor,
   onCommit,
+  onTabNextDay,
 }: EditableCapacityCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
+  // Sync draft to value when not editing
   useEffect(() => {
     if (!isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft(value);
     }
-  }, [isEditing, value]);
+  }, [value, isEditing]);
 
   const handleCommit = useCallback(() => {
     const normalized = sanitizeCapacityValue(draft);
-    setDraft(normalized);
     onCommit(normalized);
     setIsEditing(false);
   }, [draft, onCommit]);
@@ -186,9 +194,16 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
       } else if (event.key === "Escape") {
         event.preventDefault();
         handleCancel();
+      } else if (event.key === "Tab") {
+        event.preventDefault();
+        handleCommit();
+        // 次の日に遷移
+        if (onTabNextDay) {
+          onTabNextDay();
+        }
       }
     },
-    [handleCommit, handleCancel]
+    [handleCommit, handleCancel, onTabNextDay]
   );
 
   return (
@@ -246,7 +261,7 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
 
 export default function ShiftPlanManagement() {
   const dispatch = useAppDispatchV2();
-  const initialYear = useMemo(() => dayjs().year(), []);
+  const initialYear = dayjs().year();
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [yearlyPlans, setYearlyPlans] = useState<
     Record<number, ShiftPlanRow[]>
@@ -256,9 +271,18 @@ export default function ShiftPlanManagement() {
   const [isPending, startTransition] = useTransition();
   const [isFetchingYear, setIsFetchingYear] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [yearRecordIds, setYearRecordIds] = useState<Record<number, string>>(
     {}
   );
+  const [lastAutoSaveTime, setLastAutoSaveTime] = useState<string | null>(null);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [savedYearlyPlans, setSavedYearlyPlans] = useState<
+    Record<number, ShiftPlanRow[]>
+  >({
+    [initialYear]: createDefaultRows(initialYear),
+  });
+  const cellRefs = useRef<Map<string, HTMLElement | null>>(new Map());
   const { data: holidayCalendars = [], error: holidayCalendarsError } =
     useGetHolidayCalendarsQuery();
   useEffect(() => {
@@ -280,6 +304,14 @@ export default function ShiftPlanManagement() {
   // 年を跨いだときも必ず初期行が存在するように補完する
   useEffect(() => {
     setYearlyPlans((prev) => {
+      if (prev[selectedYear]) return prev;
+      return {
+        ...prev,
+        [selectedYear]: createDefaultRows(selectedYear),
+      };
+    });
+    // 年が切り替わった時は保存済み状態をリセット
+    setSavedYearlyPlans((prev) => {
       if (prev[selectedYear]) return prev;
       return {
         ...prev,
@@ -320,6 +352,10 @@ export default function ShiftPlanManagement() {
             ...prev,
             [selectedYear]: buildRowsFromPlans(selectedYear, record.plans),
           }));
+          setSavedYearlyPlans((prev) => ({
+            ...prev,
+            [selectedYear]: buildRowsFromPlans(selectedYear, record.plans),
+          }));
           setYearRecordIds((prev) => ({
             ...prev,
             [selectedYear]: record.id,
@@ -351,7 +387,19 @@ export default function ShiftPlanManagement() {
     };
   }, [dispatch, selectedYear]);
   const currentRows = yearlyPlans[selectedYear] ?? [];
-  const isBusy = isPending || isFetchingYear || isSaving;
+  const isBusy = isPending || isFetchingYear || isSaving || isAutoSaving;
+
+  // 現在の年のプランが保存済み状態から変更されているかを判定
+  const isDirty = useMemo(() => {
+    const current = yearlyPlans[selectedYear];
+    const saved = savedYearlyPlans[selectedYear];
+
+    if (!current || !saved) {
+      return false;
+    }
+
+    return JSON.stringify(current) !== JSON.stringify(saved);
+  }, [yearlyPlans, savedYearlyPlans, selectedYear]);
 
   const handleYearChange = useCallback(
     (delta: number) => {
@@ -422,6 +470,141 @@ export default function ShiftPlanManagement() {
     [selectedYear]
   );
 
+  const handleTabNextDay = useCallback(
+    (month: number, dayIndex: number) => {
+      // 次の日のインデックスを計算
+      const monthCursor = dayjs()
+        .year(selectedYear)
+        .month(month - 1);
+      const daysInMonth = monthCursor.daysInMonth();
+
+      let nextMonth = month;
+      let nextDayIndex = dayIndex + 1;
+
+      // 月を超える場合
+      if (nextDayIndex >= daysInMonth) {
+        nextMonth = month === 12 ? 1 : month + 1;
+        nextDayIndex = 0;
+      }
+
+      // 次のセルへフォーカスを移す
+      const nextCellId = `cell-${selectedYear}-${nextMonth}-${nextDayIndex}`;
+      setTimeout(() => {
+        const nextCell = cellRefs.current.get(nextCellId);
+        if (nextCell) {
+          nextCell.click();
+          nextCell.focus();
+        }
+      }, 0);
+    },
+    [selectedYear]
+  );
+
+  const performSave = useCallback(
+    async (
+      rows: ShiftPlanRow[],
+      year: number,
+      recordIds: Record<number, string>,
+      showNotification = true
+    ) => {
+      try {
+        const plansInput = convertRowsToPlanInput(rows);
+        const existingId = recordIds[year];
+        if (existingId) {
+          await graphqlClient.graphql({
+            query: updateShiftPlanYear,
+            variables: {
+              input: {
+                id: existingId,
+                targetYear: year,
+                plans: plansInput,
+              },
+            } as UpdateShiftPlanYearMutationVariables,
+            authMode: "userPool",
+          });
+        } else {
+          const response = (await graphqlClient.graphql({
+            query: createShiftPlanYear,
+            variables: {
+              input: {
+                targetYear: year,
+                plans: plansInput,
+              },
+            } as CreateShiftPlanYearMutationVariables,
+            authMode: "userPool",
+          })) as GraphQLResult<CreateShiftPlanYearMutation>;
+
+          const createdId = response.data?.createShiftPlanYear?.id;
+          if (createdId) {
+            setYearRecordIds((prev) => ({ ...prev, [year]: createdId }));
+          }
+        }
+
+        if (showNotification) {
+          dispatch(setSnackbarSuccess(`${year}年の申請期間を保存しました。`));
+        }
+
+        // 保存済み状態を記録
+        setSavedYearlyPlans((prev) => ({
+          ...prev,
+          [year]: rows.map((row) => ({ ...row })),
+        }));
+        // 保存時刻を更新
+        setLastAutoSaveTime(dayjs().format(TIME_FORMAT));
+
+        return true;
+      } catch (error) {
+        console.error(error);
+        if (showNotification) {
+          dispatch(setSnackbarError("シフト計画の保存に失敗しました。"));
+        }
+        return false;
+      }
+    },
+    [dispatch]
+  );
+
+  /**
+   * 自動保存
+   * - 入力停止後AUTO_SAVE_DELAY（1秒）経過後に自動保存を実行
+   * - デバウンス処理により、連続入力中は保存しない
+   */
+  useEffect(() => {
+    // 既存のタイマーをクリア（デバウンス処理）
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // 保存条件: 内容が変更されている、バリデーションに合格している
+    if (isDirty && currentRows.length > 0) {
+      // バリデーション: enabled な行の日付が入力されているか確認
+      const isValid = currentRows.every((row) => {
+        if (!row.enabled) return true;
+        return row.editStart && row.editEnd;
+      });
+
+      if (isValid) {
+        autoSaveTimerRef.current = setTimeout(() => {
+          setIsAutoSaving(true);
+          void performSave(currentRows, selectedYear, yearRecordIds, false)
+            .then(() => {
+              setIsAutoSaving(false);
+            })
+            .catch(() => {
+              setIsAutoSaving(false);
+            });
+        }, AUTO_SAVE_DELAY);
+      }
+    }
+
+    // クリーンアップ: コンポーネントのアンマウント時やdependenciesの変更時
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [isDirty, currentRows, selectedYear, yearRecordIds, performSave]);
+
   const handleSaveAll = useCallback(async () => {
     for (const row of currentRows) {
       if (!row.enabled) continue;
@@ -440,48 +623,11 @@ export default function ShiftPlanManagement() {
 
     setIsSaving(true);
     try {
-      const plansInput = convertRowsToPlanInput(currentRows);
-      const existingId = yearRecordIds[selectedYear];
-      if (existingId) {
-        await graphqlClient.graphql({
-          query: updateShiftPlanYear,
-          variables: {
-            input: {
-              id: existingId,
-              targetYear: selectedYear,
-              plans: plansInput,
-            },
-          } as UpdateShiftPlanYearMutationVariables,
-          authMode: "userPool",
-        });
-      } else {
-        const response = (await graphqlClient.graphql({
-          query: createShiftPlanYear,
-          variables: {
-            input: {
-              targetYear: selectedYear,
-              plans: plansInput,
-            },
-          } as CreateShiftPlanYearMutationVariables,
-          authMode: "userPool",
-        })) as GraphQLResult<CreateShiftPlanYearMutation>;
-
-        const createdId = response.data?.createShiftPlanYear?.id;
-        if (createdId) {
-          setYearRecordIds((prev) => ({ ...prev, [selectedYear]: createdId }));
-        }
-      }
-
-      dispatch(
-        setSnackbarSuccess(`${selectedYear}年の申請期間を保存しました。`)
-      );
-    } catch (error) {
-      console.error(error);
-      dispatch(setSnackbarError("シフト計画の保存に失敗しました。"));
+      await performSave(currentRows, selectedYear, yearRecordIds, true);
     } finally {
       setIsSaving(false);
     }
-  }, [currentRows, dispatch, selectedYear, yearRecordIds]);
+  }, [currentRows, dispatch, selectedYear, yearRecordIds, performSave]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -659,6 +805,7 @@ export default function ShiftPlanManagement() {
                           ? "warning.dark"
                           : weekdayColor;
                         const labelText = isHoliday ? "祝" : weekdayLabel;
+                        const cellId = `cell-${selectedYear}-${row.month}-${dayIndex}`;
                         const cellContent = (
                           <EditableCapacityCell
                             value={value}
@@ -670,6 +817,9 @@ export default function ShiftPlanManagement() {
                                 dayIndex,
                                 nextValue
                               )
+                            }
+                            onTabNextDay={() =>
+                              handleTabNextDay(row.month, dayIndex)
                             }
                           />
                         );
@@ -684,16 +834,26 @@ export default function ShiftPlanManagement() {
                               ...CELL_NOWRAP_SX,
                             }}
                           >
-                            {isHoliday ? (
-                              <Tooltip
-                                title={holidayName ?? "祝日"}
-                                placement="top"
-                              >
-                                {cellContent}
-                              </Tooltip>
-                            ) : (
-                              cellContent
-                            )}
+                            <Box
+                              ref={(ref) => {
+                                if (ref instanceof HTMLElement) {
+                                  cellRefs.current.set(cellId, ref);
+                                } else {
+                                  cellRefs.current.delete(cellId);
+                                }
+                              }}
+                            >
+                              {isHoliday ? (
+                                <Tooltip
+                                  title={holidayName ?? "祝日"}
+                                  placement="top"
+                                >
+                                  {cellContent}
+                                </Tooltip>
+                              ) : (
+                                cellContent
+                              )}
+                            </Box>
                           </TableCell>
                         );
                       })}
@@ -703,12 +863,30 @@ export default function ShiftPlanManagement() {
               </TableBody>
             </Table>
           </TableContainer>
-          <Box display="flex" justifyContent="flex-end" px={3} py={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            px={3}
+            py={2}
+          >
+            <Stack spacing={1}>
+              {isAutoSaving && (
+                <Typography variant="caption" color="info.main">
+                  自動保存中...
+                </Typography>
+              )}
+              {lastAutoSaveTime && !isAutoSaving && (
+                <Typography variant="caption" color="text.secondary">
+                  最後の自動保存: {lastAutoSaveTime}
+                </Typography>
+              )}
+            </Stack>
             <Button
               variant="contained"
               startIcon={<SaveIcon />}
               onClick={handleSaveAll}
-              disabled={isSaving}
+              disabled={isBusy}
             >
               全体を保存
             </Button>

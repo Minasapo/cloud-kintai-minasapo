@@ -27,11 +27,15 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
+import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/lib/reducers/snackbarReducer";
 import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
-import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";
@@ -220,13 +224,16 @@ export default function ShiftManagementBoard() {
     [currentMonth]
   );
   const daysInMonth = monthStart.daysInMonth();
+  const monthYear = monthStart.year();
+  const monthMonth = monthStart.month();
 
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
         monthStart.add(i, "day")
       ),
-    [monthStart.year(), monthStart.month(), daysInMonth]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [monthYear, monthMonth, daysInMonth]
   );
 
   const dayKeyList = useMemo(
@@ -408,16 +415,42 @@ export default function ShiftManagementBoard() {
     return map;
   }, [days, monthStart, shiftPlanPlans]);
 
+  // 変更を追跡するためのRef
+  const pendingChangesRef = React.useRef<Map<string, Map<string, ShiftState>>>(
+    new Map()
+  );
+  const [autoSaveCounter, setAutoSaveCounter] = React.useState(0);
+
+  // シフトの変更を記録（自動保存用）
+  const recordShiftChange = React.useCallback(
+    (staffId: string, dayKey: string, state: ShiftState) => {
+      if (scenario !== "actual") return;
+
+      if (!pendingChangesRef.current.has(staffId)) {
+        pendingChangesRef.current.set(staffId, new Map());
+      }
+      pendingChangesRef.current.get(staffId)!.set(dayKey, state);
+
+      // カウンターを更新して自動保存をトリガー
+      setAutoSaveCounter((prev) => prev + 1);
+    },
+    [scenario]
+  );
+
   const applyShiftState = async (
     staffIds: string[],
     dayKeys: string[],
     nextState: ShiftState
   ) => {
     if (!staffIds.length || !dayKeys.length) return;
+
     if (scenario === "actual") {
-      for (const staffId of staffIds) {
-        await persistShiftRequestChanges(staffId, dayKeys, nextState);
-      }
+      // 変更を記録（自動保存でバッチ処理される）
+      staffIds.forEach((staffId) => {
+        dayKeys.forEach((dayKey) => {
+          recordShiftChange(staffId, dayKey, nextState);
+        });
+      });
       return;
     }
 
@@ -433,6 +466,48 @@ export default function ShiftManagementBoard() {
       return next;
     });
   };
+
+  // 自動保存機能: 変更を監視して自動的に保存する
+  const {
+    isSaving: isAutoSaving,
+    isPending: isAutoSavePending,
+    lastSavedAt,
+    lastChangedAt,
+  } = useAutoSave({
+    saveFn: async () => {
+      // scenario が "actual" の場合のみ自動保存を実行
+      if (scenario !== "actual") return;
+
+      const changes = pendingChangesRef.current;
+      if (changes.size === 0) return;
+
+      // 変更をコピーしてクリア
+      const changesToSave = new Map(changes);
+      pendingChangesRef.current = new Map();
+
+      // 各スタッフの変更を保存
+      const promises: Promise<void>[] = [];
+      changesToSave.forEach((dayChanges, staffId) => {
+        dayChanges.forEach((state, dayKey) => {
+          promises.push(persistShiftRequestChanges(staffId, [dayKey], state));
+        });
+      });
+
+      if (promises.length > 0) {
+        await Promise.all(promises);
+      }
+    },
+    data: autoSaveCounter,
+    enabled: scenario === "actual" && isAuthenticated,
+    delay: 2000, // 2秒のdebounce
+    onSaveSuccess: () => {
+      dispatch(setSnackbarSuccess("シフトを自動保存しました"));
+    },
+    onSaveError: (error) => {
+      console.error("Auto-save error:", error);
+      dispatch(setSnackbarError("シフトの自動保存に失敗しました"));
+    },
+  });
 
   const {
     editingCell,
@@ -499,6 +574,43 @@ export default function ShiftManagementBoard() {
           <Chip label={monthStart.format("YYYY年 M月")} sx={{ mr: 1 }} />
           <Chip label="翌月" onClick={nextMonth} clickable />
 
+          {scenario === "actual" && (
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 2 }}
+            >
+              {isAutoSaving && (
+                <Chip
+                  icon={<CircularProgress size={16} />}
+                  label="保存中..."
+                  size="small"
+                  color="default"
+                />
+              )}
+              {isAutoSavePending && !isAutoSaving && (
+                <Chip
+                  label={`保存待ち${
+                    lastChangedAt
+                      ? ` (${dayjs(lastChangedAt).format("M/D HH:mm:ss")})`
+                      : ""
+                  }`}
+                  size="small"
+                  color="default"
+                  variant="outlined"
+                />
+              )}
+              {!isAutoSaving && !isAutoSavePending && lastSavedAt && (
+                <Chip
+                  label={`最終保存: ${dayjs(lastSavedAt).format(
+                    "M/D HH:mm:ss"
+                  )}`}
+                  size="small"
+                  color="success"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+          )}
+
           {hasBulkSelection ? (
             <Badge
               badgeContent={selectedCellCount}
@@ -532,6 +644,10 @@ export default function ShiftManagementBoard() {
           )}
         </Box>
       </Box>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        シフト管理機能は以前は開発者のみご利用いただけましたが、現在は一般公開されています。
+      </Alert>
 
       {(loading || shiftRequestsLoading) && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>

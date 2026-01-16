@@ -143,6 +143,7 @@ const useAppConfig = () => {
     config?.workEndTime,
     config?.lunchRestStartTime,
     config?.lunchRestEndTime,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   ]);
 
   const getLinks = useCallback(() => {

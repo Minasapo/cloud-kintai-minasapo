@@ -9,26 +9,16 @@
 import DesktopMenuView, {
   DesktopMenuItem,
 } from "@shared/ui/header/DesktopMenu";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
   const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);
   const { getOfficeMode, getAttendanceStatisticsEnabled } =
     useContext(AppConfigContext);
-  const [officeMode, setOfficeMode] = useState<boolean>(false);
-  const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
-    useState<boolean>(true);
-
-  useEffect(() => {
-    setOfficeMode(getOfficeMode());
-    setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const menuList = useMemo<DesktopMenuItem[]>(
     () => [
@@ -47,36 +37,14 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     []
   );
 
+  const officeMode = getOfficeMode();
+  const attendanceStatisticsEnabled = getAttendanceStatisticsEnabled();
+
   const operatorMenuList: DesktopMenuItem[] = officeMode
     ? [{ label: "QR表示", href: "/office/qr" }]
     : [];
 
   const isMailVerified = Boolean(cognitoUser?.emailVerified);
-
-  // developer flag for current staff (used to hide admin shift link)
-  const [isDeveloper, setIsDeveloper] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      if (!cognitoUser?.id) {
-        if (mounted) setIsDeveloper(false);
-        return;
-      }
-      try {
-        const staff = await fetchStaff(cognitoUser.id);
-        const developerFlag = (staff as unknown as Record<string, unknown>)
-          .developer as boolean | undefined;
-        if (mounted) setIsDeveloper(Boolean(developerFlag));
-      } catch {
-        if (mounted) setIsDeveloper(false);
-      }
-    }
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, [cognitoUser]);
 
   const isAdminUser = useMemo(
     () =>
@@ -87,9 +55,6 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
 
   const menuItems = useMemo(() => {
     const filteredMenuList = menuList.filter((menu) => {
-      if (menu.href === "/shift") {
-        return isDeveloper === true;
-      }
       if (menu.href === "/attendance/stats") {
         return attendanceStatisticsEnabled;
       }
@@ -117,7 +82,6 @@ export default function DesktopMenu({ pathName }: { pathName: string }) {
     isCognitoUserRole,
     operatorMenuList,
     menuList,
-    isDeveloper,
     attendanceStatisticsEnabled,
   ]);
 

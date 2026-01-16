@@ -1,10 +1,10 @@
-import dayjs from "dayjs";
 import {
   CloseDate,
   CreateCloseDateInput,
   DeleteCloseDateInput,
   UpdateCloseDateInput,
 } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
 import createCloseDateData from "./createCloseDateData";
@@ -18,7 +18,9 @@ export default function useCloseDates() {
   const [closeDates, setCloseDates] = useState<CloseDate[]>([]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null);
     fetchCloseDates()
       .then((res) => {

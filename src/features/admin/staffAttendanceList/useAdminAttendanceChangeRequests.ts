@@ -12,11 +12,14 @@ import * as MESSAGE_CODE from "@/errors";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 import { ChangeRequest } from "@/lib/ChangeRequest";
+import { createLogger } from "@/lib/logger";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+
+const logger = createLogger("useAdminAttendanceChangeRequests");
 
 export type UseAdminAttendanceChangeRequestsParams = {
   staffId?: string;
@@ -132,10 +135,9 @@ export const useAdminAttendanceChangeRequests = ({
             updatedAttendance
           ).approveChangeRequest(undefined);
         } catch (mailError) {
-          console.error(
-            "Failed to send approval notification mail:",
-            mailError
-          );
+          const message =
+            mailError instanceof Error ? mailError.message : String(mailError);
+          logger.error("Failed to send approval notification mail:", message);
           mailErrorOccurred = true;
         }
 
@@ -154,7 +156,9 @@ export const useAdminAttendanceChangeRequests = ({
             bulk: true,
           }),
         }).catch((error) => {
-          console.error("Failed to create operation log:", error);
+          const message =
+            error instanceof Error ? error.message : String(error);
+          logger.error("Failed to create operation log:", message);
         });
       }
 
@@ -165,7 +169,8 @@ export const useAdminAttendanceChangeRequests = ({
         dispatch(setSnackbarError(MESSAGE_CODE.E00002));
       }
     } catch (error) {
-      console.error("Bulk approve failed", error);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error("Bulk approve failed:", message);
       dispatch(setSnackbarError(MESSAGE_CODE.E04006));
     } finally {
       setBulkApproving(false);

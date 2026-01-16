@@ -1,36 +1,36 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 interface AuthenticatedUser {
   cognitoUserId: string;
 }
 
-export default function useAuthenticatedUser() {
+export default function useAuthenticatedUser(): {
+  loading: boolean;
+  error: Error | null;
+  authenticatedUser: AuthenticatedUser | undefined;
+} {
   const { user } = useAuthenticator();
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [authenticatedUser, setAuthenticatedUser] = useState<
-    AuthenticatedUser | undefined
-  >(undefined);
-
-  useEffect(() => {
+  // Derived state: compute authenticatedUser from user
+  const { loading, error, authenticatedUser } = useMemo(() => {
     const cognitoUserId = user?.userId ?? user?.username ?? null;
 
-    setLoading(true);
-    setError(null);
-
     if (!cognitoUserId) {
-      setLoading(false);
-      setError(new Error("User is not authenticated"));
-      setAuthenticatedUser(undefined);
-      return;
+      return {
+        loading: false,
+        error: new Error("User is not authenticated"),
+        authenticatedUser: undefined,
+      };
     }
 
-    setAuthenticatedUser({
-      cognitoUserId,
-    });
-    setLoading(false);
+    return {
+      loading: false,
+      error: null,
+      authenticatedUser: {
+        cognitoUserId,
+      },
+    };
   }, [user]);
 
   return {

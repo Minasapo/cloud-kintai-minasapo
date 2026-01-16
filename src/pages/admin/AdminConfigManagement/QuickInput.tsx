@@ -42,21 +42,23 @@ export default function QuickInput() {
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuickInputStartTimes(
       getQuickInputStartTimes().map((entry) => ({
         time: dayjs(entry.time, TIME_FORMAT),
         enabled: entry.enabled,
       }))
     );
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuickInputEndTimes(
       getQuickInputEndTimes().map((entry) => ({
         time: dayjs(entry.time, TIME_FORMAT),
         enabled: entry.enabled,
       }))
     );
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getQuickInputStartTimes, getQuickInputEndTimes, getConfigId]);
 
   const handleAddQuickInputStartTime = () =>
     setQuickInputStartTimes(

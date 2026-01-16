@@ -27,7 +27,7 @@ import { useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 export default function StaffShiftList() {
@@ -40,13 +40,16 @@ export default function StaffShiftList() {
   const [currentMonth, setCurrentMonth] = useState(dayjs());
   const monthStart = currentMonth.startOf("month");
   const daysInMonth = monthStart.daysInMonth();
+  const monthYear = monthStart.year();
+  const monthMonth = monthStart.month();
 
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
         monthStart.add(i, "day")
       ),
-    [monthStart.year(), monthStart.month(), daysInMonth]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [monthYear, monthMonth, daysInMonth]
   );
 
   const {
@@ -105,6 +108,7 @@ export default function StaffShiftList() {
       if (r < 0.2) map[d.format("YYYY-MM-DD")] = undefined;
       else map[d.format("YYYY-MM-DD")] = r > 0.6 ? "work" : "off";
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShifts(map);
   }, [monthStart.year(), monthStart.month(), daysInMonth]);
 

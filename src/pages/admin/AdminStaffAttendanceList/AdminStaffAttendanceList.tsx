@@ -7,12 +7,12 @@ import {
   Box,
   LinearProgress,
   Stack,
-  Typography,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";

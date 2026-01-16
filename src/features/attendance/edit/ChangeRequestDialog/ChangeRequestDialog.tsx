@@ -9,13 +9,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  Attendance,
-  AttendanceChangeRequest,
-  UpdateAttendanceInput,
-} from "@shared/api/graphql/types";
+import { Attendance, UpdateAttendanceInput } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
@@ -43,15 +39,14 @@ export default function ChangeRequestDialog({
 }) {
   const dispatch = useAppDispatchV2();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [changeRequest, setChangeRequest] =
-    useState<AttendanceChangeRequest | null>(null);
   const [comment, setComment] = useState<string | undefined>(undefined);
+  const [manualClose, setManualClose] = useState(false);
 
-  useEffect(() => {
+  // 派生状態として計算：未完了の変更リクエストがあれば表示
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { open: shouldOpen, changeRequest } = useMemo(() => {
     if (!attendance?.changeRequests) {
-      setOpen(false);
-      return;
+      return { open: false, changeRequest: null };
     }
 
     const changeRequests = attendance.changeRequests
@@ -59,16 +54,23 @@ export default function ChangeRequestDialog({
       .filter((item) => !item.completed);
 
     if (changeRequests.length === 0) {
-      setOpen(false);
-      return;
+      return { open: false, changeRequest: null };
     }
 
-    setChangeRequest(changeRequests[0]);
-    setOpen(true);
+    return { open: true, changeRequest: changeRequests[0] };
   }, [attendance?.changeRequests]);
 
+  // 実際の表示状態（手動で閉じられていない場合のみ表示）
+  const open = shouldOpen && !manualClose;
+
+  // changeRequestが変わったらmanualCloseをリセット
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setManualClose(false);
+  }, [changeRequest]);
+
   const handleClose = () => {
-    setOpen(false);
+    setManualClose(true);
   };
 
   const getWorkDate = () => {

@@ -1,5 +1,5 @@
 import { Button, styled } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -22,14 +22,20 @@ const StyledRestEndButton = styled(Button)(({ theme }) => ({
 export interface RestEndButtonProps {
   isResting: boolean;
   onRestEnd: () => void;
+  disabled?: boolean;
 }
 
-const RestEndButton = ({ isResting, onRestEnd }: RestEndButtonProps) => {
+const RestEndButton = ({
+  isResting,
+  onRestEnd,
+  disabled = false,
+}: RestEndButtonProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    setIsProcessing(false);
-  }, [isResting]);
+  // Derived state: reset isProcessing when isResting changes
+  const actualIsProcessing = useMemo(() => {
+    return isResting ? false : isProcessing;
+  }, [isResting, isProcessing]);
 
   const handleClick = useCallback(() => {
     setIsProcessing(true);
@@ -40,7 +46,7 @@ const RestEndButton = ({ isResting, onRestEnd }: RestEndButtonProps) => {
     <StyledRestEndButton
       fullWidth
       onClick={handleClick}
-      disabled={!isResting || isProcessing}
+      disabled={!isResting || actualIsProcessing || disabled}
       data-testid="rest-end-button"
     >
       休憩終了

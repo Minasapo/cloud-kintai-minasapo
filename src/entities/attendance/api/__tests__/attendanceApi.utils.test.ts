@@ -50,7 +50,7 @@ describe("attendanceApi utils", () => {
   });
 
   describe("buildAttendanceHistoryInput", () => {
-    const attendance: Attendance = {
+    const attendance = {
       __typename: "Attendance",
       id: "a1",
       staffId: "s1",
@@ -73,7 +73,7 @@ describe("attendanceApi utils", () => {
         {
           __typename: "HourlyPaidHolidayTime" as const,
           startTime: "17:00",
-          endTime: null as any,
+          endTime: null,
         },
       ],
       remarks: "memo",
@@ -85,7 +85,7 @@ describe("attendanceApi utils", () => {
       changeRequests: [],
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
-    };
+    } as Attendance;
 
     it("AttendanceからHistoryInputを組み立て、createdAt引数を反映する", () => {
       const input = buildAttendanceHistoryInput(

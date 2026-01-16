@@ -9,7 +9,8 @@ export function OfficeQrExperience() {
   const { isCognitoUserRole } = useContext(AuthContext);
   const { getOfficeMode } = useContext(AppConfigContext);
   const [showAdminAlert, setShowAdminAlert] = useState(false);
-  const [isOfficeModeEnabled, setIsOfficeModeEnabled] = useState(false);
+
+  const isOfficeModeEnabled = getOfficeMode();
 
   const {
     qrUrl,
@@ -23,12 +24,8 @@ export function OfficeQrExperience() {
   } = useOfficeQr();
 
   useEffect(() => {
-    setIsOfficeModeEnabled(getOfficeMode());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     if (isCognitoUserRole(StaffRole.ADMIN)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowAdminAlert(true);
     }
   }, [isCognitoUserRole]);

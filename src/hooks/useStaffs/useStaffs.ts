@@ -8,8 +8,8 @@ import {
 } from "@shared/api/graphql/types";
 import { useContext, useEffect, useState } from "react";
 
-import { StaffExternalLink } from "@/entities/staff/externalLink";
 import { AuthContext } from "@/context/AuthContext";
+import { StaffExternalLink } from "@/entities/staff/externalLink";
 
 import createStaffData from "./createStaffData";
 import deleteStaffData from "./deleteStaffData";
@@ -33,6 +33,7 @@ export const roleLabelMap = new Map<StaffRole, string>([
   [StaffRole.STAFF, "スタッフ"],
   [StaffRole.GUEST, "ゲスト"],
   [StaffRole.OPERATOR, "オペレーター"],
+  [StaffRole.NONE, "未設定"],
 ]);
 
 export type StaffType = {
@@ -77,7 +78,7 @@ export function mappingStaffRole(role: Staff["role"]): StaffRole {
   }
 }
 
-export default function useStaffs() {
+export function useStaffs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [staffs, setStaffs] = useState<StaffType[]>([]);
@@ -86,12 +87,17 @@ export default function useStaffs() {
 
   useEffect(() => {
     if (!isAuthenticated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStaffs([]);
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null);
     fetchStaffs()
       .then((res) =>

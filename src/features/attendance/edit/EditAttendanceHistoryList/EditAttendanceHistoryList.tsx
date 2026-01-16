@@ -33,6 +33,7 @@ export default function EditAttendanceHistoryList() {
 
   useEffect(() => {
     // If we're in readOnly mode, open dialog by default on mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (readOnly) setOpen(true);
   }, [readOnly]);
 

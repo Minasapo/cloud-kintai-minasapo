@@ -1,3 +1,8 @@
+import { useLazyGetAttendanceByStaffAndDateQuery } from "@entities/attendance/api/attendanceApi";
+import {
+  AttendanceHistory,
+  SystemCommentInput,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -9,21 +14,16 @@ import {
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { StaffType, mappingStaffRole } from "@/hooks/useStaffs/useStaffs";
+import { mappingStaffRole,StaffType } from "@/hooks/useStaffs/useStaffs";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { Logger } from "@/lib/logger";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import {
   AttendanceEditInputs,
+  defaultValues,
   HourlyPaidHolidayTimeInputs,
   RestInputs,
-  defaultValues,
 } from "@/pages/attendance/edit/common";
-import { useLazyGetAttendanceByStaffAndDateQuery } from "@entities/attendance/api/attendanceApi";
-import {
-  AttendanceHistory,
-  SystemCommentInput,
-} from "@shared/api/graphql/types";
 
 type ReplaceFn<T> = (value: T[]) => void;
 

@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 
+import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import { StaffType } from "@/hooks/useStaffs/useStaffs";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
@@ -46,7 +47,10 @@ export default function WorkflowCommentThread({
       <Typography variant="h6" sx={{ mb: 1 }}>
         {title}
       </Typography>
-      <Paper variant="outlined" sx={{ p: 2, maxHeight: 480, overflow: "auto" }}>
+      <Paper
+        variant="outlined"
+        sx={{ p: 2, maxHeight: PANEL_HEIGHTS.SCROLLABLE_MAX, overflow: "auto" }}
+      >
         <Stack spacing={2}>
           {messages.map((m) => {
             const displayName = formatSender(m.sender);

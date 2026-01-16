@@ -28,10 +28,11 @@ export default function Reasons() {
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setReasons(getReasons());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getReasons, getConfigId]);
 
   const handleAddReason = () =>
     setReasons(appendItem(reasons, { reason: "", enabled: true }));

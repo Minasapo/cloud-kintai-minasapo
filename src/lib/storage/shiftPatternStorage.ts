@@ -1,5 +1,9 @@
 import { downloadData, uploadData } from "aws-amplify/storage";
 
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("shiftPatternStorage");
+
 type ShiftPatternStorageRecord = {
   id: string;
   name: string;
@@ -80,7 +84,8 @@ const parseResponseBody = async (body: DownloadBody) => {
     }
     return data as ShiftPatternStorageRecord[];
   } catch (error) {
-    console.error("Failed to parse shift patterns", error);
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error("Failed to parse shift patterns:", message);
     return [] as ShiftPatternStorageRecord[];
   }
 };

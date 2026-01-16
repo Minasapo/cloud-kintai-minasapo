@@ -46,9 +46,14 @@ import React, {
 } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import * as MESSAGE_CODE from "@/errors";
+import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/lib/reducers/snackbarReducer";
 import {
   loadShiftPatterns,
   saveShiftPatterns,
@@ -187,6 +192,59 @@ export default function ShiftRequestForm() {
     shiftRequestId,
     setShiftRequestId,
     setHistories,
+  });
+
+  // 初期データロード完了を追跡
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+
+  useEffect(() => {
+    // ロード中でなく、かつスタッフ情報がある場合は初期ロード完了とみなす
+    if (!isLoadingStaff && !isLoadingShiftRequest && staff) {
+      // 少し遅延を入れてから自動保存を有効にする（初期データ設定を確実に完了させるため）
+      const timer = setTimeout(() => {
+        setIsInitialLoadComplete(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoadingStaff, isLoadingShiftRequest, staff]);
+
+  // 自動保存機能: selectedDates の変更を監視して自動的に保存する
+  const {
+    isSaving: isAutoSaving,
+    isPending: isAutoSavePending,
+    lastSavedAt,
+    lastChangedAt,
+  } = useAutoSave({
+    saveFn: async () => {
+      if (!staff || isLoadingStaff || isLoadingShiftRequest) return;
+      // summary を saveFn 内で計算
+      const currentSummary = {
+        workDays: Object.values(selectedDates).filter(
+          (v) => v.status === "work"
+        ).length,
+        fixedOffDays: Object.values(selectedDates).filter(
+          (v) => v.status === "fixedOff"
+        ).length,
+        requestedOffDays: Object.values(selectedDates).filter(
+          (v) => v.status === "requestedOff"
+        ).length,
+      };
+      await saveShiftRequest(currentSummary);
+    },
+    data: selectedDates,
+    enabled:
+      isInitialLoadComplete &&
+      !!staff &&
+      !isLoadingStaff &&
+      !isLoadingShiftRequest,
+    delay: 2000, // 2秒のdebounce
+    onSaveSuccess: () => {
+      dispatch(setSnackbarSuccess("シフトを自動保存しました"));
+    },
+    onSaveError: (error) => {
+      console.error("Auto-save error:", error);
+      dispatch(setSnackbarError("シフトの自動保存に失敗しました"));
+    },
   });
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
@@ -493,7 +551,11 @@ export default function ShiftRequestForm() {
   );
 
   const interactionDisabled =
-    !staff || isLoadingStaff || isLoadingShiftRequest || isSaving;
+    !staff ||
+    isLoadingStaff ||
+    isLoadingShiftRequest ||
+    isSaving ||
+    isAutoSaving;
   const hasSelection = Object.keys(selectedDates).length > 0;
   const hasRowSelection = selectedRowKeys.length > 0;
 
@@ -707,6 +769,32 @@ export default function ShiftRequestForm() {
             <IconButton size="small" onClick={nextMonth} aria-label="次の月">
               <ArrowForwardIcon />
             </IconButton>
+
+            {/* 自動保存ステータス表示 */}
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 1 }}
+            >
+              {isAutoSaving && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <CircularProgress size={14} />
+                  <Typography variant="caption" color="text.secondary">
+                    保存中...
+                  </Typography>
+                </Box>
+              )}
+              {isAutoSavePending && !isAutoSaving && (
+                <Typography variant="caption" color="text.secondary">
+                  保存待ち
+                  {lastChangedAt &&
+                    ` (${dayjs(lastChangedAt).format("M/D HH:mm:ss")})`}
+                </Typography>
+              )}
+              {!isAutoSaving && !isAutoSavePending && lastSavedAt && (
+                <Typography variant="caption" color="success.main">
+                  最終保存: {dayjs(lastSavedAt).format("M/D HH:mm:ss")}
+                </Typography>
+              )}
+            </Box>
           </Box>
 
           <Box>
@@ -841,7 +929,7 @@ export default function ShiftRequestForm() {
                       }
                       sx={{
                         position: "relative",
-                        minHeight: 52,
+                        minHeight: PANEL_HEIGHTS.FORM_ITEM_MIN,
                         px: 0.5,
                         py: 0.5,
                         borderRadius: 1,

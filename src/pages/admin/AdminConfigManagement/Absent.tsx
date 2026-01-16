@@ -27,10 +27,11 @@ export default function Absent() {
 
   useEffect(() => {
     if (typeof getAbsentEnabled === "function")
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAbsentEnabled(getAbsentEnabled());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getAbsentEnabled, getConfigId]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAbsentEnabled(event.target.checked);

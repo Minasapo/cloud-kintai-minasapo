@@ -41,10 +41,15 @@ export default function WorkingTime() {
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStartTime(getStartTime());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEndTime(getEndTime());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLunchRestStartTime(getLunchRestStartTime());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLunchRestEndTime(getLunchRestEndTime());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [
     getStartTime,

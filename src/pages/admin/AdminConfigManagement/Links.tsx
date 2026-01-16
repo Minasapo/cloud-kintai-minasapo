@@ -29,10 +29,11 @@ export default function Links() {
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLinks(getLinks());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getLinks, getConfigId]);
 
   const handleAddLink = () =>
     setLinks(

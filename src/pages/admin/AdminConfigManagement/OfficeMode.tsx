@@ -33,11 +33,13 @@ export default function OfficeMode() {
   const dispatch = useAppDispatchV2();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOfficeMode(getOfficeMode());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHourlyPaidHolidayEnabled(getHourlyPaidHolidayEnabled());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getOfficeMode, getHourlyPaidHolidayEnabled, getConfigId]);
 
   const handleOfficeModeChange = (
     event: React.ChangeEvent<HTMLInputElement>

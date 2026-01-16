@@ -7,6 +7,12 @@ import type {
   ShouldRevalidateFunction,
 } from "react-router-dom";
 
+/**
+ * Note: `any` is used here for ComponentType generics as we need maximum flexibility
+ * for lazy-loaded components. This is a common pattern in router configurations
+ * where component prop types are determined at runtime.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LazyModule<T extends ComponentType<any>> = { default: T };
 
 type LazyRouteOptions = {
@@ -19,6 +25,11 @@ type LazyRouteOptions = {
   hydrateFallback?: ReactNode | ComponentType;
 };
 
+/**
+ * Note: `any` is used here for ComponentType generics as we need maximum flexibility
+ * for lazy-loaded components. This is a common pattern in router configurations.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createLazyRoute<T extends ComponentType<any>>(
   loader: () => Promise<LazyModule<T>>,
   options?: LazyRouteOptions

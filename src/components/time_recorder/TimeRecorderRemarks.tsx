@@ -24,9 +24,15 @@ export default function TimeRecorderRemarks({
     attendance?.remarks
   );
 
+  // attendance が変更された場合のみフォーム状態を更新（外部データとの同期）
+  const attendanceRemarks = attendance?.remarks;
   useEffect(() => {
-    setFormState(attendance?.remarks);
-  }, [attendance]);
+    // 外部データの変更を検知してフォーム状態を更新
+    if (attendanceRemarks !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormState(attendanceRemarks);
+    }
+  }, [attendanceRemarks]);
 
   const isChanged = useMemo(
     () => attendance?.remarks !== formState,

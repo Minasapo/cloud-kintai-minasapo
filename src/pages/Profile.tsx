@@ -27,13 +27,15 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { predefinedIcons } from "@/constants/icons";
+import { MARGINS } from "@/constants/uiDimensions";
+import {
+  STAFF_EXTERNAL_LINKS_LIMIT,
+  StaffExternalLink,
+} from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
 import updateStaff from "@/hooks/useStaff/updateStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
-import {
-  StaffExternalLink,
-  STAFF_EXTERNAL_LINKS_LIMIT,
-} from "@/entities/staff/externalLink";
+import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -47,8 +49,10 @@ import {
   StaffType,
 } from "../hooks/useStaffs/useStaffs";
 
+const logger = createLogger("Profile");
+
 const NotificationSwitch = styled(Switch)(({ theme }) => ({
-  padding: 8,
+  padding: MARGINS.PADDING_STANDARD,
   "& .MuiSwitch-track": {
     borderRadius: 22 / 2,
     "&::before, &::after": {
@@ -76,7 +80,7 @@ const NotificationSwitch = styled(Switch)(({ theme }) => ({
     boxShadow: "none",
     width: 16,
     height: 16,
-    margin: 2,
+    margin: MARGINS.FORM_MARGIN,
   },
 }));
 
@@ -196,9 +200,9 @@ export default function Profile() {
         });
       })
       .catch((e: Error) => {
-        console.log(e);
+        logger.error("Failed to load staff data:", e);
       });
-  }, []);
+  }, [cognitoUser, setValue]);
 
   if (!cognitoUser || staff === undefined) {
     return null;

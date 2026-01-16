@@ -22,7 +22,7 @@ import StatusChip from "@shared/ui/chips/StatusChip";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import useStaffs from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
 import {
   CATEGORY_LABELS,
@@ -63,7 +63,9 @@ export default function AdminWorkflow() {
     const initialStatuses = statuses.filter(
       (s) => !STATUS_EXCLUDED_FROM_DEFAULT.includes(s)
     );
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatusFilter(initialStatuses);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatusInitialized(true);
   }, [statuses, statusInitialized]);
 
@@ -89,6 +91,7 @@ export default function AdminWorkflow() {
 
   // ページングリセット: フィルター変更時にページを先頭に戻す
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0);
   }, [categoryFilter, statusFilter]);
 

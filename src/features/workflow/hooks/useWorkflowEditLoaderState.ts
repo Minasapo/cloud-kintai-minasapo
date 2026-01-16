@@ -25,6 +25,8 @@ export type WorkflowEditLoaderState = {
   setEndDate: (value: string) => void;
   absenceDate: string;
   setAbsenceDate: (value: string) => void;
+  absenceReason: string;
+  setAbsenceReason: (value: string) => void;
   paidReason: string;
   setPaidReason: (value: string) => void;
   overtimeDate: string;
@@ -51,6 +53,7 @@ export function useWorkflowEditLoaderState(
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [absenceDate, setAbsenceDate] = useState("");
+  const [absenceReason, setAbsenceReason] = useState("");
   const [paidReason, setPaidReason] = useState("");
   const [overtimeDate, setOvertimeDate] = useState("");
   const [overtimeStart, setOvertimeStart] = useState<string | null>(null);
@@ -69,6 +72,7 @@ export function useWorkflowEditLoaderState(
         : CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
           workflow.category
       : "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCategory(nextCategoryLabel);
 
     const appDate =
@@ -78,16 +82,44 @@ export function useWorkflowEditLoaderState(
 
     if (workflow.overTimeDetails) {
       const overtimeDate = isoDateFromTimestamp(workflow.overTimeDetails.date);
-      setOvertimeDate(overtimeDate);
 
-      // HH:mm形式をISO形式に変換
-      const startTime = workflow.overTimeDetails.startTime;
-      const endTime = workflow.overTimeDetails.endTime;
-      setOvertimeStart(
-        startTime ? parseTimeToISO(startTime, overtimeDate) : null
-      );
-      setOvertimeEnd(endTime ? parseTimeToISO(endTime, overtimeDate) : null);
-      setOvertimeReason(workflow.overTimeDetails.reason || "");
+      // 有給休暇申請の場合
+      if (workflow.category === WorkflowCategory.PAID_LEAVE) {
+        setStartDate(workflow.overTimeDetails.startTime || "");
+        setEndDate(workflow.overTimeDetails.endTime || "");
+        setPaidReason(workflow.overTimeDetails.reason || "");
+      }
+      // 欠勤申請の場合
+      else if (workflow.category === WorkflowCategory.ABSENCE) {
+        setAbsenceDate(overtimeDate);
+        setAbsenceReason(workflow.overTimeDetails.reason || "");
+      }
+      // 残業申請の場合
+      else if (workflow.category === WorkflowCategory.OVERTIME) {
+        setOvertimeDate(overtimeDate);
+
+        // HH:mm形式をISO形式に変換
+        const startTime = workflow.overTimeDetails.startTime;
+        const endTime = workflow.overTimeDetails.endTime;
+        setOvertimeStart(
+          startTime ? parseTimeToISO(startTime, overtimeDate) : null
+        );
+        setOvertimeEnd(endTime ? parseTimeToISO(endTime, overtimeDate) : null);
+        setOvertimeReason(workflow.overTimeDetails.reason || "");
+      }
+      // 打刻修正の場合
+      else if (workflow.category === WorkflowCategory.CLOCK_CORRECTION) {
+        setOvertimeDate(overtimeDate);
+
+        // HH:mm形式をISO形式に変換
+        const startTime = workflow.overTimeDetails.startTime;
+        const endTime = workflow.overTimeDetails.endTime;
+        setOvertimeStart(
+          startTime ? parseTimeToISO(startTime, overtimeDate) : null
+        );
+        setOvertimeEnd(endTime ? parseTimeToISO(endTime, overtimeDate) : null);
+        setOvertimeReason(workflow.overTimeDetails.reason || "");
+      }
     } else {
       setOvertimeDate("");
       setOvertimeStart(null);
@@ -101,10 +133,12 @@ export function useWorkflowEditLoaderState(
 
   useEffect(() => {
     if (!workflow.staffId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setApplicant(null);
       return;
     }
     const match = staffs.find((s) => s.id === workflow.staffId);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setApplicant(
       match ||
         ({
@@ -125,6 +159,8 @@ export function useWorkflowEditLoaderState(
     setEndDate,
     absenceDate,
     setAbsenceDate,
+    absenceReason,
+    setAbsenceReason,
     paidReason,
     setPaidReason,
     overtimeDate,
