@@ -33,6 +33,7 @@ export default function ChangeRequestQuickViewDialog({
     const date = dayjs(attendance.workDate);
     if (!date.isValid()) return "";
     return date.format(AttendanceDate.DisplayFormat);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attendance?.workDate]);
 
   if (!attendance || !changeRequest) {

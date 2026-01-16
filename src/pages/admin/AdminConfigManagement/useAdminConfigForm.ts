@@ -61,7 +61,12 @@ export function useAdminConfigForm() {
     getThemeTokens,
   } = useContext(AppConfigContext);
 
-  const adminPanelTokens = useMemo(() => getThemeTokens(), []);
+  const adminPanelTokens = useMemo(
+    () => getThemeTokens(),
+    [
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    ]
+  );
   const sectionSpacing = adminPanelTokens.component.adminPanel.sectionSpacing;
 
   const [startTime, setStartTime] = useState<Dayjs | null>(null);

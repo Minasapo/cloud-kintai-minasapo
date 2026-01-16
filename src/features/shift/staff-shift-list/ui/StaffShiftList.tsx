@@ -48,6 +48,7 @@ export default function StaffShiftList() {
       Array.from({ length: daysInMonth }).map((_, i) =>
         monthStart.add(i, "day")
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [monthYear, monthMonth, daysInMonth]
   );
 
