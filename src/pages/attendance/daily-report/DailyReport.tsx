@@ -1185,11 +1185,7 @@ export default function DailyReport() {
                         >
                           <Button
                             variant="outlined"
-                            disabled={
-                              !canEditSubmit ||
-                              isUpdating ||
-                              isSelectedReportSubmitted
-                            }
+                            disabled={!canEditSubmit || isUpdating}
                             onClick={() => {
                               void handleSaveEdit(
                                 DailyReportStatus.DRAFT,
@@ -1201,7 +1197,11 @@ export default function DailyReport() {
                           </Button>
                           <Button
                             variant="contained"
-                            disabled={!canEditSubmit || isUpdating}
+                            disabled={
+                              !canEditSubmit ||
+                              isUpdating ||
+                              isSelectedReportSubmitted
+                            }
                             onClick={() => {
                               void handleSaveEdit(
                                 DailyReportStatus.SUBMITTED,

@@ -62,6 +62,9 @@ export default function QuickDailyReportCard({
   const [content, setContent] = useState("");
   const [savedContent, setSavedContent] = useState("");
   const [reportId, setReportId] = useState<string | null>(null);
+  const [reportStatus, setReportStatus] = useState<DailyReportStatus | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -144,11 +147,13 @@ export default function QuickDailyReportCard({
           setReportId(report.id);
           setContent(nextContent);
           setSavedContent(nextContent);
+          setReportStatus(report.status as DailyReportStatus);
         } else {
           // 既存の日報がない場合は空の状態にリセット
           setReportId(null);
           setContent("");
           setSavedContent("");
+          setReportStatus(null);
         }
       } catch (err) {
         if (!mounted) return;
@@ -190,14 +195,24 @@ export default function QuickDailyReportCard({
   /**
    * 日報の保存処理
    * @param showNotification - 保存完了時に通知を表示するかどうか
+   * @param isManualSave - 手動保存かどうか（提出ボタン、自動保存で区別）
    */
   const handleSave = useCallback(
-    async (showNotification = true) => {
+    async (showNotification = true, isManualSave = false) => {
       // 保存が不要な場合は早期リターン
-      if (!staffId || content === savedContent) return;
+      // 手動保存の場合は内容の変更有無を問わず実行、自動保存の場合は変更があれば実行
+      if (!staffId) return;
+      if (!isManualSave && content === savedContent) return;
 
       setIsSaving(true);
       setError(null);
+
+      // 提出ボタンで保存する場合は提出モード、自動保存の場合はステータスに基づいて決定
+      const status = isManualSave
+        ? DailyReportStatus.SUBMITTED
+        : reportStatus === DailyReportStatus.SUBMITTED
+        ? DailyReportStatus.SUBMITTED
+        : DailyReportStatus.DRAFT;
 
       try {
         if (reportId) {
@@ -208,6 +223,7 @@ export default function QuickDailyReportCard({
               input: {
                 id: reportId,
                 content,
+                status,
                 updatedAt: new Date().toISOString(),
               },
             },
@@ -222,6 +238,7 @@ export default function QuickDailyReportCard({
             response.data?.updateDailyReport?.content ?? content;
           setSavedContent(updatedContent);
           setContent(updatedContent);
+          setReportStatus(status);
         } else {
           // 新規日報を作成
           const response = (await graphqlClient.graphql({
@@ -232,7 +249,7 @@ export default function QuickDailyReportCard({
                 reportDate: date,
                 title: defaultTitle,
                 content,
-                status: DailyReportStatus.DRAFT,
+                status,
                 updatedAt: new Date().toISOString(),
                 reactions: [],
                 comments: [],
@@ -250,6 +267,7 @@ export default function QuickDailyReportCard({
           setReportId(created?.id ?? null);
           setSavedContent(nextContent);
           setContent(nextContent);
+          setReportStatus(status);
         }
 
         // 保存時刻を記録
@@ -268,7 +286,16 @@ export default function QuickDailyReportCard({
         setIsSaving(false);
       }
     },
-    [staffId, content, savedContent, reportId, date, defaultTitle, dispatch]
+    [
+      staffId,
+      content,
+      savedContent,
+      reportId,
+      reportStatus,
+      date,
+      defaultTitle,
+      dispatch,
+    ]
   );
 
   /**
@@ -284,7 +311,7 @@ export default function QuickDailyReportCard({
     // 保存条件: staffIdが存在、内容が変更されている、空ではない
     if (staffId && content !== savedContent && content.trim() !== "") {
       autoSaveTimerRef.current = setTimeout(() => {
-        void handleSave(false); // 自動保存時は通知を表示しない
+        void handleSave(false, false); // 自動保存時は通知を表示しない
       }, AUTO_SAVE_DELAY);
     }
 
@@ -295,14 +322,6 @@ export default function QuickDailyReportCard({
       }
     };
   }, [content, savedContent, staffId, handleSave]);
-
-  /**
-   * 入力内容をクリアして保存済みの状態に戻す
-   */
-  const handleClear = () => {
-    setContent(savedContent);
-    setError(null);
-  };
 
   /**
    * カードの展開/折りたたみを切り替え
@@ -335,17 +354,16 @@ export default function QuickDailyReportCard({
       isDialogOpen={isDialogOpen}
       isLoading={isLoading}
       isEditable={isEditable}
-      isDirty={isDirty}
       isSaving={isSaving}
       hasStaff={hasStaff}
       error={error}
       lastSavedAt={lastSavedAt}
       contentPanelId={contentPanelId}
+      isSubmitted={reportStatus === DailyReportStatus.SUBMITTED}
       onToggle={handleToggle}
       onDialogOpen={handleDialogOpen}
       onDialogClose={handleDialogClose}
-      onClear={handleClear}
-      onSave={() => void handleSave(true)}
+      onSave={() => void handleSave(true, true)}
       onContentChange={(value) => setContent(value)}
     />
   );
