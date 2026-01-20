@@ -42,6 +42,7 @@ import { AppShell } from "@/shared/ui/layout";
 import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";
+import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
 
 import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
@@ -144,7 +145,9 @@ function AppProviders({ children, auth, config, app }: AppProvidersProps) {
   return (
     <AuthContext.Provider value={auth}>
       <AppConfigContext.Provider value={config}>
-        <AppContext.Provider value={app}>{children}</AppContext.Provider>
+        <AppContext.Provider value={app}>
+          <SplitViewProvider>{children}</SplitViewProvider>
+        </AppContext.Provider>
       </AppConfigContext.Provider>
     </AuthContext.Provider>
   );
