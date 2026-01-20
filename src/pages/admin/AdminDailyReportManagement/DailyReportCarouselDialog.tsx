@@ -411,18 +411,18 @@ export default function DailyReportCarouselDialog({
     isResolvingCurrentStaff;
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
-          height: '80vh',
-          maxHeight: '80vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }
+          height: "80vh",
+          maxHeight: "80vh",
+          display: "flex",
+          flexDirection: "column",
+        },
       }}
     >
       <DialogTitle
@@ -454,33 +454,33 @@ export default function DailyReportCarouselDialog({
           flexShrink: 0,
         }}
       >
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <IconButton
-                onClick={handlePrevious}
-                disabled={currentIndex <= 0}
-                size="small"
-              >
-                <ChevronLeftIcon />
-              </IconButton>
-              <Typography
-                variant="body2"
-                sx={{ minWidth: 80, textAlign: "center" }}
-              >
-                {currentIndex + 1} / {filteredReports.length}
-              </Typography>
-              <IconButton
-                onClick={handleNext}
-                disabled={currentIndex >= filteredReports.length - 1}
-                size="small"
-              >
-                <ChevronRightIcon />
-              </IconButton>
-            </Stack>
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <IconButton
+            onClick={handlePrevious}
+            disabled={currentIndex <= 0}
+            size="small"
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+          <Typography
+            variant="body2"
+            sx={{ minWidth: 80, textAlign: "center" }}
+          >
+            {currentIndex + 1} / {filteredReports.length}
+          </Typography>
+          <IconButton
+            onClick={handleNext}
+            disabled={currentIndex >= filteredReports.length - 1}
+            size="small"
+          >
+            <ChevronRightIcon />
+          </IconButton>
+        </Stack>
       </Box>
 
       {/* Scrollable Content */}
@@ -488,176 +488,173 @@ export default function DailyReportCarouselDialog({
         sx={{
           p: 0,
           flex: 1,
-          overflow: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
+          overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Box sx={{ p: 3 }}>
-            {isLoading || isStaffLoading ? (
-              <Typography align="center" color="text.secondary">
-                読み込み中...
-              </Typography>
-            ) : loadError ? (
-              <Alert severity="error">{loadError}</Alert>
-            ) : !report ? (
-              <Alert severity="warning">日報が見つかりません</Alert>
-            ) : (
-              <Stack spacing={3}>
-                {actionError && (
-                  <Alert severity="error" onClose={() => setActionError(null)}>
-                    {actionError}
-                  </Alert>
-                )}
+          {isLoading || isStaffLoading ? (
+            <Typography align="center" color="text.secondary">
+              読み込み中...
+            </Typography>
+          ) : loadError ? (
+            <Alert severity="error">{loadError}</Alert>
+          ) : !report ? (
+            <Alert severity="warning">日報が見つかりません</Alert>
+          ) : (
+            <Stack spacing={3}>
+              {actionError && (
+                <Alert severity="error" onClose={() => setActionError(null)}>
+                  {actionError}
+                </Alert>
+              )}
 
-                {/* Header */}
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {report.title}
-                  </Typography>
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                    flexWrap="wrap"
-                  >
-                    <Typography variant="body2" color="text.secondary">
-                      {formatDateSlash(report.date) || report.date} |{" "}
-                      {report.author}
-                    </Typography>
-                    <Chip
-                      label={STATUS_META[report.status].label}
-                      color={STATUS_META[report.status].color}
-                      size="small"
-                    />
-                  </Stack>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: "block", mt: 0.5 }}
-                  >
-                    最終更新: {formatDateTimeReadable(report.updatedAt) || "-"}
-                  </Typography>
-                </Box>
-
-                <Divider />
-
-                {/* Content */}
-                <Typography
-                  component="pre"
-                  variant="body2"
-                  sx={{ whiteSpace: "pre-wrap", fontFamily: "inherit" }}
-                >
-                  {report.content || "内容は登録されていません"}
+              {/* Header */}
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {report.title}
                 </Typography>
-
-                <Divider />
-
-                {/* Reactions */}
-                <Stack spacing={1}>
-                  <Typography variant="subtitle2">リアクション</Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap">
-                    {(Object.keys(REACTION_META) as ReactionType[]).map(
-                      (type) => {
-                        const meta = REACTION_META[type];
-                        const count =
-                          reactions.find((reaction) => reaction.type === type)
-                            ?.count ?? 0;
-                        const isSelected = selectedReactions.includes(type);
-                        return (
-                          <Chip
-                            key={type}
-                            clickable
-                            color={isSelected ? "primary" : undefined}
-                            variant={isSelected ? "filled" : "outlined"}
-                            label={`${meta.emoji} ${meta.label}${
-                              count > 0 ? ` (${count})` : ""
-                            }`}
-                            disabled={chipsDisabled}
-                            onClick={() => {
-                              void handleToggleReaction(type);
-                            }}
-                            size="small"
-                          />
-                        );
-                      }
-                    )}
-                  </Stack>
-                  {reactions.length === 0 && (
-                    <Typography color="text.secondary" variant="caption">
-                      まだリアクションはありません。
-                    </Typography>
-                  )}
-                </Stack>
-
-                <Divider />
-
-                {/* Comments */}
-                <Stack spacing={2}>
-                  <Typography variant="subtitle2">コメント</Typography>
-                  <TextField
-                    value={commentInput}
-                    onChange={(event) => {
-                      if (actionError) setActionError(null);
-                      setCommentInput(event.target.value);
-                    }}
-                    placeholder="コメントを入力"
-                    multiline
-                    minRows={2}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  flexWrap="wrap"
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    {formatDateSlash(report.date) || report.date} |{" "}
+                    {report.author}
+                  </Typography>
+                  <Chip
+                    label={STATUS_META[report.status].label}
+                    color={STATUS_META[report.status].color}
                     size="small"
                   />
-                  <Stack direction="row" justifyContent="flex-end">
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={handleSubmitComment}
-                      disabled={isCommentDisabled}
-                    >
-                      追加
-                    </Button>
-                  </Stack>
+                </Stack>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mt: 0.5 }}
+                >
+                  最終更新: {formatDateTimeReadable(report.updatedAt) || "-"}
+                </Typography>
+              </Box>
 
-                  {comments.length === 0 ? (
-                    <Typography color="text.secondary" variant="caption">
-                      まだコメントはありません。
-                    </Typography>
-                  ) : (
-                    <Stack spacing={1}>
-                      {comments.map((comment) => (
-                        <Paper
-                          key={comment.id}
-                          variant="outlined"
-                          sx={{ p: 1.5 }}
-                        >
-                          <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={2}
-                          >
-                            <Typography variant="caption" fontWeight={600}>
-                              {comment.author}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {formatDateTimeReadable(comment.createdAt) ||
-                                comment.createdAt}
-                            </Typography>
-                          </Stack>
-                          <Typography
-                            variant="caption"
-                            sx={{ display: "block", mt: 0.5 }}
-                          >
-                            {comment.body}
-                          </Typography>
-                        </Paper>
-                      ))}
-                    </Stack>
+              <Divider />
+
+              {/* Content */}
+              <Typography
+                component="pre"
+                variant="body2"
+                sx={{ whiteSpace: "pre-wrap", fontFamily: "inherit" }}
+              >
+                {report.content || "内容は登録されていません"}
+              </Typography>
+
+              <Divider />
+
+              {/* Reactions */}
+              <Stack spacing={1}>
+                <Typography variant="subtitle2">リアクション</Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {(Object.keys(REACTION_META) as ReactionType[]).map(
+                    (type) => {
+                      const meta = REACTION_META[type];
+                      const count =
+                        reactions.find((reaction) => reaction.type === type)
+                          ?.count ?? 0;
+                      const isSelected = selectedReactions.includes(type);
+                      return (
+                        <Chip
+                          key={type}
+                          clickable
+                          color={isSelected ? "primary" : undefined}
+                          variant={isSelected ? "filled" : "outlined"}
+                          label={`${meta.emoji} ${meta.label}${
+                            count > 0 ? ` (${count})` : ""
+                          }`}
+                          disabled={chipsDisabled}
+                          onClick={() => {
+                            void handleToggleReaction(type);
+                          }}
+                          size="small"
+                        />
+                      );
+                    }
                   )}
                 </Stack>
+                {reactions.length === 0 && (
+                  <Typography color="text.secondary" variant="caption">
+                    まだリアクションはありません。
+                  </Typography>
+                )}
               </Stack>
-            )}
+
+              <Divider />
+
+              {/* Comments */}
+              <Stack spacing={2}>
+                <Typography variant="subtitle2">コメント</Typography>
+                <TextField
+                  value={commentInput}
+                  onChange={(event) => {
+                    if (actionError) setActionError(null);
+                    setCommentInput(event.target.value);
+                  }}
+                  placeholder="コメントを入力"
+                  multiline
+                  minRows={2}
+                  size="small"
+                />
+                <Stack direction="row" justifyContent="flex-end">
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleSubmitComment}
+                    disabled={isCommentDisabled}
+                  >
+                    追加
+                  </Button>
+                </Stack>
+
+                {comments.length === 0 ? (
+                  <Typography color="text.secondary" variant="caption">
+                    まだコメントはありません。
+                  </Typography>
+                ) : (
+                  <Stack spacing={1}>
+                    {comments.map((comment) => (
+                      <Paper
+                        key={comment.id}
+                        variant="outlined"
+                        sx={{ p: 1.5 }}
+                      >
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          spacing={2}
+                        >
+                          <Typography variant="caption" fontWeight={600}>
+                            {comment.author}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {formatDateTimeReadable(comment.createdAt) ||
+                              comment.createdAt}
+                          </Typography>
+                        </Stack>
+                        <Typography
+                          variant="caption"
+                          sx={{ display: "block", mt: 0.5 }}
+                        >
+                          {comment.body}
+                        </Typography>
+                      </Paper>
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
+            </Stack>
+          )}
         </Box>
       </DialogContent>
     </Dialog>
