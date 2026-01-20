@@ -17,7 +17,7 @@ export interface PanelConfig {
  * - 'single': シングルビューモード（デフォルト）
  * - 'split': 左右2分割モード
  */
-export type SplitViewMode = 'single' | 'split';
+export type SplitViewMode = "single" | "split";
 
 /**
  * SplitView の状態

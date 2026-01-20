@@ -1,6 +1,6 @@
-import { useContext } from 'react';
-import { SplitViewContext } from '../context/SplitViewContext';
-import { SplitViewContextValue } from '../types/splitView.types';
+import { useContext } from "react";
+import { SplitViewContext } from "../context/SplitViewContext";
+import { SplitViewContextValue } from "../types/splitView.types";
 
 /**
  * useSplitView フック
@@ -12,7 +12,7 @@ import { SplitViewContextValue } from '../types/splitView.types';
 export const useSplitView = (): SplitViewContextValue => {
   const context = useContext(SplitViewContext);
   if (!context) {
-    throw new Error('useSplitView must be used within a SplitViewProvider');
+    throw new Error("useSplitView must be used within a SplitViewProvider");
   }
   return context;
 };
