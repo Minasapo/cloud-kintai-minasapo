@@ -1,5 +1,6 @@
 import {
   Alert,
+  Button,
   Chip,
   Container,
   FormControl,
@@ -21,6 +22,7 @@ import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
@@ -35,6 +37,7 @@ import {
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 
 export default function AdminDailyReportManagement() {
+  const navigate = useNavigate();
   const { staffs, loading: isStaffLoading, error: staffError } = useStaffs();
   const [statusFilter, setStatusFilter] = useState<DisplayStatus | "">("");
   const [staffFilter, setStaffFilter] = useState<string>("");
@@ -168,8 +171,16 @@ export default function AdminDailyReportManagement() {
   };
 
   const handleNavigateDetail = (report: AdminDailyReport) => {
-    setSelectedReport(report);
-    setIsDialogOpen(true);
+    navigate(`/admin/daily-report/${report.id}`, {
+      state: { report },
+    });
+  };
+
+  const handleOpenCarousel = () => {
+    if (filteredReports.length > 0) {
+      setSelectedReport(filteredReports[0]);
+      setIsDialogOpen(true);
+    }
   };
 
   return (
@@ -277,6 +288,16 @@ export default function AdminDailyReportManagement() {
               fullWidth
             />
           </Stack>
+        </Stack>
+
+        <Stack direction="row" justifyContent="flex-end">
+          <Button
+            variant="contained"
+            onClick={handleOpenCarousel}
+            disabled={filteredReports.length === 0}
+          >
+            まとめて確認
+          </Button>
         </Stack>
 
         <Paper>
