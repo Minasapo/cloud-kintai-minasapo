@@ -26,6 +26,7 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { Hub } from "aws-amplify/utils";
 import dayjs from "dayjs";
 import {
   ComponentProps,
@@ -302,6 +303,29 @@ export default function Layout() {
   );
 
   const isLoginRoute = location.pathname === "/login";
+
+  // Handle authentication errors, especially token expiration
+  useEffect(() => {
+    const hubListenerCancelToken = Hub.listen("auth", (data) => {
+      const { payload } = data;
+
+      if (payload.event === "tokenRefresh_failure") {
+        logger.error("Token refresh failed", payload.data);
+        // Force sign out and redirect to login
+        void signOut().then(() => {
+          navigate("/login");
+        });
+      }
+
+      if (payload.event === "signIn_failure") {
+        logger.error("Sign in failed", payload.data);
+      }
+    });
+
+    return () => {
+      hubListenerCancelToken();
+    };
+  }, [signOut, navigate]);
 
   useEffect(() => {
     if (isLoginRoute) {
