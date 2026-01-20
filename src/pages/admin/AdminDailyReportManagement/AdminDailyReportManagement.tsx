@@ -160,8 +160,25 @@ export default function AdminDailyReportManagement() {
   };
 
   const handleNavigateDetail = (report: AdminDailyReport) => {
+    const reportIndex = filteredReports.findIndex((r) => r.id === report.id);
     navigate(`/admin/daily-report/${report.id}`, {
-      state: { report },
+      state: {
+        report,
+        filters: {
+          statusFilter,
+          staffFilter,
+          startDate,
+          endDate,
+        },
+        paginationState: {
+          page,
+          rowsPerPage,
+        },
+        carouselState: {
+          filteredReports,
+          currentIndex: reportIndex,
+        },
+      },
     });
   };
 
