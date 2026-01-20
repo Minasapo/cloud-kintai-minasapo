@@ -81,7 +81,9 @@ export default function DailyReportCarouselDialog({
   const [report, setReport] = useState<AdminDailyReport>(selectedReport);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [preloadedReports, setPreloadedReports] = useState<Map<string, PreloadedReport>>(new Map());
+  const [preloadedReports, setPreloadedReports] = useState<
+    Map<string, PreloadedReport>
+  >(new Map());
   const [reactions, setReactions] = useState<ReportReaction[]>(
     selectedReport.reactions ?? []
   );
@@ -152,18 +154,23 @@ export default function DailyReportCarouselDialog({
 
       const reactions = normalizeReactions(record.reactions);
       const comments = normalizeComments(record.comments);
-      const mappedReport = mapDailyReport(record, buildStaffName(record.staffId));
+      const mappedReport = mapDailyReport(
+        record,
+        buildStaffName(record.staffId)
+      );
 
       setReactionEntries(reactions);
       setCommentEntries(comments);
       setReport(mappedReport);
 
       // Cache the fetched report
-      setPreloadedReports((prev) => new Map(prev).set(currentReport.id, {
-        report: mappedReport,
-        reactionEntries: reactions,
-        commentEntries: comments,
-      }));
+      setPreloadedReports((prev) =>
+        new Map(prev).set(currentReport.id, {
+          report: mappedReport,
+          reactionEntries: reactions,
+          commentEntries: comments,
+        })
+      );
     } catch (error) {
       setLoadError(
         error instanceof Error ? error.message : "日報の取得に失敗しました。"
@@ -200,7 +207,10 @@ export default function DailyReportCarouselDialog({
 
         const reportToPreload = filteredReports[i];
         // Skip if already preloaded or if it's the current report (will be loaded by fetchReport)
-        if (preloadedReports.has(reportToPreload.id) || reportToPreload.id === currentReport?.id) {
+        if (
+          preloadedReports.has(reportToPreload.id) ||
+          reportToPreload.id === currentReport?.id
+        ) {
           continue;
         }
 
@@ -214,7 +224,10 @@ export default function DailyReportCarouselDialog({
           if (!mounted) break;
 
           if (response.errors?.length) {
-            console.error(`Failed to preload report ${reportToPreload.id}:`, response.errors);
+            console.error(
+              `Failed to preload report ${reportToPreload.id}:`,
+              response.errors
+            );
             continue;
           }
 
@@ -226,20 +239,28 @@ export default function DailyReportCarouselDialog({
 
           const reactions = normalizeReactions(record.reactions);
           const comments = normalizeComments(record.comments);
-          const mappedReport = mapDailyReport(record, buildStaffName(record.staffId));
+          const mappedReport = mapDailyReport(
+            record,
+            buildStaffName(record.staffId)
+          );
 
           if (mounted) {
-            setPreloadedReports((prev) => new Map(prev).set(reportToPreload.id, {
-              report: mappedReport,
-              reactionEntries: reactions,
-              commentEntries: comments,
-            }));
+            setPreloadedReports((prev) =>
+              new Map(prev).set(reportToPreload.id, {
+                report: mappedReport,
+                reactionEntries: reactions,
+                commentEntries: comments,
+              })
+            );
           }
 
           // Add a small delay between requests to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         } catch (error) {
-          console.error(`Error preloading report ${reportToPreload.id}:`, error);
+          console.error(
+            `Error preloading report ${reportToPreload.id}:`,
+            error
+          );
         }
       }
     };
