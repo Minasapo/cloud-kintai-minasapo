@@ -1,3 +1,4 @@
+import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import {
   Alert,
   Button,
@@ -21,13 +22,16 @@ import {
 import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
+import dayjs, { type Dayjs } from "dayjs";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateTimeReadable } from "@/lib/date";
 
+import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 import {
   type AdminDailyReport,
   DISPLAY_STATUSES,
@@ -35,7 +39,53 @@ import {
   mapDailyReport,
   STATUS_META,
 } from "./data";
-import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
+
+const CSV_HEADER = [
+  "日付",
+  "スタッフID",
+  "スタッフ名",
+  "タイトル",
+  "内容",
+  "作成日時",
+  "更新日時",
+];
+
+const compareReportByDateDesc = (a: AdminDailyReport, b: AdminDailyReport) => {
+  if (a.date === b.date) {
+    return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
+  }
+  return b.date.localeCompare(a.date);
+};
+
+const sanitizeCsvValue = (value: string): string => {
+  const normalized = value.replace(/\r?\n/g, " ");
+  const escaped = normalized.replace(/"/g, '""');
+  if (/[",]/.test(escaped)) return `"${escaped}"`;
+  return escaped;
+};
+
+export const buildDailyReportCsv = (reports: AdminDailyReport[]): string => {
+  const sortedReports = [...reports].sort(compareReportByDateDesc);
+
+  const lines = sortedReports.map((report) =>
+    [
+      report.date,
+      report.staffId,
+      report.author,
+      report.title,
+      report.content,
+      report.createdAt ?? "",
+      report.updatedAt ?? "",
+    ]
+      .map((value) => sanitizeCsvValue(value ?? ""))
+      .join(",")
+  );
+
+  return [CSV_HEADER.join(","), ...lines].join("\n");
+};
+
+export const formatDailyReportFileName = (timestamp: Dayjs = dayjs()): string =>
+  `daily_reports_${timestamp.format("YYYYMMDD_HHmmss")}.csv`;
 
 export default function AdminDailyReportManagement() {
   const navigate = useNavigate();
@@ -100,14 +150,7 @@ export default function AdminDailyReportManagement() {
         nextToken = response.data?.listDailyReports?.nextToken;
       } while (nextToken);
 
-      setReports(
-        aggregated.sort((a, b) => {
-          if (a.date === b.date) {
-            return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
-          }
-          return b.date.localeCompare(a.date);
-        })
-      );
+      setReports(aggregated.sort(compareReportByDateDesc));
     } catch (error) {
       setLoadError(
         error instanceof Error ? error.message : "日報の取得に失敗しました。"
@@ -183,6 +226,21 @@ export default function AdminDailyReportManagement() {
       setIsDialogOpen(true);
     }
   };
+
+  const handleExportCsv = useCallback(() => {
+    if (filteredReports.length === 0) return;
+
+    const exportData = buildDailyReportCsv(filteredReports);
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+    const blob = new Blob([bom, exportData], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.download = formatDailyReportFileName();
+    anchor.href = url;
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
+  }, [filteredReports]);
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -291,7 +349,34 @@ export default function AdminDailyReportManagement() {
           </Stack>
         </Stack>
 
-        <Stack direction="row" justifyContent="flex-end">
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          justifyContent="space-between"
+          alignItems={{ xs: "stretch", sm: "center" }}
+        >
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<CloudDownloadOutlinedIcon />}
+            onClick={handleExportCsv}
+            disabled={filteredReports.length === 0}
+            disableElevation
+            sx={{
+              minWidth: BUTTON_MIN_WIDTH,
+              fontWeight: "bold",
+              transition: "transform 150ms ease",
+              "&:hover": {
+                backgroundColor: "secondary.main",
+                boxShadow: "none",
+                transform: "translateY(-3px)",
+              },
+              "&:active": { transform: "translateY(-1px)" },
+              "&.Mui-disabled": { transform: "none", opacity: 0.6 },
+            }}
+          >
+            CSV出力
+          </Button>
           <Button
             variant="contained"
             onClick={handleOpenCarousel}
