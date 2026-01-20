@@ -1,10 +1,12 @@
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import {
   Alert,
   Button,
   Chip,
   Container,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -18,6 +20,7 @@ import {
   TablePagination,
   TableRow,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
@@ -27,6 +30,7 @@ import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
+import { useSplitView } from "@/features/splitView";
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateTimeReadable } from "@/lib/date";
@@ -89,6 +93,7 @@ export const formatDailyReportFileName = (timestamp: Dayjs = dayjs()): string =>
 
 export default function AdminDailyReportManagement() {
   const navigate = useNavigate();
+  const { enableSplitMode, setRightPanel } = useSplitView();
   const { staffs, loading: isStaffLoading, error: staffError } = useStaffs();
   const [statusFilter, setStatusFilter] = useState<DisplayStatus | "">("");
   const [staffFilter, setStaffFilter] = useState<string>("");
@@ -219,6 +224,18 @@ export default function AdminDailyReportManagement() {
       state: { report },
     });
   };
+
+  const handleOpenInRightPanel = useCallback(
+    (report: AdminDailyReport) => {
+      enableSplitMode();
+      setRightPanel({
+        id: `daily-report-${report.id}`,
+        title: `日報詳細 - ${report.date}`,
+        route: `/admin/daily-report/${report.id}`,
+      });
+    },
+    [enableSplitMode, setRightPanel]
+  );
 
   const handleOpenCarousel = () => {
     if (filteredReports.length > 0) {
@@ -391,6 +408,7 @@ export default function AdminDailyReportManagement() {
             <Table size="small">
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ width: "50px" }} />
                   <TableCell>日付</TableCell>
                   <TableCell>スタッフ</TableCell>
                   <TableCell>タイトル</TableCell>
@@ -401,27 +419,47 @@ export default function AdminDailyReportManagement() {
               <TableBody>
                 {isLoadingReports || isStaffLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center">
+                    <TableCell colSpan={6} align="center">
                       読み込み中...
                     </TableCell>
                   </TableRow>
                 ) : paginatedReports.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center">
+                    <TableCell colSpan={6} align="center">
                       条件に一致する日報がありません。
                     </TableCell>
                   </TableRow>
                 ) : (
                   paginatedReports.map((report) => (
-                    <TableRow
-                      key={report.id}
-                      hover
-                      onClick={() => handleNavigateDetail(report)}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <TableCell>{report.date}</TableCell>
-                      <TableCell>{report.author}</TableCell>
-                      <TableCell>{report.title}</TableCell>
+                    <TableRow key={report.id} hover sx={{ cursor: "pointer" }}>
+                      <TableCell sx={{ width: "50px", padding: "8px 4px" }}>
+                        <Tooltip title="右側で開く">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenInRightPanel(report);
+                            }}
+                            sx={{
+                              padding: "4px",
+                              "&:hover": {
+                                backgroundColor: "rgba(0, 0, 0, 0.04)",
+                              },
+                            }}
+                          >
+                            <OpenInNewOutlinedIcon sx={{ fontSize: "18px" }} />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell onClick={() => handleNavigateDetail(report)}>
+                        {report.date}
+                      </TableCell>
+                      <TableCell onClick={() => handleNavigateDetail(report)}>
+                        {report.author}
+                      </TableCell>
+                      <TableCell onClick={() => handleNavigateDetail(report)}>
+                        {report.title}
+                      </TableCell>
                       <TableCell>
                         <Chip
                           size="small"

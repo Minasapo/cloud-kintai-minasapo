@@ -15,13 +15,14 @@ import {
   Typography,
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 import type { ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
 import DesktopCalendarView from "@/features/attendance/list/DesktopCalendarView";
+import { useSplitView } from "@/features/splitView";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
@@ -45,6 +46,7 @@ const SECTION_CONTENT_GAP = designTokenVar("spacing.md", "12px");
 export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();
   const navigate = useNavigate();
+  const { enableSplitMode, setRightPanel } = useSplitView();
 
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
 
@@ -97,6 +99,22 @@ export default function AdminStaffAttendanceList() {
       navigate(`/admin/attendances/edit/${workDate}/${staffId}`);
     },
     [navigate, staffId]
+  );
+
+  const handleOpenInRightPanel = useCallback(
+    (attendance: Attendance | undefined, _date: Dayjs) => {
+      if (!staffId || !attendance) return;
+      const workDate = dayjs(attendance.workDate).format(
+        AttendanceDate.QueryParamFormat
+      );
+      enableSplitMode();
+      setRightPanel({
+        id: `attendance-${workDate}`,
+        title: `勤怠編集 - ${dayjs(attendance.workDate).format("YYYY/MM/DD")}`,
+        route: `/admin/attendances/edit/${workDate}/${staffId}`,
+      });
+    },
+    [staffId, enableSplitMode, setRightPanel]
   );
 
   const buildCalendarNavigatePath = useCallback(
@@ -231,6 +249,7 @@ export default function AdminStaffAttendanceList() {
             closeDatesError={closeDatesError}
             currentMonth={currentMonth}
             onMonthChange={setCurrentMonth}
+            onOpenInRightPanel={handleOpenInRightPanel}
           />
         </PageSection>
 
