@@ -645,10 +645,6 @@ export default function ShiftManagementBoard() {
         </Box>
       </Box>
 
-      <Alert severity="info" sx={{ mb: 2 }}>
-        シフト管理機能は以前は開発者のみご利用いただけましたが、現在は一般公開されています。
-      </Alert>
-
       {(loading || shiftRequestsLoading) && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />
