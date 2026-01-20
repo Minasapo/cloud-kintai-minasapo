@@ -21,7 +21,6 @@ import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
@@ -33,9 +32,9 @@ import {
   mapDailyReport,
   STATUS_META,
 } from "./data";
+import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 
 export default function AdminDailyReportManagement() {
-  const navigate = useNavigate();
   const { staffs, loading: isStaffLoading, error: staffError } = useStaffs();
   const [statusFilter, setStatusFilter] = useState<DisplayStatus | "">("");
   const [staffFilter, setStaffFilter] = useState<string>("");
@@ -46,6 +45,10 @@ export default function AdminDailyReportManagement() {
   const [reports, setReports] = useState<AdminDailyReport[]>([]);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<AdminDailyReport | null>(
+    null,
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const buildStaffName = useCallback(
     (staffId: string) => {
@@ -159,27 +162,14 @@ export default function AdminDailyReportManagement() {
     setPage(0);
   };
 
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedReport(null);
+  };
+
   const handleNavigateDetail = (report: AdminDailyReport) => {
-    const reportIndex = filteredReports.findIndex((r) => r.id === report.id);
-    navigate(`/admin/daily-report/${report.id}`, {
-      state: {
-        report,
-        filters: {
-          statusFilter,
-          staffFilter,
-          startDate,
-          endDate,
-        },
-        paginationState: {
-          page,
-          rowsPerPage,
-        },
-        carouselState: {
-          filteredReports,
-          currentIndex: reportIndex,
-        },
-      },
-    });
+    setSelectedReport(report);
+    setIsDialogOpen(true);
   };
 
   return (
@@ -354,6 +344,15 @@ export default function AdminDailyReportManagement() {
           />
         </Paper>
       </Stack>
+
+      {selectedReport && (
+        <DailyReportCarouselDialog
+          open={isDialogOpen}
+          onClose={handleCloseDialog}
+          selectedReport={selectedReport}
+          filteredReports={filteredReports}
+        />
+      )}
     </Container>
   );
 }

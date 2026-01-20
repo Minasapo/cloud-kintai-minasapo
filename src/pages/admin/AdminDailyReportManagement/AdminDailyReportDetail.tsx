@@ -54,20 +54,6 @@ import {
 
 type LocationState = {
   report?: AdminDailyReport;
-  filters?: {
-    statusFilter: string;
-    staffFilter: string;
-    startDate: string;
-    endDate: string;
-  };
-  paginationState?: {
-    page: number;
-    rowsPerPage: number;
-  };
-  carouselState?: {
-    filteredReports: AdminDailyReport[];
-    currentIndex: number;
-  };
 };
 
 const DATE_FORMAT = "YYYY-MM-DD";
@@ -102,14 +88,6 @@ export default function AdminDailyReportDetail() {
   const { staffs, loading: isStaffLoading } = useStaffs();
   const { cognitoUser } = useCognitoUser();
   const [, setSearchParams] = useSearchParams();
-
-  // Carousel state
-  const [carouselReports] = useState<AdminDailyReport[]>(
-    () => state?.carouselState?.filteredReports ?? [],
-  );
-  const [currentCarouselIndex, setCurrentCarouselIndex] = useState<number>(
-    () => state?.carouselState?.currentIndex ?? -1,
-  );
 
   const buildStaffName = useCallback(
     (staffId: string) => {
@@ -372,48 +350,6 @@ export default function AdminDailyReportDetail() {
     [navigate, reportsByDate, staffIdForReports, setSearchParams],
   );
 
-  const handleCarouselPrevious = useCallback(() => {
-    if (currentCarouselIndex <= 0 || carouselReports.length === 0) return;
-
-    const previousReport = carouselReports[currentCarouselIndex - 1];
-    setCurrentCarouselIndex(currentCarouselIndex - 1);
-    navigate(`/admin/daily-report/${previousReport.id}`, {
-      state: {
-        report: previousReport,
-        filters: state?.filters,
-        paginationState: state?.paginationState,
-        carouselState: {
-          filteredReports: carouselReports,
-          currentIndex: currentCarouselIndex - 1,
-        },
-      },
-      replace: true,
-    });
-  }, [currentCarouselIndex, carouselReports, navigate, state]);
-
-  const handleCarouselNext = useCallback(() => {
-    if (
-      currentCarouselIndex >= carouselReports.length - 1 ||
-      carouselReports.length === 0
-    )
-      return;
-
-    const nextReport = carouselReports[currentCarouselIndex + 1];
-    setCurrentCarouselIndex(currentCarouselIndex + 1);
-    navigate(`/admin/daily-report/${nextReport.id}`, {
-      state: {
-        report: nextReport,
-        filters: state?.filters,
-        paginationState: state?.paginationState,
-        carouselState: {
-          filteredReports: carouselReports,
-          currentIndex: currentCarouselIndex + 1,
-        },
-      },
-      replace: true,
-    });
-  }, [currentCarouselIndex, carouselReports, navigate, state]);
-
   const handleToggleReaction = async (type: ReactionType) => {
     if (!report) return;
     if (!reactionEntries) {
@@ -663,42 +599,6 @@ export default function AdminDailyReportDetail() {
                         />
                       </Stack>
                     </Box>
-
-                    {carouselReports.length > 0 && currentCarouselIndex >= 0 && (
-                      <Stack
-                        direction="row"
-                        spacing={2}
-                        alignItems="center"
-                        sx={{ p: 2, bgcolor: "action.hover", borderRadius: 1 }}
-                      >
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={handleCarouselPrevious}
-                          disabled={currentCarouselIndex <= 0}
-                          sx={{ minWidth: 80 }}
-                        >
-                          前へ
-                        </Button>
-                        <Typography
-                          variant="body2"
-                          sx={{ minWidth: 60, textAlign: "center" }}
-                        >
-                          {currentCarouselIndex + 1} / {carouselReports.length}
-                        </Typography>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={handleCarouselNext}
-                          disabled={
-                            currentCarouselIndex >= carouselReports.length - 1
-                          }
-                          sx={{ minWidth: 80 }}
-                        >
-                          次へ
-                        </Button>
-                      </Stack>
-                    )}
 
                     <Typography variant="body2" color="text.secondary">
                       最終更新:{" "}
