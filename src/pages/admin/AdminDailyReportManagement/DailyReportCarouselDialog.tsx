@@ -411,12 +411,26 @@ export default function DailyReportCarouselDialog({
     isResolvingCurrentStaff;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          height: '80vh',
+          maxHeight: '80vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }
+      }}
+    >
       <DialogTitle
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexShrink: 0,
         }}
       >
         <Typography variant="h6">日報を確認</Typography>
@@ -429,17 +443,17 @@ export default function DailyReportCarouselDialog({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ p: 0 }}>
-        <Stack spacing={0}>
-          {/* Carousel Navigation */}
-          <Box
-            sx={{
-              p: 2,
-              bgcolor: "action.hover",
-              borderBottom: 1,
-              borderColor: "divider",
-            }}
-          >
+      {/* Carousel Navigation - Fixed */}
+      <Box
+        sx={{
+          p: 2,
+          bgcolor: "action.hover",
+          borderBottom: 1,
+          borderTop: 1,
+          borderColor: "divider",
+          flexShrink: 0,
+        }}
+      >
             <Stack
               direction="row"
               spacing={2}
@@ -467,10 +481,19 @@ export default function DailyReportCarouselDialog({
                 <ChevronRightIcon />
               </IconButton>
             </Stack>
-          </Box>
+      </Box>
 
-          {/* Content */}
-          <Box sx={{ p: 3 }}>
+      {/* Scrollable Content */}
+      <DialogContent
+        sx={{
+          p: 0,
+          flex: 1,
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Box sx={{ p: 3 }}>
             {isLoading || isStaffLoading ? (
               <Typography align="center" color="text.secondary">
                 読み込み中...
@@ -635,8 +658,7 @@ export default function DailyReportCarouselDialog({
                 </Stack>
               </Stack>
             )}
-          </Box>
-        </Stack>
+        </Box>
       </DialogContent>
     </Dialog>
   );
