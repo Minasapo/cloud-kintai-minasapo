@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { formatDateTimeReadable } from "@/lib/date";
 
 import {
   type AdminDailyReport,
@@ -345,7 +346,7 @@ export default function AdminDailyReportManagement() {
                       </TableCell>
                       <TableCell>
                         {report.updatedAt
-                          ? report.updatedAt.replace("T", " ")
+                          ? formatDateTimeReadable(report.updatedAt)
                           : "-"}
                       </TableCell>
                     </TableRow>
