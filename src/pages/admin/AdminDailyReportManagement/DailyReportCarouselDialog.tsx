@@ -61,6 +61,12 @@ const normalizeComments = (
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
+interface PreloadedReport {
+  report: AdminDailyReport;
+  reactionEntries: DailyReportReaction[];
+  commentEntries: DailyReportComment[];
+}
+
 export default function DailyReportCarouselDialog({
   open,
   onClose,
@@ -75,6 +81,7 @@ export default function DailyReportCarouselDialog({
   const [report, setReport] = useState<AdminDailyReport>(selectedReport);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [preloadedReports, setPreloadedReports] = useState<Map<string, PreloadedReport>>(new Map());
   const [reactions, setReactions] = useState<ReportReaction[]>(
     selectedReport.reactions ?? []
   );
@@ -115,6 +122,15 @@ export default function DailyReportCarouselDialog({
   const fetchReport = useCallback(async () => {
     if (!currentReport) return;
 
+    // Check if report is already preloaded
+    const preloaded = preloadedReports.get(currentReport.id);
+    if (preloaded) {
+      setReport(preloaded.report);
+      setReactionEntries(preloaded.reactionEntries);
+      setCommentEntries(preloaded.commentEntries);
+      return;
+    }
+
     setIsLoading(true);
     setLoadError(null);
     try {
@@ -134,9 +150,20 @@ export default function DailyReportCarouselDialog({
         throw new Error("日報が見つかりませんでした。");
       }
 
-      setReactionEntries(normalizeReactions(record.reactions));
-      setCommentEntries(normalizeComments(record.comments));
-      setReport(mapDailyReport(record, buildStaffName(record.staffId)));
+      const reactions = normalizeReactions(record.reactions);
+      const comments = normalizeComments(record.comments);
+      const mappedReport = mapDailyReport(record, buildStaffName(record.staffId));
+
+      setReactionEntries(reactions);
+      setCommentEntries(comments);
+      setReport(mappedReport);
+
+      // Cache the fetched report
+      setPreloadedReports((prev) => new Map(prev).set(currentReport.id, {
+        report: mappedReport,
+        reactionEntries: reactions,
+        commentEntries: comments,
+      }));
     } catch (error) {
       setLoadError(
         error instanceof Error ? error.message : "日報の取得に失敗しました。"
@@ -144,19 +171,85 @@ export default function DailyReportCarouselDialog({
     } finally {
       setIsLoading(false);
     }
-  }, [currentReport, buildStaffName]);
+  }, [currentReport, buildStaffName, preloadedReports]);
 
   useEffect(() => {
     if (open) {
       setCurrentIndex(
         filteredReports.findIndex((r) => r.id === selectedReport.id)
       );
+      // Reset preloaded reports when dialog opens
+      setPreloadedReports(new Map());
     }
   }, [open, selectedReport.id, filteredReports]);
 
   useEffect(() => {
     void fetchReport();
   }, [fetchReport]);
+
+  // Preload all filtered reports in background
+  useEffect(() => {
+    if (!open || filteredReports.length === 0) return;
+
+    let mounted = true;
+
+    const preloadReports = async () => {
+      // Preload reports in sequence to avoid overwhelming the server
+      for (let i = 0; i < filteredReports.length; i++) {
+        if (!mounted) break;
+
+        const reportToPreload = filteredReports[i];
+        // Skip if already preloaded or if it's the current report (will be loaded by fetchReport)
+        if (preloadedReports.has(reportToPreload.id) || reportToPreload.id === currentReport?.id) {
+          continue;
+        }
+
+        try {
+          const response = (await graphqlClient.graphql({
+            query: getDailyReport,
+            variables: { id: reportToPreload.id },
+            authMode: "userPool",
+          })) as GraphQLResult<GetDailyReportQuery>;
+
+          if (!mounted) break;
+
+          if (response.errors?.length) {
+            console.error(`Failed to preload report ${reportToPreload.id}:`, response.errors);
+            continue;
+          }
+
+          const record = response.data?.getDailyReport;
+          if (!record) {
+            console.error(`Report ${reportToPreload.id} not found`);
+            continue;
+          }
+
+          const reactions = normalizeReactions(record.reactions);
+          const comments = normalizeComments(record.comments);
+          const mappedReport = mapDailyReport(record, buildStaffName(record.staffId));
+
+          if (mounted) {
+            setPreloadedReports((prev) => new Map(prev).set(reportToPreload.id, {
+              report: mappedReport,
+              reactionEntries: reactions,
+              commentEntries: comments,
+            }));
+          }
+
+          // Add a small delay between requests to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+          console.error(`Error preloading report ${reportToPreload.id}:`, error);
+        }
+      }
+    };
+
+    void preloadReports();
+
+    return () => {
+      mounted = false;
+    };
+  }, [open, filteredReports, buildStaffName, currentReport, preloadedReports]);
 
   useEffect(() => {
     if (cognitoUser === undefined) return;
