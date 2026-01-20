@@ -1,3 +1,6 @@
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Alert,
   Box,
@@ -13,9 +16,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
@@ -51,13 +51,13 @@ interface DailyReportCarouselDialogProps {
 }
 
 const normalizeReactions = (
-  entries?: (DailyReportReaction | null)[] | null,
+  entries?: (DailyReportReaction | null)[] | null
 ): DailyReportReaction[] =>
   entries?.filter((entry): entry is DailyReportReaction => Boolean(entry)) ??
   [];
 
 const normalizeComments = (
-  entries?: (DailyReportComment | null)[] | null,
+  entries?: (DailyReportComment | null)[] | null
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
@@ -70,20 +70,20 @@ export default function DailyReportCarouselDialog({
   const { staffs, loading: isStaffLoading } = useStaffs();
   const { cognitoUser } = useCognitoUser();
   const [currentIndex, setCurrentIndex] = useState(
-    filteredReports.findIndex((r) => r.id === selectedReport.id),
+    filteredReports.findIndex((r) => r.id === selectedReport.id)
   );
   const [report, setReport] = useState<AdminDailyReport>(selectedReport);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reactions, setReactions] = useState<ReportReaction[]>(
-    selectedReport.reactions ?? [],
+    selectedReport.reactions ?? []
   );
   const [comments, setComments] = useState<AdminComment[]>(
-    selectedReport.comments ?? [],
+    selectedReport.comments ?? []
   );
   const [commentInput, setCommentInput] = useState<string>("");
   const [selectedReactions, setSelectedReactions] = useState<ReactionType[]>(
-    [],
+    []
   );
   const [reactionEntries, setReactionEntries] = useState<
     DailyReportReaction[] | null
@@ -107,7 +107,7 @@ export default function DailyReportCarouselDialog({
         .join(" ");
       return name || "スタッフ";
     },
-    [staffs],
+    [staffs]
   );
 
   const currentReport = filteredReports[currentIndex];
@@ -139,7 +139,7 @@ export default function DailyReportCarouselDialog({
       setReport(mapDailyReport(record, buildStaffName(record.staffId)));
     } catch (error) {
       setLoadError(
-        error instanceof Error ? error.message : "日報の取得に失敗しました。",
+        error instanceof Error ? error.message : "日報の取得に失敗しました。"
       );
     } finally {
       setIsLoading(false);
@@ -148,7 +148,9 @@ export default function DailyReportCarouselDialog({
 
   useEffect(() => {
     if (open) {
-      setCurrentIndex(filteredReports.findIndex((r) => r.id === selectedReport.id));
+      setCurrentIndex(
+        filteredReports.findIndex((r) => r.id === selectedReport.id)
+      );
     }
   }, [open, selectedReport.id, filteredReports]);
 
@@ -214,7 +216,7 @@ export default function DailyReportCarouselDialog({
     setSelectedReactions(
       reactionEntries
         .filter((entry) => entry.staffId === currentStaffId)
-        .map((entry) => entry.type as ReactionType),
+        .map((entry) => entry.type as ReactionType)
     );
   }, [currentStaffId, reactionEntries]);
 
@@ -234,13 +236,13 @@ export default function DailyReportCarouselDialog({
     if (!report) return;
     if (!reactionEntries) {
       setActionError(
-        "リアクション情報の取得中です。少し待ってから再度お試しください。",
+        "リアクション情報の取得中です。少し待ってから再度お試しください。"
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、リアクションを登録できません。",
+        "スタッフ情報が取得できないため、リアクションを登録できません。"
       );
       return;
     }
@@ -250,12 +252,12 @@ export default function DailyReportCarouselDialog({
     setActionError(null);
 
     const hasReaction = reactionEntries.some(
-      (entry) => entry.staffId === currentStaffId && entry.type === type,
+      (entry) => entry.staffId === currentStaffId && entry.type === type
     );
     const timestamp = new Date().toISOString();
     const nextEntries = hasReaction
       ? reactionEntries.filter(
-          (entry) => entry.staffId !== currentStaffId || entry.type !== type,
+          (entry) => entry.staffId !== currentStaffId || entry.type !== type
         )
       : [
           ...reactionEntries,
@@ -286,7 +288,7 @@ export default function DailyReportCarouselDialog({
 
       if (response.errors?.length) {
         throw new Error(
-          response.errors.map((error) => error.message).join("\n"),
+          response.errors.map((error) => error.message).join("\n")
         );
       }
 
@@ -302,7 +304,7 @@ export default function DailyReportCarouselDialog({
       setActionError(
         error instanceof Error
           ? error.message
-          : "リアクションの登録に失敗しました。",
+          : "リアクションの登録に失敗しました。"
       );
     } finally {
       setIsSavingReaction(false);
@@ -315,13 +317,13 @@ export default function DailyReportCarouselDialog({
     if (!report) return;
     if (!commentEntries) {
       setActionError(
-        "コメント情報の取得中です。少し待ってから再度お試しください。",
+        "コメント情報の取得中です。少し待ってから再度お試しください。"
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、コメントを登録できません。",
+        "スタッフ情報が取得できないため、コメントを登録できません。"
       );
       return;
     }
@@ -362,7 +364,7 @@ export default function DailyReportCarouselDialog({
                 authorName,
                 body: commentBody,
                 createdAt,
-              }),
+              })
             ),
             updatedAt: timestamp,
           },
@@ -372,7 +374,7 @@ export default function DailyReportCarouselDialog({
 
       if (response.errors?.length) {
         throw new Error(
-          response.errors.map((error) => error.message).join("\n"),
+          response.errors.map((error) => error.message).join("\n")
         );
       }
 
@@ -389,7 +391,7 @@ export default function DailyReportCarouselDialog({
       setActionError(
         error instanceof Error
           ? error.message
-          : "コメントの登録に失敗しました。",
+          : "コメントの登録に失敗しました。"
       );
     } finally {
       setIsSavingComment(false);
@@ -430,7 +432,14 @@ export default function DailyReportCarouselDialog({
       <DialogContent dividers sx={{ p: 0 }}>
         <Stack spacing={0}>
           {/* Carousel Navigation */}
-          <Box sx={{ p: 2, bgcolor: "action.hover", borderBottom: 1, borderColor: "divider" }}>
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: "action.hover",
+              borderBottom: 1,
+              borderColor: "divider",
+            }}
+          >
             <Stack
               direction="row"
               spacing={2}
@@ -444,7 +453,10 @@ export default function DailyReportCarouselDialog({
               >
                 <ChevronLeftIcon />
               </IconButton>
-              <Typography variant="body2" sx={{ minWidth: 80, textAlign: "center" }}>
+              <Typography
+                variant="body2"
+                sx={{ minWidth: 80, textAlign: "center" }}
+              >
                 {currentIndex + 1} / {filteredReports.length}
               </Typography>
               <IconButton
@@ -480,9 +492,15 @@ export default function DailyReportCarouselDialog({
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     {report.title}
                   </Typography>
-                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    flexWrap="wrap"
+                  >
                     <Typography variant="body2" color="text.secondary">
-                      {formatDateSlash(report.date) || report.date} | {report.author}
+                      {formatDateSlash(report.date) || report.date} |{" "}
+                      {report.author}
                     </Typography>
                     <Chip
                       label={STATUS_META[report.status].label}
@@ -490,7 +508,11 @@ export default function DailyReportCarouselDialog({
                       size="small"
                     />
                   </Stack>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "block", mt: 0.5 }}
+                  >
                     最終更新: {formatDateTimeReadable(report.updatedAt) || "-"}
                   </Typography>
                 </Box>
@@ -535,7 +557,7 @@ export default function DailyReportCarouselDialog({
                             size="small"
                           />
                         );
-                      },
+                      }
                     )}
                   </Stack>
                   {reactions.length === 0 && (
@@ -592,12 +614,18 @@ export default function DailyReportCarouselDialog({
                             <Typography variant="caption" fontWeight={600}>
                               {comment.author}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {formatDateTimeReadable(comment.createdAt) ||
                                 comment.createdAt}
                             </Typography>
                           </Stack>
-                          <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ display: "block", mt: 0.5 }}
+                          >
                             {comment.body}
                           </Typography>
                         </Paper>

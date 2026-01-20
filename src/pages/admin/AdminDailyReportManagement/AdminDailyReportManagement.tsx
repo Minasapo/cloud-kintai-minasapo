@@ -46,7 +46,7 @@ export default function AdminDailyReportManagement() {
   const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<AdminDailyReport | null>(
-    null,
+    null
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
