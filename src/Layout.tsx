@@ -306,19 +306,22 @@ export default function Layout() {
 
   // Handle authentication errors, especially token expiration
   useEffect(() => {
+    const handleTokenRefreshFailure = async () => {
+      try {
+        await signOut();
+      } catch (error) {
+        logger.error("Failed to sign out after token refresh failure", error);
+      } finally {
+        navigate("/login");
+      }
+    };
+
     const hubListenerCancelToken = Hub.listen("auth", (data) => {
       const { payload } = data;
 
       if (payload.event === "tokenRefresh_failure") {
         logger.error("Token refresh failed", payload.data);
-        // Force sign out and redirect to login
-        void signOut().then(() => {
-          navigate("/login");
-        });
-      }
-
-      if (payload.event === "signIn_failure") {
-        logger.error("Sign in failed", payload.data);
+        void handleTokenRefreshFailure();
       }
     });
 
