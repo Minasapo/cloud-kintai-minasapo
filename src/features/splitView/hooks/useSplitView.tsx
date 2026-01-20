@@ -1,4 +1,5 @@
 import { useContext } from "react";
+
 import { SplitViewContext } from "../context/SplitViewContext";
 import { SplitViewContextValue } from "../types/splitView.types";
 

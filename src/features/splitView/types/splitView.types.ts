@@ -35,6 +35,8 @@ export interface SplitViewState {
 export interface SplitViewContextValue {
   state: SplitViewState;
   setMode: (mode: SplitViewMode) => void;
+  enableSplitMode: () => void;
+  disableSplitMode: () => void;
   setLeftPanel: (panel: PanelConfig | null) => void;
   setRightPanel: (panel: PanelConfig | null) => void;
   setDividerPosition: (position: number) => void;

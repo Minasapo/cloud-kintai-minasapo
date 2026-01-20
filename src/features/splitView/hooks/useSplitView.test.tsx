@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
+
 import { SplitViewProvider } from "../context/SplitViewProvider";
 import { useSplitView } from "./useSplitView";
 

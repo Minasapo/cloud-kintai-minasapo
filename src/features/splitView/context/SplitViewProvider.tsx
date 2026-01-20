@@ -57,6 +57,14 @@ export const SplitViewProvider: React.FC<SplitViewProviderProps> = ({
     dispatch({ type: "SET_MODE", payload: mode });
   }, []);
 
+  const enableSplitMode = useCallback(() => {
+    dispatch({ type: "SET_MODE", payload: "split" });
+  }, []);
+
+  const disableSplitMode = useCallback(() => {
+    dispatch({ type: "SET_MODE", payload: "single" });
+  }, []);
+
   const setLeftPanel = useCallback((panel: PanelConfig | null) => {
     dispatch({ type: "SET_LEFT_PANEL", payload: panel });
   }, []);
@@ -76,6 +84,8 @@ export const SplitViewProvider: React.FC<SplitViewProviderProps> = ({
   const value: SplitViewContextValue = {
     state,
     setMode,
+    enableSplitMode,
+    disableSplitMode,
     setLeftPanel,
     setRightPanel,
     setDividerPosition,
