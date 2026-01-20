@@ -5,6 +5,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import {
   PanelContainer,
+  ScreenOption,
   SplitModeToggle,
   SplitViewProvider,
   useSplitView,
@@ -27,6 +28,30 @@ const PAGE_PADDING_Y = {
 };
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
+
+// 右側パネルで選択可能な画面オプション
+const SCREEN_OPTIONS: ScreenOption[] = [
+  {
+    value: "attendance-edit",
+    label: "勤怠編集",
+    route: "/admin/attendances",
+  },
+  {
+    value: "daily-report",
+    label: "日報詳細",
+    route: "/admin/daily-report",
+  },
+  {
+    value: "staff-list",
+    label: "スタッフ一覧",
+    route: "/admin/staffs",
+  },
+  {
+    value: "shift-plan",
+    label: "シフト管理",
+    route: "/admin/shift",
+  },
+];
 
 /**
  * AdminDashboardContent
@@ -71,6 +96,28 @@ function AdminDashboardContent() {
     disableSplitMode();
     setRightPanel(null);
   }, [disableSplitMode, setRightPanel]);
+
+  const handleScreenChange = useCallback(
+    (screenValue: string) => {
+      const selectedOption = SCREEN_OPTIONS.find(
+        (option) => option.value === screenValue
+      );
+      if (selectedOption && selectedOption.route) {
+        setRightPanel({
+          id: selectedOption.value,
+          title: selectedOption.label,
+          route: selectedOption.route,
+        });
+        navigate(selectedOption.route);
+      }
+    },
+    [setRightPanel, navigate]
+  );
+
+  const selectedScreen = useMemo(() => {
+    if (!state.rightPanel) return "";
+    return state.rightPanel.id;
+  }, [state.rightPanel]);
 
   const isSplitMode = state.mode === "split";
 
@@ -124,11 +171,16 @@ function AdminDashboardContent() {
             />
             <Panel defaultSize={50} minSize={30}>
               <PanelContainer
-                title={state.rightPanel?.title}
+                title={state.rightPanel?.title || "画面を選択"}
                 onClose={handleCloseRightPanel}
+                screenOptions={SCREEN_OPTIONS}
+                selectedScreen={selectedScreen}
+                onScreenChange={handleScreenChange}
               >
                 {state.rightPanel?.component ? (
                   <state.rightPanel.component panelId={state.rightPanel.id} />
+                ) : state.rightPanel?.route ? (
+                  <Outlet />
                 ) : (
                   <div>パネルが選択されていません</div>
                 )}

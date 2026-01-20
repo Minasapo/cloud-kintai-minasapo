@@ -1,11 +1,14 @@
 import { Box } from "@mui/material";
 import React from "react";
 
-import { PanelHeader } from "./PanelHeader";
+import { PanelHeader, ScreenOption } from "./PanelHeader";
 
 export interface PanelContainerProps {
   title?: string;
   onClose?: () => void;
+  screenOptions?: ScreenOption[];
+  selectedScreen?: string;
+  onScreenChange?: (screenValue: string) => void;
   children: React.ReactNode;
 }
 
@@ -17,6 +20,9 @@ export interface PanelContainerProps {
 export const PanelContainer: React.FC<PanelContainerProps> = ({
   title,
   onClose,
+  screenOptions,
+  selectedScreen,
+  onScreenChange,
   children,
 }) => {
   return (
@@ -29,7 +35,15 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
         backgroundColor: "background.paper",
       }}
     >
-      {(title || onClose) && <PanelHeader title={title} onClose={onClose} />}
+      {(title || onClose || screenOptions) && (
+        <PanelHeader
+          title={title}
+          onClose={onClose}
+          screenOptions={screenOptions}
+          selectedScreen={selectedScreen}
+          onScreenChange={onScreenChange}
+        />
+      )}
       <Box
         sx={{
           flex: 1,

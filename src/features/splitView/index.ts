@@ -3,6 +3,7 @@
  */
 
 export { PanelContainer } from "./components/PanelContainer";
+export type { ScreenOption } from "./components/PanelHeader";
 export { PanelHeader } from "./components/PanelHeader";
 export { SplitModeToggle } from "./components/SplitModeToggle";
 export { SplitViewContext } from "./context/SplitViewContext";
