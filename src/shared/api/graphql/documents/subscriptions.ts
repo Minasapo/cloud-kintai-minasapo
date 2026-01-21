@@ -860,6 +860,8 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
     }
     submittedAt
     updatedAt
+    updatedBy
+    version
     histories {
       version
       note
@@ -910,6 +912,8 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
     }
     submittedAt
     updatedAt
+    updatedBy
+    version
     histories {
       version
       note
@@ -960,6 +964,8 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
     }
     submittedAt
     updatedAt
+    updatedBy
+    version
     histories {
       version
       note

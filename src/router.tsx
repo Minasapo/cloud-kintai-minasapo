@@ -45,6 +45,9 @@ const RegisterRoute = createLazyRoute(() => import("./pages/Register"));
 const ShiftRequestRoute = createLazyRoute(
   () => import("./pages/shift/request")
 );
+const ShiftCollaborativeRoute = createLazyRoute(
+  () => import("./pages/shift/collaborative")
+);
 const WorkflowDetailRoute = createLazyRoute(
   () => import("./pages/workflow/detail/WorkflowDetailPage"),
   {
@@ -137,6 +140,10 @@ const router = createBrowserRouter([
           {
             index: true,
             lazy: ShiftRequestRoute,
+          },
+          {
+            path: "collaborative",
+            lazy: ShiftCollaborativeRoute,
           },
         ],
       },

@@ -610,6 +610,16 @@ export default function ShiftManagementBoard() {
               )}
             </Box>
           )}
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => navigate("/shift/collaborative")}
+          >
+            🚀 共同編集プロトタイプ
+          </Button>
 
           {hasBulkSelection ? (
             <Badge
@@ -644,10 +654,6 @@ export default function ShiftManagementBoard() {
           )}
         </Box>
       </Box>
-
-      <Alert severity="info" sx={{ mb: 2 }}>
-        シフト管理機能は以前は開発者のみご利用いただけましたが、現在は一般公開されています。
-      </Alert>
 
       {(loading || shiftRequestsLoading) && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>

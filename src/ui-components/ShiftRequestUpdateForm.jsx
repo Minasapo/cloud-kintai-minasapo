@@ -30,6 +30,8 @@ export default function ShiftRequestUpdateForm(props) {
     note: "",
     submittedAt: "",
     updatedAt: "",
+    updatedBy: "",
+    version: "",
   };
   const [staffId, setStaffId] = React.useState(initialValues.staffId);
   const [targetMonth, setTargetMonth] = React.useState(
@@ -40,6 +42,8 @@ export default function ShiftRequestUpdateForm(props) {
     initialValues.submittedAt
   );
   const [updatedAt, setUpdatedAt] = React.useState(initialValues.updatedAt);
+  const [updatedBy, setUpdatedBy] = React.useState(initialValues.updatedBy);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = shiftRequestRecord
@@ -50,6 +54,8 @@ export default function ShiftRequestUpdateForm(props) {
     setNote(cleanValues.note);
     setSubmittedAt(cleanValues.submittedAt);
     setUpdatedAt(cleanValues.updatedAt);
+    setUpdatedBy(cleanValues.updatedBy);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [shiftRequestRecord, setShiftRequestRecord] = React.useState(
@@ -76,6 +82,8 @@ export default function ShiftRequestUpdateForm(props) {
     note: [],
     submittedAt: [],
     updatedAt: [],
+    updatedBy: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -108,6 +116,8 @@ export default function ShiftRequestUpdateForm(props) {
           note: note ?? null,
           submittedAt: submittedAt ?? null,
           updatedAt: updatedAt ?? null,
+          updatedBy: updatedBy ?? null,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -173,6 +183,8 @@ export default function ShiftRequestUpdateForm(props) {
               note,
               submittedAt,
               updatedAt,
+              updatedBy,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.staffId ?? value;
@@ -201,6 +213,8 @@ export default function ShiftRequestUpdateForm(props) {
               note,
               submittedAt,
               updatedAt,
+              updatedBy,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.targetMonth ?? value;
@@ -229,6 +243,8 @@ export default function ShiftRequestUpdateForm(props) {
               note: value,
               submittedAt,
               updatedAt,
+              updatedBy,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.note ?? value;
@@ -257,6 +273,8 @@ export default function ShiftRequestUpdateForm(props) {
               note,
               submittedAt: value,
               updatedAt,
+              updatedBy,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.submittedAt ?? value;
@@ -285,6 +303,8 @@ export default function ShiftRequestUpdateForm(props) {
               note,
               submittedAt,
               updatedAt: value,
+              updatedBy,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.updatedAt ?? value;
@@ -298,6 +318,70 @@ export default function ShiftRequestUpdateForm(props) {
         errorMessage={errors.updatedAt?.errorMessage}
         hasError={errors.updatedAt?.hasError}
         {...getOverrideProps(overrides, "updatedAt")}
+      ></TextField>
+      <TextField
+        label="Updated by"
+        isRequired={false}
+        isReadOnly={false}
+        value={updatedBy}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              staffId,
+              targetMonth,
+              note,
+              submittedAt,
+              updatedAt,
+              updatedBy: value,
+              version,
+            };
+            const result = onChange(modelFields);
+            value = result?.updatedBy ?? value;
+          }
+          if (errors.updatedBy?.hasError) {
+            runValidationTasks("updatedBy", value);
+          }
+          setUpdatedBy(value);
+        }}
+        onBlur={() => runValidationTasks("updatedBy", updatedBy)}
+        errorMessage={errors.updatedBy?.errorMessage}
+        hasError={errors.updatedBy?.hasError}
+        {...getOverrideProps(overrides, "updatedBy")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              staffId,
+              targetMonth,
+              note,
+              submittedAt,
+              updatedAt,
+              updatedBy,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

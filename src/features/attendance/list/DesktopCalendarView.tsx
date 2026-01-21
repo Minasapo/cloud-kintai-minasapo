@@ -1,5 +1,6 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import {
   Box,
   Chip,
@@ -265,6 +266,10 @@ type Props = {
   closeDatesError?: Error | null;
   currentMonth?: Dayjs;
   onMonthChange?: (nextMonth: Dayjs) => void;
+  onOpenInRightPanel?: (
+    attendance: Attendance | undefined,
+    date: Dayjs
+  ) => void;
 };
 
 type MonthTerm = {
@@ -346,6 +351,7 @@ export default function DesktopCalendarView({
   closeDatesError,
   currentMonth,
   onMonthChange,
+  onOpenInRightPanel,
 }: Props) {
   const theme = useTheme();
   const [internalMonth, setInternalMonth] = useState(
@@ -607,13 +613,36 @@ export default function DesktopCalendarView({
                     <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                       {date.date()}
                     </Typography>
-                    {status !== AttendanceStatus.None && (
-                      <Chip
-                        size="small"
-                        label={statusLabelMap[status]}
-                        color={statusChipColor[status]}
-                      />
-                    )}
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
+                      {onOpenInRightPanel && attendance && (
+                        <Tooltip title="右側で開く">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenInRightPanel(attendance, date);
+                            }}
+                            sx={{
+                              padding: "2px",
+                              "&:hover": {
+                                backgroundColor: "rgba(0, 0, 0, 0.04)",
+                              },
+                            }}
+                          >
+                            <OpenInNewOutlinedIcon sx={{ fontSize: "16px" }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {status !== AttendanceStatus.None && (
+                        <Chip
+                          size="small"
+                          label={statusLabelMap[status]}
+                          color={statusChipColor[status]}
+                        />
+                      )}
+                    </Box>
                   </Stack>
                   {timeRangeLabel && (
                     <Typography variant="caption" color="text.secondary" noWrap>

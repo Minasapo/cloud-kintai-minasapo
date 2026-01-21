@@ -17,14 +17,16 @@
 npm run test:unit
 npm run test:e2e -- smoke-test --project=chromium-staff
 npm run test:e2e -- smoke-test --project=chromium-admin
-npm run test:e2e -- visual-regression --project=chromium-staff
-npm run test:e2e -- visual-regression --project=chromium-admin
 ```
 
 ## コミットメッセージ
 
 コミットメッセージは英語で記述してください。
 例: "Add Storybook stories for HeaderBar component"
+
+## GitHub Issues
+
+GitHub の Issues を作成や変更する際は、タイトルや内容、コメントは日本語で記述してください。
 
 ## コーディング規約・ベストプラクティス
 

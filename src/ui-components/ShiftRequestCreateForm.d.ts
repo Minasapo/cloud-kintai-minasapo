@@ -27,6 +27,8 @@ export declare type ShiftRequestCreateFormInputValues = {
     note?: string;
     submittedAt?: string;
     updatedAt?: string;
+    updatedBy?: string;
+    version?: number;
 };
 export declare type ShiftRequestCreateFormValidationValues = {
     staffId?: ValidationFunction<string>;
@@ -34,6 +36,8 @@ export declare type ShiftRequestCreateFormValidationValues = {
     note?: ValidationFunction<string>;
     submittedAt?: ValidationFunction<string>;
     updatedAt?: ValidationFunction<string>;
+    updatedBy?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type ShiftRequestCreateFormOverridesProps = {
@@ -43,6 +47,8 @@ export declare type ShiftRequestCreateFormOverridesProps = {
     note?: PrimitiveOverrideProps<TextFieldProps>;
     submittedAt?: PrimitiveOverrideProps<TextFieldProps>;
     updatedAt?: PrimitiveOverrideProps<TextFieldProps>;
+    updatedBy?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type ShiftRequestCreateFormProps = React.PropsWithChildren<{
     overrides?: ShiftRequestCreateFormOverridesProps | undefined | null;

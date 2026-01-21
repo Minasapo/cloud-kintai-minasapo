@@ -7,7 +7,7 @@ import {
   type SnackbarCloseReason,
   type SnackbarOrigin,
 } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import { useAppDispatchV2, useAppSelectorV2 } from "@/app/hooks";
 import { SNACKBAR_AUTO_HIDE_DURATION } from "@/constants/timeouts";
@@ -40,54 +40,26 @@ const getSnackbarTopOffset = (stackIndex: number) =>
 export default function SnackbarGroup() {
   const { success, error, warn } = useAppSelectorV2(selectSnackbar);
   const dispatch = useAppDispatchV2();
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [warnMessage, setWarnMessage] = useState<string | null>(null);
 
-  // Capture Redux state and reset immediately when new message arrives
-  const handleSuccessMessage = useCallback(
-    (message: string) => {
-      setSuccessMessage(message);
-      dispatch(setSnackbarSuccess(null));
-    },
-    [dispatch]
-  );
+  // Handle close actions by clearing Redux state
+  const handleCloseSuccess = useCallback(() => {
+    dispatch(setSnackbarSuccess(null));
+  }, [dispatch]);
 
-  const handleErrorMessage = useCallback(
-    (message: string) => {
-      setErrorMessage(message);
-      dispatch(setSnackbarError(null));
-    },
-    [dispatch]
-  );
+  const handleCloseError = useCallback(() => {
+    dispatch(setSnackbarError(null));
+  }, [dispatch]);
 
-  const handleWarnMessage = useCallback(
-    (message: string) => {
-      setWarnMessage(message);
-      dispatch(setSnackbarWarn(null));
-    },
-    [dispatch]
-  );
-
-  // Trigger message capture when Redux state changes
-  if (success && success !== successMessage) {
-    handleSuccessMessage(success);
-  }
-
-  if (error && error !== errorMessage) {
-    handleErrorMessage(error);
-  }
-
-  if (warn && warn !== warnMessage) {
-    handleWarnMessage(warn);
-  }
+  const handleCloseWarn = useCallback(() => {
+    dispatch(setSnackbarWarn(null));
+  }, [dispatch]);
 
   const renderSnackbar = (
     key: string,
     message: string,
     severity: "success" | "error" | "warning",
     autoHideDuration: number | null,
-    setMessage: React.Dispatch<React.SetStateAction<string | null>>,
+    onClose: () => void,
     stackIndex: number
   ) => (
     <Snackbar
@@ -99,7 +71,7 @@ export default function SnackbarGroup() {
         if (reason === "clickaway") {
           return;
         }
-        setMessage(null);
+        onClose();
       }}
       sx={{
         "&.MuiSnackbar-anchorOriginTopRight": {
@@ -121,11 +93,7 @@ export default function SnackbarGroup() {
           color: "#333333",
         }}
         action={
-          <IconButton
-            color="inherit"
-            size="small"
-            onClick={() => setMessage(null)}
-          >
+          <IconButton color="inherit" size="small" onClick={onClose}>
             <CloseIcon fontSize="small" />
           </IconButton>
         }
@@ -138,24 +106,24 @@ export default function SnackbarGroup() {
   const snackbarConfigs = [
     {
       key: "success",
-      message: successMessage,
+      message: success,
       severity: "success" as const,
       autoHideDuration: SNACKBAR_AUTO_HIDE_DURATION.SUCCESS,
-      setMessage: setSuccessMessage,
+      onClose: handleCloseSuccess,
     },
     {
       key: "error",
-      message: errorMessage,
+      message: error,
       severity: "error" as const,
       autoHideDuration: null,
-      setMessage: setErrorMessage,
+      onClose: handleCloseError,
     },
     {
       key: "warn",
-      message: warnMessage,
+      message: warn,
       severity: "warning" as const,
       autoHideDuration: SNACKBAR_AUTO_HIDE_DURATION.ERROR,
-      setMessage: setWarnMessage,
+      onClose: handleCloseWarn,
     },
   ];
 
@@ -164,7 +132,7 @@ export default function SnackbarGroup() {
   return (
     <>
       {snackbarConfigs.map(
-        ({ key, message, severity, autoHideDuration, setMessage }) => {
+        ({ key, message, severity, autoHideDuration, onClose }) => {
           if (!message) {
             return null;
           }
@@ -173,7 +141,7 @@ export default function SnackbarGroup() {
             message,
             severity,
             autoHideDuration,
-            setMessage,
+            onClose,
             stackIndex
           );
           stackIndex += 1;
