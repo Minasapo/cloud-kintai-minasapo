@@ -909,6 +909,8 @@ export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
     }
     submittedAt
     updatedAt
+    updatedBy
+    version
     histories {
       version
       note
@@ -960,6 +962,8 @@ export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
     }
     submittedAt
     updatedAt
+    updatedBy
+    version
     histories {
       version
       note
@@ -1011,6 +1015,8 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
     }
     submittedAt
     updatedAt
+    updatedBy
+    version
     histories {
       version
       note
