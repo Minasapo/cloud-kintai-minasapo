@@ -33,10 +33,13 @@ import { CollaborativeShiftProvider } from "../../../features/shift/collaborativ
 import { ShiftState } from "../../../features/shift/collaborative/types/collaborative.types";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
+import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
 import { useKeyboardShortcuts } from "../../../features/shift/collaborative/hooks/useKeyboardShortcuts";
 import { useShiftNavigation } from "../../../features/shift/collaborative/hooks/useShiftNavigation";
 import { useMultiSelect } from "../../../features/shift/collaborative/hooks/useMultiSelect";
 import { useClipboard } from "../../../features/shift/collaborative/hooks/useClipboard";
+import { useShiftSuggestions } from "../../../features/shift/collaborative/hooks/useShiftSuggestions";
+import { SuggestedAction } from "../../../features/shift/collaborative/rules/shiftRules";
 
 // シフト状態の表示設定
 const shiftStateConfig: Record<
@@ -261,6 +264,14 @@ const ShiftCollaborativePageInner: React.FC = () => {
     getShiftState,
   });
 
+  // シフト提案機能
+  const { violations, isAnalyzing, analyzeShifts } = useShiftSuggestions({
+    shiftDataMap: state.shiftDataMap,
+    staffIds,
+    dateKeys,
+    enabled: true,
+  });
+
   /**
    * セルの状態を変更
    */
@@ -334,6 +345,18 @@ const ShiftCollaborativePageInner: React.FC = () => {
       clearClipboard();
     }
   }, [showHelp, clearSelection, clearFocus, clearClipboard]);
+
+  /**
+   * 提案アクションを適用
+   */
+  const handleApplySuggestion = useCallback(
+    (action: SuggestedAction) => {
+      action.changes.forEach(({ staffId, date, newState }) => {
+        changeCellState(staffId, date, newState);
+      });
+    },
+    [changeCellState]
+  );
 
   // キーボードショートカットの設定
   useKeyboardShortcuts({
@@ -725,6 +748,14 @@ const ShiftCollaborativePageInner: React.FC = () => {
           onChangeState={handleChangeState}
           hasClipboard={hasClipboard}
           canPaste={focusedCell !== null}
+        />
+
+        {/* シフト提案パネル */}
+        <ShiftSuggestionsPanel
+          violations={violations}
+          isAnalyzing={isAnalyzing}
+          onApplyAction={handleApplySuggestion}
+          onRefresh={analyzeShifts}
         />
 
         {/* ヘルプボタン（FAB） */}
