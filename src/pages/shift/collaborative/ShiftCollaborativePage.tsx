@@ -1,6 +1,7 @@
 import InfoIcon from "@mui/icons-material/Info";
 import LockIcon from "@mui/icons-material/Lock";
 import SyncIcon from "@mui/icons-material/Sync";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import {
   Alert,
   Avatar,
@@ -8,6 +9,7 @@ import {
   Box,
   Chip,
   Container,
+  Fab,
   IconButton,
   LinearProgress,
   Paper,
@@ -24,11 +26,14 @@ import {
 import { alpha } from "@mui/material/styles";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useCollaborativeShift } from "../../../features/shift/collaborative/context/CollaborativeShiftContext";
 import { CollaborativeShiftProvider } from "../../../features/shift/collaborative/providers/CollaborativeShiftProvider";
 import { ShiftState } from "../../../features/shift/collaborative/types/collaborative.types";
+import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
+import { useKeyboardShortcuts } from "../../../features/shift/collaborative/hooks/useKeyboardShortcuts";
+import { useShiftNavigation } from "../../../features/shift/collaborative/hooks/useShiftNavigation";
 
 // シフト状態の表示設定
 const shiftStateConfig: Record<
@@ -53,6 +58,9 @@ interface ShiftCellProps {
   lastChangedBy?: string;
   lastChangedAt?: string;
   onClick: () => void;
+  onRegisterRef?: (element: HTMLElement | null) => void;
+  isFocused?: boolean;
+  isSelected?: boolean;
 }
 
 // eslint-disable-next-line react/prop-types
@@ -64,12 +72,17 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
   lastChangedBy,
   lastChangedAt,
   onClick,
+  onRegisterRef,
+  isFocused = false,
+  isSelected = false,
 }: ShiftCellProps) => {
   const config = shiftStateConfig[state];
   const isPending = false; // TODO: pendingChangesから取得
 
   return (
     <TableCell
+      ref={onRegisterRef}
+      tabIndex={0}
       onClick={isLocked ? undefined : onClick}
       sx={{
         position: "relative",
@@ -82,13 +95,23 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
           ? alpha("#2196f3", 0.1)
           : isPending
           ? alpha("#ff9800", 0.1)
+          : isSelected
+          ? alpha("#9c27b0", 0.15)
           : "background.paper",
-        border: isEditing ? "2px solid #2196f3" : undefined,
+        border: isEditing
+          ? "2px solid #2196f3"
+          : isFocused
+          ? "2px solid #9c27b0"
+          : undefined,
         "&:hover": isLocked
           ? {}
           : {
               bgcolor: alpha("#2196f3", 0.05),
             },
+        "&:focus": {
+          outline: "none",
+          border: "2px solid #9c27b0",
+        },
       }}
     >
       <Tooltip
@@ -181,6 +204,90 @@ const ShiftCollaborativePageInner: React.FC = () => {
     [state.shiftDataMap]
   );
 
+  // 日付のキーリスト（DD形式）
+  const dateKeys = useMemo(() => days.map((day) => day.format("DD")), [days]);
+
+  // キーボードショートカット用の状態
+  const [showHelp, setShowHelp] = useState(false);
+  const [selectedCells, setSelectedCells] = useState<
+    Array<{ staffId: string; date: string }>
+  >([]);
+
+  // フォーカス管理とナビゲーション
+  const { focusedCell, registerCell, focusCell, navigate, clearFocus } =
+    useShiftNavigation({
+      staffIds,
+      dates: dateKeys,
+    });
+
+  /**
+   * セルの状態を変更
+   */
+  const changeCellState = useCallback(
+    (staffId: string, date: string, newState: ShiftState) => {
+      if (isCellBeingEdited(staffId, date)) {
+        return;
+      }
+
+      updateUserActivity();
+      void updateShift({ staffId, date, newState });
+    },
+    [isCellBeingEdited, updateUserActivity, updateShift]
+  );
+
+  /**
+   * フォーカス中のセルの状態を変更
+   */
+  const handleChangeState = useCallback(
+    (newState: ShiftState) => {
+      if (selectedCells.length > 0) {
+        // 複数選択がある場合は、選択されたすべてのセルを変更
+        selectedCells.forEach(({ staffId, date }) => {
+          changeCellState(staffId, date, newState);
+        });
+      } else if (focusedCell) {
+        // フォーカスされたセルのみ変更
+        changeCellState(focusedCell.staffId, focusedCell.date, newState);
+      }
+    },
+    [focusedCell, selectedCells, changeCellState]
+  );
+
+  /**
+   * 全セルを選択
+   */
+  const handleSelectAll = useCallback(() => {
+    const allCells: Array<{ staffId: string; date: string }> = [];
+    staffIds.forEach((staffId) => {
+      dateKeys.forEach((date) => {
+        allCells.push({ staffId, date });
+      });
+    });
+    setSelectedCells(allCells);
+  }, [staffIds, dateKeys]);
+
+  /**
+   * 選択解除・モーダルクローズ
+   */
+  const handleEscape = useCallback(() => {
+    if (showHelp) {
+      setShowHelp(false);
+    } else {
+      setSelectedCells([]);
+      clearFocus();
+    }
+  }, [showHelp, clearFocus]);
+
+  // キーボードショートカットの設定
+  useKeyboardShortcuts({
+    enabled: true,
+    onNavigate: navigate,
+    onChangeState: handleChangeState,
+    onSelectAll: handleSelectAll,
+    onShowHelp: () => setShowHelp(true),
+    onEscape: handleEscape,
+  });
+
   /**
    * セルクリックハンドラー
    */
@@ -190,6 +297,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
     }
 
     updateUserActivity();
+    focusCell(staffId, date);
 
     // TODO: 編集ダイアログを表示
     // 現在は状態を循環させるだけ
@@ -456,6 +564,12 @@ const ShiftCollaborativePageInner: React.FC = () => {
 
                         const isEditing = isCellBeingEdited(staffId, dayKey);
                         const editor = getCellEditor(staffId, dayKey);
+                        const isFocused =
+                          focusedCell?.staffId === staffId &&
+                          focusedCell?.date === dayKey;
+                        const isSelected = selectedCells.some(
+                          (c) => c.staffId === staffId && c.date === dayKey
+                        );
 
                         return (
                           <ShiftCell
@@ -467,6 +581,11 @@ const ShiftCollaborativePageInner: React.FC = () => {
                             lastChangedBy={cell.lastChangedBy}
                             lastChangedAt={cell.lastChangedAt}
                             onClick={() => handleCellClick(staffId, dayKey)}
+                            onRegisterRef={(element) =>
+                              registerCell(staffId, dayKey, element)
+                            }
+                            isFocused={isFocused}
+                            isSelected={isSelected}
                           />
                         );
                       })}
@@ -477,6 +596,26 @@ const ShiftCollaborativePageInner: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* ヘルプボタン（FAB） */}
+        <Fab
+          color="primary"
+          size="medium"
+          onClick={() => setShowHelp(true)}
+          sx={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+          }}
+        >
+          <HelpOutlineIcon />
+        </Fab>
+
+        {/* ヘルプダイアログ */}
+        <KeyboardShortcutsHelp
+          open={showHelp}
+          onClose={() => setShowHelp(false)}
+        />
       </Container>
     </Page>
   );
