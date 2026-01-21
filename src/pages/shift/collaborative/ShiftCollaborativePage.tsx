@@ -1,7 +1,7 @@
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoIcon from "@mui/icons-material/Info";
 import LockIcon from "@mui/icons-material/Lock";
 import SyncIcon from "@mui/icons-material/Sync";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import {
   Alert,
   Avatar,
@@ -28,18 +28,18 @@ import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 
-import { useCollaborativeShift } from "../../../features/shift/collaborative/context/CollaborativeShiftContext";
-import { CollaborativeShiftProvider } from "../../../features/shift/collaborative/providers/CollaborativeShiftProvider";
-import { ShiftState } from "../../../features/shift/collaborative/types/collaborative.types";
-import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
+import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
-import { useKeyboardShortcuts } from "../../../features/shift/collaborative/hooks/useKeyboardShortcuts";
-import { useShiftNavigation } from "../../../features/shift/collaborative/hooks/useShiftNavigation";
-import { useMultiSelect } from "../../../features/shift/collaborative/hooks/useMultiSelect";
+import { useCollaborativeShift } from "../../../features/shift/collaborative/context/CollaborativeShiftContext";
 import { useClipboard } from "../../../features/shift/collaborative/hooks/useClipboard";
+import { useKeyboardShortcuts } from "../../../features/shift/collaborative/hooks/useKeyboardShortcuts";
+import { useMultiSelect } from "../../../features/shift/collaborative/hooks/useMultiSelect";
+import { useShiftNavigation } from "../../../features/shift/collaborative/hooks/useShiftNavigation";
 import { useShiftSuggestions } from "../../../features/shift/collaborative/hooks/useShiftSuggestions";
+import { CollaborativeShiftProvider } from "../../../features/shift/collaborative/providers/CollaborativeShiftProvider";
 import { SuggestedAction } from "../../../features/shift/collaborative/rules/shiftRules";
+import { ShiftState } from "../../../features/shift/collaborative/types/collaborative.types";
 
 // シフト状態の表示設定
 const shiftStateConfig: Record<
