@@ -1,5 +1,5 @@
 import { Stack } from "@mui/material";
-import { useCallback, useMemo } from "react";
+import React, { lazy, Suspense, useCallback, useMemo } from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -28,6 +28,33 @@ const PAGE_PADDING_Y = {
 };
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
+
+// 右側パネル用のコンポーネント
+const AdminAttendanceComponent = lazy(() => import("./AdminAttendance"));
+const AdminDailyReportManagementComponent = lazy(
+  () => import("./AdminDailyReportManagement/AdminDailyReportManagement")
+);
+const AdminStaffComponent = lazy(() => import("./AdminStaff/AdminStaff"));
+const ShiftPlanManagementComponent = lazy(
+  () => import("./ShiftPlanManagement/ShiftPlanManagement")
+);
+
+// 画面IDとコンポーネントのマッピング
+const SCREEN_COMPONENTS: Record<
+  string,
+  React.ComponentType<{ panelId: string }>
+> = {
+  "attendance-edit": AdminAttendanceComponent as React.ComponentType<{
+    panelId: string;
+  }>,
+  "daily-report": AdminDailyReportManagementComponent as React.ComponentType<{
+    panelId: string;
+  }>,
+  "staff-list": AdminStaffComponent as React.ComponentType<{ panelId: string }>,
+  "shift-plan": ShiftPlanManagementComponent as React.ComponentType<{
+    panelId: string;
+  }>,
+};
 
 // 右側パネルで選択可能な画面オプション
 const SCREEN_OPTIONS: ScreenOption[] = [
@@ -102,16 +129,16 @@ function AdminDashboardContent() {
       const selectedOption = SCREEN_OPTIONS.find(
         (option) => option.value === screenValue
       );
-      if (selectedOption && selectedOption.route) {
+      const component = SCREEN_COMPONENTS[screenValue];
+      if (selectedOption && component) {
         setRightPanel({
           id: selectedOption.value,
           title: selectedOption.label,
-          route: selectedOption.route,
+          component: component,
         });
-        navigate(selectedOption.route);
       }
     },
-    [setRightPanel, navigate]
+    [setRightPanel]
   );
 
   const selectedScreen = useMemo(() => {
@@ -178,9 +205,9 @@ function AdminDashboardContent() {
                 onScreenChange={handleScreenChange}
               >
                 {state.rightPanel?.component ? (
-                  <state.rightPanel.component panelId={state.rightPanel.id} />
-                ) : state.rightPanel?.route ? (
-                  <Outlet />
+                  <Suspense fallback={<div>読み込み中...</div>}>
+                    <state.rightPanel.component panelId={state.rightPanel.id} />
+                  </Suspense>
                 ) : (
                   <div>パネルが選択されていません</div>
                 )}
