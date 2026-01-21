@@ -32,8 +32,11 @@ import { useCollaborativeShift } from "../../../features/shift/collaborative/con
 import { CollaborativeShiftProvider } from "../../../features/shift/collaborative/providers/CollaborativeShiftProvider";
 import { ShiftState } from "../../../features/shift/collaborative/types/collaborative.types";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
+import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { useKeyboardShortcuts } from "../../../features/shift/collaborative/hooks/useKeyboardShortcuts";
 import { useShiftNavigation } from "../../../features/shift/collaborative/hooks/useShiftNavigation";
+import { useMultiSelect } from "../../../features/shift/collaborative/hooks/useMultiSelect";
+import { useClipboard } from "../../../features/shift/collaborative/hooks/useClipboard";
 
 // シフト状態の表示設定
 const shiftStateConfig: Record<
@@ -57,8 +60,10 @@ interface ShiftCellProps {
   editorName?: string;
   lastChangedBy?: string;
   lastChangedAt?: string;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent) => void;
   onRegisterRef?: (element: HTMLElement | null) => void;
+  onMouseDown?: (event: React.MouseEvent) => void;
+  onMouseEnter?: () => void;
   isFocused?: boolean;
   isSelected?: boolean;
 }
@@ -73,6 +78,8 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
   lastChangedAt,
   onClick,
   onRegisterRef,
+  onMouseDown,
+  onMouseEnter,
   isFocused = false,
   isSelected = false,
 }: ShiftCellProps) => {
@@ -84,6 +91,8 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
       ref={onRegisterRef}
       tabIndex={0}
       onClick={isLocked ? undefined : onClick}
+      onMouseDown={isLocked ? undefined : onMouseDown}
+      onMouseEnter={onMouseEnter}
       sx={{
         position: "relative",
         cursor: isLocked ? "not-allowed" : "pointer",
@@ -112,6 +121,7 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
           outline: "none",
           border: "2px solid #9c27b0",
         },
+        userSelect: "none", // ドラッグ選択時のテキスト選択を防止
       }}
     >
       <Tooltip
@@ -209,9 +219,6 @@ const ShiftCollaborativePageInner: React.FC = () => {
 
   // キーボードショートカット用の状態
   const [showHelp, setShowHelp] = useState(false);
-  const [selectedCells, setSelectedCells] = useState<
-    Array<{ staffId: string; date: string }>
-  >([]);
 
   // フォーカス管理とナビゲーション
   const { focusedCell, registerCell, focusCell, navigate, clearFocus } =
@@ -219,6 +226,40 @@ const ShiftCollaborativePageInner: React.FC = () => {
       staffIds,
       dates: dateKeys,
     });
+
+  // 複数選択管理
+  const {
+    selectedCells,
+    selectionCount,
+    isCellSelected,
+    selectCell,
+    toggleCell,
+    selectRange,
+    startDragSelect,
+    updateDragSelect,
+    endDragSelect,
+    selectAll,
+    clearSelection,
+    isDragging,
+  } = useMultiSelect({
+    staffIds,
+    dates: dateKeys,
+  });
+
+  // シフト状態取得ヘルパー
+  const getShiftState = useCallback(
+    (staffId: string, date: string): ShiftState | undefined => {
+      return state.shiftDataMap.get(staffId)?.get(date)?.state;
+    },
+    [state.shiftDataMap]
+  );
+
+  // クリップボード管理
+  const { copy, paste, hasClipboard, clearClipboard } = useClipboard({
+    staffIds,
+    dates: dateKeys,
+    getShiftState,
+  });
 
   /**
    * セルの状態を変更
@@ -236,11 +277,11 @@ const ShiftCollaborativePageInner: React.FC = () => {
   );
 
   /**
-   * フォーカス中のセルの状態を変更
+   * フォーカス中のセルまたは選択中のセルの状態を変更
    */
   const handleChangeState = useCallback(
     (newState: ShiftState) => {
-      if (selectedCells.length > 0) {
+      if (selectionCount > 0) {
         // 複数選択がある場合は、選択されたすべてのセルを変更
         selectedCells.forEach(({ staffId, date }) => {
           changeCellState(staffId, date, newState);
@@ -250,21 +291,36 @@ const ShiftCollaborativePageInner: React.FC = () => {
         changeCellState(focusedCell.staffId, focusedCell.date, newState);
       }
     },
-    [focusedCell, selectedCells, changeCellState]
+    [focusedCell, selectedCells, selectionCount, changeCellState]
   );
+
+  /**
+   * コピー処理
+   */
+  const handleCopy = useCallback(() => {
+    if (selectionCount > 0) {
+      copy(selectedCells);
+    }
+  }, [selectionCount, selectedCells, copy]);
+
+  /**
+   * ペースト処理
+   */
+  const handlePaste = useCallback(() => {
+    if (!focusedCell) return;
+
+    const updates = paste(focusedCell);
+    updates.forEach(({ staffId, date, newState }) => {
+      changeCellState(staffId, date, newState);
+    });
+  }, [focusedCell, paste, changeCellState]);
 
   /**
    * 全セルを選択
    */
   const handleSelectAll = useCallback(() => {
-    const allCells: Array<{ staffId: string; date: string }> = [];
-    staffIds.forEach((staffId) => {
-      dateKeys.forEach((date) => {
-        allCells.push({ staffId, date });
-      });
-    });
-    setSelectedCells(allCells);
-  }, [staffIds, dateKeys]);
+    selectAll();
+  }, [selectAll]);
 
   /**
    * 選択解除・モーダルクローズ
@@ -273,10 +329,11 @@ const ShiftCollaborativePageInner: React.FC = () => {
     if (showHelp) {
       setShowHelp(false);
     } else {
-      setSelectedCells([]);
+      clearSelection();
       clearFocus();
+      clearClipboard();
     }
-  }, [showHelp, clearFocus]);
+  }, [showHelp, clearSelection, clearFocus, clearClipboard]);
 
   // キーボードショートカットの設定
   useKeyboardShortcuts({
@@ -286,21 +343,41 @@ const ShiftCollaborativePageInner: React.FC = () => {
     onSelectAll: handleSelectAll,
     onShowHelp: () => setShowHelp(true),
     onEscape: handleEscape,
+    onCopy: handleCopy,
+    onPaste: handlePaste,
   });
 
   /**
    * セルクリックハンドラー
    */
-  const handleCellClick = (staffId: string, date: string) => {
+  const handleCellClick = (
+    staffId: string,
+    date: string,
+    event: React.MouseEvent
+  ) => {
     if (isCellBeingEdited(staffId, date)) {
       return; // 他のユーザーが編集中
     }
 
     updateUserActivity();
+
+    // Shift+クリック: 範囲選択
+    if (event.shiftKey) {
+      selectRange(staffId, date);
+      return;
+    }
+
+    // Ctrl/Cmd+クリック: 個別追加選択
+    if (event.ctrlKey || event.metaKey) {
+      toggleCell(staffId, date);
+      focusCell(staffId, date);
+      return;
+    }
+
+    // 通常クリック: 単一選択して状態を循環
+    selectCell(staffId, date);
     focusCell(staffId, date);
 
-    // TODO: 編集ダイアログを表示
-    // 現在は状態を循環させるだけ
     const staffData = state.shiftDataMap.get(staffId);
     const cell = staffData?.get(date);
 
@@ -323,6 +400,42 @@ const ShiftCollaborativePageInner: React.FC = () => {
       newState: nextState,
     });
   };
+
+  /**
+   * セルのマウスダウン（ドラッグ選択開始）
+   */
+  const handleCellMouseDown = useCallback(
+    (staffId: string, date: string, event: React.MouseEvent) => {
+      // 修飾キーがある場合はドラッグ選択しない
+      if (event.shiftKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+
+      startDragSelect(staffId, date);
+    },
+    [startDragSelect]
+  );
+
+  /**
+   * セルのマウスエンター（ドラッグ選択更新）
+   */
+  const handleCellMouseEnter = useCallback(
+    (staffId: string, date: string) => {
+      if (isDragging) {
+        updateDragSelect(staffId, date);
+      }
+    },
+    [isDragging, updateDragSelect]
+  );
+
+  /**
+   * マウスアップ（ドラッグ選択終了）
+   */
+  const handleMouseUp = useCallback(() => {
+    if (isDragging) {
+      endDragSelect();
+    }
+  }, [isDragging, endDragSelect]);
 
   /**
    * 手動同期
@@ -394,7 +507,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
 
   return (
     <Page title="協同シフト調整">
-      <Container maxWidth={false} sx={{ py: 3 }}>
+      <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
         {/* ヘッダー */}
         <Stack direction="row" alignItems="center" spacing={2} mb={3}>
           <Typography variant="h4">協同シフト調整</Typography>
@@ -567,9 +680,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
                         const isFocused =
                           focusedCell?.staffId === staffId &&
                           focusedCell?.date === dayKey;
-                        const isSelected = selectedCells.some(
-                          (c) => c.staffId === staffId && c.date === dayKey
-                        );
+                        const isSelected = isCellSelected(staffId, dayKey);
 
                         return (
                           <ShiftCell
@@ -580,9 +691,17 @@ const ShiftCollaborativePageInner: React.FC = () => {
                             editorName={editor?.userName}
                             lastChangedBy={cell.lastChangedBy}
                             lastChangedAt={cell.lastChangedAt}
-                            onClick={() => handleCellClick(staffId, dayKey)}
+                            onClick={(event) =>
+                              handleCellClick(staffId, dayKey, event)
+                            }
                             onRegisterRef={(element) =>
                               registerCell(staffId, dayKey, element)
+                            }
+                            onMouseDown={(event) =>
+                              handleCellMouseDown(staffId, dayKey, event)
+                            }
+                            onMouseEnter={() =>
+                              handleCellMouseEnter(staffId, dayKey)
                             }
                             isFocused={isFocused}
                             isSelected={isSelected}
@@ -596,6 +715,17 @@ const ShiftCollaborativePageInner: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* バッチ編集ツールバー */}
+        <BatchEditToolbar
+          selectionCount={selectionCount}
+          onCopy={handleCopy}
+          onPaste={handlePaste}
+          onClear={clearSelection}
+          onChangeState={handleChangeState}
+          hasClipboard={hasClipboard}
+          canPaste={focusedCell !== null}
+        />
 
         {/* ヘルプボタン（FAB） */}
         <Fab
