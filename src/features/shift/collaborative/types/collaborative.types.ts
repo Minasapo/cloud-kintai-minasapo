@@ -103,5 +103,6 @@ export interface ShiftRequestData {
 export interface ShiftCellUpdate {
   staffId: string;
   date: string; // "YYYY-MM-DD"
-  newState: ShiftState;
+  newState?: ShiftState;
+  isLocked?: boolean;
 }

@@ -93,12 +93,12 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
     <TableCell
       ref={onRegisterRef}
       tabIndex={0}
-      onClick={isLocked ? undefined : onClick}
-      onMouseDown={isLocked ? undefined : onMouseDown}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
       sx={{
         position: "relative",
-        cursor: isLocked ? "not-allowed" : "pointer",
+        cursor: "pointer",
         minWidth: 50,
         maxWidth: 50,
         textAlign: "center",
@@ -196,6 +196,8 @@ const ShiftCollaborativePageInner: React.FC = () => {
     updateUserActivity,
   } = useCollaborativeShift();
 
+  const isAdmin = true; // TODO: 認可情報から取得する
+
   const [currentMonth] = useState(dayjs());
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
@@ -257,6 +259,20 @@ const ShiftCollaborativePageInner: React.FC = () => {
     [state.shiftDataMap]
   );
 
+  const getCellData = useCallback(
+    (staffId: string, date: string) => {
+      return state.shiftDataMap.get(staffId)?.get(date);
+    },
+    [state.shiftDataMap]
+  );
+
+  const isCellLocked = useCallback(
+    (staffId: string, date: string) => {
+      return getCellData(staffId, date)?.isLocked ?? false;
+    },
+    [getCellData]
+  );
+
   // クリップボード管理
   const { copy, paste, hasClipboard, clearClipboard } = useClipboard({
     staffIds,
@@ -277,12 +293,28 @@ const ShiftCollaborativePageInner: React.FC = () => {
    */
   const changeCellState = useCallback(
     (staffId: string, date: string, newState: ShiftState) => {
+      if (isCellLocked(staffId, date)) {
+        return;
+      }
+
       if (isCellBeingEdited(staffId, date)) {
         return;
       }
 
       updateUserActivity();
       void updateShift({ staffId, date, newState });
+    },
+    [isCellBeingEdited, updateUserActivity, updateShift, isCellLocked]
+  );
+
+  const changeCellLock = useCallback(
+    (staffId: string, date: string, locked: boolean) => {
+      if (isCellBeingEdited(staffId, date)) {
+        return;
+      }
+
+      updateUserActivity();
+      void updateShift({ staffId, date, isLocked: locked });
     },
     [isCellBeingEdited, updateUserActivity, updateShift]
   );
@@ -305,6 +337,35 @@ const ShiftCollaborativePageInner: React.FC = () => {
     [focusedCell, selectedCells, selectionCount, changeCellState]
   );
 
+  const applyLockState = useCallback(
+    (locked: boolean) => {
+      if (!locked && !isAdmin) {
+        return;
+      }
+
+      const targets =
+        selectionCount > 0
+          ? Array.from(selectedCells)
+          : focusedCell
+          ? [focusedCell]
+          : [];
+
+      targets.forEach(({ staffId, date }) => {
+        const cell = getCellData(staffId, date);
+        if (!cell || cell.isLocked === locked) return;
+        changeCellLock(staffId, date, locked);
+      });
+    },
+    [
+      selectionCount,
+      selectedCells,
+      focusedCell,
+      changeCellLock,
+      getCellData,
+      isAdmin,
+    ]
+  );
+
   /**
    * コピー処理
    */
@@ -313,6 +374,32 @@ const ShiftCollaborativePageInner: React.FC = () => {
       copy(selectedCells);
     }
   }, [selectionCount, selectedCells, copy]);
+
+  const handleLockCells = useCallback(() => {
+    applyLockState(true);
+  }, [applyLockState]);
+
+  const handleUnlockCells = useCallback(() => {
+    applyLockState(false);
+  }, [applyLockState]);
+
+  const selectionTargets = useMemo(() => {
+    if (selectionCount > 0) return Array.from(selectedCells);
+    if (focusedCell) return [focusedCell];
+    return [];
+  }, [selectionCount, selectedCells, focusedCell]);
+
+  const hasLocked = useMemo(
+    () =>
+      selectionTargets.some((t) => getCellData(t.staffId, t.date)?.isLocked),
+    [selectionTargets, getCellData]
+  );
+
+  const hasUnlocked = useMemo(
+    () =>
+      selectionTargets.some((t) => !getCellData(t.staffId, t.date)?.isLocked),
+    [selectionTargets, getCellData]
+  );
 
   /**
    * ペースト処理
@@ -400,28 +487,6 @@ const ShiftCollaborativePageInner: React.FC = () => {
     // 通常クリック: 単一選択して状態を循環
     selectCell(staffId, date);
     focusCell(staffId, date);
-
-    const staffData = state.shiftDataMap.get(staffId);
-    const cell = staffData?.get(date);
-
-    if (!cell) return;
-
-    const stateOrder: ShiftState[] = [
-      "empty",
-      "work",
-      "requestedOff",
-      "fixedOff",
-      "auto",
-    ];
-    const currentIndex = stateOrder.indexOf(cell.state);
-    const nextState =
-      stateOrder[(currentIndex + 1) % stateOrder.length] || "empty";
-
-    void updateShift({
-      staffId,
-      date,
-      newState: nextState,
-    });
   };
 
   /**
@@ -746,6 +811,11 @@ const ShiftCollaborativePageInner: React.FC = () => {
           onPaste={handlePaste}
           onClear={clearSelection}
           onChangeState={handleChangeState}
+          onLock={handleLockCells}
+          onUnlock={handleUnlockCells}
+          canUnlock={isAdmin}
+          showLock={hasUnlocked}
+          showUnlock={hasLocked}
           hasClipboard={hasClipboard}
           canPaste={focusedCell !== null}
         />

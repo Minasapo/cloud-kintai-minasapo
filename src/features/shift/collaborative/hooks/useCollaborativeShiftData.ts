@@ -115,9 +115,14 @@ export const useCollaborativeShiftData = ({
             isLocked: false,
           };
 
+          const nextState = update.newState ?? cell.state;
+          const nextLocked =
+            update.isLocked !== undefined ? update.isLocked : cell.isLocked;
+
           newStaffData.set(update.date, {
             ...cell,
-            state: update.newState,
+            state: nextState,
+            isLocked: nextLocked,
             lastChangedBy: currentUserId,
             lastChangedAt: new Date().toLocaleString(),
           });

@@ -2,6 +2,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import {
   Box,
   Button,
@@ -20,6 +22,11 @@ interface BatchEditToolbarProps {
   onPaste: () => void;
   onClear: () => void;
   onChangeState: (state: ShiftState) => void;
+  onLock: () => void;
+  onUnlock: () => void;
+  canUnlock: boolean;
+  showLock: boolean;
+  showUnlock: boolean;
   hasClipboard: boolean;
   canPaste: boolean;
 }
@@ -39,6 +46,11 @@ export const BatchEditToolbar = ({
   onPaste,
   onClear,
   onChangeState,
+  onLock,
+  onUnlock,
+  canUnlock,
+  showLock,
+  showUnlock,
   hasClipboard,
   canPaste,
 }: BatchEditToolbarProps) => {
@@ -104,6 +116,35 @@ export const BatchEditToolbar = ({
             ))}
           </Stack>
         </Box>
+
+        <Divider />
+
+        {/* 確定/解除ボタン */}
+        <Stack direction="row" spacing={1}>
+          {showLock && (
+            <Button
+              variant="contained"
+              startIcon={<LockIcon />}
+              onClick={onLock}
+              size="small"
+              color="primary"
+            >
+              確定（ロック）
+            </Button>
+          )}
+          {showUnlock && (
+            <Button
+              variant="outlined"
+              startIcon={<LockOpenIcon />}
+              onClick={onUnlock}
+              size="small"
+              color="inherit"
+              disabled={!canUnlock}
+            >
+              確定解除
+            </Button>
+          )}
+        </Stack>
 
         <Divider />
 
