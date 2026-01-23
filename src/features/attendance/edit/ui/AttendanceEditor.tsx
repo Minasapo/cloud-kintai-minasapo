@@ -46,11 +46,11 @@ import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { Logger } from "@/shared/lib/logger";
-import { AttendanceEditMailSender } from "@/lib/mail/AttendanceEditMailSender";
+import { AttendanceEditMailSender } from "@/shared/lib/mail/AttendanceEditMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 import AttendanceEditProvider from "@/pages/attendance/edit/AttendanceEditProvider";
 import {

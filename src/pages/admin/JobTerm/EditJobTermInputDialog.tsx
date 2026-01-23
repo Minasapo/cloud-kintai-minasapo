@@ -18,7 +18,7 @@ import * as MESSAGE_CODE from "../../../errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 import { defaultValues, Inputs } from "./common";
 
 export default function EditJobTermInputDialog({

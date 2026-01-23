@@ -43,7 +43,7 @@ import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
 import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,

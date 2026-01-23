@@ -54,7 +54,7 @@ import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { createLogger } from "@/shared/lib/logger";
-import { createAppTheme } from "./lib/theme";
+import { createAppTheme } from "@/shared/lib/theme";
 
 const logger = createLogger("Layout");
 

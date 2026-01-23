@@ -13,11 +13,11 @@ import createOperationLogData from "@entities/operation-log/model/createOperatio
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import { createLogger } from "@/shared/lib/logger";
-import { GenericMailSender } from "@/lib/mail/GenericMailSender";
+import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 const logger = createLogger("useAdminAttendanceChangeRequests");
 

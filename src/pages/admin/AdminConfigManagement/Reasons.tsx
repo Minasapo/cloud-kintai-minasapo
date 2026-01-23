@@ -13,7 +13,7 @@ import { E14001, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 import { appendItem, removeItemAt, updateItem } from "./arrayHelpers";
 import ReasonListSection from "./ReasonListSection";

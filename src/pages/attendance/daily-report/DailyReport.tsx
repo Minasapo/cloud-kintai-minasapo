@@ -42,7 +42,7 @@ import { useSearchParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 

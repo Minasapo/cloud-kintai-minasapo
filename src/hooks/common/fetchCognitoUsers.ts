@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-import { adminGet } from "@/lib/amplify/adminQueriesClient";
+import { adminGet } from "@/shared/api/amplify/adminQueriesClient";
 
 import * as MESSAGE_CODE from "../../errors";
 import { Staff } from "@entities/staff/model/useStaffs/common";

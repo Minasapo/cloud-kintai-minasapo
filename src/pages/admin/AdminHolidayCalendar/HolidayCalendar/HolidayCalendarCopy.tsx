@@ -26,7 +26,7 @@ import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 type Inputs = {
   holidayDate: string;

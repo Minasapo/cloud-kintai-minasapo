@@ -16,7 +16,7 @@ import { E14001, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 export default function SpecialHoliday() {
   const { getSpecialHolidayEnabled, getConfigId, saveConfig, fetchConfig } =

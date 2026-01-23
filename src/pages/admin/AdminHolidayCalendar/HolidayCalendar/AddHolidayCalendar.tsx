@@ -26,7 +26,7 @@ import { useAppDispatchV2 } from "../../../../app/hooks";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../../lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 import {
   buildHolidayDateRange,
   HolidayDateRangeError,

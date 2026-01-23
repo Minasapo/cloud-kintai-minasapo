@@ -25,7 +25,7 @@ import { useAppDispatchV2 } from "../../../../app/hooks";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../../lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 import company_holiday from "../../../../templates/company_holiday.csv";
 
 const CSV_DOWNLOAD_FILENAME = "company_holiday.csv";

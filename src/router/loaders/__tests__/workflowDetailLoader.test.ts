@@ -1,6 +1,6 @@
 import { GraphQLResult } from "aws-amplify/api";
 
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import {
   fetchWorkflowById,

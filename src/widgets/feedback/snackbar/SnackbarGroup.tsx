@@ -16,7 +16,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
   setSnackbarWarn,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 const SNACKBAR_ANCHOR_ORIGIN: SnackbarOrigin = {
   vertical: "top",

@@ -53,7 +53,7 @@ import useCognitoUser from "@/hooks/useCognitoUser";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 import {
   loadShiftPatterns,
   saveShiftPatterns,

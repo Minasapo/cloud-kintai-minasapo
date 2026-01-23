@@ -1,7 +1,7 @@
 import { sendMail } from "@shared/api/graphql/documents/queries";
 
 import * as MESSAGE_CODE from "@/errors";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export abstract class MailSender {
   protected async send(to: string[], subject: string, body: string) {

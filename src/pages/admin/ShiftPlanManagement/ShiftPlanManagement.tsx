@@ -49,11 +49,11 @@ import {
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 type ShiftPlanRow = {
   month: number;

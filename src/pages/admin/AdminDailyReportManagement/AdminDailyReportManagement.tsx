@@ -40,7 +40,7 @@ import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 import { AuthContext } from "@/context/AuthContext";
 import { useSplitView } from "@/features/splitView";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { formatDateTimeReadable } from "@/shared/lib/date";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";

@@ -19,7 +19,7 @@ import { StaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs"
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 import { handleSyncCognitoUser } from "./handleSyncCognitoUser";
 
 type Inputs = {

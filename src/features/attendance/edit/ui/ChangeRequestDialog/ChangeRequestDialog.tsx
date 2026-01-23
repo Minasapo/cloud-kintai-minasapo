@@ -18,11 +18,11 @@ import * as MESSAGE_CODE from "@/errors";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { GenericMailSender } from "@/lib/mail/GenericMailSender";
+import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 import { ChangeRequestDiffTable } from "./ChangeRequestDiffTable";
 import handleApproveChangeRequest from "./handleApproveChangeRequest";

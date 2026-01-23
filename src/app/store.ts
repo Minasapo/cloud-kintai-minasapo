@@ -2,7 +2,7 @@ import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 // eslint-disable-next-line import/no-cycle
-import snackbarReducer from "../lib/reducers/snackbarReducer";
+import snackbarReducer from "./snackbarReducer";
 import type { RegisteredRtkApi } from "./apis";
 import { rtkApis } from "./apis";
 

@@ -6,7 +6,7 @@ import {
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export default async function updateStaffData(input: UpdateStaffInput) {
   const response = (await graphqlClient.graphql({

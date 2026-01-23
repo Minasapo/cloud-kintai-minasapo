@@ -30,7 +30,7 @@ import { useCallback, useEffect } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
+import { setSnackbarError } from "@/app/snackbarReducer";
 
 import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import { AddHolidayCalendar } from "./AddHolidayCalendar";

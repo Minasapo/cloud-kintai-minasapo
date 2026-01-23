@@ -36,7 +36,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   clockInAction,
   clockOutAction,
@@ -58,7 +58,7 @@ import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
+import { setSnackbarError } from "@/app/snackbarReducer";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
 import { WorkStatus } from "../lib/common";

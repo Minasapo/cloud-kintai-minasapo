@@ -15,7 +15,7 @@ import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../../lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 export function DeleteAccountMenuItem({
   staff,

@@ -15,11 +15,11 @@ import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { Logger } from "@/shared/lib/logger";
-import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
+import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 import { getNowISOStringWithZeroSeconds } from "../lib/util";
 

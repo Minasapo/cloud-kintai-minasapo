@@ -28,7 +28,7 @@ import { useAppDispatchV2 } from "../../../app/hooks";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "../../../lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 type BulkFormValues = {
   startMonth: dayjs.Dayjs | null;

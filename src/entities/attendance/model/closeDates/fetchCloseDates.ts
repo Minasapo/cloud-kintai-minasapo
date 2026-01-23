@@ -2,7 +2,7 @@ import { listCloseDates } from "@shared/api/graphql/documents/queries";
 import { CloseDate, ListCloseDatesQuery } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export default async function fetchCloseDates() {
   const closeDates: CloseDate[] = [];

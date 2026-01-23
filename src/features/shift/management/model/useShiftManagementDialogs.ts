@@ -5,7 +5,7 @@ import * as MESSAGE_CODE from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 import { ShiftState } from "../lib/generateMockShifts";
 

@@ -23,7 +23,7 @@ import { E15001, S15001 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 
 const basePalette = [
   "#1976d2",

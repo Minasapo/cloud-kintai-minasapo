@@ -14,11 +14,11 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/app/snackbarReducer";
 import QuickDailyReportCardView from "@/shared/ui/time-recorder/QuickDailyReportCard";
 
 /**

@@ -3,7 +3,7 @@ import type { GetWorkflowQuery } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 import type { LoaderFunctionArgs } from "react-router-dom";
 
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export type WorkflowDetailLoaderData = {
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]>;
