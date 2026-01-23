@@ -53,7 +53,7 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 type ShiftPlanRow = {
   month: number;

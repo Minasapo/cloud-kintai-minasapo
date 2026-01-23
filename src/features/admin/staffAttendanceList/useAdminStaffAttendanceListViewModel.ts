@@ -28,7 +28,7 @@ import {
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
-import { setSnackbarError } from "@/app/snackbarReducer";
+import { setSnackbarError } from "@/app/slices/snackbarSlice";
 
 import type { PendingAttendanceControls } from "./components/PendingAttendanceSection";
 import { useAdminAttendanceChangeRequests } from "./useAdminAttendanceChangeRequests";

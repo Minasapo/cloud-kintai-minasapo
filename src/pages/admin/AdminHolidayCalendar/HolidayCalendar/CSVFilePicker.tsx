@@ -25,7 +25,7 @@ import { useAppDispatchV2 } from "../../../../app/hooks";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 export function CSVFilePicker({
   bulkCreateHolidayCalendar,

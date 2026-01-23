@@ -17,7 +17,7 @@ import { E14001, E14002, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 import WorkingTimeSection from "./WorkingTimeSection";
 

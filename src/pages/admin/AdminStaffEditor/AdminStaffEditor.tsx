@@ -51,7 +51,7 @@ import {
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 import { ROLE_OPTIONS } from "../AdminStaff/CreateStaffDialog";
 import WORK_TYPE_OPTIONS from "../AdminStaff/workTypeOptions";
 

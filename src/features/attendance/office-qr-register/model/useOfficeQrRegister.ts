@@ -26,7 +26,7 @@ import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 import { validateOfficeQrToken } from "../lib/validateToken";
 

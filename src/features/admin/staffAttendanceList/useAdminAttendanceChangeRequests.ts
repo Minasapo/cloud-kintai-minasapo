@@ -17,7 +17,7 @@ import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 const logger = createLogger("useAdminAttendanceChangeRequests");
 

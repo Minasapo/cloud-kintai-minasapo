@@ -22,7 +22,7 @@ import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 import { ChangeRequestDiffTable } from "./ChangeRequestDiffTable";
 import handleApproveChangeRequest from "./handleApproveChangeRequest";

@@ -6,7 +6,7 @@ import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 import { getNowISOStringWithZeroSeconds } from "../lib/util";
 

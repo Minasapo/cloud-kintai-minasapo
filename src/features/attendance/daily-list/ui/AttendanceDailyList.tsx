@@ -50,7 +50,7 @@ import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 
 import { ActionsTableCell } from "./ActionsTableCell";

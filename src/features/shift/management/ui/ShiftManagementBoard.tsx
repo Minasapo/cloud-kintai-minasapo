@@ -34,7 +34,7 @@ import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";

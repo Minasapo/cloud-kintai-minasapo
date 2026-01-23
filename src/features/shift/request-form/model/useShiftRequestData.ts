@@ -19,7 +19,7 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { setSnackbarError } from "@/app/snackbarReducer";
+import { setSnackbarError } from "@/app/slices/snackbarSlice";
 
 import { SelectedDateMap, shiftRequestStatusToStatus } from "./statusMapping";
 

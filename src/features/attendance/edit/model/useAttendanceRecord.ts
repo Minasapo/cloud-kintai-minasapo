@@ -17,7 +17,7 @@ import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole,StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { Logger } from "@/shared/lib/logger";
-import { setSnackbarError } from "@/app/snackbarReducer";
+import { setSnackbarError } from "@/app/slices/snackbarSlice";
 import {
   AttendanceEditInputs,
   defaultValues,

@@ -29,7 +29,7 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { setSnackbarError } from "@/app/snackbarReducer";
+import { setSnackbarError } from "@/app/slices/snackbarSlice";
 
 export default function StaffShiftList() {
   const dispatch = useAppDispatchV2();

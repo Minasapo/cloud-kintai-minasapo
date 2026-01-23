@@ -58,7 +58,7 @@ import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { setSnackbarError } from "@/app/snackbarReducer";
+import { setSnackbarError } from "@/app/slices/snackbarSlice";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
 import { WorkStatus } from "../lib/common";

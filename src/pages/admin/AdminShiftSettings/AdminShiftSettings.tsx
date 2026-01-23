@@ -22,7 +22,7 @@ import { E14001, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 type ShiftGroupFormValue = {
   id: string;

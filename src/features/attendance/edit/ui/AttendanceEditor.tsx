@@ -50,7 +50,7 @@ import { AttendanceEditMailSender } from "@/shared/lib/mail/AttendanceEditMailSe
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 import AttendanceEditProvider from "@/pages/attendance/edit/AttendanceEditProvider";
 import {

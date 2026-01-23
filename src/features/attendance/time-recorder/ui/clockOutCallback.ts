@@ -20,7 +20,7 @@ import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/snackbarReducer";
+} from "@/app/slices/snackbarSlice";
 
 import { getNowISOStringWithZeroSeconds } from "../lib/util";
 

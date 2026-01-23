@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatchV2 } from "@/app/hooks";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import { setSnackbarError } from "@/app/snackbarReducer";
+import { setSnackbarError } from "@/app/slices/snackbarSlice";
 
 import * as MESSAGE_CODE from "@/errors";
 // attendances are provided by parent (AttendanceDailyList)
