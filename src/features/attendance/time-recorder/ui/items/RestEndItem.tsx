@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import RestEndButton from "@/shared/ui/time-recorder/RestEndButton";
 
-import { WorkStatus, WorkStatusCodes } from "../common";
+import { WorkStatus, WorkStatusCodes } from "../../lib/common";
 
 export default function RestEndItem({
   workStatus,

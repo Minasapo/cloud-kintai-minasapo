@@ -8,7 +8,7 @@ import {
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
-import { GoDirectlyFlag } from "@/lib/attendance/attendanceActions";
+import { ReturnDirectlyFlag } from "@/lib/attendance/attendanceActions";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { Logger } from "@/lib/logger";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
@@ -17,51 +17,49 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-import { getNowISOStringWithZeroSeconds } from "./util";
+import { getNowISOStringWithZeroSeconds } from "../lib/util";
 
-export async function goDirectlyCallback(
+export async function returnDirectlyCallback(
   cognitoUser: CognitoUser | null | undefined,
   today: string,
   staff: Staff | null | undefined,
   dispatch: Dispatch,
-  clockIn: (
+  clockOut: (
     staffId: string,
     workDate: string,
-    startTime: string,
-    goDirectlyFlag?: GoDirectlyFlag
+    endTime: string,
+    returnDirectlyFlag?: ReturnDirectlyFlag
   ) => Promise<Attendance>,
   logger: Logger,
-  // optional explicit ISO timestamp to use for work start (allows AppConfig-driven times)
-  startTimeIso?: string
+  // optional explicit ISO timestamp to use for work end (allows AppConfig-driven times)
+  endTimeIso?: string
 ): Promise<void> {
   if (!cognitoUser) {
-    logger.debug("Skipped goDirectlyCallback because cognitoUser is missing");
     return;
   }
 
-  const attendanceStartTime = resolveStartTime(startTimeIso);
+  const workEndTime =
+    endTimeIso ?? new AttendanceDateTime().setWorkEnd().toISOString();
 
   try {
-    const attendance = await clockIn(
+    const attendance = await clockOut(
       cognitoUser.id,
       today,
-      attendanceStartTime,
-      GoDirectlyFlag.YES
+      workEndTime,
+      ReturnDirectlyFlag.YES
     );
-
-    // record button-press time and include attendance time inside details (best-effort)
     try {
       const pressedAt = getNowISOStringWithZeroSeconds();
       const input: CreateOperationLogInput = {
         staffId: cognitoUser.id,
-        action: "go_directly",
+        action: "return_directly",
         resource: "attendance",
         resourceId: attendance?.id ?? undefined,
         // primary timestamp: when the user pressed the button
         timestamp: pressedAt,
         details: JSON.stringify({
           workDate: today,
-          attendanceTime: attendanceStartTime,
+          attendanceTime: workEndTime,
           staffName: staff
             ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
             : undefined,
@@ -69,27 +67,20 @@ export async function goDirectlyCallback(
         userAgent:
           typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       };
+
       await createOperationLogData(input);
     } catch (logErr) {
-      logger.error("Failed to create operation log for goDirectly", logErr);
+      logger.error("Failed to create operation log for returnDirectly", logErr);
     }
 
-    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01003));
+    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01004));
     try {
-      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();
+      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
     } catch (mailErr) {
-      logger.error("Failed to send go directly mail", mailErr);
+      logger.error("Failed to send return directly mail", mailErr);
     }
   } catch (error) {
-    logger.error("Failed to clock in with go directly flag", error);
-    dispatch(setSnackbarError(MESSAGE_CODE.E01005));
+    logger.debug(error);
+    dispatch(setSnackbarError(MESSAGE_CODE.E01006));
   }
-}
-
-function resolveStartTime(startTimeIso?: string) {
-  if (startTimeIso) {
-    return startTimeIso;
-  }
-
-  return new AttendanceDateTime().setWorkStart().toISOString();
 }

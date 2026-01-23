@@ -10,7 +10,7 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import downloadAttendances from "./downloadAttendances";
+import downloadAttendances from "../lib/downloadAttendances";
 
 type Props = {
   workDates: string[];

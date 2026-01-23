@@ -2,7 +2,7 @@ import { Alert, Box, Container } from "@mui/material";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import TimeRecorder from "../components/time_recorder/TimeRecorder";
+import TimeRecorder from "@/features/attendance/time-recorder/ui/TimeRecorder";
 import { AuthContext } from "../context/AuthContext";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 

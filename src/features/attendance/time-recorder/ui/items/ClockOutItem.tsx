@@ -1,29 +1,29 @@
 import { useMemo } from "react";
 
-import RestStartButton from "@/shared/ui/time-recorder/RestStartButton";
+import ClockOutButton from "@/shared/ui/time-recorder/ClockOutButton";
 
-import { WorkStatus, WorkStatusCodes } from "../common";
+import { WorkStatus, WorkStatusCodes } from "../../lib/common";
 
-type RestStartItemProps = {
+type ClockOutItemProps = {
   workStatus: WorkStatus | null;
   onClick: () => void;
   disabled?: boolean;
 };
 
-export default function RestStartItem({
+export default function ClockOutItem({
   workStatus,
   onClick,
   disabled = false,
-}: RestStartItemProps) {
+}: ClockOutItemProps) {
   const isWorking = useMemo(
     () => workStatus?.code === WorkStatusCodes.WORKING,
     [workStatus?.code]
   );
 
   return (
-    <RestStartButton
+    <ClockOutButton
       isWorking={Boolean(isWorking)}
-      onRestStart={onClick}
+      onClockOut={onClick}
       disabled={disabled}
     />
   );

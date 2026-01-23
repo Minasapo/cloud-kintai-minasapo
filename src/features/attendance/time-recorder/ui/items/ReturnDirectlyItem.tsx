@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import ReturnDirectlyButton from "@/shared/ui/time-recorder/ReturnDirectlyButton";
 
-import { WorkStatus, WorkStatusCodes } from "../common";
+import { WorkStatus, WorkStatusCodes } from "../../lib/common";
 
 export default function ReturnDirectly({
   workStatus,

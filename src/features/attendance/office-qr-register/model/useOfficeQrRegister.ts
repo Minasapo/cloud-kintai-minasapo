@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { getNowISOStringWithZeroSeconds } from "@/components/time_recorder/util";
+import { getNowISOStringWithZeroSeconds } from "@/features/attendance/time-recorder/lib/util";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";

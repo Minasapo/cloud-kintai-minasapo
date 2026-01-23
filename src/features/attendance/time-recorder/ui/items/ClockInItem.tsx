@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import ClockInButton from "@/shared/ui/time-recorder/ClockInButton";
 
-import { WorkStatus, WorkStatusCodes } from "../common";
+import { WorkStatus, WorkStatusCodes } from "../../lib/common";
 
 type ClockInItemProps = {
   workStatus: WorkStatus;

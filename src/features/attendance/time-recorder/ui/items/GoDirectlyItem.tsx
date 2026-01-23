@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import GoDirectlyButton from "@/shared/ui/time-recorder/GoDirectlyButton";
 
-import { WorkStatus, WorkStatusCodes } from "../common";
+import { WorkStatus, WorkStatusCodes } from "../../lib/common";
 
 interface GoDirectlyItemProps {
   workStatus: WorkStatus | null;

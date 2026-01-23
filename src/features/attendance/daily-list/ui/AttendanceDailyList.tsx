@@ -42,7 +42,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import MoveDateItem from "@/components/AttendanceDailyList/MoveDateItem";
+import MoveDateItem from "./MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
@@ -58,7 +58,7 @@ import { EndTimeTableCell } from "./EndTimeTableCell";
 import {
   calculateTotalOvertimeMinutes,
   formatMinutesToHHmm,
-} from "./overtimeUtils";
+} from "../lib/overtimeUtils";
 import { StartTimeTableCell } from "./StartTimeTableCell";
 
 export default function AttendanceDailyList() {

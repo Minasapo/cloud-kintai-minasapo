@@ -11,7 +11,7 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-import { getNowISOStringWithZeroSeconds } from "./util";
+import { getNowISOStringWithZeroSeconds } from "../lib/util";
 
 export function restStartCallback(
   cognitoUser: CognitoUser | null | undefined,

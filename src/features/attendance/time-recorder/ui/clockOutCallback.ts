@@ -1,7 +1,7 @@
 /**
- * @file clockInCallback.ts
- * @description 出勤打刻時のコールバック処理を提供するユーティリティ。
- * Reduxのdispatchやユーザー情報、スタッフ情報を受け取り、打刻処理・メール送信・スナックバー表示を行う。
+ * 勤怠打刻（退勤）時のコールバック関数を提供します。
+ *
+ * @packageDocumentation
  */
 
 import { Dispatch } from "@reduxjs/toolkit";
@@ -14,6 +14,7 @@ import {
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
+import { ReturnDirectlyFlag } from "@/lib/attendance/attendanceActions";
 import { Logger } from "@/lib/logger";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {
@@ -21,48 +22,50 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-import { getNowISOStringWithZeroSeconds } from "./util";
+import { getNowISOStringWithZeroSeconds } from "../lib/util";
 
 /**
- * 出勤打刻時のコールバック関数。
+ * 退勤打刻時の処理を行うコールバック関数です。
  *
- * @param cognitoUser - 現在のCognitoユーザー情報
+ * @param cognitoUser - 現在ログイン中のCognitoユーザー情報
  * @param today - 本日の日付（YYYY-MM-DD形式）
- * @param clockIn - 出勤打刻を行う非同期関数
+ * @param clockOut - 退勤打刻を行う非同期関数
  * @param dispatch - Reduxのdispatch関数
  * @param staff - スタッフ情報
- * @param logger - デバッグ用ロガー
+ * @param logger - ログ出力用Loggerインスタンス
  */
-export async function clockInCallback(
+export async function clockOutCallback(
   cognitoUser: CognitoUser | null | undefined,
   today: string,
-  clockIn: (
+  clockOut: (
     staffId: string,
     workDate: string,
-    startTime: string
+    endTime: string,
+    returnDirectlyFlag?: ReturnDirectlyFlag
   ) => Promise<Attendance>,
   dispatch: Dispatch,
   staff: Staff | null | undefined,
-  logger: Logger
+  logger: Logger,
+  endTimeIso?: string
 ): Promise<void> {
   if (!cognitoUser) {
-    logger.debug("Skipped clockInCallback because cognitoUser is missing");
+    logger.debug("Skipped clockOutCallback because cognitoUser is missing");
     return;
   }
 
   if (!staff) {
-    logger.debug("Skipped clockInCallback because staff is missing");
+    logger.debug("Skipped clockOutCallback because staff is missing");
     return;
   }
 
-  const startTimeIso = resolveClockInTime();
+  const clockOutTime = resolveClockOutTime(endTimeIso);
 
-  // capture pressed time immediately to measure processing duration
+  // capture pressed time and t0 immediately to measure processing duration
   const pressedAt = getNowISOStringWithZeroSeconds();
   const t0 = Date.now();
 
   try {
-    const attendance = await clockIn(cognitoUser.id, today, startTimeIso);
+    const attendance = await clockOut(cognitoUser.id, today, clockOutTime);
     const t1 = Date.now();
     const processingTimeMs = t1 - t0;
 
@@ -70,20 +73,19 @@ export async function clockInCallback(
     try {
       const input: CreateOperationLogInput = {
         staffId: cognitoUser.id,
-        action: "clock_in",
+        action: "clock_out",
         resource: "attendance",
         resourceId: attendance?.id ?? undefined,
         // primary timestamp: when the user pressed the button
         timestamp: pressedAt,
         details: JSON.stringify({
           workDate: today,
-          attendanceTime: startTimeIso,
+          attendanceTime: clockOutTime,
           processingTimeMs,
           staffName: staff
             ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
             : undefined,
         }),
-        // metadata is a good place to store structured diagnostic info
         metadata: JSON.stringify({ processingTimeMs }),
         userAgent:
           typeof navigator !== "undefined" ? navigator.userAgent : undefined,
@@ -91,21 +93,25 @@ export async function clockInCallback(
 
       await createOperationLogData(input);
     } catch (logErr) {
-      logger.error("Failed to create operation log for clockIn", logErr);
+      logger.error("Failed to create operation log for clockOut", logErr);
     }
 
-    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01001));
+    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01002));
     try {
-      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();
+      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
     } catch (mailErr) {
-      logger.error("Failed to send clock in mail", mailErr);
+      logger.error("Failed to send clock out mail", mailErr);
     }
   } catch (error) {
-    logger.error("Failed to clock in", error);
-    dispatch(setSnackbarError(MESSAGE_CODE.E01001));
+    logger.error("Failed to clock out", error);
+    dispatch(setSnackbarError(MESSAGE_CODE.E01002));
   }
 }
 
-function resolveClockInTime() {
+function resolveClockOutTime(endTimeIso?: string) {
+  if (endTimeIso) {
+    return endTimeIso;
+  }
+
   return getNowISOStringWithZeroSeconds();
 }
