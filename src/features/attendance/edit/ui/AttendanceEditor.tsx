@@ -45,7 +45,7 @@ import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { Logger } from "@/lib/logger";
+import { Logger } from "@/shared/lib/logger";
 import { AttendanceEditMailSender } from "@/lib/mail/AttendanceEditMailSender";
 import {
   setSnackbarError,

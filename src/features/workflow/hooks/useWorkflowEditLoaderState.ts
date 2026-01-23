@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
+import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
 import {
   CATEGORY_LABELS,
   resolveClockCorrectionLabel,

@@ -20,8 +20,8 @@ import {
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
-import { createLogger } from "@/lib/logger";
+import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
+import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,

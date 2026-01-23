@@ -1,4 +1,4 @@
-import "@/lib/dayjs-locale";
+import "@/shared/lib/dayjs-locale";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";

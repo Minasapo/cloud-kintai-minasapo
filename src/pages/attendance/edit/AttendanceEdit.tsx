@@ -31,7 +31,7 @@ import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { createLogger } from "@/lib/logger";
+import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,

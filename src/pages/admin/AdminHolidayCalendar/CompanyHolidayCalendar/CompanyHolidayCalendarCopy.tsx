@@ -21,8 +21,8 @@ import { Controller, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { CompanyHolidayCalenderMessage } from "@/lib/message/CompanyHolidayCalenderMessage";
-import { MessageStatus } from "@/lib/message/Message";
+import { CompanyHolidayCalenderMessage } from "@/shared/lib/message/CompanyHolidayCalenderMessage";
+import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
   setSnackbarSuccess,

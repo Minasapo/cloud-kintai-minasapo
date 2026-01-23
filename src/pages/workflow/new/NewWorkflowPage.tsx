@@ -34,7 +34,7 @@ import WorkflowTypeFields from "@/features/workflow/application-form/ui/Workflow
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { createLogger } from "@/lib/logger";
+import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,

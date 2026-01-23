@@ -41,7 +41,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { useSplitView } from "@/features/splitView";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { formatDateTimeReadable } from "@/lib/date";
+import { formatDateTimeReadable } from "@/shared/lib/date";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 import {

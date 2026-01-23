@@ -53,7 +53,7 @@ import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
-import { createLogger } from "./lib/logger";
+import { createLogger } from "@/shared/lib/logger";
 import { createAppTheme } from "./lib/theme";
 
 const logger = createLogger("Layout");

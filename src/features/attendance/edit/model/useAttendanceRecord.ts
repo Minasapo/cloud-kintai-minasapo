@@ -16,7 +16,7 @@ import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole,StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { Logger } from "@/lib/logger";
+import { Logger } from "@/shared/lib/logger";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import {
   AttendanceEditInputs,

@@ -2,7 +2,7 @@ import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance } from "@shared/api/graphql/types";
 
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import { Logger } from "@/lib/logger";
+import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,

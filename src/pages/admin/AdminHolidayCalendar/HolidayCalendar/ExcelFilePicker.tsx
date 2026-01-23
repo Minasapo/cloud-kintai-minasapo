@@ -18,8 +18,8 @@ import dayjs from "dayjs";
 import { useState } from "react";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { CompanyHolidayCalenderMessage } from "@/lib/message/CompanyHolidayCalenderMessage";
-import { MessageStatus } from "@/lib/message/Message";
+import { CompanyHolidayCalenderMessage } from "@/shared/lib/message/CompanyHolidayCalenderMessage";
+import { MessageStatus } from "@/shared/lib/message/Message";
 
 import { useAppDispatchV2 } from "../../../../app/hooks";
 import {

@@ -35,7 +35,7 @@ import {
 import * as MESSAGE_CODE from "@/errors";
 import updateStaff from "@entities/staff/model/useStaff/updateStaff";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { createLogger } from "@/lib/logger";
+import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,

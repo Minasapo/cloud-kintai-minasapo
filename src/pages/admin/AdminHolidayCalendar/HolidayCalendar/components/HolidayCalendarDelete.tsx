@@ -8,8 +8,8 @@ import dayjs from "dayjs";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";
-import { MessageStatus } from "@/lib/message/Message";
+import { HolidayCalenderMessage } from "@/shared/lib/message/HolidayCalenderMessage";
+import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
   setSnackbarSuccess,

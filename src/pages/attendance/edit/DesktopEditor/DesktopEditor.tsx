@@ -33,7 +33,7 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useOperationLog from "@entities/operation-log/model/useOperationLog";
-import { createLogger } from "@/lib/logger";
+import { createLogger } from "@/shared/lib/logger";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";

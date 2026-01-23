@@ -10,7 +10,7 @@ import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { GoDirectlyFlag } from "@/entities/attendance/lib/attendance/attendanceActions";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { Logger } from "@/lib/logger";
+import { Logger } from "@/shared/lib/logger";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,

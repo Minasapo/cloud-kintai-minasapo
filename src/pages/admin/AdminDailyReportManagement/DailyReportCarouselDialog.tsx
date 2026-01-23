@@ -32,7 +32,7 @@ import useCognitoUser from "@/hooks/useCognitoUser";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
+import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
 
 import {
   type AdminComment,

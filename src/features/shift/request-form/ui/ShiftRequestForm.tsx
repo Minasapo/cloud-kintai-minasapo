@@ -57,7 +57,7 @@ import {
 import {
   loadShiftPatterns,
   saveShiftPatterns,
-} from "@/lib/storage/shiftPatternStorage";
+} from "@/shared/lib/storage/shiftPatternStorage";
 
 import { normalizeStatus, ShiftRequestDayStatus } from "../model/statusMapping";
 import { useShiftRequestData } from "../model/useShiftRequestData";

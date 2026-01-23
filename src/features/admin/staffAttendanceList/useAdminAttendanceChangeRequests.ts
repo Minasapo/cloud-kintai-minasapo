@@ -12,7 +12,7 @@ import * as MESSAGE_CODE from "@/errors";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
-import { createLogger } from "@/lib/logger";
+import { createLogger } from "@/shared/lib/logger";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
 import {
   setSnackbarError,

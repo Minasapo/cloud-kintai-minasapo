@@ -29,7 +29,7 @@ import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
-import { Logger } from "@/lib/logger";
+import { Logger } from "@/shared/lib/logger";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";

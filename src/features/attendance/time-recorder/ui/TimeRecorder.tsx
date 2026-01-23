@@ -48,7 +48,7 @@ import {
 import { getWorkStatus } from "@/entities/attendance/lib/attendance/workStatus";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import { Logger } from "@/lib/logger";
+import { Logger } from "@/shared/lib/logger";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
 import { designTokenVar } from "@/shared/designSystem";
 import Clock from "@/shared/ui/clock/Clock";

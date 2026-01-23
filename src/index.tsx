@@ -1,5 +1,5 @@
 import "./index.css";
-import "@/lib/dayjs-locale";
+import "@/shared/lib/dayjs-locale";
 
 import { Authenticator } from "@aws-amplify/ui-react";
 import { LocalizationProvider } from "@mui/x-date-pickers";

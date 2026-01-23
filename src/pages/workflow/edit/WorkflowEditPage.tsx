@@ -29,7 +29,7 @@ import { extractExistingWorkflowComments } from "@/features/workflow/comment-thr
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { createLogger } from "@/lib/logger";
+import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
