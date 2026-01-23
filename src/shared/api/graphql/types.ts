@@ -794,6 +794,8 @@ export type CreateShiftRequestInput = {
   summary?: ShiftRequestSummaryInput | null,
   submittedAt?: string | null,
   updatedAt?: string | null,
+  updatedBy?: string | null,
+  version?: number | null,
   histories?: Array< ShiftRequestHistoryInput | null > | null,
 };
 
@@ -834,6 +836,8 @@ export type ModelShiftRequestConditionInput = {
   note?: ModelStringInput | null,
   submittedAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
+  updatedBy?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelShiftRequestConditionInput | null > | null,
   or?: Array< ModelShiftRequestConditionInput | null > | null,
   not?: ModelShiftRequestConditionInput | null,
@@ -850,6 +854,8 @@ export type ShiftRequest = {
   summary?: ShiftRequestSummary | null,
   submittedAt?: string | null,
   updatedAt?: string | null,
+  updatedBy?: string | null,
+  version?: number | null,
   histories?:  Array<ShiftRequestHistory | null > | null,
   createdAt: string,
 };
@@ -889,6 +895,8 @@ export type UpdateShiftRequestInput = {
   summary?: ShiftRequestSummaryInput | null,
   submittedAt?: string | null,
   updatedAt?: string | null,
+  updatedBy?: string | null,
+  version?: number | null,
   histories?: Array< ShiftRequestHistoryInput | null > | null,
 };
 
@@ -1624,6 +1632,8 @@ export type ModelShiftRequestFilterInput = {
   note?: ModelStringInput | null,
   submittedAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
+  updatedBy?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   and?: Array< ModelShiftRequestFilterInput | null > | null,
   or?: Array< ModelShiftRequestFilterInput | null > | null,
@@ -1946,6 +1956,8 @@ export type ModelSubscriptionShiftRequestFilterInput = {
   note?: ModelSubscriptionStringInput | null,
   submittedAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
+  updatedBy?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionShiftRequestFilterInput | null > | null,
   or?: Array< ModelSubscriptionShiftRequestFilterInput | null > | null,
@@ -2915,6 +2927,8 @@ export type CreateShiftRequestMutation = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    updatedBy?: string | null,
+    version?: number | null,
     histories?:  Array< {
       __typename: "ShiftRequestHistory",
       version: number,
@@ -2965,6 +2979,8 @@ export type UpdateShiftRequestMutation = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    updatedBy?: string | null,
+    version?: number | null,
     histories?:  Array< {
       __typename: "ShiftRequestHistory",
       version: number,
@@ -3015,6 +3031,8 @@ export type DeleteShiftRequestMutation = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    updatedBy?: string | null,
+    version?: number | null,
     histories?:  Array< {
       __typename: "ShiftRequestHistory",
       version: number,
@@ -4312,6 +4330,8 @@ export type GetShiftRequestQuery = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    updatedBy?: string | null,
+    version?: number | null,
     histories?:  Array< {
       __typename: "ShiftRequestHistory",
       version: number,
@@ -4365,6 +4385,8 @@ export type ListShiftRequestsQuery = {
       } | null,
       submittedAt?: string | null,
       updatedAt?: string | null,
+      updatedBy?: string | null,
+      version?: number | null,
       histories?:  Array< {
         __typename: "ShiftRequestHistory",
         version: number,
@@ -4423,6 +4445,8 @@ export type ShiftRequestsByStaffIdQuery = {
       } | null,
       submittedAt?: string | null,
       updatedAt?: string | null,
+      updatedBy?: string | null,
+      version?: number | null,
       histories?:  Array< {
         __typename: "ShiftRequestHistory",
         version: number,
@@ -5806,6 +5830,8 @@ export type OnCreateShiftRequestSubscription = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    updatedBy?: string | null,
+    version?: number | null,
     histories?:  Array< {
       __typename: "ShiftRequestHistory",
       version: number,
@@ -5855,6 +5881,8 @@ export type OnUpdateShiftRequestSubscription = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    updatedBy?: string | null,
+    version?: number | null,
     histories?:  Array< {
       __typename: "ShiftRequestHistory",
       version: number,
@@ -5904,6 +5932,8 @@ export type OnDeleteShiftRequestSubscription = {
     } | null,
     submittedAt?: string | null,
     updatedAt?: string | null,
+    updatedBy?: string | null,
+    version?: number | null,
     histories?:  Array< {
       __typename: "ShiftRequestHistory",
       version: number,

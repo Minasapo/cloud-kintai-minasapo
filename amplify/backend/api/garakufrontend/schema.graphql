@@ -233,6 +233,9 @@ type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   summary: ShiftRequestSummary
   submittedAt: String
   updatedAt: String
+  # 共同編集用フィールド
+  updatedBy: String # 最終更新者のユーザーID
+  version: Int # 楽観的ロック用バージョン番号
   # 変更履歴（最新が先頭になるようクライアントで整列）
   histories: [ShiftRequestHistory]
 }
@@ -460,4 +463,31 @@ type DailyReport @model @auth(rules: [{ allow: private }]) {
   updatedAt: String
   reactions: [DailyReportReaction]
   comments: [DailyReportComment]
+}
+
+# 共同編集用のバッチ更新型
+input ShiftRequestBatchUpdateInput {
+  id: ID!
+  staffId: String!
+  targetMonth: String!
+  entries: [ShiftRequestDayPreferenceInput]
+  expectedVersion: Int # 楽観的ロック用
+  updatedBy: String!
+}
+
+input ShiftRequestDayPreferenceInput {
+  date: String!
+  status: ShiftRequestStatus!
+}
+
+type ShiftRequestBatchUpdateResult {
+  success: Boolean!
+  updatedRequests: [ShiftRequest]
+  errors: [ShiftRequestBatchError]
+}
+
+type ShiftRequestBatchError {
+  id: ID!
+  message: String!
+  code: String
 }

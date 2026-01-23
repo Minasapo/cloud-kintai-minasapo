@@ -1,0 +1,47 @@
+import { createContext, useContext } from "react";
+
+import {
+  CollaborativeShiftState,
+  CollaborativeUser,
+  ShiftCellUpdate,
+} from "../types/collaborative.types";
+
+/**
+ * 共同編集シフトコンテキストの型
+ */
+export interface CollaborativeShiftContextType {
+  state: CollaborativeShiftState;
+  updateShift: (update: ShiftCellUpdate) => Promise<void>;
+  batchUpdateShifts: (updates: ShiftCellUpdate[]) => Promise<void>;
+  toggleCellSelection: (cellKey: string, selected: boolean) => void;
+  startEditingCell: (staffId: string, date: string) => void;
+  stopEditingCell: (staffId: string, date: string) => void;
+  isCellBeingEdited: (staffId: string, date: string) => boolean;
+  getCellEditor: (
+    staffId: string,
+    date: string
+  ) => CollaborativeUser | undefined;
+  triggerSync: () => Promise<void>;
+  pauseSync: () => void;
+  resumeSync: () => void;
+  updateUserActivity: () => void;
+}
+
+/**
+ * 共同編集シフトコンテキスト
+ */
+export const CollaborativeShiftContext =
+  createContext<CollaborativeShiftContextType | null>(null);
+
+/**
+ * 共同編集シフトコンテキストを使用するフック
+ */
+export const useCollaborativeShift = () => {
+  const context = useContext(CollaborativeShiftContext);
+  if (!context) {
+    throw new Error(
+      "useCollaborativeShift must be used within CollaborativeShiftProvider"
+    );
+  }
+  return context;
+};
