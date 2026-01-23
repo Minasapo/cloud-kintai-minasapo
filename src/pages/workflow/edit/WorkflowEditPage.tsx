@@ -12,10 +12,11 @@ import {
   Typography,
 } from "@mui/material";
 import Page from "@shared/ui/page/Page";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import { AuthContext } from "@/context/AuthContext";
 import {
   buildUpdateWorkflowInput,
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
@@ -27,7 +28,7 @@ import WorkflowTypeFields from "@/features/workflow/application-form/ui/Workflow
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
@@ -47,7 +48,9 @@ export default function WorkflowEditPage() {
   const { workflow } = useLoaderData() as WorkflowEditLoaderData;
 
   const { staffs } = useStaffs();
-  const { update: updateWorkflow } = useWorkflows();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const dispatch = useAppDispatchV2();
   const {
     category,

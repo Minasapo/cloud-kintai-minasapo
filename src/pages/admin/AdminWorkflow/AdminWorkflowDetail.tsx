@@ -37,7 +37,7 @@ import {
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import { createLogger } from "@/lib/logger";
 import {
@@ -58,14 +58,15 @@ export default function AdminWorkflowDetail() {
   const { id } = useParams() as { id?: string };
   const navigate = useNavigate();
   const { staffs } = useStaffs();
-  const { cognitoUser } = useContext(AuthContext);
+  const { cognitoUser, authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
   const {
     getStartTime,
     getEndTime,
     getLunchRestStartTime,
     getLunchRestEndTime,
   } = useContext(AppConfigContext);
-  const { update: updateWorkflow } = useWorkflows();
+  const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const [createAttendance] = useCreateAttendanceMutation();
   const [getAttendanceByStaffAndDate] =
     useLazyGetAttendanceByStaffAndDateQuery();

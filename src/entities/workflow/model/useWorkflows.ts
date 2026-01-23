@@ -9,9 +9,7 @@ import {
   UpdateWorkflowInput,
   Workflow as APIWorkflow,
 } from "@shared/api/graphql/types";
-import { useCallback, useContext } from "react";
-
-import { AuthContext } from "@/context/AuthContext";
+import { useCallback } from "react";
 
 const extractErrorMessage = (error: unknown) => {
   if (!error) {
@@ -34,9 +32,11 @@ const extractErrorMessage = (error: unknown) => {
   return null;
 };
 
-export default function useWorkflows() {
-  const { authStatus } = useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
+export type UseWorkflowsParams = {
+  isAuthenticated: boolean;
+};
+
+export default function useWorkflows({ isAuthenticated }: UseWorkflowsParams) {
 
   const {
     data,

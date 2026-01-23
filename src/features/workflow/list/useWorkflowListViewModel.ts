@@ -2,7 +2,7 @@ import { useContext, useMemo } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 
 import { useWorkflowListFilters } from "./useWorkflowListFilters";
 import type { WorkflowListItem } from "./workflowListModel";
@@ -15,11 +15,10 @@ export type WorkflowListFilterActions = Pick<
 >;
 
 export const useWorkflowListViewModel = () => {
-  const { workflows, loading, error } = useWorkflows();
-  const { staffs } = useStaffs();
   const { cognitoUser, authStatus } = useContext(AuthContext);
-
   const isAuthenticated = authStatus === "authenticated";
+  const { workflows, loading, error } = useWorkflows({ isAuthenticated });
+  const { staffs } = useStaffs();
 
   const currentStaffId = useMemo(() => {
     if (!cognitoUser?.id) return undefined;

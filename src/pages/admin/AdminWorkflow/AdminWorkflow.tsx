@@ -19,11 +19,12 @@ import {
 } from "@mui/material";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { AuthContext } from "@/context/AuthContext";
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
   CATEGORY_LABELS,
   getWorkflowCategoryLabel,
@@ -37,7 +38,9 @@ const STATUS_EXCLUDED_FROM_DEFAULT: WorkflowStatus[] = [
 ];
 
 export default function AdminWorkflow() {
-  const { workflows, loading, error } = useWorkflows();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { workflows, loading, error } = useWorkflows({ isAuthenticated });
   const { staffs, loading: staffLoading, error: staffError } = useStaffs();
   const navigate = useNavigate();
 

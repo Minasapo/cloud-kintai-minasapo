@@ -33,7 +33,7 @@ import {
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import { StaffType, useStaffs } from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
@@ -141,9 +141,10 @@ export default function NewWorkflowPage() {
   const [overtimeDateError, setOvertimeDateError] = useState("");
   const [overtimeReason, setOvertimeReason] = useState("");
 
-  const { cognitoUser } = useContext(AuthContext);
+  const { cognitoUser, authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
   const { staffs } = useStaffs();
-  const { create: createWorkflow } = useWorkflows();
+  const { create: createWorkflow } = useWorkflows({ isAuthenticated });
   const dispatch = useAppDispatchV2();
   const { getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
 
