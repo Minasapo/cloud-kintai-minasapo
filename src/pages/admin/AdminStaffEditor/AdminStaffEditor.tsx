@@ -47,7 +47,7 @@ import {
   StaffRole,
   StaffType,
   useStaffs,
-} from "../../../hooks/useStaffs/useStaffs";
+} from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -88,14 +88,15 @@ type ExtendedStaff = StaffType & {
 export default function AdminStaffEditor() {
   const { staffId } = useParams();
   const dispatch = useAppDispatchV2();
-  const { cognitoUser } = useContext(AuthContext);
+  const { cognitoUser, authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
   const { getShiftGroups } = useContext(AppConfigContext);
   const {
     staffs,
     loading: staffLoading,
     error: staffError,
     updateStaff,
-  } = useStaffs();
+  } = useStaffs({ isAuthenticated });
 
   const {
     register,

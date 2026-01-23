@@ -3,7 +3,7 @@ import type { AuthUser } from "aws-amplify/auth";
 import { createContext } from "react";
 
 import { CognitoUser } from "../hooks/useCognitoUser";
-import { StaffRole } from "../hooks/useStaffs/useStaffs";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 
 type AuthContextProps = {
   signOut: (data?: AuthEventData | undefined) => void;

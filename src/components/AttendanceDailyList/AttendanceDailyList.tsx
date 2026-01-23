@@ -44,13 +44,14 @@ import { useParams } from "react-router-dom";
 import { useAppDispatchV2 } from "@/app/hooks";
 import MoveDateItem from "@/components/AttendanceDailyList/MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 
 import { ActionsTableCell } from "./ActionsTableCell";
 import { EndTimeTableCell } from "./EndTimeTableCell";
@@ -62,7 +63,11 @@ import { StartTimeTableCell } from "./StartTimeTableCell";
 
 export default function AttendanceDailyList() {
   const { targetWorkDate } = useParams();
-  const { staffs, loading: staffLoading, error: staffError } = useStaffs();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs, loading: staffLoading, error: staffError } = useStaffs({
+    isAuthenticated,
+  });
   const {
     attendanceDailyList,
     error,

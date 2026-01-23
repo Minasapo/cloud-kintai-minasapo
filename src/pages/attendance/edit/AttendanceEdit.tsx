@@ -29,7 +29,7 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { StaffType, useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { createLogger } from "@/lib/logger";
 import {
@@ -65,7 +65,11 @@ export default function AttendanceEdit() {
 
   const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
 
-  const { staffs, loading: staffsLoading, error: staffSError } = useStaffs();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs, loading: staffsLoading, error: staffSError } = useStaffs({
+    isAuthenticated,
+  });
   const [createAttendanceMutation] = useCreateAttendanceMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 

@@ -33,7 +33,7 @@ import {
   StaffExternalLink,
 } from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
-import updateStaff from "@/hooks/useStaff/updateStaff";
+import updateStaff from "@entities/staff/model/useStaff/updateStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { createLogger } from "@/lib/logger";
 import {
@@ -42,12 +42,12 @@ import {
 } from "@/lib/reducers/snackbarReducer";
 
 import { AuthContext } from "../context/AuthContext";
-import fetchStaff from "../hooks/useStaff/fetchStaff";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
   mappingStaffRole,
   roleLabelMap,
   StaffType,
-} from "../hooks/useStaffs/useStaffs";
+} from "@entities/staff/model/useStaffs/useStaffs";
 
 const logger = createLogger("Profile");
 

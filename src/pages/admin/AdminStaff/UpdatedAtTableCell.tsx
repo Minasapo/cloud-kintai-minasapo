@@ -1,7 +1,7 @@
 import { TableCell } from "@mui/material";
 import dayjs from "dayjs";
 
-import { StaffType } from "../../../hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 export function UpdatedAtTableCell({ staff }: { staff: StaffType }) {
   const { updatedAt } = staff;

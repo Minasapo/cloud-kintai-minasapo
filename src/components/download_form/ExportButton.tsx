@@ -8,7 +8,7 @@ import { useContext } from "react";
 import { FLAG_VALUES } from "@/constants/businessLogic";
 import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
 import downloadAttendances from "./downloadAttendances";

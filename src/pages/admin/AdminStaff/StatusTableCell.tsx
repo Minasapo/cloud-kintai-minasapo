@@ -1,6 +1,6 @@
 import { TableCell } from "@mui/material";
 
-import { StaffType } from "../../../hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 export function StatusTableCell({ staff }: { staff: StaffType }) {
   const { status } = staff;

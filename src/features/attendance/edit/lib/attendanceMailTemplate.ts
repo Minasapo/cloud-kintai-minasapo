@@ -1,6 +1,6 @@
 import { Attendance, AttendanceHistory } from "@shared/api/graphql/types";
 
-import { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { AttendanceTime } from "@/lib/AttendanceTime";
 

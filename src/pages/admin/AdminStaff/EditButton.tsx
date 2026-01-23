@@ -2,7 +2,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-import { StaffType } from "../../../hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 export function EditButton({ staff }: { staff: StaffType }) {
   const navigate = useNavigate();

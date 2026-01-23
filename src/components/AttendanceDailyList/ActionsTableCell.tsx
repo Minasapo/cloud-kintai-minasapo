@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 

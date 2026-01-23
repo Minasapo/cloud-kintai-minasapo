@@ -3,7 +3,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { Box, Chip, CircularProgress, Stack } from "@mui/material";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
@@ -14,9 +14,10 @@ import {
   SELECTOR_MAX_WIDTH,
   STANDARD_PADDING,
 } from "@/constants/uiDimensions";
+import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import { StaffType, useStaffs } from "../../hooks/useStaffs/useStaffs";
+import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import AggregateExportButton from "./AggregateExportButton";
 import ExportButton from "./ExportButton";
 import StaffSelector from "./StaffSelector";
@@ -36,7 +37,11 @@ const defaultValues: Inputs = {
 export default function DownloadForm() {
   const navigate = useNavigate();
   const [selectedStaff, setSelectedStaff] = useState<StaffType[]>([]);
-  const { staffs, loading: staffLoading, error: staffError } = useStaffs();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs, loading: staffLoading, error: staffError } = useStaffs({
+    isAuthenticated,
+  });
   const {
     closeDates,
     loading: closeDateLoading,

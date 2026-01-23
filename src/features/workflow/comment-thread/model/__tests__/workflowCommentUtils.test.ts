@@ -5,8 +5,8 @@ import {
 } from "@features/workflow/comment-thread/model/workflowCommentUtils";
 import type { WorkflowComment } from "@shared/api/graphql/types";
 
-import type { StaffType } from "@/hooks/useStaffs/useStaffs";
-import { StaffRole } from "@/hooks/useStaffs/useStaffs";
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 
 const staffFixture = (overrides: Partial<StaffType> = {}): StaffType =>
   ({

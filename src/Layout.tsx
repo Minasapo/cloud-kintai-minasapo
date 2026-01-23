@@ -52,7 +52,7 @@ import { ThemeContextProvider } from "./context/ThemeContext";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
-import { StaffRole } from "./hooks/useStaffs/useStaffs";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { createLogger } from "./lib/logger";
 import { createAppTheme } from "./lib/theme";
 

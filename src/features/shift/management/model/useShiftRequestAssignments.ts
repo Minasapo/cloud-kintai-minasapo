@@ -14,7 +14,7 @@ import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 
-import { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 
 import { ShiftState } from "../lib/generateMockShifts";

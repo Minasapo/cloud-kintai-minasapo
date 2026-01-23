@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { getOperationLogLabel } from "@/constants/operationLogLabels";
 import useAdminOperationLogs from "@/hooks/useAdminOperationLogs/useAdminOperationLogs";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 
 export default function AdminLogsClean() {
   const { logs, loading, error, nextToken, loadInitial, loadMore } =

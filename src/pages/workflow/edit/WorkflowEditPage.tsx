@@ -27,7 +27,7 @@ import {
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { createLogger } from "@/lib/logger";
 import {
@@ -47,10 +47,10 @@ export default function WorkflowEditPage() {
   const navigate = useNavigate();
   const { workflow } = useLoaderData() as WorkflowEditLoaderData;
 
-  const { staffs } = useStaffs();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
+  const { staffs } = useStaffs({ isAuthenticated });
   const dispatch = useAppDispatchV2();
   const {
     category,

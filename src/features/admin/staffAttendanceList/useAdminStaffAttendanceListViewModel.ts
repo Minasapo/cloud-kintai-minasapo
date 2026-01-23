@@ -25,8 +25,8 @@ import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
 } from "@/features/attendance/list/lib/getAttendanceRowClassName";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ChangeRequest } from "@/lib/ChangeRequest";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 

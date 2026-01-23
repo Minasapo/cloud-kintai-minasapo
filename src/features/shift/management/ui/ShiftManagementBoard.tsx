@@ -30,7 +30,7 @@ import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -132,10 +132,10 @@ export default function ShiftManagementBoard() {
   const navigate = useNavigate();
   const dispatch = useAppDispatchV2();
   const { cognitoUser } = useCognitoUser();
-  const { loading, error, staffs } = useStaffs();
   const { getShiftGroups } = useContext(AppConfigContext);
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
+  const { loading, error, staffs } = useStaffs({ isAuthenticated });
 
   const shiftStaffs = useMemo(
     () => staffs.filter((s) => s.workType === "shift"),

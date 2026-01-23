@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 
 import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
-import { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
 import type { WorkflowCommentMessage } from "../types";

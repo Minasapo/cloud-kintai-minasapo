@@ -10,7 +10,7 @@ import type {
   UseFormWatch,
 } from "react-hook-form";
 
-import type { StaffType } from "@/hooks/useStaffs/useStaffs";
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import AttendanceEditProvider, {
   AttendanceEditContext,

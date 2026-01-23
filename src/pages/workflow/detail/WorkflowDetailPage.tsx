@@ -18,7 +18,7 @@ import {
   useWorkflowLoaderWorkflow,
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import { createLogger } from "@/lib/logger";
@@ -38,9 +38,9 @@ const logger = createLogger("WorkflowDetailPage");
 export default function WorkflowDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { staffs } = useStaffs();
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
   const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const { workflow: initialWorkflow } =
     useLoaderData() as WorkflowDetailLoaderData;

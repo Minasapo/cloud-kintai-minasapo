@@ -5,7 +5,7 @@ import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { usePersonalExternalLinks } from "@/hooks/useStaff/usePersonalExternalLinks";
+import { usePersonalExternalLinks } from "@entities/staff/model/useStaff/usePersonalExternalLinks";
 
 export function ExternalLinks() {
   const { cognitoUser, authStatus } = useContext(AuthContext);

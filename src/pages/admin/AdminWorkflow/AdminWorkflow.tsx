@@ -23,7 +23,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
   CATEGORY_LABELS,
@@ -41,7 +41,7 @@ export default function AdminWorkflow() {
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { workflows, loading, error } = useWorkflows({ isAuthenticated });
-  const { staffs, loading: staffLoading, error: staffError } = useStaffs();
+  const { staffs, loading: staffLoading, error: staffError } = useStaffs({ isAuthenticated });
   const navigate = useNavigate();
 
   // フィルター/ページネーション state

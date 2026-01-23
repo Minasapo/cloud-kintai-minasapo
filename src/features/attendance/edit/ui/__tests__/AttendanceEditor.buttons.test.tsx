@@ -21,7 +21,7 @@ jest.mock("@/hooks/useAppConfig/useAppConfig", () => () => ({
 jest.mock("@/hooks/useAuthenticatedUser", () => () => ({
   authenticatedUser: null,
 }));
-jest.mock("@/hooks/useStaffs/useStaffs", () => ({
+jest.mock("@entities/staff/model/useStaffs/useStaffs", () => ({
   useStaffs: () => ({ loading: false, error: null }),
 }));
 jest.mock("react-router-dom", () => ({

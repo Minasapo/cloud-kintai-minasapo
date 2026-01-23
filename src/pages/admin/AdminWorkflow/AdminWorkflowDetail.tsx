@@ -36,7 +36,7 @@ import {
 } from "@/entities/attendance/api/attendanceApi";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import { createLogger } from "@/lib/logger";
@@ -57,9 +57,9 @@ const logger = createLogger("AdminWorkflowDetail");
 export default function AdminWorkflowDetail() {
   const { id } = useParams() as { id?: string };
   const navigate = useNavigate();
-  const { staffs } = useStaffs();
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
   const {
     getStartTime,
     getEndTime,

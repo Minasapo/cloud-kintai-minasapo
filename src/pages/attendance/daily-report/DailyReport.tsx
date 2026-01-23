@@ -41,7 +41,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";

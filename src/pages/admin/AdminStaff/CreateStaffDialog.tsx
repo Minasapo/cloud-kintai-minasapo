@@ -15,7 +15,7 @@ import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
 import addUserToGroup from "../../../hooks/common/addUserToGroup";
 import createCognitoUser from "../../../hooks/common/createCognitoUser";
-import { StaffRole, StaffType } from "../../../hooks/useStaffs/useStaffs";
+import { StaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,

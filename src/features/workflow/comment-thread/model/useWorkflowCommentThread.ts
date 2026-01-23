@@ -7,7 +7,7 @@ import type {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { CognitoUser } from "@/hooks/useCognitoUser";
-import type { StaffType } from "@/hooks/useStaffs/useStaffs";
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import type { WorkflowCommentMessage } from "../types";
 import {

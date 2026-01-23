@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
-import { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
 import {

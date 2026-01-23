@@ -13,11 +13,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
+import { AuthContext } from "../../../context/AuthContext";
 import * as MESSAGE_CODE from "../../../errors";
-import { useStaffs } from "../../../hooks/useStaffs/useStaffs";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { setSnackbarError } from "../../../lib/reducers/snackbarReducer";
 import { AccountStatusTableCell } from "./AccountStatusTableCell";
 import { CreatedAtTableCell } from "./CreatedAtTableCell";
@@ -33,6 +34,8 @@ import { WorkTypeTableCell } from "./WorkTypeTableCell";
 
 export default function AdminStaff() {
   const dispatch = useAppDispatchV2();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
 
   const {
     staffs,
@@ -42,7 +45,7 @@ export default function AdminStaff() {
     createStaff,
     updateStaff,
     deleteStaff,
-  } = useStaffs();
+  } = useStaffs({ isAuthenticated });
 
   const [searchQuery, setSearchQuery] = useState("");
 

@@ -13,7 +13,7 @@ import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { StaffRole } from "@/hooks/useStaffs/useStaffs";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
   const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);

@@ -4,7 +4,7 @@ import {
   roleLabelMap,
   StaffRole,
   StaffType,
-} from "../../../hooks/useStaffs/useStaffs";
+} from "@entities/staff/model/useStaffs/useStaffs";
 
 export function RoleTableCell({ staff }: { staff: StaffType }) {
   const { role, owner } = staff;

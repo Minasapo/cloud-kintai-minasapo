@@ -34,14 +34,15 @@ import {
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
 import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
 import { Logger } from "@/lib/logger";
@@ -133,7 +134,11 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
   const { targetWorkDate, staffId: targetStaffId } = useParams();
   const navigate = useNavigate();
-  const { loading: staffsLoading, error: staffSError } = useStaffs();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { loading: staffsLoading, error: staffSError } = useStaffs({
+    isAuthenticated,
+  });
   const [createAttendanceMutation] = useCreateAttendanceMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 

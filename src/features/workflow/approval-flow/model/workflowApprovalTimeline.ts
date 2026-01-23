@@ -1,7 +1,7 @@
 import type { ApprovalStep, GetWorkflowQuery } from "@shared/api/graphql/types";
 import { ApprovalStatus, WorkflowStatus } from "@shared/api/graphql/types";
 
-import type { StaffType } from "@/hooks/useStaffs/useStaffs";
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import type { WorkflowApprovalStepView } from "../types";
 

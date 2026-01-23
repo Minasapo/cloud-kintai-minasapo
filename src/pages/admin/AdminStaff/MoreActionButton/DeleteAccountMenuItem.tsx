@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "../../../../errors";
 import deleteCognitoUser from "../../../../hooks/common/deleteCognitoUser";
-import { StaffType } from "../../../../hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,

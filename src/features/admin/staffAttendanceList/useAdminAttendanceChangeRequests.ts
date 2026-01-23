@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
 import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
-import { StaffType } from "@/hooks/useStaffs/useStaffs";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ChangeRequest } from "@/lib/ChangeRequest";
 import { createLogger } from "@/lib/logger";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
