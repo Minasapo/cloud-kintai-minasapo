@@ -20,7 +20,7 @@ import createOperationLogData from "@entities/operation-log/model/createOperatio
 import {
   clockInAction,
   clockOutAction,
-} from "@/lib/attendance/attendanceActions";
+} from "@/entities/attendance/lib/attendance/attendanceActions";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { Logger } from "@/lib/logger";
 import {
