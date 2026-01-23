@@ -136,6 +136,14 @@ export default [
             "依存方向は app -> processes -> pages -> features -> entities -> shared のみ許可されています",
         },
       ],
+      "boundaries/no-private": [
+        "error",
+        {
+          allowUncles: false,
+          message:
+            "features から app/pages/processes への依存は禁止されています",
+        },
+      ],
     },
   }),
 ];
