@@ -17,8 +17,8 @@ export type TimeRangeMessages = {
  * 休憩中や時間単位休暇の利用中など、部分的な入力状態を許容します。
  */
 export const createTimeRangeValidator = <T extends Partial<TimeRangeShape>>(
-  schema: z.ZodType<T, z.ZodTypeDef, T>,
-  messages: TimeRangeMessages
+  schema: z.ZodType<T>,
+  messages: TimeRangeMessages,
 ) =>
   schema.superRefine((value, ctx) => {
     const hasStart = Boolean(value.startTime);

@@ -1,7 +1,4 @@
-import {
-  createTimeRangeValidator,
-  TimeRangeShape,
-} from "@entities/attendance/validation/validators";
+import { createTimeRangeValidator } from "@entities/attendance/validation/validators";
 import dayjs from "dayjs";
 import { z } from "zod";
 
@@ -9,7 +6,10 @@ import { validationMessages } from "@/constants/validationMessages";
 
 const isoDateTimeSchema = z
   .string({
-    invalid_type_error: validationMessages.common.invalidDateTime,
+    error: (issue) =>
+      issue.input === undefined
+        ? validationMessages.common.invalidDateTime
+        : validationMessages.common.invalidDateTime,
   })
   .datetime({
     offset: true,
@@ -20,7 +20,10 @@ const dateTimeField = z.union([isoDateTimeSchema, z.null(), z.undefined()]);
 
 const isoDateSchema = z
   .string({
-    invalid_type_error: validationMessages.common.invalidDate,
+    error: (issue) =>
+      issue.input === undefined
+        ? validationMessages.common.invalidDate
+        : validationMessages.common.invalidDate,
   })
   .refine((value) => dayjs(value, "YYYY-MM-DD", true).isValid(), {
     message: validationMessages.common.invalidDate,
@@ -32,22 +35,22 @@ const restIntervalSchema = createTimeRangeValidator(
   z.object({
     startTime: dateTimeField.optional(),
     endTime: dateTimeField.optional(),
-  }) as z.ZodType<TimeRangeShape, z.ZodTypeDef, TimeRangeShape>,
+  }),
   {
     incomplete: validationMessages.attendance.rest.incomplete,
     range: validationMessages.attendance.rest.range,
-  }
+  },
 );
 
 const hourlyPaidHolidayTimeSchema = createTimeRangeValidator(
   z.object({
     startTime: dateTimeField.optional(),
     endTime: dateTimeField.optional(),
-  }) as z.ZodType<TimeRangeShape, z.ZodTypeDef, TimeRangeShape>,
+  }),
   {
     incomplete: validationMessages.attendance.hourlyPaidHoliday.incomplete,
     range: validationMessages.attendance.hourlyPaidHoliday.range,
-  }
+  },
 );
 
 const systemCommentSchema = z.object({
@@ -111,7 +114,7 @@ export const attendanceEditSchema = z
     if (data.substituteHolidayDate) {
       const hasWorkTime = data.startTime || data.endTime;
       const hasRest = data.rests?.some(
-        (rest) => rest?.startTime || rest?.endTime
+        (rest) => rest?.startTime || rest?.endTime,
       );
       if (hasWorkTime || hasRest) {
         ctx.addIssue({
