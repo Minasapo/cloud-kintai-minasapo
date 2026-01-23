@@ -3,7 +3,7 @@ import { Alert,Switch } from "@mui/material";
 import ReturnDirectlyFlagInputBase from "@shared/ui/form/flags/ReturnDirectlyFlagInputBase";
 import { useContext, useState } from "react";
 
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 import { pulseAnimationStyles } from "@/shared/ui/animations/highlightAnimation";
 

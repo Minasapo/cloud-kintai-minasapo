@@ -13,7 +13,7 @@ import {
 
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { Logger } from "@/lib/logger";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {

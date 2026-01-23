@@ -31,8 +31,8 @@ import { Controller, useFormState } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
-import useOperationLog from "@/hooks/useOperationLog/useOperationLog";
+import useAppConfig from "@entities/app-config/model/useAppConfig";
+import useOperationLog from "@entities/operation-log/model/useOperationLog";
 import { createLogger } from "@/lib/logger";
 import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
 

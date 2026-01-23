@@ -8,7 +8,7 @@ jest.mock("@entities/attendance/api/attendanceApi", () => ({
   useCreateAttendanceMutation: () => [jest.fn()],
   useUpdateAttendanceMutation: () => [jest.fn()],
 }));
-jest.mock("@/hooks/useAppConfig/useAppConfig", () => () => ({
+jest.mock("@entities/app-config/model/useAppConfig", () => () => ({
   getLunchRestStartTime: () => undefined,
   getLunchRestEndTime: () => undefined,
   getHourlyPaidHolidayEnabled: () => false,

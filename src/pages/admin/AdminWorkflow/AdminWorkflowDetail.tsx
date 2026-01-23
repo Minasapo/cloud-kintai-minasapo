@@ -35,7 +35,7 @@ import {
   useUpdateAttendanceMutation,
 } from "@/entities/attendance/api/attendanceApi";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
-import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";

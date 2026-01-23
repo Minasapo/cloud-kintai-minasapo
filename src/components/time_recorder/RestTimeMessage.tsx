@@ -1,6 +1,6 @@
 import RestTimeMessageView from "@shared/ui/time-recorder/RestTimeMessage";
 
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 
 export function RestTimeMessage() {
   const { getLunchRestStartTime, getLunchRestEndTime } = useAppConfig();

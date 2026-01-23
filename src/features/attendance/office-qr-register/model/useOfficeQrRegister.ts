@@ -16,7 +16,7 @@ import { useSearchParams } from "react-router-dom";
 import { getNowISOStringWithZeroSeconds } from "@/components/time_recorder/util";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import {
   clockInAction,
   clockOutAction,

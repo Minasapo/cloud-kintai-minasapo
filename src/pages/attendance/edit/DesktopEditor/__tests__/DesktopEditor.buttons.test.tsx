@@ -30,10 +30,10 @@ jest.mock("react-hook-form", () => ({
     }) => ReactElement;
   }) => render({ field: {}, fieldState: {}, formState: {} }),
 }));
-jest.mock("@/hooks/useAppConfig/useAppConfig", () => () => ({
+jest.mock("@entities/app-config/model/useAppConfig", () => () => ({
   getStartTime: () => undefined,
 }));
-jest.mock("@/hooks/useOperationLog/useOperationLog", () => () => ({
+jest.mock("@entities/operation-log/model/useOperationLog", () => () => ({
   create: jest.fn(),
 }));
 

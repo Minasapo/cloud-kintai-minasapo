@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import dayjs from "dayjs";
 
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 
 import { RestTimeMessage } from "../RestTimeMessage";
 
-jest.mock("@/hooks/useAppConfig/useAppConfig", () => ({
+jest.mock("@entities/app-config/model/useAppConfig", () => ({
   __esModule: true,
   default: jest.fn(),
 }));

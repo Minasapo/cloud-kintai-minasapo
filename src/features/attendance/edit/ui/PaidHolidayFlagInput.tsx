@@ -4,7 +4,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import dayjs from "dayjs";
 import { Controller, UseFieldArrayReplace } from "react-hook-form";
 
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import {
   AttendanceEditInputs,
   RestInputs,

@@ -2,7 +2,7 @@ import { Box, Checkbox, Stack } from "@mui/material";
 import dayjs from "dayjs";
 import { Controller, UseFieldArrayReplace } from "react-hook-form";
 
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import {
   AttendanceEditInputs,
   RestInputs,

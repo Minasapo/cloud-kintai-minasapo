@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { useQuickInputActions } from "../useQuickInputActions";
 
 // Mock useAppConfig
-jest.mock("@/hooks/useAppConfig/useAppConfig", () => ({
+jest.mock("@entities/app-config/model/useAppConfig", () => ({
   __esModule: true,
   default: () => ({
     getStartTime: () => dayjs("2024-01-01 09:00:00"),
