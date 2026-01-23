@@ -25,7 +25,7 @@ import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
-import * as MESSAGE_CODE from "../../errors";
+import * as MESSAGE_CODE from "@/errors";
 // attendances are provided by parent (AttendanceDailyList)
 
 function getBadgeContent(attendances: Attendance[]) {

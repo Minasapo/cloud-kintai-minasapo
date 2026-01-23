@@ -11,7 +11,7 @@ import {
 } from "@shared/api/graphql/types";
 import { z } from "zod";
 
-import { validationMessages } from "@/constants/validationMessages";
+import { validationMessages } from "@/shared/config/validationMessages";
 import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   CLOCK_CORRECTION_LABEL,

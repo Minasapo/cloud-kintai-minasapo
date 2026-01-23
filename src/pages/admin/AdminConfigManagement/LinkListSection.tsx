@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { predefinedIcons } from "@/constants/icons";
+import { predefinedIcons } from "@/shared/config/icons";
 
 interface Link {
   label: string;

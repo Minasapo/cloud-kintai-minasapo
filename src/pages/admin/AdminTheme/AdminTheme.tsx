@@ -17,7 +17,7 @@ import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { resolveThemeColor } from "@/constants/theme";
+import { resolveThemeColor } from "@/shared/config/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
 import {

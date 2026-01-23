@@ -1,7 +1,7 @@
 import Logo from "@shared/ui/logo/Logo";
 import { useContext, useMemo } from "react";
 
-import { resolveThemeColor } from "@/constants/theme";
+import { resolveThemeColor } from "@/shared/config/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";

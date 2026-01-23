@@ -14,7 +14,7 @@ import {
   MARGINS,
   SELECTOR_MAX_WIDTH,
   SELECTOR_MIN_WIDTH,
-} from "@/constants/uiDimensions";
+} from "@/shared/config/uiDimensions";
 
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { Inputs } from "./DownloadForm";

@@ -26,7 +26,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import {

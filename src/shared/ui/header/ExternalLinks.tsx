@@ -14,7 +14,7 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { useTheme } from "@mui/material/styles";
 import { MouseEvent, useMemo, useState } from "react";
 
-import { predefinedIcons } from "@/constants/icons";
+import { predefinedIcons } from "@/shared/config/icons";
 import { designTokenVar } from "@/shared/designSystem";
 
 export type ExternalLinkItem = {

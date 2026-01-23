@@ -11,7 +11,7 @@ import type {
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { resolveThemeColor } from "@/constants/theme";
+import { resolveThemeColor } from "@/shared/config/theme";
 import {
   applyDesignTokenCssVariables,
   getDesignTokens,

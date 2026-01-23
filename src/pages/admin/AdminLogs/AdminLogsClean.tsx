@@ -13,7 +13,7 @@ import { Staff } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 
-import { getOperationLogLabel } from "@/constants/operationLogLabels";
+import { getOperationLogLabel } from "@/entities/operation-log/lib/operationLogLabels";
 import useAdminOperationLogs from "@/hooks/useAdminOperationLogs/useAdminOperationLogs";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 

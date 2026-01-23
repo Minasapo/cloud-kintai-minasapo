@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";

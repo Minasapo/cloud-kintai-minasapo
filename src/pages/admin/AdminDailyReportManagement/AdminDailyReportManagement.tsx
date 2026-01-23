@@ -36,7 +36,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
+import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 import { AuthContext } from "@/context/AuthContext";
 import { useSplitView } from "@/features/splitView";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";

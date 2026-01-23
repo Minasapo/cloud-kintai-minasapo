@@ -2,7 +2,7 @@ import { Box, Chip, Stack, TextField } from "@mui/material";
 import { useContext } from "react";
 import { Controller } from "react-hook-form";
 
-import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 
 export default function RemarksItem() {

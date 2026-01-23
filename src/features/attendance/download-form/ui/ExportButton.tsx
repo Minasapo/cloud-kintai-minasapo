@@ -5,8 +5,8 @@ import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
-import { FLAG_VALUES } from "@/constants/businessLogic";
-import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
+import { FLAG_VALUES } from "@/entities/attendance/lib/businessLogic";
+import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/lib/AttendanceDate";

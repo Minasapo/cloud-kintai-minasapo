@@ -8,7 +8,7 @@ import {
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
 
-import { getNowISOStringWithZeroSeconds } from "./util";
+import { getNowISOStringWithZeroSeconds } from "../lib/util";
 
 type SnackbarMessage = Parameters<typeof setSnackbarSuccess>[0];
 

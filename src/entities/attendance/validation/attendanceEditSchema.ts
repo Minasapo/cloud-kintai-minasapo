@@ -2,7 +2,7 @@ import { createTimeRangeValidator } from "@entities/attendance/validation/valida
 import dayjs from "dayjs";
 import { z } from "zod";
 
-import { validationMessages } from "@/constants/validationMessages";
+import { validationMessages } from "@/shared/config/validationMessages";
 
 const isoDateTimeSchema = z
   .string({

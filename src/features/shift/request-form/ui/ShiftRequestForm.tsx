@@ -46,7 +46,7 @@ import React, {
 } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";

@@ -26,8 +26,8 @@ import { useContext, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { predefinedIcons } from "@/constants/icons";
-import { MARGINS } from "@/constants/uiDimensions";
+import { predefinedIcons } from "@/shared/config/icons";
+import { MARGINS } from "@/shared/config/uiDimensions";
 import {
   STAFF_EXTERNAL_LINKS_LIMIT,
   StaffExternalLink,

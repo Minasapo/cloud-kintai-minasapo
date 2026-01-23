@@ -13,7 +13,7 @@ import {
   LIST_WIDTHS,
   SELECTOR_MAX_WIDTH,
   STANDARD_PADDING,
-} from "@/constants/uiDimensions";
+} from "@/shared/config/uiDimensions";
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 

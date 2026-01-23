@@ -23,7 +23,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 
-import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { CompanyHoliday } from "@/lib/CompanyHoliday";

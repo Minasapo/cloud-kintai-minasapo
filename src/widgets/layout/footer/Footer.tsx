@@ -1,7 +1,7 @@
 import FooterView from "@shared/ui/footer/Footer";
 import { useContext, useMemo } from "react";
 
-import { resolveThemeColor } from "@/constants/theme";
+import { resolveThemeColor } from "@/shared/config/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 
 export default function Footer() {

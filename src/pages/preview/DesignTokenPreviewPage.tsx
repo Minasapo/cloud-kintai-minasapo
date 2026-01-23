@@ -13,7 +13,7 @@ import {
 import { ThemeProvider } from "@mui/material/styles";
 import { useMemo, useState } from "react";
 
-import { resolveThemeColor } from "@/constants/theme";
+import { resolveThemeColor } from "@/shared/config/theme";
 import { createAppTheme } from "@/lib/theme";
 import { DESIGN_TOKENS, getDesignTokens } from "@/shared/designSystem";
 

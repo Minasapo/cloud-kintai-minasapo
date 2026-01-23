@@ -10,7 +10,7 @@ import {
 import { useCallback } from "react";
 
 import { useAppDispatchV2, useAppSelectorV2 } from "@/app/hooks";
-import { SNACKBAR_AUTO_HIDE_DURATION } from "@/constants/timeouts";
+import { SNACKBAR_AUTO_HIDE_DURATION } from "@/shared/config/timeouts";
 import {
   selectSnackbar,
   setSnackbarError,
