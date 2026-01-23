@@ -1,7 +1,6 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import dayjs from "dayjs";
 import { useMemo } from "react";
-
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 
 import {
   AttendanceFieldPath,

@@ -1,3 +1,6 @@
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
   Avatar,
   Box,
@@ -26,7 +29,6 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import {
@@ -34,21 +36,19 @@ import {
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@/entities/attendance/api/attendanceApi";
+import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
+import {
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  getWorkflowCategoryLabel,
+} from "@/entities/workflow/lib/workflowLabels";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import useWorkflows from "@entities/workflow/model/useWorkflows";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
-import {
-  CLOCK_CORRECTION_CHECK_OUT_LABEL,
-  getWorkflowCategoryLabel,
-} from "@/entities/workflow/lib/workflowLabels";
 
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
 

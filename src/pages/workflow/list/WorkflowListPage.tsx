@@ -24,12 +24,12 @@ import Page from "@shared/ui/page/Page";
 import { useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
 import {
   useWorkflowListViewModel,
   type WorkflowListViewModel,
 } from "@/features/workflow/list/useWorkflowListViewModel";
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
-import { STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
 import { designTokenVar } from "@/shared/designSystem";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 

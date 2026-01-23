@@ -1,3 +1,6 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
+import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
   Box,
   Button,
@@ -31,15 +34,12 @@ import {
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
-import useAppConfig from "@entities/app-config/model/useAppConfig";
-import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import useWorkflows from "@entities/workflow/model/useWorkflows";
+import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-import { designTokenVar } from "@/shared/designSystem";
 import { parseTimeToISO } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 

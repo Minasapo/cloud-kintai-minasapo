@@ -1,14 +1,13 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance } from "@shared/api/graphql/types";
 
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 type SnackbarMessage = Parameters<typeof setSnackbarSuccess>[0];
 

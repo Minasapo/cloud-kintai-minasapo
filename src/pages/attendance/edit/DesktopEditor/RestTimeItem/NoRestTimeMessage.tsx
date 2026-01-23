@@ -1,7 +1,6 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { FieldArrayWithId } from "react-hook-form";
-
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 

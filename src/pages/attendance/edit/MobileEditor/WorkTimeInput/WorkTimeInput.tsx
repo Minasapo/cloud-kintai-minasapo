@@ -2,8 +2,9 @@ import { Divider, Typography } from "@mui/material";
 import { useContext } from "react";
 
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { GoDirectlyFlagInput } from "../GoDirectlyFlagInput";
 import { Label } from "@/features/attendance/edit/ui/mobile/Label";
+
+import { GoDirectlyFlagInput } from "../GoDirectlyFlagInput";
 import { ReturnDirectlyFlagInput } from "../ReturnDirectlyFlagInput";
 import EndTimeInput from "./EndTimeInput";
 import StartTimeInputMobile from "./StartTimeInputMobile";

@@ -3,13 +3,13 @@
  * ユーザーの勤怠情報を取得し、デスクトップ・モバイル両方のリストで表示する。
  * MaterialUIを使用し、日付選択や合計勤務時間の表示も行う。
  */
-import { useDispatch } from "react-redux";
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { Box, LinearProgress, Stack, styled, Typography } from "@mui/material";
 import { Staff } from "@shared/api/graphql/types";
 /**
@@ -20,20 +20,19 @@ import { Staff } from "@shared/api/graphql/types";
  */
 import dayjs, { Dayjs } from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import * as MESSAGE_CODE from "@/errors";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/timeCalculations";
+import * as MESSAGE_CODE from "@/errors";
+import { designTokenVar } from "@/shared/designSystem";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
 import { Logger } from "@/shared/lib/logger";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
-import { calcTotalRestTime } from "@/entities/attendance/lib/timeCalculations";
-import { calcTotalWorkTime } from "@/entities/attendance/lib/timeCalculations";
-import { designTokenVar } from "@/shared/designSystem";
 
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";

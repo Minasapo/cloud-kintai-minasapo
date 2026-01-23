@@ -5,6 +5,7 @@ import {
 } from "@entities/attendance/api/attendanceApi";
 import { attendanceEditSchema } from "@entities/attendance/validation/attendanceEditSchema";
 import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
+import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Alert,
@@ -28,22 +29,21 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import * as MESSAGE_CODE from "@/errors";
-import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { createLogger } from "@/shared/lib/logger";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
-
+import * as MESSAGE_CODE from "@/errors";
 import AttendanceEditProvider from "@/features/attendance/edit/model/AttendanceEditProvider";
 import {
   AttendanceEditInputs,
   defaultValues,
   HourlyPaidHolidayTimeInputs,
 } from "@/features/attendance/edit/model/common";
+import { createLogger } from "@/shared/lib/logger";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
+
 import DesktopEditor from "./DesktopEditor/DesktopEditor";
 import { MobileEditor } from "./MobileEditor/MobileEditor";
 import sendChangeRequestMail from "./sendChangeRequestMail";

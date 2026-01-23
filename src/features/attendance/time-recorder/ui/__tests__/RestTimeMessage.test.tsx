@@ -1,7 +1,6 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { render, screen } from "@testing-library/react";
 import dayjs from "dayjs";
-
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 
 import { RestTimeMessage } from "../RestTimeMessage";
 

@@ -1,3 +1,4 @@
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import {
@@ -36,11 +37,10 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 import { AuthContext } from "@/context/AuthContext";
 import { useSplitView } from "@/features/splitView";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 import { formatDateTimeReadable } from "@/shared/lib/date";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";

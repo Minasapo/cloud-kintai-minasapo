@@ -1,22 +1,22 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { Box, Checkbox, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import dayjs from "dayjs";
 import { Controller, UseFieldArrayReplace } from "react-hook-form";
 
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 import {
   AttendanceEditInputs,
   RestInputs,
 } from "@/features/attendance/edit/model/common";
 
-import PaidHolidayFlagInputMobile from "./PaidHolidayFlagInputMobile";
 import {
   AttendanceControl,
   AttendanceControllerField,
   AttendanceGetValues,
   AttendanceSetValue,
 } from "../model/types";
+import PaidHolidayFlagInputMobile from "./PaidHolidayFlagInputMobile";
 
 type PaidHolidayFlagField = AttendanceControllerField<"paidHolidayFlag">;
 

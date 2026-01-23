@@ -12,8 +12,8 @@ import {
 import dayjs from "dayjs";
 import { useRef, useState } from "react";
 
-import { useQuickInputActions } from "../model/useQuickInputActions";
 import { AttendanceGetValues, AttendanceSetValue } from "../model/types";
+import { useQuickInputActions } from "../model/useQuickInputActions";
 
 type QuickInputButtonsProps = {
   setValue: AttendanceSetValue;

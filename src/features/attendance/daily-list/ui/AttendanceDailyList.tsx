@@ -13,6 +13,7 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Alert,
   AlertTitle,
@@ -39,26 +40,25 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 
-import { useDispatch } from "react-redux";
-import MoveDateItem from "./MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import * as MESSAGE_CODE from "@/errors";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import * as MESSAGE_CODE from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 
-import { ActionsTableCell } from "./ActionsTableCell";
-import { EndTimeTableCell } from "./EndTimeTableCell";
 import {
   calculateTotalOvertimeMinutes,
   formatMinutesToHHmm,
 } from "../lib/overtimeUtils";
+import { ActionsTableCell } from "./ActionsTableCell";
+import { EndTimeTableCell } from "./EndTimeTableCell";
+import MoveDateItem from "./MoveDateItem";
 import { StartTimeTableCell } from "./StartTimeTableCell";
 
 export default function AttendanceDailyList() {

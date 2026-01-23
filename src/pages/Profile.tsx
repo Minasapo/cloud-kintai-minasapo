@@ -1,3 +1,10 @@
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import updateStaff from "@entities/staff/model/useStaff/updateStaff";
+import {
+  mappingStaffRole,
+  roleLabelMap,
+  StaffType,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
@@ -26,15 +33,14 @@ import { useContext, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { predefinedIcons } from "@/shared/config/icons";
-import { MARGINS } from "@/shared/config/uiDimensions";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   STAFF_EXTERNAL_LINKS_LIMIT,
   StaffExternalLink,
 } from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
-import updateStaff from "@entities/staff/model/useStaff/updateStaff";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { predefinedIcons } from "@/shared/config/icons";
+import { MARGINS } from "@/shared/config/uiDimensions";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
@@ -42,12 +48,6 @@ import {
 } from "@/shared/lib/store/snackbarSlice";
 
 import { AuthContext } from "../context/AuthContext";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import {
-  mappingStaffRole,
-  roleLabelMap,
-  StaffType,
-} from "@entities/staff/model/useStaffs/useStaffs";
 
 const logger = createLogger("Profile");
 

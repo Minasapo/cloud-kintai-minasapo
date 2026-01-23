@@ -1,4 +1,5 @@
-import { useDispatch } from "react-redux";
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Button,
   Dialog,
@@ -12,12 +13,11 @@ import {
 import { Attendance, UpdateAttendanceInput } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import * as MESSAGE_CODE from "@/errors";
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import * as MESSAGE_CODE from "@/errors";
 import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {
   setSnackbarError,

@@ -26,6 +26,11 @@ import { useMemo, useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+  getAttendanceRowVariant,
+} from "@/entities/attendance/lib/attendanceRowVariant";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
@@ -37,11 +42,6 @@ import { WorkTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance
 
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
-import {
-  AttendanceRowVariant,
-  attendanceRowVariantStyles,
-  getAttendanceRowVariant,
-} from "@/entities/attendance/lib/attendanceRowVariant";
 
 const DesktopBox = styled(Box)(({ theme }) => ({
   padding: "0px 40px 40px 40px",

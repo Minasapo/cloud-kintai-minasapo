@@ -1,15 +1,16 @@
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import SyncIcon from "@mui/icons-material/Sync";
 import { Box, Button, CircularProgress } from "@mui/material";
 import { CreateStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+
+import { useAppDispatchV2 } from "../../../app/hooks";
+import * as MESSAGE_CODE from "../../../errors";
 import { handleSyncCognitoUser } from "./handleSyncCognitoUser";
 
 export default function SyncCognitoUser({

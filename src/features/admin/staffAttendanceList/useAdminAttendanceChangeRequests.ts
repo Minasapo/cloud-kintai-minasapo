@@ -1,4 +1,5 @@
-import { useDispatch } from "react-redux";
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import handleApproveChangeRequest from "@features/attendance/edit/ui/ChangeRequestDialog/handleApproveChangeRequest";
 import {
   Attendance,
@@ -7,11 +8,10 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 
-import * as MESSAGE_CODE from "@/errors";
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
+import * as MESSAGE_CODE from "@/errors";
 import { createLogger } from "@/shared/lib/logger";
 import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {

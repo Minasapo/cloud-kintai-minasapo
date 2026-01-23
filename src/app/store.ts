@@ -3,6 +3,7 @@ import { setupListeners } from "@reduxjs/toolkit/query";
 
 // eslint-disable-next-line import/no-cycle
 import snackbarReducer from "@/shared/lib/store/snackbarSlice";
+
 import type { RegisteredRtkApi } from "./apis";
 import { rtkApis } from "./apis";
 

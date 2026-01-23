@@ -4,8 +4,8 @@ import Page from "@shared/ui/page/Page";
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 export default function AttendanceStatisticsPage() {

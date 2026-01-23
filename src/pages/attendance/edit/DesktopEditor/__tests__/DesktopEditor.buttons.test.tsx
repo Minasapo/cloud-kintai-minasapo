@@ -1,3 +1,4 @@
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import type { AttendanceChangeRequest } from "@shared/api/graphql/types";
 import { render, screen } from "@testing-library/react";
 import React, { type ReactElement } from "react";
@@ -9,8 +10,6 @@ import type {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
-
-import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import AttendanceEditProvider, {
   AttendanceEditContext,

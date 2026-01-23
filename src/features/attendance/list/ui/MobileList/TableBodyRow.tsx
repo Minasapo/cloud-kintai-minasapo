@@ -16,6 +16,11 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+  getAttendanceRowVariant,
+} from "@/entities/attendance/lib/attendanceRowVariant";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
@@ -24,11 +29,6 @@ import { WorkDateTableCell } from "@/entities/attendance/ui/adminStaffAttendance
 import { WorkTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
 
 import { AttendanceStatusTooltip } from "../AttendanceStatusTooltip";
-import {
-  AttendanceRowVariant,
-  attendanceRowVariantStyles,
-  getAttendanceRowVariant,
-} from "@/entities/attendance/lib/attendanceRowVariant";
 
 export default function TableBodyRow({
   attendance,

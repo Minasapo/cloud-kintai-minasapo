@@ -1,7 +1,7 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import ReturnDirectlyFlagInputBase from "@shared/ui/form/flags/ReturnDirectlyFlagInputBase";
 import { useContext } from "react";
 
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 

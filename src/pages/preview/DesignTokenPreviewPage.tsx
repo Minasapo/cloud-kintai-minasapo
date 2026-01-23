@@ -14,8 +14,8 @@ import { ThemeProvider } from "@mui/material/styles";
 import { useMemo, useState } from "react";
 
 import { resolveThemeColor } from "@/shared/config/theme";
-import { createAppTheme } from "@/shared/lib/theme";
 import { DESIGN_TOKENS, getDesignTokens } from "@/shared/designSystem";
+import { createAppTheme } from "@/shared/lib/theme";
 
 const COLOR_PRESETS = [
   "#0FA85E",

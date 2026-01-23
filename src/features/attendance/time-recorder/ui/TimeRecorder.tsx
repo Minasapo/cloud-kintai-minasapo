@@ -8,6 +8,7 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
   Alert,
   Box,
@@ -33,10 +34,10 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   clockInAction,
   clockOutAction,
@@ -48,20 +49,19 @@ import {
 import { getWorkStatus } from "@/entities/attendance/lib/attendance/workStatus";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import { Logger } from "@/shared/lib/logger";
+import * as MESSAGE_CODE from "@/errors";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
 import { designTokenVar } from "@/shared/designSystem";
+import { Logger } from "@/shared/lib/logger";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 import Clock from "@/shared/ui/clock/Clock";
 import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
 import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
 
-import { useDispatch } from "react-redux";
-import * as MESSAGE_CODE from "@/errors";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
+import { WorkStatus } from "../lib/common";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
-import { WorkStatus } from "../lib/common";
 import { goDirectlyCallback } from "./goDirectlyCallback";
 import ClockInItem from "./items/ClockInItem";
 import ClockOutItem from "./items/ClockOutItem";

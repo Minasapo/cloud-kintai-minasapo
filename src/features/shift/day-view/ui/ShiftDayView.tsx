@@ -1,4 +1,5 @@
 import { useLazyListRecentAttendancesQuery } from "@entities/attendance/api/attendanceApi";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Box,
   Chip,
@@ -18,7 +19,6 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 
 // 日付ごとの時間軸ビュー（デモ用のモック表示）
 export default function ShiftDayView() {

@@ -4,9 +4,8 @@ import dayjs from "dayjs";
 import { useContext } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { RestInputs } from "@/features/attendance/edit/model/common";
-
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { RestInputs } from "@/features/attendance/edit/model/common";
 
 export default function RestStartTimeInputMobile({
   rest,

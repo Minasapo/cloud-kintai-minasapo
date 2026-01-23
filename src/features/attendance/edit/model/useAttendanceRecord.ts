@@ -1,4 +1,6 @@
 import { useLazyGetAttendanceByStaffAndDateQuery } from "@entities/attendance/api/attendanceApi";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { mappingStaffRole,StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   AttendanceHistory,
   SystemCommentInput,
@@ -10,20 +12,18 @@ import {
   UseFormReset,
   UseFormSetValue,
 } from "react-hook-form";
-
 import { useDispatch } from "react-redux";
-import * as MESSAGE_CODE from "@/errors";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { mappingStaffRole,StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { Logger } from "@/shared/lib/logger";
-import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
+import * as MESSAGE_CODE from "@/errors";
 import {
   AttendanceEditInputs,
   defaultValues,
   HourlyPaidHolidayTimeInputs,
   RestInputs,
 } from "@/features/attendance/edit/model/common";
+import { Logger } from "@/shared/lib/logger";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 type ReplaceFn<T> = (value: T[]) => void;
 

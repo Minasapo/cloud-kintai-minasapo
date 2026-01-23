@@ -1,3 +1,4 @@
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import {
@@ -16,7 +17,6 @@ import {
   SELECTOR_MIN_WIDTH,
 } from "@/shared/config/uiDimensions";
 
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { Inputs } from "./DownloadForm";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;

@@ -18,17 +18,17 @@ import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@/entities/calendar/api/calendarApi";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-
-import { useAppDispatchV2 } from "../../../app/hooks";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+
+import { useAppDispatchV2 } from "../../../app/hooks";
 
 type BulkFormValues = {
   startMonth: dayjs.Dayjs | null;

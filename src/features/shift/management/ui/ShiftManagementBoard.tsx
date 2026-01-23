@@ -2,6 +2,7 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Alert,
   Badge,
@@ -21,21 +22,20 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { useDispatch } from "react-redux";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";

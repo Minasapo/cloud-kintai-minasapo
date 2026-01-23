@@ -1,3 +1,4 @@
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
   Box,
   Chip,
@@ -15,7 +16,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { getOperationLogLabel } from "@/entities/operation-log/lib/operationLogLabels";
 import useAdminOperationLogs from "@/hooks/useAdminOperationLogs/useAdminOperationLogs";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 
 export default function AdminLogsClean() {
   const { logs, loading, error, nextToken, loadInitial, loadMore } =

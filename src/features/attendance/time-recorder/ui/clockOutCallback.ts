@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { Dispatch } from "@reduxjs/toolkit";
 import {
   Attendance,
@@ -11,18 +12,16 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
+import { ReturnDirectlyFlag } from "@/entities/attendance/lib/attendance/attendanceActions";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
-import { ReturnDirectlyFlag } from "@/entities/attendance/lib/attendance/attendanceActions";
 import { Logger } from "@/shared/lib/logger";
 import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 /**
  * 退勤打刻時の処理を行うコールバック関数です。

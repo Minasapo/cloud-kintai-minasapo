@@ -1,4 +1,3 @@
-import { useDispatch } from "react-redux";
 import {
   type DuplicateAttendanceInfo,
   useListAttendancesByDateRangeQuery,
@@ -9,6 +8,8 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Attendance,
   CloseDate,
@@ -19,15 +20,14 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 
-import * as MESSAGE_CODE from "@/errors";
 import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
 } from "@/entities/attendance/lib/attendanceRowVariant";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
+import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import type { PendingAttendanceControls } from "./components/PendingAttendanceSection";

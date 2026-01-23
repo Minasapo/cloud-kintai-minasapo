@@ -1,4 +1,5 @@
 import { AttendanceDaily } from "@entities/attendance/model/useAttendanceDaily";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
@@ -18,14 +19,12 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { useDispatch } from "react-redux";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
-
 import * as MESSAGE_CODE from "@/errors";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 // attendances are provided by parent (AttendanceDailyList)
 
 function getBadgeContent(attendances: Attendance[]) {

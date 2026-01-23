@@ -1,3 +1,4 @@
+import { StaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { Autocomplete, Box, CircularProgress, Stack } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -11,15 +12,15 @@ import { CreateStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
-import addUserToGroup from "../../../hooks/common/addUserToGroup";
-import createCognitoUser from "../../../hooks/common/createCognitoUser";
-import { StaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+
+import { useAppDispatchV2 } from "../../../app/hooks";
+import * as MESSAGE_CODE from "../../../errors";
+import addUserToGroup from "../../../hooks/common/addUserToGroup";
+import createCognitoUser from "../../../hooks/common/createCognitoUser";
 import { handleSyncCognitoUser } from "./handleSyncCognitoUser";
 
 type Inputs = {

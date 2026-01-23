@@ -1,10 +1,10 @@
+import { Staff } from "@entities/staff/model/useStaffs/common";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import dayjs from "dayjs";
 
 import { adminGet } from "@/shared/api/amplify/adminQueriesClient";
 
 import * as MESSAGE_CODE from "../../errors";
-import { Staff } from "@entities/staff/model/useStaffs/common";
-import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 
 type CognitoUserAttribute = {
   Name?: string;

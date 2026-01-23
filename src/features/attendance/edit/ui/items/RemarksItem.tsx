@@ -2,8 +2,8 @@ import { Box, Chip, Stack, TextField } from "@mui/material";
 import { useContext } from "react";
 import { Controller } from "react-hook-form";
 
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
 export default function RemarksItem() {
   const { getValues, setValue, control, watch, readOnly } = useContext(

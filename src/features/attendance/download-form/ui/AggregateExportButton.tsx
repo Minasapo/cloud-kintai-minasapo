@@ -1,14 +1,14 @@
-import { calcTotalRestTime } from "@/entities/attendance/lib/timeCalculations";
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import { Button } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
-import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { calcTotalRestTime } from "@/entities/attendance/lib/timeCalculations";
+import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 
 import downloadAttendances from "../lib/downloadAttendances";
 

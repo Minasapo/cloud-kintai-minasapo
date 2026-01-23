@@ -11,12 +11,12 @@ import {
 } from "@shared/api/graphql/types";
 import { z } from "zod";
 
-import { validationMessages } from "@/shared/config/validationMessages";
 import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   CLOCK_CORRECTION_LABEL,
   REVERSE_CATEGORY,
 } from "@/entities/workflow/lib/workflowLabels";
+import { validationMessages } from "@/shared/config/validationMessages";
 import { formatISOToTime } from "@/shared/lib/time";
 
 export { CLOCK_CORRECTION_CHECK_OUT_LABEL, CLOCK_CORRECTION_LABEL };

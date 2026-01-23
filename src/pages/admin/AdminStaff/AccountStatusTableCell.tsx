@@ -1,6 +1,5 @@
-import { TableCell } from "@mui/material";
-
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { TableCell } from "@mui/material";
 
 export function AccountStatusTableCell({ staff }: { staff: StaffType }) {
   const { enabled } = staff;

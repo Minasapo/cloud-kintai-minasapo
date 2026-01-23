@@ -1,3 +1,4 @@
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   CircularProgress,
@@ -9,13 +10,13 @@ import { DeleteStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
-import * as MESSAGE_CODE from "../../../../errors";
-import deleteCognitoUser from "../../../../hooks/common/deleteCognitoUser";
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+
+import * as MESSAGE_CODE from "../../../../errors";
+import deleteCognitoUser from "../../../../hooks/common/deleteCognitoUser";
 
 export function DeleteAccountMenuItem({
   staff,

@@ -44,20 +44,20 @@ import React, {
   useRef,
   useState,
 } from "react";
-
 import { useDispatch } from "react-redux";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
+
 import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import {
   loadShiftPatterns,
   saveShiftPatterns,
 } from "@/shared/lib/storage/shiftPatternStorage";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 
 import { normalizeStatus, ShiftRequestDayStatus } from "../model/statusMapping";
 import { useShiftRequestData } from "../model/useShiftRequestData";

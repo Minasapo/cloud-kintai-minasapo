@@ -1,10 +1,9 @@
-import { TableCell } from "@mui/material";
-
 import {
   roleLabelMap,
   StaffRole,
   StaffType,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import { TableCell } from "@mui/material";
 
 export function RoleTableCell({ staff }: { staff: StaffType }) {
   const { role, owner } = staff;

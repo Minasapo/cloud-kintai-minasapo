@@ -12,8 +12,8 @@ import { DailyReportStatus } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
 import { useDispatch } from "react-redux";
+
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   setSnackbarError,

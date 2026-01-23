@@ -1,5 +1,6 @@
 import "./styles.scss";
 
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Container,
   LinearProgress,
@@ -15,11 +16,11 @@ import {
 } from "@mui/material";
 import { useContext, useState } from "react";
 
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
+
 import { useAppDispatchV2 } from "../../../app/hooks";
 import { AuthContext } from "../../../context/AuthContext";
 import * as MESSAGE_CODE from "../../../errors";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 import { AccountStatusTableCell } from "./AccountStatusTableCell";
 import { CreatedAtTableCell } from "./CreatedAtTableCell";
 import CreateStaffDialog from "./CreateStaffDialog";

@@ -1,3 +1,5 @@
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
   Box,
   Button,
@@ -27,16 +29,14 @@ import {
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import useWorkflows from "@entities/workflow/model/useWorkflows";
+import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
+import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
+import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
-import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
-import { designTokenVar } from "@/shared/designSystem";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");

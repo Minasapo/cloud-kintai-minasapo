@@ -1,6 +1,5 @@
-import type { WorkflowComment } from "@shared/api/graphql/types";
-
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import type { WorkflowComment } from "@shared/api/graphql/types";
 
 import type { WorkflowCommentMessage } from "../types";
 

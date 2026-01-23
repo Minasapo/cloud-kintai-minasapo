@@ -1,10 +1,11 @@
-import { useDispatch } from "react-redux";
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import {
   useCreateAttendanceMutation,
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
 import { attendanceEditSchema } from "@entities/attendance/validation/attendanceEditSchema";
 import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
@@ -36,22 +37,14 @@ import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import * as MESSAGE_CODE from "@/errors";
-import useAppConfig from "@entities/app-config/model/useAppConfig";
-import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { Logger } from "@/shared/lib/logger";
-import { AttendanceEditMailSender } from "@/shared/lib/mail/AttendanceEditMailSender";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
+import * as MESSAGE_CODE from "@/errors";
 import AttendanceEditProvider from "@/features/attendance/edit/model/AttendanceEditProvider";
 import {
   AttendanceEditInputs,
@@ -60,13 +53,20 @@ import {
   RestInputs,
 } from "@/features/attendance/edit/model/common";
 import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
+import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
+import { Logger } from "@/shared/lib/logger";
+import { AttendanceEditMailSender } from "@/shared/lib/mail/AttendanceEditMailSender";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 
+import { useAttendanceRecord } from "../model/useAttendanceRecord";
 import ChangeRequestDialog from "./ChangeRequestDialog/ChangeRequestDialog";
 import { AttendanceEditFormSkeleton } from "./components/AttendanceEditFormSkeleton";
 import { VacationTabs } from "./components/VacationTabs";
 // eslint-disable-next-line import/no-cycle
 import EditAttendanceHistoryList from "./EditAttendanceHistoryList/EditAttendanceHistoryList";
-import { useAttendanceRecord } from "../model/useAttendanceRecord";
 import IsDeemedHolidayFlagInput from "./IsDeemedHolidayFlagInput";
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,

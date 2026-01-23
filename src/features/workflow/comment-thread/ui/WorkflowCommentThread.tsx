@@ -1,3 +1,4 @@
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Avatar,
   Box,
@@ -10,7 +11,6 @@ import {
 } from "@mui/material";
 
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
 import type { WorkflowCommentMessage } from "../types";

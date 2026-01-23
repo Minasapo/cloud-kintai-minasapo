@@ -5,14 +5,14 @@ import { CloseDate } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { lazy, Suspense, useMemo, useState } from "react";
 
-import PageLoader from "@/shared/ui/feedback/PageLoader";
-
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+import PageLoader from "@/shared/ui/feedback/PageLoader";
+
+import { useAppDispatchV2 } from "../../../app/hooks";
+import * as MESSAGE_CODE from "../../../errors";
 import EditJobTermInputDialog from "./EditJobTermInputDialog";
 import JobTermBulkRegister from "./JobTermBulkRegister";
 

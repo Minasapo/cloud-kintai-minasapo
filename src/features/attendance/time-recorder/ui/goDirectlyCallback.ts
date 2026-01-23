@@ -1,3 +1,4 @@
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { Dispatch } from "@reduxjs/toolkit";
 import {
   Attendance,
@@ -5,19 +6,17 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
-import * as MESSAGE_CODE from "@/errors";
-import { CognitoUser } from "@/hooks/useCognitoUser";
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { GoDirectlyFlag } from "@/entities/attendance/lib/attendance/attendanceActions";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
+import * as MESSAGE_CODE from "@/errors";
+import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";
 import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 export async function goDirectlyCallback(
   cognitoUser: CognitoUser | null | undefined,

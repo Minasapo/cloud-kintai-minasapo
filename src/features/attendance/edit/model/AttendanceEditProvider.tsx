@@ -1,3 +1,4 @@
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { createContext } from "react";
@@ -14,8 +15,6 @@ import {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
-
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import { AttendanceEditInputs } from "./common";
 

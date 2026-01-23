@@ -4,6 +4,7 @@
  * Reduxのdispatchやユーザー情報、スタッフ情報を受け取り、打刻処理・メール送信・スナックバー表示を行う。
  */
 
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { Dispatch } from "@reduxjs/toolkit";
 import {
   Attendance,
@@ -11,17 +12,15 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { Logger } from "@/shared/lib/logger";
 import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 /**
  * 出勤打刻時のコールバック関数。

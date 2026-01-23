@@ -1,3 +1,4 @@
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import PersonIcon from "@mui/icons-material/Person";
 import {
   CircularProgress,
@@ -9,10 +10,10 @@ import { UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
+import { setSnackbarSuccess } from "@/shared/lib/store/snackbarSlice";
+
 import * as MESSAGE_CODE from "../../../../errors";
 import disableStaff from "../../../../hooks/common/disableStaff";
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { setSnackbarSuccess } from "@/shared/lib/store/snackbarSlice";
 
 export function DisableAccountMenuItem({
   staff,

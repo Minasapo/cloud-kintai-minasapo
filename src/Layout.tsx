@@ -4,6 +4,7 @@
  */
 
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
   useBulkCreateCompanyHolidayCalendarsMutation,
@@ -17,6 +18,7 @@ import {
   useUpdateCompanyHolidayCalendarMutation,
   useUpdateHolidayCalendarMutation,
 } from "@entities/calendar/api/calendarApi";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Button,
   Dialog,
@@ -40,6 +42,8 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
+import { createLogger } from "@/shared/lib/logger";
+import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
 import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import Footer from "@/widgets/layout/footer/Footer";
@@ -49,12 +53,8 @@ import { AppConfigContext } from "./context/AppConfigContext";
 import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
-import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
-import { createLogger } from "@/shared/lib/logger";
-import { createAppTheme } from "@/shared/lib/theme";
 
 const logger = createLogger("Layout");
 

@@ -1,4 +1,9 @@
 import {
+  StaffRole,
+  StaffType,
+  useStaffs,
+} from "@entities/staff/model/useStaffs/useStaffs";
+import {
   Autocomplete,
   Box,
   Button,
@@ -40,20 +45,15 @@ import { useParams } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
-import {
-  StaffRole,
-  StaffType,
-  useStaffs,
-} from "@entities/staff/model/useStaffs/useStaffs";
+import WORK_TYPE_OPTIONS from "@/entities/staff/lib/workTypeOptions";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+
+import { useAppDispatchV2 } from "../../../app/hooks";
+import * as MESSAGE_CODE from "../../../errors";
 import { ROLE_OPTIONS } from "../AdminStaff/CreateStaffDialog";
-import WORK_TYPE_OPTIONS from "@/entities/staff/lib/workTypeOptions";
 
 type Inputs = {
   staffId?: string | null;

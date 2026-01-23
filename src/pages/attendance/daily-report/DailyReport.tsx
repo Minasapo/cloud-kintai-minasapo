@@ -1,3 +1,4 @@
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
   DailyReportCalendar,
   DailyReportFormChangeHandler,
@@ -41,7 +42,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";

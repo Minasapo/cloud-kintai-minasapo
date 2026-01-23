@@ -20,14 +20,14 @@ import type { ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
 import DesktopCalendarView from "@/features/attendance/list/ui/DesktopCalendarView";
 import { useSplitView } from "@/features/splitView";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
 
-import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
 import ChangeRequestQuickViewDialog from "./ChangeRequestQuickViewDialog";
 
 const PAGE_PADDING_X = {

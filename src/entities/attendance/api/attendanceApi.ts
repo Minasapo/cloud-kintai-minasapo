@@ -24,9 +24,9 @@ import type {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { E02004 } from "@/errors";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
+import { E02004 } from "@/errors";
 
 // 重複データの詳細情報
 export type DuplicateAttendanceInfo = {

@@ -1,11 +1,11 @@
-import { VacationTabs } from "@features/attendance/edit/ui/components/VacationTabs";
-import HourlyPaidHolidayTimeItemMobile from "@features/attendance/edit/ui/items/HourlyPaidHolidayTimeItemMobile";
-import PaidHolidayFlagInputMobile from "@features/attendance/edit/ui/PaidHolidayFlagInputMobile";
 import {
   AttendanceControl,
   AttendanceGetValues,
   AttendanceSetValue,
 } from "@features/attendance/edit/model/types";
+import { VacationTabs } from "@features/attendance/edit/ui/components/VacationTabs";
+import HourlyPaidHolidayTimeItemMobile from "@features/attendance/edit/ui/items/HourlyPaidHolidayTimeItemMobile";
+import PaidHolidayFlagInputMobile from "@features/attendance/edit/ui/PaidHolidayFlagInputMobile";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Box, Button, Checkbox, FormControlLabel, Stack } from "@mui/material";
 import dayjs from "dayjs";
@@ -18,6 +18,7 @@ import {
 
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 import { Label } from "@/features/attendance/edit/ui/mobile/Label";
+
 import { SubstituteHolidayDateInput } from "./SubstituteHolidayDateInput";
 
 interface TabbedPaidHolidayMobileProps {

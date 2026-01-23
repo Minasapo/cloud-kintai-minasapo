@@ -6,6 +6,7 @@
  * @returns メニューのReact要素
  */
 
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import DesktopMenuView, {
   DesktopMenuItem,
 } from "@shared/ui/header/DesktopMenu";
@@ -13,7 +14,6 @@ import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 
 export default function DesktopMenu({ pathName }: { pathName: string }) {
   const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);

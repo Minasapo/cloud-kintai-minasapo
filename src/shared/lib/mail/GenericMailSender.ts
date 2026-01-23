@@ -1,10 +1,10 @@
+import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import * as MESSAGE_CODE from "@/errors";
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import * as MESSAGE_CODE from "@/errors";
+
 import { MailSender } from "./MailSender";
 
 export class GenericMailSender extends MailSender {

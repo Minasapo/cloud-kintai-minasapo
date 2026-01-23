@@ -1,17 +1,16 @@
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance, CreateOperationLogInput } from "@shared/api/graphql/types";
 
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 export function restEndCallback(
   cognitoUser: CognitoUser | null | undefined,

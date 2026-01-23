@@ -1,3 +1,5 @@
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -29,8 +31,6 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
 

@@ -7,6 +7,7 @@ import {
   UpdateStaffInput,
 } from "@shared/api/graphql/types";
 import { useEffect, useState } from "react";
+
 import { StaffExternalLink } from "@/entities/staff/externalLink";
 
 import createStaffData from "./createStaffData";

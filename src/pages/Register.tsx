@@ -1,10 +1,11 @@
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { Alert, Box, Container } from "@mui/material";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import TimeRecorder from "@/features/attendance/time-recorder/ui/TimeRecorder";
+
 import { AuthContext } from "../context/AuthContext";
-import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 
 export default function Register() {
   const { isCognitoUserRole } = useContext(AuthContext);

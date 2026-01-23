@@ -1,8 +1,4 @@
 import { AttendanceStatusTooltip } from "@features/attendance/list/ui/AttendanceStatusTooltip";
-import {
-  AttendanceRowVariant,
-  attendanceRowVariantStyles,
-} from "@/entities/attendance/lib/attendanceRowVariant";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Button,
@@ -22,6 +18,10 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+} from "@/entities/attendance/lib/attendanceRowVariant";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";

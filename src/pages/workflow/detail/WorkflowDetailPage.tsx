@@ -1,3 +1,5 @@
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { Grid, Stack, Typography } from "@mui/material";
 import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
@@ -6,6 +8,7 @@ import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
 import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow/model/workflowApprovalTimeline";
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
@@ -18,17 +21,14 @@ import {
   useWorkflowLoaderWorkflow,
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import useWorkflows from "@entities/workflow/model/useWorkflows";
+import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
+import { designTokenVar } from "@/shared/designSystem";
 import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
-import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
-import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
 
 const SECTION_GAP = designTokenVar("spacing.xl", "24px");

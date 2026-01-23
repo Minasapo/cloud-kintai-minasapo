@@ -1,3 +1,4 @@
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { shiftRequestsByStaffId } from "@shared/api/graphql/documents/queries";
 import {
   ShiftRequestHistoryInput,
@@ -14,10 +15,9 @@ import {
   useMemo,
   useState,
 } from "react";
-
 import { useDispatch } from "react-redux";
+
 import * as MESSAGE_CODE from "@/errors";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 

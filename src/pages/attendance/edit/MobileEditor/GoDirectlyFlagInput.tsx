@@ -1,13 +1,12 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/ui/GoDirectlyFlagCheckbox";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Alert,Switch } from "@mui/material";
 import { useContext, useState } from "react";
 
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
-import { pulseAnimationStyles } from "@/shared/ui/animations/highlightAnimation";
-
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { pulseAnimationStyles } from "@/shared/ui/animations/highlightAnimation";
 
 export function GoDirectlyFlagInput() {
   const { control, setValue, workDate, getValues, attendance } = useContext(

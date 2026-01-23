@@ -1,8 +1,8 @@
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { useContext, useMemo } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import useWorkflows from "@entities/workflow/model/useWorkflows";
 
 import { useWorkflowListFilters } from "./useWorkflowListFilters";
 import type { WorkflowListItem } from "./workflowListModel";
