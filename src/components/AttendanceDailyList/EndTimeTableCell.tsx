@@ -1,8 +1,7 @@
+import { AttendanceDaily } from "@entities/attendance/model/useAttendanceDaily";
 import { TableCell } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { AttendanceDaily } from "../../hooks/useAttendanceDaily/useAttendanceDaily";
 
 export function EndTimeTableCell({
   row,

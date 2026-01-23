@@ -4,6 +4,7 @@
  */
 
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
   useBulkCreateCompanyHolidayCalendarsMutation,
   useBulkCreateHolidayCalendarsMutation,
@@ -49,7 +50,6 @@ import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import useAppConfig from "./hooks/useAppConfig/useAppConfig";
-import useCloseDates from "./hooks/useCloseDates/useCloseDates";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
 import { StaffRole } from "./hooks/useStaffs/useStaffs";

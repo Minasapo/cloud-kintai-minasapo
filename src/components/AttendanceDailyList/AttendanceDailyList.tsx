@@ -5,6 +5,10 @@ import {
   useLazyGetAttendanceByIdQuery,
   useLazyListRecentAttendancesQuery,
 } from "@entities/attendance/api/attendanceApi";
+import useAttendanceDaily, {
+  AttendanceDaily,
+  DuplicateAttendanceDaily,
+} from "@entities/attendance/model/useAttendanceDaily";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -46,11 +50,8 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
+import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 
-import useAttendanceDaily, {
-  AttendanceDaily,
-  DuplicateAttendanceDaily,
-} from "../../hooks/useAttendanceDaily/useAttendanceDaily";
 import { ActionsTableCell } from "./ActionsTableCell";
 import { EndTimeTableCell } from "./EndTimeTableCell";
 import {
@@ -61,13 +62,18 @@ import { StartTimeTableCell } from "./StartTimeTableCell";
 
 export default function AttendanceDailyList() {
   const { targetWorkDate } = useParams();
+  const { staffs, loading: staffLoading, error: staffError } = useStaffs();
   const {
     attendanceDailyList,
     error,
     loading,
     duplicateAttendances,
     loadAttendanceDataByMonth,
-  } = useAttendanceDaily();
+  } = useAttendanceDaily({
+    staffs,
+    staffLoading,
+    staffError,
+  });
   const { getEndTime } = useContext(AppConfigContext);
   const today = dayjs().format(AttendanceDate.QueryParamFormat);
   const displayDate = targetWorkDate || today;

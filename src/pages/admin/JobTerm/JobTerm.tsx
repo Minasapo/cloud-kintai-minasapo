@@ -1,3 +1,4 @@
+import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { LinearProgress, Stack, Typography } from "@mui/material";
 import { CloseDate } from "@shared/api/graphql/types";
 // Title removed per admin UI simplification
@@ -8,7 +9,6 @@ import PageLoader from "@/shared/ui/feedback/PageLoader";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
-import useCloseDates from "../../../hooks/useCloseDates/useCloseDates";
 import {
   setSnackbarError,
   setSnackbarSuccess,

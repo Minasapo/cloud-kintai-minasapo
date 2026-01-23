@@ -5,6 +5,7 @@
  */
 import { useAppDispatchV2 } from "@app/hooks";
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
+import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -23,7 +24,6 @@ import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import useCloseDates from "@/hooks/useCloseDates/useCloseDates";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 /**

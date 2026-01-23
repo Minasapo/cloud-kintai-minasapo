@@ -4,6 +4,7 @@ import {
   useListAttendancesByDateRangeQuery,
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
+import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
@@ -24,7 +25,6 @@ import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
 } from "@/features/attendance/list/getAttendanceRowClassName";
-import useCloseDates from "@/hooks/useCloseDates/useCloseDates";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
 import { ChangeRequest } from "@/lib/ChangeRequest";

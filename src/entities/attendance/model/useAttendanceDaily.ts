@@ -9,8 +9,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import { useStaffs } from "../useStaffs/useStaffs";
-
 dayjs.extend(isBetween);
 
 export interface AttendanceDaily {
@@ -28,6 +26,19 @@ export interface DuplicateAttendanceDaily {
   ids: string[];
 }
 
+export type AttendanceDailyStaff = {
+  cognitoUserId: string;
+  givenName?: string | null;
+  familyName?: string | null;
+  sortKey?: string | null;
+};
+
+export type UseAttendanceDailyParams = {
+  staffs: AttendanceDailyStaff[];
+  staffLoading?: boolean;
+  staffError?: Error | null;
+};
+
 /**
  * 年月をキーとするロード済み月データの管理
  */
@@ -37,7 +48,11 @@ interface MonthlyAttendanceData {
   loadedAt: number;
 }
 
-export default function useAttendanceDaily() {
+export default function useAttendanceDaily({
+  staffs,
+  staffLoading = false,
+  staffError = null,
+}: UseAttendanceDailyParams) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [attendanceDailyList, setAttendanceDailyList] = useState<
@@ -50,7 +65,6 @@ export default function useAttendanceDaily() {
   // 複数月のデータをキャッシュ（年月をキーとする）
   const monthlyDataCache = useRef<Record<string, MonthlyAttendanceData>>({});
 
-  const { staffs, loading: staffLoading, error: staffError } = useStaffs();
   const [triggerGetAttendance] = useLazyGetAttendanceByStaffAndDateQuery();
 
   /**
@@ -97,6 +111,9 @@ export default function useAttendanceDaily() {
         const results = await Promise.all(
           staffs.map(
             async ({ cognitoUserId, givenName, familyName, sortKey }) => {
+              const safeGivenName = givenName ?? "";
+              const safeFamilyName = familyName ?? "";
+              const safeSortKey = sortKey ?? "";
               const response = await triggerGetAttendance({
                 staffId: cognitoUserId,
                 workDate: firstDayOfMonth,
@@ -129,7 +146,7 @@ export default function useAttendanceDaily() {
                 ) {
                   duplicateBuffer.push({
                     staffId: cognitoUserId,
-                    staffName: `${familyName} ${givenName}`.trim(),
+                    staffName: `${safeFamilyName} ${safeGivenName}`.trim(),
                     workDate: dup.workDate,
                     ids: dup.ids,
                   });
@@ -138,10 +155,10 @@ export default function useAttendanceDaily() {
 
               return {
                 sub: cognitoUserId,
-                givenName,
-                familyName,
+                givenName: safeGivenName,
+                familyName: safeFamilyName,
                 attendance,
-                sortKey: sortKey || "",
+                sortKey: safeSortKey,
               } as AttendanceDaily;
             }
           )
@@ -192,8 +209,7 @@ export default function useAttendanceDaily() {
         console.error("Failed to load initial attendance data", e);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [staffs.length, staffLoading, staffError]);
+  }, [staffs, staffLoading, staffError, loadAttendanceDataByMonth]);
 
   return {
     loading,

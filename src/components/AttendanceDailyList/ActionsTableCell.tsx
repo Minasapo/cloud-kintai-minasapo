@@ -1,3 +1,4 @@
+import { AttendanceDaily } from "@entities/attendance/model/useAttendanceDaily";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
@@ -25,7 +26,6 @@ import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import * as MESSAGE_CODE from "../../errors";
-import { AttendanceDaily } from "../../hooks/useAttendanceDaily/useAttendanceDaily";
 // attendances are provided by parent (AttendanceDailyList)
 
 function getBadgeContent(attendances: Attendance[]) {

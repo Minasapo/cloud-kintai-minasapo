@@ -1,3 +1,4 @@
+import useCloseDates from "@entities/attendance/model/useCloseDates";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Box, Chip, CircularProgress, Stack } from "@mui/material";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
@@ -15,7 +16,6 @@ import {
 } from "@/constants/uiDimensions";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 
-import useCloseDates from "../../hooks/useCloseDates/useCloseDates";
 import { StaffType, useStaffs } from "../../hooks/useStaffs/useStaffs";
 import AggregateExportButton from "./AggregateExportButton";
 import ExportButton from "./ExportButton";
