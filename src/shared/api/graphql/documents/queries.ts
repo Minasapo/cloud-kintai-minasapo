@@ -808,6 +808,8 @@ export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
     }
     submittedAt
     updatedAt
+    updatedBy
+    version
     histories {
       version
       note
@@ -861,6 +863,8 @@ export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
       }
       submittedAt
       updatedAt
+      updatedBy
+      version
       histories {
         version
         note
@@ -927,6 +931,8 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
       }
       submittedAt
       updatedAt
+      updatedBy
+      version
       histories {
         version
         note

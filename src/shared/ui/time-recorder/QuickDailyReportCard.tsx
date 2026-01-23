@@ -1,5 +1,3 @@
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import {
@@ -7,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  CircularProgress,
   Collapse,
   Dialog,
   DialogActions,
@@ -30,16 +27,15 @@ export interface QuickDailyReportCardViewProps {
   isDialogOpen: boolean;
   isLoading: boolean;
   isEditable: boolean;
-  isDirty: boolean;
   isSaving: boolean;
   hasStaff: boolean;
   error: string | null;
   lastSavedAt: string | null;
   contentPanelId: string;
+  isSubmitted: boolean;
   onToggle: () => void;
   onDialogOpen: () => void;
   onDialogClose: () => void;
-  onClear: () => void;
   onSave: () => void;
   onContentChange: (value: string) => void;
 }
@@ -52,26 +48,18 @@ const QuickDailyReportCardView = ({
   isDialogOpen,
   isLoading,
   isEditable,
-  isDirty,
   isSaving,
   hasStaff,
   error,
   lastSavedAt,
   contentPanelId,
+  isSubmitted,
   onToggle,
   onDialogOpen,
   onDialogClose,
-  onClear,
   onSave,
   onContentChange,
 }: QuickDailyReportCardViewProps) => {
-  const renderSaveIcon = () => {
-    if (!isSaving) {
-      return <CheckIcon fontSize="small" />;
-    }
-    return <CircularProgress size={18} />;
-  };
-
   const handleContentChange = (event: ChangeEvent<HTMLInputElement>) => {
     onContentChange(event.target.value);
   };
@@ -115,38 +103,26 @@ const QuickDailyReportCardView = ({
                 onClick={onDialogOpen}
                 disabled={!hasStaff || isLoading}
                 aria-label="拡大表示"
+                sx={{
+                  visibility: isOpen ? "visible" : "hidden",
+                }}
               >
                 <OpenInFullIcon fontSize="small" />
               </IconButton>
             </span>
           </Tooltip>
-          {isOpen && (
-            <Stack direction="row" spacing={0.5}>
-              <Tooltip title="入力をキャンセル">
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={onClear}
-                    disabled={!isEditable || !isDirty || isSaving}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-              <Tooltip title="保存">
-                <span>
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={onSave}
-                    disabled={!isEditable || !isDirty || isSaving}
-                  >
-                    {renderSaveIcon()}
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </Stack>
-          )}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onSave}
+            disabled={!isEditable || isSaving || isSubmitted}
+            sx={{
+              visibility: isOpen ? "visible" : "hidden",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {isSaving ? "提出中" : "提出"}
+          </Button>
         </Stack>
         <Collapse in={isOpen} timeout="auto" unmountOnExit>
           <Stack spacing={1} mt={1} id={contentPanelId}>
@@ -209,9 +185,9 @@ const QuickDailyReportCardView = ({
           <Button
             variant="contained"
             onClick={() => void onSave()}
-            disabled={!isEditable || !isDirty || isSaving}
+            disabled={!isEditable || isSaving || isSubmitted}
           >
-            {isSaving ? "保存中..." : "保存"}
+            {isSaving ? "提出中..." : "提出"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,8 +1,12 @@
+import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import {
   Alert,
+  Button,
   Chip,
   Container,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -16,16 +20,22 @@ import {
   TablePagination,
   TableRow,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
+import dayjs, { type Dayjs } from "dayjs";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
+import { useSplitView } from "@/features/splitView";
 import { useStaffs } from "@/hooks/useStaffs/useStaffs";
 import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { formatDateTimeReadable } from "@/lib/date";
 
+import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 import {
   type AdminDailyReport,
   DISPLAY_STATUSES,
@@ -34,8 +44,56 @@ import {
   STATUS_META,
 } from "./data";
 
+const CSV_HEADER = [
+  "日付",
+  "スタッフID",
+  "スタッフ名",
+  "タイトル",
+  "内容",
+  "作成日時",
+  "更新日時",
+];
+
+const compareReportByDateDesc = (a: AdminDailyReport, b: AdminDailyReport) => {
+  if (a.date === b.date) {
+    return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
+  }
+  return b.date.localeCompare(a.date);
+};
+
+const sanitizeCsvValue = (value: string): string => {
+  const normalized = value.replace(/\r?\n/g, " ");
+  const escaped = normalized.replace(/"/g, '""');
+  if (/[",]/.test(escaped)) return `"${escaped}"`;
+  return escaped;
+};
+
+export const buildDailyReportCsv = (reports: AdminDailyReport[]): string => {
+  const sortedReports = [...reports].sort(compareReportByDateDesc);
+
+  const lines = sortedReports.map((report) =>
+    [
+      report.date,
+      report.staffId,
+      report.author,
+      report.title,
+      report.content,
+      report.createdAt ?? "",
+      report.updatedAt ?? "",
+    ]
+      .map((value) => sanitizeCsvValue(value ?? ""))
+      .join(",")
+  );
+
+  return [CSV_HEADER.join(","), ...lines].join("\n");
+};
+
+export const formatDailyReportFileName = (timestamp: Dayjs = dayjs()): string =>
+  `daily_reports_${timestamp.format("YYYYMMDD_HHmmss")}.csv`;
+
 export default function AdminDailyReportManagement() {
   const navigate = useNavigate();
+  const { enableSplitMode, setRightPanel } = useSplitView();
   const { staffs, loading: isStaffLoading, error: staffError } = useStaffs();
   const [statusFilter, setStatusFilter] = useState<DisplayStatus | "">("");
   const [staffFilter, setStaffFilter] = useState<string>("");
@@ -46,6 +104,10 @@ export default function AdminDailyReportManagement() {
   const [reports, setReports] = useState<AdminDailyReport[]>([]);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<AdminDailyReport | null>(
+    null
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const buildStaffName = useCallback(
     (staffId: string) => {
@@ -93,14 +155,7 @@ export default function AdminDailyReportManagement() {
         nextToken = response.data?.listDailyReports?.nextToken;
       } while (nextToken);
 
-      setReports(
-        aggregated.sort((a, b) => {
-          if (a.date === b.date) {
-            return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
-          }
-          return b.date.localeCompare(a.date);
-        })
-      );
+      setReports(aggregated.sort(compareReportByDateDesc));
     } catch (error) {
       setLoadError(
         error instanceof Error ? error.message : "日報の取得に失敗しました。"
@@ -159,11 +214,50 @@ export default function AdminDailyReportManagement() {
     setPage(0);
   };
 
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedReport(null);
+  };
+
   const handleNavigateDetail = (report: AdminDailyReport) => {
     navigate(`/admin/daily-report/${report.id}`, {
       state: { report },
     });
   };
+
+  const handleOpenInRightPanel = useCallback(
+    (report: AdminDailyReport) => {
+      enableSplitMode();
+      setRightPanel({
+        id: `daily-report-${report.id}`,
+        title: `日報詳細 - ${report.date}`,
+        route: `/admin/daily-report/${report.id}`,
+      });
+    },
+    [enableSplitMode, setRightPanel]
+  );
+
+  const handleOpenCarousel = () => {
+    if (filteredReports.length > 0) {
+      setSelectedReport(filteredReports[0]);
+      setIsDialogOpen(true);
+    }
+  };
+
+  const handleExportCsv = useCallback(() => {
+    if (filteredReports.length === 0) return;
+
+    const exportData = buildDailyReportCsv(filteredReports);
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+    const blob = new Blob([bom, exportData], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.download = formatDailyReportFileName();
+    anchor.href = url;
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
+  }, [filteredReports]);
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -272,11 +366,49 @@ export default function AdminDailyReportManagement() {
           </Stack>
         </Stack>
 
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          justifyContent="space-between"
+          alignItems={{ xs: "stretch", sm: "center" }}
+        >
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<CloudDownloadOutlinedIcon />}
+            onClick={handleExportCsv}
+            disabled={filteredReports.length === 0}
+            disableElevation
+            sx={{
+              minWidth: BUTTON_MIN_WIDTH,
+              fontWeight: "bold",
+              transition: "transform 150ms ease",
+              "&:hover": {
+                backgroundColor: "secondary.main",
+                boxShadow: "none",
+                transform: "translateY(-3px)",
+              },
+              "&:active": { transform: "translateY(-1px)" },
+              "&.Mui-disabled": { transform: "none", opacity: 0.6 },
+            }}
+          >
+            CSV出力
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleOpenCarousel}
+            disabled={filteredReports.length === 0}
+          >
+            まとめて確認
+          </Button>
+        </Stack>
+
         <Paper>
           <TableContainer>
             <Table size="small">
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ width: "50px" }} />
                   <TableCell>日付</TableCell>
                   <TableCell>スタッフ</TableCell>
                   <TableCell>タイトル</TableCell>
@@ -287,27 +419,47 @@ export default function AdminDailyReportManagement() {
               <TableBody>
                 {isLoadingReports || isStaffLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center">
+                    <TableCell colSpan={6} align="center">
                       読み込み中...
                     </TableCell>
                   </TableRow>
                 ) : paginatedReports.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center">
+                    <TableCell colSpan={6} align="center">
                       条件に一致する日報がありません。
                     </TableCell>
                   </TableRow>
                 ) : (
                   paginatedReports.map((report) => (
-                    <TableRow
-                      key={report.id}
-                      hover
-                      onClick={() => handleNavigateDetail(report)}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <TableCell>{report.date}</TableCell>
-                      <TableCell>{report.author}</TableCell>
-                      <TableCell>{report.title}</TableCell>
+                    <TableRow key={report.id} hover sx={{ cursor: "pointer" }}>
+                      <TableCell sx={{ width: "50px", padding: "8px 4px" }}>
+                        <Tooltip title="右側で開く">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenInRightPanel(report);
+                            }}
+                            sx={{
+                              padding: "4px",
+                              "&:hover": {
+                                backgroundColor: "rgba(0, 0, 0, 0.04)",
+                              },
+                            }}
+                          >
+                            <OpenInNewOutlinedIcon sx={{ fontSize: "18px" }} />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell onClick={() => handleNavigateDetail(report)}>
+                        {report.date}
+                      </TableCell>
+                      <TableCell onClick={() => handleNavigateDetail(report)}>
+                        {report.author}
+                      </TableCell>
+                      <TableCell onClick={() => handleNavigateDetail(report)}>
+                        {report.title}
+                      </TableCell>
                       <TableCell>
                         <Chip
                           size="small"
@@ -317,7 +469,7 @@ export default function AdminDailyReportManagement() {
                       </TableCell>
                       <TableCell>
                         {report.updatedAt
-                          ? report.updatedAt.replace("T", " ")
+                          ? formatDateTimeReadable(report.updatedAt)
                           : "-"}
                       </TableCell>
                     </TableRow>
@@ -337,6 +489,15 @@ export default function AdminDailyReportManagement() {
           />
         </Paper>
       </Stack>
+
+      {selectedReport && (
+        <DailyReportCarouselDialog
+          open={isDialogOpen}
+          onClose={handleCloseDialog}
+          selectedReport={selectedReport}
+          filteredReports={filteredReports}
+        />
+      )}
     </Container>
   );
 }

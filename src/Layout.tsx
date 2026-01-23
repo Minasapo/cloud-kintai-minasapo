@@ -26,6 +26,7 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { Hub } from "aws-amplify/utils";
 import dayjs from "dayjs";
 import {
   ComponentProps,
@@ -37,6 +38,7 @@ import {
 } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
 import { AppShell } from "@/shared/ui/layout";
 import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import Footer from "@/widgets/layout/footer/Footer";
@@ -143,7 +145,9 @@ function AppProviders({ children, auth, config, app }: AppProvidersProps) {
   return (
     <AuthContext.Provider value={auth}>
       <AppConfigContext.Provider value={config}>
-        <AppContext.Provider value={app}>{children}</AppContext.Provider>
+        <AppContext.Provider value={app}>
+          <SplitViewProvider>{children}</SplitViewProvider>
+        </AppContext.Provider>
       </AppConfigContext.Provider>
     </AuthContext.Provider>
   );
@@ -302,6 +306,32 @@ export default function Layout() {
   );
 
   const isLoginRoute = location.pathname === "/login";
+
+  // Handle authentication errors, especially token expiration
+  useEffect(() => {
+    const handleTokenRefreshFailure = async () => {
+      try {
+        await signOut();
+      } catch (error) {
+        logger.error("Failed to sign out after token refresh failure", error);
+      } finally {
+        navigate("/login");
+      }
+    };
+
+    const hubListenerCancelToken = Hub.listen("auth", (data) => {
+      const { payload } = data;
+
+      if (payload.event === "tokenRefresh_failure") {
+        logger.error("Token refresh failed", payload.data);
+        void handleTokenRefreshFailure();
+      }
+    });
+
+    return () => {
+      hubListenerCancelToken();
+    };
+  }, [signOut, navigate]);
 
   useEffect(() => {
     if (isLoginRoute) {
