@@ -15,7 +15,7 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { CreatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/RestTimeTableCell";
 import { SummaryTableCell } from "@/pages/admin/AdminStaffAttendanceList/SummaryTableCell";

@@ -22,7 +22,7 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@/entities/calendar/api/calendarApi";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import {

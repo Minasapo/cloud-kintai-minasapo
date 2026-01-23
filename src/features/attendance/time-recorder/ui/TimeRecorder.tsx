@@ -46,8 +46,8 @@ import {
   ReturnDirectlyFlag,
 } from "@/lib/attendance/attendanceActions";
 import { getWorkStatus } from "@/lib/attendance/workStatus";
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { Logger } from "@/lib/logger";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
 import { designTokenVar } from "@/shared/designSystem";

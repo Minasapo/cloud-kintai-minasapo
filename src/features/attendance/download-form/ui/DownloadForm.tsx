@@ -15,7 +15,7 @@ import {
   STANDARD_PADDING,
 } from "@/shared/config/uiDimensions";
 import { AuthContext } from "@/context/AuthContext";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import AggregateExportButton from "./AggregateExportButton";

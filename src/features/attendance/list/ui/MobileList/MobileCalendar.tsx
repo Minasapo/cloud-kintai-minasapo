@@ -26,8 +26,8 @@ import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus, isHolidayLike } from "../../lib/attendanceStatusUtils";
 

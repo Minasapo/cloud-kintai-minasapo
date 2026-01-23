@@ -23,7 +23,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
 import DesktopCalendarView from "@/features/attendance/list/ui/DesktopCalendarView";
 import { useSplitView } from "@/features/splitView";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
 

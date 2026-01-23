@@ -7,7 +7,7 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 
 export enum GoDirectlyFlag {
   YES,

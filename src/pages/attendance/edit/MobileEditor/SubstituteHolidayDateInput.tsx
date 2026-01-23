@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 import { AttendanceEditContext } from "../AttendanceEditProvider";
 import { Label } from "./Label";

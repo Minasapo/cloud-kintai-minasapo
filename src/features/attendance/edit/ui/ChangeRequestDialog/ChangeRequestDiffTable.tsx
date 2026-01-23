@@ -10,7 +10,7 @@ import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 export type ChangeRequestDiffTableProps = {
   attendance: Attendance;

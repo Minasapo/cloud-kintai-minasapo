@@ -5,8 +5,8 @@ import {
   HolidayCalendar,
 } from "@shared/api/graphql/types";
 
-import { CompanyHoliday } from "@/lib/CompanyHoliday";
-import { Holiday } from "@/lib/Holiday";
+import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
+import { Holiday } from "@/entities/attendance/lib/Holiday";
 
 export function HolidayTableCell({
   attendance,

@@ -6,10 +6,10 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { CompanyHoliday } from "@/lib/CompanyHoliday";
-import { DayOfWeek, DayOfWeekString } from "@/lib/DayOfWeek";
-import { Holiday } from "@/lib/Holiday";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
+import { DayOfWeek, DayOfWeekString } from "@/entities/attendance/lib/DayOfWeek";
+import { Holiday } from "@/entities/attendance/lib/Holiday";
 import { designTokenVar } from "@/shared/designSystem";
 
 export type AttendanceRowVariant = "default" | "today" | "saturday" | "sunday";

@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { CompanyHolidayCalenderMessage } from "@/lib/message/CompanyHolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 

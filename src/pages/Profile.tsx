@@ -34,7 +34,7 @@ import {
 } from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
 import updateStaff from "@entities/staff/model/useStaff/updateStaff";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,

@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
-import { AttendanceDate } from "../AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { MailSender } from "./MailSender";
 
 export class AttendanceEditMailSender extends MailSender {

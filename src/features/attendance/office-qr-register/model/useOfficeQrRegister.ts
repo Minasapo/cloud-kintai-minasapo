@@ -21,7 +21,7 @@ import {
   clockInAction,
   clockOutAction,
 } from "@/lib/attendance/attendanceActions";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { Logger } from "@/lib/logger";
 import {
   setSnackbarError,

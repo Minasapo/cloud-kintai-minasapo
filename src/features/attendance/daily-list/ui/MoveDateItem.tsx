@@ -5,7 +5,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 type MoveDateItemProps = {
   workDate: dayjs.Dayjs;

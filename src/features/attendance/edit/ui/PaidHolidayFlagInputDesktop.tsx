@@ -2,7 +2,7 @@ import { Box, Checkbox, Stack } from "@mui/material";
 import dayjs from "dayjs";
 import { Controller, UseFieldArrayReplace } from "react-hook-form";
 
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import {
   AttendanceEditInputs,
   RestInputs,

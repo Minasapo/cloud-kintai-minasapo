@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import * as MESSAGE_CODE from "@/errors";

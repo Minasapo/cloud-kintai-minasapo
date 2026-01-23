@@ -10,10 +10,10 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-import { CompanyHoliday } from "@/lib/CompanyHoliday";
-import { Holiday } from "@/lib/Holiday";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
+import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
+import { Holiday } from "@/entities/attendance/lib/Holiday";
 
 /**
  * 指定日付が祝日・会社休日・週末かどうかを判定

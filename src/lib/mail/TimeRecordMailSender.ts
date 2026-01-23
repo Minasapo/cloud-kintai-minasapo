@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 
-import { AttendanceDate } from "../AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { MailSender } from "./MailSender";
 
 export class TimeRecordMailSender extends MailSender {

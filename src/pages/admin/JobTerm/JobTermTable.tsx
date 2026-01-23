@@ -4,7 +4,7 @@ import { DataGrid, GridActionsCellItem, GridRowParams } from "@mui/x-data-grid";
 import { CloseDate } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 type JobTermTableProps = {
   rows: CloseDate[];

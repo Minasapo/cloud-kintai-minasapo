@@ -24,10 +24,10 @@ import { useMemo, useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
-import { CompanyHoliday } from "@/lib/CompanyHoliday";
-import { Holiday } from "@/lib/Holiday";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
+import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
+import { Holiday } from "@/entities/attendance/lib/Holiday";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 

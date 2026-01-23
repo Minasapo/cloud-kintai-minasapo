@@ -1,7 +1,7 @@
 import { TableCell, TableRow } from "@mui/material";
 import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 
 export default function SubstituteHolidayDateTableRow({
   value,

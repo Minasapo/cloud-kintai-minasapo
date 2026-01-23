@@ -30,13 +30,13 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { createLogger } from "@/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
+import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 
 import AttendanceEditProvider from "./AttendanceEditProvider";
 import {

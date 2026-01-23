@@ -46,7 +46,7 @@ import MoveDateItem from "./MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   setSnackbarError,
   setSnackbarSuccess,

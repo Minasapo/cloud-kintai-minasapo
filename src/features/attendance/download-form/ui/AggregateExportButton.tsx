@@ -8,7 +8,7 @@ import { useContext } from "react";
 import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 import downloadAttendances from "../lib/downloadAttendances";
 

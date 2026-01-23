@@ -25,8 +25,8 @@ import type {
 import dayjs from "dayjs";
 
 import { E02004 } from "@/errors";
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 
 // 重複データの詳細情報
 export type DuplicateAttendanceInfo = {

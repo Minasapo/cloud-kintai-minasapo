@@ -13,7 +13,7 @@ import { useContext } from "react";
 import { FieldArrayWithId, UseFieldArrayUpdate } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 
 import { AttendanceEditInputs } from "../../common";
 

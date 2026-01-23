@@ -15,7 +15,7 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole,StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { Logger } from "@/lib/logger";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 import {

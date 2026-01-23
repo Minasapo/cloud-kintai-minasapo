@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 dayjs.extend(isBetween);
 

@@ -33,7 +33,7 @@ import { useCallback, useEffect } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { CompanyHolidayCalenderMessage } from "@/lib/message/CompanyHolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 

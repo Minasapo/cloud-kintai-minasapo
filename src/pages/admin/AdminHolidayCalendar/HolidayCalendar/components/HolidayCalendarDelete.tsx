@@ -7,7 +7,7 @@ import {
 import dayjs from "dayjs";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 import {

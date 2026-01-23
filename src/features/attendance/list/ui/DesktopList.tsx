@@ -25,8 +25,8 @@ import dayjs, { Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { AttendanceGraph } from "@/pages/admin/AdminStaffAttendanceList/AttendanceGraph";
 import { CreatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/RestTimeTableCell";

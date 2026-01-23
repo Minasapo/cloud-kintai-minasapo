@@ -10,7 +10,7 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 
-import { AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus } from "../../lib/attendanceStatusUtils";
 import MobileCalendar from "./MobileCalendar";

@@ -2,7 +2,7 @@ import { Breadcrumbs, Link, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 import { AttendanceEditContext } from "./AttendanceEditProvider";
 

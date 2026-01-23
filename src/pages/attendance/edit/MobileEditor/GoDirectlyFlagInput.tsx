@@ -4,7 +4,7 @@ import { Alert,Switch } from "@mui/material";
 import { useContext, useState } from "react";
 
 import useAppConfig from "@entities/app-config/model/useAppConfig";
-import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
+import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 import { pulseAnimationStyles } from "@/shared/ui/animations/highlightAnimation";
 
 import { AttendanceEditContext } from "../AttendanceEditProvider";

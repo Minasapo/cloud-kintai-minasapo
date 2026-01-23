@@ -27,7 +27,7 @@ import {
 } from "@/features/attendance/list/lib/getAttendanceRowClassName";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { ChangeRequest } from "@/lib/ChangeRequest";
+import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
 
 import type { PendingAttendanceControls } from "./components/PendingAttendanceSection";

@@ -17,7 +17,7 @@ import {
 import dayjs from "dayjs";
 import { useState } from "react";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { HolidayCalenderMessage } from "@/lib/message/HolidayCalenderMessage";
 import { MessageStatus } from "@/lib/message/Message";
 

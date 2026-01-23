@@ -9,7 +9,7 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
-import { AttendanceState, AttendanceStatus } from "@/lib/AttendanceState";
+import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 export function AttendanceStatusTooltip({
   staff,

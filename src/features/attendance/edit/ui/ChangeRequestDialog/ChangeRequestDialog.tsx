@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import * as MESSAGE_CODE from "@/errors";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { GenericMailSender } from "@/lib/mail/GenericMailSender";
 import {
   setSnackbarError,

@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */

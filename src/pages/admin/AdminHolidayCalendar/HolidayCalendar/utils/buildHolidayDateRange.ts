@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from "dayjs";
 
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 export const MAX_HOLIDAY_RANGE_DAYS = 366;
 

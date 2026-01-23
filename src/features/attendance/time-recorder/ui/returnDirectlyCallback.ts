@@ -9,7 +9,7 @@ import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { ReturnDirectlyFlag } from "@/lib/attendance/attendanceActions";
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { Logger } from "@/lib/logger";
 import { TimeRecordMailSender } from "@/lib/mail/TimeRecordMailSender";
 import {

@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
 import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
 

@@ -43,15 +43,15 @@ import * as MESSAGE_CODE from "@/errors";
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { AttendanceDateTime } from "@/lib/AttendanceDateTime";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { Logger } from "@/lib/logger";
 import { AttendanceEditMailSender } from "@/lib/mail/AttendanceEditMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
+import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 import AttendanceEditProvider from "@/pages/attendance/edit/AttendanceEditProvider";
 import {
   AttendanceEditInputs,
