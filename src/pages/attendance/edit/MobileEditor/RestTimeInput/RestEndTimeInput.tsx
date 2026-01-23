@@ -15,7 +15,7 @@ import { FieldArrayWithId, UseFieldArrayUpdate } from "react-hook-form";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 
-import { AttendanceEditInputs } from "../../common";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 /**
  * RestEndTimeInputのプロパティ型定義。

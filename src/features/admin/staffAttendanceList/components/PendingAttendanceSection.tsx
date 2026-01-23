@@ -2,7 +2,7 @@ import { AttendanceStatusTooltip } from "@features/attendance/list/ui/Attendance
 import {
   AttendanceRowVariant,
   attendanceRowVariantStyles,
-} from "@features/attendance/list/lib/getAttendanceRowClassName";
+} from "@/entities/attendance/lib/attendanceRowVariant";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
@@ -26,12 +26,12 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
-import { CreatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/CreatedAtTableCell";
-import { RestTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/RestTimeTableCell";
-import { SummaryTableCell } from "@/pages/admin/AdminStaffAttendanceList/SummaryTableCell";
-import { UpdatedAtTableCell } from "@/pages/admin/AdminStaffAttendanceList/UpdatedAtTableCell";
-import { WorkDateTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkDateTableCell";
-import { WorkTimeTableCell } from "@/pages/admin/AdminStaffAttendanceList/WorkTimeTableCell";
+import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
+import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
+import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
+import { UpdatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
+import { WorkDateTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
+import { WorkTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
 import { designTokenVar } from "@/shared/designSystem";
 
 const HIGHLIGHT_BORDER = designTokenVar(

@@ -39,7 +39,7 @@ import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 import { AuthContext } from "../context/AuthContext";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";

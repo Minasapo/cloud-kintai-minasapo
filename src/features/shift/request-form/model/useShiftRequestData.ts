@@ -15,11 +15,11 @@ import {
   useState,
 } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import { SelectedDateMap, shiftRequestStatusToStatus } from "./statusMapping";
 
@@ -46,7 +46,7 @@ export function useShiftRequestData({
   cognitoUserId,
   monthStart,
 }: UseShiftRequestDataParams): UseShiftRequestDataResult {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const [staff, setStaff] = useState<Staff | null>(null);
   const [isLoadingStaff, setIsLoadingStaff] = useState(true);
   const [isLoadingShiftRequest, setIsLoadingShiftRequest] = useState(false);

@@ -1,4 +1,4 @@
-import { useAppDispatchV2 } from "@app/hooks";
+import { useDispatch } from "react-redux";
 import {
   useCreateAttendanceMutation,
   useLazyGetAttendanceByStaffAndDateQuery,
@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { getNowISOStringWithZeroSeconds } from "@/features/attendance/time-recorder/lib/util";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
@@ -26,14 +26,14 @@ import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 import { validateOfficeQrToken } from "../lib/validateToken";
 
 type ClockMode = "clock_in" | "clock_out" | null;
 
 export function useOfficeQrRegister() {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const logger = useMemo(
     () =>
       new Logger("OfficeQrRegister", import.meta.env.DEV ? "DEBUG" : "ERROR"),

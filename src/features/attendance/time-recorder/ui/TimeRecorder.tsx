@@ -55,10 +55,10 @@ import Clock from "@/shared/ui/clock/Clock";
 import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
 import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
 import { WorkStatus } from "../lib/common";
@@ -83,7 +83,7 @@ import { returnDirectlyCallback } from "./returnDirectlyCallback";
 export default function TimeRecorder(): JSX.Element {
   const { cognitoUser } = useContext(AuthContext);
 
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
 
   const { getStartTime, getEndTime } = useContext(AppConfigContext);
 

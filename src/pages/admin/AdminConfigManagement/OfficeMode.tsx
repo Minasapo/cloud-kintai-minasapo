@@ -14,7 +14,7 @@ import { E14001, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 import OfficeModeSection from "./OfficeModeSection";
 

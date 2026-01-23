@@ -25,7 +25,7 @@ import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
 import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
 import { designTokenVar } from "@/shared/designSystem";

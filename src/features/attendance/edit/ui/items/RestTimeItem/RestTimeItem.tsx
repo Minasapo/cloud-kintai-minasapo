@@ -4,8 +4,8 @@ import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
 import { FieldArrayWithId } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import RestEndTimeInput from "./RestEndTimeInput";
 import RestStartTimeInput from "./RestStartTimeInput";

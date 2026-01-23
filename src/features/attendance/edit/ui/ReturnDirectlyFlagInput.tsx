@@ -3,7 +3,7 @@ import { useContext } from "react";
 
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 interface ReturnDirectlyFlagInputProps {
   onHighlightEndTime?: (highlight: boolean) => void;

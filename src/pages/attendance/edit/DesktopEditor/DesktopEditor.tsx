@@ -37,7 +37,7 @@ import { createLogger } from "@/shared/lib/logger";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
-import { AttendanceEditContext } from "../AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
 import NoDataAlert from "./NoDataAlert";
 import PaidHolidayFlagInput from "./PaidHolidayFlagInput";
@@ -47,7 +47,7 @@ import { calcTotalRestTime } from "./RestTimeItem/RestTimeInput/RestTimeInput";
 import RestTimeItem from "./RestTimeItem/RestTimeItem";
 import ReturnDirectlyFlagInput from "./ReturnDirectlyFlagInput";
 import StaffCommentInput from "./StaffCommentInput";
-import { SubstituteHolidayDateInput } from "./SubstituteHolidayDateInput";
+import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
 import WorkDateItem from "./WorkDateItem";
 import {
   calcTotalWorkTime,

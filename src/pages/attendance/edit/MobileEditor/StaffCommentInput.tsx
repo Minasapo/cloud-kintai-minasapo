@@ -4,7 +4,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 
-import { AttendanceEditContext } from "../AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export default function StaffCommentInput() {
   const { changeRequests, register, setValue } = useContext(

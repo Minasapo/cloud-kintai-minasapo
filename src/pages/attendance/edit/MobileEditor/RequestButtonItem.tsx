@@ -1,7 +1,7 @@
 import { Button, CircularProgress } from "@mui/material";
 import { UseFormHandleSubmit } from "react-hook-form";
 
-import { AttendanceEditInputs } from "../common";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 export function RequestButtonItem({
   handleSubmit,

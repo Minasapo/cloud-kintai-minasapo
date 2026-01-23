@@ -5,7 +5,7 @@ import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 
-import { AttendanceEditContext } from "../../AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export default function StartTimeInputMobile({
   dataTestId = "mobile-start-time-input",

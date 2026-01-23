@@ -8,7 +8,7 @@ import useAppConfig from "@entities/app-config/model/useAppConfig";
 import {
   AttendanceEditInputs,
   RestInputs,
-} from "@/pages/attendance/edit/common";
+} from "@/features/attendance/edit/model/common";
 
 import PaidHolidayFlagInputMobile from "./PaidHolidayFlagInputMobile";
 import {

@@ -20,7 +20,7 @@ import { E14001, E14002, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 import {
   DEFAULT_AM_HOLIDAY_END,

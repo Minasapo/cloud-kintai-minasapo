@@ -45,7 +45,7 @@ import React, {
   useState,
 } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
@@ -53,7 +53,7 @@ import useCognitoUser from "@/hooks/useCognitoUser";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import {
   loadShiftPatterns,
   saveShiftPatterns,
@@ -66,7 +66,7 @@ import { useShiftRequestPersist } from "../model/useShiftRequestPersist";
 type Status = ShiftRequestDayStatus;
 
 export default function ShiftRequestForm() {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const { cognitoUser, loading: cognitoUserLoading } = useCognitoUser();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));

@@ -40,7 +40,7 @@ import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import { ExcelFilePicker } from "../HolidayCalendar/ExcelFilePicker";
 import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import AddCompanyHolidayCalendar from "./AddCompanyHolidayCalendar";

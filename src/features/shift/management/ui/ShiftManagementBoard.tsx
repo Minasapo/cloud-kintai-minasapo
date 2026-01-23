@@ -23,7 +23,7 @@ import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
@@ -34,7 +34,7 @@ import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
@@ -130,7 +130,7 @@ const SATURDAY_BG = mixWithTransparent(
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const { cognitoUser } = useCognitoUser();
   const { getShiftGroups } = useContext(AppConfigContext);
   const { authStatus } = useContext(AuthContext);

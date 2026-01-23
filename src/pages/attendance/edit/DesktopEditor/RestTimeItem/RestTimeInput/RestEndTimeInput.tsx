@@ -7,9 +7,9 @@ import { Controller, FieldArrayWithId } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
-import { AttendanceEditInputs } from "../../../common";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 /**
  * 休憩終了時刻の入力コンポーネント。

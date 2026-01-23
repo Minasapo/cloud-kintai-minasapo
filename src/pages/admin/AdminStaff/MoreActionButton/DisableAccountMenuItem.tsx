@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import * as MESSAGE_CODE from "../../../../errors";
 import disableStaff from "../../../../hooks/common/disableStaff";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { setSnackbarSuccess } from "@/app/slices/snackbarSlice";
+import { setSnackbarSuccess } from "@/shared/lib/store/snackbarSlice";
 
 export function DisableAccountMenuItem({
   staff,

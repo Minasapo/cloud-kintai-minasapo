@@ -12,8 +12,8 @@ import { Controller } from "react-hook-form";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
-import { AttendanceEditContext } from "../AttendanceEditProvider";
-import { Label } from "./Label";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 
 export function SubstituteHolidayDateInput() {
   const { control, setValue, restReplace } = useContext(AttendanceEditContext);

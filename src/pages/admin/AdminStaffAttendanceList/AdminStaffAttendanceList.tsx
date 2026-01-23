@@ -27,7 +27,7 @@ import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
 
-import { AttendanceGraph } from "./AttendanceGraph";
+import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
 import ChangeRequestQuickViewDialog from "./ChangeRequestQuickViewDialog";
 
 const PAGE_PADDING_X = {

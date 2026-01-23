@@ -1,4 +1,4 @@
-import { useAppDispatchV2 } from "@app/hooks";
+import { useDispatch } from "react-redux";
 import {
   useCreateAttendanceMutation,
   useUpdateAttendanceMutation,
@@ -50,16 +50,16 @@ import { AttendanceEditMailSender } from "@/shared/lib/mail/AttendanceEditMailSe
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
-import AttendanceEditProvider from "@/pages/attendance/edit/AttendanceEditProvider";
+import AttendanceEditProvider from "@/features/attendance/edit/model/AttendanceEditProvider";
 import {
   AttendanceEditInputs,
   defaultValues,
   HourlyPaidHolidayTimeInputs,
   RestInputs,
-} from "@/pages/attendance/edit/common";
-import { SubstituteHolidayDateInput } from "@/pages/attendance/edit/DesktopEditor/SubstituteHolidayDateInput";
+} from "@/features/attendance/edit/model/common";
+import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
 
 import ChangeRequestDialog from "./ChangeRequestDialog/ChangeRequestDialog";
 import { AttendanceEditFormSkeleton } from "./components/AttendanceEditFormSkeleton";
@@ -129,7 +129,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     getAbsentEnabled,
     loading: appConfigLoading,
   } = useAppConfig();
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const { authenticatedUser } = useAuthenticatedUser();
 
   const { targetWorkDate, staffId: targetStaffId } = useParams();

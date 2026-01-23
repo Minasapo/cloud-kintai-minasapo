@@ -25,14 +25,14 @@ import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 export default function StaffShiftList() {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const { staffId } = useParams();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";

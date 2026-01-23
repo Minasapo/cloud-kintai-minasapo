@@ -7,7 +7,7 @@ import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 import { pulseAnimationStyles } from "@/shared/ui/animations/highlightAnimation";
 
-import { AttendanceEditContext } from "../AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export function GoDirectlyFlagInput() {
   const { control, setValue, workDate, getValues, attendance } = useContext(

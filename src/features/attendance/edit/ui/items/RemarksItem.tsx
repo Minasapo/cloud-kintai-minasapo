@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { Controller } from "react-hook-form";
 
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export default function RemarksItem() {
   const { getValues, setValue, control, watch, readOnly } = useContext(

@@ -1,4 +1,4 @@
-import { useAppDispatchV2 } from "@app/hooks";
+import { useDispatch } from "react-redux";
 import handleApproveChangeRequest from "@features/attendance/edit/ui/ChangeRequestDialog/handleApproveChangeRequest";
 import {
   Attendance,
@@ -17,7 +17,7 @@ import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 const logger = createLogger("useAdminAttendanceChangeRequests");
 
@@ -38,7 +38,7 @@ export const useAdminAttendanceChangeRequests = ({
   refetchAttendances,
   updateAttendance,
 }: UseAdminAttendanceChangeRequestsParams) => {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const [quickViewAttendance, setQuickViewAttendance] =
     useState<Attendance | null>(null);
   const [quickViewChangeRequest, setQuickViewChangeRequest] =

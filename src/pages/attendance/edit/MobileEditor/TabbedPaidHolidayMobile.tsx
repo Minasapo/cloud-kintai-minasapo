@@ -16,8 +16,8 @@ import {
   UseFieldArrayReplace,
 } from "react-hook-form";
 
-import { AttendanceEditInputs } from "../common";
-import { Label } from "./Label";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
+import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 import { SubstituteHolidayDateInput } from "./SubstituteHolidayDateInput";
 
 interface TabbedPaidHolidayMobileProps {

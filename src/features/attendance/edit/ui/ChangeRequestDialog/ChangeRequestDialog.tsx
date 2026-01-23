@@ -1,4 +1,4 @@
-import { useAppDispatchV2 } from "@app/hooks";
+import { useDispatch } from "react-redux";
 import {
   Button,
   Dialog,
@@ -22,7 +22,7 @@ import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 import { ChangeRequestDiffTable } from "./ChangeRequestDiffTable";
 import handleApproveChangeRequest from "./handleApproveChangeRequest";
@@ -37,7 +37,7 @@ export default function ChangeRequestDialog({
   updateAttendance: (input: UpdateAttendanceInput) => Promise<Attendance>;
   staff: StaffType | null | undefined;
 }) {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [comment, setComment] = useState<string | undefined>(undefined);
   const [manualClose, setManualClose] = useState(false);

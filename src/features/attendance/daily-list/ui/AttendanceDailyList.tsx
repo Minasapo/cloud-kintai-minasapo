@@ -41,7 +41,7 @@ import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import MoveDateItem from "./MoveDateItem";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
@@ -50,7 +50,7 @@ import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 
 import { ActionsTableCell } from "./ActionsTableCell";
@@ -87,7 +87,7 @@ export default function AttendanceDailyList() {
         AttendanceDate.DataFormat
       )
     : undefined;
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const [searchName, setSearchName] = useState("");
   const [triggerListAttendances] = useLazyListRecentAttendancesQuery();
   const {

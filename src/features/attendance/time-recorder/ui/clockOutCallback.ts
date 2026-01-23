@@ -20,9 +20,9 @@ import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
-import { getNowISOStringWithZeroSeconds } from "../lib/util";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 /**
  * 退勤打刻時の処理を行うコールバック関数です。

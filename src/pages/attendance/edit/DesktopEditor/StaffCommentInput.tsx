@@ -5,8 +5,8 @@ import { UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 
-import { AttendanceEditContext } from "../AttendanceEditProvider";
-import { AttendanceEditInputs } from "../common";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 const Label = styled(Typography)(() => ({
   width: "150px",

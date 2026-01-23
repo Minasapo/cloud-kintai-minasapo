@@ -12,7 +12,7 @@ import * as MESSAGE_CODE from "../../../errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import EditJobTermInputDialog from "./EditJobTermInputDialog";
 import JobTermBulkRegister from "./JobTermBulkRegister";
 

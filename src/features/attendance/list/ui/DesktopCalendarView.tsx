@@ -28,8 +28,8 @@ import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
 import { Holiday } from "@/entities/attendance/lib/Holiday";
-import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
-import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+import { calcTotalRestTime } from "@/entities/attendance/lib/timeCalculations";
+import { calcTotalWorkTime } from "@/entities/attendance/lib/timeCalculations";
 
 const DAYS_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
 

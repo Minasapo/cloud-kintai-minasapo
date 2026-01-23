@@ -51,9 +51,9 @@ import {
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import { ROLE_OPTIONS } from "../AdminStaff/CreateStaffDialog";
-import WORK_TYPE_OPTIONS from "../AdminStaff/workTypeOptions";
+import WORK_TYPE_OPTIONS from "@/entities/staff/lib/workTypeOptions";
 
 type Inputs = {
   staffId?: string | null;

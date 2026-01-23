@@ -1,7 +1,7 @@
 import { Alert, AlertTitle, Box } from "@mui/material";
 import { useContext } from "react";
 
-import { AttendanceEditContext } from "../AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export default function NoDataAlert() {
   const { attendance } = useContext(AttendanceEditContext);

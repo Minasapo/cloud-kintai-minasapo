@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { Control, Controller } from "react-hook-form";
 
-import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 // -----------------------------------------------------------------------------
 // ファイル / コンポーネントの概要

@@ -12,13 +12,13 @@ import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { Dayjs } from "dayjs";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 import {
   SelectedDateMap,
@@ -52,7 +52,7 @@ export function useShiftRequestPersist({
   setShiftRequestId,
   setHistories,
 }: UseShiftRequestPersistParams) {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const [isSaving, setIsSaving] = useState(false);
 
   const saveShiftRequest = useCallback(

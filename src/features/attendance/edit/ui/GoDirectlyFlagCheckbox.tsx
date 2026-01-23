@@ -7,11 +7,11 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Label as MobileLabel } from "@pages/attendance/edit/MobileEditor/Label";
+import { Label as MobileLabel } from "@/features/attendance/edit/ui/mobile/Label";
 import { ChangeEvent, ComponentType, ReactNode } from "react";
 import { Controller } from "react-hook-form";
 
-import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import {
   AttendanceBooleanFieldName,

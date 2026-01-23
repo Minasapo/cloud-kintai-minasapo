@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import * as MESSAGE_CODE from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 import { ShiftState } from "../lib/generateMockShifts";
 
@@ -24,7 +24,7 @@ export type ApplyShiftStateFn = (
 export default function useShiftManagementDialogs(
   applyShiftState: ApplyShiftStateFn
 ) {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const [editingCell, setEditingCell] = useState<ShiftEditingTarget | null>(
     null
   );

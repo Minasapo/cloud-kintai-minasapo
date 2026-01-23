@@ -4,7 +4,7 @@ import { Box, IconButton, Stack, styled, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 
-import { AttendanceEditContext } from "../../AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 import NoRestTimeMessage from "./NoRestTimeMessage";
 import {
   calcTotalRestTime,

@@ -1,4 +1,4 @@
-import { useAppDispatchV2 } from "@app/hooks";
+import { useDispatch } from "react-redux";
 import {
   type DuplicateAttendanceInfo,
   useListAttendancesByDateRangeQuery,
@@ -24,11 +24,11 @@ import * as MESSAGE_CODE from "@/errors";
 import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
-} from "@/features/attendance/list/lib/getAttendanceRowClassName";
+} from "@/entities/attendance/lib/attendanceRowVariant";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import type { PendingAttendanceControls } from "./components/PendingAttendanceSection";
 import { useAdminAttendanceChangeRequests } from "./useAdminAttendanceChangeRequests";
@@ -41,7 +41,7 @@ export const useAdminStaffAttendanceListViewModel = (
   staffId?: string,
   currentMonth?: Dayjs
 ) => {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
 
   const {

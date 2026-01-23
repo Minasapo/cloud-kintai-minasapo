@@ -6,8 +6,8 @@ import { UseFormSetValue } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 
-import { AttendanceEditContext } from "../../AttendanceEditProvider";
-import { AttendanceEditInputs } from "../../common";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 /**
  * 勤務終了時刻の入力コンポーネント（モバイル用）。

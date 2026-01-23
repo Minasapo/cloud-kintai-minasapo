@@ -11,19 +11,19 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import * as MESSAGE_CODE from "@/errors";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole,StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { Logger } from "@/shared/lib/logger";
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 import {
   AttendanceEditInputs,
   defaultValues,
   HourlyPaidHolidayTimeInputs,
   RestInputs,
-} from "@/pages/attendance/edit/common";
+} from "@/features/attendance/edit/model/common";
 
 type ReplaceFn<T> = (value: T[]) => void;
 
@@ -88,7 +88,7 @@ export const useAttendanceRecord = ({
   getValues,
   logger,
 }: UseAttendanceRecordParams) => {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
 
   const [triggerGetAttendance, { data: attendanceData }] =
     useLazyGetAttendanceByStaffAndDateQuery();

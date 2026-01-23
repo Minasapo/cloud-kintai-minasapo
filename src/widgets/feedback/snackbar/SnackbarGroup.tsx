@@ -16,7 +16,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
   setSnackbarWarn,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 const SNACKBAR_ANCHOR_ORIGIN: SnackbarOrigin = {
   vertical: "top",

@@ -3,7 +3,7 @@
  * ユーザーの勤怠情報を取得し、デスクトップ・モバイル両方のリストで表示する。
  * MaterialUIを使用し、日付選択や合計勤務時間の表示も行う。
  */
-import { useAppDispatchV2 } from "@app/hooks";
+import { useDispatch } from "react-redux";
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
@@ -30,9 +30,9 @@ import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
 import { Logger } from "@/shared/lib/logger";
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
-import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
-import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
+import { calcTotalRestTime } from "@/entities/attendance/lib/timeCalculations";
+import { calcTotalWorkTime } from "@/entities/attendance/lib/timeCalculations";
 import { designTokenVar } from "@/shared/designSystem";
 
 import DesktopList from "./DesktopList";
@@ -60,7 +60,7 @@ export default function AttendanceTable() {
   /**
    * Reduxのdispatch関数。
    */
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   /**
    * ページ遷移用navigate関数。
    */

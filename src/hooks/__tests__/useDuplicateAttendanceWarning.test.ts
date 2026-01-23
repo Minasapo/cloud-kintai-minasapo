@@ -6,7 +6,7 @@ jest.mock("@app/hooks", () => ({
   useAppDispatchV2: jest.fn(),
 }));
 
-jest.mock("@/app/slices/snackbarSlice", () => ({
+jest.mock("@/shared/lib/store/snackbarSlice", () => ({
   setSnackbarError: jest.fn((message: string) => ({
     type: "snackbar/setError",
     payload: message,
@@ -25,7 +25,7 @@ describe("useDuplicateAttendanceWarning", () => {
   it("カスタムイベントを受信するとスナックバーエラーをdispatchする", () => {
     const { unmount } = renderHook(() => useDuplicateAttendanceWarning());
     const { setSnackbarError } = jest.requireMock(
-      "@/app/slices/snackbarSlice"
+      "@/shared/lib/store/snackbarSlice"
     );
 
     act(() => {
@@ -44,7 +44,7 @@ describe("useDuplicateAttendanceWarning", () => {
   it("アンマウント後はイベントを無視する", () => {
     const { unmount } = renderHook(() => useDuplicateAttendanceWarning());
     const { setSnackbarError } = jest.requireMock(
-      "@/app/slices/snackbarSlice"
+      "@/shared/lib/store/snackbarSlice"
     );
 
     unmount();

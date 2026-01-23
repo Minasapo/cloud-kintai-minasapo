@@ -6,9 +6,9 @@ import { useContext } from "react";
 import { Controller, FieldArrayWithId } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
-import { AttendanceEditInputs } from "../../../common";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 type RestStartTimeInputProp = {
   rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;

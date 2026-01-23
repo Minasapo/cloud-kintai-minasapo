@@ -20,10 +20,10 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import * as MESSAGE_CODE from "@/errors";
 // attendances are provided by parent (AttendanceDailyList)
@@ -118,7 +118,7 @@ export function ActionsTableCell({
   calendarLoading: boolean;
 }) {
   const navigate = useNavigate();
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
 
   const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
   const [staffLoading, setStaffLoading] = useState(true);

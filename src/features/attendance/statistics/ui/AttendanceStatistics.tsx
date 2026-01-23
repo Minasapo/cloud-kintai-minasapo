@@ -14,8 +14,8 @@ import { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { calcTotalRestTime } from "@/pages/attendance/edit/DesktopEditor/RestTimeItem/RestTimeInput/RestTimeInput";
-import { calcTotalWorkTime } from "@/pages/attendance/edit/DesktopEditor/WorkTimeInput/WorkTimeInput";
+import { calcTotalRestTime } from "@/entities/attendance/lib/timeCalculations";
+import { calcTotalWorkTime } from "@/entities/attendance/lib/timeCalculations";
 
 function StatItem({ label, value }: { label: string; value: string }) {
   return (

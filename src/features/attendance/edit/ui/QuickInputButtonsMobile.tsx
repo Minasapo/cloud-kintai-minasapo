@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
 
-import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import { useQuickInputActions } from "../model/useQuickInputActions";
 

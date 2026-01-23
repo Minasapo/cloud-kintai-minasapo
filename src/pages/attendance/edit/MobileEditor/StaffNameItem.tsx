@@ -1,8 +1,8 @@
 import { Typography } from "@mui/material";
 import { useContext } from "react";
 
-import { AttendanceEditContext } from "../AttendanceEditProvider";
-import { Label } from "./Label";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 
 export function StaffNameItem() {
   const { staff } = useContext(AttendanceEditContext);

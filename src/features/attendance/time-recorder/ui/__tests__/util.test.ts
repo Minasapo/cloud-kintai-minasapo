@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-import { getNowISOStringWithZeroSeconds } from "../../lib/util";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 jest.mock("dayjs");
 

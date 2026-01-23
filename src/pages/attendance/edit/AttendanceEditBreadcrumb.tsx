@@ -4,7 +4,7 @@ import { useContext } from "react";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
-import { AttendanceEditContext } from "./AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export default function AttendanceEditBreadcrumb() {
   const { workDate } = useContext(AttendanceEditContext);

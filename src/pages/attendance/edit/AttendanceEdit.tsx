@@ -35,15 +35,15 @@ import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 
-import AttendanceEditProvider from "./AttendanceEditProvider";
+import AttendanceEditProvider from "@/features/attendance/edit/model/AttendanceEditProvider";
 import {
   AttendanceEditInputs,
   defaultValues,
   HourlyPaidHolidayTimeInputs,
-} from "./common";
+} from "@/features/attendance/edit/model/common";
 import DesktopEditor from "./DesktopEditor/DesktopEditor";
 import { MobileEditor } from "./MobileEditor/MobileEditor";
 import sendChangeRequestMail from "./sendChangeRequestMail";

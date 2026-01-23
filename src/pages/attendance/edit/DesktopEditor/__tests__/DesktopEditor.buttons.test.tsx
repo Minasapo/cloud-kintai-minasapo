@@ -14,8 +14,8 @@ import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 
 import AttendanceEditProvider, {
   AttendanceEditContext,
-} from "../../AttendanceEditProvider";
-import type { AttendanceEditInputs } from "../../common";
+} from "@/features/attendance/edit/model/AttendanceEditProvider";
+import type { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 // react-hook-formのuseFormState/Controllerを軽量モック
 jest.mock("react-hook-form", () => ({

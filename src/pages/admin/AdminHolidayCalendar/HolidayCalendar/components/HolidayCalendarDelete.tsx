@@ -13,7 +13,7 @@ import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
 export default function HolidayCalendarDelete({
   holidayCalendar,

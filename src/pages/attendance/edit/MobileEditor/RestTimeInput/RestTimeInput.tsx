@@ -16,9 +16,9 @@ import {
   UseFieldArrayUpdate,
 } from "react-hook-form";
 
-import { AttendanceEditContext } from "../../AttendanceEditProvider";
-import { AttendanceEditInputs, RestInputs } from "../../common";
-import { Label } from "../Label";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs, RestInputs } from "@/features/attendance/edit/model/common";
+import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 import RestEndTimeInput from "./RestEndTimeInput";
 import RestStartTimeInput from "./RestStartTimeInputMobile";
 

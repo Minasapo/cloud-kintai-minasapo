@@ -29,7 +29,7 @@ import {
 import dayjs from "dayjs";
 import { useContext, useState } from "react";
 
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 /**
  * システムコメント一覧ダイアログを表示するReactコンポーネント。

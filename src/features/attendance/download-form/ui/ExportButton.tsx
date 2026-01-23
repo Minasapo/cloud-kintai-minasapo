@@ -1,4 +1,4 @@
-import { calcTotalRestTime } from "@features/attendance/edit/ui/items/RestTimeItem/RestTimeItem";
+import { calcTotalRestTime } from "@/entities/attendance/lib/timeCalculations";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import { Button } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";

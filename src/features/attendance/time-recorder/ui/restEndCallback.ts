@@ -9,9 +9,9 @@ import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
-import { getNowISOStringWithZeroSeconds } from "../lib/util";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 export function restEndCallback(
   cognitoUser: CognitoUser | null | undefined,

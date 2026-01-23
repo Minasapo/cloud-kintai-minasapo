@@ -19,7 +19,7 @@ import { useAppDispatchV2 } from "../../../app/hooks";
 import { AuthContext } from "../../../context/AuthContext";
 import * as MESSAGE_CODE from "../../../errors";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 import { AccountStatusTableCell } from "./AccountStatusTableCell";
 import { CreatedAtTableCell } from "./CreatedAtTableCell";
 import CreateStaffDialog from "./CreateStaffDialog";

@@ -12,7 +12,7 @@ import { Controller } from "react-hook-form";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
-import { AttendanceEditContext } from "../AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 const Label = styled(Typography)(() => ({
   width: "150px",

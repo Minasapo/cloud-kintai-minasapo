@@ -3,7 +3,9 @@ import type { PropsWithChildren, ReactElement } from "react";
 import type { Control, FieldValues } from "react-hook-form";
 
 // モック群
-jest.mock("@app/hooks", () => ({ useAppDispatchV2: () => jest.fn() }));
+jest.mock("react-redux", () => ({
+  useDispatch: () => jest.fn(),
+}));
 jest.mock("@entities/attendance/api/attendanceApi", () => ({
   useCreateAttendanceMutation: () => [jest.fn()],
   useUpdateAttendanceMutation: () => [jest.fn()],

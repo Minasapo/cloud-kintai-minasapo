@@ -9,8 +9,8 @@ import {
   UseFieldArrayUpdate,
 } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import { AttendanceControl, AttendanceFieldPath } from "../../../model/types";
 

@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // eslint-disable-next-line import/no-cycle
-import type { RootState } from "../store";
-
 export interface SnackbarState {
   success: string | null;
   error: string | null;
@@ -36,4 +34,6 @@ export const { setSnackbarSuccess, setSnackbarError, setSnackbarWarn } =
 
 export default snackbarSlice.reducer;
 
-export const selectSnackbar = (state: RootState) => state.snackbar;
+export type SnackbarRootState = { snackbar: SnackbarState };
+
+export const selectSnackbar = (state: SnackbarRootState) => state.snackbar;

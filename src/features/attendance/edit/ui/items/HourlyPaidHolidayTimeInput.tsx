@@ -4,8 +4,8 @@ import dayjs from "dayjs";
 import { useContext } from "react";
 import { Controller, FieldArrayWithId } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 /**
  * 時間単位休暇の開始/終了時刻を入力するための共通コンポーネント。

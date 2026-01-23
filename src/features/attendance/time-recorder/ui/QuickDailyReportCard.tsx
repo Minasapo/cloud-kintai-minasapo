@@ -13,12 +13,12 @@ import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useDispatch } from "react-redux";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import QuickDailyReportCardView from "@/shared/ui/time-recorder/QuickDailyReportCard";
 
 /**
@@ -58,7 +58,7 @@ export default function QuickDailyReportCard({
   staffId,
   date,
 }: QuickDailyReportCardProps) {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const [content, setContent] = useState("");
   const [savedContent, setSavedContent] = useState("");
   const [reportId, setReportId] = useState<string | null>(null);

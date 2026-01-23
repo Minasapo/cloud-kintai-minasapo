@@ -7,7 +7,7 @@ import { Control, UseFormGetValues, UseFormSetValue } from "react-hook-form";
 import {
   AttendanceEditInputs,
   RestInputs,
-} from "@/pages/attendance/edit/common";
+} from "@/features/attendance/edit/model/common";
 
 import { GoDirectlyFlagCheckbox } from "../GoDirectlyFlagCheckbox";
 import ProductionTimeItem from "../items/ProductionTimeItem";

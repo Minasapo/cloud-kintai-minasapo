@@ -33,7 +33,7 @@ import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 import { designTokenVar } from "@/shared/designSystem";

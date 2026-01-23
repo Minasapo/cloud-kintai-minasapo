@@ -6,8 +6,8 @@ import useAppConfig from "@entities/app-config/model/useAppConfig";
 import {
   AttendanceEditInputs,
   RestInputs,
-} from "@/pages/attendance/edit/common";
-import { Label } from "@/pages/attendance/edit/MobileEditor/Label";
+} from "@/features/attendance/edit/model/common";
+import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 
 import {
   AttendanceControl,

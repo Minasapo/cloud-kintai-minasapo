@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { useContext } from "react";
 import { Controller } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
+import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 import {
   AttendanceControl,

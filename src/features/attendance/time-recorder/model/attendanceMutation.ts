@@ -6,9 +6,9 @@ import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/app/slices/snackbarSlice";
+} from "@/shared/lib/store/snackbarSlice";
 
-import { getNowISOStringWithZeroSeconds } from "../lib/util";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
 
 type SnackbarMessage = Parameters<typeof setSnackbarSuccess>[0];
 

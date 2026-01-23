@@ -1,7 +1,7 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import { useEffect } from "react";
 
-import { setSnackbarError } from "@/app/slices/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 /**
  * 重複した勤怠データの警告をリッスンし、スナックバーで表示するカスタムフック
