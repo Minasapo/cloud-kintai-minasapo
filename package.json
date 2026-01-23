@@ -84,6 +84,7 @@
     "storybook:build": "storybook build",
     "lint": "eslint ./src/ --ext .ts,.tsx",
     "eslint": "npx eslint ./src/",
+    "typecheck": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "test:unit": "jest --passWithNoTests",
     "test:watch": "jest --watch",
