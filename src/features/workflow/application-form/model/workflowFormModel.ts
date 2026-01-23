@@ -16,7 +16,7 @@ import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   CLOCK_CORRECTION_LABEL,
   REVERSE_CATEGORY,
-} from "@/lib/workflowLabels";
+} from "@/entities/workflow/lib/workflowLabels";
 import { formatISOToTime } from "@/shared/lib/time";
 
 export { CLOCK_CORRECTION_CHECK_OUT_LABEL, CLOCK_CORRECTION_LABEL };

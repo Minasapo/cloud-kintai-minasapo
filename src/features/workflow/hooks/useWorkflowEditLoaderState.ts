@@ -12,7 +12,7 @@ import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
 import {
   CATEGORY_LABELS,
   resolveClockCorrectionLabel,
-} from "@/lib/workflowLabels";
+} from "@/entities/workflow/lib/workflowLabels";
 import { parseTimeToISO } from "@/shared/lib/time";
 
 export type WorkflowEditLoaderState = {

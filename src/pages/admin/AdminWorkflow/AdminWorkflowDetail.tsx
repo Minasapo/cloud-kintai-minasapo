@@ -48,7 +48,7 @@ import { AttendanceTime } from "@/lib/time/AttendanceTime";
 import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   getWorkflowCategoryLabel,
-} from "@/lib/workflowLabels";
+} from "@/entities/workflow/lib/workflowLabels";
 
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
 

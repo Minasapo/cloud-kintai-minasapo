@@ -26,7 +26,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { getWorkflowCategoryLabel } from "@/lib/workflowLabels";
+import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
 import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";

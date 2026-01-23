@@ -29,7 +29,7 @@ import {
   CATEGORY_LABELS,
   getWorkflowCategoryLabel,
   STATUS_LABELS,
-} from "@/lib/workflowLabels";
+} from "@/entities/workflow/lib/workflowLabels";
 
 const STATUS_ALL_VALUE = "__ALL__";
 const STATUS_EXCLUDED_FROM_DEFAULT: WorkflowStatus[] = [

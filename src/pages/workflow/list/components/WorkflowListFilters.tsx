@@ -19,7 +19,7 @@ import {
 } from "react";
 
 import type { UseWorkflowListFiltersResult } from "@/features/workflow/list/useWorkflowListFilters";
-import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/workflowLabels";
+import { CATEGORY_LABELS, STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
 import { designTokenVar } from "@/shared/designSystem";
 
 export type WorkflowListFiltersHandle = {

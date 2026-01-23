@@ -1,7 +1,7 @@
 import { Chip } from "@mui/material";
 import { WorkflowStatus } from "@shared/api/graphql/types";
 
-import { REVERSE_STATUS, STATUS_LABELS } from "@/lib/workflowLabels";
+import { REVERSE_STATUS, STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
 import { designTokenVar } from "@/shared/designSystem";
 
 type FeedbackKey = "success" | "warning" | "danger" | "info";
