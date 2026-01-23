@@ -44,7 +44,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/lib/reducers/snackbarReducer";
-import { AttendanceTime } from "@/lib/time/AttendanceTime";
+import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
 import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   getWorkflowCategoryLabel,
