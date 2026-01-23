@@ -1,4 +1,4 @@
-import { ChangeRequestDiffTable } from "@features/attendance/edit/ChangeRequestDialog/ChangeRequestDiffTable";
+import { ChangeRequestDiffTable } from "@features/attendance/edit/ui/ChangeRequestDialog/ChangeRequestDiffTable";
 import {
   Button,
   Dialog,

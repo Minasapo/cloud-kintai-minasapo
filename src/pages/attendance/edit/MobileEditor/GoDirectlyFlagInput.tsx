@@ -1,4 +1,4 @@
-import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/GoDirectlyFlagCheckbox";
+import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/ui/GoDirectlyFlagCheckbox";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Alert,Switch } from "@mui/material";
 import { useContext, useState } from "react";

@@ -28,7 +28,7 @@ import {
   AttendanceRowVariant,
   attendanceRowVariantStyles,
   getAttendanceRowVariant,
-} from "../getAttendanceRowClassName";
+} from "../../lib/getAttendanceRowClassName";
 
 export default function TableBodyRow({
   attendance,

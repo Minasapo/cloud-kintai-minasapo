@@ -17,7 +17,7 @@ import type { UseFormSetValue } from "react-hook-form";
 
 import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
-import { useQuickInputActions } from "./hooks/useQuickInputActions";
+import { useQuickInputActions } from "../model/useQuickInputActions";
 
 type Props = {
   setValue: UseFormSetValue<AttendanceEditInputs>;

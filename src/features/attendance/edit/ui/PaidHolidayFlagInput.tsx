@@ -16,7 +16,7 @@ import {
   AttendanceControllerField,
   AttendanceGetValues,
   AttendanceSetValue,
-} from "./types";
+} from "../model/types";
 
 type PaidHolidayFlagField = AttendanceControllerField<"paidHolidayFlag">;
 

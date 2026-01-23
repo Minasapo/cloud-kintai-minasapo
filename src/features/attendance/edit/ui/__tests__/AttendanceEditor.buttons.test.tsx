@@ -29,7 +29,7 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => jest.fn(),
   useParams: () => ({ targetWorkDate: "20240115", staffId: "dummy" }),
 }));
-jest.mock("../hooks/useAttendanceRecord", () => ({
+jest.mock("../../model/useAttendanceRecord", () => ({
   useAttendanceRecord: () => ({
     attendance: null,
     staff: null,

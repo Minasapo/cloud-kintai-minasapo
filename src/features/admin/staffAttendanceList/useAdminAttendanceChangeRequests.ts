@@ -1,5 +1,5 @@
 import { useAppDispatchV2 } from "@app/hooks";
-import handleApproveChangeRequest from "@features/attendance/edit/ChangeRequestDialog/handleApproveChangeRequest";
+import handleApproveChangeRequest from "@features/attendance/edit/ui/ChangeRequestDialog/handleApproveChangeRequest";
 import {
   Attendance,
   AttendanceChangeRequest,

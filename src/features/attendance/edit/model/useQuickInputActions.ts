@@ -8,7 +8,7 @@ import {
   AttendanceFieldValue,
   AttendanceGetValues,
   AttendanceSetValue,
-} from "../types";
+} from "./types";
 
 type ButtonRoleMode = "all" | "admin" | "staff";
 

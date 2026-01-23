@@ -17,7 +17,7 @@ import {
   AttendanceBooleanFieldName,
   AttendanceControl,
   AttendanceControllerField,
-} from "./types";
+} from "../model/types";
 
 const DesktopLabel = styled(Typography)(() => ({
   width: "150px",

@@ -29,7 +29,7 @@ import { useNavigate } from "react-router-dom";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { AttendanceStatus } from "@/lib/AttendanceState";
 
-import { getStatus, isHolidayLike } from "./attendanceStatusUtils";
+import { getStatus, isHolidayLike } from "../../lib/attendanceStatusUtils";
 
 const CalendarContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(1),

@@ -1,4 +1,4 @@
-import AttendanceStatistics from "@features/attendance/statistics/AttendanceStatistics";
+import AttendanceStatistics from "@features/attendance/statistics/ui/AttendanceStatistics";
 import Box from "@mui/material/Box";
 import Page from "@shared/ui/page/Page";
 import { useContext } from "react";

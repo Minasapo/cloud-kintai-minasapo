@@ -41,7 +41,7 @@ import {
   AttendanceRowVariant,
   attendanceRowVariantStyles,
   getAttendanceRowVariant,
-} from "./getAttendanceRowClassName";
+} from "../lib/getAttendanceRowClassName";
 
 const DesktopBox = styled(Box)(({ theme }) => ({
   padding: "0px 40px 40px 40px",

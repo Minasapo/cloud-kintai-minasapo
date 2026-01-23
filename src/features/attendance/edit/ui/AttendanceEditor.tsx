@@ -65,7 +65,7 @@ import { AttendanceEditFormSkeleton } from "./components/AttendanceEditFormSkele
 import { VacationTabs } from "./components/VacationTabs";
 // eslint-disable-next-line import/no-cycle
 import EditAttendanceHistoryList from "./EditAttendanceHistoryList/EditAttendanceHistoryList";
-import { useAttendanceRecord } from "./hooks/useAttendanceRecord";
+import { useAttendanceRecord } from "../model/useAttendanceRecord";
 import IsDeemedHolidayFlagInput from "./IsDeemedHolidayFlagInput";
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,

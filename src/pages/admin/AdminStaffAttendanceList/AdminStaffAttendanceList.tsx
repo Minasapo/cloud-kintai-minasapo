@@ -21,7 +21,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
-import DesktopCalendarView from "@/features/attendance/list/DesktopCalendarView";
+import DesktopCalendarView from "@/features/attendance/list/ui/DesktopCalendarView";
 import { useSplitView } from "@/features/splitView";
 import { AttendanceDate } from "@/lib/AttendanceDate";
 import { designTokenVar } from "@/shared/designSystem";

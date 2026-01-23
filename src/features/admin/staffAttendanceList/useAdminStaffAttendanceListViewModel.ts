@@ -24,7 +24,7 @@ import * as MESSAGE_CODE from "@/errors";
 import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
-} from "@/features/attendance/list/getAttendanceRowClassName";
+} from "@/features/attendance/list/lib/getAttendanceRowClassName";
 import fetchStaff from "@/hooks/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
 import { ChangeRequest } from "@/lib/ChangeRequest";

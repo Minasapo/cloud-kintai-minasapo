@@ -1,4 +1,4 @@
-import PaidHolidayFlagInputCommon from "@features/attendance/edit/PaidHolidayFlagInput";
+import PaidHolidayFlagInputCommon from "@features/attendance/edit/ui/PaidHolidayFlagInput";
 import { useContext } from "react";
 
 import { AttendanceEditContext } from "../AttendanceEditProvider";

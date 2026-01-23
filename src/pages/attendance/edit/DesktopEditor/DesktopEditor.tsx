@@ -1,12 +1,12 @@
-import { VacationTabs } from "@features/attendance/edit/components/VacationTabs";
-import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/GoDirectlyFlagCheckbox";
+import { VacationTabs } from "@features/attendance/edit/ui/components/VacationTabs";
+import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/ui/GoDirectlyFlagCheckbox";
 import HourlyPaidHolidayTimeItem, {
   calcTotalHourlyPaidHolidayTime,
-} from "@features/attendance/edit/items/HourlyPaidHolidayTimeItem";
-import ProductionTimeItem from "@features/attendance/edit/items/ProductionTimeItem";
-import StaffNameItem from "@features/attendance/edit/items/StaffNameItem";
-import WorkTypeItem from "@features/attendance/edit/items/WorkTypeItem";
-import QuickInputButtons from "@features/attendance/edit/QuickInputButtons";
+} from "@features/attendance/edit/ui/items/HourlyPaidHolidayTimeItem";
+import ProductionTimeItem from "@features/attendance/edit/ui/items/ProductionTimeItem";
+import StaffNameItem from "@features/attendance/edit/ui/items/StaffNameItem";
+import WorkTypeItem from "@features/attendance/edit/ui/items/WorkTypeItem";
+import QuickInputButtons from "@features/attendance/edit/ui/QuickInputButtons";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
   Alert,

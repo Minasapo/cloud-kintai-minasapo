@@ -1,4 +1,4 @@
-import QuickInputButtonsMobile from "@features/attendance/edit/QuickInputButtonsMobile";
+import QuickInputButtonsMobile from "@features/attendance/edit/ui/QuickInputButtonsMobile";
 import { Alert, AlertTitle, Box, Stack, Typography } from "@mui/material";
 import GroupContainerMobile from "@shared/ui/group-container/GroupContainerMobile";
 import Title from "@shared/ui/typography/Title";

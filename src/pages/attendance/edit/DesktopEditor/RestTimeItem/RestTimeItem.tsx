@@ -1,4 +1,4 @@
-import { LunchRestTimeNotSetWarning } from "@features/attendance/edit/LunchRestTimeNotSetWarning";
+import { LunchRestTimeNotSetWarning } from "@features/attendance/edit/ui/LunchRestTimeNotSetWarning";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import { Box, IconButton, Stack, styled, Typography } from "@mui/material";
 import dayjs from "dayjs";

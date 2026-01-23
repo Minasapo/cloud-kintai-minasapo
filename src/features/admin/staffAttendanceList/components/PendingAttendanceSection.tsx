@@ -1,8 +1,8 @@
-import { AttendanceStatusTooltip } from "@features/attendance/list/AttendanceStatusTooltip";
+import { AttendanceStatusTooltip } from "@features/attendance/list/ui/AttendanceStatusTooltip";
 import {
   AttendanceRowVariant,
   attendanceRowVariantStyles,
-} from "@features/attendance/list/getAttendanceRowClassName";
+} from "@features/attendance/list/lib/getAttendanceRowClassName";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,

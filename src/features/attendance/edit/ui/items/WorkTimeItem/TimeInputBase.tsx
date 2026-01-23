@@ -12,7 +12,7 @@ import {
   AttendanceFieldValue,
   AttendanceSetValue,
   AttendanceTimeFieldName,
-} from "../../types";
+} from "../../../model/types";
 
 interface TimeInputBaseProps<TFieldName extends AttendanceTimeFieldName> {
   name: TFieldName;

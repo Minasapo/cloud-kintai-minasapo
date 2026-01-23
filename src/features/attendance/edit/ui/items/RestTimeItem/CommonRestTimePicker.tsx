@@ -12,7 +12,7 @@ import {
 import { AttendanceEditContext } from "@/pages/attendance/edit/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@/pages/attendance/edit/common";
 
-import { AttendanceControl, AttendanceFieldPath } from "../../types";
+import { AttendanceControl, AttendanceFieldPath } from "../../../model/types";
 
 interface CommonRestTimePickerProps {
   name: AttendanceFieldPath;

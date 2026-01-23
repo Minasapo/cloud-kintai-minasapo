@@ -1,4 +1,4 @@
-import WorkDateItem from "@features/attendance/edit/items/WorkDateItem";
+import WorkDateItem from "@features/attendance/edit/ui/items/WorkDateItem";
 import { useContext } from "react";
 
 import { AttendanceEditContext } from "../AttendanceEditProvider";

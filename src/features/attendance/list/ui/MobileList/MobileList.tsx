@@ -12,7 +12,7 @@ import dayjs, { Dayjs } from "dayjs";
 
 import { AttendanceStatus } from "@/lib/AttendanceState";
 
-import { getStatus } from "./attendanceStatusUtils";
+import { getStatus } from "../../lib/attendanceStatusUtils";
 import MobileCalendar from "./MobileCalendar";
 
 const MobileBox = styled(Box)(({ theme }) => ({

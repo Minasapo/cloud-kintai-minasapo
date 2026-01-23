@@ -1,6 +1,6 @@
 import { Grid, TextField } from "@mui/material";
 
-import { DailyReportFormChangeHandler, DailyReportFormData } from "./types";
+import { DailyReportFormChangeHandler, DailyReportFormData } from "../model/types";
 
 export type DailyReportFormFieldsProps = {
   form: DailyReportFormData;
