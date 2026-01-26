@@ -18,16 +18,16 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
-import {
-  AttendanceRowVariant,
-  attendanceRowVariantStyles,
-} from "@/entities/attendance/ui/rowVariant";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
 import { UpdatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
 import { WorkDateTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
 import { WorkTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+} from "@/entities/attendance/ui/rowVariant";
 
 import type { PendingAttendanceControls } from "./PendingAttendanceSection";
 

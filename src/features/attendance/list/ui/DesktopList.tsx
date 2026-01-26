@@ -27,11 +27,6 @@ import { NavigateFunction } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import {
-  AttendanceRowVariant,
-  attendanceRowVariantStyles,
-  getAttendanceRowVariant,
-} from "@/entities/attendance/ui/rowVariant";
 import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
@@ -39,6 +34,11 @@ import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/
 import { UpdatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
 import { WorkDateTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
 import { WorkTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+  getAttendanceRowVariant,
+} from "@/entities/attendance/ui/rowVariant";
 
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
