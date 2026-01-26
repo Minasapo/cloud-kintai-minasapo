@@ -30,14 +30,14 @@ import { useCallback, useEffect } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
+import CreatedAtTableCell from "@/features/admin/holidayCalendar/ui/components/CreatedAtTableCell";
+import HolidayCalendarDelete from "@/features/admin/holidayCalendar/ui/components/HolidayCalendarDelete";
+import HolidayDateTableCell from "@/features/admin/holidayCalendar/ui/components/HolidayDateTableCell";
+import HolidayNameTableCell from "@/features/admin/holidayCalendar/ui/components/HolidayNameTableCell";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import { AddHolidayCalendar } from "./AddHolidayCalendar";
-import CreatedAtTableCell from "./components/CreatedAtTableCell";
-import HolidayCalendarDelete from "./components/HolidayCalendarDelete";
-import HolidayDateTableCell from "./components/HolidayDateTableCell";
-import HolidayNameTableCell from "./components/HolidayNameTableCell";
 import { CSVFilePicker } from "./CSVFilePicker";
 import HolidayCalendarCopy from "./HolidayCalendarCopy";
 import HolidayCalendarEdit from "./HolidayCalendarEdit";
