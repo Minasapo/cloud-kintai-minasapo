@@ -46,6 +46,7 @@ import { useParams } from "react-router-dom";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import WORK_TYPE_OPTIONS from "@/entities/staff/lib/workTypeOptions";
+import { ROLE_OPTIONS } from "@/features/admin/staff/ui/CreateStaffDialog";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -53,7 +54,6 @@ import {
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
-import { ROLE_OPTIONS } from "../AdminStaff/CreateStaffDialog";
 
 type Inputs = {
   staffId?: string | null;

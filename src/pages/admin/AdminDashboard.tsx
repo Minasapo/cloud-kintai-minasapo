@@ -33,7 +33,7 @@ const AdminAttendanceComponent = lazy(() => import("./AdminAttendance"));
 const AdminDailyReportManagementComponent = lazy(
   () => import("./AdminDailyReportManagement/AdminDailyReportManagement")
 );
-const AdminStaffComponent = lazy(() => import("./AdminStaff/AdminStaff"));
+const AdminStaffComponent = lazy(() => import("@/pages/admin/AdminStaff/AdminStaff"));
 const ShiftPlanManagementComponent = lazy(
   () => import("./ShiftPlanManagement/ShiftPlanManagement")
 );

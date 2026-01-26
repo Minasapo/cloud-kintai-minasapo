@@ -1,4 +1,4 @@
-import "./styles.scss";
+import "@/features/admin/staff/ui/styles.scss";
 
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
@@ -16,6 +16,10 @@ import {
 } from "@mui/material";
 import { useContext, useState } from "react";
 
+import CreateStaffDialog from "@/features/admin/staff/ui/CreateStaffDialog";
+import { EditButton } from "@/features/admin/staff/ui/EditButton";
+import { MoreActionButton } from "@/features/admin/staff/ui/MoreActionButton/MoreActionButton";
+import SyncCognitoUser from "@/features/admin/staff/ui/SyncCognitoUser";
 import { AccountStatusTableCell } from "@/features/admin/staff/ui/tableCells/AccountStatusTableCell";
 import { CreatedAtTableCell } from "@/features/admin/staff/ui/tableCells/CreatedAtTableCell";
 import { RoleTableCell } from "@/features/admin/staff/ui/tableCells/RoleTableCell";
@@ -28,10 +32,6 @@ import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 import { useAppDispatchV2 } from "../../../app/hooks";
 import { AuthContext } from "../../../context/AuthContext";
 import * as MESSAGE_CODE from "../../../errors";
-import CreateStaffDialog from "./CreateStaffDialog";
-import { EditButton } from "./EditButton";
-import { MoreActionButton } from "./MoreActionButton/MoreActionButton";
-import SyncCognitoUser from "./SyncCognitoUser";
 
 export default function AdminStaff() {
   const dispatch = useAppDispatchV2();
