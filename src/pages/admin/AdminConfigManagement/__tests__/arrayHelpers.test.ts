@@ -3,7 +3,7 @@ import {
   removeItemAt,
   toggleEnabledAt,
   updateItem,
-} from "../arrayHelpers";
+} from "@/features/admin/configManagement/lib/arrayHelpers";
 
 describe("arrayHelpers", () => {
   test("appendItem adds item to end", () => {

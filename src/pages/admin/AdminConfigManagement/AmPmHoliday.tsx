@@ -18,17 +18,16 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, E14002, S14001, S14002 } from "@/errors";
 import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
-
-import {
   DEFAULT_AM_HOLIDAY_END,
   DEFAULT_AM_HOLIDAY_START,
   DEFAULT_PM_HOLIDAY_END,
   DEFAULT_PM_HOLIDAY_START,
   TIME_FORMAT,
-} from "./constants";
+} from "@/features/admin/configManagement/lib/constants";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 
 export default function AmPmHoliday() {
   const {

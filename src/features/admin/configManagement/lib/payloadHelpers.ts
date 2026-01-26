@@ -4,7 +4,7 @@ import {
 } from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
 
-import { DEFAULT_CONFIG_NAME, TIME_FORMAT } from "./constants";
+import { DEFAULT_CONFIG_NAME, TIME_FORMAT } from "@/features/admin/configManagement/lib/constants";
 
 export const formatTime = (time: Dayjs) => time.format(TIME_FORMAT);
 

@@ -7,7 +7,7 @@ import {
   validateTimeWithinRange,
   validateWorkTimeConfig,
   VALIDATION_ERRORS,
-} from "../validation";
+} from "@/features/admin/configManagement/lib/validation";
 
 /**
  * テスト用ヘルパー: 時刻文字列をDayjsオブジェクトに変換

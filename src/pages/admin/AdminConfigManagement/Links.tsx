@@ -11,12 +11,12 @@ import { useContext, useEffect, useState } from "react";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
+import { appendItem, removeItemAt, updateItem } from "@/features/admin/configManagement/lib/arrayHelpers";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import { appendItem, removeItemAt, updateItem } from "./arrayHelpers";
 import LinkListSection from "./LinkListSection";
 
 export default function Links() {

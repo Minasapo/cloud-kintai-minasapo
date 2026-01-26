@@ -13,17 +13,17 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
-
-import {
   appendItem,
   removeItemAt,
   toggleEnabledAt,
   updateItem,
-} from "./arrayHelpers";
-import { TIME_FORMAT } from "./constants";
+} from "@/features/admin/configManagement/lib/arrayHelpers";
+import { TIME_FORMAT } from "@/features/admin/configManagement/lib/constants";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
+
 import QuickInputSection from "./QuickInputSection";
 
 type Entry = { time: Dayjs; enabled: boolean };

@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 
-import { DEFAULT_CONFIG_NAME } from "../constants";
+import { DEFAULT_CONFIG_NAME } from "@/features/admin/configManagement/lib/constants";
 import {
   buildCreatePayload,
   buildUpdatePayload,
   ConfigFormState,
-} from "../payloadHelpers";
+} from "@/features/admin/configManagement/lib/payloadHelpers";
 
 describe("Payload Builders", () => {
   const baseFormState: Omit<ConfigFormState, "id"> = {

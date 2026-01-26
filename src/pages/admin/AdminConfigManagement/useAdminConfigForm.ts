@@ -6,25 +6,24 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
-
-import {
   appendItem,
   removeItemAt,
   toggleEnabledAt,
   updateItem,
-} from "./arrayHelpers";
+} from "@/features/admin/configManagement/lib/arrayHelpers";
 import {
   DEFAULT_AM_HOLIDAY_END,
   DEFAULT_AM_HOLIDAY_START,
   DEFAULT_PM_HOLIDAY_END,
   DEFAULT_PM_HOLIDAY_START,
   TIME_FORMAT,
-} from "./constants";
-import { buildCreatePayload, buildUpdatePayload } from "./payloadHelpers";
-import { validateAdminConfigForm } from "./validation";
+} from "@/features/admin/configManagement/lib/constants";
+import { buildCreatePayload, buildUpdatePayload } from "@/features/admin/configManagement/lib/payloadHelpers";
+import { validateAdminConfigForm } from "@/features/admin/configManagement/lib/validation";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 
 export type QuickInputEntry = { time: Dayjs; enabled: boolean };
 export type LinkItem = {
