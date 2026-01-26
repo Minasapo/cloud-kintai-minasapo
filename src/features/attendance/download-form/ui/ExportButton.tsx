@@ -8,7 +8,7 @@ import { useContext } from "react";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { FLAG_VALUES } from "@/entities/attendance/lib/businessLogic";
-import { calcTotalRestTime } from "@/entities/attendance/lib/timeCalculations";
+import { calcTotalRestTime } from "@/entities/attendance/lib/time";
 import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
 
 import downloadAttendances from "../lib/downloadAttendances";

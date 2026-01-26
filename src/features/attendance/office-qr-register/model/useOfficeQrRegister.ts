@@ -21,7 +21,7 @@ import {
   clockOutAction,
 } from "@/entities/attendance/lib/attendance/attendanceActions";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,

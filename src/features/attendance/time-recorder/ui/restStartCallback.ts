@@ -3,7 +3,7 @@ import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance, CreateOperationLogInput } from "@shared/api/graphql/types";
 
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";

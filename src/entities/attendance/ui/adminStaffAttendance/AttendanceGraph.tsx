@@ -5,7 +5,7 @@ import { lazy, Suspense, useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/timeCalculations";
+import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
 
 const LazyBarChart = lazy(async () => {
   const module = await import("@mui/x-charts/BarChart");

@@ -27,7 +27,7 @@ import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
 import { Holiday } from "@/entities/attendance/lib/Holiday";
-import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/timeCalculations";
+import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
 const DAYS_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];

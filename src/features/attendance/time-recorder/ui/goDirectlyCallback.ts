@@ -8,7 +8,7 @@ import {
 
 import { GoDirectlyFlag } from "@/entities/attendance/lib/attendance/attendanceActions";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";

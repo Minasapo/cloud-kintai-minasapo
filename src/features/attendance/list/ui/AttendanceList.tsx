@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/timeCalculations";
+import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { designTokenVar } from "@/shared/designSystem";
 /**

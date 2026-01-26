@@ -1,7 +1,7 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance } from "@shared/api/graphql/types";
 
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/timeUtils";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";
 import {
