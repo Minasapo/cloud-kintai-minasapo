@@ -19,7 +19,7 @@ import { AuthContext } from "@/context/AuthContext";
 import {
   clockInAction,
   clockOutAction,
-} from "@/entities/attendance/lib/attendance/attendanceActions";
+} from "@/entities/attendance/lib/actions/attendanceActions";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import { Logger } from "@/shared/lib/logger";

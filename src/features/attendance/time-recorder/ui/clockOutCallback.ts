@@ -12,7 +12,7 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
-import { ReturnDirectlyFlag } from "@/entities/attendance/lib/attendance/attendanceActions";
+import { ReturnDirectlyFlag } from "@/entities/attendance/lib/actions/attendanceActions";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";

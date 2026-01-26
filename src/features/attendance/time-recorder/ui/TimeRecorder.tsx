@@ -45,8 +45,8 @@ import {
   restEndAction,
   restStartAction,
   ReturnDirectlyFlag,
-} from "@/entities/attendance/lib/attendance/attendanceActions";
-import { getWorkStatus } from "@/entities/attendance/lib/attendance/workStatus";
+} from "@/entities/attendance/lib/actions/attendanceActions";
+import { getWorkStatus } from "@/entities/attendance/lib/actions/workStatus";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import * as MESSAGE_CODE from "@/errors";

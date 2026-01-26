@@ -6,7 +6,7 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
-import { GoDirectlyFlag } from "@/entities/attendance/lib/attendance/attendanceActions";
+import { GoDirectlyFlag } from "@/entities/attendance/lib/actions/attendanceActions";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
