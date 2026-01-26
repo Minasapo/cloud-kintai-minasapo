@@ -28,7 +28,7 @@ import {
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import { useAppDispatchV2 } from "../../../app/hooks";
+import { useAppDispatchV2 } from "@/app/hooks";
 
 type BulkFormValues = {
   startMonth: dayjs.Dayjs | null;
@@ -94,19 +94,19 @@ export default function JobTermBulkRegister({
   const considerWeekend = watch("considerWeekend");
   const considerHolidayCalendar = watch("considerHolidayCalendar");
   const considerCompanyHolidayCalendar = watch(
-    "considerCompanyHolidayCalendar"
+    "considerCompanyHolidayCalendar",
   );
 
   const holidaySet = useMemo(() => {
     const dates = holidayCalendars.map((item) =>
-      dayjs(item.holidayDate).format(AttendanceDate.DataFormat)
+      dayjs(item.holidayDate).format(AttendanceDate.DataFormat),
     );
     return new Set(dates);
   }, [holidayCalendars]);
 
   const companyHolidaySet = useMemo(() => {
     const dates = companyHolidayCalendars.map((item) =>
-      dayjs(item.holidayDate).format(AttendanceDate.DataFormat)
+      dayjs(item.holidayDate).format(AttendanceDate.DataFormat),
     );
     return new Set(dates);
   }, [companyHolidayCalendars]);
@@ -139,7 +139,7 @@ export default function JobTermBulkRegister({
       considerWeekend,
       companyHolidaySet,
       holidaySet,
-    ]
+    ],
   );
 
   const adjustCloseDate = useCallback(
@@ -162,7 +162,7 @@ export default function JobTermBulkRegister({
 
       return { adjusted: current, lastReasons };
     },
-    [adjustDirection, isNonWorkingDay]
+    [adjustDirection, isNonWorkingDay],
   );
 
   const previewItems = useMemo<PreviewItem[]>(() => {
@@ -171,8 +171,8 @@ export default function JobTermBulkRegister({
     const startOfMonth = startMonth.startOf("month");
     const existingMonthKeys = new Set(
       existingCloseDates.map((closeDate) =>
-        dayjs(closeDate.closeDate).format("YYYY-MM")
-      )
+        dayjs(closeDate.closeDate).format("YYYY-MM"),
+      ),
     );
 
     const baseItems = Array.from({ length: monthCount }).map((_, index) => {
@@ -234,7 +234,7 @@ export default function JobTermBulkRegister({
   const onSubmit = handleSubmit(async () => {
     if (creatableItems.length === 0) {
       dispatch(
-        setSnackbarError("登録可能な月がありません。すでに登録済みです。")
+        setSnackbarError("登録可能な月がありません。すでに登録済みです。"),
       );
       return;
     }
@@ -251,8 +251,8 @@ export default function JobTermBulkRegister({
 
       dispatch(
         setSnackbarSuccess(
-          `${creatableItems.length}件の集計対象月を登録しました`
-        )
+          `${creatableItems.length}件の集計対象月を登録しました`,
+        ),
       );
     } catch {
       dispatch(setSnackbarError("集計対象月の登録に失敗しました"));
@@ -360,7 +360,7 @@ export default function JobTermBulkRegister({
                 {
                   shouldValidate: true,
                   shouldDirty: true,
-                }
+                },
               )
             }
           >
@@ -413,7 +413,7 @@ export default function JobTermBulkRegister({
                       e.target.checked,
                       {
                         shouldDirty: true,
-                      }
+                      },
                     )
                   }
                 />

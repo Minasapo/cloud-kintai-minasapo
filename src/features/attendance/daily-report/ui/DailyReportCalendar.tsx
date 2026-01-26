@@ -1,6 +1,8 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   PickersDay,
   type PickersDayProps,
@@ -57,18 +59,20 @@ export function DailyReportCalendar({
           />
         );
       },
-    [reportedDateSet]
+    [reportedDateSet],
   );
 
   return (
     <Paper variant="outlined" sx={{ height: "100%" }}>
       <Box sx={{ p: 1 }}>
-        <DateCalendar
-          value={value}
-          onChange={onChange}
-          reduceAnimations
-          slots={{ day: CalendarDay }}
-        />
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
+          <DateCalendar
+            value={value}
+            onChange={onChange}
+            reduceAnimations
+            slots={{ day: CalendarDay }}
+          />
+        </LocalizationProvider>
         <Typography
           variant="caption"
           color="text.secondary"

@@ -5,6 +5,8 @@ import { CloseDate } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { lazy, Suspense, useMemo, useState } from "react";
 
+import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
 import EditJobTermInputDialog from "@/features/admin/jobTerm/ui/EditJobTermInputDialog";
 import JobTermBulkRegister from "@/features/admin/jobTerm/ui/JobTermBulkRegister";
 import {
@@ -13,10 +15,9 @@ import {
 } from "@/shared/lib/store/snackbarSlice";
 import PageLoader from "@/shared/ui/feedback/PageLoader";
 
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
-
-const JobTermTable = lazy(() => import("@/features/admin/jobTerm/ui/JobTermTable"));
+const JobTermTable = lazy(
+  () => import("@/features/admin/jobTerm/ui/JobTermTable"),
+);
 
 export default function JobTerm() {
   const dispatch = useAppDispatchV2();
@@ -34,10 +35,10 @@ export default function JobTerm() {
 
   const candidateCloseDates = useMemo(() => {
     const upcoming = Array.from(Array(12).keys()).map((i) =>
-      dayjs().add(i, "month").startOf("month")
+      dayjs().add(i, "month").startOf("month"),
     );
     const existing = closeDates.map((item) =>
-      dayjs(item.closeDate).startOf("month")
+      dayjs(item.closeDate).startOf("month"),
     );
 
     const merged = [...upcoming, ...existing];
@@ -86,7 +87,7 @@ export default function JobTerm() {
             onDelete={(row) => {
               // eslint-disable-next-line no-alert
               const result = window.confirm(
-                "本当に削除しますか？この操作は取り消せません。"
+                "本当に削除しますか？この操作は取り消せません。",
               );
               if (!result) return;
 

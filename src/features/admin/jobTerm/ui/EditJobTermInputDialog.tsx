@@ -11,15 +11,14 @@ import dayjs from "dayjs";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import * as MESSAGE_CODE from "@/errors";
 import { defaultValues, Inputs } from "@/features/admin/jobTerm/lib/common";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
-import { useAppDispatchV2 } from "../../../app/hooks";
-import * as MESSAGE_CODE from "../../../errors";
 
 export default function EditJobTermInputDialog({
   targetData,

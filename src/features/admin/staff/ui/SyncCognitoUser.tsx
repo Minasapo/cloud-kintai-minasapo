@@ -11,7 +11,7 @@ import {
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import * as MESSAGE_CODE from "../../../errors";
+import * as MESSAGE_CODE from "@/errors";
 
 export default function SyncCognitoUser({
   staffs,

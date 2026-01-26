@@ -29,9 +29,9 @@ import { UpdatedAtTableCell } from "@/features/admin/staff/ui/tableCells/Updated
 import { WorkTypeTableCell } from "@/features/admin/staff/ui/tableCells/WorkTypeTableCell";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
-import { useAppDispatchV2 } from "../../../app/hooks";
-import { AuthContext } from "../../../context/AuthContext";
-import * as MESSAGE_CODE from "../../../errors";
+import { useAppDispatchV2 } from "@/app/hooks";
+import { AuthContext } from "@/context/AuthContext";
+import * as MESSAGE_CODE from "@/errors";
 
 export default function AdminStaff() {
   const dispatch = useAppDispatchV2();

@@ -1,4 +1,7 @@
-import { StaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  StaffRole,
+  StaffType,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { Autocomplete, Box, CircularProgress, Stack } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -18,10 +21,10 @@ import {
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import * as MESSAGE_CODE from "../../../errors";
-import addUserToGroup from "../../../hooks/common/addUserToGroup";
-import createCognitoUser from "../../../hooks/common/createCognitoUser";
-import { handleSyncCognitoUser } from "./handleSyncCognitoUser";
+import * as MESSAGE_CODE from "@/errors";
+import addUserToGroup from "@/hooks/common/addUserToGroup";
+import createCognitoUser from "@/hooks/common/createCognitoUser";
+import { handleSyncCognitoUser } from "@/features/admin/staff/model/handleSyncCognitoUser";
 
 type Inputs = {
   familyName?: string;
@@ -96,7 +99,7 @@ export default function CreateStaffDialog({
       staffs,
       refreshStaff,
       createStaff,
-      updateStaff
+      updateStaff,
     ).catch(() => {
       dispatch(setSnackbarError(MESSAGE_CODE.E10001));
     });
@@ -155,7 +158,7 @@ export default function CreateStaffDialog({
                     {...field}
                     value={
                       ROLE_OPTIONS.find(
-                        (option) => String(option.value) === field.value
+                        (option) => String(option.value) === field.value,
                       ) ?? null
                     }
                     disablePortal

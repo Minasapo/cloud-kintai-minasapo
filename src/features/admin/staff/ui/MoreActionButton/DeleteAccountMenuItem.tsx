@@ -15,8 +15,8 @@ import {
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import * as MESSAGE_CODE from "../../../../errors";
-import deleteCognitoUser from "../../../../hooks/common/deleteCognitoUser";
+import * as MESSAGE_CODE from "@/errors";
+import deleteCognitoUser from "@/hooks/common/deleteCognitoUser";
 
 export function DeleteAccountMenuItem({
   staff,
@@ -36,7 +36,7 @@ export function DeleteAccountMenuItem({
       const messages = [];
       messages.push(`「${familyName} ${givenName}」のアカウントを削除します。`);
       messages.push(
-        "削除すると元に戻せないことを理解した上で、削除処理を実行しますか?"
+        "削除すると元に戻せないことを理解した上で、削除処理を実行しますか?",
       );
       return messages.join("\n");
     })();

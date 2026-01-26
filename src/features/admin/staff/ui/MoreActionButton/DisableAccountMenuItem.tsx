@@ -12,8 +12,8 @@ import { useDispatch } from "react-redux";
 
 import { setSnackbarSuccess } from "@/shared/lib/store/snackbarSlice";
 
-import * as MESSAGE_CODE from "../../../../errors";
-import disableStaff from "../../../../hooks/common/disableStaff";
+import * as MESSAGE_CODE from "@/errors";
+import disableStaff from "@/hooks/common/disableStaff";
 
 export function DisableAccountMenuItem({
   staff,

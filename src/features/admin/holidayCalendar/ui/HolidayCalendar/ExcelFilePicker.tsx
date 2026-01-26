@@ -26,7 +26,7 @@ import {
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import company_holiday from "../../../../templates/company_holiday.csv";
+import company_holiday from "@/templates/company_holiday.csv";
 
 const CSV_DOWNLOAD_FILENAME = "company_holiday.csv";
 const CSV_PARSE_ERROR_MESSAGE =
@@ -84,7 +84,7 @@ export function ExcelFilePicker({
   bulkCreateCompanyHolidayCalendar,
 }: {
   bulkCreateCompanyHolidayCalendar: (
-    inputs: CreateCompanyHolidayCalendarInput[]
+    inputs: CreateCompanyHolidayCalendarInput[],
   ) => Promise<CompanyHolidayCalendar[]>;
 }) {
   const dispatch = useAppDispatchV2();
@@ -107,7 +107,7 @@ export function ExcelFilePicker({
 
     // eslint-disable-next-line no-alert
     const result = window.confirm(
-      `以下の${uploadedData.length}件のデータを登録しますか？`
+      `以下の${uploadedData.length}件のデータを登録しますか？`,
     );
     if (!result) return;
 
@@ -118,16 +118,16 @@ export function ExcelFilePicker({
         handleClose();
         dispatch(
           setSnackbarSuccess(
-            companyHolidayCalenderMessage.create(MessageStatus.SUCCESS)
-          )
+            companyHolidayCalenderMessage.create(MessageStatus.SUCCESS),
+          ),
         );
       })
       .catch(() =>
         dispatch(
           setSnackbarError(
-            companyHolidayCalenderMessage.create(MessageStatus.ERROR)
-          )
-        )
+            companyHolidayCalenderMessage.create(MessageStatus.ERROR),
+          ),
+        ),
       );
   };
 

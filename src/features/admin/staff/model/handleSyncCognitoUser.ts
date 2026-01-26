@@ -1,18 +1,16 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { CreateStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 
-import * as MESSAGE_CODE from "../../../errors";
-import fetchCognitoUsers from "../../../hooks/common/fetchCognitoUsers";
+import * as MESSAGE_CODE from "@/errors";
+import fetchCognitoUsers from "@/hooks/common/fetchCognitoUsers";
 
 export async function handleSyncCognitoUser(
   staffs: StaffType[],
   refreshStaff: () => Promise<void>,
   createStaff: (input: CreateStaffInput) => Promise<void>,
-  updateStaff: (input: UpdateStaffInput) => Promise<void>
+  updateStaff: (input: UpdateStaffInput) => Promise<void>,
 ) {
-  const cognitoUsers = await fetchCognitoUsers().catch((e) => {
-    throw e;
-  });
+  const cognitoUsers = await fetchCognitoUsers();
 
   if (!cognitoUsers) {
     throw new Error(MESSAGE_CODE.E05006);
@@ -21,7 +19,7 @@ export async function handleSyncCognitoUser(
   await Promise.all(
     cognitoUsers.map(async (cognitoUser) => {
       const isExistStaff = staffs.find(
-        ({ cognitoUserId }) => cognitoUserId === cognitoUser.sub
+        ({ cognitoUserId }) => cognitoUserId === cognitoUser.sub,
       );
 
       if (isExistStaff) {
@@ -53,14 +51,12 @@ export async function handleSyncCognitoUser(
       }).catch(() => {
         throw new Error(MESSAGE_CODE.E05002);
       });
-    })
-  )
-    .then(async () => {
-      await refreshStaff().catch(() => {
-        throw new Error(MESSAGE_CODE.E05001);
-      });
-    })
-    .catch((e) => {
-      throw e;
-    });
+    }),
+  );
+
+  try {
+    await refreshStaff();
+  } catch {
+    throw new Error(MESSAGE_CODE.E05001);
+  }
 }
