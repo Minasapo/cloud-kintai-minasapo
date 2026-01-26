@@ -58,7 +58,7 @@ const AdminDailyReportManagementRoute = createLazyRoute(
 const AdminHolidayCalendarRoute = createLazyRoute(
   () =>
     import(
-      "../pages/admin/AdminHolidayCalendar/HolidayCalendar/AdminHolidayCalendar"
+      "@/features/admin/holidayCalendar/ui/HolidayCalendar/AdminHolidayCalendar"
     )
 );
 const AdminLogsRoute = createLazyRoute(
