@@ -2,7 +2,7 @@ import { Box, ButtonBase, Stack } from "@mui/material";
 import type { MouseEvent } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
-import type { AdminHeaderMenuItem } from "./useHeaderMenu";
+import type { AdminHeaderMenuItem } from "@/features/admin/layout/model/useHeaderMenu";
 
 interface AdminMenuProps {
   items: readonly AdminHeaderMenuItem[];
