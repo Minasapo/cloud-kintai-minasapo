@@ -25,7 +25,6 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
 import company_holiday from "@/templates/company_holiday.csv";
 
 const CSV_DOWNLOAD_FILENAME = "company_holiday.csv";

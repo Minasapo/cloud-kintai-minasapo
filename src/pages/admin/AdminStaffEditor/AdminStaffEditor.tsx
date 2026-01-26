@@ -39,14 +39,14 @@ import {
   Controller,
   useForm,
   UseFormRegister,
-  UseFormSetValue,
 } from "react-hook-form";
 import { useParams } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import WORK_TYPE_OPTIONS from "@/entities/staff/lib/workTypeOptions";
-import { ROLE_OPTIONS } from "@/features/admin/staff/ui/CreateStaffDialog";
+import { StaffNameTableCell } from "@/features/admin/staff/ui/editor/StaffNameTableCell";
+import { StaffRoleTableCell } from "@/features/admin/staff/ui/editor/StaffRoleTableCell";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -746,45 +746,6 @@ function ApproverSettingTableRows({
   );
 }
 
-function StaffRoleTableCell({
-  control,
-  setValue,
-}: {
-  control: Control<Inputs>;
-  setValue: UseFormSetValue<Inputs>;
-}) {
-  return (
-    <TableCell>
-      <Box>
-        <Controller
-          name="role"
-          control={control}
-          render={({ field }) => (
-            <Autocomplete
-              {...field}
-              value={
-                ROLE_OPTIONS.find(
-                  (option) => String(option.value) === field.value
-                ) ?? null
-              }
-              options={ROLE_OPTIONS}
-              getOptionLabel={(option) => option.label}
-              renderInput={(params) => (
-                <TextField {...params} size="small" sx={{ width: 400 }} />
-              )}
-              onChange={(_, data) => {
-                if (!data) return;
-                setValue("role", data.value);
-                field.onChange(data.value);
-              }}
-            />
-          )}
-        />
-      </Box>
-    </TableCell>
-  );
-}
-
 function MailAddressTableCell({
   register,
 }: {
@@ -797,29 +758,6 @@ function MailAddressTableCell({
         size="small"
         sx={{ width: 400 }}
       />
-    </TableCell>
-  );
-}
-
-function StaffNameTableCell({
-  register,
-}: {
-  register: UseFormRegister<Inputs>;
-}) {
-  return (
-    <TableCell>
-      <Stack direction="row" spacing={1}>
-        <TextField
-          {...register("familyName", { required: true })}
-          size="small"
-          label="姓"
-        />
-        <TextField
-          {...register("givenName", { required: true })}
-          size="small"
-          label="名"
-        />
-      </Stack>
     </TableCell>
   );
 }

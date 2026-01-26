@@ -10,10 +10,9 @@ import { UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { setSnackbarSuccess } from "@/shared/lib/store/snackbarSlice";
-
 import * as MESSAGE_CODE from "@/errors";
 import enableStaff from "@/hooks/common/enableStaff";
+import { setSnackbarSuccess } from "@/shared/lib/store/snackbarSlice";
 
 export function EnableAccountMenuItem({
   staff,

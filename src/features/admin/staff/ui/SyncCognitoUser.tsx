@@ -5,13 +5,12 @@ import { CreateStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
+import * as MESSAGE_CODE from "@/errors";
 import { handleSyncCognitoUser } from "@/features/admin/staff/model/handleSyncCognitoUser";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
-import * as MESSAGE_CODE from "@/errors";
 
 export default function SyncCognitoUser({
   staffs,

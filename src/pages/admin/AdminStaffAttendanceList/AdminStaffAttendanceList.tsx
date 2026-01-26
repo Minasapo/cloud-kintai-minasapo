@@ -22,13 +22,12 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
+import ChangeRequestQuickViewDialog from "@/features/admin/staffAttendanceList/components/ChangeRequestQuickViewDialog";
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
 import DesktopCalendarView from "@/features/attendance/list/ui/DesktopCalendarView";
 import { useSplitView } from "@/features/splitView";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
-
-import ChangeRequestQuickViewDialog from "./ChangeRequestQuickViewDialog";
 
 const PAGE_PADDING_X = {
   xs: designTokenVar("spacing.lg", "16px"),

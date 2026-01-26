@@ -3,7 +3,7 @@ import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
-import { AppConfigContext } from "../../../context/AppConfigContext";
+import { AppConfigContext } from "@/context/AppConfigContext";
 
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   width: theme.spacing(16),
