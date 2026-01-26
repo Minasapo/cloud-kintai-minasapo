@@ -25,7 +25,7 @@ import {
 import {
   AttendanceRowVariant,
   attendanceRowVariantStyles,
-} from "@/entities/attendance/lib/attendanceRowVariant";
+} from "@/entities/attendance/lib/rowVariant";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";

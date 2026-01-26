@@ -22,11 +22,11 @@ import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
+import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
-} from "@/entities/attendance/lib/attendanceRowVariant";
-import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
+} from "@/entities/attendance/lib/rowVariant";
 import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
