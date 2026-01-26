@@ -4,7 +4,7 @@ import {
   buildHolidayDateRange,
   HolidayDateRangeError,
   MAX_HOLIDAY_RANGE_DAYS,
-} from "./buildHolidayDateRange";
+} from "@/features/admin/holidayCalendar/lib/buildHolidayDateRange";
 
 describe("buildHolidayDateRange", () => {
   it("returns a single ISO date when only startDate is provided", () => {

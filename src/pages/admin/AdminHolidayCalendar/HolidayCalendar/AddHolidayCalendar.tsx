@@ -19,6 +19,11 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import {
+  buildHolidayDateRange,
+  HolidayDateRangeError,
+  MAX_HOLIDAY_RANGE_DAYS,
+} from "@/features/admin/holidayCalendar/lib/buildHolidayDateRange";
 import { HolidayCalenderMessage } from "@/shared/lib/message/HolidayCalenderMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
@@ -27,11 +32,6 @@ import {
 } from "@/shared/lib/store/snackbarSlice";
 
 import { useAppDispatchV2 } from "../../../../app/hooks";
-import {
-  buildHolidayDateRange,
-  HolidayDateRangeError,
-  MAX_HOLIDAY_RANGE_DAYS,
-} from "./utils/buildHolidayDateRange";
 
 /**
  * AddHolidayCalendar コンポーネントのフォーム入力型
