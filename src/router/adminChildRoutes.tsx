@@ -71,7 +71,7 @@ const AdminShiftSettingsRoute = createLazyRoute(
   () => import("../pages/admin/AdminShiftSettings/AdminShiftSettings")
 );
 const AdminStaffRoute = createLazyRoute(
-  () => import("@/pages/admin/AdminStaff/AdminStaff")
+  () => import("@/features/admin/staff/ui/AdminStaff")
 );
 const AdminStaffAttendanceListRoute = createLazyRoute(
   () =>
