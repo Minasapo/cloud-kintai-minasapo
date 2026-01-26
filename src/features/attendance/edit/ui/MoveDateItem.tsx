@@ -17,10 +17,22 @@ export default function MoveDateItem({
   workDate: dayjs.Dayjs | null;
 }) {
   const navigate = useNavigate();
+  const today = dayjs();
 
-  if (!workDate || !staffId) {
+  if (!workDate) {
     return null;
   }
+
+  const isAdmin = Boolean(staffId);
+  const format = isAdmin
+    ? AttendanceDate.DatePickerFormat
+    : AttendanceDate.DisplayFormat;
+  const buildPath = (date: dayjs.Dayjs) => {
+    const formatted = date.format(AttendanceDate.QueryParamFormat);
+    return isAdmin
+      ? `/admin/attendances/edit/${formatted}/${staffId}`
+      : `/attendance/${formatted}/edit`;
+  };
 
   return (
     <Stack direction="row" spacing={2} alignItems="center">
@@ -28,11 +40,7 @@ export default function MoveDateItem({
         <IconButton
           onClick={() => {
             const prevDate = workDate.add(-1, "day");
-            navigate(
-              `/admin/attendances/edit/${prevDate.format(
-                AttendanceDate.QueryParamFormat
-              )}/${staffId}`
-            );
+            navigate(buildPath(prevDate));
           }}
         >
           <ArrowBackIcon />
@@ -40,29 +48,22 @@ export default function MoveDateItem({
       </Box>
       <DatePicker
         value={workDate}
-        format={AttendanceDate.DatePickerFormat}
+        format={format}
         slotProps={{
           textField: { size: "small" },
         }}
         onChange={(date) => {
           if (date) {
-            navigate(
-              `/admin/attendances/edit/${date.format(
-                AttendanceDate.QueryParamFormat
-              )}/${staffId}`
-            );
+            navigate(buildPath(date));
           }
         }}
       />
       <Box>
         <IconButton
+          disabled={!isAdmin && workDate.isSame(today, "day")}
           onClick={() => {
             const nextDate = workDate.add(1, "day");
-            navigate(
-              `/admin/attendances/edit/${nextDate.format(
-                AttendanceDate.QueryParamFormat
-              )}/${staffId}`
-            );
+            navigate(buildPath(nextDate));
           }}
         >
           <ArrowForwardIcon />

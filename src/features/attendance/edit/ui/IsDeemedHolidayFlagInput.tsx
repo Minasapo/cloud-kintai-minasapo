@@ -23,7 +23,7 @@ import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
  * - react-hook-form の Controller を使用してフォーム制御を行います
  *
  * 参照:
- * - AttendanceEditInputs 型は /src/pages/attendance/edit/common で定義されています
+ * - AttendanceEditInputs 型は /src/features/attendance/edit/model/common で定義されています
  */
 
 // -----------------------------------------------------------------------------
