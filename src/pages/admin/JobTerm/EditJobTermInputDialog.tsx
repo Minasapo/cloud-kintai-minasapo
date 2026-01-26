@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { defaultValues, Inputs } from "@/features/admin/jobTerm/lib/common";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -19,7 +20,6 @@ import {
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
-import { defaultValues, Inputs } from "./common";
 
 export default function EditJobTermInputDialog({
   targetData,
