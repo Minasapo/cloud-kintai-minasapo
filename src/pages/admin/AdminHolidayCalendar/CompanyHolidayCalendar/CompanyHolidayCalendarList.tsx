@@ -34,6 +34,7 @@ import { useCallback, useEffect } from "react";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
+import { useHolidayCalendarList } from "@/features/admin/holidayCalendar/model/useHolidayCalendarList";
 import { CompanyHolidayCalenderMessage } from "@/shared/lib/message/CompanyHolidayCalenderMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
@@ -42,7 +43,6 @@ import {
 } from "@/shared/lib/store/snackbarSlice";
 
 import { ExcelFilePicker } from "../HolidayCalendar/ExcelFilePicker";
-import { useHolidayCalendarList } from "../hooks/useHolidayCalendarList";
 import AddCompanyHolidayCalendar from "./AddCompanyHolidayCalendar";
 import CompanyHolidayCalendarCopy from "./CompanyHolidayCalendarCopy";
 import CompanyHolidayCalendarEdit from "./CompanyHolidayCalendarEdit";
