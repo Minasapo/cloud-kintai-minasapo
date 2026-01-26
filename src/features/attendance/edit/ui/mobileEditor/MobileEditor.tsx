@@ -10,8 +10,8 @@ import { collectAttendanceErrorMessages } from "@/entities/attendance/validation
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
-import ChangeRequestingAlert from "../DesktopEditor/ChangeRequestingMessage";
-import NoDataAlert from "../DesktopEditor/NoDataAlert";
+import ChangeRequestingAlert from "../desktopEditor/ChangeRequestingMessage";
+import NoDataAlert from "../desktopEditor/NoDataAlert";
 import RemarksInput from "./RemarksInput";
 import { RequestButtonItem } from "./RequestButtonItem";
 import { RestTimeInput } from "./RestTimeInput/RestTimeInput";

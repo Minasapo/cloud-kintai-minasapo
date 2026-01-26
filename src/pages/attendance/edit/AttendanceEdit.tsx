@@ -38,14 +38,14 @@ import {
   defaultValues,
   HourlyPaidHolidayTimeInputs,
 } from "@/features/attendance/edit/model/common";
+import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEditor";
+import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import DesktopEditor from "./DesktopEditor/DesktopEditor";
-import { MobileEditor } from "./MobileEditor/MobileEditor";
 import sendChangeRequestMail from "./sendChangeRequestMail";
 
 const logger = createLogger("AttendanceEdit");
