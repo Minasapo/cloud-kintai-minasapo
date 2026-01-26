@@ -8,14 +8,15 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import Title from "@shared/ui/typography/Title";
 
-import AttendanceStatisticsSection from "./AttendanceStatisticsSection";
-import GroupSection from "./GroupSection";
-import LinkListSection from "./LinkListSection";
-import OfficeModeSection from "./OfficeModeSection";
-import QuickInputSection from "./QuickInputSection";
-import ReasonListSection from "./ReasonListSection";
+import AttendanceStatisticsSection from "@/features/admin/configManagement/ui/AttendanceStatisticsSection";
+import GroupSection from "@/features/admin/configManagement/ui/GroupSection";
+import LinkListSection from "@/features/admin/configManagement/ui/LinkListSection";
+import OfficeModeSection from "@/features/admin/configManagement/ui/OfficeModeSection";
+import QuickInputSection from "@/features/admin/configManagement/ui/QuickInputSection";
+import ReasonListSection from "@/features/admin/configManagement/ui/ReasonListSection";
+import WorkingTimeSection from "@/features/admin/configManagement/ui/WorkingTimeSection";
+
 import { useAdminConfigForm } from "./useAdminConfigForm";
-import WorkingTimeSection from "./WorkingTimeSection";
 
 export default function AdminConfigManagement() {
   const {
