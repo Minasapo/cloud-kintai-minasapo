@@ -16,22 +16,22 @@ import {
 } from "@mui/material";
 import { useContext, useState } from "react";
 
+import { AccountStatusTableCell } from "@/features/admin/staff/ui/tableCells/AccountStatusTableCell";
+import { CreatedAtTableCell } from "@/features/admin/staff/ui/tableCells/CreatedAtTableCell";
+import { RoleTableCell } from "@/features/admin/staff/ui/tableCells/RoleTableCell";
+import { StaffNameTableCell } from "@/features/admin/staff/ui/tableCells/StaffNameTableCell";
+import { StatusTableCell } from "@/features/admin/staff/ui/tableCells/StatusTableCell";
+import { UpdatedAtTableCell } from "@/features/admin/staff/ui/tableCells/UpdatedAtTableCell";
+import { WorkTypeTableCell } from "@/features/admin/staff/ui/tableCells/WorkTypeTableCell";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import { AuthContext } from "../../../context/AuthContext";
 import * as MESSAGE_CODE from "../../../errors";
-import { AccountStatusTableCell } from "./AccountStatusTableCell";
-import { CreatedAtTableCell } from "./CreatedAtTableCell";
 import CreateStaffDialog from "./CreateStaffDialog";
 import { EditButton } from "./EditButton";
 import { MoreActionButton } from "./MoreActionButton/MoreActionButton";
-import { RoleTableCell } from "./RoleTableCell";
-import { StaffNameTableCell } from "./StaffNameTableCell";
-import { StatusTableCell } from "./StatusTableCell";
 import SyncCognitoUser from "./SyncCognitoUser";
-import { UpdatedAtTableCell } from "./UpdatedAtTableCell";
-import { WorkTypeTableCell } from "./WorkTypeTableCell";
 
 export default function AdminStaff() {
   const dispatch = useAppDispatchV2();

@@ -5,6 +5,8 @@ import { CloseDate } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { lazy, Suspense, useMemo, useState } from "react";
 
+import EditJobTermInputDialog from "@/features/admin/jobTerm/ui/EditJobTermInputDialog";
+import JobTermBulkRegister from "@/features/admin/jobTerm/ui/JobTermBulkRegister";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -13,10 +15,8 @@ import PageLoader from "@/shared/ui/feedback/PageLoader";
 
 import { useAppDispatchV2 } from "../../../app/hooks";
 import * as MESSAGE_CODE from "../../../errors";
-import EditJobTermInputDialog from "./EditJobTermInputDialog";
-import JobTermBulkRegister from "./JobTermBulkRegister";
 
-const JobTermTable = lazy(() => import("./JobTermTable"));
+const JobTermTable = lazy(() => import("@/features/admin/jobTerm/ui/JobTermTable"));
 
 export default function JobTerm() {
   const dispatch = useAppDispatchV2();

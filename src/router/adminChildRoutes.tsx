@@ -90,7 +90,7 @@ const AdminWorkflowDetailRoute = createLazyRoute(
   () => import("../pages/admin/AdminWorkflow/AdminWorkflowDetail")
 );
 const JobTermRoute = createLazyRoute(
-  () => import("../pages/admin/JobTerm/JobTerm")
+  () => import("@/features/admin/jobTerm/ui/JobTerm")
 );
 const ShiftPlanManagementRoute = createLazyRoute(
   () => import("../pages/admin/ShiftPlanManagement/ShiftPlanManagement")
