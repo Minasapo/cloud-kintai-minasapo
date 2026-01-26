@@ -28,7 +28,7 @@ import {
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import { useAppDispatchV2 } from "../../../../app/hooks";
+import { useAppDispatchV2 } from "@/app/hooks";
 
 type Inputs = {
   startDate: string;

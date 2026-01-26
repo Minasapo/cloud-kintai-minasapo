@@ -19,7 +19,7 @@ const AbsentRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Absent")
 );
 const AdminConfigManagementRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/AdminConfigManagement")
+  () => import("@/features/admin/configManagement/ui/AdminConfigManagement")
 );
 const AmPmHolidayRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/AmPmHoliday")

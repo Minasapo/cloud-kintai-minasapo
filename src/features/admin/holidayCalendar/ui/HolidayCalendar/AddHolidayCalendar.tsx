@@ -31,7 +31,7 @@ import {
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-import { useAppDispatchV2 } from "../../../../app/hooks";
+import { useAppDispatchV2 } from "@/app/hooks";
 
 /**
  * AddHolidayCalendar コンポーネントのフォーム入力型
