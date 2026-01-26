@@ -26,7 +26,7 @@ import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
-} from "@/entities/attendance/lib/rowVariant";
+} from "@/entities/attendance/ui/rowVariant";
 import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
