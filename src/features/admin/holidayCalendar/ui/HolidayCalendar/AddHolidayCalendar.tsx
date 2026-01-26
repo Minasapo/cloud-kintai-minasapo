@@ -18,6 +18,7 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   buildHolidayDateRange,
@@ -30,8 +31,6 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
-
-import { useAppDispatchV2 } from "@/app/hooks";
 
 /**
  * AddHolidayCalendar コンポーネントのフォーム入力型
