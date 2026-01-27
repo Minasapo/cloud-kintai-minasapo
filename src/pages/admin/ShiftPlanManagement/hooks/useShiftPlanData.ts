@@ -66,9 +66,9 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [yearlyPlans, setYearlyPlans] = useState<
     Record<number, ShiftPlanRow[]>
-  >({
+  >(() => ({
     [initialYear]: createDefaultRows(initialYear),
-  });
+  }));
   const [isPending, startTransition] = useTransition();
   const [isFetchingYear, setIsFetchingYear] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,9 +78,9 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
   const [lastAutoSaveTime, setLastAutoSaveTime] = useState<string | null>(null);
   const [savedYearlyPlans, setSavedYearlyPlans] = useState<
     Record<number, ShiftPlanRow[]>
-  >({
+  >(() => ({
     [initialYear]: createDefaultRows(initialYear),
-  });
+  }));
 
   // 年を跨いだときも必ず初期行が存在するように補完する
   useEffect(() => {
@@ -182,73 +182,72 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
     return !areRowsEqual(current, saved);
   }, [yearlyPlans, savedYearlyPlans, selectedYear]);
 
+  const updateYearRows = useCallback(
+    (
+      year: number,
+      updater: (rows: ShiftPlanRow[]) => ShiftPlanRow[],
+    ) => {
+      setYearlyPlans((prev) => {
+        const rows = getOrInitYearRows(year, prev);
+        return {
+          ...prev,
+          [year]: updater(rows),
+        };
+      });
+    },
+    [],
+  );
+
+  const ensureYearRows = useCallback((year: number) => {
+    updateYearRows(year, (rows) => rows);
+  }, [updateYearRows]);
+
   const handleYearChange = useCallback(
     (delta: number) => {
       const nextYear = selectedYear + delta;
       startTransition(() => {
-        setYearlyPlans((prev) => {
-          if (prev[nextYear]) return prev;
-          return {
-            ...prev,
-            [nextYear]: getOrInitYearRows(nextYear, prev),
-          };
-        });
+        ensureYearRows(nextYear);
         setSelectedYear(nextYear);
       });
     },
-    [selectedYear, startTransition],
+    [ensureYearRows, selectedYear, startTransition],
   );
 
   const handleFieldChange = useCallback(
     (month: number, field: EditableField, value: string) => {
-      setYearlyPlans((prev) => {
-        const rows = getOrInitYearRows(selectedYear, prev);
-        const updatedRows = rows.map((row) =>
+      updateYearRows(selectedYear, (rows) =>
+        rows.map((row) =>
           row.month === month ? { ...row, [field]: value } : row,
-        );
-        return {
-          ...prev,
-          [selectedYear]: updatedRows,
-        };
-      });
+        ),
+      );
     },
-    [selectedYear],
+    [selectedYear, updateYearRows],
   );
 
   const handleToggleEnabled = useCallback(
     (month: number) => {
-      setYearlyPlans((prev) => {
-        const rows = getOrInitYearRows(selectedYear, prev);
-        const updatedRows = rows.map((row) =>
+      updateYearRows(selectedYear, (rows) =>
+        rows.map((row) =>
           row.month === month ? { ...row, enabled: !row.enabled } : row,
-        );
-        return {
-          ...prev,
-          [selectedYear]: updatedRows,
-        };
-      });
+        ),
+      );
     },
-    [selectedYear],
+    [selectedYear, updateYearRows],
   );
 
   const handleDailyCapacityChange = useCallback(
     (month: number, dayIndex: number, value: string) => {
       const normalizedValue = sanitizeCapacityValue(value);
-      setYearlyPlans((prev) => {
-        const rows = getOrInitYearRows(selectedYear, prev);
-        const updatedRows = rows.map((row) => {
+      updateYearRows(selectedYear, (rows) =>
+        rows.map((row) => {
           if (row.month !== month) return row;
           const nextCapacity = [...row.dailyCapacity];
           nextCapacity[dayIndex] = normalizedValue;
           return { ...row, dailyCapacity: nextCapacity };
-        });
-        return {
-          ...prev,
-          [selectedYear]: updatedRows,
-        };
-      });
+        }),
+      );
     },
-    [selectedYear],
+    [selectedYear, updateYearRows],
   );
 
   const performSave = useCallback(
