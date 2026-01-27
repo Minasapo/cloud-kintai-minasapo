@@ -88,6 +88,18 @@ const normalizeApprovalSteps = (
       } satisfies WorkflowApprovalStepView;
     });
 
+const buildAnyApproverFallback = (approverInfo: WorkflowApproverInfo) => {
+  const hasSpecificItems =
+    approverInfo.items.length > 0 &&
+    approverInfo.items.some((item) => item !== DEFAULT_APPROVER_LABEL);
+  return {
+    name: hasSpecificItems
+      ? approverInfo.items.filter(Boolean).join(" / ")
+      : DEFAULT_APPROVER_LABEL,
+    role: hasSpecificItems ? "承認者（複数）" : "承認者",
+  };
+};
+
 export const deriveWorkflowApproverInfo = (
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null,
   staffs: StaffType[]
@@ -180,14 +192,8 @@ export const buildWorkflowApprovalTimeline = ({
   });
 
   if (approverInfo.mode === "any") {
-    const hasSpecificItems =
-      approverInfo.items.length > 0 &&
-      approverInfo.items.some((item) => item !== DEFAULT_APPROVER_LABEL);
-    const fallbackName = hasSpecificItems
-      ? approverInfo.items.filter(Boolean).join(" / ")
-      : DEFAULT_APPROVER_LABEL;
-    const fallbackRole = hasSpecificItems ? "承認者（複数）" : "承認者";
-    const fallback = buildFallbackStep(fallbackName, "s1", fallbackRole);
+    const { name, role } = buildAnyApproverFallback(approverInfo);
+    const fallback = buildFallbackStep(name, "s1", role);
     return [...base, fallback];
   }
 
