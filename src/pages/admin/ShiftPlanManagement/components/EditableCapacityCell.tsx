@@ -1,5 +1,5 @@
 import { ButtonBase, Stack, TextField, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { INPUT_PLACEHOLDER, sanitizeCapacityValue } from "../shiftPlanUtils";
 
@@ -20,6 +20,7 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
 }: EditableCapacityCellProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
+  const skipBlurCommitRef = useRef(false);
 
   // Sync draft to value when not editing
   useEffect(() => {
@@ -44,12 +45,14 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === "Enter") {
         event.preventDefault();
+        skipBlurCommitRef.current = true;
         handleCommit();
       } else if (event.key === "Escape") {
         event.preventDefault();
         handleCancel();
       } else if (event.key === "Tab") {
         event.preventDefault();
+        skipBlurCommitRef.current = true;
         handleCommit();
         // 次の日に遷移
         if (onTabNextDay) {
@@ -85,7 +88,13 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
             },
           }}
           onChange={(event) => setDraft(event.target.value)}
-          onBlur={handleCommit}
+          onBlur={() => {
+            if (skipBlurCommitRef.current) {
+              skipBlurCommitRef.current = false;
+              return;
+            }
+            handleCommit();
+          }}
           onKeyDown={handleKeyDown}
         />
       ) : (
