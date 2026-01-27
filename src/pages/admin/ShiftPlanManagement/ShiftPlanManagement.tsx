@@ -154,6 +154,27 @@ const getOrInitYearRows = (
   rowsByYear: Record<number, ShiftPlanRow[]>,
 ): ShiftPlanRow[] => rowsByYear[year] ?? createDefaultRows(year);
 
+const areRowsEqual = (left: ShiftPlanRow[], right: ShiftPlanRow[]): boolean => {
+  if (left.length !== right.length) return false;
+  for (let i = 0; i < left.length; i += 1) {
+    const a = left[i];
+    const b = right[i];
+    if (
+      a.month !== b.month ||
+      a.editStart !== b.editStart ||
+      a.editEnd !== b.editEnd ||
+      a.enabled !== b.enabled
+    ) {
+      return false;
+    }
+    if (a.dailyCapacity.length !== b.dailyCapacity.length) return false;
+    for (let j = 0; j < a.dailyCapacity.length; j += 1) {
+      if (a.dailyCapacity[j] !== b.dailyCapacity[j]) return false;
+    }
+  }
+  return true;
+};
+
 type EditableCapacityCellProps = {
   value: string;
   labelText: string;
@@ -711,7 +732,7 @@ export default function ShiftPlanManagement() {
       return false;
     }
 
-    return JSON.stringify(current) !== JSON.stringify(saved);
+    return !areRowsEqual(current, saved);
   }, [yearlyPlans, savedYearlyPlans, selectedYear]);
 
   const handleYearChange = useCallback(
