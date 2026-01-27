@@ -23,13 +23,13 @@ import CreateStaffDialog from "@/features/admin/staff/ui/CreateStaffDialog";
 import { EditButton } from "@/features/admin/staff/ui/EditButton";
 import { MoreActionButton } from "@/features/admin/staff/ui/MoreActionButton/MoreActionButton";
 import SyncCognitoUser from "@/features/admin/staff/ui/SyncCognitoUser";
-import { AccountStatusTableCell } from "@/features/admin/staff/ui/tableCells/AccountStatusTableCell";
-import { CreatedAtTableCell } from "@/features/admin/staff/ui/tableCells/CreatedAtTableCell";
-import { RoleTableCell } from "@/features/admin/staff/ui/tableCells/RoleTableCell";
-import { StaffNameTableCell } from "@/features/admin/staff/ui/tableCells/StaffNameTableCell";
-import { StatusTableCell } from "@/features/admin/staff/ui/tableCells/StatusTableCell";
-import { UpdatedAtTableCell } from "@/features/admin/staff/ui/tableCells/UpdatedAtTableCell";
-import { WorkTypeTableCell } from "@/features/admin/staff/ui/tableCells/WorkTypeTableCell";
+import { AccountStatusTableCell } from "@/features/admin/staff/ui/table/AccountStatusTableCell";
+import { CreatedAtTableCell } from "@/features/admin/staff/ui/table/CreatedAtTableCell";
+import { RoleTableCell } from "@/features/admin/staff/ui/table/RoleTableCell";
+import { StaffNameTableCell } from "@/features/admin/staff/ui/table/StaffNameTableCell";
+import { StatusTableCell } from "@/features/admin/staff/ui/table/StatusTableCell";
+import { UpdatedAtTableCell } from "@/features/admin/staff/ui/table/UpdatedAtTableCell";
+import { WorkTypeTableCell } from "@/features/admin/staff/ui/table/WorkTypeTableCell";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 export default function AdminStaff() {
