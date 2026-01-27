@@ -175,6 +175,33 @@ const areRowsEqual = (left: ShiftPlanRow[], right: ShiftPlanRow[]): boolean => {
   return true;
 };
 
+const useDayCellFocus = () => {
+  const cellRefs = useRef<Map<string, HTMLElement | null>>(new Map());
+
+  const registerCellRef = useCallback(
+    (cellId: string, element: HTMLElement | null) => {
+      if (element instanceof HTMLElement) {
+        cellRefs.current.set(cellId, element);
+      } else {
+        cellRefs.current.delete(cellId);
+      }
+    },
+    [],
+  );
+
+  const focusCell = useCallback((cellId: string) => {
+    setTimeout(() => {
+      const cell = cellRefs.current.get(cellId);
+      if (cell) {
+        cell.click();
+        cell.focus();
+      }
+    }, 0);
+  }, []);
+
+  return { registerCellRef, focusCell };
+};
+
 type EditableCapacityCellProps = {
   value: string;
   labelText: string;
@@ -616,7 +643,7 @@ export default function ShiftPlanManagement() {
   >({
     [initialYear]: createDefaultRows(initialYear),
   });
-  const cellRefs = useRef<Map<string, HTMLElement | null>>(new Map());
+  const { registerCellRef, focusCell } = useDayCellFocus();
   const { data: holidayCalendars = [], error: holidayCalendarsError } =
     useGetHolidayCalendarsQuery();
   useEffect(() => {
@@ -823,26 +850,9 @@ export default function ShiftPlanManagement() {
 
       // 次のセルへフォーカスを移す
       const nextCellId = `cell-${selectedYear}-${nextMonth}-${nextDayIndex}`;
-      setTimeout(() => {
-        const nextCell = cellRefs.current.get(nextCellId);
-        if (nextCell) {
-          nextCell.click();
-          nextCell.focus();
-        }
-      }, 0);
+      focusCell(nextCellId);
     },
-    [selectedYear],
-  );
-
-  const handleRegisterCellRef = useCallback(
-    (cellId: string, element: HTMLElement | null) => {
-      if (element instanceof HTMLElement) {
-        cellRefs.current.set(cellId, element);
-      } else {
-        cellRefs.current.delete(cellId);
-      }
-    },
-    [],
+    [selectedYear, focusCell],
   );
 
   const performSave = useCallback(
@@ -992,7 +1002,7 @@ export default function ShiftPlanManagement() {
           onToggleEnabled={handleToggleEnabled}
           onDailyCapacityChange={handleDailyCapacityChange}
           onTabNextDay={handleTabNextDay}
-          onRegisterCellRef={handleRegisterCellRef}
+          onRegisterCellRef={registerCellRef}
         />
 
         <ShiftPlanFooter
