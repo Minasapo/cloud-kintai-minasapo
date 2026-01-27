@@ -1,5 +1,13 @@
 import { ShiftGroupFormValue } from "./shiftGroupValidation";
 
+export type ShiftGroupSource = {
+  label?: string | null;
+  description?: string | null;
+  min?: number | null;
+  max?: number | null;
+  fixed?: number | null;
+};
+
 export const createShiftGroupId = (
   now: () => number = Date.now,
   random: () => number = Math.random,
@@ -20,3 +28,15 @@ export const createShiftGroup = (
   fixed: "",
   ...initial,
 });
+
+const toOptionalNumberString = (value?: number | null) =>
+  typeof value === "number" && !Number.isNaN(value) ? String(value) : "";
+
+export const toShiftGroupFormValue = (group: ShiftGroupSource) =>
+  createShiftGroup({
+    label: group.label ?? "",
+    description: group.description ?? "",
+    min: toOptionalNumberString(group.min),
+    max: toOptionalNumberString(group.max),
+    fixed: toOptionalNumberString(group.fixed),
+  });

@@ -27,6 +27,7 @@ import {
   SHIFT_GROUP_TEXTS,
   ShiftGroupFormValue,
   ShiftGroupRow,
+  toShiftGroupFormValue,
   useShiftGroupValidation,
 } from "./";
 
@@ -42,22 +43,7 @@ export default function AdminShiftSettings() {
     const initialGroups = getShiftGroups();
     setShiftGroups(() =>
       initialGroups.map((group) =>
-        createShiftGroup({
-          label: group.label ?? "",
-          description: group.description ?? "",
-          min:
-            typeof group.min === "number" && !Number.isNaN(group.min)
-              ? String(group.min)
-              : "",
-          max:
-            typeof group.max === "number" && !Number.isNaN(group.max)
-              ? String(group.max)
-              : "",
-          fixed:
-            typeof group.fixed === "number" && !Number.isNaN(group.fixed)
-              ? String(group.fixed)
-              : "",
-        }),
+        toShiftGroupFormValue(group),
       ),
     );
     setConfigId(getConfigId());
