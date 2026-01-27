@@ -1,26 +1,27 @@
 import { Stack, TableCell, TextField } from "@mui/material";
-import { UseFormRegister } from "react-hook-form";
+import type { FieldValues, Path, UseFormRegister } from "react-hook-form";
 
-type StaffNameInputs = {
-  familyName?: string | null;
-  givenName?: string | null;
+type StaffNameTableCellProps<TFieldValues extends FieldValues> = {
+  register: UseFormRegister<TFieldValues>;
 };
 
-type StaffNameTableCellProps = {
-  register: UseFormRegister<StaffNameInputs>;
-};
-
-export function StaffNameTableCell({ register }: StaffNameTableCellProps) {
+export function StaffNameTableCell<TFieldValues extends FieldValues>({
+  register,
+}: StaffNameTableCellProps<TFieldValues>) {
   return (
     <TableCell>
       <Stack direction="row" spacing={1}>
         <TextField
-          {...register("familyName", { required: true })}
+          {...register("familyName" as Path<TFieldValues>, {
+            required: true,
+          })}
           size="small"
           label="姓"
         />
         <TextField
-          {...register("givenName", { required: true })}
+          {...register("givenName" as Path<TFieldValues>, {
+            required: true,
+          })}
           size="small"
           label="名"
         />
