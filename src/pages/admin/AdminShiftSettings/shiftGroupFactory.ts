@@ -1,9 +1,12 @@
 import { ShiftGroupFormValue } from "./shiftGroupValidation";
 
+export const createShiftGroupId = () =>
+  `sg-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+
 export const createShiftGroup = (
   initial?: Partial<ShiftGroupFormValue>,
 ): ShiftGroupFormValue => ({
-  id: `sg-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`,
+  id: createShiftGroupId(),
   label: "",
   description: "",
   min: "",
