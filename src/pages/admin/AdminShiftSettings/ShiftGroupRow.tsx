@@ -6,8 +6,8 @@ import {
   getHelperTexts,
   GroupValidationResult,
   ShiftGroupFormValue,
-  SHIFT_GROUP_TEXTS,
 } from "./shiftGroupValidation";
+import { SHIFT_GROUP_TEXTS } from "./shiftGroupTexts";
 
 type ShiftGroupRowProps = {
   group: ShiftGroupFormValue;

@@ -24,8 +24,8 @@ import {
 import {
   parseOptionalInteger,
   ShiftGroupFormValue,
-  SHIFT_GROUP_TEXTS,
 } from "./shiftGroupValidation";
+import { SHIFT_GROUP_TEXTS } from "./shiftGroupTexts";
 import { createShiftGroup } from "./shiftGroupFactory";
 import ShiftGroupRow from "./ShiftGroupRow";
 import useShiftGroupValidation from "./useShiftGroupValidation";
