@@ -26,6 +26,7 @@ import {
 import { alpha, useTheme } from "@mui/material/styles";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
+import PropTypes from "prop-types";
 import { useCallback, useMemo, useState } from "react";
 
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
@@ -174,26 +175,26 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
   );
 };
 
-const useCollaborativePageState = () => {
+type ActiveUser = {
+  userId: string;
+  userName: string;
+  color: string;
+};
+
+type ShiftEvent = {
+  label: string;
+  start: dayjs.Dayjs;
+  end?: dayjs.Dayjs;
+  color: string;
+};
+
+const useShiftCalendar = (currentMonth: dayjs.Dayjs) => {
   const theme = useTheme();
-  const {
-    state,
-    updateShift,
-    isCellBeingEdited,
-    getCellEditor,
-    triggerSync,
-    updateUserActivity,
-  } = useCollaborativeShift();
-
-  const isAdmin = true; // TODO: 認可情報から取得する
-
-  const [currentMonth] = useState(dayjs());
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
     [currentMonth],
   );
   const daysInMonth = monthStart.daysInMonth();
-
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
@@ -201,8 +202,7 @@ const useCollaborativePageState = () => {
       ),
     [monthStart, daysInMonth],
   );
-
-  const eventCalendar = useMemo(
+  const eventCalendar = useMemo<ShiftEvent[]>(
     () => [
       {
         label: "研修",
@@ -231,27 +231,18 @@ const useCollaborativePageState = () => {
     ],
     [monthStart, theme],
   );
-
-  // スタッフリストを取得（shiftDataMapから）
-  const staffIds = useMemo(
-    () => Array.from(state.shiftDataMap.keys()),
-    [state.shiftDataMap],
-  );
-
-  // 日付のキーリスト（DD形式）
   const dateKeys = useMemo(() => days.map((day) => day.format("DD")), [days]);
 
-  // キーボードショートカット用の状態
-  const [showHelp, setShowHelp] = useState(false);
+  return { days, dateKeys, eventCalendar };
+};
 
-  // フォーカス管理とナビゲーション
+const useSelectionState = (staffIds: string[], dateKeys: string[]) => {
   const { focusedCell, registerCell, focusCell, navigate, clearFocus } =
     useShiftNavigation({
       staffIds,
       dates: dateKeys,
     });
 
-  // 複数選択管理
   const {
     selectedCells,
     selectionCount,
@@ -269,6 +260,157 @@ const useCollaborativePageState = () => {
     staffIds,
     dates: dateKeys,
   });
+
+  return {
+    focusedCell,
+    registerCell,
+    focusCell,
+    navigate,
+    clearFocus,
+    selectedCells,
+    selectionCount,
+    isCellSelected,
+    selectCell,
+    toggleCell,
+    selectRange,
+    startDragSelect,
+    updateDragSelect,
+    endDragSelect,
+    selectAll,
+    clearSelection,
+    isDragging,
+  };
+};
+
+const useClipboardOps = (
+  staffIds: string[],
+  dateKeys: string[],
+  getShiftState: (staffId: string, date: string) => ShiftState | undefined,
+) =>
+  useClipboard({
+    staffIds,
+    dates: dateKeys,
+    getShiftState,
+  });
+
+function useShiftMetrics<T extends { state: ShiftState }>(
+  days: dayjs.Dayjs[],
+  staffIds: string[],
+  shiftDataMap: Map<string, Map<string, T>>,
+) {
+  const dailyCountsByKey = useMemo(() => {
+    const counts = new Map<
+      string,
+      { work: number; fixedOff: number; requestedOff: number }
+    >();
+    days.forEach((day) => {
+      const dayKey = day.format("DD");
+      counts.set(dayKey, { work: 0, fixedOff: 0, requestedOff: 0 });
+    });
+
+    staffIds.forEach((staffId) => {
+      const staffMap = shiftDataMap.get(staffId);
+      if (!staffMap) return;
+      days.forEach((day) => {
+        const dayKey = day.format("DD");
+        const cell = staffMap.get(dayKey);
+        if (!cell) return;
+        const count = counts.get(dayKey);
+        if (!count) return;
+        if (cell.state === "work") count.work += 1;
+        else if (cell.state === "fixedOff") count.fixedOff += 1;
+        else if (cell.state === "requestedOff") count.requestedOff += 1;
+      });
+    });
+
+    return counts;
+  }, [days, staffIds, shiftDataMap]);
+
+  const calculateDailyCount = useCallback(
+    (dayKey: string): { work: number; fixedOff: number; requestedOff: number } =>
+      dailyCountsByKey.get(dayKey) ?? { work: 0, fixedOff: 0, requestedOff: 0 },
+    [dailyCountsByKey],
+  );
+
+  const progress = useMemo(() => {
+    let confirmedCount = 0;
+    let needsAdjustmentCount = 0;
+    let emptyCount = 0;
+
+    days.forEach((day) => {
+      const dayKey = day.format("DD");
+      const count = dailyCountsByKey.get(dayKey);
+      const workCount = count?.work ?? 0;
+
+      if (day.date() <= 10) {
+        confirmedCount++;
+      } else if (workCount < 2) {
+        needsAdjustmentCount++;
+      } else if (workCount === 0) {
+        emptyCount++;
+      }
+    });
+
+    const totalDays = days.length;
+    const confirmedPercent = (confirmedCount / totalDays) * 100;
+    const adjustmentPercent = (needsAdjustmentCount / totalDays) * 100;
+
+    return {
+      confirmedCount,
+      confirmedPercent,
+      needsAdjustmentCount,
+      adjustmentPercent,
+      emptyCount,
+    };
+  }, [days, dailyCountsByKey]);
+
+  return { calculateDailyCount, progress };
+}
+
+const useCollaborativePageState = () => {
+  const {
+    state,
+    updateShift,
+    isCellBeingEdited,
+    getCellEditor,
+    triggerSync,
+    updateUserActivity,
+  } = useCollaborativeShift();
+
+  const isAdmin = true; // TODO: 認可情報から取得する
+
+  const [currentMonth] = useState(dayjs());
+  const { days, dateKeys, eventCalendar } = useShiftCalendar(currentMonth);
+
+  // スタッフリストを取得（shiftDataMapから）
+  const staffIds = useMemo(
+    () => Array.from(state.shiftDataMap.keys()),
+    [state.shiftDataMap],
+  );
+
+  // キーボードショートカット用の状態
+  const [showHelp, setShowHelp] = useState(false);
+
+  // フォーカス管理と複数選択
+  const {
+    focusedCell,
+    registerCell,
+    focusCell,
+    navigate,
+    clearFocus,
+    selectedCells,
+    selectionCount,
+    isCellSelected,
+    selectCell,
+    toggleCell,
+    selectRange,
+    startDragSelect,
+    updateDragSelect,
+    endDragSelect,
+    selectAll,
+    clearSelection,
+    isDragging,
+  } = useSelectionState(staffIds, dateKeys);
 
   // シフト状態取得ヘルパー
   const getShiftState = useCallback(
@@ -306,11 +448,11 @@ const useCollaborativePageState = () => {
   );
 
   // クリップボード管理
-  const { copy, paste, hasClipboard, clearClipboard } = useClipboard({
+  const { copy, paste, hasClipboard, clearClipboard } = useClipboardOps(
     staffIds,
-    dates: dateKeys,
+    dateKeys,
     getShiftState,
-  });
+  );
 
   // シフト提案機能
   const { violations, isAnalyzing, analyzeShifts } = useShiftSuggestions({
@@ -564,74 +706,11 @@ const useCollaborativePageState = () => {
     await triggerSync();
   };
 
-  const dailyCountsByKey = useMemo(() => {
-    const counts = new Map<
-      string,
-      { work: number; fixedOff: number; requestedOff: number }
-    >();
-    days.forEach((day) => {
-      const dayKey = day.format("DD");
-      counts.set(dayKey, { work: 0, fixedOff: 0, requestedOff: 0 });
-    });
-
-    staffIds.forEach((staffId) => {
-      const staffMap = state.shiftDataMap.get(staffId);
-      if (!staffMap) return;
-      days.forEach((day) => {
-        const dayKey = day.format("DD");
-        const cell = staffMap.get(dayKey);
-        if (!cell) return;
-        const count = counts.get(dayKey);
-        if (!count) return;
-        if (cell.state === "work") count.work += 1;
-        else if (cell.state === "fixedOff") count.fixedOff += 1;
-        else if (cell.state === "requestedOff") count.requestedOff += 1;
-      });
-    });
-
-    return counts;
-  }, [days, staffIds, state.shiftDataMap]);
-
-  const calculateDailyCount = useCallback(
-    (dayKey: string): { work: number; fixedOff: number; requestedOff: number } =>
-      dailyCountsByKey.get(dayKey) ?? { work: 0, fixedOff: 0, requestedOff: 0 },
-    [dailyCountsByKey],
+  const { calculateDailyCount, progress } = useShiftMetrics(
+    days,
+    staffIds,
+    state.shiftDataMap,
   );
-
-  /**
-   * 進捗計算
-   */
-  const progress = useMemo(() => {
-    let confirmedCount = 0;
-    let needsAdjustmentCount = 0;
-    let emptyCount = 0;
-
-    days.forEach((day) => {
-      const dayKey = day.format("DD");
-      const count = dailyCountsByKey.get(dayKey);
-      const workCount = count?.work ?? 0;
-
-      if (day.date() <= 10) {
-        confirmedCount++;
-      } else if (workCount < 2) {
-        needsAdjustmentCount++;
-      } else if (workCount === 0) {
-        emptyCount++;
-      }
-    });
-
-    const totalDays = days.length;
-    const confirmedPercent = (confirmedCount / totalDays) * 100;
-    const adjustmentPercent = (needsAdjustmentCount / totalDays) * 100;
-
-    return {
-      confirmedCount,
-      confirmedPercent,
-      needsAdjustmentCount,
-      adjustmentPercent,
-      emptyCount,
-    };
-  }, [days, dailyCountsByKey]);
 
   return {
     state,
@@ -670,6 +749,350 @@ const useCollaborativePageState = () => {
     isCellBeingEdited,
   };
 };
+
+type CollaborativeHeaderProps = {
+  currentMonth: dayjs.Dayjs;
+  activeUsers: ActiveUser[];
+  isSyncing: boolean;
+  lastSyncedAt: number;
+  onSync: () => void;
+};
+
+const CollaborativeHeader: React.FC<CollaborativeHeaderProps> = ({
+  currentMonth,
+  activeUsers,
+  isSyncing,
+  lastSyncedAt,
+  onSync,
+}) => (
+  <Stack direction="row" alignItems="center" spacing={2} mb={3}>
+    <Typography variant="h4">協同シフト調整</Typography>
+    <Chip label={currentMonth.format("YYYY年 M月")} color="primary" variant="outlined" />
+
+    <Box sx={{ flex: 1 }} />
+    <AvatarGroup max={5}>
+      {activeUsers.map((user) => (
+        <Tooltip key={user.userId} title={user.userName}>
+          <Avatar
+            sx={{
+              bgcolor: user.color,
+              width: 32,
+              height: 32,
+              fontSize: "0.875rem",
+            }}
+          >
+            {user.userName.charAt(0)}
+          </Avatar>
+        </Tooltip>
+      ))}
+    </AvatarGroup>
+
+  <Tooltip
+    title={
+      lastSyncedAt > 0
+        ? `最終同期: ${dayjs(lastSyncedAt).format("HH:mm:ss")}`
+        : "同期"
+    }
+  >
+      <IconButton onClick={onSync} disabled={isSyncing} size="small">
+        <SyncIcon
+          sx={{
+            animation: isSyncing ? "spin 1s linear infinite" : "",
+            "@keyframes spin": {
+              from: { transform: "rotate(0deg)" },
+              to: { transform: "rotate(360deg)" },
+            },
+          }}
+        />
+      </IconButton>
+    </Tooltip>
+  </Stack>
+);
+
+CollaborativeHeader.propTypes = {
+  currentMonth: PropTypes.object.isRequired,
+  activeUsers: PropTypes.arrayOf(
+    PropTypes.shape({
+      userId: PropTypes.string.isRequired,
+      userName: PropTypes.string.isRequired,
+      color: PropTypes.string.isRequired,
+    }).isRequired,
+  ).isRequired,
+  isSyncing: PropTypes.bool.isRequired,
+  lastSyncedAt: PropTypes.number.isRequired,
+  onSync: PropTypes.func.isRequired,
+};
+
+type ProgressPanelProps = {
+  progress: {
+    confirmedCount: number;
+    confirmedPercent: number;
+    needsAdjustmentCount: number;
+  };
+  totalDays: number;
+};
+
+const ProgressPanel: React.FC<ProgressPanelProps> = ({ progress, totalDays }) => (
+  <Paper sx={{ p: 2, mb: 3 }}>
+    <Stack spacing={2}>
+      <Box>
+        <Typography variant="subtitle2" gutterBottom>
+          調整状況
+        </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={progress.confirmedPercent}
+          sx={{ height: 8, borderRadius: 1 }}
+        />
+        <Typography variant="caption" color="text.secondary">
+          確定: {progress.confirmedCount} / {totalDays}日 (
+          {progress.confirmedPercent.toFixed(0)}%)
+        </Typography>
+      </Box>
+
+      {progress.needsAdjustmentCount > 0 && (
+        <Alert severity="warning" icon={<InfoIcon />}>
+          調整が必要な日: {progress.needsAdjustmentCount}日
+        </Alert>
+      )}
+    </Stack>
+  </Paper>
+);
+
+ProgressPanel.propTypes = {
+  progress: PropTypes.shape({
+    confirmedCount: PropTypes.number.isRequired,
+    confirmedPercent: PropTypes.number.isRequired,
+    needsAdjustmentCount: PropTypes.number.isRequired,
+  }).isRequired,
+  totalDays: PropTypes.number.isRequired,
+};
+
+type ShiftCellLike = {
+  state: ShiftState;
+  isLocked: boolean;
+  lastChangedBy?: string;
+  lastChangedAt?: string;
+};
+
+type ShiftTableProps<T extends ShiftCellLike> = {
+  days: dayjs.Dayjs[];
+  staffIds: string[];
+  shiftDataMap: Map<string, Map<string, T>>;
+  isLoading: boolean;
+  focusedCell: { staffId: string; date: string } | null;
+  isCellSelected: (staffId: string, date: string) => boolean;
+  isCellBeingEdited: (staffId: string, date: string) => boolean;
+  getCellEditor: (
+    staffId: string,
+    date: string,
+  ) => { userName: string } | null | undefined;
+  registerCell: (staffId: string, date: string, element: HTMLElement | null) => void;
+  handleCellClick: (staffId: string, date: string, event: React.MouseEvent) => void;
+  handleCellMouseDown: (staffId: string, date: string, event: React.MouseEvent) => void;
+  handleCellMouseEnter: (staffId: string, date: string) => void;
+  calculateDailyCount: (dayKey: string) => { work: number; fixedOff: number; requestedOff: number };
+  getEventsForDay: (day: dayjs.Dayjs) => ShiftEvent[];
+};
+
+function ShiftTable<T extends ShiftCellLike>({
+  days,
+  staffIds,
+  shiftDataMap,
+  isLoading,
+  focusedCell,
+  isCellSelected,
+  isCellBeingEdited,
+  getCellEditor,
+  registerCell,
+  handleCellClick,
+  handleCellMouseDown,
+  handleCellMouseEnter,
+  calculateDailyCount,
+  getEventsForDay,
+}: ShiftTableProps<T>) {
+  return (
+    <TableContainer component={Paper}>
+    <Table
+      size="small"
+      stickyHeader
+      sx={{
+        "& .MuiTableCell-root": {
+          borderRight: "1px solid",
+          borderColor: "divider",
+        },
+        "& .MuiTableCell-root:last-child": {
+          borderRight: "none",
+        },
+      }}
+    >
+      <TableHead>
+        <TableRow>
+          <TableCell
+            sx={{
+              position: "sticky",
+              left: 0,
+              zIndex: 3,
+              bgcolor: "background.paper",
+              whiteSpace: "nowrap",
+            }}
+          >
+            スタッフ名
+          </TableCell>
+          {days.map((day) => {
+            const dayKey = day.format("DD");
+            const count = calculateDailyCount(dayKey);
+            const isWeekend = day.day() === 0 || day.day() === 6;
+
+            return (
+              <TableCell
+                key={dayKey}
+                align="center"
+                sx={{
+                  bgcolor: isWeekend ? alpha("#f44336", 0.05) : "background.paper",
+                  minWidth: 50,
+                }}
+              >
+                <Typography variant="caption" display="block">
+                  {day.format("M/D")}
+                </Typography>
+                <Typography variant="caption" display="block">
+                  ({day.format("ddd")})
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color={count.work < 2 ? "warning.main" : "text.secondary"}
+                >
+                  {count.work}人
+                </Typography>
+              </TableCell>
+            );
+          })}
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {isLoading ? (
+          <TableRow>
+            <TableCell colSpan={days.length + 1} align="center">
+              読み込み中...
+            </TableCell>
+          </TableRow>
+        ) : (
+          <>
+            {staffIds.map((staffId) => {
+              const staffData = shiftDataMap.get(staffId);
+              if (!staffData) return null;
+
+              return (
+                <TableRow key={staffId}>
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 2,
+                      bgcolor: "background.paper",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {staffId}
+                  </TableCell>
+                  {days.map((day) => {
+                    const dayKey = day.format("DD");
+                    const cell = staffData.get(dayKey);
+                    if (!cell) return <TableCell key={dayKey}>-</TableCell>;
+
+                    const isEditing = isCellBeingEdited(staffId, dayKey);
+                    const editor = getCellEditor(staffId, dayKey);
+                    const isFocused =
+                      focusedCell?.staffId === staffId &&
+                      focusedCell?.date === dayKey;
+                    const isSelected = isCellSelected(staffId, dayKey);
+
+                    return (
+                      <ShiftCell
+                        key={dayKey}
+                        state={cell.state}
+                        isLocked={cell.isLocked}
+                        isEditing={isEditing}
+                        editorName={editor?.userName}
+                        lastChangedBy={cell.lastChangedBy}
+                        lastChangedAt={cell.lastChangedAt}
+                        onClick={(event) => handleCellClick(staffId, dayKey, event)}
+                        onRegisterRef={(element) =>
+                          registerCell(staffId, dayKey, element)
+                        }
+                        onMouseDown={(event) =>
+                          handleCellMouseDown(staffId, dayKey, event)
+                        }
+                        onMouseEnter={() => handleCellMouseEnter(staffId, dayKey)}
+                        isFocused={isFocused}
+                        isSelected={isSelected}
+                      />
+                    );
+                  })}
+                </TableRow>
+              );
+            })}
+
+            <TableRow>
+              <TableCell
+                sx={{
+                  position: "sticky",
+                  left: 0,
+                  zIndex: 2,
+                  bgcolor: "background.paper",
+                  fontWeight: 600,
+                }}
+              >
+                備考
+              </TableCell>
+              {days.map((day) => {
+                const events = getEventsForDay(day);
+                return (
+                  <TableCell
+                    key={`remark-${day.format("DD")}`}
+                    sx={{
+                      minWidth: 50,
+                      px: 2,
+                      py: 2,
+                      textAlign: "start",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    {events.length > 0 && (
+                      <Box
+                        sx={{
+                          display: "inline-block",
+                          writingMode: "vertical-rl",
+                        }}
+                      >
+                        {events.map((event) => (
+                          <Typography
+                            key={`${event.label}-${event.start.format("YYYY-MM-DD")}`}
+                            variant="caption"
+                            component="span"
+                            sx={{
+                              fontWeight: 700,
+                              lineHeight: 1.2,
+                              display: "block",
+                            }}
+                          >
+                            {event.label}
+                          </Typography>
+                        ))}
+                      </Box>
+                    )}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          </>
+        )}
+      </TableBody>
+    </Table>
+    </TableContainer>
+  );
+}
 
 /**
  * メインコンポーネント（内部実装）
@@ -715,283 +1138,38 @@ const ShiftCollaborativePageInner: React.FC = () => {
   return (
     <Page title="協同シフト調整">
       <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
-        {/* ヘッダー */}
-        <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-          <Typography variant="h4">協同シフト調整</Typography>
-          <Chip
-            label={currentMonth.format("YYYY年 M月")}
-            color="primary"
-            variant="outlined"
-          />
+        <CollaborativeHeader
+          currentMonth={currentMonth}
+          activeUsers={state.activeUsers}
+          isSyncing={state.isSyncing}
+          lastSyncedAt={state.lastSyncedAt}
+          onSync={handleSync}
+        />
 
-          {/* アクティブユーザー表示 */}
-          <Box sx={{ flex: 1 }} />
-          <AvatarGroup max={5}>
-            {state.activeUsers.map((user) => (
-              <Tooltip key={user.userId} title={user.userName}>
-                <Avatar
-                  sx={{
-                    bgcolor: user.color,
-                    width: 32,
-                    height: 32,
-                    fontSize: "0.875rem",
-                  }}
-                >
-                  {user.userName.charAt(0)}
-                </Avatar>
-              </Tooltip>
-            ))}
-          </AvatarGroup>
-
-          {/* 同期ボタン */}
-          <Tooltip
-            title={
-              state.lastSyncedAt
-                ? `最終同期: ${dayjs(state.lastSyncedAt).format("HH:mm:ss")}`
-                : "同期"
-            }
-          >
-            <IconButton
-              onClick={handleSync}
-              disabled={state.isSyncing}
-              size="small"
-            >
-              <SyncIcon
-                sx={{
-                  animation: state.isSyncing ? "spin 1s linear infinite" : "",
-                  "@keyframes spin": {
-                    from: { transform: "rotate(0deg)" },
-                    to: { transform: "rotate(360deg)" },
-                  },
-                }}
-              />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-
-        {/* エラー表示 */}
         {state.error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {state.error}
           </Alert>
         )}
 
-        {/* 進捗表示 */}
-        <Paper sx={{ p: 2, mb: 3 }}>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="subtitle2" gutterBottom>
-                調整状況
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={progress.confirmedPercent}
-                sx={{ height: 8, borderRadius: 1 }}
-              />
-              <Typography variant="caption" color="text.secondary">
-                確定: {progress.confirmedCount} / {days.length}日 (
-                {progress.confirmedPercent.toFixed(0)}%)
-              </Typography>
-            </Box>
+        <ProgressPanel progress={progress} totalDays={days.length} />
 
-            {progress.needsAdjustmentCount > 0 && (
-              <Alert severity="warning" icon={<InfoIcon />}>
-                調整が必要な日: {progress.needsAdjustmentCount}日
-              </Alert>
-            )}
-          </Stack>
-        </Paper>
-
-        {/* シフト表 */}
-        <TableContainer component={Paper}>
-          <Table
-            size="small"
-            stickyHeader
-            sx={{
-              "& .MuiTableCell-root": {
-                borderRight: "1px solid",
-                borderColor: "divider",
-              },
-              "& .MuiTableCell-root:last-child": {
-                borderRight: "none",
-              },
-            }}
-          >
-            <TableHead>
-              <TableRow>
-                <TableCell
-                  sx={{
-                    position: "sticky",
-                    left: 0,
-                    zIndex: 3,
-                    bgcolor: "background.paper",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  スタッフ名
-                </TableCell>
-                {days.map((day) => {
-                  const dayKey = day.format("DD");
-                  const count = calculateDailyCount(dayKey);
-                  const isWeekend = day.day() === 0 || day.day() === 6;
-
-                  return (
-                    <TableCell
-                      key={dayKey}
-                      align="center"
-                      sx={{
-                        bgcolor: isWeekend
-                          ? alpha("#f44336", 0.05)
-                          : "background.paper",
-                        minWidth: 50,
-                      }}
-                    >
-                      <Typography variant="caption" display="block">
-                        {day.format("M/D")}
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        ({day.format("ddd")})
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        color={
-                          count.work < 2 ? "warning.main" : "text.secondary"
-                        }
-                      >
-                        {count.work}人
-                      </Typography>
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {state.isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={days.length + 1} align="center">
-                    読み込み中...
-                  </TableCell>
-                </TableRow>
-              ) : (
-                <>
-                  {staffIds.map((staffId) => {
-                    const staffData = state.shiftDataMap.get(staffId);
-                    if (!staffData) return null;
-
-                    return (
-                      <TableRow key={staffId}>
-                        <TableCell
-                          sx={{
-                            position: "sticky",
-                            left: 0,
-                            zIndex: 2,
-                            bgcolor: "background.paper",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {staffId}
-                        </TableCell>
-                        {days.map((day) => {
-                          const dayKey = day.format("DD");
-                          const cell = staffData.get(dayKey);
-                          if (!cell)
-                            return <TableCell key={dayKey}>-</TableCell>;
-
-                          const isEditing = isCellBeingEdited(staffId, dayKey);
-                          const editor = getCellEditor(staffId, dayKey);
-                          const isFocused =
-                            focusedCell?.staffId === staffId &&
-                            focusedCell?.date === dayKey;
-                          const isSelected = isCellSelected(staffId, dayKey);
-
-                          return (
-                            <ShiftCell
-                              key={dayKey}
-                              state={cell.state}
-                              isLocked={cell.isLocked}
-                              isEditing={isEditing}
-                              editorName={editor?.userName}
-                              lastChangedBy={cell.lastChangedBy}
-                              lastChangedAt={cell.lastChangedAt}
-                              onClick={(event) =>
-                                handleCellClick(staffId, dayKey, event)
-                              }
-                              onRegisterRef={(element) =>
-                                registerCell(staffId, dayKey, element)
-                              }
-                              onMouseDown={(event) =>
-                                handleCellMouseDown(staffId, dayKey, event)
-                              }
-                              onMouseEnter={() =>
-                                handleCellMouseEnter(staffId, dayKey)
-                              }
-                              isFocused={isFocused}
-                              isSelected={isSelected}
-                            />
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-
-                  {/* 備考行（各日セルにイベント表示） */}
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        position: "sticky",
-                        left: 0,
-                        zIndex: 2,
-                        bgcolor: "background.paper",
-                        fontWeight: 600,
-                      }}
-                    >
-                      備考
-                    </TableCell>
-                    {days.map((day) => {
-                      const events = getEventsForDay(day);
-                      return (
-                        <TableCell
-                          key={`remark-${day.format("DD")}`}
-                          sx={{
-                            minWidth: 50,
-                            px: 2,
-                            py: 2,
-                            textAlign: "start",
-                            verticalAlign: "top",
-                          }}
-                        >
-                          {events.length > 0 && (
-                            <Box
-                              sx={{
-                                display: "inline-block",
-                                writingMode: "vertical-rl",
-                              }}
-                            >
-                              {events.map((event) => (
-                                <Typography
-                                  key={`${event.label}-${event.start.format("YYYY-MM-DD")}`}
-                                  variant="caption"
-                                  component="span"
-                                  sx={{
-                                    fontWeight: 700,
-                                    lineHeight: 1.2,
-                                    display: "block",
-                                  }}
-                                >
-                                  {event.label}
-                                </Typography>
-                              ))}
-                            </Box>
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                </>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <ShiftTable
+          days={days}
+          staffIds={staffIds}
+          shiftDataMap={state.shiftDataMap}
+          isLoading={state.isLoading}
+          focusedCell={focusedCell}
+          isCellSelected={isCellSelected}
+          isCellBeingEdited={isCellBeingEdited}
+          getCellEditor={getCellEditor}
+          registerCell={registerCell}
+          handleCellClick={handleCellClick}
+          handleCellMouseDown={handleCellMouseDown}
+          handleCellMouseEnter={handleCellMouseEnter}
+          calculateDailyCount={calculateDailyCount}
+          getEventsForDay={getEventsForDay}
+        />
 
         {/* バッチ編集ツールバー */}
         <BatchEditToolbar
