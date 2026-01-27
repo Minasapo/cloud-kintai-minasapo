@@ -28,15 +28,18 @@ const mapStaffName = (staff?: StaffType | null): string | undefined => {
   return name || undefined;
 };
 
-const findStaffNameByIdentifier = (
-  identifier: StaffLookupKey,
-  staffs: StaffType[]
-): string | undefined => {
-  if (!identifier) return undefined;
-  const staff = staffs.find(
-    (s) => s.id === identifier || s.cognitoUserId === identifier
-  );
-  return mapStaffName(staff) ?? identifier;
+const createStaffNameResolver = (staffs: StaffType[]) => {
+  const lookup = new Map<string, string>();
+  staffs.forEach((staff) => {
+    const name = mapStaffName(staff);
+    if (!name) return;
+    if (staff.id) lookup.set(staff.id, name);
+    if (staff.cognitoUserId) lookup.set(staff.cognitoUserId, name);
+  });
+  return (identifier: StaffLookupKey): string | undefined => {
+    if (!identifier) return undefined;
+    return lookup.get(identifier) ?? identifier;
+  };
 };
 
 const mapApprovalStatus = (status?: ApprovalStatus | null): string => {
@@ -58,6 +61,7 @@ export const deriveWorkflowApproverInfo = (
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null,
   staffs: StaffType[]
 ): WorkflowApproverInfo => {
+  const resolveStaffName = createStaffNameResolver(staffs);
   if (!workflow?.staffId) {
     return { mode: "any", items: [DEFAULT_APPROVER_LABEL] };
   }
@@ -74,7 +78,7 @@ export const deriveWorkflowApproverInfo = (
     if (!targetId) {
       return { mode: "single", items: ["未設定"] };
     }
-    const name = findStaffNameByIdentifier(targetId, staffs);
+    const name = resolveStaffName(targetId);
     return { mode: "single", items: [name ?? targetId] };
   }
 
@@ -85,7 +89,7 @@ export const deriveWorkflowApproverInfo = (
     if (multiple.length === 0) {
       return { mode: "any", items: ["未設定"] };
     }
-    const names = multiple.map((id) => findStaffNameByIdentifier(id, staffs));
+    const names = multiple.map((id) => resolveStaffName(id));
     const resolved = names.map((name, idx) => name ?? multiple[idx]);
     const orderMode = applicant?.approverMultipleMode === "ORDER";
     return { mode: orderMode ? "order" : "any", items: resolved };
@@ -100,6 +104,7 @@ export const buildWorkflowApprovalTimeline = ({
   applicantName,
   applicationDate,
 }: BuildTimelineParams): WorkflowApprovalStepView[] => {
+  const resolveStaffName = createStaffNameResolver(staffs);
   const base: WorkflowApprovalStepView[] = [
     {
       id: "s0",
@@ -126,7 +131,7 @@ export const buildWorkflowApprovalTimeline = ({
         const name: string | undefined =
           approverId === "ADMINS"
             ? DEFAULT_APPROVER_LABEL
-            : findStaffNameByIdentifier(approverId, staffs);
+            : resolveStaffName(approverId);
         const timestamp = step.decisionTimestamp
           ? new Date(step.decisionTimestamp).toLocaleString()
           : "";
