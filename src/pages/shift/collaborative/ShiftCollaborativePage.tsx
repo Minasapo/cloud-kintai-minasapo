@@ -174,10 +174,7 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
   );
 };
 
-/**
- * メインコンポーネント（内部実装）
- */
-const ShiftCollaborativePageInner: React.FC = () => {
+const useCollaborativePageState = () => {
   const theme = useTheme();
   const {
     state,
@@ -627,6 +624,85 @@ const ShiftCollaborativePageInner: React.FC = () => {
 
     return { work, fixedOff, requestedOff };
   };
+
+  return {
+    state,
+    isAdmin,
+    currentMonth,
+    days,
+    staffIds,
+    focusedCell,
+    isCellSelected,
+    registerCell,
+    handleCellClick,
+    handleCellMouseDown,
+    handleCellMouseEnter,
+    handleMouseUp,
+    handleSync,
+    progress,
+    calculateDailyCount,
+    getEventsForDay,
+    selectionCount,
+    hasLocked,
+    hasUnlocked,
+    hasClipboard,
+    handleCopy,
+    handlePaste,
+    clearSelection,
+    handleChangeState,
+    handleLockCells,
+    handleUnlockCells,
+    handleApplySuggestion,
+    violations,
+    isAnalyzing,
+    analyzeShifts,
+    showHelp,
+    setShowHelp,
+    getCellEditor,
+    isCellBeingEdited,
+  };
+};
+
+/**
+ * メインコンポーネント（内部実装）
+ */
+const ShiftCollaborativePageInner: React.FC = () => {
+  const {
+    state,
+    isCellBeingEdited,
+    getCellEditor,
+    focusedCell,
+    isCellSelected,
+    registerCell,
+    handleCellClick,
+    handleCellMouseDown,
+    handleCellMouseEnter,
+    handleMouseUp,
+    handleSync,
+    progress,
+    calculateDailyCount,
+    getEventsForDay,
+    selectionCount,
+    hasLocked,
+    hasUnlocked,
+    hasClipboard,
+    handleCopy,
+    handlePaste,
+    clearSelection,
+    handleChangeState,
+    handleLockCells,
+    handleUnlockCells,
+    handleApplySuggestion,
+    violations,
+    isAnalyzing,
+    analyzeShifts,
+    showHelp,
+    setShowHelp,
+    isAdmin,
+    currentMonth,
+    days,
+    staffIds,
+  } = useCollaborativePageState();
 
   return (
     <Page title="協同シフト調整">
