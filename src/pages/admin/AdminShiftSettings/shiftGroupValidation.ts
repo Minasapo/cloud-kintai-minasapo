@@ -28,6 +28,23 @@ export type GroupHelperTexts = {
   fixedHelperText: string;
 };
 
+export const SHIFT_GROUP_TEXTS = {
+  labelRequired: "ラベル名は必須です",
+  minInvalid: "0以上の整数で入力してください。",
+  maxInvalid: "0以上の整数で入力してください。",
+  fixedInvalid: "0以上の整数で入力してください。",
+  minOptional: "任意",
+  maxOptional: "任意",
+  fixedOptional: "任意",
+  maxRangeError: "最大人数は最小人数以上にしてください。",
+  fixedBelowMin: "最小人数以上を入力してください。",
+  fixedAboveMax: "最大人数以下を入力してください。",
+  rangeConflict: "固定人数と同時に設定できません。",
+  fixedRangeConflict: "固定人数を使う場合は最小/最大を空欄にしてください。",
+  rangeAndFixedHint:
+    "最小/最大 (レンジ指定) と固定人数は併用できません。いずれか一方のみ入力してください。",
+} as const;
+
 const isNonNegativeIntegerString = (value: string) => {
   const trimmed = value.trim();
   return trimmed === "" || /^\d+$/.test(trimmed);
@@ -89,26 +106,26 @@ export const getHelperTexts = (
   validation: GroupValidationResult,
 ): GroupHelperTexts => {
   const minHelperText = validation.minInputError
-    ? "0以上の整数で入力してください。"
+    ? SHIFT_GROUP_TEXTS.minInvalid
     : validation.fixedWithRangeConflict
-      ? "固定人数と同時に設定できません。"
-      : "任意";
+      ? SHIFT_GROUP_TEXTS.rangeConflict
+      : SHIFT_GROUP_TEXTS.minOptional;
   const maxHelperText = validation.maxInputError
-    ? "0以上の整数で入力してください。"
+    ? SHIFT_GROUP_TEXTS.maxInvalid
     : validation.rangeError
-      ? "最大人数は最小人数以上にしてください。"
+      ? SHIFT_GROUP_TEXTS.maxRangeError
       : validation.fixedWithRangeConflict
-        ? "固定人数と同時に設定できません。"
-        : "任意";
+        ? SHIFT_GROUP_TEXTS.rangeConflict
+        : SHIFT_GROUP_TEXTS.maxOptional;
   const fixedHelperText = validation.fixedInputError
-    ? "0以上の整数で入力してください。"
+    ? SHIFT_GROUP_TEXTS.fixedInvalid
     : validation.fixedBelowMin
-      ? "最小人数以上を入力してください。"
+      ? SHIFT_GROUP_TEXTS.fixedBelowMin
       : validation.fixedAboveMax
-        ? "最大人数以下を入力してください。"
+        ? SHIFT_GROUP_TEXTS.fixedAboveMax
         : validation.fixedWithRangeConflict
-          ? "固定人数を使う場合は最小/最大を空欄にしてください。"
-          : "任意";
+          ? SHIFT_GROUP_TEXTS.fixedRangeConflict
+          : SHIFT_GROUP_TEXTS.fixedOptional;
 
   return { minHelperText, maxHelperText, fixedHelperText };
 };

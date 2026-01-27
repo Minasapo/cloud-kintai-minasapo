@@ -5,6 +5,7 @@ import {
   getHelperTexts,
   GroupValidationResult,
   ShiftGroupFormValue,
+  SHIFT_GROUP_TEXTS,
 } from "./shiftGroupValidation";
 
 type ShiftGroupRowProps = {
@@ -43,7 +44,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
               })
             }
             error={labelError}
-            helperText={labelError ? "ラベル名は必須です" : undefined}
+            helperText={labelError ? SHIFT_GROUP_TEXTS.labelRequired : undefined}
             sx={{ flexGrow: 1 }}
           />
           <IconButton
@@ -126,7 +127,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           />
         </Stack>
         <Typography variant="caption" color="text.secondary">
-          最小/最大 (レンジ指定) と固定人数は併用できません。いずれか一方のみ入力してください。
+          {SHIFT_GROUP_TEXTS.rangeAndFixedHint}
         </Typography>
       </Stack>
     </Paper>
