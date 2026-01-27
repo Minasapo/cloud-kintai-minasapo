@@ -9,6 +9,7 @@ import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
+import type { WorkflowDetailLoaderData } from "@/entities/workflow/model/loader";
 import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow/model/workflowApprovalTimeline";
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
@@ -21,7 +22,6 @@ import {
   useWorkflowLoaderWorkflow,
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
 import { designTokenVar } from "@/shared/designSystem";
 import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
 import { createLogger } from "@/shared/lib/logger";

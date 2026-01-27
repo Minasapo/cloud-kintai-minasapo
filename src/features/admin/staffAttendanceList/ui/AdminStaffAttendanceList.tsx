@@ -1,7 +1,7 @@
 import {
   pendingAttendanceContainerSx,
   PendingAttendanceSection,
-} from "@features/admin/staffAttendanceList/components/PendingAttendanceSection";
+} from "@features/admin/staffAttendanceList/ui/components/PendingAttendanceSection";
 import {
   Alert,
   Box,
@@ -22,7 +22,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
-import ChangeRequestQuickViewDialog from "@/features/admin/staffAttendanceList/components/ChangeRequestQuickViewDialog";
+import ChangeRequestQuickViewDialog from "@/features/admin/staffAttendanceList/ui/components/ChangeRequestQuickViewDialog";
 import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
 import DesktopCalendarView from "@/features/attendance/list/ui/DesktopCalendarView";
 import { useSplitView } from "@/features/splitView";

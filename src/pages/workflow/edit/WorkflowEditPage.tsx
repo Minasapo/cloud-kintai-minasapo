@@ -19,6 +19,7 @@ import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import { fetchWorkflowById } from "@/entities/workflow/model/loader";
 import {
   buildUpdateWorkflowInput,
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
@@ -29,7 +30,6 @@ import {
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
-import { fetchWorkflowById } from "@/router/loaders/workflowDetailLoader";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
