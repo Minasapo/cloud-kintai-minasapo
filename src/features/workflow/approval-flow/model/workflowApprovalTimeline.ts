@@ -158,46 +158,47 @@ export const buildWorkflowApprovalTimeline = ({
 
   const approverInfo = deriveWorkflowApproverInfo(workflow, staffs);
   const isApproved = workflow.status === WorkflowStatus.APPROVED;
+  const fallbackState = isApproved ? "承認済み" : "未承認";
+  const fallbackDate = isApproved ? applicationDate : "";
+
+  const buildFallbackStep = (
+    name: string,
+    id: string,
+    role: string
+  ): WorkflowApprovalStepView => ({
+    id,
+    name,
+    role,
+    state: fallbackState,
+    date: fallbackDate,
+    comment: "",
+  });
 
   if (approverInfo.mode === "any") {
     const hasSpecificItems =
       approverInfo.items.length > 0 &&
       approverInfo.items.some((item) => item !== DEFAULT_APPROVER_LABEL);
-    const fallback: WorkflowApprovalStepView = {
-      id: "s1",
-      name: hasSpecificItems
-        ? approverInfo.items.filter(Boolean).join(" / ")
-        : DEFAULT_APPROVER_LABEL,
-      role: hasSpecificItems ? "承認者（複数）" : "承認者",
-      state: isApproved ? "承認済み" : "未承認",
-      date: isApproved ? applicationDate : "",
-      comment: "",
-    };
+    const fallbackName = hasSpecificItems
+      ? approverInfo.items.filter(Boolean).join(" / ")
+      : DEFAULT_APPROVER_LABEL;
+    const fallbackRole = hasSpecificItems ? "承認者（複数）" : "承認者";
+    const fallback = buildFallbackStep(fallbackName, "s1", fallbackRole);
     return [...base, fallback];
   }
 
   if (approverInfo.mode === "single") {
-    const fallback: WorkflowApprovalStepView = {
-      id: "s1",
-      name: approverInfo.items[0] ?? "未設定",
-      role: "承認者",
-      state: isApproved ? "承認済み" : "未承認",
-      date: isApproved ? applicationDate : "",
-      comment: "",
-    };
+    const fallback = buildFallbackStep(
+      approverInfo.items[0] ?? "未設定",
+      "s1",
+      "承認者"
+    );
     return [...base, fallback];
   }
 
   if (approverInfo.mode === "order") {
     const fallbackSteps = approverInfo.items.map(
-      (name, idx): WorkflowApprovalStepView => ({
-        id: `s${idx + 1}`,
-        name: name || "未設定",
-        role: "承認者",
-        state: isApproved ? "承認済み" : "未承認",
-        date: isApproved ? applicationDate : "",
-        comment: "",
-      })
+      (name, idx): WorkflowApprovalStepView =>
+        buildFallbackStep(name || "未設定", `s${idx + 1}`, "承認者")
     );
     return [...base, ...fallbackSteps];
   }
