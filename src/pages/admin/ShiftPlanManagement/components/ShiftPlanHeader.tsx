@@ -1,8 +1,6 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
-import PropTypes from "prop-types";
-import { memo } from "react";
 
 type ShiftPlanHeaderProps = {
   selectedYear: number;
@@ -10,7 +8,7 @@ type ShiftPlanHeaderProps = {
   onYearChange: (delta: number) => void;
 };
 
-const ShiftPlanHeaderBase: React.FC<ShiftPlanHeaderProps> = ({
+const ShiftPlanHeader: React.FC<ShiftPlanHeaderProps> = ({
   selectedYear,
   isBusy,
   onYearChange,
@@ -47,13 +45,5 @@ const ShiftPlanHeaderBase: React.FC<ShiftPlanHeaderProps> = ({
     </Box>
   );
 };
-
-ShiftPlanHeaderBase.propTypes = {
-  selectedYear: PropTypes.number.isRequired,
-  isBusy: PropTypes.bool.isRequired,
-  onYearChange: PropTypes.func.isRequired,
-};
-
-const ShiftPlanHeader = memo(ShiftPlanHeaderBase);
 
 export default ShiftPlanHeader;

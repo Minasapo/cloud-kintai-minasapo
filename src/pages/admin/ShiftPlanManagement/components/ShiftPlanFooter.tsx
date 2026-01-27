@@ -1,7 +1,5 @@
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import PropTypes from "prop-types";
-import { memo } from "react";
 
 type ShiftPlanFooterProps = {
   isAutoSaving: boolean;
@@ -10,7 +8,7 @@ type ShiftPlanFooterProps = {
   onSaveAll: () => void;
 };
 
-const ShiftPlanFooterBase: React.FC<ShiftPlanFooterProps> = ({
+const ShiftPlanFooter: React.FC<ShiftPlanFooterProps> = ({
   isAutoSaving,
   lastAutoSaveTime,
   isBusy,
@@ -47,14 +45,5 @@ const ShiftPlanFooterBase: React.FC<ShiftPlanFooterProps> = ({
     </Box>
   );
 };
-
-ShiftPlanFooterBase.propTypes = {
-  isAutoSaving: PropTypes.bool.isRequired,
-  lastAutoSaveTime: PropTypes.string,
-  isBusy: PropTypes.bool.isRequired,
-  onSaveAll: PropTypes.func.isRequired,
-};
-
-const ShiftPlanFooter = memo(ShiftPlanFooterBase);
 
 export default ShiftPlanFooter;

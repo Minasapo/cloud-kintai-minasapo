@@ -1,6 +1,5 @@
 import { ButtonBase, Stack, TextField, Typography } from "@mui/material";
-import PropTypes from "prop-types";
-import { memo, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { INPUT_PLACEHOLDER, sanitizeCapacityValue } from "../shiftPlanUtils";
 
@@ -12,7 +11,7 @@ type EditableCapacityCellProps = {
   onTabNextDay?: () => void;
 };
 
-const EditableCapacityCellBase: React.FC<EditableCapacityCellProps> = ({
+const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
   value,
   labelText,
   labelColor,
@@ -113,15 +112,5 @@ const EditableCapacityCellBase: React.FC<EditableCapacityCellProps> = ({
     </Stack>
   );
 };
-
-EditableCapacityCellBase.propTypes = {
-  value: PropTypes.string.isRequired,
-  labelText: PropTypes.string.isRequired,
-  labelColor: PropTypes.string.isRequired,
-  onCommit: PropTypes.func.isRequired,
-  onTabNextDay: PropTypes.func,
-};
-
-const EditableCapacityCell = memo(EditableCapacityCellBase);
 
 export default EditableCapacityCell;
