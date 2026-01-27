@@ -28,34 +28,11 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
   const labelError = validation.labelError;
   const { minHelperText, maxHelperText, fixedHelperText } =
     getHelperTexts(validation);
-  const handleLabelChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onUpdate(group.id, { label: event.target.value });
-    },
-    [group.id, onUpdate],
-  );
-  const handleDescriptionChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onUpdate(group.id, { description: event.target.value });
-    },
-    [group.id, onUpdate],
-  );
-  const handleMinChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onUpdate(group.id, { min: event.target.value });
-    },
-    [group.id, onUpdate],
-  );
-  const handleMaxChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onUpdate(group.id, { max: event.target.value });
-    },
-    [group.id, onUpdate],
-  );
-  const handleFixedChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onUpdate(group.id, { fixed: event.target.value });
-    },
+  const handleChange = useCallback(
+    (key: keyof Omit<ShiftGroupFormValue, "id">) =>
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        onUpdate(group.id, { [key]: event.target.value });
+      },
     [group.id, onUpdate],
   );
   const handleDelete = useCallback(() => {
@@ -75,7 +52,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             size="small"
             label="ラベル名"
             value={group.label}
-            onChange={handleLabelChange}
+            onChange={handleChange("label")}
             error={labelError}
             helperText={
               labelError ? SHIFT_GROUP_TEXTS.labelRequired : undefined
@@ -94,7 +71,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           size="small"
           label="説明"
           value={group.description}
-          onChange={handleDescriptionChange}
+          onChange={handleChange("description")}
           inputProps={{ maxLength: 48 }}
           helperText="50文字以内を目安に入力"
           fullWidth
@@ -105,7 +82,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="最小人数 (min)"
             value={group.min}
-            onChange={handleMinChange}
+            onChange={handleChange("min")}
             inputProps={{ min: 0 }}
             error={
               validation.minInputError || validation.fixedWithRangeConflict
@@ -118,7 +95,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="最大人数 (max)"
             value={group.max}
-            onChange={handleMaxChange}
+            onChange={handleChange("max")}
             inputProps={{ min: 0 }}
             error={
               validation.maxInputError ||
@@ -133,7 +110,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="固定人数 (fixed)"
             value={group.fixed}
-            onChange={handleFixedChange}
+            onChange={handleChange("fixed")}
             inputProps={{ min: 0 }}
             error={
               validation.fixedInputError ||
