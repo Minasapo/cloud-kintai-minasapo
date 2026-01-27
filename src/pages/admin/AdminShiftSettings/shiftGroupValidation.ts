@@ -1,4 +1,4 @@
-import { SHIFT_GROUP_TEXTS } from "./shiftGroupTexts";
+import { SHIFT_GROUP_VALIDATION_TEXTS } from "./shiftGroupTexts.validation";
 
 export type ShiftGroupFormValue = {
   id: string;
@@ -7,6 +7,14 @@ export type ShiftGroupFormValue = {
   min: string;
   max: string;
   fixed: string;
+};
+
+export type ShiftGroupConfig = {
+  label: string;
+  description?: string | null;
+  min?: number | null;
+  max?: number | null;
+  fixed?: number | null;
 };
 
 export type GroupValidationResult = {
@@ -90,31 +98,31 @@ export const getGroupValidation = (
 export const getHelperTexts = (
   validation: GroupValidationResult,
 ): GroupHelperTexts => {
-  let minHelperText: string = SHIFT_GROUP_TEXTS.validation.minOptional;
+  let minHelperText: string = SHIFT_GROUP_VALIDATION_TEXTS.minOptional;
   if (validation.minInputError) {
-    minHelperText = SHIFT_GROUP_TEXTS.validation.minInvalid;
+    minHelperText = SHIFT_GROUP_VALIDATION_TEXTS.minInvalid;
   } else if (validation.fixedWithRangeConflict) {
-    minHelperText = SHIFT_GROUP_TEXTS.validation.rangeConflict;
+    minHelperText = SHIFT_GROUP_VALIDATION_TEXTS.rangeConflict;
   }
 
-  let maxHelperText: string = SHIFT_GROUP_TEXTS.validation.maxOptional;
+  let maxHelperText: string = SHIFT_GROUP_VALIDATION_TEXTS.maxOptional;
   if (validation.maxInputError) {
-    maxHelperText = SHIFT_GROUP_TEXTS.validation.maxInvalid;
+    maxHelperText = SHIFT_GROUP_VALIDATION_TEXTS.maxInvalid;
   } else if (validation.rangeError) {
-    maxHelperText = SHIFT_GROUP_TEXTS.validation.maxRangeError;
+    maxHelperText = SHIFT_GROUP_VALIDATION_TEXTS.maxRangeError;
   } else if (validation.fixedWithRangeConflict) {
-    maxHelperText = SHIFT_GROUP_TEXTS.validation.rangeConflict;
+    maxHelperText = SHIFT_GROUP_VALIDATION_TEXTS.rangeConflict;
   }
 
-  let fixedHelperText: string = SHIFT_GROUP_TEXTS.validation.fixedOptional;
+  let fixedHelperText: string = SHIFT_GROUP_VALIDATION_TEXTS.fixedOptional;
   if (validation.fixedInputError) {
-    fixedHelperText = SHIFT_GROUP_TEXTS.validation.fixedInvalid;
+    fixedHelperText = SHIFT_GROUP_VALIDATION_TEXTS.fixedInvalid;
   } else if (validation.fixedBelowMin) {
-    fixedHelperText = SHIFT_GROUP_TEXTS.validation.fixedBelowMin;
+    fixedHelperText = SHIFT_GROUP_VALIDATION_TEXTS.fixedBelowMin;
   } else if (validation.fixedAboveMax) {
-    fixedHelperText = SHIFT_GROUP_TEXTS.validation.fixedAboveMax;
+    fixedHelperText = SHIFT_GROUP_VALIDATION_TEXTS.fixedAboveMax;
   } else if (validation.fixedWithRangeConflict) {
-    fixedHelperText = SHIFT_GROUP_TEXTS.validation.fixedRangeConflict;
+    fixedHelperText = SHIFT_GROUP_VALIDATION_TEXTS.fixedRangeConflict;
   }
 
   return { minHelperText, maxHelperText, fixedHelperText };

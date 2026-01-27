@@ -2,7 +2,8 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 
-import { SHIFT_GROUP_TEXTS } from "./shiftGroupTexts";
+import { SHIFT_GROUP_UI_TEXTS } from "./shiftGroupTexts.ui";
+import { SHIFT_GROUP_VALIDATION_TEXTS } from "./shiftGroupTexts.validation";
 import {
   getHelperTexts,
   GroupValidationResult,
@@ -59,29 +60,37 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
         ...getFieldProps(key),
         error: labelError,
         helperText: labelError
-          ? SHIFT_GROUP_TEXTS.validation.labelRequired
+          ? SHIFT_GROUP_VALIDATION_TEXTS.labelRequired
           : undefined,
       };
     }
 
     return {
       ...getFieldProps(key),
-      helperText: SHIFT_GROUP_TEXTS.ui.descriptionHelperText,
+      helperText: SHIFT_GROUP_UI_TEXTS.descriptionHelperText,
     };
   };
 
-  const getNumberFieldState = (
+  const getNumberFieldProps = (
     key: "min" | "max" | "fixed",
-  ): { error: boolean; helperText: string } => {
+  ): {
+    value: string;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    error: boolean;
+    helperText: string;
+  } => {
+    const fieldProps = getFieldProps(key);
     switch (key) {
       case "min":
         return {
+          ...fieldProps,
           error:
             validation.minInputError || validation.fixedWithRangeConflict,
           helperText: minHelperText,
         };
       case "max":
         return {
+          ...fieldProps,
           error:
             validation.maxInputError ||
             validation.rangeError ||
@@ -91,6 +100,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
       case "fixed":
       default:
         return {
+          ...fieldProps,
           error:
             validation.fixedInputError ||
             validation.fixedBelowMin ||
@@ -136,32 +146,29 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             size="small"
             type="number"
             label="最小人数 (min)"
-            {...getFieldProps("min")}
+            {...getNumberFieldProps("min")}
             inputProps={{ min: 0 }}
-            {...getNumberFieldState("min")}
             sx={{ flexGrow: 1 }}
           />
           <TextField
             size="small"
             type="number"
             label="最大人数 (max)"
-            {...getFieldProps("max")}
+            {...getNumberFieldProps("max")}
             inputProps={{ min: 0 }}
-            {...getNumberFieldState("max")}
             sx={{ flexGrow: 1 }}
           />
           <TextField
             size="small"
             type="number"
             label="固定人数 (fixed)"
-            {...getFieldProps("fixed")}
+            {...getNumberFieldProps("fixed")}
             inputProps={{ min: 0 }}
-            {...getNumberFieldState("fixed")}
             sx={{ flexGrow: 1 }}
           />
         </Stack>
         <Typography variant="caption" color="text.secondary">
-          {SHIFT_GROUP_TEXTS.ui.rangeAndFixedHint}
+          {SHIFT_GROUP_UI_TEXTS.rangeAndFixedHint}
         </Typography>
       </Stack>
     </Paper>

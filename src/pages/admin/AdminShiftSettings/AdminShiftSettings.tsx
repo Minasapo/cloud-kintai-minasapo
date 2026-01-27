@@ -24,12 +24,12 @@ import {
 import {
   buildShiftGroupPayload,
   createShiftGroup,
-  SHIFT_GROUP_TEXTS,
   ShiftGroupFormValue,
   ShiftGroupRow,
   toShiftGroupFormValue,
   useShiftGroupValidation,
 } from "./";
+import { SHIFT_GROUP_UI_TEXTS } from "./shiftGroupTexts.ui";
 
 export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
@@ -117,10 +117,10 @@ export default function AdminShiftSettings() {
   return (
     <Stack spacing={2.5}>
       <Typography>
-        {SHIFT_GROUP_TEXTS.ui.intro}
+        {SHIFT_GROUP_UI_TEXTS.intro}
       </Typography>
       <Alert severity="info">
-        {SHIFT_GROUP_TEXTS.ui.saveInfo}
+        {SHIFT_GROUP_UI_TEXTS.saveInfo}
       </Alert>
 
       <Paper sx={{ p: 2 }}>
@@ -129,7 +129,7 @@ export default function AdminShiftSettings() {
           <Stack spacing={1.5}>
             {shiftGroups.length === 0 ? (
               <Alert severity="info" variant="outlined">
-                {SHIFT_GROUP_TEXTS.ui.emptyGroups}
+                {SHIFT_GROUP_UI_TEXTS.emptyGroups}
               </Alert>
             ) : (
               shiftGroups.map((group) => {
@@ -155,7 +155,7 @@ export default function AdminShiftSettings() {
           </Button>
           {hasValidationError && (
             <Alert severity="warning">
-              {SHIFT_GROUP_TEXTS.ui.validationWarning}
+              {SHIFT_GROUP_UI_TEXTS.validationWarning}
             </Alert>
           )}
         </Stack>

@@ -1,7 +1,6 @@
-import type { ShiftGroupConfig } from "@entities/app-config/model/useAppConfig";
-
 import {
   parseOptionalInteger,
+  type ShiftGroupConfig,
   ShiftGroupFormValue,
 } from "./shiftGroupValidation";
 
