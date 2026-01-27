@@ -15,16 +15,14 @@ const useShiftGroupValidation = (
   shiftGroups: ShiftGroupFormValue[],
 ): ShiftGroupValidationState =>
   useMemo(() => {
-    const map = new Map<string, GroupValidationResult>();
-    let hasError = false;
-    shiftGroups.forEach((group) => {
+    const entries = shiftGroups.map((group) => {
       const validation = getGroupValidation(group);
-      map.set(group.id, validation);
-      if (validation.hasError) {
-        hasError = true;
-      }
+      return [group.id, validation] as const;
     });
-    return { validationMap: map, hasValidationError: hasError };
+    return {
+      validationMap: new Map(entries),
+      hasValidationError: entries.some(([, validation]) => validation.hasError),
+    };
   }, [shiftGroups]);
 
 export default useShiftGroupValidation;
