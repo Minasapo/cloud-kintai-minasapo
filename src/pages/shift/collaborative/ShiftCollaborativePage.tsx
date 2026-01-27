@@ -85,6 +85,20 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
 }: ShiftCellProps) => {
   const config = shiftStateConfig[state];
   const isPending = false; // TODO: pendingChangesから取得
+  const tooltipTitle = isLocked
+    ? "確定済み"
+    : isEditing
+      ? `${editorName}が編集中`
+      : (
+          <Box>
+            <Typography variant="caption">{config.text}</Typography>
+            {lastChangedBy && (
+              <Typography variant="caption" component="div">
+                {lastChangedBy} ({lastChangedAt})
+              </Typography>
+            )}
+          </Box>
+        );
 
   return (
     <TableCell
@@ -124,27 +138,7 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
         userSelect: "none", // ドラッグ選択時のテキスト選択を防止
       }}
     >
-      <Tooltip
-        title={
-          isLocked ? (
-            "確定済み"
-          ) : isEditing ? (
-            `${editorName}が編集中`
-          ) : (
-            <Box>
-              <Typography variant="caption">{config.text}</Typography>
-              {lastChangedBy && (
-                <>
-                  <br />
-                  <Typography variant="caption">
-                    {lastChangedBy} ({lastChangedAt})
-                  </Typography>
-                </>
-              )}
-            </Box>
-          )
-        }
-      >
+      <Tooltip title={tooltipTitle}>
         <Box
           sx={{
             display: "flex",

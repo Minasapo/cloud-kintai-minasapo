@@ -259,6 +259,314 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
   );
 });
 
+type ShiftPlanHeaderProps = {
+  selectedYear: number;
+  isBusy: boolean;
+  onYearChange: (delta: number) => void;
+};
+
+const ShiftPlanHeader = memo(function ShiftPlanHeader({
+  selectedYear,
+  isBusy,
+  onYearChange,
+}: ShiftPlanHeaderProps) {
+  return (
+    <Box display="flex" alignItems="center" justifyContent="space-between">
+      <Box>
+        <Typography component="h1" variant="h4" fontWeight="bold">
+          シフト計画管理
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          年ごとのシフト申請期間を管理し、各月の受付開始・締切日を調整できます。
+        </Typography>
+      </Box>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <IconButton
+          aria-label="前の年"
+          onClick={() => onYearChange(-1)}
+          disabled={isBusy}
+        >
+          <ChevronLeftIcon />
+        </IconButton>
+        <Typography variant="h5" component="div" fontWeight="bold">
+          {selectedYear}年
+        </Typography>
+        <IconButton
+          aria-label="次の年"
+          onClick={() => onYearChange(1)}
+          disabled={isBusy}
+        >
+          <ChevronRightIcon />
+        </IconButton>
+      </Stack>
+    </Box>
+  );
+});
+
+type ShiftPlanTableProps = {
+  selectedYear: number;
+  rows: ShiftPlanRow[];
+  isBusy: boolean;
+  holidayNameMap: Map<string, string>;
+  onFieldChange: (month: number, field: EditableField, value: string) => void;
+  onToggleEnabled: (month: number) => void;
+  onDailyCapacityChange: (
+    month: number,
+    dayIndex: number,
+    value: string,
+  ) => void;
+  onTabNextDay: (month: number, dayIndex: number) => void;
+  onRegisterCellRef: (cellId: string, element: HTMLElement | null) => void;
+};
+
+const ShiftPlanTable = memo(function ShiftPlanTable({
+  selectedYear,
+  rows,
+  isBusy,
+  holidayNameMap,
+  onFieldChange,
+  onToggleEnabled,
+  onDailyCapacityChange,
+  onTabNextDay,
+  onRegisterCellRef,
+}: ShiftPlanTableProps) {
+  return (
+    <Paper elevation={0} variant="outlined" sx={{ position: "relative" }}>
+      {isBusy && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2,
+          }}
+        >
+          <LinearProgress />
+        </Box>
+      )}
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell rowSpan={2} sx={{ width: 96, ...CELL_NOWRAP_SX }}>
+                月
+              </TableCell>
+              <TableCell rowSpan={2} sx={{ width: 160, ...CELL_NOWRAP_SX }}>
+                申請開始
+              </TableCell>
+              <TableCell rowSpan={2} sx={{ width: 160, ...CELL_NOWRAP_SX }}>
+                申請終了
+              </TableCell>
+              <TableCell
+                rowSpan={2}
+                align="center"
+                sx={{ width: 160, ...CELL_NOWRAP_SX }}
+              >
+                手動停止
+              </TableCell>
+              <TableCell
+                align="center"
+                colSpan={DAY_COLUMNS.length}
+                sx={{ px: 0.5, ...CELL_NOWRAP_SX }}
+              >
+                日別人数
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              {DAY_COLUMNS.map((day) => (
+                <TableCell
+                  key={`day-header-${day}`}
+                  align="center"
+                  sx={{ minWidth: 52, px: 0.5, ...CELL_NOWRAP_SX }}
+                >
+                  {day}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map((row) => {
+              const monthCursor = dayjs()
+                .year(selectedYear)
+                .month(row.month - 1);
+              const rowDaysInMonth = monthCursor.daysInMonth();
+              return (
+                <TableRow key={`${selectedYear}-${row.month}`} hover>
+                  <TableCell sx={{ width: 96, ...CELL_NOWRAP_SX }}>
+                    <Typography fontWeight="bold">{row.month}月</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: 160, ...CELL_NOWRAP_SX }}>
+                    <TextField
+                      type="date"
+                      size="small"
+                      value={row.editStart}
+                      fullWidth
+                      sx={{ maxWidth: 180 }}
+                      onChange={(event) =>
+                        onFieldChange(
+                          row.month,
+                          "editStart",
+                          event.target.value,
+                        )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell sx={{ width: 160, ...CELL_NOWRAP_SX }}>
+                    <TextField
+                      type="date"
+                      size="small"
+                      value={row.editEnd}
+                      fullWidth
+                      sx={{ maxWidth: 180 }}
+                      onChange={(event) =>
+                        onFieldChange(row.month, "editEnd", event.target.value)
+                      }
+                    />
+                  </TableCell>
+                  <TableCell align="center" sx={CELL_NOWRAP_SX}>
+                    <Button
+                      size="small"
+                      variant={row.enabled ? "outlined" : "contained"}
+                      color="primary"
+                      onClick={() => onToggleEnabled(row.month)}
+                    >
+                      {row.enabled ? "申請停止" : "申請再開"}
+                    </Button>
+                  </TableCell>
+                  {DAY_COLUMNS.map((day) => {
+                    if (day > rowDaysInMonth) {
+                      return (
+                        <TableCell
+                          key={`${row.month}-day-${day}`}
+                          align="center"
+                          sx={{ px: 0.25, minWidth: 52, ...CELL_NOWRAP_SX }}
+                        />
+                      );
+                    }
+                    const dayIndex = day - 1;
+                    const value = row.dailyCapacity[dayIndex] ?? "";
+                    const dayInstance = monthCursor.date(day);
+                    const weekdayIndex = dayInstance.day();
+                    const dateKey = dayInstance.format("YYYY-MM-DD");
+                    const holidayName = holidayNameMap.get(dateKey);
+                    const isHoliday = Boolean(holidayName);
+                    const weekdayLabel = WEEKDAY_LABELS[weekdayIndex];
+                    const isSunday = weekdayIndex === 0;
+                    const isSaturday = weekdayIndex === 6;
+                    const cellBgColor = isHoliday
+                      ? HOLIDAY_BG
+                      : isSunday
+                        ? SUNDAY_BG
+                        : isSaturday
+                          ? SATURDAY_BG
+                          : undefined;
+                    const weekdayColor = isSunday
+                      ? "error.main"
+                      : isSaturday
+                        ? "primary.main"
+                        : "text.secondary";
+                    const labelColor = isHoliday
+                      ? "warning.dark"
+                      : weekdayColor;
+                    const labelText = isHoliday ? "祝" : weekdayLabel;
+                    const cellId = `cell-${selectedYear}-${row.month}-${dayIndex}`;
+                    const cellContent = (
+                      <EditableCapacityCell
+                        value={value}
+                        labelText={labelText}
+                        labelColor={labelColor}
+                        onCommit={(nextValue) =>
+                          onDailyCapacityChange(row.month, dayIndex, nextValue)
+                        }
+                        onTabNextDay={() => onTabNextDay(row.month, dayIndex)}
+                      />
+                    );
+                    return (
+                      <TableCell
+                        key={`${row.month}-day-${day}`}
+                        align="center"
+                        sx={{
+                          px: 0.25,
+                          minWidth: 52,
+                          backgroundColor: cellBgColor,
+                          ...CELL_NOWRAP_SX,
+                        }}
+                      >
+                        <Box
+                          ref={(ref) =>
+                            onRegisterCellRef(cellId, ref as HTMLElement | null)
+                          }
+                        >
+                          {isHoliday ? (
+                            <Tooltip
+                              title={holidayName ?? "祝日"}
+                              placement="top"
+                            >
+                              {cellContent}
+                            </Tooltip>
+                          ) : (
+                            cellContent
+                          )}
+                        </Box>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+});
+
+type ShiftPlanFooterProps = {
+  isAutoSaving: boolean;
+  lastAutoSaveTime: string | null;
+  isBusy: boolean;
+  onSaveAll: () => void;
+};
+
+const ShiftPlanFooter = memo(function ShiftPlanFooter({
+  isAutoSaving,
+  lastAutoSaveTime,
+  isBusy,
+  onSaveAll,
+}: ShiftPlanFooterProps) {
+  return (
+    <Box
+      display="flex"
+      justifyContent="space-between"
+      alignItems="center"
+      px={3}
+      py={2}
+    >
+      <Stack spacing={1}>
+        {isAutoSaving && (
+          <Typography variant="caption" color="info.main">
+            自動保存中...
+          </Typography>
+        )}
+        {lastAutoSaveTime && !isAutoSaving && (
+          <Typography variant="caption" color="text.secondary">
+            最後の自動保存: {lastAutoSaveTime}
+          </Typography>
+        )}
+      </Stack>
+      <Button
+        variant="contained"
+        startIcon={<SaveIcon />}
+        onClick={onSaveAll}
+        disabled={isBusy}
+      >
+        全体を保存
+      </Button>
+    </Box>
+  );
+});
+
 export default function ShiftPlanManagement() {
   const dispatch = useAppDispatchV2();
   const initialYear = dayjs().year();
@@ -500,6 +808,17 @@ export default function ShiftPlanManagement() {
     [selectedYear],
   );
 
+  const handleRegisterCellRef = useCallback(
+    (cellId: string, element: HTMLElement | null) => {
+      if (element instanceof HTMLElement) {
+        cellRefs.current.set(cellId, element);
+      } else {
+        cellRefs.current.delete(cellId);
+      }
+    },
+    [],
+  );
+
   const performSave = useCallback(
     async (
       rows: ShiftPlanRow[],
@@ -632,266 +951,30 @@ export default function ShiftPlanManagement() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Stack spacing={3}>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box>
-            <Typography component="h1" variant="h4" fontWeight="bold">
-              シフト計画管理
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              年ごとのシフト申請期間を管理し、各月の受付開始・締切日を調整できます。
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <IconButton
-              aria-label="前の年"
-              onClick={() => handleYearChange(-1)}
-              disabled={isBusy}
-            >
-              <ChevronLeftIcon />
-            </IconButton>
-            <Typography variant="h5" component="div" fontWeight="bold">
-              {selectedYear}年
-            </Typography>
-            <IconButton
-              aria-label="次の年"
-              onClick={() => handleYearChange(1)}
-              disabled={isBusy}
-            >
-              <ChevronRightIcon />
-            </IconButton>
-          </Stack>
-        </Box>
+        <ShiftPlanHeader
+          selectedYear={selectedYear}
+          isBusy={isBusy}
+          onYearChange={handleYearChange}
+        />
 
-        <Paper elevation={0} variant="outlined" sx={{ position: "relative" }}>
-          {isBusy && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 2,
-              }}
-            >
-              <LinearProgress />
-            </Box>
-          )}
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell rowSpan={2} sx={{ width: 96, ...CELL_NOWRAP_SX }}>
-                    月
-                  </TableCell>
-                  <TableCell rowSpan={2} sx={{ width: 160, ...CELL_NOWRAP_SX }}>
-                    申請開始
-                  </TableCell>
-                  <TableCell rowSpan={2} sx={{ width: 160, ...CELL_NOWRAP_SX }}>
-                    申請終了
-                  </TableCell>
-                  <TableCell
-                    rowSpan={2}
-                    align="center"
-                    sx={{ width: 160, ...CELL_NOWRAP_SX }}
-                  >
-                    手動停止
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    colSpan={DAY_COLUMNS.length}
-                    sx={{ px: 0.5, ...CELL_NOWRAP_SX }}
-                  >
-                    日別人数
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  {DAY_COLUMNS.map((day) => (
-                    <TableCell
-                      key={`day-header-${day}`}
-                      align="center"
-                      sx={{ minWidth: 52, px: 0.5, ...CELL_NOWRAP_SX }}
-                    >
-                      {day}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {currentRows.map((row) => {
-                  const monthCursor = dayjs()
-                    .year(selectedYear)
-                    .month(row.month - 1);
-                  const rowDaysInMonth = monthCursor.daysInMonth();
-                  return (
-                    <TableRow key={`${selectedYear}-${row.month}`} hover>
-                      <TableCell sx={{ width: 96, ...CELL_NOWRAP_SX }}>
-                        <Typography fontWeight="bold">{row.month}月</Typography>
-                      </TableCell>
-                      <TableCell sx={{ width: 160, ...CELL_NOWRAP_SX }}>
-                        <TextField
-                          type="date"
-                          size="small"
-                          value={row.editStart}
-                          fullWidth
-                          sx={{ maxWidth: 180 }}
-                          onChange={(event) =>
-                            handleFieldChange(
-                              row.month,
-                              "editStart",
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </TableCell>
-                      <TableCell sx={{ width: 160, ...CELL_NOWRAP_SX }}>
-                        <TextField
-                          type="date"
-                          size="small"
-                          value={row.editEnd}
-                          fullWidth
-                          sx={{ maxWidth: 180 }}
-                          onChange={(event) =>
-                            handleFieldChange(
-                              row.month,
-                              "editEnd",
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </TableCell>
-                      <TableCell align="center" sx={CELL_NOWRAP_SX}>
-                        <Button
-                          size="small"
-                          variant={row.enabled ? "outlined" : "contained"}
-                          color="primary"
-                          onClick={() => handleToggleEnabled(row.month)}
-                        >
-                          {row.enabled ? "申請停止" : "申請再開"}
-                        </Button>
-                      </TableCell>
-                      {DAY_COLUMNS.map((day) => {
-                        if (day > rowDaysInMonth) {
-                          return (
-                            <TableCell
-                              key={`${row.month}-day-${day}`}
-                              align="center"
-                              sx={{ px: 0.25, minWidth: 52, ...CELL_NOWRAP_SX }}
-                            />
-                          );
-                        }
-                        const dayIndex = day - 1;
-                        const value = row.dailyCapacity[dayIndex] ?? "";
-                        const dayInstance = monthCursor.date(day);
-                        const weekdayIndex = dayInstance.day();
-                        const dateKey = dayInstance.format("YYYY-MM-DD");
-                        const holidayName = holidayNameMap.get(dateKey);
-                        const isHoliday = Boolean(holidayName);
-                        const weekdayLabel = WEEKDAY_LABELS[weekdayIndex];
-                        const isSunday = weekdayIndex === 0;
-                        const isSaturday = weekdayIndex === 6;
-                        const cellBgColor = isHoliday
-                          ? HOLIDAY_BG
-                          : isSunday
-                            ? SUNDAY_BG
-                            : isSaturday
-                              ? SATURDAY_BG
-                              : undefined;
-                        const weekdayColor = isSunday
-                          ? "error.main"
-                          : isSaturday
-                            ? "primary.main"
-                            : "text.secondary";
-                        const labelColor = isHoliday
-                          ? "warning.dark"
-                          : weekdayColor;
-                        const labelText = isHoliday ? "祝" : weekdayLabel;
-                        const cellId = `cell-${selectedYear}-${row.month}-${dayIndex}`;
-                        const cellContent = (
-                          <EditableCapacityCell
-                            value={value}
-                            labelText={labelText}
-                            labelColor={labelColor}
-                            onCommit={(nextValue) =>
-                              handleDailyCapacityChange(
-                                row.month,
-                                dayIndex,
-                                nextValue,
-                              )
-                            }
-                            onTabNextDay={() =>
-                              handleTabNextDay(row.month, dayIndex)
-                            }
-                          />
-                        );
-                        return (
-                          <TableCell
-                            key={`${row.month}-day-${day}`}
-                            align="center"
-                            sx={{
-                              px: 0.25,
-                              minWidth: 52,
-                              backgroundColor: cellBgColor,
-                              ...CELL_NOWRAP_SX,
-                            }}
-                          >
-                            <Box
-                              ref={(ref) => {
-                                if (ref instanceof HTMLElement) {
-                                  cellRefs.current.set(cellId, ref);
-                                } else {
-                                  cellRefs.current.delete(cellId);
-                                }
-                              }}
-                            >
-                              {isHoliday ? (
-                                <Tooltip
-                                  title={holidayName ?? "祝日"}
-                                  placement="top"
-                                >
-                                  {cellContent}
-                                </Tooltip>
-                              ) : (
-                                cellContent
-                              )}
-                            </Box>
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            px={3}
-            py={2}
-          >
-            <Stack spacing={1}>
-              {isAutoSaving && (
-                <Typography variant="caption" color="info.main">
-                  自動保存中...
-                </Typography>
-              )}
-              {lastAutoSaveTime && !isAutoSaving && (
-                <Typography variant="caption" color="text.secondary">
-                  最後の自動保存: {lastAutoSaveTime}
-                </Typography>
-              )}
-            </Stack>
-            <Button
-              variant="contained"
-              startIcon={<SaveIcon />}
-              onClick={handleSaveAll}
-              disabled={isBusy}
-            >
-              全体を保存
-            </Button>
-          </Box>
-        </Paper>
+        <ShiftPlanTable
+          selectedYear={selectedYear}
+          rows={currentRows}
+          isBusy={isBusy}
+          holidayNameMap={holidayNameMap}
+          onFieldChange={handleFieldChange}
+          onToggleEnabled={handleToggleEnabled}
+          onDailyCapacityChange={handleDailyCapacityChange}
+          onTabNextDay={handleTabNextDay}
+          onRegisterCellRef={handleRegisterCellRef}
+        />
+
+        <ShiftPlanFooter
+          isAutoSaving={isAutoSaving}
+          lastAutoSaveTime={lastAutoSaveTime}
+          isBusy={isBusy}
+          onSaveAll={handleSaveAll}
+        />
       </Stack>
     </Container>
   );
