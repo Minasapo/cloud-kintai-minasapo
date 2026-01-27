@@ -1,3 +1,5 @@
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   buildWorkflowApprovalTimeline,
   deriveWorkflowApproverInfo,
@@ -9,9 +11,6 @@ import {
   type GetWorkflowQuery,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
-
-import type { StaffType } from "@/hooks/useStaffs/useStaffs";
-import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
 const staffFixture = (overrides: Partial<StaffType> = {}): StaffType =>
   ({

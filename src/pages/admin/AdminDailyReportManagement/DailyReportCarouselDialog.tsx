@@ -1,3 +1,5 @@
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -25,13 +27,12 @@ import type {
   UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
+import { AuthContext } from "@/context/AuthContext";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
 
 import {
   type AdminComment,
@@ -73,7 +74,9 @@ export default function DailyReportCarouselDialog({
   selectedReport,
   filteredReports,
 }: DailyReportCarouselDialogProps) {
-  const { staffs, loading: isStaffLoading } = useStaffs();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs, loading: isStaffLoading } = useStaffs({ isAuthenticated });
   const { cognitoUser } = useCognitoUser();
   const [currentIndex, setCurrentIndex] = useState(
     filteredReports.findIndex((r) => r.id === selectedReport.id)

@@ -2,6 +2,7 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import {
   Box,
@@ -22,18 +23,20 @@ import {
 } from "@mui/material";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 
-import { useAppDispatchV2 } from "@/app/hooks";
+import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import { setSnackbarError } from "@/lib/reducers/snackbarReducer";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 export default function StaffShiftList() {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const { staffId } = useParams();
-  const { staffs } = useStaffs();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
 
   const staff = staffs.find((s) => String(s.id) === String(staffId));
 

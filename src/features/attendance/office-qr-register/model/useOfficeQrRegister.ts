@@ -1,9 +1,9 @@
-import { useAppDispatchV2 } from "@app/hooks";
 import {
   useCreateAttendanceMutation,
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import type {
   Attendance,
   CreateAttendanceInput,
@@ -11,29 +11,29 @@ import type {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 
-import { getNowISOStringWithZeroSeconds } from "@/components/time_recorder/util";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
 import {
   clockInAction,
   clockOutAction,
-} from "@/lib/attendance/attendanceActions";
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { Logger } from "@/lib/logger";
+} from "@/entities/attendance/lib/actions/attendanceActions";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
+import { Logger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/shared/lib/store/snackbarSlice";
 
 import { validateOfficeQrToken } from "../lib/validateToken";
 
 type ClockMode = "clock_in" | "clock_out" | null;
 
 export function useOfficeQrRegister() {
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const logger = useMemo(
     () =>
       new Logger("OfficeQrRegister", import.meta.env.DEV ? "DEBUG" : "ERROR"),

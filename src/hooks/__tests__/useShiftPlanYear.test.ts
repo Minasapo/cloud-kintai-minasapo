@@ -5,7 +5,7 @@ import useShiftPlanYear from "../useShiftPlanYear";
 type MockGraphQL = jest.Mock;
 const mockGraphql: MockGraphQL = jest.fn();
 
-jest.mock("@/lib/amplify/graphqlClient", () => ({
+jest.mock("@/shared/api/amplify/graphqlClient", () => ({
   graphqlClient: {
     graphql: (...args: unknown[]) => mockGraphql(...args),
   },

@@ -1,3 +1,6 @@
+import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
   Avatar,
   Box,
@@ -26,7 +29,6 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
-import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import {
@@ -34,21 +36,19 @@ import {
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@/entities/attendance/api/attendanceApi";
-import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
-import createOperationLogData from "@/hooks/useOperationLog/createOperationLogData";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
-import { createLogger } from "@/lib/logger";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
-import { AttendanceTime } from "@/lib/time/AttendanceTime";
+import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
 import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   getWorkflowCategoryLabel,
-} from "@/lib/workflowLabels";
+} from "@/entities/workflow/lib/workflowLabels";
+import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
+import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
+import { createLogger } from "@/shared/lib/logger";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
 
@@ -57,15 +57,16 @@ const logger = createLogger("AdminWorkflowDetail");
 export default function AdminWorkflowDetail() {
   const { id } = useParams() as { id?: string };
   const navigate = useNavigate();
-  const { staffs } = useStaffs();
-  const { cognitoUser } = useContext(AuthContext);
+  const { cognitoUser, authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
   const {
     getStartTime,
     getEndTime,
     getLunchRestStartTime,
     getLunchRestEndTime,
   } = useContext(AppConfigContext);
-  const { update: updateWorkflow } = useWorkflows();
+  const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const [createAttendance] = useCreateAttendanceMutation();
   const [getAttendanceByStaffAndDate] =
     useLazyGetAttendanceByStaffAndDateQuery();

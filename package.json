@@ -47,7 +47,7 @@
     "vite-plugin-checker": "^0.12.0",
     "vite-tsconfig-paths": "^5.1.4",
     "web-vitals": "^3.5.2",
-    "zod": "^3.25.76"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
@@ -84,6 +84,7 @@
     "storybook:build": "storybook build",
     "lint": "eslint ./src/ --ext .ts,.tsx",
     "eslint": "npx eslint ./src/",
+    "typecheck": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "test:unit": "jest --passWithNoTests",
     "test:watch": "jest --watch",
