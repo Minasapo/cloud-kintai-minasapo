@@ -564,6 +564,40 @@ const useCollaborativePageState = () => {
     await triggerSync();
   };
 
+  const dailyCountsByKey = useMemo(() => {
+    const counts = new Map<
+      string,
+      { work: number; fixedOff: number; requestedOff: number }
+    >();
+    days.forEach((day) => {
+      const dayKey = day.format("DD");
+      counts.set(dayKey, { work: 0, fixedOff: 0, requestedOff: 0 });
+    });
+
+    staffIds.forEach((staffId) => {
+      const staffMap = state.shiftDataMap.get(staffId);
+      if (!staffMap) return;
+      days.forEach((day) => {
+        const dayKey = day.format("DD");
+        const cell = staffMap.get(dayKey);
+        if (!cell) return;
+        const count = counts.get(dayKey);
+        if (!count) return;
+        if (cell.state === "work") count.work += 1;
+        else if (cell.state === "fixedOff") count.fixedOff += 1;
+        else if (cell.state === "requestedOff") count.requestedOff += 1;
+      });
+    });
+
+    return counts;
+  }, [days, staffIds, state.shiftDataMap]);
+
+  const calculateDailyCount = useCallback(
+    (dayKey: string): { work: number; fixedOff: number; requestedOff: number } =>
+      dailyCountsByKey.get(dayKey) ?? { work: 0, fixedOff: 0, requestedOff: 0 },
+    [dailyCountsByKey],
+  );
+
   /**
    * 進捗計算
    */
@@ -574,12 +608,8 @@ const useCollaborativePageState = () => {
 
     days.forEach((day) => {
       const dayKey = day.format("DD");
-      let workCount = 0;
-
-      staffIds.forEach((staffId) => {
-        const cell = state.shiftDataMap.get(staffId)?.get(dayKey);
-        if (cell?.state === "work") workCount++;
-      });
+      const count = dailyCountsByKey.get(dayKey);
+      const workCount = count?.work ?? 0;
 
       if (day.date() <= 10) {
         confirmedCount++;
@@ -601,29 +631,7 @@ const useCollaborativePageState = () => {
       adjustmentPercent,
       emptyCount,
     };
-  }, [days, staffIds, state.shiftDataMap]);
-
-  /**
-   * 日ごとの人数集計
-   */
-  const calculateDailyCount = (
-    dayKey: string,
-  ): { work: number; fixedOff: number; requestedOff: number } => {
-    let work = 0;
-    let fixedOff = 0;
-    let requestedOff = 0;
-
-    staffIds.forEach((staffId) => {
-      const cell = state.shiftDataMap.get(staffId)?.get(dayKey);
-      if (cell) {
-        if (cell.state === "work") work++;
-        else if (cell.state === "fixedOff") fixedOff++;
-        else if (cell.state === "requestedOff") requestedOff++;
-      }
-    });
-
-    return { work, fixedOff, requestedOff };
-  };
+  }, [days, dailyCountsByKey]);
 
   return {
     state,
