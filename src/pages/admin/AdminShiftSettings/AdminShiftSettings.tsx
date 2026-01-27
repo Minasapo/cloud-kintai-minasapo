@@ -1,12 +1,9 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   Alert,
   Button,
-  IconButton,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import {
@@ -27,10 +24,10 @@ import {
 import {
   GroupValidationResult,
   getGroupValidation,
-  getHelperTexts,
   parseOptionalInteger,
   ShiftGroupFormValue,
 } from "./shiftGroupValidation";
+import ShiftGroupRow from "./ShiftGroupRow";
 
 const createShiftGroup = (
   initial?: Partial<ShiftGroupFormValue>,
@@ -173,126 +170,14 @@ export default function AdminShiftSettings() {
             ) : (
               shiftGroups.map((group) => {
                 const validation = validationMap.get(group.id)!;
-                const labelError = validation.labelError;
-                const { minHelperText, maxHelperText, fixedHelperText } =
-                  getHelperTexts(validation);
                 return (
-                  <Paper
+                  <ShiftGroupRow
                     key={group.id}
-                    variant="outlined"
-                    sx={{ p: 1.5, borderRadius: 2 }}
-                  >
-                    <Stack spacing={1}>
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={1}
-                        alignItems={{ xs: "stretch", sm: "center" }}
-                      >
-                        <TextField
-                          required
-                          size="small"
-                          label="ラベル名"
-                          value={group.label}
-                          onChange={(event) =>
-                            updateGroup(group.id, {
-                              label: event.target.value,
-                            })
-                          }
-                          error={labelError}
-                          helperText={
-                            labelError ? "ラベル名は必須です" : undefined
-                          }
-                          sx={{ flexGrow: 1 }}
-                        />
-                        <IconButton
-                          aria-label={`${group.label || "未設定"}を削除`}
-                          onClick={() => handleDeleteGroup(group.id)}
-                          size="small"
-                        >
-                          <DeleteOutlineIcon fontSize="small" />
-                        </IconButton>
-                      </Stack>
-                      <TextField
-                        size="small"
-                        label="説明"
-                        value={group.description}
-                        onChange={(event) =>
-                          updateGroup(group.id, {
-                            description: event.target.value,
-                          })
-                        }
-                        inputProps={{ maxLength: 48 }}
-                        helperText="50文字以内を目安に入力"
-                        fullWidth
-                      />
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={1}
-                      >
-                        <TextField
-                          size="small"
-                          type="number"
-                          label="最小人数 (min)"
-                          value={group.min}
-                          onChange={(event) =>
-                            updateGroup(group.id, {
-                              min: event.target.value,
-                            })
-                          }
-                          inputProps={{ min: 0 }}
-                          error={
-                            validation.minInputError ||
-                            validation.fixedWithRangeConflict
-                          }
-                          helperText={minHelperText}
-                          sx={{ flexGrow: 1 }}
-                        />
-                        <TextField
-                          size="small"
-                          type="number"
-                          label="最大人数 (max)"
-                          value={group.max}
-                          onChange={(event) =>
-                            updateGroup(group.id, {
-                              max: event.target.value,
-                            })
-                          }
-                          inputProps={{ min: 0 }}
-                          error={
-                            validation.maxInputError ||
-                            validation.rangeError ||
-                            validation.fixedWithRangeConflict
-                          }
-                          helperText={maxHelperText}
-                          sx={{ flexGrow: 1 }}
-                        />
-                        <TextField
-                          size="small"
-                          type="number"
-                          label="固定人数 (fixed)"
-                          value={group.fixed}
-                          onChange={(event) =>
-                            updateGroup(group.id, {
-                              fixed: event.target.value,
-                            })
-                          }
-                          inputProps={{ min: 0 }}
-                          error={
-                            validation.fixedInputError ||
-                            validation.fixedBelowMin ||
-                            validation.fixedAboveMax ||
-                            validation.fixedWithRangeConflict
-                          }
-                          helperText={fixedHelperText}
-                          sx={{ flexGrow: 1 }}
-                        />
-                      </Stack>
-                      <Typography variant="caption" color="text.secondary">
-                        最小/最大 (レンジ指定)
-                        と固定人数は併用できません。いずれか一方のみ入力してください。
-                      </Typography>
-                    </Stack>
-                  </Paper>
+                    group={group}
+                    validation={validation}
+                    onUpdate={updateGroup}
+                    onDelete={handleDeleteGroup}
+                  />
                 );
               })
             )}
