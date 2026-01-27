@@ -154,6 +154,13 @@ export default function AdminShiftSettings() {
     () => shiftGroups.some((group) => getGroupValidation(group).hasError),
     [shiftGroups],
   );
+  const validationMap = useMemo(() => {
+    const map = new Map<string, GroupValidationResult>();
+    shiftGroups.forEach((group) => {
+      map.set(group.id, getGroupValidation(group));
+    });
+    return map;
+  }, [shiftGroups]);
 
   const handleGroupChange = (
     id: string,
@@ -238,7 +245,8 @@ export default function AdminShiftSettings() {
               </Alert>
             ) : (
               shiftGroups.map((group) => {
-                const validation = getGroupValidation(group);
+                const validation =
+                  validationMap.get(group.id) ?? getGroupValidation(group);
                 const labelError = validation.labelError;
                 const minHelperText = validation.minInputError
                   ? "0以上の整数で入力してください。"
