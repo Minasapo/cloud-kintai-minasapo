@@ -72,6 +72,12 @@ type GroupValidationResult = {
   hasError: boolean;
 };
 
+type GroupHelperTexts = {
+  minHelperText: string;
+  maxHelperText: string;
+  fixedHelperText: string;
+};
+
 const getGroupValidation = (
   group: ShiftGroupFormValue,
 ): GroupValidationResult => {
@@ -115,6 +121,32 @@ const getGroupValidation = (
       fixedAboveMax ||
       fixedWithRangeConflict,
   };
+};
+
+const getHelperTexts = (validation: GroupValidationResult): GroupHelperTexts => {
+  const minHelperText = validation.minInputError
+    ? "0以上の整数で入力してください。"
+    : validation.fixedWithRangeConflict
+      ? "固定人数と同時に設定できません。"
+      : "任意";
+  const maxHelperText = validation.maxInputError
+    ? "0以上の整数で入力してください。"
+    : validation.rangeError
+      ? "最大人数は最小人数以上にしてください。"
+      : validation.fixedWithRangeConflict
+        ? "固定人数と同時に設定できません。"
+        : "任意";
+  const fixedHelperText = validation.fixedInputError
+    ? "0以上の整数で入力してください。"
+    : validation.fixedBelowMin
+      ? "最小人数以上を入力してください。"
+      : validation.fixedAboveMax
+        ? "最大人数以下を入力してください。"
+        : validation.fixedWithRangeConflict
+          ? "固定人数を使う場合は最小/最大を空欄にしてください。"
+          : "任意";
+
+  return { minHelperText, maxHelperText, fixedHelperText };
 };
 
 export default function AdminShiftSettings() {
@@ -248,27 +280,8 @@ export default function AdminShiftSettings() {
                 const validation =
                   validationMap.get(group.id) ?? getGroupValidation(group);
                 const labelError = validation.labelError;
-                const minHelperText = validation.minInputError
-                  ? "0以上の整数で入力してください。"
-                  : validation.fixedWithRangeConflict
-                    ? "固定人数と同時に設定できません。"
-                    : "任意";
-                const maxHelperText = validation.maxInputError
-                  ? "0以上の整数で入力してください。"
-                  : validation.rangeError
-                    ? "最大人数は最小人数以上にしてください。"
-                    : validation.fixedWithRangeConflict
-                      ? "固定人数と同時に設定できません。"
-                      : "任意";
-                const fixedHelperText = validation.fixedInputError
-                  ? "0以上の整数で入力してください。"
-                  : validation.fixedBelowMin
-                    ? "最小人数以上を入力してください。"
-                    : validation.fixedAboveMax
-                      ? "最大人数以下を入力してください。"
-                      : validation.fixedWithRangeConflict
-                        ? "固定人数を使う場合は最小/最大を空欄にしてください。"
-                        : "任意";
+                const { minHelperText, maxHelperText, fixedHelperText } =
+                  getHelperTexts(validation);
                 return (
                   <Paper
                     key={group.id}
