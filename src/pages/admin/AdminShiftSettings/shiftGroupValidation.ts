@@ -1,3 +1,5 @@
+import type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
+
 import { SHIFT_GROUP_VALIDATION_TEXTS } from "./shiftGroupTexts.validation";
 
 export type ShiftGroupFormValue = {
@@ -9,13 +11,7 @@ export type ShiftGroupFormValue = {
   fixed: string;
 };
 
-export type ShiftGroupConfig = {
-  label: string;
-  description?: string | null;
-  min?: number | null;
-  max?: number | null;
-  fixed?: number | null;
-};
+export type { ShiftGroupConfig };
 
 export type GroupValidationResult = {
   labelError: boolean;

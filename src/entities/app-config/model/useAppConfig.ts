@@ -16,6 +16,7 @@ import {
   applyDesignTokenCssVariables,
   getDesignTokens,
 } from "@/shared/designSystem";
+import type { ShiftGroupConfig } from "./shiftGroupTypes";
 
 const DEFAULT_THEME_TOKENS = getDesignTokens();
 
@@ -38,14 +39,6 @@ export type DefaultAppConfig = Pick<
   | "shiftGroups"
   | "attendanceStatisticsEnabled"
 >;
-
-export type ShiftGroupConfig = {
-  label: string;
-  description?: string | null;
-  min?: number | null;
-  max?: number | null;
-  fixed?: number | null;
-};
 
 /**
  * デフォルトのアプリケーション設定値。

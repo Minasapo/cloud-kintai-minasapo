@@ -18,7 +18,7 @@ export {
   type GroupHelperTexts,
   type GroupValidationResult,
   parseOptionalInteger,
-  type ShiftGroupConfig,
   type ShiftGroupFormValue,
 } from "./shiftGroupValidation";
+export type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
 export { default as useShiftGroupValidation } from "./useShiftGroupValidation";

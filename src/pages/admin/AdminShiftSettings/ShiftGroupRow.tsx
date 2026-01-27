@@ -2,8 +2,10 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 
-import { SHIFT_GROUP_UI_TEXTS } from "./shiftGroupTexts.ui";
-import { SHIFT_GROUP_VALIDATION_TEXTS } from "./shiftGroupTexts.validation";
+import {
+  SHIFT_GROUP_UI_TEXTS,
+  SHIFT_GROUP_VALIDATION_TEXTS,
+} from "./";
 import {
   getHelperTexts,
   GroupValidationResult,
@@ -54,6 +56,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     error?: boolean;
     helperText?: string;
+    inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   } => {
     if (key === "label") {
       return {
@@ -68,6 +71,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     return {
       ...getFieldProps(key),
       helperText: SHIFT_GROUP_UI_TEXTS.descriptionHelperText,
+      inputProps: { maxLength: 48 },
     };
   };
 
@@ -78,12 +82,14 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     error: boolean;
     helperText: string;
+    inputProps: { min: number };
   } => {
     const fieldProps = getFieldProps(key);
     switch (key) {
       case "min":
         return {
           ...fieldProps,
+          inputProps: { min: 0 },
           error:
             validation.minInputError || validation.fixedWithRangeConflict,
           helperText: minHelperText,
@@ -91,6 +97,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
       case "max":
         return {
           ...fieldProps,
+          inputProps: { min: 0 },
           error:
             validation.maxInputError ||
             validation.rangeError ||
@@ -101,6 +108,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
       default:
         return {
           ...fieldProps,
+          inputProps: { min: 0 },
           error:
             validation.fixedInputError ||
             validation.fixedBelowMin ||
@@ -138,7 +146,6 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           size="small"
           label="説明"
           {...getTextFieldProps("description")}
-          inputProps={{ maxLength: 48 }}
           fullWidth
         />
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
@@ -147,7 +154,6 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="最小人数 (min)"
             {...getNumberFieldProps("min")}
-            inputProps={{ min: 0 }}
             sx={{ flexGrow: 1 }}
           />
           <TextField
@@ -155,7 +161,6 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="最大人数 (max)"
             {...getNumberFieldProps("max")}
-            inputProps={{ min: 0 }}
             sx={{ flexGrow: 1 }}
           />
           <TextField
@@ -163,7 +168,6 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="固定人数 (fixed)"
             {...getNumberFieldProps("fixed")}
-            inputProps={{ min: 0 }}
             sx={{ flexGrow: 1 }}
           />
         </Stack>

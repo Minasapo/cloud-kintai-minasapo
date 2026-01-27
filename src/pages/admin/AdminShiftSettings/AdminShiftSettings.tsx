@@ -24,12 +24,12 @@ import {
 import {
   buildShiftGroupPayload,
   createShiftGroup,
+  SHIFT_GROUP_UI_TEXTS,
   ShiftGroupFormValue,
   ShiftGroupRow,
   toShiftGroupFormValue,
   useShiftGroupValidation,
 } from "./";
-import { SHIFT_GROUP_UI_TEXTS } from "./shiftGroupTexts.ui";
 
 export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
