@@ -1,7 +1,9 @@
 export {
+  buildShiftGroupPayload,
   createShiftGroup,
   createShiftGroupId,
   toShiftGroupFormValue,
+  toShiftGroupPayload,
 } from "./shiftGroupFactory";
 export { default as ShiftGroupRow } from "./ShiftGroupRow";
 export { SHIFT_GROUP_TEXTS } from "./shiftGroupTexts";

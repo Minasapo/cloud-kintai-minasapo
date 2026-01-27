@@ -22,8 +22,8 @@ import {
 } from "@/shared/lib/store/snackbarSlice";
 
 import {
+  buildShiftGroupPayload,
   createShiftGroup,
-  parseOptionalInteger,
   SHIFT_GROUP_TEXTS,
   ShiftGroupFormValue,
   ShiftGroupRow,
@@ -75,18 +75,6 @@ export default function AdminShiftSettings() {
   const handleDeleteGroup = useCallback((id: string) => {
     setShiftGroups((prev) => prev.filter((group) => group.id !== id));
   }, []);
-
-  const buildShiftGroupPayload = useCallback(
-    (groups: ShiftGroupFormValue[]) =>
-      groups.map((group) => ({
-        label: group.label.trim(),
-        description: group.description.trim() ? group.description.trim() : null,
-        min: parseOptionalInteger(group.min),
-        max: parseOptionalInteger(group.max),
-        fixed: parseOptionalInteger(group.fixed),
-      })),
-    [],
-  );
 
   const persistConfig = useCallback(
     async (payloadShiftGroups: ReturnType<typeof buildShiftGroupPayload>) => {

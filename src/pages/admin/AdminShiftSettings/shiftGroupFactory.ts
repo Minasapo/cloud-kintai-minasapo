@@ -1,4 +1,4 @@
-import { ShiftGroupFormValue } from "./shiftGroupValidation";
+import { parseOptionalInteger, ShiftGroupFormValue } from "./shiftGroupValidation";
 
 export type ShiftGroupSource = {
   label?: string | null;
@@ -40,3 +40,14 @@ export const toShiftGroupFormValue = (group: ShiftGroupSource) =>
     max: toOptionalNumberString(group.max),
     fixed: toOptionalNumberString(group.fixed),
   });
+
+export const toShiftGroupPayload = (group: ShiftGroupFormValue) => ({
+  label: group.label.trim(),
+  description: group.description.trim() ? group.description.trim() : null,
+  min: parseOptionalInteger(group.min),
+  max: parseOptionalInteger(group.max),
+  fixed: parseOptionalInteger(group.fixed),
+});
+
+export const buildShiftGroupPayload = (groups: ShiftGroupFormValue[]) =>
+  groups.map((group) => toShiftGroupPayload(group));
