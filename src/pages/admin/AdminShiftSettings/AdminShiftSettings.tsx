@@ -11,7 +11,7 @@ import {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 // Title removed per admin UI simplification
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -76,29 +76,29 @@ export default function AdminShiftSettings() {
   const { validationMap, hasValidationError } =
     useShiftGroupValidation(shiftGroups);
 
-  const updateGroup = (
-    id: string,
-    patch: Partial<Omit<ShiftGroupFormValue, "id">>,
-  ) => {
-    setShiftGroups((prev) =>
-      prev.map((group) =>
-        group.id === id
-          ? {
-              ...group,
-              ...patch,
-            }
-          : group,
-      ),
-    );
-  };
+  const updateGroup = useCallback(
+    (id: string, patch: Partial<Omit<ShiftGroupFormValue, "id">>) => {
+      setShiftGroups((prev) =>
+        prev.map((group) =>
+          group.id === id
+            ? {
+                ...group,
+                ...patch,
+              }
+            : group,
+        ),
+      );
+    },
+    [],
+  );
 
   const handleAddGroup = () => {
     setShiftGroups((prev) => [...prev, createShiftGroup()]);
   };
 
-  const handleDeleteGroup = (id: string) => {
+  const handleDeleteGroup = useCallback((id: string) => {
     setShiftGroups((prev) => prev.filter((group) => group.id !== id));
-  };
+  }, []);
 
   const handleSave = async () => {
     if (hasValidationError || saving) {
