@@ -63,6 +63,8 @@ export class Message {
         return this.getErrorMessage(operation, status, categoryName);
       case MessageStatus.SUCCESS:
         return this.getSuccessMessage(operation, categoryName);
+      default:
+        throw new Error(`Invalid message status: ${status}`);
     }
   }
 
