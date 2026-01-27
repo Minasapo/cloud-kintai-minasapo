@@ -19,11 +19,21 @@ import { useContext, useState } from "react";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { MoreActionButton } from "@/features/admin/staff/ui/actions";
-import CreateStaffDialog from "@/features/admin/staff/ui/actions/CreateStaffDialog";
-import SyncCognitoUser from "@/features/admin/staff/ui/actions/SyncCognitoUser";
+import {
+  CreateStaffDialog,
+  MoreActionButton,
+  SyncCognitoUser,
+} from "@/features/admin/staff/ui/actions";
 import { EditButton } from "@/features/admin/staff/ui/EditButton";
-import { AccountStatusTableCell , CreatedAtTableCell , RoleTableCell , StaffNameTableCell , StatusTableCell , UpdatedAtTableCell , WorkTypeTableCell } from "@/features/admin/staff/ui/table";
+import {
+  AccountStatusTableCell,
+  CreatedAtTableCell,
+  RoleTableCell,
+  StaffNameTableCell,
+  StatusTableCell,
+  UpdatedAtTableCell,
+  WorkTypeTableCell,
+} from "@/features/admin/staff/ui/table";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 export default function AdminStaff() {
