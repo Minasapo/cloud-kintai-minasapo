@@ -90,27 +90,32 @@ export const getGroupValidation = (
 export const getHelperTexts = (
   validation: GroupValidationResult,
 ): GroupHelperTexts => {
-  const minHelperText = validation.minInputError
-    ? SHIFT_GROUP_TEXTS.minInvalid
-    : validation.fixedWithRangeConflict
-      ? SHIFT_GROUP_TEXTS.rangeConflict
-      : SHIFT_GROUP_TEXTS.minOptional;
-  const maxHelperText = validation.maxInputError
-    ? SHIFT_GROUP_TEXTS.maxInvalid
-    : validation.rangeError
-      ? SHIFT_GROUP_TEXTS.maxRangeError
-      : validation.fixedWithRangeConflict
-        ? SHIFT_GROUP_TEXTS.rangeConflict
-        : SHIFT_GROUP_TEXTS.maxOptional;
-  const fixedHelperText = validation.fixedInputError
-    ? SHIFT_GROUP_TEXTS.fixedInvalid
-    : validation.fixedBelowMin
-      ? SHIFT_GROUP_TEXTS.fixedBelowMin
-      : validation.fixedAboveMax
-        ? SHIFT_GROUP_TEXTS.fixedAboveMax
-        : validation.fixedWithRangeConflict
-          ? SHIFT_GROUP_TEXTS.fixedRangeConflict
-          : SHIFT_GROUP_TEXTS.fixedOptional;
+  let minHelperText: string = SHIFT_GROUP_TEXTS.minOptional;
+  if (validation.minInputError) {
+    minHelperText = SHIFT_GROUP_TEXTS.minInvalid;
+  } else if (validation.fixedWithRangeConflict) {
+    minHelperText = SHIFT_GROUP_TEXTS.rangeConflict;
+  }
+
+  let maxHelperText: string = SHIFT_GROUP_TEXTS.maxOptional;
+  if (validation.maxInputError) {
+    maxHelperText = SHIFT_GROUP_TEXTS.maxInvalid;
+  } else if (validation.rangeError) {
+    maxHelperText = SHIFT_GROUP_TEXTS.maxRangeError;
+  } else if (validation.fixedWithRangeConflict) {
+    maxHelperText = SHIFT_GROUP_TEXTS.rangeConflict;
+  }
+
+  let fixedHelperText: string = SHIFT_GROUP_TEXTS.fixedOptional;
+  if (validation.fixedInputError) {
+    fixedHelperText = SHIFT_GROUP_TEXTS.fixedInvalid;
+  } else if (validation.fixedBelowMin) {
+    fixedHelperText = SHIFT_GROUP_TEXTS.fixedBelowMin;
+  } else if (validation.fixedAboveMax) {
+    fixedHelperText = SHIFT_GROUP_TEXTS.fixedAboveMax;
+  } else if (validation.fixedWithRangeConflict) {
+    fixedHelperText = SHIFT_GROUP_TEXTS.fixedRangeConflict;
+  }
 
   return { minHelperText, maxHelperText, fixedHelperText };
 };
