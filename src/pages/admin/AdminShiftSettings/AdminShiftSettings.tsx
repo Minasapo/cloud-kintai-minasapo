@@ -277,8 +277,7 @@ export default function AdminShiftSettings() {
               </Alert>
             ) : (
               shiftGroups.map((group) => {
-                const validation =
-                  validationMap.get(group.id) ?? getGroupValidation(group);
+                const validation = validationMap.get(group.id)!;
                 const labelError = validation.labelError;
                 const { minHelperText, maxHelperText, fixedHelperText } =
                   getHelperTexts(validation);
