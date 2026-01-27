@@ -4,9 +4,11 @@ import { IconButton, Menu } from "@mui/material";
 import { DeleteStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
 
-import { DeleteAccountMenuItem } from "./DeleteAccountMenuItem";
-import { DisableAccountMenuItem } from "./DisableAccountMenuItem";
-import { EnableAccountMenuItem } from "./EnableAccountMenuItem";
+import {
+  DeleteAccountMenuItem,
+  DisableAccountMenuItem,
+  EnableAccountMenuItem,
+} from "./index";
 
 export function MoreActionButton({
   staff,

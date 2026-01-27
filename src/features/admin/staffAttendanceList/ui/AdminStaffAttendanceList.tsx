@@ -18,7 +18,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
-import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/model/useAdminStaffAttendanceListViewModel";
+import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/model";
 import {
   ChangeRequestQuickViewDialog,
   pendingAttendanceContainerSx,
