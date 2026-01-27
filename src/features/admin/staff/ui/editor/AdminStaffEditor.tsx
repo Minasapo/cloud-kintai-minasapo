@@ -47,8 +47,7 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import WORK_TYPE_OPTIONS from "@/entities/staff/lib/workTypeOptions";
 import * as MESSAGE_CODE from "@/errors";
-import { StaffNameTableCell } from "@/features/admin/staff/ui/editor/StaffNameTableCell";
-import { StaffRoleTableCell } from "@/features/admin/staff/ui/editor/StaffRoleTableCell";
+import { StaffNameTableCell , StaffRoleTableCell } from "@/features/admin/staff/ui/editor";
 import {
   setSnackbarError,
   setSnackbarSuccess,

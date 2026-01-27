@@ -19,17 +19,11 @@ import { useContext, useState } from "react";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { MoreActionButton } from "@/features/admin/staff/ui/actions/MoreActionButton";
+import { MoreActionButton } from "@/features/admin/staff/ui/actions";
 import CreateStaffDialog from "@/features/admin/staff/ui/CreateStaffDialog";
 import { EditButton } from "@/features/admin/staff/ui/EditButton";
 import SyncCognitoUser from "@/features/admin/staff/ui/SyncCognitoUser";
-import { AccountStatusTableCell } from "@/features/admin/staff/ui/table/AccountStatusTableCell";
-import { CreatedAtTableCell } from "@/features/admin/staff/ui/table/CreatedAtTableCell";
-import { RoleTableCell } from "@/features/admin/staff/ui/table/RoleTableCell";
-import { StaffNameTableCell } from "@/features/admin/staff/ui/table/StaffNameTableCell";
-import { StatusTableCell } from "@/features/admin/staff/ui/table/StatusTableCell";
-import { UpdatedAtTableCell } from "@/features/admin/staff/ui/table/UpdatedAtTableCell";
-import { WorkTypeTableCell } from "@/features/admin/staff/ui/table/WorkTypeTableCell";
+import { AccountStatusTableCell , CreatedAtTableCell , RoleTableCell , StaffNameTableCell , StatusTableCell , UpdatedAtTableCell , WorkTypeTableCell } from "@/features/admin/staff/ui/table";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 export default function AdminStaff() {

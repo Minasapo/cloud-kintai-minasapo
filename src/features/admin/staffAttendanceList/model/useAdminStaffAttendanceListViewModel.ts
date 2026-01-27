@@ -30,7 +30,7 @@ import {
 import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
-import type { PendingAttendanceControls } from "../ui/components/PendingAttendanceSection";
+import type { PendingAttendanceControls } from "../ui/components";
 import { useAdminAttendanceChangeRequests } from "./useAdminAttendanceChangeRequests";
 
 export type AdminStaffAttendanceListViewModel = ReturnType<
