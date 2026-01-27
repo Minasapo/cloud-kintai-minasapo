@@ -1,15 +1,11 @@
+import type { ShiftGroupConfig } from "@entities/app-config/model/useAppConfig";
+
 import {
   parseOptionalInteger,
   ShiftGroupFormValue,
 } from "./shiftGroupValidation";
 
-export type ShiftGroupSource = {
-  label?: string | null;
-  description?: string | null;
-  min?: number | null;
-  max?: number | null;
-  fixed?: number | null;
-};
+export type ShiftGroupSource = ShiftGroupConfig;
 
 export const createShiftGroupId = (
   now: () => number = Date.now,

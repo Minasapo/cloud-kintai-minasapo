@@ -46,17 +46,29 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     onChange: handleChange(key),
   });
 
-  const getTextFieldProps = (key: "label" | "description") => ({
-    ...getFieldProps(key),
-    ...(key === "label"
-      ? {
-          error: labelError,
-          helperText: labelError
-            ? SHIFT_GROUP_TEXTS.validation.labelRequired
-            : undefined,
-        }
-      : {}),
-  });
+  const getTextFieldProps = (
+    key: "label" | "description",
+  ): {
+    value: string;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    error?: boolean;
+    helperText?: string;
+  } => {
+    if (key === "label") {
+      return {
+        ...getFieldProps(key),
+        error: labelError,
+        helperText: labelError
+          ? SHIFT_GROUP_TEXTS.validation.labelRequired
+          : undefined,
+      };
+    }
+
+    return {
+      ...getFieldProps(key),
+      helperText: SHIFT_GROUP_TEXTS.ui.descriptionHelperText,
+    };
+  };
 
   const getNumberFieldState = (
     key: "min" | "max" | "fixed",
@@ -117,7 +129,6 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           label="説明"
           {...getTextFieldProps("description")}
           inputProps={{ maxLength: 48 }}
-          helperText="50文字以内を目安に入力"
           fullWidth
         />
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
