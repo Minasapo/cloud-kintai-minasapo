@@ -39,6 +39,13 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     onDelete(group.id);
   }, [group.id, onDelete]);
 
+  const getFieldProps = (
+    key: keyof Omit<ShiftGroupFormValue, "id">,
+  ) => ({
+    value: group[key],
+    onChange: handleChange(key),
+  });
+
   return (
     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
       <Stack spacing={1}>
@@ -51,8 +58,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             required
             size="small"
             label="ラベル名"
-            value={group.label}
-            onChange={handleChange("label")}
+            {...getFieldProps("label")}
             error={labelError}
             helperText={
               labelError ? SHIFT_GROUP_TEXTS.labelRequired : undefined
@@ -70,8 +76,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
         <TextField
           size="small"
           label="説明"
-          value={group.description}
-          onChange={handleChange("description")}
+          {...getFieldProps("description")}
           inputProps={{ maxLength: 48 }}
           helperText="50文字以内を目安に入力"
           fullWidth
@@ -81,8 +86,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             size="small"
             type="number"
             label="最小人数 (min)"
-            value={group.min}
-            onChange={handleChange("min")}
+            {...getFieldProps("min")}
             inputProps={{ min: 0 }}
             error={
               validation.minInputError || validation.fixedWithRangeConflict
@@ -94,8 +98,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             size="small"
             type="number"
             label="最大人数 (max)"
-            value={group.max}
-            onChange={handleChange("max")}
+            {...getFieldProps("max")}
             inputProps={{ min: 0 }}
             error={
               validation.maxInputError ||
@@ -109,8 +112,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             size="small"
             type="number"
             label="固定人数 (fixed)"
-            value={group.fixed}
-            onChange={handleChange("fixed")}
+            {...getFieldProps("fixed")}
             inputProps={{ min: 0 }}
             error={
               validation.fixedInputError ||
