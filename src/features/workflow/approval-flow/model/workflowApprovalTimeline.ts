@@ -42,6 +42,16 @@ const createStaffNameResolver = (staffs: StaffType[]) => {
   };
 };
 
+const createStaffByIdLookup = (staffs: StaffType[]) => {
+  const lookup = new Map<string, StaffType>();
+  staffs.forEach((staff) => {
+    if (staff.id) {
+      lookup.set(staff.id, staff);
+    }
+  });
+  return lookup;
+};
+
 const mapApprovalStatus = (status?: ApprovalStatus | null): string => {
   switch (status) {
     case ApprovalStatus.APPROVED:
@@ -88,11 +98,12 @@ export const deriveWorkflowApproverInfo = (
   staffs: StaffType[]
 ): WorkflowApproverInfo => {
   const resolveStaffName = createStaffNameResolver(staffs);
+  const staffById = createStaffByIdLookup(staffs);
   if (!workflow?.staffId) {
     return { mode: "any", items: [DEFAULT_APPROVER_LABEL] };
   }
 
-  const applicant = staffs.find((s) => s.id === workflow.staffId) ?? null;
+  const applicant = staffById.get(workflow.staffId) ?? null;
   const setting = applicant?.approverSetting ?? null;
 
   if (!setting || setting === "ADMINS") {
