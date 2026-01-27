@@ -24,6 +24,7 @@ import {
 import {
   parseOptionalInteger,
   ShiftGroupFormValue,
+  SHIFT_GROUP_TEXTS,
 } from "./shiftGroupValidation";
 import { createShiftGroup } from "./shiftGroupFactory";
 import ShiftGroupRow from "./ShiftGroupRow";
@@ -129,12 +130,10 @@ export default function AdminShiftSettings() {
   return (
     <Stack spacing={2.5}>
       <Typography>
-        シフトグループを定義し、公開範囲や担当者単位でシフトを整理できます。
-        ラベル・説明に加えて、各グループの最小／最大人数、または固定人数を任意で設定し、必要に応じて追加・編集・削除してください（レンジ指定と固定人数は同時に使用できません）。
+        {SHIFT_GROUP_TEXTS.intro}
       </Typography>
       <Alert severity="info">
-        入力内容は「保存」ボタンを押すと全社設定に反映され、以降の画面で参照できます。
-        編集途中の変更は自動保存されないためご注意ください。
+        {SHIFT_GROUP_TEXTS.saveInfo}
       </Alert>
 
       <Paper sx={{ p: 2 }}>
@@ -143,7 +142,7 @@ export default function AdminShiftSettings() {
           <Stack spacing={1.5}>
             {shiftGroups.length === 0 ? (
               <Alert severity="info" variant="outlined">
-                現在登録されているシフトグループはありません。「グループを追加」から新規に追加できます。
+                {SHIFT_GROUP_TEXTS.emptyGroups}
               </Alert>
             ) : (
               shiftGroups.map((group) => {
@@ -169,7 +168,7 @@ export default function AdminShiftSettings() {
           </Button>
           {hasValidationError && (
             <Alert severity="warning">
-              ラベル未入力、または人数設定に誤りのあるグループがあります。保存前に修正してください。
+              {SHIFT_GROUP_TEXTS.validationWarning}
             </Alert>
           )}
         </Stack>
