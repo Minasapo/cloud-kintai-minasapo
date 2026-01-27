@@ -24,7 +24,7 @@ export class Message {
   get(status: MessageStatus) {
     return this.getMessage(
       status,
-      OperationCode.Create,
+      OperationCode.Get,
       this.getCategoryName()
     );
   }
@@ -77,7 +77,7 @@ export class Message {
   ) {
     return `${categoryName}の${this.getOperationName(
       operation
-    )}に失敗しました(${this.getMessageCode(status, OperationCode.Create)})`;
+    )}に失敗しました(${this.getMessageCode(status, operation)})`;
   }
 
   private getOperationName(operation: OperationCode) {
