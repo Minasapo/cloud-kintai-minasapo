@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { HolidayCalenderMessage } from "@/shared/lib/message/HolidayCalenderMessage";
+import { HolidayCalendarMessage } from "@/shared/lib/message/HolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
@@ -36,18 +36,18 @@ export default function HolidayCalendarDelete({
       return;
     }
 
-    const holidayCalenderMessage = new HolidayCalenderMessage();
+    const holidayCalendarMessage = new HolidayCalendarMessage();
     await deleteHolidayCalendar({ id: holidayCalendar.id })
       .then(() => {
         dispatch(
           setSnackbarSuccess(
-            holidayCalenderMessage.delete(MessageStatus.SUCCESS)
+            holidayCalendarMessage.delete(MessageStatus.SUCCESS)
           )
         );
       })
       .catch(() => {
         dispatch(
-          setSnackbarError(holidayCalenderMessage.delete(MessageStatus.ERROR))
+          setSnackbarError(holidayCalendarMessage.delete(MessageStatus.ERROR))
         );
       });
   };

@@ -17,7 +17,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { CompanyHolidayCalenderMessage } from "@/shared/lib/message/CompanyHolidayCalenderMessage";
+import { CompanyHolidayCalendarMessage } from "@/shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
@@ -77,7 +77,7 @@ export default function CompanyHolidayCalendarEdit({
     const { id, holidayDate } = data;
     if (!id || !holidayDate) return;
 
-    const companyHolidayCalenderMessage = new CompanyHolidayCalenderMessage();
+    const companyHolidayCalendarMessage = new CompanyHolidayCalendarMessage();
     await updateCompanyHolidayCalendar({
       id,
       holidayDate: holidayDate.format(AttendanceDate.DataFormat),
@@ -86,7 +86,7 @@ export default function CompanyHolidayCalendarEdit({
       .then(() => {
         dispatch(
           setSnackbarSuccess(
-            companyHolidayCalenderMessage.update(MessageStatus.SUCCESS)
+            companyHolidayCalendarMessage.update(MessageStatus.SUCCESS)
           )
         );
         setEditRow(null);
@@ -94,7 +94,7 @@ export default function CompanyHolidayCalendarEdit({
       .catch(() =>
         dispatch(
           setSnackbarError(
-            companyHolidayCalenderMessage.update(MessageStatus.ERROR)
+            companyHolidayCalendarMessage.update(MessageStatus.ERROR)
           )
         )
       );

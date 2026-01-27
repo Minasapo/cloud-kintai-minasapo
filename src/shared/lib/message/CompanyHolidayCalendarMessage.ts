@@ -1,6 +1,6 @@
 import { Message } from "./Message";
 
-export class CompanyHolidayCalenderMessage extends Message {
+export class CompanyHolidayCalendarMessage extends Message {
   private categoryName: string = "会社休日カレンダー";
 
   constructor() {

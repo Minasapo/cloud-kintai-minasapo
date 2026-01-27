@@ -19,7 +19,7 @@ import { useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { HolidayCalenderMessage } from "@/shared/lib/message/HolidayCalenderMessage";
+import { HolidayCalendarMessage } from "@/shared/lib/message/HolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
@@ -57,18 +57,18 @@ export function CSVFilePicker({
     );
     if (!result) return;
 
-    const holidayCalenderMessage = new HolidayCalenderMessage();
+    const holidayCalendarMessage = new HolidayCalendarMessage();
     await bulkCreateHolidayCalendar(uploadedData)
       .then(() =>
         dispatch(
           setSnackbarSuccess(
-            holidayCalenderMessage.create(MessageStatus.SUCCESS)
+            holidayCalendarMessage.create(MessageStatus.SUCCESS)
           )
         )
       )
       .catch(() =>
         dispatch(
-          setSnackbarError(holidayCalenderMessage.create(MessageStatus.ERROR))
+          setSnackbarError(holidayCalendarMessage.create(MessageStatus.ERROR))
         )
       );
   };

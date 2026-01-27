@@ -4,7 +4,7 @@ export enum MessageStatus {
 }
 
 export enum MessageCategory {
-  HolidayCalender = "8",
+  HolidayCalendar = "8",
 }
 
 export enum OperationCode {
@@ -15,7 +15,7 @@ export enum OperationCode {
 }
 
 export class Message {
-  private messageCode: string = MessageCategory.HolidayCalender;
+  private messageCode: string = MessageCategory.HolidayCalendar;
 
   getCategoryName(): string {
     throw new Error("Method not implemented.");

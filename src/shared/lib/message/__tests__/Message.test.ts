@@ -1,5 +1,5 @@
-import { CompanyHolidayCalenderMessage } from "../CompanyHolidayCalenderMessage";
-import { HolidayCalenderMessage } from "../HolidayCalenderMessage";
+import { CompanyHolidayCalendarMessage } from "../CompanyHolidayCalendarMessage";
+import { HolidayCalendarMessage } from "../HolidayCalendarMessage";
 import { Message, MessageStatus } from "../Message";
 
 describe("Message base class", () => {
@@ -34,9 +34,9 @@ describe("Message base class", () => {
   });
 });
 
-describe("HolidayCalenderMessage", () => {
+describe("HolidayCalendarMessage", () => {
   it("uses '休日カレンダー' as category name", () => {
-    const msg = new HolidayCalenderMessage();
+    const msg = new HolidayCalendarMessage();
 
     expect(msg.create(MessageStatus.SUCCESS)).toBe(
       "休日カレンダーを作成しました"
@@ -44,9 +44,9 @@ describe("HolidayCalenderMessage", () => {
   });
 });
 
-describe("CompanyHolidayCalenderMessage", () => {
+describe("CompanyHolidayCalendarMessage", () => {
   it("uses '会社休日カレンダー' as category name", () => {
-    const msg = new CompanyHolidayCalenderMessage();
+    const msg = new CompanyHolidayCalendarMessage();
 
     expect(msg.update(MessageStatus.SUCCESS)).toBe(
       "会社休日カレンダーを更新しました"
