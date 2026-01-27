@@ -28,28 +28,23 @@ const mapStaffName = (staff?: StaffType | null): string | undefined => {
   return name || undefined;
 };
 
-const createStaffNameResolver = (staffs: StaffType[]) => {
-  const lookup = new Map<string, string>();
-  staffs.forEach((staff) => {
-    const name = mapStaffName(staff);
-    if (!name) return;
-    if (staff.id) lookup.set(staff.id, name);
-    if (staff.cognitoUserId) lookup.set(staff.cognitoUserId, name);
-  });
-  return (identifier: StaffLookupKey): string | undefined => {
-    if (!identifier) return undefined;
-    return lookup.get(identifier) ?? identifier;
-  };
-};
-
-const createStaffByIdLookup = (staffs: StaffType[]) => {
-  const lookup = new Map<string, StaffType>();
+const createStaffLookups = (staffs: StaffType[]) => {
+  const nameLookup = new Map<string, string>();
+  const staffById = new Map<string, StaffType>();
   staffs.forEach((staff) => {
     if (staff.id) {
-      lookup.set(staff.id, staff);
+      staffById.set(staff.id, staff);
     }
+    const name = mapStaffName(staff);
+    if (!name) return;
+    if (staff.id) nameLookup.set(staff.id, name);
+    if (staff.cognitoUserId) nameLookup.set(staff.cognitoUserId, name);
   });
-  return lookup;
+  const resolveStaffName = (identifier: StaffLookupKey): string | undefined => {
+    if (!identifier) return undefined;
+    return nameLookup.get(identifier) ?? identifier;
+  };
+  return { resolveStaffName, staffById };
 };
 
 const mapApprovalStatus = (status?: ApprovalStatus | null): string => {
@@ -97,8 +92,7 @@ export const deriveWorkflowApproverInfo = (
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null,
   staffs: StaffType[]
 ): WorkflowApproverInfo => {
-  const resolveStaffName = createStaffNameResolver(staffs);
-  const staffById = createStaffByIdLookup(staffs);
+  const { resolveStaffName, staffById } = createStaffLookups(staffs);
   if (!workflow?.staffId) {
     return { mode: "any", items: [DEFAULT_APPROVER_LABEL] };
   }
@@ -141,7 +135,7 @@ export const buildWorkflowApprovalTimeline = ({
   applicantName,
   applicationDate,
 }: BuildTimelineParams): WorkflowApprovalStepView[] => {
-  const resolveStaffName = createStaffNameResolver(staffs);
+  const { resolveStaffName } = createStaffLookups(staffs);
   const base: WorkflowApprovalStepView[] = [
     {
       id: "s0",
