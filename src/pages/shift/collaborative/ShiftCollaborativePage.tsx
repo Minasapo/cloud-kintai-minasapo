@@ -27,7 +27,7 @@ import { alpha, useTheme } from "@mui/material/styles";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
-import { useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
@@ -54,6 +54,20 @@ const shiftStateConfig: Record<
   empty: { label: "-", color: "text.disabled", text: "未入力" },
 };
 
+const SHIFT_CELL_SIZE = 50;
+const SHIFT_CELL_BASE_SX = {
+  position: "relative",
+  cursor: "pointer",
+  minWidth: SHIFT_CELL_SIZE,
+  maxWidth: SHIFT_CELL_SIZE,
+  textAlign: "center",
+  p: 0.5,
+  "&:focus": {
+    outline: "none",
+  },
+  userSelect: "none", // ドラッグ選択時のテキスト選択を防止
+} as const;
+
 interface ShiftCellProps {
   state: ShiftState;
   isLocked: boolean;
@@ -69,8 +83,7 @@ interface ShiftCellProps {
   isSelected?: boolean;
 }
 
-// eslint-disable-next-line react/prop-types
-const ShiftCell: React.FC<ShiftCellProps> = ({
+const ShiftCellBase: React.FC<ShiftCellProps> = ({
   state,
   isLocked,
   isEditing,
@@ -109,12 +122,7 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
       sx={{
-        position: "relative",
-        cursor: "pointer",
-        minWidth: 50,
-        maxWidth: 50,
-        textAlign: "center",
-        p: 0.5,
+        ...SHIFT_CELL_BASE_SX,
         bgcolor: isEditing
           ? alpha("#2196f3", 0.1)
           : isPending
@@ -133,10 +141,8 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
               bgcolor: alpha("#2196f3", 0.05),
             },
         "&:focus": {
-          outline: "none",
           border: "2px solid #9c27b0",
         },
-        userSelect: "none", // ドラッグ選択時のテキスト選択を防止
       }}
     >
       <Tooltip title={tooltipTitle}>
@@ -174,6 +180,24 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
     </TableCell>
   );
 };
+
+ShiftCellBase.propTypes = {
+  state: PropTypes.oneOf(["work", "fixedOff", "requestedOff", "auto", "empty"])
+    .isRequired,
+  isLocked: PropTypes.bool.isRequired,
+  isEditing: PropTypes.bool.isRequired,
+  editorName: PropTypes.string,
+  lastChangedBy: PropTypes.string,
+  lastChangedAt: PropTypes.string,
+  onClick: PropTypes.func.isRequired,
+  onRegisterRef: PropTypes.func,
+  onMouseDown: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  isFocused: PropTypes.bool,
+  isSelected: PropTypes.bool,
+};
+
+const ShiftCell = memo(ShiftCellBase);
 
 type ActiveUser = {
   userId: string;
