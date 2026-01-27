@@ -69,7 +69,7 @@ type EditableField = Extract<keyof ShiftPlanRow, "editStart" | "editEnd">;
 const MAX_DAYS_IN_MONTH = 31;
 const DAY_COLUMNS = Array.from(
   { length: MAX_DAYS_IN_MONTH },
-  (_, index) => index + 1
+  (_, index) => index + 1,
 );
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const SUNDAY_BG = "#ffebee";
@@ -103,7 +103,7 @@ const createDefaultRows = (year: number): ShiftPlanRow[] =>
   });
 
 const convertDailyCapacitiesToStrings = (
-  capacities?: (number | null)[] | null
+  capacities?: (number | null)[] | null,
 ): string[] =>
   Array.from({ length: MAX_DAYS_IN_MONTH }, (_, idx) => {
     const value = capacities?.[idx];
@@ -114,7 +114,7 @@ const convertDailyCapacitiesToStrings = (
 
 const buildRowsFromPlans = (
   year: number,
-  plans?: (ShiftPlanMonthSetting | null)[] | null
+  plans?: (ShiftPlanMonthSetting | null)[] | null,
 ): ShiftPlanRow[] => {
   const baseRows = createDefaultRows(year);
   if (!plans?.length) return baseRows;
@@ -137,7 +137,7 @@ const buildRowsFromPlans = (
 };
 
 const convertRowsToPlanInput = (
-  rows: ShiftPlanRow[]
+  rows: ShiftPlanRow[],
 ): ShiftPlanMonthSettingInput[] =>
   rows.map((row) => ({
     month: row.month,
@@ -145,7 +145,7 @@ const convertRowsToPlanInput = (
     editEnd: row.editEnd || null,
     enabled: row.enabled,
     dailyCapacities: row.dailyCapacity.map((value) =>
-      value === "" ? null : Number(value)
+      value === "" ? null : Number(value),
     ),
   }));
 
@@ -203,7 +203,7 @@ const EditableCapacityCell = memo(function EditableCapacityCell({
         }
       }
     },
-    [handleCommit, handleCancel, onTabNextDay]
+    [handleCommit, handleCancel, onTabNextDay],
   );
 
   return (
@@ -273,7 +273,7 @@ export default function ShiftPlanManagement() {
   const [isSaving, setIsSaving] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [yearRecordIds, setYearRecordIds] = useState<Record<number, string>>(
-    {}
+    {},
   );
   const [lastAutoSaveTime, setLastAutoSaveTime] = useState<string | null>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -297,7 +297,7 @@ export default function ShiftPlanManagement() {
       holidayCalendars.map((calendar) => [
         dayjs(calendar.holidayDate).format("YYYY-MM-DD"),
         calendar.name,
-      ])
+      ]),
     );
   }, [holidayCalendars]);
 
@@ -338,13 +338,13 @@ export default function ShiftPlanManagement() {
 
         if (response.errors?.length) {
           throw new Error(
-            response.errors.map((error) => error.message).join(",")
+            response.errors.map((error) => error.message).join(","),
           );
         }
 
         const record =
           response.data?.shiftPlanYearByTargetYear?.items?.find(
-            (item): item is NonNullable<typeof item> => item !== null
+            (item): item is NonNullable<typeof item> => item !== null,
           ) ?? null;
 
         if (record) {
@@ -415,7 +415,7 @@ export default function ShiftPlanManagement() {
         setSelectedYear(nextYear);
       });
     },
-    [selectedYear, startTransition]
+    [selectedYear, startTransition],
   );
 
   const handleFieldChange = useCallback(
@@ -423,7 +423,7 @@ export default function ShiftPlanManagement() {
       setYearlyPlans((prev) => {
         const rows = prev[selectedYear] ?? createDefaultRows(selectedYear);
         const updatedRows = rows.map((row) =>
-          row.month === month ? { ...row, [field]: value } : row
+          row.month === month ? { ...row, [field]: value } : row,
         );
         return {
           ...prev,
@@ -431,7 +431,7 @@ export default function ShiftPlanManagement() {
         };
       });
     },
-    [selectedYear]
+    [selectedYear],
   );
 
   const handleToggleEnabled = useCallback(
@@ -439,7 +439,7 @@ export default function ShiftPlanManagement() {
       setYearlyPlans((prev) => {
         const rows = prev[selectedYear] ?? createDefaultRows(selectedYear);
         const updatedRows = rows.map((row) =>
-          row.month === month ? { ...row, enabled: !row.enabled } : row
+          row.month === month ? { ...row, enabled: !row.enabled } : row,
         );
         return {
           ...prev,
@@ -447,7 +447,7 @@ export default function ShiftPlanManagement() {
         };
       });
     },
-    [selectedYear]
+    [selectedYear],
   );
 
   const handleDailyCapacityChange = useCallback(
@@ -467,7 +467,7 @@ export default function ShiftPlanManagement() {
         };
       });
     },
-    [selectedYear]
+    [selectedYear],
   );
 
   const handleTabNextDay = useCallback(
@@ -497,7 +497,7 @@ export default function ShiftPlanManagement() {
         }
       }, 0);
     },
-    [selectedYear]
+    [selectedYear],
   );
 
   const performSave = useCallback(
@@ -505,7 +505,7 @@ export default function ShiftPlanManagement() {
       rows: ShiftPlanRow[],
       year: number,
       recordIds: Record<number, string>,
-      showNotification = true
+      showNotification = true,
     ) => {
       try {
         const plansInput = convertRowsToPlanInput(rows);
@@ -561,7 +561,7 @@ export default function ShiftPlanManagement() {
         return false;
       }
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -615,7 +615,7 @@ export default function ShiftPlanManagement() {
       }
       if (dayjs(row.editStart).isAfter(dayjs(row.editEnd))) {
         dispatch(
-          setSnackbarError(`${label}は開始日が終了日より後になっています。`)
+          setSnackbarError(`${label}は開始日が終了日より後になっています。`),
         );
         return;
       }
@@ -738,7 +738,7 @@ export default function ShiftPlanManagement() {
                             handleFieldChange(
                               row.month,
                               "editStart",
-                              event.target.value
+                              event.target.value,
                             )
                           }
                         />
@@ -754,7 +754,7 @@ export default function ShiftPlanManagement() {
                             handleFieldChange(
                               row.month,
                               "editEnd",
-                              event.target.value
+                              event.target.value,
                             )
                           }
                         />
@@ -792,15 +792,15 @@ export default function ShiftPlanManagement() {
                         const cellBgColor = isHoliday
                           ? HOLIDAY_BG
                           : isSunday
-                          ? SUNDAY_BG
-                          : isSaturday
-                          ? SATURDAY_BG
-                          : undefined;
+                            ? SUNDAY_BG
+                            : isSaturday
+                              ? SATURDAY_BG
+                              : undefined;
                         const weekdayColor = isSunday
                           ? "error.main"
                           : isSaturday
-                          ? "primary.main"
-                          : "text.secondary";
+                            ? "primary.main"
+                            : "text.secondary";
                         const labelColor = isHoliday
                           ? "warning.dark"
                           : weekdayColor;
@@ -815,7 +815,7 @@ export default function ShiftPlanManagement() {
                               handleDailyCapacityChange(
                                 row.month,
                                 dayIndex,
-                                nextValue
+                                nextValue,
                               )
                             }
                             onTabNextDay={() =>
