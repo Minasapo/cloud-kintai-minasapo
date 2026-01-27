@@ -1,18 +1,21 @@
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
-import React from "react";
+import React, { useCallback } from "react";
 
+import { SHIFT_GROUP_TEXTS } from "./shiftGroupTexts";
 import {
   getHelperTexts,
   GroupValidationResult,
   ShiftGroupFormValue,
 } from "./shiftGroupValidation";
-import { SHIFT_GROUP_TEXTS } from "./shiftGroupTexts";
 
 type ShiftGroupRowProps = {
   group: ShiftGroupFormValue;
   validation: GroupValidationResult;
-  onUpdate: (id: string, patch: Partial<Omit<ShiftGroupFormValue, "id">>) => void;
+  onUpdate: (
+    id: string,
+    patch: Partial<Omit<ShiftGroupFormValue, "id">>,
+  ) => void;
   onDelete: (id: string) => void;
 };
 
@@ -25,6 +28,39 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
   const labelError = validation.labelError;
   const { minHelperText, maxHelperText, fixedHelperText } =
     getHelperTexts(validation);
+  const handleLabelChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(group.id, { label: event.target.value });
+    },
+    [group.id, onUpdate],
+  );
+  const handleDescriptionChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(group.id, { description: event.target.value });
+    },
+    [group.id, onUpdate],
+  );
+  const handleMinChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(group.id, { min: event.target.value });
+    },
+    [group.id, onUpdate],
+  );
+  const handleMaxChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(group.id, { max: event.target.value });
+    },
+    [group.id, onUpdate],
+  );
+  const handleFixedChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(group.id, { fixed: event.target.value });
+    },
+    [group.id, onUpdate],
+  );
+  const handleDelete = useCallback(() => {
+    onDelete(group.id);
+  }, [group.id, onDelete]);
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
@@ -39,18 +75,16 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             size="small"
             label="ラベル名"
             value={group.label}
-            onChange={(event) =>
-              onUpdate(group.id, {
-                label: event.target.value,
-              })
-            }
+            onChange={handleLabelChange}
             error={labelError}
-            helperText={labelError ? SHIFT_GROUP_TEXTS.labelRequired : undefined}
+            helperText={
+              labelError ? SHIFT_GROUP_TEXTS.labelRequired : undefined
+            }
             sx={{ flexGrow: 1 }}
           />
           <IconButton
             aria-label={`${group.label || "未設定"}を削除`}
-            onClick={() => onDelete(group.id)}
+            onClick={handleDelete}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />
@@ -60,11 +94,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           size="small"
           label="説明"
           value={group.description}
-          onChange={(event) =>
-            onUpdate(group.id, {
-              description: event.target.value,
-            })
-          }
+          onChange={handleDescriptionChange}
           inputProps={{ maxLength: 48 }}
           helperText="50文字以内を目安に入力"
           fullWidth
@@ -75,11 +105,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="最小人数 (min)"
             value={group.min}
-            onChange={(event) =>
-              onUpdate(group.id, {
-                min: event.target.value,
-              })
-            }
+            onChange={handleMinChange}
             inputProps={{ min: 0 }}
             error={
               validation.minInputError || validation.fixedWithRangeConflict
@@ -92,11 +118,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="最大人数 (max)"
             value={group.max}
-            onChange={(event) =>
-              onUpdate(group.id, {
-                max: event.target.value,
-              })
-            }
+            onChange={handleMaxChange}
             inputProps={{ min: 0 }}
             error={
               validation.maxInputError ||
@@ -111,11 +133,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="固定人数 (fixed)"
             value={group.fixed}
-            onChange={(event) =>
-              onUpdate(group.id, {
-                fixed: event.target.value,
-              })
-            }
+            onChange={handleFixedChange}
             inputProps={{ min: 0 }}
             error={
               validation.fixedInputError ||
