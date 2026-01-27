@@ -22,13 +22,13 @@ import {
 } from "@/shared/lib/store/snackbarSlice";
 
 import {
+  createShiftGroup,
   parseOptionalInteger,
+  SHIFT_GROUP_TEXTS,
   ShiftGroupFormValue,
-} from "./shiftGroupValidation";
-import { SHIFT_GROUP_TEXTS } from "./shiftGroupTexts";
-import { createShiftGroup } from "./shiftGroupFactory";
-import ShiftGroupRow from "./ShiftGroupRow";
-import useShiftGroupValidation from "./useShiftGroupValidation";
+  ShiftGroupRow,
+  useShiftGroupValidation,
+} from "./";
 
 export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
