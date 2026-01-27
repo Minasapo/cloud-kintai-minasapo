@@ -1,3 +1,4 @@
+export { default as DayCapacityCell } from "./DayCapacityCell";
 export { default as EditableCapacityCell } from "./EditableCapacityCell";
 export { default as ShiftPlanFooter } from "./ShiftPlanFooter";
 export { default as ShiftPlanHeader } from "./ShiftPlanHeader";
