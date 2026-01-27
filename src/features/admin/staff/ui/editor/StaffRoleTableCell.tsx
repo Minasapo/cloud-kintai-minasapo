@@ -1,22 +1,21 @@
 import { Autocomplete, Box, TableCell, TextField } from "@mui/material";
-import {
-  Control,
-  Controller,
-  FieldValues,
-  UseFormSetValue,
-} from "react-hook-form";
+import { Control, Controller, UseFormSetValue } from "react-hook-form";
 
 import { ROLE_OPTIONS } from "@/features/admin/staff/ui/CreateStaffDialog";
 
-type StaffRoleTableCellProps<TFieldValues extends FieldValues> = {
-  control: Control<TFieldValues>;
-  setValue: UseFormSetValue<TFieldValues>;
+type StaffRoleInputs = {
+  role?: string | null;
 };
 
-export function StaffRoleTableCell<TFieldValues extends FieldValues>({
+type StaffRoleTableCellProps = {
+  control: Control<StaffRoleInputs>;
+  setValue: UseFormSetValue<StaffRoleInputs>;
+};
+
+export function StaffRoleTableCell({
   control,
   setValue,
-}: StaffRoleTableCellProps<TFieldValues>) {
+}: StaffRoleTableCellProps) {
   return (
     <TableCell>
       <Box>
