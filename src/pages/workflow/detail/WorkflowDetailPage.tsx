@@ -23,7 +23,7 @@ import {
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { designTokenVar } from "@/shared/designSystem";
-import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
+import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,

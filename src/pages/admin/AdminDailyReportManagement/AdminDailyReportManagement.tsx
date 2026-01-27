@@ -41,7 +41,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { useSplitView } from "@/features/splitView";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
-import { formatDateTimeReadable } from "@/shared/lib/date";
+import { formatDateTimeReadable } from "@/shared/lib/time";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 import {

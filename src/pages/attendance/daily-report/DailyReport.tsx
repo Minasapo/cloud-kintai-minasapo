@@ -45,7 +45,7 @@ import { useSearchParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
+import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 /**
