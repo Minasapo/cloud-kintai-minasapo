@@ -46,6 +46,37 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     onChange: handleChange(key),
   });
 
+  const getNumberFieldState = (
+    key: "min" | "max" | "fixed",
+  ): { error: boolean; helperText: string } => {
+    switch (key) {
+      case "min":
+        return {
+          error:
+            validation.minInputError || validation.fixedWithRangeConflict,
+          helperText: minHelperText,
+        };
+      case "max":
+        return {
+          error:
+            validation.maxInputError ||
+            validation.rangeError ||
+            validation.fixedWithRangeConflict,
+          helperText: maxHelperText,
+        };
+      case "fixed":
+      default:
+        return {
+          error:
+            validation.fixedInputError ||
+            validation.fixedBelowMin ||
+            validation.fixedAboveMax ||
+            validation.fixedWithRangeConflict,
+          helperText: fixedHelperText,
+        };
+    }
+  };
+
   return (
     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
       <Stack spacing={1}>
@@ -88,10 +119,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             label="最小人数 (min)"
             {...getFieldProps("min")}
             inputProps={{ min: 0 }}
-            error={
-              validation.minInputError || validation.fixedWithRangeConflict
-            }
-            helperText={minHelperText}
+            {...getNumberFieldState("min")}
             sx={{ flexGrow: 1 }}
           />
           <TextField
@@ -100,12 +128,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             label="最大人数 (max)"
             {...getFieldProps("max")}
             inputProps={{ min: 0 }}
-            error={
-              validation.maxInputError ||
-              validation.rangeError ||
-              validation.fixedWithRangeConflict
-            }
-            helperText={maxHelperText}
+            {...getNumberFieldState("max")}
             sx={{ flexGrow: 1 }}
           />
           <TextField
@@ -114,13 +137,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             label="固定人数 (fixed)"
             {...getFieldProps("fixed")}
             inputProps={{ min: 0 }}
-            error={
-              validation.fixedInputError ||
-              validation.fixedBelowMin ||
-              validation.fixedAboveMax ||
-              validation.fixedWithRangeConflict
-            }
-            helperText={fixedHelperText}
+            {...getNumberFieldState("fixed")}
             sx={{ flexGrow: 1 }}
           />
         </Stack>
