@@ -25,20 +25,9 @@ import {
   parseOptionalInteger,
   ShiftGroupFormValue,
 } from "./shiftGroupValidation";
+import { createShiftGroup } from "./shiftGroupFactory";
 import ShiftGroupRow from "./ShiftGroupRow";
 import useShiftGroupValidation from "./useShiftGroupValidation";
-
-const createShiftGroup = (
-  initial?: Partial<ShiftGroupFormValue>,
-): ShiftGroupFormValue => ({
-  id: `sg-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`,
-  label: "",
-  description: "",
-  min: "",
-  max: "",
-  fixed: "",
-  ...initial,
-});
 
 export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
