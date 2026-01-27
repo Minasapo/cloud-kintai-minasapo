@@ -22,8 +22,8 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
+import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/model/useAdminStaffAttendanceListViewModel";
 import ChangeRequestQuickViewDialog from "@/features/admin/staffAttendanceList/ui/components/ChangeRequestQuickViewDialog";
-import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/useAdminStaffAttendanceListViewModel";
 import DesktopCalendarView from "@/features/attendance/list/ui/DesktopCalendarView";
 import { useSplitView } from "@/features/splitView";
 import { designTokenVar } from "@/shared/designSystem";

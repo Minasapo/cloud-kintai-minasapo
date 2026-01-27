@@ -78,7 +78,7 @@ const AdminStaffAttendanceListRoute = createLazyRoute(
     import("@/features/admin/staffAttendanceList/ui/AdminStaffAttendanceList")
 );
 const AdminStaffEditorRoute = createLazyRoute(
-  () => import("@/features/admin/staff/ui/AdminStaffEditor")
+  () => import("@/features/admin/staff/ui/editor/AdminStaffEditor")
 );
 const AdminThemeRoute = createLazyRoute(
   () => import("../pages/admin/AdminTheme/AdminTheme")
