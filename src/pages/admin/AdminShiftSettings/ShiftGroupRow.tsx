@@ -1,5 +1,6 @@
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
+import React from "react";
 
 import {
   getHelperTexts,
@@ -134,4 +135,4 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
   );
 };
 
-export default ShiftGroupRow;
+export default React.memo(ShiftGroupRow);
