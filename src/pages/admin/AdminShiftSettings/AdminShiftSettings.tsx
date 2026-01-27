@@ -11,7 +11,7 @@ import {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 // Title removed per admin UI simplification
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -22,12 +22,11 @@ import {
 } from "@/shared/lib/store/snackbarSlice";
 
 import {
-  GroupValidationResult,
-  getGroupValidation,
   parseOptionalInteger,
   ShiftGroupFormValue,
 } from "./shiftGroupValidation";
 import ShiftGroupRow from "./ShiftGroupRow";
+import useShiftGroupValidation from "./useShiftGroupValidation";
 
 const createShiftGroup = (
   initial?: Partial<ShiftGroupFormValue>,
@@ -74,18 +73,8 @@ export default function AdminShiftSettings() {
     setConfigId(getConfigId());
   }, [getConfigId, getShiftGroups]);
 
-  const { validationMap, hasValidationError } = useMemo(() => {
-    const map = new Map<string, GroupValidationResult>();
-    let hasError = false;
-    shiftGroups.forEach((group) => {
-      const validation = getGroupValidation(group);
-      map.set(group.id, validation);
-      if (validation.hasError) {
-        hasError = true;
-      }
-    });
-    return { validationMap: map, hasValidationError: hasError };
-  }, [shiftGroups]);
+  const { validationMap, hasValidationError } =
+    useShiftGroupValidation(shiftGroups);
 
   const updateGroup = (
     id: string,
