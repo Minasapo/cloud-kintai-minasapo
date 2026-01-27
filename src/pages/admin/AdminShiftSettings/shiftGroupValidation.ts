@@ -34,6 +34,13 @@ export type GroupHelperTexts = {
   fixedHelperText: string;
 };
 
+export type NumberFieldKey = "min" | "max" | "fixed";
+
+export type NumberFieldState = {
+  error: boolean;
+  helperText: string;
+};
+
 const isNonNegativeIntegerString = (value: string) => {
   const trimmed = value.trim();
   return trimmed === "" || /^\d+$/.test(trimmed);
@@ -138,4 +145,37 @@ export const getHelperTexts = (
     maxHelperText: getMaxHelperText(),
     fixedHelperText: getFixedHelperText(),
   };
+};
+
+export const getNumberFieldState = (
+  validation: GroupValidationResult,
+  key: NumberFieldKey,
+): NumberFieldState => {
+  const { minHelperText, maxHelperText, fixedHelperText } =
+    getHelperTexts(validation);
+  switch (key) {
+    case "min":
+      return {
+        error: validation.minInputError || validation.fixedWithRangeConflict,
+        helperText: minHelperText,
+      };
+    case "max":
+      return {
+        error:
+          validation.maxInputError ||
+          validation.rangeError ||
+          validation.fixedWithRangeConflict,
+        helperText: maxHelperText,
+      };
+    case "fixed":
+    default:
+      return {
+        error:
+          validation.fixedInputError ||
+          validation.fixedBelowMin ||
+          validation.fixedAboveMax ||
+          validation.fixedWithRangeConflict,
+        helperText: fixedHelperText,
+      };
+  }
 };

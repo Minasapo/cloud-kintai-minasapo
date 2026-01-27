@@ -15,8 +15,11 @@ export {
 export {
   getGroupValidation,
   getHelperTexts,
+  getNumberFieldState,
   type GroupHelperTexts,
   type GroupValidationResult,
+  type NumberFieldKey,
+  type NumberFieldState,
   parseOptionalInteger,
   type ShiftGroupFormValue,
 } from "./shiftGroupValidation";

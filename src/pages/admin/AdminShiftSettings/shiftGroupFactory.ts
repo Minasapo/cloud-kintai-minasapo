@@ -1,4 +1,4 @@
-import type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
+import type { ShiftGroupConfig } from "./";
 
 import {
   parseOptionalInteger,

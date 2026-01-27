@@ -5,9 +5,10 @@ import React, { useCallback } from "react";
 import {
   SHIFT_GROUP_UI_TEXTS,
   SHIFT_GROUP_VALIDATION_TEXTS,
+  getNumberFieldState,
+  type NumberFieldKey,
 } from "./";
 import {
-  getHelperTexts,
   GroupValidationResult,
   ShiftGroupFormValue,
 } from "./shiftGroupValidation";
@@ -29,8 +30,6 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
   onDelete,
 }: ShiftGroupRowProps) => {
   const labelError = validation.labelError;
-  const { minHelperText, maxHelperText, fixedHelperText } =
-    getHelperTexts(validation);
   const handleChange = useCallback(
     (key: keyof Omit<ShiftGroupFormValue, "id">) =>
       (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,41 +74,6 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     };
   };
 
-  type NumberFieldKey = "min" | "max" | "fixed";
-  type NumberFieldState = {
-    error: boolean;
-    helperText: string;
-  };
-
-  const getNumberFieldState = (key: NumberFieldKey): NumberFieldState => {
-    switch (key) {
-      case "min":
-        return {
-          error:
-            validation.minInputError || validation.fixedWithRangeConflict,
-          helperText: minHelperText,
-        };
-      case "max":
-        return {
-          error:
-            validation.maxInputError ||
-            validation.rangeError ||
-            validation.fixedWithRangeConflict,
-          helperText: maxHelperText,
-        };
-      case "fixed":
-      default:
-        return {
-          error:
-            validation.fixedInputError ||
-            validation.fixedBelowMin ||
-            validation.fixedAboveMax ||
-            validation.fixedWithRangeConflict,
-          helperText: fixedHelperText,
-        };
-    }
-  };
-
   const getNumberFieldProps = (
     key: NumberFieldKey,
   ): {
@@ -123,9 +87,29 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     return {
       ...fieldProps,
       inputProps: { min: 0 },
-      ...getNumberFieldState(key),
+      ...getNumberFieldState(validation, key),
     };
   };
+
+  const textFieldDefinitions: Array<{
+    key: "label" | "description";
+    label: string;
+    required?: boolean;
+    fullWidth?: boolean;
+    sx?: { flexGrow: number };
+  }> = [
+    {
+      key: "label",
+      label: "ラベル名",
+      required: true,
+      sx: { flexGrow: 1 },
+    },
+    {
+      key: "description",
+      label: "説明",
+      fullWidth: true,
+    },
+  ];
 
   const numberFieldDefinitions: Array<{
     key: NumberFieldKey;
@@ -144,13 +128,18 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           spacing={1}
           alignItems={{ xs: "stretch", sm: "center" }}
         >
-          <TextField
-            required
-            size="small"
-            label="ラベル名"
-            {...getTextFieldProps("label")}
-            sx={{ flexGrow: 1 }}
-          />
+          {textFieldDefinitions
+            .filter((field) => field.key === "label")
+            .map((field) => (
+              <TextField
+                key={field.key}
+                required={field.required}
+                size="small"
+                label={field.label}
+                {...getTextFieldProps(field.key)}
+                sx={field.sx}
+              />
+            ))}
           <IconButton
             aria-label={`${group.label || "未設定"}を削除`}
             onClick={handleDelete}
@@ -159,12 +148,17 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             <DeleteOutlineIcon fontSize="small" />
           </IconButton>
         </Stack>
-        <TextField
-          size="small"
-          label="説明"
-          {...getTextFieldProps("description")}
-          fullWidth
-        />
+        {textFieldDefinitions
+          .filter((field) => field.key === "description")
+          .map((field) => (
+            <TextField
+              key={field.key}
+              size="small"
+              label={field.label}
+              {...getTextFieldProps(field.key)}
+              fullWidth={field.fullWidth}
+            />
+          ))}
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
           {numberFieldDefinitions.map((field) => (
             <TextField
