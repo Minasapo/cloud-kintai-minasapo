@@ -149,6 +149,11 @@ const convertRowsToPlanInput = (
     ),
   }));
 
+const getOrInitYearRows = (
+  year: number,
+  rowsByYear: Record<number, ShiftPlanRow[]>,
+): ShiftPlanRow[] => rowsByYear[year] ?? createDefaultRows(year);
+
 type EditableCapacityCellProps = {
   value: string;
   labelText: string;
@@ -615,7 +620,7 @@ export default function ShiftPlanManagement() {
       if (prev[selectedYear]) return prev;
       return {
         ...prev,
-        [selectedYear]: createDefaultRows(selectedYear),
+        [selectedYear]: getOrInitYearRows(selectedYear, prev),
       };
     });
     // 年が切り替わった時は保存済み状態をリセット
@@ -623,7 +628,7 @@ export default function ShiftPlanManagement() {
       if (prev[selectedYear]) return prev;
       return {
         ...prev,
-        [selectedYear]: createDefaultRows(selectedYear),
+        [selectedYear]: getOrInitYearRows(selectedYear, prev),
       };
     });
   }, [selectedYear]);
@@ -717,7 +722,7 @@ export default function ShiftPlanManagement() {
           if (prev[nextYear]) return prev;
           return {
             ...prev,
-            [nextYear]: createDefaultRows(nextYear),
+            [nextYear]: getOrInitYearRows(nextYear, prev),
           };
         });
         setSelectedYear(nextYear);
@@ -729,7 +734,7 @@ export default function ShiftPlanManagement() {
   const handleFieldChange = useCallback(
     (month: number, field: EditableField, value: string) => {
       setYearlyPlans((prev) => {
-        const rows = prev[selectedYear] ?? createDefaultRows(selectedYear);
+        const rows = getOrInitYearRows(selectedYear, prev);
         const updatedRows = rows.map((row) =>
           row.month === month ? { ...row, [field]: value } : row,
         );
@@ -745,7 +750,7 @@ export default function ShiftPlanManagement() {
   const handleToggleEnabled = useCallback(
     (month: number) => {
       setYearlyPlans((prev) => {
-        const rows = prev[selectedYear] ?? createDefaultRows(selectedYear);
+        const rows = getOrInitYearRows(selectedYear, prev);
         const updatedRows = rows.map((row) =>
           row.month === month ? { ...row, enabled: !row.enabled } : row,
         );
@@ -762,7 +767,7 @@ export default function ShiftPlanManagement() {
     (month: number, dayIndex: number, value: string) => {
       const normalizedValue = sanitizeCapacityValue(value);
       setYearlyPlans((prev) => {
-        const rows = prev[selectedYear] ?? createDefaultRows(selectedYear);
+        const rows = getOrInitYearRows(selectedYear, prev);
         const updatedRows = rows.map((row) => {
           if (row.month !== month) return row;
           const nextCapacity = [...row.dailyCapacity];
