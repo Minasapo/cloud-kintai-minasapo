@@ -75,29 +75,22 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     };
   };
 
-  const getNumberFieldProps = (
-    key: "min" | "max" | "fixed",
-  ): {
-    value: string;
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  type NumberFieldKey = "min" | "max" | "fixed";
+  type NumberFieldState = {
     error: boolean;
     helperText: string;
-    inputProps: { min: number };
-  } => {
-    const fieldProps = getFieldProps(key);
+  };
+
+  const getNumberFieldState = (key: NumberFieldKey): NumberFieldState => {
     switch (key) {
       case "min":
         return {
-          ...fieldProps,
-          inputProps: { min: 0 },
           error:
             validation.minInputError || validation.fixedWithRangeConflict,
           helperText: minHelperText,
         };
       case "max":
         return {
-          ...fieldProps,
-          inputProps: { min: 0 },
           error:
             validation.maxInputError ||
             validation.rangeError ||
@@ -107,8 +100,6 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
       case "fixed":
       default:
         return {
-          ...fieldProps,
-          inputProps: { min: 0 },
           error:
             validation.fixedInputError ||
             validation.fixedBelowMin ||
@@ -118,6 +109,32 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
         };
     }
   };
+
+  const getNumberFieldProps = (
+    key: NumberFieldKey,
+  ): {
+    value: string;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    error: boolean;
+    helperText: string;
+    inputProps: { min: number };
+  } => {
+    const fieldProps = getFieldProps(key);
+    return {
+      ...fieldProps,
+      inputProps: { min: 0 },
+      ...getNumberFieldState(key),
+    };
+  };
+
+  const numberFieldDefinitions: Array<{
+    key: NumberFieldKey;
+    label: string;
+  }> = [
+    { key: "min", label: "最小人数 (min)" },
+    { key: "max", label: "最大人数 (max)" },
+    { key: "fixed", label: "固定人数 (fixed)" },
+  ];
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
@@ -149,27 +166,16 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           fullWidth
         />
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-          <TextField
-            size="small"
-            type="number"
-            label="最小人数 (min)"
-            {...getNumberFieldProps("min")}
-            sx={{ flexGrow: 1 }}
-          />
-          <TextField
-            size="small"
-            type="number"
-            label="最大人数 (max)"
-            {...getNumberFieldProps("max")}
-            sx={{ flexGrow: 1 }}
-          />
-          <TextField
-            size="small"
-            type="number"
-            label="固定人数 (fixed)"
-            {...getNumberFieldProps("fixed")}
-            sx={{ flexGrow: 1 }}
-          />
+          {numberFieldDefinitions.map((field) => (
+            <TextField
+              key={field.key}
+              size="small"
+              type="number"
+              label={field.label}
+              {...getNumberFieldProps(field.key)}
+              sx={{ flexGrow: 1 }}
+            />
+          ))}
         </Stack>
         <Typography variant="caption" color="text.secondary">
           {SHIFT_GROUP_UI_TEXTS.rangeAndFixedHint}

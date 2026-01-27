@@ -5,8 +5,6 @@ import {
   ShiftGroupFormValue,
 } from "./shiftGroupValidation";
 
-export type ShiftGroupSource = ShiftGroupConfig;
-
 export const createShiftGroupId = (
   now: () => number = Date.now,
   random: () => number = Math.random,
@@ -31,7 +29,7 @@ export const createShiftGroup = (
 const toOptionalNumberString = (value?: number | null) =>
   typeof value === "number" && !Number.isNaN(value) ? String(value) : "";
 
-export const toShiftGroupFormValue = (group: ShiftGroupSource) =>
+export const toShiftGroupFormValue = (group: ShiftGroupConfig) =>
   createShiftGroup({
     label: group.label ?? "",
     description: group.description ?? "",
