@@ -46,6 +46,18 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     onChange: handleChange(key),
   });
 
+  const getTextFieldProps = (key: "label" | "description") => ({
+    ...getFieldProps(key),
+    ...(key === "label"
+      ? {
+          error: labelError,
+          helperText: labelError
+            ? SHIFT_GROUP_TEXTS.validation.labelRequired
+            : undefined,
+        }
+      : {}),
+  });
+
   const getNumberFieldState = (
     key: "min" | "max" | "fixed",
   ): { error: boolean; helperText: string } => {
@@ -89,11 +101,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             required
             size="small"
             label="ラベル名"
-            {...getFieldProps("label")}
-            error={labelError}
-            helperText={
-              labelError ? SHIFT_GROUP_TEXTS.labelRequired : undefined
-            }
+            {...getTextFieldProps("label")}
             sx={{ flexGrow: 1 }}
           />
           <IconButton
@@ -107,7 +115,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
         <TextField
           size="small"
           label="説明"
-          {...getFieldProps("description")}
+          {...getTextFieldProps("description")}
           inputProps={{ maxLength: 48 }}
           helperText="50文字以内を目安に入力"
           fullWidth
@@ -142,7 +150,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           />
         </Stack>
         <Typography variant="caption" color="text.secondary">
-          {SHIFT_GROUP_TEXTS.rangeAndFixedHint}
+          {SHIFT_GROUP_TEXTS.ui.rangeAndFixedHint}
         </Typography>
       </Stack>
     </Paper>

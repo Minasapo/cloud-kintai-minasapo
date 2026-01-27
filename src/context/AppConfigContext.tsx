@@ -1,4 +1,7 @@
-import { DEFAULT_CONFIG } from "@entities/app-config/model/useAppConfig";
+import {
+  DEFAULT_CONFIG,
+  type ShiftGroupConfig,
+} from "@entities/app-config/model/useAppConfig";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -39,13 +42,7 @@ type AppConfigContextProps = {
     time: string;
     enabled: boolean;
   }[];
-  getShiftGroups: () => {
-    label: string;
-    description?: string | null;
-    min?: number | null;
-    max?: number | null;
-    fixed?: number | null;
-  }[];
+  getShiftGroups: () => ShiftGroupConfig[];
   getLunchRestStartTime: () => dayjs.Dayjs;
   getLunchRestEndTime: () => dayjs.Dayjs;
   getHourlyPaidHolidayEnabled: () => boolean;

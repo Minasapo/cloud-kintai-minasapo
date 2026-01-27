@@ -1,4 +1,7 @@
-import { parseOptionalInteger, ShiftGroupFormValue } from "./shiftGroupValidation";
+import {
+  parseOptionalInteger,
+  ShiftGroupFormValue,
+} from "./shiftGroupValidation";
 
 export type ShiftGroupSource = {
   label?: string | null;

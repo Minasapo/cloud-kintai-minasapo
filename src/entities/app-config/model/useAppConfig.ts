@@ -39,6 +39,14 @@ export type DefaultAppConfig = Pick<
   | "attendanceStatisticsEnabled"
 >;
 
+export type ShiftGroupConfig = {
+  label: string;
+  description?: string | null;
+  min?: number | null;
+  max?: number | null;
+  fixed?: number | null;
+};
+
 /**
  * デフォルトのアプリケーション設定値。
  */
@@ -218,7 +226,7 @@ const useAppConfig = () => {
     [config?.quickInputEndTimes]
   );
 
-  const getShiftGroups = useCallback(() => {
+  const getShiftGroups = useCallback((): ShiftGroupConfig[] => {
     if (!config?.shiftGroups) {
       return [];
     }

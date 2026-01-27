@@ -117,10 +117,10 @@ export default function AdminShiftSettings() {
   return (
     <Stack spacing={2.5}>
       <Typography>
-        {SHIFT_GROUP_TEXTS.intro}
+        {SHIFT_GROUP_TEXTS.ui.intro}
       </Typography>
       <Alert severity="info">
-        {SHIFT_GROUP_TEXTS.saveInfo}
+        {SHIFT_GROUP_TEXTS.ui.saveInfo}
       </Alert>
 
       <Paper sx={{ p: 2 }}>
@@ -129,7 +129,7 @@ export default function AdminShiftSettings() {
           <Stack spacing={1.5}>
             {shiftGroups.length === 0 ? (
               <Alert severity="info" variant="outlined">
-                {SHIFT_GROUP_TEXTS.emptyGroups}
+                {SHIFT_GROUP_TEXTS.ui.emptyGroups}
               </Alert>
             ) : (
               shiftGroups.map((group) => {
@@ -155,7 +155,7 @@ export default function AdminShiftSettings() {
           </Button>
           {hasValidationError && (
             <Alert severity="warning">
-              {SHIFT_GROUP_TEXTS.validationWarning}
+              {SHIFT_GROUP_TEXTS.ui.validationWarning}
             </Alert>
           )}
         </Stack>

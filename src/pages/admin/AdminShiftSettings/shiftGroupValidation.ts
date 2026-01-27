@@ -90,31 +90,31 @@ export const getGroupValidation = (
 export const getHelperTexts = (
   validation: GroupValidationResult,
 ): GroupHelperTexts => {
-  let minHelperText: string = SHIFT_GROUP_TEXTS.minOptional;
+  let minHelperText: string = SHIFT_GROUP_TEXTS.validation.minOptional;
   if (validation.minInputError) {
-    minHelperText = SHIFT_GROUP_TEXTS.minInvalid;
+    minHelperText = SHIFT_GROUP_TEXTS.validation.minInvalid;
   } else if (validation.fixedWithRangeConflict) {
-    minHelperText = SHIFT_GROUP_TEXTS.rangeConflict;
+    minHelperText = SHIFT_GROUP_TEXTS.validation.rangeConflict;
   }
 
-  let maxHelperText: string = SHIFT_GROUP_TEXTS.maxOptional;
+  let maxHelperText: string = SHIFT_GROUP_TEXTS.validation.maxOptional;
   if (validation.maxInputError) {
-    maxHelperText = SHIFT_GROUP_TEXTS.maxInvalid;
+    maxHelperText = SHIFT_GROUP_TEXTS.validation.maxInvalid;
   } else if (validation.rangeError) {
-    maxHelperText = SHIFT_GROUP_TEXTS.maxRangeError;
+    maxHelperText = SHIFT_GROUP_TEXTS.validation.maxRangeError;
   } else if (validation.fixedWithRangeConflict) {
-    maxHelperText = SHIFT_GROUP_TEXTS.rangeConflict;
+    maxHelperText = SHIFT_GROUP_TEXTS.validation.rangeConflict;
   }
 
-  let fixedHelperText: string = SHIFT_GROUP_TEXTS.fixedOptional;
+  let fixedHelperText: string = SHIFT_GROUP_TEXTS.validation.fixedOptional;
   if (validation.fixedInputError) {
-    fixedHelperText = SHIFT_GROUP_TEXTS.fixedInvalid;
+    fixedHelperText = SHIFT_GROUP_TEXTS.validation.fixedInvalid;
   } else if (validation.fixedBelowMin) {
-    fixedHelperText = SHIFT_GROUP_TEXTS.fixedBelowMin;
+    fixedHelperText = SHIFT_GROUP_TEXTS.validation.fixedBelowMin;
   } else if (validation.fixedAboveMax) {
-    fixedHelperText = SHIFT_GROUP_TEXTS.fixedAboveMax;
+    fixedHelperText = SHIFT_GROUP_TEXTS.validation.fixedAboveMax;
   } else if (validation.fixedWithRangeConflict) {
-    fixedHelperText = SHIFT_GROUP_TEXTS.fixedRangeConflict;
+    fixedHelperText = SHIFT_GROUP_TEXTS.validation.fixedRangeConflict;
   }
 
   return { minHelperText, maxHelperText, fixedHelperText };
