@@ -57,6 +57,32 @@ const mapApprovalStatus = (status?: ApprovalStatus | null): string => {
   }
 };
 
+const normalizeApprovalSteps = (
+  steps: (ApprovalStep | null)[],
+  resolveStaffName: (identifier: StaffLookupKey) => string | undefined
+): WorkflowApprovalStepView[] =>
+  steps
+    .filter((step): step is ApprovalStep => Boolean(step))
+    .sort((a, b) => (a.stepOrder ?? 0) - (b.stepOrder ?? 0))
+    .map((step, idx) => {
+      const approverId = step.approverStaffId ?? "";
+      const name: string | undefined =
+        approverId === "ADMINS"
+          ? DEFAULT_APPROVER_LABEL
+          : resolveStaffName(approverId);
+      const timestamp = step.decisionTimestamp
+        ? new Date(step.decisionTimestamp).toLocaleString()
+        : "";
+      return {
+        id: step.id ?? `s${idx + 1}`,
+        name: name ?? (approverId || "未設定"),
+        role: "承認者",
+        state: mapApprovalStatus(step.decisionStatus),
+        date: timestamp,
+        comment: step.approverComment ?? "",
+      } satisfies WorkflowApprovalStepView;
+    });
+
 export const deriveWorkflowApproverInfo = (
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null,
   staffs: StaffType[]
@@ -123,27 +149,10 @@ export const buildWorkflowApprovalTimeline = ({
   const approvalSteps =
     (workflow.approvalSteps as (ApprovalStep | null)[]) ?? [];
   if (approvalSteps.length > 0) {
-    const normalized = approvalSteps
-      .filter((step): step is ApprovalStep => Boolean(step))
-      .sort((a, b) => (a.stepOrder ?? 0) - (b.stepOrder ?? 0))
-      .map((step, idx) => {
-        const approverId = step.approverStaffId ?? "";
-        const name: string | undefined =
-          approverId === "ADMINS"
-            ? DEFAULT_APPROVER_LABEL
-            : resolveStaffName(approverId);
-        const timestamp = step.decisionTimestamp
-          ? new Date(step.decisionTimestamp).toLocaleString()
-          : "";
-        return {
-          id: step.id ?? `s${idx + 1}`,
-          name: name ?? (approverId || "未設定"),
-          role: "承認者",
-          state: mapApprovalStatus(step.decisionStatus),
-          date: timestamp,
-          comment: step.approverComment ?? "",
-        } satisfies WorkflowApprovalStepView;
-      });
+    const normalized = normalizeApprovalSteps(
+      approvalSteps,
+      resolveStaffName
+    );
     return [...base, ...normalized];
   }
 
