@@ -182,16 +182,17 @@ export default function AdminShiftSettings() {
     setConfigId(getConfigId());
   }, [getConfigId, getShiftGroups]);
 
-  const hasValidationError = useMemo(
-    () => shiftGroups.some((group) => getGroupValidation(group).hasError),
-    [shiftGroups],
-  );
-  const validationMap = useMemo(() => {
+  const { validationMap, hasValidationError } = useMemo(() => {
     const map = new Map<string, GroupValidationResult>();
+    let hasError = false;
     shiftGroups.forEach((group) => {
-      map.set(group.id, getGroupValidation(group));
+      const validation = getGroupValidation(group);
+      map.set(group.id, validation);
+      if (validation.hasError) {
+        hasError = true;
+      }
     });
-    return map;
+    return { validationMap: map, hasValidationError: hasError };
   }, [shiftGroups]);
 
   const handleGroupChange = (
