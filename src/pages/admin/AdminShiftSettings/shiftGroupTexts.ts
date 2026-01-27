@@ -1,11 +1,14 @@
+const OPTIONAL_TEXT = "任意";
+const NON_NEGATIVE_INTEGER_TEXT = "0以上の整数で入力してください。";
+
 export const SHIFT_GROUP_TEXTS = {
   labelRequired: "ラベル名は必須です",
-  minInvalid: "0以上の整数で入力してください。",
-  maxInvalid: "0以上の整数で入力してください。",
-  fixedInvalid: "0以上の整数で入力してください。",
-  minOptional: "任意",
-  maxOptional: "任意",
-  fixedOptional: "任意",
+  minInvalid: NON_NEGATIVE_INTEGER_TEXT,
+  maxInvalid: NON_NEGATIVE_INTEGER_TEXT,
+  fixedInvalid: NON_NEGATIVE_INTEGER_TEXT,
+  minOptional: OPTIONAL_TEXT,
+  maxOptional: OPTIONAL_TEXT,
+  fixedOptional: OPTIONAL_TEXT,
   maxRangeError: "最大人数は最小人数以上にしてください。",
   fixedBelowMin: "最小人数以上を入力してください。",
   fixedAboveMax: "最大人数以下を入力してください。",
