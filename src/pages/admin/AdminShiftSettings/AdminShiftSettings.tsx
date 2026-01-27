@@ -90,21 +90,20 @@ export default function AdminShiftSettings() {
     setShiftGroups((prev) => prev.filter((group) => group.id !== id));
   }, []);
 
-  const handleSave = async () => {
-    if (hasValidationError || saving) {
-      return;
-    }
+  const buildShiftGroupPayload = useCallback(
+    (groups: ShiftGroupFormValue[]) =>
+      groups.map((group) => ({
+        label: group.label.trim(),
+        description: group.description.trim() ? group.description.trim() : null,
+        min: parseOptionalInteger(group.min),
+        max: parseOptionalInteger(group.max),
+        fixed: parseOptionalInteger(group.fixed),
+      })),
+    [],
+  );
 
-    setSaving(true);
-    const payloadShiftGroups = shiftGroups.map((group) => ({
-      label: group.label.trim(),
-      description: group.description.trim() ? group.description.trim() : null,
-      min: parseOptionalInteger(group.min),
-      max: parseOptionalInteger(group.max),
-      fixed: parseOptionalInteger(group.fixed),
-    }));
-
-    try {
+  const persistConfig = useCallback(
+    async (payloadShiftGroups: ReturnType<typeof buildShiftGroupPayload>) => {
       if (configId) {
         await saveConfig({
           id: configId,
@@ -119,6 +118,20 @@ export default function AdminShiftSettings() {
         dispatch(setSnackbarSuccess(S14001));
       }
       await fetchConfig();
+    },
+    [configId, dispatch, fetchConfig, saveConfig],
+  );
+
+  const handleSave = async () => {
+    if (hasValidationError || saving) {
+      return;
+    }
+
+    setSaving(true);
+    const payloadShiftGroups = buildShiftGroupPayload(shiftGroups);
+
+    try {
+      await persistConfig(payloadShiftGroups);
     } catch (error) {
       console.error(error);
       dispatch(setSnackbarError(E14001));
