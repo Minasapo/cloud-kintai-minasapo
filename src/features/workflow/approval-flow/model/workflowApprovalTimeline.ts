@@ -150,18 +150,11 @@ export const buildWorkflowApprovalTimeline = ({
   const approverInfo = deriveWorkflowApproverInfo(workflow, staffs);
   const isApproved = workflow.status === WorkflowStatus.APPROVED;
 
-  const appendFallbackStep = (step: WorkflowApprovalStepView) => {
-    base.push(step);
-    if (!isApproved) {
-      base[0] = { ...base[0], date: applicationDate };
-    }
-  };
-
   if (approverInfo.mode === "any") {
     const hasSpecificItems =
       approverInfo.items.length > 0 &&
       approverInfo.items.some((item) => item !== DEFAULT_APPROVER_LABEL);
-    appendFallbackStep({
+    const fallback: WorkflowApprovalStepView = {
       id: "s1",
       name: hasSpecificItems
         ? approverInfo.items.filter(Boolean).join(" / ")
@@ -170,34 +163,34 @@ export const buildWorkflowApprovalTimeline = ({
       state: isApproved ? "承認済み" : "未承認",
       date: isApproved ? applicationDate : "",
       comment: "",
-    });
-    return base;
+    };
+    return [...base, fallback];
   }
 
   if (approverInfo.mode === "single") {
-    appendFallbackStep({
+    const fallback: WorkflowApprovalStepView = {
       id: "s1",
       name: approverInfo.items[0] ?? "未設定",
       role: "承認者",
       state: isApproved ? "承認済み" : "未承認",
       date: isApproved ? applicationDate : "",
       comment: "",
-    });
-    return base;
+    };
+    return [...base, fallback];
   }
 
   if (approverInfo.mode === "order") {
-    approverInfo.items.forEach((name, idx) => {
-      appendFallbackStep({
+    const fallbackSteps = approverInfo.items.map(
+      (name, idx): WorkflowApprovalStepView => ({
         id: `s${idx + 1}`,
         name: name || "未設定",
         role: "承認者",
         state: isApproved ? "承認済み" : "未承認",
         date: isApproved ? applicationDate : "",
         comment: "",
-      });
-    });
-    return base;
+      })
+    );
+    return [...base, ...fallbackSteps];
   }
 
   return base;
