@@ -195,17 +195,16 @@ export default function AdminShiftSettings() {
     return { validationMap: map, hasValidationError: hasError };
   }, [shiftGroups]);
 
-  const handleGroupChange = (
+  const updateGroup = (
     id: string,
-    field: keyof Omit<ShiftGroupFormValue, "id">,
-    value: string,
+    patch: Partial<Omit<ShiftGroupFormValue, "id">>,
   ) => {
     setShiftGroups((prev) =>
       prev.map((group) =>
         group.id === id
           ? {
               ...group,
-              [field]: value,
+              ...patch,
             }
           : group,
       ),
@@ -300,11 +299,9 @@ export default function AdminShiftSettings() {
                           label="ラベル名"
                           value={group.label}
                           onChange={(event) =>
-                            handleGroupChange(
-                              group.id,
-                              "label",
-                              event.target.value,
-                            )
+                            updateGroup(group.id, {
+                              label: event.target.value,
+                            })
                           }
                           error={labelError}
                           helperText={
@@ -325,11 +322,9 @@ export default function AdminShiftSettings() {
                         label="説明"
                         value={group.description}
                         onChange={(event) =>
-                          handleGroupChange(
-                            group.id,
-                            "description",
-                            event.target.value,
-                          )
+                          updateGroup(group.id, {
+                            description: event.target.value,
+                          })
                         }
                         inputProps={{ maxLength: 48 }}
                         helperText="50文字以内を目安に入力"
@@ -345,11 +340,9 @@ export default function AdminShiftSettings() {
                           label="最小人数 (min)"
                           value={group.min}
                           onChange={(event) =>
-                            handleGroupChange(
-                              group.id,
-                              "min",
-                              event.target.value,
-                            )
+                            updateGroup(group.id, {
+                              min: event.target.value,
+                            })
                           }
                           inputProps={{ min: 0 }}
                           error={
@@ -365,11 +358,9 @@ export default function AdminShiftSettings() {
                           label="最大人数 (max)"
                           value={group.max}
                           onChange={(event) =>
-                            handleGroupChange(
-                              group.id,
-                              "max",
-                              event.target.value,
-                            )
+                            updateGroup(group.id, {
+                              max: event.target.value,
+                            })
                           }
                           inputProps={{ min: 0 }}
                           error={
@@ -386,11 +377,9 @@ export default function AdminShiftSettings() {
                           label="固定人数 (fixed)"
                           value={group.fixed}
                           onChange={(event) =>
-                            handleGroupChange(
-                              group.id,
-                              "fixed",
-                              event.target.value,
-                            )
+                            updateGroup(group.id, {
+                              fixed: event.target.value,
+                            })
                           }
                           inputProps={{ min: 0 }}
                           error={
