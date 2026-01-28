@@ -8,10 +8,8 @@ export {
 export { default as ShiftGroupRow } from "./ShiftGroupRow";
 export {
   SHIFT_GROUP_UI_TEXTS,
-} from "./shiftGroupTexts.ui";
-export {
   SHIFT_GROUP_VALIDATION_TEXTS,
-} from "./shiftGroupTexts.validation";
+} from "@/shared/config/shiftGroupTexts";
 export {
   getGroupValidation,
   getHelperTexts,

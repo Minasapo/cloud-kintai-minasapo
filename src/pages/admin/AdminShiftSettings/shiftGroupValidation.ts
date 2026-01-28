@@ -6,7 +6,7 @@ import {
   type FieldState,
 } from "@/shared/lib/validation/fieldState";
 
-import { SHIFT_GROUP_VALIDATION_TEXTS } from "./shiftGroupTexts.validation";
+import { SHIFT_GROUP_VALIDATION_TEXTS } from "@/shared/config/shiftGroupTexts";
 
 export type ShiftGroupFormValue = {
   id: string;
