@@ -91,34 +91,64 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
     };
   };
 
-  const textFieldDefinitions: Array<{
-    key: "label" | "description";
-    label: string;
-    required?: boolean;
-    fullWidth?: boolean;
-    sx?: { flexGrow: number };
-  }> = [
+  type FieldDefinition =
+    | {
+        kind: "text";
+        key: "label" | "description";
+        label: string;
+        required?: boolean;
+        fullWidth?: boolean;
+        sx?: { flexGrow: number };
+      }
+    | {
+        kind: "number";
+        key: NumberFieldKey;
+        label: string;
+      };
+
+  const fieldDefinitions: FieldDefinition[] = [
     {
+      kind: "text",
       key: "label",
       label: "ラベル名",
       required: true,
       sx: { flexGrow: 1 },
     },
     {
+      kind: "text",
       key: "description",
       label: "説明",
       fullWidth: true,
     },
+    { kind: "number", key: "min", label: "最小人数 (min)" },
+    { kind: "number", key: "max", label: "最大人数 (max)" },
+    { kind: "number", key: "fixed", label: "固定人数 (fixed)" },
   ];
 
-  const numberFieldDefinitions: Array<{
-    key: NumberFieldKey;
-    label: string;
-  }> = [
-    { key: "min", label: "最小人数 (min)" },
-    { key: "max", label: "最大人数 (max)" },
-    { key: "fixed", label: "固定人数 (fixed)" },
-  ];
+  const renderTextField = (field: Extract<FieldDefinition, { kind: "text" }>) => (
+    <TextField
+      key={field.key}
+      required={field.required}
+      size="small"
+      label={field.label}
+      {...getTextFieldProps(field.key)}
+      sx={field.sx}
+      fullWidth={field.fullWidth}
+    />
+  );
+
+  const renderNumberField = (
+    field: Extract<FieldDefinition, { kind: "number" }>
+  ) => (
+    <TextField
+      key={field.key}
+      size="small"
+      type="number"
+      label={field.label}
+      {...getNumberFieldProps(field.key)}
+      sx={{ flexGrow: 1 }}
+    />
+  );
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
@@ -128,18 +158,11 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           spacing={1}
           alignItems={{ xs: "stretch", sm: "center" }}
         >
-          {textFieldDefinitions
-            .filter((field) => field.key === "label")
-            .map((field) => (
-              <TextField
-                key={field.key}
-                required={field.required}
-                size="small"
-                label={field.label}
-                {...getTextFieldProps(field.key)}
-                sx={field.sx}
-              />
-            ))}
+          {fieldDefinitions
+            .filter((field): field is Extract<FieldDefinition, { kind: "text" }> =>
+              field.kind === "text" && field.key === "label"
+            )
+            .map(renderTextField)}
           <IconButton
             aria-label={`${group.label || "未設定"}を削除`}
             onClick={handleDelete}
@@ -148,28 +171,17 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             <DeleteOutlineIcon fontSize="small" />
           </IconButton>
         </Stack>
-        {textFieldDefinitions
-          .filter((field) => field.key === "description")
-          .map((field) => (
-            <TextField
-              key={field.key}
-              size="small"
-              label={field.label}
-              {...getTextFieldProps(field.key)}
-              fullWidth={field.fullWidth}
-            />
-          ))}
+        {fieldDefinitions
+          .filter((field): field is Extract<FieldDefinition, { kind: "text" }> =>
+            field.kind === "text" && field.key === "description"
+          )
+          .map(renderTextField)}
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-          {numberFieldDefinitions.map((field) => (
-            <TextField
-              key={field.key}
-              size="small"
-              type="number"
-              label={field.label}
-              {...getNumberFieldProps(field.key)}
-              sx={{ flexGrow: 1 }}
-            />
-          ))}
+          {fieldDefinitions
+            .filter((field): field is Extract<FieldDefinition, { kind: "number" }> =>
+              field.kind === "number"
+            )
+            .map(renderNumberField)}
         </Stack>
         <Typography variant="caption" color="text.secondary">
           {SHIFT_GROUP_UI_TEXTS.rangeAndFixedHint}

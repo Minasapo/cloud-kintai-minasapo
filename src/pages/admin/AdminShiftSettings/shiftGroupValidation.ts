@@ -1,5 +1,11 @@
 import type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
 
+import {
+  resolveFieldState,
+  type FieldRule,
+  type FieldState,
+} from "@/shared/lib/validation/fieldState";
+
 import { SHIFT_GROUP_VALIDATION_TEXTS } from "./shiftGroupTexts.validation";
 
 export type ShiftGroupFormValue = {
@@ -36,10 +42,7 @@ export type GroupHelperTexts = {
 
 export type NumberFieldKey = "min" | "max" | "fixed";
 
-export type NumberFieldState = {
-  error: boolean;
-  helperText: string;
-};
+export type NumberFieldState = FieldState;
 
 const isNonNegativeIntegerString = (value: string) => {
   const trimmed = value.trim();
@@ -101,81 +104,78 @@ export const getGroupValidation = (
 export const getHelperTexts = (
   validation: GroupValidationResult,
 ): GroupHelperTexts => {
-  const getMinHelperText = () => {
-    if (validation.minInputError) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.minInvalid;
-    }
-    if (validation.fixedWithRangeConflict) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.rangeConflict;
-    }
-    return SHIFT_GROUP_VALIDATION_TEXTS.minOptional;
-  };
-
-  const getMaxHelperText = () => {
-    if (validation.maxInputError) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.maxInvalid;
-    }
-    if (validation.rangeError) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.maxRangeError;
-    }
-    if (validation.fixedWithRangeConflict) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.rangeConflict;
-    }
-    return SHIFT_GROUP_VALIDATION_TEXTS.maxOptional;
-  };
-
-  const getFixedHelperText = () => {
-    if (validation.fixedInputError) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.fixedInvalid;
-    }
-    if (validation.fixedBelowMin) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.fixedBelowMin;
-    }
-    if (validation.fixedAboveMax) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.fixedAboveMax;
-    }
-    if (validation.fixedWithRangeConflict) {
-      return SHIFT_GROUP_VALIDATION_TEXTS.fixedRangeConflict;
-    }
-    return SHIFT_GROUP_VALIDATION_TEXTS.fixedOptional;
-  };
-
   return {
-    minHelperText: getMinHelperText(),
-    maxHelperText: getMaxHelperText(),
-    fixedHelperText: getFixedHelperText(),
+    minHelperText: getNumberFieldState(validation, "min").helperText,
+    maxHelperText: getNumberFieldState(validation, "max").helperText,
+    fixedHelperText: getNumberFieldState(validation, "fixed").helperText,
   };
 };
+
+const buildNumberFieldState = (
+  rules: FieldRule[],
+  fallbackHelperText: string,
+): NumberFieldState =>
+  resolveFieldState(rules, { error: false, helperText: fallbackHelperText });
 
 export const getNumberFieldState = (
   validation: GroupValidationResult,
   key: NumberFieldKey,
 ): NumberFieldState => {
-  const { minHelperText, maxHelperText, fixedHelperText } =
-    getHelperTexts(validation);
   switch (key) {
     case "min":
-      return {
-        error: validation.minInputError || validation.fixedWithRangeConflict,
-        helperText: minHelperText,
-      };
+      return buildNumberFieldState(
+        [
+          {
+            when: validation.minInputError,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.minInvalid,
+          },
+          {
+            when: validation.fixedWithRangeConflict,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.rangeConflict,
+          },
+        ],
+        SHIFT_GROUP_VALIDATION_TEXTS.minOptional,
+      );
     case "max":
-      return {
-        error:
-          validation.maxInputError ||
-          validation.rangeError ||
-          validation.fixedWithRangeConflict,
-        helperText: maxHelperText,
-      };
+      return buildNumberFieldState(
+        [
+          {
+            when: validation.maxInputError,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.maxInvalid,
+          },
+          {
+            when: validation.rangeError,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.maxRangeError,
+          },
+          {
+            when: validation.fixedWithRangeConflict,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.rangeConflict,
+          },
+        ],
+        SHIFT_GROUP_VALIDATION_TEXTS.maxOptional,
+      );
     case "fixed":
     default:
-      return {
-        error:
-          validation.fixedInputError ||
-          validation.fixedBelowMin ||
-          validation.fixedAboveMax ||
-          validation.fixedWithRangeConflict,
-        helperText: fixedHelperText,
-      };
+      return buildNumberFieldState(
+        [
+          {
+            when: validation.fixedInputError,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.fixedInvalid,
+          },
+          {
+            when: validation.fixedBelowMin,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.fixedBelowMin,
+          },
+          {
+            when: validation.fixedAboveMax,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.fixedAboveMax,
+          },
+          {
+            when: validation.fixedWithRangeConflict,
+            helperText: SHIFT_GROUP_VALIDATION_TEXTS.fixedRangeConflict,
+          },
+        ],
+        SHIFT_GROUP_VALIDATION_TEXTS.fixedOptional,
+      );
   }
 };
