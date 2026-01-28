@@ -1,5 +1,4 @@
 import type { ShiftGroupConfig } from "./";
-
 import {
   parseOptionalInteger,
   ShiftGroupFormValue,

@@ -16,6 +16,7 @@ import {
   applyDesignTokenCssVariables,
   getDesignTokens,
 } from "@/shared/designSystem";
+
 import type { ShiftGroupConfig } from "./shiftGroupTypes";
 
 const DEFAULT_THEME_TOKENS = getDesignTokens();

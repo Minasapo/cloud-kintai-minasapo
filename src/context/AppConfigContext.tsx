@@ -1,5 +1,5 @@
-import { DEFAULT_CONFIG } from "@entities/app-config/model/useAppConfig";
 import type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
+import { DEFAULT_CONFIG } from "@entities/app-config/model/useAppConfig";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,

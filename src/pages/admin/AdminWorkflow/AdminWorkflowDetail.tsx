@@ -43,12 +43,12 @@ import {
 } from "@/entities/workflow/lib/workflowLabels";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
 

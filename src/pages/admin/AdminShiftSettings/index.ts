@@ -23,5 +23,5 @@ export {
   parseOptionalInteger,
   type ShiftGroupFormValue,
 } from "./shiftGroupValidation";
-export type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
 export { default as useShiftGroupValidation } from "./useShiftGroupValidation";
+export type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";

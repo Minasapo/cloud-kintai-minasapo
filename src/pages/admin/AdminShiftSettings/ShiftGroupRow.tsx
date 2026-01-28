@@ -3,10 +3,10 @@ import { IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 
 import {
-  SHIFT_GROUP_UI_TEXTS,
-  SHIFT_GROUP_VALIDATION_TEXTS,
   getNumberFieldState,
   type NumberFieldKey,
+  SHIFT_GROUP_UI_TEXTS,
+  SHIFT_GROUP_VALIDATION_TEXTS,
 } from "./";
 import {
   GroupValidationResult,
