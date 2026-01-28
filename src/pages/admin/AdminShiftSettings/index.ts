@@ -7,10 +7,6 @@ export {
 } from "./shiftGroupFactory";
 export { default as ShiftGroupRow } from "./ShiftGroupRow";
 export {
-  SHIFT_GROUP_UI_TEXTS,
-  SHIFT_GROUP_VALIDATION_TEXTS,
-} from "@/shared/config/shiftGroupTexts";
-export {
   getGroupValidation,
   getHelperTexts,
   getNumberFieldState,
@@ -22,4 +18,8 @@ export {
   type ShiftGroupFormValue,
 } from "./shiftGroupValidation";
 export { default as useShiftGroupValidation } from "./useShiftGroupValidation";
+export {
+  SHIFT_GROUP_UI_TEXTS,
+  SHIFT_GROUP_VALIDATION_TEXTS,
+} from "@/shared/config/shiftGroupTexts";
 export type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
