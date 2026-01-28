@@ -145,7 +145,7 @@ export default function CompanyHolidayCalendarList() {
     }
 
     const id = companyHolidayCalendar.id;
-    const companyHolidayCalendarMessage = new CompanyHolidayCalendarMessage();
+    const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
     await deleteCompanyHolidayCalendar({ id })
       .then(() =>
         dispatch(

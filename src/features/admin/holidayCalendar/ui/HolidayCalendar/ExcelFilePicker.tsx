@@ -110,7 +110,7 @@ export function ExcelFilePicker({
     );
     if (!result) return;
 
-    const companyHolidayCalendarMessage = new CompanyHolidayCalendarMessage();
+    const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
     await bulkCreateCompanyHolidayCalendar(uploadedData)
       .then(() => {
         setUploadedData([]);

@@ -57,7 +57,7 @@ export function CSVFilePicker({
     );
     if (!result) return;
 
-    const holidayCalendarMessage = new HolidayCalendarMessage();
+    const holidayCalendarMessage = HolidayCalendarMessage();
     await bulkCreateHolidayCalendar(uploadedData)
       .then(() =>
         dispatch(

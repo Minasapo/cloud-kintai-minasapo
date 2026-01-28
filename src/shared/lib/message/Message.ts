@@ -14,95 +14,87 @@ export enum OperationCode {
   Delete = "4",
 }
 
-export class Message {
-  private messageCode: string = MessageCategory.HolidayCalendar;
+export type MessageGenerator = {
+  getCategoryName: () => string;
+  get: (status: MessageStatus) => string;
+  create: (status: MessageStatus) => string;
+  update: (status: MessageStatus) => string;
+  delete: (status: MessageStatus) => string;
+};
 
-  getCategoryName(): string {
-    throw new Error("Method not implemented.");
+type MessageFactoryOptions = {
+  messageCode?: MessageCategory | string;
+};
+
+const getOperationName = (operation: OperationCode) => {
+  switch (operation) {
+    case OperationCode.Get:
+      return "取得";
+    case OperationCode.Create:
+      return "作成";
+    case OperationCode.Update:
+      return "更新";
+    case OperationCode.Delete:
+      return "削除";
+    default:
+      throw new Error("Invalid operation code");
   }
+};
 
-  get(status: MessageStatus) {
-    return this.getMessage(
-      status,
-      OperationCode.Get,
-      this.getCategoryName()
-    );
-  }
+const getMessageCode = (
+  status: MessageStatus,
+  operation: OperationCode,
+  messageCode: string
+) => {
+  return [
+    status,
+    messageCode.padStart(2, "0"),
+    operation.padStart(3, "0"),
+  ].join("");
+};
 
-  create(status: MessageStatus) {
-    return this.getMessage(
-      status,
-      OperationCode.Create,
-      this.getCategoryName()
-    );
-  }
+const getSuccessMessage = (operation: OperationCode, categoryName: string) =>
+  `${categoryName}を${getOperationName(operation)}しました`;
 
-  update(status: MessageStatus) {
-    return this.getMessage(
-      status,
-      OperationCode.Update,
-      this.getCategoryName()
-    );
-  }
+const getErrorMessage = (
+  operation: OperationCode,
+  status: MessageStatus,
+  categoryName: string,
+  messageCode: string
+) =>
+  `${categoryName}の${getOperationName(
+    operation
+  )}に失敗しました(${getMessageCode(status, operation, messageCode)})`;
 
-  delete(status: MessageStatus) {
-    return this.getMessage(
-      status,
-      OperationCode.Delete,
-      this.getCategoryName()
-    );
-  }
-
-  private getMessage(
-    status: MessageStatus,
-    operation: OperationCode,
-    categoryName: string
-  ) {
+const buildMessage =
+  (categoryName: string, messageCode: string) =>
+  (status: MessageStatus, operation: OperationCode) => {
     switch (status) {
       case MessageStatus.ERROR:
-        return this.getErrorMessage(operation, status, categoryName);
+        return getErrorMessage(
+          operation,
+          status,
+          categoryName,
+          messageCode
+        );
       case MessageStatus.SUCCESS:
-        return this.getSuccessMessage(operation, categoryName);
+        return getSuccessMessage(operation, categoryName);
       default:
         throw new Error(`Invalid message status: ${status}`);
     }
-  }
+  };
 
-  private getSuccessMessage(operation: OperationCode, categoryName: string) {
-    return `${categoryName}を${this.getOperationName(operation)}しました`;
-  }
-
-  private getErrorMessage(
-    operation: OperationCode,
-    status: MessageStatus,
-    categoryName: string
-  ) {
-    return `${categoryName}の${this.getOperationName(
-      operation
-    )}に失敗しました(${this.getMessageCode(status, operation)})`;
-  }
-
-  private getOperationName(operation: OperationCode) {
-    switch (operation) {
-      case OperationCode.Get:
-        return "取得";
-      case OperationCode.Create:
-        return "作成";
-      case OperationCode.Update:
-        return "更新";
-      case OperationCode.Delete:
-        return "削除";
-      default:
-        throw new Error("Invalid operation code");
-    }
-  }
-
-  private getMessageCode(status: MessageStatus, operation: OperationCode) {
-    const messageCode = [
-      status,
-      this.messageCode.padStart(2, "0"),
-      operation.padStart(3, "0"),
-    ].join("");
-    return messageCode;
-  }
-}
+export const createMessage = (
+  categoryName: string,
+  options: MessageFactoryOptions = {}
+): MessageGenerator => {
+  const messageCode = options.messageCode ?? MessageCategory.HolidayCalendar;
+  const getMessage = buildMessage(categoryName, messageCode);
+  return {
+    getCategoryName: () => categoryName,
+    get: (status) => getMessage(status, OperationCode.Get),
+    create: (status) => getMessage(status, OperationCode.Create),
+    update: (status) => getMessage(status, OperationCode.Update),
+    delete: (status) => getMessage(status, OperationCode.Delete),
+  };
+};

@@ -78,7 +78,7 @@ export default function HolidayCalendarEdit({
 
     if (!id || !holidayDate) return;
 
-    const holidayCalendarMessage = new HolidayCalendarMessage();
+    const holidayCalendarMessage = HolidayCalendarMessage();
     await updateHolidayCalendar({
       id: holidayCalendar.id,
       holidayDate: holidayDate.toISOString(),

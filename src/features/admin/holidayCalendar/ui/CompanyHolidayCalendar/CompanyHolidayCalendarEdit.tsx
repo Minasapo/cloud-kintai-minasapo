@@ -77,7 +77,7 @@ export default function CompanyHolidayCalendarEdit({
     const { id, holidayDate } = data;
     if (!id || !holidayDate) return;
 
-    const companyHolidayCalendarMessage = new CompanyHolidayCalendarMessage();
+    const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
     await updateCompanyHolidayCalendar({
       id,
       holidayDate: holidayDate.format(AttendanceDate.DataFormat),

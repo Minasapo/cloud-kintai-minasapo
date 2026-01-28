@@ -74,7 +74,7 @@ export default function CompanyHolidayCalendarCopy({
   };
 
   const onSubmit = async (data: Inputs) => {
-    const companyHolidayCalendarMessage = new CompanyHolidayCalendarMessage();
+    const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
     await createCompanyHolidayCalendar(data)
       .then(() => {
         dispatch(

@@ -36,7 +36,7 @@ export default function HolidayCalendarDelete({
       return;
     }
 
-    const holidayCalendarMessage = new HolidayCalendarMessage();
+    const holidayCalendarMessage = HolidayCalendarMessage();
     await deleteHolidayCalendar({ id: holidayCalendar.id })
       .then(() => {
         dispatch(

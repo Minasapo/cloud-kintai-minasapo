@@ -76,7 +76,7 @@ export default function AddCompanyHolidayCalendar({
   };
 
   const onSubmit = async ({ startDate, endDate, name }: Inputs) => {
-    const companyHolidayCalendarMessage = new CompanyHolidayCalendarMessage();
+    const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
     const isRangeSubmission = Boolean(endDate);
 
     try {

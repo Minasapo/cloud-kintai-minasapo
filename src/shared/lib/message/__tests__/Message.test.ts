@@ -1,16 +1,10 @@
 import { CompanyHolidayCalendarMessage } from "../CompanyHolidayCalendarMessage";
 import { HolidayCalendarMessage } from "../HolidayCalendarMessage";
-import { Message, MessageStatus } from "../Message";
+import { createMessage, MessageStatus } from "../Message";
 
-describe("Message base class", () => {
-  class TestMessage extends Message {
-    getCategoryName(): string {
-      return "テストカテゴリ";
-    }
-  }
-
+describe("Message generator", () => {
   it("generates success messages for CRUD operations", () => {
-    const msg = new TestMessage();
+    const msg = createMessage("テストカテゴリ");
 
     expect(msg.create(MessageStatus.SUCCESS)).toBe(
       "テストカテゴリを作成しました"
@@ -25,7 +19,7 @@ describe("Message base class", () => {
   });
 
   it("generates error messages with code", () => {
-    const msg = new TestMessage();
+    const msg = createMessage("テストカテゴリ");
 
     expect(msg.create(MessageStatus.ERROR)).toContain(
       "テストカテゴリの作成に失敗しました"
@@ -36,7 +30,7 @@ describe("Message base class", () => {
 
 describe("HolidayCalendarMessage", () => {
   it("uses '休日カレンダー' as category name", () => {
-    const msg = new HolidayCalendarMessage();
+    const msg = HolidayCalendarMessage();
 
     expect(msg.create(MessageStatus.SUCCESS)).toBe(
       "休日カレンダーを作成しました"
@@ -46,7 +40,7 @@ describe("HolidayCalendarMessage", () => {
 
 describe("CompanyHolidayCalendarMessage", () => {
   it("uses '会社休日カレンダー' as category name", () => {
-    const msg = new CompanyHolidayCalendarMessage();
+    const msg = CompanyHolidayCalendarMessage();
 
     expect(msg.update(MessageStatus.SUCCESS)).toBe(
       "会社休日カレンダーを更新しました"

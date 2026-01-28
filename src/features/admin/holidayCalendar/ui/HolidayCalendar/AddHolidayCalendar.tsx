@@ -107,7 +107,7 @@ export function AddHolidayCalendar({
    * @param data - フォーム入力（Inputs）
    */
   const onSubmit = async ({ startDate, endDate, name }: Inputs) => {
-    const holidayCalendarMessage = new HolidayCalendarMessage();
+    const holidayCalendarMessage = HolidayCalendarMessage();
     const isRangeSubmission = Boolean(endDate);
 
     try {
