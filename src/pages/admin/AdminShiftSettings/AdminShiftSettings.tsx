@@ -1,17 +1,13 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import {
-  Alert,
-  Button,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, Button, Paper, Stack, Typography } from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 // Title removed per admin UI simplification
 import { useCallback, useContext, useEffect, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -25,56 +21,50 @@ import {
   buildShiftGroupPayload,
   createShiftGroup,
   SHIFT_GROUP_UI_TEXTS,
-  ShiftGroupFormValue,
   ShiftGroupRow,
-  toShiftGroupFormValue,
-  useShiftGroupValidation,
 } from "./";
+import { shiftGroupFormSchema } from "./shiftGroupSchema";
+import type { ShiftGroupFormState } from "./shiftGroupSchema";
+import { toShiftGroupFormValue } from "./shiftGroupFactory";
 
 export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
     useContext(AppConfigContext);
   const dispatch = useAppDispatchV2();
-  const [shiftGroups, setShiftGroups] = useState<ShiftGroupFormValue[]>([]);
   const [configId, setConfigId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const {
+    control,
+    handleSubmit,
+    reset,
+    trigger,
+    formState: { errors },
+  } = useForm<ShiftGroupFormState>({
+    defaultValues: { shiftGroups: [] },
+    resolver: zodResolver(shiftGroupFormSchema),
+    mode: "onChange",
+  });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "shiftGroups",
+  });
+
   useEffect(() => {
     const initialGroups = getShiftGroups();
-    setShiftGroups(() =>
-      initialGroups.map((group) =>
-        toShiftGroupFormValue(group),
-      ),
-    );
+    reset({
+      shiftGroups: initialGroups.map((group) => toShiftGroupFormValue(group)),
+    });
     setConfigId(getConfigId());
-  }, [getConfigId, getShiftGroups]);
-
-  const { validationMap, hasValidationError } =
-    useShiftGroupValidation(shiftGroups);
-
-  const updateGroup = useCallback(
-    (id: string, patch: Partial<Omit<ShiftGroupFormValue, "id">>) => {
-      setShiftGroups((prev) =>
-        prev.map((group) =>
-          group.id === id
-            ? {
-                ...group,
-                ...patch,
-              }
-            : group,
-        ),
-      );
-    },
-    [],
-  );
+    void trigger();
+  }, [getConfigId, getShiftGroups, reset, trigger]);
 
   const handleAddGroup = () => {
-    setShiftGroups((prev) => [...prev, createShiftGroup()]);
+    append(createShiftGroup());
+    void trigger();
   };
 
-  const handleDeleteGroup = useCallback((id: string) => {
-    setShiftGroups((prev) => prev.filter((group) => group.id !== id));
-  }, []);
+  const hasValidationError = Object.keys(errors).length > 0;
 
   const persistConfig = useCallback(
     async (payloadShiftGroups: ReturnType<typeof buildShiftGroupPayload>) => {
@@ -96,13 +86,13 @@ export default function AdminShiftSettings() {
     [configId, dispatch, fetchConfig, saveConfig],
   );
 
-  const handleSave = async () => {
-    if (hasValidationError || saving) {
+  const handleSave = handleSubmit(async (values) => {
+    if (saving) {
       return;
     }
 
     setSaving(true);
-    const payloadShiftGroups = buildShiftGroupPayload(shiftGroups);
+    const payloadShiftGroups = buildShiftGroupPayload(values.shiftGroups);
 
     try {
       await persistConfig(payloadShiftGroups);
@@ -112,7 +102,7 @@ export default function AdminShiftSettings() {
     } finally {
       setSaving(false);
     }
-  };
+  });
 
   return (
     <Stack spacing={2.5}>
@@ -127,23 +117,19 @@ export default function AdminShiftSettings() {
         <Stack spacing={3}>
           <Typography variant="h6">シフトグループ</Typography>
           <Stack spacing={1.5}>
-            {shiftGroups.length === 0 ? (
+            {fields.length === 0 ? (
               <Alert severity="info" variant="outlined">
                 {SHIFT_GROUP_UI_TEXTS.emptyGroups}
               </Alert>
             ) : (
-              shiftGroups.map((group) => {
-                const validation = validationMap.get(group.id)!;
-                return (
-                  <ShiftGroupRow
-                    key={group.id}
-                    group={group}
-                    validation={validation}
-                    onUpdate={updateGroup}
-                    onDelete={handleDeleteGroup}
-                  />
-                );
-              })
+              fields.map((group, index) => (
+                <ShiftGroupRow
+                  key={group.id}
+                  control={control}
+                  index={index}
+                  onDelete={() => remove(index)}
+                />
+              ))
             )}
           </Stack>
           <Button

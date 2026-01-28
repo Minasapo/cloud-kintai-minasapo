@@ -17,7 +17,6 @@ export {
   parseOptionalInteger,
   type ShiftGroupFormValue,
 } from "./shiftGroupValidation";
-export { default as useShiftGroupValidation } from "./useShiftGroupValidation";
 export {
   SHIFT_GROUP_UI_TEXTS,
   SHIFT_GROUP_VALIDATION_TEXTS,
