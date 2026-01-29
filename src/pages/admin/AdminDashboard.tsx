@@ -3,6 +3,9 @@ import React, { lazy, Suspense, useCallback, useMemo } from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import useHeaderMenu from "@/features/admin/layout/model/useHeaderMenu";
+import AdminHeader from "@/features/admin/layout/ui/AdminHeader";
+import AdminMenu from "@/features/admin/layout/ui/AdminMenu";
 import {
   PanelContainer,
   ScreenOption,
@@ -12,10 +15,6 @@ import {
 } from "@/features/splitView";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
-
-import AdminHeader from "./components/AdminHeader";
-import AdminMenu from "./components/AdminMenu";
-import useHeaderMenu from "./components/useHeaderMenu";
 
 const PAGE_PADDING_X = {
   xs: designTokenVar("spacing.lg", "16px"),
@@ -34,7 +33,7 @@ const AdminAttendanceComponent = lazy(() => import("./AdminAttendance"));
 const AdminDailyReportManagementComponent = lazy(
   () => import("./AdminDailyReportManagement/AdminDailyReportManagement")
 );
-const AdminStaffComponent = lazy(() => import("./AdminStaff/AdminStaff"));
+const AdminStaffComponent = lazy(() => import("@/features/admin/staff/ui/AdminStaff"));
 const ShiftPlanManagementComponent = lazy(
   () => import("./ShiftPlanManagement/ShiftPlanManagement")
 );

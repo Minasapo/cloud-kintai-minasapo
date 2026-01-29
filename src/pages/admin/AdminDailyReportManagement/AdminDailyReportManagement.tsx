@@ -1,3 +1,4 @@
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import {
@@ -26,14 +27,21 @@ import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
-import { BUTTON_MIN_WIDTH } from "@/constants/uiDimensions";
+import { AuthContext } from "@/context/AuthContext";
 import { useSplitView } from "@/features/splitView";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { formatDateTimeReadable } from "@/lib/date";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
+import { formatDateTimeReadable } from "@/shared/lib/date";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 import {
@@ -92,9 +100,13 @@ export const formatDailyReportFileName = (timestamp: Dayjs = dayjs()): string =>
   `daily_reports_${timestamp.format("YYYYMMDD_HHmmss")}.csv`;
 
 export default function AdminDailyReportManagement() {
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
   const navigate = useNavigate();
   const { enableSplitMode, setRightPanel } = useSplitView();
-  const { staffs, loading: isStaffLoading, error: staffError } = useStaffs();
+  const { staffs, loading: isStaffLoading, error: staffError } = useStaffs({
+    isAuthenticated,
+  });
   const [statusFilter, setStatusFilter] = useState<DisplayStatus | "">("");
   const [staffFilter, setStaffFilter] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");

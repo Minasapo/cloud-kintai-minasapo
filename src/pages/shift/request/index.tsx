@@ -2,7 +2,7 @@ import { ShiftRequestForm } from "@features/shift/request-form";
 import Box from "@mui/material/Box";
 import Page from "@shared/ui/page/Page";
 
-import { PANEL_HEIGHTS } from "@/constants/uiDimensions";
+import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 export default function ShiftRequestPage() {

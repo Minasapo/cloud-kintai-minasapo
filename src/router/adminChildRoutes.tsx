@@ -16,34 +16,34 @@ const AdminAttendancePrintRoute = createLazyRoute(
   () => import("../pages/admin/AdminAttendancePrint")
 );
 const AbsentRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/Absent")
+  () => import("@/features/admin/configManagement/ui/Absent")
 );
 const AdminConfigManagementRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/AdminConfigManagement")
+  () => import("@/features/admin/configManagement/ui/AdminConfigManagement")
 );
 const AmPmHolidayRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/AmPmHoliday")
+  () => import("@/features/admin/configManagement/ui/AmPmHoliday")
 );
 const LinksRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/Links")
+  () => import("@/features/admin/configManagement/ui/Links")
 );
 const AttendanceStatisticsRoute = createLazyRoute(
-  () => import("@pages/admin/AdminConfigManagement/AttendanceStatistics")
+  () => import("@/features/admin/configManagement/ui/AttendanceStatistics")
 );
 const OfficeModeRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/OfficeMode")
+  () => import("@/features/admin/configManagement/ui/OfficeMode")
 );
 const QuickInputRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/QuickInput")
+  () => import("@/features/admin/configManagement/ui/QuickInput")
 );
 const ReasonsRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/Reasons")
+  () => import("@/features/admin/configManagement/ui/Reasons")
 );
 const SpecialHolidayRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/SpecialHoliday")
+  () => import("@/features/admin/configManagement/ui/SpecialHoliday")
 );
 const WorkingTimeRoute = createLazyRoute(
-  () => import("../pages/admin/AdminConfigManagement/WorkingTime")
+  () => import("@/features/admin/configManagement/ui/WorkingTime")
 );
 const AdminDailyReportDetailRoute = createLazyRoute(
   () =>
@@ -58,7 +58,7 @@ const AdminDailyReportManagementRoute = createLazyRoute(
 const AdminHolidayCalendarRoute = createLazyRoute(
   () =>
     import(
-      "../pages/admin/AdminHolidayCalendar/HolidayCalendar/AdminHolidayCalendar"
+      "@/features/admin/holidayCalendar/ui/HolidayCalendar/AdminHolidayCalendar"
     )
 );
 const AdminLogsRoute = createLazyRoute(
@@ -71,14 +71,14 @@ const AdminShiftSettingsRoute = createLazyRoute(
   () => import("../pages/admin/AdminShiftSettings/AdminShiftSettings")
 );
 const AdminStaffRoute = createLazyRoute(
-  () => import("../pages/admin/AdminStaff/AdminStaff")
+  () => import("@/features/admin/staff/ui/AdminStaff")
 );
 const AdminStaffAttendanceListRoute = createLazyRoute(
   () =>
-    import("../pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList")
+    import("@/features/admin/staffAttendanceList/ui/AdminStaffAttendanceList")
 );
 const AdminStaffEditorRoute = createLazyRoute(
-  () => import("../pages/admin/AdminStaffEditor/AdminStaffEditor")
+  () => import("@/features/admin/staff/ui/editor/AdminStaffEditor")
 );
 const AdminThemeRoute = createLazyRoute(
   () => import("../pages/admin/AdminTheme/AdminTheme")
@@ -90,7 +90,7 @@ const AdminWorkflowDetailRoute = createLazyRoute(
   () => import("../pages/admin/AdminWorkflow/AdminWorkflowDetail")
 );
 const JobTermRoute = createLazyRoute(
-  () => import("../pages/admin/JobTerm/JobTerm")
+  () => import("@/features/admin/jobTerm/ui/JobTerm")
 );
 const ShiftPlanManagementRoute = createLazyRoute(
   () => import("../pages/admin/ShiftPlanManagement/ShiftPlanManagement")

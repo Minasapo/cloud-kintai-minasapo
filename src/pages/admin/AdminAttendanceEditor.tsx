@@ -1,4 +1,4 @@
-import AttendanceEditor from "@features/attendance/edit/AttendanceEditor";
+import AttendanceEditor from "@features/attendance/edit/ui/AttendanceEditor";
 import { Container } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 

@@ -1,3 +1,4 @@
+import { DEFAULT_CONFIG } from "@entities/app-config/model/useAppConfig";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -5,7 +6,6 @@ import {
 import dayjs from "dayjs";
 import { createContext } from "react";
 
-import { DEFAULT_CONFIG } from "@/hooks/useAppConfig/useAppConfig";
 import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
 
 const DEFAULT_THEME_TOKENS = getDesignTokens();

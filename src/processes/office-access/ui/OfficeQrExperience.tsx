@@ -1,9 +1,9 @@
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { OfficeQrPanel, useOfficeQr } from "@features/attendance/office-qr";
 import { useContext, useEffect, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { StaffRole } from "@/hooks/useStaffs/useStaffs";
 
 export function OfficeQrExperience() {
   const { isCognitoUserRole } = useContext(AuthContext);

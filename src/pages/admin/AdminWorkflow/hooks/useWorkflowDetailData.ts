@@ -3,7 +3,7 @@ import { GetWorkflowQuery } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useEffect, useState } from "react";
 
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export const useWorkflowDetailData = (id?: string) => {
   const [workflow, setWorkflow] = useState<NonNullable<

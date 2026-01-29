@@ -1,3 +1,6 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
+import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
   Box,
   Button,
@@ -31,15 +34,12 @@ import {
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
-import useAppConfig from "@/hooks/useAppConfig/useAppConfig";
-import { StaffType, useStaffs } from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { createLogger } from "@/lib/logger";
+import { designTokenVar } from "@/shared/designSystem";
+import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
-import { designTokenVar } from "@/shared/designSystem";
+} from "@/shared/lib/store/snackbarSlice";
 import { parseTimeToISO } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
@@ -141,9 +141,10 @@ export default function NewWorkflowPage() {
   const [overtimeDateError, setOvertimeDateError] = useState("");
   const [overtimeReason, setOvertimeReason] = useState("");
 
-  const { cognitoUser } = useContext(AuthContext);
-  const { staffs } = useStaffs();
-  const { create: createWorkflow } = useWorkflows();
+  const { cognitoUser, authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
+  const { create: createWorkflow } = useWorkflows({ isAuthenticated });
   const dispatch = useAppDispatchV2();
   const { getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
 

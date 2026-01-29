@@ -6,7 +6,7 @@ import {
   CLOCK_CORRECTION_LABEL,
   getWorkflowCategoryLabel,
   STATUS_LABELS,
-} from "@/lib/workflowLabels";
+} from "@/entities/workflow/lib/workflowLabels";
 
 const CATEGORY_LABELS_REVERSE = Object.entries(CATEGORY_LABELS).reduce(
   (acc, [key, value]) => {

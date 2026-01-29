@@ -1,3 +1,4 @@
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
   DailyReportCalendar,
   DailyReportFormChangeHandler,
@@ -16,6 +17,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material"; // 保存時刻の表示形式
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   createDailyReport,
   updateDailyReport,
@@ -41,9 +44,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 /**
@@ -117,7 +119,7 @@ const buildDefaultTitle = (date: string) => (date ? `${date}の日報` : "日報
 /** 空の日報フォームを作成 */
 const emptyForm = (
   initialDate?: string,
-  initialAuthor?: string
+  initialAuthor?: string,
 ): DailyReportForm => {
   const date = initialDate ?? formatDateInput(new Date());
   return {
@@ -130,7 +132,7 @@ const emptyForm = (
 
 /** リアクション配列を集計してタイプごとのカウントに変換 */
 const aggregateReactions = (
-  entries?: (DailyReportReaction | null)[] | null
+  entries?: (DailyReportReaction | null)[] | null,
 ): ReportReaction[] => {
   if (!entries?.length) return [];
   const counts = new Map<ReactionType, number>();
@@ -145,7 +147,7 @@ const aggregateReactions = (
 
 /** コメント配列を整形し、作成日時の降順でソート */
 const mapComments = (
-  entries?: (DailyReportComment | null)[] | null
+  entries?: (DailyReportComment | null)[] | null,
 ): AdminComment[] => {
   if (!entries?.length) return [];
   return entries
@@ -162,7 +164,7 @@ const mapComments = (
 /** GraphQLレスポンスの日報データを内部形式に変換 */
 const mapDailyReport = (
   record: DailyReportModel,
-  authorFallback: string
+  authorFallback: string,
 ): DailyReportItem => ({
   id: record.id,
   staffId: record.staffId,
@@ -193,10 +195,10 @@ export default function DailyReport() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [reports, setReports] = useState<DailyReportItem[]>([]);
   const [createForm, setCreateForm] = useState<DailyReportForm>(() =>
-    emptyForm()
+    emptyForm(),
   );
   const [calendarDate, setCalendarDate] = useState<Dayjs>(() =>
-    dayjs().startOf("day")
+    dayjs().startOf("day"),
   );
   const [isInitializedFromUrl, setIsInitializedFromUrl] = useState(false);
   const [editingReportId, setEditingReportId] = useState<string | null>(null);
@@ -242,19 +244,19 @@ export default function DailyReport() {
   const resolvedAuthorName = authorName || "スタッフ";
   const isCreateFormDirty = useMemo(
     () => JSON.stringify(createForm) !== JSON.stringify(createFormSavedState),
-    [createForm, createFormSavedState]
+    [createForm, createFormSavedState],
   );
   const isEditDraftDirty = useMemo(
     () =>
       editDraft &&
       JSON.stringify(editDraft) !== JSON.stringify(editDraftSavedState),
-    [editDraft, editDraftSavedState]
+    [editDraft, editDraftSavedState],
   );
   const canSubmit = Boolean(staffId && createForm.title.trim());
   const canEditSubmit = Boolean(editDraft && editDraft.title.trim());
   const selectedReport =
     selectedReportId && selectedReportId !== "create"
-      ? reports.find((report) => report.id === selectedReportId) ?? null
+      ? (reports.find((report) => report.id === selectedReportId) ?? null)
       : null;
   const showInitialLoading = isInitialViewPending;
   const isSelectedReportSubmitted =
@@ -282,7 +284,7 @@ export default function DailyReport() {
     setCalendarDate(targetDate);
     const dateKey = targetDate.format(DATE_FORMAT);
     setCreateForm((prev) =>
-      emptyForm(dateKey, prev.author || resolvedAuthorName)
+      emptyForm(dateKey, prev.author || resolvedAuthorName),
     );
 
     // URLパラメータがない、または無効な場合は当日をURLに設定
@@ -342,11 +344,11 @@ export default function DailyReport() {
         if (!mounted) return;
         const staffName = buildName(
           staff?.familyName ?? null,
-          staff?.givenName ?? null
+          staff?.givenName ?? null,
         );
         const fallback = buildName(
           currentUser.familyName ?? null,
-          currentUser.givenName ?? null
+          currentUser.givenName ?? null,
         );
         setAuthorName(staffName || fallback || "スタッフ");
         setStaffId(staff?.id ?? null);
@@ -357,7 +359,7 @@ export default function DailyReport() {
         if (!mounted) return;
         const fallback = buildName(
           currentUser.familyName ?? null,
-          currentUser.givenName ?? null
+          currentUser.givenName ?? null,
         );
         setAuthorName(fallback || "スタッフ");
         setStaffId(null);
@@ -376,10 +378,10 @@ export default function DailyReport() {
     setCreateForm((prev) =>
       prev.author === resolvedAuthorName
         ? prev
-        : { ...prev, author: resolvedAuthorName }
+        : { ...prev, author: resolvedAuthorName },
     );
     setReports((prev) =>
-      prev.map((report) => ({ ...report, author: resolvedAuthorName }))
+      prev.map((report) => ({ ...report, author: resolvedAuthorName })),
     );
   }, [authorName, resolvedAuthorName]);
 
@@ -412,13 +414,13 @@ export default function DailyReport() {
 
         if (response.errors?.length) {
           throw new Error(
-            response.errors.map((error) => error.message).join("\n")
+            response.errors.map((error) => error.message).join("\n"),
           );
         }
 
         const items =
           response.data?.dailyReportsByStaffId?.items?.filter(
-            (item): item is NonNullable<typeof item> => item !== null
+            (item): item is NonNullable<typeof item> => item !== null,
           ) ?? [];
 
         items.forEach((item) => {
@@ -431,7 +433,7 @@ export default function DailyReport() {
       setReports(sortReports(aggregated));
     } catch (error) {
       setRequestError(
-        error instanceof Error ? error.message : "日報の取得に失敗しました。"
+        error instanceof Error ? error.message : "日報の取得に失敗しました。",
       );
     } finally {
       setIsLoadingReports(false);
@@ -535,7 +537,7 @@ export default function DailyReport() {
 
   const handleCreateSubmit = async (
     status: EditableStatus,
-    showNotification = true
+    showNotification = true,
   ) => {
     if (!createForm.title.trim()) {
       setActionError("タイトルを入力してください。");
@@ -576,7 +578,7 @@ export default function DailyReport() {
 
         if (response.errors?.length) {
           throw new Error(
-            response.errors.map((error) => error.message).join("\n")
+            response.errors.map((error) => error.message).join("\n"),
           );
         }
 
@@ -590,7 +592,7 @@ export default function DailyReport() {
           sortReports([
             mapped,
             ...prev.filter((report) => report.id !== mapped.id),
-          ])
+          ]),
         );
 
         // 保存時刻を記録
@@ -634,7 +636,7 @@ export default function DailyReport() {
 
         if (response.errors?.length) {
           throw new Error(
-            response.errors.map((error) => error.message).join("\n")
+            response.errors.map((error) => error.message).join("\n"),
           );
         }
 
@@ -648,7 +650,7 @@ export default function DailyReport() {
           sortReports([
             mapped,
             ...prev.filter((report) => report.id !== mapped.id),
-          ])
+          ]),
         );
 
         // 作成されたレポートIDを保持（自動保存時のみ）
@@ -706,7 +708,7 @@ export default function DailyReport() {
 
   const handleSaveEdit = async (
     status: EditableStatus,
-    showNotification = true
+    showNotification = true,
   ) => {
     if (!editingReportId || !editDraft) return;
     if (!editDraft.title.trim()) {
@@ -739,7 +741,7 @@ export default function DailyReport() {
 
       if (response.errors?.length) {
         throw new Error(
-          response.errors.map((error) => error.message).join("\n")
+          response.errors.map((error) => error.message).join("\n"),
         );
       }
 
@@ -751,8 +753,8 @@ export default function DailyReport() {
       const mapped = mapDailyReport(updated, resolvedAuthorName);
       setReports((prev) =>
         sortReports(
-          prev.map((report) => (report.id === mapped.id ? mapped : report))
-        )
+          prev.map((report) => (report.id === mapped.id ? mapped : report)),
+        ),
       );
 
       // 保存時刻を記録
@@ -851,395 +853,403 @@ export default function DailyReport() {
   ]);
 
   return (
-    <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
-      <PageSection layoutVariant="dashboard">
-        <Stack spacing={3}>
-          <Box>
-            <Typography variant="h1">日報</Typography>
-          </Box>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
+      <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
+        <PageSection layoutVariant="dashboard">
+          <Stack spacing={3}>
+            <Box>
+              <Typography variant="h1">日報</Typography>
+            </Box>
 
-          {requestError && (
-            <Alert severity="error" onClose={() => setRequestError(null)}>
-              {requestError}
-            </Alert>
-          )}
+            {requestError && (
+              <Alert severity="error" onClose={() => setRequestError(null)}>
+                {requestError}
+              </Alert>
+            )}
 
-          <Grid container spacing={3} alignItems="flex-start">
-            <Grid item xs={12} md={3}>
-              <Box sx={dashboardInnerSurfaceSx}>
-                <DailyReportCalendar
-                  value={calendarDate}
-                  onChange={handleCalendarChange}
-                  reportedDateSet={reportedDateSet}
-                  isLoadingReports={isLoadingReports}
-                  hasReports={reports.length > 0}
-                />
-              </Box>
-            </Grid>
+            <Grid container spacing={3} alignItems="flex-start">
+              <Grid item xs={12} md={3}>
+                <Box sx={dashboardInnerSurfaceSx}>
+                  <DailyReportCalendar
+                    value={calendarDate}
+                    onChange={handleCalendarChange}
+                    reportedDateSet={reportedDateSet}
+                    isLoadingReports={isLoadingReports}
+                    hasReports={reports.length > 0}
+                  />
+                </Box>
+              </Grid>
 
-            <Grid item xs={12} md={9}>
-              <Box sx={dashboardInnerSurfaceSx}>
-                <Stack spacing={3}>
-                  {actionError && (
-                    <Alert
-                      severity="error"
-                      onClose={() => setActionError(null)}
-                    >
-                      {actionError}
-                    </Alert>
-                  )}
-                  {showInitialLoading ? (
-                    <Stack spacing={2}>
-                      <Skeleton variant="text" width="40%" height={32} />
-                      <Skeleton variant="text" width="60%" height={48} />
-                      <Skeleton variant="rectangular" height={160} />
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={2}
+              <Grid item xs={12} md={9}>
+                <Box sx={dashboardInnerSurfaceSx}>
+                  <Stack spacing={3}>
+                    {actionError && (
+                      <Alert
+                        severity="error"
+                        onClose={() => setActionError(null)}
                       >
-                        <Skeleton variant="rounded" width={120} height={36} />
-                        <Skeleton variant="rounded" width={140} height={36} />
-                        <Skeleton variant="rounded" width={140} height={36} />
-                      </Stack>
-                    </Stack>
-                  ) : isCreateMode ? (
-                    <Stack spacing={2}>
-                      <Box>
-                        <Typography variant="subtitle2" color="text.secondary">
-                          新しい日報を登録
-                        </Typography>
-                        <Typography variant="h5">日報作成フォーム</Typography>
-                      </Box>
-                      <Alert severity="warning" sx={{ mt: 2 }}>
-                        この日報はまだ提出されていません。下書き保存後、必ず「提出する」ボタンをクリックしてください。
+                        {actionError}
                       </Alert>
-                      <Divider />
-                      <Box
-                        component="form"
-                        onSubmit={(event) => event.preventDefault()}
-                      >
-                        <Stack spacing={3}>
-                          <DailyReportFormFields
-                            form={createForm}
-                            onChange={handleCreateChange}
-                            resolvedAuthorName={resolvedAuthorName}
-                          />
-                          {createFormLastSavedAt && (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
+                    )}
+                    {showInitialLoading ? (
+                      <Stack spacing={2}>
+                        <Skeleton variant="text" width="40%" height={32} />
+                        <Skeleton variant="text" width="60%" height={48} />
+                        <Skeleton variant="rectangular" height={160} />
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          spacing={2}
+                        >
+                          <Skeleton variant="rounded" width={120} height={36} />
+                          <Skeleton variant="rounded" width={140} height={36} />
+                          <Skeleton variant="rounded" width={140} height={36} />
+                        </Stack>
+                      </Stack>
+                    ) : isCreateMode ? (
+                      <Stack spacing={2}>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            color="text.secondary"
+                          >
+                            新しい日報を登録
+                          </Typography>
+                          <Typography variant="h5">日報作成フォーム</Typography>
+                        </Box>
+                        <Alert severity="warning" sx={{ mt: 2 }}>
+                          この日報はまだ提出されていません。下書き保存後、必ず「提出する」ボタンをクリックしてください。
+                        </Alert>
+                        <Divider />
+                        <Box
+                          component="form"
+                          onSubmit={(event) => event.preventDefault()}
+                        >
+                          <Stack spacing={3}>
+                            <DailyReportFormFields
+                              form={createForm}
+                              onChange={handleCreateChange}
+                              resolvedAuthorName={resolvedAuthorName}
+                            />
+                            {createFormLastSavedAt && (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                最終保存: {createFormLastSavedAt}
+                              </Typography>
+                            )}
+                            <Stack
+                              direction={{ xs: "column", sm: "row" }}
+                              justifyContent="flex-end"
+                              spacing={2}
                             >
-                              最終保存: {createFormLastSavedAt}
+                              <Button
+                                type="button"
+                                variant="text"
+                                onClick={() => {
+                                  setActionError(null);
+                                  const newForm = emptyForm(
+                                    undefined,
+                                    resolvedAuthorName,
+                                  );
+                                  setCreateForm(() => newForm);
+                                  setCreateFormSavedState(newForm);
+                                  setCreateFormLastSavedAt(null);
+                                }}
+                              >
+                                クリア
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outlined"
+                                disabled={!canSubmit || isSubmitting}
+                                onClick={() => {
+                                  void handleCreateSubmit(
+                                    DailyReportStatus.DRAFT,
+                                    true,
+                                  );
+                                }}
+                              >
+                                下書き保存
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="contained"
+                                disabled={!canSubmit || isSubmitting}
+                                onClick={() => {
+                                  void handleCreateSubmit(
+                                    DailyReportStatus.SUBMITTED,
+                                    true,
+                                  );
+                                }}
+                              >
+                                提出する
+                              </Button>
+                            </Stack>
+                          </Stack>
+                        </Box>
+                      </Stack>
+                    ) : selectedReportId ? (
+                      (() => {
+                        const report = selectedReport;
+                        if (!report) {
+                          return (
+                            <Typography color="text.secondary">
+                              選択中の日報が見つかりません。
                             </Typography>
-                          )}
+                          );
+                        }
+                        const statusMeta = STATUS_META[report.status];
+                        const isEditing =
+                          editingReportId === report.id && Boolean(editDraft);
+                        const hasReactions = report.reactions.length > 0;
+                        const hasComments = report.comments.length > 0;
+
+                        return (
+                          <Stack spacing={2}>
+                            <Stack
+                              direction={{ xs: "column", md: "row" }}
+                              justifyContent="space-between"
+                              spacing={2}
+                            >
+                              <Box>
+                                <Typography
+                                  variant="subtitle2"
+                                  color="text.secondary"
+                                >
+                                  {formatDateSlash(report.date) || report.date}{" "}
+                                  | {report.author}
+                                </Typography>
+                                <Typography variant="h5">
+                                  {report.title}
+                                </Typography>
+                                {report.updatedAt && (
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    最終更新:{" "}
+                                    {formatDateTimeReadable(report.updatedAt) ||
+                                      "-"}
+                                  </Typography>
+                                )}
+                              </Box>
+                              <Chip
+                                label={statusMeta.label}
+                                color={statusMeta.color}
+                                sx={{
+                                  alignSelf: { xs: "flex-start", md: "center" },
+                                }}
+                              />
+                            </Stack>
+
+                            <Divider />
+
+                            {report.status === DailyReportStatus.DRAFT && (
+                              <Alert severity="warning">
+                                この日報はまだ提出されていません。内容を確認して「提出する」ボタンをクリックしてください。
+                              </Alert>
+                            )}
+
+                            {isEditing && editDraft ? (
+                              <Stack spacing={2}>
+                                <DailyReportFormFields
+                                  form={editDraft}
+                                  onChange={handleEditChange}
+                                  resolvedAuthorName={resolvedAuthorName}
+                                />
+                                {editDraftLastSavedAt && (
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                  >
+                                    最終保存: {editDraftLastSavedAt}
+                                  </Typography>
+                                )}
+                              </Stack>
+                            ) : (
+                              <Typography
+                                component="pre"
+                                sx={{
+                                  whiteSpace: "pre-wrap",
+                                  fontFamily: "inherit",
+                                }}
+                              >
+                                {report.content ||
+                                  "内容はまだ入力されていません。"}
+                              </Typography>
+                            )}
+
+                            {hasReactions && (
+                              <>
+                                <Divider />
+                                <Box>
+                                  <Typography
+                                    variant="subtitle2"
+                                    sx={{ mb: 1 }}
+                                  >
+                                    管理者からのリアクション
+                                  </Typography>
+                                  <Stack
+                                    direction="row"
+                                    spacing={1}
+                                    flexWrap="wrap"
+                                    sx={{ mb: 2 }}
+                                  >
+                                    {report.reactions.map((reaction) => {
+                                      const meta = REACTION_META[reaction.type];
+                                      if (!meta) return null;
+                                      return (
+                                        <Chip
+                                          key={reaction.type}
+                                          variant="outlined"
+                                          size="small"
+                                          label={`${meta.emoji} ${meta.label} ×${reaction.count}`}
+                                        />
+                                      );
+                                    })}
+                                  </Stack>
+                                </Box>
+                              </>
+                            )}
+
+                            {hasComments && (
+                              <>
+                                <Divider />
+                                <Box>
+                                  <Typography variant="subtitle2" gutterBottom>
+                                    管理者からのコメント
+                                  </Typography>
+                                  <Stack spacing={1}>
+                                    {report.comments.map((comment) => (
+                                      <Paper
+                                        key={comment.id}
+                                        variant="outlined"
+                                        sx={{ p: 1.5 }}
+                                      >
+                                        <Stack
+                                          direction="row"
+                                          justifyContent="space-between"
+                                        >
+                                          <Typography
+                                            variant="body2"
+                                            fontWeight={600}
+                                          >
+                                            {comment.author}
+                                          </Typography>
+                                          <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                          >
+                                            {formatDateTimeReadable(
+                                              comment.createdAt,
+                                            ) || comment.createdAt}
+                                          </Typography>
+                                        </Stack>
+                                        <Typography sx={{ mt: 0.5 }}>
+                                          {comment.body}
+                                        </Typography>
+                                      </Paper>
+                                    ))}
+                                  </Stack>
+                                </Box>
+                              </>
+                            )}
+                          </Stack>
+                        );
+                      })()
+                    ) : (
+                      <Stack spacing={3} alignItems="center" sx={{ py: 4 }}>
+                        <Typography color="text.secondary" textAlign="center">
+                          {calendarDate.format("YYYY年MM月DD日")}
+                          の日報はまだ登録されていません。
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          onClick={() => {
+                            setSelectedReportId("create");
+                            setCreateForm(
+                              emptyForm(
+                                calendarDate.format("YYYY-MM-DD"),
+                                resolvedAuthorName,
+                              ),
+                            );
+                            // 新規作成ボタンを押したときは作成済みレポートIDをクリア
+                            createdReportIdRef.current = null;
+                          }}
+                        >
+                          この日の日報を作成する
+                        </Button>
+                      </Stack>
+                    )}
+
+                    {!isCreateMode && selectedReportId && (
+                      <Stack spacing={2}>
+                        <Divider />
+                        {editingReportId && editDraft ? (
                           <Stack
                             direction={{ xs: "column", sm: "row" }}
-                            justifyContent="flex-end"
-                            spacing={2}
+                            spacing={1}
+                            alignItems={{ xs: "stretch", sm: "center" }}
                           >
                             <Button
-                              type="button"
-                              variant="text"
-                              onClick={() => {
-                                setActionError(null);
-                                const newForm = emptyForm(
-                                  undefined,
-                                  resolvedAuthorName
-                                );
-                                setCreateForm(() => newForm);
-                                setCreateFormSavedState(newForm);
-                                setCreateFormLastSavedAt(null);
-                              }}
-                            >
-                              クリア
-                            </Button>
-                            <Button
-                              type="button"
                               variant="outlined"
-                              disabled={!canSubmit || isSubmitting}
+                              disabled={!canEditSubmit || isUpdating}
                               onClick={() => {
-                                void handleCreateSubmit(
+                                void handleSaveEdit(
                                   DailyReportStatus.DRAFT,
-                                  true
+                                  true,
                                 );
                               }}
                             >
                               下書き保存
                             </Button>
                             <Button
-                              type="button"
                               variant="contained"
-                              disabled={!canSubmit || isSubmitting}
+                              disabled={
+                                !canEditSubmit ||
+                                isUpdating ||
+                                isSelectedReportSubmitted
+                              }
                               onClick={() => {
-                                void handleCreateSubmit(
+                                void handleSaveEdit(
                                   DailyReportStatus.SUBMITTED,
-                                  true
+                                  true,
                                 );
                               }}
                             >
                               提出する
                             </Button>
+                            <Button variant="text" onClick={handleCancelEdit}>
+                              キャンセル
+                            </Button>
                           </Stack>
-                        </Stack>
-                      </Box>
-                    </Stack>
-                  ) : selectedReportId ? (
-                    (() => {
-                      const report = selectedReport;
-                      if (!report) {
-                        return (
-                          <Typography color="text.secondary">
-                            選択中の日報が見つかりません。
-                          </Typography>
-                        );
-                      }
-                      const statusMeta = STATUS_META[report.status];
-                      const isEditing =
-                        editingReportId === report.id && Boolean(editDraft);
-                      const hasReactions = report.reactions.length > 0;
-                      const hasComments = report.comments.length > 0;
-
-                      return (
-                        <Stack spacing={2}>
-                          <Stack
-                            direction={{ xs: "column", md: "row" }}
-                            justifyContent="space-between"
-                            spacing={2}
+                        ) : (
+                          <Box
+                            sx={{ display: "flex", justifyContent: "flex-end" }}
                           >
-                            <Box>
-                              <Typography
-                                variant="subtitle2"
-                                color="text.secondary"
-                              >
-                                {formatDateSlash(report.date) || report.date} |{" "}
-                                {report.author}
-                              </Typography>
-                              <Typography variant="h5">
-                                {report.title}
-                              </Typography>
-                              {report.updatedAt && (
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  最終更新:{" "}
-                                  {formatDateTimeReadable(report.updatedAt) ||
-                                    "-"}
-                                </Typography>
-                              )}
-                            </Box>
-                            <Chip
-                              label={statusMeta.label}
-                              color={statusMeta.color}
-                              sx={{
-                                alignSelf: { xs: "flex-start", md: "center" },
-                              }}
-                            />
-                          </Stack>
-
-                          <Divider />
-
-                          {report.status === DailyReportStatus.DRAFT && (
-                            <Alert severity="warning">
-                              この日報はまだ提出されていません。内容を確認して「提出する」ボタンをクリックしてください。
-                            </Alert>
-                          )}
-
-                          {isEditing && editDraft ? (
-                            <Stack spacing={2}>
-                              <DailyReportFormFields
-                                form={editDraft}
-                                onChange={handleEditChange}
-                                resolvedAuthorName={resolvedAuthorName}
-                              />
-                              {editDraftLastSavedAt && (
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                >
-                                  最終保存: {editDraftLastSavedAt}
-                                </Typography>
-                              )}
-                            </Stack>
-                          ) : (
-                            <Typography
-                              component="pre"
-                              sx={{
-                                whiteSpace: "pre-wrap",
-                                fontFamily: "inherit",
+                            <Button
+                              variant="outlined"
+                              disabled={isUpdating}
+                              onClick={() => {
+                                if (selectedReport) {
+                                  handleStartEdit(selectedReport);
+                                }
                               }}
                             >
-                              {report.content ||
-                                "内容はまだ入力されていません。"}
-                            </Typography>
-                          )}
-
-                          {hasReactions && (
-                            <>
-                              <Divider />
-                              <Box>
-                                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                                  管理者からのリアクション
-                                </Typography>
-                                <Stack
-                                  direction="row"
-                                  spacing={1}
-                                  flexWrap="wrap"
-                                  sx={{ mb: 2 }}
-                                >
-                                  {report.reactions.map((reaction) => {
-                                    const meta = REACTION_META[reaction.type];
-                                    if (!meta) return null;
-                                    return (
-                                      <Chip
-                                        key={reaction.type}
-                                        variant="outlined"
-                                        size="small"
-                                        label={`${meta.emoji} ${meta.label} ×${reaction.count}`}
-                                      />
-                                    );
-                                  })}
-                                </Stack>
-                              </Box>
-                            </>
-                          )}
-
-                          {hasComments && (
-                            <>
-                              <Divider />
-                              <Box>
-                                <Typography variant="subtitle2" gutterBottom>
-                                  管理者からのコメント
-                                </Typography>
-                                <Stack spacing={1}>
-                                  {report.comments.map((comment) => (
-                                    <Paper
-                                      key={comment.id}
-                                      variant="outlined"
-                                      sx={{ p: 1.5 }}
-                                    >
-                                      <Stack
-                                        direction="row"
-                                        justifyContent="space-between"
-                                      >
-                                        <Typography
-                                          variant="body2"
-                                          fontWeight={600}
-                                        >
-                                          {comment.author}
-                                        </Typography>
-                                        <Typography
-                                          variant="caption"
-                                          color="text.secondary"
-                                        >
-                                          {formatDateTimeReadable(
-                                            comment.createdAt
-                                          ) || comment.createdAt}
-                                        </Typography>
-                                      </Stack>
-                                      <Typography sx={{ mt: 0.5 }}>
-                                        {comment.body}
-                                      </Typography>
-                                    </Paper>
-                                  ))}
-                                </Stack>
-                              </Box>
-                            </>
-                          )}
-                        </Stack>
-                      );
-                    })()
-                  ) : (
-                    <Stack spacing={3} alignItems="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary" textAlign="center">
-                        {calendarDate.format("YYYY年MM月DD日")}
-                        の日報はまだ登録されていません。
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        onClick={() => {
-                          setSelectedReportId("create");
-                          setCreateForm(
-                            emptyForm(
-                              calendarDate.format("YYYY-MM-DD"),
-                              resolvedAuthorName
-                            )
-                          );
-                          // 新規作成ボタンを押したときは作成済みレポートIDをクリア
-                          createdReportIdRef.current = null;
-                        }}
-                      >
-                        この日の日報を作成する
-                      </Button>
-                    </Stack>
-                  )}
-
-                  {!isCreateMode && selectedReportId && (
-                    <Stack spacing={2}>
-                      <Divider />
-                      {editingReportId && editDraft ? (
-                        <Stack
-                          direction={{ xs: "column", sm: "row" }}
-                          spacing={1}
-                          alignItems={{ xs: "stretch", sm: "center" }}
-                        >
-                          <Button
-                            variant="outlined"
-                            disabled={!canEditSubmit || isUpdating}
-                            onClick={() => {
-                              void handleSaveEdit(
-                                DailyReportStatus.DRAFT,
-                                true
-                              );
-                            }}
-                          >
-                            下書き保存
-                          </Button>
-                          <Button
-                            variant="contained"
-                            disabled={
-                              !canEditSubmit ||
-                              isUpdating ||
-                              isSelectedReportSubmitted
-                            }
-                            onClick={() => {
-                              void handleSaveEdit(
-                                DailyReportStatus.SUBMITTED,
-                                true
-                              );
-                            }}
-                          >
-                            提出する
-                          </Button>
-                          <Button variant="text" onClick={handleCancelEdit}>
-                            キャンセル
-                          </Button>
-                        </Stack>
-                      ) : (
-                        <Box
-                          sx={{ display: "flex", justifyContent: "flex-end" }}
-                        >
-                          <Button
-                            variant="outlined"
-                            disabled={isUpdating}
-                            onClick={() => {
-                              if (selectedReport) {
-                                handleStartEdit(selectedReport);
-                              }
-                            }}
-                          >
-                            編集
-                          </Button>
-                        </Box>
-                      )}
-                    </Stack>
-                  )}
-                </Stack>
-              </Box>
+                              編集
+                            </Button>
+                          </Box>
+                        )}
+                      </Stack>
+                    )}
+                  </Stack>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </Stack>
-      </PageSection>
-    </Page>
+          </Stack>
+        </PageSection>
+      </Page>
+    </LocalizationProvider>
   );
 }

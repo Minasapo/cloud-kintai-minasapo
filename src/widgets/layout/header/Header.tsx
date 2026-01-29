@@ -1,10 +1,10 @@
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import Logo from "@shared/ui/logo/Logo";
 import { useContext, useMemo } from "react";
 
-import { resolveThemeColor } from "@/constants/theme";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { StaffRole } from "@/hooks/useStaffs/useStaffs";
+import { resolveThemeColor } from "@/shared/config/theme";
 import { designTokenVar } from "@/shared/designSystem";
 import HeaderBar from "@/shared/ui/header/HeaderBar";
 

@@ -1,8 +1,7 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { fetchAuthSession } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
-
-import { StaffRole } from "./useStaffs/useStaffs";
 
 export interface CognitoUser {
   id: string;

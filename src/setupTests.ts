@@ -27,13 +27,13 @@ Object.defineProperty(globalThis, "import", {
 });
 
 // Mock AWS Amplify to avoid configuration warnings in tests
-jest.mock("./lib/amplify/graphqlClient", () => ({
+jest.mock("@/shared/api/amplify/graphqlClient", () => ({
   graphqlClient: {
     graphql: jest.fn(),
   },
 }));
 
-jest.mock("./lib/amplify/adminQueriesClient", () => ({
+jest.mock("@/shared/api/amplify/adminQueriesClient", () => ({
   adminQueriesClient: {
     graphql: jest.fn(),
   },

@@ -22,7 +22,7 @@ import { E14001, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
+} from "@/shared/lib/store/snackbarSlice";
 
 type ShiftGroupFormValue = {
   id: string;
@@ -34,7 +34,7 @@ type ShiftGroupFormValue = {
 };
 
 const createShiftGroup = (
-  initial?: Partial<ShiftGroupFormValue>
+  initial?: Partial<ShiftGroupFormValue>,
 ): ShiftGroupFormValue => ({
   id: `sg-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`,
   label: "",
@@ -73,7 +73,7 @@ type GroupValidationResult = {
 };
 
 const getGroupValidation = (
-  group: ShiftGroupFormValue
+  group: ShiftGroupFormValue,
 ): GroupValidationResult => {
   const labelError = group.label.trim() === "";
   const minInputError = !isNonNegativeIntegerString(group.min);
@@ -144,21 +144,21 @@ export default function AdminShiftSettings() {
             typeof group.fixed === "number" && !Number.isNaN(group.fixed)
               ? String(group.fixed)
               : "",
-        })
-      )
+        }),
+      ),
     );
     setConfigId(getConfigId());
   }, [getConfigId, getShiftGroups]);
 
   const hasValidationError = useMemo(
     () => shiftGroups.some((group) => getGroupValidation(group).hasError),
-    [shiftGroups]
+    [shiftGroups],
   );
 
   const handleGroupChange = (
     id: string,
     field: keyof Omit<ShiftGroupFormValue, "id">,
-    value: string
+    value: string,
   ) => {
     setShiftGroups((prev) =>
       prev.map((group) =>
@@ -167,8 +167,8 @@ export default function AdminShiftSettings() {
               ...group,
               [field]: value,
             }
-          : group
-      )
+          : group,
+      ),
     );
   };
 
@@ -243,24 +243,24 @@ export default function AdminShiftSettings() {
                 const minHelperText = validation.minInputError
                   ? "0以上の整数で入力してください。"
                   : validation.fixedWithRangeConflict
-                  ? "固定人数と同時に設定できません。"
-                  : "任意";
+                    ? "固定人数と同時に設定できません。"
+                    : "任意";
                 const maxHelperText = validation.maxInputError
                   ? "0以上の整数で入力してください。"
                   : validation.rangeError
-                  ? "最大人数は最小人数以上にしてください。"
-                  : validation.fixedWithRangeConflict
-                  ? "固定人数と同時に設定できません。"
-                  : "任意";
+                    ? "最大人数は最小人数以上にしてください。"
+                    : validation.fixedWithRangeConflict
+                      ? "固定人数と同時に設定できません。"
+                      : "任意";
                 const fixedHelperText = validation.fixedInputError
                   ? "0以上の整数で入力してください。"
                   : validation.fixedBelowMin
-                  ? "最小人数以上を入力してください。"
-                  : validation.fixedAboveMax
-                  ? "最大人数以下を入力してください。"
-                  : validation.fixedWithRangeConflict
-                  ? "固定人数を使う場合は最小/最大を空欄にしてください。"
-                  : "任意";
+                    ? "最小人数以上を入力してください。"
+                    : validation.fixedAboveMax
+                      ? "最大人数以下を入力してください。"
+                      : validation.fixedWithRangeConflict
+                        ? "固定人数を使う場合は最小/最大を空欄にしてください。"
+                        : "任意";
                 return (
                   <Paper
                     key={group.id}
@@ -282,7 +282,7 @@ export default function AdminShiftSettings() {
                             handleGroupChange(
                               group.id,
                               "label",
-                              event.target.value
+                              event.target.value,
                             )
                           }
                           error={labelError}
@@ -307,7 +307,7 @@ export default function AdminShiftSettings() {
                           handleGroupChange(
                             group.id,
                             "description",
-                            event.target.value
+                            event.target.value,
                           )
                         }
                         inputProps={{ maxLength: 48 }}
@@ -327,7 +327,7 @@ export default function AdminShiftSettings() {
                             handleGroupChange(
                               group.id,
                               "min",
-                              event.target.value
+                              event.target.value,
                             )
                           }
                           inputProps={{ min: 0 }}
@@ -347,7 +347,7 @@ export default function AdminShiftSettings() {
                             handleGroupChange(
                               group.id,
                               "max",
-                              event.target.value
+                              event.target.value,
                             )
                           }
                           inputProps={{ min: 0 }}
@@ -368,7 +368,7 @@ export default function AdminShiftSettings() {
                             handleGroupChange(
                               group.id,
                               "fixed",
-                              event.target.value
+                              event.target.value,
                             )
                           }
                           inputProps={{ min: 0 }}

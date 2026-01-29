@@ -47,7 +47,7 @@
     "vite-plugin-checker": "^0.12.0",
     "vite-tsconfig-paths": "^5.1.4",
     "web-vitals": "^3.5.2",
-    "zod": "^3.25.76"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
@@ -64,7 +64,7 @@
     "@testing-library/dom": "^10.4.1",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.49.0",
-    "@typescript-eslint/parser": "^8.49.0",
+    "@typescript-eslint/parser": "^8.53.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-af1b7da-20250417",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-boundaries": "^5.3.1",
@@ -84,6 +84,7 @@
     "storybook:build": "storybook build",
     "lint": "eslint ./src/ --ext .ts,.tsx",
     "eslint": "npx eslint ./src/",
+    "typecheck": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "test:unit": "jest --passWithNoTests",
     "test:watch": "jest --watch",
