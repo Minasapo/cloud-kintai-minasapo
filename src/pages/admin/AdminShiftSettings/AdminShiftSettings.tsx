@@ -1,5 +1,5 @@
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { zodResolver } from "@hookform/resolvers/zod";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { Alert, Button, Paper, Stack, Typography } from "@mui/material";
 import {
   CreateAppConfigInput,
@@ -23,9 +23,9 @@ import {
   SHIFT_GROUP_UI_TEXTS,
   ShiftGroupRow,
 } from "./";
-import { shiftGroupFormSchema } from "./shiftGroupSchema";
-import type { ShiftGroupFormState } from "./shiftGroupSchema";
 import { toShiftGroupFormValue } from "./shiftGroupFactory";
+import type { ShiftGroupFormState } from "./shiftGroupSchema";
+import { shiftGroupFormSchema } from "./shiftGroupSchema";
 
 export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
