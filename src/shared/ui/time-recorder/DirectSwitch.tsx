@@ -1,6 +1,6 @@
 import { styled, Switch } from "@mui/material";
 
-import { MARGINS } from "@/constants/uiDimensions";
+import { MARGINS } from "@/shared/config/uiDimensions";
 
 const DirectSwitch = styled(Switch)(({ theme }) => ({
   padding: MARGINS.PADDING_STANDARD,

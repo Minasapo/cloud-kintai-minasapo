@@ -1,7 +1,9 @@
 import type { LoaderFunctionArgs } from "react-router-dom";
 
-import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
-import { resolveWorkflowLoaderData } from "@/router/loaders/workflowDetailLoader";
+import {
+  resolveWorkflowLoaderData,
+  type WorkflowDetailLoaderData,
+} from "@/entities/workflow/model/loader";
 
 export type WorkflowEditLoaderData = WorkflowDetailLoaderData;
 

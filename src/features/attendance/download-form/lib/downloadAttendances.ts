@@ -1,0 +1,52 @@
+import { listAttendances } from "@shared/api/graphql/documents/queries";
+import {
+  Attendance,
+  ListAttendancesQuery,
+  ModelAttendanceFilterInput,
+} from "@shared/api/graphql/types";
+import { GraphQLResult } from "aws-amplify/api";
+
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+
+export default async function downloadAttendances(
+  $orCondition: ModelAttendanceFilterInput[]
+) {
+  const attendances: Attendance[] = [];
+  let nextToken: string | null = null;
+  const isLooping = true;
+  while (isLooping) {
+    const response = (await graphqlClient.graphql({
+      query: listAttendances,
+      variables: {
+        filter: {
+          or: $orCondition,
+        },
+        nextToken,
+      },
+      authMode: "userPool",
+    })) as GraphQLResult<ListAttendancesQuery>;
+
+    if (response.errors) {
+      throw new Error(response.errors[0].message);
+    }
+
+    if (!response.data?.listAttendances) {
+      throw new Error("Failed to fetch attendance");
+    }
+
+    attendances.push(
+      ...response.data.listAttendances.items.filter(
+        (item): item is NonNullable<typeof item> => item !== null
+      )
+    );
+
+    if (response.data.listAttendances.nextToken) {
+      nextToken = response.data.listAttendances.nextToken;
+      continue;
+    }
+
+    break;
+  }
+
+  return attendances;
+}

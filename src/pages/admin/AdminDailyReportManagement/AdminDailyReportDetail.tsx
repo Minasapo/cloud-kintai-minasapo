@@ -1,3 +1,5 @@
+import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { DailyReportCalendar } from "@features/attendance/daily-report";
 import {
   Alert,
@@ -27,7 +29,7 @@ import type {
 import { ModelSortDirection } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   useLocation,
   useNavigate,
@@ -35,11 +37,10 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
+import { AuthContext } from "@/context/AuthContext";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import fetchStaff from "@/hooks/useStaff/fetchStaff";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { formatDateSlash, formatDateTimeReadable } from "@/lib/date";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
 import { dashboardInnerSurfaceSx } from "@/shared/ui/layout";
 
 import {
@@ -80,12 +81,14 @@ const sortReports = (items: AdminDailyReport[]) =>
   });
 
 export default function AdminDailyReportDetail() {
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const state = location.state as LocationState | null;
   const stateReportId = state?.report?.id ?? null;
-  const { staffs, loading: isStaffLoading } = useStaffs();
+  const { staffs, loading: isStaffLoading } = useStaffs({ isAuthenticated });
   const { cognitoUser } = useCognitoUser();
   const [, setSearchParams] = useSearchParams();
 

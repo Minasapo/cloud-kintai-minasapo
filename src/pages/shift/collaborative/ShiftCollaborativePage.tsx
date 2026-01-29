@@ -23,7 +23,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
@@ -53,9 +53,6 @@ const shiftStateConfig: Record<
   empty: { label: "-", color: "text.disabled", text: "未入力" },
 };
 
-/**
- * シフトセルコンポーネント
- */
 interface ShiftCellProps {
   state: ShiftState;
   isLocked: boolean;
@@ -106,15 +103,15 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
         bgcolor: isEditing
           ? alpha("#2196f3", 0.1)
           : isPending
-          ? alpha("#ff9800", 0.1)
-          : isSelected
-          ? alpha("#9c27b0", 0.15)
-          : "background.paper",
+            ? alpha("#ff9800", 0.1)
+            : isSelected
+              ? alpha("#9c27b0", 0.15)
+              : "background.paper",
         border: isEditing
           ? "2px solid #2196f3"
           : isFocused
-          ? "2px solid #9c27b0"
-          : undefined,
+            ? "2px solid #9c27b0"
+            : undefined,
         "&:hover": isLocked
           ? {}
           : {
@@ -187,6 +184,7 @@ const ShiftCell: React.FC<ShiftCellProps> = ({
  * メインコンポーネント（内部実装）
  */
 const ShiftCollaborativePageInner: React.FC = () => {
+  const theme = useTheme();
   const {
     state,
     updateShift,
@@ -201,22 +199,52 @@ const ShiftCollaborativePageInner: React.FC = () => {
   const [currentMonth] = useState(dayjs());
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
-    [currentMonth]
+    [currentMonth],
   );
   const daysInMonth = monthStart.daysInMonth();
 
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
-        monthStart.add(i, "day")
+        monthStart.add(i, "day"),
       ),
-    [monthStart, daysInMonth]
+    [monthStart, daysInMonth],
+  );
+
+  const eventCalendar = useMemo(
+    () => [
+      {
+        label: "研修",
+        start: monthStart.date(5),
+        end: monthStart.date(5),
+        color: theme.palette.info.main,
+      },
+      {
+        label: "企画展 開始",
+        start: monthStart.date(12),
+        end: monthStart.date(12),
+        color: theme.palette.primary.main,
+      },
+      {
+        label: "企画展 終了",
+        start: monthStart.date(18),
+        end: monthStart.date(18),
+        color: theme.palette.secondary.main,
+      },
+      {
+        label: "館内点検",
+        start: monthStart.date(26),
+        end: monthStart.date(26),
+        color: theme.palette.warning.main,
+      },
+    ],
+    [monthStart, theme],
   );
 
   // スタッフリストを取得（shiftDataMapから）
   const staffIds = useMemo(
     () => Array.from(state.shiftDataMap.keys()),
-    [state.shiftDataMap]
+    [state.shiftDataMap],
   );
 
   // 日付のキーリスト（DD形式）
@@ -256,21 +284,34 @@ const ShiftCollaborativePageInner: React.FC = () => {
     (staffId: string, date: string): ShiftState | undefined => {
       return state.shiftDataMap.get(staffId)?.get(date)?.state;
     },
-    [state.shiftDataMap]
+    [state.shiftDataMap],
+  );
+
+  const getEventsForDay = useCallback(
+    (day: dayjs.Dayjs) =>
+      eventCalendar.filter((event) => {
+        const end = event.end ?? event.start;
+        return (
+          day.isSame(event.start, "day") ||
+          day.isSame(end, "day") ||
+          (day.isAfter(event.start, "day") && day.isBefore(end, "day"))
+        );
+      }),
+    [eventCalendar],
   );
 
   const getCellData = useCallback(
     (staffId: string, date: string) => {
       return state.shiftDataMap.get(staffId)?.get(date);
     },
-    [state.shiftDataMap]
+    [state.shiftDataMap],
   );
 
   const isCellLocked = useCallback(
     (staffId: string, date: string) => {
       return getCellData(staffId, date)?.isLocked ?? false;
     },
-    [getCellData]
+    [getCellData],
   );
 
   // クリップボード管理
@@ -304,7 +345,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
       updateUserActivity();
       void updateShift({ staffId, date, newState });
     },
-    [isCellBeingEdited, updateUserActivity, updateShift, isCellLocked]
+    [isCellBeingEdited, updateUserActivity, updateShift, isCellLocked],
   );
 
   const changeCellLock = useCallback(
@@ -316,7 +357,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
       updateUserActivity();
       void updateShift({ staffId, date, isLocked: locked });
     },
-    [isCellBeingEdited, updateUserActivity, updateShift]
+    [isCellBeingEdited, updateUserActivity, updateShift],
   );
 
   /**
@@ -334,7 +375,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
         changeCellState(focusedCell.staffId, focusedCell.date, newState);
       }
     },
-    [focusedCell, selectedCells, selectionCount, changeCellState]
+    [focusedCell, selectedCells, selectionCount, changeCellState],
   );
 
   const applyLockState = useCallback(
@@ -347,8 +388,8 @@ const ShiftCollaborativePageInner: React.FC = () => {
         selectionCount > 0
           ? Array.from(selectedCells)
           : focusedCell
-          ? [focusedCell]
-          : [];
+            ? [focusedCell]
+            : [];
 
       targets.forEach(({ staffId, date }) => {
         const cell = getCellData(staffId, date);
@@ -363,7 +404,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
       changeCellLock,
       getCellData,
       isAdmin,
-    ]
+    ],
   );
 
   /**
@@ -392,13 +433,13 @@ const ShiftCollaborativePageInner: React.FC = () => {
   const hasLocked = useMemo(
     () =>
       selectionTargets.some((t) => getCellData(t.staffId, t.date)?.isLocked),
-    [selectionTargets, getCellData]
+    [selectionTargets, getCellData],
   );
 
   const hasUnlocked = useMemo(
     () =>
       selectionTargets.some((t) => !getCellData(t.staffId, t.date)?.isLocked),
-    [selectionTargets, getCellData]
+    [selectionTargets, getCellData],
   );
 
   /**
@@ -442,7 +483,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
         changeCellState(staffId, date, newState);
       });
     },
-    [changeCellState]
+    [changeCellState],
   );
 
   // キーボードショートカットの設定
@@ -463,7 +504,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
   const handleCellClick = (
     staffId: string,
     date: string,
-    event: React.MouseEvent
+    event: React.MouseEvent,
   ) => {
     if (isCellBeingEdited(staffId, date)) {
       return; // 他のユーザーが編集中
@@ -501,7 +542,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
 
       startDragSelect(staffId, date);
     },
-    [startDragSelect]
+    [startDragSelect],
   );
 
   /**
@@ -513,7 +554,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
         updateDragSelect(staffId, date);
       }
     },
-    [isDragging, updateDragSelect]
+    [isDragging, updateDragSelect],
   );
 
   /**
@@ -575,7 +616,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
    * 日ごとの人数集計
    */
   const calculateDailyCount = (
-    dayKey: string
+    dayKey: string,
   ): { work: number; fixedOff: number; requestedOff: number } => {
     let work = 0;
     let fixedOff = 0;
@@ -685,7 +726,19 @@ const ShiftCollaborativePageInner: React.FC = () => {
 
         {/* シフト表 */}
         <TableContainer component={Paper}>
-          <Table size="small" stickyHeader>
+          <Table
+            size="small"
+            stickyHeader
+            sx={{
+              "& .MuiTableCell-root": {
+                borderRight: "1px solid",
+                borderColor: "divider",
+              },
+              "& .MuiTableCell-root:last-child": {
+                borderRight: "none",
+              },
+            }}
+          >
             <TableHead>
               <TableRow>
                 <TableCell
@@ -694,6 +747,7 @@ const ShiftCollaborativePageInner: React.FC = () => {
                     left: 0,
                     zIndex: 3,
                     bgcolor: "background.paper",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   スタッフ名
@@ -741,64 +795,121 @@ const ShiftCollaborativePageInner: React.FC = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                staffIds.map((staffId) => {
-                  const staffData = state.shiftDataMap.get(staffId);
-                  if (!staffData) return null;
+                <>
+                  {staffIds.map((staffId) => {
+                    const staffData = state.shiftDataMap.get(staffId);
+                    if (!staffData) return null;
 
-                  return (
-                    <TableRow key={staffId}>
-                      <TableCell
-                        sx={{
-                          position: "sticky",
-                          left: 0,
-                          zIndex: 2,
-                          bgcolor: "background.paper",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {staffId}
-                      </TableCell>
-                      {days.map((day) => {
-                        const dayKey = day.format("DD");
-                        const cell = staffData.get(dayKey);
-                        if (!cell) return <TableCell key={dayKey}>-</TableCell>;
+                    return (
+                      <TableRow key={staffId}>
+                        <TableCell
+                          sx={{
+                            position: "sticky",
+                            left: 0,
+                            zIndex: 2,
+                            bgcolor: "background.paper",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {staffId}
+                        </TableCell>
+                        {days.map((day) => {
+                          const dayKey = day.format("DD");
+                          const cell = staffData.get(dayKey);
+                          if (!cell)
+                            return <TableCell key={dayKey}>-</TableCell>;
 
-                        const isEditing = isCellBeingEdited(staffId, dayKey);
-                        const editor = getCellEditor(staffId, dayKey);
-                        const isFocused =
-                          focusedCell?.staffId === staffId &&
-                          focusedCell?.date === dayKey;
-                        const isSelected = isCellSelected(staffId, dayKey);
+                          const isEditing = isCellBeingEdited(staffId, dayKey);
+                          const editor = getCellEditor(staffId, dayKey);
+                          const isFocused =
+                            focusedCell?.staffId === staffId &&
+                            focusedCell?.date === dayKey;
+                          const isSelected = isCellSelected(staffId, dayKey);
 
-                        return (
-                          <ShiftCell
-                            key={dayKey}
-                            state={cell.state}
-                            isLocked={cell.isLocked}
-                            isEditing={isEditing}
-                            editorName={editor?.userName}
-                            lastChangedBy={cell.lastChangedBy}
-                            lastChangedAt={cell.lastChangedAt}
-                            onClick={(event) =>
-                              handleCellClick(staffId, dayKey, event)
-                            }
-                            onRegisterRef={(element) =>
-                              registerCell(staffId, dayKey, element)
-                            }
-                            onMouseDown={(event) =>
-                              handleCellMouseDown(staffId, dayKey, event)
-                            }
-                            onMouseEnter={() =>
-                              handleCellMouseEnter(staffId, dayKey)
-                            }
-                            isFocused={isFocused}
-                            isSelected={isSelected}
-                          />
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })
+                          return (
+                            <ShiftCell
+                              key={dayKey}
+                              state={cell.state}
+                              isLocked={cell.isLocked}
+                              isEditing={isEditing}
+                              editorName={editor?.userName}
+                              lastChangedBy={cell.lastChangedBy}
+                              lastChangedAt={cell.lastChangedAt}
+                              onClick={(event) =>
+                                handleCellClick(staffId, dayKey, event)
+                              }
+                              onRegisterRef={(element) =>
+                                registerCell(staffId, dayKey, element)
+                              }
+                              onMouseDown={(event) =>
+                                handleCellMouseDown(staffId, dayKey, event)
+                              }
+                              onMouseEnter={() =>
+                                handleCellMouseEnter(staffId, dayKey)
+                              }
+                              isFocused={isFocused}
+                              isSelected={isSelected}
+                            />
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })}
+
+                  {/* 備考行（各日セルにイベント表示） */}
+                  <TableRow>
+                    <TableCell
+                      sx={{
+                        position: "sticky",
+                        left: 0,
+                        zIndex: 2,
+                        bgcolor: "background.paper",
+                        fontWeight: 600,
+                      }}
+                    >
+                      備考
+                    </TableCell>
+                    {days.map((day) => {
+                      const events = getEventsForDay(day);
+                      return (
+                        <TableCell
+                          key={`remark-${day.format("DD")}`}
+                          sx={{
+                            minWidth: 50,
+                            px: 2,
+                            py: 2,
+                            textAlign: "start",
+                            verticalAlign: "top",
+                          }}
+                        >
+                          {events.length > 0 && (
+                            <Box
+                              sx={{
+                                display: "inline-block",
+                                writingMode: "vertical-rl",
+                              }}
+                            >
+                              {events.map((event) => (
+                                <Typography
+                                  key={`${event.label}-${event.start.format("YYYY-MM-DD")}`}
+                                  variant="caption"
+                                  component="span"
+                                  sx={{
+                                    fontWeight: 700,
+                                    lineHeight: 1.2,
+                                    display: "block",
+                                  }}
+                                >
+                                  {event.label}
+                                </Typography>
+                              ))}
+                            </Box>
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                </>
               )}
             </TableBody>
           </Table>

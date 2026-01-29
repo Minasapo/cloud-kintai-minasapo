@@ -1,4 +1,5 @@
 import { useLazyListRecentAttendancesQuery } from "@entities/attendance/api/attendanceApi";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Box,
   Chip,
@@ -14,16 +15,18 @@ import {
 import type { Attendance, Rest } from "@shared/api/graphql/types";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { AuthContext } from "@/context/AuthContext";
 
 // 日付ごとの時間軸ビュー（デモ用のモック表示）
 export default function ShiftDayView() {
   const { date } = useParams<{ date?: string }>();
   const navigate = useNavigate();
-  const { loading, error, staffs } = useStaffs();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { loading, error, staffs } = useStaffs({ isAuthenticated });
   const [triggerListAttendances] = useLazyListRecentAttendancesQuery();
 
   const target = useMemo(() => (date ? dayjs(date) : dayjs()), [date]);

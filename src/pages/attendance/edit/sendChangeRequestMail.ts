@@ -1,11 +1,11 @@
+import { StaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendMail } from "@shared/api/graphql/documents/queries";
 import dayjs from "dayjs";
 
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import { StaffRole, StaffType } from "@/hooks/useStaffs/useStaffs";
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
-import { AttendanceDate } from "@/lib/AttendanceDate";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export default function sendChangeRequestMail(
   cognitoUser: CognitoUser,

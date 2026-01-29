@@ -1,10 +1,9 @@
 import { Stack } from "@mui/material";
 
+import AttendanceDailyList from "@/features/attendance/daily-list/ui/AttendanceDailyList";
+import DownloadForm from "@/features/attendance/download-form/ui/DownloadForm";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
-
-import AttendanceDailyList from "../../components/AttendanceDailyList/AttendanceDailyList";
-import DownloadForm from "../../components/download_form/DownloadForm";
 
 const PAGE_PADDING_X = {
   xs: designTokenVar("spacing.lg", "16px"),

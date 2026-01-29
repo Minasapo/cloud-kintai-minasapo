@@ -1,3 +1,5 @@
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { Grid, Stack, Typography } from "@mui/material";
 import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
@@ -6,6 +8,8 @@ import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
+import type { WorkflowDetailLoaderData } from "@/entities/workflow/model/loader";
 import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow/model/workflowApprovalTimeline";
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
@@ -18,17 +22,13 @@ import {
   useWorkflowLoaderWorkflow,
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
-import useWorkflows from "@/hooks/useWorkflows/useWorkflows";
-import { formatDateSlash, isoDateFromTimestamp } from "@/lib/date";
-import { createLogger } from "@/lib/logger";
+import { designTokenVar } from "@/shared/designSystem";
+import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
+import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
-import { getWorkflowCategoryLabel } from "@/lib/workflowLabels";
-import type { WorkflowDetailLoaderData } from "@/router/loaders/workflowDetailLoader";
-import { designTokenVar } from "@/shared/designSystem";
+} from "@/shared/lib/store/snackbarSlice";
 import { PageSection } from "@/shared/ui/layout";
 
 const SECTION_GAP = designTokenVar("spacing.xl", "24px");
@@ -38,9 +38,10 @@ const logger = createLogger("WorkflowDetailPage");
 export default function WorkflowDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { staffs } = useStaffs();
-  const { cognitoUser } = useContext(AuthContext);
-  const { update: updateWorkflow } = useWorkflows();
+  const { cognitoUser, authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
+  const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const { workflow: initialWorkflow } =
     useLoaderData() as WorkflowDetailLoaderData;
   const { workflow, setWorkflow } = useWorkflowLoaderWorkflow(initialWorkflow);

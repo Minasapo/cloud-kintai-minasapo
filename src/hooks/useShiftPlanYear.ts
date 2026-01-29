@@ -7,7 +7,7 @@ import {
 import { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { graphqlClient } from "@/lib/amplify/graphqlClient";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 type UseShiftPlanYearResult = {
   plans: ShiftPlanMonthSetting[] | null;

@@ -5,6 +5,7 @@ import {
 } from "@entities/attendance/api/attendanceApi";
 import { attendanceEditSchema } from "@entities/attendance/validation/attendanceEditSchema";
 import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
+import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Alert,
@@ -28,24 +29,23 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 import * as MESSAGE_CODE from "@/errors";
-import { StaffType, useStaffs } from "@/hooks/useStaffs/useStaffs";
-import { AttendanceDate } from "@/lib/AttendanceDate";
-import { createLogger } from "@/lib/logger";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
-import { resolveConfigTimeOnDate } from "@/lib/resolveConfigTimeOnDate";
-
-import AttendanceEditProvider from "./AttendanceEditProvider";
+import AttendanceEditProvider from "@/features/attendance/edit/model/AttendanceEditProvider";
 import {
   AttendanceEditInputs,
   defaultValues,
   HourlyPaidHolidayTimeInputs,
-} from "./common";
-import DesktopEditor from "./DesktopEditor/DesktopEditor";
-import { MobileEditor } from "./MobileEditor/MobileEditor";
+} from "@/features/attendance/edit/model/common";
+import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEditor";
+import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
+import { createLogger } from "@/shared/lib/logger";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
+
 import sendChangeRequestMail from "./sendChangeRequestMail";
 
 const logger = createLogger("AttendanceEdit");
@@ -65,7 +65,11 @@ export default function AttendanceEdit() {
 
   const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
 
-  const { staffs, loading: staffsLoading, error: staffSError } = useStaffs();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs, loading: staffsLoading, error: staffSError } = useStaffs({
+    isAuthenticated,
+  });
   const [createAttendanceMutation] = useCreateAttendanceMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 

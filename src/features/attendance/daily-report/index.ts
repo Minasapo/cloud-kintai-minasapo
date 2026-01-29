@@ -1,3 +1,3 @@
-export * from "./DailyReportCalendar";
-export * from "./DailyReportFormFields";
-export * from "./types";
+export * from "./model/types";
+export * from "./ui/DailyReportCalendar";
+export * from "./ui/DailyReportFormFields";

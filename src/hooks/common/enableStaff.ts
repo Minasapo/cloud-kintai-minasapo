@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { adminPost } from "@/lib/amplify/adminQueriesClient";
+import { adminPost } from "@/shared/api/amplify/adminQueriesClient";
 
 export default async function enableStaff(username: string) {
   const params = {

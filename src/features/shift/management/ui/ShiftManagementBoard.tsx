@@ -2,6 +2,7 @@ import {
   useGetCompanyHolidayCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Alert,
   Badge,
@@ -21,21 +22,20 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
-import { useStaffs } from "@/hooks/useStaffs/useStaffs";
+import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 import {
   setSnackbarError,
   setSnackbarSuccess,
-} from "@/lib/reducers/snackbarReducer";
-import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
+} from "@/shared/lib/store/snackbarSlice";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";
@@ -130,12 +130,12 @@ const SATURDAY_BG = mixWithTransparent(
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatchV2();
+  const dispatch = useDispatch();
   const { cognitoUser } = useCognitoUser();
-  const { loading, error, staffs } = useStaffs();
   const { getShiftGroups } = useContext(AppConfigContext);
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
+  const { loading, error, staffs } = useStaffs({ isAuthenticated });
 
   const shiftStaffs = useMemo(
     () => staffs.filter((s) => s.workType === "shift"),
