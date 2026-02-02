@@ -71,6 +71,16 @@ npm run test:unit
 - `src/widgets/README.md` ページ構成要素の責務 例 `widgets/layout/header`
 - `src/processes/README.md` 複数ページをまたぐ業務フローの責務 例 `processes/office-access`
 
+### 6 初回PRチェックリスト
+
+PR 作成前に次を確認してください。
+
+- `npm run lint`
+- `npm run typecheck`
+- `npm run test:unit`
+- 変更した画面の表示崩れがないこと（PC とモバイルの主要表示）
+- 既存機能への影響がないこと（最低1つの関連画面で動作確認）
+
 ## よくある詰まりどころ
 
 ### `npm WARN EBADENGINE` が出る
