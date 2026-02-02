@@ -61,11 +61,11 @@ npm run test:unit
 
 - `src/router.tsx` 画面遷移とルート定義の入口
 - `src/pages/admin/AdminShiftSettings/AdminShiftSettings.tsx` 管理画面の実装例
-- `src/features/README.md` 機能単位の責務
-- `src/entities/README.md` ドメイン層の責務
-- `src/shared/README.md` 共通部品の責務
-- `src/widgets/README.md` ページ構成要素の責務
-- `src/processes/README.md` 複数ページをまたぐ業務フローの責務
+- `src/features/README.md` 機能単位の責務 例 `features/admin/configManagement`
+- `src/entities/README.md` ドメイン層の責務 例 `entities/attendance`
+- `src/shared/README.md` 共通部品の責務 例 `shared/ui/form/RHFTextField.tsx`
+- `src/widgets/README.md` ページ構成要素の責務 例 `widgets/layout/header`
+- `src/processes/README.md` 複数ページをまたぐ業務フローの責務 例 `processes/office-access`
 
 ## よくある詰まりどころ
 
