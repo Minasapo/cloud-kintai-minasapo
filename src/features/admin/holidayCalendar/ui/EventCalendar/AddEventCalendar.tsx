@@ -64,11 +64,11 @@ const defaultValues: Inputs = {
  *   引数に CreateEventCalendarInput を取り、作成した EventCalendar または void を返す Promise を返す。
  */
 type CreateEventCalendarHandler = (
-  input: CreateEventCalendarInput
+  input: CreateEventCalendarInput,
 ) => Promise<void | EventCalendar>;
 
 type BulkCreateEventCalendarHandler = (
-  inputs: CreateEventCalendarInput[]
+  inputs: CreateEventCalendarInput[],
 ) => Promise<void | EventCalendar[]>;
 
 export function AddEventCalendar({
@@ -109,7 +109,12 @@ export function AddEventCalendar({
    *
    * @param data - フォーム入力（Inputs）
    */
-  const onSubmit = async ({ startDate, endDate, name, description }: Inputs) => {
+  const onSubmit = async ({
+    startDate,
+    endDate,
+    name,
+    description,
+  }: Inputs) => {
     const eventCalendarMessage = EventCalendarMessage();
     const isRangeSubmission = Boolean(endDate);
 
@@ -128,15 +133,15 @@ export function AddEventCalendar({
         dispatch(setSnackbarSuccess(successMessage));
       } else {
         const [eventDate] = buildHolidayDateRange(startDate);
-        await createEventCalendar({ 
-          eventDate, 
-          name, 
-          description: description || undefined 
+        await createEventCalendar({
+          eventDate,
+          name,
+          description: description || undefined,
         });
         dispatch(
           setSnackbarSuccess(
-            eventCalendarMessage.create(MessageStatus.SUCCESS)
-          )
+            eventCalendarMessage.create(MessageStatus.SUCCESS),
+          ),
         );
       }
 
@@ -149,7 +154,7 @@ export function AddEventCalendar({
       }
 
       dispatch(
-        setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR))
+        setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR)),
       );
     }
   };
@@ -194,7 +199,7 @@ export function AddEventCalendar({
                     value={value ? dayjs(value) : null}
                     onChange={(date) =>
                       onChange(
-                        date ? date.format(AttendanceDate.DataFormat) : ""
+                        date ? date.format(AttendanceDate.DataFormat) : "",
                       )
                     }
                     slotProps={{
@@ -227,7 +232,7 @@ export function AddEventCalendar({
                   const start = dayjs(
                     startDateValue,
                     AttendanceDate.DataFormat,
-                    true
+                    true,
                   );
                   const end = dayjs(value, AttendanceDate.DataFormat, true);
 
@@ -256,7 +261,7 @@ export function AddEventCalendar({
                     value={value ? dayjs(value) : null}
                     onChange={(date) =>
                       onChange(
-                        date ? date.format(AttendanceDate.DataFormat) : ""
+                        date ? date.format(AttendanceDate.DataFormat) : "",
                       )
                     }
                     slotProps={{

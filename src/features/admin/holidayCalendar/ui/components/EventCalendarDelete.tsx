@@ -26,7 +26,7 @@ export default function EventCalendarDelete({
 
   const onSubmit = async () => {
     const beDeleteDate = dayjs(eventCalendar.eventDate).format(
-      AttendanceDate.DisplayFormat
+      AttendanceDate.DisplayFormat,
     );
     const beDeleteName = eventCalendar.name;
     const formattedDeleteMessage = `「${beDeleteDate}(${beDeleteName})」を削除しますか？\nこの操作は取り消せません。`;
@@ -41,13 +41,13 @@ export default function EventCalendarDelete({
       .then(() => {
         dispatch(
           setSnackbarSuccess(
-            eventCalendarMessage.delete(MessageStatus.SUCCESS)
-          )
+            eventCalendarMessage.delete(MessageStatus.SUCCESS),
+          ),
         );
       })
       .catch(() => {
         dispatch(
-          setSnackbarError(eventCalendarMessage.delete(MessageStatus.ERROR))
+          setSnackbarError(eventCalendarMessage.delete(MessageStatus.ERROR)),
         );
       });
   };

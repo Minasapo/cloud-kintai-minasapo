@@ -19,35 +19,35 @@ type AppContextProps = {
   companyHolidayCalendars: CompanyHolidayCalendar[];
   eventCalendars: EventCalendar[];
   createHolidayCalendar: (
-    input: CreateHolidayCalendarInput
+    input: CreateHolidayCalendarInput,
   ) => Promise<void | HolidayCalendar>;
   bulkCreateHolidayCalendar: (
-    inputs: CreateHolidayCalendarInput[]
+    inputs: CreateHolidayCalendarInput[],
   ) => Promise<HolidayCalendar[]>;
   updateHolidayCalendar: (
-    input: UpdateHolidayCalendarInput
+    input: UpdateHolidayCalendarInput,
   ) => Promise<HolidayCalendar>;
   deleteHolidayCalendar: (input: DeleteHolidayCalendarInput) => Promise<void>;
   createCompanyHolidayCalendar: (
-    input: CreateCompanyHolidayCalendarInput
+    input: CreateCompanyHolidayCalendarInput,
   ) => Promise<CompanyHolidayCalendar>;
   bulkCreateCompanyHolidayCalendar: (
-    inputs: CreateCompanyHolidayCalendarInput[]
+    inputs: CreateCompanyHolidayCalendarInput[],
   ) => Promise<CompanyHolidayCalendar[]>;
   updateCompanyHolidayCalendar: (
-    input: UpdateCompanyHolidayCalendarInput
+    input: UpdateCompanyHolidayCalendarInput,
   ) => Promise<CompanyHolidayCalendar>;
   deleteCompanyHolidayCalendar: (
-    input: DeleteCompanyHolidayCalendarInput
+    input: DeleteCompanyHolidayCalendarInput,
   ) => Promise<CompanyHolidayCalendar>;
   createEventCalendar: (
-    input: CreateEventCalendarInput
+    input: CreateEventCalendarInput,
   ) => Promise<void | EventCalendar>;
   bulkCreateEventCalendar: (
-    inputs: CreateEventCalendarInput[]
+    inputs: CreateEventCalendarInput[],
   ) => Promise<EventCalendar[]>;
   updateEventCalendar: (
-    input: UpdateEventCalendarInput
+    input: UpdateEventCalendarInput,
   ) => Promise<EventCalendar>;
   deleteEventCalendar: (input: DeleteEventCalendarInput) => Promise<void>;
 };

@@ -44,7 +44,7 @@ export default function EventCalendarEdit({
 }: {
   eventCalendar: EventCalendar;
   updateEventCalendar: (
-    input: UpdateEventCalendarInput
+    input: UpdateEventCalendarInput,
   ) => Promise<EventCalendar>;
 }) {
   const dispatch = useAppDispatchV2();
@@ -91,14 +91,14 @@ export default function EventCalendarEdit({
       .then(() => {
         dispatch(
           setSnackbarSuccess(
-            eventCalendarMessage.update(MessageStatus.SUCCESS)
-          )
+            eventCalendarMessage.update(MessageStatus.SUCCESS),
+          ),
         );
         onClose();
       })
       .catch(() => {
         dispatch(
-          setSnackbarError(eventCalendarMessage.update(MessageStatus.ERROR))
+          setSnackbarError(eventCalendarMessage.update(MessageStatus.ERROR)),
         );
       });
   };

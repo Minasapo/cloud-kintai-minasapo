@@ -55,7 +55,7 @@ export default function AdminHolidayCalendar() {
   const [searchParams, setSearchParams] = useSearchParams();
   const value = useMemo(
     () => getTabIndexFromParam(searchParams.get(tabParamKey)),
-    [searchParams]
+    [searchParams],
   );
 
   const handleChange = (_event: SyntheticEvent, newValue: number) => {

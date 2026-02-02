@@ -1,7 +1,9 @@
 import dayjs from "dayjs";
 import { ChangeEvent, useMemo, useState } from "react";
 
-export function sortCalendar<T extends { holidayDate?: string; eventDate?: string }>(a: T, b: T) {
+export function sortCalendar<
+  T extends { holidayDate?: string; eventDate?: string },
+>(a: T, b: T) {
   const dateA = a.holidayDate || a.eventDate || "";
   const dateB = b.holidayDate || b.eventDate || "";
   return dayjs(dateA).isBefore(dayjs(dateB)) ? 1 : -1;
@@ -21,11 +23,11 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
     initialRowsPerPage?: number;
     yearRange?: number;
     yearOffset?: number;
-  }
+  },
 ) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(
-    options?.initialRowsPerPage ?? 20
+    options?.initialRowsPerPage ?? 20,
   );
   const [yearMonthFilter, setYearMonthFilter] = useState<string>("");
   const [nameFilter, setNameFilter] = useState<string>("");
@@ -36,14 +38,14 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
   const YEAR_OFFSET = options?.yearOffset ?? 5;
   const currentYear = dayjs().year();
   const years = Array.from({ length: YEAR_RANGE }).map(
-    (_, i) => currentYear - YEAR_OFFSET + i
+    (_, i) => currentYear - YEAR_OFFSET + i,
   );
 
   const normalizedItems = useMemo(() => items ?? [], [items]);
 
   const sorted = useMemo(
     () => [...normalizedItems].sort((a, b) => sortCalendar(a, b)),
-    [normalizedItems]
+    [normalizedItems],
   );
 
   const filtered = useMemo(() => {
@@ -73,7 +75,7 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
 
   const paginated = useMemo(
     () => filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [filtered, page, rowsPerPage]
+    [filtered, page, rowsPerPage],
   );
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -81,7 +83,7 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
   };
 
   const handleChangeRowsPerPage = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);

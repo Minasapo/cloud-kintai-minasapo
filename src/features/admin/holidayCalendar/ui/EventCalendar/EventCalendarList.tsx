@@ -59,26 +59,26 @@ export default function EventCalendarList() {
   const createEventCalendar = useCallback(
     async (input: Parameters<typeof createEventCalendarMutation>[0]) =>
       createEventCalendarMutation(input).unwrap(),
-    [createEventCalendarMutation]
+    [createEventCalendarMutation],
   );
 
   const bulkCreateEventCalendar = useCallback(
     async (inputs: Parameters<typeof bulkCreateEventCalendarsMutation>[0]) =>
       bulkCreateEventCalendarsMutation(inputs).unwrap(),
-    [bulkCreateEventCalendarsMutation]
+    [bulkCreateEventCalendarsMutation],
   );
 
   const updateEventCalendar = useCallback(
     async (input: Parameters<typeof updateEventCalendarMutation>[0]) =>
       updateEventCalendarMutation(input).unwrap(),
-    [updateEventCalendarMutation]
+    [updateEventCalendarMutation],
   );
 
   const deleteEventCalendar = useCallback(
     async (input: Parameters<typeof deleteEventCalendarMutation>[0]) => {
       await deleteEventCalendarMutation(input).unwrap();
     },
-    [deleteEventCalendarMutation]
+    [deleteEventCalendarMutation],
   );
 
   const calendarLoading = isEventCalendarsLoading || isEventCalendarsFetching;

@@ -46,7 +46,7 @@ export default function EventCalendarCopy({
 }: {
   eventCalendar: EventCalendar;
   createEventCalendar: (
-    input: CreateEventCalendarInput
+    input: CreateEventCalendarInput,
   ) => Promise<void | EventCalendar>;
 }) {
   const dispatch = useAppDispatchV2();
@@ -84,21 +84,21 @@ export default function EventCalendarCopy({
       ...rest,
       description: description || undefined,
     };
-    
+
     await createEventCalendar(input)
       .then(() => {
         dispatch(
           setSnackbarSuccess(
-            eventCalendarMessage.create(MessageStatus.SUCCESS)
-          )
+            eventCalendarMessage.create(MessageStatus.SUCCESS),
+          ),
         );
         reset(defaultValues);
         setOpen(false);
       })
       .catch(() =>
         dispatch(
-          setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR))
-        )
+          setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR)),
+        ),
       );
   };
 
@@ -128,7 +128,7 @@ export default function EventCalendarCopy({
                     value={value ? dayjs(value) : null}
                     onChange={(date) =>
                       onChange(
-                        date ? date.format(AttendanceDate.DataFormat) : ""
+                        date ? date.format(AttendanceDate.DataFormat) : "",
                       )
                     }
                     slotProps={{

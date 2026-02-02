@@ -29,14 +29,14 @@ export function CSVFilePicker({
   bulkCreateEventCalendar,
 }: {
   bulkCreateEventCalendar: (
-    inputs: CreateEventCalendarInput[]
+    inputs: CreateEventCalendarInput[],
   ) => Promise<EventCalendar[]>;
 }) {
   const dispatch = useAppDispatchV2();
 
   const [open, setOpen] = useState(false);
   const [uploadedData, setUploadedData] = useState<CreateEventCalendarInput[]>(
-    []
+    [],
   );
 
   const handleClickOpen = () => {
@@ -52,7 +52,7 @@ export function CSVFilePicker({
 
     // eslint-disable-next-line no-alert
     const result = window.confirm(
-      `以下の${uploadedData.length}件のデータを登録しますか？`
+      `以下の${uploadedData.length}件のデータを登録しますか？`,
     );
     if (!result) return;
 
@@ -61,14 +61,14 @@ export function CSVFilePicker({
       .then(() =>
         dispatch(
           setSnackbarSuccess(
-            eventCalendarMessage.create(MessageStatus.SUCCESS)
-          )
-        )
+            eventCalendarMessage.create(MessageStatus.SUCCESS),
+          ),
+        ),
       )
       .catch(() =>
         dispatch(
-          setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR))
-        )
+          setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR)),
+        ),
       );
   };
 
@@ -96,10 +96,11 @@ export function CSVFilePicker({
         <DialogContent>
           <Stack direction="column" spacing={1}>
             <Typography variant="body1">
-              CSVファイル形式: eventDate (YYYY-MM-DD), name, description
-              (任意)
+              CSVファイル形式: eventDate (YYYY-MM-DD), name, description (任意)
             </Typography>
-            <Typography variant="body1">例: 2026-04-01,花見,桜を見る会</Typography>
+            <Typography variant="body1">
+              例: 2026-04-01,花見,桜を見る会
+            </Typography>
             <Typography variant="body1">
               ファイルを選択してください。
             </Typography>
@@ -159,14 +160,16 @@ function FileInput({
                   if (!eventDate.isValid()) {
                     return null;
                   }
-                  
+
                   return {
                     eventDate: eventDate.format(AttendanceDate.DataFormat),
                     name: String(row[1]?.trim() || ""),
                     description: row[2]?.trim() || undefined,
                   } as CreateEventCalendarInput;
                 })
-                .filter((item): item is CreateEventCalendarInput => item !== null);
+                .filter(
+                  (item): item is CreateEventCalendarInput => item !== null,
+                );
 
               setUploadedData(requestCalendars);
             };

@@ -243,17 +243,17 @@ export default function Layout() {
       const result = await createHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [createHolidayCalendarMutation]
+    [createHolidayCalendarMutation],
   );
 
   const bulkCreateHolidayCalendar = useCallback(
     async (
-      inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0]
+      inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0],
     ) => {
       const result = await bulkCreateHolidayCalendarsMutation(inputs).unwrap();
       return result;
     },
-    [bulkCreateHolidayCalendarsMutation]
+    [bulkCreateHolidayCalendarsMutation],
   );
 
   const updateHolidayCalendar = useCallback(
@@ -261,56 +261,55 @@ export default function Layout() {
       const result = await updateHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [updateHolidayCalendarMutation]
+    [updateHolidayCalendarMutation],
   );
 
   const deleteHolidayCalendar = useCallback(
     async (input: Parameters<typeof deleteHolidayCalendarMutation>[0]) => {
       await deleteHolidayCalendarMutation(input).unwrap();
     },
-    [deleteHolidayCalendarMutation]
+    [deleteHolidayCalendarMutation],
   );
 
   const createCompanyHolidayCalendar = useCallback(
     async (
-      input: Parameters<typeof createCompanyHolidayCalendarMutation>[0]
+      input: Parameters<typeof createCompanyHolidayCalendarMutation>[0],
     ) => {
       const result = await createCompanyHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [createCompanyHolidayCalendarMutation]
+    [createCompanyHolidayCalendarMutation],
   );
 
   const bulkCreateCompanyHolidayCalendar = useCallback(
     async (
-      inputs: Parameters<typeof bulkCreateCompanyHolidayCalendarsMutation>[0]
+      inputs: Parameters<typeof bulkCreateCompanyHolidayCalendarsMutation>[0],
     ) => {
-      const result = await bulkCreateCompanyHolidayCalendarsMutation(
-        inputs
-      ).unwrap();
+      const result =
+        await bulkCreateCompanyHolidayCalendarsMutation(inputs).unwrap();
       return result;
     },
-    [bulkCreateCompanyHolidayCalendarsMutation]
+    [bulkCreateCompanyHolidayCalendarsMutation],
   );
 
   const updateCompanyHolidayCalendar = useCallback(
     async (
-      input: Parameters<typeof updateCompanyHolidayCalendarMutation>[0]
+      input: Parameters<typeof updateCompanyHolidayCalendarMutation>[0],
     ) => {
       const result = await updateCompanyHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [updateCompanyHolidayCalendarMutation]
+    [updateCompanyHolidayCalendarMutation],
   );
 
   const deleteCompanyHolidayCalendar = useCallback(
     async (
-      input: Parameters<typeof deleteCompanyHolidayCalendarMutation>[0]
+      input: Parameters<typeof deleteCompanyHolidayCalendarMutation>[0],
     ) => {
       const result = await deleteCompanyHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [deleteCompanyHolidayCalendarMutation]
+    [deleteCompanyHolidayCalendarMutation],
   );
 
   const createEventCalendar = useCallback(
@@ -318,7 +317,7 @@ export default function Layout() {
       const result = await createEventCalendarMutation(input).unwrap();
       return result;
     },
-    [createEventCalendarMutation]
+    [createEventCalendarMutation],
   );
 
   const bulkCreateEventCalendar = useCallback(
@@ -326,7 +325,7 @@ export default function Layout() {
       const result = await bulkCreateEventCalendarsMutation(inputs).unwrap();
       return result;
     },
-    [bulkCreateEventCalendarsMutation]
+    [bulkCreateEventCalendarsMutation],
   );
 
   const updateEventCalendar = useCallback(
@@ -334,19 +333,19 @@ export default function Layout() {
       const result = await updateEventCalendarMutation(input).unwrap();
       return result;
     },
-    [updateEventCalendarMutation]
+    [updateEventCalendarMutation],
   );
 
   const deleteEventCalendar = useCallback(
     async (input: Parameters<typeof deleteEventCalendarMutation>[0]) => {
       await deleteEventCalendarMutation(input).unwrap();
     },
-    [deleteEventCalendarMutation]
+    [deleteEventCalendarMutation],
   );
 
   const isAdminUser = useMemo(
     () => isCognitoUserRole(StaffRole.ADMIN),
-    [isCognitoUserRole]
+    [isCognitoUserRole],
   );
 
   const isLoginRoute = location.pathname === "/login";
@@ -404,7 +403,7 @@ export default function Layout() {
     }
 
     alert(
-      "メール認証が完了していません。ログイン時にメール認証を行なってください。"
+      "メール認証が完了していません。ログイン時にメール認証を行なってください。",
     );
 
     try {
@@ -434,7 +433,7 @@ export default function Layout() {
       authStatus,
       cognitoUser,
     }),
-    [signOut, navigate, isCognitoUserRole, user, authStatus, cognitoUser]
+    [signOut, navigate, isCognitoUserRole, user, authStatus, cognitoUser],
   );
 
   const appConfigContextValue = useMemo(
@@ -491,7 +490,7 @@ export default function Layout() {
       getAttendanceStatisticsEnabled,
       getThemeColor,
       getThemeTokens,
-    ]
+    ],
   );
 
   const appContextValue = useMemo(
@@ -528,17 +527,17 @@ export default function Layout() {
       bulkCreateEventCalendar,
       updateEventCalendar,
       deleteEventCalendar,
-    ]
+    ],
   );
 
   const configuredThemeColor = useMemo(
     () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
-    [getThemeColor]
+    [getThemeColor],
   );
 
   const appTheme = useMemo(
     () => createAppTheme(configuredThemeColor),
-    [configuredThemeColor]
+    [configuredThemeColor],
   );
 
   const shouldBlockUnauthenticated =
