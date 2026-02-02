@@ -32,6 +32,12 @@ export function CSVFilePicker({
     inputs: CreateEventCalendarInput[],
   ) => Promise<EventCalendar[]>;
 }) {
+  type ParseSummary = {
+    totalRows: number;
+    validRows: number;
+    invalidRows: number;
+  };
+
   const dispatch = useAppDispatchV2();
 
   const [open, setOpen] = useState(false);
@@ -40,14 +46,17 @@ export function CSVFilePicker({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [parseSummary, setParseSummary] = useState<ParseSummary | null>(null);
 
   const handleClickOpen = () => {
     setSubmitError(null);
+    setParseSummary(null);
     setOpen(true);
   };
 
   const handleClose = () => {
     setSubmitError(null);
+    setParseSummary(null);
     setOpen(false);
   };
 
@@ -115,10 +124,23 @@ export function CSVFilePicker({
             <FileInput
               setUploadedData={setUploadedData}
               onFileSelected={() => setSubmitError(null)}
+              onParsed={setParseSummary}
             />
             <Typography variant="body1">
               ファイルを選択したら、登録ボタンを押してください。
             </Typography>
+            {parseSummary && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color:
+                    parseSummary.invalidRows > 0 ? "warning.main" : "text.secondary",
+                }}
+              >
+                読み込み結果: {parseSummary.totalRows}件中 {parseSummary.validRows}
+                件を登録対象にしました（除外 {parseSummary.invalidRows}件）
+              </Typography>
+            )}
             {submitError && (
               <Typography variant="body2" color="error">
                 {submitError}
@@ -142,11 +164,13 @@ export function CSVFilePicker({
 function FileInput({
   setUploadedData,
   onFileSelected,
+  onParsed,
 }: {
   setUploadedData: React.Dispatch<
     React.SetStateAction<CreateEventCalendarInput[]>
   >;
   onFileSelected: () => void;
+  onParsed: (summary: { totalRows: number; validRows: number; invalidRows: number }) => void;
 }) {
   const [name, setName] = useState<string | undefined>();
 
@@ -193,6 +217,13 @@ function FileInput({
                 );
 
               setUploadedData(requestCalendars);
+              onParsed({
+                totalRows: data.slice(1).filter((row) => row[0] !== "").length,
+                validRows: requestCalendars.length,
+                invalidRows:
+                  data.slice(1).filter((row) => row[0] !== "").length -
+                  requestCalendars.length,
+              });
             };
           }}
         />
