@@ -2,14 +2,10 @@ import createOperationLogData from "@entities/operation-log/model/createOperatio
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
-  Avatar,
   Box,
   Button,
   Grid,
-  InputAdornment,
   Paper,
-  Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import {
@@ -25,7 +21,7 @@ import {
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -42,7 +38,6 @@ import {
   getWorkflowCategoryLabel,
 } from "@/entities/workflow/lib/workflowLabels";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
@@ -50,6 +45,7 @@ import {
 } from "@/shared/lib/store/snackbarSlice";
 import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 
+import WorkflowCommentSection from "./components/WorkflowCommentSection";
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
 
 const logger = createLogger("AdminWorkflowDetail");
@@ -215,70 +211,6 @@ export default function AdminWorkflowDetail() {
     return base;
   }, [workflow, staffName, applicationDate, approverInfo]);
 
-  const [messages, setMessages] = useState(
-    [] as {
-      id: string;
-      sender: string;
-      staffId?: string;
-      text: string;
-      time: string;
-    }[]
-  );
-  const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const [expandedMessages, setExpandedMessages] = useState<
-    Record<string, boolean>
-  >({});
-  const toggleExpanded = (id: string) =>
-    setExpandedMessages((s) => ({ ...s, [id]: !s[id] }));
-
-  const currentStaff = useMemo(() => {
-    if (!cognitoUser?.id) return undefined;
-    return staffs.find((s) => s.cognitoUserId === cognitoUser.id);
-  }, [cognitoUser, staffs]);
-
-  const formatSender = (sender?: string) => {
-    const s = sender ?? "";
-    if (!s.trim()) return "システム";
-    const low = s.trim().toLowerCase();
-    if (low === "system" || low.startsWith("system") || low.includes("bot"))
-      return "システム";
-    return s;
-  };
-
-  const commentsToMessages = (
-    comments?: Array<WorkflowComment | null> | null
-  ) => {
-    if (!comments)
-      return [] as {
-        id: string;
-        sender: string;
-        staffId?: string;
-        text: string;
-        time: string;
-      }[];
-    return comments
-      .filter((c): c is WorkflowComment => Boolean(c))
-      .map((c) => {
-        const staff = staffs.find((s) => s.id === c.staffId);
-        const sender = staff
-          ? `${staff.familyName} ${staff.givenName}`
-          : c.staffId || "システム";
-        const time = c.createdAt ? new Date(c.createdAt).toLocaleString() : "";
-        return {
-          id: c.id || `c-${Date.now()}`,
-          sender,
-          staffId: c.staffId,
-          text: c.text,
-          time,
-        };
-      });
-  };
-
-  useEffect(() => {
-    setMessages(commentsToMessages(workflow?.comments || []));
-  }, [workflow, staffs]);
-
   const buildApprovalStepInputs = () => {
     if (!workflow?.id) return [] as ApprovalStepInput[];
     let steps: ApprovalStepInput[] = [];
@@ -319,80 +251,6 @@ export default function AdminWorkflowDetail() {
     }
 
     return steps;
-  };
-
-  const sendMessage = () => void handleSend();
-
-  const handleSend = async () => {
-    if (sending) return;
-    if (!input.trim()) return;
-    if (!workflow?.id) return;
-    const currentStaffLocal = cognitoUser?.id
-      ? staffs.find((s) => s.cognitoUserId === cognitoUser.id)
-      : undefined;
-
-    // Allow sending comments even if the staff record cannot be resolved.
-    // Use the staff's id when available; otherwise leave staffId undefined so
-    // the backend can decide how to store it. Provide an optimistic local
-    // display name using the staff record or cognito username.
-    const senderDisplay = currentStaffLocal
-      ? `${currentStaffLocal.familyName} ${currentStaffLocal.givenName}`
-      : cognitoUser
-      ? `${cognitoUser.familyName ?? ""} ${
-          cognitoUser.givenName ?? ""
-        }`.trim() || "不明なユーザー"
-      : "不明なユーザー";
-
-    const newComment: WorkflowCommentInput = {
-      id: `c-${Date.now()}`,
-      // Ensure staffId is a string as required by the GraphQL input type.
-      // Prefer the mapped staff.id; otherwise fall back to the cognito user id
-      // so the backend still has a trace of who sent the comment. If neither
-      // exists, use 'system' as a last resort.
-      staffId: currentStaffLocal?.id ?? cognitoUser?.id ?? "system",
-      text: input.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    const existingInputs = (workflow.comments || [])
-      .filter((c): c is WorkflowComment => Boolean(c))
-      .map((c) => ({
-        id: c.id,
-        staffId: c.staffId,
-        text: c.text,
-        createdAt: c.createdAt,
-      }));
-
-    const inputForUpdate: UpdateWorkflowInput = {
-      id: workflow.id,
-      comments: [...existingInputs, newComment],
-    };
-
-    // Optimistically show the comment in UI while the update runs.
-    const optimisticMsg = {
-      id: newComment.id,
-      sender: senderDisplay,
-      staffId: newComment.staffId,
-      text: newComment.text,
-      time: new Date(newComment.createdAt).toLocaleString(),
-    };
-    setMessages((m) => [...m, optimisticMsg]);
-    setInput("");
-    setSending(true);
-    try {
-      const updated = await updateWorkflow(inputForUpdate);
-      setWorkflow(updated as NonNullable<GetWorkflowQuery["getWorkflow"]>);
-      setMessages(commentsToMessages(updated.comments || []));
-      dispatch(setSnackbarSuccess("コメントを送信しました"));
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      logger.error("Failed to send comment:", message);
-      dispatch(setSnackbarError(message));
-      // remove optimistic message on error
-      setMessages((m) => m.filter((mm) => mm.id !== optimisticMsg.id));
-    } finally {
-      setSending(false);
-    }
   };
 
   const handleApprove = async () => {
@@ -503,7 +361,6 @@ export default function AdminWorkflowDetail() {
         GetWorkflowQuery["getWorkflow"]
       >;
       setWorkflow(updated);
-      setMessages(commentsToMessages(updated.comments || []));
 
       // 有給休暇申請の場合、承認時に申請期間の勤怠データへ有給フラグを立て、規定勤務時刻を設定する
       if (isFinal && updated.category === WorkflowCategory.PAID_LEAVE) {
@@ -1067,7 +924,6 @@ export default function AdminWorkflowDetail() {
         GetWorkflowQuery["getWorkflow"]
       >;
       setWorkflow(updated);
-      setMessages(commentsToMessages(updated.comments || []));
       dispatch(setSnackbarSuccess("却下しました"));
       try {
         await createOperationLogData({
@@ -1171,187 +1027,22 @@ export default function AdminWorkflowDetail() {
             </Grid>
 
             <Grid item xs={12} sm={5}>
-              <Box sx={{ mt: { xs: 2, sm: 0 } }}>
-                <Typography variant="h6" sx={{ mb: 1 }}>
-                  コメント
-                </Typography>
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    p: 2,
-                    maxHeight: PANEL_HEIGHTS.SCROLLABLE_MAX,
-                    overflow: "auto",
-                  }}
-                >
-                  <Stack spacing={2}>
-                    {messages.map((m) => {
-                      const displayName = formatSender(m.sender);
-                      const staff = m.staffId
-                        ? staffs.find((s) => s.id === m.staffId)
-                        : undefined;
-                      const avatarText = staff
-                        ? `${(staff.familyName || "").slice(0, 1)}${(
-                            staff.givenName || ""
-                          ).slice(0, 1)}` || displayName.slice(0, 1)
-                        : displayName.slice(0, 1);
-                      const isSystem = m.staffId === "system";
-
-                      const isMine = Boolean(
-                        currentStaff && m.staffId === currentStaff.id
-                      );
-
-                      const avatarBg = isSystem
-                        ? "grey.500"
-                        : isMine
-                        ? "primary.main"
-                        : "secondary.main";
-
-                      const long =
-                        (m.text.split("\n").length > 5 ||
-                          m.text.length > 800) &&
-                        !expandedMessages[m.id];
-
-                      return (
-                        <Box
-                          key={m.id}
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: isMine ? "flex-end" : "flex-start",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              mb: 0.5,
-                            }}
-                          >
-                            {!isMine && (
-                              <Avatar
-                                sx={{
-                                  bgcolor: avatarBg,
-                                  width: 32,
-                                  height: 32,
-                                  fontSize: 12,
-                                }}
-                              >
-                                {avatarText}
-                              </Avatar>
-                            )}
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ fontWeight: 600 }}
-                            >
-                              {displayName}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ ml: 1 }}
-                            >
-                              {m.time}
-                            </Typography>
-                            {isMine && (
-                              <Avatar
-                                sx={{
-                                  bgcolor: avatarBg,
-                                  width: 32,
-                                  height: 32,
-                                  fontSize: 12,
-                                  ml: 1,
-                                }}
-                              >
-                                {avatarText}
-                              </Avatar>
-                            )}
-                          </Box>
-
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              bgcolor: isMine ? "primary.main" : "grey.100",
-                              color: isMine ? "common.white" : "text.primary",
-                              p: 1.5,
-                              borderRadius: 2,
-                              maxWidth: "90%",
-                              whiteSpace: "pre-wrap",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              component="div"
-                              sx={{
-                                display: long ? "-webkit-box" : "block",
-                                WebkitLineClamp: long ? 5 : "none",
-                                WebkitBoxOrient: long ? "vertical" : "initial",
-                                overflow: long ? "hidden" : "visible",
-                              }}
-                            >
-                              {m.text}
-                            </Typography>
-                            {long && (
-                              <Button
-                                size="small"
-                                onClick={() => toggleExpanded(m.id)}
-                                sx={{ mt: 0.5 }}
-                              >
-                                {expandedMessages[m.id]
-                                  ? "折りたたむ"
-                                  : "もっと見る"}
-                              </Button>
-                            )}
-                          </Paper>
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </Paper>
-
-                <Box
-                  sx={{
-                    mt: 1,
-                    display: "flex",
-                    gap: 1,
-                    alignItems: "flex-end",
-                  }}
-                >
-                  <TextField
-                    size="small"
-                    fullWidth
-                    multiline
-                    minRows={2}
-                    placeholder="メッセージを入力..."
-                    helperText="Command+Enterで送信"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && e.metaKey) {
-                        e.preventDefault();
-                        sendMessage();
-                      }
-                    }}
-                    disabled={sending}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Button
-                            variant="contained"
-                            size="small"
-                            onClick={sendMessage}
-                            disabled={sending || !input.trim()}
-                            sx={{ textTransform: "none", minWidth: 64 }}
-                          >
-                            送信
-                          </Button>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Box>
-              </Box>
+              <WorkflowCommentSection
+                workflow={workflow}
+                staffs={staffs}
+                cognitoUser={cognitoUser}
+                updateWorkflow={(input) =>
+                  updateWorkflow(input) as Promise<
+                    NonNullable<GetWorkflowQuery["getWorkflow"]>
+                  >
+                }
+                onWorkflowUpdated={setWorkflow}
+                onSuccess={(message) => dispatch(setSnackbarSuccess(message))}
+                onError={(message) => {
+                  logger.error("Failed to send comment:", message);
+                  dispatch(setSnackbarError(message));
+                }}
+              />
             </Grid>
           </Grid>
         )}
