@@ -38,24 +38,29 @@ const getValidationDetails = (errors: {
   shiftGroups?: Array<Record<string, { message?: unknown } | undefined>>;
 }) => {
   const details: string[] = [];
-  const seen = new Set<string>();
 
   errors.shiftGroups?.forEach((groupError, index) => {
     if (!groupError) {
       return;
     }
 
+    const messageToLabels = new Map<string, string[]>();
     SHIFT_GROUP_ERROR_FIELDS.forEach(({ key, label }) => {
       const message = groupError[key]?.message;
       if (typeof message !== "string" || message.length === 0) {
         return;
       }
 
-      const detail = `${index + 1}行目 ${label}: ${message}`;
-      if (!seen.has(detail)) {
-        seen.add(detail);
-        details.push(detail);
+      const labels = messageToLabels.get(message) ?? [];
+      if (!labels.includes(label)) {
+        labels.push(label);
       }
+      messageToLabels.set(message, labels);
+    });
+
+    messageToLabels.forEach((labels, message) => {
+      const labelText = labels.join(" / ");
+      details.push(`${index + 1}行目 ${labelText}: ${message}`);
     });
   });
 
