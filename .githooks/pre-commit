@@ -23,7 +23,7 @@ echo "========================================"
 eslint_pid=$!
 
 # Jest
-(CI=true make test) &
+(CI=true npm test) &
 jest_test_pid=$!
 
 wait $eslint_pid

@@ -61,9 +61,37 @@ npm start
 ```
 
 `npm start` は Vite の開発サーバーを起動します。  
-`make start` でも同じコマンドが呼ばれます。
 
-### 5 最初の成功体験
+### 5 E2E 最短実行（smoke-test）
+
+Playwright の初回実行時はブラウザをインストールしてください。
+
+```bash
+npx playwright install --with-deps
+```
+
+`smoke-test` 実行前に、`.env.local` へ次の値を設定します（値は管理者に確認）。
+
+```bash
+VITE_BASE_PATH=http://localhost:5173
+PLAYWRIGHT_LOGIN_EMAIL=
+PLAYWRIGHT_LOGIN_PASSWORD=
+PLAYWRIGHT_ADMIN_EMAIL=
+PLAYWRIGHT_ADMIN_PASSWORD=
+PLAYWRIGHT_OUT_USER_EMAIL=
+PLAYWRIGHT_OUT_USER_PASSWORD=
+PLAYWRIGHT_LAZY_USER_EMAIL=
+PLAYWRIGHT_LAZY_USER_PASSWORD=
+```
+
+最短確認コマンド
+
+```bash
+npm run test:e2e --project=setup
+npm run test:e2e -- smoke-test --project=chromium-staff
+```
+
+### 6 最初の成功体験
 
 次の順に実行すると、ローカル開発の基本導線を一通り確認できます。
 
@@ -73,7 +101,7 @@ npm run typecheck
 npm run test:unit
 ```
 
-### 6 最初の作業チケットで見るファイル
+### 7 最初の作業チケットで見るファイル
 
 初回は次の順で読むと、画面 ルーティング 機能分割の流れをつかみやすいです。
 
@@ -85,7 +113,7 @@ npm run test:unit
 - `src/widgets/README.md` ページ構成要素の責務 例 `widgets/layout/header`
 - `src/processes/README.md` 複数ページをまたぐ業務フローの責務 例 `processes/office-access`
 
-### 7 初回PRチェックリスト
+### 8 初回PRチェックリスト
 
 PR 作成前に次を確認してください。
 
