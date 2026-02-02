@@ -22,19 +22,23 @@ npm ci
 ### 2 環境変数
 
 アプリ起動や一部機能で `VITE_` 系の環境変数を参照します。  
-ローカル実行時は `.env.local` を作成してください。
+ローカル実行時は `.env.example` をもとに `.env.local` を作成してください。
 
-最小構成の例
+```bash
+cp .env.example .env.local
+```
+
+開発サーバー起動で最低限必要なキー
 
 ```bash
 VITE_BASE_PATH=http://localhost:5173
 VITE_TOKEN_SECRET=local-secret
-VITE_STANDARD_REGISTER_DISABLE=false
 ```
 
 補足
 
-- E2E テストを実行する場合は `PLAYWRIGHT_` 系の環境変数も必要です（`.env.example` を参照）
+- `VITE_STANDARD_REGISTER_DISABLE` などの追加キーは `.env.example` を参照してください
+- E2E テストを実行する場合は `PLAYWRIGHT_` 系の環境変数も設定してください
 
 ### 3 開発サーバー起動
 
