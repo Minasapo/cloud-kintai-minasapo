@@ -1,10 +1,6 @@
 setup:
 	./.devcontainer/setup.sh
 
-app-build:
-	npm isntall
-	npm run build
-
 start:
 	npm start
 
