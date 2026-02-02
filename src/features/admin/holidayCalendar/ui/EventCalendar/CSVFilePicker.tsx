@@ -47,29 +47,24 @@ export function CSVFilePicker({
     setOpen(false);
   };
 
-  const onSubmit = async () => {
-    if (uploadedData.length === 0) return;
+  const onSubmit = async (): Promise<boolean> => {
+    if (uploadedData.length === 0) return false;
 
     // eslint-disable-next-line no-alert
     const result = window.confirm(
       `以下の${uploadedData.length}件のデータを登録しますか？`,
     );
-    if (!result) return;
+    if (!result) return false;
 
     const eventCalendarMessage = EventCalendarMessage();
-    await bulkCreateEventCalendar(uploadedData)
-      .then(() =>
-        dispatch(
-          setSnackbarSuccess(
-            eventCalendarMessage.create(MessageStatus.SUCCESS),
-          ),
-        ),
-      )
-      .catch(() =>
-        dispatch(
-          setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR)),
-        ),
-      );
+    try {
+      await bulkCreateEventCalendar(uploadedData);
+      dispatch(setSnackbarSuccess(eventCalendarMessage.create(MessageStatus.SUCCESS)));
+      return true;
+    } catch {
+      dispatch(setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR)));
+      return false;
+    }
   };
 
   return (
@@ -86,9 +81,12 @@ export function CSVFilePicker({
         onClose={handleClose}
         PaperProps={{
           component: "form",
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+          onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            handleClose();
+            const isSucceeded = await onSubmit();
+            if (isSucceeded) {
+              handleClose();
+            }
           },
         }}
       >
@@ -112,7 +110,7 @@ export function CSVFilePicker({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>キャンセル</Button>
-          <Button type="submit" onClick={onSubmit}>
+          <Button type="submit">
             登録
           </Button>
         </DialogActions>
