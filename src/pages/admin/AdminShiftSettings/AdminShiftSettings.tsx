@@ -106,9 +106,18 @@ export default function AdminShiftSettings() {
 
   return (
     <Stack spacing={2.5}>
-      <Typography>
-        {SHIFT_GROUP_UI_TEXTS.intro}
-      </Typography>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle2">
+          {SHIFT_GROUP_UI_TEXTS.introTitle}
+        </Typography>
+        <Stack component="ul" sx={{ m: 0, pl: 3 }}>
+          {SHIFT_GROUP_UI_TEXTS.introBullets.map((text) => (
+            <Typography key={text} component="li" variant="body2">
+              {text}
+            </Typography>
+          ))}
+        </Stack>
+      </Stack>
       <Alert severity="info">
         {SHIFT_GROUP_UI_TEXTS.saveInfo}
       </Alert>
