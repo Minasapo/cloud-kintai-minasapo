@@ -63,7 +63,7 @@
     "@storybook/test": "^8.6.15",
     "@testing-library/dom": "^10.4.1",
     "@types/jest": "^30.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.53.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-af1b7da-20250417",
     "eslint-import-resolver-typescript": "^4.4.4",
