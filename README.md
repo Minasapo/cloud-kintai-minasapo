@@ -19,6 +19,13 @@ nvm use
 npm ci
 ```
 
+`npm ci` 実行時に `prepare` スクリプトで Git hooks を自動有効化します。  
+手動で有効化する場合は次を実行してください。
+
+```bash
+npm run hooks:install
+```
+
 ### 2 Amplify 設定の取得
 
 `src/aws-exports.js` は Git 管理対象外のため、初回セットアップ時に `amplify pull` で生成してください。

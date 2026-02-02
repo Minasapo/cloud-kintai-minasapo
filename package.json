@@ -91,7 +91,10 @@
     "test:coverage": "jest --coverage",
     "test:e2e": "npx playwright test",
     "test:e2e:setup": "npx playwright test --project=setup",
-    "test:all": "npm run test:unit && npm run test:e2e"
+    "test:all": "npm run test:unit && npm run test:e2e",
+    "hooks:install": "git config core.hooksPath .githooks",
+    "prepare": "npm run hooks:install",
+    "prepush:verify": "npm run typecheck && npm run test:unit"
   },
   "eslintConfig": {
     "extends": [
