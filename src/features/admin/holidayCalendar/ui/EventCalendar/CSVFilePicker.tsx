@@ -38,6 +38,7 @@ export function CSVFilePicker({
   const [uploadedData, setUploadedData] = useState<CreateEventCalendarInput[]>(
     [],
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -48,6 +49,7 @@ export function CSVFilePicker({
   };
 
   const onSubmit = async (): Promise<boolean> => {
+    if (isSubmitting) return false;
     if (uploadedData.length === 0) return false;
 
     // eslint-disable-next-line no-alert
@@ -57,6 +59,7 @@ export function CSVFilePicker({
     if (!result) return false;
 
     const eventCalendarMessage = EventCalendarMessage();
+    setIsSubmitting(true);
     try {
       await bulkCreateEventCalendar(uploadedData);
       dispatch(setSnackbarSuccess(eventCalendarMessage.create(MessageStatus.SUCCESS)));
@@ -64,6 +67,8 @@ export function CSVFilePicker({
     } catch {
       dispatch(setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR)));
       return false;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -109,9 +114,11 @@ export function CSVFilePicker({
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>キャンセル</Button>
-          <Button type="submit">
-            登録
+          <Button onClick={handleClose} disabled={isSubmitting}>
+            キャンセル
+          </Button>
+          <Button type="submit" disabled={isSubmitting || uploadedData.length === 0}>
+            {isSubmitting ? "登録中..." : "登録"}
           </Button>
         </DialogActions>
       </Dialog>
