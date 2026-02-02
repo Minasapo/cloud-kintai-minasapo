@@ -1,11 +1,15 @@
 import {
   CompanyHolidayCalendar,
   CreateCompanyHolidayCalendarInput,
+  CreateEventCalendarInput,
   CreateHolidayCalendarInput,
   DeleteCompanyHolidayCalendarInput,
+  DeleteEventCalendarInput,
   DeleteHolidayCalendarInput,
+  EventCalendar,
   HolidayCalendar,
   UpdateCompanyHolidayCalendarInput,
+  UpdateEventCalendarInput,
   UpdateHolidayCalendarInput,
 } from "@shared/api/graphql/types";
 import { createContext } from "react";
@@ -13,6 +17,7 @@ import { createContext } from "react";
 type AppContextProps = {
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
+  eventCalendars: EventCalendar[];
   createHolidayCalendar: (
     input: CreateHolidayCalendarInput
   ) => Promise<void | HolidayCalendar>;
@@ -35,11 +40,22 @@ type AppContextProps = {
   deleteCompanyHolidayCalendar: (
     input: DeleteCompanyHolidayCalendarInput
   ) => Promise<CompanyHolidayCalendar>;
+  createEventCalendar: (
+    input: CreateEventCalendarInput
+  ) => Promise<void | EventCalendar>;
+  bulkCreateEventCalendar: (
+    inputs: CreateEventCalendarInput[]
+  ) => Promise<EventCalendar[]>;
+  updateEventCalendar: (
+    input: UpdateEventCalendarInput
+  ) => Promise<EventCalendar>;
+  deleteEventCalendar: (input: DeleteEventCalendarInput) => Promise<void>;
 };
 
 export const AppContext = createContext<AppContextProps>({
   holidayCalendars: [],
   companyHolidayCalendars: [],
+  eventCalendars: [],
   createHolidayCalendar: async () => {
     return;
   },
@@ -63,5 +79,17 @@ export const AppContext = createContext<AppContextProps>({
   },
   deleteCompanyHolidayCalendar: async () => {
     return {} as CompanyHolidayCalendar;
+  },
+  createEventCalendar: async () => {
+    return;
+  },
+  bulkCreateEventCalendar: async () => {
+    return [];
+  },
+  updateEventCalendar: async () => {
+    return {} as EventCalendar;
+  },
+  deleteEventCalendar: async () => {
+    return;
   },
 });

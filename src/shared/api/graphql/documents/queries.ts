@@ -395,6 +395,44 @@ export const listCompanyHolidayCalendars = /* GraphQL */ `query ListCompanyHolid
   APITypes.ListCompanyHolidayCalendarsQueryVariables,
   APITypes.ListCompanyHolidayCalendarsQuery
 >;
+export const getEventCalendar = /* GraphQL */ `query GetEventCalendar($id: ID!) {
+  getEventCalendar(id: $id) {
+    id
+    eventDate
+    name
+    description
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetEventCalendarQueryVariables,
+  APITypes.GetEventCalendarQuery
+>;
+export const listEventCalendars = /* GraphQL */ `query ListEventCalendars(
+  $filter: ModelEventCalendarFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listEventCalendars(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      eventDate
+      name
+      description
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListEventCalendarsQueryVariables,
+  APITypes.ListEventCalendarsQuery
+>;
 export const getCloseDate = /* GraphQL */ `query GetCloseDate($id: ID!) {
   getCloseDate(id: $id) {
     id

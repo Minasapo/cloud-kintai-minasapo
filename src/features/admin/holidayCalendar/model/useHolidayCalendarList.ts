@@ -1,13 +1,16 @@
 import dayjs from "dayjs";
 import { ChangeEvent, useMemo, useState } from "react";
 
-export function sortCalendar<T extends { holidayDate: string }>(a: T, b: T) {
-  return dayjs(a.holidayDate).isBefore(dayjs(b.holidayDate)) ? 1 : -1;
+export function sortCalendar<T extends { holidayDate?: string; eventDate?: string }>(a: T, b: T) {
+  const dateA = a.holidayDate || a.eventDate || "";
+  const dateB = b.holidayDate || b.eventDate || "";
+  return dayjs(dateA).isBefore(dayjs(dateB)) ? 1 : -1;
 }
 
 type HolidayCalendarLike = {
   id?: string | null;
-  holidayDate: string;
+  holidayDate?: string;
+  eventDate?: string;
   name?: string;
   createdAt?: string | null;
 };
@@ -45,7 +48,8 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
 
   const filtered = useMemo(() => {
     return sorted.filter((hc) => {
-      const date = dayjs(hc.holidayDate);
+      const dateStr = hc.holidayDate || hc.eventDate || "";
+      const date = dayjs(dateStr);
 
       // Support filtering by year+month, year only, or month only.
       if (selectedYear !== "" && selectedMonth !== "") {

@@ -8,14 +8,19 @@ import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
   useBulkCreateCompanyHolidayCalendarsMutation,
+  useBulkCreateEventCalendarsMutation,
   useBulkCreateHolidayCalendarsMutation,
   useCreateCompanyHolidayCalendarMutation,
+  useCreateEventCalendarMutation,
   useCreateHolidayCalendarMutation,
   useDeleteCompanyHolidayCalendarMutation,
+  useDeleteEventCalendarMutation,
   useDeleteHolidayCalendarMutation,
   useGetCompanyHolidayCalendarsQuery,
+  useGetEventCalendarsQuery,
   useGetHolidayCalendarsQuery,
   useUpdateCompanyHolidayCalendarMutation,
+  useUpdateEventCalendarMutation,
   useUpdateHolidayCalendarMutation,
 } from "@entities/calendar/api/calendarApi";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
@@ -209,6 +214,8 @@ export default function Layout() {
   } = useGetCompanyHolidayCalendarsQuery(undefined, {
     skip: !isAuthenticated,
   });
+  const { data: eventCalendars = [], isLoading: eventCalendarLoading } =
+    useGetEventCalendarsQuery(undefined, { skip: !isAuthenticated });
 
   const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
   const [bulkCreateHolidayCalendarsMutation] =
@@ -224,6 +231,12 @@ export default function Layout() {
     useUpdateCompanyHolidayCalendarMutation();
   const [deleteCompanyHolidayCalendarMutation] =
     useDeleteCompanyHolidayCalendarMutation();
+
+  const [createEventCalendarMutation] = useCreateEventCalendarMutation();
+  const [bulkCreateEventCalendarsMutation] =
+    useBulkCreateEventCalendarsMutation();
+  const [updateEventCalendarMutation] = useUpdateEventCalendarMutation();
+  const [deleteEventCalendarMutation] = useDeleteEventCalendarMutation();
 
   const createHolidayCalendar = useCallback(
     async (input: Parameters<typeof createHolidayCalendarMutation>[0]) => {
@@ -298,6 +311,37 @@ export default function Layout() {
       return result;
     },
     [deleteCompanyHolidayCalendarMutation]
+  );
+
+  const createEventCalendar = useCallback(
+    async (input: Parameters<typeof createEventCalendarMutation>[0]) => {
+      const result = await createEventCalendarMutation(input).unwrap();
+      return result;
+    },
+    [createEventCalendarMutation]
+  );
+
+  const bulkCreateEventCalendar = useCallback(
+    async (inputs: Parameters<typeof bulkCreateEventCalendarsMutation>[0]) => {
+      const result = await bulkCreateEventCalendarsMutation(inputs).unwrap();
+      return result;
+    },
+    [bulkCreateEventCalendarsMutation]
+  );
+
+  const updateEventCalendar = useCallback(
+    async (input: Parameters<typeof updateEventCalendarMutation>[0]) => {
+      const result = await updateEventCalendarMutation(input).unwrap();
+      return result;
+    },
+    [updateEventCalendarMutation]
+  );
+
+  const deleteEventCalendar = useCallback(
+    async (input: Parameters<typeof deleteEventCalendarMutation>[0]) => {
+      await deleteEventCalendarMutation(input).unwrap();
+    },
+    [deleteEventCalendarMutation]
   );
 
   const isAdminUser = useMemo(
@@ -454,6 +498,7 @@ export default function Layout() {
     () => ({
       holidayCalendars,
       companyHolidayCalendars,
+      eventCalendars,
       createHolidayCalendar,
       bulkCreateHolidayCalendar,
       updateHolidayCalendar,
@@ -462,10 +507,15 @@ export default function Layout() {
       bulkCreateCompanyHolidayCalendar,
       updateCompanyHolidayCalendar,
       deleteCompanyHolidayCalendar,
+      createEventCalendar,
+      bulkCreateEventCalendar,
+      updateEventCalendar,
+      deleteEventCalendar,
     }),
     [
       holidayCalendars,
       companyHolidayCalendars,
+      eventCalendars,
       createHolidayCalendar,
       bulkCreateHolidayCalendar,
       updateHolidayCalendar,
@@ -474,6 +524,10 @@ export default function Layout() {
       bulkCreateCompanyHolidayCalendar,
       updateCompanyHolidayCalendar,
       deleteCompanyHolidayCalendar,
+      createEventCalendar,
+      bulkCreateEventCalendar,
+      updateEventCalendar,
+      deleteEventCalendar,
     ]
   );
 
@@ -496,6 +550,7 @@ export default function Layout() {
     appConfigLoading ||
     holidayCalendarLoading ||
     companyHolidayCalendarLoading ||
+    eventCalendarLoading ||
     shouldBlockUnauthenticated
   ) {
     return (

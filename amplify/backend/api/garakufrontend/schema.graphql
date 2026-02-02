@@ -66,6 +66,13 @@ type CompanyHolidayCalendar @model @auth(rules: [{ allow: private }]) {
   name: String!
 }
 
+type EventCalendar @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  eventDate: String!
+  name: String!
+  description: String
+}
+
 type CloseDate @model @auth(rules: [{ allow: private }]) {
   id: ID!
   closeDate: String!

@@ -476,6 +476,45 @@ export type DeleteCompanyHolidayCalendarInput = {
   id: string,
 };
 
+export type CreateEventCalendarInput = {
+  id?: string | null,
+  eventDate: string,
+  name: string,
+  description?: string | null,
+};
+
+export type ModelEventCalendarConditionInput = {
+  eventDate?: ModelStringInput | null,
+  name?: ModelStringInput | null,
+  description?: ModelStringInput | null,
+  and?: Array< ModelEventCalendarConditionInput | null > | null,
+  or?: Array< ModelEventCalendarConditionInput | null > | null,
+  not?: ModelEventCalendarConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type EventCalendar = {
+  __typename: "EventCalendar",
+  id: string,
+  eventDate: string,
+  name: string,
+  description?: string | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateEventCalendarInput = {
+  id: string,
+  eventDate?: string | null,
+  name?: string | null,
+  description?: string | null,
+};
+
+export type DeleteEventCalendarInput = {
+  id: string,
+};
+
 export type CreateCloseDateInput = {
   id?: string | null,
   closeDate: string,
@@ -1548,6 +1587,24 @@ export type ModelCompanyHolidayCalendarConnection = {
   nextToken?: string | null,
 };
 
+export type ModelEventCalendarFilterInput = {
+  id?: ModelIDInput | null,
+  eventDate?: ModelStringInput | null,
+  name?: ModelStringInput | null,
+  description?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelEventCalendarFilterInput | null > | null,
+  or?: Array< ModelEventCalendarFilterInput | null > | null,
+  not?: ModelEventCalendarFilterInput | null,
+};
+
+export type ModelEventCalendarConnection = {
+  __typename: "ModelEventCalendarConnection",
+  items:  Array<EventCalendar | null >,
+  nextToken?: string | null,
+};
+
 export type ModelCloseDateFilterInput = {
   id?: ModelIDInput | null,
   closeDate?: ModelStringInput | null,
@@ -1889,6 +1946,17 @@ export type ModelSubscriptionCompanyHolidayCalendarFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionCompanyHolidayCalendarFilterInput | null > | null,
   or?: Array< ModelSubscriptionCompanyHolidayCalendarFilterInput | null > | null,
+};
+
+export type ModelSubscriptionEventCalendarFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  eventDate?: ModelSubscriptionStringInput | null,
+  name?: ModelSubscriptionStringInput | null,
+  description?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionEventCalendarFilterInput | null > | null,
+  or?: Array< ModelSubscriptionEventCalendarFilterInput | null > | null,
 };
 
 export type ModelSubscriptionCloseDateFilterInput = {
@@ -2495,6 +2563,57 @@ export type DeleteCompanyHolidayCalendarMutation = {
     id: string,
     holidayDate: string,
     name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateEventCalendarMutationVariables = {
+  input: CreateEventCalendarInput,
+  condition?: ModelEventCalendarConditionInput | null,
+};
+
+export type CreateEventCalendarMutation = {
+  createEventCalendar?:  {
+    __typename: "EventCalendar",
+    id: string,
+    eventDate: string,
+    name: string,
+    description?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateEventCalendarMutationVariables = {
+  input: UpdateEventCalendarInput,
+  condition?: ModelEventCalendarConditionInput | null,
+};
+
+export type UpdateEventCalendarMutation = {
+  updateEventCalendar?:  {
+    __typename: "EventCalendar",
+    id: string,
+    eventDate: string,
+    name: string,
+    description?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteEventCalendarMutationVariables = {
+  input: DeleteEventCalendarInput,
+  condition?: ModelEventCalendarConditionInput | null,
+};
+
+export type DeleteEventCalendarMutation = {
+  deleteEventCalendar?:  {
+    __typename: "EventCalendar",
+    id: string,
+    eventDate: string,
+    name: string,
+    description?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3913,6 +4032,44 @@ export type ListCompanyHolidayCalendarsQuery = {
       id: string,
       holidayDate: string,
       name: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetEventCalendarQueryVariables = {
+  id: string,
+};
+
+export type GetEventCalendarQuery = {
+  getEventCalendar?:  {
+    __typename: "EventCalendar",
+    id: string,
+    eventDate: string,
+    name: string,
+    description?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListEventCalendarsQueryVariables = {
+  filter?: ModelEventCalendarFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListEventCalendarsQuery = {
+  listEventCalendars?:  {
+    __typename: "ModelEventCalendarConnection",
+    items:  Array< {
+      __typename: "EventCalendar",
+      id: string,
+      eventDate: string,
+      name: string,
+      description?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5408,6 +5565,54 @@ export type OnDeleteCompanyHolidayCalendarSubscription = {
     id: string,
     holidayDate: string,
     name: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateEventCalendarSubscriptionVariables = {
+  filter?: ModelSubscriptionEventCalendarFilterInput | null,
+};
+
+export type OnCreateEventCalendarSubscription = {
+  onCreateEventCalendar?:  {
+    __typename: "EventCalendar",
+    id: string,
+    eventDate: string,
+    name: string,
+    description?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateEventCalendarSubscriptionVariables = {
+  filter?: ModelSubscriptionEventCalendarFilterInput | null,
+};
+
+export type OnUpdateEventCalendarSubscription = {
+  onUpdateEventCalendar?:  {
+    __typename: "EventCalendar",
+    id: string,
+    eventDate: string,
+    name: string,
+    description?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteEventCalendarSubscriptionVariables = {
+  filter?: ModelSubscriptionEventCalendarFilterInput | null,
+};
+
+export type OnDeleteEventCalendarSubscription = {
+  onDeleteEventCalendar?:  {
+    __typename: "EventCalendar",
+    id: string,
+    eventDate: string,
+    name: string,
+    description?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
