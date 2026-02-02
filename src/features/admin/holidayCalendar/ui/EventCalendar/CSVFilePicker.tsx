@@ -39,12 +39,15 @@ export function CSVFilePicker({
     [],
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleClickOpen = () => {
+    setSubmitError(null);
     setOpen(true);
   };
 
   const handleClose = () => {
+    setSubmitError(null);
     setOpen(false);
   };
 
@@ -59,6 +62,7 @@ export function CSVFilePicker({
     if (!result) return false;
 
     const eventCalendarMessage = EventCalendarMessage();
+    setSubmitError(null);
     setIsSubmitting(true);
     try {
       await bulkCreateEventCalendar(uploadedData);
@@ -66,6 +70,7 @@ export function CSVFilePicker({
       return true;
     } catch {
       dispatch(setSnackbarError(eventCalendarMessage.create(MessageStatus.ERROR)));
+      setSubmitError("登録に失敗しました。内容を確認して再度お試しください。");
       return false;
     } finally {
       setIsSubmitting(false);
@@ -107,10 +112,18 @@ export function CSVFilePicker({
             <Typography variant="body1">
               ファイルを選択してください。
             </Typography>
-            <FileInput setUploadedData={setUploadedData} />
+            <FileInput
+              setUploadedData={setUploadedData}
+              onFileSelected={() => setSubmitError(null)}
+            />
             <Typography variant="body1">
               ファイルを選択したら、登録ボタンを押してください。
             </Typography>
+            {submitError && (
+              <Typography variant="body2" color="error">
+                {submitError}
+              </Typography>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -128,10 +141,12 @@ export function CSVFilePicker({
 
 function FileInput({
   setUploadedData,
+  onFileSelected,
 }: {
   setUploadedData: React.Dispatch<
     React.SetStateAction<CreateEventCalendarInput[]>
   >;
+  onFileSelected: () => void;
 }) {
   const [name, setName] = useState<string | undefined>();
 
@@ -148,6 +163,7 @@ function FileInput({
             const file = event.target.files?.item(0);
             if (!file) return;
 
+            onFileSelected();
             setName(file.name);
 
             const reader = new FileReader();
