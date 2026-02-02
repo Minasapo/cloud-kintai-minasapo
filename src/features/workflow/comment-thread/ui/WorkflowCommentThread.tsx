@@ -49,7 +49,12 @@ export default function WorkflowCommentThread({
       </Typography>
       <Paper
         variant="outlined"
-        sx={{ p: 2, maxHeight: PANEL_HEIGHTS.SCROLLABLE_MAX, overflow: "auto" }}
+        sx={{
+          p: 2,
+          maxHeight: PANEL_HEIGHTS.SCROLLABLE_MAX,
+          overflow: "auto",
+          bgcolor: "background.paper",
+        }}
       >
         <Stack spacing={2}>
           {messages.map((m) => {
@@ -64,13 +69,13 @@ export default function WorkflowCommentThread({
               : displayName.slice(0, 1);
             const isSystem = m.staffId === "system";
             const isMine = Boolean(
-              currentStaff && m.staffId === currentStaff.id
+              currentStaff && m.staffId === currentStaff.id,
             );
             const avatarBg = isSystem
               ? "grey.500"
               : isMine
-              ? "primary.main"
-              : "secondary.main";
+                ? "primary.main"
+                : "secondary.main";
             const expanded = Boolean(expandedMessages[m.id]);
             const long = shouldTruncateWorkflowMessage(m.text, expanded);
 
@@ -185,6 +190,12 @@ export default function WorkflowCommentThread({
             }
           }}
           disabled={sending}
+          sx={{
+            bgcolor: "background.paper",
+            "& .MuiInputBase-root": {
+              bgcolor: "background.paper",
+            },
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
