@@ -132,6 +132,15 @@ PR 作成前に次を確認してください。
 
 ## よくある詰まりどころ
 
+### `Cannot find module './aws-exports'` が出る
+
+`src/aws-exports.js` が未生成の状態です。  
+`amplify pull` を実行して設定を取得してください。
+
+```bash
+npx @aws-amplify/cli pull --appId <your-app-id> --envName <your-env-name>
+```
+
 ### `npm WARN EBADENGINE` が出る
 
 Node.js 23 系以上で `npm ci` / `npm install` を実行すると `jest@30` 由来の `npm WARN EBADENGINE` が出る場合があります。  
@@ -143,4 +152,13 @@ npm_config_engine_strict=false npm ci
 
 # もしくはグローバル設定
 npm config set engine-strict false
+```
+
+### `browserType.launch: Executable doesn't exist` が出る
+
+Playwright ブラウザが未インストールの状態です。  
+次を実行してブラウザをインストールしてください。
+
+```bash
+npx playwright install --with-deps
 ```
