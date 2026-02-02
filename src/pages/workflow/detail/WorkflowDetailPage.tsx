@@ -23,12 +23,12 @@ import {
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { designTokenVar } from "@/shared/designSystem";
-import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 import { PageSection } from "@/shared/ui/layout";
 
 const SECTION_GAP = designTokenVar("spacing.xl", "24px");

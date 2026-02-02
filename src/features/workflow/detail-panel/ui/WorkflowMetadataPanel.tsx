@@ -2,7 +2,7 @@ import { Grid, Typography } from "@mui/material";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 
-import { formatDateSlash } from "@/shared/lib/date";
+import { formatDateSlash } from "@/shared/lib/time";
 
 import type { WorkflowApprovalStepView } from "../../approval-flow/types";
 import WorkflowApprovalTimeline from "../../approval-flow/ui/WorkflowApprovalTimeline";

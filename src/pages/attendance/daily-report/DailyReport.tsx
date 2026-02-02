@@ -45,7 +45,7 @@ import { useSearchParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
+import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 /**
@@ -446,6 +446,12 @@ export default function DailyReport() {
   }, [fetchReports]);
 
   useEffect(() => {
+    // selectedReportIdが明示的に"create"の場合は作成フォームを保持
+    // 自動保存によってreportForCalendarDateが作成されても遷移しない
+    if (selectedReportId === "create") {
+      return;
+    }
+
     if (reports.length === 0) {
       // 日報が一つもない場合は何も表示しない
       setSelectedReportId(null);
@@ -464,12 +470,6 @@ export default function DailyReport() {
 
     const calendarKey = calendarDate.format("YYYY-MM-DD");
     const reportForCalendarDate = reportsByDate.get(calendarKey) ?? null;
-
-    // selectedReportIdが明示的に"create"の場合は作成フォームを保持
-    // 自動保存によってreportForCalendarDateが作成されても遷移しない
-    if (selectedReportId === "create") {
-      return;
-    }
 
     // 初回ロード時や日付変更時：データがある場合のみ詳細画面を表示
     if (!selectedReportId && reportForCalendarDate) {

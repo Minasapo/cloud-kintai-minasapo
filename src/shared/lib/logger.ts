@@ -82,8 +82,13 @@ export class Logger {
 /**
  * Create a logger instance for a specific namespace.
  * @param namespace - The namespace for the logger (e.g., 'AttendanceEdit', 'AdminStaff')
- * @param level - Optional log level override
+ * @param options - Optional settings (or log level for backward compatibility)
  */
-export const createLogger = (namespace: string, level?: LogLevel): Logger => {
+export const createLogger = (
+  namespace: string,
+  options?: LogLevel | { level?: LogLevel }
+): Logger => {
+  const level =
+    typeof options === "string" ? options : options?.level;
   return new Logger(namespace, level);
 };

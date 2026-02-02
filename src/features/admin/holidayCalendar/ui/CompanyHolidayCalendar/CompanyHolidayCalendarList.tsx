@@ -35,7 +35,7 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
 import { useHolidayCalendarList } from "@/features/admin/holidayCalendar/model/useHolidayCalendarList";
-import { CompanyHolidayCalenderMessage } from "@/shared/lib/message/CompanyHolidayCalenderMessage";
+import { CompanyHolidayCalendarMessage } from "@/shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
@@ -145,19 +145,19 @@ export default function CompanyHolidayCalendarList() {
     }
 
     const id = companyHolidayCalendar.id;
-    const companyHolidayCalenderMessage = new CompanyHolidayCalenderMessage();
+    const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
     await deleteCompanyHolidayCalendar({ id })
       .then(() =>
         dispatch(
           setSnackbarSuccess(
-            companyHolidayCalenderMessage.delete(MessageStatus.SUCCESS)
+            companyHolidayCalendarMessage.delete(MessageStatus.SUCCESS)
           )
         )
       )
       .catch(() =>
         dispatch(
           setSnackbarError(
-            companyHolidayCalenderMessage.delete(MessageStatus.ERROR)
+            companyHolidayCalendarMessage.delete(MessageStatus.ERROR)
           )
         )
       );
