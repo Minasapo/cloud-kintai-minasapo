@@ -55,6 +55,18 @@ npm run typecheck
 npm run test:unit
 ```
 
+### 5 最初の作業チケットで見るファイル
+
+初回は次の順で読むと、画面 ルーティング 機能分割の流れをつかみやすいです。
+
+- `src/router.tsx` 画面遷移とルート定義の入口
+- `src/pages/admin/AdminShiftSettings/AdminShiftSettings.tsx` 管理画面の実装例
+- `src/features/README.md` 機能単位の責務
+- `src/entities/README.md` ドメイン層の責務
+- `src/shared/README.md` 共通部品の責務
+- `src/widgets/README.md` ページ構成要素の責務
+- `src/processes/README.md` 複数ページをまたぐ業務フローの責務
+
 ## よくある詰まりどころ
 
 ### `npm WARN EBADENGINE` が出る
