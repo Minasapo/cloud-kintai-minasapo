@@ -80,7 +80,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           size="small"
           label="説明"
           helperText={SHIFT_GROUP_UI_TEXTS.descriptionHelperText}
-          inputProps={{ maxLength: 48 }}
+          inputProps={{ maxLength: 50 }}
           fullWidth
         />
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
