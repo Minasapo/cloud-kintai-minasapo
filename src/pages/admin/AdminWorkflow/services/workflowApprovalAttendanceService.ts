@@ -10,23 +10,23 @@ import dayjs from "dayjs";
 
 type WorkflowData = NonNullable<GetWorkflowQuery["getWorkflow"]>;
 
-type StaffLike = {
+export type StaffLike = {
   id: string;
   cognitoUserId?: string | null;
   familyName?: string | null;
   givenName?: string | null;
 };
 
-type AttendanceQueryTrigger = (arg: {
+export type AttendanceQueryTrigger = (arg: {
   staffId: string;
   workDate: string;
 }) => { unwrap: () => Promise<Attendance | null> };
 
-type CreateAttendanceTrigger = (
+export type CreateAttendanceTrigger = (
   input: CreateAttendanceInput
 ) => { unwrap: () => Promise<Attendance> };
 
-type UpdateAttendanceTrigger = (
+export type UpdateAttendanceTrigger = (
   input: UpdateAttendanceInput
 ) => { unwrap: () => Promise<Attendance> };
 
