@@ -7,22 +7,22 @@ describe("Message generator", () => {
     const msg = createMessage("テストカテゴリ");
 
     expect(msg.create(MessageStatus.SUCCESS)).toBe(
-      "テストカテゴリを作成しました"
+      "テストカテゴリを作成しました",
     );
     expect(msg.update(MessageStatus.SUCCESS)).toBe(
-      "テストカテゴリを更新しました"
+      "テストカテゴリを更新しました",
     );
     expect(msg.delete(MessageStatus.SUCCESS)).toBe(
-      "テストカテゴリを削除しました"
+      "テストカテゴリを削除しました",
     );
-    expect(msg.get(MessageStatus.SUCCESS)).toBe("テストカテゴリを作成しました");
+    expect(msg.get(MessageStatus.SUCCESS)).toBe("テストカテゴリを取得しました");
   });
 
   it("generates error messages with code", () => {
     const msg = createMessage("テストカテゴリ");
 
     expect(msg.create(MessageStatus.ERROR)).toContain(
-      "テストカテゴリの作成に失敗しました"
+      "テストカテゴリの作成に失敗しました",
     );
     expect(msg.create(MessageStatus.ERROR)).toMatch(/\(E\d{2}\d{3}\)/);
   });
@@ -33,7 +33,7 @@ describe("HolidayCalendarMessage", () => {
     const msg = HolidayCalendarMessage();
 
     expect(msg.create(MessageStatus.SUCCESS)).toBe(
-      "休日カレンダーを作成しました"
+      "休日カレンダーを作成しました",
     );
   });
 });
@@ -43,7 +43,7 @@ describe("CompanyHolidayCalendarMessage", () => {
     const msg = CompanyHolidayCalendarMessage();
 
     expect(msg.update(MessageStatus.SUCCESS)).toBe(
-      "会社休日カレンダーを更新しました"
+      "会社休日カレンダーを更新しました",
     );
   });
 });
