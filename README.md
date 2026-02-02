@@ -130,6 +130,42 @@ PR 作成前に次を確認してください。
 - 変更した画面の表示崩れがないこと（PC とモバイルの主要表示）
 - 既存機能への影響がないこと（最低1つの関連画面で動作確認）
 
+## 初回30分チェックリスト
+
+```bash
+# 1) 依存関係インストールと hooks 有効化
+npm ci
+
+# 2) Amplify 設定取得（値は管理者に確認）
+npx @aws-amplify/cli pull --appId <your-app-id> --envName <your-env-name>
+
+# 3) 環境変数ファイル作成
+cp .env.example .env.local
+
+# 4) アプリ起動
+npm start
+
+# 5) 静的チェック
+npm run lint
+npm run typecheck
+
+# 6) 単体テスト
+npm run test:unit
+
+# 7) E2E 最短確認
+npx playwright install --with-deps
+npm run test:e2e --project=setup
+npm run test:e2e -- smoke-test --project=chromium-staff
+```
+
+成功条件（目安）
+
+- `npm start`: アプリが起動し、ログイン画面へアクセスできる
+- `npm run lint` / `npm run typecheck`: エラー 0 件で完了
+- `npm run test:unit`: 失敗なしで完了
+- `npm run test:e2e --project=setup`: `playwright/.auth/` に認証状態ファイルが生成される
+- `npm run test:e2e -- smoke-test --project=chromium-staff`: 全テストが通る
+
 ## よくある詰まりどころ
 
 ### `Cannot find module './aws-exports'` が出る
