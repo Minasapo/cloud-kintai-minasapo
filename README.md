@@ -19,7 +19,21 @@ nvm use
 npm ci
 ```
 
-### 2 環境変数
+### 2 Amplify 設定の取得
+
+`src/aws-exports.js` は Git 管理対象外のため、初回セットアップ時に `amplify pull` で生成してください。
+
+```bash
+# appId / envName は管理者に確認した値を指定
+npx @aws-amplify/cli pull --appId <your-app-id> --envName <your-env-name>
+```
+
+補足
+
+- 実行時に AWS 認証情報が必要です（`aws configure` 済みのプロファイルなど）
+- `appId` / `envName` が不明な場合は、必ずプロジェクト管理者に確認してください
+
+### 3 環境変数
 
 アプリ起動や一部機能で `VITE_` 系の環境変数を参照します。  
 ローカル実行時は `.env.example` をもとに `.env.local` を作成してください。
@@ -40,7 +54,7 @@ VITE_TOKEN_SECRET=local-secret
 - `VITE_STANDARD_REGISTER_DISABLE` などの追加キーは `.env.example` を参照してください
 - E2E テストを実行する場合は `PLAYWRIGHT_` 系の環境変数も設定してください
 
-### 3 開発サーバー起動
+### 4 開発サーバー起動
 
 ```bash
 npm start
@@ -49,7 +63,7 @@ npm start
 `npm start` は Vite の開発サーバーを起動します。  
 `make start` でも同じコマンドが呼ばれます。
 
-### 4 最初の成功体験
+### 5 最初の成功体験
 
 次の順に実行すると、ローカル開発の基本導線を一通り確認できます。
 
@@ -59,7 +73,7 @@ npm run typecheck
 npm run test:unit
 ```
 
-### 5 最初の作業チケットで見るファイル
+### 6 最初の作業チケットで見るファイル
 
 初回は次の順で読むと、画面 ルーティング 機能分割の流れをつかみやすいです。
 
@@ -71,7 +85,7 @@ npm run test:unit
 - `src/widgets/README.md` ページ構成要素の責務 例 `widgets/layout/header`
 - `src/processes/README.md` 複数ページをまたぐ業務フローの責務 例 `processes/office-access`
 
-### 6 初回PRチェックリスト
+### 7 初回PRチェックリスト
 
 PR 作成前に次を確認してください。
 
