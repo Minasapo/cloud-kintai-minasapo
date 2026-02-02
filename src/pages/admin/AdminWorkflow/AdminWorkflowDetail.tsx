@@ -11,16 +11,12 @@ import {
 import {
   ApprovalStatus,
   ApprovalStep,
-  ApprovalStepInput,
   GetWorkflowQuery,
   UpdateWorkflowInput,
   WorkflowCategory,
-  WorkflowComment,
-  WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -32,11 +28,7 @@ import {
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@/entities/attendance/api/attendanceApi";
-import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
-import {
-  CLOCK_CORRECTION_CHECK_OUT_LABEL,
-  getWorkflowCategoryLabel,
-} from "@/entities/workflow/lib/workflowLabels";
+import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import { createLogger } from "@/shared/lib/logger";
 import {
@@ -47,6 +39,17 @@ import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 
 import WorkflowCommentSection from "./components/WorkflowCommentSection";
 import { useWorkflowDetailData } from "./hooks/useWorkflowDetailData";
+import {
+  buildApprovalStepInputs,
+  createSystemComment,
+  mapCommentsToInputs,
+  resolvePendingApprovalStepIndex,
+} from "./services/approvalWorkflowHelpers";
+import {
+  processClockCorrectionApprovalAttendance,
+  processPaidLeaveApprovalAttendance,
+  WorkflowApprovalUserError,
+} from "./services/workflowApprovalAttendanceService";
 
 const logger = createLogger("AdminWorkflowDetail");
 
@@ -209,49 +212,12 @@ export default function AdminWorkflowDetail() {
     }
 
     return base;
-  }, [workflow, staffName, applicationDate, approverInfo]);
+  }, [workflow, staffs, staffName, applicationDate, approverInfo]);
 
-  const buildApprovalStepInputs = () => {
-    if (!workflow?.id) return [] as ApprovalStepInput[];
-    let steps: ApprovalStepInput[] = [];
-    if (workflow.approvalSteps && workflow.approvalSteps.length > 0) {
-      steps = (workflow.approvalSteps as ApprovalStep[]).map((s) => ({
-        id: s.id,
-        approverStaffId: s.approverStaffId,
-        decisionStatus: s.decisionStatus as ApprovalStatus,
-        approverComment: s.approverComment ?? null,
-        decisionTimestamp: s.decisionTimestamp ?? null,
-        stepOrder: s.stepOrder ?? 0,
-      }));
-    } else if (
-      workflow.assignedApproverStaffIds &&
-      workflow.assignedApproverStaffIds.length > 0
-    ) {
-      steps = (workflow.assignedApproverStaffIds || []).map((aid, idx) => ({
-        id: `s-${idx}-${workflow.id}`,
-        approverStaffId: aid || "",
-        decisionStatus: ApprovalStatus.PENDING,
-        approverComment: null,
-        decisionTimestamp: null,
-        stepOrder: idx,
-      }));
-    }
-
-    if (steps.length === 0) {
-      steps = [
-        {
-          id: `fallback-${workflow.id}`,
-          approverStaffId: "ADMINS",
-          decisionStatus: ApprovalStatus.PENDING,
-          approverComment: null,
-          decisionTimestamp: null,
-          stepOrder: 0,
-        },
-      ];
-    }
-
-    return steps;
-  };
+  const resolveCurrentStaff = () =>
+    cognitoUser?.id
+      ? staffs.find((staff) => staff.cognitoUserId === cognitoUser.id)
+      : undefined;
 
   const handleApprove = async () => {
     if (!workflow?.id) return;
@@ -260,9 +226,8 @@ export default function AdminWorkflowDetail() {
       return;
     }
     if (!window.confirm("この申請を承認しますか？")) return;
-    const currentStaffLocal = cognitoUser?.id
-      ? staffs.find((s) => s.cognitoUserId === cognitoUser.id)
-      : undefined;
+
+    const currentStaffLocal = resolveCurrentStaff();
     if (!currentStaffLocal?.id) {
       dispatch(
         setSnackbarError("承認を実行するユーザー情報が取得できませんでした。")
@@ -271,27 +236,12 @@ export default function AdminWorkflowDetail() {
     }
 
     try {
-      // prepare approvalSteps
-      const steps = buildApprovalStepInputs();
-
-      // determine which step to update
-      let idxToUpdate = -1;
-      const pendingIndex = steps.findIndex(
-        (st) => st.decisionStatus === ApprovalStatus.PENDING
+      const steps = buildApprovalStepInputs(workflow);
+      const idxToUpdate = resolvePendingApprovalStepIndex(
+        steps,
+        workflow.nextApprovalStepIndex
       );
-      if (typeof workflow.nextApprovalStepIndex === "number") {
-        const candidate = workflow.nextApprovalStepIndex;
-        if (
-          candidate >= 0 &&
-          candidate < steps.length &&
-          steps[candidate].decisionStatus === ApprovalStatus.PENDING
-        ) {
-          idxToUpdate = candidate;
-        }
-      }
-      if (idxToUpdate < 0) {
-        idxToUpdate = pendingIndex;
-      }
+
       if (idxToUpdate < 0) {
         dispatch(
           setSnackbarError("承認可能なステップが見つかりませんでした。")
@@ -299,7 +249,6 @@ export default function AdminWorkflowDetail() {
         return;
       }
 
-      // update the target step
       steps[idxToUpdate] = {
         ...steps[idxToUpdate],
         decisionStatus: ApprovalStatus.APPROVED,
@@ -307,45 +256,21 @@ export default function AdminWorkflowDetail() {
         approverComment: null,
       };
 
-      // update summary arrays
       const approved = Array.from(
         new Set([...(workflow.approvedStaffIds || []), currentStaffLocal.id])
       );
 
-      // determine finalization: ANY mode or all steps approved
-      let isFinal = false;
-      if (workflow.submitterApproverMultipleMode === "ANY") {
-        isFinal = true;
-      } else {
-        const anyPending = steps.some(
-          (s) => s.decisionStatus === ApprovalStatus.PENDING
-        );
-        if (!anyPending) isFinal = true;
-      }
+      const isFinal =
+        workflow.submitterApproverMultipleMode === "ANY" ||
+        !steps.some((step) => step.decisionStatus === ApprovalStatus.PENDING);
 
       const updatedStatus = isFinal ? WorkflowStatus.APPROVED : workflow.status;
       const finalDecisionTimestamp = isFinal
         ? new Date().toISOString()
         : workflow.finalDecisionTimestamp;
-
       const nextIdx = isFinal
         ? null
-        : steps.findIndex((s) => s.decisionStatus === ApprovalStatus.PENDING);
-
-      const existingComments = (workflow.comments || [])
-        .filter((c): c is WorkflowComment => Boolean(c))
-        .map((c) => ({
-          id: c.id,
-          staffId: c.staffId,
-          text: c.text,
-          createdAt: c.createdAt,
-        }));
-      const sysComment: WorkflowCommentInput = {
-        id: `c-${Date.now()}`,
-        staffId: "system",
-        text: "申請を承認しました",
-        createdAt: new Date().toISOString(),
-      };
+        : resolvePendingApprovalStepIndex(steps, undefined);
 
       const inputForUpdate: UpdateWorkflowInput = {
         id: workflow.id,
@@ -354,7 +279,10 @@ export default function AdminWorkflowDetail() {
         status: updatedStatus,
         finalDecisionTimestamp,
         nextApprovalStepIndex: nextIdx ?? undefined,
-        comments: [...existingComments, sysComment],
+        comments: [
+          ...mapCommentsToInputs(workflow.comments),
+          createSystemComment("申請を承認しました"),
+        ],
       };
 
       const updated = (await updateWorkflow(inputForUpdate)) as NonNullable<
@@ -362,44 +290,32 @@ export default function AdminWorkflowDetail() {
       >;
       setWorkflow(updated);
 
-      // 有給休暇申請の場合、承認時に申請期間の勤怠データへ有給フラグを立て、規定勤務時刻を設定する
       if (isFinal && updated.category === WorkflowCategory.PAID_LEAVE) {
         try {
-          // overTimeDetails.startTime / endTime に 'YYYY-MM-DD' 形式で期間が格納されている
-          const startDateStr = updated.overTimeDetails?.startTime ?? null;
-          const endDateStr = updated.overTimeDetails?.endTime ?? null;
+          const result = await processPaidLeaveApprovalAttendance({
+            workflow: updated,
+            staffs,
+            getStartTime,
+            getEndTime,
+            getLunchRestStartTime,
+            getLunchRestEndTime,
+            getAttendanceByStaffAndDate,
+            createAttendance,
+            updateAttendance,
+          });
 
-          if (!startDateStr || !endDateStr) {
-            console.warn("有給期間が不明のため勤怠設定をスキップします");
+          if (result.kind === "updated") {
+            dispatch(
+              setSnackbarSuccess("有給休暇申請を承認し、勤怠データを更新しました")
+            );
+          } else if (result.reason === "missing_period") {
             dispatch(
               setSnackbarSuccess(
                 "有給申請を承認しました（勤怠情報の更新はスキップ）"
               )
             );
             return;
-          }
-
-          const applicantStaff = staffs.find((s) => s.id === updated.staffId);
-          const targetStaffId =
-            applicantStaff?.cognitoUserId || updated.staffId;
-
-          if (!applicantStaff) {
-            console.warn(
-              `⚠️ ワークフロー申請者（staffId: ${updated.staffId}）が見つかりません。`
-            );
-          }
-
-          // AppConfig 規定の勤務開始・終了・休憩時刻を取得
-          const stdStartTime = getStartTime().format("HH:mm");
-          const stdEndTime = getEndTime().format("HH:mm");
-          const stdLunchStartTime = getLunchRestStartTime().format("HH:mm");
-          const stdLunchEndTime = getLunchRestEndTime().format("HH:mm");
-
-          // 有給期間中の全日を列挙
-          const start = dayjs(startDateStr);
-          const end = dayjs(endDateStr);
-          if (!start.isValid() || !end.isValid()) {
-            console.warn("有給期間の日付が不正なため処理をスキップします");
+          } else {
             dispatch(
               setSnackbarSuccess(
                 "有給申請を承認しました（日付が不正なため勤怠更新をスキップ）"
@@ -407,74 +323,6 @@ export default function AdminWorkflowDetail() {
             );
             return;
           }
-
-          const dayCount = end.diff(start, "day") + 1;
-
-          for (let i = 0; i < dayCount; i++) {
-            const targetDay = start.add(i, "day");
-            const targetDayStr = targetDay.format("YYYY-MM-DD");
-
-            // HH:mm → ISO8601へ変換
-            const buildISO = (time: string) => {
-              const [h, m] = time.split(":").map(Number);
-              return targetDay
-                .hour(h || 0)
-                .minute(m || 0)
-                .second(0)
-                .millisecond(0)
-                .toISOString();
-            };
-
-            const attendanceInput = {
-              staffId: targetStaffId,
-              workDate: targetDayStr,
-              startTime: buildISO(stdStartTime),
-              endTime: buildISO(stdEndTime),
-              goDirectlyFlag: false,
-              returnDirectlyFlag: false,
-              absentFlag: false,
-              paidHolidayFlag: true,
-              specialHolidayFlag: false,
-              rests: [
-                {
-                  startTime: buildISO(stdLunchStartTime),
-                  endTime: buildISO(stdLunchEndTime),
-                },
-              ],
-              hourlyPaidHolidayTimes: [],
-            };
-
-            const existingAttendance = await getAttendanceByStaffAndDate({
-              staffId: targetStaffId,
-              workDate: targetDayStr,
-            }).unwrap();
-
-            if (existingAttendance) {
-              // UPDATE (既存あり)
-              await updateAttendance({
-                id: existingAttendance.id,
-                staffId: targetStaffId,
-                workDate: targetDayStr,
-                startTime: attendanceInput.startTime,
-                endTime: attendanceInput.endTime,
-                goDirectlyFlag: attendanceInput.goDirectlyFlag,
-                returnDirectlyFlag: attendanceInput.returnDirectlyFlag,
-                absentFlag: attendanceInput.absentFlag,
-                paidHolidayFlag: attendanceInput.paidHolidayFlag,
-                specialHolidayFlag: attendanceInput.specialHolidayFlag,
-                rests: attendanceInput.rests,
-                hourlyPaidHolidayTimes: attendanceInput.hourlyPaidHolidayTimes,
-                revision: existingAttendance.revision,
-              }).unwrap();
-            } else {
-              // CREATE (新規作成)
-              await createAttendance(attendanceInput).unwrap();
-            }
-          }
-
-          dispatch(
-            setSnackbarSuccess("有給休暇申請を承認し、勤怠データを更新しました")
-          );
         } catch (paidLeaveError) {
           const message =
             paidLeaveError instanceof Error
@@ -489,279 +337,31 @@ export default function AdminWorkflowDetail() {
         }
       }
 
-      // 打刻修正申請の場合、承認時に勤怠データを作成/更新
       if (isFinal && updated.category === WorkflowCategory.CLOCK_CORRECTION) {
         try {
-          const overtimeDetails = updated.overTimeDetails;
-          const correctionReason = overtimeDetails?.reason;
-          const isClockOutCorrection =
-            correctionReason === CLOCK_CORRECTION_CHECK_OUT_LABEL;
-          const timeLabel = isClockOutCorrection ? "退勤" : "出勤";
-
-          // 修正対象スタッフIDの判定
-          // 打刻修正ワークフロー（CLOCK_CORRECTION）では、申請者自身が自分の打刻修正を申請する
-          // API には cognitoUserId を優先して渡し、なければ従来の staff.id をフォールバックする
-          const applicantStaff = staffs.find((s) => s.id === updated.staffId);
-          const targetStaffId =
-            applicantStaff?.cognitoUserId || updated.staffId;
-
-          if (!applicantStaff) {
-            console.warn(
-              `⚠️ ワークフロー申請者（staffId: ${updated.staffId}）が見つかりません。staffsリストを確認してください。`
-            );
-          } else {
-            console.log(
-              `✅ ワークフロー申請者確認: ${applicantStaff.familyName} ${applicantStaff.givenName} (staffId: ${updated.staffId}, cognitoUserId: ${applicantStaff.cognitoUserId})`
-            );
-          }
-          console.log("📌 スタッフIDマッピング:", {
-            submitterStaffId: updated.staffId,
-            cognitoUserId: applicantStaff?.cognitoUserId,
-            targetStaffId,
+          const result = await processClockCorrectionApprovalAttendance({
+            workflow: updated,
+            staffs,
+            getAttendanceByStaffAndDate,
+            createAttendance,
+            updateAttendance,
           });
 
-          console.log("=== 打刻修正処理 開始 ===");
-          console.log("workflow情報:", {
-            id: updated.id,
-            category: updated.category,
-            submitterStaffId: updated.staffId,
-            targetStaffId: targetStaffId,
-            overTimeDetails: overtimeDetails,
-            status: updated.status,
-          });
-          console.log("📌 打刻修正の修正対象：staffId =", targetStaffId);
-
-          // データ検証
-          const validationErrors: string[] = [];
-          if (!targetStaffId) {
-            validationErrors.push("修正対象のstaffId が null/undefined");
-          }
-          if (!overtimeDetails?.date) {
-            validationErrors.push("overtimeDetails.date が null/undefined");
-          }
-          const targetTime = isClockOutCorrection
-            ? overtimeDetails?.endTime || overtimeDetails?.startTime
-            : overtimeDetails?.startTime;
-          if (!targetTime) {
-            validationErrors.push("対象の時刻が null/undefined");
-          }
-
-          // workDate の形式チェック
-          if (
-            overtimeDetails?.date &&
-            !/^\d{4}-\d{2}-\d{2}$/.test(overtimeDetails.date)
-          ) {
-            validationErrors.push(
-              `workDate が正しい形式ではありません: "${overtimeDetails.date}" (YYYY-MM-DD の形式が必要)`
-            );
-          }
-
-          // staffId の形式チェック（cognitoUserId 優先）
-          if (targetStaffId && typeof targetStaffId !== "string") {
-            validationErrors.push(
-              `staffId が文字列ではありません: ${typeof targetStaffId}`
-            );
-          }
-
-          // startTime / endTime の形式チェック
-          if (targetTime && !/^\d{2}:\d{2}$/.test(targetTime)) {
-            validationErrors.push(
-              `${timeLabel}時刻が正しい形式ではありません: "${targetTime}" (HH:mm の形式が必要)`
-            );
-          }
-
-          if (validationErrors.length > 0) {
-            console.warn("⚠️ データ検証エラー:", validationErrors);
-            dispatch(
-              setSnackbarError(
-                `勤怠データの作成に失敗しました: ${validationErrors.join(", ")}`
-              )
-            );
-            return;
-          }
-
-          // validation を通った時点で overtimeDetails は確実に存在
-          // AttendanceTime クラスを使用して、HH:mm → ISO 8601 に統一的に変換
-          let attendanceTimeISO: string;
-          try {
-            const attendanceTime = new AttendanceTime(
-              targetTime!,
-              overtimeDetails!.date
-            );
-            attendanceTimeISO = attendanceTime.toAPI();
-            console.log("✅ 時刻変換成功:", {
-              input: `${targetTime} on ${overtimeDetails!.date}`,
-              output: attendanceTimeISO,
-              displayFormat: attendanceTime.toDisplay(),
-            });
-          } catch (timeError) {
-            console.error("❌ 時刻変換失敗:", timeError);
-            dispatch(
-              setSnackbarError(
-                "時刻の形式が正しくありません。勤怠データを作成できません。"
-              )
-            );
-            return;
-          }
-
-          const attendanceInput = {
-            staffId: targetStaffId,
-            workDate: overtimeDetails!.date,
-            startTime: isClockOutCorrection ? null : attendanceTimeISO,
-            endTime: isClockOutCorrection ? attendanceTimeISO : null,
-            goDirectlyFlag: false,
-            returnDirectlyFlag: false,
-            absentFlag: false,
-            paidHolidayFlag: false,
-            specialHolidayFlag: false,
-            rests: [],
-            hourlyPaidHolidayTimes: [],
-          };
-
-          console.log("📤 勤怠APIに送信するデータ詳細:", {
-            staffId: {
-              value: attendanceInput.staffId,
-              type: typeof attendanceInput.staffId,
-              length:
-                typeof attendanceInput.staffId === "string"
-                  ? attendanceInput.staffId.length
-                  : "N/A",
-              staffName:
-                staffs.find((s) => s.cognitoUserId === attendanceInput.staffId)
-                  ?.familyName +
-                  " " +
-                  staffs.find(
-                    (s) => s.cognitoUserId === attendanceInput.staffId
-                  )?.givenName || "不明",
-            },
-            workDate: {
-              value: attendanceInput.workDate,
-              type: typeof attendanceInput.workDate,
-              format: /^\d{4}-\d{2}-\d{2}$/.test(attendanceInput.workDate)
-                ? "✅ YYYY-MM-DD"
-                : "❌ 不正",
-            },
-            startTime: {
-              value: attendanceInput.startTime,
-              type: typeof attendanceInput.startTime,
-              format:
-                attendanceInput.startTime &&
-                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(
-                  attendanceInput.startTime
-                )
-                  ? "✅ ISO 8601"
-                  : "❌ 不正",
-            },
-            otherFields: {
-              endTime: attendanceInput.endTime,
-              flags: {
-                goDirectly: attendanceInput.goDirectlyFlag,
-                returnDirectly: attendanceInput.returnDirectlyFlag,
-                absent: attendanceInput.absentFlag,
-                paidHoliday: attendanceInput.paidHolidayFlag,
-                specialHoliday: attendanceInput.specialHolidayFlag,
-              },
-              rests: attendanceInput.rests,
-              hourlyPaidHolidayTimes: attendanceInput.hourlyPaidHolidayTimes,
-            },
-          });
-
-          // 既存の勤務データを確認
-          console.log("🔍 既存勤務データの確認を開始:", {
-            staffId: attendanceInput.staffId,
-            workDate: attendanceInput.workDate,
-          });
-
-          const existingAttendance = await getAttendanceByStaffAndDate({
-            staffId: attendanceInput.staffId,
-            workDate: attendanceInput.workDate,
-          }).unwrap();
-
-          if (isClockOutCorrection && !existingAttendance) {
-            dispatch(
-              setSnackbarError(
-                "対応する出勤打刻がありません。先に出勤打刻を登録してください。"
-              )
-            );
-            return;
-          }
-
-          if (existingAttendance) {
-            // 既存レコードがある場合は UPDATE
-            console.log(
-              "📝 既存勤務データが見つかりました。UPDATE を実行します:",
-              {
-                existingId: existingAttendance.id,
-                existingStartTime: existingAttendance.startTime,
-                newStartTime: attendanceInput.startTime,
-                revision: existingAttendance.revision,
-              }
-            );
-
-            const updateInput = {
-              id: existingAttendance.id,
-              staffId: attendanceInput.staffId,
-              workDate: attendanceInput.workDate,
-              startTime: isClockOutCorrection
-                ? existingAttendance.startTime || attendanceInput.startTime
-                : attendanceInput.startTime,
-              endTime: isClockOutCorrection
-                ? attendanceInput.endTime
-                : existingAttendance.endTime ?? attendanceInput.endTime,
-              goDirectlyFlag:
-                existingAttendance.goDirectlyFlag ??
-                attendanceInput.goDirectlyFlag,
-              returnDirectlyFlag:
-                existingAttendance.returnDirectlyFlag ??
-                attendanceInput.returnDirectlyFlag,
-              absentFlag:
-                existingAttendance.absentFlag ?? attendanceInput.absentFlag,
-              paidHolidayFlag:
-                existingAttendance.paidHolidayFlag ??
-                attendanceInput.paidHolidayFlag,
-              specialHolidayFlag:
-                existingAttendance.specialHolidayFlag ??
-                attendanceInput.specialHolidayFlag,
-              rests: existingAttendance.rests ?? attendanceInput.rests,
-              hourlyPaidHolidayTimes:
-                existingAttendance.hourlyPaidHolidayTimes ??
-                attendanceInput.hourlyPaidHolidayTimes,
-              revision: existingAttendance.revision,
-            };
-
-            const updateResult = await updateAttendance(updateInput).unwrap();
-            console.log("✅ 勤怠データを更新しました:", {
-              resultId: updateResult.id,
-              staffId: updateResult.staffId,
-              workDate: updateResult.workDate,
-              startTime: updateResult.startTime,
-              revision: updateResult.revision,
-            });
-
+          if (result.kind === "updated") {
             dispatch(
               setSnackbarSuccess("打刻修正を承認し、勤怠データを更新しました")
             );
           } else {
-            // 既存レコードがない場合は CREATE
-            console.log(
-              "✨ 既存勤務データが見つかりません。CREATE を実行します"
-            );
-
-            const result = await createAttendance(attendanceInput).unwrap();
-            console.log("✅ 勤怠データを作成しました:", {
-              resultId: result.id,
-              staffId: result.staffId,
-              workDate: result.workDate,
-              startTime: result.startTime,
-              result,
-            });
-
             dispatch(
               setSnackbarSuccess("打刻修正を承認し、勤怠データを作成しました")
             );
           }
         } catch (attendanceError) {
-          // Attendance processing error - log details and continue
+          if (attendanceError instanceof WorkflowApprovalUserError) {
+            dispatch(setSnackbarError(attendanceError.message));
+            return;
+          }
+
           if (attendanceError instanceof Error) {
             logger.error("Attendance data processing failed:", {
               message: attendanceError.message,
@@ -771,39 +371,6 @@ export default function AdminWorkflowDetail() {
             logger.error("Attendance data processing failed:", attendanceError);
           }
 
-          // Try to extract GraphQL error details
-          const attendanceApiError = (() => {
-            if (
-              typeof attendanceError === "object" &&
-              attendanceError !== null &&
-              ("data" in attendanceError || "graphQLErrors" in attendanceError)
-            ) {
-              return attendanceError as {
-                data?: {
-                  data?: {
-                    createAttendance?: { errors?: unknown };
-                    updateAttendance?: { errors?: unknown };
-                  };
-                };
-                graphQLErrors?: { message?: string }[];
-              };
-            }
-            return null;
-          })();
-
-          const errorData =
-            attendanceApiError?.data?.data?.createAttendance?.errors ||
-            attendanceApiError?.data?.data?.updateAttendance?.errors;
-          const gqlError = attendanceApiError?.graphQLErrors?.[0];
-
-          if (errorData) {
-            logger.warn("GraphQL validation error:", errorData);
-          }
-          if (gqlError) {
-            logger.warn("GraphQL error message:", gqlError.message);
-          }
-
-          // Attendance processing error is non-critical, show partial success message
           dispatch(
             setSnackbarSuccess(
               "打刻修正を承認しました（勤怠データの処理に失敗）"
@@ -844,9 +411,8 @@ export default function AdminWorkflowDetail() {
       return;
     }
     if (!window.confirm("この申請を却下しますか？")) return;
-    const currentStaffLocal = cognitoUser?.id
-      ? staffs.find((s) => s.cognitoUserId === cognitoUser.id)
-      : undefined;
+
+    const currentStaffLocal = resolveCurrentStaff();
     if (!currentStaffLocal?.id) {
       dispatch(
         setSnackbarError("却下を実行するユーザー情報が取得できませんでした。")
@@ -855,27 +421,12 @@ export default function AdminWorkflowDetail() {
     }
 
     try {
-      // prepare approvalSteps
-      const steps = buildApprovalStepInputs();
-
-      // determine which step to update
-      let idxToUpdate = -1;
-      const pendingIndex = steps.findIndex(
-        (st) => st.decisionStatus === ApprovalStatus.PENDING
+      const steps = buildApprovalStepInputs(workflow);
+      const idxToUpdate = resolvePendingApprovalStepIndex(
+        steps,
+        workflow.nextApprovalStepIndex
       );
-      if (typeof workflow.nextApprovalStepIndex === "number") {
-        const candidate = workflow.nextApprovalStepIndex;
-        if (
-          candidate >= 0 &&
-          candidate < steps.length &&
-          steps[candidate].decisionStatus === ApprovalStatus.PENDING
-        ) {
-          idxToUpdate = candidate;
-        }
-      }
-      if (idxToUpdate < 0) {
-        idxToUpdate = pendingIndex;
-      }
+
       if (idxToUpdate < 0) {
         dispatch(
           setSnackbarError("却下可能なステップが見つかりませんでした。")
@@ -883,7 +434,6 @@ export default function AdminWorkflowDetail() {
         return;
       }
 
-      // update the target step to rejected
       steps[idxToUpdate] = {
         ...steps[idxToUpdate],
         decisionStatus: ApprovalStatus.REJECTED,
@@ -895,21 +445,6 @@ export default function AdminWorkflowDetail() {
         new Set([...(workflow.rejectedStaffIds || []), currentStaffLocal.id])
       );
 
-      const existingComments = (workflow.comments || [])
-        .filter((c): c is WorkflowComment => Boolean(c))
-        .map((c) => ({
-          id: c.id,
-          staffId: c.staffId,
-          text: c.text,
-          createdAt: c.createdAt,
-        }));
-      const sysComment: WorkflowCommentInput = {
-        id: `c-${Date.now()}`,
-        staffId: "system",
-        text: "申請を却下しました",
-        createdAt: new Date().toISOString(),
-      };
-
       const inputForUpdate: UpdateWorkflowInput = {
         id: workflow.id,
         approvalSteps: steps,
@@ -917,7 +452,10 @@ export default function AdminWorkflowDetail() {
         status: WorkflowStatus.REJECTED,
         finalDecisionTimestamp: new Date().toISOString(),
         nextApprovalStepIndex: null,
-        comments: [...existingComments, sysComment],
+        comments: [
+          ...mapCommentsToInputs(workflow.comments),
+          createSystemComment("申請を却下しました"),
+        ],
       };
 
       const updated = (await updateWorkflow(inputForUpdate)) as NonNullable<
@@ -925,6 +463,7 @@ export default function AdminWorkflowDetail() {
       >;
       setWorkflow(updated);
       dispatch(setSnackbarSuccess("却下しました"));
+
       try {
         await createOperationLogData({
           staffId: currentStaffLocal?.id ?? undefined,
