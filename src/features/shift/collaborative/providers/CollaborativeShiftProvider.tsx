@@ -42,9 +42,11 @@ export const CollaborativeShiftProvider: React.FC<
     connectionState,
     fetchShifts,
     updateShift,
+    batchUpdateShifts,
+    retryPendingChanges,
   } = useCollaborativeShiftData({
     staffIds,
-    _targetMonth: targetMonth,
+    targetMonth,
     currentUserId,
   });
 
@@ -67,8 +69,8 @@ export const CollaborativeShiftProvider: React.FC<
   // 同期フック
   const { isSyncing, lastSyncedAt, syncError, triggerSync, pause, resume } =
     useShiftSync({
-      enabled: true,
-      interval: 5000, // 5秒ごとに同期
+      enabled: false, // Phase 1.1では自動同期は不要（ユーザーアクションで都度更新）
+      interval: 5000,
       onSync: async () => {
         await fetchShifts();
       },
@@ -88,7 +90,7 @@ export const CollaborativeShiftProvider: React.FC<
       // 更新を実行
       await updateShift(update);
     },
-    [updateActivity, stopEditingCell, updateShift]
+    [updateActivity, stopEditingCell, updateShift],
   );
 
   /**
@@ -103,13 +105,9 @@ export const CollaborativeShiftProvider: React.FC<
         stopEditingCell(update.staffId, update.date);
       });
 
-      // TODO: バッチ更新APIの実装
-      // 現在は個別に更新
-      for (const update of updates) {
-        await updateShift(update);
-      }
+      await batchUpdateShifts(updates);
     },
-    [updateActivity, stopEditingCell, updateShift]
+    [updateActivity, stopEditingCell, batchUpdateShifts],
   );
 
   /**
@@ -127,7 +125,7 @@ export const CollaborativeShiftProvider: React.FC<
         return next;
       });
     },
-    []
+    [],
   );
 
   /**
@@ -138,7 +136,7 @@ export const CollaborativeShiftProvider: React.FC<
       updateActivity();
       startEditingCell(staffId, date);
     },
-    [updateActivity, startEditingCell]
+    [updateActivity, startEditingCell],
   );
 
   /**
@@ -148,7 +146,7 @@ export const CollaborativeShiftProvider: React.FC<
     (staffId: string, date: string) => {
       stopEditingCell(staffId, date);
     },
-    [stopEditingCell]
+    [stopEditingCell],
   );
 
   /**
@@ -193,7 +191,7 @@ export const CollaborativeShiftProvider: React.FC<
       error,
       syncError,
       connectionState,
-    ]
+    ],
   );
 
   const contextValue: CollaborativeShiftContextType = useMemo(
@@ -210,6 +208,7 @@ export const CollaborativeShiftProvider: React.FC<
       pauseSync: pause,
       resumeSync: resume,
       updateUserActivity: handleUpdateUserActivity,
+      retryPendingChanges,
     }),
     [
       state,
@@ -224,7 +223,8 @@ export const CollaborativeShiftProvider: React.FC<
       pause,
       resume,
       handleUpdateUserActivity,
-    ]
+      retryPendingChanges,
+    ],
   );
 
   return (

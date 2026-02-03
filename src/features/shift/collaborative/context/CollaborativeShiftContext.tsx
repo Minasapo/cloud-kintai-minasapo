@@ -19,12 +19,13 @@ export interface CollaborativeShiftContextType {
   isCellBeingEdited: (staffId: string, date: string) => boolean;
   getCellEditor: (
     staffId: string,
-    date: string
+    date: string,
   ) => CollaborativeUser | undefined;
   triggerSync: () => Promise<void>;
   pauseSync: () => void;
   resumeSync: () => void;
   updateUserActivity: () => void;
+  retryPendingChanges: () => Promise<void>;
 }
 
 /**
@@ -40,7 +41,7 @@ export const useCollaborativeShift = () => {
   const context = useContext(CollaborativeShiftContext);
   if (!context) {
     throw new Error(
-      "useCollaborativeShift must be used within CollaborativeShiftProvider"
+      "useCollaborativeShift must be used within CollaborativeShiftProvider",
     );
   }
   return context;

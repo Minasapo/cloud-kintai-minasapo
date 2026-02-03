@@ -2,7 +2,11 @@
  * 共同編集シフト調整の型定義
  */
 
-import { ShiftRequestStatus } from "@shared/api/graphql/types";
+import {
+  ModelShiftRequestConditionInput,
+  ShiftRequestStatus,
+  UpdateShiftRequestInput,
+} from "@shared/api/graphql/types";
 
 /**
  * シフト状態（内部表現）
@@ -88,21 +92,72 @@ export interface ShiftRequestData {
   id: string;
   staffId: string;
   targetMonth: string;
-  entries?: Array<{
-    date: string;
-    status: ShiftRequestStatus;
-  }>;
+  entries?: ShiftRequestEntry[];
   updatedAt?: string;
   updatedBy?: string;
   version?: number;
 }
+
+export type ShiftRequestEntry = {
+  date: string;
+  status: ShiftRequestStatus;
+};
+
+export type ShiftRequestsQueryArgs = {
+  staffIds: string[];
+  targetMonth: string;
+};
+
+export type ShiftRequestQueryArgs = {
+  staffId: string;
+  targetMonth: string;
+};
+
+export type ShiftRequestUpdatePayload = {
+  input: UpdateShiftRequestInput;
+  condition?: ModelShiftRequestConditionInput;
+};
+
+export const shiftRequestStatusToShiftState = (
+  status?: ShiftRequestStatus | null,
+): ShiftState => {
+  switch (status) {
+    case ShiftRequestStatus.WORK:
+      return "work";
+    case ShiftRequestStatus.FIXED_OFF:
+      return "fixedOff";
+    case ShiftRequestStatus.REQUESTED_OFF:
+      return "requestedOff";
+    case ShiftRequestStatus.AUTO:
+      return "auto";
+    default:
+      return "empty";
+  }
+};
+
+export const shiftStateToShiftRequestStatus = (
+  state: ShiftState,
+): ShiftRequestStatus | null => {
+  switch (state) {
+    case "work":
+      return ShiftRequestStatus.WORK;
+    case "fixedOff":
+      return ShiftRequestStatus.FIXED_OFF;
+    case "requestedOff":
+      return ShiftRequestStatus.REQUESTED_OFF;
+    case "auto":
+      return ShiftRequestStatus.AUTO;
+    default:
+      return null;
+  }
+};
 
 /**
  * シフト更新リクエスト（UIからの入力）
  */
 export interface ShiftCellUpdate {
   staffId: string;
-  date: string; // "YYYY-MM-DD"
+  date: string; // "DD"
   newState?: ShiftState;
   isLocked?: boolean;
 }
