@@ -126,11 +126,7 @@ export const ActiveUsersList: React.FC<ActiveUsersListProps> = ({
             horizontal: "right",
           }}
         >
-          <UserDetailList
-            users={usersWithStatus}
-            onClose={handleClose}
-            theme={theme}
-          />
+          <UserDetailList users={usersWithStatus} onClose={handleClose} />
         </Popover>
       </>
     );
@@ -139,34 +135,39 @@ export const ActiveUsersList: React.FC<ActiveUsersListProps> = ({
   // 通常表示（アバターグループ + ポップオーバー）
   return (
     <>
-      <AvatarGroup max={5} onClick={handleClick} sx={{ cursor: "pointer" }}>
-        {usersWithStatus.map((user) => (
-          <Tooltip key={user.userId} title={user.userName}>
-            <Avatar
-              sx={{
-                bgcolor: user.color,
-                width: 32,
-                height: 32,
-                fontSize: "0.875rem",
-                position: "relative",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: 0,
-                  right: 0,
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  bgcolor: getStatusColor(user.status),
-                  border: `2px solid ${theme.palette.background.paper}`,
-                },
-              }}
-            >
-              {user.userName.charAt(0)}
-            </Avatar>
-          </Tooltip>
-        ))}
-      </AvatarGroup>
+      <Box
+        onClick={handleClick}
+        sx={{ cursor: "pointer", display: "inline-flex" }}
+      >
+        <AvatarGroup max={5}>
+          {usersWithStatus.map((user) => (
+            <Tooltip key={user.userId} title={user.userName}>
+              <Avatar
+                sx={{
+                  bgcolor: user.color,
+                  width: 32,
+                  height: 32,
+                  fontSize: "0.875rem",
+                  position: "relative",
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: 0,
+                    right: 0,
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    bgcolor: getStatusColor(user.status),
+                    border: `2px solid ${theme.palette.background.paper}`,
+                  },
+                }}
+              >
+                {user.userName.charAt(0)}
+              </Avatar>
+            </Tooltip>
+          ))}
+        </AvatarGroup>
+      </Box>
 
       <Popover
         open={open}
@@ -181,11 +182,7 @@ export const ActiveUsersList: React.FC<ActiveUsersListProps> = ({
           horizontal: "right",
         }}
       >
-        <UserDetailList
-          users={usersWithStatus}
-          onClose={handleClose}
-          theme={theme}
-        />
+        <UserDetailList users={usersWithStatus} onClose={handleClose} />
       </Popover>
     </>
   );
@@ -199,10 +196,10 @@ interface UserDetailListProps {
     }
   >;
   onClose: () => void;
-  theme: ReturnType<typeof useTheme>;
 }
 
-const UserDetailList: React.FC<UserDetailListProps> = ({ users, theme }) => {
+const UserDetailList: React.FC<UserDetailListProps> = ({ users }) => {
+  const theme = useTheme();
   return (
     <Paper sx={{ width: 320, maxHeight: 400, overflow: "auto" }}>
       <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
