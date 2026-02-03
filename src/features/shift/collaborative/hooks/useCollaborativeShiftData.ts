@@ -50,7 +50,10 @@ export const useCollaborativeShiftData = ({
   const shiftRequestsRef = useRef<Map<string, ShiftRequestData>>(new Map());
 
   // staffIds参照を安定化（毎回新しい配列参照による不要なrefetchを防ぐ）
-  const staffIdsKey = useMemo(() => staffIds.sort().join(","), [staffIds]);
+  const staffIdsKey = useMemo(
+    () => [...staffIds].sort().join(","),
+    [staffIds],
+  );
 
   const shouldSkipFetch = staffIds.length === 0 || !targetMonth;
   const {
@@ -235,18 +238,25 @@ export const useCollaborativeShiftData = ({
     async (update: ShiftCellUpdate) => {
       const key = `${update.staffId}-${update.date}`;
 
-      const nextMap = applyShiftCellUpdateToMap({
-        shiftDataMap,
-        update,
-        currentUserId,
+      let nextMap: ShiftDataMap | null = null;
+      setShiftDataMap((prev) => {
+        const computed = applyShiftCellUpdateToMap({
+          shiftDataMap: prev,
+          update,
+          currentUserId,
+        });
+        nextMap = computed;
+        return computed;
       });
-
-      setShiftDataMap(nextMap);
 
       // 保留中の変更として記録
       pendingChangesRef.current.set(key, update);
 
       try {
+        if (!nextMap) {
+          throw new Error("シフトデータの更新に失敗しました");
+        }
+
         await persistShiftUpdate(update, nextMap);
         // 成功時に保留中の変更から削除
         pendingChangesRef.current.delete(key);
@@ -259,7 +269,7 @@ export const useCollaborativeShiftData = ({
         setConnectionState(connection);
       }
     },
-    [currentUserId, shiftDataMap, persistShiftUpdate, buildShiftErrorMessage],
+    [currentUserId, persistShiftUpdate, buildShiftErrorMessage],
   );
 
   /**

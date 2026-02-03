@@ -1167,7 +1167,7 @@ interface ShiftCollaborativePageInnerProps {
  * メインコンポーネント（内部実装）
  */
 const ShiftCollaborativePageInner =
-  React.memo<ShiftCollaborativePageInnerProps>(
+  memo<ShiftCollaborativePageInnerProps>(
     ({ staffs }: ShiftCollaborativePageInnerProps) => {
       const {
         state,

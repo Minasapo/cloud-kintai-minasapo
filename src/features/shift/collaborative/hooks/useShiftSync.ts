@@ -54,7 +54,7 @@ export const useShiftSync = ({
         setIsSyncing(false);
       }
     }
-  }, [enabled, isPaused]);
+  }, [enabled, isPaused, isSyncing]);
 
   /**
    * 同期を一時停止
