@@ -917,8 +917,6 @@ type ShiftTableProps<T extends ShiftCellLike> = {
   getEventsForDay: (day: dayjs.Dayjs) => ShiftEvent[];
 };
 
-// @ts-expect-error - 将来の使用のために保持
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ShiftTable<_T extends ShiftCellLike>({
   days,
   staffIds,
@@ -1138,22 +1136,22 @@ interface ShiftCollaborativePageInnerProps {
  * メインコンポーネント（内部実装）
  */
 const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
-  ({ staffs: _staffs }: ShiftCollaborativePageInnerProps) => {
+  ({ staffs }: ShiftCollaborativePageInnerProps) => {
     const {
       state,
-      isCellBeingEdited: _isCellBeingEdited,
-      getCellEditor: _getCellEditor,
-      focusedCell: _focusedCell,
-      isCellSelected: _isCellSelected,
-      registerCell: _registerCell,
-      handleCellClick: _handleCellClick,
-      handleCellMouseDown: _handleCellMouseDown,
-      handleCellMouseEnter: _handleCellMouseEnter,
+      isCellBeingEdited,
+      getCellEditor,
+      focusedCell,
+      isCellSelected,
+      registerCell,
+      handleCellClick,
+      handleCellMouseDown,
+      handleCellMouseEnter,
       handleMouseUp,
       handleSync: _handleSync,
       progress: _progress,
-      calculateDailyCount: _calculateDailyCount,
-      getEventsForDay: _getEventsForDay,
+      calculateDailyCount,
+      getEventsForDay,
       selectionCount: _selectionCount,
       hasLocked: _hasLocked,
       hasUnlocked: _hasUnlocked,
@@ -1172,8 +1170,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       setShowHelp,
       isAdmin: _isAdmin,
       currentMonth,
-      days: _days,
-      staffIds: _staffIds,
+      days,
+      staffIds,
     } = useCollaborativePageState();
 
     // プレゼンス通知
@@ -1194,6 +1192,25 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             isAnalyzing={isAnalyzing}
             onApplyAction={handleApplySuggestion}
             onRefresh={analyzeShifts}
+          />
+
+          {/* シフト調整テーブル */}
+          <ShiftTable
+            days={days}
+            staffIds={staffIds}
+            shiftDataMap={state.shiftDataMap}
+            isLoading={state.isLoading}
+            staffs={staffs}
+            focusedCell={focusedCell}
+            isCellSelected={isCellSelected}
+            isCellBeingEdited={isCellBeingEdited}
+            getCellEditor={getCellEditor}
+            registerCell={registerCell}
+            handleCellClick={handleCellClick}
+            handleCellMouseDown={handleCellMouseDown}
+            handleCellMouseEnter={handleCellMouseEnter}
+            calculateDailyCount={calculateDailyCount}
+            getEventsForDay={getEventsForDay}
           />
 
           {/* ヘルプボタン（FAB） */}
