@@ -27,7 +27,15 @@ import { alpha, useTheme } from "@mui/material/styles";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
-import { memo, useCallback, useContext, useMemo, useState } from "react";
+import {
+  type FC,
+  memo,
+  type MouseEvent,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 
@@ -81,15 +89,15 @@ interface ShiftCellProps {
   editorName?: string;
   lastChangedBy?: string;
   lastChangedAt?: string;
-  onClick: (event: React.MouseEvent) => void;
+  onClick: (event: MouseEvent) => void;
   onRegisterRef?: (element: HTMLElement | null) => void;
-  onMouseDown?: (event: React.MouseEvent) => void;
+  onMouseDown?: (event: MouseEvent) => void;
   onMouseEnter?: () => void;
   isFocused?: boolean;
   isSelected?: boolean;
 }
 
-const ShiftCellBase: React.FC<ShiftCellProps> = ({
+const ShiftCellBase: FC<ShiftCellProps> = ({
   state,
   isLocked,
   isEditing,
@@ -664,7 +672,7 @@ const useCollaborativePageState = () => {
   const handleCellClick = (
     staffId: string,
     date: string,
-    event: React.MouseEvent,
+    event: MouseEvent,
   ) => {
     if (isCellBeingEdited(staffId, date)) {
       return; // 他のユーザーが編集中
@@ -694,7 +702,7 @@ const useCollaborativePageState = () => {
    * セルのマウスダウン（ドラッグ選択開始）
    */
   const handleCellMouseDown = useCallback(
-    (staffId: string, date: string, event: React.MouseEvent) => {
+    (staffId: string, date: string, event: MouseEvent) => {
       // 修飾キーがある場合はドラッグ選択しない
       if (event.shiftKey || event.ctrlKey || event.metaKey) {
         return;
@@ -789,7 +797,7 @@ type CollaborativeHeaderProps = {
   onSync: () => void;
 };
 
-const CollaborativeHeader: React.FC<CollaborativeHeaderProps> = ({
+const CollaborativeHeader: FC<CollaborativeHeaderProps> = ({
   currentMonth,
   activeUsers,
   editingCells,
@@ -858,10 +866,7 @@ type ProgressPanelProps = {
   totalDays: number;
 };
 
-const ProgressPanel: React.FC<ProgressPanelProps> = ({
-  progress,
-  totalDays,
-}) => (
+const ProgressPanel: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
   <Paper sx={{ p: 2, mb: 3 }}>
     <Stack spacing={2}>
       <Box>
@@ -926,15 +931,11 @@ type ShiftTableProps<T extends ShiftCellLike> = {
     date: string,
     element: HTMLElement | null,
   ) => void;
-  handleCellClick: (
-    staffId: string,
-    date: string,
-    event: React.MouseEvent,
-  ) => void;
+  handleCellClick: (staffId: string, date: string, event: MouseEvent) => void;
   handleCellMouseDown: (
     staffId: string,
     date: string,
-    event: React.MouseEvent,
+    event: MouseEvent,
   ) => void;
   handleCellMouseEnter: (staffId: string, date: string) => void;
   calculateDailyCount: (dayKey: string) => {
