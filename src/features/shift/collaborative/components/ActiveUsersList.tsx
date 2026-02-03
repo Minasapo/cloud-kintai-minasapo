@@ -136,8 +136,15 @@ export const ActiveUsersList: React.FC<ActiveUsersListProps> = ({
   return (
     <>
       <Box
+        component="button"
         onClick={handleClick}
-        sx={{ cursor: "pointer", display: "inline-flex" }}
+        sx={{
+          cursor: "pointer",
+          display: "inline-flex",
+          border: "none",
+          background: "none",
+          padding: 0,
+        }}
       >
         <AvatarGroup max={5}>
           {usersWithStatus.map((user) => (

@@ -1,16 +1,15 @@
 import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useShiftPresence } from "../useShiftPresence";
 
 describe("useShiftPresence", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
-    vi.useRealTimers();
+    jest.restoreAllMocks();
+    jest.useRealTimers();
   });
 
   const defaultProps = {
@@ -36,7 +35,7 @@ describe("useShiftPresence", () => {
 
       // 30秒経過
       act(() => {
-        vi.advanceTimersByTime(30000);
+        jest.advanceTimersByTime(30000);
       });
 
       // アクティビティが更新されていることを確認
@@ -58,7 +57,7 @@ describe("useShiftPresence", () => {
 
       // 10秒経過（非アクティブチェックが実行される）
       act(() => {
-        vi.advanceTimersByTime(10000);
+        jest.advanceTimersByTime(10000);
       });
 
       // 非アクティブユーザーが削除されることを確認
@@ -149,7 +148,7 @@ describe("useShiftPresence", () => {
 
       // 5分 + 30秒（チェック間隔）経過
       act(() => {
-        vi.advanceTimersByTime(5 * 60 * 1000 + 30000);
+        jest.advanceTimersByTime(5 * 60 * 1000 + 30000);
       });
 
       // タイムアウトで自動解除されることを確認
@@ -167,7 +166,7 @@ describe("useShiftPresence", () => {
 
       // 4分経過
       act(() => {
-        vi.advanceTimersByTime(4 * 60 * 1000);
+        jest.advanceTimersByTime(4 * 60 * 1000);
       });
 
       // まだ解除されていないことを確認
@@ -222,7 +221,7 @@ describe("useShiftPresence", () => {
       const { result } = renderHook(() => useShiftPresence(defaultProps));
 
       act(() => {
-        vi.advanceTimersByTime(1000);
+        jest.advanceTimersByTime(1000);
         result.current.updateActivity();
       });
 

@@ -3,14 +3,12 @@ import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoIcon from "@mui/icons-material/Info";
 import LockIcon from "@mui/icons-material/Lock";
-import SyncIcon from "@mui/icons-material/Sync";
 import {
   Alert,
   Box,
   Chip,
   Container,
   Fab,
-  IconButton,
   LinearProgress,
   Paper,
   Stack,
@@ -217,6 +215,7 @@ type ActiveUser = {
   userId: string;
   userName: string;
   color: string;
+  lastActivity: number;
 };
 
 type ShiftEvent = {
@@ -792,18 +791,12 @@ type CollaborativeHeaderProps = {
     string,
     { userId: string; userName: string; startTime: number }
   >;
-  isSyncing: boolean;
-  lastSyncedAt: number;
-  onSync: () => void;
 };
 
 const CollaborativeHeader: FC<CollaborativeHeaderProps> = ({
   currentMonth,
   activeUsers,
   editingCells,
-  isSyncing,
-  lastSyncedAt,
-  onSync,
 }) => (
   <Stack direction="row" alignItems="center" spacing={2} mb={3}>
     <Typography variant="h4">協同シフト調整</Typography>
@@ -819,26 +812,6 @@ const CollaborativeHeader: FC<CollaborativeHeaderProps> = ({
       editingCells={editingCells}
       compact={false}
     />
-
-    <Tooltip
-      title={
-        lastSyncedAt > 0
-          ? `最終同期: ${dayjs(lastSyncedAt).format("HH:mm:ss")}`
-          : "同期"
-      }
-    >
-      <IconButton onClick={onSync} disabled={isSyncing} size="small">
-        <SyncIcon
-          sx={{
-            animation: isSyncing ? "spin 1s linear infinite" : "",
-            "@keyframes spin": {
-              from: { transform: "rotate(0deg)" },
-              to: { transform: "rotate(360deg)" },
-            },
-          }}
-        />
-      </IconButton>
-    </Tooltip>
   </Stack>
 );
 
@@ -849,12 +822,10 @@ CollaborativeHeader.propTypes = {
       userId: PropTypes.string.isRequired,
       userName: PropTypes.string.isRequired,
       color: PropTypes.string.isRequired,
+      lastActivity: PropTypes.number.isRequired,
     }).isRequired,
   ).isRequired,
   editingCells: PropTypes.instanceOf(Map).isRequired,
-  isSyncing: PropTypes.bool.isRequired,
-  lastSyncedAt: PropTypes.number.isRequired,
-  onSync: PropTypes.func.isRequired,
 };
 
 type ProgressPanelProps = {
@@ -946,7 +917,9 @@ type ShiftTableProps<T extends ShiftCellLike> = {
   getEventsForDay: (day: dayjs.Dayjs) => ShiftEvent[];
 };
 
-function ShiftTable<T extends ShiftCellLike>({
+// @ts-expect-error - 将来の使用のために保持
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function ShiftTable<_T extends ShiftCellLike>({
   days,
   staffIds,
   shiftDataMap,
@@ -962,7 +935,7 @@ function ShiftTable<T extends ShiftCellLike>({
   handleCellMouseEnter,
   calculateDailyCount,
   getEventsForDay,
-}: ShiftTableProps<T>) {
+}: ShiftTableProps<ShiftCellLike>) {
   return (
     <TableContainer component={Paper}>
       <Table
@@ -1165,42 +1138,42 @@ interface ShiftCollaborativePageInnerProps {
  * メインコンポーネント（内部実装）
  */
 const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
-  ({ staffs }: ShiftCollaborativePageInnerProps) => {
+  ({ staffs: _staffs }: ShiftCollaborativePageInnerProps) => {
     const {
       state,
-      isCellBeingEdited,
-      getCellEditor,
-      focusedCell,
-      isCellSelected,
-      registerCell,
-      handleCellClick,
-      handleCellMouseDown,
-      handleCellMouseEnter,
+      isCellBeingEdited: _isCellBeingEdited,
+      getCellEditor: _getCellEditor,
+      focusedCell: _focusedCell,
+      isCellSelected: _isCellSelected,
+      registerCell: _registerCell,
+      handleCellClick: _handleCellClick,
+      handleCellMouseDown: _handleCellMouseDown,
+      handleCellMouseEnter: _handleCellMouseEnter,
       handleMouseUp,
-      handleSync,
-      progress,
-      calculateDailyCount,
-      getEventsForDay,
-      selectionCount,
-      hasLocked,
-      hasUnlocked,
-      hasClipboard,
-      handleCopy,
-      handlePaste,
-      clearSelection,
-      handleChangeState,
-      handleLockCells,
-      handleUnlockCells,
+      handleSync: _handleSync,
+      progress: _progress,
+      calculateDailyCount: _calculateDailyCount,
+      getEventsForDay: _getEventsForDay,
+      selectionCount: _selectionCount,
+      hasLocked: _hasLocked,
+      hasUnlocked: _hasUnlocked,
+      hasClipboard: _hasClipboard,
+      handleCopy: _handleCopy,
+      handlePaste: _handlePaste,
+      clearSelection: _clearSelection,
+      handleChangeState: _handleChangeState,
+      handleLockCells: _handleLockCells,
+      handleUnlockCells: _handleUnlockCells,
       handleApplySuggestion,
       violations,
       isAnalyzing,
       analyzeShifts,
       showHelp,
       setShowHelp,
-      isAdmin,
+      isAdmin: _isAdmin,
       currentMonth,
-      days,
-      staffIds,
+      days: _days,
+      staffIds: _staffIds,
     } = useCollaborativePageState();
 
     // プレゼンス通知
@@ -1213,13 +1186,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             currentMonth={currentMonth}
             activeUsers={state.activeUsers}
             editingCells={state.editingCells}
-            onLock={handleLockCells}
-            onUnlock={handleUnlockCells}
-            canUnlock={isAdmin}
-            showLock={hasUnlocked}
-            showUnlock={hasLocked}
-            hasClipboard={hasClipboard}
-            canPaste={focusedCell !== null}
           />
 
           {/* シフト提案パネル */}
