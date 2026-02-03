@@ -80,6 +80,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
+    "dev": "vite dev",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
     "lint": "eslint ./src/ --ext .ts,.tsx",
