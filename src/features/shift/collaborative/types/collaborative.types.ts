@@ -71,7 +71,10 @@ export interface CollaborativeShiftState {
   activeUsers: CollaborativeUser[];
 
   // 編集中のセル（他のユーザーが編集中）
-  editingCells: Map<string, { userId: string; userName: string }>;
+  editingCells: Map<
+    string,
+    { userId: string; userName: string; startTime: number }
+  >;
 
   // ローカル編集状態
   pendingChanges: PendingChangesMap;

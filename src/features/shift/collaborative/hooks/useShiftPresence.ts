@@ -18,11 +18,14 @@ export const useShiftPresence = ({
 }: UseShiftPresenceProps) => {
   const [activeUsers, setActiveUsers] = useState<CollaborativeUser[]>([]);
   const [editingCells, setEditingCells] = useState<
-    Map<string, { userId: string; userName: string }>
+    Map<string, { userId: string; userName: string; startTime: number }>
   >(new Map());
 
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const lastActivityRef = useRef<number>(0);
+  const editTimeoutCheckIntervalRef = useRef<NodeJS.Timeout | undefined>(
+    undefined,
+  );
 
   /**
    * ユーザーのアクティビティを記録
@@ -39,7 +42,11 @@ export const useShiftPresence = ({
       const cellKey = `${staffId}_${date}`;
       setEditingCells((prev) => {
         const next = new Map(prev);
-        next.set(cellKey, { userId: currentUserId, userName: currentUserName });
+        next.set(cellKey, {
+          userId: currentUserId,
+          userName: currentUserName,
+          startTime: Date.now(),
+        });
         return next;
       });
       updateActivity();
@@ -47,7 +54,7 @@ export const useShiftPresence = ({
       // TODO: Phase 4でWebSocketを使って他のユーザーに通知
       console.log("Start editing cell:", cellKey);
     },
-    [currentUserId, currentUserName, updateActivity]
+    [currentUserId, currentUserName, updateActivity],
   );
 
   /**
@@ -74,7 +81,7 @@ export const useShiftPresence = ({
       const editor = editingCells.get(cellKey);
       return editor !== undefined && editor.userId !== currentUserId;
     },
-    [editingCells, currentUserId]
+    [editingCells, currentUserId],
   );
 
   /**
@@ -88,7 +95,7 @@ export const useShiftPresence = ({
 
       return activeUsers.find((user) => user.userId === editor.userId);
     },
-    [editingCells, activeUsers]
+    [editingCells, activeUsers],
   );
 
   /**
@@ -137,12 +144,74 @@ export const useShiftPresence = ({
       const inactiveThreshold = 60000; // 60秒
 
       setActiveUsers((prev) =>
-        prev.filter((user) => now - user.lastActivity < inactiveThreshold)
+        prev.filter((user) => now - user.lastActivity < inactiveThreshold),
       );
     }, 10000); // 10秒ごとにチェック
 
     return () => clearInterval(checkInactiveUsers);
   }, []);
+
+  /**
+   * 編集タイムアウトのチェック
+   * 5分間無操作で自動解除
+   */
+  useEffect(() => {
+    const EDIT_TIMEOUT = 5 * 60 * 1000; // 5分
+
+    editTimeoutCheckIntervalRef.current = setInterval(() => {
+      const now = Date.now();
+      setEditingCells((prev) => {
+        const next = new Map(prev);
+        let hasChanges = false;
+
+        next.forEach((editor, cellKey) => {
+          if (now - editor.startTime > EDIT_TIMEOUT) {
+            next.delete(cellKey);
+            hasChanges = true;
+            console.log("Edit timeout: auto-released cell", cellKey);
+          }
+        });
+
+        return hasChanges ? next : prev;
+      });
+    }, 30000); // 30秒ごとにチェック
+
+    return () => {
+      if (editTimeoutCheckIntervalRef.current) {
+        clearInterval(editTimeoutCheckIntervalRef.current);
+      }
+    };
+  }, []);
+
+  /**
+   * 管理者による強制解除
+   */
+  const forceReleaseCell = useCallback((staffId: string, date: string) => {
+    const cellKey = `${staffId}_${date}`;
+    setEditingCells((prev) => {
+      const next = new Map(prev);
+      next.delete(cellKey);
+      return next;
+    });
+
+    // TODO: Phase 4でWebSocketを使って他のユーザーに通知
+    console.log("Force release cell:", cellKey);
+  }, []);
+
+  /**
+   * すべての編集ロックを取得（管理者用）
+   */
+  const getAllEditingCells = useCallback(() => {
+    return Array.from(editingCells.entries()).map(([cellKey, editor]) => {
+      const [staffId, date] = cellKey.split("_");
+      return {
+        cellKey,
+        staffId,
+        date,
+        ...editor,
+      };
+    });
+  }, [editingCells]);
 
   return {
     activeUsers,
@@ -152,5 +221,7 @@ export const useShiftPresence = ({
     isCellBeingEdited,
     getCellEditor,
     updateActivity,
+    forceReleaseCell,
+    getAllEditingCells,
   };
 };

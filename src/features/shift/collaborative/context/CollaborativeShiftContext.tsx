@@ -21,6 +21,15 @@ export interface CollaborativeShiftContextType {
     staffId: string,
     date: string,
   ) => CollaborativeUser | undefined;
+  forceReleaseCell: (staffId: string, date: string) => void;
+  getAllEditingCells: () => Array<{
+    cellKey: string;
+    staffId: string;
+    date: string;
+    userId: string;
+    userName: string;
+    startTime: number;
+  }>;
   triggerSync: () => Promise<void>;
   pauseSync: () => void;
   resumeSync: () => void;

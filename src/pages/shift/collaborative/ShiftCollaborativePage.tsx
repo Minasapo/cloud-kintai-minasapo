@@ -6,8 +6,6 @@ import LockIcon from "@mui/icons-material/Lock";
 import SyncIcon from "@mui/icons-material/Sync";
 import {
   Alert,
-  Avatar,
-  AvatarGroup,
   Box,
   Chip,
   Container,
@@ -33,8 +31,12 @@ import { memo, useCallback, useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 
-import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
+import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
+import {
+  PresenceNotificationContainer,
+  usePresenceNotifications,
+} from "../../../features/shift/collaborative/components/PresenceNotification";
 import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
 import { useCollaborativeShift } from "../../../features/shift/collaborative/context/CollaborativeShiftContext";
 import { useClipboard } from "../../../features/shift/collaborative/hooks/useClipboard";
@@ -778,6 +780,10 @@ const useCollaborativePageState = () => {
 type CollaborativeHeaderProps = {
   currentMonth: dayjs.Dayjs;
   activeUsers: ActiveUser[];
+  editingCells: Map<
+    string,
+    { userId: string; userName: string; startTime: number }
+  >;
   isSyncing: boolean;
   lastSyncedAt: number;
   onSync: () => void;
@@ -786,6 +792,7 @@ type CollaborativeHeaderProps = {
 const CollaborativeHeader: React.FC<CollaborativeHeaderProps> = ({
   currentMonth,
   activeUsers,
+  editingCells,
   isSyncing,
   lastSyncedAt,
   onSync,
@@ -799,22 +806,11 @@ const CollaborativeHeader: React.FC<CollaborativeHeaderProps> = ({
     />
 
     <Box sx={{ flex: 1 }} />
-    <AvatarGroup max={5}>
-      {activeUsers.map((user) => (
-        <Tooltip key={user.userId} title={user.userName}>
-          <Avatar
-            sx={{
-              bgcolor: user.color,
-              width: 32,
-              height: 32,
-              fontSize: "0.875rem",
-            }}
-          >
-            {user.userName.charAt(0)}
-          </Avatar>
-        </Tooltip>
-      ))}
-    </AvatarGroup>
+    <ActiveUsersList
+      activeUsers={activeUsers}
+      editingCells={editingCells}
+      compact={false}
+    />
 
     <Tooltip
       title={
@@ -847,6 +843,7 @@ CollaborativeHeader.propTypes = {
       color: PropTypes.string.isRequired,
     }).isRequired,
   ).isRequired,
+  editingCells: PropTypes.instanceOf(Map).isRequired,
   isSyncing: PropTypes.bool.isRequired,
   lastSyncedAt: PropTypes.number.isRequired,
   onSync: PropTypes.func.isRequired,
@@ -1166,131 +1163,102 @@ interface ShiftCollaborativePageInnerProps {
 /**
  * メインコンポーネント（内部実装）
  */
-const ShiftCollaborativePageInner =
-  memo<ShiftCollaborativePageInnerProps>(
-    ({ staffs }: ShiftCollaborativePageInnerProps) => {
-      const {
-        state,
-        isCellBeingEdited,
-        getCellEditor,
-        focusedCell,
-        isCellSelected,
-        registerCell,
-        handleCellClick,
-        handleCellMouseDown,
-        handleCellMouseEnter,
-        handleMouseUp,
-        handleSync,
-        progress,
-        calculateDailyCount,
-        getEventsForDay,
-        selectionCount,
-        hasLocked,
-        hasUnlocked,
-        hasClipboard,
-        handleCopy,
-        handlePaste,
-        clearSelection,
-        handleChangeState,
-        handleLockCells,
-        handleUnlockCells,
-        handleApplySuggestion,
-        violations,
-        isAnalyzing,
-        analyzeShifts,
-        showHelp,
-        setShowHelp,
-        isAdmin,
-        currentMonth,
-        days,
-        staffIds,
-      } = useCollaborativePageState();
+const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
+  ({ staffs }: ShiftCollaborativePageInnerProps) => {
+    const {
+      state,
+      isCellBeingEdited,
+      getCellEditor,
+      focusedCell,
+      isCellSelected,
+      registerCell,
+      handleCellClick,
+      handleCellMouseDown,
+      handleCellMouseEnter,
+      handleMouseUp,
+      handleSync,
+      progress,
+      calculateDailyCount,
+      getEventsForDay,
+      selectionCount,
+      hasLocked,
+      hasUnlocked,
+      hasClipboard,
+      handleCopy,
+      handlePaste,
+      clearSelection,
+      handleChangeState,
+      handleLockCells,
+      handleUnlockCells,
+      handleApplySuggestion,
+      violations,
+      isAnalyzing,
+      analyzeShifts,
+      showHelp,
+      setShowHelp,
+      isAdmin,
+      currentMonth,
+      days,
+      staffIds,
+    } = useCollaborativePageState();
 
-      return (
-        <Page title="協同シフト調整">
-          <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
-            <CollaborativeHeader
-              currentMonth={currentMonth}
-              activeUsers={state.activeUsers}
-              isSyncing={state.isSyncing}
-              lastSyncedAt={state.lastSyncedAt}
-              onSync={handleSync}
-            />
+    // プレゼンス通知
+    const { notifications, dismissNotification } = usePresenceNotifications();
 
-            {state.error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {state.error}
-              </Alert>
-            )}
+    return (
+      <Page title="協同シフト調整">
+        <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
+          <CollaborativeHeader
+            currentMonth={currentMonth}
+            activeUsers={state.activeUsers}
+            editingCells={state.editingCells}
+            onLock={handleLockCells}
+            onUnlock={handleUnlockCells}
+            canUnlock={isAdmin}
+            showLock={hasUnlocked}
+            showUnlock={hasLocked}
+            hasClipboard={hasClipboard}
+            canPaste={focusedCell !== null}
+          />
 
-            <ProgressPanel progress={progress} totalDays={days.length} />
+          {/* シフト提案パネル */}
+          <ShiftSuggestionsPanel
+            violations={violations}
+            isAnalyzing={isAnalyzing}
+            onApplyAction={handleApplySuggestion}
+            onRefresh={analyzeShifts}
+          />
 
-            <ShiftTable
-              days={days}
-              staffIds={staffIds}
-              shiftDataMap={state.shiftDataMap}
-              isLoading={state.isLoading}
-              staffs={staffs}
-              focusedCell={focusedCell}
-              isCellSelected={isCellSelected}
-              isCellBeingEdited={isCellBeingEdited}
-              getCellEditor={getCellEditor}
-              registerCell={registerCell}
-              handleCellClick={handleCellClick}
-              handleCellMouseDown={handleCellMouseDown}
-              handleCellMouseEnter={handleCellMouseEnter}
-              calculateDailyCount={calculateDailyCount}
-              getEventsForDay={getEventsForDay}
-            />
+          {/* ヘルプボタン（FAB） */}
+          <Fab
+            color="primary"
+            size="medium"
+            onClick={() => setShowHelp(true)}
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+            }}
+          >
+            <HelpOutlineIcon />
+          </Fab>
 
-            {/* バッチ編集ツールバー */}
-            <BatchEditToolbar
-              selectionCount={selectionCount}
-              onCopy={handleCopy}
-              onPaste={handlePaste}
-              onClear={clearSelection}
-              onChangeState={handleChangeState}
-              onLock={handleLockCells}
-              onUnlock={handleUnlockCells}
-              canUnlock={isAdmin}
-              showLock={hasUnlocked}
-              showUnlock={hasLocked}
-              hasClipboard={hasClipboard}
-              canPaste={focusedCell !== null}
-            />
+          {/* ヘルプダイアログ */}
+          <KeyboardShortcutsHelp
+            open={showHelp}
+            onClose={() => setShowHelp(false)}
+          />
 
-            {/* シフト提案パネル */}
-            <ShiftSuggestionsPanel
-              violations={violations}
-              isAnalyzing={isAnalyzing}
-              onApplyAction={handleApplySuggestion}
-              onRefresh={analyzeShifts}
-            />
-
-            {/* ヘルプボタン（FAB） */}
-            <Fab
-              color="primary"
-              size="medium"
-              onClick={() => setShowHelp(true)}
-              sx={{
-                position: "fixed",
-                bottom: 24,
-                right: 24,
-              }}
-            >
-              <HelpOutlineIcon />
-            </Fab>
-
-            {/* ヘルプダイアログ */}
-            <KeyboardShortcutsHelp
-              open={showHelp}
-              onClose={() => setShowHelp(false)}
-            />
-          </Container>
-        </Page>
-      );
-    },
-  );
+          {/* プレゼンス通知 */}
+          <PresenceNotificationContainer
+            notifications={notifications}
+            onDismiss={dismissNotification}
+          />
+        </Container>
+      </Page>
+    );
+  },
+);
 
 ShiftCollaborativePageInner.displayName = "ShiftCollaborativePageInner";
 
@@ -1313,6 +1281,7 @@ export default function ShiftCollaborativePage() {
     return currentStaff?.id ?? "";
   }, [cognitoUser, staffs]);
 
+  // 認証ユーザーの名前を取得
   const currentUserName = useMemo(() => {
     if (!cognitoUser?.id) return "Current User";
     const currentStaff = staffs.find(
