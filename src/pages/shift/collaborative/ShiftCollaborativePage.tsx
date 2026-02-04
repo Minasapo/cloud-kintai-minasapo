@@ -38,6 +38,7 @@ import {
 import { AuthContext } from "@/context/AuthContext";
 
 import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
+import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import {
   PresenceNotificationContainer,
@@ -398,6 +399,9 @@ const useCollaborativePageState = () => {
   const {
     state,
     updateShift,
+    batchUpdateShifts,
+    isBatchUpdating,
+    startEditingCell,
     isCellBeingEdited,
     getCellEditor,
     triggerSync,
@@ -533,16 +537,26 @@ const useCollaborativePageState = () => {
   const handleChangeState = useCallback(
     (newState: ShiftState) => {
       if (selectionCount > 0) {
-        // 複数選択がある場合は、選択されたすべてのセルを変更
-        selectedCells.forEach(({ staffId, date }) => {
-          changeCellState(staffId, date, newState);
-        });
-      } else if (focusedCell) {
-        // フォーカスされたセルのみ変更
+        const updates = selectedCells.map(({ staffId, date }) => ({
+          staffId,
+          date,
+          newState,
+        }));
+        void batchUpdateShifts(updates);
+        return;
+      }
+
+      if (focusedCell) {
         changeCellState(focusedCell.staffId, focusedCell.date, newState);
       }
     },
-    [focusedCell, selectedCells, selectionCount, changeCellState],
+    [
+      focusedCell,
+      selectedCells,
+      selectionCount,
+      batchUpdateShifts,
+      changeCellState,
+    ],
   );
 
   const applyLockState = useCallback(
@@ -668,40 +682,59 @@ const useCollaborativePageState = () => {
   /**
    * セルクリックハンドラー
    */
-  const handleCellClick = (
-    staffId: string,
-    date: string,
-    event: MouseEvent,
-  ) => {
-    if (isCellBeingEdited(staffId, date)) {
-      return; // 他のユーザーが編集中
-    }
+  const handleCellClick = useCallback(
+    (staffId: string, date: string, event: MouseEvent) => {
+      // バッチ更新中は操作不可
+      if (isBatchUpdating) {
+        return;
+      }
 
-    updateUserActivity();
+      if (isCellBeingEdited(staffId, date)) {
+        return; // 他のユーザーが編集中
+      }
 
-    // Shift+クリック: 範囲選択
-    if (event.shiftKey) {
-      selectRange(staffId, date);
-      return;
-    }
+      updateUserActivity();
 
-    // Ctrl/Cmd+クリック: 個別追加選択
-    if (event.ctrlKey || event.metaKey) {
-      toggleCell(staffId, date);
+      // Shift+クリック: 範囲選択
+      if (event.shiftKey) {
+        selectRange(staffId, date);
+        return;
+      }
+
+      // Ctrl/Cmd+クリック: 個別追加選択
+      if (event.ctrlKey || event.metaKey) {
+        toggleCell(staffId, date);
+        focusCell(staffId, date);
+        return;
+      }
+
+      // 通常クリック: 単一選択して編集開始
+      selectCell(staffId, date);
       focusCell(staffId, date);
-      return;
-    }
-
-    // 通常クリック: 単一選択して状態を循環
-    selectCell(staffId, date);
-    focusCell(staffId, date);
-  };
+      startEditingCell(staffId, date);
+    },
+    [
+      isBatchUpdating,
+      isCellBeingEdited,
+      updateUserActivity,
+      selectRange,
+      toggleCell,
+      focusCell,
+      selectCell,
+      startEditingCell,
+    ],
+  );
 
   /**
    * セルのマウスダウン（ドラッグ選択開始）
    */
   const handleCellMouseDown = useCallback(
     (staffId: string, date: string, event: MouseEvent) => {
+      // バッチ更新中は操作不可
+      if (isBatchUpdating) {
+        return;
+      }
+
       // 修飾キーがある場合はドラッグ選択しない
       if (event.shiftKey || event.ctrlKey || event.metaKey) {
         return;
@@ -709,7 +742,7 @@ const useCollaborativePageState = () => {
 
       startDragSelect(staffId, date);
     },
-    [startDragSelect],
+    [isBatchUpdating, startDragSelect],
   );
 
   /**
@@ -781,6 +814,7 @@ const useCollaborativePageState = () => {
     setShowHelp,
     getCellEditor,
     isCellBeingEdited,
+    isBatchUpdating,
   };
 };
 
@@ -1152,26 +1186,27 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       progress: _progress,
       calculateDailyCount,
       getEventsForDay,
-      selectionCount: _selectionCount,
-      hasLocked: _hasLocked,
-      hasUnlocked: _hasUnlocked,
-      hasClipboard: _hasClipboard,
-      handleCopy: _handleCopy,
-      handlePaste: _handlePaste,
-      clearSelection: _clearSelection,
-      handleChangeState: _handleChangeState,
-      handleLockCells: _handleLockCells,
-      handleUnlockCells: _handleUnlockCells,
+      selectionCount,
+      hasLocked,
+      hasUnlocked,
+      hasClipboard,
+      handleCopy,
+      handlePaste,
+      clearSelection,
+      handleChangeState,
+      handleLockCells,
+      handleUnlockCells,
       handleApplySuggestion,
       violations,
       isAnalyzing,
       analyzeShifts,
       showHelp,
       setShowHelp,
-      isAdmin: _isAdmin,
+      isAdmin,
       currentMonth,
       days,
       staffIds,
+      isBatchUpdating,
     } = useCollaborativePageState();
 
     // プレゼンス通知
@@ -1211,6 +1246,22 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             handleCellMouseEnter={handleCellMouseEnter}
             calculateDailyCount={calculateDailyCount}
             getEventsForDay={getEventsForDay}
+          />
+
+          <BatchEditToolbar
+            selectionCount={selectionCount}
+            onCopy={handleCopy}
+            onPaste={handlePaste}
+            onClear={clearSelection}
+            onChangeState={handleChangeState}
+            onLock={handleLockCells}
+            onUnlock={handleUnlockCells}
+            canUnlock={isAdmin}
+            showLock={hasUnlocked}
+            showUnlock={hasLocked}
+            hasClipboard={hasClipboard}
+            canPaste={focusedCell !== null}
+            isUpdating={isBatchUpdating}
           />
 
           {/* ヘルプボタン（FAB） */}

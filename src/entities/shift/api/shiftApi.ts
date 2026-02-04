@@ -1,11 +1,16 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { updateShiftRequest } from "@shared/api/graphql/documents/mutations";
+import {
+  createShiftRequest,
+  updateShiftRequest,
+} from "@shared/api/graphql/documents/mutations";
 import {
   listShiftRequests,
   shiftRequestsByStaffId,
 } from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 import type {
+  CreateShiftRequestInput,
+  CreateShiftRequestMutation,
   ListShiftRequestsQuery,
   ModelShiftRequestConditionInput,
   ModelShiftRequestFilterInput,
@@ -28,6 +33,11 @@ export type ShiftRequestQueryArgs = {
 
 export type UpdateShiftRequestPayload = {
   input: UpdateShiftRequestInput;
+  condition?: ModelShiftRequestConditionInput | null;
+};
+
+export type CreateShiftRequestPayload = {
+  input: CreateShiftRequestInput;
   condition?: ModelShiftRequestConditionInput | null;
 };
 
@@ -213,15 +223,55 @@ export const shiftApi = createApi({
         return { data: updated };
       },
       invalidatesTags: (result, _error, arg) => {
-        const listTag: ShiftRequestTag = { type: "ShiftRequest", id: "LIST" };
-        const baseTags: ShiftRequestTag[] = [listTag];
-
+        // LISTタグを削除してキャッシュを保持し、テーブル全体の再描画を防止
+        // 特定のレコードと月タグのみ無効化
         if (!result) {
-          return baseTags;
+          return [];
         }
 
         return [
-          ...baseTags,
+          { type: "ShiftRequest" as const, id: buildShiftRequestTagId(result) },
+          {
+            type: "ShiftCollaboration" as const,
+            id: arg.input.targetMonth ?? "UNKNOWN",
+          },
+        ];
+      },
+    }),
+    createShiftRequest: builder.mutation<
+      ShiftRequest,
+      CreateShiftRequestPayload
+    >({
+      async queryFn(arg, _api, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: createShiftRequest,
+          variables: {
+            input: arg.input,
+            condition: arg.condition ?? undefined,
+          },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as CreateShiftRequestMutation | null;
+        const created = data?.createShiftRequest;
+
+        if (!created) {
+          return { error: { message: "Failed to create shift request" } };
+        }
+
+        return { data: created };
+      },
+      invalidatesTags: (result, _error, arg) => {
+        // LISTタグを削除してキャッシュを保持し、テーブル全体の再描画を防止
+        // 特定のレコードと月タグのみ無効化
+        if (!result) {
+          return [];
+        }
+
+        return [
           { type: "ShiftRequest" as const, id: buildShiftRequestTagId(result) },
           {
             type: "ShiftCollaboration" as const,
@@ -280,17 +330,15 @@ export const shiftApi = createApi({
         return { data: { updatedRequests, errors } };
       },
       invalidatesTags: (result, _error, arg) => {
-        const listTag: ShiftRequestTag = { type: "ShiftRequest", id: "LIST" };
-        const baseTags: ShiftRequestTag[] = [listTag];
-
-        if (!result) {
-          return baseTags;
+        // LISTタグを削除してキャッシュを保持し、テーブル全体の再描画を防止
+        // 更新されたレコードと月タグのみ無効化
+        if (!result || result.updatedRequests.length === 0) {
+          return [];
         }
 
         const targetMonth = arg.updates[0]?.input.targetMonth ?? "UNKNOWN";
 
         return [
-          ...baseTags,
           ...result.updatedRequests.map((shiftRequest) => ({
             type: "ShiftRequest" as const,
             id: buildShiftRequestTagId(shiftRequest),
@@ -307,4 +355,5 @@ export const {
   useGetShiftRequestQuery,
   useUpdateShiftCellMutation,
   useBatchUpdateShiftCellsMutation,
+  useCreateShiftRequestMutation,
 } = shiftApi;

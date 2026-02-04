@@ -1,9 +1,12 @@
 import {
   useBatchUpdateShiftCellsMutation,
+  useCreateShiftRequestMutation,
   useGetShiftRequestsQuery,
   useUpdateShiftCellMutation,
 } from "@entities/shift/api/shiftApi";
 import type { GraphQLBaseQueryError } from "@shared/api/graphql/graphqlBaseQuery";
+import type { ShiftRequestDayPreferenceInput } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -18,6 +21,7 @@ import {
   ShiftCellUpdate,
   ShiftDataMap,
   ShiftRequestData,
+  shiftStateToShiftRequestStatus,
 } from "../types/collaborative.types";
 
 /**
@@ -40,8 +44,10 @@ export const useCollaborativeShiftData = ({
   const [connectionState, setConnectionState] = useState<
     "connected" | "disconnected" | "error"
   >("connected");
+  const [isBatchUpdating, setIsBatchUpdating] = useState(false);
 
   const [updateShiftCell] = useUpdateShiftCellMutation();
+  const [createShiftRequest] = useCreateShiftRequestMutation();
   const [batchUpdateShiftCells] = useBatchUpdateShiftCellsMutation();
 
   // 保留中の変更を追跡
@@ -50,16 +56,12 @@ export const useCollaborativeShiftData = ({
   const shiftRequestsRef = useRef<Map<string, ShiftRequestData>>(new Map());
 
   // staffIds参照を安定化（毎回新しい配列参照による不要なrefetchを防ぐ）
-  const staffIdsKey = useMemo(
-    () => staffIds.toSorted().join(","),
-    [staffIds],
-  );
+  const staffIdsKey = useMemo(() => staffIds.toSorted().join(","), [staffIds]);
 
   const shouldSkipFetch = staffIds.length === 0 || !targetMonth;
   const {
     data: shiftRequests = [],
     isLoading: isLoadingQuery,
-    isFetching,
     error: fetchError,
     refetch,
   } = useGetShiftRequestsQuery(
@@ -73,10 +75,16 @@ export const useCollaborativeShiftData = ({
       refetchOnFocus: false,
       // ネットワーク接続復帰時の自動refetchを無効化
       refetchOnReconnect: false,
+      // 再フェッチ中もキャッシュを表示し続ける（ユーザーが表の再描画を感じないようにする）
+      selectFromResult: (result) => ({
+        ...result,
+        // 初期ロード中のみisLoadingをtrue、再フェッチ時はfalseに
+        isLoading: result.isLoading && !result.data,
+      }),
     },
   );
 
-  const isLoading = isLoadingQuery || isFetching;
+  const isLoading = isLoadingQuery;
 
   const normalizedShiftRequests = useMemo(
     () => shiftRequests.map(normalizeShiftRequest),
@@ -213,7 +221,35 @@ export const useCollaborativeShiftData = ({
 
       const shiftRequest = shiftRequestsRef.current.get(update.staffId);
       if (!shiftRequest) {
-        throw new Error("対象のシフトデータが見つかりませんでした");
+        const staffData = currentMap.get(update.staffId) ?? new Map();
+        const entries: ShiftRequestDayPreferenceInput[] = Array.from(
+          staffData.entries(),
+        )
+          .map(([dayKey, cell]) => {
+            const status = shiftStateToShiftRequestStatus(cell.state);
+            if (!status) return null;
+            return {
+              date: dayjs(`${targetMonth}-${dayKey}`).format("YYYY-MM-DD"),
+              status,
+            };
+          })
+          .filter(
+            (entry): entry is ShiftRequestDayPreferenceInput => entry !== null,
+          )
+          .toSorted((a, b) => a.date.localeCompare(b.date));
+
+        const created = await createShiftRequest({
+          input: {
+            staffId: update.staffId,
+            targetMonth,
+            entries,
+            updatedBy: currentUserId,
+            updatedAt: new Date().toISOString(),
+          },
+        }).unwrap();
+
+        updateShiftRequestState(normalizeShiftRequest(created));
+        return created;
       }
 
       const payload = transformShiftCellUpdateToGraphQLInput({
@@ -228,7 +264,13 @@ export const useCollaborativeShiftData = ({
 
       return updated;
     },
-    [currentUserId, targetMonth, updateShiftCell, updateShiftRequestState],
+    [
+      currentUserId,
+      targetMonth,
+      updateShiftCell,
+      createShiftRequest,
+      updateShiftRequestState,
+    ],
   );
 
   /**
@@ -281,52 +323,104 @@ export const useCollaborativeShiftData = ({
         return;
       }
 
-      const nextMap = updates.reduce(
-        (map, update) =>
-          applyShiftCellUpdateToMap({
-            shiftDataMap: map,
-            update,
-            currentUserId,
-          }),
-        shiftDataMap,
-      );
-
-      setShiftDataMap(nextMap);
-      updates.forEach((update) => {
-        const key = `${update.staffId}-${update.date}`;
-        pendingChangesRef.current.set(key, update);
-      });
-
-      const updatesByStaff = new Map<string, ShiftCellUpdate[]>();
-      updates.forEach((update) => {
-        const list = updatesByStaff.get(update.staffId) ?? [];
-        list.push(update);
-        updatesByStaff.set(update.staffId, list);
-      });
-
-      const payloads = Array.from(updatesByStaff.keys())
-        .map((staffId) => {
-          const shiftRequest = shiftRequestsRef.current.get(staffId);
-          if (!shiftRequest) {
-            return null;
-          }
-
-          return transformShiftCellUpdateToGraphQLInput({
-            shiftRequest,
-            shiftDataMap: nextMap,
-            targetMonth,
-            updatedBy: currentUserId,
-          });
-        })
-        .filter((payload): payload is NonNullable<typeof payload> =>
-          Boolean(payload),
-        );
-
-      if (payloads.length === 0) {
-        return;
-      }
+      setIsBatchUpdating(true);
 
       try {
+        const nextMap = updates.reduce(
+          (map, update) =>
+            applyShiftCellUpdateToMap({
+              shiftDataMap: map,
+              update,
+              currentUserId,
+            }),
+          shiftDataMap,
+        );
+
+        setShiftDataMap(nextMap);
+        updates.forEach((update) => {
+          const key = `${update.staffId}-${update.date}`;
+          pendingChangesRef.current.set(key, update);
+        });
+
+        const updatesByStaff = new Map<string, ShiftCellUpdate[]>();
+        updates.forEach((update) => {
+          const list = updatesByStaff.get(update.staffId) ?? [];
+          list.push(update);
+          updatesByStaff.set(update.staffId, list);
+        });
+
+        const missingStaffIds = Array.from(updatesByStaff.keys()).filter(
+          (staffId) => !shiftRequestsRef.current.get(staffId),
+        );
+
+        if (missingStaffIds.length > 0) {
+          await Promise.all(
+            missingStaffIds.map(async (staffId) => {
+              const staffData = nextMap.get(staffId) ?? new Map();
+              const entries: ShiftRequestDayPreferenceInput[] = Array.from(
+                staffData.entries(),
+              )
+                .map(([dayKey, cell]) => {
+                  const status = shiftStateToShiftRequestStatus(cell.state);
+                  if (!status) return null;
+                  return {
+                    date: dayjs(`${targetMonth}-${dayKey}`).format(
+                      "YYYY-MM-DD",
+                    ),
+                    status,
+                  };
+                })
+                .filter(
+                  (entry): entry is ShiftRequestDayPreferenceInput =>
+                    entry !== null,
+                )
+                .toSorted((a, b) => a.date.localeCompare(b.date));
+
+              const created = await createShiftRequest({
+                input: {
+                  staffId,
+                  targetMonth,
+                  entries,
+                  updatedBy: currentUserId,
+                  updatedAt: new Date().toISOString(),
+                },
+              }).unwrap();
+
+              updateShiftRequestState(normalizeShiftRequest(created));
+
+              const staffUpdates = updatesByStaff.get(staffId) ?? [];
+              staffUpdates.forEach((update) => {
+                const key = `${update.staffId}-${update.date}`;
+                pendingChangesRef.current.delete(key);
+              });
+            }),
+          );
+        }
+
+        const payloads = Array.from(updatesByStaff.keys())
+          .filter((staffId) => !missingStaffIds.includes(staffId))
+          .map((staffId) => {
+            const shiftRequest = shiftRequestsRef.current.get(staffId);
+            if (!shiftRequest) {
+              return null;
+            }
+
+            return transformShiftCellUpdateToGraphQLInput({
+              shiftRequest,
+              shiftDataMap: nextMap,
+              targetMonth,
+              updatedBy: currentUserId,
+            });
+          })
+          .filter((payload): payload is NonNullable<typeof payload> =>
+            Boolean(payload),
+          );
+
+        if (payloads.length === 0) {
+          setIsBatchUpdating(false);
+          return;
+        }
+
         const result = await batchUpdateShiftCells({
           updates: payloads,
         }).unwrap();
@@ -351,6 +445,8 @@ export const useCollaborativeShiftData = ({
         const { message, connection } = buildShiftErrorMessage(err);
         setError(message);
         setConnectionState(connection);
+      } finally {
+        setIsBatchUpdating(false);
       }
     },
     [
@@ -358,6 +454,7 @@ export const useCollaborativeShiftData = ({
       shiftDataMap,
       currentUserId,
       batchUpdateShiftCells,
+      createShiftRequest,
       updateShiftRequestState,
       buildShiftErrorMessage,
     ],
@@ -372,6 +469,7 @@ export const useCollaborativeShiftData = ({
     shiftDataMap,
     pendingChanges: pendingChangesRef.current,
     isLoading,
+    isBatchUpdating,
     error,
     connectionState,
     lastFetchedAt,

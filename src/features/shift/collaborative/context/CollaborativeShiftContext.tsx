@@ -13,6 +13,7 @@ export interface CollaborativeShiftContextType {
   state: CollaborativeShiftState;
   updateShift: (update: ShiftCellUpdate) => Promise<void>;
   batchUpdateShifts: (updates: ShiftCellUpdate[]) => Promise<void>;
+  isBatchUpdating: boolean;
   toggleCellSelection: (cellKey: string, selected: boolean) => void;
   startEditingCell: (staffId: string, date: string) => void;
   stopEditingCell: (staffId: string, date: string) => void;
