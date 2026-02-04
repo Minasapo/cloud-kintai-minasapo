@@ -1,4 +1,8 @@
-import { useGetEventCalendarsQuery } from "@entities/calendar/api/calendarApi";
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetEventCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@entities/calendar/api/calendarApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoIcon from "@mui/icons-material/Info";
@@ -233,6 +237,14 @@ const useShiftCalendar = (
     eventDate: string;
     name: string;
   }>,
+  holidays: Array<{
+    holidayDate: string;
+    name: string;
+  }>,
+  companyHolidays: Array<{
+    holidayDate: string;
+    name: string;
+  }>,
 ) => {
   const theme = useTheme();
   const monthStart = useMemo(
@@ -247,16 +259,41 @@ const useShiftCalendar = (
       ),
     [monthStart, daysInMonth],
   );
-  const eventCalendar = useMemo<ShiftEvent[]>(
-    () =>
-      registeredEventCalendars.map((event) => ({
+  const eventCalendar = useMemo<ShiftEvent[]>(() => {
+    const events: ShiftEvent[] = [];
+
+    // イベントカレンダー
+    events.push(
+      ...registeredEventCalendars.map((event) => ({
         label: event.name,
         start: dayjs(event.eventDate),
         end: dayjs(event.eventDate),
         color: theme.palette.info.main,
       })),
-    [registeredEventCalendars, theme],
-  );
+    );
+
+    // 祝祭日カレンダー
+    events.push(
+      ...holidays.map((holiday) => ({
+        label: holiday.name,
+        start: dayjs(holiday.holidayDate),
+        end: dayjs(holiday.holidayDate),
+        color: theme.palette.error.main,
+      })),
+    );
+
+    // 会社休日カレンダー
+    events.push(
+      ...companyHolidays.map((holiday) => ({
+        label: holiday.name,
+        start: dayjs(holiday.holidayDate),
+        end: dayjs(holiday.holidayDate),
+        color: theme.palette.warning.main,
+      })),
+    );
+
+    return events;
+  }, [registeredEventCalendars, holidays, companyHolidays, theme]);
   const dateKeys = useMemo(() => days.map((day) => day.format("DD")), [days]);
 
   return { days, dateKeys, eventCalendar };
@@ -415,9 +452,17 @@ const useCollaborativePageState = () => {
   // イベントカレンダーを取得
   const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
 
+  // 祝祭日カレンダーを取得
+  const { data: holidays = [] } = useGetHolidayCalendarsQuery();
+
+  // 会社休日カレンダーを取得
+  const { data: companyHolidays = [] } = useGetCompanyHolidayCalendarsQuery();
+
   const { days, dateKeys, eventCalendar } = useShiftCalendar(
     currentMonth,
     registeredEventCalendars,
+    holidays,
+    companyHolidays,
   );
 
   // スタッフリストを取得（shiftDataMapから）
