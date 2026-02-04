@@ -901,6 +901,7 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -919,6 +920,7 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -953,6 +955,7 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -971,6 +974,7 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -1005,6 +1009,7 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -1023,6 +1028,7 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {

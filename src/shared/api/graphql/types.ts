@@ -841,6 +841,7 @@ export type CreateShiftRequestInput = {
 export type ShiftRequestDayPreferenceInput = {
   date: string,
   status: ShiftRequestStatus,
+  isLocked?: boolean | null,
 };
 
 export enum ShiftRequestStatus {
@@ -903,6 +904,7 @@ export type ShiftRequestDayPreference = {
   __typename: "ShiftRequestDayPreference",
   date: string,
   status: ShiftRequestStatus,
+  isLocked?: boolean | null,
 };
 
 export type ShiftRequestSummary = {
@@ -3037,6 +3039,7 @@ export type CreateShiftRequestMutation = {
       __typename: "ShiftRequestDayPreference",
       date: string,
       status: ShiftRequestStatus,
+      isLocked?: boolean | null,
     } | null > | null,
     summary?:  {
       __typename: "ShiftRequestSummary",
@@ -3056,6 +3059,7 @@ export type CreateShiftRequestMutation = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",
@@ -3089,6 +3093,7 @@ export type UpdateShiftRequestMutation = {
       __typename: "ShiftRequestDayPreference",
       date: string,
       status: ShiftRequestStatus,
+      isLocked?: boolean | null,
     } | null > | null,
     summary?:  {
       __typename: "ShiftRequestSummary",
@@ -3108,6 +3113,7 @@ export type UpdateShiftRequestMutation = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",
@@ -3141,6 +3147,7 @@ export type DeleteShiftRequestMutation = {
       __typename: "ShiftRequestDayPreference",
       date: string,
       status: ShiftRequestStatus,
+      isLocked?: boolean | null,
     } | null > | null,
     summary?:  {
       __typename: "ShiftRequestSummary",
@@ -3160,6 +3167,7 @@ export type DeleteShiftRequestMutation = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",
@@ -4478,6 +4486,7 @@ export type GetShiftRequestQuery = {
       __typename: "ShiftRequestDayPreference",
       date: string,
       status: ShiftRequestStatus,
+      isLocked?: boolean | null,
     } | null > | null,
     summary?:  {
       __typename: "ShiftRequestSummary",
@@ -4497,6 +4506,7 @@ export type GetShiftRequestQuery = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",
@@ -4533,6 +4543,7 @@ export type ListShiftRequestsQuery = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",
@@ -4552,6 +4563,7 @@ export type ListShiftRequestsQuery = {
           __typename: "ShiftRequestDayPreference",
           date: string,
           status: ShiftRequestStatus,
+          isLocked?: boolean | null,
         } | null > | null,
         summary?:  {
           __typename: "ShiftRequestSummary",
@@ -4593,6 +4605,7 @@ export type ShiftRequestsByStaffIdQuery = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",
@@ -4612,6 +4625,7 @@ export type ShiftRequestsByStaffIdQuery = {
           __typename: "ShiftRequestDayPreference",
           date: string,
           status: ShiftRequestStatus,
+          isLocked?: boolean | null,
         } | null > | null,
         summary?:  {
           __typename: "ShiftRequestSummary",
@@ -6026,6 +6040,7 @@ export type OnCreateShiftRequestSubscription = {
       __typename: "ShiftRequestDayPreference",
       date: string,
       status: ShiftRequestStatus,
+      isLocked?: boolean | null,
     } | null > | null,
     summary?:  {
       __typename: "ShiftRequestSummary",
@@ -6045,6 +6060,7 @@ export type OnCreateShiftRequestSubscription = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",
@@ -6077,6 +6093,7 @@ export type OnUpdateShiftRequestSubscription = {
       __typename: "ShiftRequestDayPreference",
       date: string,
       status: ShiftRequestStatus,
+      isLocked?: boolean | null,
     } | null > | null,
     summary?:  {
       __typename: "ShiftRequestSummary",
@@ -6096,6 +6113,7 @@ export type OnUpdateShiftRequestSubscription = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",
@@ -6128,6 +6146,7 @@ export type OnDeleteShiftRequestSubscription = {
       __typename: "ShiftRequestDayPreference",
       date: string,
       status: ShiftRequestStatus,
+      isLocked?: boolean | null,
     } | null > | null,
     summary?:  {
       __typename: "ShiftRequestSummary",
@@ -6147,6 +6166,7 @@ export type OnDeleteShiftRequestSubscription = {
         __typename: "ShiftRequestDayPreference",
         date: string,
         status: ShiftRequestStatus,
+        isLocked?: boolean | null,
       } | null > | null,
       summary?:  {
         __typename: "ShiftRequestSummary",

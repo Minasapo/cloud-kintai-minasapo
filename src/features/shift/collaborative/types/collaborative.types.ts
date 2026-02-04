@@ -104,6 +104,7 @@ export interface ShiftRequestData {
 export type ShiftRequestEntry = {
   date: string;
   status: ShiftRequestStatus;
+  isLocked?: boolean;
 };
 
 export type ShiftRequestsQueryArgs = {

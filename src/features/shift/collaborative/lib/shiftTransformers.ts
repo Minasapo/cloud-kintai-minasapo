@@ -51,7 +51,7 @@ const buildStaffShiftMap = (
 
     map.set(dayKey, {
       state,
-      isLocked: false,
+      isLocked: entry?.isLocked ?? false,
       lastChangedBy: shiftRequest?.updatedBy ?? undefined,
       lastChangedAt: shiftRequest?.updatedAt ?? undefined,
       version: shiftRequest?.version ?? undefined,
@@ -80,7 +80,11 @@ export const normalizeShiftRequest = (
   entries:
     shiftRequest.entries
       ?.filter(nonNullable)
-      .map((entry) => ({ date: entry.date, status: entry.status })) ?? [],
+      .map((entry) => ({
+        date: entry.date,
+        status: entry.status,
+        isLocked: entry.isLocked ?? false,
+      })) ?? [],
   updatedAt: shiftRequest.updatedAt ?? undefined,
   updatedBy: shiftRequest.updatedBy ?? undefined,
   version: shiftRequest.version ?? undefined,
@@ -183,6 +187,7 @@ export const transformShiftCellUpdateToGraphQLInput = ({
     entries.push({
       date: buildDateString(targetMonth, dayKey),
       status,
+      isLocked: cell.isLocked,
     });
   });
 

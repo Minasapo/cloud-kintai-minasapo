@@ -222,15 +222,14 @@ export const useCollaborativeShiftData = ({
       const shiftRequest = shiftRequestsRef.current.get(update.staffId);
       if (!shiftRequest) {
         const staffData = currentMap.get(update.staffId) ?? new Map();
-        const entries: ShiftRequestDayPreferenceInput[] = Array.from(
-          staffData.entries(),
-        )
-          .map(([dayKey, cell]) => {
+        const entries = Array.from(staffData.entries())
+          .map(([dayKey, cell]): ShiftRequestDayPreferenceInput | null => {
             const status = shiftStateToShiftRequestStatus(cell.state);
             if (!status) return null;
             return {
               date: dayjs(`${targetMonth}-${dayKey}`).format("YYYY-MM-DD"),
               status,
+              isLocked: cell.isLocked || undefined,
             };
           })
           .filter(
@@ -357,10 +356,8 @@ export const useCollaborativeShiftData = ({
           await Promise.all(
             missingStaffIds.map(async (staffId) => {
               const staffData = nextMap.get(staffId) ?? new Map();
-              const entries: ShiftRequestDayPreferenceInput[] = Array.from(
-                staffData.entries(),
-              )
-                .map(([dayKey, cell]) => {
+              const entries = Array.from(staffData.entries())
+                .map(([dayKey, cell]): ShiftRequestDayPreferenceInput | null => {
                   const status = shiftStateToShiftRequestStatus(cell.state);
                   if (!status) return null;
                   return {
@@ -368,6 +365,7 @@ export const useCollaborativeShiftData = ({
                       "YYYY-MM-DD",
                     ),
                     status,
+                    isLocked: cell.isLocked || undefined,
                   };
                 })
                 .filter(

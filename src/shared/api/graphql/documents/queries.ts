@@ -836,6 +836,7 @@ export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -854,6 +855,7 @@ export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -891,6 +893,7 @@ export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -909,6 +912,7 @@ export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
         entries {
           date
           status
+          isLocked
           __typename
         }
         summary {
@@ -959,6 +963,7 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -977,6 +982,7 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
         entries {
           date
           status
+          isLocked
           __typename
         }
         summary {

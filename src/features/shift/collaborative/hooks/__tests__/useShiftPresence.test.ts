@@ -31,6 +31,9 @@ describe("useShiftPresence", () => {
     it("ハートビートが30秒ごとに送信される", () => {
       const { result } = renderHook(() => useShiftPresence(defaultProps));
 
+      // フックの初期化を待つ
+      expect(result.current.activeUsers).toHaveLength(1);
+      
       const initialLastActivity = result.current.activeUsers[0].lastActivity;
 
       // 30秒経過
@@ -39,6 +42,7 @@ describe("useShiftPresence", () => {
       });
 
       // アクティビティが更新されていることを確認
+      expect(result.current.activeUsers).toHaveLength(1);
       expect(result.current.activeUsers[0].lastActivity).toBeGreaterThanOrEqual(
         initialLastActivity,
       );

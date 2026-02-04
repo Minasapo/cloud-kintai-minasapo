@@ -66,7 +66,7 @@ describe("shiftTransformers", () => {
     });
 
     expect(payload.input.entries).toEqual([
-      { date: "2026-02-01", status: ShiftRequestStatus.WORK },
+      { date: "2026-02-01", status: ShiftRequestStatus.WORK, isLocked: false },
     ]);
     expect(payload.input.version).toBe(3);
     expect(payload.condition).toEqual({ version: { eq: 2 } });

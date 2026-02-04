@@ -953,6 +953,7 @@ export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -971,6 +972,7 @@ export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -1006,6 +1008,7 @@ export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -1024,6 +1027,7 @@ export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -1059,6 +1063,7 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -1077,6 +1082,7 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {

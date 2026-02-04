@@ -6,6 +6,7 @@ import { useCollaborativeShiftData } from "../useCollaborativeShiftData";
 const mockUseGetShiftRequestsQuery = jest.fn();
 const mockUpdateShiftCell = jest.fn();
 const mockBatchUpdateShiftCells = jest.fn();
+const mockCreateShiftRequest = jest.fn();
 
 jest.mock("@entities/shift/api/shiftApi", () => ({
   __esModule: true,
@@ -13,6 +14,7 @@ jest.mock("@entities/shift/api/shiftApi", () => ({
     mockUseGetShiftRequestsQuery(...args),
   useUpdateShiftCellMutation: () => [mockUpdateShiftCell, {}],
   useBatchUpdateShiftCellsMutation: () => [mockBatchUpdateShiftCells, {}],
+  useCreateShiftRequestMutation: () => [mockCreateShiftRequest, {}],
 }));
 
 describe("useCollaborativeShiftData", () => {
@@ -44,6 +46,7 @@ describe("useCollaborativeShiftData", () => {
     mockUseGetShiftRequestsQuery.mockReset();
     mockUpdateShiftCell.mockReset();
     mockBatchUpdateShiftCells.mockReset();
+    mockCreateShiftRequest.mockReset();
   });
 
   it("取得したシフトをShiftDataMapへ反映する", async () => {

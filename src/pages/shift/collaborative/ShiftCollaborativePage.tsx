@@ -519,18 +519,6 @@ const useCollaborativePageState = () => {
     [isCellBeingEdited, updateUserActivity, updateShift, isCellLocked],
   );
 
-  const changeCellLock = useCallback(
-    (staffId: string, date: string, locked: boolean) => {
-      if (isCellBeingEdited(staffId, date)) {
-        return;
-      }
-
-      updateUserActivity();
-      void updateShift({ staffId, date, isLocked: locked });
-    },
-    [isCellBeingEdited, updateUserActivity, updateShift],
-  );
-
   /**
    * フォーカス中のセルまたは選択中のセルの状態を変更
    */
@@ -572,19 +560,29 @@ const useCollaborativePageState = () => {
             ? [focusedCell]
             : [];
 
-      targets.forEach(({ staffId, date }) => {
-        const cell = getCellData(staffId, date);
-        if (!cell || cell.isLocked === locked) return;
-        changeCellLock(staffId, date, locked);
-      });
+      // ロック状態を変更するセルのみを抽出
+      const updates = targets
+        .map(({ staffId, date }) => {
+          const cell = getCellData(staffId, date);
+          if (!cell || cell.isLocked === locked) return null;
+          return { staffId, date, isLocked: locked };
+        })
+        .filter((update): update is { staffId: string; date: string; isLocked: boolean } =>
+          update !== null,
+        );
+
+      if (updates.length === 0) return;
+
+      // バッチ更新で一括ロック
+      void batchUpdateShifts(updates);
     },
     [
       selectionCount,
       selectedCells,
       focusedCell,
-      changeCellLock,
       getCellData,
       isAdmin,
+      batchUpdateShifts,
     ],
   );
 
