@@ -44,7 +44,7 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
   const normalizedItems = useMemo(() => items ?? [], [items]);
 
   const sorted = useMemo(
-    () => [...normalizedItems].sort((a, b) => sortCalendar(a, b)),
+    () => normalizedItems.toSorted((a, b) => sortCalendar(a, b)),
     [normalizedItems],
   );
 

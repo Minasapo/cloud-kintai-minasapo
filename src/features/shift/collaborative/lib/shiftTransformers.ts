@@ -186,7 +186,9 @@ export const transformShiftCellUpdateToGraphQLInput = ({
     });
   });
 
-  entries.sort((a, b) => a.date.localeCompare(b.date));
+  const sortedEntries = entries.toSorted((a, b) =>
+    a.date.localeCompare(b.date)
+  );
 
   const expectedVersion = shiftRequest.version ?? null;
   const nextVersion =
@@ -197,7 +199,7 @@ export const transformShiftCellUpdateToGraphQLInput = ({
       id: shiftRequest.id,
       staffId: shiftRequest.staffId,
       targetMonth,
-      entries,
+      entries: sortedEntries,
       updatedBy,
       version: nextVersion,
     },

@@ -82,9 +82,9 @@ export const useWorkflowDetailViewModel = ({
     if (!workflow) return base;
 
     if (workflow.approvalSteps && workflow.approvalSteps.length > 0) {
-      const steps = (workflow.approvalSteps as ApprovalStep[])
-        .slice()
-        .sort((a, b) => (a?.stepOrder ?? 0) - (b?.stepOrder ?? 0));
+      const steps = (workflow.approvalSteps as ApprovalStep[]).toSorted(
+        (a, b) => (a?.stepOrder ?? 0) - (b?.stepOrder ?? 0)
+      );
       steps.forEach((step, index) => {
         const approverId = step.approverStaffId || "";
         const staff = staffs.find((item) => item.id === approverId);

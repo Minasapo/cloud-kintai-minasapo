@@ -52,7 +52,7 @@ export default function useCloseDates() {
     );
 
     // Determine the next term in chronological order
-    const sortedByCloseDate = [...afterPrimaryUpdate].sort(
+    const sortedByCloseDate = afterPrimaryUpdate.toSorted(
       (a, b) => dayjs(a.closeDate).valueOf() - dayjs(b.closeDate).valueOf()
     );
     const currentIndex = sortedByCloseDate.findIndex(
@@ -98,9 +98,7 @@ export default function useCloseDates() {
           if (index === -1) {
             return prev;
           }
-          const next = [...prev];
-          next.splice(index, 1);
-          return next;
+          return prev.toSpliced(index, 1);
         });
       })
       .catch((e) => {

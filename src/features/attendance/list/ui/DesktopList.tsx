@@ -94,7 +94,7 @@ export default function DesktopList({
           ? dayjs(attendance.workDate).isSame(currentMonth, "month")
           : false
       )
-      .sort((a, b) => {
+      .toSorted((a, b) => {
         const aValue = a.workDate ? dayjs(a.workDate).valueOf() : 0;
         const bValue = b.workDate ? dayjs(b.workDate).valueOf() : 0;
         return aValue - bValue;

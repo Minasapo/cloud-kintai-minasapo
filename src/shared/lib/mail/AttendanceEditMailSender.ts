@@ -35,7 +35,7 @@ export class AttendanceEditMailSender extends MailSender {
 
     const latestHistory = histories
       .filter((item): item is NonNullable<typeof item> => item !== null)
-      .sort((a, b) => {
+      .toSorted((a, b) => {
         if (a.createdAt === b.createdAt) return 0;
         return a.createdAt < b.createdAt ? 1 : -1;
       })[0];

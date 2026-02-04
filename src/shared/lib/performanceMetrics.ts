@@ -162,7 +162,7 @@ class PerformanceMetricsCollector {
     return () => {
       const index = this.callbacks.indexOf(callback);
       if (index > -1) {
-        this.callbacks.splice(index, 1);
+        this.callbacks = this.callbacks.toSpliced(index, 1);
       }
     };
   }

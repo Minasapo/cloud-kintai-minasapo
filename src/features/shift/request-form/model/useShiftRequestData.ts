@@ -183,7 +183,9 @@ export function useShiftRequestData({
               changeReason: history.changeReason ?? undefined,
             })) ?? [];
         setHistories(
-          sanitizedHistories.sort((a, b) => (a.version ?? 0) - (b.version ?? 0))
+          sanitizedHistories.toSorted(
+            (a, b) => (a.version ?? 0) - (b.version ?? 0)
+          )
         );
       } catch {
         if (isMounted) {

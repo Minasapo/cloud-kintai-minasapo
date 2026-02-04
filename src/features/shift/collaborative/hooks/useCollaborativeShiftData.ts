@@ -51,7 +51,7 @@ export const useCollaborativeShiftData = ({
 
   // staffIds参照を安定化（毎回新しい配列参照による不要なrefetchを防ぐ）
   const staffIdsKey = useMemo(
-    () => [...staffIds].sort().join(","),
+    () => staffIds.toSorted().join(","),
     [staffIds],
   );
 

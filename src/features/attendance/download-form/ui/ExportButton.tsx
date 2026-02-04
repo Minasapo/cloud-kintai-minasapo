@@ -59,7 +59,7 @@ export default function ExportButton({ workDates, selectedStaff }: Props) {
           "摘要",
         ].join(","),
         ...selectedStaff
-          .sort((a: StaffType, b: StaffType) => {
+          .toSorted((a: StaffType, b: StaffType) => {
             const aSortKey = a.sortKey || "";
             const bSortKey = b.sortKey || "";
             return aSortKey.localeCompare(bSortKey);
