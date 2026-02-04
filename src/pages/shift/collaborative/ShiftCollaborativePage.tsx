@@ -1184,7 +1184,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       handleCellMouseEnter,
       handleMouseUp,
       handleSync: _handleSync,
-      progress: _progress,
+      progress,
       calculateDailyCount,
       getEventsForDay,
       selectionCount,
@@ -1229,6 +1229,9 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onApplyAction={handleApplySuggestion}
             onRefresh={analyzeShifts}
           />
+
+          {/* 進捗パネル */}
+          <ProgressPanel progress={progress} totalDays={days.length} />
 
           {/* シフト調整テーブル */}
           <ShiftTable
