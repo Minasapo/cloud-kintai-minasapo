@@ -78,13 +78,11 @@ export const normalizeShiftRequest = (
   staffId: shiftRequest.staffId,
   targetMonth: shiftRequest.targetMonth,
   entries:
-    shiftRequest.entries
-      ?.filter(nonNullable)
-      .map((entry) => ({
-        date: entry.date,
-        status: entry.status,
-        isLocked: entry.isLocked ?? false,
-      })) ?? [],
+    shiftRequest.entries?.filter(nonNullable).map((entry) => ({
+      date: entry.date,
+      status: entry.status,
+      isLocked: entry.isLocked ?? false,
+    })) ?? [],
   updatedAt: shiftRequest.updatedAt ?? undefined,
   updatedBy: shiftRequest.updatedBy ?? undefined,
   version: shiftRequest.version ?? undefined,
@@ -192,7 +190,7 @@ export const transformShiftCellUpdateToGraphQLInput = ({
   });
 
   const sortedEntries = entries.toSorted((a, b) =>
-    a.date.localeCompare(b.date)
+    a.date.localeCompare(b.date),
   );
 
   const expectedVersion = shiftRequest.version ?? null;

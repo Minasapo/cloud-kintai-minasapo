@@ -206,6 +206,7 @@ enum ShiftRequestStatus {
 type ShiftRequestDayPreference {
   date: String!
   status: ShiftRequestStatus!
+  isLocked: Boolean
 }
 
 type ShiftRequestSummary {
@@ -485,6 +486,7 @@ input ShiftRequestBatchUpdateInput {
 input ShiftRequestDayPreferenceInput {
   date: String!
   status: ShiftRequestStatus!
+  isLocked: Boolean
 }
 
 type ShiftRequestBatchUpdateResult {

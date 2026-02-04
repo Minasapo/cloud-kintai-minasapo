@@ -33,7 +33,7 @@ describe("useShiftPresence", () => {
 
       // フックの初期化を待つ
       expect(result.current.activeUsers).toHaveLength(1);
-      
+
       const initialLastActivity = result.current.activeUsers[0].lastActivity;
 
       // 30秒経過

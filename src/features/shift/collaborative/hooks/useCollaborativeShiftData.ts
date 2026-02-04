@@ -357,17 +357,19 @@ export const useCollaborativeShiftData = ({
             missingStaffIds.map(async (staffId) => {
               const staffData = nextMap.get(staffId) ?? new Map();
               const entries = Array.from(staffData.entries())
-                .map(([dayKey, cell]): ShiftRequestDayPreferenceInput | null => {
-                  const status = shiftStateToShiftRequestStatus(cell.state);
-                  if (!status) return null;
-                  return {
-                    date: dayjs(`${targetMonth}-${dayKey}`).format(
-                      "YYYY-MM-DD",
-                    ),
-                    status,
-                    isLocked: cell.isLocked || undefined,
-                  };
-                })
+                .map(
+                  ([dayKey, cell]): ShiftRequestDayPreferenceInput | null => {
+                    const status = shiftStateToShiftRequestStatus(cell.state);
+                    if (!status) return null;
+                    return {
+                      date: dayjs(`${targetMonth}-${dayKey}`).format(
+                        "YYYY-MM-DD",
+                      ),
+                      status,
+                      isLocked: cell.isLocked || undefined,
+                    };
+                  },
+                )
                 .filter(
                   (entry): entry is ShiftRequestDayPreferenceInput =>
                     entry !== null,

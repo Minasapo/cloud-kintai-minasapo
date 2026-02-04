@@ -567,8 +567,11 @@ const useCollaborativePageState = () => {
           if (!cell || cell.isLocked === locked) return null;
           return { staffId, date, isLocked: locked };
         })
-        .filter((update): update is { staffId: string; date: string; isLocked: boolean } =>
-          update !== null,
+        .filter(
+          (
+            update,
+          ): update is { staffId: string; date: string; isLocked: boolean } =>
+            update !== null,
         );
 
       if (updates.length === 0) return;

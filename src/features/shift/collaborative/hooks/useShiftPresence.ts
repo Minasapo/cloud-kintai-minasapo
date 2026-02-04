@@ -123,7 +123,7 @@ export const useShiftPresence = ({
   useEffect(() => {
     // 初回のアクティビティ時刻を設定
     lastActivityRef.current = Date.now();
-    
+
     // 初回のアクティブユーザー登録
     updateActiveUsers();
 
