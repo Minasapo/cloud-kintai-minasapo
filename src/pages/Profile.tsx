@@ -18,18 +18,20 @@ import {
   Stack,
   styled,
   Switch,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableRow,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { type SyntheticEvent, useContext, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -65,13 +67,13 @@ const NotificationSwitch = styled(Switch)(({ theme }) => ({
     },
     "&::before": {
       backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-        theme.palette.getContrastText(theme.palette.primary.main)
+        theme.palette.getContrastText(theme.palette.primary.main),
       )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
       left: 12,
     },
     "&::after": {
       backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-        theme.palette.getContrastText(theme.palette.primary.main)
+        theme.palette.getContrastText(theme.palette.primary.main),
       )}" d="M19,13H5V11H19V13Z" /></svg>')`,
       right: 12,
     },
@@ -92,6 +94,8 @@ export type StaffNotificationInputs = {
 type StaffProfileFormInputs = StaffNotificationInputs & {
   externalLinks: StaffExternalLink[];
 };
+
+type ProfileTab = "general" | "links";
 
 const DEFAULT_ICON_VALUE = predefinedIcons[0]?.value ?? "LinkIcons";
 
@@ -115,6 +119,9 @@ const sanitizeExternalLinks = (links: StaffExternalLink[]) =>
 
 const isValidUrl = (value: string) => /^https?:\/\//i.test(value.trim());
 
+const isProfileTab = (value: string): value is ProfileTab =>
+  value === "general" || value === "links";
+
 const ProfileLogoutButton = styled(Button)(({ theme }) => ({
   color: theme.palette.logout.contrastText,
   backgroundColor: theme.palette.logout.main,
@@ -129,6 +136,7 @@ export default function Profile() {
   const dispatch = useAppDispatchV2();
   const { cognitoUser, signOut } = useContext(AuthContext);
   const [staff, setStaff] = useState<StaffType | null | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState<ProfileTab>("general");
 
   const {
     control,
@@ -232,6 +240,12 @@ export default function Profile() {
       .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E05003)));
   };
 
+  const handleTabChange = (_: SyntheticEvent, value: string) => {
+    if (isProfileTab(value)) {
+      setActiveTab(value);
+    }
+  };
+
   return (
     <Container maxWidth="xl" sx={{ pt: 2 }}>
       <Stack direction="column" spacing={2}>
@@ -240,236 +254,243 @@ export default function Profile() {
           current="個人設定"
         />
         <Title>個人設定</Title>
-        <TableContainer>
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell sx={{ width: 200 }}>
-                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                    名前
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body1">
-                    {cognitoUser.familyName} {cognitoUser.givenName} さん
-                  </Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                    メールアドレス
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body1">
-                    {cognitoUser.mailAddress}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                    権限
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body1">
-                    {staff?.role ? roleLabelMap.get(staff.role) : "未設定"}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                    利用開始日
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body1">
-                    {staff?.usageStartDate
-                      ? dayjs(staff.usageStartDate).format(
-                          AttendanceDate.DisplayFormat
-                        )
-                      : "未設定"}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                    通知設定
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Stack direction="column" spacing={1}>
-                    <FormControlLabel
-                      control={
-                        <Controller
-                          name="workStart"
-                          control={control}
-                          render={({ field }) => (
-                            <NotificationSwitch
-                              {...field}
-                              checked={field.value}
-                              onChange={(e) => field.onChange(e.target.checked)}
-                            />
-                          )}
-                        />
-                      }
-                      label="勤務開始メール"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Controller
-                          name="workEnd"
-                          control={control}
-                          render={({ field }) => (
-                            <NotificationSwitch
-                              {...field}
-                              checked={field.value}
-                              onChange={(e) => field.onChange(e.target.checked)}
-                            />
-                          )}
-                        />
-                      }
-                      label="勤務終了メール"
-                    />
-                  </Stack>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                    個人リンク
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Stack direction="column" spacing={2}>
-                    {externalLinkFields.length === 0 && (
-                      <Typography variant="body2" color="text.secondary">
-                        個人リンクはまだ登録されていません。
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs value={activeTab} onChange={handleTabChange}>
+            <Tab label="一般設定" value="general" />
+            <Tab label="個人リンク設定" value="links" />
+          </Tabs>
+        </Box>
+        <Box sx={{ pt: 2 }}>
+          {activeTab === "general" && (
+            <TableContainer>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell sx={{ width: 200 }}>
+                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                        名前
                       </Typography>
-                    )}
-                    {externalLinkFields.map((field, index) => (
-                      <Paper key={field.id} variant="outlined" sx={{ p: 2 }}>
-                        <Stack spacing={2}>
-                          <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            alignItems="center"
-                          >
-                            <Typography variant="subtitle2">
-                              リンク {index + 1}
-                            </Typography>
-                            <Stack direction="row" spacing={1}>
-                              <Controller
-                                name={`externalLinks.${index}.enabled`}
-                                control={control}
-                                render={({ field }) => (
-                                  <FormControlLabel
-                                    control={
-                                      <Switch
-                                        {...field}
-                                        checked={field.value}
-                                        onChange={(e) =>
-                                          field.onChange(e.target.checked)
-                                        }
-                                      />
-                                    }
-                                    label="有効"
-                                  />
-                                )}
-                              />
-                              <IconButton
-                                aria-label="リンクを削除"
-                                onClick={() => handleRemoveLink(index)}
-                              >
-                                <DeleteOutlineIcon />
-                              </IconButton>
-                            </Stack>
-                          </Stack>
-                          <Controller
-                            name={`externalLinks.${index}.label`}
-                            control={control}
-                            rules={{
-                              required: "表示名を入力してください",
-                              maxLength: {
-                                value: 32,
-                                message: "32文字以内で入力してください",
-                              },
-                            }}
-                            render={({ field, fieldState }) => (
-                              <TextField
-                                {...field}
-                                label="表示名"
-                                size="small"
-                                fullWidth
-                                error={Boolean(fieldState.error)}
-                                helperText={fieldState.error?.message}
-                              />
-                            )}
-                          />
-                          <Controller
-                            name={`externalLinks.${index}.url`}
-                            control={control}
-                            rules={{
-                              required: "URLを入力してください",
-                              validate: (value) =>
-                                isValidUrl(value) ||
-                                "https:// から始まるURLを入力してください",
-                            }}
-                            render={({ field, fieldState }) => (
-                              <TextField
-                                {...field}
-                                label="URL"
-                                placeholder="https://..."
-                                size="small"
-                                fullWidth
-                                error={Boolean(fieldState.error)}
-                                helperText={fieldState.error?.message}
-                              />
-                            )}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            アイコンは「その他」で固定されています。
-                          </Typography>
-                        </Stack>
-                      </Paper>
-                    ))}
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Button
-                        variant="outlined"
-                        startIcon={<AddCircleOutlineIcon />}
-                        onClick={handleAddLink}
-                        disabled={!canAddMoreLinks}
-                      >
-                        リンクを追加
-                      </Button>
-                      {!canAddMoreLinks && (
-                        <Typography variant="caption" color="text.secondary">
-                          最大{STAFF_EXTERNAL_LINKS_LIMIT}件まで追加できます。
-                        </Typography>
-                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">
+                        {cognitoUser.familyName} {cognitoUser.givenName} さん
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                        メールアドレス
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">
+                        {cognitoUser.mailAddress}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                        権限
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">
+                        {staff?.role ? roleLabelMap.get(staff.role) : "未設定"}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                        利用開始日
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">
+                        {staff?.usageStartDate
+                          ? dayjs(staff.usageStartDate).format(
+                              AttendanceDate.DisplayFormat,
+                            )
+                          : "未設定"}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                        通知設定
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="column" spacing={1}>
+                        <FormControlLabel
+                          control={
+                            <Controller
+                              name="workStart"
+                              control={control}
+                              render={({ field }) => (
+                                <NotificationSwitch
+                                  {...field}
+                                  checked={field.value}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.checked)
+                                  }
+                                />
+                              )}
+                            />
+                          }
+                          label="勤務開始メール"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Controller
+                              name="workEnd"
+                              control={control}
+                              render={({ field }) => (
+                                <NotificationSwitch
+                                  {...field}
+                                  checked={field.value}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.checked)
+                                  }
+                                />
+                              )}
+                            />
+                          }
+                          label="勤務終了メール"
+                        />
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                        ログアウト
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <ProfileLogoutButton onClick={signOut}>
+                        ログアウト
+                      </ProfileLogoutButton>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+          {activeTab === "links" && (
+            <Stack direction="column" spacing={2} sx={{ maxWidth: 720 }}>
+              {externalLinkFields.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  個人リンクはまだ登録されていません。
+                </Typography>
+              )}
+              {externalLinkFields.map((field, index) => (
+                <Paper key={field.id} variant="outlined" sx={{ p: 2 }}>
+                  <Stack spacing={2}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="subtitle2">
+                        リンク {index + 1}
+                      </Typography>
+                      <Stack direction="row" spacing={1}>
+                        <Controller
+                          name={`externalLinks.${index}.enabled`}
+                          control={control}
+                          render={({ field }) => (
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  {...field}
+                                  checked={field.value}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.checked)
+                                  }
+                                />
+                              }
+                              label="有効"
+                            />
+                          )}
+                        />
+                        <IconButton
+                          aria-label="リンクを削除"
+                          onClick={() => handleRemoveLink(index)}
+                        >
+                          <DeleteOutlineIcon />
+                        </IconButton>
+                      </Stack>
                     </Stack>
+                    <Controller
+                      name={`externalLinks.${index}.label`}
+                      control={control}
+                      rules={{
+                        required: "表示名を入力してください",
+                        maxLength: {
+                          value: 32,
+                          message: "32文字以内で入力してください",
+                        },
+                      }}
+                      render={({ field, fieldState }) => (
+                        <TextField
+                          {...field}
+                          label="表示名"
+                          size="small"
+                          fullWidth
+                          error={Boolean(fieldState.error)}
+                          helperText={fieldState.error?.message}
+                        />
+                      )}
+                    />
+                    <Controller
+                      name={`externalLinks.${index}.url`}
+                      control={control}
+                      rules={{
+                        required: "URLを入力してください",
+                        validate: (value) =>
+                          isValidUrl(value) ||
+                          "https:// から始まるURLを入力してください",
+                      }}
+                      render={({ field, fieldState }) => (
+                        <TextField
+                          {...field}
+                          label="URL"
+                          placeholder="https://..."
+                          size="small"
+                          fullWidth
+                          error={Boolean(fieldState.error)}
+                          helperText={fieldState.error?.message}
+                        />
+                      )}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      アイコンは「その他」で固定されています。
+                    </Typography>
                   </Stack>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                    ログアウト
+                </Paper>
+              ))}
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Button
+                  variant="outlined"
+                  startIcon={<AddCircleOutlineIcon />}
+                  onClick={handleAddLink}
+                  disabled={!canAddMoreLinks}
+                >
+                  リンクを追加
+                </Button>
+                {!canAddMoreLinks && (
+                  <Typography variant="caption" color="text.secondary">
+                    最大{STAFF_EXTERNAL_LINKS_LIMIT}件まで追加できます。
                   </Typography>
-                </TableCell>
-                <TableCell>
-                  <ProfileLogoutButton onClick={signOut}>
-                    ログアウト
-                  </ProfileLogoutButton>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
+                )}
+              </Stack>
+            </Stack>
+          )}
+        </Box>
         <Box>
           <Button
             variant="contained"
