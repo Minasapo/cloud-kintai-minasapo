@@ -20,13 +20,29 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
   index,
   onDelete,
 }: ShiftGroupRowProps) => {
+  const hasInputValue = (value?: string | null) => (value ?? "").trim() !== "";
   const labelValue = useWatch({
     control,
     name: `shiftGroups.${index}.label`,
   });
+  const minValue = useWatch({
+    control,
+    name: `shiftGroups.${index}.min`,
+  });
+  const maxValue = useWatch({
+    control,
+    name: `shiftGroups.${index}.max`,
+  });
+  const fixedValue = useWatch({
+    control,
+    name: `shiftGroups.${index}.fixed`,
+  });
   const handleDelete = useCallback(() => {
     onDelete();
   }, [onDelete]);
+
+  const disableMinMax = hasInputValue(fixedValue);
+  const disableFixed = hasInputValue(minValue) || hasInputValue(maxValue);
 
   const { field: idField } = useController({
     control,
@@ -64,7 +80,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           size="small"
           label="説明"
           helperText={SHIFT_GROUP_UI_TEXTS.descriptionHelperText}
-          inputProps={{ maxLength: 48 }}
+          inputProps={{ maxLength: 50 }}
           fullWidth
         />
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
@@ -75,6 +91,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="最小人数 (min)"
             helperText={SHIFT_GROUP_VALIDATION_TEXTS.minOptional}
+            disabled={disableMinMax}
             inputProps={{ min: 0 }}
             sx={{ flexGrow: 1 }}
           />
@@ -85,6 +102,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="最大人数 (max)"
             helperText={SHIFT_GROUP_VALIDATION_TEXTS.maxOptional}
+            disabled={disableMinMax}
             inputProps={{ min: 0 }}
             sx={{ flexGrow: 1 }}
           />
@@ -95,6 +113,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
             type="number"
             label="固定人数 (fixed)"
             helperText={SHIFT_GROUP_VALIDATION_TEXTS.fixedOptional}
+            disabled={disableFixed}
             inputProps={{ min: 0 }}
             sx={{ flexGrow: 1 }}
           />

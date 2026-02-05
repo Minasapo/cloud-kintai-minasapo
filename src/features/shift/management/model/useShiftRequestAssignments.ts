@@ -207,7 +207,7 @@ export default function useShiftRequestAssignments({
           date,
           status: shiftStateToShiftRequestStatus(state),
         }))
-        .sort((a, b) => a.date.localeCompare(b.date));
+        .toSorted((a, b) => a.date.localeCompare(b.date));
 
       const summary = buildSummaryFromAssignments(updatedAssignments);
       const record = shiftRequestRecords.get(staffId);

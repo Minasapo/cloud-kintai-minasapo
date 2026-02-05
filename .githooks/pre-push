@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "Running pre-push checks (typecheck + unit tests)..."
+echo "========================================"
+
+npm run prepush:verify
+if [ $? -ne 0 ]; then
+  echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+  echo "@ Pre-push checks failed, aborting push"
+  echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+  exit 1
+fi
+
+echo "========================================"

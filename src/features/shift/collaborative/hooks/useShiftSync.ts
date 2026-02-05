@@ -46,7 +46,7 @@ export const useShiftSync = ({
       console.error("Sync error:", error);
       if (isMountedRef.current) {
         setSyncError(
-          error instanceof Error ? error.message : "同期に失敗しました"
+          error instanceof Error ? error.message : "同期に失敗しました",
         );
       }
     } finally {

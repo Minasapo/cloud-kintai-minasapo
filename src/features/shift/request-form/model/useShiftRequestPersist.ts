@@ -67,7 +67,7 @@ export function useShiftRequestPersist({
           date,
           status: statusToShiftRequestStatus[value.status],
         }))
-        .sort((a, b) => a.date.localeCompare(b.date));
+        .toSorted((a, b) => a.date.localeCompare(b.date));
 
       if (entries.length === 0) {
         return;

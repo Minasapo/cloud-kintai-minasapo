@@ -449,6 +449,57 @@ export const onDeleteCompanyHolidayCalendar = /* GraphQL */ `subscription OnDele
   APITypes.OnDeleteCompanyHolidayCalendarSubscriptionVariables,
   APITypes.OnDeleteCompanyHolidayCalendarSubscription
 >;
+export const onCreateEventCalendar = /* GraphQL */ `subscription OnCreateEventCalendar(
+  $filter: ModelSubscriptionEventCalendarFilterInput
+) {
+  onCreateEventCalendar(filter: $filter) {
+    id
+    eventDate
+    name
+    description
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateEventCalendarSubscriptionVariables,
+  APITypes.OnCreateEventCalendarSubscription
+>;
+export const onUpdateEventCalendar = /* GraphQL */ `subscription OnUpdateEventCalendar(
+  $filter: ModelSubscriptionEventCalendarFilterInput
+) {
+  onUpdateEventCalendar(filter: $filter) {
+    id
+    eventDate
+    name
+    description
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateEventCalendarSubscriptionVariables,
+  APITypes.OnUpdateEventCalendarSubscription
+>;
+export const onDeleteEventCalendar = /* GraphQL */ `subscription OnDeleteEventCalendar(
+  $filter: ModelSubscriptionEventCalendarFilterInput
+) {
+  onDeleteEventCalendar(filter: $filter) {
+    id
+    eventDate
+    name
+    description
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteEventCalendarSubscriptionVariables,
+  APITypes.OnDeleteEventCalendarSubscription
+>;
 export const onCreateCloseDate = /* GraphQL */ `subscription OnCreateCloseDate($filter: ModelSubscriptionCloseDateFilterInput) {
   onCreateCloseDate(filter: $filter) {
     id
@@ -850,6 +901,7 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -868,6 +920,7 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -902,6 +955,7 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -920,6 +974,7 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -954,6 +1009,7 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -972,6 +1028,7 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {

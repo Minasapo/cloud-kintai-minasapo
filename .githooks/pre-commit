@@ -1,43 +1,19 @@
 #!/bin/sh
 
-# ステージエリアに追加されているファイルのうち、
-# src/ 以下のファイルのみを対象にする
-FILES=$(git diff --cached --name-only --diff-filter=ACM)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
+TARGET_FILES=$(echo "$STAGED_FILES" | grep -E '^src/.*\.(js|jsx|ts|tsx)$' | grep -v '^src/api/' || true)
 
-if ! echo "$FILES" | grep -q "^src/.*"
-then
-    exit 0
+if [ -z "$TARGET_FILES" ]; then
+  exit 0
 fi
 
-# 自動生成されたAPIクライアントのファイルのみの変更の場合は、対処外にする
-if ! echo "$FILES" | grep -v "^src/api/"
-then
-    exit 0
-fi
-
-echo "testing and Static code analysis now..."
+echo "Running ESLint for staged src files..."
 echo "========================================"
 
-# ESLint
-(npx eslint src/ --ext .js,.jsx,.ts,.tsx) &
-eslint_pid=$!
-
-# Jest
-(CI=true make test) &
-jest_test_pid=$!
-
-wait $eslint_pid
+echo "$TARGET_FILES" | xargs npx eslint --cache --cache-location .eslintcache
 if [ $? -ne 0 ]; then
   echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
   echo "@ ESLint failed, aborting commit"
-  echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-  exit 1
-fi
-
-wait $jest_test_pid
-if [ $? -ne 0 ]; then
-  echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-  echo "@ Tests failed, aborting commit"
   echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
   exit 1
 fi

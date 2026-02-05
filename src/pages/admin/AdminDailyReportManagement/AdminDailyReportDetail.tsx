@@ -71,7 +71,7 @@ const normalizeComments = (
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
 const sortReports = (items: AdminDailyReport[]) =>
-  [...items].sort((a, b) => {
+  items.toSorted((a, b) => {
     if (a.date === b.date) {
       const aTime = a.updatedAt ?? "";
       const bTime = b.updatedAt ?? "";

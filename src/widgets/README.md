@@ -1,6 +1,7 @@
 # Widgets Layer
 
 UI レイヤーを FSD へ寄せる第一歩として `components` 直下に偏在していた複合コンポーネントを `widgets` 配下へ移動しました。`widgets` では次のルールに従います。
+例として `widgets/layout/header` は ページ全体で使うヘッダー一式をまとめた単位です。
 
 - **目的**: ページを構成する大きめの UI ブロック（ヘッダー / フッター / スナックバーなど）をまとめる。
 - **命名**: `widgets/<domain>/<slice>` の 2 階層を基本とし、`layout`, `feedback` など概念ごとに分類する。

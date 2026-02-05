@@ -81,7 +81,7 @@ export default function AdminWorkflow() {
   });
 
   // 作成日で降順にソートしてからページネーションを適用
-  const sortedWorkflows = (filteredWorkflows || []).slice().sort((a, b) => {
+  const sortedWorkflows = filteredWorkflows.toSorted((a, b) => {
     const at = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const bt = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return bt - at; // 降順

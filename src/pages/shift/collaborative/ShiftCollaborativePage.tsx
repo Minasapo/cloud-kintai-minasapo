@@ -1,16 +1,18 @@
+import {
+  useGetCompanyHolidayCalendarsQuery,
+  useGetEventCalendarsQuery,
+  useGetHolidayCalendarsQuery,
+} from "@entities/calendar/api/calendarApi";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoIcon from "@mui/icons-material/Info";
 import LockIcon from "@mui/icons-material/Lock";
-import SyncIcon from "@mui/icons-material/Sync";
 import {
   Alert,
-  Avatar,
-  AvatarGroup,
   Box,
   Chip,
   Container,
   Fab,
-  IconButton,
   LinearProgress,
   Paper,
   Stack,
@@ -24,13 +26,33 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
+import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
+import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
+import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
-import { memo, useCallback, useMemo, useState } from "react";
+import {
+  type FC,
+  memo,
+  type MouseEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+import { AuthContext } from "@/context/AuthContext";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+
+import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
+import {
+  PresenceNotificationContainer,
+  usePresenceNotifications,
+} from "../../../features/shift/collaborative/components/PresenceNotification";
 import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
 import { useCollaborativeShift } from "../../../features/shift/collaborative/context/CollaborativeShiftContext";
 import { useClipboard } from "../../../features/shift/collaborative/hooks/useClipboard";
@@ -75,15 +97,15 @@ interface ShiftCellProps {
   editorName?: string;
   lastChangedBy?: string;
   lastChangedAt?: string;
-  onClick: (event: React.MouseEvent) => void;
+  onClick: (event: MouseEvent) => void;
   onRegisterRef?: (element: HTMLElement | null) => void;
-  onMouseDown?: (event: React.MouseEvent) => void;
+  onMouseDown?: (event: MouseEvent) => void;
   onMouseEnter?: () => void;
   isFocused?: boolean;
   isSelected?: boolean;
 }
 
-const ShiftCellBase: React.FC<ShiftCellProps> = ({
+const ShiftCellBase: FC<ShiftCellProps> = ({
   state,
   isLocked,
   isEditing,
@@ -99,20 +121,20 @@ const ShiftCellBase: React.FC<ShiftCellProps> = ({
 }: ShiftCellProps) => {
   const config = shiftStateConfig[state];
   const isPending = false; // TODO: pendingChangesから取得
-  const tooltipTitle = isLocked
-    ? "確定済み"
-    : isEditing
-      ? `${editorName}が編集中`
-      : (
-          <Box>
-            <Typography variant="caption">{config.text}</Typography>
-            {lastChangedBy && (
-              <Typography variant="caption" component="div">
-                {lastChangedBy} ({lastChangedAt})
-              </Typography>
-            )}
-          </Box>
-        );
+  const tooltipTitle = isLocked ? (
+    "確定済み"
+  ) : isEditing ? (
+    `${editorName}が編集中`
+  ) : (
+    <Box>
+      <Typography variant="caption">{config.text}</Typography>
+      {lastChangedBy && (
+        <Typography variant="caption" component="div">
+          {lastChangedBy} ({lastChangedAt})
+        </Typography>
+      )}
+    </Box>
+  );
 
   return (
     <TableCell
@@ -203,6 +225,7 @@ type ActiveUser = {
   userId: string;
   userName: string;
   color: string;
+  lastActivity: number;
 };
 
 type ShiftEvent = {
@@ -212,7 +235,22 @@ type ShiftEvent = {
   color: string;
 };
 
-const useShiftCalendar = (currentMonth: dayjs.Dayjs) => {
+const useShiftCalendar = (
+  currentMonth: dayjs.Dayjs,
+  registeredEventCalendars: Array<{
+    id: string;
+    eventDate: string;
+    name: string;
+  }>,
+  holidays: Array<{
+    holidayDate: string;
+    name: string;
+  }>,
+  companyHolidays: Array<{
+    holidayDate: string;
+    name: string;
+  }>,
+) => {
   const theme = useTheme();
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
@@ -226,35 +264,41 @@ const useShiftCalendar = (currentMonth: dayjs.Dayjs) => {
       ),
     [monthStart, daysInMonth],
   );
-  const eventCalendar = useMemo<ShiftEvent[]>(
-    () => [
-      {
-        label: "研修",
-        start: monthStart.date(5),
-        end: monthStart.date(5),
+  const eventCalendar = useMemo<ShiftEvent[]>(() => {
+    const events: ShiftEvent[] = [];
+
+    // イベントカレンダー
+    events.push(
+      ...registeredEventCalendars.map((event) => ({
+        label: event.name,
+        start: dayjs(event.eventDate),
+        end: dayjs(event.eventDate),
         color: theme.palette.info.main,
-      },
-      {
-        label: "企画展 開始",
-        start: monthStart.date(12),
-        end: monthStart.date(12),
-        color: theme.palette.primary.main,
-      },
-      {
-        label: "企画展 終了",
-        start: monthStart.date(18),
-        end: monthStart.date(18),
-        color: theme.palette.secondary.main,
-      },
-      {
-        label: "館内点検",
-        start: monthStart.date(26),
-        end: monthStart.date(26),
+      })),
+    );
+
+    // 祝祭日カレンダー
+    events.push(
+      ...holidays.map((holiday) => ({
+        label: holiday.name,
+        start: dayjs(holiday.holidayDate),
+        end: dayjs(holiday.holidayDate),
+        color: theme.palette.error.main,
+      })),
+    );
+
+    // 会社休日カレンダー
+    events.push(
+      ...companyHolidays.map((holiday) => ({
+        label: holiday.name,
+        start: dayjs(holiday.holidayDate),
+        end: dayjs(holiday.holidayDate),
         color: theme.palette.warning.main,
-      },
-    ],
-    [monthStart, theme],
-  );
+      })),
+    );
+
+    return events;
+  }, [registeredEventCalendars, holidays, companyHolidays, theme]);
   const dateKeys = useMemo(() => days.map((day) => day.format("DD")), [days]);
 
   return { days, dateKeys, eventCalendar };
@@ -351,7 +395,9 @@ function useShiftMetrics<T extends { state: ShiftState }>(
   }, [days, staffIds, shiftDataMap]);
 
   const calculateDailyCount = useCallback(
-    (dayKey: string): { work: number; fixedOff: number; requestedOff: number } =>
+    (
+      dayKey: string,
+    ): { work: number; fixedOff: number; requestedOff: number } =>
       dailyCountsByKey.get(dayKey) ?? { work: 0, fixedOff: 0, requestedOff: 0 },
     [dailyCountsByKey],
   );
@@ -391,10 +437,13 @@ function useShiftMetrics<T extends { state: ShiftState }>(
   return { calculateDailyCount, progress };
 }
 
-const useCollaborativePageState = () => {
+const useCollaborativePageState = (targetMonth: string) => {
   const {
     state,
     updateShift,
+    batchUpdateShifts,
+    isBatchUpdating,
+    startEditingCell,
     isCellBeingEdited,
     getCellEditor,
     triggerSync,
@@ -403,8 +452,65 @@ const useCollaborativePageState = () => {
 
   const isAdmin = true; // TODO: 認可情報から取得する
 
-  const [currentMonth] = useState(dayjs());
-  const { days, dateKeys, eventCalendar } = useShiftCalendar(currentMonth);
+  const currentMonth = useMemo(() => dayjs(targetMonth), [targetMonth]);
+
+  // イベントカレンダーを取得
+  const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
+
+  // 祝祭日カレンダーを取得
+  const { data: holidays = [] } = useGetHolidayCalendarsQuery();
+
+  // 会社休日カレンダーを取得
+  const { data: companyHolidays = [] } = useGetCompanyHolidayCalendarsQuery();
+
+  const { days, dateKeys, eventCalendar } = useShiftCalendar(
+    currentMonth,
+    registeredEventCalendars,
+    holidays,
+    companyHolidays,
+  );
+
+  // シフト計画データを取得
+  const [shiftPlanCapacities, setShiftPlanCapacities] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchShiftPlan = async () => {
+      try {
+        const result = (await graphqlClient.graphql({
+          query: shiftPlanYearByTargetYear,
+          variables: { targetYear: currentMonth.year(), limit: 1 },
+          authMode: "userPool",
+        })) as GraphQLResult<ShiftPlanYearByTargetYearQuery>;
+
+        if (result.errors?.length) {
+          throw new Error(
+            result.errors.map((error) => error.message).join(","),
+          );
+        }
+
+        const shiftPlanYear =
+          result.data?.shiftPlanYearByTargetYear?.items?.find(
+            (item): item is NonNullable<typeof item> => item !== null,
+          ) ?? null;
+        const monthPlan = shiftPlanYear?.plans?.find(
+          (plan) => plan?.month === currentMonth.month() + 1,
+        );
+
+        if (monthPlan?.dailyCapacities) {
+          setShiftPlanCapacities(
+            monthPlan.dailyCapacities.map((capacity) => capacity ?? Number.NaN),
+          );
+        } else {
+          setShiftPlanCapacities([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch shift plan:", error);
+        setShiftPlanCapacities([]);
+      }
+    };
+
+    void fetchShiftPlan();
+  }, [currentMonth]);
 
   // スタッフリストを取得（shiftDataMapから）
   const staffIds = useMemo(
@@ -484,6 +590,8 @@ const useCollaborativePageState = () => {
     staffIds,
     dateKeys,
     enabled: true,
+    shiftPlanCapacities,
+    days,
   });
 
   /**
@@ -505,34 +613,32 @@ const useCollaborativePageState = () => {
     [isCellBeingEdited, updateUserActivity, updateShift, isCellLocked],
   );
 
-  const changeCellLock = useCallback(
-    (staffId: string, date: string, locked: boolean) => {
-      if (isCellBeingEdited(staffId, date)) {
-        return;
-      }
-
-      updateUserActivity();
-      void updateShift({ staffId, date, isLocked: locked });
-    },
-    [isCellBeingEdited, updateUserActivity, updateShift],
-  );
-
   /**
    * フォーカス中のセルまたは選択中のセルの状態を変更
    */
   const handleChangeState = useCallback(
     (newState: ShiftState) => {
       if (selectionCount > 0) {
-        // 複数選択がある場合は、選択されたすべてのセルを変更
-        selectedCells.forEach(({ staffId, date }) => {
-          changeCellState(staffId, date, newState);
-        });
-      } else if (focusedCell) {
-        // フォーカスされたセルのみ変更
+        const updates = selectedCells.map(({ staffId, date }) => ({
+          staffId,
+          date,
+          newState,
+        }));
+        void batchUpdateShifts(updates);
+        return;
+      }
+
+      if (focusedCell) {
         changeCellState(focusedCell.staffId, focusedCell.date, newState);
       }
     },
-    [focusedCell, selectedCells, selectionCount, changeCellState],
+    [
+      focusedCell,
+      selectedCells,
+      selectionCount,
+      batchUpdateShifts,
+      changeCellState,
+    ],
   );
 
   const applyLockState = useCallback(
@@ -548,19 +654,32 @@ const useCollaborativePageState = () => {
             ? [focusedCell]
             : [];
 
-      targets.forEach(({ staffId, date }) => {
-        const cell = getCellData(staffId, date);
-        if (!cell || cell.isLocked === locked) return;
-        changeCellLock(staffId, date, locked);
-      });
+      // ロック状態を変更するセルのみを抽出
+      const updates = targets
+        .map(({ staffId, date }) => {
+          const cell = getCellData(staffId, date);
+          if (!cell || cell.isLocked === locked) return null;
+          return { staffId, date, isLocked: locked };
+        })
+        .filter(
+          (
+            update,
+          ): update is { staffId: string; date: string; isLocked: boolean } =>
+            update !== null,
+        );
+
+      if (updates.length === 0) return;
+
+      // バッチ更新で一括ロック
+      void batchUpdateShifts(updates);
     },
     [
       selectionCount,
       selectedCells,
       focusedCell,
-      changeCellLock,
       getCellData,
       isAdmin,
+      batchUpdateShifts,
     ],
   );
 
@@ -658,40 +777,59 @@ const useCollaborativePageState = () => {
   /**
    * セルクリックハンドラー
    */
-  const handleCellClick = (
-    staffId: string,
-    date: string,
-    event: React.MouseEvent,
-  ) => {
-    if (isCellBeingEdited(staffId, date)) {
-      return; // 他のユーザーが編集中
-    }
+  const handleCellClick = useCallback(
+    (staffId: string, date: string, event: MouseEvent) => {
+      // バッチ更新中は操作不可
+      if (isBatchUpdating) {
+        return;
+      }
 
-    updateUserActivity();
+      if (isCellBeingEdited(staffId, date)) {
+        return; // 他のユーザーが編集中
+      }
 
-    // Shift+クリック: 範囲選択
-    if (event.shiftKey) {
-      selectRange(staffId, date);
-      return;
-    }
+      updateUserActivity();
 
-    // Ctrl/Cmd+クリック: 個別追加選択
-    if (event.ctrlKey || event.metaKey) {
-      toggleCell(staffId, date);
+      // Shift+クリック: 範囲選択
+      if (event.shiftKey) {
+        selectRange(staffId, date);
+        return;
+      }
+
+      // Ctrl/Cmd+クリック: 個別追加選択
+      if (event.ctrlKey || event.metaKey) {
+        toggleCell(staffId, date);
+        focusCell(staffId, date);
+        return;
+      }
+
+      // 通常クリック: 単一選択して編集開始
+      selectCell(staffId, date);
       focusCell(staffId, date);
-      return;
-    }
-
-    // 通常クリック: 単一選択して状態を循環
-    selectCell(staffId, date);
-    focusCell(staffId, date);
-  };
+      startEditingCell(staffId, date);
+    },
+    [
+      isBatchUpdating,
+      isCellBeingEdited,
+      updateUserActivity,
+      selectRange,
+      toggleCell,
+      focusCell,
+      selectCell,
+      startEditingCell,
+    ],
+  );
 
   /**
    * セルのマウスダウン（ドラッグ選択開始）
    */
   const handleCellMouseDown = useCallback(
-    (staffId: string, date: string, event: React.MouseEvent) => {
+    (staffId: string, date: string, event: MouseEvent) => {
+      // バッチ更新中は操作不可
+      if (isBatchUpdating) {
+        return;
+      }
+
       // 修飾キーがある場合はドラッグ選択しない
       if (event.shiftKey || event.ctrlKey || event.metaKey) {
         return;
@@ -699,7 +837,7 @@ const useCollaborativePageState = () => {
 
       startDragSelect(staffId, date);
     },
-    [startDragSelect],
+    [isBatchUpdating, startDragSelect],
   );
 
   /**
@@ -771,65 +909,38 @@ const useCollaborativePageState = () => {
     setShowHelp,
     getCellEditor,
     isCellBeingEdited,
+    isBatchUpdating,
   };
 };
 
 type CollaborativeHeaderProps = {
   currentMonth: dayjs.Dayjs;
   activeUsers: ActiveUser[];
-  isSyncing: boolean;
-  lastSyncedAt: number;
-  onSync: () => void;
+  editingCells: Map<
+    string,
+    { userId: string; userName: string; startTime: number }
+  >;
 };
 
-const CollaborativeHeader: React.FC<CollaborativeHeaderProps> = ({
+const CollaborativeHeader: FC<CollaborativeHeaderProps> = ({
   currentMonth,
   activeUsers,
-  isSyncing,
-  lastSyncedAt,
-  onSync,
+  editingCells,
 }) => (
   <Stack direction="row" alignItems="center" spacing={2} mb={3}>
     <Typography variant="h4">協同シフト調整</Typography>
-    <Chip label={currentMonth.format("YYYY年 M月")} color="primary" variant="outlined" />
+    <Chip
+      label={currentMonth.format("YYYY年 M月")}
+      color="primary"
+      variant="outlined"
+    />
 
     <Box sx={{ flex: 1 }} />
-    <AvatarGroup max={5}>
-      {activeUsers.map((user) => (
-        <Tooltip key={user.userId} title={user.userName}>
-          <Avatar
-            sx={{
-              bgcolor: user.color,
-              width: 32,
-              height: 32,
-              fontSize: "0.875rem",
-            }}
-          >
-            {user.userName.charAt(0)}
-          </Avatar>
-        </Tooltip>
-      ))}
-    </AvatarGroup>
-
-  <Tooltip
-    title={
-      lastSyncedAt > 0
-        ? `最終同期: ${dayjs(lastSyncedAt).format("HH:mm:ss")}`
-        : "同期"
-    }
-  >
-      <IconButton onClick={onSync} disabled={isSyncing} size="small">
-        <SyncIcon
-          sx={{
-            animation: isSyncing ? "spin 1s linear infinite" : "",
-            "@keyframes spin": {
-              from: { transform: "rotate(0deg)" },
-              to: { transform: "rotate(360deg)" },
-            },
-          }}
-        />
-      </IconButton>
-    </Tooltip>
+    <ActiveUsersList
+      activeUsers={activeUsers}
+      editingCells={editingCells}
+      compact={false}
+    />
   </Stack>
 );
 
@@ -840,11 +951,10 @@ CollaborativeHeader.propTypes = {
       userId: PropTypes.string.isRequired,
       userName: PropTypes.string.isRequired,
       color: PropTypes.string.isRequired,
+      lastActivity: PropTypes.number.isRequired,
     }).isRequired,
   ).isRequired,
-  isSyncing: PropTypes.bool.isRequired,
-  lastSyncedAt: PropTypes.number.isRequired,
-  onSync: PropTypes.func.isRequired,
+  editingCells: PropTypes.instanceOf(Map).isRequired,
 };
 
 type ProgressPanelProps = {
@@ -856,7 +966,7 @@ type ProgressPanelProps = {
   totalDays: number;
 };
 
-const ProgressPanel: React.FC<ProgressPanelProps> = ({ progress, totalDays }) => (
+const ProgressPanel: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
   <Paper sx={{ p: 2, mb: 3 }}>
     <Stack spacing={2}>
       <Box>
@@ -904,6 +1014,11 @@ type ShiftTableProps<T extends ShiftCellLike> = {
   staffIds: string[];
   shiftDataMap: Map<string, Map<string, T>>;
   isLoading: boolean;
+  staffs: Array<{
+    id: string;
+    familyName?: string | null;
+    givenName?: string | null;
+  }>;
   focusedCell: { staffId: string; date: string } | null;
   isCellSelected: (staffId: string, date: string) => boolean;
   isCellBeingEdited: (staffId: string, date: string) => boolean;
@@ -911,19 +1026,32 @@ type ShiftTableProps<T extends ShiftCellLike> = {
     staffId: string,
     date: string,
   ) => { userName: string } | null | undefined;
-  registerCell: (staffId: string, date: string, element: HTMLElement | null) => void;
-  handleCellClick: (staffId: string, date: string, event: React.MouseEvent) => void;
-  handleCellMouseDown: (staffId: string, date: string, event: React.MouseEvent) => void;
+  registerCell: (
+    staffId: string,
+    date: string,
+    element: HTMLElement | null,
+  ) => void;
+  handleCellClick: (staffId: string, date: string, event: MouseEvent) => void;
+  handleCellMouseDown: (
+    staffId: string,
+    date: string,
+    event: MouseEvent,
+  ) => void;
   handleCellMouseEnter: (staffId: string, date: string) => void;
-  calculateDailyCount: (dayKey: string) => { work: number; fixedOff: number; requestedOff: number };
+  calculateDailyCount: (dayKey: string) => {
+    work: number;
+    fixedOff: number;
+    requestedOff: number;
+  };
   getEventsForDay: (day: dayjs.Dayjs) => ShiftEvent[];
 };
 
-function ShiftTable<T extends ShiftCellLike>({
+function ShiftTable<_T extends ShiftCellLike>({
   days,
   staffIds,
   shiftDataMap,
   isLoading,
+  staffs,
   focusedCell,
   isCellSelected,
   isCellBeingEdited,
@@ -934,325 +1062,399 @@ function ShiftTable<T extends ShiftCellLike>({
   handleCellMouseEnter,
   calculateDailyCount,
   getEventsForDay,
-}: ShiftTableProps<T>) {
+}: ShiftTableProps<ShiftCellLike>) {
   return (
     <TableContainer component={Paper}>
-    <Table
-      size="small"
-      stickyHeader
-      sx={{
-        "& .MuiTableCell-root": {
-          borderRight: "1px solid",
-          borderColor: "divider",
-        },
-        "& .MuiTableCell-root:last-child": {
-          borderRight: "none",
-        },
-      }}
-    >
-      <TableHead>
-        <TableRow>
-          <TableCell
-            sx={{
-              position: "sticky",
-              left: 0,
-              zIndex: 3,
-              bgcolor: "background.paper",
-              whiteSpace: "nowrap",
-            }}
-          >
-            スタッフ名
-          </TableCell>
-          {days.map((day) => {
-            const dayKey = day.format("DD");
-            const count = calculateDailyCount(dayKey);
-            const isWeekend = day.day() === 0 || day.day() === 6;
-
-            return (
-              <TableCell
-                key={dayKey}
-                align="center"
-                sx={{
-                  bgcolor: isWeekend ? alpha("#f44336", 0.05) : "background.paper",
-                  minWidth: 50,
-                }}
-              >
-                <Typography variant="caption" display="block">
-                  {day.format("M/D")}
-                </Typography>
-                <Typography variant="caption" display="block">
-                  ({day.format("ddd")})
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color={count.work < 2 ? "warning.main" : "text.secondary"}
-                >
-                  {count.work}人
-                </Typography>
-              </TableCell>
-            );
-          })}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {isLoading ? (
+      <Table
+        size="small"
+        stickyHeader
+        sx={{
+          "& .MuiTableCell-root": {
+            borderRight: "1px solid",
+            borderColor: "divider",
+          },
+          "& .MuiTableCell-root:last-child": {
+            borderRight: "none",
+          },
+        }}
+      >
+        <TableHead>
           <TableRow>
-            <TableCell colSpan={days.length + 1} align="center">
-              読み込み中...
+            <TableCell
+              sx={{
+                position: "sticky",
+                left: 0,
+                zIndex: 3,
+                bgcolor: "background.paper",
+                whiteSpace: "nowrap",
+              }}
+            >
+              スタッフ名
             </TableCell>
-          </TableRow>
-        ) : (
-          <>
-            {staffIds.map((staffId) => {
-              const staffData = shiftDataMap.get(staffId);
-              if (!staffData) return null;
+            {days.map((day) => {
+              const dayKey = day.format("DD");
+              const count = calculateDailyCount(dayKey);
+              const isWeekend = day.day() === 0 || day.day() === 6;
 
               return (
-                <TableRow key={staffId}>
-                  <TableCell
-                    sx={{
-                      position: "sticky",
-                      left: 0,
-                      zIndex: 2,
-                      bgcolor: "background.paper",
-                      fontWeight: 600,
-                    }}
+                <TableCell
+                  key={dayKey}
+                  align="center"
+                  sx={{
+                    bgcolor: isWeekend
+                      ? alpha("#f44336", 0.05)
+                      : "background.paper",
+                    minWidth: 50,
+                  }}
+                >
+                  <Typography variant="caption" display="block">
+                    {day.format("M/D")}
+                  </Typography>
+                  <Typography variant="caption" display="block">
+                    ({day.format("ddd")})
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color={count.work < 2 ? "warning.main" : "text.secondary"}
                   >
-                    {staffId}
-                  </TableCell>
-                  {days.map((day) => {
-                    const dayKey = day.format("DD");
-                    const cell = staffData.get(dayKey);
-                    if (!cell) return <TableCell key={dayKey}>-</TableCell>;
-
-                    const isEditing = isCellBeingEdited(staffId, dayKey);
-                    const editor = getCellEditor(staffId, dayKey);
-                    const isFocused =
-                      focusedCell?.staffId === staffId &&
-                      focusedCell?.date === dayKey;
-                    const isSelected = isCellSelected(staffId, dayKey);
-
-                    return (
-                      <ShiftCell
-                        key={dayKey}
-                        state={cell.state}
-                        isLocked={cell.isLocked}
-                        isEditing={isEditing}
-                        editorName={editor?.userName}
-                        lastChangedBy={cell.lastChangedBy}
-                        lastChangedAt={cell.lastChangedAt}
-                        onClick={(event) => handleCellClick(staffId, dayKey, event)}
-                        onRegisterRef={(element) =>
-                          registerCell(staffId, dayKey, element)
-                        }
-                        onMouseDown={(event) =>
-                          handleCellMouseDown(staffId, dayKey, event)
-                        }
-                        onMouseEnter={() => handleCellMouseEnter(staffId, dayKey)}
-                        isFocused={isFocused}
-                        isSelected={isSelected}
-                      />
-                    );
-                  })}
-                </TableRow>
+                    {count.work}人
+                  </Typography>
+                </TableCell>
               );
             })}
-
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {isLoading ? (
             <TableRow>
-              <TableCell
-                sx={{
-                  position: "sticky",
-                  left: 0,
-                  zIndex: 2,
-                  bgcolor: "background.paper",
-                  fontWeight: 600,
-                }}
-              >
-                備考
+              <TableCell colSpan={days.length + 1} align="center">
+                読み込み中...
               </TableCell>
-              {days.map((day) => {
-                const events = getEventsForDay(day);
+            </TableRow>
+          ) : (
+            <>
+              {staffIds.map((staffId) => {
+                const staffData = shiftDataMap.get(staffId);
+                const staff = staffs.find((s) => s.id === staffId);
+                const staffName = staff
+                  ? `${staff.familyName || ""}${staff.givenName || ""}`
+                  : staffId;
+
+                if (!staffData) return null;
+
                 return (
-                  <TableCell
-                    key={`remark-${day.format("DD")}`}
-                    sx={{
-                      minWidth: 50,
-                      px: 2,
-                      py: 2,
-                      textAlign: "start",
-                      verticalAlign: "top",
-                    }}
-                  >
-                    {events.length > 0 && (
-                      <Box
-                        sx={{
-                          display: "inline-block",
-                          writingMode: "vertical-rl",
-                        }}
-                      >
-                        {events.map((event) => (
-                          <Typography
-                            key={`${event.label}-${event.start.format("YYYY-MM-DD")}`}
-                            variant="caption"
-                            component="span"
-                            sx={{
-                              fontWeight: 700,
-                              lineHeight: 1.2,
-                              display: "block",
-                            }}
-                          >
-                            {event.label}
-                          </Typography>
-                        ))}
-                      </Box>
-                    )}
-                  </TableCell>
+                  <TableRow key={staffId}>
+                    <TableCell
+                      sx={{
+                        position: "sticky",
+                        left: 0,
+                        zIndex: 2,
+                        bgcolor: "background.paper",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {staffName}
+                    </TableCell>
+                    {days.map((day) => {
+                      const dayKey = day.format("DD");
+                      const cell = staffData.get(dayKey);
+                      if (!cell) return <TableCell key={dayKey}>-</TableCell>;
+
+                      const isEditing = isCellBeingEdited(staffId, dayKey);
+                      const editor = getCellEditor(staffId, dayKey);
+                      const isFocused =
+                        focusedCell?.staffId === staffId &&
+                        focusedCell?.date === dayKey;
+                      const isSelected = isCellSelected(staffId, dayKey);
+
+                      return (
+                        <ShiftCell
+                          key={dayKey}
+                          state={cell.state}
+                          isLocked={cell.isLocked}
+                          isEditing={isEditing}
+                          editorName={editor?.userName}
+                          lastChangedBy={cell.lastChangedBy}
+                          lastChangedAt={cell.lastChangedAt}
+                          onClick={(event) =>
+                            handleCellClick(staffId, dayKey, event)
+                          }
+                          onRegisterRef={(element) =>
+                            registerCell(staffId, dayKey, element)
+                          }
+                          onMouseDown={(event) =>
+                            handleCellMouseDown(staffId, dayKey, event)
+                          }
+                          onMouseEnter={() =>
+                            handleCellMouseEnter(staffId, dayKey)
+                          }
+                          isFocused={isFocused}
+                          isSelected={isSelected}
+                        />
+                      );
+                    })}
+                  </TableRow>
                 );
               })}
-            </TableRow>
-          </>
-        )}
-      </TableBody>
-    </Table>
+
+              <TableRow>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    left: 0,
+                    zIndex: 2,
+                    bgcolor: "background.paper",
+                    fontWeight: 600,
+                  }}
+                >
+                  備考
+                </TableCell>
+                {days.map((day) => {
+                  const events = getEventsForDay(day);
+                  return (
+                    <TableCell
+                      key={`remark-${day.format("DD")}`}
+                      sx={{
+                        minWidth: 50,
+                        px: 2,
+                        py: 2,
+                        textAlign: "start",
+                        verticalAlign: "top",
+                      }}
+                    >
+                      {events.length > 0 && (
+                        <Box
+                          sx={{
+                            display: "inline-block",
+                            writingMode: "vertical-rl",
+                          }}
+                        >
+                          {events.map((event) => (
+                            <Typography
+                              key={`${event.label}-${event.start.format("YYYY-MM-DD")}`}
+                              variant="caption"
+                              component="span"
+                              sx={{
+                                fontWeight: 700,
+                                lineHeight: 1.2,
+                                display: "block",
+                              }}
+                            >
+                              {event.label}
+                            </Typography>
+                          ))}
+                        </Box>
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            </>
+          )}
+        </TableBody>
+      </Table>
     </TableContainer>
   );
+}
+
+interface ShiftCollaborativePageInnerProps {
+  staffs: ReturnType<typeof useStaffs>["staffs"];
+  targetMonth: string;
 }
 
 /**
  * メインコンポーネント（内部実装）
  */
-const ShiftCollaborativePageInner: React.FC = () => {
-  const {
-    state,
-    isCellBeingEdited,
-    getCellEditor,
-    focusedCell,
-    isCellSelected,
-    registerCell,
-    handleCellClick,
-    handleCellMouseDown,
-    handleCellMouseEnter,
-    handleMouseUp,
-    handleSync,
-    progress,
-    calculateDailyCount,
-    getEventsForDay,
-    selectionCount,
-    hasLocked,
-    hasUnlocked,
-    hasClipboard,
-    handleCopy,
-    handlePaste,
-    clearSelection,
-    handleChangeState,
-    handleLockCells,
-    handleUnlockCells,
-    handleApplySuggestion,
-    violations,
-    isAnalyzing,
-    analyzeShifts,
-    showHelp,
-    setShowHelp,
-    isAdmin,
-    currentMonth,
-    days,
-    staffIds,
-  } = useCollaborativePageState();
+const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
+  ({ staffs, targetMonth }: ShiftCollaborativePageInnerProps) => {
+    const {
+      state,
+      isCellBeingEdited,
+      getCellEditor,
+      focusedCell,
+      isCellSelected,
+      registerCell,
+      handleCellClick,
+      handleCellMouseDown,
+      handleCellMouseEnter,
+      handleMouseUp,
+      handleSync: _handleSync,
+      progress,
+      calculateDailyCount,
+      getEventsForDay,
+      selectionCount,
+      hasLocked,
+      hasUnlocked,
+      hasClipboard,
+      handleCopy,
+      handlePaste,
+      clearSelection,
+      handleChangeState,
+      handleLockCells,
+      handleUnlockCells,
+      handleApplySuggestion,
+      violations,
+      isAnalyzing,
+      analyzeShifts,
+      showHelp,
+      setShowHelp,
+      isAdmin,
+      currentMonth,
+      days,
+      staffIds,
+      isBatchUpdating,
+    } = useCollaborativePageState(targetMonth);
 
-  return (
-    <Page title="協同シフト調整">
-      <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
-        <CollaborativeHeader
-          currentMonth={currentMonth}
-          activeUsers={state.activeUsers}
-          isSyncing={state.isSyncing}
-          lastSyncedAt={state.lastSyncedAt}
-          onSync={handleSync}
-        />
+    // プレゼンス通知
+    const { notifications, dismissNotification } = usePresenceNotifications();
 
-        {state.error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {state.error}
-          </Alert>
-        )}
+    return (
+      <Page title="協同シフト調整">
+        <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
+          <CollaborativeHeader
+            currentMonth={currentMonth}
+            activeUsers={state.activeUsers}
+            editingCells={state.editingCells}
+          />
 
-        <ProgressPanel progress={progress} totalDays={days.length} />
+          {/* シフト提案パネル */}
+          <ShiftSuggestionsPanel
+            violations={violations}
+            isAnalyzing={isAnalyzing}
+            onApplyAction={handleApplySuggestion}
+            onRefresh={analyzeShifts}
+          />
 
-        <ShiftTable
-          days={days}
-          staffIds={staffIds}
-          shiftDataMap={state.shiftDataMap}
-          isLoading={state.isLoading}
-          focusedCell={focusedCell}
-          isCellSelected={isCellSelected}
-          isCellBeingEdited={isCellBeingEdited}
-          getCellEditor={getCellEditor}
-          registerCell={registerCell}
-          handleCellClick={handleCellClick}
-          handleCellMouseDown={handleCellMouseDown}
-          handleCellMouseEnter={handleCellMouseEnter}
-          calculateDailyCount={calculateDailyCount}
-          getEventsForDay={getEventsForDay}
-        />
+          {/* 進捗パネル */}
+          <ProgressPanel progress={progress} totalDays={days.length} />
 
-        {/* バッチ編集ツールバー */}
-        <BatchEditToolbar
-          selectionCount={selectionCount}
-          onCopy={handleCopy}
-          onPaste={handlePaste}
-          onClear={clearSelection}
-          onChangeState={handleChangeState}
-          onLock={handleLockCells}
-          onUnlock={handleUnlockCells}
-          canUnlock={isAdmin}
-          showLock={hasUnlocked}
-          showUnlock={hasLocked}
-          hasClipboard={hasClipboard}
-          canPaste={focusedCell !== null}
-        />
+          {/* シフト調整テーブル */}
+          <ShiftTable
+            days={days}
+            staffIds={staffIds}
+            shiftDataMap={state.shiftDataMap}
+            isLoading={state.isLoading}
+            staffs={staffs}
+            focusedCell={focusedCell}
+            isCellSelected={isCellSelected}
+            isCellBeingEdited={isCellBeingEdited}
+            getCellEditor={getCellEditor}
+            registerCell={registerCell}
+            handleCellClick={handleCellClick}
+            handleCellMouseDown={handleCellMouseDown}
+            handleCellMouseEnter={handleCellMouseEnter}
+            calculateDailyCount={calculateDailyCount}
+            getEventsForDay={getEventsForDay}
+          />
 
-        {/* シフト提案パネル */}
-        <ShiftSuggestionsPanel
-          violations={violations}
-          isAnalyzing={isAnalyzing}
-          onApplyAction={handleApplySuggestion}
-          onRefresh={analyzeShifts}
-        />
+          <BatchEditToolbar
+            selectionCount={selectionCount}
+            onCopy={handleCopy}
+            onPaste={handlePaste}
+            onClear={clearSelection}
+            onChangeState={handleChangeState}
+            onLock={handleLockCells}
+            onUnlock={handleUnlockCells}
+            canUnlock={isAdmin}
+            showLock={hasUnlocked}
+            showUnlock={hasLocked}
+            hasClipboard={hasClipboard}
+            canPaste={focusedCell !== null}
+            isUpdating={isBatchUpdating}
+          />
 
-        {/* ヘルプボタン（FAB） */}
-        <Fab
-          color="primary"
-          size="medium"
-          onClick={() => setShowHelp(true)}
-          sx={{
-            position: "fixed",
-            bottom: 24,
-            right: 24,
-          }}
-        >
-          <HelpOutlineIcon />
-        </Fab>
+          {/* ヘルプボタン（FAB） */}
+          <Fab
+            color="primary"
+            size="medium"
+            onClick={() => setShowHelp(true)}
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+            }}
+          >
+            <HelpOutlineIcon />
+          </Fab>
 
-        {/* ヘルプダイアログ */}
-        <KeyboardShortcutsHelp
-          open={showHelp}
-          onClose={() => setShowHelp(false)}
-        />
-      </Container>
-    </Page>
-  );
-};
+          {/* ヘルプダイアログ */}
+          <KeyboardShortcutsHelp
+            open={showHelp}
+            onClose={() => setShowHelp(false)}
+          />
+
+          {/* プレゼンス通知 */}
+          <PresenceNotificationContainer
+            notifications={notifications}
+            onDismiss={dismissNotification}
+          />
+        </Container>
+      </Page>
+    );
+  },
+);
+
+ShiftCollaborativePageInner.displayName = "ShiftCollaborativePageInner";
 
 /**
  * エクスポート用コンポーネント（Providerでラップ）
  */
 export default function ShiftCollaborativePage() {
-  // TODO: 実際のプロップスをルートパラメータやContextから取得
-  const staffIds = ["staff001", "staff002", "staff003", "staff004", "staff005"];
+  const { authStatus, cognitoUser } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs, loading: staffsLoading } = useStaffs({ isAuthenticated });
+
   const targetMonth = dayjs().format("YYYY-MM");
-  const currentUserId = "current-user-id";
-  const currentUserName = "Current User";
-  const shiftRequestId = "shift-request-id";
+
+  // 認証ユーザーのスタッフIDを取得
+  const currentUserId = useMemo(() => {
+    if (!cognitoUser?.id) return "";
+    const currentStaff = staffs.find(
+      (staff) => staff.cognitoUserId === cognitoUser.id,
+    );
+    return currentStaff?.id ?? "";
+  }, [cognitoUser, staffs]);
+
+  // 認証ユーザーの名前を取得
+  const currentUserName = useMemo(() => {
+    if (!cognitoUser?.id) return "Current User";
+    const currentStaff = staffs.find(
+      (staff) => staff.cognitoUserId === cognitoUser.id,
+    );
+    return currentStaff
+      ? `${currentStaff.familyName || ""}${currentStaff.givenName || ""}`
+      : "Current User";
+  }, [cognitoUser, staffs]);
+
+  // シフト勤務で有効なスタッフのみを取得
+  const staffIds = useMemo(
+    () =>
+      staffs
+        .filter(
+          (staff) =>
+            staff.enabled &&
+            (staff as unknown as Record<string, unknown>).workType === "shift",
+        )
+        .map((staff) => staff.id),
+    [staffs],
+  );
+
+  // 最初のシフトリクエストIDを使用（実装を簡略化）
+  const shiftRequestId = staffIds[0] ?? "";
+
+  if (staffsLoading) {
+    return <LinearProgress />;
+  }
+
+  if (staffIds.length === 0) {
+    return (
+      <Page title="協同シフト調整">
+        <Container maxWidth={false} sx={{ py: 3 }}>
+          <Alert severity="info">スタッフデータが見つかりません</Alert>
+        </Container>
+      </Page>
+    );
+  }
 
   return (
     <CollaborativeShiftProvider
@@ -1262,7 +1464,7 @@ export default function ShiftCollaborativePage() {
       currentUserName={currentUserName}
       shiftRequestId={shiftRequestId}
     >
-      <ShiftCollaborativePageInner />
+      <ShiftCollaborativePageInner staffs={staffs} targetMonth={targetMonth} />
     </CollaborativeShiftProvider>
   );
 }

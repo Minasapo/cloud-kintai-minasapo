@@ -1,6 +1,6 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { Grid, Stack, Typography } from "@mui/material";
+import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import { useCallback, useContext, useMemo } from "react";
@@ -54,7 +54,7 @@ export default function WorkflowDetailPage() {
   })();
 
   const applicationDate = formatDateSlash(
-    isoDateFromTimestamp(workflow?.createdAt)
+    isoDateFromTimestamp(workflow?.createdAt),
   );
 
   const categoryLabel = getWorkflowCategoryLabel(workflow);
@@ -67,22 +67,22 @@ export default function WorkflowDetailPage() {
         applicantName: staffName,
         applicationDate,
       }),
-    [workflow, staffs, staffName, applicationDate]
+    [workflow, staffs, staffName, applicationDate],
   );
 
   const notifySuccess = useCallback(
     (message: string) => dispatch(setSnackbarSuccess(message)),
-    [dispatch]
+    [dispatch],
   );
   const notifyError = useCallback(
     (message: string) => dispatch(setSnackbarError(message)),
-    [dispatch]
+    [dispatch],
   );
   const handleWorkflowChange = useCallback(
     (nextWorkflow: WorkflowEntity) => {
       setWorkflow(nextWorkflow);
     },
-    [setWorkflow]
+    [setWorkflow],
   );
 
   const {
@@ -107,7 +107,7 @@ export default function WorkflowDetailPage() {
 
   const permissions = useMemo(
     () => deriveWorkflowDetailPermissions(workflow),
-    [workflow]
+    [workflow],
   );
 
   const handleWithdraw = async () => {
@@ -123,7 +123,7 @@ export default function WorkflowDetailPage() {
 
       const commentUpdate = buildWorkflowCommentsUpdateInput(
         afterStatus as WorkflowEntity,
-        "申請が取り下げされました"
+        "申請が取り下げされました",
       );
       const afterComments = await updateWorkflow(commentUpdate);
       setWorkflow(afterComments as WorkflowEntity);
@@ -145,55 +145,61 @@ export default function WorkflowDetailPage() {
       ]}
       maxWidth="lg"
     >
-      <PageSection layoutVariant="detail" sx={{ gap: SECTION_GAP }}>
-        <WorkflowDetailActions
-          onBack={() => navigate(-1)}
-          onWithdraw={handleWithdraw}
-          onEdit={() => navigate(`/workflow/${id}/edit`)}
-          withdrawDisabled={permissions.withdrawDisabled}
-          withdrawTooltip={permissions.withdrawTooltip}
-          editDisabled={permissions.editDisabled}
-          editTooltip={permissions.editTooltip}
-        />
+      <PageSection
+        variant="plain"
+        layoutVariant="detail"
+        sx={{ gap: SECTION_GAP }}
+      >
+        <Paper sx={{ p: 3, bgcolor: "background.paper" }}>
+          <WorkflowDetailActions
+            onBack={() => navigate(-1)}
+            onWithdraw={handleWithdraw}
+            onEdit={() => navigate(`/workflow/${id}/edit`)}
+            withdrawDisabled={permissions.withdrawDisabled}
+            withdrawTooltip={permissions.withdrawTooltip}
+            editDisabled={permissions.editDisabled}
+            editTooltip={permissions.editTooltip}
+          />
 
-        {!workflow ? (
-          <Typography color="error">
-            ワークフローの読み込みに失敗しました。
-          </Typography>
-        ) : (
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={7}>
-              <Stack spacing={0} sx={{ gap: PANEL_GAP }}>
-                <WorkflowMetadataPanel
-                  workflowId={workflow.id}
-                  fallbackId={id}
-                  category={workflow.category ?? null}
-                  categoryLabel={categoryLabel}
-                  staffName={staffName}
-                  applicationDate={applicationDate}
-                  status={workflow.status ?? null}
-                  overTimeDetails={workflow.overTimeDetails ?? null}
-                  approvalSteps={approvalSteps}
+          {!workflow ? (
+            <Typography color="error">
+              ワークフローの読み込みに失敗しました。
+            </Typography>
+          ) : (
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid item xs={12} sm={7}>
+                <Stack spacing={0} sx={{ gap: PANEL_GAP }}>
+                  <WorkflowMetadataPanel
+                    workflowId={workflow.id}
+                    fallbackId={id}
+                    category={workflow.category ?? null}
+                    categoryLabel={categoryLabel}
+                    staffName={staffName}
+                    applicationDate={applicationDate}
+                    status={workflow.status ?? null}
+                    overTimeDetails={workflow.overTimeDetails ?? null}
+                    approvalSteps={approvalSteps}
+                  />
+                </Stack>
+              </Grid>
+
+              <Grid item xs={12} sm={5}>
+                <WorkflowCommentThread
+                  messages={messages}
+                  staffs={staffs}
+                  currentStaff={currentStaff}
+                  expandedMessages={expandedMessages}
+                  onToggle={toggleExpanded}
+                  input={input}
+                  setInput={setInput}
+                  onSend={sendMessage}
+                  sending={sending}
+                  formatSender={formatSender}
                 />
-              </Stack>
+              </Grid>
             </Grid>
-
-            <Grid item xs={12} sm={5}>
-              <WorkflowCommentThread
-                messages={messages}
-                staffs={staffs}
-                currentStaff={currentStaff}
-                expandedMessages={expandedMessages}
-                onToggle={toggleExpanded}
-                input={input}
-                setInput={setInput}
-                onSend={sendMessage}
-                sending={sending}
-                formatSender={formatSender}
-              />
-            </Grid>
-          </Grid>
-        )}
+          )}
+        </Paper>
       </PageSection>
     </Page>
   );

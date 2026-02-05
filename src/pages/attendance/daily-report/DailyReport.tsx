@@ -152,7 +152,7 @@ const mapComments = (
   if (!entries?.length) return [];
   return entries
     .filter((entry): entry is DailyReportComment => Boolean(entry))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .toSorted((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((entry) => ({
       id: entry.id,
       author: entry.authorName || "管理者",
@@ -181,7 +181,7 @@ const mapDailyReport = (
 
 /** 日報を日付の降順、同日の場合は更新日時の降順でソート */
 const sortReports = (items: DailyReportItem[]) =>
-  [...items].sort((a, b) => {
+  items.toSorted((a, b) => {
     if (a.date === b.date) {
       const aTime = a.updatedAt ?? "";
       const bTime = b.updatedAt ?? "";

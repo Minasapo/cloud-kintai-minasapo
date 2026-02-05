@@ -13,18 +13,29 @@ export interface CollaborativeShiftContextType {
   state: CollaborativeShiftState;
   updateShift: (update: ShiftCellUpdate) => Promise<void>;
   batchUpdateShifts: (updates: ShiftCellUpdate[]) => Promise<void>;
+  isBatchUpdating: boolean;
   toggleCellSelection: (cellKey: string, selected: boolean) => void;
   startEditingCell: (staffId: string, date: string) => void;
   stopEditingCell: (staffId: string, date: string) => void;
   isCellBeingEdited: (staffId: string, date: string) => boolean;
   getCellEditor: (
     staffId: string,
-    date: string
+    date: string,
   ) => CollaborativeUser | undefined;
+  forceReleaseCell: (staffId: string, date: string) => void;
+  getAllEditingCells: () => Array<{
+    cellKey: string;
+    staffId: string;
+    date: string;
+    userId: string;
+    userName: string;
+    startTime: number;
+  }>;
   triggerSync: () => Promise<void>;
   pauseSync: () => void;
   resumeSync: () => void;
   updateUserActivity: () => void;
+  retryPendingChanges: () => Promise<void>;
 }
 
 /**
@@ -40,7 +51,7 @@ export const useCollaborativeShift = () => {
   const context = useContext(CollaborativeShiftContext);
   if (!context) {
     throw new Error(
-      "useCollaborativeShift must be used within CollaborativeShiftProvider"
+      "useCollaborativeShift must be used within CollaborativeShiftProvider",
     );
   }
   return context;

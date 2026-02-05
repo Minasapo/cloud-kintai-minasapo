@@ -140,7 +140,7 @@ export default function AttendanceDailyList() {
 
   const sortedAttendanceList = useMemo(() => {
     // create a copy before sort to avoid mutating the original attendanceDailyList
-    return [...(attendanceDailyList || [])].sort((a, b) => {
+    return (attendanceDailyList || []).toSorted((a, b) => {
       const aSortKey = a.sortKey || "";
       const bSortKey = b.sortKey || "";
       return aSortKey.localeCompare(bSortKey);
@@ -444,7 +444,7 @@ export default function AttendanceDailyList() {
 
         const validRecords = records
           .filter((rec): rec is Attendance => Boolean(rec))
-          .sort((a, b) => {
+          .toSorted((a, b) => {
             const aTime = dayjs(
               `${a.workDate} ${a.startTime || "00:00"}`
             ).valueOf();

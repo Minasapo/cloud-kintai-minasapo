@@ -68,7 +68,7 @@ const normalizeApprovalSteps = (
 ): WorkflowApprovalStepView[] =>
   steps
     .filter((step): step is ApprovalStep => Boolean(step))
-    .sort((a, b) => (a.stepOrder ?? 0) - (b.stepOrder ?? 0))
+    .toSorted((a, b) => (a.stepOrder ?? 0) - (b.stepOrder ?? 0))
     .map((step, idx) => {
       const approverId = step.approverStaffId ?? "";
       const name: string | undefined =

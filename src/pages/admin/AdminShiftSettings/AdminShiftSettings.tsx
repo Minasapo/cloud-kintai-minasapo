@@ -6,7 +6,7 @@ import {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 // Title removed per admin UI simplification
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
@@ -26,6 +26,46 @@ import {
 import { toShiftGroupFormValue } from "./shiftGroupFactory";
 import type { ShiftGroupFormState } from "./shiftGroupSchema";
 import { shiftGroupFormSchema } from "./shiftGroupSchema";
+
+const SHIFT_GROUP_ERROR_FIELDS = [
+  { key: "label", label: "ラベル名" },
+  { key: "min", label: "最小人数" },
+  { key: "max", label: "最大人数" },
+  { key: "fixed", label: "固定人数" },
+] as const;
+
+const getValidationDetails = (errors: {
+  shiftGroups?: Array<Record<string, { message?: unknown } | undefined>>;
+}) => {
+  const details: string[] = [];
+
+  errors.shiftGroups?.forEach((groupError, index) => {
+    if (!groupError) {
+      return;
+    }
+
+    const messageToLabels = new Map<string, string[]>();
+    SHIFT_GROUP_ERROR_FIELDS.forEach(({ key, label }) => {
+      const message = groupError[key]?.message;
+      if (typeof message !== "string" || message.length === 0) {
+        return;
+      }
+
+      const labels = messageToLabels.get(message) ?? [];
+      if (!labels.includes(label)) {
+        labels.push(label);
+      }
+      messageToLabels.set(message, labels);
+    });
+
+    messageToLabels.forEach((labels, message) => {
+      const labelText = labels.join(" / ");
+      details.push(`${index + 1}行目 ${labelText}: ${message}`);
+    });
+  });
+
+  return details;
+};
 
 export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
@@ -64,7 +104,14 @@ export default function AdminShiftSettings() {
     void trigger();
   };
 
-  const hasValidationError = Object.keys(errors).length > 0;
+  const validationDetails = useMemo(
+    () =>
+      getValidationDetails(errors as {
+        shiftGroups?: Array<Record<string, { message?: unknown } | undefined>>;
+      }),
+    [errors],
+  );
+  const hasValidationError = validationDetails.length > 0;
 
   const persistConfig = useCallback(
     async (payloadShiftGroups: ReturnType<typeof buildShiftGroupPayload>) => {
@@ -106,9 +153,18 @@ export default function AdminShiftSettings() {
 
   return (
     <Stack spacing={2.5}>
-      <Typography>
-        {SHIFT_GROUP_UI_TEXTS.intro}
-      </Typography>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle2">
+          {SHIFT_GROUP_UI_TEXTS.introTitle}
+        </Typography>
+        <Stack component="ul" sx={{ m: 0, pl: 3 }}>
+          {SHIFT_GROUP_UI_TEXTS.introBullets.map((text) => (
+            <Typography key={text} component="li" variant="body2">
+              {text}
+            </Typography>
+          ))}
+        </Stack>
+      </Stack>
       <Alert severity="info">
         {SHIFT_GROUP_UI_TEXTS.saveInfo}
       </Alert>
@@ -141,7 +197,18 @@ export default function AdminShiftSettings() {
           </Button>
           {hasValidationError && (
             <Alert severity="warning">
-              {SHIFT_GROUP_UI_TEXTS.validationWarning}
+              <Stack spacing={0.5}>
+                <Typography variant="body2">
+                  {SHIFT_GROUP_UI_TEXTS.validationWarning}
+                </Typography>
+                <Stack component="ul" sx={{ m: 0, pl: 3 }}>
+                  {validationDetails.map((detail) => (
+                    <Typography key={detail} component="li" variant="body2">
+                      {detail}
+                    </Typography>
+                  ))}
+                </Stack>
+              </Stack>
             </Alert>
           )}
         </Stack>
