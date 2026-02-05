@@ -26,7 +26,10 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
+import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
+import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
+import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import {
@@ -35,11 +38,13 @@ import {
   type MouseEvent,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
@@ -432,7 +437,7 @@ function useShiftMetrics<T extends { state: ShiftState }>(
   return { calculateDailyCount, progress };
 }
 
-const useCollaborativePageState = () => {
+const useCollaborativePageState = (targetMonth: string) => {
   const {
     state,
     updateShift,
@@ -447,7 +452,7 @@ const useCollaborativePageState = () => {
 
   const isAdmin = true; // TODO: 認可情報から取得する
 
-  const [currentMonth] = useState(dayjs());
+  const currentMonth = useMemo(() => dayjs(targetMonth), [targetMonth]);
 
   // イベントカレンダーを取得
   const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
@@ -464,6 +469,48 @@ const useCollaborativePageState = () => {
     holidays,
     companyHolidays,
   );
+
+  // シフト計画データを取得
+  const [shiftPlanCapacities, setShiftPlanCapacities] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchShiftPlan = async () => {
+      try {
+        const result = (await graphqlClient.graphql({
+          query: shiftPlanYearByTargetYear,
+          variables: { targetYear: currentMonth.year(), limit: 1 },
+          authMode: "userPool",
+        })) as GraphQLResult<ShiftPlanYearByTargetYearQuery>;
+
+        if (result.errors?.length) {
+          throw new Error(
+            result.errors.map((error) => error.message).join(","),
+          );
+        }
+
+        const shiftPlanYear =
+          result.data?.shiftPlanYearByTargetYear?.items?.find(
+            (item): item is NonNullable<typeof item> => item !== null,
+          ) ?? null;
+        const monthPlan = shiftPlanYear?.plans?.find(
+          (plan) => plan?.month === currentMonth.month() + 1,
+        );
+
+        if (monthPlan?.dailyCapacities) {
+          setShiftPlanCapacities(
+            monthPlan.dailyCapacities.map((capacity) => capacity ?? Number.NaN),
+          );
+        } else {
+          setShiftPlanCapacities([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch shift plan:", error);
+        setShiftPlanCapacities([]);
+      }
+    };
+
+    void fetchShiftPlan();
+  }, [currentMonth]);
 
   // スタッフリストを取得（shiftDataMapから）
   const staffIds = useMemo(
@@ -543,6 +590,8 @@ const useCollaborativePageState = () => {
     staffIds,
     dateKeys,
     enabled: true,
+    shiftPlanCapacities,
+    days,
   });
 
   /**
@@ -1210,13 +1259,14 @@ function ShiftTable<_T extends ShiftCellLike>({
 
 interface ShiftCollaborativePageInnerProps {
   staffs: ReturnType<typeof useStaffs>["staffs"];
+  targetMonth: string;
 }
 
 /**
  * メインコンポーネント（内部実装）
  */
 const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
-  ({ staffs }: ShiftCollaborativePageInnerProps) => {
+  ({ staffs, targetMonth }: ShiftCollaborativePageInnerProps) => {
     const {
       state,
       isCellBeingEdited,
@@ -1253,7 +1303,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       days,
       staffIds,
       isBatchUpdating,
-    } = useCollaborativePageState();
+    } = useCollaborativePageState(targetMonth);
 
     // プレゼンス通知
     const { notifications, dismissNotification } = usePresenceNotifications();
@@ -1414,7 +1464,7 @@ export default function ShiftCollaborativePage() {
       currentUserName={currentUserName}
       shiftRequestId={shiftRequestId}
     >
-      <ShiftCollaborativePageInner staffs={staffs} />
+      <ShiftCollaborativePageInner staffs={staffs} targetMonth={targetMonth} />
     </CollaborativeShiftProvider>
   );
 }
