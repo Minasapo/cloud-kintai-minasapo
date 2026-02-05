@@ -491,7 +491,7 @@ export default function Profile() {
             </Stack>
           )}
         </Box>
-        <Box>
+        <Box sx={{ pb: 2 }}>
           <Button
             variant="contained"
             size="medium"
