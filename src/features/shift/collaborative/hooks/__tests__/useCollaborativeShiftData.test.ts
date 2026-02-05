@@ -123,7 +123,11 @@ describe("useCollaborativeShiftData", () => {
     expect(mockUpdateShiftCell).toHaveBeenCalledTimes(1);
     const payload = mockUpdateShiftCell.mock.calls[0][0];
     expect(payload.input.entries).toEqual([
-      { date: "2026-02-01", status: ShiftRequestStatus.FIXED_OFF },
+      {
+        date: "2026-02-01",
+        status: ShiftRequestStatus.FIXED_OFF,
+        isLocked: false,
+      },
     ]);
   });
 

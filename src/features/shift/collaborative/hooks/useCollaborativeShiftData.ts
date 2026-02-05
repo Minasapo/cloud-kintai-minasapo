@@ -279,36 +279,34 @@ export const useCollaborativeShiftData = ({
     async (update: ShiftCellUpdate) => {
       const key = `${update.staffId}-${update.date}`;
 
-      let nextMap: ShiftDataMap | null = null;
+      // 先に nextMap を計算してから State に設定
       setShiftDataMap((prev) => {
-        const computed = applyShiftCellUpdateToMap({
+        const nextMap = applyShiftCellUpdateToMap({
           shiftDataMap: prev,
           update,
           currentUserId,
         });
-        nextMap = computed;
-        return computed;
+
+        // 保留中の変更として記録
+        pendingChangesRef.current.set(key, update);
+
+        // 非同期でデータ永続化を実行
+        persistShiftUpdate(update, nextMap)
+          .then(() => {
+            // 成功時に保留中の変更から削除
+            pendingChangesRef.current.delete(key);
+            setError(null);
+            setConnectionState("connected");
+          })
+          .catch((err) => {
+            console.error("Failed to update shift:", err);
+            const { message, connection } = buildShiftErrorMessage(err);
+            setError(message);
+            setConnectionState(connection);
+          });
+
+        return nextMap;
       });
-
-      // 保留中の変更として記録
-      pendingChangesRef.current.set(key, update);
-
-      try {
-        if (!nextMap) {
-          throw new Error("シフトデータの更新に失敗しました");
-        }
-
-        await persistShiftUpdate(update, nextMap);
-        // 成功時に保留中の変更から削除
-        pendingChangesRef.current.delete(key);
-        setError(null);
-        setConnectionState("connected");
-      } catch (err) {
-        console.error("Failed to update shift:", err);
-        const { message, connection } = buildShiftErrorMessage(err);
-        setError(message);
-        setConnectionState(connection);
-      }
     },
     [currentUserId, persistShiftUpdate, buildShiftErrorMessage],
   );
