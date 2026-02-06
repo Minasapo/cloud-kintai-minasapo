@@ -31,6 +31,7 @@ import { useState } from "react";
 import { RuleViolation, SuggestedAction } from "../rules/shiftRules";
 
 type ViewMode = "minimized" | "default" | "expanded";
+type SeverityFilter = "all" | "error" | "warning";
 
 interface ShiftSuggestionsPanelProps {
   violations: RuleViolation[];
@@ -46,8 +47,9 @@ export const ShiftSuggestionsPanel = ({
   onRefresh,
 }: ShiftSuggestionsPanelProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>("default");
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
   const [expandedViolations, setExpandedViolations] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   const toggleViolation = (violationId: string) => {
@@ -60,6 +62,12 @@ export const ShiftSuggestionsPanel = ({
       }
       return next;
     });
+  };
+
+  const handleFilterChange = (newFilter: SeverityFilter) => {
+    setSeverityFilter(newFilter);
+    // フィルター切り替え時は viewMode を "default" にリセット
+    setViewMode("default");
   };
 
   const cycleViewMode = () => {
@@ -82,12 +90,22 @@ export const ShiftSuggestionsPanel = ({
     return "全て展開する";
   };
 
+  const errorCount = violations.filter((v) => v.severity === "error").length;
+  const warningCount = violations.filter(
+    (v) => v.severity === "warning",
+  ).length;
+
+  const filteredViolations =
+    severityFilter === "all"
+      ? violations
+      : violations.filter((v) => v.severity === severityFilter);
+
   const displayedViolations =
     viewMode === "minimized"
       ? []
       : viewMode === "default"
-      ? violations.slice(0, 3)
-      : violations;
+        ? filteredViolations.slice(0, 3)
+        : filteredViolations;
 
   const getSeverityIcon = (severity: RuleViolation["severity"]) => {
     switch (severity) {
@@ -101,15 +119,10 @@ export const ShiftSuggestionsPanel = ({
   };
 
   const getSeverityColor = (
-    severity: RuleViolation["severity"]
+    severity: RuleViolation["severity"],
   ): "error" | "warning" | "info" => {
     return severity;
   };
-
-  const errorCount = violations.filter((v) => v.severity === "error").length;
-  const warningCount = violations.filter(
-    (v) => v.severity === "warning"
-  ).length;
 
   return (
     <Paper
@@ -170,13 +183,24 @@ export const ShiftSuggestionsPanel = ({
         <>
           {/* サマリー */}
           <Box sx={{ p: 2, bgcolor: "background.default" }}>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Chip
+                label="すべて"
+                size="small"
+                variant={severityFilter === "all" ? "filled" : "outlined"}
+                color={severityFilter === "all" ? "primary" : "default"}
+                onClick={() => handleFilterChange("all")}
+                sx={{ cursor: "pointer" }}
+              />
               {errorCount > 0 && (
                 <Chip
                   icon={<ErrorIcon />}
                   label={`エラー ${errorCount}`}
                   color="error"
                   size="small"
+                  variant={severityFilter === "error" ? "filled" : "outlined"}
+                  onClick={() => handleFilterChange("error")}
+                  sx={{ cursor: "pointer" }}
                 />
               )}
               {warningCount > 0 && (
@@ -185,6 +209,9 @@ export const ShiftSuggestionsPanel = ({
                   label={`警告 ${warningCount}`}
                   color="warning"
                   size="small"
+                  variant={severityFilter === "warning" ? "filled" : "outlined"}
+                  onClick={() => handleFilterChange("warning")}
+                  sx={{ cursor: "pointer" }}
                 />
               )}
               {violations.length === 0 && (
@@ -201,103 +228,114 @@ export const ShiftSuggestionsPanel = ({
           <Divider />
 
           {/* 違反リスト */}
-          {violations.length === 0 ? (
+          {filteredViolations.length === 0 ? (
             <Box sx={{ p: 3, textAlign: "center" }}>
               <CheckCircleIcon
                 sx={{ fontSize: 48, color: "success.main", mb: 1 }}
               />
               <Typography variant="body2" color="text.secondary">
-                すべてのシフトが適切に設定されています
+                {severityFilter === "all"
+                  ? "すべてのシフトが適切に設定されています"
+                  : `該当する${severityFilter === "error" ? "エラー" : "警告"}はありません`}
               </Typography>
             </Box>
           ) : (
             <>
               <List disablePadding>
-                {displayedViolations.map((violation, index) => {
-                  const violationId = `${violation.ruleId}-${index}`;
-                  const isExpanded = expandedViolations.has(violationId);
+                {displayedViolations
+                  .filter((v) =>
+                    severityFilter === "all"
+                      ? true
+                      : v.severity === severityFilter,
+                  )
+                  .map((violation, index) => {
+                    const violationId = `${violation.ruleId}-${index}`;
+                    const isExpanded = expandedViolations.has(violationId);
 
-                  return (
-                    <Box key={violationId}>
-                      <ListItemButton
-                        onClick={() => toggleViolation(violationId)}
-                        sx={{
-                          borderLeft: 4,
-                          borderColor: `${getSeverityColor(
-                            violation.severity
-                          )}.main`,
-                        }}
-                      >
-                        <Box sx={{ mr: 2 }}>
-                          {getSeverityIcon(violation.severity)}
-                        </Box>
-                        <ListItemText
-                          primary={violation.message}
-                          primaryTypographyProps={{
-                            variant: "body2",
-                            fontWeight: 600,
+                    return (
+                      <Box key={violationId}>
+                        <ListItemButton
+                          onClick={() => toggleViolation(violationId)}
+                          sx={{
+                            borderLeft: 4,
+                            borderColor: `${getSeverityColor(
+                              violation.severity,
+                            )}.main`,
                           }}
-                        />
-                      </ListItemButton>
+                        >
+                          <Box sx={{ mr: 2 }}>
+                            {getSeverityIcon(violation.severity)}
+                          </Box>
+                          <ListItemText
+                            primary={violation.message}
+                            primaryTypographyProps={{
+                              variant: "body2",
+                              fontWeight: 600,
+                            }}
+                          />
+                        </ListItemButton>
 
-                      {/* 提案アクション */}
-                      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                        <Box sx={{ bgcolor: "background.default", p: 2 }}>
-                          {violation.suggestedActions &&
-                          violation.suggestedActions.length > 0 ? (
-                            <Stack spacing={1}>
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                fontWeight={600}
-                              >
-                                推奨アクション:
-                              </Typography>
-                              {violation.suggestedActions.map((action) => (
-                                <Card key={action.id} variant="outlined">
-                                  <CardContent
-                                    sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}
-                                  >
-                                    <Stack spacing={1}>
-                                      <Typography
-                                        variant="body2"
-                                        fontWeight={600}
-                                      >
-                                        {action.description}
-                                      </Typography>
-                                      <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                      >
-                                        {action.impact}
-                                      </Typography>
-                                      <Button
-                                        size="small"
-                                        variant="outlined"
-                                        startIcon={<CheckCircleIcon />}
-                                        onClick={() => onApplyAction(action)}
-                                        fullWidth
-                                      >
-                                        適用する
-                                      </Button>
-                                    </Stack>
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </Stack>
-                          ) : (
-                            <Alert severity="info" sx={{ py: 0.5 }}>
-                              自動提案はありません。手動で調整してください。
-                            </Alert>
-                          )}
-                        </Box>
-                      </Collapse>
-                      <Divider />
-                    </Box>
-                  );
-                })}
+                        {/* 提案アクション */}
+                        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                          <Box sx={{ bgcolor: "background.default", p: 2 }}>
+                            {violation.suggestedActions &&
+                            violation.suggestedActions.length > 0 ? (
+                              <Stack spacing={1}>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  fontWeight={600}
+                                >
+                                  推奨アクション:
+                                </Typography>
+                                {violation.suggestedActions.map((action) => (
+                                  <Card key={action.id} variant="outlined">
+                                    <CardContent
+                                      sx={{
+                                        p: 1.5,
+                                        "&:last-child": { pb: 1.5 },
+                                      }}
+                                    >
+                                      <Stack spacing={1}>
+                                        <Typography
+                                          variant="body2"
+                                          fontWeight={600}
+                                        >
+                                          {action.description}
+                                        </Typography>
+                                        <Typography
+                                          variant="caption"
+                                          color="text.secondary"
+                                        >
+                                          {action.impact}
+                                        </Typography>
+                                        <Button
+                                          size="small"
+                                          variant="outlined"
+                                          startIcon={<CheckCircleIcon />}
+                                          onClick={() => onApplyAction(action)}
+                                          fullWidth
+                                        >
+                                          適用する
+                                        </Button>
+                                      </Stack>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </Stack>
+                            ) : (
+                              <Alert severity="info" sx={{ py: 0.5 }}>
+                                自動提案はありません。手動で調整してください。
+                              </Alert>
+                            )}
+                          </Box>
+                        </Collapse>
+                        <Divider />
+                      </Box>
+                    );
+                  })}
               </List>
-              {viewMode === "default" && violations.length > 3 && (
+              {viewMode === "default" && filteredViolations.length > 3 && (
                 <Box
                   sx={{
                     p: 2,
@@ -310,7 +348,7 @@ export const ShiftSuggestionsPanel = ({
                     startIcon={<ExpandMoreIcon />}
                     onClick={() => setViewMode("expanded")}
                   >
-                    残り {violations.length - 3} 件を表示
+                    残り {filteredViolations.length - 3} 件を表示
                   </Button>
                 </Box>
               )}

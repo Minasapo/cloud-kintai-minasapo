@@ -4,7 +4,7 @@ import {
   formatDateSlash,
   formatDateTimeReadable,
   isoDateFromTimestamp,
-} from "../date";
+} from "../time";
 
 describe("date helpers", () => {
   it("formats dash-separated date to slash-separated", () => {

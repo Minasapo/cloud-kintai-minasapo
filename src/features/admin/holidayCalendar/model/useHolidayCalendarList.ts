@@ -1,13 +1,18 @@
 import dayjs from "dayjs";
 import { ChangeEvent, useMemo, useState } from "react";
 
-export function sortCalendar<T extends { holidayDate: string }>(a: T, b: T) {
-  return dayjs(a.holidayDate).isBefore(dayjs(b.holidayDate)) ? 1 : -1;
+export function sortCalendar<
+  T extends { holidayDate?: string; eventDate?: string },
+>(a: T, b: T) {
+  const dateA = a.holidayDate || a.eventDate || "";
+  const dateB = b.holidayDate || b.eventDate || "";
+  return dayjs(dateA).isBefore(dayjs(dateB)) ? 1 : -1;
 }
 
 type HolidayCalendarLike = {
   id?: string | null;
-  holidayDate: string;
+  holidayDate?: string;
+  eventDate?: string;
   name?: string;
   createdAt?: string | null;
 };
@@ -18,11 +23,11 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
     initialRowsPerPage?: number;
     yearRange?: number;
     yearOffset?: number;
-  }
+  },
 ) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(
-    options?.initialRowsPerPage ?? 20
+    options?.initialRowsPerPage ?? 20,
   );
   const [yearMonthFilter, setYearMonthFilter] = useState<string>("");
   const [nameFilter, setNameFilter] = useState<string>("");
@@ -33,19 +38,20 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
   const YEAR_OFFSET = options?.yearOffset ?? 5;
   const currentYear = dayjs().year();
   const years = Array.from({ length: YEAR_RANGE }).map(
-    (_, i) => currentYear - YEAR_OFFSET + i
+    (_, i) => currentYear - YEAR_OFFSET + i,
   );
 
   const normalizedItems = useMemo(() => items ?? [], [items]);
 
   const sorted = useMemo(
-    () => [...normalizedItems].sort((a, b) => sortCalendar(a, b)),
-    [normalizedItems]
+    () => normalizedItems.toSorted((a, b) => sortCalendar(a, b)),
+    [normalizedItems],
   );
 
   const filtered = useMemo(() => {
     return sorted.filter((hc) => {
-      const date = dayjs(hc.holidayDate);
+      const dateStr = hc.holidayDate || hc.eventDate || "";
+      const date = dayjs(dateStr);
 
       // Support filtering by year+month, year only, or month only.
       if (selectedYear !== "" && selectedMonth !== "") {
@@ -69,7 +75,7 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
 
   const paginated = useMemo(
     () => filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [filtered, page, rowsPerPage]
+    [filtered, page, rowsPerPage],
   );
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -77,7 +83,7 @@ export function useHolidayCalendarList<T extends HolidayCalendarLike>(
   };
 
   const handleChangeRowsPerPage = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);

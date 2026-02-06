@@ -476,6 +476,60 @@ export const deleteCompanyHolidayCalendar = /* GraphQL */ `mutation DeleteCompan
   APITypes.DeleteCompanyHolidayCalendarMutationVariables,
   APITypes.DeleteCompanyHolidayCalendarMutation
 >;
+export const createEventCalendar = /* GraphQL */ `mutation CreateEventCalendar(
+  $input: CreateEventCalendarInput!
+  $condition: ModelEventCalendarConditionInput
+) {
+  createEventCalendar(input: $input, condition: $condition) {
+    id
+    eventDate
+    name
+    description
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateEventCalendarMutationVariables,
+  APITypes.CreateEventCalendarMutation
+>;
+export const updateEventCalendar = /* GraphQL */ `mutation UpdateEventCalendar(
+  $input: UpdateEventCalendarInput!
+  $condition: ModelEventCalendarConditionInput
+) {
+  updateEventCalendar(input: $input, condition: $condition) {
+    id
+    eventDate
+    name
+    description
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateEventCalendarMutationVariables,
+  APITypes.UpdateEventCalendarMutation
+>;
+export const deleteEventCalendar = /* GraphQL */ `mutation DeleteEventCalendar(
+  $input: DeleteEventCalendarInput!
+  $condition: ModelEventCalendarConditionInput
+) {
+  deleteEventCalendar(input: $input, condition: $condition) {
+    id
+    eventDate
+    name
+    description
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteEventCalendarMutationVariables,
+  APITypes.DeleteEventCalendarMutation
+>;
 export const createCloseDate = /* GraphQL */ `mutation CreateCloseDate(
   $input: CreateCloseDateInput!
   $condition: ModelCloseDateConditionInput
@@ -899,6 +953,7 @@ export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -917,6 +972,7 @@ export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -952,6 +1008,7 @@ export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -970,6 +1027,7 @@ export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {
@@ -1005,6 +1063,7 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
     entries {
       date
       status
+      isLocked
       __typename
     }
     summary {
@@ -1023,6 +1082,7 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
       entries {
         date
         status
+        isLocked
         __typename
       }
       summary {

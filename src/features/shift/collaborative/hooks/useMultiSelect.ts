@@ -16,19 +16,33 @@ interface UseMultiSelectProps {
 export const useMultiSelect = ({ staffIds, dates }: UseMultiSelectProps) => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [lastClickedCell, setLastClickedCell] = useState<CellPosition | null>(
-    null
+    null,
   );
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<CellPosition | null>(null);
 
-  const getCellKey = useCallback((staffId: string, date: string) => {
-    return `${staffId}-${date}`;
-  }, []);
+  const cellKeySeparator = "::";
 
-  const parseCellKey = useCallback((key: string): CellPosition => {
-    const [staffId, date] = key.split("-");
-    return { staffId, date };
-  }, []);
+  const getCellKey = useCallback(
+    (staffId: string, date: string) => {
+      return `${staffId}${cellKeySeparator}${date}`;
+    },
+    [cellKeySeparator],
+  );
+
+  const parseCellKey = useCallback(
+    (key: string): CellPosition => {
+      const separatorIndex = key.lastIndexOf(cellKeySeparator);
+      if (separatorIndex === -1) {
+        return { staffId: key, date: "" };
+      }
+
+      const staffId = key.slice(0, separatorIndex);
+      const date = key.slice(separatorIndex + cellKeySeparator.length);
+      return { staffId, date };
+    },
+    [cellKeySeparator],
+  );
 
   /**
    * セルが選択されているか確認
@@ -37,7 +51,7 @@ export const useMultiSelect = ({ staffIds, dates }: UseMultiSelectProps) => {
     (staffId: string, date: string): boolean => {
       return selectedCells.has(getCellKey(staffId, date));
     },
-    [selectedCells, getCellKey]
+    [selectedCells, getCellKey],
   );
 
   /**
@@ -49,7 +63,7 @@ export const useMultiSelect = ({ staffIds, dates }: UseMultiSelectProps) => {
       setSelectedCells(new Set([key]));
       setLastClickedCell({ staffId, date });
     },
-    [getCellKey]
+    [getCellKey],
   );
 
   /**
@@ -69,7 +83,7 @@ export const useMultiSelect = ({ staffIds, dates }: UseMultiSelectProps) => {
       });
       setLastClickedCell({ staffId, date });
     },
-    [getCellKey]
+    [getCellKey],
   );
 
   /**
@@ -101,7 +115,7 @@ export const useMultiSelect = ({ staffIds, dates }: UseMultiSelectProps) => {
 
       setSelectedCells(newSelection);
     },
-    [lastClickedCell, staffIds, dates, getCellKey, selectCell]
+    [lastClickedCell, staffIds, dates, getCellKey, selectCell],
   );
 
   /**
@@ -113,7 +127,7 @@ export const useMultiSelect = ({ staffIds, dates }: UseMultiSelectProps) => {
       setDragStart({ staffId, date });
       selectCell(staffId, date);
     },
-    [selectCell]
+    [selectCell],
   );
 
   /**
@@ -142,7 +156,7 @@ export const useMultiSelect = ({ staffIds, dates }: UseMultiSelectProps) => {
 
       setSelectedCells(newSelection);
     },
-    [isDragging, dragStart, staffIds, dates, getCellKey]
+    [isDragging, dragStart, staffIds, dates, getCellKey],
   );
 
   /**

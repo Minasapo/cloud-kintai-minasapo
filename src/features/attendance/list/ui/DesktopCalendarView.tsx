@@ -321,7 +321,7 @@ function resolveMonthlyTerms(
         !start.isAfter(monthEnd, "day")
       );
     })
-    .sort((a, b) => a.start.valueOf() - b.start.valueOf())
+    .toSorted((a, b) => a.start.valueOf() - b.start.valueOf())
     .map(
       ({ start, end }, index): MonthTerm => ({
         start: start.startOf("day"),

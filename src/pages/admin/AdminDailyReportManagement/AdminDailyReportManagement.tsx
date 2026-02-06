@@ -41,7 +41,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { useSplitView } from "@/features/splitView";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
-import { formatDateTimeReadable } from "@/shared/lib/date";
+import { formatDateTimeReadable } from "@/shared/lib/time";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 import {
@@ -77,7 +77,7 @@ const sanitizeCsvValue = (value: string): string => {
 };
 
 export const buildDailyReportCsv = (reports: AdminDailyReport[]): string => {
-  const sortedReports = [...reports].sort(compareReportByDateDesc);
+  const sortedReports = reports.toSorted(compareReportByDateDesc);
 
   const lines = sortedReports.map((report) =>
     [
@@ -167,7 +167,7 @@ export default function AdminDailyReportManagement() {
         nextToken = response.data?.listDailyReports?.nextToken;
       } while (nextToken);
 
-      setReports(aggregated.sort(compareReportByDateDesc));
+      setReports(aggregated.toSorted(compareReportByDateDesc));
     } catch (error) {
       setLoadError(
         error instanceof Error ? error.message : "日報の取得に失敗しました。"
@@ -193,7 +193,7 @@ export default function AdminDailyReportManagement() {
     const unique = Array.from(
       new Set(visibleReports.map((report) => report.author))
     );
-    return unique.sort((a, b) => a.localeCompare(b, "ja"));
+    return unique.toSorted((a, b) => a.localeCompare(b, "ja"));
   }, [visibleReports]);
 
   const filteredReports = useMemo(() => {

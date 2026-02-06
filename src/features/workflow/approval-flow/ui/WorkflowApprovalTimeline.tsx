@@ -17,7 +17,7 @@ export default function WorkflowApprovalTimeline({
       <Typography variant="h6" sx={{ mb: 1 }}>
         {title}
       </Typography>
-      <Paper variant="outlined" sx={{ p: 2 }}>
+      <Paper variant="outlined" sx={{ p: 2, bgcolor: "background.paper" }}>
         <Stack spacing={2}>
           {steps.map((s, idx) => {
             const isApplicant = s.role === "申請者";
@@ -25,8 +25,8 @@ export default function WorkflowApprovalTimeline({
               s.state === "承認済み"
                 ? "done"
                 : s.state === "未承認"
-                ? "pending"
-                : "";
+                  ? "pending"
+                  : "";
             return (
               <Box
                 key={s.id}
@@ -44,8 +44,8 @@ export default function WorkflowApprovalTimeline({
                       bgcolor: isApplicant
                         ? "grey.300"
                         : active === "done"
-                        ? "success.main"
-                        : "primary.main",
+                          ? "success.main"
+                          : "primary.main",
                       color: "common.white",
                       fontWeight: 700,
                     }}

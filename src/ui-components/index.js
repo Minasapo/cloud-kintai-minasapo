@@ -20,6 +20,8 @@ export { default as DailyReportCreateForm } from "./DailyReportCreateForm";
 export { default as DailyReportUpdateForm } from "./DailyReportUpdateForm";
 export { default as DocumentCreateForm } from "./DocumentCreateForm";
 export { default as DocumentUpdateForm } from "./DocumentUpdateForm";
+export { default as EventCalendarCreateForm } from "./EventCalendarCreateForm";
+export { default as EventCalendarUpdateForm } from "./EventCalendarUpdateForm";
 export { default as HolidayCalendarCreateForm } from "./HolidayCalendarCreateForm";
 export { default as HolidayCalendarUpdateForm } from "./HolidayCalendarUpdateForm";
 export { default as OperationLogCreateForm } from "./OperationLogCreateForm";

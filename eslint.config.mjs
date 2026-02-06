@@ -37,7 +37,7 @@ export default [
     root: true,
     env: {
       browser: true,
-      es2021: true,
+      es2023: true,
     },
     extends: [
       "eslint:recommended",
@@ -142,6 +142,28 @@ export default [
           allowUncles: false,
           message:
             "features から app/pages/processes への依存は禁止されています",
+        },
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "CallExpression[callee.property.name='sort']",
+          message:
+            "Use Array.prototype.toSorted() instead of sort() to avoid mutation.",
+        },
+        {
+          selector: "CallExpression[callee.property.name='reverse']",
+          message:
+            "Use Array.prototype.toReversed() instead of reverse() to avoid mutation.",
+        },
+        {
+          selector: "CallExpression[callee.property.name='splice']",
+          message:
+            "Use Array.prototype.toSpliced() instead of splice() to avoid mutation.",
+        },
+        {
+          selector: "CallExpression[callee.property.name='hasOwnProperty']",
+          message: "Use Object.hasOwn() instead of hasOwnProperty().",
         },
       ],
     },

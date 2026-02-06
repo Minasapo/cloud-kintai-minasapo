@@ -1,6 +1,7 @@
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import Logo from "@shared/ui/logo/Logo";
 import { useContext, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
@@ -16,9 +17,9 @@ import { SignInOutButton } from "./SignInOutButton";
 export default function Header() {
   const { isCognitoUserRole } = useContext(AuthContext);
   const { getThemeColor } = useContext(AppConfigContext);
+  const location = useLocation();
 
-  const pathName =
-    window.location.pathname === "/" ? "/register" : window.location.pathname;
+  const pathName = location.pathname === "/" ? "/register" : location.pathname;
 
   const resolvedThemeColor = useMemo(
     () =>

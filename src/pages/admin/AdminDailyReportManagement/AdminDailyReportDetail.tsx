@@ -40,7 +40,7 @@ import {
 import { AuthContext } from "@/context/AuthContext";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
+import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx } from "@/shared/ui/layout";
 
 import {
@@ -71,7 +71,7 @@ const normalizeComments = (
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
 const sortReports = (items: AdminDailyReport[]) =>
-  [...items].sort((a, b) => {
+  items.toSorted((a, b) => {
     if (a.date === b.date) {
       const aTime = a.updatedAt ?? "";
       const bTime = b.updatedAt ?? "";

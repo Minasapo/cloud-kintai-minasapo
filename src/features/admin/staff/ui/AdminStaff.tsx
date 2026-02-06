@@ -118,7 +118,7 @@ export default function AdminStaff() {
                       staffId.includes(searchQuery)
                     );
                   })
-                  .sort((a, b) => {
+                  .toSorted((a, b) => {
                     const aSortKey = a.sortKey || "";
                     const bSortKey = b.sortKey || "";
                     return aSortKey.localeCompare(bSortKey);

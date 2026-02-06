@@ -305,7 +305,7 @@ export const attendanceApi = createApi({
         const now = dayjs();
         const dateList = Array.from({ length: safeDays }, (_, index) =>
           now.subtract(index, "day").format(AttendanceDate.DataFormat)
-        ).sort();
+        ).toSorted();
 
         const result = await baseQuery({
           document: attendancesByStaffId,
@@ -404,7 +404,7 @@ export const attendanceApi = createApi({
         const now = dayjs();
         const dateList = Array.from({ length: safeDays }, (_, index) =>
           now.subtract(index, "day").format(AttendanceDate.DataFormat)
-        ).sort();
+        ).toSorted();
 
         const result = await baseQuery({
           document: attendancesByStaffId,

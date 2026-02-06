@@ -25,7 +25,7 @@ import {
   HolidayDateRangeError,
   MAX_HOLIDAY_RANGE_DAYS,
 } from "@/features/admin/holidayCalendar/lib/buildHolidayDateRange";
-import { HolidayCalenderMessage } from "@/shared/lib/message/HolidayCalenderMessage";
+import { HolidayCalendarMessage } from "@/shared/lib/message/HolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
@@ -107,7 +107,7 @@ export function AddHolidayCalendar({
    * @param data - フォーム入力（Inputs）
    */
   const onSubmit = async ({ startDate, endDate, name }: Inputs) => {
-    const holidayCalenderMessage = new HolidayCalenderMessage();
+    const holidayCalendarMessage = HolidayCalendarMessage();
     const isRangeSubmission = Boolean(endDate);
 
     try {
@@ -118,7 +118,7 @@ export function AddHolidayCalendar({
           name,
         }));
         await bulkCreateHolidayCalendar(inputs);
-        const successMessage = `${holidayCalenderMessage.getCategoryName()}を${
+        const successMessage = `${holidayCalendarMessage.getCategoryName()}を${
           range.length
         }件作成しました`;
         dispatch(setSnackbarSuccess(successMessage));
@@ -127,7 +127,7 @@ export function AddHolidayCalendar({
         await createHolidayCalendar({ holidayDate, name });
         dispatch(
           setSnackbarSuccess(
-            holidayCalenderMessage.create(MessageStatus.SUCCESS)
+            holidayCalendarMessage.create(MessageStatus.SUCCESS)
           )
         );
       }
@@ -141,7 +141,7 @@ export function AddHolidayCalendar({
       }
 
       dispatch(
-        setSnackbarError(holidayCalenderMessage.create(MessageStatus.ERROR))
+        setSnackbarError(holidayCalendarMessage.create(MessageStatus.ERROR))
       );
     }
   };

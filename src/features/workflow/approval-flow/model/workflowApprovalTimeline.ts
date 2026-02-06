@@ -28,15 +28,23 @@ const mapStaffName = (staff?: StaffType | null): string | undefined => {
   return name || undefined;
 };
 
-const findStaffNameByIdentifier = (
-  identifier: StaffLookupKey,
-  staffs: StaffType[]
-): string | undefined => {
-  if (!identifier) return undefined;
-  const staff = staffs.find(
-    (s) => s.id === identifier || s.cognitoUserId === identifier
-  );
-  return mapStaffName(staff) ?? identifier;
+const createStaffLookups = (staffs: StaffType[]) => {
+  const nameLookup = new Map<string, string>();
+  const staffById = new Map<string, StaffType>();
+  staffs.forEach((staff) => {
+    if (staff.id) {
+      staffById.set(staff.id, staff);
+    }
+    const name = mapStaffName(staff);
+    if (!name) return;
+    if (staff.id) nameLookup.set(staff.id, name);
+    if (staff.cognitoUserId) nameLookup.set(staff.cognitoUserId, name);
+  });
+  const resolveStaffName = (identifier: StaffLookupKey): string | undefined => {
+    if (!identifier) return undefined;
+    return nameLookup.get(identifier) ?? identifier;
+  };
+  return { resolveStaffName, staffById };
 };
 
 const mapApprovalStatus = (status?: ApprovalStatus | null): string => {
@@ -54,15 +62,54 @@ const mapApprovalStatus = (status?: ApprovalStatus | null): string => {
   }
 };
 
+const normalizeApprovalSteps = (
+  steps: (ApprovalStep | null)[],
+  resolveStaffName: (identifier: StaffLookupKey) => string | undefined
+): WorkflowApprovalStepView[] =>
+  steps
+    .filter((step): step is ApprovalStep => Boolean(step))
+    .toSorted((a, b) => (a.stepOrder ?? 0) - (b.stepOrder ?? 0))
+    .map((step, idx) => {
+      const approverId = step.approverStaffId ?? "";
+      const name: string | undefined =
+        approverId === "ADMINS"
+          ? DEFAULT_APPROVER_LABEL
+          : resolveStaffName(approverId);
+      const timestamp = step.decisionTimestamp
+        ? new Date(step.decisionTimestamp).toLocaleString()
+        : "";
+      return {
+        id: step.id ?? `s${idx + 1}`,
+        name: name ?? (approverId || "未設定"),
+        role: "承認者",
+        state: mapApprovalStatus(step.decisionStatus),
+        date: timestamp,
+        comment: step.approverComment ?? "",
+      } satisfies WorkflowApprovalStepView;
+    });
+
+const buildAnyApproverFallback = (approverInfo: WorkflowApproverInfo) => {
+  const hasSpecificItems =
+    approverInfo.items.length > 0 &&
+    approverInfo.items.some((item) => item !== DEFAULT_APPROVER_LABEL);
+  return {
+    name: hasSpecificItems
+      ? approverInfo.items.filter(Boolean).join(" / ")
+      : DEFAULT_APPROVER_LABEL,
+    role: hasSpecificItems ? "承認者（複数）" : "承認者",
+  };
+};
+
 export const deriveWorkflowApproverInfo = (
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null,
   staffs: StaffType[]
 ): WorkflowApproverInfo => {
+  const { resolveStaffName, staffById } = createStaffLookups(staffs);
   if (!workflow?.staffId) {
     return { mode: "any", items: [DEFAULT_APPROVER_LABEL] };
   }
 
-  const applicant = staffs.find((s) => s.id === workflow.staffId) ?? null;
+  const applicant = staffById.get(workflow.staffId) ?? null;
   const setting = applicant?.approverSetting ?? null;
 
   if (!setting || setting === "ADMINS") {
@@ -74,7 +121,7 @@ export const deriveWorkflowApproverInfo = (
     if (!targetId) {
       return { mode: "single", items: ["未設定"] };
     }
-    const name = findStaffNameByIdentifier(targetId, staffs);
+    const name = resolveStaffName(targetId);
     return { mode: "single", items: [name ?? targetId] };
   }
 
@@ -85,7 +132,7 @@ export const deriveWorkflowApproverInfo = (
     if (multiple.length === 0) {
       return { mode: "any", items: ["未設定"] };
     }
-    const names = multiple.map((id) => findStaffNameByIdentifier(id, staffs));
+    const names = multiple.map((id) => resolveStaffName(id));
     const resolved = names.map((name, idx) => name ?? multiple[idx]);
     const orderMode = applicant?.approverMultipleMode === "ORDER";
     return { mode: orderMode ? "order" : "any", items: resolved };
@@ -100,6 +147,7 @@ export const buildWorkflowApprovalTimeline = ({
   applicantName,
   applicationDate,
 }: BuildTimelineParams): WorkflowApprovalStepView[] => {
+  const { resolveStaffName } = createStaffLookups(staffs);
   const base: WorkflowApprovalStepView[] = [
     {
       id: "s0",
@@ -118,81 +166,52 @@ export const buildWorkflowApprovalTimeline = ({
   const approvalSteps =
     (workflow.approvalSteps as (ApprovalStep | null)[]) ?? [];
   if (approvalSteps.length > 0) {
-    const normalized = approvalSteps
-      .filter((step): step is ApprovalStep => Boolean(step))
-      .sort((a, b) => (a.stepOrder ?? 0) - (b.stepOrder ?? 0))
-      .map((step, idx) => {
-        const approverId = step.approverStaffId ?? "";
-        const name: string | undefined =
-          approverId === "ADMINS"
-            ? DEFAULT_APPROVER_LABEL
-            : findStaffNameByIdentifier(approverId, staffs);
-        const timestamp = step.decisionTimestamp
-          ? new Date(step.decisionTimestamp).toLocaleString()
-          : "";
-        return {
-          id: step.id ?? `s${idx + 1}`,
-          name: name ?? (approverId || "未設定"),
-          role: "承認者",
-          state: mapApprovalStatus(step.decisionStatus),
-          date: timestamp,
-          comment: step.approverComment ?? "",
-        } satisfies WorkflowApprovalStepView;
-      });
+    const normalized = normalizeApprovalSteps(
+      approvalSteps,
+      resolveStaffName
+    );
     return [...base, ...normalized];
   }
 
   const approverInfo = deriveWorkflowApproverInfo(workflow, staffs);
   const isApproved = workflow.status === WorkflowStatus.APPROVED;
+  const fallbackState = isApproved ? "承認済み" : "未承認";
+  const fallbackDate = isApproved ? applicationDate : "";
 
-  const appendFallbackStep = (step: WorkflowApprovalStepView) => {
-    base.push(step);
-    if (!isApproved) {
-      base[0] = { ...base[0], date: applicationDate };
-    }
-  };
+  const buildFallbackStep = (
+    name: string,
+    id: string,
+    role: string
+  ): WorkflowApprovalStepView => ({
+    id,
+    name,
+    role,
+    state: fallbackState,
+    date: fallbackDate,
+    comment: "",
+  });
 
   if (approverInfo.mode === "any") {
-    const hasSpecificItems =
-      approverInfo.items.length > 0 &&
-      approverInfo.items.some((item) => item !== DEFAULT_APPROVER_LABEL);
-    appendFallbackStep({
-      id: "s1",
-      name: hasSpecificItems
-        ? approverInfo.items.filter(Boolean).join(" / ")
-        : DEFAULT_APPROVER_LABEL,
-      role: hasSpecificItems ? "承認者（複数）" : "承認者",
-      state: isApproved ? "承認済み" : "未承認",
-      date: isApproved ? applicationDate : "",
-      comment: "",
-    });
-    return base;
+    const { name, role } = buildAnyApproverFallback(approverInfo);
+    const fallback = buildFallbackStep(name, "s1", role);
+    return [...base, fallback];
   }
 
   if (approverInfo.mode === "single") {
-    appendFallbackStep({
-      id: "s1",
-      name: approverInfo.items[0] ?? "未設定",
-      role: "承認者",
-      state: isApproved ? "承認済み" : "未承認",
-      date: isApproved ? applicationDate : "",
-      comment: "",
-    });
-    return base;
+    const fallback = buildFallbackStep(
+      approverInfo.items[0] ?? "未設定",
+      "s1",
+      "承認者"
+    );
+    return [...base, fallback];
   }
 
   if (approverInfo.mode === "order") {
-    approverInfo.items.forEach((name, idx) => {
-      appendFallbackStep({
-        id: `s${idx + 1}`,
-        name: name || "未設定",
-        role: "承認者",
-        state: isApproved ? "承認済み" : "未承認",
-        date: isApproved ? applicationDate : "",
-        comment: "",
-      });
-    });
-    return base;
+    const fallbackSteps = approverInfo.items.map(
+      (name, idx): WorkflowApprovalStepView =>
+        buildFallbackStep(name || "未設定", `s${idx + 1}`, "承認者")
+    );
+    return [...base, ...fallbackSteps];
   }
 
   return base;
