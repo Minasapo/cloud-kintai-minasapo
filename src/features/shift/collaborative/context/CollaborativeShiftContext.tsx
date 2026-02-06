@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 
+import { HistoryEntry } from "../hooks/useUndoRedo";
 import {
   CollaborativeShiftState,
   CollaborativeUser,
@@ -45,6 +46,13 @@ export interface CollaborativeShiftContextType {
       strategy: "local" | "remote" | "manual";
     }>;
   }>;
+  // Undo/Redo
+  canUndo: boolean;
+  canRedo: boolean;
+  undo: () => Promise<boolean>;
+  redo: () => Promise<boolean>;
+  getLastUndo: () => HistoryEntry | null;
+  getLastRedo: () => HistoryEntry | null;
 }
 
 /**

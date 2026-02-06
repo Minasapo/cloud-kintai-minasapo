@@ -4,6 +4,9 @@ export { useOfflineStorage } from "./useOfflineStorage";
 export { useOfflineSync } from "./useOfflineSync";
 export { useOnlineStatus } from "./useOnlineStatus";
 
+// Undo/Redo
+export { useUndoRedo } from "./useUndoRedo";
+
 // Existing hooks
 export { useClipboard } from "./useClipboard";
 export { useCollaborativeShiftData } from "./useCollaborativeShiftData";

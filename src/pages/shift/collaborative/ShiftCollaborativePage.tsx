@@ -51,6 +51,7 @@ import {
   usePresenceNotifications,
 } from "../../../features/shift/collaborative/components/PresenceNotification";
 import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
+import { UndoRedoIndicator } from "../../../features/shift/collaborative/components/UndoRedoIndicator";
 import { VirtualizedShiftTable } from "../../../features/shift/collaborative/components/VirtualizedShiftTable";
 import { useCollaborativeShift } from "../../../features/shift/collaborative/context/CollaborativeShiftContext";
 import { useClipboard } from "../../../features/shift/collaborative/hooks/useClipboard";
@@ -446,6 +447,12 @@ const useCollaborativePageState = (targetMonth: string) => {
     getCellEditor,
     triggerSync,
     updateUserActivity,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+    getLastUndo,
+    getLastRedo,
   } = useCollaborativeShift();
 
   const isAdmin = true; // TODO: 認可情報から取得する
@@ -770,6 +777,8 @@ const useCollaborativePageState = (targetMonth: string) => {
     onEscape: handleEscape,
     onCopy: handleCopy,
     onPaste: handlePaste,
+    onUndo: undo,
+    onRedo: redo,
   });
 
   /**
@@ -908,6 +917,12 @@ const useCollaborativePageState = (targetMonth: string) => {
     getCellEditor,
     isCellBeingEdited,
     isBatchUpdating,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+    getLastUndo,
+    getLastRedo,
   };
 };
 
@@ -1053,6 +1068,12 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       currentMonth,
       days,
       staffIds,
+      canUndo,
+      canRedo,
+      undo,
+      redo,
+      getLastUndo,
+      getLastRedo,
       isBatchUpdating,
     } = useCollaborativePageState(targetMonth);
 
@@ -1127,6 +1148,16 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <Box sx={{ position: "fixed", bottom: 24, left: 24, zIndex: 1200 }}>
             <OfflineStatusIndicator showLabel={true} />
           </Box>
+
+          {/* 取り消し/やり直しインジケーター */}
+          <UndoRedoIndicator
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={undo}
+            onRedo={redo}
+            lastUndoDescription={getLastUndo()?.description}
+            lastRedoDescription={getLastRedo()?.description}
+          />
 
           {/* コンフリクト解決ダイアログ */}
           <ConflictResolutionDialog

@@ -2,6 +2,9 @@
 export { ConflictResolutionDialog } from "./ConflictResolutionDialog";
 export { OfflineStatusIndicator } from "./OfflineStatusIndicator";
 
+// Undo/Redo
+export { UndoRedoIndicator } from "./UndoRedoIndicator";
+
 // Existing components
 export { ActiveUsersList } from "./ActiveUsersList";
 export { BatchEditToolbar } from "./BatchEditToolbar";

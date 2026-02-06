@@ -8,6 +8,7 @@ import { useCollaborativeShiftData } from "../hooks/useCollaborativeShiftData";
 import { useCollaborativeShiftOffline } from "../hooks/useCollaborativeShiftOffline";
 import { useShiftPresence } from "../hooks/useShiftPresence";
 import { useShiftSync } from "../hooks/useShiftSync";
+import { useUndoRedo } from "../hooks/useUndoRedo";
 import {
   CollaborativeShiftState,
   ShiftCellUpdate,
@@ -69,6 +70,38 @@ export const CollaborativeShiftProvider: React.FC<
     },
   });
 
+  // 取り消し/やり直しフック
+  const {
+    canUndo,
+    canRedo,
+    undo: undoAction,
+    redo: redoAction,
+    pushHistory,
+    getLastUndo,
+    getLastRedo,
+  } = useUndoRedo({
+    maxHistorySize: 50,
+    onUndo: async (entry) => {
+      // 取り消し時は逆の操作を適用
+      const undoUpdates = entry.updates.map((update) => {
+        const previousShift = shiftDataMap
+          .get(update.staffId)
+          ?.get(update.date);
+        return {
+          ...update,
+          newState: previousShift?.state,
+          isLocked: previousShift?.isLocked,
+        };
+      });
+
+      await batchUpdateShiftsWithOfflineSupport(undoUpdates);
+    },
+    onRedo: async (entry) => {
+      // やり直し時は元の操作を再適用
+      await batchUpdateShiftsWithOfflineSupport(entry.updates);
+    },
+  });
+
   // プレゼンス管理フック
   const {
     activeUsers,
@@ -108,10 +141,21 @@ export const CollaborativeShiftProvider: React.FC<
       // 編集中の通知を停止
       stopEditingCell(update.staffId, update.date);
 
+      // 履歴に追加
+      pushHistory(
+        [update],
+        `Update shift for ${update.staffId} on ${update.date}`,
+      );
+
       // オフライン対応の更新を実行
       await updateShiftWithOfflineSupport(update);
     },
-    [updateActivity, stopEditingCell, updateShiftWithOfflineSupport],
+    [
+      updateActivity,
+      stopEditingCell,
+      pushHistory,
+      updateShiftWithOfflineSupport,
+    ],
   );
 
   /**
@@ -126,10 +170,18 @@ export const CollaborativeShiftProvider: React.FC<
         stopEditingCell(update.staffId, update.date);
       });
 
+      // 履歴に追加
+      pushHistory(updates, `Batch update ${updates.length} shifts`);
+
       // オフライン対応のバッチ更新を実行
       await batchUpdateShiftsWithOfflineSupport(updates);
     },
-    [updateActivity, stopEditingCell, batchUpdateShiftsWithOfflineSupport],
+    [
+      updateActivity,
+      stopEditingCell,
+      pushHistory,
+      batchUpdateShiftsWithOfflineSupport,
+    ],
   );
 
   /**
@@ -239,6 +291,13 @@ export const CollaborativeShiftProvider: React.FC<
       updateUserActivity: handleUpdateUserActivity,
       retryPendingChanges,
       syncPendingChanges,
+      // Undo/Redo
+      canUndo,
+      canRedo,
+      undo: undoAction,
+      redo: redoAction,
+      getLastUndo,
+      getLastRedo,
     }),
     [
       state,
@@ -258,6 +317,12 @@ export const CollaborativeShiftProvider: React.FC<
       handleUpdateUserActivity,
       retryPendingChanges,
       syncPendingChanges,
+      canUndo,
+      canRedo,
+      undoAction,
+      redoAction,
+      getLastUndo,
+      getLastRedo,
     ],
   );
 
