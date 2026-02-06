@@ -36,6 +36,15 @@ export interface CollaborativeShiftContextType {
   resumeSync: () => void;
   updateUserActivity: () => void;
   retryPendingChanges: () => Promise<void>;
+  syncPendingChanges: () => Promise<{
+    successful: string[];
+    conflicts: Array<{
+      changeId: string;
+      localUpdate: ShiftCellUpdate;
+      remoteUpdate?: ShiftCellUpdate;
+      strategy: "local" | "remote" | "manual";
+    }>;
+  }>;
 }
 
 /**

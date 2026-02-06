@@ -43,7 +43,9 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
+import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
+import { OfflineStatusIndicator } from "../../../features/shift/collaborative/components/OfflineStatusIndicator";
 import {
   PresenceNotificationContainer,
   usePresenceNotifications,
@@ -1057,6 +1059,9 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     // プレゼンス通知
     const { notifications, dismissNotification } = usePresenceNotifications();
 
+    // オフラインダイアログの状態
+    const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+
     return (
       <Page title="協同シフト調整">
         <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
@@ -1116,6 +1121,21 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             hasClipboard={hasClipboard}
             canPaste={focusedCell !== null}
             isUpdating={isBatchUpdating}
+          />
+
+          {/* オフラインステータスインジケーター */}
+          <Box sx={{ position: "fixed", bottom: 24, left: 24, zIndex: 1200 }}>
+            <OfflineStatusIndicator showLabel={true} />
+          </Box>
+
+          {/* コンフリクト解決ダイアログ */}
+          <ConflictResolutionDialog
+            open={conflictDialogOpen}
+            conflicts={[]}
+            onResolve={async () => {
+              // コンフリクト解決処理
+            }}
+            onClose={() => setConflictDialogOpen(false)}
           />
 
           {/* ヘルプボタン（FAB） */}

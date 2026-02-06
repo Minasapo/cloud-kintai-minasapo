@@ -86,6 +86,10 @@ export interface CollaborativeShiftState {
   lastSyncedAt: number;
   error: string | null;
   connectionState: "connected" | "disconnected" | "error";
+
+  // オフライン対応
+  isOnline: boolean;
+  hasPendingChanges: boolean;
 }
 
 /**

@@ -5,6 +5,7 @@ import {
   CollaborativeShiftContextType,
 } from "../context/CollaborativeShiftContext";
 import { useCollaborativeShiftData } from "../hooks/useCollaborativeShiftData";
+import { useCollaborativeShiftOffline } from "../hooks/useCollaborativeShiftOffline";
 import { useShiftPresence } from "../hooks/useShiftPresence";
 import { useShiftSync } from "../hooks/useShiftSync";
 import {
@@ -51,6 +52,23 @@ export const CollaborativeShiftProvider: React.FC<
     currentUserId,
   });
 
+  // オフライン対応フック
+  const {
+    isOnline,
+    hasPendingChanges,
+    updateShiftWithOfflineSupport,
+    batchUpdateShiftsWithOfflineSupport,
+    syncPendingChanges,
+  } = useCollaborativeShiftOffline({
+    enabled: true,
+    onUpdateShift: updateShift,
+    onBatchUpdateShifts: batchUpdateShifts,
+    onConflictDetected: () => {
+      // TODO: コンフリクト解決ダイアログを表示
+      console.warn("Conflicts detected, need to implement resolution UI");
+    },
+  });
+
   // プレゼンス管理フック
   const {
     activeUsers,
@@ -90,10 +108,10 @@ export const CollaborativeShiftProvider: React.FC<
       // 編集中の通知を停止
       stopEditingCell(update.staffId, update.date);
 
-      // 更新を実行
-      await updateShift(update);
+      // オフライン対応の更新を実行
+      await updateShiftWithOfflineSupport(update);
     },
-    [updateActivity, stopEditingCell, updateShift],
+    [updateActivity, stopEditingCell, updateShiftWithOfflineSupport],
   );
 
   /**
@@ -108,9 +126,10 @@ export const CollaborativeShiftProvider: React.FC<
         stopEditingCell(update.staffId, update.date);
       });
 
-      await batchUpdateShifts(updates);
+      // オフライン対応のバッチ更新を実行
+      await batchUpdateShiftsWithOfflineSupport(updates);
     },
-    [updateActivity, stopEditingCell, batchUpdateShifts],
+    [updateActivity, stopEditingCell, batchUpdateShiftsWithOfflineSupport],
   );
 
   /**
@@ -181,6 +200,8 @@ export const CollaborativeShiftProvider: React.FC<
       lastSyncedAt,
       error: error || syncError || null,
       connectionState,
+      isOnline,
+      hasPendingChanges,
     }),
     [
       shiftDataMap,
@@ -194,6 +215,8 @@ export const CollaborativeShiftProvider: React.FC<
       error,
       syncError,
       connectionState,
+      isOnline,
+      hasPendingChanges,
     ],
   );
 
@@ -215,6 +238,7 @@ export const CollaborativeShiftProvider: React.FC<
       resumeSync: resume,
       updateUserActivity: handleUpdateUserActivity,
       retryPendingChanges,
+      syncPendingChanges,
     }),
     [
       state,
@@ -233,6 +257,7 @@ export const CollaborativeShiftProvider: React.FC<
       resume,
       handleUpdateUserActivity,
       retryPendingChanges,
+      syncPendingChanges,
     ],
   );
 
