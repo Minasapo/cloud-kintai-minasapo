@@ -918,7 +918,7 @@ type CollaborativeHeaderProps = {
   >;
 };
 
-const CollaborativeHeader: FC<CollaborativeHeaderProps> = ({
+const CollaborativeHeaderBase: FC<CollaborativeHeaderProps> = ({
   currentMonth,
   activeUsers,
   editingCells,
@@ -940,7 +940,9 @@ const CollaborativeHeader: FC<CollaborativeHeaderProps> = ({
   </Stack>
 );
 
-CollaborativeHeader.propTypes = {
+const CollaborativeHeader = memo(CollaborativeHeaderBase);
+
+CollaborativeHeaderBase.propTypes = {
   currentMonth: PropTypes.object.isRequired,
   activeUsers: PropTypes.arrayOf(
     PropTypes.shape({
@@ -962,7 +964,7 @@ type ProgressPanelProps = {
   totalDays: number;
 };
 
-const ProgressPanel: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
+const ProgressPanelBase: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
   <Paper sx={{ p: 2, mb: 3 }}>
     <Stack spacing={2}>
       <Box>
@@ -989,7 +991,9 @@ const ProgressPanel: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
   </Paper>
 );
 
-ProgressPanel.propTypes = {
+const ProgressPanel = memo(ProgressPanelBase);
+
+ProgressPanelBase.propTypes = {
   progress: PropTypes.shape({
     confirmedCount: PropTypes.number.isRequired,
     confirmedPercent: PropTypes.number.isRequired,

@@ -26,7 +26,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import { RuleViolation, SuggestedAction } from "../rules/shiftRules";
 
@@ -40,7 +40,7 @@ interface ShiftSuggestionsPanelProps {
   onRefresh: () => void;
 }
 
-export const ShiftSuggestionsPanel = ({
+export const ShiftSuggestionsPanelBase = ({
   violations,
   isAnalyzing,
   onApplyAction,
@@ -359,3 +359,5 @@ export const ShiftSuggestionsPanel = ({
     </Paper>
   );
 };
+
+export const ShiftSuggestionsPanel = memo(ShiftSuggestionsPanelBase);

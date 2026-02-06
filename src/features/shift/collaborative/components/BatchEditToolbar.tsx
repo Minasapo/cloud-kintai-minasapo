@@ -13,6 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { memo } from "react";
 
 import { ShiftState } from "../types/collaborative.types";
 
@@ -41,7 +42,7 @@ const stateOptions: Array<{ state: ShiftState; label: string; color: string }> =
     { state: "empty", label: "未入力", color: "#9e9e9e" },
   ];
 
-export const BatchEditToolbar = ({
+const BatchEditToolbarBase = ({
   selectionCount,
   onCopy,
   onPaste,
@@ -187,3 +188,5 @@ export const BatchEditToolbar = ({
     </Paper>
   );
 };
+
+export const BatchEditToolbar = memo(BatchEditToolbarBase);
