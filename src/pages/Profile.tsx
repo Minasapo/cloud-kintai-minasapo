@@ -95,7 +95,7 @@ type StaffProfileFormInputs = StaffNotificationInputs & {
   externalLinks: StaffExternalLink[];
 };
 
-type ProfileTab = "general" | "links";
+type ProfileTab = "general" | "notifications" | "links";
 
 const DEFAULT_ICON_VALUE = predefinedIcons[0]?.value ?? "LinkIcons";
 
@@ -120,7 +120,7 @@ const sanitizeExternalLinks = (links: StaffExternalLink[]) =>
 const isValidUrl = (value: string) => /^https?:\/\//i.test(value.trim());
 
 const isProfileTab = (value: string): value is ProfileTab =>
-  value === "general" || value === "links";
+  value === "general" || value === "notifications" || value === "links";
 
 const ProfileLogoutButton = styled(Button)(({ theme }) => ({
   color: theme.palette.logout.contrastText,
@@ -257,6 +257,7 @@ export default function Profile() {
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={activeTab} onChange={handleTabChange}>
             <Tab label="一般設定" value="general" />
+            <Tab label="通知設定" value="notifications" />
             <Tab label="個人リンク設定" value="links" />
           </Tabs>
         </Box>
@@ -315,53 +316,6 @@ export default function Profile() {
                             )
                           : "未設定"}
                       </Typography>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                        通知設定
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Stack direction="column" spacing={1}>
-                        <FormControlLabel
-                          control={
-                            <Controller
-                              name="workStart"
-                              control={control}
-                              render={({ field }) => (
-                                <NotificationSwitch
-                                  {...field}
-                                  checked={field.value}
-                                  onChange={(e) =>
-                                    field.onChange(e.target.checked)
-                                  }
-                                />
-                              )}
-                            />
-                          }
-                          label="勤務開始メール"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Controller
-                              name="workEnd"
-                              control={control}
-                              render={({ field }) => (
-                                <NotificationSwitch
-                                  {...field}
-                                  checked={field.value}
-                                  onChange={(e) =>
-                                    field.onChange(e.target.checked)
-                                  }
-                                />
-                              )}
-                            />
-                          }
-                          label="勤務終了メール"
-                        />
-                      </Stack>
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -488,6 +442,51 @@ export default function Profile() {
                   </Typography>
                 )}
               </Stack>
+            </Stack>
+          )}
+          {activeTab === "notifications" && (
+            <Stack direction="column" spacing={2} sx={{ maxWidth: 720 }}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Stack spacing={2}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                    通知設定
+                  </Typography>
+                  <Stack direction="column" spacing={1}>
+                    <FormControlLabel
+                      control={
+                        <Controller
+                          name="workStart"
+                          control={control}
+                          render={({ field }) => (
+                            <NotificationSwitch
+                              {...field}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                            />
+                          )}
+                        />
+                      }
+                      label="勤務開始メール"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Controller
+                          name="workEnd"
+                          control={control}
+                          render={({ field }) => (
+                            <NotificationSwitch
+                              {...field}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                            />
+                          )}
+                        />
+                      }
+                      label="勤務終了メール"
+                    />
+                  </Stack>
+                </Stack>
+              </Paper>
             </Stack>
           )}
         </Box>
