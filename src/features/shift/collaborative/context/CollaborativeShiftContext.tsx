@@ -53,6 +53,8 @@ export interface CollaborativeShiftContextType {
   redo: () => Promise<boolean>;
   getLastUndo: () => HistoryEntry | null;
   getLastRedo: () => HistoryEntry | null;
+  undoHistory: HistoryEntry[];
+  redoHistory: HistoryEntry[];
 }
 
 /**

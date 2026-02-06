@@ -1,4 +1,5 @@
 // Offline Support
+export { ChangeHistoryPanel } from "./ChangeHistoryPanel";
 export { ConflictResolutionDialog } from "./ConflictResolutionDialog";
 export { OfflineStatusIndicator } from "./OfflineStatusIndicator";
 

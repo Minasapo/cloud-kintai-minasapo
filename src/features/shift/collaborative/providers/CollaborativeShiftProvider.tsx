@@ -79,6 +79,8 @@ export const CollaborativeShiftProvider: React.FC<
     pushHistory,
     getLastUndo,
     getLastRedo,
+    undoHistory,
+    redoHistory,
   } = useUndoRedo({
     maxHistorySize: 50,
     onUndo: async (entry) => {
@@ -298,6 +300,8 @@ export const CollaborativeShiftProvider: React.FC<
       redo: redoAction,
       getLastUndo,
       getLastRedo,
+      undoHistory,
+      redoHistory,
     }),
     [
       state,
@@ -323,6 +327,8 @@ export const CollaborativeShiftProvider: React.FC<
       redoAction,
       getLastUndo,
       getLastRedo,
+      undoHistory,
+      redoHistory,
     ],
   );
 

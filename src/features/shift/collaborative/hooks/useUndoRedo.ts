@@ -177,6 +177,8 @@ export const useUndoRedo = ({
     isProcessing,
     undoStackSize: undoStack.length,
     redoStackSize: redoStack.length,
+    undoHistory: undoStack,
+    redoHistory: redoStack,
 
     // アクション
     pushHistory,

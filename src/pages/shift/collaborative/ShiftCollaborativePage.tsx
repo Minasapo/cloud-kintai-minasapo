@@ -43,6 +43,7 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
+import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
 import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import { OfflineStatusIndicator } from "../../../features/shift/collaborative/components/OfflineStatusIndicator";
@@ -453,6 +454,8 @@ const useCollaborativePageState = (targetMonth: string) => {
     redo,
     getLastUndo,
     getLastRedo,
+    undoHistory,
+    redoHistory,
   } = useCollaborativeShift();
 
   const isAdmin = true; // TODO: 認可情報から取得する
@@ -923,6 +926,8 @@ const useCollaborativePageState = (targetMonth: string) => {
     redo,
     getLastUndo,
     getLastRedo,
+    undoHistory,
+    redoHistory,
   };
 };
 
@@ -1074,6 +1079,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       redo,
       getLastUndo,
       getLastRedo,
+      undoHistory,
+      redoHistory,
       isBatchUpdating,
     } = useCollaborativePageState(targetMonth);
 
@@ -1148,6 +1155,12 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <Box sx={{ position: "fixed", bottom: 24, left: 24, zIndex: 1200 }}>
             <OfflineStatusIndicator showLabel={true} />
           </Box>
+
+          {/* 変更履歴 */}
+          <ChangeHistoryPanel
+            undoHistory={undoHistory}
+            redoHistory={redoHistory}
+          />
 
           {/* 取り消し/やり直しインジケーター */}
           <UndoRedoIndicator
