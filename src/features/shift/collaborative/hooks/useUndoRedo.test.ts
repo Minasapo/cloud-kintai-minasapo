@@ -139,6 +139,9 @@ describe("useUndoRedo", () => {
 
       await act(async () => {
         await result.current.undo();
+      });
+
+      await act(async () => {
         const success = await result.current.redo();
         expect(success).toBe(true);
       });
@@ -171,6 +174,9 @@ describe("useUndoRedo", () => {
       await act(async () => {
         await result.current.undo();
         await result.current.undo();
+      });
+
+      await act(async () => {
         await result.current.redo();
         await result.current.redo();
       });
@@ -217,10 +223,10 @@ describe("useUndoRedo", () => {
   describe("処理中フラグ", () => {
     it("取り消し実行中は処理中フラグがtrueになる", async () => {
       let resolveUndo: () => void;
-      const undoPromise = new Promise<void>((resolve) => {
+      const undoDeferred = new Promise<void>((resolve) => {
         resolveUndo = resolve;
       });
-      const onUndo = jest.fn(() => undoPromise);
+      const onUndo = jest.fn(() => undoDeferred);
       const { result } = renderHook(() => useUndoRedo({ onUndo }));
 
       act(() => {
@@ -228,14 +234,12 @@ describe("useUndoRedo", () => {
         result.current.pushHistory([mockUpdate2], "Test update 2");
       });
 
-      // 取り消しを開始（待機しない）
-      const undoTask = act(async () => {
-        await result.current.undo();
-      });
+      let undoActionPromise: Promise<boolean> | undefined;
 
-      // 少し待って処理が開始されることを確認
+      // 取り消しを開始（完了は待たない）
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        undoActionPromise = result.current.undo();
+        await Promise.resolve();
       });
 
       // 処理中の間は新しい取り消しができない
@@ -245,12 +249,12 @@ describe("useUndoRedo", () => {
       });
 
       // 取り消しを完了させる
-      act(() => {
-        resolveUndo!();
-      });
+      resolveUndo!();
 
       // 取り消し完了を待つ
-      await undoTask;
+      await act(async () => {
+        await undoActionPromise;
+      });
 
       // 完了後は再度取り消し可能
       expect(result.current.canUndo).toBe(true);
@@ -258,10 +262,10 @@ describe("useUndoRedo", () => {
 
     it("やり直し実行中は処理中フラグがtrueになる", async () => {
       let resolveRedo: () => void;
-      const redoPromise = new Promise<void>((resolve) => {
+      const redoDeferred = new Promise<void>((resolve) => {
         resolveRedo = resolve;
       });
-      const onRedo = jest.fn(() => redoPromise);
+      const onRedo = jest.fn(() => redoDeferred);
       const { result } = renderHook(() => useUndoRedo({ onRedo }));
 
       act(() => {
@@ -273,14 +277,12 @@ describe("useUndoRedo", () => {
         await result.current.undo();
       });
 
-      // やり直しを開始（待機しない）
-      const redoTask = act(async () => {
-        await result.current.redo();
-      });
+      let redoActionPromise: Promise<boolean> | undefined;
 
-      // 少し待って処理が開始されることを確認
+      // やり直しを開始（完了は待たない）
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        redoActionPromise = result.current.redo();
+        await Promise.resolve();
       });
 
       // 処理中の間は新しいやり直しができない
@@ -290,12 +292,12 @@ describe("useUndoRedo", () => {
       });
 
       // やり直しを完了させる
-      act(() => {
-        resolveRedo!();
-      });
+      resolveRedo!();
 
       // やり直し完了を待つ
-      await redoTask;
+      await act(async () => {
+        await redoActionPromise;
+      });
 
       // 完了後は取り消し可能
       expect(result.current.canUndo).toBe(true);
