@@ -34,6 +34,7 @@ export const CollaborativeShiftProvider: React.FC<
   shiftRequestId,
 }) => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
+  const [showHistory, setShowHistory] = useState(false);
 
   // データ管理フック
   const {
@@ -302,6 +303,8 @@ export const CollaborativeShiftProvider: React.FC<
       getLastRedo,
       undoHistory,
       redoHistory,
+      showHistory,
+      toggleHistory: () => setShowHistory((prev) => !prev),
     }),
     [
       state,
@@ -329,6 +332,7 @@ export const CollaborativeShiftProvider: React.FC<
       getLastRedo,
       undoHistory,
       redoHistory,
+      showHistory,
     ],
   );
 

@@ -20,12 +20,14 @@ interface ChangeHistoryPanelProps {
   undoHistory: HistoryEntry[];
   redoHistory: HistoryEntry[];
   maxVisible?: number;
+  isVisible?: boolean;
 }
 
 export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
   undoHistory,
   redoHistory,
   maxVisible = 10,
+  isVisible = true,
 }) => {
   const entries = useMemo<ChangeHistoryEntry[]>(() => {
     const undoEntries = undoHistory.map((entry) => ({
@@ -41,6 +43,10 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
       .toSorted((a, b) => b.timestamp - a.timestamp)
       .slice(0, maxVisible);
   }, [redoHistory, undoHistory, maxVisible]);
+
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <Paper

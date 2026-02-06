@@ -456,6 +456,8 @@ const useCollaborativePageState = (targetMonth: string) => {
     getLastRedo,
     undoHistory,
     redoHistory,
+    showHistory,
+    toggleHistory,
   } = useCollaborativeShift();
 
   const isAdmin = true; // TODO: 認可情報から取得する
@@ -928,6 +930,8 @@ const useCollaborativePageState = (targetMonth: string) => {
     getLastRedo,
     undoHistory,
     redoHistory,
+    showHistory,
+    toggleHistory,
   };
 };
 
@@ -1081,6 +1085,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       getLastRedo,
       undoHistory,
       redoHistory,
+      showHistory,
+      toggleHistory,
       isBatchUpdating,
     } = useCollaborativePageState(targetMonth);
 
@@ -1160,6 +1166,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <ChangeHistoryPanel
             undoHistory={undoHistory}
             redoHistory={redoHistory}
+            isVisible={showHistory}
           />
 
           {/* 取り消し/やり直しインジケーター */}
@@ -1170,6 +1177,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onRedo={redo}
             lastUndoDescription={getLastUndo()?.description}
             lastRedoDescription={getLastRedo()?.description}
+            showHistory={showHistory}
+            onToggleHistory={toggleHistory}
           />
 
           {/* コンフリクト解決ダイアログ */}
