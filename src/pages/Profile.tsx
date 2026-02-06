@@ -7,13 +7,17 @@ import {
 } from "@entities/staff/model/useStaffs/useStaffs";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
   Container,
   FormControlLabel,
   IconButton,
+  InputAdornment,
   Paper,
   Stack,
   styled,
@@ -30,6 +34,7 @@ import {
 } from "@mui/material";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import Title from "@shared/ui/typography/Title";
+import { updatePassword } from "aws-amplify/auth";
 import dayjs from "dayjs";
 import { type SyntheticEvent, useContext, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -95,7 +100,13 @@ type StaffProfileFormInputs = StaffNotificationInputs & {
   externalLinks: StaffExternalLink[];
 };
 
-type ProfileTab = "general" | "notifications" | "links";
+type PasswordChangeInputs = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+type ProfileTab = "general" | "notifications" | "links" | "security";
 
 const DEFAULT_ICON_VALUE = predefinedIcons[0]?.value ?? "LinkIcons";
 
@@ -120,7 +131,10 @@ const sanitizeExternalLinks = (links: StaffExternalLink[]) =>
 const isValidUrl = (value: string) => /^https?:\/\//i.test(value.trim());
 
 const isProfileTab = (value: string): value is ProfileTab =>
-  value === "general" || value === "notifications" || value === "links";
+  value === "general" ||
+  value === "notifications" ||
+  value === "links" ||
+  value === "security";
 
 const ProfileLogoutButton = styled(Button)(({ theme }) => ({
   color: theme.palette.logout.contrastText,
@@ -137,6 +151,13 @@ export default function Profile() {
   const { cognitoUser, signOut } = useContext(AuthContext);
   const [staff, setStaff] = useState<StaffType | null | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<ProfileTab>("general");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
+  const [passwordChangeError, setPasswordChangeError] = useState<string | null>(
+    null,
+  );
 
   const {
     control,
@@ -149,6 +170,21 @@ export default function Profile() {
       workStart: true,
       workEnd: true,
       externalLinks: [],
+    },
+  });
+
+  const {
+    control: passwordControl,
+    handleSubmit: handlePasswordSubmit,
+    formState: { isValid: isPasswordValid, isSubmitting: isPasswordSubmitting },
+    reset: resetPasswordForm,
+    watch: watchPassword,
+  } = useForm<PasswordChangeInputs>({
+    mode: "onChange",
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -243,6 +279,47 @@ export default function Profile() {
   const handleTabChange = (_: SyntheticEvent, value: string) => {
     if (isProfileTab(value)) {
       setActiveTab(value);
+      // Reset password change messages when switching tabs
+      setPasswordChangeSuccess(false);
+      setPasswordChangeError(null);
+    }
+  };
+
+  const onPasswordChange = async (data: PasswordChangeInputs) => {
+    setPasswordChangeError(null);
+    setPasswordChangeSuccess(false);
+
+    try {
+      await updatePassword({
+        oldPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      setPasswordChangeSuccess(true);
+      resetPasswordForm();
+      logger.info("Password changed successfully");
+    } catch (error) {
+      logger.error("Failed to change password:", error);
+      if (error instanceof Error) {
+        if (error.name === "NotAuthorizedException") {
+          setPasswordChangeError("現在のパスワードが正しくありません。");
+        } else if (error.name === "InvalidPasswordException") {
+          setPasswordChangeError(
+            "新しいパスワードは8文字以上で、大文字・小文字・数字・記号を含める必要があります。",
+          );
+        } else if (error.name === "LimitExceededException") {
+          setPasswordChangeError(
+            "試行回数が上限に達しました。しばらくしてから再度お試しください。",
+          );
+        } else {
+          setPasswordChangeError(
+            "パスワードの変更に失敗しました。もう一度お試しください。",
+          );
+        }
+      } else {
+        setPasswordChangeError(
+          "パスワードの変更に失敗しました。もう一度お試しください。",
+        );
+      }
     }
   };
 
@@ -259,6 +336,7 @@ export default function Profile() {
             <Tab label="一般設定" value="general" />
             <Tab label="通知設定" value="notifications" />
             <Tab label="個人リンク設定" value="links" />
+            <Tab label="セキュリティ" value="security" />
           </Tabs>
         </Box>
         <Box sx={{ pt: 2 }}>
@@ -485,6 +563,181 @@ export default function Profile() {
                       label="勤務終了メール"
                     />
                   </Stack>
+                </Stack>
+              </Paper>
+            </Stack>
+          )}
+          {activeTab === "security" && (
+            <Stack direction="column" spacing={2} sx={{ maxWidth: 720 }}>
+              <Paper variant="outlined" sx={{ p: 3 }}>
+                <Stack spacing={3}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                    パスワード変更
+                  </Typography>
+                  {passwordChangeSuccess && (
+                    <Alert
+                      severity="success"
+                      onClose={() => setPasswordChangeSuccess(false)}
+                    >
+                      パスワードを変更しました。
+                    </Alert>
+                  )}
+                  {passwordChangeError && (
+                    <Alert
+                      severity="error"
+                      onClose={() => setPasswordChangeError(null)}
+                    >
+                      {passwordChangeError}
+                    </Alert>
+                  )}
+                  <Controller
+                    name="currentPassword"
+                    control={passwordControl}
+                    rules={{
+                      required: "現在のパスワードを入力してください",
+                    }}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        label="現在のパスワード"
+                        type={showCurrentPassword ? "text" : "password"}
+                        size="small"
+                        fullWidth
+                        error={Boolean(fieldState.error)}
+                        helperText={fieldState.error?.message}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                aria-label="パスワードの表示切り替え"
+                                onClick={() =>
+                                  setShowCurrentPassword(!showCurrentPassword)
+                                }
+                                edge="end"
+                              >
+                                {showCurrentPassword ? (
+                                  <VisibilityOffIcon />
+                                ) : (
+                                  <VisibilityIcon />
+                                )}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="newPassword"
+                    control={passwordControl}
+                    rules={{
+                      required: "新しいパスワードを入力してください",
+                      minLength: {
+                        value: 8,
+                        message: "パスワードは8文字以上で入力してください",
+                      },
+                      validate: {
+                        hasUpperCase: (value) =>
+                          /[A-Z]/.test(value) ||
+                          "大文字を1文字以上含めてください",
+                        hasLowerCase: (value) =>
+                          /[a-z]/.test(value) ||
+                          "小文字を1文字以上含めてください",
+                        hasNumber: (value) =>
+                          /[0-9]/.test(value) ||
+                          "数字を1文字以上含めてください",
+                        hasSpecialChar: (value) =>
+                          /[^A-Za-z0-9]/.test(value) ||
+                          "記号を1文字以上含めてください",
+                      },
+                    }}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        label="新しいパスワード"
+                        type={showNewPassword ? "text" : "password"}
+                        size="small"
+                        fullWidth
+                        error={Boolean(fieldState.error)}
+                        helperText={
+                          fieldState.error?.message ||
+                          "8文字以上で、大文字・小文字・数字・記号を含めてください"
+                        }
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                aria-label="パスワードの表示切り替え"
+                                onClick={() =>
+                                  setShowNewPassword(!showNewPassword)
+                                }
+                                edge="end"
+                              >
+                                {showNewPassword ? (
+                                  <VisibilityOffIcon />
+                                ) : (
+                                  <VisibilityIcon />
+                                )}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="confirmPassword"
+                    control={passwordControl}
+                    rules={{
+                      required: "パスワードを再入力してください",
+                      validate: (value) =>
+                        value === watchPassword("newPassword") ||
+                        "パスワードが一致しません",
+                    }}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        label="新しいパスワード(確認)"
+                        type={showConfirmPassword ? "text" : "password"}
+                        size="small"
+                        fullWidth
+                        error={Boolean(fieldState.error)}
+                        helperText={fieldState.error?.message}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                aria-label="パスワードの表示切り替え"
+                                onClick={() =>
+                                  setShowConfirmPassword(!showConfirmPassword)
+                                }
+                                edge="end"
+                              >
+                                {showConfirmPassword ? (
+                                  <VisibilityOffIcon />
+                                ) : (
+                                  <VisibilityIcon />
+                                )}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                  <Box>
+                    <Button
+                      variant="contained"
+                      size="medium"
+                      disabled={!isPasswordValid || isPasswordSubmitting}
+                      startIcon={
+                        isPasswordSubmitting && <CircularProgress size={16} />
+                      }
+                      onClick={handlePasswordSubmit(onPasswordChange)}
+                    >
+                      パスワードを変更
+                    </Button>
+                  </Box>
                 </Stack>
               </Paper>
             </Stack>
