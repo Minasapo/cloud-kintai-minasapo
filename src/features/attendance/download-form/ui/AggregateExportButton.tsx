@@ -52,7 +52,7 @@ export default function AggregateExportButton({
     ];
 
     const lines = selectedStaff
-      .sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || ""))
+      .toSorted((a, b) => (a.sortKey || "").localeCompare(b.sortKey || ""))
       .map((staff) => {
         const attendances = res.filter(
           (a) =>

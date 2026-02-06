@@ -119,7 +119,7 @@ export default function EditAttendanceHistoryList() {
                         (item): item is NonNullable<typeof item> =>
                           item !== null
                       )
-                      .sort((a, b) =>
+                      .toSorted((a, b) =>
                         dayjs(b.createdAt).isBefore(dayjs(a.createdAt)) ? -1 : 1
                       )
                       .map((history, index) => (

@@ -8,14 +8,19 @@ import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
   useBulkCreateCompanyHolidayCalendarsMutation,
+  useBulkCreateEventCalendarsMutation,
   useBulkCreateHolidayCalendarsMutation,
   useCreateCompanyHolidayCalendarMutation,
+  useCreateEventCalendarMutation,
   useCreateHolidayCalendarMutation,
   useDeleteCompanyHolidayCalendarMutation,
+  useDeleteEventCalendarMutation,
   useDeleteHolidayCalendarMutation,
   useGetCompanyHolidayCalendarsQuery,
+  useGetEventCalendarsQuery,
   useGetHolidayCalendarsQuery,
   useUpdateCompanyHolidayCalendarMutation,
+  useUpdateEventCalendarMutation,
   useUpdateHolidayCalendarMutation,
 } from "@entities/calendar/api/calendarApi";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
@@ -209,6 +214,8 @@ export default function Layout() {
   } = useGetCompanyHolidayCalendarsQuery(undefined, {
     skip: !isAuthenticated,
   });
+  const { data: eventCalendars = [], isLoading: eventCalendarLoading } =
+    useGetEventCalendarsQuery(undefined, { skip: !isAuthenticated });
 
   const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
   const [bulkCreateHolidayCalendarsMutation] =
@@ -225,22 +232,28 @@ export default function Layout() {
   const [deleteCompanyHolidayCalendarMutation] =
     useDeleteCompanyHolidayCalendarMutation();
 
+  const [createEventCalendarMutation] = useCreateEventCalendarMutation();
+  const [bulkCreateEventCalendarsMutation] =
+    useBulkCreateEventCalendarsMutation();
+  const [updateEventCalendarMutation] = useUpdateEventCalendarMutation();
+  const [deleteEventCalendarMutation] = useDeleteEventCalendarMutation();
+
   const createHolidayCalendar = useCallback(
     async (input: Parameters<typeof createHolidayCalendarMutation>[0]) => {
       const result = await createHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [createHolidayCalendarMutation]
+    [createHolidayCalendarMutation],
   );
 
   const bulkCreateHolidayCalendar = useCallback(
     async (
-      inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0]
+      inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0],
     ) => {
       const result = await bulkCreateHolidayCalendarsMutation(inputs).unwrap();
       return result;
     },
-    [bulkCreateHolidayCalendarsMutation]
+    [bulkCreateHolidayCalendarsMutation],
   );
 
   const updateHolidayCalendar = useCallback(
@@ -248,61 +261,91 @@ export default function Layout() {
       const result = await updateHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [updateHolidayCalendarMutation]
+    [updateHolidayCalendarMutation],
   );
 
   const deleteHolidayCalendar = useCallback(
     async (input: Parameters<typeof deleteHolidayCalendarMutation>[0]) => {
       await deleteHolidayCalendarMutation(input).unwrap();
     },
-    [deleteHolidayCalendarMutation]
+    [deleteHolidayCalendarMutation],
   );
 
   const createCompanyHolidayCalendar = useCallback(
     async (
-      input: Parameters<typeof createCompanyHolidayCalendarMutation>[0]
+      input: Parameters<typeof createCompanyHolidayCalendarMutation>[0],
     ) => {
       const result = await createCompanyHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [createCompanyHolidayCalendarMutation]
+    [createCompanyHolidayCalendarMutation],
   );
 
   const bulkCreateCompanyHolidayCalendar = useCallback(
     async (
-      inputs: Parameters<typeof bulkCreateCompanyHolidayCalendarsMutation>[0]
+      inputs: Parameters<typeof bulkCreateCompanyHolidayCalendarsMutation>[0],
     ) => {
-      const result = await bulkCreateCompanyHolidayCalendarsMutation(
-        inputs
-      ).unwrap();
+      const result =
+        await bulkCreateCompanyHolidayCalendarsMutation(inputs).unwrap();
       return result;
     },
-    [bulkCreateCompanyHolidayCalendarsMutation]
+    [bulkCreateCompanyHolidayCalendarsMutation],
   );
 
   const updateCompanyHolidayCalendar = useCallback(
     async (
-      input: Parameters<typeof updateCompanyHolidayCalendarMutation>[0]
+      input: Parameters<typeof updateCompanyHolidayCalendarMutation>[0],
     ) => {
       const result = await updateCompanyHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [updateCompanyHolidayCalendarMutation]
+    [updateCompanyHolidayCalendarMutation],
   );
 
   const deleteCompanyHolidayCalendar = useCallback(
     async (
-      input: Parameters<typeof deleteCompanyHolidayCalendarMutation>[0]
+      input: Parameters<typeof deleteCompanyHolidayCalendarMutation>[0],
     ) => {
       const result = await deleteCompanyHolidayCalendarMutation(input).unwrap();
       return result;
     },
-    [deleteCompanyHolidayCalendarMutation]
+    [deleteCompanyHolidayCalendarMutation],
+  );
+
+  const createEventCalendar = useCallback(
+    async (input: Parameters<typeof createEventCalendarMutation>[0]) => {
+      const result = await createEventCalendarMutation(input).unwrap();
+      return result;
+    },
+    [createEventCalendarMutation],
+  );
+
+  const bulkCreateEventCalendar = useCallback(
+    async (inputs: Parameters<typeof bulkCreateEventCalendarsMutation>[0]) => {
+      const result = await bulkCreateEventCalendarsMutation(inputs).unwrap();
+      return result;
+    },
+    [bulkCreateEventCalendarsMutation],
+  );
+
+  const updateEventCalendar = useCallback(
+    async (input: Parameters<typeof updateEventCalendarMutation>[0]) => {
+      const result = await updateEventCalendarMutation(input).unwrap();
+      return result;
+    },
+    [updateEventCalendarMutation],
+  );
+
+  const deleteEventCalendar = useCallback(
+    async (input: Parameters<typeof deleteEventCalendarMutation>[0]) => {
+      await deleteEventCalendarMutation(input).unwrap();
+    },
+    [deleteEventCalendarMutation],
   );
 
   const isAdminUser = useMemo(
     () => isCognitoUserRole(StaffRole.ADMIN),
-    [isCognitoUserRole]
+    [isCognitoUserRole],
   );
 
   const isLoginRoute = location.pathname === "/login";
@@ -360,7 +403,7 @@ export default function Layout() {
     }
 
     alert(
-      "メール認証が完了していません。ログイン時にメール認証を行なってください。"
+      "メール認証が完了していません。ログイン時にメール認証を行なってください。",
     );
 
     try {
@@ -390,7 +433,7 @@ export default function Layout() {
       authStatus,
       cognitoUser,
     }),
-    [signOut, navigate, isCognitoUserRole, user, authStatus, cognitoUser]
+    [signOut, navigate, isCognitoUserRole, user, authStatus, cognitoUser],
   );
 
   const appConfigContextValue = useMemo(
@@ -447,13 +490,14 @@ export default function Layout() {
       getAttendanceStatisticsEnabled,
       getThemeColor,
       getThemeTokens,
-    ]
+    ],
   );
 
   const appContextValue = useMemo(
     () => ({
       holidayCalendars,
       companyHolidayCalendars,
+      eventCalendars,
       createHolidayCalendar,
       bulkCreateHolidayCalendar,
       updateHolidayCalendar,
@@ -462,10 +506,15 @@ export default function Layout() {
       bulkCreateCompanyHolidayCalendar,
       updateCompanyHolidayCalendar,
       deleteCompanyHolidayCalendar,
+      createEventCalendar,
+      bulkCreateEventCalendar,
+      updateEventCalendar,
+      deleteEventCalendar,
     }),
     [
       holidayCalendars,
       companyHolidayCalendars,
+      eventCalendars,
       createHolidayCalendar,
       bulkCreateHolidayCalendar,
       updateHolidayCalendar,
@@ -474,17 +523,21 @@ export default function Layout() {
       bulkCreateCompanyHolidayCalendar,
       updateCompanyHolidayCalendar,
       deleteCompanyHolidayCalendar,
-    ]
+      createEventCalendar,
+      bulkCreateEventCalendar,
+      updateEventCalendar,
+      deleteEventCalendar,
+    ],
   );
 
   const configuredThemeColor = useMemo(
     () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
-    [getThemeColor]
+    [getThemeColor],
   );
 
   const appTheme = useMemo(
     () => createAppTheme(configuredThemeColor),
-    [configuredThemeColor]
+    [configuredThemeColor],
   );
 
   const shouldBlockUnauthenticated =
@@ -496,6 +549,7 @@ export default function Layout() {
     appConfigLoading ||
     holidayCalendarLoading ||
     companyHolidayCalendarLoading ||
+    eventCalendarLoading ||
     shouldBlockUnauthenticated
   ) {
     return (

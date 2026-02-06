@@ -45,7 +45,7 @@ import { useSearchParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/date";
+import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 /**
@@ -152,7 +152,7 @@ const mapComments = (
   if (!entries?.length) return [];
   return entries
     .filter((entry): entry is DailyReportComment => Boolean(entry))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .toSorted((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((entry) => ({
       id: entry.id,
       author: entry.authorName || "管理者",
@@ -181,7 +181,7 @@ const mapDailyReport = (
 
 /** 日報を日付の降順、同日の場合は更新日時の降順でソート */
 const sortReports = (items: DailyReportItem[]) =>
-  [...items].sort((a, b) => {
+  items.toSorted((a, b) => {
     if (a.date === b.date) {
       const aTime = a.updatedAt ?? "";
       const bTime = b.updatedAt ?? "";
@@ -446,6 +446,12 @@ export default function DailyReport() {
   }, [fetchReports]);
 
   useEffect(() => {
+    // selectedReportIdが明示的に"create"の場合は作成フォームを保持
+    // 自動保存によってreportForCalendarDateが作成されても遷移しない
+    if (selectedReportId === "create") {
+      return;
+    }
+
     if (reports.length === 0) {
       // 日報が一つもない場合は何も表示しない
       setSelectedReportId(null);
@@ -464,12 +470,6 @@ export default function DailyReport() {
 
     const calendarKey = calendarDate.format("YYYY-MM-DD");
     const reportForCalendarDate = reportsByDate.get(calendarKey) ?? null;
-
-    // selectedReportIdが明示的に"create"の場合は作成フォームを保持
-    // 自動保存によってreportForCalendarDateが作成されても遷移しない
-    if (selectedReportId === "create") {
-      return;
-    }
 
     // 初回ロード時や日付変更時：データがある場合のみ詳細画面を表示
     if (!selectedReportId && reportForCalendarDate) {

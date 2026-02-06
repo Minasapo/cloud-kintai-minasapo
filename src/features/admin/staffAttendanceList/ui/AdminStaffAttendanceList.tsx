@@ -75,7 +75,7 @@ export default function AdminStaffAttendanceList() {
           ? dayjs(attendance.workDate).isSame(currentMonth, "month")
           : false
       )
-      .sort((a: Attendance, b: Attendance) => {
+      .toSorted((a: Attendance, b: Attendance) => {
         const aValue = a.workDate ? dayjs(a.workDate).valueOf() : 0;
         const bValue = b.workDate ? dayjs(b.workDate).valueOf() : 0;
         return aValue - bValue;

@@ -16,7 +16,7 @@ export default function useAdminOperationLogs(initialLimit = 30) {
     try {
       const res = await fetchOperationLogs(null, initialLimit);
       // ensure newest-first order by timestamp
-      const sorted = res.items.slice().sort((a, b) => {
+      const sorted = res.items.toSorted((a, b) => {
         // Use timestamp when available, otherwise fall back to createdAt.
         const ta = dayjs(a.timestamp ?? a.createdAt).valueOf() || 0;
         const tb = dayjs(b.timestamp ?? b.createdAt).valueOf() || 0;
@@ -42,7 +42,7 @@ export default function useAdminOperationLogs(initialLimit = 30) {
       setLogs((prev) => {
         const merged = [...prev, ...res.items];
         // sort merged list newest-first; prefer timestamp, then createdAt
-        return merged.slice().sort((a, b) => {
+        return merged.toSorted((a, b) => {
           const ta = dayjs(a.timestamp ?? a.createdAt).valueOf() || 0;
           const tb = dayjs(b.timestamp ?? b.createdAt).valueOf() || 0;
           return tb - ta;

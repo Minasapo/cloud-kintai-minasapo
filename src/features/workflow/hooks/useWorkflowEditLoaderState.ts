@@ -12,8 +12,7 @@ import {
 } from "@/entities/workflow/lib/workflowLabels";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/date";
-import { parseTimeToISO } from "@/shared/lib/time";
+import { formatDateSlash, isoDateFromTimestamp , parseTimeToISO } from "@/shared/lib/time";
 
 export type WorkflowEditLoaderState = {
   category: string;

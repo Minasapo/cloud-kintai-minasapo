@@ -17,7 +17,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { HolidayCalenderMessage } from "@/shared/lib/message/HolidayCalenderMessage";
+import { HolidayCalendarMessage } from "@/shared/lib/message/HolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
@@ -78,7 +78,7 @@ export default function HolidayCalendarEdit({
 
     if (!id || !holidayDate) return;
 
-    const holidayCalenderMessage = new HolidayCalenderMessage();
+    const holidayCalendarMessage = HolidayCalendarMessage();
     await updateHolidayCalendar({
       id: holidayCalendar.id,
       holidayDate: holidayDate.toISOString(),
@@ -87,14 +87,14 @@ export default function HolidayCalendarEdit({
       .then(() => {
         dispatch(
           setSnackbarSuccess(
-            holidayCalenderMessage.update(MessageStatus.SUCCESS)
+            holidayCalendarMessage.update(MessageStatus.SUCCESS)
           )
         );
         onClose();
       })
       .catch(() => {
         dispatch(
-          setSnackbarError(holidayCalenderMessage.update(MessageStatus.ERROR))
+          setSnackbarError(holidayCalendarMessage.update(MessageStatus.ERROR))
         );
       });
   };

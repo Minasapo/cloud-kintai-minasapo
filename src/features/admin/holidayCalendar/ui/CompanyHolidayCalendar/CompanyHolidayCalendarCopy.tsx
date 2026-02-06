@@ -21,7 +21,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { CompanyHolidayCalenderMessage } from "@/shared/lib/message/CompanyHolidayCalenderMessage";
+import { CompanyHolidayCalendarMessage } from "@/shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
   setSnackbarError,
@@ -74,12 +74,12 @@ export default function CompanyHolidayCalendarCopy({
   };
 
   const onSubmit = async (data: Inputs) => {
-    const companyHolidayCalenderMessage = new CompanyHolidayCalenderMessage();
+    const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
     await createCompanyHolidayCalendar(data)
       .then(() => {
         dispatch(
           setSnackbarSuccess(
-            companyHolidayCalenderMessage.create(MessageStatus.SUCCESS)
+            companyHolidayCalendarMessage.create(MessageStatus.SUCCESS)
           )
         );
         reset(defaultValues);
@@ -88,7 +88,7 @@ export default function CompanyHolidayCalendarCopy({
       .catch(() =>
         dispatch(
           setSnackbarError(
-            companyHolidayCalenderMessage.create(MessageStatus.ERROR)
+            companyHolidayCalendarMessage.create(MessageStatus.ERROR)
           )
         )
       );

@@ -98,7 +98,7 @@ export function mapWorkflowsToListItems<T extends WorkflowLike>(
       } satisfies WorkflowListItem;
     });
 
-  return mapped.sort((a, b) => {
+  return mapped.toSorted((a, b) => {
     const aApp = a.applicationDate ?? "";
     const bApp = b.applicationDate ?? "";
     if (aApp && bApp) return bApp.localeCompare(aApp);

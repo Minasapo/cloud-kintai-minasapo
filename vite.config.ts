@@ -80,6 +80,7 @@ export default defineConfig({
   },
   build: {
     outDir: "build",
+    target: "es2023",
     rollupOptions: {
       output: {
         manualChunks: shouldUseManualChunks ? manualChunks : undefined,

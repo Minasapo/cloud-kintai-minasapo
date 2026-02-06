@@ -81,7 +81,7 @@ export const mapComments = (
   if (!entries?.length) return [];
   return entries
     .filter((entry): entry is DailyReportComment => Boolean(entry))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .toSorted((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((entry) => ({
       id: entry.id,
       author: entry.authorName || "管理者",

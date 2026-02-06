@@ -66,6 +66,13 @@ type CompanyHolidayCalendar @model @auth(rules: [{ allow: private }]) {
   name: String!
 }
 
+type EventCalendar @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  eventDate: String!
+  name: String!
+  description: String
+}
+
 type CloseDate @model @auth(rules: [{ allow: private }]) {
   id: ID!
   closeDate: String!
@@ -199,6 +206,7 @@ enum ShiftRequestStatus {
 type ShiftRequestDayPreference {
   date: String!
   status: ShiftRequestStatus!
+  isLocked: Boolean
 }
 
 type ShiftRequestSummary {
@@ -478,6 +486,7 @@ input ShiftRequestBatchUpdateInput {
 input ShiftRequestDayPreferenceInput {
   date: String!
   status: ShiftRequestStatus!
+  isLocked: Boolean
 }
 
 type ShiftRequestBatchUpdateResult {

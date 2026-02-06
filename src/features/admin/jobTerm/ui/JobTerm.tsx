@@ -50,7 +50,7 @@ export default function JobTerm() {
       return acc;
     }, []);
 
-    return uniqueByMonth.sort((a, b) => a.valueOf() - b.valueOf());
+    return uniqueByMonth.toSorted((a, b) => a.valueOf() - b.valueOf());
   }, [closeDates]);
 
   if (closeDateLoading) {

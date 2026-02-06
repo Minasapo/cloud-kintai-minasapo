@@ -231,7 +231,7 @@ const resolveMonthlyTerms = (
         !start.isAfter(monthEnd, "day")
       );
     })
-    .sort((a, b) => a.start.valueOf() - b.start.valueOf())
+    .toSorted((a, b) => a.start.valueOf() - b.start.valueOf())
     .map(
       ({ start, end }, index): MonthTerm => ({
         start: start.startOf("day"),
@@ -309,7 +309,7 @@ export default function MobileCalendar({
   if (process.env.NODE_ENV === "development") {
     const today = dayjs().format("YYYY-MM-DD");
     const todayData = attendanceMap.get(today);
-    const attendanceDates = Array.from(attendanceMap.keys()).sort();
+    const attendanceDates = Array.from(attendanceMap.keys()).toSorted();
     console.log(
       `[MobileCalendar] currentMonth=${currentMonth.format(
         "YYYY-MM-DD"

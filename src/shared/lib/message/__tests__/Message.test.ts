@@ -1,55 +1,49 @@
-import { CompanyHolidayCalenderMessage } from "../CompanyHolidayCalenderMessage";
-import { HolidayCalenderMessage } from "../HolidayCalenderMessage";
-import { Message, MessageStatus } from "../Message";
+import { CompanyHolidayCalendarMessage } from "../CompanyHolidayCalendarMessage";
+import { HolidayCalendarMessage } from "../HolidayCalendarMessage";
+import { createMessage, MessageStatus } from "../Message";
 
-describe("Message base class", () => {
-  class TestMessage extends Message {
-    getCategoryName(): string {
-      return "テストカテゴリ";
-    }
-  }
-
+describe("Message generator", () => {
   it("generates success messages for CRUD operations", () => {
-    const msg = new TestMessage();
+    const msg = createMessage("テストカテゴリ");
 
     expect(msg.create(MessageStatus.SUCCESS)).toBe(
-      "テストカテゴリを作成しました"
+      "テストカテゴリを作成しました",
     );
     expect(msg.update(MessageStatus.SUCCESS)).toBe(
-      "テストカテゴリを更新しました"
+      "テストカテゴリを更新しました",
     );
     expect(msg.delete(MessageStatus.SUCCESS)).toBe(
-      "テストカテゴリを削除しました"
+      "テストカテゴリを削除しました",
     );
-    expect(msg.get(MessageStatus.SUCCESS)).toBe("テストカテゴリを作成しました");
+    expect(msg.get(MessageStatus.SUCCESS)).toBe("テストカテゴリを取得しました");
   });
 
   it("generates error messages with code", () => {
-    const msg = new TestMessage();
+    const msg = createMessage("テストカテゴリ");
 
     expect(msg.create(MessageStatus.ERROR)).toContain(
-      "テストカテゴリの作成に失敗しました"
+      "テストカテゴリの作成に失敗しました",
     );
     expect(msg.create(MessageStatus.ERROR)).toMatch(/\(E\d{2}\d{3}\)/);
   });
 });
 
-describe("HolidayCalenderMessage", () => {
+describe("HolidayCalendarMessage", () => {
   it("uses '休日カレンダー' as category name", () => {
-    const msg = new HolidayCalenderMessage();
+    const msg = HolidayCalendarMessage();
 
     expect(msg.create(MessageStatus.SUCCESS)).toBe(
-      "休日カレンダーを作成しました"
+      "休日カレンダーを作成しました",
     );
   });
 });
 
-describe("CompanyHolidayCalenderMessage", () => {
+describe("CompanyHolidayCalendarMessage", () => {
   it("uses '会社休日カレンダー' as category name", () => {
-    const msg = new CompanyHolidayCalenderMessage();
+    const msg = CompanyHolidayCalendarMessage();
 
     expect(msg.update(MessageStatus.SUCCESS)).toBe(
-      "会社休日カレンダーを更新しました"
+      "会社休日カレンダーを更新しました",
     );
   });
 });

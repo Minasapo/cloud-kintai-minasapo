@@ -1,20 +1,13 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import {
-  Alert,
-  Button,
-  IconButton,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Alert, Button, Paper, Stack, Typography } from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 // Title removed per admin UI simplification
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -24,177 +17,104 @@ import {
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
 
-type ShiftGroupFormValue = {
-  id: string;
-  label: string;
-  description: string;
-  min: string;
-  max: string;
-  fixed: string;
-};
+import {
+  buildShiftGroupPayload,
+  createShiftGroup,
+  SHIFT_GROUP_UI_TEXTS,
+  ShiftGroupRow,
+} from "./";
+import { toShiftGroupFormValue } from "./shiftGroupFactory";
+import type { ShiftGroupFormState } from "./shiftGroupSchema";
+import { shiftGroupFormSchema } from "./shiftGroupSchema";
 
-const createShiftGroup = (
-  initial?: Partial<ShiftGroupFormValue>,
-): ShiftGroupFormValue => ({
-  id: `sg-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`,
-  label: "",
-  description: "",
-  min: "",
-  max: "",
-  fixed: "",
-  ...initial,
-});
+const SHIFT_GROUP_ERROR_FIELDS = [
+  { key: "label", label: "ラベル名" },
+  { key: "min", label: "最小人数" },
+  { key: "max", label: "最大人数" },
+  { key: "fixed", label: "固定人数" },
+] as const;
 
-const isNonNegativeIntegerString = (value: string) => {
-  const trimmed = value.trim();
-  return trimmed === "" || /^\d+$/.test(trimmed);
-};
+const getValidationDetails = (errors: {
+  shiftGroups?: Array<Record<string, { message?: unknown } | undefined>>;
+}) => {
+  const details: string[] = [];
 
-const parseOptionalInteger = (value: string): number | null => {
-  const trimmed = value.trim();
-  if (trimmed === "") return null;
-  const parsed = Number(trimmed);
-  return Number.isNaN(parsed) ? null : parsed;
-};
+  errors.shiftGroups?.forEach((groupError, index) => {
+    if (!groupError) {
+      return;
+    }
 
-type GroupValidationResult = {
-  labelError: boolean;
-  minInputError: boolean;
-  maxInputError: boolean;
-  fixedInputError: boolean;
-  rangeError: boolean;
-  fixedBelowMin: boolean;
-  fixedAboveMax: boolean;
-  fixedWithRangeConflict: boolean;
-  minValue: number | null;
-  maxValue: number | null;
-  fixedValue: number | null;
-  hasError: boolean;
-};
+    const messageToLabels = new Map<string, string[]>();
+    SHIFT_GROUP_ERROR_FIELDS.forEach(({ key, label }) => {
+      const message = groupError[key]?.message;
+      if (typeof message !== "string" || message.length === 0) {
+        return;
+      }
 
-const getGroupValidation = (
-  group: ShiftGroupFormValue,
-): GroupValidationResult => {
-  const labelError = group.label.trim() === "";
-  const minInputError = !isNonNegativeIntegerString(group.min);
-  const maxInputError = !isNonNegativeIntegerString(group.max);
-  const fixedInputError = !isNonNegativeIntegerString(group.fixed);
+      const labels = messageToLabels.get(message) ?? [];
+      if (!labels.includes(label)) {
+        labels.push(label);
+      }
+      messageToLabels.set(message, labels);
+    });
 
-  const minValue = minInputError ? null : parseOptionalInteger(group.min);
-  const maxValue = maxInputError ? null : parseOptionalInteger(group.max);
-  const fixedValue = fixedInputError ? null : parseOptionalInteger(group.fixed);
+    messageToLabels.forEach((labels, message) => {
+      const labelText = labels.join(" / ");
+      details.push(`${index + 1}行目 ${labelText}: ${message}`);
+    });
+  });
 
-  const rangeError =
-    minValue !== null && maxValue !== null && minValue > maxValue;
-  const fixedBelowMin =
-    fixedValue !== null && minValue !== null && fixedValue < minValue;
-  const fixedAboveMax =
-    fixedValue !== null && maxValue !== null && fixedValue > maxValue;
-  const fixedWithRangeConflict =
-    fixedValue !== null && (minValue !== null || maxValue !== null);
-
-  return {
-    labelError,
-    minInputError,
-    maxInputError,
-    fixedInputError,
-    rangeError,
-    fixedBelowMin,
-    fixedAboveMax,
-    fixedWithRangeConflict,
-    minValue,
-    maxValue,
-    fixedValue,
-    hasError:
-      labelError ||
-      minInputError ||
-      maxInputError ||
-      fixedInputError ||
-      rangeError ||
-      fixedBelowMin ||
-      fixedAboveMax ||
-      fixedWithRangeConflict,
-  };
+  return details;
 };
 
 export default function AdminShiftSettings() {
   const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
     useContext(AppConfigContext);
   const dispatch = useAppDispatchV2();
-  const [shiftGroups, setShiftGroups] = useState<ShiftGroupFormValue[]>([]);
   const [configId, setConfigId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const {
+    control,
+    handleSubmit,
+    reset,
+    trigger,
+    formState: { errors },
+  } = useForm<ShiftGroupFormState>({
+    defaultValues: { shiftGroups: [] },
+    resolver: zodResolver(shiftGroupFormSchema),
+    mode: "onChange",
+  });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "shiftGroups",
+  });
+
   useEffect(() => {
     const initialGroups = getShiftGroups();
-    setShiftGroups(() =>
-      initialGroups.map((group) =>
-        createShiftGroup({
-          label: group.label ?? "",
-          description: group.description ?? "",
-          min:
-            typeof group.min === "number" && !Number.isNaN(group.min)
-              ? String(group.min)
-              : "",
-          max:
-            typeof group.max === "number" && !Number.isNaN(group.max)
-              ? String(group.max)
-              : "",
-          fixed:
-            typeof group.fixed === "number" && !Number.isNaN(group.fixed)
-              ? String(group.fixed)
-              : "",
-        }),
-      ),
-    );
+    reset({
+      shiftGroups: initialGroups.map((group) => toShiftGroupFormValue(group)),
+    });
     setConfigId(getConfigId());
-  }, [getConfigId, getShiftGroups]);
-
-  const hasValidationError = useMemo(
-    () => shiftGroups.some((group) => getGroupValidation(group).hasError),
-    [shiftGroups],
-  );
-
-  const handleGroupChange = (
-    id: string,
-    field: keyof Omit<ShiftGroupFormValue, "id">,
-    value: string,
-  ) => {
-    setShiftGroups((prev) =>
-      prev.map((group) =>
-        group.id === id
-          ? {
-              ...group,
-              [field]: value,
-            }
-          : group,
-      ),
-    );
-  };
+    void trigger();
+  }, [getConfigId, getShiftGroups, reset, trigger]);
 
   const handleAddGroup = () => {
-    setShiftGroups((prev) => [...prev, createShiftGroup()]);
+    append(createShiftGroup());
+    void trigger();
   };
 
-  const handleDeleteGroup = (id: string) => {
-    setShiftGroups((prev) => prev.filter((group) => group.id !== id));
-  };
+  const validationDetails = useMemo(
+    () =>
+      getValidationDetails(errors as {
+        shiftGroups?: Array<Record<string, { message?: unknown } | undefined>>;
+      }),
+    [errors],
+  );
+  const hasValidationError = validationDetails.length > 0;
 
-  const handleSave = async () => {
-    if (hasValidationError || saving) {
-      return;
-    }
-
-    setSaving(true);
-    const payloadShiftGroups = shiftGroups.map((group) => ({
-      label: group.label.trim(),
-      description: group.description.trim() ? group.description.trim() : null,
-      min: parseOptionalInteger(group.min),
-      max: parseOptionalInteger(group.max),
-      fixed: parseOptionalInteger(group.fixed),
-    }));
-
-    try {
+  const persistConfig = useCallback(
+    async (payloadShiftGroups: ReturnType<typeof buildShiftGroupPayload>) => {
       if (configId) {
         await saveConfig({
           id: configId,
@@ -209,187 +129,63 @@ export default function AdminShiftSettings() {
         dispatch(setSnackbarSuccess(S14001));
       }
       await fetchConfig();
+    },
+    [configId, dispatch, fetchConfig, saveConfig],
+  );
+
+  const handleSave = handleSubmit(async (values) => {
+    if (saving) {
+      return;
+    }
+
+    setSaving(true);
+    const payloadShiftGroups = buildShiftGroupPayload(values.shiftGroups);
+
+    try {
+      await persistConfig(payloadShiftGroups);
     } catch (error) {
       console.error(error);
       dispatch(setSnackbarError(E14001));
     } finally {
       setSaving(false);
     }
-  };
+  });
 
   return (
     <Stack spacing={2.5}>
-      <Typography>
-        シフトグループを定義し、公開範囲や担当者単位でシフトを整理できます。
-        ラベル・説明に加えて、各グループの最小／最大人数、または固定人数を任意で設定し、必要に応じて追加・編集・削除してください（レンジ指定と固定人数は同時に使用できません）。
-      </Typography>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle2">
+          {SHIFT_GROUP_UI_TEXTS.introTitle}
+        </Typography>
+        <Stack component="ul" sx={{ m: 0, pl: 3 }}>
+          {SHIFT_GROUP_UI_TEXTS.introBullets.map((text) => (
+            <Typography key={text} component="li" variant="body2">
+              {text}
+            </Typography>
+          ))}
+        </Stack>
+      </Stack>
       <Alert severity="info">
-        入力内容は「保存」ボタンを押すと全社設定に反映され、以降の画面で参照できます。
-        編集途中の変更は自動保存されないためご注意ください。
+        {SHIFT_GROUP_UI_TEXTS.saveInfo}
       </Alert>
 
       <Paper sx={{ p: 2 }}>
         <Stack spacing={3}>
           <Typography variant="h6">シフトグループ</Typography>
           <Stack spacing={1.5}>
-            {shiftGroups.length === 0 ? (
+            {fields.length === 0 ? (
               <Alert severity="info" variant="outlined">
-                現在登録されているシフトグループはありません。「グループを追加」から新規に追加できます。
+                {SHIFT_GROUP_UI_TEXTS.emptyGroups}
               </Alert>
             ) : (
-              shiftGroups.map((group) => {
-                const validation = getGroupValidation(group);
-                const labelError = validation.labelError;
-                const minHelperText = validation.minInputError
-                  ? "0以上の整数で入力してください。"
-                  : validation.fixedWithRangeConflict
-                    ? "固定人数と同時に設定できません。"
-                    : "任意";
-                const maxHelperText = validation.maxInputError
-                  ? "0以上の整数で入力してください。"
-                  : validation.rangeError
-                    ? "最大人数は最小人数以上にしてください。"
-                    : validation.fixedWithRangeConflict
-                      ? "固定人数と同時に設定できません。"
-                      : "任意";
-                const fixedHelperText = validation.fixedInputError
-                  ? "0以上の整数で入力してください。"
-                  : validation.fixedBelowMin
-                    ? "最小人数以上を入力してください。"
-                    : validation.fixedAboveMax
-                      ? "最大人数以下を入力してください。"
-                      : validation.fixedWithRangeConflict
-                        ? "固定人数を使う場合は最小/最大を空欄にしてください。"
-                        : "任意";
-                return (
-                  <Paper
-                    key={group.id}
-                    variant="outlined"
-                    sx={{ p: 1.5, borderRadius: 2 }}
-                  >
-                    <Stack spacing={1}>
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={1}
-                        alignItems={{ xs: "stretch", sm: "center" }}
-                      >
-                        <TextField
-                          required
-                          size="small"
-                          label="ラベル名"
-                          value={group.label}
-                          onChange={(event) =>
-                            handleGroupChange(
-                              group.id,
-                              "label",
-                              event.target.value,
-                            )
-                          }
-                          error={labelError}
-                          helperText={
-                            labelError ? "ラベル名は必須です" : undefined
-                          }
-                          sx={{ flexGrow: 1 }}
-                        />
-                        <IconButton
-                          aria-label={`${group.label || "未設定"}を削除`}
-                          onClick={() => handleDeleteGroup(group.id)}
-                          size="small"
-                        >
-                          <DeleteOutlineIcon fontSize="small" />
-                        </IconButton>
-                      </Stack>
-                      <TextField
-                        size="small"
-                        label="説明"
-                        value={group.description}
-                        onChange={(event) =>
-                          handleGroupChange(
-                            group.id,
-                            "description",
-                            event.target.value,
-                          )
-                        }
-                        inputProps={{ maxLength: 48 }}
-                        helperText="50文字以内を目安に入力"
-                        fullWidth
-                      />
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={1}
-                      >
-                        <TextField
-                          size="small"
-                          type="number"
-                          label="最小人数 (min)"
-                          value={group.min}
-                          onChange={(event) =>
-                            handleGroupChange(
-                              group.id,
-                              "min",
-                              event.target.value,
-                            )
-                          }
-                          inputProps={{ min: 0 }}
-                          error={
-                            validation.minInputError ||
-                            validation.fixedWithRangeConflict
-                          }
-                          helperText={minHelperText}
-                          sx={{ flexGrow: 1 }}
-                        />
-                        <TextField
-                          size="small"
-                          type="number"
-                          label="最大人数 (max)"
-                          value={group.max}
-                          onChange={(event) =>
-                            handleGroupChange(
-                              group.id,
-                              "max",
-                              event.target.value,
-                            )
-                          }
-                          inputProps={{ min: 0 }}
-                          error={
-                            validation.maxInputError ||
-                            validation.rangeError ||
-                            validation.fixedWithRangeConflict
-                          }
-                          helperText={maxHelperText}
-                          sx={{ flexGrow: 1 }}
-                        />
-                        <TextField
-                          size="small"
-                          type="number"
-                          label="固定人数 (fixed)"
-                          value={group.fixed}
-                          onChange={(event) =>
-                            handleGroupChange(
-                              group.id,
-                              "fixed",
-                              event.target.value,
-                            )
-                          }
-                          inputProps={{ min: 0 }}
-                          error={
-                            validation.fixedInputError ||
-                            validation.fixedBelowMin ||
-                            validation.fixedAboveMax ||
-                            validation.fixedWithRangeConflict
-                          }
-                          helperText={fixedHelperText}
-                          sx={{ flexGrow: 1 }}
-                        />
-                      </Stack>
-                      <Typography variant="caption" color="text.secondary">
-                        最小/最大 (レンジ指定)
-                        と固定人数は併用できません。いずれか一方のみ入力してください。
-                      </Typography>
-                    </Stack>
-                  </Paper>
-                );
-              })
+              fields.map((group, index) => (
+                <ShiftGroupRow
+                  key={group.id}
+                  control={control}
+                  index={index}
+                  onDelete={() => remove(index)}
+                />
+              ))
             )}
           </Stack>
           <Button
@@ -401,7 +197,18 @@ export default function AdminShiftSettings() {
           </Button>
           {hasValidationError && (
             <Alert severity="warning">
-              ラベル未入力、または人数設定に誤りのあるグループがあります。保存前に修正してください。
+              <Stack spacing={0.5}>
+                <Typography variant="body2">
+                  {SHIFT_GROUP_UI_TEXTS.validationWarning}
+                </Typography>
+                <Stack component="ul" sx={{ m: 0, pl: 3 }}>
+                  {validationDetails.map((detail) => (
+                    <Typography key={detail} component="li" variant="body2">
+                      {detail}
+                    </Typography>
+                  ))}
+                </Stack>
+              </Stack>
             </Alert>
           )}
         </Stack>

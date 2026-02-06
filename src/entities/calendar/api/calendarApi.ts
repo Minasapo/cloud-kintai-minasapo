@@ -1,14 +1,18 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   createCompanyHolidayCalendar,
+  createEventCalendar,
   createHolidayCalendar,
   deleteCompanyHolidayCalendar,
+  deleteEventCalendar,
   deleteHolidayCalendar,
   updateCompanyHolidayCalendar,
+  updateEventCalendar,
   updateHolidayCalendar,
 } from "@shared/api/graphql/documents/mutations";
 import {
   listCompanyHolidayCalendars,
+  listEventCalendars,
   listHolidayCalendars,
 } from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
@@ -16,23 +20,31 @@ import type {
   CompanyHolidayCalendar,
   CreateCompanyHolidayCalendarInput,
   CreateCompanyHolidayCalendarMutation,
+  CreateEventCalendarInput,
+  CreateEventCalendarMutation,
   CreateHolidayCalendarInput,
   CreateHolidayCalendarMutation,
   DeleteCompanyHolidayCalendarInput,
   DeleteCompanyHolidayCalendarMutation,
+  DeleteEventCalendarInput,
+  DeleteEventCalendarMutation,
   DeleteHolidayCalendarInput,
   DeleteHolidayCalendarMutation,
+  EventCalendar,
   HolidayCalendar,
   ListCompanyHolidayCalendarsQuery,
+  ListEventCalendarsQuery,
   ListHolidayCalendarsQuery,
   UpdateCompanyHolidayCalendarInput,
   UpdateCompanyHolidayCalendarMutation,
+  UpdateEventCalendarInput,
+  UpdateEventCalendarMutation,
   UpdateHolidayCalendarInput,
   UpdateHolidayCalendarMutation,
 } from "@shared/api/graphql/types";
 
 type CalendarTag = {
-  type: "HolidayCalendar" | "CompanyHolidayCalendar";
+  type: "HolidayCalendar" | "CompanyHolidayCalendar" | "EventCalendar";
   id: string;
 };
 
@@ -49,7 +61,7 @@ export const buildCalendarTagId = (calendar: {
 export const calendarApi = createApi({
   reducerPath: "calendarApi",
   baseQuery: graphqlBaseQuery(),
-  tagTypes: ["HolidayCalendar", "CompanyHolidayCalendar"],
+  tagTypes: ["HolidayCalendar", "CompanyHolidayCalendar", "EventCalendar"],
   endpoints: (builder) => ({
     getHolidayCalendars: builder.query<HolidayCalendar[], void>({
       async queryFn(_arg, _queryApi, _extraOptions, baseQuery) {
@@ -432,12 +444,197 @@ export const calendarApi = createApi({
         return [listTag, { type: "CompanyHolidayCalendar", id: targetId }];
       },
     }),
+    getEventCalendars: builder.query<EventCalendar[], void>({
+      async queryFn(_arg, _queryApi, _extraOptions, baseQuery) {
+        const calendars: EventCalendar[] = [];
+        let nextToken: string | null = null;
+
+        do {
+          const result = await baseQuery({
+            document: listEventCalendars,
+            variables: { nextToken },
+          });
+
+          if (result.error) {
+            return { error: result.error };
+          }
+
+          const data = result.data as ListEventCalendarsQuery | null;
+          const connection = data?.listEventCalendars;
+
+          if (!connection) {
+            return {
+              error: { message: "Failed to fetch event calendars" },
+            };
+          }
+
+          calendars.push(...connection.items.filter(nonNullable));
+          nextToken = connection.nextToken ?? null;
+        } while (nextToken);
+
+        return { data: calendars };
+      },
+      providesTags: (result) => {
+        const listTag: CalendarTag = {
+          type: "EventCalendar",
+          id: "LIST",
+        };
+        if (!result) {
+          return [listTag];
+        }
+
+        return [
+          listTag,
+          ...result.map((calendar) => ({
+            type: "EventCalendar" as const,
+            id: buildCalendarTagId(calendar),
+          })),
+        ];
+      },
+    }),
+    createEventCalendar: builder.mutation<
+      EventCalendar,
+      CreateEventCalendarInput
+    >({
+      async queryFn(input, _queryApi, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: createEventCalendar,
+          variables: { input },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as CreateEventCalendarMutation | null;
+        const created = data?.createEventCalendar;
+
+        if (!created) {
+          return { error: { message: "Failed to create event calendar" } };
+        }
+
+        return { data: created };
+      },
+      invalidatesTags: (result) => {
+        const listTag: CalendarTag = { type: "EventCalendar", id: "LIST" };
+        if (!result) {
+          return [listTag];
+        }
+
+        return [
+          listTag,
+          {
+            type: "EventCalendar" as const,
+            id: buildCalendarTagId(result),
+          },
+        ];
+      },
+    }),
+    bulkCreateEventCalendars: builder.mutation<
+      EventCalendar[],
+      CreateEventCalendarInput[]
+    >({
+      async queryFn(inputs, _queryApi, _extraOptions, baseQuery) {
+        const created: EventCalendar[] = [];
+
+        for (const input of inputs) {
+          const result = await baseQuery({
+            document: createEventCalendar,
+            variables: { input },
+          });
+
+          if (result.error) {
+            return { error: result.error };
+          }
+
+          const data = result.data as CreateEventCalendarMutation | null;
+          const calendar = data?.createEventCalendar;
+
+          if (!calendar) {
+            return { error: { message: "Failed to create event calendar" } };
+          }
+
+          created.push(calendar);
+        }
+
+        return { data: created };
+      },
+      invalidatesTags: [{ type: "EventCalendar", id: "LIST" }],
+    }),
+    updateEventCalendar: builder.mutation<
+      EventCalendar,
+      UpdateEventCalendarInput
+    >({
+      async queryFn(input, _queryApi, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: updateEventCalendar,
+          variables: { input },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as UpdateEventCalendarMutation | null;
+        const updated = data?.updateEventCalendar;
+
+        if (!updated) {
+          return { error: { message: "Failed to update event calendar" } };
+        }
+
+        return { data: updated };
+      },
+      invalidatesTags: (result) => {
+        const listTag: CalendarTag = { type: "EventCalendar", id: "LIST" };
+        if (!result) {
+          return [listTag];
+        }
+
+        return [
+          listTag,
+          {
+            type: "EventCalendar" as const,
+            id: buildCalendarTagId(result),
+          },
+        ];
+      },
+    }),
+    deleteEventCalendar: builder.mutation<
+      EventCalendar,
+      DeleteEventCalendarInput
+    >({
+      async queryFn(input, _queryApi, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: deleteEventCalendar,
+          variables: { input },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as DeleteEventCalendarMutation | null;
+        const deleted = data?.deleteEventCalendar;
+
+        if (!deleted) {
+          return { error: { message: "Failed to delete event calendar" } };
+        }
+
+        return { data: deleted };
+      },
+      invalidatesTags: (result, _error, arg) => {
+        const listTag: CalendarTag = { type: "EventCalendar", id: "LIST" };
+        const targetId = arg.id ?? buildCalendarTagId(result ?? {});
+        return [listTag, { type: "EventCalendar", id: targetId }];
+      },
+    }),
   }),
 });
 
 export const {
   useGetHolidayCalendarsQuery,
   useGetCompanyHolidayCalendarsQuery,
+  useGetEventCalendarsQuery,
   useCreateHolidayCalendarMutation,
   useBulkCreateHolidayCalendarsMutation,
   useUpdateHolidayCalendarMutation,
@@ -446,4 +643,8 @@ export const {
   useBulkCreateCompanyHolidayCalendarsMutation,
   useUpdateCompanyHolidayCalendarMutation,
   useDeleteCompanyHolidayCalendarMutation,
+  useCreateEventCalendarMutation,
+  useBulkCreateEventCalendarsMutation,
+  useUpdateEventCalendarMutation,
+  useDeleteEventCalendarMutation,
 } = calendarApi;

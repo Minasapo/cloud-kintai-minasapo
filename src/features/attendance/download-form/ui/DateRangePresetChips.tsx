@@ -38,7 +38,7 @@ export default function DateRangePresetChips({
         }}
       />
       {closeDates
-        .sort((a, b) => dayjs(b.closeDate).diff(dayjs(a.closeDate)))
+        .toSorted((a, b) => dayjs(b.closeDate).diff(dayjs(a.closeDate)))
         .map((closeDate, index) => (
           <Chip
             key={index}

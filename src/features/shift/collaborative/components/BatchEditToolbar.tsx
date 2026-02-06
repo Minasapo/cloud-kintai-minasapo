@@ -29,6 +29,7 @@ interface BatchEditToolbarProps {
   showUnlock: boolean;
   hasClipboard: boolean;
   canPaste: boolean;
+  isUpdating?: boolean;
 }
 
 const stateOptions: Array<{ state: ShiftState; label: string; color: string }> =
@@ -53,6 +54,7 @@ export const BatchEditToolbar = ({
   showUnlock,
   hasClipboard,
   canPaste,
+  isUpdating = false,
 }: BatchEditToolbarProps) => {
   if (selectionCount === 0) return null;
 
@@ -69,6 +71,8 @@ export const BatchEditToolbar = ({
         borderRadius: 2,
         minWidth: 600,
         zIndex: 1000,
+        opacity: isUpdating ? 0.6 : 1,
+        pointerEvents: isUpdating ? "none" : "auto",
       }}
     >
       <Stack spacing={2}>
@@ -85,6 +89,7 @@ export const BatchEditToolbar = ({
             onClick={onClear}
             startIcon={<DeleteIcon />}
             color="inherit"
+            disabled={isUpdating}
           >
             選択解除
           </Button>
@@ -103,13 +108,14 @@ export const BatchEditToolbar = ({
                 key={option.state}
                 label={option.label}
                 onClick={() => onChangeState(option.state)}
+                disabled={isUpdating}
                 sx={{
                   bgcolor: option.color,
                   color: "white",
                   fontWeight: 600,
                   "&:hover": {
                     bgcolor: option.color,
-                    opacity: 0.8,
+                    opacity: isUpdating ? 0.5 : 0.8,
                   },
                 }}
               />
@@ -128,6 +134,7 @@ export const BatchEditToolbar = ({
               onClick={onLock}
               size="small"
               color="primary"
+              disabled={isUpdating}
             >
               確定（ロック）
             </Button>
@@ -139,7 +146,7 @@ export const BatchEditToolbar = ({
               onClick={onUnlock}
               size="small"
               color="inherit"
-              disabled={!canUnlock}
+              disabled={!canUnlock || isUpdating}
             >
               確定解除
             </Button>
@@ -155,6 +162,7 @@ export const BatchEditToolbar = ({
             startIcon={<ContentCopyIcon />}
             onClick={onCopy}
             size="small"
+            disabled={isUpdating}
           >
             コピー
           </Button>
@@ -162,7 +170,7 @@ export const BatchEditToolbar = ({
             variant="outlined"
             startIcon={<ContentPasteIcon />}
             onClick={onPaste}
-            disabled={!hasClipboard || !canPaste}
+            disabled={!hasClipboard || !canPaste || isUpdating}
             size="small"
           >
             貼り付け

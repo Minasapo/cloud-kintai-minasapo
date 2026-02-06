@@ -17,6 +17,8 @@ import {
   getDesignTokens,
 } from "@/shared/designSystem";
 
+import type { ShiftGroupConfig } from "./shiftGroupTypes";
+
 const DEFAULT_THEME_TOKENS = getDesignTokens();
 
 /**
@@ -218,7 +220,7 @@ const useAppConfig = () => {
     [config?.quickInputEndTimes]
   );
 
-  const getShiftGroups = useCallback(() => {
+  const getShiftGroups = useCallback((): ShiftGroupConfig[] => {
     if (!config?.shiftGroups) {
       return [];
     }

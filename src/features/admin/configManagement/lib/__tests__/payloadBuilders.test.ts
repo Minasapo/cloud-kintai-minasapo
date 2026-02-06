@@ -190,8 +190,8 @@ describe("Payload Builders", () => {
       });
 
       // フィールド数の確認（Create: name + 共通, Update: id + 共通）
-      const createKeys = Object.keys(createPayload).sort();
-      const updateKeys = Object.keys(updatePayload).sort();
+      const createKeys = Object.keys(createPayload).toSorted();
+      const updateKeys = Object.keys(updatePayload).toSorted();
 
       // name/id以外のキーセットは一致すべき
       const createWithoutName = createKeys.filter((k) => k !== "name");
