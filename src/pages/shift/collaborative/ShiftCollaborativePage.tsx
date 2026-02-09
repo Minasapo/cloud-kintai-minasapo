@@ -1308,11 +1308,18 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             open={isPrintDialogOpen}
             onClose={closePrintDialog}
             days={days}
-            staffs={staffs.map((staff) => ({
-              id: staff.id,
-              familyName: staff.familyName ?? undefined,
-              givenName: staff.givenName ?? undefined,
-            }))}
+            staffs={staffs
+              .filter(
+                (staff) =>
+                  staff.enabled &&
+                  (staff as unknown as Record<string, unknown>).workType ===
+                    "shift",
+              )
+              .map((staff) => ({
+                id: staff.id,
+                familyName: staff.familyName ?? undefined,
+                givenName: staff.givenName ?? undefined,
+              }))}
             shiftDataMap={state.shiftDataMap}
             targetMonth={targetMonth}
           />

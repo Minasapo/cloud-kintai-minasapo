@@ -17,6 +17,7 @@ import {
 import dayjs, { Dayjs } from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import PropTypes from "prop-types";
 import { memo, useCallback, useMemo, useState } from "react";
 
 import { ShiftState } from "../types/collaborative.types";
@@ -52,70 +53,76 @@ interface PrintShiftDialogProps {
  * シフト調整テーブルの印刷オプションを設定し、
  * 印刷プレビューを表示するダイアログ
  */
-export const PrintShiftDialog = memo<PrintShiftDialogProps>(
-  ({ open, onClose, days, staffs, shiftDataMap, targetMonth }) => {
-    // 印刷設定状態
-    const [startDate, setStartDate] = useState<string>(
-      dayjs(targetMonth).format("YYYY-MM-DD"),
-    );
-    const [endDate, setEndDate] = useState<string>(
-      dayjs(targetMonth).endOf("month").format("YYYY-MM-DD"),
-    );
-    const [selectedStaffIds, setSelectedStaffIds] = useState<Set<string>>(
-      new Set(staffs.map((s) => s.id)),
-    );
-    const [includeLegend, setIncludeLegend] = useState(true);
-    const [includeTimestamp, setIncludeTimestamp] = useState(true);
-    const [_orientation, _setOrientation] = useState<"portrait" | "landscape">(
-      "landscape",
-    );
+const PrintShiftDialogComponent = ({
+  open,
+  onClose,
+  days,
+  staffs,
+  shiftDataMap,
+  targetMonth,
+}: PrintShiftDialogProps) => {
+  // 印刷設定状態
+  const [startDate, setStartDate] = useState<string>(
+    dayjs(targetMonth).format("YYYY-MM-DD"),
+  );
+  const [endDate, setEndDate] = useState<string>(
+    dayjs(targetMonth).endOf("month").format("YYYY-MM-DD"),
+  );
+  const [selectedStaffIds, setSelectedStaffIds] = useState<Set<string>>(
+    new Set(staffs.map((s) => s.id)),
+  );
+  const [includeLegend, setIncludeLegend] = useState(true);
+  const [includeTimestamp, setIncludeTimestamp] = useState(true);
+  const [_orientation, _setOrientation] = useState<"portrait" | "landscape">(
+    "landscape",
+  );
 
-    // フィルタリングされた日付の計算
-    const filteredDays = useMemo(() => {
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
-      return days.filter(
-        (day) => day.isSameOrAfter(start) && day.isSameOrBefore(end),
-      );
-    }, [days, startDate, endDate]);
-
-    // フィルタリングされたスタッフの計算
-    const filteredStaffs = useMemo(
-      () => staffs.filter((staff) => selectedStaffIds.has(staff.id)),
-      [staffs, selectedStaffIds],
+  // フィルタリングされた日付の計算
+  const filteredDays = useMemo(() => {
+    const start = dayjs(startDate);
+    const end = dayjs(endDate);
+    return days.filter(
+      (day) => day.isSameOrAfter(start) && day.isSameOrBefore(end),
     );
+  }, [days, startDate, endDate]);
 
-    // スタッフ選択の切り替え
-    const handleStaffToggle = useCallback((staffId: string) => {
-      setSelectedStaffIds((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(staffId)) {
-          newSet.delete(staffId);
-        } else {
-          newSet.add(staffId);
-        }
-        return newSet;
-      });
-    }, []);
+  // フィルタリングされたスタッフの計算
+  const filteredStaffs = useMemo(
+    () => staffs.filter((staff) => selectedStaffIds.has(staff.id)),
+    [staffs, selectedStaffIds],
+  );
 
-    // 全スタッフ選択
-    const handleSelectAllStaffs = useCallback(() => {
-      if (selectedStaffIds.size === staffs.length) {
-        setSelectedStaffIds(new Set());
+  // スタッフ選択の切り替え
+  const handleStaffToggle = useCallback((staffId: string) => {
+    setSelectedStaffIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(staffId)) {
+        newSet.delete(staffId);
       } else {
-        setSelectedStaffIds(new Set(staffs.map((s) => s.id)));
+        newSet.add(staffId);
       }
-    }, [staffs, selectedStaffIds.size]);
+      return newSet;
+    });
+  }, []);
 
-    // 印刷実行
-    const handlePrint = useCallback(() => {
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) {
-        alert("ポップアップが許可されていません");
-        return;
-      }
+  // 全スタッフ選択
+  const handleSelectAllStaffs = useCallback(() => {
+    if (selectedStaffIds.size === staffs.length) {
+      setSelectedStaffIds(new Set());
+    } else {
+      setSelectedStaffIds(new Set(staffs.map((s) => s.id)));
+    }
+  }, [staffs, selectedStaffIds.size]);
 
-      const htmlContent = `
+  // 印刷実行
+  const handlePrint = useCallback(() => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("ポップアップが許可されていません");
+      return;
+    }
+
+    const htmlContent = `
         <!DOCTYPE html>
         <html>
           <head>
@@ -366,165 +373,194 @@ export const PrintShiftDialog = memo<PrintShiftDialogProps>(
         </html>
       `;
 
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
 
-      printWindow.onload = () => {
-        setTimeout(() => {
-          printWindow.print();
-        }, 250);
-      };
-    }, [
-      shiftDataMap,
-      filteredDays,
-      filteredStaffs,
-      targetMonth,
-      includeLegend,
-      includeTimestamp,
-    ]);
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    };
+  }, [
+    shiftDataMap,
+    filteredDays,
+    filteredStaffs,
+    targetMonth,
+    includeLegend,
+    includeTimestamp,
+  ]);
 
-    return (
-      <Dialog
-        open={open}
-        onClose={onClose}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: {
-            maxHeight: "90vh",
-          },
-        }}
-      >
-        <DialogTitle>シフト調整表を印刷</DialogTitle>
-        <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-        >
-          {/* 印刷設定セクション */}
-          <Paper sx={{ p: 2, bgcolor: "#f5f5f5" }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 2 }}>
-              印刷設定
-            </Typography>
-
-            <Stack spacing={2}>
-              {/* 日付範囲 */}
-              <Box sx={{ display: "flex", gap: 2, alignItems: "flex-end" }}>
-                <TextField
-                  label="開始日"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                />
-                <TextField
-                  label="終了日"
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  (選択: {filteredDays.length}日)
-                </Typography>
-              </Box>
-
-              {/* スタッフ選択 */}
-              <Box>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedStaffIds.size === staffs.length}
-                      indeterminate={
-                        selectedStaffIds.size > 0 &&
-                        selectedStaffIds.size < staffs.length
-                      }
-                      onChange={handleSelectAllStaffs}
-                    />
-                  }
-                  label={`全スタッフを選択 (${selectedStaffIds.size}/${staffs.length})`}
-                />
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: 1,
-                    mt: 1,
-                  }}
-                >
-                  {staffs.map((staff) => (
-                    <FormControlLabel
-                      key={staff.id}
-                      control={
-                        <Checkbox
-                          checked={selectedStaffIds.has(staff.id)}
-                          onChange={() => handleStaffToggle(staff.id)}
-                          size="small"
-                        />
-                      }
-                      label={
-                        <Typography variant="caption">
-                          {`${staff.familyName || ""}${staff.givenName || ""}`.trim() ||
-                            staff.id}
-                        </Typography>
-                      }
-                    />
-                  ))}
-                </Box>
-              </Box>
-
-              {/* その他のオプション */}
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={includeLegend}
-                      onChange={(e) => setIncludeLegend(e.target.checked)}
-                    />
-                  }
-                  label="凡例を含める"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={includeTimestamp}
-                      onChange={(e) => setIncludeTimestamp(e.target.checked)}
-                    />
-                  }
-                  label="出力日時を含める"
-                />
-              </FormGroup>
-
-              {/* 用紙設定 */}
-              <Box>
-                <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                  用紙向き: 横
-                </Typography>
-              </Box>
-            </Stack>
-          </Paper>
-
-          {/* プレビュー情報 */}
-          <Typography variant="caption" color="text.secondary">
-            プレビュー: {filteredDays.length}日間 × {filteredStaffs.length}名
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          maxHeight: "90vh",
+        },
+      }}
+    >
+      <DialogTitle>シフト調整表を印刷</DialogTitle>
+      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {/* 印刷設定セクション */}
+        <Paper sx={{ p: 2, bgcolor: "#f5f5f5" }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 2 }}>
+            印刷設定
           </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose} variant="outlined">
-            キャンセル
-          </Button>
-          <Button
-            onClick={handlePrint}
-            variant="contained"
-            startIcon={<PrintIcon />}
-            disabled={filteredDays.length === 0 || filteredStaffs.length === 0}
-          >
-            印刷プレビューを表示
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  },
-);
+
+          <Stack spacing={2}>
+            {/* 日付範囲 */}
+            <Box sx={{ display: "flex", gap: 2, alignItems: "flex-end" }}>
+              <TextField
+                label="開始日"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                size="small"
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="終了日"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                size="small"
+                InputLabelProps={{ shrink: true }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                (選択: {filteredDays.length}日)
+              </Typography>
+            </Box>
+
+            {/* スタッフ選択 */}
+            <Box>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedStaffIds.size === staffs.length}
+                    indeterminate={
+                      selectedStaffIds.size > 0 &&
+                      selectedStaffIds.size < staffs.length
+                    }
+                    onChange={handleSelectAllStaffs}
+                  />
+                }
+                label={`全スタッフを選択 (${selectedStaffIds.size}/${staffs.length})`}
+              />
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: 1,
+                  mt: 1,
+                }}
+              >
+                {staffs.map((staff) => (
+                  <FormControlLabel
+                    key={staff.id}
+                    control={
+                      <Checkbox
+                        checked={selectedStaffIds.has(staff.id)}
+                        onChange={() => handleStaffToggle(staff.id)}
+                        size="small"
+                      />
+                    }
+                    label={
+                      <Typography variant="caption">
+                        {`${staff.familyName || ""}${staff.givenName || ""}`.trim() ||
+                          staff.id}
+                      </Typography>
+                    }
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            {/* その他のオプション */}
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeLegend}
+                    onChange={(e) => setIncludeLegend(e.target.checked)}
+                  />
+                }
+                label="凡例を含める"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeTimestamp}
+                    onChange={(e) => setIncludeTimestamp(e.target.checked)}
+                  />
+                }
+                label="出力日時を含める"
+              />
+            </FormGroup>
+
+            {/* 用紙設定 */}
+            <Box>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                用紙向き: 横
+              </Typography>
+            </Box>
+          </Stack>
+        </Paper>
+
+        {/* プレビュー情報 */}
+        <Typography variant="caption" color="text.secondary">
+          プレビュー: {filteredDays.length}日間 × {filteredStaffs.length}名
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} variant="outlined">
+          キャンセル
+        </Button>
+        <Button
+          onClick={handlePrint}
+          variant="contained"
+          startIcon={<PrintIcon />}
+          disabled={filteredDays.length === 0 || filteredStaffs.length === 0}
+        >
+          印刷プレビューを表示
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+PrintShiftDialogComponent.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  days: PropTypes.arrayOf(PropTypes.any).isRequired,
+  staffs: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      familyName: PropTypes.string,
+      givenName: PropTypes.string,
+    }),
+  ).isRequired,
+  shiftDataMap: PropTypes.instanceOf(Map).isRequired,
+  targetMonth: PropTypes.string.isRequired,
+};
+
+export const PrintShiftDialog = memo(PrintShiftDialogComponent);
 
 PrintShiftDialog.displayName = "PrintShiftDialog";
+
+(PrintShiftDialog as any).propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  days: PropTypes.arrayOf(PropTypes.any).isRequired,
+  staffs: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      familyName: PropTypes.string,
+      givenName: PropTypes.string,
+    }),
+  ).isRequired,
+  shiftDataMap: PropTypes.instanceOf(Map).isRequired,
+  targetMonth: PropTypes.string.isRequired,
+};
