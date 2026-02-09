@@ -129,8 +129,8 @@ export const ShiftSuggestionsPanelBase = ({
       elevation={2}
       sx={{
         position: "fixed",
-        right: 80,
-        bottom: 24,
+        right: 25,
+        bottom: 55,
         width: viewMode === "minimized" ? 300 : 400,
         maxHeight: viewMode === "minimized" ? "auto" : "calc(100vh - 200px)",
         overflow: "auto",
