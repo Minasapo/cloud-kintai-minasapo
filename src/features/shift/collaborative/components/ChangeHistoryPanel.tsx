@@ -134,8 +134,9 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
         <Stack spacing={2}>
           <Stack
             direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            alignItems={{ xs: "stretch", sm: "center" }}
+            spacing={1}
+            alignItems={{ xs: "stretch", sm: "flex-end" }}
+            sx={{ flexWrap: "wrap" }}
           >
             <TextField
               label="開始日"
@@ -144,6 +145,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
               InputLabelProps={{ shrink: true }}
+              sx={{ flex: "1 1 auto", minWidth: 140 }}
             />
             <TextField
               label="終了日"
@@ -152,8 +154,9 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
               value={endDate}
               onChange={(event) => setEndDate(event.target.value)}
               InputLabelProps={{ shrink: true }}
+              sx={{ flex: "1 1 auto", minWidth: 140 }}
             />
-            <FormControl size="small" sx={{ minWidth: 160 }}>
+            <FormControl size="small" sx={{ flex: "1 1 auto", minWidth: 140 }}>
               <InputLabel id="change-history-user-filter-label">
                 ユーザー
               </InputLabel>
@@ -171,7 +174,11 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                 ))}
               </Select>
             </FormControl>
-            <Button variant="text" onClick={handleResetFilters}>
+            <Button
+              variant="text"
+              onClick={handleResetFilters}
+              sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+            >
               リセット
             </Button>
           </Stack>
