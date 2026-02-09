@@ -4,7 +4,6 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoIcon from "@mui/icons-material/Info";
 import LockIcon from "@mui/icons-material/Lock";
 import {
@@ -12,7 +11,6 @@ import {
   Box,
   Chip,
   Container,
-  Fab,
   LinearProgress,
   Paper,
   Stack,
@@ -965,7 +963,7 @@ const CollaborativeHeaderBase: FC<CollaborativeHeaderProps> = ({
   editingCells,
 }) => (
   <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-    <Typography variant="h4">協同シフト調整</Typography>
+    <Typography variant="h4">シフト調整(共同)</Typography>
     <Chip
       label={currentMonth.format("YYYY年 M月")}
       color="primary"
@@ -1178,7 +1176,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     }, []) as React.FC<ShiftCellProps>;
 
     return (
-      <Page title="協同シフト調整">
+      <Page title="シフト調整(共同)">
         <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
           <CollaborativeHeader
             currentMonth={currentMonth}
@@ -1196,6 +1194,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             lastRedoDescription={getLastRedo()?.description}
             showHistory={showHistory}
             onToggleHistory={toggleHistory}
+            onShowHelp={() => setShowHelp(true)}
             onPrint={openPrintDialog}
           />
 
@@ -1282,20 +1281,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             }}
             onClose={() => setConflictDialogOpen(false)}
           />
-
-          {/* ヘルプボタン（FAB） */}
-          <Fab
-            color="primary"
-            size="medium"
-            onClick={() => setShowHelp(true)}
-            sx={{
-              position: "fixed",
-              bottom: 24,
-              right: 24,
-            }}
-          >
-            <HelpOutlineIcon />
-          </Fab>
 
           {/* ヘルプダイアログ */}
           <KeyboardShortcutsHelp
@@ -1389,7 +1374,7 @@ export default function ShiftCollaborativePage() {
 
   if (staffIds.length === 0) {
     return (
-      <Page title="協同シフト調整">
+      <Page title="シフト調整(共同)">
         <Container maxWidth={false} sx={{ py: 3 }}>
           <Alert severity="info">スタッフデータが見つかりません</Alert>
         </Container>

@@ -1,4 +1,9 @@
-import { Redo as RedoIcon, Undo as UndoIcon } from "@mui/icons-material";
+import {
+  HelpOutline as HelpOutlineIcon,
+  History as HistoryIcon,
+  Redo as RedoIcon,
+  Undo as UndoIcon,
+} from "@mui/icons-material";
 import PrintIcon from "@mui/icons-material/Print";
 import { Divider, IconButton, Paper, Stack, Tooltip } from "@mui/material";
 import React from "react";
@@ -15,6 +20,7 @@ export interface UndoRedoToolbarProps {
   lastRedoDescription?: string;
   showHistory: boolean;
   onToggleHistory: () => void;
+  onShowHelp?: () => void;
   onPrint?: () => void;
 }
 
@@ -31,6 +37,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
   lastRedoDescription,
   showHistory,
   onToggleHistory,
+  onShowHelp,
   onPrint,
 }) => {
   return (
@@ -90,7 +97,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
             aria-label="toggle history"
             sx={{ ml: 1 }}
           >
-            🕐
+            <HistoryIcon />
           </IconButton>
         </Tooltip>
 
@@ -108,6 +115,19 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
               </IconButton>
             </Tooltip>
           </>
+        )}
+
+        {onShowHelp && (
+          <Tooltip title="ヘルプ">
+            <IconButton
+              size="small"
+              onClick={onShowHelp}
+              color="default"
+              aria-label="show help"
+            >
+              <HelpOutlineIcon />
+            </IconButton>
+          </Tooltip>
         )}
       </Stack>
     </Paper>
