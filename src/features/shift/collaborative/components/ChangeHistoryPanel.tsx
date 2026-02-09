@@ -1,10 +1,11 @@
 import {
   Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   List,
   ListItem,
   ListItemText,
-  Paper,
-  Stack,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
@@ -20,14 +21,16 @@ interface ChangeHistoryPanelProps {
   undoHistory: HistoryEntry[];
   redoHistory: HistoryEntry[];
   maxVisible?: number;
-  isVisible?: boolean;
+  open: boolean;
+  onClose: () => void;
 }
 
 export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
   undoHistory,
   redoHistory,
   maxVisible = 10,
-  isVisible = true,
+  open,
+  onClose,
 }) => {
   const entries = useMemo<ChangeHistoryEntry[]>(() => {
     const undoEntries = undoHistory.map((entry) => ({
@@ -44,26 +47,20 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
       .slice(0, maxVisible);
   }, [redoHistory, undoHistory, maxVisible]);
 
-  if (!isVisible) {
-    return null;
-  }
-
   return (
-    <Paper
-      elevation={2}
-      sx={{
-        mt: 2,
-        width: "100%",
-        maxWidth: 400,
-        maxHeight: 320,
-        overflow: "auto",
-        p: 1.5,
-        zIndex: 1000,
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          maxHeight: "80vh",
+        },
       }}
     >
-      <Stack spacing={1}>
-        <Typography variant="subtitle2">変更履歴</Typography>
-
+      <DialogTitle>変更履歴</DialogTitle>
+      <DialogContent dividers>
         {entries.length === 0 ? (
           <Typography variant="caption" color="text.secondary">
             変更履歴はありません
@@ -93,7 +90,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
             ))}
           </List>
         )}
-      </Stack>
-    </Paper>
+      </DialogContent>
+    </Dialog>
   );
 };

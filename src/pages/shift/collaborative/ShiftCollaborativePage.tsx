@@ -1117,14 +1117,13 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onToggleHistory={toggleHistory}
           />
 
-          {/* 変更履歴パネル */}
-          {showHistory && (
-            <ChangeHistoryPanel
-              undoHistory={undoHistory}
-              redoHistory={redoHistory}
-              isVisible={true}
-            />
-          )}
+          {/* 変更履歴ダイアログ */}
+          <ChangeHistoryPanel
+            undoHistory={undoHistory}
+            redoHistory={redoHistory}
+            open={showHistory}
+            onClose={toggleHistory}
+          />
 
           {/* シフト提案パネル */}
           <ShiftSuggestionsPanel

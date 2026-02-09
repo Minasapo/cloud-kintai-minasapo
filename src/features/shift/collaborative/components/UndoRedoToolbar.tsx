@@ -38,10 +38,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
         p: 1,
       }}
     >
-      <Stack
-        direction="row"
-        spacing={0}
-      >
+      <Stack direction="row" spacing={0}>
         <Tooltip
           title={
             canUndo
