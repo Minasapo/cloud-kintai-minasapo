@@ -4,7 +4,9 @@ export { ConflictResolutionDialog } from "./ConflictResolutionDialog";
 export { OfflineStatusIndicator } from "./OfflineStatusIndicator";
 
 // Undo/Redo
+export { HistoryToggleButton } from "./HistoryToggleButton";
 export { UndoRedoIndicator } from "./UndoRedoIndicator";
+export { UndoRedoToolbar } from "./UndoRedoToolbar";
 
 // Existing components
 export { ActiveUsersList } from "./ActiveUsersList";

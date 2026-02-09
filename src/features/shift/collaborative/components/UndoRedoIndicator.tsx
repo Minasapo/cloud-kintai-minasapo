@@ -1,8 +1,4 @@
-import {
-  HistoryToggleOff as HistoryIcon,
-  Redo as RedoIcon,
-  Undo as UndoIcon,
-} from "@mui/icons-material";
+import { Redo as RedoIcon, Undo as UndoIcon } from "@mui/icons-material";
 import { IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import React from "react";
 
@@ -16,8 +12,6 @@ export interface UndoRedoIndicatorProps {
   onRedo: () => void;
   lastUndoDescription?: string;
   lastRedoDescription?: string;
-  showHistory: boolean;
-  onToggleHistory: () => void;
 }
 
 /**
@@ -31,8 +25,6 @@ export const UndoRedoIndicator: React.FC<UndoRedoIndicatorProps> = ({
   onRedo,
   lastUndoDescription,
   lastRedoDescription,
-  showHistory,
-  onToggleHistory,
 }) => {
   return (
     <Paper
@@ -91,17 +83,6 @@ export const UndoRedoIndicator: React.FC<UndoRedoIndicatorProps> = ({
             <RedoIcon />
           </IconButton>
         </span>
-      </Tooltip>
-
-      <Tooltip title={showHistory ? "変更履歴を非表示" : "変更履歴を表示"}>
-        <IconButton
-          size="small"
-          onClick={onToggleHistory}
-          color={showHistory ? "primary" : "default"}
-          aria-label="toggle history"
-        >
-          <HistoryIcon />
-        </IconButton>
       </Tooltip>
     </Paper>
   );

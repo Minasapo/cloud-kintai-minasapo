@@ -52,7 +52,7 @@ import {
   usePresenceNotifications,
 } from "../../../features/shift/collaborative/components/PresenceNotification";
 import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
-import { UndoRedoIndicator } from "../../../features/shift/collaborative/components/UndoRedoIndicator";
+import { UndoRedoToolbar } from "../../../features/shift/collaborative/components/UndoRedoToolbar";
 import { VirtualizedShiftTable } from "../../../features/shift/collaborative/components/VirtualizedShiftTable";
 import { useCollaborativeShift } from "../../../features/shift/collaborative/context/CollaborativeShiftContext";
 import { useClipboard } from "../../../features/shift/collaborative/hooks/useClipboard";
@@ -1169,8 +1169,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             isVisible={showHistory}
           />
 
-          {/* 取り消し/やり直しインジケーター */}
-          <UndoRedoIndicator
+          {/* 取り消し/やり直し/変更履歴ツールバー */}
+          <UndoRedoToolbar
             canUndo={canUndo}
             canRedo={canRedo}
             onUndo={undo}
