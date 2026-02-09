@@ -48,7 +48,6 @@ import { CellCommentIndicator } from "../../../features/shift/collaborative/comp
 import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
 import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
-import { OfflineStatusIndicator } from "../../../features/shift/collaborative/components/OfflineStatusIndicator";
 import {
   PresenceNotificationContainer,
   usePresenceNotifications,
@@ -1259,11 +1258,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             canPaste={focusedCell !== null}
             isUpdating={isBatchUpdating}
           />
-
-          {/* オフラインステータスインジケーター */}
-          <Box sx={{ position: "fixed", bottom: 24, left: 24, zIndex: 1200 }}>
-            <OfflineStatusIndicator showLabel={true} />
-          </Box>
 
           {/* コンフリクト解決ダイアログ */}
           <ConflictResolutionDialog
