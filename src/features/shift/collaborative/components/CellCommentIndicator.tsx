@@ -17,17 +17,18 @@ export const CellCommentIndicator: React.FC<CellCommentIndicatorProps> = ({
   onClick,
   disabled = false,
 }) => {
-  if (commentCount === 0) {
-    return null;
-  }
+  const hasComments = commentCount > 0;
 
   return (
-    <Tooltip title={`${commentCount}件のコメント`}>
+    <Tooltip
+      title={hasComments ? `${commentCount}件のコメント` : "コメントを追加"}
+    >
       <Box
         component="span"
         sx={{
           display: "inline-flex",
           alignItems: "center",
+          opacity: hasComments ? 1 : 0.4,
         }}
       >
         <IconButton
@@ -38,6 +39,7 @@ export const CellCommentIndicator: React.FC<CellCommentIndicatorProps> = ({
             p: 0.5,
             "&:hover": {
               bgcolor: "action.hover",
+              opacity: 1,
             },
           }}
         >
