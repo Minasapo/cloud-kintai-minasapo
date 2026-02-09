@@ -147,7 +147,7 @@ export const CollaborativeShiftProvider: React.FC<
       // 履歴に追加
       pushHistory(
         [update],
-        `Update shift for ${update.staffId} on ${update.date}`,
+        `${update.staffId} の ${update.date} のシフトを更新`,
       );
 
       // オフライン対応の更新を実行
@@ -174,7 +174,7 @@ export const CollaborativeShiftProvider: React.FC<
       });
 
       // 履歴に追加
-      pushHistory(updates, `Batch update ${updates.length} shifts`);
+      pushHistory(updates, `${updates.length} 件のシフトを一括更新`);
 
       // オフライン対応のバッチ更新を実行
       await batchUpdateShiftsWithOfflineSupport(updates);
