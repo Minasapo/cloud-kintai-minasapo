@@ -1,5 +1,6 @@
+import PrintIcon from "@mui/icons-material/Print";
 import { Redo as RedoIcon, Undo as UndoIcon } from "@mui/icons-material";
-import { IconButton, Paper, Stack, Tooltip } from "@mui/material";
+import { Divider, IconButton, Paper, Stack, Tooltip } from "@mui/material";
 import React from "react";
 
 /**
@@ -14,6 +15,7 @@ export interface UndoRedoToolbarProps {
   lastRedoDescription?: string;
   showHistory: boolean;
   onToggleHistory: () => void;
+  onPrint?: () => void;
 }
 
 /**
@@ -29,6 +31,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
   lastRedoDescription,
   showHistory,
   onToggleHistory,
+  onPrint,
 }) => {
   return (
     <Paper
@@ -38,7 +41,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
         p: 1,
       }}
     >
-      <Stack direction="row" spacing={0}>
+      <Stack direction="row" spacing={0} alignItems="center">
         <Tooltip
           title={
             canUndo
@@ -90,6 +93,22 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
             🕐
           </IconButton>
         </Tooltip>
+
+        {onPrint && (
+          <>
+            <Divider orientation="vertical" flexItem sx={{ mx: 1, my: 0.5 }} />
+            <Tooltip title="シフト調整表を印刷">
+              <IconButton
+                size="small"
+                onClick={onPrint}
+                color="primary"
+                aria-label="print"
+              >
+                <PrintIcon />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
       </Stack>
     </Paper>
   );

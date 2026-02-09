@@ -50,6 +50,7 @@ import {
   PresenceNotificationContainer,
   usePresenceNotifications,
 } from "../../../features/shift/collaborative/components/PresenceNotification";
+import { PrintShiftDialog } from "../../../features/shift/collaborative/components/PrintShiftDialog";
 import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
 import { UndoRedoToolbar } from "../../../features/shift/collaborative/components/UndoRedoToolbar";
 import { VirtualizedShiftTable } from "../../../features/shift/collaborative/components/VirtualizedShiftTable";
@@ -57,6 +58,7 @@ import { useCollaborativeShift } from "../../../features/shift/collaborative/con
 import { useClipboard } from "../../../features/shift/collaborative/hooks/useClipboard";
 import { useKeyboardShortcuts } from "../../../features/shift/collaborative/hooks/useKeyboardShortcuts";
 import { useMultiSelect } from "../../../features/shift/collaborative/hooks/useMultiSelect";
+import { usePrintShift } from "../../../features/shift/collaborative/hooks/usePrintShift";
 import { useShiftNavigation } from "../../../features/shift/collaborative/hooks/useShiftNavigation";
 import { useShiftSuggestions } from "../../../features/shift/collaborative/hooks/useShiftSuggestions";
 import { CollaborativeShiftProvider } from "../../../features/shift/collaborative/providers/CollaborativeShiftProvider";
@@ -1108,6 +1110,10 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     // プレゼンス通知
     const { notifications, dismissNotification } = usePresenceNotifications();
 
+    // 印刷機能
+    const { isPrintDialogOpen, openPrintDialog, closePrintDialog } =
+      usePrintShift();
+
     const staffNameMap = useMemo(
       () =>
         new Map(
@@ -1190,6 +1196,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             lastRedoDescription={getLastRedo()?.description}
             showHistory={showHistory}
             onToggleHistory={toggleHistory}
+            onPrint={openPrintDialog}
           />
 
           {/* 変更履歴ダイアログ */}
@@ -1294,6 +1301,20 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <KeyboardShortcutsHelp
             open={showHelp}
             onClose={() => setShowHelp(false)}
+          />
+
+          {/* 印刷ダイアログ */}
+          <PrintShiftDialog
+            open={isPrintDialogOpen}
+            onClose={closePrintDialog}
+            days={days}
+            staffs={staffs.map((staff) => ({
+              id: staff.id,
+              familyName: staff.familyName ?? undefined,
+              givenName: staff.givenName ?? undefined,
+            }))}
+            shiftDataMap={state.shiftDataMap}
+            targetMonth={targetMonth}
           />
 
           {/* プレゼンス通知 */}
