@@ -1105,6 +1105,27 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             editingCells={state.editingCells}
           />
 
+          {/* 取り消し/やり直し/変更履歴ツールバー */}
+          <UndoRedoToolbar
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={undo}
+            onRedo={redo}
+            lastUndoDescription={getLastUndo()?.description}
+            lastRedoDescription={getLastRedo()?.description}
+            showHistory={showHistory}
+            onToggleHistory={toggleHistory}
+          />
+
+          {/* 変更履歴パネル */}
+          {showHistory && (
+            <ChangeHistoryPanel
+              undoHistory={undoHistory}
+              redoHistory={redoHistory}
+              isVisible={true}
+            />
+          )}
+
           {/* シフト提案パネル */}
           <ShiftSuggestionsPanel
             violations={violations}
@@ -1161,25 +1182,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <Box sx={{ position: "fixed", bottom: 24, left: 24, zIndex: 1200 }}>
             <OfflineStatusIndicator showLabel={true} />
           </Box>
-
-          {/* 変更履歴 */}
-          <ChangeHistoryPanel
-            undoHistory={undoHistory}
-            redoHistory={redoHistory}
-            isVisible={showHistory}
-          />
-
-          {/* 取り消し/やり直し/変更履歴ツールバー */}
-          <UndoRedoToolbar
-            canUndo={canUndo}
-            canRedo={canRedo}
-            onUndo={undo}
-            onRedo={redo}
-            lastUndoDescription={getLastUndo()?.description}
-            lastRedoDescription={getLastRedo()?.description}
-            showHistory={showHistory}
-            onToggleHistory={toggleHistory}
-          />
 
           {/* コンフリクト解決ダイアログ */}
           <ConflictResolutionDialog

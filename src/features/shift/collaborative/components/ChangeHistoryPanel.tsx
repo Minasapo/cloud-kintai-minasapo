@@ -50,13 +50,12 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
 
   return (
     <Paper
-      elevation={3}
+      elevation={2}
       sx={{
-        position: "fixed",
-        bottom: 96,
-        left: 24,
-        width: 280,
-        maxHeight: 280,
+        mt: 2,
+        width: "100%",
+        maxWidth: 400,
+        maxHeight: 320,
         overflow: "auto",
         p: 1.5,
         zIndex: 1000,

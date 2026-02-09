@@ -18,7 +18,7 @@ export interface UndoRedoToolbarProps {
 
 /**
  * 取り消し/やり直しツールバー
- * 変更履歴パネルと同じ領域に配置するツールバー
+ * 見出しの下に配置するツールバー
  */
 export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
   canUndo,
@@ -32,20 +32,15 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
 }) => {
   return (
     <Paper
-      elevation={3}
+      elevation={1}
       sx={{
-        position: "fixed",
-        bottom: 96,
-        left: 24,
-        zIndex: 1000,
+        mb: 2,
+        p: 1,
       }}
     >
       <Stack
         direction="row"
         spacing={0}
-        sx={{
-          p: 1,
-        }}
       >
         <Tooltip
           title={
