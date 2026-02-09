@@ -62,6 +62,8 @@ interface VirtualizedShiftTableProps {
     color: string;
   }>;
   ShiftCellComponent: React.ComponentType<{
+    staffId: string;
+    date: string;
     state: ShiftState;
     isLocked: boolean;
     isEditing: boolean;
@@ -224,6 +226,8 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                     return (
                       <ShiftCellComponent
                         key={dayKey}
+                        staffId={staffId}
+                        date={dayKey}
                         state={cell.state}
                         isLocked={cell.isLocked}
                         isEditing={isEditing}

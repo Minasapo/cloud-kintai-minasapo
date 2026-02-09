@@ -43,6 +43,8 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
+import { CellCommentDialog } from "../../../features/shift/collaborative/components/CellCommentDialog";
+import { CellCommentIndicator } from "../../../features/shift/collaborative/components/CellCommentIndicator";
 import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
 import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
@@ -91,13 +93,17 @@ const SHIFT_CELL_BASE_SX = {
 } as const;
 
 interface ShiftCellProps {
+  staffId: string;
+  date: string;
   state: ShiftState;
   isLocked: boolean;
   isEditing: boolean;
   editorName?: string;
   lastChangedBy?: string;
   lastChangedAt?: string;
+  commentCount?: number;
   onClick: (event: MouseEvent) => void;
+  onCommentClick?: () => void;
   onRegisterRef?: (element: HTMLElement | null) => void;
   onMouseDown?: (event: MouseEvent) => void;
   onMouseEnter?: () => void;
@@ -112,7 +118,9 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
   editorName,
   lastChangedBy,
   lastChangedAt,
+  commentCount = 0,
   onClick,
+  onCommentClick,
   onRegisterRef,
   onMouseDown,
   onMouseEnter,
@@ -187,6 +195,14 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
             {config.label}
           </Typography>
           {isLocked && <LockIcon sx={{ fontSize: 12 }} />}
+          {commentCount > 0 && (
+            <CellCommentIndicator
+              commentCount={commentCount}
+              onClick={() => {
+                onCommentClick?.();
+              }}
+            />
+          )}
           {isPending && (
             <Box
               sx={{
@@ -211,7 +227,9 @@ ShiftCellBase.propTypes = {
   editorName: PropTypes.string,
   lastChangedBy: PropTypes.string,
   lastChangedAt: PropTypes.string,
+  commentCount: PropTypes.number,
   onClick: PropTypes.func.isRequired,
+  onCommentClick: PropTypes.func,
   onRegisterRef: PropTypes.func,
   onMouseDown: PropTypes.func,
   onMouseEnter: PropTypes.func,
@@ -458,6 +476,12 @@ const useCollaborativePageState = (targetMonth: string) => {
     redoHistory,
     showHistory,
     toggleHistory,
+    addComment,
+    updateComment,
+    deleteComment,
+    getCommentsByCell,
+    replyToComment,
+    deleteCommentReply,
   } = useCollaborativeShift();
 
   const isAdmin = true; // TODO: 認可情報から取得する
@@ -932,6 +956,12 @@ const useCollaborativePageState = (targetMonth: string) => {
     redoHistory,
     showHistory,
     toggleHistory,
+    addComment,
+    updateComment,
+    deleteComment,
+    getCommentsByCell,
+    replyToComment,
+    deleteCommentReply,
   };
 };
 
@@ -1088,6 +1118,12 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       showHistory,
       toggleHistory,
       isBatchUpdating,
+      addComment,
+      updateComment,
+      deleteComment,
+      getCommentsByCell,
+      replyToComment,
+      deleteCommentReply,
     } = useCollaborativePageState(targetMonth);
 
     // プレゼンス通知
@@ -1105,8 +1141,42 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       [staffs],
     );
 
-    // オフラインダイアログの状態
+    // コメントダイアログの状態
+    const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+    const [selectedCommentCell, setSelectedCommentCell] = useState<
+      string | null
+    >(null);
+
+    // コンフリクト解決ダイアログ状態
     const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+
+    // コメント機能付きのShiftCellコンポーネント
+    const ShiftCellWithComments = useMemo(() => {
+      const ShiftCellWithCommentsComponent = ({
+        staffId,
+        date,
+        ...restProps
+      }: ShiftCellProps) => {
+        const cellKey = `${staffId}#${date}`;
+        const comments = getCommentsByCell(cellKey);
+        return (
+          <ShiftCell
+            {...restProps}
+            staffId={staffId}
+            date={date}
+            commentCount={comments.length}
+            onCommentClick={() => {
+              setSelectedCommentCell(cellKey);
+              setCommentDialogOpen(true);
+            }}
+          />
+        );
+      };
+      Object.defineProperty(ShiftCellWithCommentsComponent, "displayName", {
+        value: "ShiftCellWithComments",
+      });
+      return ShiftCellWithCommentsComponent;
+    }, [getCommentsByCell]) as React.FC<ShiftCellProps>;
 
     return (
       <Page title="協同シフト調整">
@@ -1170,7 +1240,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onCellMouseEnter={handleCellMouseEnter}
             calculateDailyCount={(day) => calculateDailyCount(day.format("DD"))}
             getEventsForDay={getEventsForDay}
-            ShiftCellComponent={ShiftCell}
+            ShiftCellComponent={ShiftCellWithComments}
             isWeekend={isWeekend}
           />
 
@@ -1204,6 +1274,45 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             }}
             onClose={() => setConflictDialogOpen(false)}
           />
+
+          {/* コメントダイアログ */}
+          {selectedCommentCell && (
+            <CellCommentDialog
+              open={commentDialogOpen}
+              cellKey={selectedCommentCell}
+              staffName={
+                selectedCommentCell.split("#")[0] !== ""
+                  ? staffNameMap.get(selectedCommentCell.split("#")[0]) || ""
+                  : ""
+              }
+              date={selectedCommentCell.split("#")[1] || ""}
+              comments={getCommentsByCell(selectedCommentCell)}
+              availableUsers={state.activeUsers.map((user) => ({
+                userId: user.userId,
+                userName: user.userName,
+              }))}
+              currentUserId={state.activeUsers[0]?.userId || ""}
+              onClose={() => {
+                setCommentDialogOpen(false);
+                setSelectedCommentCell(null);
+              }}
+              onAddComment={async (cellKey, content, mentions) => {
+                await addComment(cellKey, content, mentions);
+              }}
+              onUpdateComment={async (commentId, content, mentions) => {
+                await updateComment(commentId, content, mentions);
+              }}
+              onDeleteComment={async (commentId) => {
+                await deleteComment(commentId);
+              }}
+              onReplyComment={async (parentCommentId, content, mentions) => {
+                await replyToComment(parentCommentId, content, mentions);
+              }}
+              onDeleteReply={async (parentCommentId, replyId) => {
+                await deleteCommentReply(parentCommentId, replyId);
+              }}
+            />
+          )}
 
           {/* ヘルプボタン（FAB） */}
           <Fab

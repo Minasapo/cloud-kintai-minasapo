@@ -2,8 +2,10 @@ import { createContext, useContext } from "react";
 
 import { HistoryEntry } from "../hooks/useUndoRedo";
 import {
+  CellComment,
   CollaborativeShiftState,
   CollaborativeUser,
+  Mention,
   ShiftCellUpdate,
 } from "../types/collaborative.types";
 
@@ -57,6 +59,28 @@ export interface CollaborativeShiftContextType {
   redoHistory: HistoryEntry[];
   showHistory: boolean;
   toggleHistory: () => void;
+  // コメント機能
+  addComment: (
+    cellKey: string,
+    content: string,
+    mentions: Mention[],
+  ) => Promise<CellComment>;
+  updateComment: (
+    commentId: string,
+    content: string,
+    mentions: Mention[],
+  ) => Promise<CellComment>;
+  deleteComment: (commentId: string) => Promise<void>;
+  getCommentsByCell: (cellKey: string) => CellComment[];
+  replyToComment: (
+    parentCommentId: string,
+    content: string,
+    mentions: Mention[],
+  ) => Promise<CellComment>;
+  deleteCommentReply: (
+    parentCommentId: string,
+    replyCommentId: string,
+  ) => Promise<void>;
 }
 
 /**

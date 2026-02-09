@@ -6,11 +6,14 @@ import {
 } from "../context/CollaborativeShiftContext";
 import { useCollaborativeShiftData } from "../hooks/useCollaborativeShiftData";
 import { useCollaborativeShiftOffline } from "../hooks/useCollaborativeShiftOffline";
+import { useShiftComments } from "../hooks/useShiftComments";
 import { useShiftPresence } from "../hooks/useShiftPresence";
 import { useShiftSync } from "../hooks/useShiftSync";
 import { useUndoRedo } from "../hooks/useUndoRedo";
 import {
+  CellComment,
   CollaborativeShiftState,
+  Mention,
   ShiftCellUpdate,
 } from "../types/collaborative.types";
 
@@ -35,6 +38,16 @@ export const CollaborativeShiftProvider: React.FC<
 }) => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [showHistory, setShowHistory] = useState(false);
+
+  // コメント管理フック
+  const {
+    addComment,
+    updateComment,
+    deleteComment,
+    getCommentsByCell,
+    replyToComment,
+    deleteCommentReply,
+  } = useShiftComments();
 
   // データ管理フック
   const {
@@ -241,6 +254,100 @@ export const CollaborativeShiftProvider: React.FC<
   }, [triggerSync]);
 
   /**
+   * コメント追加
+   */
+  const handleAddComment = useCallback(
+    async (
+      cellKey: string,
+      content: string,
+      mentions: Mention[],
+    ): Promise<CellComment> => {
+      return addComment(
+        cellKey,
+        currentUserId,
+        currentUserName,
+        activeUsers.find((u) => u.userId === currentUserId)?.color || "#1976d2",
+        content,
+        mentions,
+      );
+    },
+    [addComment, currentUserId, currentUserName, activeUsers],
+  );
+
+  /**
+   * コメント更新
+   */
+  const handleUpdateComment = useCallback(
+    async (
+      commentId: string,
+      content: string,
+      mentions: Mention[],
+    ): Promise<CellComment> => {
+      const updated = updateComment(commentId, content, mentions);
+      if (!updated) {
+        throw new Error(`Comment ${commentId} not found`);
+      }
+      return updated;
+    },
+    [updateComment],
+  );
+
+  /**
+   * コメント削除
+   */
+  const handleDeleteComment = useCallback(
+    async (commentId: string): Promise<void> => {
+      deleteComment(commentId);
+    },
+    [deleteComment],
+  );
+
+  /**
+   * セルのコメント取得
+   */
+  const handleGetCommentsByCell = useCallback(
+    (cellKey: string): CellComment[] => {
+      return getCommentsByCell(cellKey);
+    },
+    [getCommentsByCell],
+  );
+
+  /**
+   * コメントに返信
+   */
+  const handleReplyToComment = useCallback(
+    async (
+      parentCommentId: string,
+      content: string,
+      mentions: Mention[],
+    ): Promise<CellComment> => {
+      const reply = replyToComment(
+        parentCommentId,
+        currentUserId,
+        currentUserName,
+        activeUsers.find((u) => u.userId === currentUserId)?.color || "#1976d2",
+        content,
+        mentions,
+      );
+      if (!reply) {
+        throw new Error(`Parent comment ${parentCommentId} not found`);
+      }
+      return reply;
+    },
+    [replyToComment, currentUserId, currentUserName, activeUsers],
+  );
+
+  /**
+   * 返信削除
+   */
+  const handleDeleteCommentReply = useCallback(
+    async (parentCommentId: string, replyCommentId: string): Promise<void> => {
+      deleteCommentReply(parentCommentId, replyCommentId);
+    },
+    [deleteCommentReply],
+  );
+
+  /**
    * 状態をまとめる
    */
   const state: CollaborativeShiftState = useMemo(
@@ -305,6 +412,13 @@ export const CollaborativeShiftProvider: React.FC<
       redoHistory,
       showHistory,
       toggleHistory: () => setShowHistory((prev) => !prev),
+      // Comments
+      addComment: handleAddComment,
+      updateComment: handleUpdateComment,
+      deleteComment: handleDeleteComment,
+      getCommentsByCell: handleGetCommentsByCell,
+      replyToComment: handleReplyToComment,
+      deleteCommentReply: handleDeleteCommentReply,
     }),
     [
       state,
@@ -333,6 +447,12 @@ export const CollaborativeShiftProvider: React.FC<
       undoHistory,
       redoHistory,
       showHistory,
+      handleAddComment,
+      handleUpdateComment,
+      handleDeleteComment,
+      handleGetCommentsByCell,
+      handleReplyToComment,
+      handleDeleteCommentReply,
     ],
   );
 
