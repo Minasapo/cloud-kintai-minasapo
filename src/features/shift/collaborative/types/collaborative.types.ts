@@ -168,4 +168,6 @@ export interface ShiftCellUpdate {
   date: string; // "DD"
   newState?: ShiftState;
   isLocked?: boolean;
+  previousState?: ShiftState;
+  previousLocked?: boolean;
 }

@@ -1093,6 +1093,18 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     // プレゼンス通知
     const { notifications, dismissNotification } = usePresenceNotifications();
 
+    const staffNameMap = useMemo(
+      () =>
+        new Map(
+          staffs.map((staff) => [
+            staff.id,
+            `${staff.familyName || ""}${staff.givenName || ""}`.trim() ||
+              staff.id,
+          ]),
+        ),
+      [staffs],
+    );
+
     // オフラインダイアログの状態
     const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
 
@@ -1121,6 +1133,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <ChangeHistoryPanel
             undoHistory={undoHistory}
             redoHistory={redoHistory}
+            staffNameMap={staffNameMap}
             open={showHistory}
             onClose={toggleHistory}
           />

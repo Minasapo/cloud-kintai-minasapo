@@ -10,6 +10,8 @@ export interface HistoryEntry {
   timestamp: number;
   updates: ShiftCellUpdate[];
   description?: string;
+  userId?: string;
+  userName?: string;
 }
 
 /**
@@ -50,12 +52,17 @@ export const useUndoRedo = ({
    * 新しい変更を履歴に追加
    */
   const pushHistory = useCallback(
-    (updates: ShiftCellUpdate[], description?: string) => {
+    (
+      updates: ShiftCellUpdate[],
+      description?: string,
+      meta?: Pick<HistoryEntry, "userId" | "userName">,
+    ) => {
       const entry: HistoryEntry = {
         id: `${Date.now()}-${Math.random()}`,
         timestamp: Date.now(),
         updates,
         description,
+        ...meta,
       };
 
       setUndoStack((prev) => {
