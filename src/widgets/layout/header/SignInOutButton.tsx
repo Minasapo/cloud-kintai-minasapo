@@ -7,7 +7,7 @@ import { AuthContext } from "@/context/AuthContext";
 
 const DESKTOP_ONLY_DISPLAY = {
   xs: "none",
-  md: "block",
+  lg: "block",
 } as const;
 
 export function SignInOutButton() {

@@ -6,9 +6,8 @@ import { designTokenVar } from "@/shared/designSystem";
 interface HeaderBarProps {
   themeColor?: string;
   logo: ReactNode;
-  desktopMenu: ReactNode;
+  navigation: ReactNode;
   externalLinks?: ReactNode;
-  mobileMenu: ReactNode;
   signInOutButton: ReactNode;
 }
 
@@ -30,9 +29,8 @@ const HEADER_CONTENT_MAX_WIDTH = designTokenVar(
 export default function HeaderBar({
   themeColor,
   logo,
-  desktopMenu,
+  navigation,
   externalLinks,
-  mobileMenu,
   signInOutButton,
 }: HeaderBarProps) {
   const headerBackground = themeColor ?? HEADER_BACKGROUND;
@@ -73,9 +71,10 @@ export default function HeaderBar({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-start",
-                flexShrink: { xs: 2, md: 0 },
+                flexShrink: 0,
                 minWidth: 0,
                 height: "100%",
+                pr: { xs: "6px", md: 0 },
               }}
             >
               {logo}
@@ -84,14 +83,14 @@ export default function HeaderBar({
             <Box
               sx={{
                 flexGrow: 1,
-                display: { xs: "none", md: "flex" },
-                justifyContent: "center",
+                display: "flex",
+                justifyContent: { xs: "flex-end", lg: "center" },
                 alignItems: "center",
                 minWidth: 0,
-                px: HEADER_SIDE_GAP,
+                px: { xs: 0, md: HEADER_SIDE_GAP },
               }}
             >
-              {desktopMenu}
+              {navigation}
             </Box>
 
             <Stack
@@ -99,16 +98,17 @@ export default function HeaderBar({
               alignItems="center"
               justifyContent="flex-end"
               sx={{
-                flexGrow: { xs: 1, md: 0 },
+                flexGrow: 0,
                 flexShrink: 0,
                 minWidth: "fit-content",
                 columnGap: { xs: "4px", md: HEADER_GAP },
                 rowGap: { xs: "4px", md: HEADER_GAP },
               }}
             >
-              {externalLinks}
+              <Box sx={{ display: { xs: "none", lg: "block" } }}>
+                {externalLinks}
+              </Box>
               {signInOutButton}
-              {mobileMenu}
             </Stack>
           </Stack>
         </Box>

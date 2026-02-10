@@ -92,7 +92,7 @@ const DesktopMenu = ({
         width: 1,
         display: {
           xs: "none",
-          md: "flex",
+          lg: "flex",
         },
         alignItems: "center",
       }}
