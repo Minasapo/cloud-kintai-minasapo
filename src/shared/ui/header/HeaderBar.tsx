@@ -48,20 +48,24 @@ export default function HeaderBar({
             maxWidth: { xs: "100%", md: HEADER_CONTENT_MAX_WIDTH },
             mx: { xs: 0, md: "auto" },
             px: { xs: "6px", md: HEADER_PADDING_X },
+            boxSizing: "border-box",
           }}
         >
-          <Stack
-            direction="row"
-            alignItems="center"
-            color={HEADER_TEXT}
+          <Box
             sx={{
               width: "100%",
               maxWidth: "100%",
-              height: HEADER_HEIGHT,
               minHeight: HEADER_HEIGHT,
               boxSizing: "border-box",
               py: HEADER_PADDING_Y,
-              gap: { xs: "2px", md: HEADER_GAP },
+              color: HEADER_TEXT,
+              display: "grid",
+              alignItems: "center",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr) auto",
+                lg: "auto minmax(0, 1fr) auto",
+              },
+              columnGap: { xs: "2px", md: HEADER_GAP },
             }}
           >
             <Box
@@ -73,6 +77,7 @@ export default function HeaderBar({
                 minWidth: 0,
                 height: "100%",
                 pr: { xs: "6px", md: 0 },
+                overflow: "hidden",
               }}
             >
               {logo}
@@ -80,13 +85,13 @@ export default function HeaderBar({
 
             <Box
               sx={{
-                flexGrow: { xs: 0, lg: 1 },
-                display: "flex",
-                justifyContent: { xs: "flex-end", lg: "center" },
+                flexGrow: 1,
+                display: { xs: "none", lg: "flex" },
+                justifyContent: "center",
                 alignItems: "center",
                 minWidth: 0,
-                ml: { xs: "auto", lg: 0 },
-                px: { xs: 0, md: HEADER_SIDE_GAP },
+                px: HEADER_SIDE_GAP,
+                gridColumn: "2",
               }}
             >
               {navigation}
@@ -100,16 +105,21 @@ export default function HeaderBar({
                 flexGrow: 0,
                 flexShrink: 0,
                 minWidth: "fit-content",
+                gridColumn: { xs: "2", lg: "3" },
+                justifySelf: "end",
                 columnGap: { xs: "2px", md: HEADER_GAP },
                 rowGap: { xs: "4px", md: HEADER_GAP },
               }}
             >
+              <Box sx={{ display: { xs: "block", lg: "none" } }}>
+                {navigation}
+              </Box>
               <Box sx={{ display: "block" }}>
                 {externalLinks}
               </Box>
               {signInOutButton}
             </Stack>
-          </Stack>
+          </Box>
         </Box>
       </Container>
     </header>

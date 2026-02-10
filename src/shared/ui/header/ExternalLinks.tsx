@@ -1,7 +1,6 @@
 import AppsIcon from "@mui/icons-material/Apps";
 import {
   Box,
-  Grid,
   IconButton,
   Link,
   Paper,
@@ -46,26 +45,32 @@ const ACTION_ICON_HOVER_BG = designTokenVar(
   "component.headerActions.iconHoverBackground",
   "rgba(255, 255, 255, 0.16)"
 );
-const POPPER_WIDTH = designTokenVar(
-  "component.headerActions.popoverWidth",
-  "320px"
+const POPPER_WIDTH = designTokenVar("component.headerActions.popoverWidth", "420px");
+const POPPER_MIN_WIDTH = designTokenVar(
+  "component.headerActions.popoverMinWidth",
+  "280px"
 );
-const POPPER_HEIGHT = designTokenVar(
-  "component.headerActions.popoverHeight",
-  "400px"
+const POPPER_MAX_HEIGHT = designTokenVar(
+  "component.headerActions.popoverMaxHeight",
+  "560px"
 );
 const POPPER_PADDING = designTokenVar(
   "component.headerActions.popoverPadding",
   "16px"
 );
 const POPPER_GAP = designTokenVar("component.headerActions.popoverGap", "16px");
-const POPPER_BORDER_WIDTH = designTokenVar(
-  "component.headerActions.popoverBorderWidth",
-  "4px"
+const POPPER_RADIUS = designTokenVar("component.headerActions.popoverRadius", "16px");
+const POPPER_SURFACE = designTokenVar(
+  "component.headerActions.popoverSurface",
+  "#F8FCFA"
 );
-const POPPER_BORDER_COLOR = designTokenVar(
-  "component.headerActions.popoverBorderColor",
-  "#0FA85E"
+const POPPER_SURFACE_ALT = designTokenVar(
+  "component.headerActions.popoverSurfaceAlt",
+  "#F1F8F4"
+);
+const POPPER_SHADOW = designTokenVar(
+  "component.headerActions.popoverShadow",
+  "0 14px 28px rgba(18, 36, 29, 0.18)"
 );
 const GRID_GAP = designTokenVar("component.headerActions.gridGap", "8px");
 const GRID_ITEM_PADDING = designTokenVar(
@@ -74,9 +79,17 @@ const GRID_ITEM_PADDING = designTokenVar(
 );
 const GRID_HOVER_BACKGROUND = designTokenVar(
   "component.headerActions.gridHoverBackground",
-  "#EDF1EF"
+  "#E4F2E9"
 );
 const GRID_ITEM_RADIUS = designTokenVar("radius.sm", "8px");
+const GRID_ICON_SURFACE = designTokenVar(
+  "component.headerActions.iconSurface",
+  "#E8F5EC"
+);
+const GRID_ITEM_BORDER = designTokenVar(
+  "component.headerActions.gridItemBorder",
+  "1px solid #D4E7DA"
+);
 const EMPTY_STATE_COLOR = designTokenVar(
   "component.headerActions.emptyStateColor",
   "#7D9288"
@@ -92,6 +105,10 @@ const SECTION_TITLE_LETTER_SPACING = designTokenVar(
 const SECTION_TITLE_MARGIN_BOTTOM = designTokenVar(
   "component.headerActions.sectionTitle.marginBottom",
   "8px"
+);
+const SECTION_DIVIDER = designTokenVar(
+  "component.headerActions.sectionDivider",
+  "#D4E7DA"
 );
 const INTERACTION_TRANSITION_DURATION = designTokenVar(
   "component.headerActions.interaction.transitionDuration",
@@ -157,21 +174,30 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
           open={open}
           anchorEl={anchor}
           placement={isMobileSize ? "bottom-end" : "bottom"}
+          sx={{ zIndex: 1300 }}
         >
           <Paper
             elevation={3}
             sx={{
-              width: POPPER_WIDTH,
-              height: POPPER_HEIGHT,
-              m: 2,
+              width: {
+                xs: `min(calc(100vw - 16px), ${POPPER_WIDTH})`,
+                sm: POPPER_WIDTH,
+              },
+              minWidth: POPPER_MIN_WIDTH,
+              maxHeight: POPPER_MAX_HEIGHT,
+              m: { xs: 1, sm: 2 },
               p: POPPER_PADDING,
-              border: `${POPPER_BORDER_WIDTH} solid ${POPPER_BORDER_COLOR}`,
+              borderRadius: POPPER_RADIUS,
+              border: "1px solid rgba(20, 76, 44, 0.14)",
+              boxShadow: POPPER_SHADOW,
+              background: `linear-gradient(180deg, ${POPPER_SURFACE_ALT} 0%, ${POPPER_SURFACE} 100%)`,
               display: "flex",
               flexDirection: "column",
               gap: POPPER_GAP,
+              overflow: "hidden",
             }}
           >
-            <Box sx={{ overflowY: "auto", pr: 1 }}>
+            <Box sx={{ overflowY: "auto", pr: { xs: 0.5, sm: 1 } }}>
               <Stack sx={{ gap: POPPER_GAP }}>
                 {companyLinks.length > 0 && (
                   <LinksSection
@@ -214,19 +240,42 @@ interface LinksSectionProps {
 const LinksSection = ({ title, links, staffName }: LinksSectionProps) => {
   return (
     <Box>
-      <Typography
-        variant="subtitle2"
+      <Stack
+        direction="row"
+        alignItems="center"
         sx={{
-          fontWeight: SECTION_TITLE_FONT_WEIGHT,
-          letterSpacing: SECTION_TITLE_LETTER_SPACING,
-          marginBottom: SECTION_TITLE_MARGIN_BOTTOM,
+          gap: 1,
+          mb: SECTION_TITLE_MARGIN_BOTTOM,
+          pb: 0.75,
+          borderBottom: `1px solid ${SECTION_DIVIDER}`,
         }}
       >
-        {title}
-      </Typography>
-      <Grid
-        container
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            bgcolor: "success.main",
+            flexShrink: 0,
+          }}
+        />
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: SECTION_TITLE_FONT_WEIGHT,
+            letterSpacing: SECTION_TITLE_LETTER_SPACING,
+          }}
+        >
+          {title}
+        </Typography>
+      </Stack>
+      <Box
         sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "repeat(3, minmax(0, 1fr))",
+            sm: "repeat(4, minmax(0, 1fr))",
+          },
           columnGap: GRID_GAP,
           rowGap: GRID_GAP,
         }}
@@ -240,7 +289,7 @@ const LinksSection = ({ title, links, staffName }: LinksSectionProps) => {
             staffName={staffName}
           />
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 };
@@ -265,33 +314,61 @@ const LinkGridItem = ({
   const iconComponent = iconMap.get(iconType) || iconMap.get("LinkIcons");
   const processedUrl = url.replace("{staffName}", staffName);
   return (
-    <Grid item xs={4}>
-      <Link
-        href={processedUrl}
-        target="_blank"
-        color="inherit"
-        underline="none"
+    <Link
+      href={processedUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      color="inherit"
+      underline="none"
+      sx={{ display: "block" }}
+    >
+      <Stack
+        direction="column"
+        alignItems="flex-start"
+        sx={{
+          gap: 1,
+          padding: GRID_ITEM_PADDING,
+          borderRadius: GRID_ITEM_RADIUS,
+          minHeight: { xs: 72, sm: 78 },
+          border: GRID_ITEM_BORDER,
+          backgroundColor: "rgba(255,255,255,0.66)",
+          transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, transform ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, border-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
+          "&:hover": {
+            backgroundColor: GRID_HOVER_BACKGROUND,
+            borderColor: "rgba(20, 76, 44, 0.28)",
+            transform: "translateY(-1px)",
+          },
+        }}
       >
-        <Stack
-          direction="column"
-          alignItems="center"
+        <Box
           sx={{
-            gap: GRID_GAP,
-            padding: GRID_ITEM_PADDING,
-            borderRadius: GRID_ITEM_RADIUS,
-            transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
-            "&:hover": {
-              backgroundColor: GRID_HOVER_BACKGROUND,
-            },
+            width: 26,
+            height: 26,
+            borderRadius: "8px",
+            bgcolor: GRID_ICON_SURFACE,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "success.dark",
+            "& svg": { fontSize: 15 },
           }}
         >
-          <Box sx={{ position: "relative", display: "inline-flex" }}>
-            {iconComponent}
-          </Box>
-          <Typography variant="caption">{title}</Typography>
-        </Stack>
-      </Link>
-    </Grid>
+          {iconComponent}
+        </Box>
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 600,
+            color: "text.primary",
+            lineHeight: 1.2,
+            fontSize: "0.7rem",
+            wordBreak: "break-word",
+          }}
+        >
+          {title}
+        </Typography>
+      </Stack>
+    </Link>
   );
 };
 

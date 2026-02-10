@@ -5,7 +5,7 @@ import { designTokenVar } from "@/shared/designSystem";
 
 const HEADER_LOGO_MAX_HEIGHT = designTokenVar(
   "component.headerBar.logoMaxHeight",
-  "32px"
+  "32px",
 );
 
 const Logo = () => (
