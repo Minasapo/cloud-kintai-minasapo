@@ -38,6 +38,10 @@ const ACTION_ICON_SIZE = designTokenVar(
   "component.headerActions.iconSize",
   "40px"
 );
+const ACTION_ICON_SIZE_SM = designTokenVar(
+  "component.headerActions.iconSizeSm",
+  "32px"
+);
 const ACTION_ICON_HOVER_BG = designTokenVar(
   "component.headerActions.iconHoverBackground",
   "rgba(255, 255, 255, 0.16)"
@@ -136,8 +140,8 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
           onClick={handleClick}
           sx={{
             color: ACTION_ICON_COLOR,
-            width: ACTION_ICON_SIZE,
-            height: ACTION_ICON_SIZE,
+            width: { xs: ACTION_ICON_SIZE_SM, sm: ACTION_ICON_SIZE },
+            height: { xs: ACTION_ICON_SIZE_SM, sm: ACTION_ICON_SIZE },
             borderRadius: "50%",
             transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
             "&:hover": {
@@ -145,7 +149,7 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
             },
           }}
         >
-          <AppsIcon />
+          <AppsIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
         </IconButton>
         <Popper
           id={id}
