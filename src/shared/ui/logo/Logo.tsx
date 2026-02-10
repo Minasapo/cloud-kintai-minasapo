@@ -12,7 +12,7 @@ const Logo = () => (
   <Box
     sx={{
       height: { xs: "26px", sm: "28px", md: HEADER_LOGO_MAX_HEIGHT },
-      maxWidth: { xs: "180px", sm: "220px", md: "none" },
+      maxWidth: { xs: "clamp(64px, 30vw, 180px)", sm: "220px", md: "none" },
       display: "flex",
       justifyContent: "center",
       alignItems: "center",

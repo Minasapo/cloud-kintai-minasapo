@@ -36,19 +36,18 @@ export default function HeaderBar({
   const headerBackground = themeColor ?? HEADER_BACKGROUND;
 
   return (
-    <header style={{ overflow: "hidden", width: "100%" }}>
+    <header style={{ width: "100%" }}>
       <Container
         maxWidth={false}
         disableGutters
-        sx={{ p: 0, backgroundColor: headerBackground, overflow: "hidden" }}
+        sx={{ p: 0, backgroundColor: headerBackground }}
       >
         <Box
           sx={{
             width: "100%",
             maxWidth: { xs: "100%", md: HEADER_CONTENT_MAX_WIDTH },
             mx: { xs: 0, md: "auto" },
-            px: { xs: "8px", md: HEADER_PADDING_X },
-            overflow: "hidden",
+            px: { xs: "6px", md: HEADER_PADDING_X },
           }}
         >
           <Stack
@@ -62,8 +61,7 @@ export default function HeaderBar({
               minHeight: HEADER_HEIGHT,
               boxSizing: "border-box",
               py: HEADER_PADDING_Y,
-              gap: { xs: "4px", md: HEADER_GAP },
-              overflow: "hidden",
+              gap: { xs: "2px", md: HEADER_GAP },
             }}
           >
             <Box
@@ -71,7 +69,7 @@ export default function HeaderBar({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-start",
-                flexShrink: 0,
+                flexShrink: { xs: 1, md: 0 },
                 minWidth: 0,
                 height: "100%",
                 pr: { xs: "6px", md: 0 },
@@ -82,11 +80,12 @@ export default function HeaderBar({
 
             <Box
               sx={{
-                flexGrow: 1,
+                flexGrow: { xs: 0, lg: 1 },
                 display: "flex",
                 justifyContent: { xs: "flex-end", lg: "center" },
                 alignItems: "center",
                 minWidth: 0,
+                ml: { xs: "auto", lg: 0 },
                 px: { xs: 0, md: HEADER_SIDE_GAP },
               }}
             >
@@ -101,7 +100,7 @@ export default function HeaderBar({
                 flexGrow: 0,
                 flexShrink: 0,
                 minWidth: "fit-content",
-                columnGap: { xs: "4px", md: HEADER_GAP },
+                columnGap: { xs: "2px", md: HEADER_GAP },
                 rowGap: { xs: "4px", md: HEADER_GAP },
               }}
             >
