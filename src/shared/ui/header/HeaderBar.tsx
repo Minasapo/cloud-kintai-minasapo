@@ -105,7 +105,7 @@ export default function HeaderBar({
                 rowGap: { xs: "4px", md: HEADER_GAP },
               }}
             >
-              <Box sx={{ display: { xs: "none", lg: "block" } }}>
+              <Box sx={{ display: "block" }}>
                 {externalLinks}
               </Box>
               {signInOutButton}

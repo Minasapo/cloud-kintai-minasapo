@@ -48,7 +48,7 @@ const SignInButton = styled(Button)(({ theme }) => ({
 }));
 
 const RESPONSIVE_DISPLAY = {
-  xs: "none",
+  xs: "block",
   lg: "block",
 } as const;
 
