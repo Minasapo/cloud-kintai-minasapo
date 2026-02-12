@@ -23,11 +23,6 @@ import {
   styled,
   Switch,
   Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
   Tabs,
   TextField,
   Typography,
@@ -348,139 +343,68 @@ export default function Profile() {
         <Box sx={{ pt: 2 }}>
           {activeTab === "general" && (
             <Box>
-              <Box sx={{ display: { xs: "block", sm: "none" } }}>
-                <Stack spacing={1.5}>
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack spacing={0.5}>
-                      <Typography variant="caption" color="text.secondary">
-                        名前
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {cognitoUser.familyName} {cognitoUser.givenName} さん
-                      </Typography>
-                    </Stack>
-                  </Paper>
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack spacing={0.5}>
-                      <Typography variant="caption" color="text.secondary">
-                        メールアドレス
-                      </Typography>
-                      <Typography variant="body1">
-                        {cognitoUser.mailAddress}
-                      </Typography>
-                    </Stack>
-                  </Paper>
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack spacing={0.5}>
-                      <Typography variant="caption" color="text.secondary">
-                        権限
-                      </Typography>
-                      <Typography variant="body1">
-                        {staff?.role ? roleLabelMap.get(staff.role) : "未設定"}
-                      </Typography>
-                    </Stack>
-                  </Paper>
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack spacing={0.5}>
-                      <Typography variant="caption" color="text.secondary">
-                        利用開始日
-                      </Typography>
-                      <Typography variant="body1">
-                        {staff?.usageStartDate
-                          ? dayjs(staff.usageStartDate).format(
-                              AttendanceDate.DisplayFormat,
-                            )
-                          : "未設定"}
-                      </Typography>
-                    </Stack>
-                  </Paper>
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack spacing={1}>
-                      <Typography variant="caption" color="text.secondary">
-                        ログアウト
-                      </Typography>
-                      <ProfileLogoutButton
-                        onClick={signOut}
-                        sx={{ width: "100%" }}
-                      >
-                        ログアウト
-                      </ProfileLogoutButton>
-                    </Stack>
-                  </Paper>
-                </Stack>
-              </Box>
-              <TableContainer
-                sx={{ overflowX: "auto", display: { xs: "none", sm: "block" } }}
+              <Stack
+                spacing={1.5}
+                sx={{ maxWidth: { xs: "100%", sm: 720 } }}
               >
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell sx={{ width: 200 }}>
-                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                          名前
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body1">
-                          {cognitoUser.familyName} {cognitoUser.givenName} さん
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                          メールアドレス
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body1">
-                          {cognitoUser.mailAddress}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                          権限
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body1">
-                          {staff?.role ? roleLabelMap.get(staff.role) : "未設定"}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                          利用開始日
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body1">
-                          {staff?.usageStartDate
-                            ? dayjs(staff.usageStartDate).format(
-                                AttendanceDate.DisplayFormat,
-                              )
-                            : "未設定"}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                          ログアウト
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <ProfileLogoutButton onClick={signOut}>
-                          ログアウト
-                        </ProfileLogoutButton>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+                  <Stack spacing={0.5}>
+                    <Typography variant="caption" color="text.secondary">
+                      名前
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      {cognitoUser.familyName} {cognitoUser.givenName} さん
+                    </Typography>
+                  </Stack>
+                </Paper>
+                <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+                  <Stack spacing={0.5}>
+                    <Typography variant="caption" color="text.secondary">
+                      メールアドレス
+                    </Typography>
+                    <Typography variant="body1">
+                      {cognitoUser.mailAddress}
+                    </Typography>
+                  </Stack>
+                </Paper>
+                <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+                  <Stack spacing={0.5}>
+                    <Typography variant="caption" color="text.secondary">
+                      権限
+                    </Typography>
+                    <Typography variant="body1">
+                      {staff?.role ? roleLabelMap.get(staff.role) : "未設定"}
+                    </Typography>
+                  </Stack>
+                </Paper>
+                <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+                  <Stack spacing={0.5}>
+                    <Typography variant="caption" color="text.secondary">
+                      利用開始日
+                    </Typography>
+                    <Typography variant="body1">
+                      {staff?.usageStartDate
+                        ? dayjs(staff.usageStartDate).format(
+                            AttendanceDate.DisplayFormat,
+                          )
+                        : "未設定"}
+                    </Typography>
+                  </Stack>
+                </Paper>
+                <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+                  <Stack spacing={1}>
+                    <Typography variant="caption" color="text.secondary">
+                      ログアウト
+                    </Typography>
+                    <ProfileLogoutButton
+                      onClick={signOut}
+                      sx={{ width: { xs: "100%", sm: "auto" } }}
+                    >
+                      ログアウト
+                    </ProfileLogoutButton>
+                  </Stack>
+                </Paper>
+              </Stack>
             </Box>
           )}
           {activeTab === "links" && (
