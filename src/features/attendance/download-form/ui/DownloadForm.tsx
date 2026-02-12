@@ -1,7 +1,14 @@
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, CircularProgress, Stack } from "@mui/material";
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  Stack,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
@@ -39,6 +46,8 @@ export default function DownloadForm() {
   const [selectedStaff, setSelectedStaff] = useState<StaffType[]>([]);
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { staffs, loading: staffLoading, error: staffError } = useStaffs({
     isAuthenticated,
   });
@@ -83,7 +92,7 @@ export default function DownloadForm() {
   return (
     <Stack
       spacing={4}
-      alignItems="center"
+      alignItems={{ xs: "stretch", md: "center" }}
       sx={{
         border: CARD_BORDER_WIDTH,
         borderColor: "primary.main",
@@ -104,15 +113,26 @@ export default function DownloadForm() {
       >
         ダウンロードオプション
       </Box>
-      <Box>
+      <Box sx={{ width: "100%" }}>
         <Stack
           spacing={3}
-          sx={{ display: "inline-block", boxSizing: "border-box" }}
+          sx={{
+            width: "100%",
+            maxWidth: 880,
+            px: { xs: 2, sm: 3, md: 0 },
+            boxSizing: "border-box",
+            margin: "0 auto",
+          }}
         >
           <Box>
             <Stack spacing={1}>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Box>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                alignItems={{ xs: "stretch", sm: "center" }}
+                sx={{ width: "100%" }}
+              >
+                <Box sx={{ flex: 1 }}>
                   <Controller
                     name="startDate"
                     control={control}
@@ -122,14 +142,18 @@ export default function DownloadForm() {
                         label="開始日"
                         format={AttendanceDate.DisplayFormat}
                         slotProps={{
-                          textField: { variant: "outlined", size: "small" },
+                          textField: {
+                            variant: "outlined",
+                            size: "small",
+                            fullWidth: true,
+                          },
                         }}
                       />
                     )}
                   />
                 </Box>
-                <Box>〜</Box>
-                <Box>
+                <Box sx={{ display: { xs: "none", sm: "block" } }}>〜</Box>
+                <Box sx={{ flex: 1 }}>
                   <Controller
                     name="endDate"
                     control={control}
@@ -139,7 +163,11 @@ export default function DownloadForm() {
                         label="終了日"
                         format={AttendanceDate.DisplayFormat}
                         slotProps={{
-                          textField: { variant: "outlined", size: "small" },
+                          textField: {
+                            variant: "outlined",
+                            size: "small",
+                            fullWidth: true,
+                          },
                         }}
                       />
                     )}
@@ -148,35 +176,50 @@ export default function DownloadForm() {
               </Stack>
               <Stack
                 spacing={2}
-                sx={{ maxWidth: SELECTOR_MAX_WIDTH, overflowX: "auto" }}
+                sx={{ maxWidth: SELECTOR_MAX_WIDTH }}
               >
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={1}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
+                  sx={{
+                    flexWrap: "wrap",
+                    rowGap: 1,
+                    columnGap: 1,
+                  }}
+                >
                   <Box sx={{ whiteSpace: "nowrap" }}>集計対象月から:</Box>
-                  <Chip
-                    icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-                    label="新規"
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => {
-                      navigate("/admin/master/job_term");
-                    }}
-                  />
-                  {closeDates
-                    .toSorted((a, b) =>
-                      dayjs(b.closeDate).diff(dayjs(a.closeDate))
-                    )
-                    .map((closeDate, index) => (
-                      <Chip
-                        key={index}
-                        label={dayjs(closeDate.closeDate).format("YYYY/MM")}
-                        variant="outlined"
-                        color="primary"
-                        onClick={() => {
-                          setValue("startDate", dayjs(closeDate.startDate));
-                          setValue("endDate", dayjs(closeDate.endDate));
-                        }}
-                      />
-                    ))}
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ flexWrap: "wrap", rowGap: 1 }}
+                  >
+                    <Chip
+                      icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
+                      label="新規"
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => {
+                        navigate("/admin/master/job_term");
+                      }}
+                    />
+                    {closeDates
+                      .toSorted((a, b) =>
+                        dayjs(b.closeDate).diff(dayjs(a.closeDate))
+                      )
+                      .map((closeDate, index) => (
+                        <Chip
+                          key={index}
+                          label={dayjs(closeDate.closeDate).format("YYYY/MM")}
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => {
+                            setValue("startDate", dayjs(closeDate.startDate));
+                            setValue("endDate", dayjs(closeDate.endDate));
+                          }}
+                        />
+                      ))}
+                  </Stack>
                 </Stack>
               </Stack>
             </Stack>
@@ -197,11 +240,20 @@ export default function DownloadForm() {
         </Stack>
       </Box>
       <Box>
-        <Stack direction="row" spacing={1}>
-          <ExportButton workDates={workDates} selectedStaff={selectedStaff} />
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          sx={{ width: "100%" }}
+        >
+          <ExportButton
+            workDates={workDates}
+            selectedStaff={selectedStaff}
+            fullWidth={isMobile}
+          />
           <AggregateExportButton
             workDates={workDates}
             selectedStaff={selectedStaff}
+            fullWidth={isMobile}
           />
         </Stack>
       </Box>
