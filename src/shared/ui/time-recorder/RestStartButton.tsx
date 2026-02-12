@@ -7,9 +7,15 @@ const REST_DISABLED_BACKGROUND = designTokenVar(
   "component.timeRecorder.restButton.disabledBackground",
   "#D9E2DD"
 );
+const REST_BUTTON_MAX_WIDTH = designTokenVar(
+  "component.timeRecorder.restButton.maxWidth",
+  "220px"
+);
 
 const StyledRestStartButton = styled(Button)(({ theme }) => ({
   color: theme.palette.rest.main,
+  width: "100%",
+  maxWidth: REST_BUTTON_MAX_WIDTH,
   "&:hover": {
     color: theme.palette.rest.contrastText,
     backgroundColor: theme.palette.rest.main,

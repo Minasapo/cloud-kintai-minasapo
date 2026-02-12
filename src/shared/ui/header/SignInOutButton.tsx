@@ -48,8 +48,8 @@ const SignInButton = styled(Button)(({ theme }) => ({
 }));
 
 const RESPONSIVE_DISPLAY = {
-  xs: "none",
-  md: "block",
+  xs: "block",
+  lg: "block",
 } as const;
 
 export interface SignInOutButtonProps {

@@ -7,6 +7,10 @@ const ACTION_BUTTON_SIZE = designTokenVar(
   "component.timeRecorder.actionButton.size",
   "120px"
 );
+const ACTION_BUTTON_SIZE_SM = designTokenVar(
+  "component.timeRecorder.actionButton.sizeSm",
+  "96px"
+);
 const ACTION_BUTTON_RADIUS = designTokenVar(
   "component.timeRecorder.actionButton.borderRadius",
   "999px"
@@ -31,6 +35,11 @@ const StyledReturnDirectlyButton = styled(Button)(({ theme }) => ({
   width: ACTION_BUTTON_SIZE,
   height: ACTION_BUTTON_SIZE,
   borderRadius: ACTION_BUTTON_RADIUS,
+  [theme.breakpoints.down("sm")]: {
+    width: ACTION_BUTTON_SIZE_SM,
+    height: ACTION_BUTTON_SIZE_SM,
+    fontSize: "0.95rem",
+  },
   "&:hover": {
     color: theme.palette.clock_out.main,
     backgroundColor: theme.palette.clock_out.contrastText,

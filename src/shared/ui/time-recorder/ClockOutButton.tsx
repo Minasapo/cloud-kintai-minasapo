@@ -1,4 +1,4 @@
-import { Button, styled } from "@mui/material";
+import { Button, styled, useMediaQuery, useTheme } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
@@ -6,6 +6,10 @@ import { designTokenVar } from "@/shared/designSystem";
 const ACTION_BUTTON_SIZE = designTokenVar(
   "component.timeRecorder.actionButton.size",
   "120px"
+);
+const ACTION_BUTTON_SIZE_SM = designTokenVar(
+  "component.timeRecorder.actionButton.sizeSm",
+  "96px"
 );
 const ACTION_BUTTON_RADIUS = designTokenVar(
   "component.timeRecorder.actionButton.borderRadius",
@@ -31,6 +35,11 @@ const StyledClockOutButton = styled(Button)(({ theme }) => ({
   width: ACTION_BUTTON_SIZE,
   height: ACTION_BUTTON_SIZE,
   borderRadius: ACTION_BUTTON_RADIUS,
+  [theme.breakpoints.down("sm")]: {
+    width: ACTION_BUTTON_SIZE_SM,
+    height: ACTION_BUTTON_SIZE_SM,
+    fontSize: "0.95rem",
+  },
   "&:hover": {
     color: theme.palette.clock_out.main,
     backgroundColor: theme.palette.clock_out.contrastText,
@@ -53,6 +62,8 @@ const ClockOutButton = ({
   onClockOut,
   disabled = false,
 }: ClockOutButtonProps) => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [isClicked, setIsClicked] = useState(false);
 
   // Derived state: button is disabled when not working or user clicked
@@ -74,8 +85,9 @@ const ClockOutButton = ({
       onClick={handleClick}
       size="large"
       variant={isWorking ? "outlined" : "contained"}
+      sx={isSmallScreen ? { whiteSpace: "pre-line", lineHeight: 1.2 } : undefined}
     >
-      勤務終了
+      {isSmallScreen ? "勤務\n終了" : "勤務終了"}
     </StyledClockOutButton>
   );
 };

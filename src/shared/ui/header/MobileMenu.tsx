@@ -83,13 +83,14 @@ const MobileMenu = ({
     <Box
       sx={{
         textAlign: "right",
-        display: { xs: "block", md: "none" },
+        display: { xs: "block", lg: "none" },
       }}
     >
-      <IconButton onClick={onOpen}>
+      <IconButton onClick={onOpen} sx={{ p: { xs: "3px", sm: "6px" } }}>
         <MenuIcon
           sx={{
             color: iconColor,
+            fontSize: { xs: 28, sm: 32 },
           }}
         />
       </IconButton>

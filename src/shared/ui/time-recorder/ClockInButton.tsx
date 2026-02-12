@@ -1,4 +1,4 @@
-import { Button, styled } from "@mui/material";
+import { Button, styled, useMediaQuery, useTheme } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
@@ -6,6 +6,10 @@ import { designTokenVar } from "@/shared/designSystem";
 const ACTION_BUTTON_SIZE = designTokenVar(
   "component.timeRecorder.actionButton.size",
   "120px"
+);
+const ACTION_BUTTON_SIZE_SM = designTokenVar(
+  "component.timeRecorder.actionButton.sizeSm",
+  "96px"
 );
 const ACTION_BUTTON_RADIUS = designTokenVar(
   "component.timeRecorder.actionButton.borderRadius",
@@ -31,6 +35,11 @@ const StyledClockInButton = styled(Button)(({ theme }) => ({
   width: ACTION_BUTTON_SIZE,
   height: ACTION_BUTTON_SIZE,
   borderRadius: ACTION_BUTTON_RADIUS,
+  [theme.breakpoints.down("sm")]: {
+    width: ACTION_BUTTON_SIZE_SM,
+    height: ACTION_BUTTON_SIZE_SM,
+    fontSize: "0.95rem",
+  },
   "&:hover": {
     color: theme.palette.clock_in.main,
     backgroundColor: theme.palette.clock_in.contrastText,
@@ -52,6 +61,8 @@ const ClockInButton = ({
   onClockIn,
   disabled = false,
 }: ClockInButtonProps) => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [clicked, setClicked] = useState(false);
 
   // Derived state: reset clicked when isBeforeWork changes
@@ -69,8 +80,9 @@ const ClockInButton = ({
       data-testid="clock-in-button"
       onClick={handleClick}
       disabled={!isBeforeWork || actualClicked || disabled}
+      sx={isSmallScreen ? { whiteSpace: "pre-line", lineHeight: 1.2 } : undefined}
     >
-      勤務開始
+      {isSmallScreen ? "勤務\n開始" : "勤務開始"}
     </StyledClockInButton>
   );
 };
