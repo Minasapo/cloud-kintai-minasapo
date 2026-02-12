@@ -197,7 +197,6 @@ export default function DesktopEditor() {
             </Alert>
           )}
           <Stack direction="column" spacing={2}>
-            <AttendanceEditBreadcrumb />
             <ChangeRequestingAlert changeRequests={changeRequests} />
           </Stack>
           <NoDataAlert />
