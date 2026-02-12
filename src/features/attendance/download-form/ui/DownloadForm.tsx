@@ -98,6 +98,9 @@ export default function DownloadForm() {
         borderColor: "primary.main",
         borderRadius: "5px",
         pb: STANDARD_PADDING.CARD,
+        width: "100%",
+        minWidth: 0,
+        overflowX: "hidden",
       }}
     >
       <Box
@@ -119,9 +122,10 @@ export default function DownloadForm() {
           sx={{
             width: "100%",
             maxWidth: 880,
-            px: { xs: 2, sm: 3, md: 0 },
+            px: { xs: 1, sm: 2, md: 0 },
             boxSizing: "border-box",
             margin: "0 auto",
+            minWidth: 0,
           }}
         >
           <Box>
