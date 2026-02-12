@@ -324,15 +324,21 @@ export default function Profile() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ pt: 2 }}>
-      <Stack direction="column" spacing={2}>
+    <Container maxWidth="xl" sx={{ pt: 2, pb: 2, px: { xs: 2, sm: 3 } }}>
+      <Stack direction="column" spacing={{ xs: 1.5, sm: 2 }}>
         <CommonBreadcrumbs
           items={[{ label: "TOP", href: "/" }]}
           current="個人設定"
         />
         <Title>個人設定</Title>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={activeTab} onChange={handleTabChange}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
             <Tab label="一般設定" value="general" />
             <Tab label="通知設定" value="notifications" />
             <Tab label="個人リンク設定" value="links" />
@@ -341,52 +347,44 @@ export default function Profile() {
         </Box>
         <Box sx={{ pt: 2 }}>
           {activeTab === "general" && (
-            <TableContainer>
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ width: 200 }}>
-                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+            <Box>
+              <Box sx={{ display: { xs: "block", sm: "none" } }}>
+                <Stack spacing={1.5}>
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary">
                         名前
                       </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
                         {cognitoUser.familyName} {cognitoUser.givenName} さん
                       </Typography>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                    </Stack>
+                  </Paper>
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary">
                         メールアドレス
                       </Typography>
-                    </TableCell>
-                    <TableCell>
                       <Typography variant="body1">
                         {cognitoUser.mailAddress}
                       </Typography>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                    </Stack>
+                  </Paper>
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary">
                         権限
                       </Typography>
-                    </TableCell>
-                    <TableCell>
                       <Typography variant="body1">
                         {staff?.role ? roleLabelMap.get(staff.role) : "未設定"}
                       </Typography>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                    </Stack>
+                  </Paper>
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary">
                         利用開始日
                       </Typography>
-                    </TableCell>
-                    <TableCell>
                       <Typography variant="body1">
                         {staff?.usageStartDate
                           ? dayjs(staff.usageStartDate).format(
@@ -394,43 +392,125 @@ export default function Profile() {
                             )
                           : "未設定"}
                       </Typography>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                    </Stack>
+                  </Paper>
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={1}>
+                      <Typography variant="caption" color="text.secondary">
                         ログアウト
                       </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <ProfileLogoutButton onClick={signOut}>
+                      <ProfileLogoutButton
+                        onClick={signOut}
+                        sx={{ width: "100%" }}
+                      >
                         ログアウト
                       </ProfileLogoutButton>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
+                    </Stack>
+                  </Paper>
+                </Stack>
+              </Box>
+              <TableContainer
+                sx={{ overflowX: "auto", display: { xs: "none", sm: "block" } }}
+              >
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell sx={{ width: 200 }}>
+                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                          名前
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1">
+                          {cognitoUser.familyName} {cognitoUser.givenName} さん
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                          メールアドレス
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1">
+                          {cognitoUser.mailAddress}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                          権限
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1">
+                          {staff?.role ? roleLabelMap.get(staff.role) : "未設定"}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                          利用開始日
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1">
+                          {staff?.usageStartDate
+                            ? dayjs(staff.usageStartDate).format(
+                                AttendanceDate.DisplayFormat,
+                              )
+                            : "未設定"}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                          ログアウト
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <ProfileLogoutButton onClick={signOut}>
+                          ログアウト
+                        </ProfileLogoutButton>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
           )}
           {activeTab === "links" && (
-            <Stack direction="column" spacing={2} sx={{ maxWidth: 720 }}>
+            <Stack
+              direction="column"
+              spacing={2}
+              sx={{ maxWidth: { xs: "100%", sm: 720 } }}
+            >
               {externalLinkFields.length === 0 && (
                 <Typography variant="body2" color="text.secondary">
                   個人リンクはまだ登録されていません。
                 </Typography>
               )}
               {externalLinkFields.map((field, index) => (
-                <Paper key={field.id} variant="outlined" sx={{ p: 2 }}>
+                <Paper
+                  key={field.id}
+                  variant="outlined"
+                  sx={{ p: { xs: 2, sm: 2.5 } }}
+                >
                   <Stack spacing={2}>
                     <Stack
-                      direction="row"
+                      direction={{ xs: "column", sm: "row" }}
                       justifyContent="space-between"
-                      alignItems="center"
+                      alignItems={{ xs: "flex-start", sm: "center" }}
+                      spacing={{ xs: 1, sm: 0 }}
                     >
                       <Typography variant="subtitle2">
                         リンク {index + 1}
                       </Typography>
-                      <Stack direction="row" spacing={1}>
+                      <Stack direction="row" spacing={1} flexWrap="wrap">
                         <Controller
                           name={`externalLinks.${index}.enabled`}
                           control={control}
@@ -505,12 +585,17 @@ export default function Profile() {
                   </Stack>
                 </Paper>
               ))}
-              <Stack direction="row" spacing={2} alignItems="center">
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                alignItems={{ xs: "stretch", sm: "center" }}
+              >
                 <Button
                   variant="outlined"
                   startIcon={<AddCircleOutlineIcon />}
                   onClick={handleAddLink}
                   disabled={!canAddMoreLinks}
+                  sx={{ width: { xs: "100%", sm: "auto" } }}
                 >
                   リンクを追加
                 </Button>
@@ -523,8 +608,12 @@ export default function Profile() {
             </Stack>
           )}
           {activeTab === "notifications" && (
-            <Stack direction="column" spacing={2} sx={{ maxWidth: 720 }}>
-              <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack
+              direction="column"
+              spacing={2}
+              sx={{ maxWidth: { xs: "100%", sm: 720 } }}
+            >
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
                 <Stack spacing={2}>
                   <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                     通知設定
@@ -568,8 +657,12 @@ export default function Profile() {
             </Stack>
           )}
           {activeTab === "security" && (
-            <Stack direction="column" spacing={2} sx={{ maxWidth: 720 }}>
-              <Paper variant="outlined" sx={{ p: 3 }}>
+            <Stack
+              direction="column"
+              spacing={2}
+              sx={{ maxWidth: { xs: "100%", sm: 720 } }}
+            >
+              <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
                 <Stack spacing={3}>
                   <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                     パスワード変更
@@ -734,6 +827,7 @@ export default function Profile() {
                         isPasswordSubmitting && <CircularProgress size={16} />
                       }
                       onClick={handlePasswordSubmit(onPasswordChange)}
+                      sx={{ width: { xs: "100%", sm: "auto" } }}
                     >
                       パスワードを変更
                     </Button>
@@ -750,6 +844,7 @@ export default function Profile() {
             disabled={!isValid || !isDirty || isSubmitting}
             startIcon={isSubmitting && <CircularProgress size={16} />}
             onClick={handleSubmit(onSubmit)}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             保存
           </Button>
