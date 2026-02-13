@@ -73,10 +73,7 @@ const QuickDailyReportCardView = ({
             onClick={onToggle}
             aria-expanded={isOpen}
             aria-controls={contentPanelId}
-            style={{
-              transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s",
-            }}
+            className={`${isOpen ? "rotate-180" : "rotate-0"} transition-transform duration-200`}
           >
             <ExpandMoreIcon fontSize="small" />
           </IconButton>
