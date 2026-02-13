@@ -9,7 +9,7 @@ import {
   Theme,
   Typography,
 } from "@mui/material";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -76,23 +76,22 @@ const GroupContainer = ({
   sx,
 }: GroupContainerProps) => {
   const [collapsed, setCollapsed] = useState<boolean>(defaultCollapsed);
-  const containerSx = useMemo(
-    () => ({
-      borderStyle: "solid",
-      borderWidth: GROUP_BORDER_WIDTH,
-      borderColor: GROUP_BORDER_COLOR,
-      borderLeftColor: GROUP_ACCENT_COLOR,
-      borderLeftWidth: GROUP_ACCENT_WIDTH,
-      borderRadius: GROUP_RADIUS,
-      padding: GROUP_PADDING,
-      backgroundColor: GROUP_BACKGROUND,
-      boxShadow: GROUP_SHADOW,
-    }),
-    []
-  );
 
   return (
-    <Box sx={[containerSx, sx] as SxProps<Theme>}>
+    <Box
+      style={{
+        borderStyle: "solid",
+        borderWidth: GROUP_BORDER_WIDTH,
+        borderColor: GROUP_BORDER_COLOR,
+        borderLeftColor: GROUP_ACCENT_COLOR,
+        borderLeftWidth: GROUP_ACCENT_WIDTH,
+        borderRadius: GROUP_RADIUS,
+        padding: GROUP_PADDING,
+        backgroundColor: GROUP_BACKGROUND,
+        boxShadow: GROUP_SHADOW,
+      }}
+      sx={sx}
+    >
       {(title || collapsible) && (
         <Stack
           direction="row"
@@ -102,7 +101,7 @@ const GroupContainer = ({
           <Stack
             direction="row"
             alignItems="center"
-            sx={{ columnGap: GROUP_HEADER_GAP, rowGap: GROUP_HEADER_GAP }}
+            style={{ columnGap: GROUP_HEADER_GAP, rowGap: GROUP_HEADER_GAP }}
           >
             {title ? (
               <Typography variant="subtitle1" fontWeight={700}>
@@ -110,10 +109,9 @@ const GroupContainer = ({
               </Typography>
             ) : null}
             {typeof count === "number" && (
-              <Typography
-                variant="caption"
-                sx={{ color: GROUP_COUNT_COLOR }}
-              >{`(${count}件)`}</Typography>
+              <Typography variant="caption" style={{ color: GROUP_COUNT_COLOR }}>
+                {`(${count}件)`}
+              </Typography>
             )}
           </Stack>
           {collapsible && (
@@ -129,7 +127,7 @@ const GroupContainer = ({
       )}
 
       <Collapse in={!collapsed}>
-        <Box sx={{ mt: GROUP_CONTENT_GAP }}>{children}</Box>
+        <Box style={{ marginTop: GROUP_CONTENT_GAP }}>{children}</Box>
       </Collapse>
     </Box>
   );
