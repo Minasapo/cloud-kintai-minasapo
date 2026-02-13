@@ -1,5 +1,6 @@
 import { Box, Stack } from "@mui/material";
 import Link from "@shared/ui/link/Link";
+import { CSSProperties } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -62,6 +63,9 @@ const DesktopMenu = ({
     "component.headerMenu.transitionMs",
     "160ms"
   );
+  const menuVars: CSSProperties & Record<`--${string}`, string> = {
+    "--menu-gap": MENU_GAP,
+  };
 
   const buildLinkSx = (isActive: boolean) => ({
     display: "flex",
@@ -87,23 +91,8 @@ const DesktopMenu = ({
   });
 
   return (
-    <Box
-      sx={{
-        width: 1,
-        display: {
-          xs: "none",
-          lg: "flex",
-        },
-        alignItems: "center",
-      }}
-    >
-      <Stack
-        direction="row"
-        sx={{
-          width: "auto",
-          columnGap: MENU_GAP,
-        }}
-      >
+    <Box className="hidden w-full items-center lg:flex" style={menuVars}>
+      <Stack direction="row" className="w-auto gap-[var(--menu-gap)]">
         {menuItems.map((menu) => (
           <Box key={menu.href}>
             <Link
