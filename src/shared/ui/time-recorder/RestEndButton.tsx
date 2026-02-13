@@ -1,5 +1,5 @@
-import { Button, styled } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+import { Button } from "@mui/material";
+import { CSSProperties, useCallback, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -12,19 +12,6 @@ const REST_BUTTON_MAX_WIDTH = designTokenVar(
   "220px"
 );
 
-const StyledRestEndButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.rest.main,
-  width: "100%",
-  maxWidth: REST_BUTTON_MAX_WIDTH,
-  "&:hover": {
-    color: theme.palette.rest.contrastText,
-    backgroundColor: theme.palette.rest.main,
-  },
-  "&:disabled": {
-    backgroundColor: REST_DISABLED_BACKGROUND,
-  },
-}));
-
 export interface RestEndButtonProps {
   isResting: boolean;
   onRestEnd: () => void;
@@ -36,6 +23,10 @@ const RestEndButton = ({
   onRestEnd,
   disabled = false,
 }: RestEndButtonProps) => {
+  const restButtonVars: CSSProperties & Record<`--${string}`, string> = {
+    "--rest-button-max-width": REST_BUTTON_MAX_WIDTH,
+    "--rest-button-disabled-bg": REST_DISABLED_BACKGROUND,
+  };
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Derived state: reset isProcessing when isResting changes
@@ -49,14 +40,26 @@ const RestEndButton = ({
   }, [onRestEnd]);
 
   return (
-    <StyledRestEndButton
+    <Button
       fullWidth
       onClick={handleClick}
       disabled={!isResting || actualIsProcessing || disabled}
       data-testid="rest-end-button"
+      className="w-full max-w-[var(--rest-button-max-width)]"
+      style={restButtonVars}
+      sx={(theme) => ({
+        color: theme.palette.rest.main,
+        "&:hover": {
+          color: theme.palette.rest.contrastText,
+          backgroundColor: theme.palette.rest.main,
+        },
+        "&:disabled": {
+          backgroundColor: "var(--rest-button-disabled-bg)",
+        },
+      })}
     >
       休憩終了
-    </StyledRestEndButton>
+    </Button>
   );
 };
 

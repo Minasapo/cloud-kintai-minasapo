@@ -173,7 +173,7 @@ export default function Profile() {
     handleSubmit: handlePasswordSubmit,
     formState: { isValid: isPasswordValid, isSubmitting: isPasswordSubmitting },
     reset: resetPasswordForm,
-    watch: watchPassword,
+    getValues: getPasswordValues,
   } = useForm<PasswordChangeInputs>({
     mode: "onChange",
     defaultValues: {
@@ -343,10 +343,7 @@ export default function Profile() {
         <Box sx={{ pt: 2 }}>
           {activeTab === "general" && (
             <Box>
-              <Stack
-                spacing={1.5}
-                sx={{ maxWidth: { xs: "100%", sm: 720 } }}
-              >
+              <Stack spacing={1.5} sx={{ maxWidth: { xs: "100%", sm: 720 } }}>
                 <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
                   <Stack spacing={0.5}>
                     <Typography variant="caption" color="text.secondary">
@@ -708,7 +705,7 @@ export default function Profile() {
                     rules={{
                       required: "パスワードを再入力してください",
                       validate: (value) =>
-                        value === watchPassword("newPassword") ||
+                        value === getPasswordValues("newPassword") ||
                         "パスワードが一致しません",
                     }}
                     render={({ field, fieldState }) => (

@@ -1,5 +1,5 @@
-import { Button, styled } from "@mui/material";
-import { useMemo, useState } from "react";
+import { Button } from "@mui/material";
+import { CSSProperties, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -28,28 +28,6 @@ const ACTION_DISABLED_BACKGROUND = designTokenVar(
   "#D9E2DD"
 );
 
-const StyledGoDirectlyButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.clock_in.contrastText,
-  backgroundColor: theme.palette.clock_in.main,
-  border: `${ACTION_BORDER_WIDTH} solid ${theme.palette.clock_in.main}`,
-  width: ACTION_BUTTON_SIZE,
-  height: ACTION_BUTTON_SIZE,
-  borderRadius: ACTION_BUTTON_RADIUS,
-  [theme.breakpoints.down("sm")]: {
-    width: ACTION_BUTTON_SIZE_SM,
-    height: ACTION_BUTTON_SIZE_SM,
-    fontSize: "0.95rem",
-  },
-  "&:hover": {
-    color: theme.palette.clock_in.main,
-    backgroundColor: theme.palette.clock_in.contrastText,
-  },
-  "&:disabled": {
-    border: `${ACTION_BORDER_WIDTH} solid ${ACTION_DISABLED_BORDER}`,
-    backgroundColor: ACTION_DISABLED_BACKGROUND,
-  },
-}));
-
 export interface GoDirectlyButtonProps {
   isBeforeWork: boolean;
   onGoDirectly: () => void;
@@ -59,6 +37,14 @@ const GoDirectlyButton = ({
   isBeforeWork,
   onGoDirectly,
 }: GoDirectlyButtonProps) => {
+  const actionButtonVars: CSSProperties & Record<`--${string}`, string> = {
+    "--action-button-size": ACTION_BUTTON_SIZE,
+    "--action-button-size-sm": ACTION_BUTTON_SIZE_SM,
+    "--action-button-radius": ACTION_BUTTON_RADIUS,
+    "--action-border-width": ACTION_BORDER_WIDTH,
+    "--action-disabled-border": ACTION_DISABLED_BORDER,
+    "--action-disabled-bg": ACTION_DISABLED_BACKGROUND,
+  };
   const [isPending, setIsPending] = useState(false);
 
   // Derived state: reset isPending when isBeforeWork changes
@@ -67,16 +53,41 @@ const GoDirectlyButton = ({
   }, [isBeforeWork, isPending]);
 
   return (
-    <StyledGoDirectlyButton
+    <Button
       data-testid="go-directly-button"
       onClick={() => {
         setIsPending(true);
         onGoDirectly();
       }}
       disabled={!isBeforeWork || actualIsPending}
+      style={actionButtonVars}
+      sx={(theme) => ({
+        width: "var(--action-button-size)",
+        height: "var(--action-button-size)",
+        minWidth: "var(--action-button-size)",
+        borderRadius: "var(--action-button-radius)",
+        p: 0,
+        color: theme.palette.clock_in.contrastText,
+        backgroundColor: theme.palette.clock_in.main,
+        border: `var(--action-border-width) solid ${theme.palette.clock_in.main}`,
+        [theme.breakpoints.down("sm")]: {
+          width: "var(--action-button-size-sm)",
+          height: "var(--action-button-size-sm)",
+          minWidth: "var(--action-button-size-sm)",
+          fontSize: "0.95rem",
+        },
+        "&:hover": {
+          color: theme.palette.clock_in.main,
+          backgroundColor: theme.palette.clock_in.contrastText,
+        },
+        "&:disabled": {
+          border: "var(--action-border-width) solid var(--action-disabled-border)",
+          backgroundColor: "var(--action-disabled-bg)",
+        },
+      })}
     >
       直行
-    </StyledGoDirectlyButton>
+    </Button>
   );
 };
 

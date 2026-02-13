@@ -11,16 +11,10 @@ const StaffIcon = ({ name }: StaffIconProps) => {
       aria-label="account"
       component={Link}
       to="/profile"
-      sx={{
-        p: { xs: "2px", sm: "6px" },
-      }}
+      className="p-[2px] sm:p-[6px]"
     >
       <Avatar
-        sx={{
-          width: { xs: 28, sm: 36, md: 40 },
-          height: { xs: 28, sm: 36, md: 40 },
-          fontSize: { xs: "0.9rem", sm: "1.1rem", md: "1.25rem" },
-        }}
+        className="h-7 w-7 text-[0.9rem] sm:h-9 sm:w-9 sm:text-[1.1rem] md:h-10 md:w-10 md:text-[1.25rem]"
       >
         {name ? name.slice(0, 1) : ""}
       </Avatar>

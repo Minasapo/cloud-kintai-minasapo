@@ -37,7 +37,7 @@ const MenuList = ({
   onClose: () => void;
 }) => (
   <Box
-    sx={{ width: 250 }}
+    className="w-[250px]"
     role="presentation"
     onClick={onClose}
     onKeyDown={onClose}
@@ -81,17 +81,15 @@ const MobileMenu = ({
 
   return (
     <Box
+      className="text-right"
       sx={{
-        textAlign: "right",
         display: { xs: "block", lg: "none" },
       }}
     >
-      <IconButton onClick={onOpen} sx={{ p: { xs: "3px", sm: "6px" } }}>
+      <IconButton onClick={onOpen} className="p-[3px] sm:p-[6px]">
         <MenuIcon
-          sx={{
-            color: iconColor,
-            fontSize: { xs: 28, sm: 32 },
-          }}
+          className="text-[28px] sm:text-[32px]"
+          style={{ color: iconColor }}
         />
       </IconButton>
       <Drawer anchor="right" open={isOpen} onClose={onClose}>
