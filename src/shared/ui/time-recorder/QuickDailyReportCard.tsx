@@ -66,14 +66,14 @@ const QuickDailyReportCardView = ({
 
   return (
     <Card variant="outlined">
-      <CardContent sx={{ p: 2 }}>
+      <CardContent className="p-2">
         <Stack direction="row" alignItems="center" spacing={1} mb={1}>
           <IconButton
             size="small"
             onClick={onToggle}
             aria-expanded={isOpen}
             aria-controls={contentPanelId}
-            sx={{
+            style={{
               transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
               transition: "transform 0.2s",
             }}
@@ -84,7 +84,7 @@ const QuickDailyReportCardView = ({
             spacing={0.25}
             flexGrow={1}
             onClick={onToggle}
-            sx={{ cursor: "pointer" }}
+            className="cursor-pointer"
           >
             <Typography variant="subtitle1">今日の日報メモ</Typography>
             <Typography variant="caption" color="text.secondary">
@@ -103,7 +103,7 @@ const QuickDailyReportCardView = ({
                 onClick={onDialogOpen}
                 disabled={!hasStaff || isLoading}
                 aria-label="拡大表示"
-                sx={{
+                style={{
                   visibility: isOpen ? "visible" : "hidden",
                 }}
               >
@@ -116,9 +116,9 @@ const QuickDailyReportCardView = ({
             color="primary"
             onClick={onSave}
             disabled={!isEditable || isSaving || isSubmitted}
-            sx={{
+            className="whitespace-nowrap"
+            style={{
               visibility: isOpen ? "visible" : "hidden",
-              whiteSpace: "nowrap",
             }}
           >
             {isSaving ? "提出中" : "提出"}
