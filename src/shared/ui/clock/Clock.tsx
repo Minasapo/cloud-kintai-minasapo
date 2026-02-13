@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import dayjs from "dayjs";
 import React from "react";
 
@@ -13,11 +13,11 @@ const Clock = () => {
   }, []);
 
   return (
-    <Box bgcolor="black" textAlign="center" sx={{ p: 3 }} borderRadius="5px">
+    <div className="rounded-[5px] bg-black p-3 text-center">
       <Typography variant="h1" color="white">
         {time}
       </Typography>
-    </Box>
+    </div>
   );
 };
 
