@@ -47,11 +47,6 @@ const SignInButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const RESPONSIVE_DISPLAY = {
-  xs: "block",
-  lg: "block",
-} as const;
-
 export interface SignInOutButtonProps {
   isAuthenticated: boolean;
   isConfiguring?: boolean;
@@ -72,11 +67,11 @@ const SignInOutButton = ({
   }
 
   return (
-    <Box sx={{ display: RESPONSIVE_DISPLAY }}>
+    <Box className="block">
       <Stack
         direction="row"
         alignItems="center"
-        sx={{ columnGap: SIGN_BUTTON_GAP, rowGap: SIGN_BUTTON_GAP }}
+        style={{ columnGap: SIGN_BUTTON_GAP, rowGap: SIGN_BUTTON_GAP }}
       >
         {isAuthenticated ? (
           <>
