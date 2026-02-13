@@ -1,5 +1,5 @@
-import { Button, styled } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+import { Button } from "@mui/material";
+import { CSSProperties, useCallback, useMemo, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -12,19 +12,6 @@ const REST_BUTTON_MAX_WIDTH = designTokenVar(
   "220px"
 );
 
-const StyledRestStartButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.rest.main,
-  width: "100%",
-  maxWidth: REST_BUTTON_MAX_WIDTH,
-  "&:hover": {
-    color: theme.palette.rest.contrastText,
-    backgroundColor: theme.palette.rest.main,
-  },
-  "&:disabled": {
-    backgroundColor: REST_DISABLED_BACKGROUND,
-  },
-}));
-
 export interface RestStartButtonProps {
   isWorking: boolean;
   onRestStart: () => void;
@@ -36,6 +23,10 @@ const RestStartButton = ({
   onRestStart,
   disabled = false,
 }: RestStartButtonProps) => {
+  const restButtonVars: CSSProperties & Record<`--${string}`, string> = {
+    "--rest-button-max-width": REST_BUTTON_MAX_WIDTH,
+    "--rest-button-disabled-bg": REST_DISABLED_BACKGROUND,
+  };
   const [isPending, setIsPending] = useState(false);
 
   // Derived state: reset isPending when isWorking changes
@@ -49,14 +40,26 @@ const RestStartButton = ({
   }, [onRestStart]);
 
   return (
-    <StyledRestStartButton
+    <Button
       fullWidth
       onClick={handleClick}
       disabled={!isWorking || actualIsPending || disabled}
       data-testid="rest-start-button"
+      className="w-full max-w-[var(--rest-button-max-width)]"
+      style={restButtonVars}
+      sx={(theme) => ({
+        color: theme.palette.rest.main,
+        "&:hover": {
+          color: theme.palette.rest.contrastText,
+          backgroundColor: theme.palette.rest.main,
+        },
+        "&:disabled": {
+          backgroundColor: "var(--rest-button-disabled-bg)",
+        },
+      })}
     >
       休憩開始
-    </StyledRestStartButton>
+    </Button>
   );
 };
 
