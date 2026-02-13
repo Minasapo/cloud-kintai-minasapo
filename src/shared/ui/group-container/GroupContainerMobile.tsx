@@ -1,5 +1,5 @@
 import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
-import { ReactNode, useMemo } from "react";
+import { ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -53,22 +53,20 @@ const GroupContainerMobile = ({
   children,
   sx,
 }: GroupContainerMobileProps) => {
-  const containerSx = useMemo(
-    () => ({
-      borderStyle: "solid",
-      borderWidth: GROUP_BORDER_WIDTH,
-      borderColor: GROUP_BORDER_COLOR,
-      borderLeftColor: GROUP_ACCENT_COLOR,
-      borderLeftWidth: GROUP_ACCENT_WIDTH,
-      borderRadius: GROUP_RADIUS,
-      padding: GROUP_PADDING,
-      backgroundColor: GROUP_BACKGROUND,
-    }),
-    []
-  );
-
   return (
-    <Box sx={[containerSx, sx] as SxProps<Theme>}>
+    <Box
+      style={{
+        borderStyle: "solid",
+        borderWidth: GROUP_BORDER_WIDTH,
+        borderColor: GROUP_BORDER_COLOR,
+        borderLeftColor: GROUP_ACCENT_COLOR,
+        borderLeftWidth: GROUP_ACCENT_WIDTH,
+        borderRadius: GROUP_RADIUS,
+        padding: GROUP_PADDING,
+        backgroundColor: GROUP_BACKGROUND,
+      }}
+      sx={sx}
+    >
       {title ? (
         <Stack
           direction="row"
@@ -79,14 +77,14 @@ const GroupContainerMobile = ({
             {title}
           </Typography>
           {typeof count === "number" && (
-            <Typography variant="caption" sx={{ color: GROUP_COUNT_COLOR }}>
+            <Typography variant="caption" style={{ color: GROUP_COUNT_COLOR }}>
               {`(${count}件)`}
             </Typography>
           )}
         </Stack>
       ) : null}
 
-      <Box sx={{ mt: GROUP_CONTENT_GAP }}>{children}</Box>
+      <Box style={{ marginTop: GROUP_CONTENT_GAP }}>{children}</Box>
     </Box>
   );
 };
