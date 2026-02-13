@@ -276,7 +276,9 @@ export const PrintableShiftTable = memo(PrintableShiftTableComponent);
 
 PrintableShiftTable.displayName = "PrintableShiftTable";
 
-(PrintableShiftTable as any).propTypes = {
+(
+  PrintableShiftTable as React.ComponentType<PrintableShiftTableProps>
+).propTypes = {
   days: PropTypes.arrayOf(PropTypes.any).isRequired,
   staffs: PropTypes.arrayOf(
     PropTypes.shape({

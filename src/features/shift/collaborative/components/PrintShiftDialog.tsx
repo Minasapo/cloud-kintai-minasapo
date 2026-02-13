@@ -550,7 +550,7 @@ export const PrintShiftDialog = memo(PrintShiftDialogComponent);
 
 PrintShiftDialog.displayName = "PrintShiftDialog";
 
-(PrintShiftDialog as any).propTypes = {
+(PrintShiftDialog as React.ComponentType<PrintShiftDialogProps>).propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   days: PropTypes.arrayOf(PropTypes.any).isRequired,
