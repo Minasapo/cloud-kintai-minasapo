@@ -80,7 +80,7 @@ const ClockInButton = ({
       data-testid="clock-in-button"
       onClick={handleClick}
       disabled={!isBeforeWork || actualClicked || disabled}
-      sx={isSmallScreen ? { whiteSpace: "pre-line", lineHeight: 1.2 } : undefined}
+      className={isSmallScreen ? "whitespace-pre-line leading-[1.2]" : undefined}
     >
       {isSmallScreen ? "勤務\n開始" : "勤務開始"}
     </StyledClockInButton>

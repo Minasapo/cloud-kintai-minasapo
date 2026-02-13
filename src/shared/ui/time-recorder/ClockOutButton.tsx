@@ -85,7 +85,7 @@ const ClockOutButton = ({
       onClick={handleClick}
       size="large"
       variant={isWorking ? "outlined" : "contained"}
-      sx={isSmallScreen ? { whiteSpace: "pre-line", lineHeight: 1.2 } : undefined}
+      className={isSmallScreen ? "whitespace-pre-line leading-[1.2]" : undefined}
     >
       {isSmallScreen ? "勤務\n終了" : "勤務終了"}
     </StyledClockOutButton>
