@@ -155,7 +155,7 @@ export default function useShiftRequestAssignments({
             const historyInputs = histories.map(convertHistoryToInput);
             nextRecords.set(item.staffId, {
               id: item.id,
-              version: item.version,
+              version: item.version ?? undefined,
               histories: historyInputs,
               note: item.note ?? undefined,
               submittedAt: item.submittedAt ?? undefined,
@@ -413,7 +413,7 @@ export default function useShiftRequestAssignments({
         const next = new Map(prev);
         next.set(staffId, {
           id: responseShiftRequest.id,
-          version: responseShiftRequest.version,
+          version: responseShiftRequest.version ?? undefined,
           histories: historiesInput,
           note: responseShiftRequest.note ?? record?.note ?? undefined,
           submittedAt: responseShiftRequest.submittedAt ?? timestamp,
