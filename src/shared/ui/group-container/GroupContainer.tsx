@@ -63,6 +63,7 @@ export interface GroupContainerProps {
   collapsible?: boolean;
   defaultCollapsed?: boolean;
   hideAccent?: boolean;
+  hideBorder?: boolean;
   sx?: SxProps<Theme>;
   children?: ReactNode;
 }
@@ -73,6 +74,7 @@ const GroupContainer = ({
   collapsible = false,
   defaultCollapsed = false,
   hideAccent = false,
+  hideBorder = false,
   children,
   sx,
 }: GroupContainerProps) => {
@@ -92,6 +94,10 @@ const GroupContainer = ({
   };
   if (hideAccent) {
     groupVars["--group-accent-width"] = "0px";
+  }
+  if (hideBorder) {
+    groupVars["--group-border-width"] = "0px";
+    groupVars["--group-border-color"] = "transparent";
   }
 
   return (

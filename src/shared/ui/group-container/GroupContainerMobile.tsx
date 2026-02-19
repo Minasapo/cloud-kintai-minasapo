@@ -44,6 +44,7 @@ export interface GroupContainerMobileProps {
   title?: string;
   count?: number;
   hideAccent?: boolean;
+  hideBorder?: boolean;
   sx?: SxProps<Theme>;
   children?: ReactNode;
 }
@@ -52,6 +53,7 @@ const GroupContainerMobile = ({
   title,
   count,
   hideAccent = false,
+  hideBorder = false,
   children,
   sx,
 }: GroupContainerMobileProps) => {
@@ -68,6 +70,10 @@ const GroupContainerMobile = ({
   };
   if (hideAccent) {
     groupVars["--group-accent-width"] = "0px";
+  }
+  if (hideBorder) {
+    groupVars["--group-border-width"] = "0px";
+    groupVars["--group-border-color"] = "transparent";
   }
 
   return (
