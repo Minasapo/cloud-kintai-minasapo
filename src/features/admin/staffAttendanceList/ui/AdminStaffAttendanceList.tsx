@@ -15,7 +15,7 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs, { type Dayjs } from "dayjs";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
@@ -51,8 +51,6 @@ export default function AdminStaffAttendanceList() {
   const { enableSplitMode, setRightPanel } = useSplitView();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const calendarContainerRef = useRef<HTMLDivElement | null>(null);
-  const [calendarContainerWidth, setCalendarContainerWidth] = useState(0);
 
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
 
@@ -150,24 +148,6 @@ export default function AdminStaffAttendanceList() {
     </Stack>
   );
 
-  useEffect(() => {
-    if (
-      !calendarContainerRef.current ||
-      typeof ResizeObserver === "undefined"
-    ) {
-      return;
-    }
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      setCalendarContainerWidth(entry.contentRect.width);
-    });
-
-    observer.observe(calendarContainerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   const isCalendarCompact = isMobile;
 
   // エラーがある場合は、エラーメッセージが既にsnackbarで表示されているため、
@@ -263,7 +243,7 @@ export default function AdminStaffAttendanceList() {
         )}
 
         <PageSection variant="surface" layoutVariant="dashboard">
-          <Box ref={calendarContainerRef} sx={{ width: "100%" }}>
+          <Box sx={{ width: "100%" }}>
             {isCalendarCompact ? (
               <MobileCalendar
                 attendances={attendances}
