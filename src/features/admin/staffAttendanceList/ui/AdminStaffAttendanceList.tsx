@@ -80,7 +80,7 @@ export default function AdminStaffAttendanceList() {
       .filter((attendance: Attendance) =>
         attendance.workDate
           ? dayjs(attendance.workDate).isSame(currentMonth, "month")
-          : false
+          : false,
       )
       .toSorted((a: Attendance, b: Attendance) => {
         const aValue = a.workDate ? dayjs(a.workDate).valueOf() : 0;
@@ -100,18 +100,18 @@ export default function AdminStaffAttendanceList() {
     (attendance: Attendance) => {
       if (!staffId) return;
       const workDate = dayjs(attendance.workDate).format(
-        AttendanceDate.QueryParamFormat
+        AttendanceDate.QueryParamFormat,
       );
       navigate(`/admin/attendances/edit/${workDate}/${staffId}`);
     },
-    [navigate, staffId]
+    [navigate, staffId],
   );
 
   const handleOpenInRightPanel = useCallback(
     (attendance: Attendance | undefined, _date: Dayjs) => {
       if (!staffId || !attendance) return;
       const workDate = dayjs(attendance.workDate).format(
-        AttendanceDate.QueryParamFormat
+        AttendanceDate.QueryParamFormat,
       );
       enableSplitMode();
       setRightPanel({
@@ -120,7 +120,7 @@ export default function AdminStaffAttendanceList() {
         route: `/admin/attendances/edit/${workDate}/${staffId}`,
       });
     },
-    [staffId, enableSplitMode, setRightPanel]
+    [staffId, enableSplitMode, setRightPanel],
   );
 
   const buildCalendarNavigatePath = useCallback(
@@ -130,7 +130,7 @@ export default function AdminStaffAttendanceList() {
       }
       return `/admin/attendances/edit/${formattedWorkDate}/${staffId}`;
     },
-    [staffId]
+    [staffId],
   );
 
   const renderStandaloneSection = (content: ReactNode) => (
@@ -151,7 +151,10 @@ export default function AdminStaffAttendanceList() {
   );
 
   useEffect(() => {
-    if (!calendarContainerRef.current || typeof ResizeObserver === "undefined") {
+    if (
+      !calendarContainerRef.current ||
+      typeof ResizeObserver === "undefined"
+    ) {
       return;
     }
 
@@ -165,7 +168,7 @@ export default function AdminStaffAttendanceList() {
     return () => observer.disconnect();
   }, []);
 
-  const isCalendarCompact = isMobile || calendarContainerWidth < 900;
+  const isCalendarCompact = isMobile;
 
   // エラーがある場合は、エラーメッセージが既にsnackbarで表示されているため、
   // データが存在する場合は表示を続ける
@@ -174,14 +177,14 @@ export default function AdminStaffAttendanceList() {
     return renderStandaloneSection(
       <Typography>
         勤怠データの読み込みに失敗しました。エラーメッセージをご確認ください。
-      </Typography>
+      </Typography>,
     );
   }
 
   // staffIdがない場合のみエラーとする（staffがnullでもattendancesがあれば表示）
   if (!staffId) {
     return renderStandaloneSection(
-      <Typography>データ取得中に何らかの問題が発生しました</Typography>
+      <Typography>データ取得中に何らかの問題が発生しました</Typography>,
     );
   }
 
