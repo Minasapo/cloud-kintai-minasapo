@@ -368,7 +368,7 @@ export default function useShiftRequestAssignments({
                 }
                 responseShiftRequest = retryResponse.data?.updateShiftRequest;
               }
-            } catch (mergeError) {
+            } catch {
               throw new Error(
                 `Failed to resolve version conflict: ${errorMessage}`,
               );
