@@ -4,7 +4,7 @@ import { useOvertimeRequest } from "../useOvertimeRequest";
 
 // Mock RTK query hook
 jest.mock("@entities/workflow/api/workflowApi", () => ({
-  useGetWorkflowsQuery: jest.fn(),
+  useGetWorkflowsQuery: jest.fn(() => ({ data: undefined })),
 }));
 
 describe("useOvertimeRequest", () => {
