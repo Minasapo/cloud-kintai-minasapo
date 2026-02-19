@@ -43,6 +43,7 @@ const GROUP_COUNT_COLOR = designTokenVar(
 export interface GroupContainerMobileProps {
   title?: string;
   count?: number;
+  hideAccent?: boolean;
   sx?: SxProps<Theme>;
   children?: ReactNode;
 }
@@ -50,6 +51,7 @@ export interface GroupContainerMobileProps {
 const GroupContainerMobile = ({
   title,
   count,
+  hideAccent = false,
   children,
   sx,
 }: GroupContainerMobileProps) => {
@@ -64,6 +66,9 @@ const GroupContainerMobile = ({
     "--group-content-gap": GROUP_CONTENT_GAP,
     "--group-count-color": GROUP_COUNT_COLOR,
   };
+  if (hideAccent) {
+    groupVars["--group-accent-width"] = "0px";
+  }
 
   return (
     <Box

@@ -62,6 +62,7 @@ export interface GroupContainerProps {
   count?: number;
   collapsible?: boolean;
   defaultCollapsed?: boolean;
+  hideAccent?: boolean;
   sx?: SxProps<Theme>;
   children?: ReactNode;
 }
@@ -71,6 +72,7 @@ const GroupContainer = ({
   count,
   collapsible = false,
   defaultCollapsed = false,
+  hideAccent = false,
   children,
   sx,
 }: GroupContainerProps) => {
@@ -88,6 +90,9 @@ const GroupContainer = ({
     "--group-content-gap": GROUP_CONTENT_GAP,
     "--group-count-color": GROUP_COUNT_COLOR,
   };
+  if (hideAccent) {
+    groupVars["--group-accent-width"] = "0px";
+  }
 
   return (
     <Box

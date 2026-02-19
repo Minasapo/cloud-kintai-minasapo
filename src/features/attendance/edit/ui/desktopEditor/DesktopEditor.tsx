@@ -200,7 +200,7 @@ export default function DesktopEditor() {
             <ChangeRequestingAlert changeRequests={changeRequests} />
           </Stack>
           <NoDataAlert />
-          <GroupContainer>
+          <GroupContainer hideAccent>
             {setValue && restReplace && hourlyPaidHolidayTimeReplace && (
               <QuickInputButtons
                 setValue={setValue}
@@ -212,16 +212,16 @@ export default function DesktopEditor() {
               />
             )}
           </GroupContainer>
-          <GroupContainer>
+          <GroupContainer hideAccent>
             <WorkDateItem />
           </GroupContainer>
-          <GroupContainer>
+          <GroupContainer hideAccent>
             <Stack spacing={2}>
               <StaffNameItem />
               <WorkTypeItem />
             </Stack>
           </GroupContainer>
-          <GroupContainer>
+          <GroupContainer hideAccent>
             <WorkTimeInput
               highlightStartTime={highlightStartTime}
               highlightEndTime={highlightEndTime}
@@ -255,7 +255,7 @@ export default function DesktopEditor() {
               hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
             />
           </GroupContainer>
-          <GroupContainer>
+          <GroupContainer hideAccent>
             {(() => {
               const items: { label: string; content: JSX.Element }[] = [];
               items.push({
@@ -364,10 +364,10 @@ export default function DesktopEditor() {
               );
             })()}
           </GroupContainer>
-          <GroupContainer title="備考">
+          <GroupContainer title="備考" hideAccent>
             <RemarksInput />
           </GroupContainer>
-          <GroupContainer>
+          <GroupContainer hideAccent>
             <StaffCommentInput register={register} setValue={setValue} />
           </GroupContainer>
           <Box>

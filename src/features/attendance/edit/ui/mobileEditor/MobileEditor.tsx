@@ -131,16 +131,16 @@ export function MobileEditor() {
             visibleMode="staff"
           />
         )}
-        <GroupContainerMobile>
+        <GroupContainerMobile hideAccent>
           {/* 勤務日 */}
           <WorkDateItem />
         </GroupContainerMobile>
-        <GroupContainerMobile>
+        <GroupContainerMobile hideAccent>
           {/* スタッフ・勤務形態 */}
           <StaffNameItem />
           <WorkTypeItemMobile />
         </GroupContainerMobile>
-        <GroupContainerMobile>
+        <GroupContainerMobile hideAccent>
           <Stack spacing={1}>
             {/* 勤務時間・休憩時間 */}
             <WorkTimeInput />
@@ -152,7 +152,7 @@ export function MobileEditor() {
             />
           </Stack>
         </GroupContainerMobile>
-        <GroupContainerMobile>
+        <GroupContainerMobile hideAccent>
           {/* 休暇タブ */}
           <TabbedPaidHolidayComponent
             control={control}
@@ -169,10 +169,10 @@ export function MobileEditor() {
             setHolidayTab={setHolidayTab}
           />
         </GroupContainerMobile>
-        <GroupContainerMobile title="備考">
+        <GroupContainerMobile title="備考" hideAccent>
           <RemarksInput />
         </GroupContainerMobile>
-        <GroupContainerMobile title="修正理由">
+        <GroupContainerMobile title="修正理由" hideAccent>
           <StaffCommentInput />
         </GroupContainerMobile>
         <RequestButtonItem

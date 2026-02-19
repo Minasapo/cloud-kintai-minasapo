@@ -152,10 +152,10 @@ export default function DesktopList({
           <Box
             sx={{
               border: "1px solid",
-              borderColor: "warning.main",
+              borderColor: "divider",
               borderRadius: 2,
               p: 2,
-              backgroundColor: "rgba(255,243,205,0.12)",
+              backgroundColor: "background.paper",
             }}
           >
             <Typography variant="h4" sx={{ mb: 1 }}>

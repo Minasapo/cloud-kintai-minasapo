@@ -106,7 +106,6 @@ const CalendarDayCell = ({
     color = theme.palette.error.dark;
   } else if (status === AttendanceStatus.Late) {
     // 遅刻系：背景色なし、枠線のみ
-    borderColor = theme.palette.warning.main;
     color = theme.palette.warning.dark;
   } else if (status === AttendanceStatus.None && !isCurrentMonth) {
     // 月外のステータスなし：グレーアウト
@@ -611,25 +610,16 @@ export default function MobileCalendar({
                       sx={{
                         p: 1,
                         borderRadius: 1,
-                        backgroundColor:
-                          holidayInfo.type === "holiday"
-                            ? "#ffebee"
-                            : "#e3f2fd",
+                        backgroundColor: "background.default",
                         border: "1px solid",
-                        borderColor:
-                          holidayInfo.type === "holiday"
-                            ? "#ef5350"
-                            : "#42a5f5",
+                        borderColor: "divider",
                       }}
                     >
                       <Typography
                         variant="caption"
                         sx={{
                           fontWeight: "bold",
-                          color:
-                            holidayInfo.type === "holiday"
-                              ? "#d32f2f"
-                              : "#1976d2",
+                          color: "text.secondary",
                         }}
                       >
                         {holidayInfo.type === "holiday"
@@ -639,10 +629,7 @@ export default function MobileCalendar({
                       <Typography
                         variant="body2"
                         sx={{
-                          color:
-                            holidayInfo.type === "holiday"
-                              ? "#d32f2f"
-                              : "#1976d2",
+                          color: "text.secondary",
                         }}
                       >
                         {holidayInfo.name}
@@ -659,14 +646,14 @@ export default function MobileCalendar({
                     sx={{
                       p: 1,
                       borderRadius: 1,
-                      backgroundColor: "#fff3cd",
+                      backgroundColor: "background.default",
                       border: "1px solid",
-                      borderColor: "#ffc107",
+                      borderColor: "divider",
                     }}
                   >
                     <Typography
                       variant="body2"
-                      sx={{ color: "#856404", fontWeight: 500 }}
+                      sx={{ color: "text.secondary", fontWeight: 500 }}
                     >
                       本日の勤務データはまだ記録されていません
                     </Typography>
