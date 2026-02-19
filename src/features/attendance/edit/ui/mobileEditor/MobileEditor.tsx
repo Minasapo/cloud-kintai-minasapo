@@ -53,7 +53,7 @@ export function MobileEditor() {
   const contextErrorMessages = ctx.errorMessages;
   const derivedMessages = useMemo(
     () => collectAttendanceErrorMessages(errors),
-    [errors]
+    [errors],
   );
   const errorMessages = contextErrorMessages?.length
     ? contextErrorMessages

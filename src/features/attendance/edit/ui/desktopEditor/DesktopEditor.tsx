@@ -165,7 +165,7 @@ export default function DesktopEditor() {
           if (!time.endTime) return acc;
           const diff = calcTotalHourlyPaidHolidayTime(
             time.startTime,
-            time.endTime
+            time.endTime,
           );
           return acc + diff;
         }, 0) ?? 0;
@@ -238,8 +238,8 @@ export default function DesktopEditor() {
                       getStartTime(),
                       getValues?.("startTime") as string | null | undefined,
                       workDate ?? undefined,
-                      attendance?.workDate
-                    )
+                      attendance?.workDate,
+                    ),
                   );
                   // トリガーハイライトアニメーション
                   setHighlightStartTime(true);
@@ -290,7 +290,7 @@ export default function DesktopEditor() {
                                   {...field}
                                   checked={!!field.value}
                                   onChange={(
-                                    e: React.ChangeEvent<HTMLInputElement>
+                                    e: React.ChangeEvent<HTMLInputElement>,
                                   ) => field.onChange(e.target.checked)}
                                   disabled={changeRequests.length > 0}
                                 />
@@ -326,7 +326,7 @@ export default function DesktopEditor() {
                               time={hourlyPaidHolidayTime}
                               index={index}
                             />
-                          )
+                          ),
                         )}
                         <Box>
                           <IconButton

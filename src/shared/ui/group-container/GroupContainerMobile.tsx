@@ -5,39 +5,39 @@ import { designTokenVar } from "@/shared/designSystem";
 
 const GROUP_BORDER_WIDTH = designTokenVar(
   "component.groupContainer.borderWidth",
-  "1px"
+  "1px",
 );
 const GROUP_ACCENT_WIDTH = designTokenVar(
   "component.groupContainer.accentWidthMobile",
-  "4px"
+  "4px",
 );
 const GROUP_BORDER_COLOR = designTokenVar(
   "component.groupContainer.borderColor",
-  "#D9E2DD"
+  "#D9E2DD",
 );
 const GROUP_ACCENT_COLOR = designTokenVar(
   "component.groupContainer.accentColor",
-  "#0FA85E"
+  "#0FA85E",
 );
 const GROUP_RADIUS = designTokenVar(
   "component.groupContainer.borderRadius",
-  "12px"
+  "12px",
 );
 const GROUP_PADDING = designTokenVar(
   "component.groupContainer.paddingMobile",
-  "12px"
+  "12px",
 );
 const GROUP_BACKGROUND = designTokenVar(
   "component.groupContainer.background",
-  "#FFFFFF"
+  "#FFFFFF",
 );
 const GROUP_CONTENT_GAP = designTokenVar(
   "component.groupContainer.contentGap",
-  "8px"
+  "8px",
 );
 const GROUP_COUNT_COLOR = designTokenVar(
   "component.groupContainer.countColor",
-  "#5E726A"
+  "#5E726A",
 );
 
 export interface GroupContainerMobileProps {
