@@ -18,11 +18,11 @@ const GROUP_BORDER_WIDTH = designTokenVar(
 );
 const GROUP_ACCENT_WIDTH = designTokenVar(
   "component.groupContainer.accentWidth",
-  "6px",
+  "3px",
 );
 const GROUP_BORDER_COLOR = designTokenVar(
   "component.groupContainer.borderColor",
-  "#D9E2DD",
+  "#E8EFEB",
 );
 const GROUP_ACCENT_COLOR = designTokenVar(
   "component.groupContainer.accentColor",
@@ -42,7 +42,7 @@ const GROUP_BACKGROUND = designTokenVar(
 );
 const GROUP_SHADOW = designTokenVar(
   "component.groupContainer.shadow",
-  "0 6px 16px rgba(15, 168, 94, 0.08)",
+  "0 2px 4px rgba(15, 168, 94, 0.04)",
 );
 const GROUP_HEADER_GAP = designTokenVar(
   "component.groupContainer.headerGap",
@@ -102,7 +102,7 @@ const GroupContainer = ({
 
   return (
     <Box
-      className="rounded-[var(--group-radius)] border-[var(--group-border-width)] border-[var(--group-border-color)] border-l-[var(--group-accent-width)] border-l-[var(--group-accent-color)] border-solid bg-[var(--group-background)] p-[var(--group-padding)] shadow-[var(--group-shadow)]"
+      className="rounded-[var(--group-radius)] border-b-[var(--group-border-width)] border-t-[var(--group-border-width)] border-b-[var(--group-border-color)] border-t-[var(--group-border-color)] border-l-[var(--group-accent-width)] border-l-[var(--group-accent-color)] border-solid bg-[var(--group-background)] p-[var(--group-padding)] shadow-[var(--group-shadow)]"
       style={groupVars}
       sx={sx}
     >
