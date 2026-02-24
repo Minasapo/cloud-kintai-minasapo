@@ -1,12 +1,14 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
-import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  StaffType,
+  useStaffs,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
   Box,
   Button,
   FormControlLabel,
   Grid,
-  ListSubheader,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -19,6 +21,7 @@ import {
   ApprovalStepInput,
   ApproverMultipleMode,
   ApproverSettingMode,
+  WorkflowCategory,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import React, { useContext, useMemo, useState } from "react";
@@ -26,6 +29,10 @@ import { useNavigate } from "react-router-dom";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import {
+  CATEGORY_LABELS,
+  getEnabledWorkflowCategories,
+} from "@/entities/workflow/lib/workflowLabels";
 import {
   buildCreateWorkflowInput,
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
@@ -61,7 +68,7 @@ const getTodayAsSlash = (): string => {
  */
 const generateApprovalSteps = (
   staff: StaffType,
-  staffs: StaffType[]
+  staffs: StaffType[],
 ): {
   approvalSteps: ApprovalStepInput[];
   assignedApproverStaffIds: string[];
@@ -73,7 +80,7 @@ const generateApprovalSteps = (
     const target = staff.approverSingle;
     if (target) {
       const mapped = staffs.find(
-        (s) => s.cognitoUserId === target || s.id === target
+        (s) => s.cognitoUserId === target || s.id === target,
       );
       const approverId = mapped ? mapped.id : target;
       approvalSteps.push({
@@ -91,7 +98,7 @@ const generateApprovalSteps = (
     multiple.forEach((aid, idx) => {
       if (!aid) return;
       const mapped = staffs.find(
-        (s) => s.cognitoUserId === aid || s.id === aid
+        (s) => s.cognitoUserId === aid || s.id === aid,
       );
       const approverId = mapped ? mapped.id : aid;
       approvalSteps.push({
@@ -125,7 +132,7 @@ export default function NewWorkflowPage() {
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
   const [applicationDate, setApplicationDate] = useState(() =>
-    getTodayAsSlash()
+    getTodayAsSlash(),
   );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -146,7 +153,21 @@ export default function NewWorkflowPage() {
   const { staffs } = useStaffs({ isAuthenticated });
   const { create: createWorkflow } = useWorkflows({ isAuthenticated });
   const dispatch = useAppDispatchV2();
-  const { getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
+  const { config, getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
+
+  const enabledCategoryOptions = useMemo(
+    () =>
+      getEnabledWorkflowCategories(config).filter((item) => {
+        if (item.category === WorkflowCategory.CUSTOM) {
+          return false;
+        }
+        if (item.category === WorkflowCategory.ABSENCE && !getAbsentEnabled()) {
+          return false;
+        }
+        return true;
+      }),
+    [config, getAbsentEnabled],
+  );
 
   // Derived state: find matching staff from staffs
   const staff = useMemo(() => {
@@ -238,7 +259,7 @@ export default function NewWorkflowPage() {
     // staff の approverSetting を参照して approvalSteps / assignedApproverStaffIds を生成
     const { approvalSteps, assignedApproverStaffIds } = generateApprovalSteps(
       staff,
-      staffs
+      staffs,
     );
 
     if (approvalSteps.length > 0) {
@@ -342,18 +363,27 @@ export default function NewWorkflowPage() {
                 <MenuItem value="">
                   <em>種別を選択</em>
                 </MenuItem>
-                <ListSubheader>勤怠</ListSubheader>
-                <MenuItem value="有給休暇申請">有給休暇申請</MenuItem>
-                {getAbsentEnabled() && (
-                  <MenuItem value="欠勤申請">欠勤申請</MenuItem>
-                )}
-                <MenuItem value={CLOCK_CORRECTION_LABEL}>
-                  {CLOCK_CORRECTION_LABEL}
-                </MenuItem>
-                <MenuItem value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
-                  {CLOCK_CORRECTION_CHECK_OUT_LABEL}
-                </MenuItem>
-                <MenuItem value="残業申請">残業申請</MenuItem>
+                {enabledCategoryOptions.map((item) => {
+                  if (item.category === WorkflowCategory.CLOCK_CORRECTION) {
+                    return (
+                      <React.Fragment key={item.category}>
+                        <MenuItem value={CLOCK_CORRECTION_LABEL}>
+                          {CLOCK_CORRECTION_LABEL}
+                        </MenuItem>
+                        <MenuItem value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
+                          {CLOCK_CORRECTION_CHECK_OUT_LABEL}
+                        </MenuItem>
+                      </React.Fragment>
+                    );
+                  }
+
+                  const label = CATEGORY_LABELS[item.category] ?? item.label;
+                  return (
+                    <MenuItem key={item.category} value={label}>
+                      {label}
+                    </MenuItem>
+                  );
+                })}
               </Select>
             </Grid>
 

@@ -109,6 +109,16 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
       fixed
       __typename
     }
+    workflowCategoryOrder {
+      categories {
+        category
+        label
+        displayOrder
+        enabled
+        __typename
+      }
+      __typename
+    }
     overTimeCheckEnabled
     createdAt
     updatedAt
@@ -172,6 +182,16 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
       fixed
       __typename
     }
+    workflowCategoryOrder {
+      categories {
+        category
+        label
+        displayOrder
+        enabled
+        __typename
+      }
+      __typename
+    }
     overTimeCheckEnabled
     createdAt
     updatedAt
@@ -233,6 +253,16 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
       min
       max
       fixed
+      __typename
+    }
+    workflowCategoryOrder {
+      categories {
+        category
+        label
+        displayOrder
+        enabled
+        __typename
+      }
       __typename
     }
     overTimeCheckEnabled

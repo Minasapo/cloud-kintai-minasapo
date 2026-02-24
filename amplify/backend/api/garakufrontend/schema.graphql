@@ -270,6 +270,28 @@ type ShiftPlanYear @model @auth(rules: [{ allow: private }]) {
   updatedBy: String
 }
 
+type WorkflowCategoryOrderItem {
+  category: WorkflowCategory!
+  label: String!
+  displayOrder: Int!
+  enabled: Boolean!
+}
+
+input WorkflowCategoryOrderItemInput {
+  category: WorkflowCategory!
+  label: String!
+  displayOrder: Int!
+  enabled: Boolean!
+}
+
+type WorkflowCategoryOrder {
+  categories: [WorkflowCategoryOrderItem!]!
+}
+
+input WorkflowCategoryOrderInput {
+  categories: [WorkflowCategoryOrderItemInput!]!
+}
+
 type AppConfig @model {
   id: ID!
   name: String!
@@ -294,6 +316,7 @@ type AppConfig @model {
   quickInputEndTimes: [QuickInputTime]
   themeColor: String
   shiftGroups: [ShiftGroup]
+  workflowCategoryOrder: WorkflowCategoryOrder
   overTimeCheckEnabled: Boolean
 }
 

@@ -100,6 +100,16 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
       fixed
       __typename
     }
+    workflowCategoryOrder {
+      categories {
+        category
+        label
+        displayOrder
+        enabled
+        __typename
+      }
+      __typename
+    }
     overTimeCheckEnabled
     createdAt
     updatedAt
@@ -163,6 +173,16 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
         min
         max
         fixed
+        __typename
+      }
+      workflowCategoryOrder {
+        categories {
+          category
+          label
+          displayOrder
+          enabled
+          __typename
+        }
         __typename
       }
       overTimeCheckEnabled

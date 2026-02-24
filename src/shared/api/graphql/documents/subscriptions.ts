@@ -103,6 +103,16 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
       fixed
       __typename
     }
+    workflowCategoryOrder {
+      categories {
+        category
+        label
+        displayOrder
+        enabled
+        __typename
+      }
+      __typename
+    }
     overTimeCheckEnabled
     createdAt
     updatedAt
@@ -163,6 +173,16 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
       fixed
       __typename
     }
+    workflowCategoryOrder {
+      categories {
+        category
+        label
+        displayOrder
+        enabled
+        __typename
+      }
+      __typename
+    }
     overTimeCheckEnabled
     createdAt
     updatedAt
@@ -221,6 +241,16 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
       min
       max
       fixed
+      __typename
+    }
+    workflowCategoryOrder {
+      categories {
+        category
+        label
+        displayOrder
+        enabled
+        __typename
+      }
       __typename
     }
     overTimeCheckEnabled

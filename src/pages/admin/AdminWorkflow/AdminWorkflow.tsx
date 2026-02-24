@@ -1,3 +1,4 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import {
@@ -23,7 +24,7 @@ import {
 } from "@mui/material";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
@@ -45,7 +46,12 @@ export default function AdminWorkflow() {
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { workflows, loading, error } = useWorkflows({ isAuthenticated });
-  const { staffs, loading: staffLoading, error: staffError } = useStaffs({ isAuthenticated });
+  const { config, getAbsentEnabled, getWorkflowCategoryOrder } = useAppConfig();
+  const {
+    staffs,
+    loading: staffLoading,
+    error: staffError,
+  } = useStaffs({ isAuthenticated });
   const navigate = useNavigate();
 
   // フィルター/ページネーション state
@@ -55,12 +61,21 @@ export default function AdminWorkflow() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // 利用可能なカテゴリとステータスをワークフローから抽出
-  const categories = Array.from(
-    new Set((workflows || []).map((w) => w.category).filter(Boolean))
-  ) as Array<WorkflowCategory>;
+  const categories = useMemo(
+    () =>
+      getWorkflowCategoryOrder()
+        .filter((item) => item.enabled)
+        .filter((item) => item.category !== WorkflowCategory.CUSTOM)
+        .filter(
+          (item) =>
+            item.category !== WorkflowCategory.ABSENCE || getAbsentEnabled(),
+        ),
+    [config, getAbsentEnabled, getWorkflowCategoryOrder],
+  );
+
+  // 利用可能なステータスをワークフローから抽出
   const statuses = Array.from(
-    new Set((workflows || []).map((w) => w.status).filter(Boolean))
+    new Set((workflows || []).map((w) => w.status).filter(Boolean)),
   ) as Array<WorkflowStatus>;
 
   useEffect(() => {
@@ -68,7 +83,7 @@ export default function AdminWorkflow() {
     if (statuses.length === 0) return;
 
     const initialStatuses = statuses.filter(
-      (s) => !STATUS_EXCLUDED_FROM_DEFAULT.includes(s)
+      (s) => !STATUS_EXCLUDED_FROM_DEFAULT.includes(s),
     );
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatusFilter(initialStatuses);
@@ -93,7 +108,7 @@ export default function AdminWorkflow() {
 
   const paginatedWorkflows = sortedWorkflows.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   // ページングリセット: フィルター変更時にページを先頭に戻す
@@ -145,8 +160,8 @@ export default function AdminWorkflow() {
             >
               <MenuItem value="">すべて</MenuItem>
               {categories.map((c) => (
-                <MenuItem key={String(c)} value={String(c)}>
-                  {CATEGORY_LABELS[String(c) as WorkflowCategory] || String(c)}
+                <MenuItem key={c.category} value={c.category}>
+                  {CATEGORY_LABELS[c.category] || c.label}
                 </MenuItem>
               ))}
             </Select>
@@ -167,7 +182,7 @@ export default function AdminWorkflow() {
                       .map(
                         (s) =>
                           STATUS_LABELS[String(s) as WorkflowStatus] ||
-                          String(s)
+                          String(s),
                       )
                       .join("、")
               }
@@ -200,9 +215,15 @@ export default function AdminWorkflow() {
                     sx={{ p: 1.5, cursor: "pointer" }}
                   >
                     <Stack spacing={1}>
-                      <Typography variant="subtitle2">{categoryLabel}</Typography>
+                      <Typography variant="subtitle2">
+                        {categoryLabel}
+                      </Typography>
                       <Typography variant="body2">{staffName}</Typography>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
                         <StatusChip status={w.status} />
                         <Typography variant="caption" color="text.secondary">
                           {w.createdAt ? w.createdAt.split("T")[0] : ""}
