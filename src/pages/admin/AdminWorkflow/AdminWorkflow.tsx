@@ -1,9 +1,12 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import {
+  Button,
   Container,
   FormControl,
+  IconButton,
   InputLabel,
   LinearProgress,
   MenuItem,
@@ -18,13 +21,21 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
-import { useContext, useEffect, useMemo, useState } from "react";
+import {
+  ComponentType,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
@@ -33,6 +44,10 @@ import {
   getWorkflowCategoryLabel,
   STATUS_LABELS,
 } from "@/entities/workflow/lib/workflowLabels";
+import { useSplitView } from "@/features/splitView";
+
+import WorkflowCarouselDialog from "./components/WorkflowCarouselDialog";
+import WorkflowDetailPanel from "./components/WorkflowDetailPanel";
 
 const STATUS_ALL_VALUE = "__ALL__";
 const STATUS_EXCLUDED_FROM_DEFAULT: WorkflowStatus[] = [
@@ -52,6 +67,7 @@ export default function AdminWorkflow() {
     loading: staffLoading,
     error: staffError,
   } = useStaffs({ isAuthenticated });
+  const { enableSplitMode, setRightPanel } = useSplitView();
   const navigate = useNavigate();
 
   // フィルター/ページネーション state
@@ -60,6 +76,10 @@ export default function AdminWorkflow() {
   const [statusInitialized, setStatusInitialized] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [isCarouselOpen, setIsCarouselOpen] = useState(false);
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(
+    null,
+  );
 
   const categories = useMemo(
     () =>
@@ -111,6 +131,23 @@ export default function AdminWorkflow() {
     page * rowsPerPage + rowsPerPage,
   );
 
+  const workflowsById = new Map(
+    sortedWorkflows.map((workflow) => [workflow.id, workflow]),
+  );
+
+  const staffNamesById = useMemo(
+    () =>
+      new Map(
+        staffs.map((staff) => [
+          staff.id,
+          `${staff.familyName || ""}${staff.givenName || ""}` || "不明",
+        ]),
+      ),
+    [staffs],
+  );
+
+  const filteredWorkflowIds = sortedWorkflows.map((workflow) => workflow.id);
+
   // ページングリセット: フィルター変更時にページを先頭に戻す
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -127,6 +164,33 @@ export default function AdminWorkflow() {
     }
 
     setStatusFilter(nextValue);
+  };
+
+  const createWorkflowPanelComponent = useCallback(
+    (workflowId: string): ComponentType<{ panelId: string }> => {
+      const WorkflowPanel = () => (
+        <WorkflowDetailPanel workflowId={workflowId} />
+      );
+      WorkflowPanel.displayName = `WorkflowPanel_${workflowId}`;
+      return WorkflowPanel;
+    },
+    [],
+  );
+
+  const handleOpenInRightPanel = (workflowId: string) => {
+    const workflow = workflowsById.get(workflowId);
+    enableSplitMode();
+    setRightPanel({
+      id: `workflow-${workflowId}`,
+      title: `申請内容 - ${workflow?.createdAt?.split("T")[0] ?? workflowId}`,
+      component: createWorkflowPanelComponent(workflowId),
+    });
+  };
+
+  const handleOpenCarousel = () => {
+    if (filteredWorkflowIds.length === 0) return;
+    setSelectedWorkflowId(filteredWorkflowIds[0]);
+    setIsCarouselOpen(true);
   };
 
   if (loading || staffLoading) return <LinearProgress />;
@@ -198,6 +262,24 @@ export default function AdminWorkflow() {
         </Stack>
 
         <Paper sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            justifyContent="space-between"
+            alignItems={{ xs: "stretch", sm: "center" }}
+            mb={2}
+          >
+            <Typography variant="body2" color="text.secondary">
+              {filteredWorkflows.length} 件の申請
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleOpenCarousel}
+              disabled={filteredWorkflowIds.length === 0}
+            >
+              まとめて確認
+            </Button>
+          </Stack>
+
           {isMobile ? (
             <Stack spacing={1.5}>
               {paginatedWorkflows.map((w) => {
@@ -215,9 +297,22 @@ export default function AdminWorkflow() {
                     sx={{ p: 1.5, cursor: "pointer" }}
                   >
                     <Stack spacing={1}>
-                      <Typography variant="subtitle2">
-                        {categoryLabel}
-                      </Typography>
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="subtitle2">
+                          {categoryLabel}
+                        </Typography>
+                        <Tooltip title="右側で開く">
+                          <IconButton
+                            size="small"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleOpenInRightPanel(w.id);
+                            }}
+                          >
+                            <OpenInNewOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
                       <Typography variant="body2">{staffName}</Typography>
                       <Stack
                         direction="row"
@@ -239,6 +334,7 @@ export default function AdminWorkflow() {
               <Table size="small">
                 <TableHead>
                   <TableRow>
+                    <TableCell sx={{ width: "50px" }} />
                     <TableCell>種別</TableCell>
                     <TableCell>申請者</TableCell>
                     <TableCell>ステータス</TableCell>
@@ -260,6 +356,21 @@ export default function AdminWorkflow() {
                         onClick={() => navigate(`/admin/workflow/${w.id}`)}
                         sx={{ cursor: "pointer" }}
                       >
+                        <TableCell
+                          sx={{ width: "50px", padding: "8px 4px" }}
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <Tooltip title="右側で開く">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenInRightPanel(w.id)}
+                            >
+                              <OpenInNewOutlinedIcon
+                                sx={{ fontSize: "18px" }}
+                              />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
                         <TableCell>{categoryLabel}</TableCell>
                         <TableCell>{staffName}</TableCell>
                         <TableCell>
@@ -289,6 +400,24 @@ export default function AdminWorkflow() {
             rowsPerPageOptions={isMobile ? [10] : [10, 25, 50]}
           />
         </Paper>
+
+        {selectedWorkflowId && (
+          <WorkflowCarouselDialog
+            open={isCarouselOpen}
+            onClose={() => {
+              setIsCarouselOpen(false);
+              setSelectedWorkflowId(null);
+            }}
+            selectedWorkflowId={selectedWorkflowId}
+            filteredWorkflowIds={filteredWorkflowIds}
+            workflowsById={workflowsById}
+            staffNamesById={staffNamesById}
+            onOpenInRightPanel={(workflowId) => {
+              handleOpenInRightPanel(workflowId);
+              setIsCarouselOpen(false);
+            }}
+          />
+        )}
       </Stack>
     </Container>
   );
