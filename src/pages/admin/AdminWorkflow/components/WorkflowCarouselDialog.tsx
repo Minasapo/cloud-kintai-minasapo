@@ -1,3 +1,5 @@
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -14,11 +16,30 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { Workflow as WorkflowType } from "@shared/api/graphql/types";
+import {
+  GetWorkflowQuery,
+  Workflow as WorkflowType,
+  WorkflowStatus,
+} from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
+import { useAppDispatchV2 } from "@/app/hooks";
+import { AppConfigContext } from "@/context/AppConfigContext";
+import { AuthContext } from "@/context/AuthContext";
+import {
+  useCreateAttendanceMutation,
+  useLazyGetAttendanceByStaffAndDateQuery,
+  useUpdateAttendanceMutation,
+} from "@/entities/attendance/api/attendanceApi";
 import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
+
+import { useWorkflowApprovalActions } from "../hooks/useWorkflowApprovalActions";
+import { useWorkflowDetailData } from "../hooks/useWorkflowDetailData";
 
 interface WorkflowCarouselDialogProps {
   open: boolean;
@@ -28,6 +49,98 @@ interface WorkflowCarouselDialogProps {
   workflowsById: Map<string, WorkflowType>;
   staffNamesById: Map<string, string>;
   onOpenInRightPanel: (workflowId: string) => void;
+  enableApprovalActions?: boolean;
+  onWorkflowActionCompleted?: () => Promise<void> | void;
+}
+
+function WorkflowCarouselActionButtons({
+  workflowId,
+  onWorkflowActionCompleted,
+}: {
+  workflowId: string;
+  onWorkflowActionCompleted?: () => Promise<void> | void;
+}) {
+  const { authStatus, cognitoUser } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
+  const {
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useContext(AppConfigContext);
+  const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
+  const [createAttendance] = useCreateAttendanceMutation();
+  const [getAttendanceByStaffAndDate] =
+    useLazyGetAttendanceByStaffAndDateQuery();
+  const [updateAttendance] = useUpdateAttendanceMutation();
+  const { workflow, setWorkflow } = useWorkflowDetailData(workflowId);
+  const dispatch = useAppDispatchV2();
+
+  const { handleApprove, handleReject } = useWorkflowApprovalActions({
+    workflow,
+    cognitoUser,
+    staffs,
+    updateWorkflow: (input) =>
+      updateWorkflow(input) as Promise<
+        NonNullable<GetWorkflowQuery["getWorkflow"]>
+      >,
+    setWorkflow,
+    notifySuccess: (message) => dispatch(setSnackbarSuccess(message)),
+    notifyError: (message) => dispatch(setSnackbarError(message)),
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+    getAttendanceByStaffAndDate,
+    createAttendance,
+    updateAttendance,
+  });
+
+  const handleApproveAndRefresh = async () => {
+    await handleApprove();
+    await onWorkflowActionCompleted?.();
+  };
+
+  const handleRejectAndRefresh = async () => {
+    await handleReject();
+    await onWorkflowActionCompleted?.();
+  };
+
+  return (
+    <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+      <Button
+        size="small"
+        variant="contained"
+        color="success"
+        onClick={() => {
+          void handleApproveAndRefresh();
+        }}
+        disabled={
+          !workflow?.id ||
+          workflow.status === WorkflowStatus.APPROVED ||
+          workflow.status === WorkflowStatus.CANCELLED
+        }
+      >
+        承認
+      </Button>
+      <Button
+        size="small"
+        variant="contained"
+        color="error"
+        onClick={() => {
+          void handleRejectAndRefresh();
+        }}
+        disabled={
+          !workflow?.id ||
+          workflow.status === WorkflowStatus.REJECTED ||
+          workflow.status === WorkflowStatus.CANCELLED
+        }
+      >
+        却下
+      </Button>
+    </Stack>
+  );
 }
 
 export default function WorkflowCarouselDialog({
@@ -38,6 +151,8 @@ export default function WorkflowCarouselDialog({
   workflowsById,
   staffNamesById,
   onOpenInRightPanel,
+  enableApprovalActions = false,
+  onWorkflowActionCompleted,
 }: WorkflowCarouselDialogProps) {
   const initialIndex = useMemo(
     () =>
@@ -145,6 +260,13 @@ export default function WorkflowCarouselDialog({
                 </span>
               </Tooltip>
             </Stack>
+
+            {enableApprovalActions && currentWorkflowId && (
+              <WorkflowCarouselActionButtons
+                workflowId={currentWorkflowId}
+                onWorkflowActionCompleted={onWorkflowActionCompleted}
+              />
+            )}
 
             <Box>
               <Typography variant="subtitle2" color="text.secondary">

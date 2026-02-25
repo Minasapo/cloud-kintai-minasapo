@@ -60,7 +60,9 @@ export default function AdminWorkflow() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-  const { workflows, loading, error } = useWorkflows({ isAuthenticated });
+  const { workflows, loading, error, fetchWorkflows } = useWorkflows({
+    isAuthenticated,
+  });
   const { config, getAbsentEnabled, getWorkflowCategoryOrder } = useAppConfig();
   const {
     staffs,
@@ -416,6 +418,8 @@ export default function AdminWorkflow() {
               handleOpenInRightPanel(workflowId);
               setIsCarouselOpen(false);
             }}
+            enableApprovalActions
+            onWorkflowActionCompleted={fetchWorkflows}
           />
         )}
       </Stack>

@@ -37,6 +37,7 @@ describe("WorkflowCarouselDialog", () => {
         workflowsById={workflowsById}
         staffNamesById={staffNamesById}
         onOpenInRightPanel={jest.fn()}
+        enableApprovalActions={false}
       />,
     );
 
@@ -60,6 +61,7 @@ describe("WorkflowCarouselDialog", () => {
         workflowsById={workflowsById}
         staffNamesById={staffNamesById}
         onOpenInRightPanel={onOpenInRightPanel}
+        enableApprovalActions={false}
       />,
     );
 
