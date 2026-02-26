@@ -13,6 +13,9 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
+const playwrightBaseUrl =
+  process.env.PLAYWRIGHT_BASE_URL || "http://localhost:4173";
+
 export default defineConfig({
   testDir: "./playwright/tests",
   /* Run tests in files in parallel */
@@ -27,7 +30,7 @@ export default defineConfig({
   reporter: [["html", { open: "never" }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    baseURL: process.env.VITE_BASE_PATH || "http://localhost:5173",
+    baseURL: playwrightBaseUrl,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
@@ -40,9 +43,9 @@ export default defineConfig({
 
   /* Start dev server before running tests */
   webServer: {
-    command: "npm start",
-    url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
+    command: "npm start -- --port 4173",
+    url: playwrightBaseUrl,
+    reuseExistingServer: false,
     env: {
       VITE_CHECKER_OVERLAY: "false",
     },
