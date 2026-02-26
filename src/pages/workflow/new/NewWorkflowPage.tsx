@@ -4,6 +4,7 @@ import {
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
+import useWorkflowTemplates from "@entities/workflow-template/model/useWorkflowTemplates";
 import {
   Box,
   Button,
@@ -127,6 +128,7 @@ const generateApprovalSteps = (
 };
 
 export default function NewWorkflowPage() {
+  const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
   const navigate = useNavigate();
   const [draftMode, setDraftMode] = useState(false);
@@ -147,20 +149,27 @@ export default function NewWorkflowPage() {
   const [overtimeDate, setOvertimeDate] = useState("");
   const [overtimeDateError, setOvertimeDateError] = useState("");
   const [overtimeReason, setOvertimeReason] = useState("");
+  const [customWorkflowTitle, setCustomWorkflowTitle] = useState("");
+  const [customWorkflowContent, setCustomWorkflowContent] = useState("");
+  const [customWorkflowTitleError, setCustomWorkflowTitleError] = useState("");
+  const [customWorkflowContentError, setCustomWorkflowContentError] =
+    useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
 
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { staffs } = useStaffs({ isAuthenticated });
   const { create: createWorkflow } = useWorkflows({ isAuthenticated });
+  const { templates } = useWorkflowTemplates({
+    isAuthenticated,
+    organizationId: WORKFLOW_TEMPLATE_ORGANIZATION_ID,
+  });
   const dispatch = useAppDispatchV2();
   const { config, getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
 
   const enabledCategoryOptions = useMemo(
     () =>
       getEnabledWorkflowCategories(config).filter((item) => {
-        if (item.category === WorkflowCategory.CUSTOM) {
-          return false;
-        }
         if (item.category === WorkflowCategory.ABSENCE && !getAbsentEnabled()) {
           return false;
         }
@@ -230,6 +239,8 @@ export default function NewWorkflowPage() {
       overtimeStart,
       overtimeEnd,
       overtimeReason,
+      customWorkflowTitle,
+      customWorkflowContent,
     };
 
     const validation = validateWorkflowForm(formState);
@@ -237,6 +248,12 @@ export default function NewWorkflowPage() {
     setAbsenceDateError(validation.errors.absenceDateError ?? "");
     setOvertimeDateError(validation.errors.overtimeDateError ?? "");
     setOvertimeError(validation.errors.overtimeError ?? "");
+    setCustomWorkflowTitleError(
+      validation.errors.customWorkflowTitleError ?? "",
+    );
+    setCustomWorkflowContentError(
+      validation.errors.customWorkflowContentError ?? "",
+    );
     if (!validation.isValid) return;
     // 申請者（staff）が取れていない場合はエラー
     if (!staff?.id) {
@@ -328,6 +345,43 @@ export default function NewWorkflowPage() {
       }
       setOvertimeStart(null);
     }
+  };
+
+  const handleApplyTemplate = () => {
+    if (!selectedTemplateId) {
+      return;
+    }
+
+    const targetTemplate = templates.find(
+      (template) => template.id === selectedTemplateId,
+    );
+    if (!targetTemplate) {
+      dispatch(setSnackbarError("テンプレートが見つかりませんでした。"));
+      return;
+    }
+
+    const hasCurrentValue =
+      customWorkflowTitle.trim().length > 0 ||
+      customWorkflowContent.trim().length > 0;
+
+    if (hasCurrentValue) {
+      const shouldOverwrite = window.confirm(
+        "現在入力しているタイトル・詳細をテンプレート内容で上書きします。よろしいですか？",
+      );
+      if (!shouldOverwrite) {
+        return;
+      }
+    } else {
+      const shouldApply = window.confirm("テンプレートを適用しますか？");
+      if (!shouldApply) {
+        return;
+      }
+    }
+
+    setCustomWorkflowTitle(targetTemplate.title);
+    setCustomWorkflowContent(targetTemplate.content);
+    setCustomWorkflowTitleError("");
+    setCustomWorkflowContentError("");
   };
 
   return (
@@ -446,6 +500,20 @@ export default function NewWorkflowPage() {
               overtimeError={overtimeError}
               overtimeReason={overtimeReason}
               setOvertimeReason={setOvertimeReason}
+              customWorkflowTitle={customWorkflowTitle}
+              setCustomWorkflowTitle={setCustomWorkflowTitle}
+              customWorkflowContent={customWorkflowContent}
+              setCustomWorkflowContent={setCustomWorkflowContent}
+              customWorkflowTitleError={customWorkflowTitleError}
+              customWorkflowContentError={customWorkflowContentError}
+              templateOptions={templates.map((template) => ({
+                id: template.id,
+                name: template.name,
+              }))}
+              selectedTemplateId={selectedTemplateId}
+              setSelectedTemplateId={setSelectedTemplateId}
+              onApplyTemplate={handleApplyTemplate}
+              disableTemplateApply={!selectedTemplateId}
             />
             {/* 新規作成では "その他" は選択不可のため備考UIは表示しない */}
 

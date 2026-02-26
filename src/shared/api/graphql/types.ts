@@ -1054,6 +1054,8 @@ export type CreateWorkflowInput = {
   rejectedStaffIds?: Array< string | null > | null,
   finalDecisionTimestamp?: string | null,
   category?: WorkflowCategory | null,
+  customWorkflowTitle?: string | null,
+  customWorkflowContent?: string | null,
   staffId: string,
   status: WorkflowStatus,
   assignedApproverStaffIds?: Array< string | null > | null,
@@ -1113,6 +1115,8 @@ export type ModelWorkflowConditionInput = {
   rejectedStaffIds?: ModelStringInput | null,
   finalDecisionTimestamp?: ModelStringInput | null,
   category?: ModelWorkflowCategoryInput | null,
+  customWorkflowTitle?: ModelStringInput | null,
+  customWorkflowContent?: ModelStringInput | null,
   staffId?: ModelStringInput | null,
   status?: ModelWorkflowStatusInput | null,
   assignedApproverStaffIds?: ModelStringInput | null,
@@ -1145,6 +1149,8 @@ export type Workflow = {
   rejectedStaffIds?: Array< string | null > | null,
   finalDecisionTimestamp?: string | null,
   category?: WorkflowCategory | null,
+  customWorkflowTitle?: string | null,
+  customWorkflowContent?: string | null,
   staffId: string,
   status: WorkflowStatus,
   assignedApproverStaffIds?: Array< string | null > | null,
@@ -1192,6 +1198,8 @@ export type UpdateWorkflowInput = {
   rejectedStaffIds?: Array< string | null > | null,
   finalDecisionTimestamp?: string | null,
   category?: WorkflowCategory | null,
+  customWorkflowTitle?: string | null,
+  customWorkflowContent?: string | null,
   staffId?: string | null,
   status?: WorkflowStatus | null,
   assignedApproverStaffIds?: Array< string | null > | null,
@@ -1206,6 +1214,49 @@ export type UpdateWorkflowInput = {
 };
 
 export type DeleteWorkflowInput = {
+  id: string,
+};
+
+export type CreateWorkflowTemplateInput = {
+  id?: string | null,
+  name: string,
+  title: string,
+  content: string,
+  organizationId: string,
+};
+
+export type ModelWorkflowTemplateConditionInput = {
+  name?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  content?: ModelStringInput | null,
+  organizationId?: ModelStringInput | null,
+  and?: Array< ModelWorkflowTemplateConditionInput | null > | null,
+  or?: Array< ModelWorkflowTemplateConditionInput | null > | null,
+  not?: ModelWorkflowTemplateConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type WorkflowTemplate = {
+  __typename: "WorkflowTemplate",
+  id: string,
+  name: string,
+  title: string,
+  content: string,
+  organizationId: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateWorkflowTemplateInput = {
+  id: string,
+  name?: string | null,
+  title?: string | null,
+  content?: string | null,
+  organizationId?: string | null,
+};
+
+export type DeleteWorkflowTemplateInput = {
   id: string,
 };
 
@@ -1762,6 +1813,8 @@ export type ModelWorkflowFilterInput = {
   rejectedStaffIds?: ModelStringInput | null,
   finalDecisionTimestamp?: ModelStringInput | null,
   category?: ModelWorkflowCategoryInput | null,
+  customWorkflowTitle?: ModelStringInput | null,
+  customWorkflowContent?: ModelStringInput | null,
   staffId?: ModelStringInput | null,
   status?: ModelWorkflowStatusInput | null,
   assignedApproverStaffIds?: ModelStringInput | null,
@@ -1780,6 +1833,25 @@ export type ModelWorkflowFilterInput = {
 export type ModelWorkflowConnection = {
   __typename: "ModelWorkflowConnection",
   items:  Array<Workflow | null >,
+  nextToken?: string | null,
+};
+
+export type ModelWorkflowTemplateFilterInput = {
+  id?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  content?: ModelStringInput | null,
+  organizationId?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelWorkflowTemplateFilterInput | null > | null,
+  or?: Array< ModelWorkflowTemplateFilterInput | null > | null,
+  not?: ModelWorkflowTemplateFilterInput | null,
+};
+
+export type ModelWorkflowTemplateConnection = {
+  __typename: "ModelWorkflowTemplateConnection",
+  items:  Array<WorkflowTemplate | null >,
   nextToken?: string | null,
 };
 
@@ -2084,6 +2156,8 @@ export type ModelSubscriptionWorkflowFilterInput = {
   rejectedStaffIds?: ModelSubscriptionStringInput | null,
   finalDecisionTimestamp?: ModelSubscriptionStringInput | null,
   category?: ModelSubscriptionStringInput | null,
+  customWorkflowTitle?: ModelSubscriptionStringInput | null,
+  customWorkflowContent?: ModelSubscriptionStringInput | null,
   staffId?: ModelSubscriptionStringInput | null,
   status?: ModelSubscriptionStringInput | null,
   assignedApproverStaffIds?: ModelSubscriptionStringInput | null,
@@ -2096,6 +2170,18 @@ export type ModelSubscriptionWorkflowFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
   or?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
+};
+
+export type ModelSubscriptionWorkflowTemplateFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  name?: ModelSubscriptionStringInput | null,
+  title?: ModelSubscriptionStringInput | null,
+  content?: ModelSubscriptionStringInput | null,
+  organizationId?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionWorkflowTemplateFilterInput | null > | null,
+  or?: Array< ModelSubscriptionWorkflowTemplateFilterInput | null > | null,
 };
 
 export type ModelSubscriptionOperationLogFilterInput = {
@@ -3342,6 +3428,8 @@ export type CreateWorkflowMutation = {
     rejectedStaffIds?: Array< string | null > | null,
     finalDecisionTimestamp?: string | null,
     category?: WorkflowCategory | null,
+    customWorkflowTitle?: string | null,
+    customWorkflowContent?: string | null,
     staffId: string,
     status: WorkflowStatus,
     assignedApproverStaffIds?: Array< string | null > | null,
@@ -3391,6 +3479,8 @@ export type UpdateWorkflowMutation = {
     rejectedStaffIds?: Array< string | null > | null,
     finalDecisionTimestamp?: string | null,
     category?: WorkflowCategory | null,
+    customWorkflowTitle?: string | null,
+    customWorkflowContent?: string | null,
     staffId: string,
     status: WorkflowStatus,
     assignedApproverStaffIds?: Array< string | null > | null,
@@ -3440,6 +3530,8 @@ export type DeleteWorkflowMutation = {
     rejectedStaffIds?: Array< string | null > | null,
     finalDecisionTimestamp?: string | null,
     category?: WorkflowCategory | null,
+    customWorkflowTitle?: string | null,
+    customWorkflowContent?: string | null,
     staffId: string,
     status: WorkflowStatus,
     assignedApproverStaffIds?: Array< string | null > | null,
@@ -3471,6 +3563,60 @@ export type DeleteWorkflowMutation = {
       text: string,
       createdAt: string,
     } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateWorkflowTemplateMutationVariables = {
+  input: CreateWorkflowTemplateInput,
+  condition?: ModelWorkflowTemplateConditionInput | null,
+};
+
+export type CreateWorkflowTemplateMutation = {
+  createWorkflowTemplate?:  {
+    __typename: "WorkflowTemplate",
+    id: string,
+    name: string,
+    title: string,
+    content: string,
+    organizationId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateWorkflowTemplateMutationVariables = {
+  input: UpdateWorkflowTemplateInput,
+  condition?: ModelWorkflowTemplateConditionInput | null,
+};
+
+export type UpdateWorkflowTemplateMutation = {
+  updateWorkflowTemplate?:  {
+    __typename: "WorkflowTemplate",
+    id: string,
+    name: string,
+    title: string,
+    content: string,
+    organizationId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteWorkflowTemplateMutationVariables = {
+  input: DeleteWorkflowTemplateInput,
+  condition?: ModelWorkflowTemplateConditionInput | null,
+};
+
+export type DeleteWorkflowTemplateMutation = {
+  deleteWorkflowTemplate?:  {
+    __typename: "WorkflowTemplate",
+    id: string,
+    name: string,
+    title: string,
+    content: string,
+    organizationId: string,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4835,6 +4981,8 @@ export type GetWorkflowQuery = {
     rejectedStaffIds?: Array< string | null > | null,
     finalDecisionTimestamp?: string | null,
     category?: WorkflowCategory | null,
+    customWorkflowTitle?: string | null,
+    customWorkflowContent?: string | null,
     staffId: string,
     status: WorkflowStatus,
     assignedApproverStaffIds?: Array< string | null > | null,
@@ -4887,6 +5035,8 @@ export type ListWorkflowsQuery = {
       rejectedStaffIds?: Array< string | null > | null,
       finalDecisionTimestamp?: string | null,
       category?: WorkflowCategory | null,
+      customWorkflowTitle?: string | null,
+      customWorkflowContent?: string | null,
       staffId: string,
       status: WorkflowStatus,
       assignedApproverStaffIds?: Array< string | null > | null,
@@ -4943,6 +5093,8 @@ export type WorkflowsByStaffIdQuery = {
       rejectedStaffIds?: Array< string | null > | null,
       finalDecisionTimestamp?: string | null,
       category?: WorkflowCategory | null,
+      customWorkflowTitle?: string | null,
+      customWorkflowContent?: string | null,
       staffId: string,
       status: WorkflowStatus,
       assignedApproverStaffIds?: Array< string | null > | null,
@@ -4974,6 +5126,71 @@ export type WorkflowsByStaffIdQuery = {
         text: string,
         createdAt: string,
       } | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetWorkflowTemplateQueryVariables = {
+  id: string,
+};
+
+export type GetWorkflowTemplateQuery = {
+  getWorkflowTemplate?:  {
+    __typename: "WorkflowTemplate",
+    id: string,
+    name: string,
+    title: string,
+    content: string,
+    organizationId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListWorkflowTemplatesQueryVariables = {
+  filter?: ModelWorkflowTemplateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListWorkflowTemplatesQuery = {
+  listWorkflowTemplates?:  {
+    __typename: "ModelWorkflowTemplateConnection",
+    items:  Array< {
+      __typename: "WorkflowTemplate",
+      id: string,
+      name: string,
+      title: string,
+      content: string,
+      organizationId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type WorkflowTemplatesByOrganizationIdQueryVariables = {
+  organizationId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelWorkflowTemplateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type WorkflowTemplatesByOrganizationIdQuery = {
+  workflowTemplatesByOrganizationId?:  {
+    __typename: "ModelWorkflowTemplateConnection",
+    items:  Array< {
+      __typename: "WorkflowTemplate",
+      id: string,
+      name: string,
+      title: string,
+      content: string,
+      organizationId: string,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -6392,6 +6609,8 @@ export type OnCreateWorkflowSubscription = {
     rejectedStaffIds?: Array< string | null > | null,
     finalDecisionTimestamp?: string | null,
     category?: WorkflowCategory | null,
+    customWorkflowTitle?: string | null,
+    customWorkflowContent?: string | null,
     staffId: string,
     status: WorkflowStatus,
     assignedApproverStaffIds?: Array< string | null > | null,
@@ -6440,6 +6659,8 @@ export type OnUpdateWorkflowSubscription = {
     rejectedStaffIds?: Array< string | null > | null,
     finalDecisionTimestamp?: string | null,
     category?: WorkflowCategory | null,
+    customWorkflowTitle?: string | null,
+    customWorkflowContent?: string | null,
     staffId: string,
     status: WorkflowStatus,
     assignedApproverStaffIds?: Array< string | null > | null,
@@ -6488,6 +6709,8 @@ export type OnDeleteWorkflowSubscription = {
     rejectedStaffIds?: Array< string | null > | null,
     finalDecisionTimestamp?: string | null,
     category?: WorkflowCategory | null,
+    customWorkflowTitle?: string | null,
+    customWorkflowContent?: string | null,
     staffId: string,
     status: WorkflowStatus,
     assignedApproverStaffIds?: Array< string | null > | null,
@@ -6519,6 +6742,57 @@ export type OnDeleteWorkflowSubscription = {
       text: string,
       createdAt: string,
     } | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateWorkflowTemplateSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowTemplateFilterInput | null,
+};
+
+export type OnCreateWorkflowTemplateSubscription = {
+  onCreateWorkflowTemplate?:  {
+    __typename: "WorkflowTemplate",
+    id: string,
+    name: string,
+    title: string,
+    content: string,
+    organizationId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateWorkflowTemplateSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowTemplateFilterInput | null,
+};
+
+export type OnUpdateWorkflowTemplateSubscription = {
+  onUpdateWorkflowTemplate?:  {
+    __typename: "WorkflowTemplate",
+    id: string,
+    name: string,
+    title: string,
+    content: string,
+    organizationId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteWorkflowTemplateSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowTemplateFilterInput | null,
+};
+
+export type OnDeleteWorkflowTemplateSubscription = {
+  onDeleteWorkflowTemplate?:  {
+    __typename: "WorkflowTemplate",
+    id: string,
+    name: string,
+    title: string,
+    content: string,
+    organizationId: string,
     createdAt: string,
     updatedAt: string,
   } | null,

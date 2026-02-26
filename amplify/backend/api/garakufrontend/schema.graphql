@@ -394,6 +394,8 @@ type Workflow @model @auth(rules: [{ allow: private }]) {
   rejectedStaffIds: [String]
   finalDecisionTimestamp: String
   category: WorkflowCategory
+  customWorkflowTitle: String
+  customWorkflowContent: String
   staffId: String! @index(name: "byStaffId", queryField: "workflowsByStaffId")
   status: WorkflowStatus!
   assignedApproverStaffIds: [String]
@@ -405,6 +407,18 @@ type Workflow @model @auth(rules: [{ allow: private }]) {
   submitterApproverMultipleMode: ApproverMultipleMode
   overTimeDetails: OverTimeWorkflow
   comments: [WorkflowComment]
+}
+
+type WorkflowTemplate @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String!
+  title: String!
+  content: String!
+  organizationId: String!
+    @index(
+      name: "workflowTemplatesByOrganizationId"
+      queryField: "workflowTemplatesByOrganizationId"
+    )
 }
 
 type OperationLog @model @auth(rules: [{ allow: private }]) {

@@ -1230,6 +1230,8 @@ export const createWorkflow = /* GraphQL */ `mutation CreateWorkflow(
     rejectedStaffIds
     finalDecisionTimestamp
     category
+    customWorkflowTitle
+    customWorkflowContent
     staffId
     status
     assignedApproverStaffIds
@@ -1280,6 +1282,8 @@ export const updateWorkflow = /* GraphQL */ `mutation UpdateWorkflow(
     rejectedStaffIds
     finalDecisionTimestamp
     category
+    customWorkflowTitle
+    customWorkflowContent
     staffId
     status
     assignedApproverStaffIds
@@ -1330,6 +1334,8 @@ export const deleteWorkflow = /* GraphQL */ `mutation DeleteWorkflow(
     rejectedStaffIds
     finalDecisionTimestamp
     category
+    customWorkflowTitle
+    customWorkflowContent
     staffId
     status
     assignedApproverStaffIds
@@ -1369,6 +1375,63 @@ export const deleteWorkflow = /* GraphQL */ `mutation DeleteWorkflow(
 ` as GeneratedMutation<
   APITypes.DeleteWorkflowMutationVariables,
   APITypes.DeleteWorkflowMutation
+>;
+export const createWorkflowTemplate = /* GraphQL */ `mutation CreateWorkflowTemplate(
+  $input: CreateWorkflowTemplateInput!
+  $condition: ModelWorkflowTemplateConditionInput
+) {
+  createWorkflowTemplate(input: $input, condition: $condition) {
+    id
+    name
+    title
+    content
+    organizationId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateWorkflowTemplateMutationVariables,
+  APITypes.CreateWorkflowTemplateMutation
+>;
+export const updateWorkflowTemplate = /* GraphQL */ `mutation UpdateWorkflowTemplate(
+  $input: UpdateWorkflowTemplateInput!
+  $condition: ModelWorkflowTemplateConditionInput
+) {
+  updateWorkflowTemplate(input: $input, condition: $condition) {
+    id
+    name
+    title
+    content
+    organizationId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowTemplateMutationVariables,
+  APITypes.UpdateWorkflowTemplateMutation
+>;
+export const deleteWorkflowTemplate = /* GraphQL */ `mutation DeleteWorkflowTemplate(
+  $input: DeleteWorkflowTemplateInput!
+  $condition: ModelWorkflowTemplateConditionInput
+) {
+  deleteWorkflowTemplate(input: $input, condition: $condition) {
+    id
+    name
+    title
+    content
+    organizationId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowTemplateMutationVariables,
+  APITypes.DeleteWorkflowTemplateMutation
 >;
 export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
   $input: CreateOperationLogInput!

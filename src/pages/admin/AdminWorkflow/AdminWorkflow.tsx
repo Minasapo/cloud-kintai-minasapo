@@ -87,7 +87,6 @@ export default function AdminWorkflow() {
     () =>
       getWorkflowCategoryOrder()
         .filter((item) => item.enabled)
-        .filter((item) => item.category !== WorkflowCategory.CUSTOM)
         .filter(
           (item) =>
             item.category !== WorkflowCategory.ABSENCE || getAbsentEnabled(),

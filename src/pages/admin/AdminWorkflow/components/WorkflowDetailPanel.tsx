@@ -169,6 +169,8 @@ export default function WorkflowDetailPanel({
               applicationDate={applicationDate}
               status={workflow?.status ?? null}
               overTimeDetails={workflow?.overTimeDetails ?? null}
+              customWorkflowTitle={workflow?.customWorkflowTitle ?? null}
+              customWorkflowContent={workflow?.customWorkflowContent ?? null}
               approvalSteps={approvalSteps}
             />
           </Grid>

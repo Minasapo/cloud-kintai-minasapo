@@ -259,7 +259,6 @@ function WorkflowListFilters(
     () =>
       getWorkflowCategoryOrder()
         .filter((item) => item.enabled)
-        .filter((item) => item.category !== WorkflowCategory.CUSTOM)
         .filter(
           (item) =>
             item.category !== WorkflowCategory.ABSENCE || getAbsentEnabled(),
@@ -415,7 +414,6 @@ export const WorkflowListFiltersPanel = forwardRef(
       () =>
         getWorkflowCategoryOrder()
           .filter((item) => item.enabled)
-          .filter((item) => item.category !== WorkflowCategory.CUSTOM)
           .filter(
             (item) =>
               item.category !== WorkflowCategory.ABSENCE || getAbsentEnabled(),

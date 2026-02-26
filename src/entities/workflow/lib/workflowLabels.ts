@@ -45,7 +45,7 @@ export const getDefaultWorkflowCategoryOrder =
       category,
       label: CATEGORY_LABELS[category],
       displayOrder: index,
-      enabled: category !== WorkflowCategory.CUSTOM,
+      enabled: true,
     }));
 
 const isWorkflowCategory = (value?: string | null): value is WorkflowCategory =>
