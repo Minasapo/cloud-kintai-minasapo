@@ -230,6 +230,7 @@ export const getStaff = /* GraphQL */ `query GetStaff($id: ID!) {
     approverMultiple
     approverMultipleMode
     shiftGroup
+    attendanceManagementEnabled
     createdAt
     updatedAt
     __typename
@@ -273,6 +274,7 @@ export const listStaff = /* GraphQL */ `query ListStaff(
       approverMultiple
       approverMultipleMode
       shiftGroup
+      attendanceManagementEnabled
       createdAt
       updatedAt
       __typename
@@ -329,6 +331,7 @@ export const staffByCognitoUserId = /* GraphQL */ `query StaffByCognitoUserId(
       approverMultiple
       approverMultipleMode
       shiftGroup
+      attendanceManagementEnabled
       createdAt
       updatedAt
       __typename

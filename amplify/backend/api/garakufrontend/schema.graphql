@@ -29,6 +29,7 @@ type Staff @model @auth(rules: [{ allow: private }]) {
   approverMultiple: [String]
   approverMultipleMode: ApproverMultipleMode
   shiftGroup: String
+  attendanceManagementEnabled: Boolean
 }
 
 enum ApproverSettingMode {
