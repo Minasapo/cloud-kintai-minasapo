@@ -101,11 +101,9 @@ export const ShiftSuggestionsPanelBase = ({
       : violations.filter((v) => v.severity === severityFilter);
 
   const displayedViolations =
-    viewMode === "minimized"
-      ? []
-      : viewMode === "default"
-        ? filteredViolations.slice(0, 3)
-        : filteredViolations;
+    viewMode === "default"
+      ? filteredViolations.slice(0, 3)
+      : filteredViolations;
 
   const getSeverityIcon = (severity: RuleViolation["severity"]) => {
     switch (severity) {
@@ -134,20 +132,14 @@ export const ShiftSuggestionsPanelBase = ({
           zIndex: 999,
         }}
       >
-        <Tooltip title={getViewModeTooltip()}>
+        <Tooltip title="展開する">
           <IconButton
-            size="small"
+            color="primary"
             onClick={cycleViewMode}
-            sx={{
-              color: "white",
-              bgcolor: "primary.main",
-              "&:hover": {
-                bgcolor: "primary.dark",
-              },
-            }}
-            aria-label="シフト提案を展開する"
+            aria-label="シフト提案パネルを展開"
+            sx={{ bgcolor: "background.paper", boxShadow: 2 }}
           >
-            {getViewModeIcon()}
+            <LightbulbIcon />
           </IconButton>
         </Tooltip>
       </Box>
@@ -191,6 +183,7 @@ export const ShiftSuggestionsPanelBase = ({
             <IconButton
               size="small"
               onClick={cycleViewMode}
+              aria-label="表示モードを切り替え"
               sx={{ color: "white" }}
             >
               {getViewModeIcon()}
