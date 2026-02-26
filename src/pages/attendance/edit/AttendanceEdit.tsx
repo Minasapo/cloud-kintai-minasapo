@@ -678,7 +678,14 @@ export default function AttendanceEdit() {
         isOnBreak,
       }}
     >
-      <Box data-testid="attendance-edit-root">
+      <Box
+        data-testid="attendance-edit-root"
+        sx={{
+          width: "100%",
+          maxWidth: { md: 1280 },
+          mx: "auto",
+        }}
+      >
         {errorMessages.length > 0 && (
           <Box mb={2}>
             <Alert severity="error">
