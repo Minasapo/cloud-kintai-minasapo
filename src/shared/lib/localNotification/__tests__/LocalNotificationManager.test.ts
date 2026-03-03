@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LocalNotificationManager } from "@shared/lib/localNotification/LocalNotificationManager";
 import {
   AttendanceNotificationType,

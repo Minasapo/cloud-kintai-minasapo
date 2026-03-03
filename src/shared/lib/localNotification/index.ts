@@ -1,9 +1,11 @@
 export { LocalNotificationManager } from "./LocalNotificationManager";
-export type { LocalNotificationOptions } from "./types";
+export type {
+  LocalNotificationOptions,
+  NotificationPermissionStatus,
+} from "./types";
 export {
   AttendanceNotificationType,
-  NotificationPermissionError,
-  NotificationNotSupportedError,
   LocalNotificationError,
+  NotificationNotSupportedError,
+  NotificationPermissionError,
 } from "./types";
-export type { NotificationPermissionStatus } from "./types";
