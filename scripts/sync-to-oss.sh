@@ -48,6 +48,10 @@ node_modules/
 playwright-report/
 test-results/
 .devcontainer/.ssh
+docs/OSS_SYNC_GUIDE.md
+scripts/sync-to-oss.sh
+scripts/check-oss-security.sh
+scripts/README.md
 EOF
 
 while IFS= read -r pattern; do
