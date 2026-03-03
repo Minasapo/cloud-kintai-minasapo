@@ -29,7 +29,8 @@ chmod +x scripts/sync-to-oss.sh
 
 このスクリプトは以下を自動で行います:
 - `oss-sync` ブランチの作成
-- 機密情報を含むファイルの削除
+- 機密情報を含むファイルの削除（AWS設定、環境変数、ビルド成果物など）
+- OSS同期関連ファイルの削除（`docs/OSS_SYNC_GUIDE.md`, `scripts/sync-to-oss.sh` など）
 - OSS用の.gitignoreの適用
 
 ### 2. 手動編集が必要なファイル
