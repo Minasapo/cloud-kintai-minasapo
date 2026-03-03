@@ -47,6 +47,7 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
+import { WorkflowNotificationDebugPanel } from "@/features/workflow/debug/WorkflowNotificationDebugPanel";
 import { createLogger } from "@/shared/lib/logger";
 import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
@@ -60,6 +61,8 @@ import { AuthContext } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
+import { useLocalNotification } from "./hooks/useLocalNotification";
+import { useWorkflowNotification } from "./hooks/useWorkflowNotification";
 
 const logger = createLogger("Layout");
 
@@ -176,6 +179,26 @@ export default function Layout() {
 
   // 重複勤怠データの警告をリッスン
   useDuplicateAttendanceWarning();
+
+  // 通知権限をリクエスト
+  const { requestPermission, permission, isSupported } = useLocalNotification();
+
+  // 認証後に通知権限をリクエスト
+  useEffect(() => {
+    if (
+      authStatus === "authenticated" &&
+      isSupported &&
+      permission === "default"
+    ) {
+      logger.info("Requesting notification permission on authentication");
+      requestPermission().catch((error) => {
+        logger.warn("Failed to request notification permission:", error);
+      });
+    }
+  }, [authStatus, isSupported, permission, requestPermission]);
+
+  // ワークフロー申請の通知を購読
+  useWorkflowNotification();
 
   const {
     fetchConfig,
@@ -590,6 +613,7 @@ export default function Layout() {
               onConfirm={() => navigate("/admin/master/job_term")}
             />
           )}
+          <WorkflowNotificationDebugPanel />
         </AppProviders>
       </ThemeProvider>
     </ThemeContextProvider>

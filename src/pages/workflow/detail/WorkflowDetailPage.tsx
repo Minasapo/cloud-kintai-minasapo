@@ -6,7 +6,6 @@ import Page from "@shared/ui/page/Page";
 import { useCallback, useContext, useMemo } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
 import type { WorkflowDetailLoaderData } from "@/entities/workflow/model/loader";
@@ -22,12 +21,9 @@ import {
   useWorkflowLoaderWorkflow,
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
 import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 import { PageSection } from "@/shared/ui/layout";
 
@@ -45,7 +41,7 @@ export default function WorkflowDetailPage() {
   const { workflow: initialWorkflow } =
     useLoaderData() as WorkflowDetailLoaderData;
   const { workflow, setWorkflow } = useWorkflowLoaderWorkflow(initialWorkflow);
-  const dispatch = useAppDispatchV2();
+  const { notify } = useLocalNotification();
 
   const staffName = (() => {
     if (!workflow?.staffId) return "—";
@@ -71,12 +67,17 @@ export default function WorkflowDetailPage() {
   );
 
   const notifySuccess = useCallback(
-    (message: string) => dispatch(setSnackbarSuccess(message)),
-    [dispatch],
+    (message: string) => void notify(message, { mode: "auto-close" }),
+    [notify],
   );
   const notifyError = useCallback(
-    (message: string) => dispatch(setSnackbarError(message)),
-    [dispatch],
+    (message: string) =>
+      void notify("エラー", {
+        body: message,
+        mode: "await-interaction",
+        priority: "high",
+      }),
+    [notify],
   );
   const handleWorkflowChange = useCallback(
     (nextWorkflow: WorkflowEntity) => {
@@ -127,12 +128,16 @@ export default function WorkflowDetailPage() {
       );
       const afterComments = await updateWorkflow(commentUpdate);
       setWorkflow(afterComments as WorkflowEntity);
-      dispatch(setSnackbarSuccess("取り下げしました"));
+      void notify("取り下げしました", { mode: "auto-close" });
       setTimeout(() => navigate(-1), 1000);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow withdrawal failed:", message);
-      dispatch(setSnackbarError(message));
+      void notify("エラー", {
+        body: message,
+        mode: "await-interaction",
+        priority: "high",
+      });
     }
   };
 

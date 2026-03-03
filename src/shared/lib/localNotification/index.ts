@@ -8,4 +8,5 @@ export {
   LocalNotificationError,
   NotificationNotSupportedError,
   NotificationPermissionError,
+  WorkflowNotificationType,
 } from "./types";

@@ -54,6 +54,16 @@ export enum AttendanceNotificationType {
 }
 
 /**
+ * ワークフロー関連の通知タイプ
+ */
+export enum WorkflowNotificationType {
+  WORKFLOW_CREATED = "workflow_created",
+  WORKFLOW_APPROVED = "workflow_approved",
+  WORKFLOW_REJECTED = "workflow_rejected",
+  WORKFLOW_UPDATED = "workflow_updated",
+}
+
+/**
  * 通知タイプのメタデータ
  */
 export interface NotificationTypeMetadata {

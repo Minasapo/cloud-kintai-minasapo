@@ -8,6 +8,7 @@ import {
   NotificationPermissionError,
   NotificationPermissionStatus,
   NotificationTypeMetadata,
+  WorkflowNotificationType,
 } from "./types";
 
 const logger = createLogger("LocalNotificationManager");
@@ -281,6 +282,95 @@ export class LocalNotificationManager {
           title: "日報の提出を忘れていませんか？",
           body: `${data.date} の日報をまだ提出していません`,
           mode: "await-interaction",
+          priority: "normal",
+        };
+
+      default:
+        return baseMetadata;
+    }
+  }
+
+  /**
+   * ワークフロー関連の通知を表示（ヘルパーメソッド）
+   */
+  async showWorkflowNotification(
+    type: WorkflowNotificationType,
+    data: Record<string, string | number>,
+  ): Promise<Notification | null> {
+    const metadata = this.getWorkflowNotificationMetadata(type, data);
+
+    return this.showNotification(metadata.title, {
+      body: metadata.body,
+      icon: metadata.icon,
+      badge: metadata.badge,
+      tag: type,
+      mode: metadata.mode,
+      priority: metadata.priority,
+      requireInteraction: metadata.requireInteraction,
+      silent: false,
+    });
+  }
+
+  /**
+   * ワークフロー通知のメタデータを取得
+   */
+  private getWorkflowNotificationMetadata(
+    type: WorkflowNotificationType,
+    data: Record<string, string | number>,
+  ): NotificationTypeMetadata & { body?: string } {
+    const baseMetadata: NotificationTypeMetadata & { body?: string } = {
+      title: "",
+      icon: "📋",
+      badge: "📋",
+      mode: "await-interaction",
+      priority: "normal",
+    };
+
+    switch (type) {
+      case WorkflowNotificationType.WORKFLOW_CREATED:
+        return {
+          ...baseMetadata,
+          title: "新しい申請があります",
+          body: data.submitterName
+            ? `${data.submitterName} さんから${data.categoryLabel || "申請"}が作成されました`
+            : `新しい${data.categoryLabel || "申請"}が作成されました`,
+          mode: "await-interaction",
+          priority: "high",
+          requireInteraction: true,
+        };
+
+      case WorkflowNotificationType.WORKFLOW_APPROVED:
+        return {
+          ...baseMetadata,
+          title: "申請が承認されました",
+          body: data.approverName
+            ? `${data.approverName} さんが申請を承認しました`
+            : "申請が承認されました",
+          mode: "auto-close",
+          priority: "normal",
+          icon: "✅",
+          badge: "✅",
+        };
+
+      case WorkflowNotificationType.WORKFLOW_REJECTED:
+        return {
+          ...baseMetadata,
+          title: "申請が却下されました",
+          body: data.approverName
+            ? `${data.approverName} さんが申請を却下しました`
+            : "申請が却下されました",
+          mode: "await-interaction",
+          priority: "high",
+          icon: "❌",
+          badge: "❌",
+        };
+
+      case WorkflowNotificationType.WORKFLOW_UPDATED:
+        return {
+          ...baseMetadata,
+          title: "申請が更新されました",
+          body: `${data.categoryLabel || "申請"}が更新されました`,
+          mode: "auto-close",
           priority: "normal",
         };
 

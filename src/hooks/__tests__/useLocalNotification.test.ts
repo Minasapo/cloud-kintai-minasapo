@@ -15,14 +15,15 @@ jest.mock("@shared/lib/logger", () => ({
 
 describe("useLocalNotification", () => {
   let manager: LocalNotificationManager;
-  let originalNotification: any;
+  let originalNotification: unknown;
 
   beforeEach(() => {
     // Setup global Notification mock
-    originalNotification = (global as any).Notification;
-    (global as any).Notification = jest.fn(function (
+    const globalWithNotif = global as Record<string, unknown>;
+    originalNotification = globalWithNotif.Notification;
+    globalWithNotif.Notification = jest.fn(function (
       title: string,
-      options?: any,
+      options?: NotificationOptions,
     ) {
       return {
         title,
@@ -31,19 +32,25 @@ describe("useLocalNotification", () => {
         addEventListener: jest.fn(),
       };
     });
-    (global as any).Notification.permission = "granted";
-    (global as any).Notification.requestPermission = jest
-      .fn()
-      .mockResolvedValue("granted");
+    const mockNotification = globalWithNotif.Notification as Record<
+      string,
+      unknown
+    >;
+    mockNotification.permission = "granted";
+    mockNotification.requestPermission = jest.fn().mockResolvedValue("granted");
 
-    (LocalNotificationManager as any).instance = null;
+    const managerClass = LocalNotificationManager as unknown as Record<
+      string,
+      unknown
+    >;
+    managerClass.instance = null;
     manager = LocalNotificationManager.getInstance();
     jest.clearAllMocks();
   });
 
   afterEach(() => {
     if (originalNotification) {
-      (global as any).Notification = originalNotification;
+      (global as Record<string, unknown>).Notification = originalNotification;
     }
   });
 
@@ -72,9 +79,16 @@ describe("useLocalNotification", () => {
   });
 
   it("should request permission and update state", async () => {
-    (global as any).Notification.permission = "default";
-    const mockRequestPermission = jest.fn().mockResolvedValue("granted");
-    (global as any).Notification.requestPermission = mockRequestPermission;
+    const globalNotif = global as Record<string, unknown>;
+    const mockNotification = globalNotif.Notification as Record<
+      string,
+      unknown
+    >;
+    mockNotification.permission = "default";
+    const mockRequestPermission = jest
+      .fn()
+      .mockResolvedValue("granted" as NotificationPermission);
+    mockNotification.requestPermission = mockRequestPermission;
 
     const { result } = renderHook(() => useLocalNotification());
 
@@ -90,9 +104,16 @@ describe("useLocalNotification", () => {
       .fn()
       .mockImplementation(
         () =>
-          new Promise((resolve) => setTimeout(() => resolve("granted"), 100)),
+          new Promise<NotificationPermission>((resolve) =>
+            setTimeout(() => resolve("granted"), 100),
+          ),
       );
-    (global as any).Notification.requestPermission = mockRequestPermission;
+    const globalNotif = global as Record<string, unknown>;
+    const mockNotification = globalNotif.Notification as Record<
+      string,
+      unknown
+    >;
+    mockNotification.requestPermission = mockRequestPermission;
 
     const { result } = renderHook(() => useLocalNotification());
 
@@ -113,14 +134,19 @@ describe("useLocalNotification", () => {
   it("should handle permission request errors", async () => {
     const mockError = new Error("Permission denied");
     const mockRequestPermission = jest.fn().mockRejectedValue(mockError);
-    (global as any).Notification.requestPermission = mockRequestPermission;
+    const globalNotif = global as Record<string, unknown>;
+    const mockNotification = globalNotif.Notification as Record<
+      string,
+      unknown
+    >;
+    mockNotification.requestPermission = mockRequestPermission;
 
     const { result } = renderHook(() => useLocalNotification());
 
     await act(async () => {
       try {
         await result.current.requestPermission();
-      } catch (error) {
+      } catch {
         // Expected
       }
     });
@@ -135,8 +161,12 @@ describe("useLocalNotification", () => {
       addEventListener: jest.fn(),
     };
     const mockConstructor = jest.fn().mockReturnValue(mockNotification);
-    (mockConstructor as any).permission = "granted";
-    (global as any).Notification = mockConstructor;
+    const mockNotifWithMethods = mockConstructor as unknown as Record<
+      string,
+      unknown
+    >;
+    mockNotifWithMethods.permission = "granted";
+    (global as Record<string, unknown>).Notification = mockConstructor;
 
     const { result } = renderHook(() => useLocalNotification());
 
@@ -148,14 +178,19 @@ describe("useLocalNotification", () => {
   });
 
   it("should handle notification errors", async () => {
-    (global as any).Notification.permission = "denied";
+    const globalNotif = global as Record<string, unknown>;
+    const mockNotification = globalNotif.Notification as Record<
+      string,
+      unknown
+    >;
+    mockNotification.permission = "denied";
 
     const { result } = renderHook(() => useLocalNotification());
 
     await act(async () => {
       try {
         await result.current.notify("Test");
-      } catch (error) {
+      } catch {
         // Expected
       }
     });
@@ -169,9 +204,10 @@ describe("useLocalNotification", () => {
     // Set initial error
     await act(async () => {
       try {
-        (Notification as any).permission = "denied";
+        (Notification as unknown as Record<string, unknown>).permission =
+          "denied";
         await result.current.notify("Test");
-      } catch (error) {
+      } catch {
         // Expected
       }
     });
@@ -179,15 +215,24 @@ describe("useLocalNotification", () => {
     expect(result.current.error).toBeDefined();
 
     // Successful call
-    (global as any).Notification.permission = "granted";
-    const mockNotification = {
+    const globalNotif = global as Record<string, unknown>;
+    const mockNotification = globalNotif.Notification as Record<
+      string,
+      unknown
+    >;
+    mockNotification.permission = "granted";
+    const mockNotifObj = {
       title: "Test",
       close: jest.fn(),
       addEventListener: jest.fn(),
     };
-    const mockConstructor = jest.fn().mockReturnValue(mockNotification);
-    (mockConstructor as any).permission = "granted";
-    (global as any).Notification = mockConstructor;
+    const mockConstructor = jest.fn().mockReturnValue(mockNotifObj);
+    const mockNotifWithMethods = mockConstructor as unknown as Record<
+      string,
+      unknown
+    >;
+    mockNotifWithMethods.permission = "granted";
+    globalNotif.Notification = mockConstructor;
 
     await act(async () => {
       await result.current.notify("Test");

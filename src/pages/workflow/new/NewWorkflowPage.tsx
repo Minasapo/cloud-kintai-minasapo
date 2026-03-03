@@ -28,7 +28,6 @@ import Page from "@shared/ui/page/Page";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import {
   CATEGORY_LABELS,
@@ -42,12 +41,9 @@ import {
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
 import { parseTimeToISO } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
@@ -164,7 +160,7 @@ export default function NewWorkflowPage() {
     isAuthenticated,
     organizationId: WORKFLOW_TEMPLATE_ORGANIZATION_ID,
   });
-  const dispatch = useAppDispatchV2();
+  const { notify } = useLocalNotification();
   const { config, getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
 
   const enabledCategoryOptions = useMemo(
@@ -257,7 +253,12 @@ export default function NewWorkflowPage() {
     if (!validation.isValid) return;
     // 申請者（staff）が取れていない場合はエラー
     if (!staff?.id) {
-      dispatch(setSnackbarError("申請者情報が取得できませんでした。"));
+      void notify("エラー", {
+        body: "申請者情報が取得できませんでした。",
+        mode: "await-interaction",
+        priority: "high",
+        tag: "workflow-applicant-error",
+      });
       return;
     }
 
@@ -301,13 +302,17 @@ export default function NewWorkflowPage() {
 
     try {
       await createWorkflow(input);
-      dispatch(setSnackbarSuccess("ワークフローを作成しました。"));
+      void notify("ワークフローを作成しました。", { mode: "auto-close" });
       navigate("/workflow", { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow creation failed:", message);
       const errorMessage = extractErrorMessage(err);
-      dispatch(setSnackbarError(errorMessage));
+      void notify("エラー", {
+        body: errorMessage,
+        mode: "await-interaction",
+        priority: "high",
+      });
     }
   };
 
@@ -356,7 +361,12 @@ export default function NewWorkflowPage() {
       (template) => template.id === selectedTemplateId,
     );
     if (!targetTemplate) {
-      dispatch(setSnackbarError("テンプレートが見つかりませんでした。"));
+      void notify("エラー", {
+        body: "テンプレートが見つかりませんでした。",
+        mode: "await-interaction",
+        priority: "high",
+        tag: "workflow-template-not-found",
+      });
       return;
     }
 
