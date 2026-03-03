@@ -7,64 +7,64 @@ import { workflowDetailLoader } from "./router/loaders/workflowDetailLoader";
 import { workflowEditLoader } from "./router/loaders/workflowEditLoader";
 
 const AdminDashboardRoute = createLazyRoute(
-  () => import("./pages/admin/AdminDashboard")
+  () => import("./pages/admin/AdminDashboard"),
 );
 const AdminLayoutRoute = createLazyRoute(
-  () => import("./pages/admin/AdminLayout")
+  () => import("./pages/admin/AdminLayout"),
 );
 const DailyReportRoute = createLazyRoute(
-  () => import("./pages/attendance/daily-report/DailyReport")
+  () => import("./pages/attendance/daily-report/DailyReport"),
 );
 const AttendanceEditRoute = createLazyRoute(
-  () => import("./pages/attendance/edit/AttendanceEdit")
+  () => import("./pages/attendance/edit/AttendanceEdit"),
 );
 const AttendanceListRoute = createLazyRoute(
-  () => import("./pages/attendance/list/AttendanceListPage")
+  () => import("./pages/attendance/list/AttendanceListPage"),
 );
 const AttendanceStatisticsRoute = createLazyRoute(
-  () => import("./pages/attendance/statistics/AttendanceStatisticsPage")
+  () => import("./pages/attendance/statistics/AttendanceStatisticsPage"),
 );
 const LoginRoute = createLazyRoute(() => import("./pages/Login/Login"));
 const OfficeHomeRoute = createLazyRoute(
-  () => import("./pages/office/home/OfficeHomePage")
+  () => import("./pages/office/home/OfficeHomePage"),
 );
 const OfficeLayoutRoute = createLazyRoute(
-  () => import("./pages/office/layout/OfficeLayoutPage")
+  () => import("./pages/office/layout/OfficeLayoutPage"),
 );
 const OfficeQrRoute = createLazyRoute(
-  () => import("./pages/office/qr/OfficeQrPage")
+  () => import("./pages/office/qr/OfficeQrPage"),
 );
 const OfficeQrRegisterRoute = createLazyRoute(
-  () => import("./pages/office/qr-register/OfficeQrRegisterPage")
+  () => import("./pages/office/qr-register/OfficeQrRegisterPage"),
 );
 const DesignTokenPreviewRoute = createLazyRoute(
-  () => import("./pages/preview/DesignTokenPreviewPage")
+  () => import("./pages/preview/DesignTokenPreviewPage"),
 );
 const ProfileRoute = createLazyRoute(() => import("./pages/Profile"));
 const RegisterRoute = createLazyRoute(() => import("./pages/Register"));
 const ShiftRequestRoute = createLazyRoute(
-  () => import("./pages/shift/request")
+  () => import("./pages/shift/request"),
 );
 const ShiftCollaborativeRoute = createLazyRoute(
-  () => import("./pages/shift/collaborative")
+  () => import("./pages/shift/collaborative"),
 );
 const WorkflowDetailRoute = createLazyRoute(
   () => import("./pages/workflow/detail/WorkflowDetailPage"),
   {
     loader: workflowDetailLoader,
-  }
+  },
 );
 const WorkflowEditRoute = createLazyRoute(
   () => import("./pages/workflow/edit/WorkflowEditPage"),
   {
     loader: workflowEditLoader,
-  }
+  },
 );
 const WorkflowListRoute = createLazyRoute(
-  () => import("./pages/workflow/list/WorkflowListPage")
+  () => import("./pages/workflow/list/WorkflowListPage"),
 );
 const NewWorkflowRoute = createLazyRoute(
-  () => import("./pages/workflow/new/NewWorkflowPage")
+  () => import("./pages/workflow/new/NewWorkflowPage"),
 );
 
 const router = createBrowserRouter([

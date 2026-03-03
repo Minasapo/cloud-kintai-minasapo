@@ -13,6 +13,7 @@ NC='\033[0m' # No Color
 OSS_REPO_URL="${1:-}"
 OSS_BRANCH="${2:-main}"
 SYNC_BRANCH="oss-sync"
+OSS_PREFERRED_FILE="amplify/backend/custom/customResource1b080f88/cdk-stack.ts"
 
 if [ -z "$OSS_REPO_URL" ]; then
     echo -e "${RED}エラー: OSSリポジトリのURLを指定してください${NC}"
@@ -30,6 +31,9 @@ else
     echo -e "${YELLOW}OSS リモートは既に存在します${NC}"
     git remote set-url oss "$OSS_REPO_URL"
 fi
+
+echo -e "${YELLOW}OSS リモートの最新を取得...${NC}"
+git fetch oss
 
 # 2. 現在のブランチから oss-sync ブランチを作成/更新
 echo -e "${YELLOW}同期ブランチ ($SYNC_BRANCH) を作成/更新...${NC}"
@@ -62,7 +66,16 @@ while IFS= read -r pattern; do
     fi
 done < /tmp/oss-remove-list.txt
 
-# 4. OSS用の.gitignoreを追加
+# 4. 指定ファイルはOSS側の内容を優先採用
+echo -e "${YELLOW}OSS側優先ファイルを適用...${NC}"
+if git cat-file -e "oss/$OSS_BRANCH:$OSS_PREFERRED_FILE" 2>/dev/null; then
+    git checkout "oss/$OSS_BRANCH" -- "$OSS_PREFERRED_FILE"
+    echo "  適用: $OSS_PREFERRED_FILE (from oss/$OSS_BRANCH)"
+else
+    echo "  スキップ: oss/$OSS_BRANCH に $OSS_PREFERRED_FILE が存在しません"
+fi
+
+# 5. OSS用の.gitignoreを追加
 echo -e "${YELLOW}OSS用の設定ファイルを更新...${NC}"
 cat >> .gitignore.oss << 'EOF'
 # OSS版で追加で除外するファイル
@@ -72,15 +85,15 @@ src/aws-exports.js
 !.env.example
 EOF
 
-# 5. 変更をコミット
+# 6. 変更をコミット
+git add -A
 if git diff --cached --quiet; then
     echo -e "${YELLOW}変更はありません${NC}"
 else
-    git add -A
     git commit -m "Prepare for OSS sync: Remove sensitive files"
 fi
 
-# 6. 手動編集が必要なファイルをリスト表示
+# 7. 手動編集が必要なファイルをリスト表示
 echo -e "${GREEN}=== 次のステップ ===${NC}"
 echo -e "${YELLOW}以下のファイルを手動で確認・編集してください:${NC}"
 echo ""

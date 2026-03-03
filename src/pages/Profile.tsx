@@ -34,20 +34,16 @@ import dayjs from "dayjs";
 import { type SyntheticEvent, useContext, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   STAFF_EXTERNAL_LINKS_LIMIT,
   StaffExternalLink,
 } from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { predefinedIcons } from "@/shared/config/icons";
 import { MARGINS } from "@/shared/config/uiDimensions";
 import { createLogger } from "@/shared/lib/logger";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
 
 import { AuthContext } from "../context/AuthContext";
 
@@ -142,7 +138,7 @@ const ProfileLogoutButton = styled(Button)(({ theme }) => ({
 }));
 
 export default function Profile() {
-  const dispatch = useAppDispatchV2();
+  const { notify } = useLocalNotification();
   const { cognitoUser, signOut } = useContext(AuthContext);
   const [staff, setStaff] = useState<StaffType | null | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<ProfileTab>("general");
@@ -267,8 +263,15 @@ export default function Profile() {
       },
       externalLinks: preparedLinks,
     })
-      .then(() => dispatch(setSnackbarSuccess(MESSAGE_CODE.S05003)))
-      .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E05003)));
+      .then(() => void notify(MESSAGE_CODE.S05003, { mode: "auto-close" }))
+      .catch(
+        () =>
+          void notify("エラー", {
+            body: MESSAGE_CODE.E05003,
+            mode: "await-interaction",
+            priority: "high",
+          }),
+      );
   };
 
   const handleTabChange = (_: SyntheticEvent, value: string) => {

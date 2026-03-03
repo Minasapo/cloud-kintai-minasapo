@@ -43,20 +43,16 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import {
   loadShiftPatterns,
   saveShiftPatterns,
 } from "@/shared/lib/storage/shiftPatternStorage";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
 
 import { normalizeStatus, ShiftRequestDayStatus } from "../model/statusMapping";
 import { useShiftRequestData } from "../model/useShiftRequestData";
@@ -65,7 +61,7 @@ import { useShiftRequestPersist } from "../model/useShiftRequestPersist";
 type Status = ShiftRequestDayStatus;
 
 export default function ShiftRequestForm() {
-  const dispatch = useDispatch();
+  const { notify } = useLocalNotification();
   const { cognitoUser, loading: cognitoUserLoading } = useCognitoUser();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -105,7 +101,7 @@ export default function ShiftRequestForm() {
       requestedOff: alpha(theme.palette.warning.main, 0.3),
       auto: alpha(theme.palette.info.main, 0.18),
     }),
-    [theme]
+    [theme],
   );
   const [focusedDateKey, setFocusedDateKey] = useState<string | null>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -135,16 +131,16 @@ export default function ShiftRequestForm() {
 
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
-    [currentMonth]
+    [currentMonth],
   );
   const daysInMonth = monthStart.daysInMonth();
 
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
-        monthStart.add(i, "day")
+        monthStart.add(i, "day"),
       ),
-    [monthStart.year(), monthStart.month(), daysInMonth]
+    [monthStart.year(), monthStart.month(), daysInMonth],
   );
 
   const calendarDays = useMemo(() => {
@@ -163,7 +159,7 @@ export default function ShiftRequestForm() {
 
   const dayKeyList = useMemo(
     () => days.map((d) => d.format("YYYY-MM-DD")),
-    [days]
+    [days],
   );
 
   const {
@@ -220,13 +216,13 @@ export default function ShiftRequestForm() {
       // summary を saveFn 内で計算
       const currentSummary = {
         workDays: Object.values(selectedDates).filter(
-          (v) => v.status === "work"
+          (v) => v.status === "work",
         ).length,
         fixedOffDays: Object.values(selectedDates).filter(
-          (v) => v.status === "fixedOff"
+          (v) => v.status === "fixedOff",
         ).length,
         requestedOffDays: Object.values(selectedDates).filter(
-          (v) => v.status === "requestedOff"
+          (v) => v.status === "requestedOff",
         ).length,
       };
       await saveShiftRequest(currentSummary);
@@ -239,17 +235,26 @@ export default function ShiftRequestForm() {
       !isLoadingShiftRequest,
     delay: 2000, // 2秒のdebounce
     onSaveSuccess: () => {
-      dispatch(setSnackbarSuccess("シフトを自動保存しました"));
+      void notify("自動保存完了", {
+        body: "シフトを自動保存しました",
+        mode: "auto-close",
+        tag: "shift-auto-save-success",
+      });
     },
     onSaveError: (error) => {
       console.error("Auto-save error:", error);
-      dispatch(setSnackbarError("シフトの自動保存に失敗しました"));
+      void notify("自動保存エラー", {
+        body: "シフトの自動保存に失敗しました",
+        mode: "await-interaction",
+        priority: "high",
+        tag: "shift-auto-save-error",
+      });
     },
   });
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [selectionAnchorKey, setSelectionAnchorKey] = useState<string | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -300,7 +305,7 @@ export default function ShiftRequestForm() {
         return Array.from(merged);
       });
     },
-    [dayKeyList]
+    [dayKeyList],
   );
 
   const applyStatusToSelection = (status: Status) => {
@@ -350,7 +355,7 @@ export default function ShiftRequestForm() {
           extendSelectionRange(selectionAnchorKey, key);
         } else {
           setSelectedRowKeys((prev) =>
-            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
           );
         }
         setSelectionAnchorKey(key);
@@ -364,7 +369,7 @@ export default function ShiftRequestForm() {
       isSelectionMode,
       monthStart,
       selectionAnchorKey,
-    ]
+    ],
   );
 
   const handleWeekdayLabelClick = useCallback(
@@ -379,7 +384,7 @@ export default function ShiftRequestForm() {
       setSelectedRowKeys((prev) => {
         const prevSet = new Set(prev);
         const isColumnAlreadySelected = columnKeys.every((key) =>
-          prevSet.has(key)
+          prevSet.has(key),
         );
 
         if (isColumnAlreadySelected) {
@@ -396,7 +401,7 @@ export default function ShiftRequestForm() {
       });
       setSelectionAnchorKey(nextAnchor ?? null);
     },
-    [dayKeyList, days, isMobile, isSelectionMode, selectionAnchorKey]
+    [dayKeyList, days, isMobile, isSelectionMode, selectionAnchorKey],
   );
 
   useEffect(() => {
@@ -440,15 +445,20 @@ export default function ShiftRequestForm() {
               Object.entries(pattern.mapping).map(([weekday, status]) => [
                 Number(weekday),
                 normalizeStatus(status),
-              ])
+              ]),
             ) as Record<number, Status>,
-          }))
+          })),
         );
       } catch (error) {
         if (isMounted) {
           console.error("Failed to load shift patterns", error);
           setPatterns([]);
-          dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+          notify("エラー", {
+            body: MESSAGE_CODE.E00001,
+            mode: "await-interaction",
+            priority: "high",
+            tag: "shift-pattern-load-error",
+          });
         }
       } finally {
         if (isMounted) {
@@ -462,7 +472,7 @@ export default function ShiftRequestForm() {
     return () => {
       isMounted = false;
     };
-  }, [cognitoUser, cognitoUserLoading, dispatch]);
+  }, [cognitoUser, cognitoUserLoading, notify]);
 
   const serializePatterns = useCallback(
     (patternList: Pattern[]) =>
@@ -473,10 +483,10 @@ export default function ShiftRequestForm() {
           Object.entries(pattern.mapping).map(([weekday, status]) => [
             String(weekday),
             status,
-          ])
+          ]),
         ),
       })),
-    []
+    [],
   );
 
   const persistPatterns = useCallback(
@@ -489,10 +499,15 @@ export default function ShiftRequestForm() {
         await saveShiftPatterns(serializePatterns(nextPatterns));
       } catch (error) {
         console.error("Failed to save shift patterns", error);
-        dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+        void notify("エラー", {
+          body: MESSAGE_CODE.E00001,
+          mode: "await-interaction",
+          priority: "high",
+          tag: "shift-pattern-save-error",
+        });
       }
     },
-    [cognitoUser, cognitoUserLoading, dispatch, serializePatterns]
+    [cognitoUser, cognitoUserLoading, notify, serializePatterns],
   );
 
   const applyPattern = (pattern: Pattern) => {
@@ -526,19 +541,19 @@ export default function ShiftRequestForm() {
   const workCount = useMemo(
     () =>
       Object.values(selectedDates).filter((v) => v.status === "work").length,
-    [selectedDates]
+    [selectedDates],
   );
   const fixedOffCount = useMemo(
     () =>
       Object.values(selectedDates).filter((v) => v.status === "fixedOff")
         .length,
-    [selectedDates]
+    [selectedDates],
   );
   const requestedOffCount = useMemo(
     () =>
       Object.values(selectedDates).filter((v) => v.status === "requestedOff")
         .length,
-    [selectedDates]
+    [selectedDates],
   );
 
   const summary = useMemo(
@@ -547,7 +562,7 @@ export default function ShiftRequestForm() {
       fixedOffDays: fixedOffCount,
       requestedOffDays: requestedOffCount,
     }),
-    [fixedOffCount, requestedOffCount, workCount]
+    [fixedOffCount, requestedOffCount, workCount],
   );
 
   const interactionDisabled =
@@ -752,7 +767,11 @@ export default function ShiftRequestForm() {
   return (
     <Container
       disableGutters={isMobile}
-      sx={{ py: { xs: 2, sm: 3 }, pb: isMobile ? 10 : 3, px: { xs: 1.5, sm: 2 } }}
+      sx={{
+        py: { xs: 2, sm: 3 },
+        pb: isMobile ? 10 : 3,
+        px: { xs: 1.5, sm: 2 },
+      }}
     >
       <Paper sx={{ p: { xs: 1.5, sm: 2.5 } }}>
         <Typography variant="h1">希望シフト</Typography>
@@ -929,7 +948,7 @@ export default function ShiftRequestForm() {
                     const status = selectedDates[key]?.status;
                     const isCurrentMonthDay = dayValue.isSame(
                       monthStart,
-                      "month"
+                      "month",
                     );
                     const isFocused = focusedDateKey === key;
                     const isSelectedDate = selectedRowKeys.includes(key);
@@ -939,13 +958,13 @@ export default function ShiftRequestForm() {
                     const boxShadowValue = isFocused
                       ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.8)}`
                       : isSelectedDate
-                      ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.5)}`
-                      : undefined;
+                        ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.5)}`
+                        : undefined;
                     const borderColor = isFocused
                       ? theme.palette.primary.main
                       : isSelectedDate
-                      ? alpha(theme.palette.primary.main, 0.5)
-                      : "divider";
+                        ? alpha(theme.palette.primary.main, 0.5)
+                        : "divider";
                     return (
                       <Box
                         key={`calendar-${key}`}
@@ -954,7 +973,10 @@ export default function ShiftRequestForm() {
                         }
                         sx={{
                           position: "relative",
-                          minHeight: { xs: 42, sm: PANEL_HEIGHTS.FORM_ITEM_MIN },
+                          minHeight: {
+                            xs: 42,
+                            sm: PANEL_HEIGHTS.FORM_ITEM_MIN,
+                          },
                           px: { xs: 0.25, sm: 0.5 },
                           py: { xs: 0.25, sm: 0.5 },
                           borderRadius: 1,
@@ -980,8 +1002,8 @@ export default function ShiftRequestForm() {
                         {status && (
                           <Typography variant="caption" sx={{ fontSize: 10 }}>
                             {isMobile
-                              ? statusMobileLabelMap[status] ??
-                                statusLabelMap[status]
+                              ? (statusMobileLabelMap[status] ??
+                                statusLabelMap[status])
                               : statusLabelMap[status]}
                           </Typography>
                         )}
@@ -1091,7 +1113,7 @@ export default function ShiftRequestForm() {
                               <TableRow>
                                 {weekdayLabels.map((_, idx) => {
                                   const normalized = normalizeStatus(
-                                    p.mapping[idx] as string
+                                    p.mapping[idx] as string,
                                   );
                                   return (
                                     <TableCell
@@ -1100,8 +1122,8 @@ export default function ShiftRequestForm() {
                                       sx={{ py: 0.5, whiteSpace: "nowrap" }}
                                     >
                                       {isMobile
-                                        ? statusMobileLabelMap[normalized] ??
-                                          statusLabelMap[normalized]
+                                        ? (statusMobileLabelMap[normalized] ??
+                                          statusLabelMap[normalized])
                                         : statusLabelMap[normalized]}
                                     </TableCell>
                                   );
