@@ -10,7 +10,7 @@ export class cdkStack extends cdk.Stack {
     scope: Construct,
     id: string,
     props?: cdk.StackProps,
-    amplifyResourceProps?: AmplifyHelpers.AmplifyResourceProps
+    amplifyResourceProps?: AmplifyHelpers.AmplifyResourceProps,
   ) {
     super(scope, id, props);
     /* Do not remove - Amplify CLI automatically injects the current deployment environment in this input parameter */
@@ -26,7 +26,7 @@ export class cdkStack extends cdk.Stack {
       this,
       "keyAdmin",
       // `amplify-backup-${AmplifyHelpers.getProjectInfo().envName}`
-      "amplify-dev"
+      "amplify-cloud-kintai-user",
     );
 
     const root = new iam.AccountRootPrincipal();
@@ -37,11 +37,11 @@ export class cdkStack extends cdk.Stack {
       assumedBy: new iam.AccountPrincipal(cdk.Stack.of(this).account),
     });
     backupAdmin.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AWSBackupFullAccess")
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AWSBackupFullAccess"),
     );
 
     const { envName } = AmplifyHelpers.getProjectInfo();
-    const roleName = envName === "main" ? "amplifyconsole-backend-role" : "ap-northeast-1_UvGocGkQJ_Full-access";
+    const roleName = "amplifyconsole-backend-role";
     const keyRole = iam.Role.fromRoleName(this, "RunUser", roleName);
 
     const key = new kms.Key(
@@ -55,15 +55,13 @@ export class cdkStack extends cdk.Stack {
         description:
           "KMS key for encrypting the objects in your AWS Backup Vault",
         enableKeyRotation: false,
-          admins: [backupAdmin, keyAdmin, root],
+        admins: [backupAdmin, keyAdmin, root],
         policy: new iam.PolicyDocument({
-            statements: [
+          statements: [
             new iam.PolicyStatement({
-                actions: [
-                    "kms:*"
-                ],
-                principals: [keyAdmin, root],
-                resources: ["*"],
+              actions: ["kms:*"],
+              principals: [keyAdmin, root],
+              resources: ["*"],
             }),
             new iam.PolicyStatement({
               actions: [
@@ -96,7 +94,7 @@ export class cdkStack extends cdk.Stack {
             }),
           ],
         }),
-      }
+      },
     );
 
     const plan = new backup.BackupPlan(this, "amplify-appsync-dyanmodb-plan", {
