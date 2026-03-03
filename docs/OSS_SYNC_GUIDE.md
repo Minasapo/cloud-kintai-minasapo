@@ -31,6 +31,7 @@ chmod +x scripts/sync-to-oss.sh
 - `oss-sync` ブランチの作成
 - 機密情報を含むファイルの削除（AWS設定、環境変数、ビルド成果物など）
 - OSS同期関連ファイルの削除（`docs/OSS_SYNC_GUIDE.md`, `scripts/sync-to-oss.sh` など）
+- `amplify/backend/custom/customResource1b080f88/cdk-stack.ts` は OSS 側（`oss/main`）の内容を優先採用
 - OSS用の.gitignoreの適用
 
 ### 2. 手動編集が必要なファイル
