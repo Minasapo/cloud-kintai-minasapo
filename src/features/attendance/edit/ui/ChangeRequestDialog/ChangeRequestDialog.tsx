@@ -47,7 +47,7 @@ export default function ChangeRequestDialog({
 }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { notify } = useLocalNotification();
+  useLocalNotification();
   const [comment, setComment] = useState<string | undefined>(undefined);
   const [manualClose, setManualClose] = useState(false);
 

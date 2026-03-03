@@ -19,9 +19,7 @@ import {
 } from "@/shared/lib/localNotification";
 import { createLogger } from "@/shared/lib/logger";
 import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
-import {
-  setSnackbarError,
-} from "@/shared/lib/store/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 const logger = createLogger("useAdminAttendanceChangeRequests");
 
@@ -43,7 +41,7 @@ export const useAdminAttendanceChangeRequests = ({
   updateAttendance,
 }: UseAdminAttendanceChangeRequestsParams) => {
   const dispatch = useDispatch();
-  const { notify } = useLocalNotification();
+  useLocalNotification();
   const [quickViewAttendance, setQuickViewAttendance] =
     useState<Attendance | null>(null);
   const [quickViewChangeRequest, setQuickViewChangeRequest] =
