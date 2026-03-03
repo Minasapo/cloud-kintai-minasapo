@@ -9,6 +9,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
@@ -17,6 +18,7 @@ import type { WorkflowCommentMessage } from "../types";
 
 type Props = {
   title?: string;
+  threadKey?: string;
   messages: WorkflowCommentMessage[];
   staffs: StaffType[];
   currentStaff?: StaffType;
@@ -29,8 +31,14 @@ type Props = {
   formatSender: (sender?: string) => string;
 };
 
+const INITIAL_VISIBLE_COUNT = 30;
+const LOAD_MORE_COUNT = 20;
+const TOP_THRESHOLD_PX = 32;
+const BOTTOM_STICK_THRESHOLD_PX = 64;
+
 export default function WorkflowCommentThread({
   title = "コメント",
+  threadKey,
   messages,
   staffs,
   currentStaff,
@@ -42,6 +50,62 @@ export default function WorkflowCommentThread({
   sending,
   formatSender,
 }: Props) {
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+  const [prependAnchorHeight, setPrependAnchorHeight] = useState<number | null>(
+    null,
+  );
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const stickToBottomRef = useRef(true);
+
+  const visibleMessages = useMemo(() => {
+    const start = Math.max(messages.length - visibleCount, 0);
+    return messages.slice(start);
+  }, [messages, visibleCount]);
+
+  const hasOlderMessages = visibleMessages.length < messages.length;
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_COUNT);
+    setPrependAnchorHeight(null);
+    stickToBottomRef.current = true;
+  }, [threadKey]);
+
+  useLayoutEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    if (prependAnchorHeight !== null) {
+      const heightDiff = container.scrollHeight - prependAnchorHeight;
+      container.scrollTop += heightDiff;
+      setPrependAnchorHeight(null);
+      return;
+    }
+
+    if (stickToBottomRef.current) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [visibleMessages, prependAnchorHeight]);
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    stickToBottomRef.current = distanceFromBottom <= BOTTOM_STICK_THRESHOLD_PX;
+
+    if (
+      container.scrollTop <= TOP_THRESHOLD_PX &&
+      hasOlderMessages &&
+      prependAnchorHeight === null
+    ) {
+      setPrependAnchorHeight(container.scrollHeight);
+      setVisibleCount((prev) =>
+        Math.min(prev + LOAD_MORE_COUNT, messages.length),
+      );
+    }
+  };
+
   return (
     <Box sx={{ mt: { xs: 2, sm: 0 } }}>
       <Typography variant="h6" sx={{ mb: 1 }}>
@@ -49,6 +113,8 @@ export default function WorkflowCommentThread({
       </Typography>
       <Paper
         variant="outlined"
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
         sx={{
           p: 2,
           maxHeight: PANEL_HEIGHTS.SCROLLABLE_MAX,
@@ -57,7 +123,7 @@ export default function WorkflowCommentThread({
         }}
       >
         <Stack spacing={2}>
-          {messages.map((m) => {
+          {visibleMessages.map((m) => {
             const displayName = formatSender(m.sender);
             const staff = m.staffId
               ? staffs.find((s) => s.id === m.staffId)
