@@ -285,6 +285,17 @@ export class LocalNotificationManager {
           priority: "normal",
         };
 
+      case AttendanceNotificationType.ATTENDANCE_CHANGE_REQUEST_APPROVED:
+        return {
+          ...baseMetadata,
+          title: "勤怠情報の変更リクエストを承認しました",
+          body: `${data.date} の勤怠情報の変更リクエストが承認されました`,
+          mode: "await-interaction",
+          priority: "high",
+          icon: "✅",
+          badge: "✅",
+        };
+
       default:
         return baseMetadata;
     }
