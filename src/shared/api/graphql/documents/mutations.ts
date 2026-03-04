@@ -1436,6 +1436,81 @@ export const deleteWorkflowTemplate = /* GraphQL */ `mutation DeleteWorkflowTemp
   APITypes.DeleteWorkflowTemplateMutationVariables,
   APITypes.DeleteWorkflowTemplateMutation
 >;
+export const createWorkflowNotificationEvent = /* GraphQL */ `mutation CreateWorkflowNotificationEvent(
+  $input: CreateWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  createWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateWorkflowNotificationEventMutationVariables,
+  APITypes.CreateWorkflowNotificationEventMutation
+>;
+export const updateWorkflowNotificationEvent = /* GraphQL */ `mutation UpdateWorkflowNotificationEvent(
+  $input: UpdateWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  updateWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowNotificationEventMutationVariables,
+  APITypes.UpdateWorkflowNotificationEventMutation
+>;
+export const deleteWorkflowNotificationEvent = /* GraphQL */ `mutation DeleteWorkflowNotificationEvent(
+  $input: DeleteWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  deleteWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowNotificationEventMutationVariables,
+  APITypes.DeleteWorkflowNotificationEventMutation
+>;
 export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
   $input: CreateOperationLogInput!
   $condition: ModelOperationLogConditionInput

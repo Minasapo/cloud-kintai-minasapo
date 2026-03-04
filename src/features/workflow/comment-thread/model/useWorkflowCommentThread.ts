@@ -115,6 +115,9 @@ const useWorkflowCommentThread = ({
         const updated = await submitWorkflowComment({
           workflowId: workflow.id,
           newComment,
+          actorStaffId: senderStaff?.id ?? "system",
+          actorDisplayName: senderDisplay,
+          staffs,
         });
         onWorkflowChange(updated);
         setMessages(mapCommentsToMessages(updated.comments || []));

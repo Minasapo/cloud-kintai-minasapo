@@ -213,7 +213,7 @@ export default function WorkflowDetailPage() {
 
               <Grid item xs={12} sm={5}>
                 <WorkflowCommentThread
-                  threadKey={workflow?.id}
+                  key={workflow?.id ?? "workflow-comment-thread"}
                   messages={messages}
                   staffs={staffs}
                   currentStaff={currentStaff}

@@ -1367,6 +1367,78 @@ export const onDeleteWorkflowTemplate = /* GraphQL */ `subscription OnDeleteWork
   APITypes.OnDeleteWorkflowTemplateSubscriptionVariables,
   APITypes.OnDeleteWorkflowTemplateSubscription
 >;
+export const onCreateWorkflowNotificationEvent = /* GraphQL */ `subscription OnCreateWorkflowNotificationEvent(
+  $filter: ModelSubscriptionWorkflowNotificationEventFilterInput
+) {
+  onCreateWorkflowNotificationEvent(filter: $filter) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateWorkflowNotificationEventSubscriptionVariables,
+  APITypes.OnCreateWorkflowNotificationEventSubscription
+>;
+export const onUpdateWorkflowNotificationEvent = /* GraphQL */ `subscription OnUpdateWorkflowNotificationEvent(
+  $filter: ModelSubscriptionWorkflowNotificationEventFilterInput
+) {
+  onUpdateWorkflowNotificationEvent(filter: $filter) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateWorkflowNotificationEventSubscriptionVariables,
+  APITypes.OnUpdateWorkflowNotificationEventSubscription
+>;
+export const onDeleteWorkflowNotificationEvent = /* GraphQL */ `subscription OnDeleteWorkflowNotificationEvent(
+  $filter: ModelSubscriptionWorkflowNotificationEventFilterInput
+) {
+  onDeleteWorkflowNotificationEvent(filter: $filter) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteWorkflowNotificationEventSubscriptionVariables,
+  APITypes.OnDeleteWorkflowNotificationEventSubscription
+>;
 export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperationLog(
   $filter: ModelSubscriptionOperationLogFilterInput
 ) {

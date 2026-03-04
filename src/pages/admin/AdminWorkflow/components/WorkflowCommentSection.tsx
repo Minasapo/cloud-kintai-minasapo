@@ -27,6 +27,7 @@ type StaffLike = {
   cognitoUserId?: string | null;
   familyName?: string | null;
   givenName?: string | null;
+  role?: string | null;
 };
 
 type CognitoUserLike = {
@@ -221,6 +222,9 @@ export default function WorkflowCommentSection({
       const updated = await submitWorkflowComment({
         workflowId: workflow.id,
         newComment,
+        actorStaffId: currentStaffLocal?.id ?? "system",
+        actorDisplayName: senderDisplay,
+        staffs,
       });
       onWorkflowUpdated(updated);
       setMessages(commentsToMessages(updated.comments || []));

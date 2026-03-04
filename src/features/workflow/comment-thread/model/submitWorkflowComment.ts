@@ -10,6 +10,10 @@ import type {
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 
+import {
+  NotificationStaff,
+  publishWorkflowCommentNotifications,
+} from "@/features/workflow/notification/model/workflowNotificationEventService";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { createLogger } from "@/shared/lib/logger";
 
@@ -20,6 +24,9 @@ type WorkflowData = NonNullable<GetWorkflowQuery["getWorkflow"]>;
 type SubmitWorkflowCommentArgs = {
   workflowId: string;
   newComment: WorkflowCommentInput;
+  actorStaffId: string;
+  actorDisplayName: string;
+  staffs: NotificationStaff[];
 };
 
 const MAX_RETRIES = 3;
@@ -48,6 +55,9 @@ const wait = async (milliseconds: number) =>
 export const submitWorkflowComment = async ({
   workflowId,
   newComment,
+  actorStaffId,
+  actorDisplayName,
+  staffs,
 }: SubmitWorkflowCommentArgs): Promise<WorkflowData> => {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt += 1) {
     const latestResult = (await graphqlClient.graphql({
@@ -110,6 +120,14 @@ export const submitWorkflowComment = async ({
     if (!updatedWorkflow) {
       throw new Error("コメント更新結果を取得できませんでした");
     }
+
+    await publishWorkflowCommentNotifications({
+      workflow: updatedWorkflow as WorkflowData,
+      actorStaffId,
+      actorDisplayName,
+      commentId: newComment.id,
+      staffs,
+    });
 
     return updatedWorkflow as WorkflowData;
   }

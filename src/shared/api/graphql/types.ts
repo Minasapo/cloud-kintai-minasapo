@@ -1264,6 +1264,99 @@ export type DeleteWorkflowTemplateInput = {
   id: string,
 };
 
+export type CreateWorkflowNotificationEventInput = {
+  id?: string | null,
+  recipientStaffId: string,
+  actorStaffId: string,
+  workflowId: string,
+  eventType: WorkflowNotificationEventType,
+  commentId?: string | null,
+  title: string,
+  body: string,
+  isRead: boolean,
+  readAt?: string | null,
+  eventAt: string,
+};
+
+export enum WorkflowNotificationEventType {
+  WORKFLOW_COMMENT = "WORKFLOW_COMMENT",
+}
+
+
+export type ModelWorkflowNotificationEventConditionInput = {
+  recipientStaffId?: ModelStringInput | null,
+  actorStaffId?: ModelStringInput | null,
+  workflowId?: ModelIDInput | null,
+  eventType?: ModelWorkflowNotificationEventTypeInput | null,
+  commentId?: ModelIDInput | null,
+  title?: ModelStringInput | null,
+  body?: ModelStringInput | null,
+  isRead?: ModelBooleanInput | null,
+  readAt?: ModelStringInput | null,
+  eventAt?: ModelStringInput | null,
+  and?: Array< ModelWorkflowNotificationEventConditionInput | null > | null,
+  or?: Array< ModelWorkflowNotificationEventConditionInput | null > | null,
+  not?: ModelWorkflowNotificationEventConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelIDInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
+};
+
+export type ModelWorkflowNotificationEventTypeInput = {
+  eq?: WorkflowNotificationEventType | null,
+  ne?: WorkflowNotificationEventType | null,
+};
+
+export type WorkflowNotificationEvent = {
+  __typename: "WorkflowNotificationEvent",
+  id: string,
+  recipientStaffId: string,
+  actorStaffId: string,
+  workflowId: string,
+  eventType: WorkflowNotificationEventType,
+  commentId?: string | null,
+  title: string,
+  body: string,
+  isRead: boolean,
+  readAt?: string | null,
+  eventAt: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateWorkflowNotificationEventInput = {
+  id: string,
+  recipientStaffId?: string | null,
+  actorStaffId?: string | null,
+  workflowId?: string | null,
+  eventType?: WorkflowNotificationEventType | null,
+  commentId?: string | null,
+  title?: string | null,
+  body?: string | null,
+  isRead?: boolean | null,
+  readAt?: string | null,
+  eventAt?: string | null,
+};
+
+export type DeleteWorkflowNotificationEventInput = {
+  id: string,
+};
+
 export type CreateOperationLogInput = {
   id?: string | null,
   staffId?: string | null,
@@ -1368,22 +1461,6 @@ export type ModelAuditLogConditionInput = {
   or?: Array< ModelAuditLogConditionInput | null > | null,
   not?: ModelAuditLogConditionInput | null,
   updatedAt?: ModelStringInput | null,
-};
-
-export type ModelIDInput = {
-  ne?: string | null,
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  contains?: string | null,
-  notContains?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  size?: ModelSizeInput | null,
 };
 
 export type AuditLog = {
@@ -1860,6 +1937,31 @@ export type ModelWorkflowTemplateConnection = {
   nextToken?: string | null,
 };
 
+export type ModelWorkflowNotificationEventFilterInput = {
+  id?: ModelIDInput | null,
+  recipientStaffId?: ModelStringInput | null,
+  actorStaffId?: ModelStringInput | null,
+  workflowId?: ModelIDInput | null,
+  eventType?: ModelWorkflowNotificationEventTypeInput | null,
+  commentId?: ModelIDInput | null,
+  title?: ModelStringInput | null,
+  body?: ModelStringInput | null,
+  isRead?: ModelBooleanInput | null,
+  readAt?: ModelStringInput | null,
+  eventAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelWorkflowNotificationEventFilterInput | null > | null,
+  or?: Array< ModelWorkflowNotificationEventFilterInput | null > | null,
+  not?: ModelWorkflowNotificationEventFilterInput | null,
+};
+
+export type ModelWorkflowNotificationEventConnection = {
+  __typename: "ModelWorkflowNotificationEventConnection",
+  items:  Array<WorkflowNotificationEvent | null >,
+  nextToken?: string | null,
+};
+
 export type ModelOperationLogFilterInput = {
   id?: ModelIDInput | null,
   staffId?: ModelStringInput | null,
@@ -2188,6 +2290,24 @@ export type ModelSubscriptionWorkflowTemplateFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionWorkflowTemplateFilterInput | null > | null,
   or?: Array< ModelSubscriptionWorkflowTemplateFilterInput | null > | null,
+};
+
+export type ModelSubscriptionWorkflowNotificationEventFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  recipientStaffId?: ModelSubscriptionStringInput | null,
+  actorStaffId?: ModelSubscriptionStringInput | null,
+  workflowId?: ModelSubscriptionIDInput | null,
+  eventType?: ModelSubscriptionStringInput | null,
+  commentId?: ModelSubscriptionIDInput | null,
+  title?: ModelSubscriptionStringInput | null,
+  body?: ModelSubscriptionStringInput | null,
+  isRead?: ModelSubscriptionBooleanInput | null,
+  readAt?: ModelSubscriptionStringInput | null,
+  eventAt?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionWorkflowNotificationEventFilterInput | null > | null,
+  or?: Array< ModelSubscriptionWorkflowNotificationEventFilterInput | null > | null,
 };
 
 export type ModelSubscriptionOperationLogFilterInput = {
@@ -3626,6 +3746,78 @@ export type DeleteWorkflowTemplateMutation = {
     title: string,
     content: string,
     organizationId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateWorkflowNotificationEventMutationVariables = {
+  input: CreateWorkflowNotificationEventInput,
+  condition?: ModelWorkflowNotificationEventConditionInput | null,
+};
+
+export type CreateWorkflowNotificationEventMutation = {
+  createWorkflowNotificationEvent?:  {
+    __typename: "WorkflowNotificationEvent",
+    id: string,
+    recipientStaffId: string,
+    actorStaffId: string,
+    workflowId: string,
+    eventType: WorkflowNotificationEventType,
+    commentId?: string | null,
+    title: string,
+    body: string,
+    isRead: boolean,
+    readAt?: string | null,
+    eventAt: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateWorkflowNotificationEventMutationVariables = {
+  input: UpdateWorkflowNotificationEventInput,
+  condition?: ModelWorkflowNotificationEventConditionInput | null,
+};
+
+export type UpdateWorkflowNotificationEventMutation = {
+  updateWorkflowNotificationEvent?:  {
+    __typename: "WorkflowNotificationEvent",
+    id: string,
+    recipientStaffId: string,
+    actorStaffId: string,
+    workflowId: string,
+    eventType: WorkflowNotificationEventType,
+    commentId?: string | null,
+    title: string,
+    body: string,
+    isRead: boolean,
+    readAt?: string | null,
+    eventAt: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteWorkflowNotificationEventMutationVariables = {
+  input: DeleteWorkflowNotificationEventInput,
+  condition?: ModelWorkflowNotificationEventConditionInput | null,
+};
+
+export type DeleteWorkflowNotificationEventMutation = {
+  deleteWorkflowNotificationEvent?:  {
+    __typename: "WorkflowNotificationEvent",
+    id: string,
+    recipientStaffId: string,
+    actorStaffId: string,
+    workflowId: string,
+    eventType: WorkflowNotificationEventType,
+    commentId?: string | null,
+    title: string,
+    body: string,
+    isRead: boolean,
+    readAt?: string | null,
+    eventAt: string,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5203,6 +5395,122 @@ export type WorkflowTemplatesByOrganizationIdQuery = {
       title: string,
       content: string,
       organizationId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetWorkflowNotificationEventQueryVariables = {
+  id: string,
+};
+
+export type GetWorkflowNotificationEventQuery = {
+  getWorkflowNotificationEvent?:  {
+    __typename: "WorkflowNotificationEvent",
+    id: string,
+    recipientStaffId: string,
+    actorStaffId: string,
+    workflowId: string,
+    eventType: WorkflowNotificationEventType,
+    commentId?: string | null,
+    title: string,
+    body: string,
+    isRead: boolean,
+    readAt?: string | null,
+    eventAt: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListWorkflowNotificationEventsQueryVariables = {
+  filter?: ModelWorkflowNotificationEventFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListWorkflowNotificationEventsQuery = {
+  listWorkflowNotificationEvents?:  {
+    __typename: "ModelWorkflowNotificationEventConnection",
+    items:  Array< {
+      __typename: "WorkflowNotificationEvent",
+      id: string,
+      recipientStaffId: string,
+      actorStaffId: string,
+      workflowId: string,
+      eventType: WorkflowNotificationEventType,
+      commentId?: string | null,
+      title: string,
+      body: string,
+      isRead: boolean,
+      readAt?: string | null,
+      eventAt: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type WorkflowNotificationEventsByRecipientQueryVariables = {
+  recipientStaffId: string,
+  eventAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelWorkflowNotificationEventFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type WorkflowNotificationEventsByRecipientQuery = {
+  workflowNotificationEventsByRecipient?:  {
+    __typename: "ModelWorkflowNotificationEventConnection",
+    items:  Array< {
+      __typename: "WorkflowNotificationEvent",
+      id: string,
+      recipientStaffId: string,
+      actorStaffId: string,
+      workflowId: string,
+      eventType: WorkflowNotificationEventType,
+      commentId?: string | null,
+      title: string,
+      body: string,
+      isRead: boolean,
+      readAt?: string | null,
+      eventAt: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type WorkflowNotificationEventsByWorkflowQueryVariables = {
+  workflowId: string,
+  eventAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelWorkflowNotificationEventFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type WorkflowNotificationEventsByWorkflowQuery = {
+  workflowNotificationEventsByWorkflow?:  {
+    __typename: "ModelWorkflowNotificationEventConnection",
+    items:  Array< {
+      __typename: "WorkflowNotificationEvent",
+      id: string,
+      recipientStaffId: string,
+      actorStaffId: string,
+      workflowId: string,
+      eventType: WorkflowNotificationEventType,
+      commentId?: string | null,
+      title: string,
+      body: string,
+      isRead: boolean,
+      readAt?: string | null,
+      eventAt: string,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -6808,6 +7116,75 @@ export type OnDeleteWorkflowTemplateSubscription = {
     title: string,
     content: string,
     organizationId: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateWorkflowNotificationEventSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowNotificationEventFilterInput | null,
+};
+
+export type OnCreateWorkflowNotificationEventSubscription = {
+  onCreateWorkflowNotificationEvent?:  {
+    __typename: "WorkflowNotificationEvent",
+    id: string,
+    recipientStaffId: string,
+    actorStaffId: string,
+    workflowId: string,
+    eventType: WorkflowNotificationEventType,
+    commentId?: string | null,
+    title: string,
+    body: string,
+    isRead: boolean,
+    readAt?: string | null,
+    eventAt: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateWorkflowNotificationEventSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowNotificationEventFilterInput | null,
+};
+
+export type OnUpdateWorkflowNotificationEventSubscription = {
+  onUpdateWorkflowNotificationEvent?:  {
+    __typename: "WorkflowNotificationEvent",
+    id: string,
+    recipientStaffId: string,
+    actorStaffId: string,
+    workflowId: string,
+    eventType: WorkflowNotificationEventType,
+    commentId?: string | null,
+    title: string,
+    body: string,
+    isRead: boolean,
+    readAt?: string | null,
+    eventAt: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteWorkflowNotificationEventSubscriptionVariables = {
+  filter?: ModelSubscriptionWorkflowNotificationEventFilterInput | null,
+};
+
+export type OnDeleteWorkflowNotificationEventSubscription = {
+  onDeleteWorkflowNotificationEvent?:  {
+    __typename: "WorkflowNotificationEvent",
+    id: string,
+    recipientStaffId: string,
+    actorStaffId: string,
+    workflowId: string,
+    eventType: WorkflowNotificationEventType,
+    commentId?: string | null,
+    title: string,
+    body: string,
+    isRead: boolean,
+    readAt?: string | null,
+    eventAt: string,
     createdAt: string,
     updatedAt: string,
   } | null,
