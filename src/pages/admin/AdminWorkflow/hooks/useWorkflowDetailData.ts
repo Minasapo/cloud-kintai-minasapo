@@ -5,7 +5,7 @@ import {
   OnUpdateWorkflowSubscription,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { subscribeWorkflowCommentNotifications } from "@/features/workflow/notification/model/workflowNotificationEventService";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
@@ -27,6 +27,24 @@ export const useWorkflowDetailData = (
   > | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastNotifiedCommentIdRef = useRef<string | null>(null);
+
+  const notifyNewComment = useCallback(
+    (commentId?: string | null) => {
+      if (!options?.onNewComment) return;
+
+      if (commentId && lastNotifiedCommentIdRef.current === commentId) {
+        return;
+      }
+
+      if (commentId) {
+        lastNotifiedCommentIdRef.current = commentId;
+      }
+
+      options.onNewComment();
+    },
+    [options?.onNewComment],
+  );
 
   const fetchWorkflow = useCallback(async () => {
     if (!id) return;
@@ -89,6 +107,15 @@ export const useWorkflowDetailData = (
             commentCount: updatedWorkflow.comments?.length ?? 0,
           });
 
+          const latestComment =
+            updatedWorkflow.comments?.[updatedWorkflow.comments.length - 1];
+          const isOwnComment =
+            Boolean(options?.currentStaffId) &&
+            latestComment?.staffId === options?.currentStaffId;
+          if (!isOwnComment && latestComment?.id) {
+            notifyNewComment(latestComment.id);
+          }
+
           setWorkflow(
             updatedWorkflow as NonNullable<GetWorkflowQuery["getWorkflow"]>,
           );
@@ -102,7 +129,7 @@ export const useWorkflowDetailData = (
       logger.info("Unsubscribing from workflow update subscription:", { id });
       subscription.unsubscribe();
     };
-  }, [id]);
+  }, [id, notifyNewComment, options?.currentStaffId]);
 
   useEffect(() => {
     if (!id || !options?.currentStaffId || !options?.onNewComment) return;
@@ -115,8 +142,8 @@ export const useWorkflowDetailData = (
     const unsubscribe = subscribeWorkflowCommentNotifications({
       workflowId: id,
       recipientStaffId: options.currentStaffId,
-      onReceived: () => {
-        options.onNewComment?.();
+      onReceived: (event) => {
+        notifyNewComment(event.commentId);
       },
       onError: (subscriptionError) => {
         logger.error(
@@ -133,7 +160,7 @@ export const useWorkflowDetailData = (
       });
       unsubscribe();
     };
-  }, [id, options?.currentStaffId, options?.onNewComment]);
+  }, [id, notifyNewComment, options?.currentStaffId, options?.onNewComment]);
 
   useEffect(() => {
     void fetchWorkflow();
