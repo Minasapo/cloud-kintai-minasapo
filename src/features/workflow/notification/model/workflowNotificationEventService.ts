@@ -187,7 +187,7 @@ export const publishWorkflowCommentNotifications = async ({
 };
 
 type SubscribeWorkflowCommentNotificationsArgs = {
-  workflowId: string;
+  workflowId?: string;
   recipientStaffId: string;
   onReceived: (
     event: NonNullable<
@@ -203,14 +203,19 @@ export const subscribeWorkflowCommentNotifications = ({
   onReceived,
   onError,
 }: SubscribeWorkflowCommentNotificationsArgs) => {
+  const filter: Record<string, unknown> = {
+    recipientStaffId: { eq: recipientStaffId },
+    eventType: { eq: "WORKFLOW_COMMENT" },
+  };
+
+  if (workflowId) {
+    filter.workflowId = { eq: workflowId };
+  }
+
   const observable = graphqlClient.graphql({
     query: onCreateWorkflowNotificationEvent,
     variables: {
-      filter: {
-        workflowId: { eq: workflowId },
-        recipientStaffId: { eq: recipientStaffId },
-        eventType: { eq: "WORKFLOW_COMMENT" },
-      },
+      filter,
     },
     authMode: "userPool",
   }) as WorkflowNotificationObservable;
