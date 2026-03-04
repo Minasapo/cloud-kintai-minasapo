@@ -1,4 +1,7 @@
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  StaffRole,
+  useStaffs,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import { updateWorkflowNotificationEvent } from "@shared/api/graphql/documents/mutations";
 import { workflowNotificationEventsByRecipient } from "@shared/api/graphql/documents/queries";
 import {
@@ -34,7 +37,8 @@ const sortByEventAtDesc = (
 ) => new Date(right.eventAt).getTime() - new Date(left.eventAt).getTime();
 
 export const useWorkflowNotificationInbox = () => {
-  const { authStatus, cognitoUser } = useContext(AuthContext);
+  const { authStatus, cognitoUser, isCognitoUserRole } =
+    useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { staffs } = useStaffs({ isAuthenticated });
 
@@ -45,7 +49,9 @@ export const useWorkflowNotificationInbox = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [nextToken, setNextToken] = useState<string | null>(null);
+  const [nextTokensByRecipient, setNextTokensByRecipient] = useState<
+    Record<string, string | null>
+  >({});
 
   const currentStaffId = useMemo(() => {
     if (!isAuthenticated || !cognitoUser?.id) return null;
@@ -54,21 +60,50 @@ export const useWorkflowNotificationInbox = () => {
     );
   }, [cognitoUser?.id, isAuthenticated, staffs]);
 
-  const fetchUnreadCount = useCallback(async (recipientStaffId: string) => {
-    let total = 0;
-    let cursor: string | null = null;
+  const isAdminWatcher = useMemo(
+    () =>
+      isCognitoUserRole(StaffRole.ADMIN) ||
+      isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
+      isCognitoUserRole(StaffRole.OWNER),
+    [isCognitoUserRole],
+  );
 
-    do {
+  const recipientIds = useMemo(() => {
+    const selfIds = [currentStaffId, cognitoUser?.id].filter(
+      (id): id is string => Boolean(id),
+    );
+
+    if (!isAdminWatcher) {
+      return selfIds.filter((id, index, list) => list.indexOf(id) === index);
+    }
+
+    const adminIds = staffs
+      .filter(
+        (staff) =>
+          staff.role === StaffRole.ADMIN ||
+          staff.role === StaffRole.STAFF_ADMIN ||
+          staff.role === StaffRole.OWNER,
+      )
+      .flatMap((staff) => [staff.id, staff.cognitoUserId ?? null])
+      .filter((id): id is string => Boolean(id));
+
+    return [...selfIds, ...adminIds].filter(
+      (id, index, list) => list.indexOf(id) === index,
+    );
+  }, [cognitoUser?.id, currentStaffId, isAdminWatcher, staffs]);
+
+  const fetchNotificationPage = useCallback(
+    async (
+      recipientStaffId: string,
+      options?: { nextToken?: string | null },
+    ) => {
       const response = (await graphqlClient.graphql({
         query: workflowNotificationEventsByRecipient,
         variables: {
           recipientStaffId,
           sortDirection: ModelSortDirection.DESC,
-          limit: 100,
-          nextToken: cursor,
-          filter: {
-            isRead: { eq: false },
-          },
+          limit: NOTIFICATION_PAGE_SIZE,
+          nextToken: options?.nextToken ?? null,
         },
         authMode: "userPool",
       })) as GraphQLResult<WorkflowNotificationEventsByRecipientQuery>;
@@ -77,53 +112,139 @@ export const useWorkflowNotificationInbox = () => {
         throw new Error(response.errors[0].message);
       }
 
-      const connection = response.data?.workflowNotificationEventsByRecipient;
-      const countInPage =
-        connection?.items.filter((item): item is WorkflowNotificationEvent =>
-          Boolean(item),
-        ).length ?? 0;
-      total += countInPage;
-      cursor = connection?.nextToken ?? null;
-    } while (cursor);
+      return response.data?.workflowNotificationEventsByRecipient;
+    },
+    [],
+  );
 
-    setUnreadCount(total);
+  const toUniqueSorted = useCallback((items: WorkflowNotificationEvent[]) => {
+    const dedupedMap = new Map<string, WorkflowNotificationEvent>();
+    items.forEach((item) => {
+      dedupedMap.set(item.id, item);
+    });
+    return [...dedupedMap.values()].toSorted(sortByEventAtDesc);
   }, []);
 
+  const fetchUnreadCountForRecipients = useCallback(
+    async (recipientStaffIds: string[]) => {
+      if (recipientStaffIds.length === 0) {
+        setUnreadCount(0);
+        return;
+      }
+
+      let total = 0;
+      for (const recipientStaffId of recipientStaffIds) {
+        let recipientTotal = 0;
+        let cursor: string | null = null;
+
+        do {
+          const response = (await graphqlClient.graphql({
+            query: workflowNotificationEventsByRecipient,
+            variables: {
+              recipientStaffId,
+              sortDirection: ModelSortDirection.DESC,
+              limit: 100,
+              nextToken: cursor,
+              filter: {
+                isRead: { eq: false },
+              },
+            },
+            authMode: "userPool",
+          })) as GraphQLResult<WorkflowNotificationEventsByRecipientQuery>;
+
+          if (response.errors?.length) {
+            throw new Error(response.errors[0].message);
+          }
+
+          const connection =
+            response.data?.workflowNotificationEventsByRecipient;
+          recipientTotal +=
+            connection?.items.filter(
+              (item): item is WorkflowNotificationEvent => Boolean(item),
+            ).length ?? 0;
+          cursor = connection?.nextToken ?? null;
+        } while (cursor);
+
+        total += recipientTotal;
+      }
+
+      setUnreadCount(total);
+    },
+    [],
+  );
+
+  const fetchUnreadIdsForRecipient = useCallback(
+    async (recipientStaffId: string) => {
+      const ids: string[] = [];
+      let cursor: string | null = null;
+
+      do {
+        const response = (await graphqlClient.graphql({
+          query: workflowNotificationEventsByRecipient,
+          variables: {
+            recipientStaffId,
+            sortDirection: ModelSortDirection.DESC,
+            limit: 100,
+            nextToken: cursor,
+            filter: {
+              isRead: { eq: false },
+            },
+          },
+          authMode: "userPool",
+        })) as GraphQLResult<WorkflowNotificationEventsByRecipientQuery>;
+
+        if (response.errors?.length) {
+          throw new Error(response.errors[0].message);
+        }
+
+        const connection = response.data?.workflowNotificationEventsByRecipient;
+        const pageIds =
+          connection?.items
+            .filter((item): item is WorkflowNotificationEvent => Boolean(item))
+            .map((item) => item.id) ?? [];
+        ids.push(...pageIds);
+        cursor = connection?.nextToken ?? null;
+      } while (cursor);
+
+      return ids;
+    },
+    [],
+  );
+
   const fetchNotifications = useCallback(async () => {
-    if (!currentStaffId) {
+    if (recipientIds.length === 0) {
       setNotifications([]);
       setUnreadCount(0);
-      setNextToken(null);
+      setNextTokensByRecipient({});
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      const response = (await graphqlClient.graphql({
-        query: workflowNotificationEventsByRecipient,
-        variables: {
-          recipientStaffId: currentStaffId,
-          sortDirection: ModelSortDirection.DESC,
-          limit: NOTIFICATION_PAGE_SIZE,
-        },
-        authMode: "userPool",
-      })) as GraphQLResult<WorkflowNotificationEventsByRecipientQuery>;
-
-      if (response.errors?.length) {
-        throw new Error(response.errors[0].message);
-      }
-
-      const items =
-        response.data?.workflowNotificationEventsByRecipient?.items
-          .filter((item): item is WorkflowNotificationEvent => Boolean(item))
-          .toSorted(sortByEventAtDesc) ?? [];
-
-      setNotifications(items);
-      setNextToken(
-        response.data?.workflowNotificationEventsByRecipient?.nextToken ?? null,
+      const pages = await Promise.all(
+        recipientIds.map(async (recipientId) => {
+          const connection = await fetchNotificationPage(recipientId);
+          const items =
+            connection?.items.filter(
+              (item): item is WorkflowNotificationEvent => Boolean(item),
+            ) ?? [];
+          return {
+            recipientId,
+            items,
+            nextToken: connection?.nextToken ?? null,
+          };
+        }),
       );
-      await fetchUnreadCount(currentStaffId);
+
+      setNotifications(toUniqueSorted(pages.flatMap((page) => page.items)));
+      setNextTokensByRecipient(
+        pages.reduce<Record<string, string | null>>((acc, page) => {
+          acc[page.recipientId] = page.nextToken;
+          return acc;
+        }, {}),
+      );
+      await fetchUnreadCountForRecipients(recipientIds);
     } catch (fetchError) {
       const message =
         fetchError instanceof Error ? fetchError.message : String(fetchError);
@@ -132,49 +253,56 @@ export const useWorkflowNotificationInbox = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentStaffId, fetchUnreadCount]);
+  }, [
+    fetchNotificationPage,
+    fetchUnreadCountForRecipients,
+    recipientIds,
+    toUniqueSorted,
+  ]);
 
   const loadMoreNotifications = useCallback(async () => {
-    if (!currentStaffId || !nextToken || loadingMore) {
+    if (recipientIds.length === 0 || loadingMore) {
+      return;
+    }
+
+    const targets = recipientIds.filter((recipientId) =>
+      Boolean(nextTokensByRecipient[recipientId]),
+    );
+
+    if (targets.length === 0) {
       return;
     }
 
     setLoadingMore(true);
     setError(null);
     try {
-      const response = (await graphqlClient.graphql({
-        query: workflowNotificationEventsByRecipient,
-        variables: {
-          recipientStaffId: currentStaffId,
-          sortDirection: ModelSortDirection.DESC,
-          limit: NOTIFICATION_PAGE_SIZE,
-          nextToken,
-        },
-        authMode: "userPool",
-      })) as GraphQLResult<WorkflowNotificationEventsByRecipientQuery>;
-
-      if (response.errors?.length) {
-        throw new Error(response.errors[0].message);
-      }
-
-      const items =
-        response.data?.workflowNotificationEventsByRecipient?.items
-          .filter((item): item is WorkflowNotificationEvent => Boolean(item))
-          .toSorted(sortByEventAtDesc) ?? [];
-
-      setNotifications((previous) => {
-        const previousIds = new Set(previous.map((item) => item.id));
-        const merged = [...previous];
-        items.forEach((item) => {
-          if (!previousIds.has(item.id)) {
-            merged.push(item);
-          }
-        });
-        return merged.toSorted(sortByEventAtDesc);
-      });
-      setNextToken(
-        response.data?.workflowNotificationEventsByRecipient?.nextToken ?? null,
+      const pages = await Promise.all(
+        targets.map(async (recipientId) => {
+          const connection = await fetchNotificationPage(recipientId, {
+            nextToken: nextTokensByRecipient[recipientId] ?? null,
+          });
+          const items =
+            connection?.items.filter(
+              (item): item is WorkflowNotificationEvent => Boolean(item),
+            ) ?? [];
+          return {
+            recipientId,
+            items,
+            nextToken: connection?.nextToken ?? null,
+          };
+        }),
       );
+
+      setNotifications((previous) =>
+        toUniqueSorted([...previous, ...pages.flatMap((page) => page.items)]),
+      );
+      setNextTokensByRecipient((previous) => {
+        const next = { ...previous };
+        pages.forEach((page) => {
+          next[page.recipientId] = page.nextToken;
+        });
+        return next;
+      });
     } catch (fetchError) {
       const message =
         fetchError instanceof Error ? fetchError.message : String(fetchError);
@@ -183,7 +311,13 @@ export const useWorkflowNotificationInbox = () => {
     } finally {
       setLoadingMore(false);
     }
-  }, [currentStaffId, loadingMore, nextToken]);
+  }, [
+    fetchNotificationPage,
+    loadingMore,
+    nextTokensByRecipient,
+    recipientIds,
+    toUniqueSorted,
+  ]);
 
   const applyIncomingEvent = useCallback(
     (incoming: WorkflowNotificationEvent) => {
@@ -253,75 +387,90 @@ export const useWorkflowNotificationInbox = () => {
   }, []);
 
   const markAllAsRead = useCallback(async () => {
-    const unreadIds = notifications
-      .filter((item) => !item.isRead)
-      .map((item) => item.id);
+    const unreadIdsByRecipient = await Promise.all(
+      recipientIds.map((recipientId) =>
+        fetchUnreadIdsForRecipient(recipientId),
+      ),
+    );
+    const unreadIds = [...new Set(unreadIdsByRecipient.flat())];
+
     await Promise.all(unreadIds.map((id) => markAsRead(id)));
-    setUnreadCount(0);
-  }, [markAsRead, notifications]);
+    setNotifications((previous) =>
+      previous.map((notification) => ({ ...notification, isRead: true })),
+    );
+    await fetchUnreadCountForRecipients(recipientIds);
+  }, [
+    fetchUnreadCountForRecipients,
+    fetchUnreadIdsForRecipient,
+    markAsRead,
+    recipientIds,
+  ]);
 
   useEffect(() => {
     void fetchNotifications();
   }, [fetchNotifications]);
 
   useEffect(() => {
-    if (!currentStaffId) {
+    if (recipientIds.length === 0) {
       return;
     }
 
-    const filter = {
-      recipientStaffId: { eq: currentStaffId },
-    };
+    const subscriptions = recipientIds.flatMap((recipientStaffId) => {
+      const filter = {
+        recipientStaffId: { eq: recipientStaffId },
+      };
 
-    const createSubscription = graphqlClient
-      .graphql({
-        query: onCreateWorkflowNotificationEvent,
-        variables: { filter },
-        authMode: "userPool",
-      })
-      .subscribe({
-        next: ({ data }) => {
-          const event = (
-            data as OnCreateWorkflowNotificationEventSubscription | undefined
-          )?.onCreateWorkflowNotificationEvent;
-          if (!event) return;
-          applyIncomingEvent(event as WorkflowNotificationEvent);
-        },
-        error: (subscriptionError) => {
-          logger.error(
-            "Create workflow notification subscription error:",
-            subscriptionError,
-          );
-        },
-      });
+      const createSubscription = graphqlClient
+        .graphql({
+          query: onCreateWorkflowNotificationEvent,
+          variables: { filter },
+          authMode: "userPool",
+        })
+        .subscribe({
+          next: ({ data }) => {
+            const event = (
+              data as OnCreateWorkflowNotificationEventSubscription | undefined
+            )?.onCreateWorkflowNotificationEvent;
+            if (!event) return;
+            applyIncomingEvent(event as WorkflowNotificationEvent);
+          },
+          error: (subscriptionError) => {
+            logger.error("Create workflow notification subscription error:", {
+              recipientStaffId,
+              subscriptionError,
+            });
+          },
+        });
 
-    const updateSubscription = graphqlClient
-      .graphql({
-        query: onUpdateWorkflowNotificationEvent,
-        variables: { filter },
-        authMode: "userPool",
-      })
-      .subscribe({
-        next: ({ data }) => {
-          const event = (
-            data as OnUpdateWorkflowNotificationEventSubscription | undefined
-          )?.onUpdateWorkflowNotificationEvent;
-          if (!event) return;
-          applyIncomingEvent(event as WorkflowNotificationEvent);
-        },
-        error: (subscriptionError) => {
-          logger.error(
-            "Update workflow notification subscription error:",
-            subscriptionError,
-          );
-        },
-      });
+      const updateSubscription = graphqlClient
+        .graphql({
+          query: onUpdateWorkflowNotificationEvent,
+          variables: { filter },
+          authMode: "userPool",
+        })
+        .subscribe({
+          next: ({ data }) => {
+            const event = (
+              data as OnUpdateWorkflowNotificationEventSubscription | undefined
+            )?.onUpdateWorkflowNotificationEvent;
+            if (!event) return;
+            applyIncomingEvent(event as WorkflowNotificationEvent);
+          },
+          error: (subscriptionError) => {
+            logger.error("Update workflow notification subscription error:", {
+              recipientStaffId,
+              subscriptionError,
+            });
+          },
+        });
+
+      return [createSubscription, updateSubscription];
+    });
 
     return () => {
-      createSubscription.unsubscribe();
-      updateSubscription.unsubscribe();
+      subscriptions.forEach((subscription) => subscription.unsubscribe());
     };
-  }, [applyIncomingEvent, currentStaffId]);
+  }, [applyIncomingEvent, recipientIds]);
 
   return {
     currentStaffId,
@@ -329,7 +478,9 @@ export const useWorkflowNotificationInbox = () => {
     unreadCount,
     loading,
     loadingMore,
-    hasMore: nextToken !== null,
+    hasMore: Object.values(nextTokensByRecipient).some((value) =>
+      Boolean(value),
+    ),
     error,
     fetchNotifications,
     loadMoreNotifications,

@@ -1,5 +1,8 @@
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import {
+  StaffRole,
+  useStaffs,
+} from "@entities/staff/model/useStaffs/useStaffs";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import { subscribeWorkflowCommentNotifications } from "@/features/workflow/notification/model/workflowNotificationEventService";
@@ -10,7 +13,8 @@ import { useLocalNotification } from "./useLocalNotification";
 const logger = createLogger("useWorkflowCommentNotification");
 
 export const useWorkflowCommentNotification = () => {
-  const { authStatus, cognitoUser } = useContext(AuthContext);
+  const { authStatus, cognitoUser, isCognitoUserRole } =
+    useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { staffs } = useStaffs({ isAuthenticated });
   const { notify, canNotify } = useLocalNotification();
@@ -23,9 +27,37 @@ export const useWorkflowCommentNotification = () => {
     );
   })();
 
-  const recipientIds = [currentStaffId, cognitoUser?.id]
-    .filter((id): id is string => Boolean(id))
-    .filter((id, index, list) => list.indexOf(id) === index);
+  const isAdminWatcher = useMemo(
+    () =>
+      isCognitoUserRole(StaffRole.ADMIN) ||
+      isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
+      isCognitoUserRole(StaffRole.OWNER),
+    [isCognitoUserRole],
+  );
+
+  const recipientIds = useMemo(() => {
+    const selfIds = [currentStaffId, cognitoUser?.id].filter(
+      (id): id is string => Boolean(id),
+    );
+
+    if (!isAdminWatcher) {
+      return selfIds.filter((id, index, list) => list.indexOf(id) === index);
+    }
+
+    const adminIds = staffs
+      .filter(
+        (staff) =>
+          staff.role === StaffRole.ADMIN ||
+          staff.role === StaffRole.STAFF_ADMIN ||
+          staff.role === StaffRole.OWNER,
+      )
+      .flatMap((staff) => [staff.id, staff.cognitoUserId ?? null])
+      .filter((id): id is string => Boolean(id));
+
+    return [...selfIds, ...adminIds].filter(
+      (id, index, list) => list.indexOf(id) === index,
+    );
+  }, [cognitoUser?.id, currentStaffId, isAdminWatcher, staffs]);
 
   const handleNotification = useCallback(
     (eventId: string, title: string, body: string) => {
