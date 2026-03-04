@@ -83,7 +83,20 @@ const onCreateWorkflowNotificationEvent = /* GraphQL */ `
 const normalizeApproverId = (approverId?: string | null) =>
   (approverId ?? "").trim();
 
-const isAdminRole = (role?: string | null) => (role ?? "") === "ADMIN";
+const normalizeRole = (role?: string | null) =>
+  (role ?? "")
+    .trim()
+    .replace(/[^a-zA-Z]/g, "")
+    .toUpperCase();
+
+const isAdminRole = (role?: string | null) => {
+  const normalized = normalizeRole(role);
+  return (
+    normalized === "ADMIN" ||
+    normalized === "STAFFADMIN" ||
+    normalized === "OWNER"
+  );
+};
 
 const collectWorkflowParticipantIds = (
   workflow: WorkflowData,
