@@ -35,6 +35,21 @@ type OnCreateWorkflowNotificationEventSubscription = {
   } | null;
 };
 
+type WorkflowNotificationSubscriptionPayload = {
+  data?: OnCreateWorkflowNotificationEventSubscription;
+};
+
+type WorkflowNotificationSubscription = {
+  unsubscribe: () => void;
+};
+
+type WorkflowNotificationObservable = {
+  subscribe: (observer: {
+    next: (payload: WorkflowNotificationSubscriptionPayload) => void;
+    error: (error: unknown) => void;
+  }) => WorkflowNotificationSubscription;
+};
+
 const createWorkflowNotificationEvent = /* GraphQL */ `
   mutation CreateWorkflowNotificationEvent(
     $input: CreateWorkflowNotificationEventInput!
@@ -188,31 +203,31 @@ export const subscribeWorkflowCommentNotifications = ({
   onReceived,
   onError,
 }: SubscribeWorkflowCommentNotificationsArgs) => {
-  const subscription = graphqlClient
-    .graphql({
-      query: onCreateWorkflowNotificationEvent,
-      variables: {
-        filter: {
-          workflowId: { eq: workflowId },
-          recipientStaffId: { eq: recipientStaffId },
-          eventType: { eq: "WORKFLOW_COMMENT" },
-        },
+  const observable = graphqlClient.graphql({
+    query: onCreateWorkflowNotificationEvent,
+    variables: {
+      filter: {
+        workflowId: { eq: workflowId },
+        recipientStaffId: { eq: recipientStaffId },
+        eventType: { eq: "WORKFLOW_COMMENT" },
       },
-      authMode: "userPool",
-    })
-    .subscribe({
-      next: ({ data }) => {
-        if (!data?.onCreateWorkflowNotificationEvent) return;
-        onReceived(data.onCreateWorkflowNotificationEvent);
-      },
-      error: (error) => {
-        if (onError) {
-          onError(error);
-          return;
-        }
-        logger.error("Workflow notification subscription error:", error);
-      },
-    });
+    },
+    authMode: "userPool",
+  }) as WorkflowNotificationObservable;
+
+  const subscription = observable.subscribe({
+    next: ({ data }: WorkflowNotificationSubscriptionPayload) => {
+      if (!data?.onCreateWorkflowNotificationEvent) return;
+      onReceived(data.onCreateWorkflowNotificationEvent);
+    },
+    error: (error: unknown) => {
+      if (onError) {
+        onError(error);
+        return;
+      }
+      logger.error("Workflow notification subscription error:", error);
+    },
+  });
 
   return () => {
     subscription.unsubscribe();
