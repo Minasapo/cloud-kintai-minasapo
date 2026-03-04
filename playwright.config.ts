@@ -14,12 +14,9 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 const playwrightBaseUrl =
-  process.env.PLAYWRIGHT_BASE_URL ||
-  process.env.VITE_BASE_PATH ||
-  "http://localhost:4173";
+  process.env.PLAYWRIGHT_BASE_URL || "http://localhost:4173";
 
-const useLocalWebServer =
-  !process.env.PLAYWRIGHT_BASE_URL && !process.env.VITE_BASE_PATH;
+const useLocalWebServer = !process.env.PLAYWRIGHT_BASE_URL;
 
 console.info(
   `[playwright] baseURL=${playwrightBaseUrl} mode=${useLocalWebServer ? "local-webserver" : "external-base-url"}`,
