@@ -20,6 +20,7 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("useWorkflowNotificationInbox");
+const NOTIFICATION_PAGE_SIZE = 10;
 
 type WorkflowNotificationEvent = NonNullable<
   NonNullable<
@@ -41,7 +42,9 @@ export const useWorkflowNotificationInbox = () => {
     WorkflowNotificationEvent[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nextToken, setNextToken] = useState<string | null>(null);
 
   const currentStaffId = useMemo(() => {
     if (!isAuthenticated || !cognitoUser?.id) return null;
@@ -58,6 +61,7 @@ export const useWorkflowNotificationInbox = () => {
   const fetchNotifications = useCallback(async () => {
     if (!currentStaffId) {
       setNotifications([]);
+      setNextToken(null);
       return;
     }
 
@@ -69,7 +73,7 @@ export const useWorkflowNotificationInbox = () => {
         variables: {
           recipientStaffId: currentStaffId,
           sortDirection: ModelSortDirection.DESC,
-          limit: 100,
+          limit: NOTIFICATION_PAGE_SIZE,
         },
         authMode: "userPool",
       })) as GraphQLResult<WorkflowNotificationEventsByRecipientQuery>;
@@ -84,6 +88,9 @@ export const useWorkflowNotificationInbox = () => {
           .toSorted(sortByEventAtDesc) ?? [];
 
       setNotifications(items);
+      setNextToken(
+        response.data?.workflowNotificationEventsByRecipient?.nextToken ?? null,
+      );
     } catch (fetchError) {
       const message =
         fetchError instanceof Error ? fetchError.message : String(fetchError);
@@ -93,6 +100,57 @@ export const useWorkflowNotificationInbox = () => {
       setLoading(false);
     }
   }, [currentStaffId]);
+
+  const loadMoreNotifications = useCallback(async () => {
+    if (!currentStaffId || !nextToken || loadingMore) {
+      return;
+    }
+
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const response = (await graphqlClient.graphql({
+        query: workflowNotificationEventsByRecipient,
+        variables: {
+          recipientStaffId: currentStaffId,
+          sortDirection: ModelSortDirection.DESC,
+          limit: NOTIFICATION_PAGE_SIZE,
+          nextToken,
+        },
+        authMode: "userPool",
+      })) as GraphQLResult<WorkflowNotificationEventsByRecipientQuery>;
+
+      if (response.errors?.length) {
+        throw new Error(response.errors[0].message);
+      }
+
+      const items =
+        response.data?.workflowNotificationEventsByRecipient?.items
+          .filter((item): item is WorkflowNotificationEvent => Boolean(item))
+          .toSorted(sortByEventAtDesc) ?? [];
+
+      setNotifications((previous) => {
+        const previousIds = new Set(previous.map((item) => item.id));
+        const merged = [...previous];
+        items.forEach((item) => {
+          if (!previousIds.has(item.id)) {
+            merged.push(item);
+          }
+        });
+        return merged.toSorted(sortByEventAtDesc);
+      });
+      setNextToken(
+        response.data?.workflowNotificationEventsByRecipient?.nextToken ?? null,
+      );
+    } catch (fetchError) {
+      const message =
+        fetchError instanceof Error ? fetchError.message : String(fetchError);
+      setError(message);
+      logger.error("Failed to load more workflow notifications:", message);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [currentStaffId, loadingMore, nextToken]);
 
   const applyIncomingEvent = useCallback(
     (incoming: WorkflowNotificationEvent) => {
@@ -211,8 +269,11 @@ export const useWorkflowNotificationInbox = () => {
     notifications,
     unreadCount,
     loading,
+    loadingMore,
+    hasMore: nextToken !== null,
     error,
     fetchNotifications,
+    loadMoreNotifications,
     markAsRead,
     markAllAsRead,
   };

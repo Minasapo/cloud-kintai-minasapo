@@ -15,7 +15,13 @@ import {
 } from "@mui/material";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
-import { useContext, useMemo, useState } from "react";
+import {
+  type UIEvent,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
@@ -33,9 +39,12 @@ export default function WorkflowNotificationsPage() {
     notifications,
     unreadCount,
     loading,
+    loadingMore,
+    hasMore,
     error,
     markAsRead,
     markAllAsRead,
+    loadMoreNotifications,
   } = useWorkflowNotificationInbox();
 
   const isAdminUser = useMemo(
@@ -79,6 +88,22 @@ export default function WorkflowNotificationsPage() {
       setActionError(message);
     }
   };
+
+  const handleListScroll = useCallback(
+    (event: UIEvent<HTMLDivElement>) => {
+      if (!hasMore || loadingMore) {
+        return;
+      }
+
+      const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
+      const reachedBottom = scrollHeight - scrollTop - clientHeight < 80;
+
+      if (reachedBottom) {
+        void loadMoreNotifications();
+      }
+    },
+    [hasMore, loadingMore, loadMoreNotifications],
+  );
 
   return (
     <Page title="通知" maxWidth="md" showDefaultHeader={false}>
@@ -132,43 +157,53 @@ export default function WorkflowNotificationsPage() {
                 <Typography color="text.secondary">通知はありません</Typography>
               </Box>
             ) : (
-              <List disablePadding>
-                {notifications.map((notification) => (
-                  <ListItemButton
-                    key={notification.id}
-                    onClick={() => {
-                      void handleOpenNotification(
-                        notification.id,
-                        notification.workflowId,
-                      );
-                    }}
-                    sx={{
-                      borderRadius: 2,
-                      mb: 0.5,
-                      backgroundColor: notification.isRead
-                        ? "transparent"
-                        : "action.hover",
-                    }}
-                  >
-                    <ListItemText
-                      primary={notification.title}
-                      secondary={
-                        <Stack spacing={0.5} mt={0.5}>
-                          <Typography variant="body2" color="text.secondary">
-                            {notification.body}
-                          </Typography>
-                          <Typography variant="caption" color="text.disabled">
-                            {formatEventAt(notification.eventAt)}
-                          </Typography>
-                        </Stack>
-                      }
-                    />
-                    {!notification.isRead && (
-                      <Chip size="small" label="未読" color="primary" />
-                    )}
-                  </ListItemButton>
-                ))}
-              </List>
+              <Box
+                sx={{ maxHeight: "65vh", overflowY: "auto", pr: 0.5 }}
+                onScroll={handleListScroll}
+              >
+                <List disablePadding>
+                  {notifications.map((notification) => (
+                    <ListItemButton
+                      key={notification.id}
+                      onClick={() => {
+                        void handleOpenNotification(
+                          notification.id,
+                          notification.workflowId,
+                        );
+                      }}
+                      sx={{
+                        borderRadius: 2,
+                        mb: 0.5,
+                        backgroundColor: notification.isRead
+                          ? "transparent"
+                          : "action.hover",
+                      }}
+                    >
+                      <ListItemText
+                        primary={notification.title}
+                        secondary={
+                          <Stack spacing={0.5} mt={0.5}>
+                            <Typography variant="body2" color="text.secondary">
+                              {notification.body}
+                            </Typography>
+                            <Typography variant="caption" color="text.disabled">
+                              {formatEventAt(notification.eventAt)}
+                            </Typography>
+                          </Stack>
+                        }
+                      />
+                      {!notification.isRead && (
+                        <Chip size="small" label="未読" color="primary" />
+                      )}
+                    </ListItemButton>
+                  ))}
+                </List>
+                {loadingMore && (
+                  <Box display="flex" justifyContent="center" py={1.5}>
+                    <CircularProgress size={20} />
+                  </Box>
+                )}
+              </Box>
             )}
           </Stack>
         </Box>
