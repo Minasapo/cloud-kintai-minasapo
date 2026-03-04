@@ -83,6 +83,8 @@ const onCreateWorkflowNotificationEvent = /* GraphQL */ `
 const normalizeApproverId = (approverId?: string | null) =>
   (approverId ?? "").trim();
 
+const normalizeStaffId = (staffId?: string | null) => (staffId ?? "").trim();
+
 const normalizeRole = (role?: string | null) =>
   (role ?? "")
     .trim()
@@ -104,22 +106,34 @@ const collectWorkflowParticipantIds = (
 ) => {
   const participantIds = new Set<string>();
 
-  participantIds.add(workflow.staffId);
+  const addParticipant = (candidateId?: string | null) => {
+    const normalized = normalizeStaffId(candidateId);
+    if (!normalized || normalized === "ADMINS") {
+      return;
+    }
+    participantIds.add(normalized);
+  };
+
+  const addAdmins = () => {
+    staffs
+      .filter((staff) => isAdminRole(staff.role))
+      .forEach((admin) => {
+        addParticipant(admin.id);
+      });
+  };
+
+  addParticipant(workflow.staffId);
 
   (workflow.assignedApproverStaffIds ?? []).forEach((approverId) => {
     const normalized = normalizeApproverId(approverId);
     if (!normalized) return;
 
     if (normalized === "ADMINS") {
-      staffs
-        .filter((staff) => isAdminRole(staff.role))
-        .forEach((admin) => {
-          participantIds.add(admin.id);
-        });
+      addAdmins();
       return;
     }
 
-    participantIds.add(normalized);
+    addParticipant(normalized);
   });
 
   (workflow.approvalSteps ?? []).forEach((step) => {
@@ -127,15 +141,11 @@ const collectWorkflowParticipantIds = (
     if (!normalized) return;
 
     if (normalized === "ADMINS") {
-      staffs
-        .filter((staff) => isAdminRole(staff.role))
-        .forEach((admin) => {
-          participantIds.add(admin.id);
-        });
+      addAdmins();
       return;
     }
 
-    participantIds.add(normalized);
+    addParticipant(normalized);
   });
 
   return participantIds;

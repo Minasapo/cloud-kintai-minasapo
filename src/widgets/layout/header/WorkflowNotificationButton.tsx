@@ -31,6 +31,7 @@ export default function WorkflowNotificationButton() {
           color="error"
           max={99}
           overlap="circular"
+          showZero
         >
           <NotificationsNoneIcon />
         </Badge>

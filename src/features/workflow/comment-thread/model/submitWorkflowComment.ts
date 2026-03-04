@@ -121,8 +121,13 @@ export const submitWorkflowComment = async ({
       throw new Error("コメント更新結果を取得できませんでした");
     }
 
+    const workflowForNotification: WorkflowData = {
+      ...(latestWorkflow as WorkflowData),
+      ...(updatedWorkflow as WorkflowData),
+    };
+
     await publishWorkflowCommentNotifications({
-      workflow: updatedWorkflow as WorkflowData,
+      workflow: workflowForNotification,
       actorStaffId,
       actorDisplayName,
       commentId: newComment.id,

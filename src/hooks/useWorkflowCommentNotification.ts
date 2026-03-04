@@ -23,6 +23,10 @@ export const useWorkflowCommentNotification = () => {
     );
   })();
 
+  const recipientIds = [currentStaffId, cognitoUser?.id]
+    .filter((id): id is string => Boolean(id))
+    .filter((id, index, list) => list.indexOf(id) === index);
+
   const handleNotification = useCallback(
     (eventId: string, title: string, body: string) => {
       if (!canNotify) return;
@@ -40,36 +44,41 @@ export const useWorkflowCommentNotification = () => {
   );
 
   useEffect(() => {
-    if (!currentStaffId) {
+    if (recipientIds.length === 0) {
       return;
     }
 
     logger.info("Starting global workflow comment notification subscription", {
-      recipientStaffId: currentStaffId,
+      recipientStaffIds: recipientIds,
     });
 
-    const unsubscribe = subscribeWorkflowCommentNotifications({
-      recipientStaffId: currentStaffId,
-      onReceived: (event) => {
-        handleNotification(event.id, event.title, event.body);
-      },
-      onError: (error) => {
-        logger.error("Global workflow comment notification error:", error);
-      },
-    });
+    const unsubscribes = recipientIds.map((recipientStaffId) =>
+      subscribeWorkflowCommentNotifications({
+        recipientStaffId,
+        onReceived: (event) => {
+          handleNotification(event.id, event.title, event.body);
+        },
+        onError: (error) => {
+          logger.error("Global workflow comment notification error:", {
+            recipientStaffId,
+            error,
+          });
+        },
+      }),
+    );
 
     return () => {
       logger.info(
         "Stopping global workflow comment notification subscription",
         {
-          recipientStaffId: currentStaffId,
+          recipientStaffIds: recipientIds,
         },
       );
-      unsubscribe();
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
-  }, [currentStaffId, handleNotification]);
+  }, [handleNotification, recipientIds]);
 
   return {
-    isSubscribed: Boolean(currentStaffId),
+    isSubscribed: recipientIds.length > 0,
   };
 };

@@ -41,6 +41,7 @@ export const useWorkflowNotificationInbox = () => {
   const [notifications, setNotifications] = useState<
     WorkflowNotificationEvent[]
   >([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,14 +54,45 @@ export const useWorkflowNotificationInbox = () => {
     );
   }, [cognitoUser?.id, isAuthenticated, staffs]);
 
-  const unreadCount = useMemo(
-    () => notifications.filter((notification) => !notification.isRead).length,
-    [notifications],
-  );
+  const fetchUnreadCount = useCallback(async (recipientStaffId: string) => {
+    let total = 0;
+    let cursor: string | null = null;
+
+    do {
+      const response = (await graphqlClient.graphql({
+        query: workflowNotificationEventsByRecipient,
+        variables: {
+          recipientStaffId,
+          sortDirection: ModelSortDirection.DESC,
+          limit: 100,
+          nextToken: cursor,
+          filter: {
+            isRead: { eq: false },
+          },
+        },
+        authMode: "userPool",
+      })) as GraphQLResult<WorkflowNotificationEventsByRecipientQuery>;
+
+      if (response.errors?.length) {
+        throw new Error(response.errors[0].message);
+      }
+
+      const connection = response.data?.workflowNotificationEventsByRecipient;
+      const countInPage =
+        connection?.items.filter((item): item is WorkflowNotificationEvent =>
+          Boolean(item),
+        ).length ?? 0;
+      total += countInPage;
+      cursor = connection?.nextToken ?? null;
+    } while (cursor);
+
+    setUnreadCount(total);
+  }, []);
 
   const fetchNotifications = useCallback(async () => {
     if (!currentStaffId) {
       setNotifications([]);
+      setUnreadCount(0);
       setNextToken(null);
       return;
     }
@@ -91,6 +123,7 @@ export const useWorkflowNotificationInbox = () => {
       setNextToken(
         response.data?.workflowNotificationEventsByRecipient?.nextToken ?? null,
       );
+      await fetchUnreadCount(currentStaffId);
     } catch (fetchError) {
       const message =
         fetchError instanceof Error ? fetchError.message : String(fetchError);
@@ -99,7 +132,7 @@ export const useWorkflowNotificationInbox = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentStaffId]);
+  }, [currentStaffId, fetchUnreadCount]);
 
   const loadMoreNotifications = useCallback(async () => {
     if (!currentStaffId || !nextToken || loadingMore) {
@@ -156,6 +189,20 @@ export const useWorkflowNotificationInbox = () => {
     (incoming: WorkflowNotificationEvent) => {
       setNotifications((previous) => {
         const index = previous.findIndex((item) => item.id === incoming.id);
+        const previousEvent = index >= 0 ? previous[index] : null;
+
+        if (!previousEvent && !incoming.isRead) {
+          setUnreadCount((prev) => prev + 1);
+        }
+
+        if (previousEvent && previousEvent.isRead && !incoming.isRead) {
+          setUnreadCount((prev) => prev + 1);
+        }
+
+        if (previousEvent && !previousEvent.isRead && incoming.isRead) {
+          setUnreadCount((prev) => Math.max(prev - 1, 0));
+        }
+
         if (index >= 0) {
           const next = [...previous];
           next[index] = incoming;
@@ -185,13 +232,24 @@ export const useWorkflowNotificationInbox = () => {
       throw new Error(response.errors[0].message);
     }
 
+    let decremented = false;
     setNotifications((previous) =>
-      previous.map((notification) =>
-        notification.id === id
-          ? { ...notification, isRead: true, readAt }
-          : notification,
-      ),
+      previous.map((notification) => {
+        if (notification.id !== id) {
+          return notification;
+        }
+
+        if (!notification.isRead) {
+          decremented = true;
+        }
+
+        return { ...notification, isRead: true, readAt };
+      }),
     );
+
+    if (decremented) {
+      setUnreadCount((prev) => Math.max(prev - 1, 0));
+    }
   }, []);
 
   const markAllAsRead = useCallback(async () => {
@@ -199,6 +257,7 @@ export const useWorkflowNotificationInbox = () => {
       .filter((item) => !item.isRead)
       .map((item) => item.id);
     await Promise.all(unreadIds.map((id) => markAsRead(id)));
+    setUnreadCount(0);
   }, [markAsRead, notifications]);
 
   useEffect(() => {
