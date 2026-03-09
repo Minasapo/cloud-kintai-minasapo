@@ -35,8 +35,7 @@ export interface CollaborativeShiftContextType {
     startTime: number;
   }>;
   triggerSync: () => Promise<void>;
-  pauseSync: () => void;
-  resumeSync: () => void;
+  clearSyncError: () => void;
   updateUserActivity: () => void;
   retryPendingChanges: () => Promise<void>;
   syncPendingChanges: () => Promise<{

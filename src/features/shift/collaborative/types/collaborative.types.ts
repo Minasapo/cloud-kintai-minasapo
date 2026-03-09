@@ -9,6 +9,17 @@ import {
 } from "@shared/api/graphql/types";
 
 /**
+ * データ同期ステータス
+ */
+export type DataSyncStatus =
+  | "idle"
+  | "saving"
+  | "syncing"
+  | "saved"
+  | "synced"
+  | "error";
+
+/**
  * シフト状態（内部表現）
  */
 export type ShiftState =
@@ -84,6 +95,8 @@ export interface CollaborativeShiftState {
   isLoading: boolean;
   isSyncing: boolean;
   lastSyncedAt: number;
+  lastAutoSyncedAt: number;
+  dataStatus: DataSyncStatus;
   error: string | null;
   connectionState: "connected" | "disconnected" | "error";
 

@@ -96,11 +96,14 @@ describe("useCollaborativeShiftData", () => {
         }),
       });
 
+    const onAutoSyncReceived = jest.fn();
+
     const { result } = renderHook(() =>
       useCollaborativeShiftData({
         staffIds: ["staff-2"],
         targetMonth: "2026-02",
         currentUserId: "user-1",
+        onAutoSyncReceived,
       }),
     );
 
@@ -125,10 +128,10 @@ describe("useCollaborativeShiftData", () => {
         "work",
       ),
     );
-    expect(result.current.lastAutoSyncedAt).toBeGreaterThan(0);
+    expect(onAutoSyncReceived).toHaveBeenCalledTimes(1);
   });
 
-  it("自分の購読イベントは二重適用せず自動同期時刻も更新しない", async () => {
+  it("自分の購読イベントは二重適用せずonAutoSyncReceivedも呼ばない", async () => {
     mockUseGetShiftRequestsQuery.mockReturnValue({
       data: [],
       isLoading: false,
@@ -158,11 +161,14 @@ describe("useCollaborativeShiftData", () => {
         }),
       });
 
+    const onAutoSyncReceived = jest.fn();
+
     const { result } = renderHook(() =>
       useCollaborativeShiftData({
         staffIds: ["staff-2"],
         targetMonth: "2026-02",
         currentUserId: "user-1",
+        onAutoSyncReceived,
       }),
     );
 
@@ -187,7 +193,7 @@ describe("useCollaborativeShiftData", () => {
         "empty",
       );
     });
-    expect(result.current.lastAutoSyncedAt).toBe(0);
+    expect(onAutoSyncReceived).not.toHaveBeenCalled();
   });
 
   it("取得したシフトをShiftDataMapへ反映する", async () => {
@@ -272,7 +278,7 @@ describe("useCollaborativeShiftData", () => {
     ]);
   });
 
-  it("updateShift失敗時に権限エラーをセットする", async () => {
+  it("updateShift失敗時にonSaveFailedコールバックを呼ぶ", async () => {
     mockUseGetShiftRequestsQuery.mockReturnValue({
       data: shiftRequests,
       isLoading: false,
@@ -285,11 +291,14 @@ describe("useCollaborativeShiftData", () => {
       unwrap: () => Promise.reject({ message: "Unauthorized" }),
     });
 
+    const onSaveFailed = jest.fn();
+
     const { result } = renderHook(() =>
       useCollaborativeShiftData({
         staffIds: ["staff-1"],
         targetMonth: "2026-02",
         currentUserId: "user-1",
+        onSaveFailed,
       }),
     );
 
@@ -307,6 +316,8 @@ describe("useCollaborativeShiftData", () => {
       });
     });
 
-    expect(result.current.error).toBe("権限がありません。");
+    await waitFor(() => {
+      expect(onSaveFailed).toHaveBeenCalledWith("権限がありません。");
+    });
   });
 });

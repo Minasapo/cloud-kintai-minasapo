@@ -37,21 +37,40 @@ interface UseCollaborativeShiftDataProps {
   staffIds: string[];
   targetMonth?: string; // "YYYY-MM"
   currentUserId: string;
+  onAutoSyncReceived?: () => void;
+  onSaveStarted?: () => void;
+  onSaveCompleted?: () => void;
+  onSaveFailed?: (error: string) => void;
 }
 
 export const useCollaborativeShiftData = ({
   staffIds,
   targetMonth,
   currentUserId,
+  onAutoSyncReceived,
+  onSaveStarted,
+  onSaveCompleted,
+  onSaveFailed,
 }: UseCollaborativeShiftDataProps) => {
   const [shiftDataMap, setShiftDataMap] = useState<ShiftDataMap>(new Map());
   const [error, setError] = useState<string | null>(null);
   const [lastFetchedAt, setLastFetchedAt] = useState<number>(0);
-  const [lastAutoSyncedAt, setLastAutoSyncedAt] = useState<number>(0);
   const [connectionState, setConnectionState] = useState<
     "connected" | "disconnected" | "error"
   >("connected");
   const [isBatchUpdating, setIsBatchUpdating] = useState(false);
+
+  const onAutoSyncReceivedRef = useRef(onAutoSyncReceived);
+  const onSaveStartedRef = useRef(onSaveStarted);
+  const onSaveCompletedRef = useRef(onSaveCompleted);
+  const onSaveFailedRef = useRef(onSaveFailed);
+
+  useEffect(() => {
+    onAutoSyncReceivedRef.current = onAutoSyncReceived;
+    onSaveStartedRef.current = onSaveStarted;
+    onSaveCompletedRef.current = onSaveCompleted;
+    onSaveFailedRef.current = onSaveFailed;
+  }, [onAutoSyncReceived, onSaveStarted, onSaveCompleted, onSaveFailed]);
 
   const [updateShiftCell] = useUpdateShiftCellMutation();
   const [createShiftRequest] = useCreateShiftRequestMutation();
@@ -287,6 +306,8 @@ export const useCollaborativeShiftData = ({
     async (update: ShiftCellUpdate) => {
       const key = `${update.staffId}-${update.date}`;
 
+      onSaveStartedRef.current?.();
+
       // 先に nextMap を計算してから State に設定
       setShiftDataMap((prev) => {
         const nextMap = applyShiftCellUpdateToMap({
@@ -301,16 +322,15 @@ export const useCollaborativeShiftData = ({
         // 非同期でデータ永続化を実行
         persistShiftUpdate(update, nextMap)
           .then(() => {
-            // 成功時に保留中の変更から削除
             pendingChangesRef.current.delete(key);
-            setError(null);
             setConnectionState("connected");
+            onSaveCompletedRef.current?.();
           })
           .catch((err) => {
             console.error("Failed to update shift:", err);
             const { message, connection } = buildShiftErrorMessage(err);
-            setError(message);
             setConnectionState(connection);
+            onSaveFailedRef.current?.(message);
           });
 
         return nextMap;
@@ -329,6 +349,7 @@ export const useCollaborativeShiftData = ({
       }
 
       setIsBatchUpdating(true);
+      onSaveStartedRef.current?.();
 
       try {
         const nextMap = updates.reduce(
@@ -442,15 +463,17 @@ export const useCollaborativeShiftData = ({
         });
 
         if (result.errors.length > 0) {
-          setError("一部の更新に失敗しました。再試行してください。");
+          onSaveFailedRef.current?.(
+            "一部の更新に失敗しました。再試行してください。",
+          );
         } else {
-          setError(null);
+          onSaveCompletedRef.current?.();
         }
       } catch (err) {
         console.error("Batch update failed:", err);
         const { message, connection } = buildShiftErrorMessage(err);
-        setError(message);
         setConnectionState(connection);
+        onSaveFailedRef.current?.(message);
       } finally {
         setIsBatchUpdating(false);
       }
@@ -508,7 +531,7 @@ export const useCollaborativeShiftData = ({
 
       // 他のユーザーの更新をローカルステートに反映
       updateShiftRequestState(request);
-      setLastAutoSyncedAt(Date.now());
+      onAutoSyncReceivedRef.current?.();
 
       console.log(
         `[Realtime Update] Shift ${eventLabel} by another user for staff ${staffId}`,
@@ -584,7 +607,6 @@ export const useCollaborativeShiftData = ({
     isBatchUpdating,
     error,
     connectionState,
-    lastAutoSyncedAt,
     lastFetchedAt,
     fetchShifts,
     updateShift,

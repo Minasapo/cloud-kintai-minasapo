@@ -11,6 +11,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Container,
   LinearProgress,
   Paper,
@@ -62,7 +63,10 @@ import { useShiftNavigation } from "../../../features/shift/collaborative/hooks/
 import { useShiftSuggestions } from "../../../features/shift/collaborative/hooks/useShiftSuggestions";
 import { CollaborativeShiftProvider } from "../../../features/shift/collaborative/providers/CollaborativeShiftProvider";
 import { SuggestedAction } from "../../../features/shift/collaborative/rules/shiftRules";
-import { ShiftState } from "../../../features/shift/collaborative/types/collaborative.types";
+import {
+  DataSyncStatus,
+  ShiftState,
+} from "../../../features/shift/collaborative/types/collaborative.types";
 
 // シフト状態の表示設定
 const shiftStateConfig: Record<
@@ -449,6 +453,7 @@ const useCollaborativePageState = (targetMonth: string) => {
     isCellBeingEdited,
     getCellEditor,
     triggerSync,
+    clearSyncError,
     updateUserActivity,
     canUndo,
     canRedo,
@@ -908,6 +913,7 @@ const useCollaborativePageState = (targetMonth: string) => {
     handleCellMouseEnter,
     handleMouseUp,
     handleSync,
+    clearSyncError,
     progress,
     calculateDailyCount,
     getEventsForDay,
@@ -1037,19 +1043,41 @@ type SyncPanelProps = {
   isSyncing: boolean;
   lastAutoSyncedAt: number;
   syncError: string | null;
+  dataStatus: DataSyncStatus;
   onSync: () => Promise<void>;
+  onClearError?: () => void;
+};
+
+const dataSyncStatusConfig: Record<
+  DataSyncStatus,
+  {
+    label: string;
+    color: "default" | "primary" | "success" | "warning" | "error";
+    showSpinner: boolean;
+  }
+> = {
+  idle: { label: "未同期", color: "default", showSpinner: false },
+  saving: { label: "保存中", color: "warning", showSpinner: true },
+  syncing: { label: "同期中", color: "primary", showSpinner: true },
+  saved: { label: "保存完了", color: "success", showSpinner: false },
+  synced: { label: "同期完了", color: "success", showSpinner: false },
+  error: { label: "エラー", color: "error", showSpinner: false },
 };
 
 const SyncPanelBase: FC<SyncPanelProps> = ({
   isSyncing,
   lastAutoSyncedAt,
   syncError,
+  dataStatus,
   onSync,
+  onClearError,
 }) => {
   const formattedLastSyncedAt =
     lastAutoSyncedAt > 0
       ? dayjs(lastAutoSyncedAt).format("YYYY/MM/DD HH:mm:ss")
       : "未同期";
+
+  const statusConfig = dataSyncStatusConfig[dataStatus];
 
   return (
     <Paper sx={{ p: 2, mb: 3 }}>
@@ -1067,12 +1095,23 @@ const SyncPanelBase: FC<SyncPanelProps> = ({
         >
           {isSyncing ? "同期中..." : "最新状態を取得"}
         </Button>
+        <Chip
+          label={statusConfig.label}
+          color={statusConfig.color}
+          size="small"
+          variant="outlined"
+          icon={
+            statusConfig.showSpinner ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : undefined
+          }
+        />
         <Typography variant="body2" color="text.secondary">
           最後に自動同期された日時: {formattedLastSyncedAt}
         </Typography>
       </Stack>
       {syncError && (
-        <Alert severity="error" sx={{ mt: 2 }}>
+        <Alert severity="error" sx={{ mt: 2 }} onClose={onClearError}>
           同期に失敗しました。再試行してください。({syncError})
         </Alert>
       )}
@@ -1118,6 +1157,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       handleCellMouseEnter,
       handleMouseUp,
       handleSync: _handleSync,
+      clearSyncError: _clearSyncError,
       progress,
       calculateDailyCount,
       getEventsForDay,
@@ -1260,9 +1300,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
 
           <SyncPanel
             isSyncing={state.isSyncing}
-            lastAutoSyncedAt={state.lastSyncedAt}
+            lastAutoSyncedAt={state.lastAutoSyncedAt}
             syncError={state.error}
+            dataStatus={state.dataStatus}
             onSync={_handleSync}
+            onClearError={_clearSyncError}
           />
 
           {/* 変更履歴ダイアログ */}

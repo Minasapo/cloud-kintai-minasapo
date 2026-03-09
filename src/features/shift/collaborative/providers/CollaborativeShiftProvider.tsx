@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   CollaborativeShiftContext,
@@ -49,6 +55,28 @@ export const CollaborativeShiftProvider: React.FC<
     deleteCommentReply,
   } = useShiftComments();
 
+  // fetchShifts への参照ブリッジ（同期フックをデータフックより先に初期化するため）
+  const fetchShiftsRef = useRef<() => Promise<void>>(() => Promise.resolve());
+
+  // 同期コーディネータフック（Subscription ファースト）
+  const {
+    isSyncing,
+    syncError,
+    triggerSync,
+    lastAutoSyncedAt,
+    lastSyncedAt,
+    dataStatus,
+    notifyAutoSyncReceived,
+    notifySaveStarted,
+    notifySaveCompleted,
+    notifySaveFailed,
+    clearSyncError,
+  } = useShiftSync({
+    onManualSync: async () => {
+      await fetchShiftsRef.current();
+    },
+  });
+
   // データ管理フック
   const {
     shiftDataMap,
@@ -57,7 +85,6 @@ export const CollaborativeShiftProvider: React.FC<
     isBatchUpdating,
     error,
     connectionState,
-    lastAutoSyncedAt,
     fetchShifts,
     updateShift,
     batchUpdateShifts,
@@ -66,7 +93,16 @@ export const CollaborativeShiftProvider: React.FC<
     staffIds,
     targetMonth,
     currentUserId,
+    onAutoSyncReceived: notifyAutoSyncReceived,
+    onSaveStarted: notifySaveStarted,
+    onSaveCompleted: notifySaveCompleted,
+    onSaveFailed: notifySaveFailed,
   });
+
+  // fetchShifts 参照を同期
+  useEffect(() => {
+    fetchShiftsRef.current = fetchShifts;
+  }, [fetchShifts]);
 
   // オフライン対応フック
   const {
@@ -135,15 +171,6 @@ export const CollaborativeShiftProvider: React.FC<
     currentUserName,
     shiftRequestId,
     targetMonth,
-  });
-
-  // 同期フック
-  const { isSyncing, syncError, triggerSync, pause, resume } = useShiftSync({
-    enabled: false, // 手動同期を基本とし、リアルタイム更新はSubscriptionで追従
-    interval: 5000,
-    onSync: async () => {
-      await fetchShifts();
-    },
   });
 
   /**
@@ -367,7 +394,9 @@ export const CollaborativeShiftProvider: React.FC<
       selectedCells,
       isLoading,
       isSyncing,
-      lastSyncedAt: lastAutoSyncedAt,
+      lastSyncedAt,
+      lastAutoSyncedAt,
+      dataStatus,
       error: error || syncError || null,
       connectionState,
       isOnline,
@@ -381,7 +410,9 @@ export const CollaborativeShiftProvider: React.FC<
       selectedCells,
       isLoading,
       isSyncing,
+      lastSyncedAt,
       lastAutoSyncedAt,
+      dataStatus,
       error,
       syncError,
       connectionState,
@@ -404,8 +435,7 @@ export const CollaborativeShiftProvider: React.FC<
       forceReleaseCell,
       getAllEditingCells,
       triggerSync: handleTriggerSync,
-      pauseSync: pause,
-      resumeSync: resume,
+      clearSyncError,
       updateUserActivity: handleUpdateUserActivity,
       retryPendingChanges,
       syncPendingChanges,
@@ -441,8 +471,7 @@ export const CollaborativeShiftProvider: React.FC<
       forceReleaseCell,
       getAllEditingCells,
       handleTriggerSync,
-      pause,
-      resume,
+      clearSyncError,
       handleUpdateUserActivity,
       retryPendingChanges,
       syncPendingChanges,
