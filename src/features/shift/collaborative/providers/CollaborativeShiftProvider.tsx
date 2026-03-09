@@ -132,8 +132,8 @@ export const CollaborativeShiftProvider: React.FC<
   } = useShiftPresence({
     currentUserId,
     currentUserName,
-    _shiftRequestId: shiftRequestId,
-    _targetMonth: targetMonth,
+    shiftRequestId,
+    targetMonth,
   });
 
   // 同期フック
