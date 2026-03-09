@@ -10,7 +10,10 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { onUpdateShiftRequest } from "@/shared/api/graphql/documents/subscriptions";
+import {
+  onCreateShiftRequest,
+  onUpdateShiftRequest,
+} from "@/shared/api/graphql/documents/subscriptions";
 
 import {
   applyShiftCellUpdateToMap,
@@ -490,47 +493,79 @@ export const useCollaborativeShiftData = ({
       return;
     }
 
-    // 各スタッフのシフト更新をサブスクライブ
-    const subscriptions = staffIds.map((staffId) => {
-      const subscription = graphqlClient
+    const handleRealtimeEvent = (
+      request: ShiftRequestData,
+      eventLabel: "created" | "updated",
+      staffId: string,
+    ) => {
+      // 自分の更新による無限ループと二重適用を防ぐ
+      // 自分の更新は楽観的更新として既に反映済みのためスキップ
+      if (request.updatedBy === currentUserId) {
+        return;
+      }
+
+      // 他のユーザーの更新をローカルステートに反映
+      updateShiftRequestState(request);
+
+      console.log(
+        `[Realtime Update] Shift ${eventLabel} by another user for staff ${staffId}`,
+      );
+    };
+
+    // 各スタッフのシフト新規作成・更新をサブスクライブ
+    const subscriptions = staffIds.flatMap((staffId) => {
+      const variables = {
+        filter: {
+          staffId: { eq: staffId },
+          targetMonth: { eq: targetMonth },
+        },
+      };
+
+      const createSubscription = graphqlClient
         .graphql({
-          query: onUpdateShiftRequest,
-          variables: {
-            filter: {
-              staffId: { eq: staffId },
-              targetMonth: { eq: targetMonth },
-            },
-          },
+          query: onCreateShiftRequest,
+          variables,
         })
         .subscribe({
           next: ({ data }) => {
-            if (!data?.onUpdateShiftRequest) return;
+            if (!data?.onCreateShiftRequest) return;
 
-            const updatedRequest = data.onUpdateShiftRequest;
-
-            // 自分の更新による無限ループと二重適用を防ぐ
-            // 自分の更新は楽観的更新として既に反映済みのためスキップ
-            if (updatedRequest.updatedBy === currentUserId) {
-              return;
-            }
-
-            // 他のユーザーの更新をローカルステートに反映
-            const normalized = normalizeShiftRequest(updatedRequest);
-            updateShiftRequestState(normalized);
-
-            console.log(
-              `[Realtime Update] Shift updated by another user for staff ${staffId}`,
+            const createdRequest = normalizeShiftRequest(
+              data.onCreateShiftRequest,
             );
+            handleRealtimeEvent(createdRequest, "created", staffId);
           },
           error: (error) => {
             console.error(
-              `[Subscription Error] Failed to subscribe for staff ${staffId}:`,
+              `[Subscription Error] Failed to subscribe create for staff ${staffId}:`,
               error,
             );
           },
         });
 
-      return subscription;
+      const updateSubscription = graphqlClient
+        .graphql({
+          query: onUpdateShiftRequest,
+          variables,
+        })
+        .subscribe({
+          next: ({ data }) => {
+            if (!data?.onUpdateShiftRequest) return;
+
+            const updatedRequest = normalizeShiftRequest(
+              data.onUpdateShiftRequest,
+            );
+            handleRealtimeEvent(updatedRequest, "updated", staffId);
+          },
+          error: (error) => {
+            console.error(
+              `[Subscription Error] Failed to subscribe update for staff ${staffId}:`,
+              error,
+            );
+          },
+        });
+
+      return [createSubscription, updateSubscription];
     });
 
     // クリーンアップ：コンポーネントのアンマウント時や依存配列の変更時にサブスクリプションを解除

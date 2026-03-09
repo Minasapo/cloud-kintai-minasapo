@@ -77,20 +77,82 @@ export const useWorkflowNotificationInbox = () => {
       return selfIds.filter((id, index, list) => list.indexOf(id) === index);
     }
 
-    const adminIds = staffs
-      .filter(
-        (staff) =>
-          staff.role === StaffRole.ADMIN ||
-          staff.role === StaffRole.STAFF_ADMIN ||
-          staff.role === StaffRole.OWNER,
-      )
-      .flatMap((staff) => [staff.id, staff.cognitoUserId ?? null])
-      .filter((id): id is string => Boolean(id));
-
-    return [...selfIds, ...adminIds].filter(
+    return [...selfIds, "ADMINS"].filter(
       (id, index, list) => list.indexOf(id) === index,
     );
-  }, [cognitoUser?.id, currentStaffId, isAdminWatcher, staffs]);
+  }, [cognitoUser?.id, currentStaffId, isAdminWatcher]);
+
+  const adminGroupReadStorageKey = useMemo(
+    () =>
+      cognitoUser?.id
+        ? `workflowNotificationRead.workflowComment.${cognitoUser.id}`
+        : null,
+    [cognitoUser?.id],
+  );
+
+  const getLocallyReadAdminIds = useCallback(() => {
+    if (!adminGroupReadStorageKey || typeof window === "undefined") {
+      return new Set<string>();
+    }
+
+    try {
+      const raw = window.localStorage.getItem(adminGroupReadStorageKey);
+      if (!raw) {
+        return new Set<string>();
+      }
+      const parsed = JSON.parse(raw) as string[];
+      if (!Array.isArray(parsed)) {
+        return new Set<string>();
+      }
+      return new Set(
+        parsed.filter((id): id is string => typeof id === "string"),
+      );
+    } catch {
+      return new Set<string>();
+    }
+  }, [adminGroupReadStorageKey]);
+
+  const saveLocallyReadAdminIds = useCallback(
+    (ids: Set<string>) => {
+      if (!adminGroupReadStorageKey || typeof window === "undefined") {
+        return;
+      }
+      window.localStorage.setItem(
+        adminGroupReadStorageKey,
+        JSON.stringify([...ids]),
+      );
+    },
+    [adminGroupReadStorageKey],
+  );
+
+  const markAdminGroupEventAsReadLocally = useCallback(
+    (eventId: string) => {
+      const current = getLocallyReadAdminIds();
+      if (current.has(eventId)) {
+        return false;
+      }
+      current.add(eventId);
+      saveLocallyReadAdminIds(current);
+      return true;
+    },
+    [getLocallyReadAdminIds, saveLocallyReadAdminIds],
+  );
+
+  const applyLocalReadState = useCallback(
+    (items: WorkflowNotificationEvent[]) => {
+      const locallyReadAdminIds = getLocallyReadAdminIds();
+      return items.map((item) => {
+        if (
+          item.recipientStaffId === "ADMINS" &&
+          locallyReadAdminIds.has(item.id)
+        ) {
+          return { ...item, isRead: true };
+        }
+        return item;
+      });
+    },
+    [getLocallyReadAdminIds],
+  );
 
   const fetchNotificationPage = useCallback(
     async (
@@ -158,10 +220,18 @@ export const useWorkflowNotificationInbox = () => {
 
           const connection =
             response.data?.workflowNotificationEventsByRecipient;
-          recipientTotal +=
+          const pageItems =
             connection?.items.filter(
               (item): item is WorkflowNotificationEvent => Boolean(item),
-            ).length ?? 0;
+            ) ?? [];
+          if (recipientStaffId === "ADMINS") {
+            const locallyReadAdminIds = getLocallyReadAdminIds();
+            recipientTotal += pageItems.filter(
+              (item) => !locallyReadAdminIds.has(item.id),
+            ).length;
+          } else {
+            recipientTotal += pageItems.length;
+          }
           cursor = connection?.nextToken ?? null;
         } while (cursor);
 
@@ -237,7 +307,11 @@ export const useWorkflowNotificationInbox = () => {
         }),
       );
 
-      setNotifications(toUniqueSorted(pages.flatMap((page) => page.items)));
+      setNotifications(
+        toUniqueSorted(
+          applyLocalReadState(pages.flatMap((page) => page.items)),
+        ),
+      );
       setNextTokensByRecipient(
         pages.reduce<Record<string, string | null>>((acc, page) => {
           acc[page.recipientId] = page.nextToken;
@@ -258,6 +332,7 @@ export const useWorkflowNotificationInbox = () => {
     fetchUnreadCountForRecipients,
     recipientIds,
     toUniqueSorted,
+    applyLocalReadState,
   ]);
 
   const loadMoreNotifications = useCallback(async () => {
@@ -294,7 +369,12 @@ export const useWorkflowNotificationInbox = () => {
       );
 
       setNotifications((previous) =>
-        toUniqueSorted([...previous, ...pages.flatMap((page) => page.items)]),
+        toUniqueSorted(
+          applyLocalReadState([
+            ...previous,
+            ...pages.flatMap((page) => page.items),
+          ]),
+        ),
       );
       setNextTokensByRecipient((previous) => {
         const next = { ...previous };
@@ -317,74 +397,118 @@ export const useWorkflowNotificationInbox = () => {
     nextTokensByRecipient,
     recipientIds,
     toUniqueSorted,
+    applyLocalReadState,
   ]);
 
   const applyIncomingEvent = useCallback(
     (incoming: WorkflowNotificationEvent) => {
+      const locallyReadAdminIds = getLocallyReadAdminIds();
+      const normalizedIncoming =
+        incoming.recipientStaffId === "ADMINS" &&
+        locallyReadAdminIds.has(incoming.id)
+          ? { ...incoming, isRead: true }
+          : incoming;
+
       setNotifications((previous) => {
-        const index = previous.findIndex((item) => item.id === incoming.id);
+        const index = previous.findIndex(
+          (item) => item.id === normalizedIncoming.id,
+        );
         const previousEvent = index >= 0 ? previous[index] : null;
 
-        if (!previousEvent && !incoming.isRead) {
+        if (!previousEvent && !normalizedIncoming.isRead) {
           setUnreadCount((prev) => prev + 1);
         }
 
-        if (previousEvent && previousEvent.isRead && !incoming.isRead) {
+        if (
+          previousEvent &&
+          previousEvent.isRead &&
+          !normalizedIncoming.isRead
+        ) {
           setUnreadCount((prev) => prev + 1);
         }
 
-        if (previousEvent && !previousEvent.isRead && incoming.isRead) {
+        if (
+          previousEvent &&
+          !previousEvent.isRead &&
+          normalizedIncoming.isRead
+        ) {
           setUnreadCount((prev) => Math.max(prev - 1, 0));
         }
 
         if (index >= 0) {
           const next = [...previous];
-          next[index] = incoming;
+          next[index] = normalizedIncoming;
           return next.toSorted(sortByEventAtDesc);
         }
-        return [incoming, ...previous].toSorted(sortByEventAtDesc);
+        return [normalizedIncoming, ...previous].toSorted(sortByEventAtDesc);
       });
     },
-    [],
+    [getLocallyReadAdminIds],
   );
 
-  const markAsRead = useCallback(async (id: string) => {
-    const readAt = new Date().toISOString();
-    const response = (await graphqlClient.graphql({
-      query: updateWorkflowNotificationEvent,
-      variables: {
-        input: {
-          id,
-          isRead: true,
-          readAt,
+  const markAsRead = useCallback(
+    async (id: string) => {
+      const target = notifications.find(
+        (notification) => notification.id === id,
+      );
+
+      if (target?.recipientStaffId === "ADMINS") {
+        const marked = markAdminGroupEventAsReadLocally(id);
+        setNotifications((previous) =>
+          previous.map((notification) =>
+            notification.id === id
+              ? {
+                  ...notification,
+                  isRead: true,
+                  readAt: new Date().toISOString(),
+                }
+              : notification,
+          ),
+        );
+        if (marked && !target.isRead) {
+          setUnreadCount((prev) => Math.max(prev - 1, 0));
+        }
+        return;
+      }
+
+      const readAt = new Date().toISOString();
+      const response = (await graphqlClient.graphql({
+        query: updateWorkflowNotificationEvent,
+        variables: {
+          input: {
+            id,
+            isRead: true,
+            readAt,
+          },
         },
-      },
-      authMode: "userPool",
-    })) as GraphQLResult<UpdateWorkflowNotificationEventMutation>;
+        authMode: "userPool",
+      })) as GraphQLResult<UpdateWorkflowNotificationEventMutation>;
 
-    if (response.errors?.length) {
-      throw new Error(response.errors[0].message);
-    }
+      if (response.errors?.length) {
+        throw new Error(response.errors[0].message);
+      }
 
-    let decremented = false;
-    setNotifications((previous) =>
-      previous.map((notification) => {
-        if (notification.id !== id) {
-          return notification;
-        }
+      let decremented = false;
+      setNotifications((previous) =>
+        previous.map((notification) => {
+          if (notification.id !== id) {
+            return notification;
+          }
 
-        if (!notification.isRead) {
-          decremented = true;
-        }
+          if (!notification.isRead) {
+            decremented = true;
+          }
 
-        return { ...notification, isRead: true, readAt };
-      }),
-    );
+          return { ...notification, isRead: true, readAt };
+        }),
+      );
 
-    if (decremented) {
-      setUnreadCount((prev) => Math.max(prev - 1, 0));
-    }
-  }, []);
+      if (decremented) {
+        setUnreadCount((prev) => Math.max(prev - 1, 0));
+      }
+    },
+    [markAdminGroupEventAsReadLocally, notifications],
+  );
 
   const markAllAsRead = useCallback(async () => {
     const unreadIdsByRecipient = await Promise.all(

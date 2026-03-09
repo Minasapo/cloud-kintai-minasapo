@@ -44,20 +44,10 @@ export const useWorkflowCommentNotification = () => {
       return selfIds.filter((id, index, list) => list.indexOf(id) === index);
     }
 
-    const adminIds = staffs
-      .filter(
-        (staff) =>
-          staff.role === StaffRole.ADMIN ||
-          staff.role === StaffRole.STAFF_ADMIN ||
-          staff.role === StaffRole.OWNER,
-      )
-      .flatMap((staff) => [staff.id, staff.cognitoUserId ?? null])
-      .filter((id): id is string => Boolean(id));
-
-    return [...selfIds, ...adminIds].filter(
+    return [...selfIds, "ADMINS"].filter(
       (id, index, list) => list.indexOf(id) === index,
     );
-  }, [cognitoUser?.id, currentStaffId, isAdminWatcher, staffs]);
+  }, [cognitoUser?.id, currentStaffId, isAdminWatcher]);
 
   const handleNotification = useCallback(
     (eventId: string, title: string, body: string) => {

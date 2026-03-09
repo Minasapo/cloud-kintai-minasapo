@@ -80,11 +80,6 @@ const onCreateWorkflowNotificationEvent = /* GraphQL */ `
   }
 `;
 
-const normalizeApproverId = (approverId?: string | null) =>
-  (approverId ?? "").trim();
-
-const normalizeStaffId = (staffId?: string | null) => (staffId ?? "").trim();
-
 const normalizeRole = (role?: string | null) =>
   (role ?? "")
     .trim()
@@ -100,56 +95,7 @@ const isAdminRole = (role?: string | null) => {
   );
 };
 
-const collectWorkflowParticipantIds = (
-  workflow: WorkflowData,
-  staffs: NotificationStaff[],
-) => {
-  const participantIds = new Set<string>();
-
-  const addParticipant = (candidateId?: string | null) => {
-    const normalized = normalizeStaffId(candidateId);
-    if (!normalized || normalized === "ADMINS") {
-      return;
-    }
-    participantIds.add(normalized);
-  };
-
-  const addAdmins = () => {
-    staffs
-      .filter((staff) => isAdminRole(staff.role))
-      .forEach((admin) => {
-        addParticipant(admin.id);
-      });
-  };
-
-  addParticipant(workflow.staffId);
-
-  (workflow.assignedApproverStaffIds ?? []).forEach((approverId) => {
-    const normalized = normalizeApproverId(approverId);
-    if (!normalized) return;
-
-    if (normalized === "ADMINS") {
-      addAdmins();
-      return;
-    }
-
-    addParticipant(normalized);
-  });
-
-  (workflow.approvalSteps ?? []).forEach((step) => {
-    const normalized = normalizeApproverId(step?.approverStaffId);
-    if (!normalized) return;
-
-    if (normalized === "ADMINS") {
-      addAdmins();
-      return;
-    }
-
-    addParticipant(normalized);
-  });
-
-  return participantIds;
-};
+const normalizeRecipientId = (id?: string | null) => (id ?? "").trim();
 
 type PublishWorkflowCommentNotificationsArgs = {
   workflow: WorkflowData;
@@ -166,8 +112,22 @@ export const publishWorkflowCommentNotifications = async ({
   commentId,
   staffs,
 }: PublishWorkflowCommentNotificationsArgs) => {
-  const recipients = collectWorkflowParticipantIds(workflow, staffs);
-  recipients.delete(actorStaffId);
+  const actor = staffs.find((staff) => staff.id === actorStaffId);
+  const actorIsAdmin = isAdminRole(actor?.role);
+
+  const recipients = new Set<string>();
+  if (actorIsAdmin) {
+    const applicantId = normalizeRecipientId(workflow.staffId);
+    if (applicantId && applicantId !== actorStaffId) {
+      recipients.add(applicantId);
+    }
+  } else {
+    recipients.add("ADMINS");
+  }
+
+  if (recipients.size === 0) {
+    return;
+  }
 
   const eventAt = new Date().toISOString();
   const tasks = [...recipients].map(async (recipientStaffId) => {

@@ -72,15 +72,16 @@ export const useShiftPresence = ({
     undefined,
   );
   const currentUserColorRef = useRef<string>(generateUserColor(currentUserId));
-  const sessionIdRef = useRef<string>(createSessionId());
+  const [sessionId] = useState<string>(() => createSessionId());
   const editingCellsRef = useRef(editingCells);
 
   const scopeKey = useMemo(() => {
     const normalizedShiftRequestId = shiftRequestId?.trim();
     const normalizedTargetMonth = targetMonth?.trim();
     return (
-      [normalizedShiftRequestId, normalizedTargetMonth].filter(Boolean).join("_") ||
-      "global"
+      [normalizedShiftRequestId, normalizedTargetMonth]
+        .filter(Boolean)
+        .join("_") || "global"
     );
   }, [shiftRequestId, targetMonth]);
 
@@ -90,9 +91,8 @@ export const useShiftPresence = ({
   );
 
   const storageKey = useMemo(
-    () =>
-      `${storageKeyPrefix}${currentUserId}_${sessionIdRef.current}`,
-    [storageKeyPrefix, currentUserId],
+    () => `${storageKeyPrefix}${currentUserId}_${sessionId}`,
+    [storageKeyPrefix, currentUserId, sessionId],
   );
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export const useShiftPresence = ({
 
   const buildPresenceData = useCallback((): PresenceData => {
     return {
-      sessionId: sessionIdRef.current,
+      sessionId,
       userId: currentUserId,
       userName: currentUserName,
       color: currentUserColorRef.current,
@@ -139,90 +139,93 @@ export const useShiftPresence = ({
         }),
       ),
     };
-  }, [currentUserId, currentUserName]);
+  }, [currentUserId, currentUserName, sessionId]);
 
-  const applyPresenceSnapshot = useCallback((records: PresenceData[]) => {
-    const now = Date.now();
-    const activeUserMap = new Map<string, CollaborativeUser>();
-    const editingCellMap = new Map<
-      string,
-      { userId: string; userName: string; startTime: number }
-    >();
+  const applyPresenceSnapshot = useCallback(
+    (records: PresenceData[]) => {
+      const now = Date.now();
+      const activeUserMap = new Map<string, CollaborativeUser>();
+      const editingCellMap = new Map<
+        string,
+        { userId: string; userName: string; startTime: number }
+      >();
 
-    records.forEach((record) => {
-      if (now - record.timestamp >= INACTIVE_THRESHOLD) {
-        return;
-      }
-
-      const existingUser = activeUserMap.get(record.userId);
-      if (!existingUser || existingUser.lastActivity < record.lastActivity) {
-        activeUserMap.set(record.userId, {
-          userId: record.userId,
-          userName: record.userName,
-          color: record.color,
-          lastActivity: record.lastActivity,
-        });
-      }
-
-      record.editingCells.forEach((cell) => {
-        if (now - cell.startTime >= EDIT_TIMEOUT) {
+      records.forEach((record) => {
+        if (now - record.timestamp >= INACTIVE_THRESHOLD) {
           return;
         }
 
-        const existingCell = editingCellMap.get(cell.cellKey);
-        if (!existingCell || existingCell.startTime < cell.startTime) {
-          editingCellMap.set(cell.cellKey, {
-            userId: cell.userId,
-            userName: cell.userName,
-            startTime: cell.startTime,
+        const existingUser = activeUserMap.get(record.userId);
+        if (!existingUser || existingUser.lastActivity < record.lastActivity) {
+          activeUserMap.set(record.userId, {
+            userId: record.userId,
+            userName: record.userName,
+            color: record.color,
+            lastActivity: record.lastActivity,
           });
         }
+
+        record.editingCells.forEach((cell) => {
+          if (now - cell.startTime >= EDIT_TIMEOUT) {
+            return;
+          }
+
+          const existingCell = editingCellMap.get(cell.cellKey);
+          if (!existingCell || existingCell.startTime < cell.startTime) {
+            editingCellMap.set(cell.cellKey, {
+              userId: cell.userId,
+              userName: cell.userName,
+              startTime: cell.startTime,
+            });
+          }
+        });
       });
-    });
 
-    const nextUsers = Array.from(activeUserMap.values()).toSorted((a, b) =>
-      a.userId.localeCompare(b.userId),
-    );
+      const nextUsers = Array.from(activeUserMap.values()).toSorted((a, b) =>
+        a.userId.localeCompare(b.userId),
+      );
 
-    setActiveUsers((prevUsers) => {
-      if (
-        prevUsers.length === nextUsers.length &&
-        prevUsers.every((prevUser, index) => {
-          const nextUser = nextUsers[index];
-          return (
-            prevUser?.userId === nextUser?.userId &&
-            prevUser?.lastActivity === nextUser?.lastActivity &&
-            prevUser?.userName === nextUser?.userName &&
-            prevUser?.color === nextUser?.color
-          );
-        })
-      ) {
-        return prevUsers;
-      }
-      return nextUsers;
-    });
-
-    setEditingCellsState((prevCells) => {
-      if (prevCells.size === editingCellMap.size) {
-        const hasDiff = Array.from(editingCellMap.entries()).some(
-          ([cellKey, nextEditor]) => {
-            const prevEditor = prevCells.get(cellKey);
+      setActiveUsers((prevUsers) => {
+        if (
+          prevUsers.length === nextUsers.length &&
+          prevUsers.every((prevUser, index) => {
+            const nextUser = nextUsers[index];
             return (
-              !prevEditor ||
-              prevEditor.userId !== nextEditor.userId ||
-              prevEditor.userName !== nextEditor.userName ||
-              prevEditor.startTime !== nextEditor.startTime
+              prevUser?.userId === nextUser?.userId &&
+              prevUser?.lastActivity === nextUser?.lastActivity &&
+              prevUser?.userName === nextUser?.userName &&
+              prevUser?.color === nextUser?.color
             );
-          },
-        );
-        if (!hasDiff) {
-          return prevCells;
+          })
+        ) {
+          return prevUsers;
         }
-      }
+        return nextUsers;
+      });
 
-      return editingCellMap;
-    });
-  }, [setEditingCellsState]);
+      setEditingCellsState((prevCells) => {
+        if (prevCells.size === editingCellMap.size) {
+          const hasDiff = Array.from(editingCellMap.entries()).some(
+            ([cellKey, nextEditor]) => {
+              const prevEditor = prevCells.get(cellKey);
+              return (
+                !prevEditor ||
+                prevEditor.userId !== nextEditor.userId ||
+                prevEditor.userName !== nextEditor.userName ||
+                prevEditor.startTime !== nextEditor.startTime
+              );
+            },
+          );
+          if (!hasDiff) {
+            return prevCells;
+          }
+        }
+
+        return editingCellMap;
+      });
+    },
+    [setEditingCellsState],
+  );
 
   const loadPresenceFromStorage = useCallback(() => {
     const records: PresenceData[] = [];
@@ -258,7 +261,10 @@ export const useShiftPresence = ({
   const updateActivity = useCallback(() => {
     lastActivityRef.current = Date.now();
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(buildPresenceData()));
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify(buildPresenceData()),
+      );
     } catch (error) {
       console.error("Failed to save presence to storage:", error);
     }
@@ -287,15 +293,18 @@ export const useShiftPresence = ({
   /**
    * セル編集の終了を通知
    */
-  const stopEditingCell = useCallback((staffId: string, date: string) => {
-    const cellKey = `${staffId}_${date}`;
-    setEditingCellsState((prev) => {
-      const next = new Map(prev);
-      next.delete(cellKey);
-      return next;
-    });
-    updateActivity();
-  }, [setEditingCellsState, updateActivity]);
+  const stopEditingCell = useCallback(
+    (staffId: string, date: string) => {
+      const cellKey = `${staffId}_${date}`;
+      setEditingCellsState((prev) => {
+        const next = new Map(prev);
+        next.delete(cellKey);
+        return next;
+      });
+      updateActivity();
+    },
+    [setEditingCellsState, updateActivity],
+  );
 
   /**
    * 特定のセルが他のユーザーによって編集中かチェック
@@ -318,15 +327,17 @@ export const useShiftPresence = ({
       const editor = editingCells.get(cellKey);
       if (!editor) return undefined;
 
-      return activeUsers.find((user) => user.userId === editor.userId) ?? {
-        userId: editor.userId,
-        userName: editor.userName,
-        color:
-          editor.userId === currentUserId
-            ? currentUserColorRef.current
-            : generateUserColor(editor.userId),
-        lastActivity: editor.startTime,
-      };
+      return (
+        activeUsers.find((user) => user.userId === editor.userId) ?? {
+          userId: editor.userId,
+          userName: editor.userName,
+          color:
+            editor.userId === currentUserId
+              ? currentUserColorRef.current
+              : generateUserColor(editor.userId),
+          lastActivity: editor.startTime,
+        }
+      );
     },
     [editingCells, activeUsers, currentUserId],
   );
@@ -336,7 +347,10 @@ export const useShiftPresence = ({
    */
   const savePresenceToStorage = useCallback(() => {
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(buildPresenceData()));
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify(buildPresenceData()),
+      );
     } catch (error) {
       console.error("Failed to save presence to storage:", error);
     }
@@ -356,7 +370,9 @@ export const useShiftPresence = ({
    */
   useEffect(() => {
     lastActivityRef.current = Date.now();
-    updateActiveUsers();
+    const initialSyncTimeout = window.setTimeout(() => {
+      updateActiveUsers();
+    }, 0);
 
     heartbeatIntervalRef.current = setInterval(() => {
       updateActiveUsers();
@@ -389,6 +405,7 @@ export const useShiftPresence = ({
     window.addEventListener("beforeunload", removeOwnPresence);
 
     return () => {
+      window.clearTimeout(initialSyncTimeout);
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
       }
@@ -453,15 +470,18 @@ export const useShiftPresence = ({
   /**
    * 管理者による強制解除
    */
-  const forceReleaseCell = useCallback((staffId: string, date: string) => {
-    const cellKey = `${staffId}_${date}`;
-    setEditingCellsState((prev) => {
-      const next = new Map(prev);
-      next.delete(cellKey);
-      return next;
-    });
-    updateActivity();
-  }, [setEditingCellsState, updateActivity]);
+  const forceReleaseCell = useCallback(
+    (staffId: string, date: string) => {
+      const cellKey = `${staffId}_${date}`;
+      setEditingCellsState((prev) => {
+        const next = new Map(prev);
+        next.delete(cellKey);
+        return next;
+      });
+      updateActivity();
+    },
+    [setEditingCellsState, updateActivity],
+  );
 
   /**
    * すべての編集ロックを取得（管理者用）
