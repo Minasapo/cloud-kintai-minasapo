@@ -47,6 +47,7 @@ export const useCollaborativeShiftData = ({
   const [shiftDataMap, setShiftDataMap] = useState<ShiftDataMap>(new Map());
   const [error, setError] = useState<string | null>(null);
   const [lastFetchedAt, setLastFetchedAt] = useState<number>(0);
+  const [lastAutoSyncedAt, setLastAutoSyncedAt] = useState<number>(0);
   const [connectionState, setConnectionState] = useState<
     "connected" | "disconnected" | "error"
   >("connected");
@@ -216,6 +217,7 @@ export const useCollaborativeShiftData = ({
       const { message, connection } = buildShiftErrorMessage(err);
       setConnectionState(connection);
       setError(message);
+      throw err;
     }
   }, [shouldSkipFetch, buildShiftErrorMessage]);
 
@@ -506,6 +508,7 @@ export const useCollaborativeShiftData = ({
 
       // 他のユーザーの更新をローカルステートに反映
       updateShiftRequestState(request);
+      setLastAutoSyncedAt(Date.now());
 
       console.log(
         `[Realtime Update] Shift ${eventLabel} by another user for staff ${staffId}`,
@@ -581,6 +584,7 @@ export const useCollaborativeShiftData = ({
     isBatchUpdating,
     error,
     connectionState,
+    lastAutoSyncedAt,
     lastFetchedAt,
     fetchShifts,
     updateShift,

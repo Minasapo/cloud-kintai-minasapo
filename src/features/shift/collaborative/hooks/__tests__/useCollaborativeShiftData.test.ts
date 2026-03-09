@@ -125,6 +125,69 @@ describe("useCollaborativeShiftData", () => {
         "work",
       ),
     );
+    expect(result.current.lastAutoSyncedAt).toBeGreaterThan(0);
+  });
+
+  it("自分の購読イベントは二重適用せず自動同期時刻も更新しない", async () => {
+    mockUseGetShiftRequestsQuery.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    let createNext:
+      | ((value: { data?: { onCreateShiftRequest?: unknown } }) => void)
+      | undefined;
+    let updateNext:
+      | ((value: { data?: { onUpdateShiftRequest?: unknown } }) => void)
+      | undefined;
+
+    mockGraphqlSubscribe
+      .mockReturnValueOnce({
+        subscribe: jest.fn((handlers: { next: typeof createNext }) => {
+          createNext = handlers.next;
+          return { unsubscribe: mockSubscriptionUnsubscribe };
+        }),
+      })
+      .mockReturnValueOnce({
+        subscribe: jest.fn((handlers: { next: typeof updateNext }) => {
+          updateNext = handlers.next;
+          return { unsubscribe: mockSubscriptionUnsubscribe };
+        }),
+      });
+
+    const { result } = renderHook(() =>
+      useCollaborativeShiftData({
+        staffIds: ["staff-2"],
+        targetMonth: "2026-02",
+        currentUserId: "user-1",
+      }),
+    );
+
+    await waitFor(() => expect(createNext).toBeDefined());
+    expect(updateNext).toBeDefined();
+
+    act(() => {
+      createNext?.({
+        data: {
+          onCreateShiftRequest: {
+            ...baseShiftRequest,
+            id: "req-3",
+            staffId: "staff-2",
+            updatedBy: "user-1",
+          },
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.shiftDataMap.get("staff-2")?.get("01")?.state).toBe(
+        "empty",
+      );
+    });
+    expect(result.current.lastAutoSyncedAt).toBe(0);
   });
 
   it("取得したシフトをShiftDataMapへ反映する", async () => {

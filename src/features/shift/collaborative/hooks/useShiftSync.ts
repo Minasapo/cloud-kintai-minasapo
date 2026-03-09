@@ -31,30 +31,34 @@ export const useShiftSync = ({
   /**
    * 同期を実行
    */
-  const sync = useCallback(async () => {
-    if (!enabled || isPaused || isSyncing) return;
+  const sync = useCallback(
+    async ({ force = false }: { force?: boolean } = {}) => {
+      if (isSyncing) return;
+      if (!force && (!enabled || isPaused)) return;
 
-    setIsSyncing(true);
-    setSyncError(null);
+      setIsSyncing(true);
+      setSyncError(null);
 
-    try {
-      await onSyncRef.current();
-      if (isMountedRef.current) {
-        setLastSyncedAt(Date.now());
+      try {
+        await onSyncRef.current();
+        if (isMountedRef.current) {
+          setLastSyncedAt(Date.now());
+        }
+      } catch (error) {
+        console.error("Sync error:", error);
+        if (isMountedRef.current) {
+          setSyncError(
+            error instanceof Error ? error.message : "同期に失敗しました",
+          );
+        }
+      } finally {
+        if (isMountedRef.current) {
+          setIsSyncing(false);
+        }
       }
-    } catch (error) {
-      console.error("Sync error:", error);
-      if (isMountedRef.current) {
-        setSyncError(
-          error instanceof Error ? error.message : "同期に失敗しました",
-        );
-      }
-    } finally {
-      if (isMountedRef.current) {
-        setIsSyncing(false);
-      }
-    }
-  }, [enabled, isPaused, isSyncing]);
+    },
+    [enabled, isPaused, isSyncing],
+  );
 
   /**
    * 同期を一時停止
@@ -78,7 +82,7 @@ export const useShiftSync = ({
    * 手動で同期をトリガー
    */
   const triggerSync = useCallback(async () => {
-    await sync();
+    await sync({ force: true });
   }, [sync]);
 
   /**

@@ -9,6 +9,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import {
   Alert,
   Box,
+  Button,
   Chip,
   Container,
   LinearProgress,
@@ -1032,6 +1033,55 @@ const ProgressPanelBase: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
 
 const ProgressPanel = memo(ProgressPanelBase);
 
+type SyncPanelProps = {
+  isSyncing: boolean;
+  lastAutoSyncedAt: number;
+  syncError: string | null;
+  onSync: () => Promise<void>;
+};
+
+const SyncPanelBase: FC<SyncPanelProps> = ({
+  isSyncing,
+  lastAutoSyncedAt,
+  syncError,
+  onSync,
+}) => {
+  const formattedLastSyncedAt =
+    lastAutoSyncedAt > 0
+      ? dayjs(lastAutoSyncedAt).format("YYYY/MM/DD HH:mm:ss")
+      : "未同期";
+
+  return (
+    <Paper sx={{ p: 2, mb: 3 }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+      >
+        <Button
+          variant="contained"
+          onClick={() => {
+            void onSync();
+          }}
+          disabled={isSyncing}
+        >
+          {isSyncing ? "同期中..." : "最新状態を取得"}
+        </Button>
+        <Typography variant="body2" color="text.secondary">
+          最後に自動同期された日時: {formattedLastSyncedAt}
+        </Typography>
+      </Stack>
+      {syncError && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          同期に失敗しました。再試行してください。({syncError})
+        </Alert>
+      )}
+    </Paper>
+  );
+};
+
+const SyncPanel = memo(SyncPanelBase);
+
 ProgressPanelBase.propTypes = {
   progress: PropTypes.shape({
     confirmedCount: PropTypes.number.isRequired,
@@ -1206,6 +1256,13 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onToggleHistory={toggleHistory}
             onShowHelp={() => setShowHelp(true)}
             onPrint={openPrintDialog}
+          />
+
+          <SyncPanel
+            isSyncing={state.isSyncing}
+            lastAutoSyncedAt={state.lastSyncedAt}
+            syncError={state.error}
+            onSync={_handleSync}
           />
 
           {/* 変更履歴ダイアログ */}

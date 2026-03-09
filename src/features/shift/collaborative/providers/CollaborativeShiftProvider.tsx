@@ -57,6 +57,7 @@ export const CollaborativeShiftProvider: React.FC<
     isBatchUpdating,
     error,
     connectionState,
+    lastAutoSyncedAt,
     fetchShifts,
     updateShift,
     batchUpdateShifts,
@@ -137,14 +138,13 @@ export const CollaborativeShiftProvider: React.FC<
   });
 
   // 同期フック
-  const { isSyncing, lastSyncedAt, syncError, triggerSync, pause, resume } =
-    useShiftSync({
-      enabled: false, // Phase 1.1では自動同期は不要（ユーザーアクションで都度更新）
-      interval: 5000,
-      onSync: async () => {
-        await fetchShifts();
-      },
-    });
+  const { isSyncing, syncError, triggerSync, pause, resume } = useShiftSync({
+    enabled: false, // 手動同期を基本とし、リアルタイム更新はSubscriptionで追従
+    interval: 5000,
+    onSync: async () => {
+      await fetchShifts();
+    },
+  });
 
   /**
    * シフトセルを更新
@@ -367,7 +367,7 @@ export const CollaborativeShiftProvider: React.FC<
       selectedCells,
       isLoading,
       isSyncing,
-      lastSyncedAt,
+      lastSyncedAt: lastAutoSyncedAt,
       error: error || syncError || null,
       connectionState,
       isOnline,
@@ -381,7 +381,7 @@ export const CollaborativeShiftProvider: React.FC<
       selectedCells,
       isLoading,
       isSyncing,
-      lastSyncedAt,
+      lastAutoSyncedAt,
       error,
       syncError,
       connectionState,
