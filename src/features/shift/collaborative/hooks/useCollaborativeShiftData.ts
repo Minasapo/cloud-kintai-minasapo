@@ -551,6 +551,7 @@ export const useCollaborativeShiftData = ({
         .graphql({
           query: onCreateShiftRequest,
           variables,
+          authMode: "userPool",
         })
         .subscribe({
           next: ({ data }) => {
@@ -573,6 +574,7 @@ export const useCollaborativeShiftData = ({
         .graphql({
           query: onUpdateShiftRequest,
           variables,
+          authMode: "userPool",
         })
         .subscribe({
           next: ({ data }) => {
