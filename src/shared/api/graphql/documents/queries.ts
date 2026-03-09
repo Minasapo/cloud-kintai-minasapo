@@ -896,6 +896,15 @@ export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -951,6 +960,15 @@ export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
         recordedAt
         recordedByStaffId
         changeReason
+        __typename
+      }
+      comments {
+        id
+        cellKey
+        staffId
+        authorName
+        body
+        createdAt
         __typename
       }
       createdAt
@@ -1021,6 +1039,15 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
         recordedAt
         recordedByStaffId
         changeReason
+        __typename
+      }
+      comments {
+        id
+        cellKey
+        staffId
+        authorName
+        body
+        createdAt
         __typename
       }
       createdAt

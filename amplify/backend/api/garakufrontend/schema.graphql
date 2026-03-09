@@ -228,6 +228,15 @@ type ShiftRequestHistory {
   changeReason: String
 }
 
+type ShiftRequestComment {
+  id: ID!
+  cellKey: String!
+  staffId: String!
+  authorName: String
+  body: String!
+  createdAt: String!
+}
+
 type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   id: ID!
   staffId: String!
@@ -247,6 +256,8 @@ type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   version: Int # 楽観的ロック用バージョン番号
   # 変更履歴（最新が先頭になるようクライアントで整列）
   histories: [ShiftRequestHistory]
+  # セルコメント（共同編集時のセル単位コメント）
+  comments: [ShiftRequestComment]
 }
 
 type ShiftPlanMonthSetting {

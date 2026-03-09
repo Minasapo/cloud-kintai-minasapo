@@ -880,6 +880,7 @@ export type CreateShiftRequestInput = {
   updatedBy?: string | null,
   version?: number | null,
   histories?: Array< ShiftRequestHistoryInput | null > | null,
+  comments?: Array< ShiftRequestCommentInput | null > | null,
 };
 
 export type ShiftRequestDayPreferenceInput = {
@@ -914,6 +915,15 @@ export type ShiftRequestHistoryInput = {
   changeReason?: string | null,
 };
 
+export type ShiftRequestCommentInput = {
+  id: string,
+  cellKey: string,
+  staffId: string,
+  authorName?: string | null,
+  body: string,
+  createdAt: string,
+};
+
 export type ModelShiftRequestConditionInput = {
   staffId?: ModelStringInput | null,
   targetMonth?: ModelStringInput | null,
@@ -941,6 +951,7 @@ export type ShiftRequest = {
   updatedBy?: string | null,
   version?: number | null,
   histories?:  Array<ShiftRequestHistory | null > | null,
+  comments?:  Array<ShiftRequestComment | null > | null,
   createdAt: string,
 };
 
@@ -971,6 +982,16 @@ export type ShiftRequestHistory = {
   changeReason?: string | null,
 };
 
+export type ShiftRequestComment = {
+  __typename: "ShiftRequestComment",
+  id: string,
+  cellKey: string,
+  staffId: string,
+  authorName?: string | null,
+  body: string,
+  createdAt: string,
+};
+
 export type UpdateShiftRequestInput = {
   id: string,
   staffId?: string | null,
@@ -983,6 +1004,7 @@ export type UpdateShiftRequestInput = {
   updatedBy?: string | null,
   version?: number | null,
   histories?: Array< ShiftRequestHistoryInput | null > | null,
+  comments?: Array< ShiftRequestCommentInput | null > | null,
 };
 
 export type DeleteShiftRequestInput = {
@@ -3354,6 +3376,15 @@ export type CreateShiftRequestMutation = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
+    comments?:  Array< {
+      __typename: "ShiftRequestComment",
+      id: string,
+      cellKey: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -3408,6 +3439,15 @@ export type UpdateShiftRequestMutation = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
+    comments?:  Array< {
+      __typename: "ShiftRequestComment",
+      id: string,
+      cellKey: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -3461,6 +3501,15 @@ export type DeleteShiftRequestMutation = {
       recordedAt: string,
       recordedByStaffId?: string | null,
       changeReason?: string | null,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "ShiftRequestComment",
+      id: string,
+      cellKey: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
     } | null > | null,
     createdAt: string,
   } | null,
@@ -4958,6 +5007,15 @@ export type GetShiftRequestQuery = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
+    comments?:  Array< {
+      __typename: "ShiftRequestComment",
+      id: string,
+      cellKey: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -5014,6 +5072,15 @@ export type ListShiftRequestsQuery = {
         recordedAt: string,
         recordedByStaffId?: string | null,
         changeReason?: string | null,
+      } | null > | null,
+      comments?:  Array< {
+        __typename: "ShiftRequestComment",
+        id: string,
+        cellKey: string,
+        staffId: string,
+        authorName?: string | null,
+        body: string,
+        createdAt: string,
       } | null > | null,
       createdAt: string,
     } | null >,
@@ -5076,6 +5143,15 @@ export type ShiftRequestsByStaffIdQuery = {
         recordedAt: string,
         recordedByStaffId?: string | null,
         changeReason?: string | null,
+      } | null > | null,
+      comments?:  Array< {
+        __typename: "ShiftRequestComment",
+        id: string,
+        cellKey: string,
+        staffId: string,
+        authorName?: string | null,
+        body: string,
+        createdAt: string,
       } | null > | null,
       createdAt: string,
     } | null >,
@@ -6735,6 +6811,15 @@ export type OnCreateShiftRequestSubscription = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
+    comments?:  Array< {
+      __typename: "ShiftRequestComment",
+      id: string,
+      cellKey: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -6788,6 +6873,15 @@ export type OnUpdateShiftRequestSubscription = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
+    comments?:  Array< {
+      __typename: "ShiftRequestComment",
+      id: string,
+      cellKey: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
+    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -6840,6 +6934,15 @@ export type OnDeleteShiftRequestSubscription = {
       recordedAt: string,
       recordedByStaffId?: string | null,
       changeReason?: string | null,
+    } | null > | null,
+    comments?:  Array< {
+      __typename: "ShiftRequestComment",
+      id: string,
+      cellKey: string,
+      staffId: string,
+      authorName?: string | null,
+      body: string,
+      createdAt: string,
     } | null > | null,
     createdAt: string,
   } | null,

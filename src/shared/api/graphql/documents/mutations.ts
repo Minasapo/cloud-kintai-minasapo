@@ -1024,6 +1024,15 @@ export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -1079,6 +1088,15 @@ export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -1132,6 +1150,15 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
       recordedAt
       recordedByStaffId
       changeReason
+      __typename
+    }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
       __typename
     }
     createdAt

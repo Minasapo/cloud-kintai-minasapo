@@ -917,6 +917,7 @@ const useCollaborativePageState = (targetMonth: string) => {
     progress,
     calculateDailyCount,
     getEventsForDay,
+    selectedCells,
     selectionCount,
     hasLocked,
     hasUnlocked,
@@ -1161,6 +1162,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       progress,
       calculateDailyCount,
       getEventsForDay,
+      selectedCells,
       selectionCount,
       hasLocked,
       hasUnlocked,
@@ -1206,7 +1208,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     }, [cognitoUser, staffs]);
 
     // プレゼンス通知
-    const { notifications, dismissNotification } = usePresenceNotifications();
+    const { notifications, addNotification, dismissNotification } =
+      usePresenceNotifications();
 
     // 印刷機能
     const { isPrintDialogOpen, openPrintDialog, closePrintDialog } =
@@ -1223,6 +1226,15 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
         ),
       [staffs],
     );
+
+    // サブスクリプション経由のリモート更新をトースト通知
+    useEffect(() => {
+      if (!state.lastRemoteUpdate) return;
+      const staffName =
+        staffNameMap.get(state.lastRemoteUpdate.staffId) ??
+        state.lastRemoteUpdate.staffId;
+      addNotification("data-synced", "", { staffName, date: "" });
+    }, [state.lastRemoteUpdate, staffNameMap, addNotification]);
 
     // コンフリクト解決ダイアログ状態
     const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
@@ -1356,9 +1368,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <BatchEditToolbar
             selectionCount={selectionCount}
             selectedCells={
-              focusedCell
-                ? [{ staffId: focusedCell.staffId, date: focusedCell.date }]
-                : []
+              selectionCount > 0
+                ? selectedCells
+                : focusedCell
+                  ? [{ staffId: focusedCell.staffId, date: focusedCell.date }]
+                  : []
             }
             comments={
               focusedCell

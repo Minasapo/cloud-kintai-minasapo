@@ -972,6 +972,15 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -1026,6 +1035,15 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -1078,6 +1096,15 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
       recordedAt
       recordedByStaffId
       changeReason
+      __typename
+    }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
       __typename
     }
     createdAt

@@ -26,6 +26,7 @@ import {
   PendingChangesMap,
   ShiftCellUpdate,
   ShiftDataMap,
+  ShiftRequestCommentData,
   ShiftRequestData,
   shiftStateToShiftRequestStatus,
 } from "../types/collaborative.types";
@@ -41,6 +42,8 @@ interface UseCollaborativeShiftDataProps {
   onSaveStarted?: () => void;
   onSaveCompleted?: () => void;
   onSaveFailed?: (error: string) => void;
+  onRemoteUpdate?: (staffId: string) => void;
+  onCommentsReceived?: (staffId: string, comments: ShiftRequestCommentData[]) => void;
 }
 
 export const useCollaborativeShiftData = ({
@@ -51,6 +54,8 @@ export const useCollaborativeShiftData = ({
   onSaveStarted,
   onSaveCompleted,
   onSaveFailed,
+  onRemoteUpdate,
+  onCommentsReceived,
 }: UseCollaborativeShiftDataProps) => {
   const [shiftDataMap, setShiftDataMap] = useState<ShiftDataMap>(new Map());
   const [error, setError] = useState<string | null>(null);
@@ -64,13 +69,17 @@ export const useCollaborativeShiftData = ({
   const onSaveStartedRef = useRef(onSaveStarted);
   const onSaveCompletedRef = useRef(onSaveCompleted);
   const onSaveFailedRef = useRef(onSaveFailed);
+  const onRemoteUpdateRef = useRef(onRemoteUpdate);
+  const onCommentsReceivedRef = useRef(onCommentsReceived);
 
   useEffect(() => {
     onAutoSyncReceivedRef.current = onAutoSyncReceived;
     onSaveStartedRef.current = onSaveStarted;
     onSaveCompletedRef.current = onSaveCompleted;
     onSaveFailedRef.current = onSaveFailed;
-  }, [onAutoSyncReceived, onSaveStarted, onSaveCompleted, onSaveFailed]);
+    onRemoteUpdateRef.current = onRemoteUpdate;
+    onCommentsReceivedRef.current = onCommentsReceived;
+  }, [onAutoSyncReceived, onSaveStarted, onSaveCompleted, onSaveFailed, onRemoteUpdate, onCommentsReceived]);
 
   const [updateShiftCell] = useUpdateShiftCellMutation();
   const [createShiftRequest] = useCreateShiftRequestMutation();
@@ -532,6 +541,12 @@ export const useCollaborativeShiftData = ({
       // 他のユーザーの更新をローカルステートに反映
       updateShiftRequestState(request);
       onAutoSyncReceivedRef.current?.();
+      onRemoteUpdateRef.current?.(staffId);
+
+      // コメントの更新を通知
+      if (request.comments) {
+        onCommentsReceivedRef.current?.(staffId, request.comments);
+      }
 
       console.log(
         `[Realtime Update] Shift ${eventLabel} by another user for staff ${staffId}`,
@@ -602,6 +617,16 @@ export const useCollaborativeShiftData = ({
     };
   }, [staffIdsKey, targetMonth, currentUserId, updateShiftRequestState]);
 
+  const getShiftRequest = useCallback(
+    (staffId: string) => shiftRequestsRef.current.get(staffId),
+    [],
+  );
+
+  const getAllShiftRequests = useCallback(
+    () => Array.from(shiftRequestsRef.current.values()),
+    [],
+  );
+
   return {
     shiftDataMap,
     pendingChanges: pendingChangesRef.current,
@@ -614,5 +639,7 @@ export const useCollaborativeShiftData = ({
     updateShift,
     batchUpdateShifts,
     retryPendingChanges,
+    getShiftRequest,
+    getAllShiftRequests,
   };
 };

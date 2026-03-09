@@ -6,6 +6,9 @@ import React, {
   useState,
 } from "react";
 
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import { updateShiftRequest } from "@/shared/api/graphql/documents/mutations";
+
 import {
   CollaborativeShiftContext,
   CollaborativeShiftContextType,
@@ -21,6 +24,7 @@ import {
   CollaborativeShiftState,
   Mention,
   ShiftCellUpdate,
+  ShiftRequestCommentData,
 } from "../types/collaborative.types";
 
 interface CollaborativeShiftProviderProps {
@@ -44,6 +48,10 @@ export const CollaborativeShiftProvider: React.FC<
 }) => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [showHistory, setShowHistory] = useState(false);
+  const [lastRemoteUpdate, setLastRemoteUpdate] = useState<{
+    staffId: string;
+    timestamp: number;
+  } | null>(null);
 
   // コメント管理フック
   const {
@@ -53,10 +61,24 @@ export const CollaborativeShiftProvider: React.FC<
     getCommentsByCell,
     replyToComment,
     deleteCommentReply,
+    loadCommentsFromShiftRequests,
+    mergeRemoteComments,
+    getCommentsInputForStaff,
   } = useShiftComments();
 
   // fetchShifts への参照ブリッジ（同期フックをデータフックより先に初期化するため）
   const fetchShiftsRef = useRef<() => Promise<void>>(() => Promise.resolve());
+
+  const handleRemoteUpdate = useCallback((staffId: string) => {
+    setLastRemoteUpdate({ staffId, timestamp: Date.now() });
+  }, []);
+
+  const handleCommentsReceived = useCallback(
+    (staffId: string, comments: ShiftRequestCommentData[]) => {
+      mergeRemoteComments(staffId, comments);
+    },
+    [mergeRemoteComments],
+  );
 
   // 同期コーディネータフック（Subscription ファースト）
   const {
@@ -89,6 +111,8 @@ export const CollaborativeShiftProvider: React.FC<
     updateShift,
     batchUpdateShifts,
     retryPendingChanges,
+    getShiftRequest,
+    getAllShiftRequests,
   } = useCollaborativeShiftData({
     staffIds,
     targetMonth,
@@ -97,12 +121,53 @@ export const CollaborativeShiftProvider: React.FC<
     onSaveStarted: notifySaveStarted,
     onSaveCompleted: notifySaveCompleted,
     onSaveFailed: notifySaveFailed,
+    onRemoteUpdate: handleRemoteUpdate,
+    onCommentsReceived: handleCommentsReceived,
   });
 
   // fetchShifts 参照を同期
   useEffect(() => {
     fetchShiftsRef.current = fetchShifts;
   }, [fetchShifts]);
+
+  // 初期データ読み込み時にコメントをロード
+  const commentsInitializedRef = useRef(false);
+  useEffect(() => {
+    if (isLoading || commentsInitializedRef.current) {
+      return;
+    }
+    const allRequests = getAllShiftRequests();
+    if (allRequests.length > 0) {
+      loadCommentsFromShiftRequests(allRequests);
+      commentsInitializedRef.current = true;
+    }
+  }, [isLoading, getAllShiftRequests, loadCommentsFromShiftRequests]);
+
+  const persistComments = useCallback(
+    async (staffId: string) => {
+      const shiftRequest = getShiftRequest(staffId);
+      if (!shiftRequest) return;
+
+      const commentsInput = getCommentsInputForStaff(staffId);
+      try {
+        await graphqlClient.graphql({
+          query: updateShiftRequest,
+          variables: {
+            input: {
+              id: shiftRequest.id,
+              comments: commentsInput,
+              updatedBy: currentUserId,
+              updatedAt: new Date().toISOString(),
+            },
+          },
+          authMode: "userPool",
+        });
+      } catch (err) {
+        console.error("Failed to persist comments:", err);
+      }
+    },
+    [getShiftRequest, getCommentsInputForStaff, currentUserId],
+  );
 
   // オフライン対応フック
   const {
@@ -297,7 +362,7 @@ export const CollaborativeShiftProvider: React.FC<
       content: string,
       mentions: Mention[],
     ): Promise<CellComment> => {
-      return addComment(
+      const comment = addComment(
         cellKey,
         currentUserId,
         currentUserName,
@@ -305,8 +370,14 @@ export const CollaborativeShiftProvider: React.FC<
         content,
         mentions,
       );
+
+      // cellKey は "staffId#date" 形式
+      const staffId = cellKey.split("#")[0];
+      await persistComments(staffId);
+
+      return comment;
     },
-    [addComment, currentUserId, currentUserName, activeUsers],
+    [addComment, currentUserId, currentUserName, activeUsers, persistComments],
   );
 
   /**
@@ -322,9 +393,13 @@ export const CollaborativeShiftProvider: React.FC<
       if (!updated) {
         throw new Error(`Comment ${commentId} not found`);
       }
+
+      const staffId = updated.cellKey.split("#")[0];
+      await persistComments(staffId);
+
       return updated;
     },
-    [updateComment],
+    [updateComment, persistComments],
   );
 
   /**
@@ -332,9 +407,13 @@ export const CollaborativeShiftProvider: React.FC<
    */
   const handleDeleteComment = useCallback(
     async (commentId: string): Promise<void> => {
-      deleteComment(commentId);
+      const { cellKey } = deleteComment(commentId);
+      if (cellKey) {
+        const staffId = cellKey.split("#")[0];
+        await persistComments(staffId);
+      }
     },
-    [deleteComment],
+    [deleteComment, persistComments],
   );
 
   /**
@@ -367,9 +446,13 @@ export const CollaborativeShiftProvider: React.FC<
       if (!reply) {
         throw new Error(`Parent comment ${parentCommentId} not found`);
       }
+
+      const staffId = reply.cellKey.split("#")[0];
+      await persistComments(staffId);
+
       return reply;
     },
-    [replyToComment, currentUserId, currentUserName, activeUsers],
+    [replyToComment, currentUserId, currentUserName, activeUsers, persistComments],
   );
 
   /**
@@ -401,6 +484,7 @@ export const CollaborativeShiftProvider: React.FC<
       connectionState,
       isOnline,
       hasPendingChanges,
+      lastRemoteUpdate,
     }),
     [
       shiftDataMap,
@@ -418,6 +502,7 @@ export const CollaborativeShiftProvider: React.FC<
       connectionState,
       isOnline,
       hasPendingChanges,
+      lastRemoteUpdate,
     ],
   );
 

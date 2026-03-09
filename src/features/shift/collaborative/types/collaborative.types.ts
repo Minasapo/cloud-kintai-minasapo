@@ -103,16 +103,29 @@ export interface CollaborativeShiftState {
   // オフライン対応
   isOnline: boolean;
   hasPendingChanges: boolean;
+
+  // リモート更新通知（サブスクリプション経由で他ユーザーの変更を受信した際のスタッフID）
+  lastRemoteUpdate: { staffId: string; timestamp: number } | null;
 }
 
 /**
  * GraphQL から受け取るシフトリクエスト
  */
+export interface ShiftRequestCommentData {
+  id: string;
+  cellKey: string;
+  staffId: string;
+  authorName?: string;
+  body: string;
+  createdAt: string;
+}
+
 export interface ShiftRequestData {
   id: string;
   staffId: string;
   targetMonth: string;
   entries?: ShiftRequestEntry[];
+  comments?: ShiftRequestCommentData[];
   updatedAt?: string;
   updatedBy?: string;
   version?: number;
