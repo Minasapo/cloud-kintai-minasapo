@@ -47,7 +47,6 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
-import { WorkflowNotificationDebugPanel } from "@/features/workflow/debug/WorkflowNotificationDebugPanel";
 import { createLogger } from "@/shared/lib/logger";
 import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
@@ -616,7 +615,6 @@ export default function Layout() {
               onConfirm={() => navigate("/admin/master/job_term")}
             />
           )}
-          <WorkflowNotificationDebugPanel />
         </AppProviders>
       </ThemeProvider>
     </ThemeContextProvider>
