@@ -2,6 +2,7 @@ import {
   HelpOutline as HelpOutlineIcon,
   Lightbulb as LightbulbIcon,
   Redo as RedoIcon,
+  Sync as SyncIcon,
   Undo as UndoIcon,
 } from "@mui/icons-material";
 import PrintIcon from "@mui/icons-material/Print";
@@ -29,6 +30,10 @@ export interface UndoRedoToolbarProps {
   onToggleHistory?: () => void;
   onShowHelp?: () => void;
   onPrint?: () => void;
+  onSync?: () => void;
+  syncTooltip?: React.ReactNode;
+  syncColor?: "default" | "primary" | "success" | "error";
+  isSyncing?: boolean;
   onShowSuggestions?: () => void;
   suggestionsBadgeCount?: number;
 }
@@ -46,6 +51,10 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
   lastRedoDescription,
   onShowHelp,
   onPrint,
+  onSync,
+  syncTooltip,
+  syncColor = "default",
+  isSyncing = false,
   onShowSuggestions,
   suggestionsBadgeCount,
 }) => {
@@ -111,6 +120,36 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
                 <PrintIcon />
               </IconButton>
             </Tooltip>
+
+            {onSync && (
+              <Tooltip
+                title={
+                  syncTooltip || (isSyncing ? "同期中です" : "最新状態を取得")
+                }
+              >
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={onSync}
+                    color={syncColor}
+                    disabled={isSyncing}
+                    aria-label="sync"
+                  >
+                    <SyncIcon
+                      sx={{
+                        animation: isSyncing
+                          ? "copilot-sync-spin 1s linear infinite"
+                          : "none",
+                        "@keyframes copilot-sync-spin": {
+                          from: { transform: "rotate(0deg)" },
+                          to: { transform: "rotate(360deg)" },
+                        },
+                      }}
+                    />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
           </>
         )}
 

@@ -9,9 +9,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import {
   Alert,
   Box,
-  Button,
   Chip,
-  CircularProgress,
   Container,
   LinearProgress,
   Paper,
@@ -1048,11 +1046,7 @@ const ProgressPanelBase: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
 const ProgressPanel = memo(ProgressPanelBase);
 
 type SyncPanelProps = {
-  isSyncing: boolean;
-  lastAutoSyncedAt: number;
   syncError: string | null;
-  dataStatus: DataSyncStatus;
-  onSync: () => Promise<void>;
   onClearError?: () => void;
 };
 
@@ -1072,58 +1066,15 @@ const dataSyncStatusConfig: Record<
   error: { label: "エラー", color: "error", showSpinner: false },
 };
 
-const SyncPanelBase: FC<SyncPanelProps> = ({
-  isSyncing,
-  lastAutoSyncedAt,
-  syncError,
-  dataStatus,
-  onSync,
-  onClearError,
-}) => {
-  const formattedLastSyncedAt =
-    lastAutoSyncedAt > 0
-      ? dayjs(lastAutoSyncedAt).format("YYYY/MM/DD HH:mm:ss")
-      : "未同期";
-
-  const statusConfig = dataSyncStatusConfig[dataStatus];
-
+const SyncPanelBase: FC<SyncPanelProps> = ({ syncError, onClearError }) => {
   return (
-    <Paper sx={{ p: 2, mb: 3 }}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-      >
-        <Button
-          variant="contained"
-          onClick={() => {
-            void onSync();
-          }}
-          disabled={isSyncing}
-        >
-          {isSyncing ? "同期中..." : "最新状態を取得"}
-        </Button>
-        <Chip
-          label={statusConfig.label}
-          color={statusConfig.color}
-          size="small"
-          variant="outlined"
-          icon={
-            statusConfig.showSpinner ? (
-              <CircularProgress size={14} color="inherit" />
-            ) : undefined
-          }
-        />
-        <Typography variant="body2" color="text.secondary">
-          最後に自動同期された日時: {formattedLastSyncedAt}
-        </Typography>
-      </Stack>
+    <>
       {syncError && (
-        <Alert severity="error" sx={{ mt: 2 }} onClose={onClearError}>
+        <Alert severity="error" sx={{ mb: 3 }} onClose={onClearError}>
           同期に失敗しました。再試行してください。({syncError})
         </Alert>
       )}
-    </Paper>
+    </>
   );
 };
 
@@ -1332,6 +1283,36 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       return ShiftCellWithCommentsComponent;
     }, []) as React.FC<ShiftCellProps>;
 
+    const formattedLastSyncedAt =
+      state.lastAutoSyncedAt > 0
+        ? dayjs(state.lastAutoSyncedAt).format("YYYY/MM/DD HH:mm:ss")
+        : "未同期";
+
+    const syncStatusConfig = dataSyncStatusConfig[state.dataStatus];
+
+    const syncButtonColor: "default" | "primary" | "success" | "error" =
+      state.dataStatus === "error"
+        ? "error"
+        : state.dataStatus === "synced" || state.dataStatus === "saved"
+          ? "success"
+          : state.dataStatus === "syncing"
+            ? "primary"
+            : "default";
+
+    const syncTooltipTitle = (
+      <Box>
+        <Typography variant="caption" component="div">
+          同期状態: {syncStatusConfig.label}
+        </Typography>
+        <Typography variant="caption" component="div">
+          最後に自動同期された日時: {formattedLastSyncedAt}
+        </Typography>
+        <Typography variant="caption" component="div">
+          {state.isSyncing ? "同期中です" : "最新状態を取得"}
+        </Typography>
+      </Box>
+    );
+
     return (
       <Page title="シフト調整(共同)">
         <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
@@ -1351,18 +1332,17 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             lastRedoDescription={getLastRedo()?.description}
             onShowHelp={() => setShowHelp(true)}
             onPrint={openPrintDialog}
+            onSync={() => {
+              void _handleSync();
+            }}
+            syncTooltip={syncTooltipTitle}
+            syncColor={syncButtonColor}
+            isSyncing={state.isSyncing}
             onShowSuggestions={() => setSuggestionsDrawerOpen(true)}
             suggestionsBadgeCount={suggestionsBadgeCount}
           />
 
-          <SyncPanel
-            isSyncing={state.isSyncing}
-            lastAutoSyncedAt={state.lastAutoSyncedAt}
-            syncError={state.error}
-            dataStatus={state.dataStatus}
-            onSync={_handleSync}
-            onClearError={_clearSyncError}
-          />
+          <SyncPanel syncError={state.error} onClearError={_clearSyncError} />
 
           {/* 進捗パネル */}
           <ProgressPanel progress={progress} totalDays={days.length} />
