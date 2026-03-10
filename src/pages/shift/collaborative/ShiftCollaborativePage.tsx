@@ -1251,6 +1251,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     const [cellHistoryFocusKey, setCellHistoryFocusKey] = useState<string>("");
     const [cellHistoryFocusToken, setCellHistoryFocusToken] =
       useState<number>(0);
+    const [suggestionsDrawerOpen, setSuggestionsDrawerOpen] =
+      useState<boolean>(false);
 
     const handleCellContextMenu = useCallback(
       (staffId: string, date: string, event: React.MouseEvent) => {
@@ -1272,6 +1274,15 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       setCellHistoryFocusToken(Date.now());
       setCellHistoryDrawerOpen(true);
     }, []);
+
+    const suggestionsBadgeCount = useMemo(
+      () =>
+        violations.filter(
+          (violation) =>
+            violation.severity === "error" || violation.severity === "warning",
+        ).length,
+      [violations],
+    );
 
     // 複数セルへのコメント一括追加ハンドラー
     const handleAddCommentsToSelectedCells = useCallback(
@@ -1340,6 +1351,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             lastRedoDescription={getLastRedo()?.description}
             onShowHelp={() => setShowHelp(true)}
             onPrint={openPrintDialog}
+            onShowSuggestions={() => setSuggestionsDrawerOpen(true)}
+            suggestionsBadgeCount={suggestionsBadgeCount}
           />
 
           <SyncPanel
@@ -1349,14 +1362,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             dataStatus={state.dataStatus}
             onSync={_handleSync}
             onClearError={_clearSyncError}
-          />
-
-          {/* シフト提案パネル */}
-          <ShiftSuggestionsPanel
-            violations={violations}
-            isAnalyzing={isAnalyzing}
-            onApplyAction={handleApplySuggestion}
-            onRefresh={analyzeShifts}
           />
 
           {/* 進捗パネル */}
@@ -1480,6 +1485,15 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
               : undefined
           }
           showOperationTab={false}
+        />
+
+        <ShiftSuggestionsPanel
+          open={suggestionsDrawerOpen}
+          onClose={() => setSuggestionsDrawerOpen(false)}
+          violations={violations}
+          isAnalyzing={isAnalyzing}
+          onApplyAction={handleApplySuggestion}
+          onRefresh={analyzeShifts}
         />
       </Page>
     );

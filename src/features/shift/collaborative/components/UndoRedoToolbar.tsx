@@ -1,10 +1,18 @@
 import {
   HelpOutline as HelpOutlineIcon,
+  Lightbulb as LightbulbIcon,
   Redo as RedoIcon,
   Undo as UndoIcon,
 } from "@mui/icons-material";
 import PrintIcon from "@mui/icons-material/Print";
-import { Divider, IconButton, Paper, Stack, Tooltip } from "@mui/material";
+import {
+  Badge,
+  Divider,
+  IconButton,
+  Paper,
+  Stack,
+  Tooltip,
+} from "@mui/material";
 import React from "react";
 
 /**
@@ -21,6 +29,8 @@ export interface UndoRedoToolbarProps {
   onToggleHistory?: () => void;
   onShowHelp?: () => void;
   onPrint?: () => void;
+  onShowSuggestions?: () => void;
+  suggestionsBadgeCount?: number;
 }
 
 /**
@@ -36,6 +46,8 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
   lastRedoDescription,
   onShowHelp,
   onPrint,
+  onShowSuggestions,
+  suggestionsBadgeCount,
 }) => {
   return (
     <Paper
@@ -100,6 +112,26 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
               </IconButton>
             </Tooltip>
           </>
+        )}
+
+        {onShowSuggestions && (
+          <Tooltip title="シフト提案を表示">
+            <Badge
+              color="error"
+              badgeContent={suggestionsBadgeCount}
+              max={9}
+              invisible={!suggestionsBadgeCount || suggestionsBadgeCount <= 0}
+            >
+              <IconButton
+                size="small"
+                onClick={onShowSuggestions}
+                color="primary"
+                aria-label="show suggestions"
+              >
+                <LightbulbIcon />
+              </IconButton>
+            </Badge>
+          </Tooltip>
         )}
 
         {onShowHelp && (
