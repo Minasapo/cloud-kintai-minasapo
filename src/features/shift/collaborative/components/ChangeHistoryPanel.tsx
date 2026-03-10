@@ -1,11 +1,15 @@
 import {
+  ArrowBack as ArrowBackIcon,
+  Close as CloseIcon,
+} from "@mui/icons-material";
+import {
   Box,
   Button,
+  ButtonBase,
   Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
+  Drawer,
   FormControl,
+  IconButton,
   InputLabel,
   List,
   ListItem,
@@ -16,10 +20,11 @@ import {
   Tab,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import { HistoryEntry } from "../hooks/useUndoRedo";
 import {
@@ -41,7 +46,10 @@ interface ChangeHistoryPanelProps {
   open: boolean;
   onClose: () => void;
   initialCellKey?: string;
+  focusCellKey?: string;
 }
+
+const DRAWER_WIDTH = 400;
 
 const SHIFT_STATE_LABELS: Record<ShiftState, string> = {
   work: "出勤",
@@ -87,12 +95,23 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
   open,
   onClose,
   initialCellKey,
+  focusCellKey,
 }) => {
   const [tabIndex, setTabIndex] = useState(initialCellKey ? 1 : 0);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [userFilter, setUserFilter] = useState("all");
   const [cellFilter, setCellFilter] = useState(initialCellKey ?? "all");
+
+  const [prevFocusCellKey, setPrevFocusCellKey] = useState(focusCellKey);
+  if (focusCellKey && focusCellKey !== prevFocusCellKey) {
+    setPrevFocusCellKey(focusCellKey);
+    const cellKey = focusCellKey.includes("@")
+      ? focusCellKey.split("@")[0]
+      : focusCellKey;
+    setCellFilter(cellKey);
+    setTabIndex(1);
+  }
 
   // --- 操作単位タブ用 ---
   const entries = useMemo<ChangeHistoryEntry[]>(() => {
@@ -178,33 +197,59 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
     return filtered.slice(0, maxVisible);
   }, [cellHistory, cellFilter, userFilter, startDate, endDate, maxVisible]);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setStartDate("");
     setEndDate("");
     setUserFilter("all");
     setCellFilter("all");
-  };
+  }, []);
 
-  const formatCellKeyLabel = (cellKey: string) => {
-    const [staffId, date] = cellKey.split("#");
-    const staffName = staffNameMap?.get(staffId) ?? staffId;
-    return `${staffName} / ${date}日`;
-  };
+  const formatCellKeyLabel = useCallback(
+    (cellKey: string) => {
+      const [staffId, date] = cellKey.split("#");
+      const staffName = staffNameMap?.get(staffId) ?? staffId;
+      return `${staffName} / ${date}日`;
+    },
+    [staffNameMap],
+  );
+
+  const navigateToCellHistory = useCallback((cellKey: string) => {
+    setCellFilter(cellKey);
+    setTabIndex(1);
+  }, []);
+
+  const handleBackToCellList = useCallback(() => {
+    setCellFilter("all");
+  }, []);
 
   return (
-    <Dialog
+    <Drawer
+      anchor="right"
       open={open}
       onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          maxHeight: "80vh",
+      variant="persistent"
+      sx={{
+        "& .MuiDrawer-paper": {
+          width: DRAWER_WIDTH,
+          boxSizing: "border-box",
         },
       }}
     >
-      <DialogTitle>変更履歴</DialogTitle>
-      <DialogContent dividers>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: "divider" }}
+      >
+        <Typography variant="subtitle1" fontWeight="bold">
+          変更履歴
+        </Typography>
+        <IconButton size="small" onClick={onClose} aria-label="close">
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Stack>
+
+      <Box sx={{ overflow: "auto", flex: 1, px: 2, py: 1.5 }}>
         <Stack spacing={2}>
           <Tabs
             value={tabIndex}
@@ -215,79 +260,93 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
             <Tab label="セル単位" />
           </Tabs>
 
-          {/* フィルター */}
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1}
-            alignItems={{ xs: "stretch", sm: "flex-end" }}
-            sx={{ flexWrap: "wrap" }}
-          >
-            <TextField
-              label="開始日"
-              type="date"
-              size="small"
-              value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
-              InputLabelProps={{ shrink: true }}
-              sx={{ flex: "1 1 auto", minWidth: 140 }}
-            />
-            <TextField
-              label="終了日"
-              type="date"
-              size="small"
-              value={endDate}
-              onChange={(event) => setEndDate(event.target.value)}
-              InputLabelProps={{ shrink: true }}
-              sx={{ flex: "1 1 auto", minWidth: 140 }}
-            />
-            <FormControl size="small" sx={{ flex: "1 1 auto", minWidth: 140 }}>
-              <InputLabel id="change-history-user-filter-label">
-                ユーザー
-              </InputLabel>
-              <Select
-                labelId="change-history-user-filter-label"
-                label="ユーザー"
-                value={userFilter}
-                onChange={(event) => setUserFilter(event.target.value)}
-              >
-                <MenuItem value="all">すべて</MenuItem>
-                {userOptions.map((userName) => (
-                  <MenuItem key={userName} value={userName}>
-                    {userName}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {tabIndex === 1 && (
-              <FormControl
+          {/* セル単位タブで特定セル絞り込み中の戻るバー */}
+          {tabIndex === 1 && cellFilter !== "all" && (
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Tooltip title="セル一覧に戻る">
+                <IconButton size="small" onClick={handleBackToCellList}>
+                  <ArrowBackIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Chip
+                label={formatCellKeyLabel(cellFilter)}
                 size="small"
-                sx={{ flex: "1 1 auto", minWidth: 160 }}
-              >
-                <InputLabel id="change-history-cell-filter-label">
-                  セル
+                color="primary"
+                onDelete={handleBackToCellList}
+              />
+            </Stack>
+          )}
+
+          {/* フィルター */}
+          <Stack spacing={1}>
+            <Stack direction="row" spacing={1}>
+              <TextField
+                label="開始日"
+                type="date"
+                size="small"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ flex: 1 }}
+              />
+              <TextField
+                label="終了日"
+                type="date"
+                size="small"
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ flex: 1 }}
+              />
+            </Stack>
+            <Stack direction="row" spacing={1} alignItems="flex-end">
+              <FormControl size="small" sx={{ flex: 1 }}>
+                <InputLabel id="change-history-user-filter-label">
+                  ユーザー
                 </InputLabel>
                 <Select
-                  labelId="change-history-cell-filter-label"
-                  label="セル"
-                  value={cellFilter}
-                  onChange={(event) => setCellFilter(event.target.value)}
+                  labelId="change-history-user-filter-label"
+                  label="ユーザー"
+                  value={userFilter}
+                  onChange={(event) => setUserFilter(event.target.value)}
                 >
                   <MenuItem value="all">すべて</MenuItem>
-                  {cellKeyOptions.map((cellKey) => (
-                    <MenuItem key={cellKey} value={cellKey}>
-                      {formatCellKeyLabel(cellKey)}
+                  {userOptions.map((userName) => (
+                    <MenuItem key={userName} value={userName}>
+                      {userName}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-            )}
-            <Button
-              variant="text"
-              onClick={handleResetFilters}
-              sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
-            >
-              リセット
-            </Button>
+              {tabIndex === 1 && (
+                <FormControl size="small" sx={{ flex: 1 }}>
+                  <InputLabel id="change-history-cell-filter-label">
+                    セル
+                  </InputLabel>
+                  <Select
+                    labelId="change-history-cell-filter-label"
+                    label="セル"
+                    value={cellFilter}
+                    onChange={(event) => setCellFilter(event.target.value)}
+                  >
+                    <MenuItem value="all">すべて</MenuItem>
+                    {cellKeyOptions.map((cellKey) => (
+                      <MenuItem key={cellKey} value={cellKey}>
+                        {formatCellKeyLabel(cellKey)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+              <Button
+                variant="text"
+                size="small"
+                onClick={handleResetFilters}
+                sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+              >
+                リセット
+              </Button>
+            </Stack>
           </Stack>
 
           {/* 操作単位タブ */}
@@ -322,6 +381,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                             </Typography>
                             <Box component="div">
                               {entry.updates.map((update, index) => {
+                                const cellKey = `${update.staffId}#${update.date}`;
                                 const staffName =
                                   staffNameMap?.get(update.staffId) ??
                                   update.staffId;
@@ -333,17 +393,31 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                                     : `${formatLockState(update.previousLocked)} → ${formatLockState(update.isLocked)}`;
 
                                 return (
-                                  <Box
+                                  <ButtonBase
                                     key={`${update.staffId}-${update.date}-${index}`}
+                                    onClick={() =>
+                                      navigateToCellHistory(cellKey)
+                                    }
                                     sx={{
                                       display: "flex",
                                       gap: 1,
                                       flexWrap: "wrap",
+                                      textAlign: "left",
+                                      width: "100%",
+                                      borderRadius: 0.5,
+                                      px: 0.5,
+                                      "&:hover": {
+                                        bgcolor: "action.hover",
+                                      },
                                     }}
                                   >
                                     <Typography
                                       variant="caption"
-                                      color="text.primary"
+                                      color="primary.main"
+                                      sx={{
+                                        textDecoration: "underline",
+                                        cursor: "pointer",
+                                      }}
                                     >
                                       {staffName} / {update.date}日
                                     </Typography>
@@ -361,7 +435,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                                         ロック: {lockDiff}
                                       </Typography>
                                     )}
-                                  </Box>
+                                  </ButtonBase>
                                 );
                               })}
                             </Box>
@@ -413,7 +487,18 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                       <ListItem
                         key={record.id}
                         divider
-                        sx={{ alignItems: "flex-start" }}
+                        sx={{
+                          alignItems: "flex-start",
+                          ...(cellFilter === "all" && {
+                            cursor: "pointer",
+                            "&:hover": { bgcolor: "action.hover" },
+                          }),
+                        }}
+                        onClick={
+                          cellFilter === "all"
+                            ? () => navigateToCellHistory(record.cellKey)
+                            : undefined
+                        }
                       >
                         <ListItemText
                           primary={
@@ -422,7 +507,19 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                               spacing={1}
                               alignItems="center"
                             >
-                              <Typography variant="body2">
+                              <Typography
+                                variant="body2"
+                                color={
+                                  cellFilter === "all"
+                                    ? "primary.main"
+                                    : "text.primary"
+                                }
+                                sx={
+                                  cellFilter === "all"
+                                    ? { textDecoration: "underline" }
+                                    : undefined
+                                }
+                              >
                                 {staffName} / {record.date}日
                               </Typography>
                               <Chip
@@ -477,7 +574,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
             </>
           )}
         </Stack>
-      </DialogContent>
-    </Dialog>
+      </Box>
+    </Drawer>
   );
 };

@@ -1,6 +1,5 @@
 import {
   HelpOutline as HelpOutlineIcon,
-  History as HistoryIcon,
   Redo as RedoIcon,
   Undo as UndoIcon,
 } from "@mui/icons-material";
@@ -18,8 +17,8 @@ export interface UndoRedoToolbarProps {
   onRedo: () => void;
   lastUndoDescription?: string;
   lastRedoDescription?: string;
-  showHistory: boolean;
-  onToggleHistory: () => void;
+  showHistory?: boolean;
+  onToggleHistory?: () => void;
   onShowHelp?: () => void;
   onPrint?: () => void;
 }
@@ -35,8 +34,6 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
   onRedo,
   lastUndoDescription,
   lastRedoDescription,
-  showHistory,
-  onToggleHistory,
   onShowHelp,
   onPrint,
 }) => {
@@ -87,18 +84,6 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
               <RedoIcon />
             </IconButton>
           </span>
-        </Tooltip>
-
-        <Tooltip title={showHistory ? "変更履歴を非表示" : "変更履歴を表示"}>
-          <IconButton
-            size="small"
-            onClick={onToggleHistory}
-            color={showHistory ? "primary" : "default"}
-            aria-label="toggle history"
-            sx={{ ml: 1 }}
-          >
-            <HistoryIcon />
-          </IconButton>
         </Tooltip>
 
         {onPrint && (

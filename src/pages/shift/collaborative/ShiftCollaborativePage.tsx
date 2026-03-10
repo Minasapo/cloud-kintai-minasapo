@@ -44,7 +44,6 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { CellHistoryPopover } from "../../../features/shift/collaborative/components/CellHistoryPopover";
-import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
 import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import {
@@ -1197,15 +1196,10 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       redo,
       getLastUndo,
       getLastRedo,
-      undoHistory,
-      redoHistory,
-      showHistory,
-      toggleHistory,
       isBatchUpdating,
       addComment,
       getCommentsByCell,
       getCellHistory,
-      getAllCellHistory,
     } = useCollaborativePageState(targetMonth);
 
     // 現在のユーザーIDを取得
@@ -1267,6 +1261,14 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       setCellHistoryAnchor(null);
       setCellHistoryKey("");
     }, []);
+
+    const handleShowCellHistory = useCallback(
+      (cellKey: string, event: React.MouseEvent<HTMLButtonElement>) => {
+        setCellHistoryKey(cellKey);
+        setCellHistoryAnchor(event.currentTarget);
+      },
+      [],
+    );
 
     // 複数セルへのコメント一括追加ハンドラー
     const handleAddCommentsToSelectedCells = useCallback(
@@ -1333,8 +1335,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onRedo={redo}
             lastUndoDescription={getLastUndo()?.description}
             lastRedoDescription={getLastRedo()?.description}
-            showHistory={showHistory}
-            onToggleHistory={toggleHistory}
             onShowHelp={() => setShowHelp(true)}
             onPrint={openPrintDialog}
           />
@@ -1346,16 +1346,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             dataStatus={state.dataStatus}
             onSync={_handleSync}
             onClearError={_clearSyncError}
-          />
-
-          {/* 変更履歴ダイアログ */}
-          <ChangeHistoryPanel
-            undoHistory={undoHistory}
-            redoHistory={redoHistory}
-            cellHistory={getAllCellHistory()}
-            staffNameMap={staffNameMap}
-            open={showHistory}
-            onClose={toggleHistory}
           />
 
           {/* シフト提案パネル */}
@@ -1433,6 +1423,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onLock={handleLockCells}
             onUnlock={handleUnlockCells}
             onAddComments={handleAddCommentsToSelectedCells}
+            onShowCellHistory={handleShowCellHistory}
             canUnlock={isAdmin}
             showLock={hasUnlocked}
             showUnlock={hasLocked}
