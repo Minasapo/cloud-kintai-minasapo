@@ -142,7 +142,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
                           : "none",
                         "@keyframes copilot-sync-spin": {
                           from: { transform: "rotate(0deg)" },
-                          to: { transform: "rotate(360deg)" },
+                          to: { transform: "rotate(-360deg)" },
                         },
                       }}
                     />
