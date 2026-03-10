@@ -86,7 +86,18 @@ export const normalizeShiftRequest = (
     });
   });
 
-  const comments = (shiftRequest as { comments?: Array<{ id: string; cellKey: string; staffId: string; authorName?: string | null; body: string; createdAt: string } | null> | null }).comments;
+  const comments = (
+    shiftRequest as {
+      comments?: Array<{
+        id: string;
+        cellKey: string;
+        staffId: string;
+        authorName?: string | null;
+        body: string;
+        createdAt: string;
+      } | null> | null;
+    }
+  ).comments;
 
   return {
     id: shiftRequest.id,

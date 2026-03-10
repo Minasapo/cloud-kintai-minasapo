@@ -127,7 +127,9 @@ describe("useShiftComments", () => {
       const { result } = renderHook(() => useShiftComments());
 
       let commentId: string;
-      let deleteResult: { deleted: boolean; cellKey?: string } = { deleted: false };
+      let deleteResult: { deleted: boolean; cellKey?: string } = {
+        deleted: false,
+      };
 
       act(() => {
         const comment = result.current.addComment(
@@ -155,7 +157,9 @@ describe("useShiftComments", () => {
     it("存在しないコメント削除はfalseを返すこと", () => {
       const { result } = renderHook(() => useShiftComments());
 
-      let deleteResult: { deleted: boolean; cellKey?: string } = { deleted: false };
+      let deleteResult: { deleted: boolean; cellKey?: string } = {
+        deleted: false,
+      };
       act(() => {
         deleteResult = result.current.deleteComment("non-existent");
       });

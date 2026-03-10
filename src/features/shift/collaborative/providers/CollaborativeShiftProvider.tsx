@@ -13,6 +13,7 @@ import {
   CollaborativeShiftContext,
   CollaborativeShiftContextType,
 } from "../context/CollaborativeShiftContext";
+import { useCellChangeHistory } from "../hooks/useCellChangeHistory";
 import { useCollaborativeShiftData } from "../hooks/useCollaborativeShiftData";
 import { useCollaborativeShiftOffline } from "../hooks/useCollaborativeShiftOffline";
 import { useShiftComments } from "../hooks/useShiftComments";
@@ -25,6 +26,9 @@ import {
   Mention,
   ShiftCellUpdate,
   ShiftRequestCommentData,
+  ShiftRequestData,
+  shiftRequestStatusToShiftState,
+  ShiftState,
 } from "../types/collaborative.types";
 
 interface CollaborativeShiftProviderProps {
@@ -69,9 +73,49 @@ export const CollaborativeShiftProvider: React.FC<
   // fetchShifts への参照ブリッジ（同期フックをデータフックより先に初期化するため）
   const fetchShiftsRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
-  const handleRemoteUpdate = useCallback((staffId: string) => {
-    setLastRemoteUpdate({ staffId, timestamp: Date.now() });
-  }, []);
+  // セル単位変更履歴フック
+  const {
+    recordCellChange,
+    recordBatchCellChanges,
+    recordRemoteChange,
+    getCellHistory,
+    getAllCellHistory,
+    getStaffCellHistory,
+  } = useCellChangeHistory();
+
+  // shiftDataMap への参照（リモート差分計算用）
+  const shiftDataMapRef = useRef<
+    Map<string, Map<string, { state: ShiftState; isLocked: boolean }>>
+  >(new Map());
+
+  const handleRemoteUpdate = useCallback(
+    (staffId: string, request: ShiftRequestData) => {
+      setLastRemoteUpdate({ staffId, timestamp: Date.now() });
+
+      // リモート更新のセル単位差分を記録
+      const currentStaffData = shiftDataMapRef.current.get(staffId);
+      const entries = request.entries ?? [];
+      for (const entry of entries) {
+        const dayKey = entry.date;
+        const previousCell = currentStaffData?.get(dayKey);
+        const newState = shiftRequestStatusToShiftState(entry.status);
+        const previousState = previousCell?.state;
+
+        // 変化があった場合のみ記録
+        if (previousState !== newState) {
+          recordRemoteChange(
+            staffId,
+            dayKey,
+            previousState,
+            newState,
+            request.updatedBy ?? "unknown",
+            request.updatedBy ?? "不明",
+          );
+        }
+      }
+    },
+    [recordRemoteChange],
+  );
 
   const handleCommentsReceived = useCallback(
     (staffId: string, comments: ShiftRequestCommentData[]) => {
@@ -129,6 +173,11 @@ export const CollaborativeShiftProvider: React.FC<
   useEffect(() => {
     fetchShiftsRef.current = fetchShifts;
   }, [fetchShifts]);
+
+  // shiftDataMapRef をリモート差分計算用に同期
+  useEffect(() => {
+    shiftDataMapRef.current = shiftDataMap;
+  }, [shiftDataMap]);
 
   // 初期データ読み込み時にコメントをロード
   const commentsInitializedRef = useRef(false);
@@ -212,9 +261,25 @@ export const CollaborativeShiftProvider: React.FC<
         };
       });
 
+      // セル単位の変更履歴を記録（undo）
+      recordBatchCellChanges(
+        undoUpdates,
+        currentUserId,
+        currentUserName,
+        "undo",
+      );
+
       await batchUpdateShiftsWithOfflineSupport(undoUpdates);
     },
     onRedo: async (entry) => {
+      // セル単位の変更履歴を記録（redo）
+      recordBatchCellChanges(
+        entry.updates,
+        currentUserId,
+        currentUserName,
+        "redo",
+      );
+
       // やり直し時は元の操作を再適用
       await batchUpdateShiftsWithOfflineSupport(entry.updates);
     },
@@ -256,6 +321,9 @@ export const CollaborativeShiftProvider: React.FC<
         { userId: currentUserId, userName: currentUserName },
       );
 
+      // セル単位の変更履歴を記録
+      recordCellChange(update, currentUserId, currentUserName, "manual");
+
       // オフライン対応の更新を実行
       await updateShiftWithOfflineSupport(update);
     },
@@ -263,6 +331,7 @@ export const CollaborativeShiftProvider: React.FC<
       updateActivity,
       stopEditingCell,
       pushHistory,
+      recordCellChange,
       updateShiftWithOfflineSupport,
       currentUserId,
       currentUserName,
@@ -287,6 +356,9 @@ export const CollaborativeShiftProvider: React.FC<
         userName: currentUserName,
       });
 
+      // セル単位の変更履歴を一括記録
+      recordBatchCellChanges(updates, currentUserId, currentUserName, "batch");
+
       // オフライン対応のバッチ更新を実行
       await batchUpdateShiftsWithOfflineSupport(updates);
     },
@@ -294,6 +366,7 @@ export const CollaborativeShiftProvider: React.FC<
       updateActivity,
       stopEditingCell,
       pushHistory,
+      recordBatchCellChanges,
       batchUpdateShiftsWithOfflineSupport,
       currentUserId,
       currentUserName,
@@ -452,7 +525,13 @@ export const CollaborativeShiftProvider: React.FC<
 
       return reply;
     },
-    [replyToComment, currentUserId, currentUserName, activeUsers, persistComments],
+    [
+      replyToComment,
+      currentUserId,
+      currentUserName,
+      activeUsers,
+      persistComments,
+    ],
   );
 
   /**
@@ -535,6 +614,10 @@ export const CollaborativeShiftProvider: React.FC<
       redoHistory,
       showHistory,
       toggleHistory: () => setShowHistory((prev) => !prev),
+      // セル単位変更履歴
+      getCellHistory,
+      getAllCellHistory,
+      getStaffCellHistory,
       // Comments
       addComment: handleAddComment,
       updateComment: handleUpdateComment,
@@ -569,6 +652,9 @@ export const CollaborativeShiftProvider: React.FC<
       undoHistory,
       redoHistory,
       showHistory,
+      getCellHistory,
+      getAllCellHistory,
+      getStaffCellHistory,
       handleAddComment,
       handleUpdateComment,
       handleDeleteComment,

@@ -42,8 +42,11 @@ interface UseCollaborativeShiftDataProps {
   onSaveStarted?: () => void;
   onSaveCompleted?: () => void;
   onSaveFailed?: (error: string) => void;
-  onRemoteUpdate?: (staffId: string) => void;
-  onCommentsReceived?: (staffId: string, comments: ShiftRequestCommentData[]) => void;
+  onRemoteUpdate?: (staffId: string, request: ShiftRequestData) => void;
+  onCommentsReceived?: (
+    staffId: string,
+    comments: ShiftRequestCommentData[],
+  ) => void;
 }
 
 export const useCollaborativeShiftData = ({
@@ -79,7 +82,14 @@ export const useCollaborativeShiftData = ({
     onSaveFailedRef.current = onSaveFailed;
     onRemoteUpdateRef.current = onRemoteUpdate;
     onCommentsReceivedRef.current = onCommentsReceived;
-  }, [onAutoSyncReceived, onSaveStarted, onSaveCompleted, onSaveFailed, onRemoteUpdate, onCommentsReceived]);
+  }, [
+    onAutoSyncReceived,
+    onSaveStarted,
+    onSaveCompleted,
+    onSaveFailed,
+    onRemoteUpdate,
+    onCommentsReceived,
+  ]);
 
   const [updateShiftCell] = useUpdateShiftCellMutation();
   const [createShiftRequest] = useCreateShiftRequestMutation();
@@ -541,7 +551,7 @@ export const useCollaborativeShiftData = ({
       // 他のユーザーの更新をローカルステートに反映
       updateShiftRequestState(request);
       onAutoSyncReceivedRef.current?.();
-      onRemoteUpdateRef.current?.(staffId);
+      onRemoteUpdateRef.current?.(staffId, request);
 
       // コメントの更新を通知
       if (request.comments) {

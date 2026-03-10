@@ -199,6 +199,42 @@ export interface ShiftCellUpdate {
 }
 
 /**
+ * セル変更の発生源
+ */
+export type CellChangeSource =
+  | "manual"
+  | "batch"
+  | "undo"
+  | "redo"
+  | "conflict-resolution"
+  | "remote";
+
+/**
+ * セル単位の変更履歴レコード
+ */
+export interface CellChangeRecord {
+  readonly id: string;
+  readonly cellKey: string; // "staffId#date"
+  readonly staffId: string;
+  readonly date: string; // "DD"
+  readonly previousState?: ShiftState;
+  readonly newState?: ShiftState;
+  readonly previousLocked?: boolean;
+  readonly newLocked?: boolean;
+  readonly changedBy: string; // userId
+  readonly changedByName: string;
+  readonly changedAt: number; // timestamp
+  readonly source: CellChangeSource;
+  readonly operationId?: string; // 一括操作のグルーピング用
+}
+
+/**
+ * セル変更履歴マップ
+ * Key: cellKey ("staffId#date"), Value: CellChangeRecord[]
+ */
+export type CellChangeHistoryMap = Map<string, CellChangeRecord[]>;
+
+/**
  * メンション情報
  */
 export interface Mention {

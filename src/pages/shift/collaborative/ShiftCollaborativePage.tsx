@@ -43,6 +43,7 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
+import { CellHistoryPopover } from "../../../features/shift/collaborative/components/CellHistoryPopover";
 import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
 import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
@@ -107,6 +108,7 @@ interface ShiftCellProps {
   onRegisterRef?: (element: HTMLElement | null) => void;
   onMouseDown?: (event: MouseEvent) => void;
   onMouseEnter?: () => void;
+  onContextMenu?: (event: React.MouseEvent) => void;
   isFocused?: boolean;
   isSelected?: boolean;
 }
@@ -122,6 +124,7 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
   onRegisterRef,
   onMouseDown,
   onMouseEnter,
+  onContextMenu,
   isFocused = false,
   isSelected = false,
 }: ShiftCellProps) => {
@@ -149,6 +152,7 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
       onClick={onClick}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
+      onContextMenu={onContextMenu}
       sx={{
         ...SHIFT_CELL_BASE_SX,
         bgcolor: isEditing
@@ -465,6 +469,8 @@ const useCollaborativePageState = (targetMonth: string) => {
     redoHistory,
     showHistory,
     toggleHistory,
+    getCellHistory,
+    getAllCellHistory,
     addComment,
     updateComment,
     deleteComment,
@@ -947,6 +953,8 @@ const useCollaborativePageState = (targetMonth: string) => {
     redoHistory,
     showHistory,
     toggleHistory,
+    getCellHistory,
+    getAllCellHistory,
     addComment,
     updateComment,
     deleteComment,
@@ -1196,6 +1204,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       isBatchUpdating,
       addComment,
       getCommentsByCell,
+      getCellHistory,
+      getAllCellHistory,
     } = useCollaborativePageState(targetMonth);
 
     // 現在のユーザーIDを取得
@@ -1238,6 +1248,25 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
 
     // コンフリクト解決ダイアログ状態
     const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+
+    // セル単位変更履歴ポップオーバー状態
+    const [cellHistoryAnchor, setCellHistoryAnchor] =
+      useState<HTMLElement | null>(null);
+    const [cellHistoryKey, setCellHistoryKey] = useState<string>("");
+
+    const handleCellContextMenu = useCallback(
+      (staffId: string, date: string, event: React.MouseEvent) => {
+        event.preventDefault();
+        setCellHistoryKey(`${staffId}#${date}`);
+        setCellHistoryAnchor(event.currentTarget as HTMLElement);
+      },
+      [],
+    );
+
+    const handleCloseCellHistory = useCallback(() => {
+      setCellHistoryAnchor(null);
+      setCellHistoryKey("");
+    }, []);
 
     // 複数セルへのコメント一括追加ハンドラー
     const handleAddCommentsToSelectedCells = useCallback(
@@ -1323,6 +1352,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <ChangeHistoryPanel
             undoHistory={undoHistory}
             redoHistory={redoHistory}
+            cellHistory={getAllCellHistory()}
             staffNameMap={staffNameMap}
             open={showHistory}
             onClose={toggleHistory}
@@ -1358,11 +1388,26 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onCellRegisterRef={registerCell}
             onCellMouseDown={handleCellMouseDown}
             onCellMouseEnter={handleCellMouseEnter}
+            onCellContextMenu={handleCellContextMenu}
             calculateDailyCount={(day) => calculateDailyCount(day.format("DD"))}
             getEventsForDay={getEventsForDay}
             ShiftCellComponent={ShiftCellWithComments}
             isWeekend={isWeekend}
             currentUserId={currentUserId}
+          />
+
+          {/* セル単位変更履歴ポップオーバー */}
+          <CellHistoryPopover
+            anchorEl={cellHistoryAnchor}
+            open={Boolean(cellHistoryAnchor)}
+            onClose={handleCloseCellHistory}
+            cellKey={cellHistoryKey}
+            records={cellHistoryKey ? getCellHistory(cellHistoryKey) : []}
+            staffName={
+              cellHistoryKey
+                ? staffNameMap.get(cellHistoryKey.split("#")[0])
+                : undefined
+            }
           />
 
           <BatchEditToolbar
