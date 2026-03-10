@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import React from "react";
 
+const MIN_SYNC_SPIN_DURATION_MS = 2000;
+
 /**
  * 取り消し/やり直しツールバーのProps
  */
@@ -58,6 +60,56 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
   onShowSuggestions,
   suggestionsBadgeCount,
 }) => {
+  const [isSyncAnimating, setIsSyncAnimating] = React.useState(isSyncing);
+  const syncAnimationStartedAtRef = React.useRef<number | null>(null);
+  const syncAnimationTimerRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (syncAnimationTimerRef.current !== null) {
+      window.clearTimeout(syncAnimationTimerRef.current);
+      syncAnimationTimerRef.current = null;
+    }
+
+    if (isSyncing) {
+      if (syncAnimationStartedAtRef.current === null) {
+        syncAnimationStartedAtRef.current = Date.now();
+      }
+      setIsSyncAnimating(true);
+      return;
+    }
+
+    if (syncAnimationStartedAtRef.current === null) {
+      setIsSyncAnimating(false);
+      return;
+    }
+
+    const elapsed = Date.now() - syncAnimationStartedAtRef.current;
+    const remaining = Math.max(0, MIN_SYNC_SPIN_DURATION_MS - elapsed);
+
+    if (remaining === 0) {
+      syncAnimationStartedAtRef.current = null;
+      setIsSyncAnimating(false);
+      return;
+    }
+
+    syncAnimationTimerRef.current = window.setTimeout(() => {
+      syncAnimationStartedAtRef.current = null;
+      syncAnimationTimerRef.current = null;
+      setIsSyncAnimating(false);
+    }, remaining);
+  }, [isSyncing]);
+
+  React.useEffect(
+    () => () => {
+      if (syncAnimationTimerRef.current !== null) {
+        window.clearTimeout(syncAnimationTimerRef.current);
+      }
+    },
+    [],
+  );
+
+  const isSyncBusy = isSyncing || isSyncAnimating;
+
   return (
     <Paper
       elevation={1}
@@ -124,7 +176,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
             {onSync && (
               <Tooltip
                 title={
-                  syncTooltip || (isSyncing ? "同期中です" : "最新状態を取得")
+                  syncTooltip || (isSyncBusy ? "同期中です" : "最新状態を取得")
                 }
               >
                 <span>
@@ -132,12 +184,12 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
                     size="small"
                     onClick={onSync}
                     color={syncColor}
-                    disabled={isSyncing}
+                    disabled={isSyncBusy}
                     aria-label="sync"
                   >
                     <SyncIcon
                       sx={{
-                        animation: isSyncing
+                        animation: isSyncAnimating
                           ? "copilot-sync-spin 1s linear infinite"
                           : "none",
                         "@keyframes copilot-sync-spin": {
