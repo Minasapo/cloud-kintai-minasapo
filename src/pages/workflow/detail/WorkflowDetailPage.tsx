@@ -40,8 +40,28 @@ export default function WorkflowDetailPage() {
   const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const { workflow: initialWorkflow } =
     useLoaderData() as WorkflowDetailLoaderData;
-  const { workflow, setWorkflow } = useWorkflowLoaderWorkflow(initialWorkflow);
-  const { notify } = useLocalNotification();
+  const { notify, canNotify } = useLocalNotification();
+  const currentStaffId = useMemo(() => {
+    if (!cognitoUser?.id) return null;
+    return (
+      staffs.find((staff) => staff.cognitoUserId === cognitoUser.id)?.id ?? null
+    );
+  }, [cognitoUser, staffs]);
+
+  const handleNewCommentNotification = useCallback(() => {
+    if (!canNotify) return;
+    void notify("新着コメントがあります", {
+      body: "申請内容に新しいコメントが投稿されました",
+      tag: `workflow-comment-${id ?? "unknown"}`,
+      mode: "auto-close",
+      priority: "high",
+    });
+  }, [canNotify, id, notify]);
+
+  const { workflow, setWorkflow } = useWorkflowLoaderWorkflow(initialWorkflow, {
+    currentStaffId,
+    onNewComment: handleNewCommentNotification,
+  });
 
   const staffName = (() => {
     if (!workflow?.staffId) return "—";
@@ -100,7 +120,6 @@ export default function WorkflowDetailPage() {
     workflow,
     staffs,
     cognitoUser,
-    updateWorkflow,
     onWorkflowChange: handleWorkflowChange,
     notifySuccess,
     notifyError,
@@ -194,6 +213,7 @@ export default function WorkflowDetailPage() {
 
               <Grid item xs={12} sm={5}>
                 <WorkflowCommentThread
+                  key={workflow?.id ?? "workflow-comment-thread"}
                   messages={messages}
                   staffs={staffs}
                   currentStaff={currentStaff}

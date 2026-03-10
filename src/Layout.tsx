@@ -47,7 +47,6 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
-import { WorkflowNotificationDebugPanel } from "@/features/workflow/debug/WorkflowNotificationDebugPanel";
 import { createLogger } from "@/shared/lib/logger";
 import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
@@ -62,6 +61,7 @@ import { ThemeContextProvider } from "./context/ThemeContext";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
 import { useLocalNotification } from "./hooks/useLocalNotification";
+import { useWorkflowCommentNotification } from "./hooks/useWorkflowCommentNotification";
 import { useWorkflowNotification } from "./hooks/useWorkflowNotification";
 
 const logger = createLogger("Layout");
@@ -199,6 +199,8 @@ export default function Layout() {
 
   // ワークフロー申請の通知を購読
   useWorkflowNotification();
+  // ワークフローコメント通知を全画面で購読
+  useWorkflowCommentNotification();
 
   const {
     fetchConfig,
@@ -613,7 +615,6 @@ export default function Layout() {
               onConfirm={() => navigate("/admin/master/job_term")}
             />
           )}
-          <WorkflowNotificationDebugPanel />
         </AppProviders>
       </ThemeProvider>
     </ThemeContextProvider>

@@ -33,7 +33,7 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -81,6 +81,7 @@ import { returnDirectlyCallback } from "./returnDirectlyCallback";
  * @returns {JSX.Element} 勤怠打刻UI
  */
 export default function TimeRecorder(): JSX.Element {
+  const LOCAL_ATTENDANCE_UPDATE_IGNORE_MS = 3000;
   const { cognitoUser } = useContext(AuthContext);
 
   const dispatch = useDispatch();
@@ -150,6 +151,7 @@ export default function TimeRecorder(): JSX.Element {
 
   const [createAttendanceMutation] = useCreateAttendanceMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
+  const localAttendanceUpdateIgnoreUntilRef = useRef(0);
 
   const createAttendance = useCallback(
     (input: CreateAttendanceInput) => createAttendanceMutation(input).unwrap(),
@@ -157,7 +159,11 @@ export default function TimeRecorder(): JSX.Element {
   );
 
   const updateAttendance = useCallback(
-    (input: UpdateAttendanceInput) => updateAttendanceMutation(input).unwrap(),
+    (input: UpdateAttendanceInput) => {
+      localAttendanceUpdateIgnoreUntilRef.current =
+        Date.now() + LOCAL_ATTENDANCE_UPDATE_IGNORE_MS;
+      return updateAttendanceMutation(input).unwrap();
+    },
     [updateAttendanceMutation]
   );
 
@@ -551,19 +557,29 @@ export default function TimeRecorder(): JSX.Element {
     const subscription = graphqlClient
       .graphql({
         query: onUpdateAttendance,
-        variables: {},
+        variables: {
+          filter: {
+            staffId: { eq: cognitoUser.id },
+            workDate: { eq: today },
+          },
+        },
         authMode: "userPool",
       })
       .subscribe({
-        next: async (event) => {
-          const updatedAttendance =
-            event.data as OnUpdateAttendanceSubscription;
-          if (updatedAttendance?.onUpdateAttendance) {
-            await Promise.allSettled([
-              refetchAttendance(),
-              refetchAttendances(),
-            ]);
+        next: (event) => {
+          const updatedAttendance = (event.data as OnUpdateAttendanceSubscription)
+            ?.onUpdateAttendance;
+          if (!updatedAttendance) {
+            return;
           }
+
+          const shouldIgnoreLocalUpdate =
+            Date.now() < localAttendanceUpdateIgnoreUntilRef.current;
+          if (shouldIgnoreLocalUpdate) {
+            return;
+          }
+
+          window.location.reload();
         },
         error: (error: unknown) => {
           logger.error("Subscription error:", error);
@@ -573,7 +589,7 @@ export default function TimeRecorder(): JSX.Element {
     return () => {
       subscription.unsubscribe();
     };
-  }, [cognitoUser?.id, refetchAttendance, refetchAttendances, logger]);
+  }, [cognitoUser?.id, logger, today]);
 
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return (

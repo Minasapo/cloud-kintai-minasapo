@@ -12,6 +12,7 @@ import HeaderBar from "@/shared/ui/header/HeaderBar";
 import { ExternalLinks } from "./ExternalLinks/ExternalLinks";
 import NavigationMenu from "./NavigationMenu";
 import { SignInOutButton } from "./SignInOutButton";
+import WorkflowNotificationButton from "./WorkflowNotificationButton";
 
 export default function Header() {
   const { isCognitoUserRole } = useContext(AuthContext);
@@ -23,13 +24,13 @@ export default function Header() {
   const resolvedThemeColor = useMemo(
     () =>
       resolveThemeColor(
-        typeof getThemeColor === "function" ? getThemeColor() : undefined
+        typeof getThemeColor === "function" ? getThemeColor() : undefined,
       ),
-    [getThemeColor]
+    [getThemeColor],
   );
   const headerThemeColor = designTokenVar(
     "color.brand.primary.base",
-    resolvedThemeColor
+    resolvedThemeColor,
   );
 
   const showExternalLinks = !isCognitoUserRole(StaffRole.OPERATOR);
@@ -39,6 +40,7 @@ export default function Header() {
       themeColor={headerThemeColor}
       logo={<Logo />}
       navigation={<NavigationMenu pathName={pathName} />}
+      notificationsButton={<WorkflowNotificationButton />}
       externalLinks={showExternalLinks ? <ExternalLinks /> : null}
       signInOutButton={<SignInOutButton />}
     />

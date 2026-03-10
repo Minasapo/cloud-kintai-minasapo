@@ -51,6 +51,7 @@ export enum AttendanceNotificationType {
   CLOCK_OUT_ERROR = "clock_out_error",
   DAILY_REPORT_SUBMITTED = "daily_report_submitted",
   DAILY_REPORT_REMINDER = "daily_report_reminder",
+  ATTENDANCE_CHANGE_REQUEST_APPROVED = "attendance_change_request_approved",
 }
 
 /**

@@ -7,13 +7,14 @@ interface HeaderBarProps {
   themeColor?: string;
   logo: ReactNode;
   navigation: ReactNode;
+  notificationsButton?: ReactNode;
   externalLinks?: ReactNode;
   signInOutButton: ReactNode;
 }
 
 const HEADER_BACKGROUND = designTokenVar(
   "component.headerBar.background",
-  "#0FA85E"
+  "#0FA85E",
 );
 const HEADER_TEXT = designTokenVar("component.headerBar.textColor", "#FFFFFF");
 const HEADER_HEIGHT = designTokenVar("component.headerBar.minHeight", "48px");
@@ -23,13 +24,14 @@ const HEADER_GAP = designTokenVar("component.headerBar.gap", "8px");
 const HEADER_SIDE_GAP = designTokenVar("spacing.md", "12px");
 const HEADER_CONTENT_MAX_WIDTH = designTokenVar(
   "component.headerBar.contentMaxWidth",
-  "1200px"
+  "1200px",
 );
 
 export default function HeaderBar({
   themeColor,
   logo,
   navigation,
+  notificationsButton,
   externalLinks,
   signInOutButton,
 }: HeaderBarProps) {
@@ -114,9 +116,8 @@ export default function HeaderBar({
               <Box sx={{ display: { xs: "block", lg: "none" } }}>
                 {navigation}
               </Box>
-              <Box sx={{ display: "block" }}>
-                {externalLinks}
-              </Box>
+              <Box sx={{ display: "block" }}>{notificationsButton}</Box>
+              <Box sx={{ display: "block" }}>{externalLinks}</Box>
               {signInOutButton}
             </Stack>
           </Box>

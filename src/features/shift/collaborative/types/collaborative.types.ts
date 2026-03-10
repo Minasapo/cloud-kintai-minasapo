@@ -9,6 +9,17 @@ import {
 } from "@shared/api/graphql/types";
 
 /**
+ * データ同期ステータス
+ */
+export type DataSyncStatus =
+  | "idle"
+  | "saving"
+  | "syncing"
+  | "saved"
+  | "synced"
+  | "error";
+
+/**
  * シフト状態（内部表現）
  */
 export type ShiftState =
@@ -84,22 +95,37 @@ export interface CollaborativeShiftState {
   isLoading: boolean;
   isSyncing: boolean;
   lastSyncedAt: number;
+  lastAutoSyncedAt: number;
+  dataStatus: DataSyncStatus;
   error: string | null;
   connectionState: "connected" | "disconnected" | "error";
 
   // オフライン対応
   isOnline: boolean;
   hasPendingChanges: boolean;
+
+  // リモート更新通知（サブスクリプション経由で他ユーザーの変更を受信した際のスタッフID）
+  lastRemoteUpdate: { staffId: string; timestamp: number } | null;
 }
 
 /**
  * GraphQL から受け取るシフトリクエスト
  */
+export interface ShiftRequestCommentData {
+  id: string;
+  cellKey: string;
+  staffId: string;
+  authorName?: string;
+  body: string;
+  createdAt: string;
+}
+
 export interface ShiftRequestData {
   id: string;
   staffId: string;
   targetMonth: string;
   entries?: ShiftRequestEntry[];
+  comments?: ShiftRequestCommentData[];
   updatedAt?: string;
   updatedBy?: string;
   version?: number;
@@ -171,6 +197,42 @@ export interface ShiftCellUpdate {
   previousState?: ShiftState;
   previousLocked?: boolean;
 }
+
+/**
+ * セル変更の発生源
+ */
+export type CellChangeSource =
+  | "manual"
+  | "batch"
+  | "undo"
+  | "redo"
+  | "conflict-resolution"
+  | "remote";
+
+/**
+ * セル単位の変更履歴レコード
+ */
+export interface CellChangeRecord {
+  readonly id: string;
+  readonly cellKey: string; // "staffId#date"
+  readonly staffId: string;
+  readonly date: string; // "DD"
+  readonly previousState?: ShiftState;
+  readonly newState?: ShiftState;
+  readonly previousLocked?: boolean;
+  readonly newLocked?: boolean;
+  readonly changedBy: string; // userId
+  readonly changedByName: string;
+  readonly changedAt: number; // timestamp
+  readonly source: CellChangeSource;
+  readonly operationId?: string; // 一括操作のグルーピング用
+}
+
+/**
+ * セル変更履歴マップ
+ * Key: cellKey ("staffId#date"), Value: CellChangeRecord[]
+ */
+export type CellChangeHistoryMap = Map<string, CellChangeRecord[]>;
 
 /**
  * メンション情報

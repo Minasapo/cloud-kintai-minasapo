@@ -214,7 +214,7 @@ export class LocalNotificationManager {
       title: "",
       icon: "✓",
       badge: "✓",
-      mode: "auto-close",
+      mode: "await-interaction",
       priority: "normal",
     };
 
@@ -224,7 +224,7 @@ export class LocalNotificationManager {
           ...baseMetadata,
           title: "出勤打刻完了",
           body: `${data.time} に出勤打刻しました`,
-          mode: "auto-close",
+          mode: "await-interaction",
           priority: "normal",
         };
 
@@ -233,7 +233,7 @@ export class LocalNotificationManager {
           ...baseMetadata,
           title: "退勤打刻完了",
           body: `${data.time} に退勤打刻しました`,
-          mode: "auto-close",
+          mode: "await-interaction",
           priority: "normal",
         };
 
@@ -242,7 +242,7 @@ export class LocalNotificationManager {
           ...baseMetadata,
           title: "休憩開始",
           body: `${data.time} に休憩を開始しました`,
-          mode: "auto-close",
+          mode: "await-interaction",
           priority: "normal",
         };
 
@@ -251,7 +251,7 @@ export class LocalNotificationManager {
           ...baseMetadata,
           title: "休憩終了",
           body: `${data.time} に休憩を終了しました`,
-          mode: "auto-close",
+          mode: "await-interaction",
           priority: "normal",
         };
 
@@ -272,7 +272,7 @@ export class LocalNotificationManager {
           ...baseMetadata,
           title: "日報を提出しました",
           body: `${data.date} の日報を提出しました`,
-          mode: "auto-close",
+          mode: "await-interaction",
           priority: "normal",
         };
 
@@ -283,6 +283,17 @@ export class LocalNotificationManager {
           body: `${data.date} の日報をまだ提出していません`,
           mode: "await-interaction",
           priority: "normal",
+        };
+
+      case AttendanceNotificationType.ATTENDANCE_CHANGE_REQUEST_APPROVED:
+        return {
+          ...baseMetadata,
+          title: "勤怠情報の変更リクエストを承認しました",
+          body: `${data.date} の勤怠情報の変更リクエストが承認されました`,
+          mode: "await-interaction",
+          priority: "high",
+          icon: "✅",
+          badge: "✅",
         };
 
       default:
@@ -346,10 +357,11 @@ export class LocalNotificationManager {
           body: data.approverName
             ? `${data.approverName} さんが申請を承認しました`
             : "申請が承認されました",
-          mode: "auto-close",
-          priority: "normal",
+          mode: "await-interaction",
+          priority: "high",
           icon: "✅",
           badge: "✅",
+          requireInteraction: true,
         };
 
       case WorkflowNotificationType.WORKFLOW_REJECTED:
@@ -370,8 +382,9 @@ export class LocalNotificationManager {
           ...baseMetadata,
           title: "申請が更新されました",
           body: `${data.categoryLabel || "申請"}が更新されました`,
-          mode: "auto-close",
+          mode: "await-interaction",
           priority: "normal",
+          requireInteraction: true,
         };
 
       default:

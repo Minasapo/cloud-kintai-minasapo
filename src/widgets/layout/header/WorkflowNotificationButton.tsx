@@ -1,0 +1,41 @@
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import { Badge, IconButton, Tooltip } from "@mui/material";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { AuthContext } from "@/context/AuthContext";
+import { useWorkflowNotificationInbox } from "@/features/workflow/notification/model/useWorkflowNotificationInbox";
+
+export default function WorkflowNotificationButton() {
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const navigate = useNavigate();
+  const { unreadCount } = useWorkflowNotificationInbox();
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return (
+    <Tooltip title="通知一覧">
+      <IconButton
+        aria-label="通知一覧"
+        onClick={() => navigate("/notifications")}
+        sx={{
+          color: "common.white",
+          p: { xs: "4px", md: "8px" },
+        }}
+      >
+        <Badge
+          badgeContent={unreadCount}
+          color="error"
+          max={99}
+          overlap="circular"
+          showZero
+        >
+          <NotificationsNoneIcon />
+        </Badge>
+      </IconButton>
+    </Tooltip>
+  );
+}

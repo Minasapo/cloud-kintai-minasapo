@@ -7,6 +7,9 @@ export { useOnlineStatus } from "./useOnlineStatus";
 // Undo/Redo
 export { useUndoRedo } from "./useUndoRedo";
 
+// Cell Change History
+export { useCellChangeHistory } from "./useCellChangeHistory";
+
 // Comments
 export { useShiftComments } from "./useShiftComments";
 export { useShiftSync } from "./useShiftSync";
