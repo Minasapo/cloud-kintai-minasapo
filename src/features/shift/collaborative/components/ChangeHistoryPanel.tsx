@@ -47,6 +47,7 @@ interface ChangeHistoryPanelProps {
   onClose: () => void;
   initialCellKey?: string;
   focusCellKey?: string;
+  showOperationTab?: boolean;
 }
 
 const DRAWER_WIDTH = 400;
@@ -96,8 +97,11 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
   onClose,
   initialCellKey,
   focusCellKey,
+  showOperationTab = true,
 }) => {
-  const [tabIndex, setTabIndex] = useState(initialCellKey ? 1 : 0);
+  const [tabIndex, setTabIndex] = useState(
+    !showOperationTab || initialCellKey ? 1 : 0,
+  );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [userFilter, setUserFilter] = useState("all");
@@ -222,6 +226,8 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
     setCellFilter("all");
   }, []);
 
+  const activeTabIndex = showOperationTab ? tabIndex : 1;
+
   return (
     <Drawer
       anchor="right"
@@ -251,17 +257,23 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
 
       <Box sx={{ overflow: "auto", flex: 1, px: 2, py: 1.5 }}>
         <Stack spacing={2}>
-          <Tabs
-            value={tabIndex}
-            onChange={(_, newValue) => setTabIndex(newValue)}
-            variant="fullWidth"
-          >
-            <Tab label="操作単位" />
-            <Tab label="セル単位" />
-          </Tabs>
+          {showOperationTab ? (
+            <Tabs
+              value={tabIndex}
+              onChange={(_, newValue) => setTabIndex(newValue)}
+              variant="fullWidth"
+            >
+              <Tab label="操作単位" />
+              <Tab label="セル単位" />
+            </Tabs>
+          ) : (
+            <Typography variant="subtitle2" color="text.secondary">
+              セル単位の変更履歴
+            </Typography>
+          )}
 
           {/* セル単位タブで特定セル絞り込み中の戻るバー */}
-          {tabIndex === 1 && cellFilter !== "all" && (
+          {activeTabIndex === 1 && cellFilter !== "all" && (
             <Stack direction="row" alignItems="center" spacing={1}>
               <Tooltip title="セル一覧に戻る">
                 <IconButton size="small" onClick={handleBackToCellList}>
@@ -318,7 +330,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                   ))}
                 </Select>
               </FormControl>
-              {tabIndex === 1 && (
+              {activeTabIndex === 1 && (
                 <FormControl size="small" sx={{ flex: 1 }}>
                   <InputLabel id="change-history-cell-filter-label">
                     セル
@@ -350,7 +362,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
           </Stack>
 
           {/* 操作単位タブ */}
-          {tabIndex === 0 && (
+          {activeTabIndex === 0 && (
             <>
               {entries.length === 0 ? (
                 <Typography variant="caption" color="text.secondary">
@@ -461,7 +473,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
           )}
 
           {/* セル単位タブ */}
-          {tabIndex === 1 && (
+          {activeTabIndex === 1 && (
             <>
               {cellHistory.length === 0 ? (
                 <Typography variant="caption" color="text.secondary">

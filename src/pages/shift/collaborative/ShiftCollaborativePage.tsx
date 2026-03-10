@@ -43,7 +43,7 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { ActiveUsersList } from "../../../features/shift/collaborative/components/ActiveUsersList";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
-import { CellHistoryPopover } from "../../../features/shift/collaborative/components/CellHistoryPopover";
+import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
 import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import {
@@ -1196,10 +1196,12 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       redo,
       getLastUndo,
       getLastRedo,
+      undoHistory,
+      redoHistory,
       isBatchUpdating,
       addComment,
       getCommentsByCell,
-      getCellHistory,
+      getAllCellHistory,
     } = useCollaborativePageState(targetMonth);
 
     // 現在のユーザーIDを取得
@@ -1243,32 +1245,33 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     // コンフリクト解決ダイアログ状態
     const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
 
-    // セル単位変更履歴ポップオーバー状態
-    const [cellHistoryAnchor, setCellHistoryAnchor] =
-      useState<HTMLElement | null>(null);
-    const [cellHistoryKey, setCellHistoryKey] = useState<string>("");
+    // セル単位変更履歴Drawer状態
+    const [cellHistoryDrawerOpen, setCellHistoryDrawerOpen] =
+      useState<boolean>(false);
+    const [cellHistoryFocusKey, setCellHistoryFocusKey] = useState<string>("");
+    const [cellHistoryFocusToken, setCellHistoryFocusToken] =
+      useState<number>(0);
 
     const handleCellContextMenu = useCallback(
       (staffId: string, date: string, event: React.MouseEvent) => {
         event.preventDefault();
-        setCellHistoryKey(`${staffId}#${date}`);
-        setCellHistoryAnchor(event.currentTarget as HTMLElement);
+        const cellKey = `${staffId}#${date}`;
+        setCellHistoryFocusKey(cellKey);
+        setCellHistoryFocusToken(Date.now());
+        setCellHistoryDrawerOpen(true);
       },
       [],
     );
 
     const handleCloseCellHistory = useCallback(() => {
-      setCellHistoryAnchor(null);
-      setCellHistoryKey("");
+      setCellHistoryDrawerOpen(false);
     }, []);
 
-    const handleShowCellHistory = useCallback(
-      (cellKey: string, event: React.MouseEvent<HTMLButtonElement>) => {
-        setCellHistoryKey(cellKey);
-        setCellHistoryAnchor(event.currentTarget);
-      },
-      [],
-    );
+    const handleShowCellHistory = useCallback((cellKey: string) => {
+      setCellHistoryFocusKey(cellKey);
+      setCellHistoryFocusToken(Date.now());
+      setCellHistoryDrawerOpen(true);
+    }, []);
 
     // 複数セルへのコメント一括追加ハンドラー
     const handleAddCommentsToSelectedCells = useCallback(
@@ -1386,20 +1389,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             currentUserId={currentUserId}
           />
 
-          {/* セル単位変更履歴ポップオーバー */}
-          <CellHistoryPopover
-            anchorEl={cellHistoryAnchor}
-            open={Boolean(cellHistoryAnchor)}
-            onClose={handleCloseCellHistory}
-            cellKey={cellHistoryKey}
-            records={cellHistoryKey ? getCellHistory(cellHistoryKey) : []}
-            staffName={
-              cellHistoryKey
-                ? staffNameMap.get(cellHistoryKey.split("#")[0])
-                : undefined
-            }
-          />
-
           <BatchEditToolbar
             selectionCount={selectionCount}
             selectedCells={
@@ -1423,7 +1412,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onLock={handleLockCells}
             onUnlock={handleUnlockCells}
             onAddComments={handleAddCommentsToSelectedCells}
-            onShowCellHistory={handleShowCellHistory}
+            onShowCellHistory={(cellKey) => handleShowCellHistory(cellKey)}
             canUnlock={isAdmin}
             showLock={hasUnlocked}
             showUnlock={hasLocked}
@@ -1475,6 +1464,23 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onDismiss={dismissNotification}
           />
         </Container>
+
+        {/* セル履歴Drawer */}
+        <ChangeHistoryPanel
+          undoHistory={undoHistory}
+          redoHistory={redoHistory}
+          cellHistory={getAllCellHistory()}
+          staffNameMap={staffNameMap}
+          open={cellHistoryDrawerOpen}
+          onClose={handleCloseCellHistory}
+          initialCellKey={cellHistoryFocusKey || undefined}
+          focusCellKey={
+            cellHistoryFocusKey
+              ? `${cellHistoryFocusKey}@${cellHistoryFocusToken}`
+              : undefined
+          }
+          showOperationTab={false}
+        />
       </Page>
     );
   },
