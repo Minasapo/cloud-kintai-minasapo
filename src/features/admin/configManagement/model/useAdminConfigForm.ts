@@ -60,6 +60,7 @@ export function useAdminConfigForm() {
     getSpecialHolidayEnabled,
     getAbsentEnabled,
     getAttendanceStatisticsEnabled,
+    getWorkflowNotificationEnabled,
     getOverTimeCheckEnabled,
     getThemeTokens,
   } = useContext(AppConfigContext);
@@ -103,6 +104,8 @@ export function useAdminConfigForm() {
     dayjs(DEFAULT_PM_HOLIDAY_END, TIME_FORMAT),
   );
   const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
+    useState<boolean>(false);
+  const [workflowNotificationEnabled, setWorkflowNotificationEnabled] =
     useState<boolean>(false);
   const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
   const [specialHolidayEnabled, setSpecialHolidayEnabled] =
@@ -151,6 +154,7 @@ export function useAdminConfigForm() {
     }
 
     setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
+    setWorkflowNotificationEnabled(getWorkflowNotificationEnabled());
 
     if (
       typeof getAmHolidayStartTime === "function" &&
@@ -321,6 +325,13 @@ export function useAdminConfigForm() {
     setOverTimeCheckEnabled(event.target.checked);
   };
 
+  const handleWorkflowNotificationEnabledChange = (
+    _: ChangeEvent<HTMLInputElement>,
+    checked: boolean,
+  ) => {
+    setWorkflowNotificationEnabled(checked);
+  };
+
   const handleSave = async () => {
     const validationResult = validateAdminConfigForm({
       startTime,
@@ -350,6 +361,7 @@ export function useAdminConfigForm() {
       amPmHolidayEnabled,
       specialHolidayEnabled,
       attendanceStatisticsEnabled,
+      workflowNotificationEnabled,
       overTimeCheckEnabled,
       startTime: startTime!,
       endTime: endTime!,
@@ -397,6 +409,7 @@ export function useAdminConfigForm() {
     specialHolidayEnabled,
     absentEnabled,
     attendanceStatisticsEnabled,
+    workflowNotificationEnabled,
     overTimeCheckEnabled,
     setStartTime,
     setEndTime,
@@ -412,6 +425,7 @@ export function useAdminConfigForm() {
     handleSpecialHolidayEnabledChange,
     handleAbsentEnabledChange,
     handleAttendanceStatisticsEnabledChange,
+    handleWorkflowNotificationEnabledChange,
     handleOverTimeCheckEnabledChange,
     handleAddLink,
     handleLinkChange,

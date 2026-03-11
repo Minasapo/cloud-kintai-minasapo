@@ -43,6 +43,7 @@ export default function AppConfigCreateForm(props) {
     amPmHolidayEnabled: false,
     officeMode: false,
     attendanceStatisticsEnabled: false,
+    workflowNotificationEnabled: false,
     absentEnabled: false,
     hourlyPaidHolidayEnabled: false,
     themeColor: "",
@@ -85,6 +86,8 @@ export default function AppConfigCreateForm(props) {
   const [officeMode, setOfficeMode] = React.useState(initialValues.officeMode);
   const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
     React.useState(initialValues.attendanceStatisticsEnabled);
+  const [workflowNotificationEnabled, setWorkflowNotificationEnabled] =
+    React.useState(initialValues.workflowNotificationEnabled);
   const [absentEnabled, setAbsentEnabled] = React.useState(
     initialValues.absentEnabled
   );
@@ -110,6 +113,7 @@ export default function AppConfigCreateForm(props) {
     setAmPmHolidayEnabled(initialValues.amPmHolidayEnabled);
     setOfficeMode(initialValues.officeMode);
     setAttendanceStatisticsEnabled(initialValues.attendanceStatisticsEnabled);
+    setWorkflowNotificationEnabled(initialValues.workflowNotificationEnabled);
     setAbsentEnabled(initialValues.absentEnabled);
     setHourlyPaidHolidayEnabled(initialValues.hourlyPaidHolidayEnabled);
     setThemeColor(initialValues.themeColor);
@@ -131,6 +135,7 @@ export default function AppConfigCreateForm(props) {
     amPmHolidayEnabled: [],
     officeMode: [],
     attendanceStatisticsEnabled: [],
+    workflowNotificationEnabled: [],
     absentEnabled: [],
     hourlyPaidHolidayEnabled: [],
     themeColor: [],
@@ -176,6 +181,7 @@ export default function AppConfigCreateForm(props) {
           amPmHolidayEnabled,
           officeMode,
           attendanceStatisticsEnabled,
+          workflowNotificationEnabled,
           absentEnabled,
           hourlyPaidHolidayEnabled,
           themeColor,
@@ -256,6 +262,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -297,6 +304,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -338,6 +346,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -379,6 +388,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -422,6 +432,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -467,6 +478,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -510,6 +522,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -553,6 +566,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -594,6 +608,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -637,6 +652,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -678,6 +694,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -721,6 +738,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled: value,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -764,6 +782,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode: value,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -805,6 +824,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled: value,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -829,6 +849,53 @@ export default function AppConfigCreateForm(props) {
         {...getOverrideProps(overrides, "attendanceStatisticsEnabled")}
       ></SwitchField>
       <SwitchField
+        label="Workflow notification enabled"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={workflowNotificationEnabled}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled,
+              workflowNotificationEnabled: value,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+              overTimeCheckEnabled,
+            };
+            const result = onChange(modelFields);
+            value = result?.workflowNotificationEnabled ?? value;
+          }
+          if (errors.workflowNotificationEnabled?.hasError) {
+            runValidationTasks("workflowNotificationEnabled", value);
+          }
+          setWorkflowNotificationEnabled(value);
+        }}
+        onBlur={() =>
+          runValidationTasks(
+            "workflowNotificationEnabled",
+            workflowNotificationEnabled
+          )
+        }
+        errorMessage={errors.workflowNotificationEnabled?.errorMessage}
+        hasError={errors.workflowNotificationEnabled?.hasError}
+        {...getOverrideProps(overrides, "workflowNotificationEnabled")}
+      ></SwitchField>
+      <SwitchField
         label="Absent enabled"
         defaultChecked={false}
         isDisabled={false}
@@ -851,6 +918,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled: value,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -892,6 +960,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled: value,
               themeColor,
@@ -938,6 +1007,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor: value,
@@ -979,6 +1049,7 @@ export default function AppConfigCreateForm(props) {
               amPmHolidayEnabled,
               officeMode,
               attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,

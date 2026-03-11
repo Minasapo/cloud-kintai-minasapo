@@ -39,6 +39,7 @@ export default function AdminConfigManagement() {
     specialHolidayEnabled,
     absentEnabled,
     attendanceStatisticsEnabled,
+    workflowNotificationEnabled,
     overTimeCheckEnabled,
     setStartTime,
     setEndTime,
@@ -54,6 +55,7 @@ export default function AdminConfigManagement() {
     handleSpecialHolidayEnabledChange,
     handleAbsentEnabledChange,
     handleAttendanceStatisticsEnabledChange,
+    handleWorkflowNotificationEnabledChange,
     handleOverTimeCheckEnabledChange,
     handleAddLink,
     handleLinkChange,
@@ -209,6 +211,24 @@ export default function AdminConfigManagement() {
             enabled={attendanceStatisticsEnabled}
             onChange={handleAttendanceStatisticsEnabledChange}
           />
+        </GroupSection>
+        <GroupSection
+          title="通知機能(開発中)"
+          description="ヘッダーの通知アイコンと通知一覧への導線を表示するか切り替えます。"
+        >
+          <Stack spacing={1}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={workflowNotificationEnabled}
+                  onChange={handleWorkflowNotificationEnabledChange}
+                  color="primary"
+                />
+              }
+              label={workflowNotificationEnabled ? "有効" : "無効"}
+              sx={{ mb: 1 }}
+            />
+          </Stack>
         </GroupSection>
         <GroupSection title="欠勤">
           <Stack spacing={1}>

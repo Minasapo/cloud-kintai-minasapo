@@ -60,6 +60,7 @@ describe("buildBasePayload helpers", () => {
       amPmHolidayEnabled: true,
       specialHolidayEnabled: false,
       attendanceStatisticsEnabled: true,
+      workflowNotificationEnabled: true,
       overTimeCheckEnabled: true,
     });
     expect(payload.workStartTime).toBe("09:00");
@@ -68,6 +69,7 @@ describe("buildBasePayload helpers", () => {
     expect(payload.lunchRestEndTime).toBe("13:00");
     expect(payload.amHolidayStartTime).toBe("09:00");
     expect(payload.pmHolidayEndTime).toBe("18:00");
+    expect(payload.workflowNotificationEnabled).toBe(true);
     expect(typeof payload.standardWorkHours).toBe("number");
     expect(Array.isArray(payload.links)).toBe(true);
     expect(Array.isArray(payload.reasons)).toBe(true);

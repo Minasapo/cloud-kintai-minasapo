@@ -228,6 +228,7 @@ export default function Layout() {
     getAbsentEnabled,
     getWorkflowCategoryOrder,
     getAttendanceStatisticsEnabled,
+    getWorkflowNotificationEnabled,
     getThemeColor,
     getThemeTokens,
   } = useAppConfig();
@@ -488,6 +489,7 @@ export default function Layout() {
       getAbsentEnabled,
       getWorkflowCategoryOrder,
       getAttendanceStatisticsEnabled,
+      getWorkflowNotificationEnabled,
       getThemeColor,
       getThemeTokens,
     }),
@@ -516,6 +518,7 @@ export default function Layout() {
       getAbsentEnabled,
       getWorkflowCategoryOrder,
       getAttendanceStatisticsEnabled,
+      getWorkflowNotificationEnabled,
       getThemeColor,
       getThemeTokens,
     ],

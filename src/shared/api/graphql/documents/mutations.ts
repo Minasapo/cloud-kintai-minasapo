@@ -76,6 +76,7 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -149,6 +150,7 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -222,6 +224,7 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {

@@ -22,8 +22,9 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { useWorkflowNotificationInbox } from "@/features/workflow/notification/model/useWorkflowNotificationInbox";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
@@ -33,7 +34,9 @@ const formatEventAt = (eventAt: string) =>
 
 export default function WorkflowNotificationsPage() {
   const navigate = useNavigate();
+  const { getWorkflowNotificationEnabled } = useContext(AppConfigContext);
   const { isCognitoUserRole } = useContext(AuthContext);
+  const workflowNotificationEnabled = getWorkflowNotificationEnabled();
   const [actionError, setActionError] = useState<string | null>(null);
   const {
     notifications,
@@ -104,6 +107,10 @@ export default function WorkflowNotificationsPage() {
     },
     [hasMore, loadingMore, loadMoreNotifications],
   );
+
+  if (!workflowNotificationEnabled) {
+    return <Navigate to="/attendance/list" replace />;
+  }
 
   return (
     <Page title="通知" maxWidth="md" showDefaultHeader={false}>

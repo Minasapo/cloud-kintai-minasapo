@@ -44,6 +44,7 @@ type BuildBasePayloadOptions = {
   amPmHolidayEnabled: boolean;
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
+  workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
 };
 
@@ -67,6 +68,7 @@ export type BaseAppConfigPayload = {
   amPmHolidayEnabled: boolean;
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
+  workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
 };
 
@@ -112,6 +114,7 @@ export const buildBasePayload = (
   amPmHolidayEnabled: opts.amPmHolidayEnabled,
   specialHolidayEnabled: opts.specialHolidayEnabled,
   attendanceStatisticsEnabled: opts.attendanceStatisticsEnabled,
+  workflowNotificationEnabled: opts.workflowNotificationEnabled,
   overTimeCheckEnabled: opts.overTimeCheckEnabled,
 });
 
@@ -131,6 +134,7 @@ export type ConfigFormState = {
   amPmHolidayEnabled: boolean;
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
+  workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
   startTime: Dayjs;
   endTime: Dayjs;
@@ -171,6 +175,7 @@ const transformFormStateToPayload = (
       amPmHolidayEnabled: state.amPmHolidayEnabled,
       specialHolidayEnabled: state.specialHolidayEnabled,
       attendanceStatisticsEnabled: state.attendanceStatisticsEnabled,
+      workflowNotificationEnabled: state.workflowNotificationEnabled,
       overTimeCheckEnabled: state.overTimeCheckEnabled,
     },
   );

@@ -67,6 +67,7 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -142,6 +143,7 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       amPmHolidayEnabled
       officeMode
       attendanceStatisticsEnabled
+      workflowNotificationEnabled
       absentEnabled
       hourlyPaidHolidayEnabled
       links {

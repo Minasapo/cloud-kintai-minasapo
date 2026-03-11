@@ -40,6 +40,7 @@ export type DefaultAppConfig = Pick<
   | "themeColor"
   | "shiftGroups"
   | "attendanceStatisticsEnabled"
+  | "workflowNotificationEnabled"
   | "overTimeCheckEnabled"
 >;
 
@@ -60,6 +61,7 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   themeColor: resolveThemeColor(),
   shiftGroups: [],
   attendanceStatisticsEnabled: false,
+  workflowNotificationEnabled: false,
   overTimeCheckEnabled: false,
 };
 
@@ -187,6 +189,11 @@ const useAppConfig = () => {
   const getAttendanceStatisticsEnabled = useCallback(
     () => config?.attendanceStatisticsEnabled ?? false,
     [config?.attendanceStatisticsEnabled],
+  );
+
+  const getWorkflowNotificationEnabled = useCallback(
+    () => config?.workflowNotificationEnabled ?? false,
+    [config?.workflowNotificationEnabled],
   );
 
   const getQuickInputStartTimes = useCallback(
@@ -341,6 +348,7 @@ const useAppConfig = () => {
     getReasons,
     getOfficeMode,
     getAttendanceStatisticsEnabled,
+    getWorkflowNotificationEnabled,
     getQuickInputStartTimes,
     getQuickInputEndTimes,
     getShiftGroups,
