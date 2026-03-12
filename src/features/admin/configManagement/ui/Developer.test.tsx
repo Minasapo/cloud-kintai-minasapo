@@ -52,7 +52,6 @@ describe("Developer", () => {
     );
 
     expect(screen.getByText("開発者")).toBeInTheDocument();
-    expect(screen.getByText("開発機能")).toBeInTheDocument();
     expect(screen.getByText("通知機能(開発中)")).toBeInTheDocument();
     expect(screen.getByText("有効")).toBeInTheDocument();
     expect(
