@@ -16,32 +16,30 @@ describe("AdminMasterLayout", () => {
     mockNavigate.mockReset();
   });
 
-  it("renders a direct menu entry to feature management root", async () => {
+  it("renders feature management menu entries", async () => {
     const user = userEvent.setup();
 
     render(<AdminMasterLayout />);
 
     await user.click(screen.getByRole("button", { name: "menu" }));
 
-    expect(
-      screen.getByRole("button", { name: "設定一覧" }),
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "残業確認" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "開発者" })).toBeInTheDocument();
   });
 
-  it("navigates to feature management root from the settings menu", async () => {
+  it("navigates to developer settings from the attendance menu", async () => {
     const user = userEvent.setup();
 
     render(<AdminMasterLayout />);
 
     await user.click(screen.getByRole("button", { name: "menu" }));
 
-    await user.click(screen.getByRole("button", { name: "設定一覧" }));
+    await user.click(screen.getByRole("button", { name: "開発者" }));
 
     expect(mockNavigate).toHaveBeenCalledWith(
-      "/admin/master/feature_management",
+      "/admin/master/feature_management/developer",
     );
   });
 });

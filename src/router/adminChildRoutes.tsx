@@ -18,11 +18,11 @@ const AdminAttendancePrintRoute = createLazyRoute(
 const AbsentRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Absent"),
 );
-const AdminConfigManagementRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/AdminConfigManagement"),
-);
 const AmPmHolidayRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/AmPmHoliday"),
+);
+const DeveloperRoute = createLazyRoute(
+  () => import("@/features/admin/configManagement/ui/Developer"),
 );
 const LinksRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Links"),
@@ -214,10 +214,6 @@ export const adminChildRoutes: RouteObject[] = [
         lazy: AdminWorkflowCategorySettingsRoute,
       },
       {
-        path: "feature_management",
-        lazy: AdminConfigManagementRoute,
-      },
-      {
         path: "feature_management/working_time",
         lazy: WorkingTimeRoute,
       },
@@ -236,6 +232,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "feature_management/overtime_confirmation",
         lazy: OvertimeConfirmationRoute,
+      },
+      {
+        path: "feature_management/developer",
+        lazy: DeveloperRoute,
       },
       {
         path: "feature_management/links",
