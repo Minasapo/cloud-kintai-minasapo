@@ -234,7 +234,7 @@ export const adminChildRoutes: RouteObject[] = [
         lazy: OvertimeConfirmationRoute,
       },
       {
-        path: "feature_management/developer",
+        path: "developer",
         lazy: DeveloperRoute,
       },
       {

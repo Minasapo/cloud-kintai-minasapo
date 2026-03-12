@@ -23,6 +23,7 @@ describe("AdminMasterLayout", () => {
 
     await user.click(screen.getByRole("button", { name: "menu" }));
 
+    expect(screen.getByRole("button", { name: "勤怠" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "残業確認" }),
     ).toBeInTheDocument();
@@ -38,8 +39,6 @@ describe("AdminMasterLayout", () => {
 
     await user.click(screen.getByRole("button", { name: "開発者" }));
 
-    expect(mockNavigate).toHaveBeenCalledWith(
-      "/admin/master/feature_management/developer",
-    );
+    expect(mockNavigate).toHaveBeenCalledWith("/admin/master/developer");
   });
 });
