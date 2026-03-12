@@ -217,25 +217,53 @@ export default function AdminPendingApprovalSummary() {
       }, 300);
     };
 
+    const createSubscription = graphqlClient
+      .graphql({
+        query: onCreateAttendance,
+        authMode: "userPool",
+      })
+      .subscribe({
+        next: () => {
+          scheduleRecalc();
+        },
+        error: (error: unknown) => {
+          logger.error("Attendance create subscription error", error);
+        },
+      });
+
+    const updateSubscription = graphqlClient
+      .graphql({
+        query: onUpdateAttendance,
+        authMode: "userPool",
+      })
+      .subscribe({
+        next: () => {
+          scheduleRecalc();
+        },
+        error: (error: unknown) => {
+          logger.error("Attendance update subscription error", error);
+        },
+      });
+
+    const deleteSubscription = graphqlClient
+      .graphql({
+        query: onDeleteAttendance,
+        authMode: "userPool",
+      })
+      .subscribe({
+        next: () => {
+          scheduleRecalc();
+        },
+        error: (error: unknown) => {
+          logger.error("Attendance delete subscription error", error);
+        },
+      });
+
     const subscriptions = [
-      onCreateAttendance,
-      onUpdateAttendance,
-      onDeleteAttendance,
-    ].map((query) =>
-      graphqlClient
-        .graphql({
-          query,
-          authMode: "userPool",
-        })
-        .subscribe({
-          next: () => {
-            scheduleRecalc();
-          },
-          error: (error) => {
-            logger.error("Attendance subscription error", error);
-          },
-        }),
-    );
+      createSubscription,
+      updateSubscription,
+      deleteSubscription,
+    ];
 
     return () => {
       isMounted = false;
