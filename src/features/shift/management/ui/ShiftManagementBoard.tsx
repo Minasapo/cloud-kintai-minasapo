@@ -622,14 +622,6 @@ export default function ShiftManagementBoard() {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => navigate("/shift/collaborative")}
-          >
-            🚀 共同編集プロトタイプ
-          </Button>
-
           {hasBulkSelection ? (
             <Badge
               badgeContent={selectedCellCount}

@@ -4,6 +4,7 @@ import {
 } from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
 
+import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import {
   DEFAULT_CONFIG_NAME,
   TIME_FORMAT,
@@ -46,6 +47,8 @@ type BuildBasePayloadOptions = {
   attendanceStatisticsEnabled: boolean;
   workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
+  shiftCollaborativeEnabled: boolean;
+  shiftDefaultMode: ShiftDisplayMode;
 };
 
 export type BaseAppConfigPayload = {
@@ -70,6 +73,8 @@ export type BaseAppConfigPayload = {
   attendanceStatisticsEnabled: boolean;
   workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
+  shiftCollaborativeEnabled: boolean;
+  shiftDefaultMode: ShiftDisplayMode;
 };
 
 export const buildBasePayload = (
@@ -116,6 +121,8 @@ export const buildBasePayload = (
   attendanceStatisticsEnabled: opts.attendanceStatisticsEnabled,
   workflowNotificationEnabled: opts.workflowNotificationEnabled,
   overTimeCheckEnabled: opts.overTimeCheckEnabled,
+  shiftCollaborativeEnabled: opts.shiftCollaborativeEnabled,
+  shiftDefaultMode: opts.shiftDefaultMode,
 });
 
 /**
@@ -136,6 +143,8 @@ export type ConfigFormState = {
   attendanceStatisticsEnabled: boolean;
   workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
+  shiftCollaborativeEnabled: boolean;
+  shiftDefaultMode: ShiftDisplayMode;
   startTime: Dayjs;
   endTime: Dayjs;
   lunchRestStartTime: Dayjs;
@@ -177,6 +186,8 @@ const transformFormStateToPayload = (
       attendanceStatisticsEnabled: state.attendanceStatisticsEnabled,
       workflowNotificationEnabled: state.workflowNotificationEnabled,
       overTimeCheckEnabled: state.overTimeCheckEnabled,
+      shiftCollaborativeEnabled: state.shiftCollaborativeEnabled,
+      shiftDefaultMode: state.shiftDefaultMode,
     },
   );
 };

@@ -1,7 +1,10 @@
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import FormLabel from "@mui/material/FormLabel";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -41,6 +44,8 @@ export default function AdminConfigManagement() {
     attendanceStatisticsEnabled,
     workflowNotificationEnabled,
     overTimeCheckEnabled,
+    shiftCollaborativeEnabled,
+    shiftDefaultMode,
     setStartTime,
     setEndTime,
     setLunchRestStartTime,
@@ -57,6 +62,8 @@ export default function AdminConfigManagement() {
     handleAttendanceStatisticsEnabledChange,
     handleWorkflowNotificationEnabledChange,
     handleOverTimeCheckEnabledChange,
+    handleShiftCollaborativeEnabledChange,
+    handleShiftDefaultModeChange,
     handleAddLink,
     handleLinkChange,
     handleRemoveLink,
@@ -261,6 +268,46 @@ export default function AdminConfigManagement() {
               label={overTimeCheckEnabled ? "有効" : "無効"}
               sx={{ mb: 1 }}
             />
+          </Stack>
+        </GroupSection>
+        <GroupSection
+          title="シフト表示モード"
+          description="シフト管理画面で共同編集モードを利用するか、初期表示をどちらにするかを設定します。"
+        >
+          <Stack spacing={1.5}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={shiftCollaborativeEnabled}
+                  onChange={handleShiftCollaborativeEnabledChange}
+                  color="primary"
+                />
+              }
+              label={
+                shiftCollaborativeEnabled
+                  ? "共同編集モードを有効"
+                  : "共同編集モードを無効"
+              }
+            />
+            <Stack spacing={1}>
+              <FormLabel>初期表示モード</FormLabel>
+              <ToggleButtonGroup
+                color="primary"
+                exclusive
+                size="small"
+                value={shiftDefaultMode}
+                onChange={(_, value: "normal" | "collaborative" | null) => {
+                  if (!value) return;
+                  handleShiftDefaultModeChange(value);
+                }}
+                disabled={!shiftCollaborativeEnabled}
+              >
+                <ToggleButton value="normal">通常モード</ToggleButton>
+                <ToggleButton value="collaborative">
+                  共同編集モード
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Stack>
           </Stack>
         </GroupSection>
         <GroupSection title="出勤モード">

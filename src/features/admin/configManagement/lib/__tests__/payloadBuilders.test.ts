@@ -30,6 +30,8 @@ describe("Payload Builders", () => {
     attendanceStatisticsEnabled: true,
     workflowNotificationEnabled: true,
     overTimeCheckEnabled: true,
+    shiftCollaborativeEnabled: true,
+    shiftDefaultMode: "collaborative",
     startTime: dayjs("2020-01-01T09:00:00"),
     endTime: dayjs("2020-01-01T18:00:00"),
     lunchRestStartTime: dayjs("2020-01-01T12:00:00"),

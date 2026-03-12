@@ -1,4 +1,5 @@
 import type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
+import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
 import { DEFAULT_CONFIG } from "@entities/app-config/model/useAppConfig";
 import type { WorkflowCategoryOrderItem } from "@entities/workflow/lib/workflowLabels";
 import {
@@ -34,6 +35,8 @@ type AppConfigContextProps = {
   getOfficeMode: () => boolean;
   getAttendanceStatisticsEnabled: () => boolean;
   getWorkflowNotificationEnabled: () => boolean;
+  getShiftCollaborativeEnabled: () => boolean;
+  getShiftDefaultMode: () => ShiftDisplayMode;
   getQuickInputStartTimes: (onlyEnabled?: boolean) => {
     time: string;
     enabled: boolean;
@@ -83,6 +86,8 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getOfficeMode: () => false,
   getAttendanceStatisticsEnabled: () => false,
   getWorkflowNotificationEnabled: () => false,
+  getShiftCollaborativeEnabled: () => false,
+  getShiftDefaultMode: () => "normal",
   getQuickInputStartTimes: () => [],
   getQuickInputEndTimes: () => [],
   getShiftGroups: () => [],

@@ -62,6 +62,8 @@ describe("buildBasePayload helpers", () => {
       attendanceStatisticsEnabled: true,
       workflowNotificationEnabled: true,
       overTimeCheckEnabled: true,
+      shiftCollaborativeEnabled: true,
+      shiftDefaultMode: "collaborative",
     });
     expect(payload.workStartTime).toBe("09:00");
     expect(payload.workEndTime).toBe("18:00");

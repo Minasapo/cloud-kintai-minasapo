@@ -4,6 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import { E14001, S14001, S14002 } from "@/errors";
 import {
   appendItem,
@@ -62,6 +63,8 @@ export function useAdminConfigForm() {
     getAttendanceStatisticsEnabled,
     getWorkflowNotificationEnabled,
     getOverTimeCheckEnabled,
+    getShiftCollaborativeEnabled,
+    getShiftDefaultMode,
     getThemeTokens,
   } = useContext(AppConfigContext);
 
@@ -113,6 +116,10 @@ export function useAdminConfigForm() {
   const [absentEnabled, setAbsentEnabled] = useState<boolean>(false);
   const [overTimeCheckEnabled, setOverTimeCheckEnabled] =
     useState<boolean>(false);
+  const [shiftCollaborativeEnabled, setShiftCollaborativeEnabled] =
+    useState<boolean>(false);
+  const [shiftDefaultMode, setShiftDefaultMode] =
+    useState<ShiftDisplayMode>("normal");
 
   const dispatch = useAppDispatchV2();
 
@@ -151,6 +158,14 @@ export function useAdminConfigForm() {
 
     if (typeof getOverTimeCheckEnabled === "function") {
       setOverTimeCheckEnabled(getOverTimeCheckEnabled());
+    }
+
+    if (typeof getShiftCollaborativeEnabled === "function") {
+      setShiftCollaborativeEnabled(getShiftCollaborativeEnabled());
+    }
+
+    if (typeof getShiftDefaultMode === "function") {
+      setShiftDefaultMode(getShiftDefaultMode());
     }
 
     setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
@@ -332,6 +347,20 @@ export function useAdminConfigForm() {
     setWorkflowNotificationEnabled(checked);
   };
 
+  const handleShiftCollaborativeEnabledChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const enabled = event.target.checked;
+    setShiftCollaborativeEnabled(enabled);
+    if (!enabled) {
+      setShiftDefaultMode("normal");
+    }
+  };
+
+  const handleShiftDefaultModeChange = (mode: ShiftDisplayMode) => {
+    setShiftDefaultMode(mode);
+  };
+
   const handleSave = async () => {
     const validationResult = validateAdminConfigForm({
       startTime,
@@ -363,6 +392,8 @@ export function useAdminConfigForm() {
       attendanceStatisticsEnabled,
       workflowNotificationEnabled,
       overTimeCheckEnabled,
+      shiftCollaborativeEnabled,
+      shiftDefaultMode,
       startTime: startTime!,
       endTime: endTime!,
       lunchRestStartTime: lunchRestStartTime!,
@@ -411,6 +442,8 @@ export function useAdminConfigForm() {
     attendanceStatisticsEnabled,
     workflowNotificationEnabled,
     overTimeCheckEnabled,
+    shiftCollaborativeEnabled,
+    shiftDefaultMode,
     setStartTime,
     setEndTime,
     setLunchRestStartTime,
@@ -427,6 +460,8 @@ export function useAdminConfigForm() {
     handleAttendanceStatisticsEnabledChange,
     handleWorkflowNotificationEnabledChange,
     handleOverTimeCheckEnabledChange,
+    handleShiftCollaborativeEnabledChange,
+    handleShiftDefaultModeChange,
     handleAddLink,
     handleLinkChange,
     handleRemoveLink,

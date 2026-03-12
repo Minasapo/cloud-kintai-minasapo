@@ -112,6 +112,8 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -188,6 +190,8 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
         __typename
       }
       overTimeCheckEnabled
+      shiftCollaborativeEnabled
+      shiftDefaultMode
       createdAt
       updatedAt
       __typename

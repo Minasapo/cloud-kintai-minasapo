@@ -121,6 +121,8 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -195,6 +197,8 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -269,6 +273,8 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename

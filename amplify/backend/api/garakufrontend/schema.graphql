@@ -331,6 +331,8 @@ type AppConfig @model {
   shiftGroups: [ShiftGroup]
   workflowCategoryOrder: WorkflowCategoryOrder
   overTimeCheckEnabled: Boolean
+  shiftCollaborativeEnabled: Boolean
+  shiftDefaultMode: String
 }
 
 type EmailResult {

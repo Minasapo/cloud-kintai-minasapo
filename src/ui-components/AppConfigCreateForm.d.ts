@@ -41,6 +41,8 @@ export declare type AppConfigCreateFormInputValues = {
     hourlyPaidHolidayEnabled?: boolean;
     themeColor?: string;
     overTimeCheckEnabled?: boolean;
+    shiftCollaborativeEnabled?: boolean;
+    shiftDefaultMode?: string;
 };
 export declare type AppConfigCreateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -62,6 +64,8 @@ export declare type AppConfigCreateFormValidationValues = {
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
     themeColor?: ValidationFunction<string>;
     overTimeCheckEnabled?: ValidationFunction<boolean>;
+    shiftCollaborativeEnabled?: ValidationFunction<boolean>;
+    shiftDefaultMode?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type AppConfigCreateFormOverridesProps = {
@@ -85,6 +89,8 @@ export declare type AppConfigCreateFormOverridesProps = {
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     themeColor?: PrimitiveOverrideProps<TextFieldProps>;
     overTimeCheckEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    shiftCollaborativeEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    shiftDefaultMode?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type AppConfigCreateFormProps = React.PropsWithChildren<{
     overrides?: AppConfigCreateFormOverridesProps | undefined | null;
