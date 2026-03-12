@@ -30,6 +30,9 @@ const LinksRoute = createLazyRoute(
 const AttendanceStatisticsRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/AttendanceStatistics"),
 );
+const OvertimeConfirmationRoute = createLazyRoute(
+  () => import("@/features/admin/configManagement/ui/OvertimeConfirmation"),
+);
 const OfficeModeRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/OfficeMode"),
 );
@@ -229,6 +232,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "feature_management/attendance_statistics",
         lazy: AttendanceStatisticsRoute,
+      },
+      {
+        path: "feature_management/overtime_confirmation",
+        lazy: OvertimeConfirmationRoute,
       },
       {
         path: "feature_management/links",

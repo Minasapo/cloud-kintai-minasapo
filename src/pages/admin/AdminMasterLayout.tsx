@@ -37,6 +37,10 @@ export default function AdminMasterLayout() {
       path: "/admin/master/feature_management",
       children: [
         {
+          name: "設定一覧",
+          path: "/admin/master/feature_management",
+        },
+        {
           name: "勤務時間",
           path: "/admin/master/feature_management/working_time",
         },
@@ -51,6 +55,10 @@ export default function AdminMasterLayout() {
         {
           name: "稼働統計",
           path: "/admin/master/feature_management/attendance_statistics",
+        },
+        {
+          name: "残業確認",
+          path: "/admin/master/feature_management/overtime_confirmation",
         },
         { name: "外部リンク", path: "/admin/master/feature_management/links" },
         { name: "打刻理由", path: "/admin/master/feature_management/reasons" },

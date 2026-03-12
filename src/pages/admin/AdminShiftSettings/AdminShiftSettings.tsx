@@ -1,6 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { Alert, Button, Paper, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  FormControlLabel,
+  FormLabel,
+  Paper,
+  Stack,
+  Switch,
+  Tab,
+  Tabs,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -11,6 +25,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
+import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import { E14001, S14001, S14002 } from "@/errors";
 import {
   setSnackbarError,
@@ -33,6 +48,8 @@ const SHIFT_GROUP_ERROR_FIELDS = [
   { key: "max", label: "最大人数" },
   { key: "fixed", label: "固定人数" },
 ] as const;
+
+type ShiftSettingsTab = "shift-group" | "shift-display";
 
 const getValidationDetails = (errors: {
   shiftGroups?: Array<Record<string, { message?: unknown } | undefined>>;
@@ -68,11 +85,23 @@ const getValidationDetails = (errors: {
 };
 
 export default function AdminShiftSettings() {
-  const { getShiftGroups, getConfigId, saveConfig, fetchConfig } =
-    useContext(AppConfigContext);
+  const {
+    getShiftGroups,
+    getConfigId,
+    saveConfig,
+    fetchConfig,
+    getShiftCollaborativeEnabled,
+    getShiftDefaultMode,
+  } = useContext(AppConfigContext);
   const dispatch = useAppDispatchV2();
   const [configId, setConfigId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [savingShiftGroup, setSavingShiftGroup] = useState(false);
+  const [savingShiftDisplay, setSavingShiftDisplay] = useState(false);
+  const [activeTab, setActiveTab] = useState<ShiftSettingsTab>("shift-group");
+  const [shiftCollaborativeEnabled, setShiftCollaborativeEnabled] =
+    useState(false);
+  const [shiftDefaultMode, setShiftDefaultMode] =
+    useState<ShiftDisplayMode>("normal");
 
   const {
     control,
@@ -96,8 +125,21 @@ export default function AdminShiftSettings() {
       shiftGroups: initialGroups.map((group) => toShiftGroupFormValue(group)),
     });
     setConfigId(getConfigId());
+    if (typeof getShiftCollaborativeEnabled === "function") {
+      setShiftCollaborativeEnabled(getShiftCollaborativeEnabled());
+    }
+    if (typeof getShiftDefaultMode === "function") {
+      setShiftDefaultMode(getShiftDefaultMode());
+    }
     void trigger();
-  }, [getConfigId, getShiftGroups, reset, trigger]);
+  }, [
+    getConfigId,
+    getShiftCollaborativeEnabled,
+    getShiftDefaultMode,
+    getShiftGroups,
+    reset,
+    trigger,
+  ]);
 
   const handleAddGroup = () => {
     append(createShiftGroup());
@@ -106,9 +148,13 @@ export default function AdminShiftSettings() {
 
   const validationDetails = useMemo(
     () =>
-      getValidationDetails(errors as {
-        shiftGroups?: Array<Record<string, { message?: unknown } | undefined>>;
-      }),
+      getValidationDetails(
+        errors as {
+          shiftGroups?: Array<
+            Record<string, { message?: unknown } | undefined>
+          >;
+        },
+      ),
     [errors],
   );
   const hasValidationError = validationDetails.length > 0;
@@ -134,11 +180,11 @@ export default function AdminShiftSettings() {
   );
 
   const handleSave = handleSubmit(async (values) => {
-    if (saving) {
+    if (savingShiftGroup) {
       return;
     }
 
-    setSaving(true);
+    setSavingShiftGroup(true);
     const payloadShiftGroups = buildShiftGroupPayload(values.shiftGroups);
 
     try {
@@ -147,82 +193,219 @@ export default function AdminShiftSettings() {
       console.error(error);
       dispatch(setSnackbarError(E14001));
     } finally {
-      setSaving(false);
+      setSavingShiftGroup(false);
     }
   });
 
+  const handleShiftDisplaySave = async () => {
+    if (savingShiftDisplay) {
+      return;
+    }
+
+    setSavingShiftDisplay(true);
+
+    try {
+      const payload = {
+        shiftCollaborativeEnabled,
+        shiftDefaultMode,
+      };
+
+      if (configId) {
+        await saveConfig({
+          id: configId,
+          ...payload,
+        } as UpdateAppConfigInput);
+        dispatch(setSnackbarSuccess(S14002));
+      } else {
+        await saveConfig({
+          name: "default",
+          ...payload,
+        } as CreateAppConfigInput);
+        dispatch(setSnackbarSuccess(S14001));
+      }
+      await fetchConfig();
+    } catch (error) {
+      console.error(error);
+      dispatch(setSnackbarError(E14001));
+    } finally {
+      setSavingShiftDisplay(false);
+    }
+  };
+
+  const handleShiftCollaborativeChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const enabled = event.target.checked;
+    setShiftCollaborativeEnabled(enabled);
+    if (!enabled) {
+      setShiftDefaultMode("normal");
+    }
+  };
+
   return (
     <Stack spacing={2.5}>
-      <Stack spacing={0.5}>
-        <Typography variant="subtitle2">
-          {SHIFT_GROUP_UI_TEXTS.introTitle}
-        </Typography>
-        <Stack component="ul" sx={{ m: 0, pl: 3 }}>
-          {SHIFT_GROUP_UI_TEXTS.introBullets.map((text) => (
-            <Typography key={text} component="li" variant="body2">
-              {text}
-            </Typography>
-          ))}
-        </Stack>
-      </Stack>
-      <Alert severity="info">
-        {SHIFT_GROUP_UI_TEXTS.saveInfo}
-      </Alert>
-
-      <Paper sx={{ p: 2 }}>
-        <Stack spacing={3}>
-          <Typography variant="h6">シフトグループ</Typography>
-          <Stack spacing={1.5}>
-            {fields.length === 0 ? (
-              <Alert severity="info" variant="outlined">
-                {SHIFT_GROUP_UI_TEXTS.emptyGroups}
-              </Alert>
-            ) : (
-              fields.map((group, index) => (
-                <ShiftGroupRow
-                  key={group.id}
-                  control={control}
-                  index={index}
-                  onDelete={() => remove(index)}
-                />
-              ))
-            )}
-          </Stack>
-          <Button
-            variant="outlined"
-            onClick={handleAddGroup}
-            startIcon={<AddCircleOutlineIcon />}
-          >
-            グループを追加
-          </Button>
-          {hasValidationError && (
-            <Alert severity="warning">
-              <Stack spacing={0.5}>
-                <Typography variant="body2">
-                  {SHIFT_GROUP_UI_TEXTS.validationWarning}
-                </Typography>
-                <Stack component="ul" sx={{ m: 0, pl: 3 }}>
-                  {validationDetails.map((detail) => (
-                    <Typography key={detail} component="li" variant="body2">
-                      {detail}
-                    </Typography>
-                  ))}
-                </Stack>
-              </Stack>
-            </Alert>
-          )}
-        </Stack>
+      <Paper sx={{ p: 1 }}>
+        <Tabs
+          value={activeTab}
+          onChange={(_, value: ShiftSettingsTab) => setActiveTab(value)}
+          variant="fullWidth"
+        >
+          <Tab label="シフトグループ" value="shift-group" />
+          <Tab label="シフト表示" value="shift-display" />
+        </Tabs>
       </Paper>
 
-      <Stack direction="row" justifyContent="flex-end" sx={{ pb: 4 }}>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={hasValidationError || saving}
-        >
-          {saving ? "保存中..." : "保存"}
-        </Button>
-      </Stack>
+      <Box
+        role="tabpanel"
+        hidden={activeTab !== "shift-group"}
+        aria-labelledby="shift-group-tab"
+      >
+        {activeTab === "shift-group" && (
+          <Stack spacing={2.5}>
+            <Stack spacing={0.5}>
+              <Typography variant="subtitle2">
+                {SHIFT_GROUP_UI_TEXTS.introTitle}
+              </Typography>
+              <Stack component="ul" sx={{ m: 0, pl: 3 }}>
+                {SHIFT_GROUP_UI_TEXTS.introBullets.map((text) => (
+                  <Typography key={text} component="li" variant="body2">
+                    {text}
+                  </Typography>
+                ))}
+              </Stack>
+            </Stack>
+            <Alert severity="info">{SHIFT_GROUP_UI_TEXTS.saveInfo}</Alert>
+
+            <Paper sx={{ p: 2 }}>
+              <Stack spacing={3}>
+                <Typography variant="h6">シフトグループ</Typography>
+                <Stack spacing={1.5}>
+                  {fields.length === 0 ? (
+                    <Alert severity="info" variant="outlined">
+                      {SHIFT_GROUP_UI_TEXTS.emptyGroups}
+                    </Alert>
+                  ) : (
+                    fields.map((group, index) => (
+                      <ShiftGroupRow
+                        key={group.id}
+                        control={control}
+                        index={index}
+                        onDelete={() => remove(index)}
+                      />
+                    ))
+                  )}
+                </Stack>
+                <Button
+                  variant="outlined"
+                  onClick={handleAddGroup}
+                  startIcon={<AddCircleOutlineIcon />}
+                >
+                  グループを追加
+                </Button>
+                {hasValidationError && (
+                  <Alert severity="warning">
+                    <Stack spacing={0.5}>
+                      <Typography variant="body2">
+                        {SHIFT_GROUP_UI_TEXTS.validationWarning}
+                      </Typography>
+                      <Stack component="ul" sx={{ m: 0, pl: 3 }}>
+                        {validationDetails.map((detail) => (
+                          <Typography
+                            key={detail}
+                            component="li"
+                            variant="body2"
+                          >
+                            {detail}
+                          </Typography>
+                        ))}
+                      </Stack>
+                    </Stack>
+                  </Alert>
+                )}
+              </Stack>
+            </Paper>
+
+            <Stack direction="row" justifyContent="flex-end" sx={{ pb: 4 }}>
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={hasValidationError || savingShiftGroup}
+              >
+                {savingShiftGroup ? "保存中..." : "保存"}
+              </Button>
+            </Stack>
+          </Stack>
+        )}
+      </Box>
+
+      <Box
+        role="tabpanel"
+        hidden={activeTab !== "shift-display"}
+        aria-labelledby="shift-display-tab"
+      >
+        {activeTab === "shift-display" && (
+          <Stack spacing={2.5}>
+            <Alert severity="info">
+              シフト管理画面の初期表示と共同編集モードの利用可否を設定します。
+            </Alert>
+            <Paper sx={{ p: 2 }}>
+              <Stack spacing={3}>
+                <Typography variant="h6">シフト表示</Typography>
+                <Stack spacing={1.5}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={shiftCollaborativeEnabled}
+                        onChange={handleShiftCollaborativeChange}
+                        color="primary"
+                      />
+                    }
+                    label={
+                      shiftCollaborativeEnabled
+                        ? "共同編集モードを有効"
+                        : "共同編集モードを無効"
+                    }
+                  />
+                  <Stack spacing={1}>
+                    <FormLabel>初期表示モード</FormLabel>
+                    <ToggleButtonGroup
+                      color="primary"
+                      exclusive
+                      size="small"
+                      value={shiftDefaultMode}
+                      onChange={(_, value: ShiftDisplayMode | null) => {
+                        if (!value) {
+                          return;
+                        }
+                        setShiftDefaultMode(value);
+                      }}
+                      disabled={!shiftCollaborativeEnabled}
+                    >
+                      <ToggleButton value="normal">通常モード</ToggleButton>
+                      <ToggleButton value="collaborative">
+                        共同編集モード
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </Stack>
+                  <Typography variant="body2" color="textSecondary">
+                    スタッフ側への設定反映には数分程度かかる場合があります。
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Paper>
+
+            <Stack direction="row" justifyContent="flex-end" sx={{ pb: 4 }}>
+              <Button
+                variant="contained"
+                onClick={handleShiftDisplaySave}
+                disabled={savingShiftDisplay}
+              >
+                {savingShiftDisplay ? "保存中..." : "保存"}
+              </Button>
+            </Stack>
+          </Stack>
+        )}
+      </Box>
     </Stack>
   );
 }
