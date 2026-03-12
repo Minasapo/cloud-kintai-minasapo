@@ -70,6 +70,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -114,6 +115,8 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -140,6 +143,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -184,6 +188,8 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -210,6 +216,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -254,6 +261,8 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename

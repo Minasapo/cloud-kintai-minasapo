@@ -320,6 +320,7 @@ type AppConfig @model {
   amPmHolidayEnabled: Boolean
   officeMode: Boolean
   attendanceStatisticsEnabled: Boolean
+  workflowNotificationEnabled: Boolean
   absentEnabled: Boolean
   hourlyPaidHolidayEnabled: Boolean
   links: [Link]
@@ -330,6 +331,8 @@ type AppConfig @model {
   shiftGroups: [ShiftGroup]
   workflowCategoryOrder: WorkflowCategoryOrder
   overTimeCheckEnabled: Boolean
+  shiftCollaborativeEnabled: Boolean
+  shiftDefaultMode: String
 }
 
 type EmailResult {

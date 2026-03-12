@@ -20,6 +20,8 @@ import {
 
 import type { ShiftGroupConfig } from "./shiftGroupTypes";
 
+export type ShiftDisplayMode = "normal" | "collaborative";
+
 const DEFAULT_THEME_TOKENS = getDesignTokens();
 
 /**
@@ -40,7 +42,10 @@ export type DefaultAppConfig = Pick<
   | "themeColor"
   | "shiftGroups"
   | "attendanceStatisticsEnabled"
+  | "workflowNotificationEnabled"
   | "overTimeCheckEnabled"
+  | "shiftCollaborativeEnabled"
+  | "shiftDefaultMode"
 >;
 
 /**
@@ -60,7 +65,10 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   themeColor: resolveThemeColor(),
   shiftGroups: [],
   attendanceStatisticsEnabled: false,
+  workflowNotificationEnabled: false,
   overTimeCheckEnabled: false,
+  shiftCollaborativeEnabled: false,
+  shiftDefaultMode: "normal",
 };
 
 const useAppConfig = () => {
@@ -188,6 +196,22 @@ const useAppConfig = () => {
     () => config?.attendanceStatisticsEnabled ?? false,
     [config?.attendanceStatisticsEnabled],
   );
+
+  const getWorkflowNotificationEnabled = useCallback(
+    () => config?.workflowNotificationEnabled ?? false,
+    [config?.workflowNotificationEnabled],
+  );
+
+  const getShiftCollaborativeEnabled = useCallback(
+    () => config?.shiftCollaborativeEnabled ?? false,
+    [config?.shiftCollaborativeEnabled],
+  );
+
+  const getShiftDefaultMode = useCallback((): ShiftDisplayMode => {
+    return config?.shiftDefaultMode === "collaborative"
+      ? "collaborative"
+      : "normal";
+  }, [config?.shiftDefaultMode]);
 
   const getQuickInputStartTimes = useCallback(
     (onlyEnabled = false) => {
@@ -341,6 +365,9 @@ const useAppConfig = () => {
     getReasons,
     getOfficeMode,
     getAttendanceStatisticsEnabled,
+    getWorkflowNotificationEnabled,
+    getShiftCollaborativeEnabled,
+    getShiftDefaultMode,
     getQuickInputStartTimes,
     getQuickInputEndTimes,
     getShiftGroups,

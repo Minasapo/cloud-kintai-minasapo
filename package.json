@@ -16,7 +16,7 @@
     "@mui/material": "^6.0.0",
     "@mui/styled-engine": "^6.0.0",
     "@mui/system": "^6.0.0",
-    "@mui/x-charts": "^8.25.0",
+    "@mui/x-charts": "^8.27.0",
     "@mui/x-data-grid": "^8.27.1",
     "@mui/x-date-pickers": "^8.25.0",
     "@reduxjs/toolkit": "^2.8.2",

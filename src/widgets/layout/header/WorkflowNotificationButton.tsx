@@ -3,16 +3,19 @@ import { Badge, IconButton, Tooltip } from "@mui/material";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { useWorkflowNotificationInbox } from "@/features/workflow/notification/model/useWorkflowNotificationInbox";
 
 export default function WorkflowNotificationButton() {
   const { authStatus } = useContext(AuthContext);
+  const { getWorkflowNotificationEnabled } = useContext(AppConfigContext);
   const isAuthenticated = authStatus === "authenticated";
+  const workflowNotificationEnabled = getWorkflowNotificationEnabled();
   const navigate = useNavigate();
   const { unreadCount } = useWorkflowNotificationInbox();
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !workflowNotificationEnabled) {
     return null;
   }
 

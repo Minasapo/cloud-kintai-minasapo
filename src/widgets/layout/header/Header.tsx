@@ -9,6 +9,7 @@ import { resolveThemeColor } from "@/shared/config/theme";
 import { designTokenVar } from "@/shared/designSystem";
 import HeaderBar from "@/shared/ui/header/HeaderBar";
 
+import AdminPendingApprovalSummary from "./AdminPendingApprovalSummary";
 import { ExternalLinks } from "./ExternalLinks/ExternalLinks";
 import NavigationMenu from "./NavigationMenu";
 import { SignInOutButton } from "./SignInOutButton";
@@ -40,6 +41,7 @@ export default function Header() {
       themeColor={headerThemeColor}
       logo={<Logo />}
       navigation={<NavigationMenu pathName={pathName} />}
+      centerContent={<AdminPendingApprovalSummary />}
       notificationsButton={<WorkflowNotificationButton />}
       externalLinks={showExternalLinks ? <ExternalLinks /> : null}
       signInOutButton={<SignInOutButton />}
