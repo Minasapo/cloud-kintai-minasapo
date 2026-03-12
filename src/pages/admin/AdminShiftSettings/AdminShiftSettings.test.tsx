@@ -44,7 +44,7 @@ const contextValue: React.ContextType<typeof AppConfigContext> = {
   getAttendanceStatisticsEnabled: () => false,
   getWorkflowNotificationEnabled: () => false,
   getShiftGroups: () => [],
-  getShiftCollaborativeEnabled: () => true,
+  getShiftCollaborativeEnabled: () => false,
   getShiftDefaultMode: () => "normal" as const,
   getQuickInputStartTimes: () => [],
   getQuickInputEndTimes: () => [],
@@ -90,7 +90,10 @@ describe("AdminShiftSettings", () => {
       "aria-selected",
       "true",
     );
-    expect(screen.getByText("共同編集モードを有効")).toBeInTheDocument();
-    expect(screen.getByText("初期表示モード")).toBeInTheDocument();
+    expect(screen.queryByText("共同編集モードを無効")).not.toBeInTheDocument();
+    expect(screen.getByText("表示モード")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "共同編集モード" }),
+    ).toBeEnabled();
   });
 });

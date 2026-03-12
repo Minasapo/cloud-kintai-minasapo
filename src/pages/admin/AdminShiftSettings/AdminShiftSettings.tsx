@@ -4,11 +4,9 @@ import {
   Alert,
   Box,
   Button,
-  FormControlLabel,
   FormLabel,
   Paper,
   Stack,
-  Switch,
   Tab,
   Tabs,
   ToggleButton,
@@ -90,7 +88,6 @@ export default function AdminShiftSettings() {
     getConfigId,
     saveConfig,
     fetchConfig,
-    getShiftCollaborativeEnabled,
     getShiftDefaultMode,
   } = useContext(AppConfigContext);
   const dispatch = useAppDispatchV2();
@@ -98,8 +95,6 @@ export default function AdminShiftSettings() {
   const [savingShiftGroup, setSavingShiftGroup] = useState(false);
   const [savingShiftDisplay, setSavingShiftDisplay] = useState(false);
   const [activeTab, setActiveTab] = useState<ShiftSettingsTab>("shift-group");
-  const [shiftCollaborativeEnabled, setShiftCollaborativeEnabled] =
-    useState(false);
   const [shiftDefaultMode, setShiftDefaultMode] =
     useState<ShiftDisplayMode>("normal");
 
@@ -125,21 +120,11 @@ export default function AdminShiftSettings() {
       shiftGroups: initialGroups.map((group) => toShiftGroupFormValue(group)),
     });
     setConfigId(getConfigId());
-    if (typeof getShiftCollaborativeEnabled === "function") {
-      setShiftCollaborativeEnabled(getShiftCollaborativeEnabled());
-    }
     if (typeof getShiftDefaultMode === "function") {
       setShiftDefaultMode(getShiftDefaultMode());
     }
     void trigger();
-  }, [
-    getConfigId,
-    getShiftCollaborativeEnabled,
-    getShiftDefaultMode,
-    getShiftGroups,
-    reset,
-    trigger,
-  ]);
+  }, [getConfigId, getShiftDefaultMode, getShiftGroups, reset, trigger]);
 
   const handleAddGroup = () => {
     append(createShiftGroup());
@@ -206,7 +191,7 @@ export default function AdminShiftSettings() {
 
     try {
       const payload = {
-        shiftCollaborativeEnabled,
+        shiftCollaborativeEnabled: true,
         shiftDefaultMode,
       };
 
@@ -229,16 +214,6 @@ export default function AdminShiftSettings() {
       dispatch(setSnackbarError(E14001));
     } finally {
       setSavingShiftDisplay(false);
-    }
-  };
-
-  const handleShiftCollaborativeChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const enabled = event.target.checked;
-    setShiftCollaborativeEnabled(enabled);
-    if (!enabled) {
-      setShiftDefaultMode("normal");
     }
   };
 
@@ -346,28 +321,14 @@ export default function AdminShiftSettings() {
         {activeTab === "shift-display" && (
           <Stack spacing={2.5}>
             <Alert severity="info">
-              シフト管理画面の初期表示と共同編集モードの利用可否を設定します。
+              シフト管理画面の表示モードを設定します。
             </Alert>
             <Paper sx={{ p: 2 }}>
               <Stack spacing={3}>
                 <Typography variant="h6">シフト表示</Typography>
                 <Stack spacing={1.5}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={shiftCollaborativeEnabled}
-                        onChange={handleShiftCollaborativeChange}
-                        color="primary"
-                      />
-                    }
-                    label={
-                      shiftCollaborativeEnabled
-                        ? "共同編集モードを有効"
-                        : "共同編集モードを無効"
-                    }
-                  />
                   <Stack spacing={1}>
-                    <FormLabel>初期表示モード</FormLabel>
+                    <FormLabel>表示モード</FormLabel>
                     <ToggleButtonGroup
                       color="primary"
                       exclusive
@@ -379,7 +340,6 @@ export default function AdminShiftSettings() {
                         }
                         setShiftDefaultMode(value);
                       }}
-                      disabled={!shiftCollaborativeEnabled}
                     >
                       <ToggleButton value="normal">通常モード</ToggleButton>
                       <ToggleButton value="collaborative">
