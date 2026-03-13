@@ -1,10 +1,7 @@
-import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import Logo from "@shared/ui/logo/Logo";
 import { useContext, useMemo } from "react";
-import { useLocation } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AuthContext } from "@/context/AuthContext";
 import { resolveThemeColor } from "@/shared/config/theme";
 import { designTokenVar } from "@/shared/designSystem";
 import HeaderBar from "@/shared/ui/header/HeaderBar";
@@ -16,11 +13,7 @@ import { SignInOutButton } from "./SignInOutButton";
 import WorkflowNotificationButton from "./WorkflowNotificationButton";
 
 export default function Header() {
-  const { isCognitoUserRole } = useContext(AuthContext);
   const { getThemeColor } = useContext(AppConfigContext);
-  const location = useLocation();
-
-  const pathName = location.pathname === "/" ? "/register" : location.pathname;
 
   const resolvedThemeColor = useMemo(
     () =>
@@ -34,16 +27,14 @@ export default function Header() {
     resolvedThemeColor,
   );
 
-  const showExternalLinks = !isCognitoUserRole(StaffRole.OPERATOR);
-
   return (
     <HeaderBar
       themeColor={headerThemeColor}
       logo={<Logo />}
-      navigation={<NavigationMenu pathName={pathName} />}
+      navigation={<NavigationMenu />}
       centerContent={<AdminPendingApprovalSummary />}
       notificationsButton={<WorkflowNotificationButton />}
-      externalLinks={showExternalLinks ? <ExternalLinks /> : null}
+      externalLinks={<ExternalLinks />}
       signInOutButton={<SignInOutButton />}
     />
   );

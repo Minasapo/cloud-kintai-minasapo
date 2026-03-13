@@ -216,7 +216,6 @@ export default function Layout() {
     getShiftGroups,
     getLunchRestStartTime,
     getLunchRestEndTime,
-    loading: appConfigLoading,
     getStandardWorkHours,
     getHourlyPaidHolidayEnabled,
     getAmHolidayStartTime,
@@ -235,16 +234,17 @@ export default function Layout() {
     getThemeTokens,
   } = useAppConfig();
   const isAuthenticated = authStatus === "authenticated";
-  const { data: holidayCalendars = [], isLoading: holidayCalendarLoading } =
-    useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
-  const {
-    data: companyHolidayCalendars = [],
-    isLoading: companyHolidayCalendarLoading,
-  } = useGetCompanyHolidayCalendarsQuery(undefined, {
+  const { data: holidayCalendars = [] } = useGetHolidayCalendarsQuery(
+    undefined,
+    { skip: !isAuthenticated },
+  );
+  const { data: companyHolidayCalendars = [] } =
+    useGetCompanyHolidayCalendarsQuery(undefined, {
+      skip: !isAuthenticated,
+    });
+  const { data: eventCalendars = [] } = useGetEventCalendarsQuery(undefined, {
     skip: !isAuthenticated,
   });
-  const { data: eventCalendars = [], isLoading: eventCalendarLoading } =
-    useGetEventCalendarsQuery(undefined, { skip: !isAuthenticated });
 
   const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
   const [bulkCreateHolidayCalendarsMutation] =
@@ -580,15 +580,12 @@ export default function Layout() {
   const shouldBlockUnauthenticated =
     authStatus === "unauthenticated" && !isLoginRoute;
 
-  if (
+  const shouldBlockLayoutBootstrap =
     authStatus === "configuring" ||
     cognitoUserLoading ||
-    appConfigLoading ||
-    holidayCalendarLoading ||
-    companyHolidayCalendarLoading ||
-    eventCalendarLoading ||
-    shouldBlockUnauthenticated
-  ) {
+    shouldBlockUnauthenticated;
+
+  if (shouldBlockLayoutBootstrap) {
     return (
       <ThemeContextProvider>
         <ThemeProvider theme={appTheme}>
