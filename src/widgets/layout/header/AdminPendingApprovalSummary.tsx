@@ -1,5 +1,6 @@
 import { Box, ButtonBase, Stack, Tooltip, Typography } from "@mui/material";
 import { GraphQLResult } from "aws-amplify/api";
+import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -29,6 +30,7 @@ import {
 import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("AdminPendingApprovalSummary");
+const ATTENDANCE_LOOKBACK_DAYS = 30;
 
 const isWorkflowPendingForCurrentAdmin = (workflow: Workflow) => {
   const isUnapprovedStatus =
@@ -136,6 +138,10 @@ export default function AdminPendingApprovalSummary() {
       };
     }
 
+    const sinceWorkDate = dayjs()
+      .subtract(ATTENDANCE_LOOKBACK_DAYS, "day")
+      .format("YYYY-MM-DD");
+
     let nextToken: string | null = null;
     const pendingEntryKeys = new Set<string>();
     const pendingEntries: PendingAttendanceEntry[] = [];
@@ -145,6 +151,11 @@ export default function AdminPendingApprovalSummary() {
         query: listAttendances,
         variables: {
           limit: 100,
+          filter: {
+            workDate: {
+              ge: sinceWorkDate,
+            },
+          },
           nextToken,
         },
         authMode: "userPool",
@@ -434,7 +445,7 @@ export default function AdminPendingApprovalSummary() {
         title={
           <Box sx={{ py: 0.5 }}>
             <Typography variant="caption" sx={{ fontWeight: 700 }}>
-              未承認勤怠（全期間・過去分含む）
+              未承認勤怠（直近30日）
             </Typography>
             {pendingEntriesForTooltip.length === 0 ? (
               <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
