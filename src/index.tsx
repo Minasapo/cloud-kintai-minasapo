@@ -3,8 +3,6 @@ import "./tailwind.css";
 import "@/shared/lib/dayjs-locale";
 
 import { Authenticator } from "@aws-amplify/ui-react";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Amplify } from "aws-amplify";
 import { I18n } from "aws-amplify/utils";
 import React from "react";
@@ -35,12 +33,7 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <Authenticator.Provider>
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
-          <RouterProvider
-            router={router}
-            fallbackElement={<RouterFallback />}
-          />
-        </LocalizationProvider>
+        <RouterProvider router={router} fallbackElement={<RouterFallback />} />
       </Authenticator.Provider>
     </Provider>
   </React.StrictMode>,
