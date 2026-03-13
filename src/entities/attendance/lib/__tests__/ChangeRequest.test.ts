@@ -1,4 +1,4 @@
-import { ChangeRequest } from "../ChangeRequest";
+import { ChangeRequest, hasUnapprovedChangeRequest } from "../ChangeRequest";
 
 describe("ChangeRequest", () => {
   it("counts unapproved change requests", () => {
@@ -46,5 +46,21 @@ describe("ChangeRequest", () => {
     const crUndefined = new ChangeRequest(undefined);
     expect(crUndefined.getUnapprovedCount()).toBe(0);
     expect(crUndefined.getFirstUnapproved()).toBeNull();
+  });
+
+  it("checks unapproved requests with shared helper", () => {
+    expect(
+      hasUnapprovedChangeRequest([
+        { __typename: "AttendanceChangeRequest" as const, completed: true },
+      ]),
+    ).toBe(false);
+
+    expect(
+      hasUnapprovedChangeRequest([
+        { __typename: "AttendanceChangeRequest" as const, completed: false },
+      ]),
+    ).toBe(true);
+
+    expect(hasUnapprovedChangeRequest(undefined)).toBe(false);
   });
 });

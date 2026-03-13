@@ -3,6 +3,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Button,
   Collapse,
+  Skeleton,
   Stack,
   useMediaQuery,
   useTheme,
@@ -39,11 +40,13 @@ const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
 // 右側パネル用のコンポーネント
 const AdminAttendanceComponent = lazy(() => import("./AdminAttendance"));
 const AdminDailyReportManagementComponent = lazy(
-  () => import("./AdminDailyReportManagement/AdminDailyReportManagement")
+  () => import("./AdminDailyReportManagement/AdminDailyReportManagement"),
 );
-const AdminStaffComponent = lazy(() => import("@/features/admin/staff/ui/AdminStaff"));
+const AdminStaffComponent = lazy(
+  () => import("@/features/admin/staff/ui/AdminStaff"),
+);
 const ShiftPlanManagementComponent = lazy(
-  () => import("./ShiftPlanManagement/ShiftPlanManagement")
+  () => import("./ShiftPlanManagement/ShiftPlanManagement"),
 );
 
 // 画面IDとコンポーネントのマッピング
@@ -87,6 +90,16 @@ const SCREEN_OPTIONS: ScreenOption[] = [
   },
 ];
 
+const SplitPanelSkeleton = () => (
+  <Stack spacing={1.5} sx={{ p: 2 }}>
+    <Skeleton variant="text" width="38%" height={32} />
+    <Skeleton variant="rounded" height={54} />
+    <Skeleton variant="rounded" height={54} />
+    <Skeleton variant="rounded" height={54} />
+    <Skeleton variant="rounded" height={54} />
+  </Stack>
+);
+
 /**
  * AdminDashboardContent
  * 実際のダッシュボードコンテンツ
@@ -106,7 +119,7 @@ function AdminDashboardContent() {
       if (location.pathname === itemHref) return;
       navigate(itemHref);
     },
-    [location.pathname, navigate]
+    [location.pathname, navigate],
   );
 
   const activeMenuHref = useMemo(() => {
@@ -115,7 +128,7 @@ function AdminDashboardContent() {
     if (exactMatch) return exactMatch.href;
 
     const prefixMatch = menuItems.find((item) =>
-      currentPath.startsWith(`${item.href}/`)
+      currentPath.startsWith(`${item.href}/`),
     );
     return prefixMatch?.href ?? menuItems[0]?.href ?? "";
   }, [location.pathname, menuItems]);
@@ -145,7 +158,7 @@ function AdminDashboardContent() {
   const handleScreenChange = useCallback(
     (screenValue: string) => {
       const selectedOption = SCREEN_OPTIONS.find(
-        (option) => option.value === screenValue
+        (option) => option.value === screenValue,
       );
       const component = SCREEN_COMPONENTS[screenValue];
       if (selectedOption && component) {
@@ -156,7 +169,7 @@ function AdminDashboardContent() {
         });
       }
     },
-    [setRightPanel]
+    [setRightPanel],
   );
 
   const selectedScreen = useMemo(() => {
@@ -193,13 +206,19 @@ function AdminDashboardContent() {
                   variant="text"
                   size="small"
                   onClick={() => setIsMenuExpanded((prev) => !prev)}
-                  startIcon={isMenuExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  startIcon={
+                    isMenuExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />
+                  }
                   sx={{ fontWeight: 600 }}
                 >
                   {isMenuExpanded ? "メニューを閉じる" : "メニューを開く"}
                 </Button>
               )}
-              <Collapse in={isMenuExpanded} timeout="auto" unmountOnExit={false}>
+              <Collapse
+                in={isMenuExpanded}
+                timeout="auto"
+                unmountOnExit={false}
+              >
                 <AdminMenu
                   items={menuItems}
                   selectedHref={activeMenuHref}
@@ -238,7 +257,7 @@ function AdminDashboardContent() {
                 onScreenChange={handleScreenChange}
               >
                 {state.rightPanel?.component ? (
-                  <Suspense fallback={<div>読み込み中...</div>}>
+                  <Suspense fallback={<SplitPanelSkeleton />}>
                     <state.rightPanel.component panelId={state.rightPanel.id} />
                   </Suspense>
                 ) : (

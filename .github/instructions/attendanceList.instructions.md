@@ -42,3 +42,27 @@ applyTo: "src/pages/attendance/list/AttendanceListPage.tsx,src/pages/admin/Admin
 - **休日出勤チェック**: 休日（土日）に勤怠記録がある場合:
   - 出勤時刻・退勤時刻が両方未入力の場合: 「なし」
   - それ以外の場合: **OK**
+
+## 管理者画面の「申請中のスタッフ」表示条件
+
+管理者向け勤怠画面（`src/pages/admin/AdminStaffAttendanceList/AdminStaffAttendanceList.tsx`）では、申請中のスタッフ表示は次の条件で制御されます。
+
+### 1. 「申請中」とみなす勤怠データの条件
+
+- 対象データ: `attendances`（対象スタッフの勤怠一覧）
+- 判定ロジック: `new ChangeRequest(attendance.changeRequests).getUnapprovedCount() > 0`
+  - 実装箇所: `src/features/admin/staffAttendanceList/model/useAdminStaffAttendanceListViewModel.ts`
+  - `ChangeRequest` クラスは `null` の申請要素を除外してから判定する
+  - `completed === false` の申請を「未承認」としてカウントする
+
+### 2. 画面に「申請中のスタッフ」セクションを表示する条件
+
+- `pendingAttendances.length > 0` のときのみ表示する
+  - 実装箇所: `src/features/admin/staffAttendanceList/ui/AdminStaffAttendanceList.tsx`
+  - 0 件の場合はセクション自体を描画しない
+
+### 3. セクション内の各行で表示される内容
+
+- `pendingAttendances` の各勤怠を 1 行として表示する
+- 行ごとの「申請確認」ボタンは `getBadgeContent(attendance) > 0` のときのみ表示する
+- ここでの `getBadgeContent` も `ChangeRequest.getUnapprovedCount()` を利用するため、判定基準はセクション表示と同一

@@ -3,8 +3,11 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "./Layout";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
+import { adminDashboardLoader } from "./router/loaders/adminDashboardLoader";
+import { attendanceListLoader } from "./router/loaders/attendanceListLoader";
 import { workflowDetailLoader } from "./router/loaders/workflowDetailLoader";
 import { workflowEditLoader } from "./router/loaders/workflowEditLoader";
+import { workflowListLoader } from "./router/loaders/workflowListLoader";
 
 const AdminDashboardRoute = createLazyRoute(
   () => import("./pages/admin/AdminDashboard"),
@@ -93,6 +96,7 @@ const router = createBrowserRouter([
           {
             path: "list",
             lazy: AttendanceListRoute,
+            loader: attendanceListLoader,
           },
           {
             path: "stats",
@@ -122,6 +126,7 @@ const router = createBrowserRouter([
           {
             index: true,
             lazy: WorkflowListRoute,
+            loader: workflowListLoader,
           },
           {
             path: ":id",
@@ -161,6 +166,7 @@ const router = createBrowserRouter([
       {
         path: "/admin",
         lazy: AdminLayoutRoute,
+        loader: adminDashboardLoader,
         children: [
           {
             path: "",

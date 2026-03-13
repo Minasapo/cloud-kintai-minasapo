@@ -1,11 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 
 import Link from "./Link";
 
+const renderWithRouter = (ui: React.ReactElement) =>
+  render(<MemoryRouter>{ui}</MemoryRouter>);
+
 describe("Link", () => {
   it("renders default label and href", () => {
-    render(<Link />);
+    renderWithRouter(<Link />);
 
     const anchor = screen.getByRole("link", { name: "link" });
 
@@ -14,10 +18,10 @@ describe("Link", () => {
   });
 
   it("prefers children over label", () => {
-    render(
+    renderWithRouter(
       <Link label="fallback">
         <span>custom child</span>
-      </Link>
+      </Link>,
     );
 
     expect(screen.queryByText("fallback")).not.toBeInTheDocument();
@@ -28,12 +32,32 @@ describe("Link", () => {
     const onClick = jest.fn();
     const user = userEvent.setup();
 
-    render(
-      <Link href="#" label="click me" onClick={onClick} data-testid="link" />
+    renderWithRouter(
+      <Link href="#" label="click me" onClick={onClick} data-testid="link" />,
     );
 
     await user.click(screen.getByTestId("link"));
 
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders internal href with router link", () => {
+    renderWithRouter(<Link href="/attendance/list" label="勤怠一覧" />);
+
+    expect(screen.getByRole("link", { name: "勤怠一覧" })).toHaveAttribute(
+      "href",
+      "/attendance/list",
+    );
+  });
+
+  it("renders external href as anchor link", () => {
+    renderWithRouter(
+      <Link href="https://example.com" label="外部リンク" target="_blank" />,
+    );
+
+    expect(screen.getByRole("link", { name: "外部リンク" })).toHaveAttribute(
+      "href",
+      "https://example.com",
+    );
   });
 });

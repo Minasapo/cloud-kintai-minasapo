@@ -1,7 +1,8 @@
-import { Breadcrumbs, Link, Typography } from "@mui/material";
+import { Breadcrumbs, Typography } from "@mui/material";
 import { CSSProperties } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
+import Link from "@/shared/ui/link/Link";
 
 export type BreadcrumbItem = {
   label: string;
@@ -20,23 +21,23 @@ export default function CommonBreadcrumbs({
   const BREADCRUMB_GAP = designTokenVar("component.breadcrumbs.gap", "8px");
   const BREADCRUMB_SEPARATOR_COLOR = designTokenVar(
     "component.breadcrumbs.separatorColor",
-    "#A0B1A7"
+    "#A0B1A7",
   );
   const BREADCRUMB_LINK_COLOR = designTokenVar(
     "component.breadcrumbs.linkColor",
-    "#0FA85E"
+    "#0FA85E",
   );
   const BREADCRUMB_TEXT_COLOR = designTokenVar(
     "component.breadcrumbs.textColor",
-    "#45574F"
+    "#45574F",
   );
   const BREADCRUMB_FONT_SIZE = designTokenVar(
     "component.breadcrumbs.fontSize",
-    "14px"
+    "14px",
   );
   const BREADCRUMB_FONT_WEIGHT = designTokenVar(
     "component.breadcrumbs.fontWeight",
-    "500"
+    "500",
   );
   const breadcrumbVars: CSSProperties & Record<`--${string}`, string> = {
     "--breadcrumbs-gap": BREADCRUMB_GAP,
@@ -77,7 +78,7 @@ export default function CommonBreadcrumbs({
           >
             {item.label}
           </Typography>
-        )
+        ),
       )}
       <Typography
         className="text-[color:var(--breadcrumbs-text-color)]"
