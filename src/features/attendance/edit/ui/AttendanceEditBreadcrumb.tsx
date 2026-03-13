@@ -1,9 +1,10 @@
-import { Breadcrumbs, Link, Typography } from "@mui/material";
+import { Breadcrumbs, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import Link from "@/shared/ui/link/Link";
 
 export default function AttendanceEditBreadcrumb() {
   const { workDate } = useContext(AttendanceEditContext);
@@ -15,7 +16,7 @@ export default function AttendanceEditBreadcrumb() {
       <Link href="/" color="inherit">
         TOP
       </Link>
-      <Link href={"/attendance/list"} color="inherit">
+      <Link href="/attendance/list" color="inherit">
         勤怠一覧
       </Link>
       <Typography color="text.primary">
