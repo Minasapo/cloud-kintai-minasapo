@@ -3,7 +3,9 @@ const preloadedData = new Set<string>();
 let idlePreloadScheduled = false;
 
 type IdleRoutePreloadOptions = {
+  currentPathname: string;
   isAdminUser: boolean;
+  isOperatorUser?: boolean;
 };
 
 type NavigatorConnection = {
@@ -101,20 +103,49 @@ export function preloadRoute(href: string): void {
 }
 
 export function scheduleIdleRoutePreload({
+  currentPathname,
   isAdminUser,
+  isOperatorUser = false,
 }: IdleRoutePreloadOptions): void {
   if (typeof window === "undefined") return;
   if (idlePreloadScheduled) return;
 
   idlePreloadScheduled = true;
   scheduleOnIdle(() => {
-    const coreRoutes = ["/attendance/list", "/workflow"];
-    const supplementalRoutes = canUseAggressivePreload()
-      ? ["/attendance/report", "/shift"]
-      : [];
-    const adminRoutes = isAdminUser ? ["/admin"] : [];
+    const preloadTargets = new Set<string>();
+    const canUseSupplementalPreload = canUseAggressivePreload();
 
-    [...coreRoutes, ...supplementalRoutes, ...adminRoutes].forEach((href) => {
+    switch (currentPathname) {
+      case "/":
+      case "/register":
+        if (isOperatorUser) {
+          preloadTargets.add("/office/qr");
+        } else {
+          preloadTargets.add("/attendance/list");
+        }
+        break;
+      case "/attendance/list":
+        preloadTargets.add("/workflow");
+        if (canUseSupplementalPreload) {
+          preloadTargets.add("/attendance/report");
+        }
+        break;
+      case "/workflow":
+        preloadTargets.add("/attendance/list");
+        break;
+      case "/profile":
+        preloadTargets.add("/attendance/list");
+        break;
+      default:
+        preloadTargets.add("/attendance/list");
+        break;
+    }
+
+    if (isAdminUser && canUseSupplementalPreload) {
+      preloadTargets.add("/admin");
+    }
+
+    preloadTargets.forEach((href) => {
       preloadRoute(href);
     });
   });

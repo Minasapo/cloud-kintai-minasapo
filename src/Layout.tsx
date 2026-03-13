@@ -182,11 +182,13 @@ export default function Layout() {
     }
 
     scheduleIdleRoutePreload({
+      currentPathname: location.pathname,
       isAdminUser:
         isCognitoUserRole(StaffRole.ADMIN) ||
         isCognitoUserRole(StaffRole.STAFF_ADMIN),
+      isOperatorUser: isCognitoUserRole(StaffRole.OPERATOR),
     });
-  }, [authStatus, cognitoUserLoading, isCognitoUserRole]);
+  }, [authStatus, cognitoUserLoading, isCognitoUserRole, location.pathname]);
 
   const {
     fetchConfig,
