@@ -188,11 +188,6 @@ export default function Layout() {
     });
   }, [authStatus, cognitoUserLoading, isCognitoUserRole]);
 
-  // ワークフロー申請の通知を購読
-  useWorkflowNotification();
-  // ワークフローコメント通知を全画面で購読
-  useWorkflowCommentNotification();
-
   const {
     fetchConfig,
     saveConfig,
@@ -224,6 +219,17 @@ export default function Layout() {
     getThemeColor,
     getThemeTokens,
   } = useAppConfig();
+
+  const workflowNotificationsEnabled =
+    authStatus === "authenticated" &&
+    isSupported &&
+    permission === "granted" &&
+    getWorkflowNotificationEnabled();
+
+  // ワークフロー申請の通知を購読
+  useWorkflowNotification(workflowNotificationsEnabled);
+  // ワークフローコメント通知を全画面で購読
+  useWorkflowCommentNotification(workflowNotificationsEnabled);
 
   const isAdminUser = useMemo(
     () => isCognitoUserRole(StaffRole.ADMIN),

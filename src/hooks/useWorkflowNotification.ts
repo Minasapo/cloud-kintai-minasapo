@@ -31,9 +31,9 @@ const WORKFLOW_CATEGORY_LABELS: Record<WorkflowCategory, string> = {
 /**
  * ワークフローの新規作成を購読し、自分が承認者として割り当てられている場合に通知を表示するフック
  */
-export const useWorkflowNotification = () => {
+export const useWorkflowNotification = (enabled = true) => {
   const { authStatus, cognitoUser } = useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
+  const isAuthenticated = authStatus === "authenticated" && enabled;
   const { staffs } = useStaffs({ isAuthenticated });
   const { notify, canNotify } = useLocalNotification();
 
@@ -201,7 +201,7 @@ export const useWorkflowNotification = () => {
 
   // ワークフロー作成のサブスクリプションを購読
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!enabled || !isAuthenticated) {
       logger.debug("Not authenticated, skipping subscription");
       return;
     }
@@ -251,9 +251,9 @@ export const useWorkflowNotification = () => {
       logger.info("Unsubscribing from workflow subscription");
       subscription.unsubscribe();
     };
-  }, [isAuthenticated, currentStaffId, handleWorkflowCreated]);
+  }, [enabled, isAuthenticated, currentStaffId, handleWorkflowCreated]);
 
   return {
-    isSubscribed: isAuthenticated && !!currentStaffId,
+    isSubscribed: enabled && isAuthenticated && !!currentStaffId,
   };
 };
