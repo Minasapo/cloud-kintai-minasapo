@@ -1,5 +1,60 @@
 const preloaded = new Set<string>();
 const preloadedData = new Set<string>();
+let idlePreloadScheduled = false;
+
+type IdleRoutePreloadOptions = {
+  isAdminUser: boolean;
+};
+
+type NavigatorConnection = {
+  saveData?: boolean;
+  effectiveType?: string;
+};
+
+const canUseAggressivePreload = () => {
+  if (typeof navigator === "undefined") return true;
+
+  const connection = (navigator as { connection?: NavigatorConnection })
+    .connection;
+  if (connection?.saveData) return false;
+  if (
+    connection?.effectiveType === "2g" ||
+    connection?.effectiveType === "slow-2g"
+  ) {
+    return false;
+  }
+
+  const deviceMemory = (navigator as { deviceMemory?: number }).deviceMemory;
+  if (typeof deviceMemory === "number" && deviceMemory <= 1) {
+    return false;
+  }
+
+  return true;
+};
+
+const scheduleOnIdle = (task: () => void) => {
+  const fallback = () => {
+    window.setTimeout(task, 600);
+  };
+
+  type WindowWithIdle = Window & {
+    requestIdleCallback?: (
+      callback: (deadline: {
+        didTimeout: boolean;
+        timeRemaining: () => number;
+      }) => void,
+      options?: { timeout: number },
+    ) => number;
+  };
+
+  const idleWindow = window as WindowWithIdle;
+  if (typeof idleWindow.requestIdleCallback === "function") {
+    idleWindow.requestIdleCallback(() => task(), { timeout: 1200 });
+    return;
+  }
+
+  fallback();
+};
 
 const dataLoaders: Partial<Record<string, () => Promise<unknown>>> = {
   "/attendance/list": () =>
@@ -42,5 +97,25 @@ export function preloadRoute(href: string): void {
   preloadedData.add(href);
   dataLoaders[href]?.().catch(() => {
     preloadedData.delete(href);
+  });
+}
+
+export function scheduleIdleRoutePreload({
+  isAdminUser,
+}: IdleRoutePreloadOptions): void {
+  if (typeof window === "undefined") return;
+  if (idlePreloadScheduled) return;
+
+  idlePreloadScheduled = true;
+  scheduleOnIdle(() => {
+    const coreRoutes = ["/attendance/list", "/workflow"];
+    const supplementalRoutes = canUseAggressivePreload()
+      ? ["/attendance/report", "/shift"]
+      : [];
+    const adminRoutes = isAdminUser ? ["/admin"] : [];
+
+    [...coreRoutes, ...supplementalRoutes, ...adminRoutes].forEach((href) => {
+      preloadRoute(href);
+    });
   });
 }

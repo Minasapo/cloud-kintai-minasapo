@@ -47,6 +47,7 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
+import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
 import { createLogger } from "@/shared/lib/logger";
 import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
@@ -196,6 +197,18 @@ export default function Layout() {
       });
     }
   }, [authStatus, isSupported, permission, requestPermission]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated" || cognitoUserLoading) {
+      return;
+    }
+
+    scheduleIdleRoutePreload({
+      isAdminUser:
+        isCognitoUserRole(StaffRole.ADMIN) ||
+        isCognitoUserRole(StaffRole.STAFF_ADMIN),
+    });
+  }, [authStatus, cognitoUserLoading, isCognitoUserRole]);
 
   // ワークフロー申請の通知を購読
   useWorkflowNotification();
