@@ -6,23 +6,6 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
-import {
-  useBulkCreateCompanyHolidayCalendarsMutation,
-  useBulkCreateEventCalendarsMutation,
-  useBulkCreateHolidayCalendarsMutation,
-  useCreateCompanyHolidayCalendarMutation,
-  useCreateEventCalendarMutation,
-  useCreateHolidayCalendarMutation,
-  useDeleteCompanyHolidayCalendarMutation,
-  useDeleteEventCalendarMutation,
-  useDeleteHolidayCalendarMutation,
-  useGetCompanyHolidayCalendarsQuery,
-  useGetEventCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-  useUpdateCompanyHolidayCalendarMutation,
-  useUpdateEventCalendarMutation,
-  useUpdateHolidayCalendarMutation,
-} from "@entities/calendar/api/calendarApi";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Button,
@@ -56,7 +39,6 @@ import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";
 
 import { AppConfigContext } from "./context/AppConfigContext";
-import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import useCognitoUser from "./hooks/useCognitoUser";
@@ -141,22 +123,18 @@ type AuthContextValue = ComponentProps<typeof AuthContext.Provider>["value"];
 type AppConfigContextValue = ComponentProps<
   typeof AppConfigContext.Provider
 >["value"];
-type AppContextValue = ComponentProps<typeof AppContext.Provider>["value"];
 
 type AppProvidersProps = {
   children: ReactNode;
   auth: AuthContextValue;
   config: AppConfigContextValue;
-  app: AppContextValue;
 };
 
-function AppProviders({ children, auth, config, app }: AppProvidersProps) {
+function AppProviders({ children, auth, config }: AppProvidersProps) {
   return (
     <AuthContext.Provider value={auth}>
       <AppConfigContext.Provider value={config}>
-        <AppContext.Provider value={app}>
-          <SplitViewProvider>{children}</SplitViewProvider>
-        </AppContext.Provider>
+        <SplitViewProvider>{children}</SplitViewProvider>
       </AppConfigContext.Provider>
     </AuthContext.Provider>
   );
@@ -246,144 +224,6 @@ export default function Layout() {
     getThemeColor,
     getThemeTokens,
   } = useAppConfig();
-  const isAuthenticated = authStatus === "authenticated";
-  const { data: holidayCalendars = [] } = useGetHolidayCalendarsQuery(
-    undefined,
-    { skip: !isAuthenticated },
-  );
-  const { data: companyHolidayCalendars = [] } =
-    useGetCompanyHolidayCalendarsQuery(undefined, {
-      skip: !isAuthenticated,
-    });
-  const { data: eventCalendars = [] } = useGetEventCalendarsQuery(undefined, {
-    skip: !isAuthenticated,
-  });
-
-  const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
-  const [bulkCreateHolidayCalendarsMutation] =
-    useBulkCreateHolidayCalendarsMutation();
-  const [updateHolidayCalendarMutation] = useUpdateHolidayCalendarMutation();
-  const [deleteHolidayCalendarMutation] = useDeleteHolidayCalendarMutation();
-
-  const [createCompanyHolidayCalendarMutation] =
-    useCreateCompanyHolidayCalendarMutation();
-  const [bulkCreateCompanyHolidayCalendarsMutation] =
-    useBulkCreateCompanyHolidayCalendarsMutation();
-  const [updateCompanyHolidayCalendarMutation] =
-    useUpdateCompanyHolidayCalendarMutation();
-  const [deleteCompanyHolidayCalendarMutation] =
-    useDeleteCompanyHolidayCalendarMutation();
-
-  const [createEventCalendarMutation] = useCreateEventCalendarMutation();
-  const [bulkCreateEventCalendarsMutation] =
-    useBulkCreateEventCalendarsMutation();
-  const [updateEventCalendarMutation] = useUpdateEventCalendarMutation();
-  const [deleteEventCalendarMutation] = useDeleteEventCalendarMutation();
-
-  const createHolidayCalendar = useCallback(
-    async (input: Parameters<typeof createHolidayCalendarMutation>[0]) => {
-      const result = await createHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [createHolidayCalendarMutation],
-  );
-
-  const bulkCreateHolidayCalendar = useCallback(
-    async (
-      inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0],
-    ) => {
-      const result = await bulkCreateHolidayCalendarsMutation(inputs).unwrap();
-      return result;
-    },
-    [bulkCreateHolidayCalendarsMutation],
-  );
-
-  const updateHolidayCalendar = useCallback(
-    async (input: Parameters<typeof updateHolidayCalendarMutation>[0]) => {
-      const result = await updateHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [updateHolidayCalendarMutation],
-  );
-
-  const deleteHolidayCalendar = useCallback(
-    async (input: Parameters<typeof deleteHolidayCalendarMutation>[0]) => {
-      await deleteHolidayCalendarMutation(input).unwrap();
-    },
-    [deleteHolidayCalendarMutation],
-  );
-
-  const createCompanyHolidayCalendar = useCallback(
-    async (
-      input: Parameters<typeof createCompanyHolidayCalendarMutation>[0],
-    ) => {
-      const result = await createCompanyHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [createCompanyHolidayCalendarMutation],
-  );
-
-  const bulkCreateCompanyHolidayCalendar = useCallback(
-    async (
-      inputs: Parameters<typeof bulkCreateCompanyHolidayCalendarsMutation>[0],
-    ) => {
-      const result =
-        await bulkCreateCompanyHolidayCalendarsMutation(inputs).unwrap();
-      return result;
-    },
-    [bulkCreateCompanyHolidayCalendarsMutation],
-  );
-
-  const updateCompanyHolidayCalendar = useCallback(
-    async (
-      input: Parameters<typeof updateCompanyHolidayCalendarMutation>[0],
-    ) => {
-      const result = await updateCompanyHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [updateCompanyHolidayCalendarMutation],
-  );
-
-  const deleteCompanyHolidayCalendar = useCallback(
-    async (
-      input: Parameters<typeof deleteCompanyHolidayCalendarMutation>[0],
-    ) => {
-      const result = await deleteCompanyHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [deleteCompanyHolidayCalendarMutation],
-  );
-
-  const createEventCalendar = useCallback(
-    async (input: Parameters<typeof createEventCalendarMutation>[0]) => {
-      const result = await createEventCalendarMutation(input).unwrap();
-      return result;
-    },
-    [createEventCalendarMutation],
-  );
-
-  const bulkCreateEventCalendar = useCallback(
-    async (inputs: Parameters<typeof bulkCreateEventCalendarsMutation>[0]) => {
-      const result = await bulkCreateEventCalendarsMutation(inputs).unwrap();
-      return result;
-    },
-    [bulkCreateEventCalendarsMutation],
-  );
-
-  const updateEventCalendar = useCallback(
-    async (input: Parameters<typeof updateEventCalendarMutation>[0]) => {
-      const result = await updateEventCalendarMutation(input).unwrap();
-      return result;
-    },
-    [updateEventCalendarMutation],
-  );
-
-  const deleteEventCalendar = useCallback(
-    async (input: Parameters<typeof deleteEventCalendarMutation>[0]) => {
-      await deleteEventCalendarMutation(input).unwrap();
-    },
-    [deleteEventCalendarMutation],
-  );
 
   const isAdminUser = useMemo(
     () => isCognitoUserRole(StaffRole.ADMIN),
@@ -462,10 +302,6 @@ export default function Layout() {
     signOut,
   ]);
 
-  useEffect(() => {
-    void fetchConfig();
-  }, [fetchConfig]);
-
   const authContextValue = useMemo(
     () => ({
       signOut,
@@ -543,43 +379,6 @@ export default function Layout() {
     ],
   );
 
-  const appContextValue = useMemo(
-    () => ({
-      holidayCalendars,
-      companyHolidayCalendars,
-      eventCalendars,
-      createHolidayCalendar,
-      bulkCreateHolidayCalendar,
-      updateHolidayCalendar,
-      deleteHolidayCalendar,
-      createCompanyHolidayCalendar,
-      bulkCreateCompanyHolidayCalendar,
-      updateCompanyHolidayCalendar,
-      deleteCompanyHolidayCalendar,
-      createEventCalendar,
-      bulkCreateEventCalendar,
-      updateEventCalendar,
-      deleteEventCalendar,
-    }),
-    [
-      holidayCalendars,
-      companyHolidayCalendars,
-      eventCalendars,
-      createHolidayCalendar,
-      bulkCreateHolidayCalendar,
-      updateHolidayCalendar,
-      deleteHolidayCalendar,
-      createCompanyHolidayCalendar,
-      bulkCreateCompanyHolidayCalendar,
-      updateCompanyHolidayCalendar,
-      deleteCompanyHolidayCalendar,
-      createEventCalendar,
-      bulkCreateEventCalendar,
-      updateEventCalendar,
-      deleteEventCalendar,
-    ],
-  );
-
   const configuredThemeColor = useMemo(
     () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
     [getThemeColor],
@@ -614,7 +413,6 @@ export default function Layout() {
         <AppProviders
           auth={authContextValue}
           config={appConfigContextValue}
-          app={appContextValue}
         >
           <AppShell
             header={<Header />}
