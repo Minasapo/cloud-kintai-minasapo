@@ -19,7 +19,12 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Staff } from "@shared/api/graphql/types";
+import {
+  OnCreateAttendanceSubscription,
+  OnDeleteAttendanceSubscription,
+  OnUpdateAttendanceSubscription,
+  Staff,
+} from "@shared/api/graphql/types";
 /**
  * 日付操作ライブラリ。日付のフォーマットや計算に使用。
  */
@@ -38,6 +43,12 @@ import {
   calcTotalWorkTime,
 } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import {
+  onCreateAttendance,
+  onDeleteAttendance,
+  onUpdateAttendance,
+} from "@/shared/api/graphql/documents/subscriptions";
 import { designTokenVar } from "@/shared/designSystem";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
@@ -170,13 +181,17 @@ export default function AttendanceTable() {
     isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
+    refetch: refetchAttendances,
   } = useListAttendancesByDateRangeQuery(
     {
       staffId: cognitoUser?.id ?? "",
       startDate,
       endDate,
     },
-    { skip: !shouldFetchAttendances },
+    {
+      skip: !shouldFetchAttendances,
+      refetchOnMountOrArgChange: true,
+    },
   );
 
   const attendanceLoading =
@@ -184,6 +199,88 @@ export default function AttendanceTable() {
     isAttendancesInitialLoading ||
     isAttendancesFetching ||
     isAttendancesUninitialized;
+
+  useEffect(() => {
+    const currentStaffId = cognitoUser?.id;
+    if (!currentStaffId || !shouldFetchAttendances) return;
+
+    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const shouldRefetch = (
+      eventStaffId?: string | null,
+      workDate?: string | null,
+    ) => {
+      if (!eventStaffId || !workDate) return false;
+      if (eventStaffId !== currentStaffId) return false;
+
+      const eventDate = dayjs(workDate);
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
+
+      return eventDate.isBetween(start, end, "day", "[]");
+    };
+
+    const scheduleRefetch = () => {
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+
+      refetchTimer = setTimeout(() => {
+        void refetchAttendances();
+      }, 300);
+    };
+
+    const createSubscription = graphqlClient
+      .graphql({ query: onCreateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
+          const attendance = data?.onCreateAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    const updateSubscription = graphqlClient
+      .graphql({ query: onUpdateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
+          const attendance = data?.onUpdateAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    const deleteSubscription = graphqlClient
+      .graphql({ query: onDeleteAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
+          const attendance = data?.onDeleteAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    return () => {
+      createSubscription.unsubscribe();
+      updateSubscription.unsubscribe();
+      deleteSubscription.unsubscribe();
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+    };
+  }, [
+    cognitoUser?.id,
+    shouldFetchAttendances,
+    startDate,
+    endDate,
+    refetchAttendances,
+  ]);
 
   /**
    * スタッフ情報の状態。
