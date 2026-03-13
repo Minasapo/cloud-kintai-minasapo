@@ -1,7 +1,6 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import type {
   GetWorkflowQuery,
-  UpdateWorkflowInput,
   WorkflowComment,
   WorkflowCommentInput,
 } from "@shared/api/graphql/types";
@@ -10,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { CognitoUser } from "@/hooks/useCognitoUser";
 
 import type { WorkflowCommentMessage } from "../types";
+import { submitWorkflowComment } from "./submitWorkflowComment";
 import {
   commentsToWorkflowMessages,
   formatWorkflowCommentSender,
@@ -19,11 +19,8 @@ type UseWorkflowCommentThreadParams = {
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null;
   staffs: StaffType[];
   cognitoUser?: CognitoUser | null;
-  updateWorkflow: (
-    input: UpdateWorkflowInput
-  ) => Promise<GetWorkflowQuery["getWorkflow"] | null | undefined>;
   onWorkflowChange: (
-    workflow: NonNullable<GetWorkflowQuery["getWorkflow"]>
+    workflow: NonNullable<GetWorkflowQuery["getWorkflow"]>,
   ) => void;
   notifySuccess: (message: string) => void;
   notifyError: (message: string) => void;
@@ -45,7 +42,6 @@ const useWorkflowCommentThread = ({
   workflow,
   staffs,
   cognitoUser,
-  updateWorkflow,
   onWorkflowChange,
   notifySuccess,
   notifyError,
@@ -67,7 +63,7 @@ const useWorkflowCommentThread = ({
   const mapCommentsToMessages = useCallback(
     (comments?: Array<WorkflowComment | null> | null) =>
       commentsToWorkflowMessages(comments, staffs),
-    [staffs]
+    [staffs],
   );
 
   useEffect(() => {
@@ -92,30 +88,16 @@ const useWorkflowCommentThread = ({
       const senderDisplay = senderStaff
         ? `${senderStaff.familyName} ${senderStaff.givenName}`
         : cognitoUser
-        ? `${cognitoUser.familyName ?? ""} ${
-            cognitoUser.givenName ?? ""
-          }`.trim() || "不明なユーザー"
-        : "不明なユーザー";
+          ? `${cognitoUser.familyName ?? ""} ${
+              cognitoUser.givenName ?? ""
+            }`.trim() || "不明なユーザー"
+          : "不明なユーザー";
 
       const newComment: WorkflowCommentInput = {
         id: `c-${Date.now()}`,
         staffId: senderStaff?.id ?? cognitoUser?.id ?? "system",
         text: input.trim(),
         createdAt: new Date().toISOString(),
-      };
-
-      const existingInputs = (workflow.comments || [])
-        .filter((c): c is WorkflowComment => Boolean(c))
-        .map((c) => ({
-          id: c.id,
-          staffId: c.staffId,
-          text: c.text,
-          createdAt: c.createdAt,
-        }));
-
-      const updateInput: UpdateWorkflowInput = {
-        id: workflow.id,
-        comments: [...existingInputs, newComment],
       };
 
       const optimisticMsg: WorkflowCommentMessage = {
@@ -130,20 +112,22 @@ const useWorkflowCommentThread = ({
       setInput("");
       setSending(true);
       try {
-        const updated = await updateWorkflow(updateInput);
-        if (updated) {
-          onWorkflowChange(
-            updated as NonNullable<GetWorkflowQuery["getWorkflow"]>
-          );
-          setMessages(mapCommentsToMessages(updated.comments || []));
-        }
+        const updated = await submitWorkflowComment({
+          workflowId: workflow.id,
+          newComment,
+          actorStaffId: senderStaff?.id ?? "system",
+          actorDisplayName: senderDisplay,
+          staffs,
+        });
+        onWorkflowChange(updated);
+        setMessages(mapCommentsToMessages(updated.comments || []));
         notifySuccess("コメントを送信しました");
       } catch (error) {
         console.error(error);
         const message = error instanceof Error ? error.message : String(error);
         notifyError(message);
         setMessages((prev) =>
-          prev.filter((msg) => msg.id !== optimisticMsg.id)
+          prev.filter((msg) => msg.id !== optimisticMsg.id),
         );
       } finally {
         setSending(false);
@@ -155,11 +139,11 @@ const useWorkflowCommentThread = ({
     workflow,
     currentStaff,
     cognitoUser,
-    updateWorkflow,
     onWorkflowChange,
     mapCommentsToMessages,
     notifySuccess,
     notifyError,
+    staffs,
   ]);
 
   return {

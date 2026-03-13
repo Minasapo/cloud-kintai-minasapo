@@ -25,10 +25,11 @@ describe("ShiftSuggestionsPanel", () => {
     ],
   });
 
-  it("最小化時にパネル本体をDOMから削除し、展開ボタンのみ表示する", async () => {
-    const user = userEvent.setup();
+  it("タイトルと違反内容を表示する", () => {
     render(
       <ShiftSuggestionsPanelBase
+        open
+        onClose={jest.fn()}
         violations={[createViolation()]}
         isAnalyzing={false}
         onApplyAction={jest.fn()}
@@ -38,20 +39,24 @@ describe("ShiftSuggestionsPanel", () => {
 
     expect(screen.getByText("シフト提案")).toBeInTheDocument();
     expect(screen.getByText("出勤者が不足しています")).toBeInTheDocument();
+  });
 
-    const toggleButton = screen.getByLabelText("表示モードを切り替え");
+  it("クローズボタン押下時に onClose を呼ぶ", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
 
-    await user.click(toggleButton);
-    await user.click(toggleButton);
+    render(
+      <ShiftSuggestionsPanelBase
+        open
+        onClose={onClose}
+        violations={[createViolation()]}
+        isAnalyzing={false}
+        onApplyAction={jest.fn()}
+        onRefresh={jest.fn()}
+      />,
+    );
 
-    expect(screen.queryByText("シフト提案")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("出勤者が不足しています"),
-    ).not.toBeInTheDocument();
-    expect(screen.getByLabelText("シフト提案パネルを展開")).toBeInTheDocument();
-
-    await user.click(screen.getByLabelText("シフト提案パネルを展開"));
-
-    expect(screen.getByText("シフト提案")).toBeInTheDocument();
+    await user.click(screen.getByLabelText("close"));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

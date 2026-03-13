@@ -76,6 +76,7 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -120,6 +121,8 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -149,6 +152,7 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -193,6 +197,8 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -222,6 +228,7 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -266,6 +273,8 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -1024,6 +1033,15 @@ export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -1079,6 +1097,15 @@ export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -1132,6 +1159,15 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
       recordedAt
       recordedByStaffId
       changeReason
+      __typename
+    }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
       __typename
     }
     createdAt
@@ -1435,6 +1471,81 @@ export const deleteWorkflowTemplate = /* GraphQL */ `mutation DeleteWorkflowTemp
 ` as GeneratedMutation<
   APITypes.DeleteWorkflowTemplateMutationVariables,
   APITypes.DeleteWorkflowTemplateMutation
+>;
+export const createWorkflowNotificationEvent = /* GraphQL */ `mutation CreateWorkflowNotificationEvent(
+  $input: CreateWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  createWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateWorkflowNotificationEventMutationVariables,
+  APITypes.CreateWorkflowNotificationEventMutation
+>;
+export const updateWorkflowNotificationEvent = /* GraphQL */ `mutation UpdateWorkflowNotificationEvent(
+  $input: UpdateWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  updateWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowNotificationEventMutationVariables,
+  APITypes.UpdateWorkflowNotificationEventMutation
+>;
+export const deleteWorkflowNotificationEvent = /* GraphQL */ `mutation DeleteWorkflowNotificationEvent(
+  $input: DeleteWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  deleteWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowNotificationEventMutationVariables,
+  APITypes.DeleteWorkflowNotificationEventMutation
 >;
 export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
   $input: CreateOperationLogInput!

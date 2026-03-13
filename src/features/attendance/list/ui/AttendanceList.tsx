@@ -33,7 +33,10 @@ import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
+import {
+  calcTotalRestTime,
+  calcTotalWorkTime,
+} from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { designTokenVar } from "@/shared/designSystem";
 /**
@@ -79,13 +82,8 @@ export default function AttendanceTable() {
    */
   const shouldFetchAttendances = Boolean(cognitoUser?.id);
   const [currentMonth, setCurrentMonth] = useState<Dayjs>(() =>
-    dayjs().startOf("month")
+    dayjs().startOf("month"),
   );
-
-  const startDate = currentMonth
-    .startOf("month")
-    .format(AttendanceDate.DataFormat);
-  const endDate = currentMonth.endOf("month").format(AttendanceDate.DataFormat);
 
   const {
     data: holidayCalendars = [],
@@ -109,6 +107,63 @@ export default function AttendanceTable() {
     isHolidayCalendarsFetching ||
     isCompanyHolidayCalendarsLoading ||
     isCompanyHolidayCalendarsFetching;
+
+  const effectiveDateRange = useMemo(() => {
+    const monthStart = currentMonth.startOf("month");
+    const monthEnd = currentMonth.endOf("month");
+    const today = dayjs();
+
+    const applicableCloseDates = closeDates.filter((closeDate) => {
+      const start = dayjs(closeDate.startDate);
+      const end = dayjs(closeDate.endDate);
+      return (
+        start.isValid() &&
+        end.isValid() &&
+        !end.isBefore(monthStart, "day") &&
+        !start.isAfter(monthEnd, "day")
+      );
+    });
+
+    if (applicableCloseDates.length > 0) {
+      const containsToday = applicableCloseDates.find((cd) => {
+        const start = dayjs(cd.startDate);
+        const end = dayjs(cd.endDate);
+        return !today.isBefore(start, "day") && !today.isAfter(end, "day");
+      });
+
+      if (containsToday) {
+        return {
+          start: dayjs(containsToday.startDate),
+          end: dayjs(containsToday.endDate),
+          hasValidPeriod: true,
+        };
+      }
+
+      const latest = applicableCloseDates.reduce((prev, current) => {
+        const prevUpdatedAt = dayjs(prev.updatedAt ?? prev.closeDate).valueOf();
+        const currentUpdatedAt = dayjs(
+          current.updatedAt ?? current.closeDate,
+        ).valueOf();
+        return currentUpdatedAt > prevUpdatedAt ? current : prev;
+      });
+
+      return {
+        start: dayjs(latest.startDate),
+        end: dayjs(latest.endDate),
+        hasValidPeriod: true,
+      };
+    }
+
+    return {
+      start: monthStart,
+      end: monthEnd,
+      hasValidPeriod: false,
+    };
+  }, [currentMonth, closeDates]);
+
+  const startDate = effectiveDateRange.start.format(AttendanceDate.DataFormat);
+  const endDate = effectiveDateRange.end.format(AttendanceDate.DataFormat);
+
   const {
     data: attendances = [],
     isLoading: isAttendancesInitialLoading,
@@ -121,7 +176,7 @@ export default function AttendanceTable() {
       startDate,
       endDate,
     },
-    { skip: !shouldFetchAttendances }
+    { skip: !shouldFetchAttendances },
   );
 
   const attendanceLoading =
@@ -135,7 +190,7 @@ export default function AttendanceTable() {
    */
   const logger = useMemo(
     () => new Logger("AttendanceList", import.meta.env.DEV ? "DEBUG" : "ERROR"),
-    []
+    [],
   );
   const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
 
@@ -176,52 +231,6 @@ export default function AttendanceTable() {
   }, [attendancesError, dispatch, logger]);
 
   /**
-   * 現在有効期間中の集計期間を解決する。
-   * closeDatesから該当月の有効期間を取得し、フォールバックは月初〜月末。
-   */
-  const effectiveDateRange = useMemo(() => {
-    const monthStart = currentMonth.startOf("month");
-    const monthEnd = currentMonth.endOf("month");
-
-    // 該当月と重複する有効期間を探す
-    const applicableCloseDates = closeDates.filter((closeDate) => {
-      const start = dayjs(closeDate.startDate);
-      const end = dayjs(closeDate.endDate);
-      return (
-        start.isValid() &&
-        end.isValid() &&
-        // 月の範囲と少しでも重なれば対象
-        !end.isBefore(monthStart, "day") &&
-        !start.isAfter(monthEnd, "day")
-      );
-    });
-
-    if (applicableCloseDates.length > 0) {
-      // 有効期間が複数ある場合は、最新の更新日時を優先
-      const latest = applicableCloseDates.reduce((prev, current) => {
-        const prevUpdatedAt = dayjs(prev.updatedAt ?? prev.closeDate).valueOf();
-        const currentUpdatedAt = dayjs(
-          current.updatedAt ?? current.closeDate
-        ).valueOf();
-        return currentUpdatedAt > prevUpdatedAt ? current : prev;
-      });
-
-      return {
-        start: dayjs(latest.startDate),
-        end: dayjs(latest.endDate),
-        hasValidPeriod: true,
-      };
-    }
-
-    // フォールバック: 月初〜月末
-    return {
-      start: monthStart,
-      end: monthEnd,
-      hasValidPeriod: false,
-    };
-  }, [currentMonth, closeDates]);
-
-  /**
    * 勤怠データから合計勤務時間（休憩時間を除く）を計算する。
    * 有効期間内のデータのみを対象とする。
    */
@@ -240,7 +249,7 @@ export default function AttendanceTable() {
       if (!attendance.startTime || !attendance.endTime) return acc;
       const workTime = calcTotalWorkTime(
         attendance.startTime,
-        attendance.endTime
+        attendance.endTime,
       );
       return acc + workTime;
     }, 0);
@@ -263,10 +272,10 @@ export default function AttendanceTable() {
    */
   const rangeLabelForDisplay = useMemo(() => {
     const startLabel = effectiveDateRange.start.format(
-      AttendanceDate.DisplayFormat
+      AttendanceDate.DisplayFormat,
     );
     const endLabel = effectiveDateRange.end.format(
-      AttendanceDate.DisplayFormat
+      AttendanceDate.DisplayFormat,
     );
     return `${startLabel} 〜 ${endLabel}`;
   }, [effectiveDateRange]);
@@ -277,11 +286,11 @@ export default function AttendanceTable() {
 
   const headerBackground = designTokenVar(
     "component.pageSection.background",
-    "#FFFFFF"
+    "#FFFFFF",
   );
   const headerShadow = designTokenVar(
     "component.pageSection.shadow",
-    "0 12px 24px rgba(17, 24, 39, 0.06)"
+    "0 12px 24px rgba(17, 24, 39, 0.06)",
   );
   const headerRadius = designTokenVar("component.pageSection.radius", "12px");
   const headerPaddingX = designTokenVar("spacing.lg", "16px");

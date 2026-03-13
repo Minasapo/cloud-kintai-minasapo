@@ -52,6 +52,10 @@ export default function AdminMasterLayout() {
           name: "稼働統計",
           path: "/admin/master/feature_management/attendance_statistics",
         },
+        {
+          name: "残業確認",
+          path: "/admin/master/feature_management/overtime_confirmation",
+        },
         { name: "外部リンク", path: "/admin/master/feature_management/links" },
         { name: "打刻理由", path: "/admin/master/feature_management/reasons" },
         {
@@ -65,6 +69,7 @@ export default function AdminMasterLayout() {
         { name: "欠勤", path: "/admin/master/feature_management/absent" },
       ],
     },
+    { name: "開発者", path: "/admin/master/developer" },
   ];
 
   const menuBoxList = menuList.map((item, index) => {

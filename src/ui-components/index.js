@@ -33,6 +33,8 @@ export { default as ShiftRequestUpdateForm } from "./ShiftRequestUpdateForm";
 export { default as StaffCreateForm } from "./StaffCreateForm";
 export { default as StaffUpdateForm } from "./StaffUpdateForm";
 export { default as WorkflowCreateForm } from "./WorkflowCreateForm";
+export { default as WorkflowNotificationEventCreateForm } from "./WorkflowNotificationEventCreateForm";
+export { default as WorkflowNotificationEventUpdateForm } from "./WorkflowNotificationEventUpdateForm";
 export { default as WorkflowTemplateCreateForm } from "./WorkflowTemplateCreateForm";
 export { default as WorkflowTemplateUpdateForm } from "./WorkflowTemplateUpdateForm";
 export { default as WorkflowUpdateForm } from "./WorkflowUpdateForm";

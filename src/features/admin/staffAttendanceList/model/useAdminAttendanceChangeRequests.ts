@@ -12,12 +12,14 @@ import { useDispatch } from "react-redux";
 
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import * as MESSAGE_CODE from "@/errors";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
+import {
+  AttendanceNotificationType,
+  LocalNotificationManager,
+} from "@/shared/lib/localNotification";
 import { createLogger } from "@/shared/lib/logger";
 import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 const logger = createLogger("useAdminAttendanceChangeRequests");
 
@@ -39,13 +41,14 @@ export const useAdminAttendanceChangeRequests = ({
   updateAttendance,
 }: UseAdminAttendanceChangeRequestsParams) => {
   const dispatch = useDispatch();
+  useLocalNotification();
   const [quickViewAttendance, setQuickViewAttendance] =
     useState<Attendance | null>(null);
   const [quickViewChangeRequest, setQuickViewChangeRequest] =
     useState<AttendanceChangeRequest | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [selectedAttendanceIds, setSelectedAttendanceIds] = useState<string[]>(
-    []
+    [],
   );
   const [bulkApproving, setBulkApproving] = useState(false);
 
@@ -62,7 +65,7 @@ export const useAdminAttendanceChangeRequests = ({
       setQuickViewChangeRequest(pendingRequest);
       setQuickViewOpen(true);
     },
-    [getPendingChangeRequest]
+    [getPendingChangeRequest],
   );
 
   const handleCloseQuickView = useCallback(() => {
@@ -73,7 +76,7 @@ export const useAdminAttendanceChangeRequests = ({
 
   const isAttendanceSelected = useCallback(
     (attendanceId: string) => selectedAttendanceIds.includes(attendanceId),
-    [selectedAttendanceIds]
+    [selectedAttendanceIds],
   );
 
   const toggleAttendanceSelection = useCallback((attendanceId: string) => {
@@ -98,8 +101,8 @@ export const useAdminAttendanceChangeRequests = ({
   useEffect(() => {
     setSelectedAttendanceIds((prev) =>
       prev.filter((id) =>
-        pendingAttendances.some((attendance) => attendance.id === id)
-      )
+        pendingAttendances.some((attendance) => attendance.id === id),
+      ),
     );
   }, [pendingAttendances]);
 
@@ -114,7 +117,7 @@ export const useAdminAttendanceChangeRequests = ({
     }
 
     const targetAttendances = pendingAttendances.filter((attendance) =>
-      selectedAttendanceIds.includes(attendance.id)
+      selectedAttendanceIds.includes(attendance.id),
     );
     if (targetAttendances.length === 0) return;
 
@@ -126,13 +129,13 @@ export const useAdminAttendanceChangeRequests = ({
         const updatedAttendance = await handleApproveChangeRequest(
           attendance,
           (input: UpdateAttendanceInput) => updateAttendance(input),
-          undefined
+          undefined,
         );
 
         try {
           await new GenericMailSender(
             staffForMail,
-            updatedAttendance
+            updatedAttendance,
           ).approveChangeRequest(undefined);
         } catch (mailError) {
           const message =
@@ -162,7 +165,26 @@ export const useAdminAttendanceChangeRequests = ({
         });
       }
 
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
+      // ローカル通知を表示
+      try {
+        const manager = LocalNotificationManager.getInstance();
+        const firstAttendance = selectedAttendanceIds[0];
+        const attendance = pendingAttendances.find(
+          (a) => a.id === firstAttendance,
+        );
+        await manager.showAttendanceNotification(
+          AttendanceNotificationType.ATTENDANCE_CHANGE_REQUEST_APPROVED,
+          {
+            date: attendance?.workDate || "",
+          },
+        );
+      } catch (notificationError) {
+        logger.warn(
+          "Failed to show attendance change request notification:",
+          notificationError,
+        );
+      }
+
       setSelectedAttendanceIds([]);
       await refetchAttendances();
       if (mailErrorOccurred) {
@@ -203,7 +225,7 @@ export const useAdminAttendanceChangeRequests = ({
         bulkApproving,
         canBulkApprove,
         handleBulkApprove,
-      } as const),
+      }) as const,
     [
       quickViewAttendance,
       quickViewChangeRequest,
@@ -217,7 +239,7 @@ export const useAdminAttendanceChangeRequests = ({
       bulkApproving,
       canBulkApprove,
       handleBulkApprove,
-    ]
+    ],
   );
 
   return controls;

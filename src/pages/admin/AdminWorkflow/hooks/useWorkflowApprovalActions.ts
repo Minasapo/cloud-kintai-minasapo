@@ -8,6 +8,10 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
+import {
+  LocalNotificationManager,
+  WorkflowNotificationType,
+} from "@/shared/lib/localNotification";
 import { createLogger } from "@/shared/lib/logger";
 
 import {
@@ -90,7 +94,7 @@ export const useWorkflowApprovalActions = ({
       const steps = buildApprovalStepInputs(workflow);
       const idxToUpdate = resolvePendingApprovalStepIndex(
         steps,
-        workflow.nextApprovalStepIndex
+        workflow.nextApprovalStepIndex,
       );
 
       if (idxToUpdate < 0) {
@@ -106,7 +110,7 @@ export const useWorkflowApprovalActions = ({
       };
 
       const approved = Array.from(
-        new Set([...(workflow.approvedStaffIds || []), currentStaffLocal.id])
+        new Set([...(workflow.approvedStaffIds || []), currentStaffLocal.id]),
       );
 
       const isFinal =
@@ -154,7 +158,7 @@ export const useWorkflowApprovalActions = ({
             return;
           } else {
             notifySuccess(
-              "有給申請を承認しました（日付が不正なため勤怠更新をスキップ）"
+              "有給申請を承認しました（日付が不正なため勤怠更新をスキップ）",
             );
             return;
           }
@@ -203,6 +207,26 @@ export const useWorkflowApprovalActions = ({
       }
 
       notifySuccess("承認しました");
+
+      // ローカル通知を表示
+      try {
+        const approverName = currentStaffLocal
+          ? `${currentStaffLocal.familyName} ${currentStaffLocal.givenName}`
+          : undefined;
+        const manager = LocalNotificationManager.getInstance();
+        await manager.showWorkflowNotification(
+          WorkflowNotificationType.WORKFLOW_APPROVED,
+          {
+            approverName: approverName || "",
+          },
+        );
+      } catch (notificationError) {
+        logger.warn(
+          "Failed to show workflow approval notification:",
+          notificationError,
+        );
+      }
+
       try {
         await createOperationLogData({
           staffId: currentStaffLocal.id,
@@ -245,7 +269,7 @@ export const useWorkflowApprovalActions = ({
       const steps = buildApprovalStepInputs(workflow);
       const idxToUpdate = resolvePendingApprovalStepIndex(
         steps,
-        workflow.nextApprovalStepIndex
+        workflow.nextApprovalStepIndex,
       );
 
       if (idxToUpdate < 0) {
@@ -261,7 +285,7 @@ export const useWorkflowApprovalActions = ({
       };
 
       const rejected = Array.from(
-        new Set([...(workflow.rejectedStaffIds || []), currentStaffLocal.id])
+        new Set([...(workflow.rejectedStaffIds || []), currentStaffLocal.id]),
       );
 
       const inputForUpdate: UpdateWorkflowInput = {
@@ -280,6 +304,25 @@ export const useWorkflowApprovalActions = ({
       const updated = await updateWorkflow(inputForUpdate);
       setWorkflow(updated);
       notifySuccess("却下しました");
+
+      // ローカル通知を表示
+      try {
+        const approverName = currentStaffLocal
+          ? `${currentStaffLocal.familyName} ${currentStaffLocal.givenName}`
+          : undefined;
+        const manager = LocalNotificationManager.getInstance();
+        await manager.showWorkflowNotification(
+          WorkflowNotificationType.WORKFLOW_REJECTED,
+          {
+            approverName: approverName || "",
+          },
+        );
+      } catch (notificationError) {
+        logger.warn(
+          "Failed to show workflow rejection notification:",
+          notificationError,
+        );
+      }
 
       try {
         await createOperationLogData({

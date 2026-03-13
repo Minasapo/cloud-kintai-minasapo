@@ -66,6 +66,136 @@ describe("useCollaborativeShiftData", () => {
     });
   });
 
+  it("他ユーザーのcreate購読イベントでローカル状態を即時更新する", async () => {
+    mockUseGetShiftRequestsQuery.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    let createNext:
+      | ((value: { data?: { onCreateShiftRequest?: unknown } }) => void)
+      | undefined;
+    let updateNext:
+      | ((value: { data?: { onUpdateShiftRequest?: unknown } }) => void)
+      | undefined;
+
+    mockGraphqlSubscribe
+      .mockReturnValueOnce({
+        subscribe: jest.fn((handlers: { next: typeof createNext }) => {
+          createNext = handlers.next;
+          return { unsubscribe: mockSubscriptionUnsubscribe };
+        }),
+      })
+      .mockReturnValueOnce({
+        subscribe: jest.fn((handlers: { next: typeof updateNext }) => {
+          updateNext = handlers.next;
+          return { unsubscribe: mockSubscriptionUnsubscribe };
+        }),
+      });
+
+    const onAutoSyncReceived = jest.fn();
+
+    const { result } = renderHook(() =>
+      useCollaborativeShiftData({
+        staffIds: ["staff-2"],
+        targetMonth: "2026-02",
+        currentUserId: "user-1",
+        onAutoSyncReceived,
+      }),
+    );
+
+    await waitFor(() => expect(createNext).toBeDefined());
+    expect(updateNext).toBeDefined();
+
+    act(() => {
+      createNext?.({
+        data: {
+          onCreateShiftRequest: {
+            ...baseShiftRequest,
+            id: "req-2",
+            staffId: "staff-2",
+            updatedBy: "other-user",
+          },
+        },
+      });
+    });
+
+    await waitFor(() =>
+      expect(result.current.shiftDataMap.get("staff-2")?.get("01")?.state).toBe(
+        "work",
+      ),
+    );
+    expect(onAutoSyncReceived).toHaveBeenCalledTimes(1);
+  });
+
+  it("自分の購読イベントは二重適用せずonAutoSyncReceivedも呼ばない", async () => {
+    mockUseGetShiftRequestsQuery.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    let createNext:
+      | ((value: { data?: { onCreateShiftRequest?: unknown } }) => void)
+      | undefined;
+    let updateNext:
+      | ((value: { data?: { onUpdateShiftRequest?: unknown } }) => void)
+      | undefined;
+
+    mockGraphqlSubscribe
+      .mockReturnValueOnce({
+        subscribe: jest.fn((handlers: { next: typeof createNext }) => {
+          createNext = handlers.next;
+          return { unsubscribe: mockSubscriptionUnsubscribe };
+        }),
+      })
+      .mockReturnValueOnce({
+        subscribe: jest.fn((handlers: { next: typeof updateNext }) => {
+          updateNext = handlers.next;
+          return { unsubscribe: mockSubscriptionUnsubscribe };
+        }),
+      });
+
+    const onAutoSyncReceived = jest.fn();
+
+    const { result } = renderHook(() =>
+      useCollaborativeShiftData({
+        staffIds: ["staff-2"],
+        targetMonth: "2026-02",
+        currentUserId: "user-1",
+        onAutoSyncReceived,
+      }),
+    );
+
+    await waitFor(() => expect(createNext).toBeDefined());
+    expect(updateNext).toBeDefined();
+
+    act(() => {
+      createNext?.({
+        data: {
+          onCreateShiftRequest: {
+            ...baseShiftRequest,
+            id: "req-3",
+            staffId: "staff-2",
+            updatedBy: "user-1",
+          },
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.shiftDataMap.get("staff-2")?.get("01")?.state).toBe(
+        "empty",
+      );
+    });
+    expect(onAutoSyncReceived).not.toHaveBeenCalled();
+  });
+
   it("取得したシフトをShiftDataMapへ反映する", async () => {
     mockUseGetShiftRequestsQuery.mockReturnValue({
       data: shiftRequests,
@@ -148,7 +278,7 @@ describe("useCollaborativeShiftData", () => {
     ]);
   });
 
-  it("updateShift失敗時に権限エラーをセットする", async () => {
+  it("updateShift失敗時にonSaveFailedコールバックを呼ぶ", async () => {
     mockUseGetShiftRequestsQuery.mockReturnValue({
       data: shiftRequests,
       isLoading: false,
@@ -161,11 +291,14 @@ describe("useCollaborativeShiftData", () => {
       unwrap: () => Promise.reject({ message: "Unauthorized" }),
     });
 
+    const onSaveFailed = jest.fn();
+
     const { result } = renderHook(() =>
       useCollaborativeShiftData({
         staffIds: ["staff-1"],
         targetMonth: "2026-02",
         currentUserId: "user-1",
+        onSaveFailed,
       }),
     );
 
@@ -183,6 +316,8 @@ describe("useCollaborativeShiftData", () => {
       });
     });
 
-    expect(result.current.error).toBe("権限がありません。");
+    await waitFor(() => {
+      expect(onSaveFailed).toHaveBeenCalledWith("権限がありません。");
+    });
   });
 });

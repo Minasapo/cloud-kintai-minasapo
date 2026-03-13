@@ -5,7 +5,8 @@ export type PresenceNotificationType =
   | "user-joined"
   | "user-left"
   | "cell-editing-started"
-  | "cell-editing-stopped";
+  | "cell-editing-stopped"
+  | "data-synced";
 
 export interface PresenceNotification {
   id: string;
@@ -126,6 +127,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         return notification.cellInfo
           ? `${notification.userName} が ${notification.cellInfo.staffName} の ${notification.cellInfo.date} の編集を終了しました`
           : `${notification.userName} が編集を終了しました`;
+      case "data-synced":
+        return notification.cellInfo
+          ? `${notification.cellInfo.staffName} のシフトが更新されました`
+          : "他のユーザーがシフトを更新しました";
       default:
         return "";
     }
@@ -140,6 +145,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       case "cell-editing-started":
         return "warning";
       case "cell-editing-stopped":
+        return "info";
+      case "data-synced":
         return "info";
       default:
         return "info";

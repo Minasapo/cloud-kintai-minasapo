@@ -7,13 +7,15 @@ interface HeaderBarProps {
   themeColor?: string;
   logo: ReactNode;
   navigation: ReactNode;
+  centerContent?: ReactNode;
+  notificationsButton?: ReactNode;
   externalLinks?: ReactNode;
   signInOutButton: ReactNode;
 }
 
 const HEADER_BACKGROUND = designTokenVar(
   "component.headerBar.background",
-  "#0FA85E"
+  "#0FA85E",
 );
 const HEADER_TEXT = designTokenVar("component.headerBar.textColor", "#FFFFFF");
 const HEADER_HEIGHT = designTokenVar("component.headerBar.minHeight", "48px");
@@ -23,17 +25,20 @@ const HEADER_GAP = designTokenVar("component.headerBar.gap", "8px");
 const HEADER_SIDE_GAP = designTokenVar("spacing.md", "12px");
 const HEADER_CONTENT_MAX_WIDTH = designTokenVar(
   "component.headerBar.contentMaxWidth",
-  "1200px"
+  "1200px",
 );
 
 export default function HeaderBar({
   themeColor,
   logo,
   navigation,
+  centerContent,
+  notificationsButton,
   externalLinks,
   signInOutButton,
 }: HeaderBarProps) {
   const headerBackground = themeColor ?? HEADER_BACKGROUND;
+  const hasCenterContent = Boolean(centerContent);
 
   return (
     <header style={{ width: "100%" }}>
@@ -63,7 +68,9 @@ export default function HeaderBar({
               alignItems: "center",
               gridTemplateColumns: {
                 xs: "minmax(0, 1fr) auto",
-                lg: "auto minmax(0, 1fr) auto",
+                lg: hasCenterContent
+                  ? "auto minmax(0, 1fr) auto auto"
+                  : "auto minmax(0, 1fr) auto",
               },
               columnGap: { xs: "2px", md: HEADER_GAP },
             }}
@@ -97,6 +104,20 @@ export default function HeaderBar({
               {navigation}
             </Box>
 
+            <Box
+              sx={{
+                flexGrow: 1,
+                display: { xs: "none", lg: "flex" },
+                justifyContent: "center",
+                alignItems: "center",
+                minWidth: 0,
+                px: HEADER_SIDE_GAP,
+                gridColumn: "3",
+              }}
+            >
+              {centerContent}
+            </Box>
+
             <Stack
               direction="row"
               alignItems="center"
@@ -105,7 +126,7 @@ export default function HeaderBar({
                 flexGrow: 0,
                 flexShrink: 0,
                 minWidth: "fit-content",
-                gridColumn: { xs: "2", lg: "3" },
+                gridColumn: { xs: "2", lg: hasCenterContent ? "4" : "3" },
                 justifySelf: "end",
                 columnGap: { xs: "2px", md: HEADER_GAP },
                 rowGap: { xs: "4px", md: HEADER_GAP },
@@ -114,9 +135,8 @@ export default function HeaderBar({
               <Box sx={{ display: { xs: "block", lg: "none" } }}>
                 {navigation}
               </Box>
-              <Box sx={{ display: "block" }}>
-                {externalLinks}
-              </Box>
+              <Box sx={{ display: "block" }}>{notificationsButton}</Box>
+              <Box sx={{ display: "block" }}>{externalLinks}</Box>
               {signInOutButton}
             </Stack>
           </Box>

@@ -60,6 +60,9 @@ import { AuthContext } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
+import { useLocalNotification } from "./hooks/useLocalNotification";
+import { useWorkflowCommentNotification } from "./hooks/useWorkflowCommentNotification";
+import { useWorkflowNotification } from "./hooks/useWorkflowNotification";
 
 const logger = createLogger("Layout");
 
@@ -177,6 +180,28 @@ export default function Layout() {
   // 重複勤怠データの警告をリッスン
   useDuplicateAttendanceWarning();
 
+  // 通知権限をリクエスト
+  const { requestPermission, permission, isSupported } = useLocalNotification();
+
+  // 認証後に通知権限をリクエスト
+  useEffect(() => {
+    if (
+      authStatus === "authenticated" &&
+      isSupported &&
+      permission === "default"
+    ) {
+      logger.info("Requesting notification permission on authentication");
+      requestPermission().catch((error) => {
+        logger.warn("Failed to request notification permission:", error);
+      });
+    }
+  }, [authStatus, isSupported, permission, requestPermission]);
+
+  // ワークフロー申請の通知を購読
+  useWorkflowNotification();
+  // ワークフローコメント通知を全画面で購読
+  useWorkflowCommentNotification();
+
   const {
     fetchConfig,
     saveConfig,
@@ -203,6 +228,9 @@ export default function Layout() {
     getAbsentEnabled,
     getWorkflowCategoryOrder,
     getAttendanceStatisticsEnabled,
+    getWorkflowNotificationEnabled,
+    getShiftCollaborativeEnabled,
+    getShiftDefaultMode,
     getThemeColor,
     getThemeTokens,
   } = useAppConfig();
@@ -463,6 +491,9 @@ export default function Layout() {
       getAbsentEnabled,
       getWorkflowCategoryOrder,
       getAttendanceStatisticsEnabled,
+      getWorkflowNotificationEnabled,
+      getShiftCollaborativeEnabled,
+      getShiftDefaultMode,
       getThemeColor,
       getThemeTokens,
     }),
@@ -491,6 +522,9 @@ export default function Layout() {
       getAbsentEnabled,
       getWorkflowCategoryOrder,
       getAttendanceStatisticsEnabled,
+      getWorkflowNotificationEnabled,
+      getShiftCollaborativeEnabled,
+      getShiftDefaultMode,
       getThemeColor,
       getThemeTokens,
     ],
