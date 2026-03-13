@@ -37,13 +37,10 @@ export declare type AppConfigUpdateFormInputValues = {
     amPmHolidayEnabled?: boolean;
     officeMode?: boolean;
     attendanceStatisticsEnabled?: boolean;
-    workflowNotificationEnabled?: boolean;
     absentEnabled?: boolean;
     hourlyPaidHolidayEnabled?: boolean;
     themeColor?: string;
     overTimeCheckEnabled?: boolean;
-    shiftCollaborativeEnabled?: boolean;
-    shiftDefaultMode?: string;
 };
 export declare type AppConfigUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -60,13 +57,10 @@ export declare type AppConfigUpdateFormValidationValues = {
     amPmHolidayEnabled?: ValidationFunction<boolean>;
     officeMode?: ValidationFunction<boolean>;
     attendanceStatisticsEnabled?: ValidationFunction<boolean>;
-    workflowNotificationEnabled?: ValidationFunction<boolean>;
     absentEnabled?: ValidationFunction<boolean>;
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
     themeColor?: ValidationFunction<string>;
     overTimeCheckEnabled?: ValidationFunction<boolean>;
-    shiftCollaborativeEnabled?: ValidationFunction<boolean>;
-    shiftDefaultMode?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type AppConfigUpdateFormOverridesProps = {
@@ -85,13 +79,10 @@ export declare type AppConfigUpdateFormOverridesProps = {
     amPmHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     officeMode?: PrimitiveOverrideProps<SwitchFieldProps>;
     attendanceStatisticsEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
-    workflowNotificationEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     absentEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     themeColor?: PrimitiveOverrideProps<TextFieldProps>;
     overTimeCheckEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
-    shiftCollaborativeEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
-    shiftDefaultMode?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type AppConfigUpdateFormProps = React.PropsWithChildren<{
     overrides?: AppConfigUpdateFormOverridesProps | undefined | null;

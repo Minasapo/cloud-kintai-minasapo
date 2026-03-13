@@ -33,16 +33,8 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link as RouterLink } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
@@ -56,10 +48,7 @@ import {
 } from "@/entities/attendance/lib/actions/attendanceActions";
 import { getWorkStatus } from "@/entities/attendance/lib/actions/workStatus";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import {
-  AttendanceState,
-  AttendanceStatus,
-} from "@/entities/attendance/lib/AttendanceState";
+import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
@@ -92,8 +81,6 @@ import { returnDirectlyCallback } from "./returnDirectlyCallback";
  * @returns {JSX.Element} 勤怠打刻UI
  */
 export default function TimeRecorder(): JSX.Element {
-  const LOCAL_ATTENDANCE_UPDATE_IGNORE_MS = 3000;
-  const VISIBILITY_REFRESH_THRESHOLD_MINUTES = 5;
   const { cognitoUser } = useContext(AuthContext);
 
   const dispatch = useDispatch();
@@ -131,7 +118,7 @@ export default function TimeRecorder(): JSX.Element {
     refetch: refetchAttendance,
   } = useGetAttendanceByStaffAndDateQuery(
     { staffId: cognitoUser?.id ?? "", workDate: today },
-    { skip: !shouldFetchAttendance },
+    { skip: !shouldFetchAttendance }
   );
 
   const {
@@ -143,7 +130,7 @@ export default function TimeRecorder(): JSX.Element {
     refetch: refetchAttendances,
   } = useListRecentAttendancesQuery(
     { staffId: cognitoUser?.id ?? "" },
-    { skip: !shouldFetchAttendance },
+    { skip: !shouldFetchAttendance }
   );
 
   const attendance = attendanceData;
@@ -163,20 +150,15 @@ export default function TimeRecorder(): JSX.Element {
 
   const [createAttendanceMutation] = useCreateAttendanceMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
-  const localAttendanceUpdateIgnoreUntilRef = useRef(0);
 
   const createAttendance = useCallback(
     (input: CreateAttendanceInput) => createAttendanceMutation(input).unwrap(),
-    [createAttendanceMutation],
+    [createAttendanceMutation]
   );
 
   const updateAttendance = useCallback(
-    (input: UpdateAttendanceInput) => {
-      localAttendanceUpdateIgnoreUntilRef.current =
-        Date.now() + LOCAL_ATTENDANCE_UPDATE_IGNORE_MS;
-      return updateAttendanceMutation(input).unwrap();
-    },
-    [updateAttendanceMutation],
+    (input: UpdateAttendanceInput) => updateAttendanceMutation(input).unwrap(),
+    [updateAttendanceMutation]
   );
 
   const refreshAttendanceData = useCallback(async () => {
@@ -192,7 +174,7 @@ export default function TimeRecorder(): JSX.Element {
       staffId: string,
       workDate: string,
       startTime: string,
-      goDirectlyFlag = GoDirectlyFlag.NO,
+      goDirectlyFlag = GoDirectlyFlag.NO
     ) => {
       const result = await clockInAction({
         attendance,
@@ -208,7 +190,7 @@ export default function TimeRecorder(): JSX.Element {
 
       return result;
     },
-    [attendance, createAttendance, updateAttendance, refreshAttendanceData],
+    [attendance, createAttendance, updateAttendance, refreshAttendanceData]
   );
 
   const clockOut = useCallback(
@@ -216,7 +198,7 @@ export default function TimeRecorder(): JSX.Element {
       staffId: string,
       workDate: string,
       endTime: string,
-      returnDirectlyFlag = ReturnDirectlyFlag.NO,
+      returnDirectlyFlag = ReturnDirectlyFlag.NO
     ) => {
       const result = await clockOutAction({
         attendance,
@@ -232,7 +214,7 @@ export default function TimeRecorder(): JSX.Element {
 
       return result;
     },
-    [attendance, createAttendance, updateAttendance, refreshAttendanceData],
+    [attendance, createAttendance, updateAttendance, refreshAttendanceData]
   );
 
   const restStart = useCallback(
@@ -250,7 +232,7 @@ export default function TimeRecorder(): JSX.Element {
 
       return result;
     },
-    [attendance, createAttendance, updateAttendance, refreshAttendanceData],
+    [attendance, createAttendance, updateAttendance, refreshAttendanceData]
   );
 
   const restEnd = useCallback(
@@ -268,17 +250,17 @@ export default function TimeRecorder(): JSX.Element {
 
       return result;
     },
-    [attendance, createAttendance, updateAttendance, refreshAttendanceData],
+    [attendance, createAttendance, updateAttendance, refreshAttendanceData]
   );
 
   const [workStatus, setWorkStatus] = useState<WorkStatus | null | undefined>(
-    undefined,
+    undefined
   );
   const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
   const [isAttendanceError, setIsAttendanceError] = useState(false);
   const [isTimeElapsedError, setIsTimeElapsedError] = useState(false);
   const [directMode, setDirectMode] = useState(false);
-  const lastActiveTimeRef = useRef(dayjs());
+  const [lastActiveTime, setLastActiveTime] = useState(dayjs());
 
   // 変更リクエスト中かどうか
   const hasChangeRequest = useMemo(() => {
@@ -289,23 +271,6 @@ export default function TimeRecorder(): JSX.Element {
   }, [attendance?.changeRequests]);
 
   const logger = new Logger("TimeRecorder", "DEBUG");
-
-  const refreshStaff = useCallback(async () => {
-    if (!cognitoUser?.id) {
-      return;
-    }
-
-    try {
-      const latestStaff = await fetchStaff(cognitoUser.id);
-      setStaff(latestStaff);
-    } catch {
-      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
-    }
-  }, [cognitoUser?.id, dispatch]);
-
-  const refreshTimeRecorderData = useCallback(async () => {
-    await Promise.allSettled([refreshStaff(), refreshAttendanceData()]);
-  }, [refreshAttendanceData, refreshStaff]);
 
   useEffect(() => {
     if (holidayCalendarsError || companyHolidayCalendarsError) {
@@ -330,39 +295,39 @@ export default function TimeRecorder(): JSX.Element {
 
   const TIME_RECORDER_WIDTH_MD = designTokenVar(
     "component.timeRecorder.layout.widthMd",
-    "400px",
+    "400px"
   );
   const TIME_RECORDER_MARGIN_XS = designTokenVar(
     "component.timeRecorder.layout.marginXMobile",
-    "24px",
+    "24px"
   );
   const TIME_RECORDER_SURFACE_BG = designTokenVar(
     "component.timeRecorder.surface.background",
-    "#FFFFFF",
+    "#FFFFFF"
   );
   const TIME_RECORDER_BORDER_COLOR = designTokenVar(
     "component.timeRecorder.surface.borderColor",
-    "#E5E7EB",
+    "#E5E7EB"
   );
   const TIME_RECORDER_BORDER_WIDTH = designTokenVar(
     "component.timeRecorder.surface.borderWidth",
-    "1px",
+    "1px"
   );
   const TIME_RECORDER_BORDER_RADIUS = designTokenVar(
     "component.timeRecorder.surface.borderRadius",
-    "12px",
+    "12px"
   );
   const TIME_RECORDER_SURFACE_SHADOW = designTokenVar(
     "component.timeRecorder.surface.shadow",
-    "0 12px 24px rgba(17, 24, 39, 0.08)",
+    "0 12px 24px rgba(17, 24, 39, 0.08)"
   );
   const TIME_RECORDER_PADDING_XS = designTokenVar(
     "component.timeRecorder.surface.padding.xs",
-    "16px",
+    "16px"
   );
   const TIME_RECORDER_PADDING_MD = designTokenVar(
     "component.timeRecorder.surface.padding.md",
-    "24px",
+    "24px"
   );
 
   const BADGE_PADDING_X = designTokenVar("spacing.sm", "8px");
@@ -371,19 +336,19 @@ export default function TimeRecorder(): JSX.Element {
   const BADGE_FONT_WEIGHT = designTokenVar("typography.fontWeight.bold", "600");
   const CLOCK_IN_BADGE_BG = designTokenVar(
     "color.feedback.success.surface",
-    "#E4F8C9",
+    "#E4F8C9"
   );
   const CLOCK_IN_BADGE_TEXT = designTokenVar(
     "color.feedback.success.base",
-    "#1EAA6A",
+    "#1EAA6A"
   );
   const CLOCK_OUT_BADGE_BG = designTokenVar(
     "color.feedback.danger.surface",
-    "#FDE0E0",
+    "#FDE0E0"
   );
   const CLOCK_OUT_BADGE_TEXT = designTokenVar(
     "color.feedback.danger.base",
-    "#B33D47",
+    "#B33D47"
   );
 
   const clockInBadgeStyles: SxProps<Theme> = {
@@ -408,13 +373,13 @@ export default function TimeRecorder(): JSX.Element {
 
   const handleClockIn = useCallback(
     () => clockInCallback(cognitoUser, today, clockIn, dispatch, staff, logger),
-    [cognitoUser, clockIn, dispatch, staff],
+    [cognitoUser, clockIn, dispatch, staff]
   );
 
   const handleClockOut = useCallback(
     () =>
       clockOutCallback(cognitoUser, today, clockOut, dispatch, staff, logger),
-    [cognitoUser, clockOut, dispatch, staff],
+    [cognitoUser, clockOut, dispatch, staff]
   );
 
   const handleGoDirectly = useCallback(() => {
@@ -433,7 +398,7 @@ export default function TimeRecorder(): JSX.Element {
       dispatch,
       clockIn,
       logger,
-      startIso,
+      startIso
     );
   }, [
     cognitoUser,
@@ -462,7 +427,7 @@ export default function TimeRecorder(): JSX.Element {
       dispatch,
       clockOut,
       logger,
-      endIso,
+      endIso
     );
   }, [
     cognitoUser,
@@ -477,29 +442,25 @@ export default function TimeRecorder(): JSX.Element {
 
   const handleRestStart = useCallback(
     () => restStartCallback(cognitoUser, today, dispatch, restStart, logger),
-    [cognitoUser, restStart, dispatch],
+    [cognitoUser, restStart, dispatch]
   );
 
   const handleRestEnd = useCallback(
     () => restEndCallback(cognitoUser, today, restEnd, dispatch, logger),
-    [cognitoUser, restEnd, dispatch],
+    [cognitoUser, restEnd, dispatch]
   );
 
-  const handleVisibilityChange = useCallback(() => {
-    const now = dayjs();
-    if (document.visibilityState !== "visible") {
-      return;
-    }
-
-    if (
-      now.diff(lastActiveTimeRef.current, "minute") >
-      VISIBILITY_REFRESH_THRESHOLD_MINUTES
-    ) {
-      void refreshTimeRecorderData();
-    }
-
-    lastActiveTimeRef.current = now;
-  }, [refreshTimeRecorderData]);
+  const handleVisibilityChange = useMemo(() => {
+    return () => {
+      const now = dayjs();
+      if (document.visibilityState === "visible") {
+        if (now.diff(lastActiveTime, "minute") > 5) {
+          window.location.reload();
+        }
+        setLastActiveTime(now);
+      }
+    };
+  }, [lastActiveTime]);
 
   useEffect(() => {
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -510,8 +471,12 @@ export default function TimeRecorder(): JSX.Element {
   }, [handleVisibilityChange]);
 
   useEffect(() => {
-    void refreshStaff();
-  }, [refreshStaff]);
+    if (!cognitoUser) return;
+
+    fetchStaff(cognitoUser.id)
+      .then(setStaff)
+      .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E00001)));
+  }, [cognitoUser, dispatch]);
 
   useEffect(() => {
     if (!shouldFetchAttendance || !attendanceError) {
@@ -540,7 +505,7 @@ export default function TimeRecorder(): JSX.Element {
           staff,
           attendance,
           holidayCalendars,
-          companyHolidayCalendars,
+          companyHolidayCalendars
         ).get();
         return status;
       })
@@ -557,7 +522,7 @@ export default function TimeRecorder(): JSX.Element {
         staff,
         attendance,
         holidayCalendars,
-        companyHolidayCalendars,
+        companyHolidayCalendars
       ).get();
       return status === AttendanceStatus.Error;
     }).length;
@@ -586,30 +551,19 @@ export default function TimeRecorder(): JSX.Element {
     const subscription = graphqlClient
       .graphql({
         query: onUpdateAttendance,
-        variables: {
-          filter: {
-            staffId: { eq: cognitoUser.id },
-            workDate: { eq: today },
-          },
-        },
+        variables: {},
         authMode: "userPool",
       })
       .subscribe({
-        next: (event) => {
-          const updatedAttendance = (
-            event.data as OnUpdateAttendanceSubscription
-          )?.onUpdateAttendance;
-          if (!updatedAttendance) {
-            return;
+        next: async (event) => {
+          const updatedAttendance =
+            event.data as OnUpdateAttendanceSubscription;
+          if (updatedAttendance?.onUpdateAttendance) {
+            await Promise.allSettled([
+              refetchAttendance(),
+              refetchAttendances(),
+            ]);
           }
-
-          const shouldIgnoreLocalUpdate =
-            Date.now() < localAttendanceUpdateIgnoreUntilRef.current;
-          if (shouldIgnoreLocalUpdate) {
-            return;
-          }
-
-          void refreshTimeRecorderData();
         },
         error: (error: unknown) => {
           logger.error("Subscription error:", error);
@@ -619,7 +573,7 @@ export default function TimeRecorder(): JSX.Element {
     return () => {
       subscription.unsubscribe();
     };
-  }, [cognitoUser?.id, logger, refreshTimeRecorderData, today]);
+  }, [cognitoUser?.id, refetchAttendance, refetchAttendances, logger]);
 
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return (
@@ -838,9 +792,10 @@ function TimeElapsedErrorDialog({
         </Button>
         <Button
           variant="contained"
-          component={RouterLink}
-          to="/attendance/list"
-          onClick={handleClose}
+          onClick={() => {
+            handleClose();
+            window.open("/attendance/list", "_blank");
+          }}
           data-testid="time-elapsed-error-dialog-confirm-btn"
         >
           確認する

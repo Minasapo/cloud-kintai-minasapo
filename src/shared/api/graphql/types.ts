@@ -89,7 +89,6 @@ export type CreateAppConfigInput = {
   amPmHolidayEnabled?: boolean | null,
   officeMode?: boolean | null,
   attendanceStatisticsEnabled?: boolean | null,
-  workflowNotificationEnabled?: boolean | null,
   absentEnabled?: boolean | null,
   hourlyPaidHolidayEnabled?: boolean | null,
   links?: Array< LinkInput | null > | null,
@@ -100,8 +99,6 @@ export type CreateAppConfigInput = {
   shiftGroups?: Array< ShiftGroupInput | null > | null,
   workflowCategoryOrder?: WorkflowCategoryOrderInput | null,
   overTimeCheckEnabled?: boolean | null,
-  shiftCollaborativeEnabled?: boolean | null,
-  shiftDefaultMode?: string | null,
 };
 
 export type LinkInput = {
@@ -164,13 +161,10 @@ export type ModelAppConfigConditionInput = {
   amPmHolidayEnabled?: ModelBooleanInput | null,
   officeMode?: ModelBooleanInput | null,
   attendanceStatisticsEnabled?: ModelBooleanInput | null,
-  workflowNotificationEnabled?: ModelBooleanInput | null,
   absentEnabled?: ModelBooleanInput | null,
   hourlyPaidHolidayEnabled?: ModelBooleanInput | null,
   themeColor?: ModelStringInput | null,
   overTimeCheckEnabled?: ModelBooleanInput | null,
-  shiftCollaborativeEnabled?: ModelBooleanInput | null,
-  shiftDefaultMode?: ModelStringInput | null,
   and?: Array< ModelAppConfigConditionInput | null > | null,
   or?: Array< ModelAppConfigConditionInput | null > | null,
   not?: ModelAppConfigConditionInput | null,
@@ -214,7 +208,6 @@ export type AppConfig = {
   amPmHolidayEnabled?: boolean | null,
   officeMode?: boolean | null,
   attendanceStatisticsEnabled?: boolean | null,
-  workflowNotificationEnabled?: boolean | null,
   absentEnabled?: boolean | null,
   hourlyPaidHolidayEnabled?: boolean | null,
   links?:  Array<Link | null > | null,
@@ -225,8 +218,6 @@ export type AppConfig = {
   shiftGroups?:  Array<ShiftGroup | null > | null,
   workflowCategoryOrder?: WorkflowCategoryOrder | null,
   overTimeCheckEnabled?: boolean | null,
-  shiftCollaborativeEnabled?: boolean | null,
-  shiftDefaultMode?: string | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -289,7 +280,6 @@ export type UpdateAppConfigInput = {
   amPmHolidayEnabled?: boolean | null,
   officeMode?: boolean | null,
   attendanceStatisticsEnabled?: boolean | null,
-  workflowNotificationEnabled?: boolean | null,
   absentEnabled?: boolean | null,
   hourlyPaidHolidayEnabled?: boolean | null,
   links?: Array< LinkInput | null > | null,
@@ -300,8 +290,6 @@ export type UpdateAppConfigInput = {
   shiftGroups?: Array< ShiftGroupInput | null > | null,
   workflowCategoryOrder?: WorkflowCategoryOrderInput | null,
   overTimeCheckEnabled?: boolean | null,
-  shiftCollaborativeEnabled?: boolean | null,
-  shiftDefaultMode?: string | null,
 };
 
 export type DeleteAppConfigInput = {
@@ -892,7 +880,6 @@ export type CreateShiftRequestInput = {
   updatedBy?: string | null,
   version?: number | null,
   histories?: Array< ShiftRequestHistoryInput | null > | null,
-  comments?: Array< ShiftRequestCommentInput | null > | null,
 };
 
 export type ShiftRequestDayPreferenceInput = {
@@ -927,15 +914,6 @@ export type ShiftRequestHistoryInput = {
   changeReason?: string | null,
 };
 
-export type ShiftRequestCommentInput = {
-  id: string,
-  cellKey: string,
-  staffId: string,
-  authorName?: string | null,
-  body: string,
-  createdAt: string,
-};
-
 export type ModelShiftRequestConditionInput = {
   staffId?: ModelStringInput | null,
   targetMonth?: ModelStringInput | null,
@@ -963,7 +941,6 @@ export type ShiftRequest = {
   updatedBy?: string | null,
   version?: number | null,
   histories?:  Array<ShiftRequestHistory | null > | null,
-  comments?:  Array<ShiftRequestComment | null > | null,
   createdAt: string,
 };
 
@@ -994,16 +971,6 @@ export type ShiftRequestHistory = {
   changeReason?: string | null,
 };
 
-export type ShiftRequestComment = {
-  __typename: "ShiftRequestComment",
-  id: string,
-  cellKey: string,
-  staffId: string,
-  authorName?: string | null,
-  body: string,
-  createdAt: string,
-};
-
 export type UpdateShiftRequestInput = {
   id: string,
   staffId?: string | null,
@@ -1016,7 +983,6 @@ export type UpdateShiftRequestInput = {
   updatedBy?: string | null,
   version?: number | null,
   histories?: Array< ShiftRequestHistoryInput | null > | null,
-  comments?: Array< ShiftRequestCommentInput | null > | null,
 };
 
 export type DeleteShiftRequestInput = {
@@ -1298,99 +1264,6 @@ export type DeleteWorkflowTemplateInput = {
   id: string,
 };
 
-export type CreateWorkflowNotificationEventInput = {
-  id?: string | null,
-  recipientStaffId: string,
-  actorStaffId: string,
-  workflowId: string,
-  eventType: WorkflowNotificationEventType,
-  commentId?: string | null,
-  title: string,
-  body: string,
-  isRead: boolean,
-  readAt?: string | null,
-  eventAt: string,
-};
-
-export enum WorkflowNotificationEventType {
-  WORKFLOW_COMMENT = "WORKFLOW_COMMENT",
-}
-
-
-export type ModelWorkflowNotificationEventConditionInput = {
-  recipientStaffId?: ModelStringInput | null,
-  actorStaffId?: ModelStringInput | null,
-  workflowId?: ModelIDInput | null,
-  eventType?: ModelWorkflowNotificationEventTypeInput | null,
-  commentId?: ModelIDInput | null,
-  title?: ModelStringInput | null,
-  body?: ModelStringInput | null,
-  isRead?: ModelBooleanInput | null,
-  readAt?: ModelStringInput | null,
-  eventAt?: ModelStringInput | null,
-  and?: Array< ModelWorkflowNotificationEventConditionInput | null > | null,
-  or?: Array< ModelWorkflowNotificationEventConditionInput | null > | null,
-  not?: ModelWorkflowNotificationEventConditionInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
-export type ModelIDInput = {
-  ne?: string | null,
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  contains?: string | null,
-  notContains?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  size?: ModelSizeInput | null,
-};
-
-export type ModelWorkflowNotificationEventTypeInput = {
-  eq?: WorkflowNotificationEventType | null,
-  ne?: WorkflowNotificationEventType | null,
-};
-
-export type WorkflowNotificationEvent = {
-  __typename: "WorkflowNotificationEvent",
-  id: string,
-  recipientStaffId: string,
-  actorStaffId: string,
-  workflowId: string,
-  eventType: WorkflowNotificationEventType,
-  commentId?: string | null,
-  title: string,
-  body: string,
-  isRead: boolean,
-  readAt?: string | null,
-  eventAt: string,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type UpdateWorkflowNotificationEventInput = {
-  id: string,
-  recipientStaffId?: string | null,
-  actorStaffId?: string | null,
-  workflowId?: string | null,
-  eventType?: WorkflowNotificationEventType | null,
-  commentId?: string | null,
-  title?: string | null,
-  body?: string | null,
-  isRead?: boolean | null,
-  readAt?: string | null,
-  eventAt?: string | null,
-};
-
-export type DeleteWorkflowNotificationEventInput = {
-  id: string,
-};
-
 export type CreateOperationLogInput = {
   id?: string | null,
   staffId?: string | null,
@@ -1495,6 +1368,22 @@ export type ModelAuditLogConditionInput = {
   or?: Array< ModelAuditLogConditionInput | null > | null,
   not?: ModelAuditLogConditionInput | null,
   updatedAt?: ModelStringInput | null,
+};
+
+export type ModelIDInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
 };
 
 export type AuditLog = {
@@ -1688,13 +1577,10 @@ export type ModelAppConfigFilterInput = {
   amPmHolidayEnabled?: ModelBooleanInput | null,
   officeMode?: ModelBooleanInput | null,
   attendanceStatisticsEnabled?: ModelBooleanInput | null,
-  workflowNotificationEnabled?: ModelBooleanInput | null,
   absentEnabled?: ModelBooleanInput | null,
   hourlyPaidHolidayEnabled?: ModelBooleanInput | null,
   themeColor?: ModelStringInput | null,
   overTimeCheckEnabled?: ModelBooleanInput | null,
-  shiftCollaborativeEnabled?: ModelBooleanInput | null,
-  shiftDefaultMode?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelAppConfigFilterInput | null > | null,
@@ -1974,31 +1860,6 @@ export type ModelWorkflowTemplateConnection = {
   nextToken?: string | null,
 };
 
-export type ModelWorkflowNotificationEventFilterInput = {
-  id?: ModelIDInput | null,
-  recipientStaffId?: ModelStringInput | null,
-  actorStaffId?: ModelStringInput | null,
-  workflowId?: ModelIDInput | null,
-  eventType?: ModelWorkflowNotificationEventTypeInput | null,
-  commentId?: ModelIDInput | null,
-  title?: ModelStringInput | null,
-  body?: ModelStringInput | null,
-  isRead?: ModelBooleanInput | null,
-  readAt?: ModelStringInput | null,
-  eventAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelWorkflowNotificationEventFilterInput | null > | null,
-  or?: Array< ModelWorkflowNotificationEventFilterInput | null > | null,
-  not?: ModelWorkflowNotificationEventFilterInput | null,
-};
-
-export type ModelWorkflowNotificationEventConnection = {
-  __typename: "ModelWorkflowNotificationEventConnection",
-  items:  Array<WorkflowNotificationEvent | null >,
-  nextToken?: string | null,
-};
-
 export type ModelOperationLogFilterInput = {
   id?: ModelIDInput | null,
   staffId?: ModelStringInput | null,
@@ -2127,13 +1988,10 @@ export type ModelSubscriptionAppConfigFilterInput = {
   amPmHolidayEnabled?: ModelSubscriptionBooleanInput | null,
   officeMode?: ModelSubscriptionBooleanInput | null,
   attendanceStatisticsEnabled?: ModelSubscriptionBooleanInput | null,
-  workflowNotificationEnabled?: ModelSubscriptionBooleanInput | null,
   absentEnabled?: ModelSubscriptionBooleanInput | null,
   hourlyPaidHolidayEnabled?: ModelSubscriptionBooleanInput | null,
   themeColor?: ModelSubscriptionStringInput | null,
   overTimeCheckEnabled?: ModelSubscriptionBooleanInput | null,
-  shiftCollaborativeEnabled?: ModelSubscriptionBooleanInput | null,
-  shiftDefaultMode?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionAppConfigFilterInput | null > | null,
@@ -2332,24 +2190,6 @@ export type ModelSubscriptionWorkflowTemplateFilterInput = {
   or?: Array< ModelSubscriptionWorkflowTemplateFilterInput | null > | null,
 };
 
-export type ModelSubscriptionWorkflowNotificationEventFilterInput = {
-  id?: ModelSubscriptionIDInput | null,
-  recipientStaffId?: ModelSubscriptionStringInput | null,
-  actorStaffId?: ModelSubscriptionStringInput | null,
-  workflowId?: ModelSubscriptionIDInput | null,
-  eventType?: ModelSubscriptionStringInput | null,
-  commentId?: ModelSubscriptionIDInput | null,
-  title?: ModelSubscriptionStringInput | null,
-  body?: ModelSubscriptionStringInput | null,
-  isRead?: ModelSubscriptionBooleanInput | null,
-  readAt?: ModelSubscriptionStringInput | null,
-  eventAt?: ModelSubscriptionStringInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionWorkflowNotificationEventFilterInput | null > | null,
-  or?: Array< ModelSubscriptionWorkflowNotificationEventFilterInput | null > | null,
-};
-
 export type ModelSubscriptionOperationLogFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   staffId?: ModelSubscriptionStringInput | null,
@@ -2470,7 +2310,6 @@ export type CreateAppConfigMutation = {
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
     attendanceStatisticsEnabled?: boolean | null,
-    workflowNotificationEnabled?: boolean | null,
     absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
@@ -2515,8 +2354,6 @@ export type CreateAppConfigMutation = {
       } >,
     } | null,
     overTimeCheckEnabled?: boolean | null,
-    shiftCollaborativeEnabled?: boolean | null,
-    shiftDefaultMode?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2545,7 +2382,6 @@ export type UpdateAppConfigMutation = {
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
     attendanceStatisticsEnabled?: boolean | null,
-    workflowNotificationEnabled?: boolean | null,
     absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
@@ -2590,8 +2426,6 @@ export type UpdateAppConfigMutation = {
       } >,
     } | null,
     overTimeCheckEnabled?: boolean | null,
-    shiftCollaborativeEnabled?: boolean | null,
-    shiftDefaultMode?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2620,7 +2454,6 @@ export type DeleteAppConfigMutation = {
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
     attendanceStatisticsEnabled?: boolean | null,
-    workflowNotificationEnabled?: boolean | null,
     absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
@@ -2665,8 +2498,6 @@ export type DeleteAppConfigMutation = {
       } >,
     } | null,
     overTimeCheckEnabled?: boolean | null,
-    shiftCollaborativeEnabled?: boolean | null,
-    shiftDefaultMode?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3403,15 +3234,6 @@ export type CreateShiftRequestMutation = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
-    comments?:  Array< {
-      __typename: "ShiftRequestComment",
-      id: string,
-      cellKey: string,
-      staffId: string,
-      authorName?: string | null,
-      body: string,
-      createdAt: string,
-    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -3466,15 +3288,6 @@ export type UpdateShiftRequestMutation = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
-    comments?:  Array< {
-      __typename: "ShiftRequestComment",
-      id: string,
-      cellKey: string,
-      staffId: string,
-      authorName?: string | null,
-      body: string,
-      createdAt: string,
-    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -3528,15 +3341,6 @@ export type DeleteShiftRequestMutation = {
       recordedAt: string,
       recordedByStaffId?: string | null,
       changeReason?: string | null,
-    } | null > | null,
-    comments?:  Array< {
-      __typename: "ShiftRequestComment",
-      id: string,
-      cellKey: string,
-      staffId: string,
-      authorName?: string | null,
-      body: string,
-      createdAt: string,
     } | null > | null,
     createdAt: string,
   } | null,
@@ -3822,78 +3626,6 @@ export type DeleteWorkflowTemplateMutation = {
     title: string,
     content: string,
     organizationId: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type CreateWorkflowNotificationEventMutationVariables = {
-  input: CreateWorkflowNotificationEventInput,
-  condition?: ModelWorkflowNotificationEventConditionInput | null,
-};
-
-export type CreateWorkflowNotificationEventMutation = {
-  createWorkflowNotificationEvent?:  {
-    __typename: "WorkflowNotificationEvent",
-    id: string,
-    recipientStaffId: string,
-    actorStaffId: string,
-    workflowId: string,
-    eventType: WorkflowNotificationEventType,
-    commentId?: string | null,
-    title: string,
-    body: string,
-    isRead: boolean,
-    readAt?: string | null,
-    eventAt: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateWorkflowNotificationEventMutationVariables = {
-  input: UpdateWorkflowNotificationEventInput,
-  condition?: ModelWorkflowNotificationEventConditionInput | null,
-};
-
-export type UpdateWorkflowNotificationEventMutation = {
-  updateWorkflowNotificationEvent?:  {
-    __typename: "WorkflowNotificationEvent",
-    id: string,
-    recipientStaffId: string,
-    actorStaffId: string,
-    workflowId: string,
-    eventType: WorkflowNotificationEventType,
-    commentId?: string | null,
-    title: string,
-    body: string,
-    isRead: boolean,
-    readAt?: string | null,
-    eventAt: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteWorkflowNotificationEventMutationVariables = {
-  input: DeleteWorkflowNotificationEventInput,
-  condition?: ModelWorkflowNotificationEventConditionInput | null,
-};
-
-export type DeleteWorkflowNotificationEventMutation = {
-  deleteWorkflowNotificationEvent?:  {
-    __typename: "WorkflowNotificationEvent",
-    id: string,
-    recipientStaffId: string,
-    actorStaffId: string,
-    workflowId: string,
-    eventType: WorkflowNotificationEventType,
-    commentId?: string | null,
-    title: string,
-    body: string,
-    isRead: boolean,
-    readAt?: string | null,
-    eventAt: string,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4219,7 +3951,6 @@ export type GetAppConfigQuery = {
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
     attendanceStatisticsEnabled?: boolean | null,
-    workflowNotificationEnabled?: boolean | null,
     absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
@@ -4264,8 +3995,6 @@ export type GetAppConfigQuery = {
       } >,
     } | null,
     overTimeCheckEnabled?: boolean | null,
-    shiftCollaborativeEnabled?: boolean | null,
-    shiftDefaultMode?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4297,7 +4026,6 @@ export type ListAppConfigsQuery = {
       amPmHolidayEnabled?: boolean | null,
       officeMode?: boolean | null,
       attendanceStatisticsEnabled?: boolean | null,
-      workflowNotificationEnabled?: boolean | null,
       absentEnabled?: boolean | null,
       hourlyPaidHolidayEnabled?: boolean | null,
       links?:  Array< {
@@ -4342,8 +4070,6 @@ export type ListAppConfigsQuery = {
         } >,
       } | null,
       overTimeCheckEnabled?: boolean | null,
-      shiftCollaborativeEnabled?: boolean | null,
-      shiftDefaultMode?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5040,15 +4766,6 @@ export type GetShiftRequestQuery = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
-    comments?:  Array< {
-      __typename: "ShiftRequestComment",
-      id: string,
-      cellKey: string,
-      staffId: string,
-      authorName?: string | null,
-      body: string,
-      createdAt: string,
-    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -5105,15 +4822,6 @@ export type ListShiftRequestsQuery = {
         recordedAt: string,
         recordedByStaffId?: string | null,
         changeReason?: string | null,
-      } | null > | null,
-      comments?:  Array< {
-        __typename: "ShiftRequestComment",
-        id: string,
-        cellKey: string,
-        staffId: string,
-        authorName?: string | null,
-        body: string,
-        createdAt: string,
       } | null > | null,
       createdAt: string,
     } | null >,
@@ -5176,15 +4884,6 @@ export type ShiftRequestsByStaffIdQuery = {
         recordedAt: string,
         recordedByStaffId?: string | null,
         changeReason?: string | null,
-      } | null > | null,
-      comments?:  Array< {
-        __typename: "ShiftRequestComment",
-        id: string,
-        cellKey: string,
-        staffId: string,
-        authorName?: string | null,
-        body: string,
-        createdAt: string,
       } | null > | null,
       createdAt: string,
     } | null >,
@@ -5511,122 +5210,6 @@ export type WorkflowTemplatesByOrganizationIdQuery = {
   } | null,
 };
 
-export type GetWorkflowNotificationEventQueryVariables = {
-  id: string,
-};
-
-export type GetWorkflowNotificationEventQuery = {
-  getWorkflowNotificationEvent?:  {
-    __typename: "WorkflowNotificationEvent",
-    id: string,
-    recipientStaffId: string,
-    actorStaffId: string,
-    workflowId: string,
-    eventType: WorkflowNotificationEventType,
-    commentId?: string | null,
-    title: string,
-    body: string,
-    isRead: boolean,
-    readAt?: string | null,
-    eventAt: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListWorkflowNotificationEventsQueryVariables = {
-  filter?: ModelWorkflowNotificationEventFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListWorkflowNotificationEventsQuery = {
-  listWorkflowNotificationEvents?:  {
-    __typename: "ModelWorkflowNotificationEventConnection",
-    items:  Array< {
-      __typename: "WorkflowNotificationEvent",
-      id: string,
-      recipientStaffId: string,
-      actorStaffId: string,
-      workflowId: string,
-      eventType: WorkflowNotificationEventType,
-      commentId?: string | null,
-      title: string,
-      body: string,
-      isRead: boolean,
-      readAt?: string | null,
-      eventAt: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type WorkflowNotificationEventsByRecipientQueryVariables = {
-  recipientStaffId: string,
-  eventAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelWorkflowNotificationEventFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type WorkflowNotificationEventsByRecipientQuery = {
-  workflowNotificationEventsByRecipient?:  {
-    __typename: "ModelWorkflowNotificationEventConnection",
-    items:  Array< {
-      __typename: "WorkflowNotificationEvent",
-      id: string,
-      recipientStaffId: string,
-      actorStaffId: string,
-      workflowId: string,
-      eventType: WorkflowNotificationEventType,
-      commentId?: string | null,
-      title: string,
-      body: string,
-      isRead: boolean,
-      readAt?: string | null,
-      eventAt: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type WorkflowNotificationEventsByWorkflowQueryVariables = {
-  workflowId: string,
-  eventAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelWorkflowNotificationEventFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type WorkflowNotificationEventsByWorkflowQuery = {
-  workflowNotificationEventsByWorkflow?:  {
-    __typename: "ModelWorkflowNotificationEventConnection",
-    items:  Array< {
-      __typename: "WorkflowNotificationEvent",
-      id: string,
-      recipientStaffId: string,
-      actorStaffId: string,
-      workflowId: string,
-      eventType: WorkflowNotificationEventType,
-      commentId?: string | null,
-      title: string,
-      body: string,
-      isRead: boolean,
-      readAt?: string | null,
-      eventAt: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
 export type GetOperationLogQueryVariables = {
   id: string,
 };
@@ -5944,7 +5527,6 @@ export type OnCreateAppConfigSubscription = {
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
     attendanceStatisticsEnabled?: boolean | null,
-    workflowNotificationEnabled?: boolean | null,
     absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
@@ -5989,8 +5571,6 @@ export type OnCreateAppConfigSubscription = {
       } >,
     } | null,
     overTimeCheckEnabled?: boolean | null,
-    shiftCollaborativeEnabled?: boolean | null,
-    shiftDefaultMode?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6018,7 +5598,6 @@ export type OnUpdateAppConfigSubscription = {
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
     attendanceStatisticsEnabled?: boolean | null,
-    workflowNotificationEnabled?: boolean | null,
     absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
@@ -6063,8 +5642,6 @@ export type OnUpdateAppConfigSubscription = {
       } >,
     } | null,
     overTimeCheckEnabled?: boolean | null,
-    shiftCollaborativeEnabled?: boolean | null,
-    shiftDefaultMode?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6092,7 +5669,6 @@ export type OnDeleteAppConfigSubscription = {
     amPmHolidayEnabled?: boolean | null,
     officeMode?: boolean | null,
     attendanceStatisticsEnabled?: boolean | null,
-    workflowNotificationEnabled?: boolean | null,
     absentEnabled?: boolean | null,
     hourlyPaidHolidayEnabled?: boolean | null,
     links?:  Array< {
@@ -6137,8 +5713,6 @@ export type OnDeleteAppConfigSubscription = {
       } >,
     } | null,
     overTimeCheckEnabled?: boolean | null,
-    shiftCollaborativeEnabled?: boolean | null,
-    shiftDefaultMode?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6853,15 +6427,6 @@ export type OnCreateShiftRequestSubscription = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
-    comments?:  Array< {
-      __typename: "ShiftRequestComment",
-      id: string,
-      cellKey: string,
-      staffId: string,
-      authorName?: string | null,
-      body: string,
-      createdAt: string,
-    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -6915,15 +6480,6 @@ export type OnUpdateShiftRequestSubscription = {
       recordedByStaffId?: string | null,
       changeReason?: string | null,
     } | null > | null,
-    comments?:  Array< {
-      __typename: "ShiftRequestComment",
-      id: string,
-      cellKey: string,
-      staffId: string,
-      authorName?: string | null,
-      body: string,
-      createdAt: string,
-    } | null > | null,
     createdAt: string,
   } | null,
 };
@@ -6976,15 +6532,6 @@ export type OnDeleteShiftRequestSubscription = {
       recordedAt: string,
       recordedByStaffId?: string | null,
       changeReason?: string | null,
-    } | null > | null,
-    comments?:  Array< {
-      __typename: "ShiftRequestComment",
-      id: string,
-      cellKey: string,
-      staffId: string,
-      authorName?: string | null,
-      body: string,
-      createdAt: string,
     } | null > | null,
     createdAt: string,
   } | null,
@@ -7261,75 +6808,6 @@ export type OnDeleteWorkflowTemplateSubscription = {
     title: string,
     content: string,
     organizationId: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnCreateWorkflowNotificationEventSubscriptionVariables = {
-  filter?: ModelSubscriptionWorkflowNotificationEventFilterInput | null,
-};
-
-export type OnCreateWorkflowNotificationEventSubscription = {
-  onCreateWorkflowNotificationEvent?:  {
-    __typename: "WorkflowNotificationEvent",
-    id: string,
-    recipientStaffId: string,
-    actorStaffId: string,
-    workflowId: string,
-    eventType: WorkflowNotificationEventType,
-    commentId?: string | null,
-    title: string,
-    body: string,
-    isRead: boolean,
-    readAt?: string | null,
-    eventAt: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnUpdateWorkflowNotificationEventSubscriptionVariables = {
-  filter?: ModelSubscriptionWorkflowNotificationEventFilterInput | null,
-};
-
-export type OnUpdateWorkflowNotificationEventSubscription = {
-  onUpdateWorkflowNotificationEvent?:  {
-    __typename: "WorkflowNotificationEvent",
-    id: string,
-    recipientStaffId: string,
-    actorStaffId: string,
-    workflowId: string,
-    eventType: WorkflowNotificationEventType,
-    commentId?: string | null,
-    title: string,
-    body: string,
-    isRead: boolean,
-    readAt?: string | null,
-    eventAt: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnDeleteWorkflowNotificationEventSubscriptionVariables = {
-  filter?: ModelSubscriptionWorkflowNotificationEventFilterInput | null,
-};
-
-export type OnDeleteWorkflowNotificationEventSubscription = {
-  onDeleteWorkflowNotificationEvent?:  {
-    __typename: "WorkflowNotificationEvent",
-    id: string,
-    recipientStaffId: string,
-    actorStaffId: string,
-    workflowId: string,
-    eventType: WorkflowNotificationEventType,
-    commentId?: string | null,
-    title: string,
-    body: string,
-    isRead: boolean,
-    readAt?: string | null,
-    eventAt: string,
     createdAt: string,
     updatedAt: string,
   } | null,

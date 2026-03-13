@@ -127,9 +127,7 @@ describe("useShiftComments", () => {
       const { result } = renderHook(() => useShiftComments());
 
       let commentId: string;
-      let deleteResult: { deleted: boolean; cellKey?: string } = {
-        deleted: false,
-      };
+      let deleted = false;
 
       act(() => {
         const comment = result.current.addComment(
@@ -144,11 +142,10 @@ describe("useShiftComments", () => {
       });
 
       act(() => {
-        deleteResult = result.current.deleteComment(commentId);
+        deleted = result.current.deleteComment(commentId);
       });
 
-      expect(deleteResult.deleted).toBe(true);
-      expect(deleteResult.cellKey).toBe("staff1#01");
+      expect(deleted).toBe(true);
 
       const comments = result.current.getCommentsByCell("staff1#01");
       expect(comments).toHaveLength(0);
@@ -157,14 +154,12 @@ describe("useShiftComments", () => {
     it("存在しないコメント削除はfalseを返すこと", () => {
       const { result } = renderHook(() => useShiftComments());
 
-      let deleteResult: { deleted: boolean; cellKey?: string } = {
-        deleted: false,
-      };
+      let deleted = false;
       act(() => {
-        deleteResult = result.current.deleteComment("non-existent");
+        deleted = result.current.deleteComment("non-existent");
       });
 
-      expect(deleteResult.deleted).toBe(false);
+      expect(deleted).toBe(false);
     });
   });
 

@@ -70,7 +70,6 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
-    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -115,8 +114,6 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
       __typename
     }
     overTimeCheckEnabled
-    shiftCollaborativeEnabled
-    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -143,7 +140,6 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
-    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -188,8 +184,6 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
       __typename
     }
     overTimeCheckEnabled
-    shiftCollaborativeEnabled
-    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -216,7 +210,6 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
-    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -261,8 +254,6 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
       __typename
     }
     overTimeCheckEnabled
-    shiftCollaborativeEnabled
-    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -981,15 +972,6 @@ export const onCreateShiftRequest = /* GraphQL */ `subscription OnCreateShiftReq
       changeReason
       __typename
     }
-    comments {
-      id
-      cellKey
-      staffId
-      authorName
-      body
-      createdAt
-      __typename
-    }
     createdAt
     __typename
   }
@@ -1044,15 +1026,6 @@ export const onUpdateShiftRequest = /* GraphQL */ `subscription OnUpdateShiftReq
       changeReason
       __typename
     }
-    comments {
-      id
-      cellKey
-      staffId
-      authorName
-      body
-      createdAt
-      __typename
-    }
     createdAt
     __typename
   }
@@ -1105,15 +1078,6 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
       recordedAt
       recordedByStaffId
       changeReason
-      __typename
-    }
-    comments {
-      id
-      cellKey
-      staffId
-      authorName
-      body
-      createdAt
       __typename
     }
     createdAt
@@ -1402,78 +1366,6 @@ export const onDeleteWorkflowTemplate = /* GraphQL */ `subscription OnDeleteWork
 ` as GeneratedSubscription<
   APITypes.OnDeleteWorkflowTemplateSubscriptionVariables,
   APITypes.OnDeleteWorkflowTemplateSubscription
->;
-export const onCreateWorkflowNotificationEvent = /* GraphQL */ `subscription OnCreateWorkflowNotificationEvent(
-  $filter: ModelSubscriptionWorkflowNotificationEventFilterInput
-) {
-  onCreateWorkflowNotificationEvent(filter: $filter) {
-    id
-    recipientStaffId
-    actorStaffId
-    workflowId
-    eventType
-    commentId
-    title
-    body
-    isRead
-    readAt
-    eventAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateWorkflowNotificationEventSubscriptionVariables,
-  APITypes.OnCreateWorkflowNotificationEventSubscription
->;
-export const onUpdateWorkflowNotificationEvent = /* GraphQL */ `subscription OnUpdateWorkflowNotificationEvent(
-  $filter: ModelSubscriptionWorkflowNotificationEventFilterInput
-) {
-  onUpdateWorkflowNotificationEvent(filter: $filter) {
-    id
-    recipientStaffId
-    actorStaffId
-    workflowId
-    eventType
-    commentId
-    title
-    body
-    isRead
-    readAt
-    eventAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdateWorkflowNotificationEventSubscriptionVariables,
-  APITypes.OnUpdateWorkflowNotificationEventSubscription
->;
-export const onDeleteWorkflowNotificationEvent = /* GraphQL */ `subscription OnDeleteWorkflowNotificationEvent(
-  $filter: ModelSubscriptionWorkflowNotificationEventFilterInput
-) {
-  onDeleteWorkflowNotificationEvent(filter: $filter) {
-    id
-    recipientStaffId
-    actorStaffId
-    workflowId
-    eventType
-    commentId
-    title
-    body
-    isRead
-    readAt
-    eventAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteWorkflowNotificationEventSubscriptionVariables,
-  APITypes.OnDeleteWorkflowNotificationEventSubscription
 >;
 export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperationLog(
   $filter: ModelSubscriptionOperationLogFilterInput

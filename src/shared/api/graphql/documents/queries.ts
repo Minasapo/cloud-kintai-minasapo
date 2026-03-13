@@ -67,7 +67,6 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
-    workflowNotificationEnabled
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -112,8 +111,6 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
       __typename
     }
     overTimeCheckEnabled
-    shiftCollaborativeEnabled
-    shiftDefaultMode
     createdAt
     updatedAt
     __typename
@@ -145,7 +142,6 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       amPmHolidayEnabled
       officeMode
       attendanceStatisticsEnabled
-      workflowNotificationEnabled
       absentEnabled
       hourlyPaidHolidayEnabled
       links {
@@ -190,8 +186,6 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
         __typename
       }
       overTimeCheckEnabled
-      shiftCollaborativeEnabled
-      shiftDefaultMode
       createdAt
       updatedAt
       __typename
@@ -902,15 +896,6 @@ export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
       changeReason
       __typename
     }
-    comments {
-      id
-      cellKey
-      staffId
-      authorName
-      body
-      createdAt
-      __typename
-    }
     createdAt
     __typename
   }
@@ -966,15 +951,6 @@ export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
         recordedAt
         recordedByStaffId
         changeReason
-        __typename
-      }
-      comments {
-        id
-        cellKey
-        staffId
-        authorName
-        body
-        createdAt
         __typename
       }
       createdAt
@@ -1045,15 +1021,6 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
         recordedAt
         recordedByStaffId
         changeReason
-        __typename
-      }
-      comments {
-        id
-        cellKey
-        staffId
-        authorName
-        body
-        createdAt
         __typename
       }
       createdAt
@@ -1407,142 +1374,6 @@ export const workflowTemplatesByOrganizationId = /* GraphQL */ `query WorkflowTe
 ` as GeneratedQuery<
   APITypes.WorkflowTemplatesByOrganizationIdQueryVariables,
   APITypes.WorkflowTemplatesByOrganizationIdQuery
->;
-export const getWorkflowNotificationEvent = /* GraphQL */ `query GetWorkflowNotificationEvent($id: ID!) {
-  getWorkflowNotificationEvent(id: $id) {
-    id
-    recipientStaffId
-    actorStaffId
-    workflowId
-    eventType
-    commentId
-    title
-    body
-    isRead
-    readAt
-    eventAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetWorkflowNotificationEventQueryVariables,
-  APITypes.GetWorkflowNotificationEventQuery
->;
-export const listWorkflowNotificationEvents = /* GraphQL */ `query ListWorkflowNotificationEvents(
-  $filter: ModelWorkflowNotificationEventFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listWorkflowNotificationEvents(
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-  ) {
-    items {
-      id
-      recipientStaffId
-      actorStaffId
-      workflowId
-      eventType
-      commentId
-      title
-      body
-      isRead
-      readAt
-      eventAt
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListWorkflowNotificationEventsQueryVariables,
-  APITypes.ListWorkflowNotificationEventsQuery
->;
-export const workflowNotificationEventsByRecipient = /* GraphQL */ `query WorkflowNotificationEventsByRecipient(
-  $recipientStaffId: String!
-  $eventAt: ModelStringKeyConditionInput
-  $sortDirection: ModelSortDirection
-  $filter: ModelWorkflowNotificationEventFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  workflowNotificationEventsByRecipient(
-    recipientStaffId: $recipientStaffId
-    eventAt: $eventAt
-    sortDirection: $sortDirection
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-  ) {
-    items {
-      id
-      recipientStaffId
-      actorStaffId
-      workflowId
-      eventType
-      commentId
-      title
-      body
-      isRead
-      readAt
-      eventAt
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.WorkflowNotificationEventsByRecipientQueryVariables,
-  APITypes.WorkflowNotificationEventsByRecipientQuery
->;
-export const workflowNotificationEventsByWorkflow = /* GraphQL */ `query WorkflowNotificationEventsByWorkflow(
-  $workflowId: ID!
-  $eventAt: ModelStringKeyConditionInput
-  $sortDirection: ModelSortDirection
-  $filter: ModelWorkflowNotificationEventFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  workflowNotificationEventsByWorkflow(
-    workflowId: $workflowId
-    eventAt: $eventAt
-    sortDirection: $sortDirection
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-  ) {
-    items {
-      id
-      recipientStaffId
-      actorStaffId
-      workflowId
-      eventType
-      commentId
-      title
-      body
-      isRead
-      readAt
-      eventAt
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.WorkflowNotificationEventsByWorkflowQueryVariables,
-  APITypes.WorkflowNotificationEventsByWorkflowQuery
 >;
 export const getOperationLog = /* GraphQL */ `query GetOperationLog($id: ID!) {
   getOperationLog(id: $id) {

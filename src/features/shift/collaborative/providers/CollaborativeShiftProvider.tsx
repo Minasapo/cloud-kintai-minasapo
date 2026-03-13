@@ -1,19 +1,9 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { updateShiftRequest } from "@/shared/api/graphql/documents/mutations";
+import React, { useCallback, useMemo, useState } from "react";
 
 import {
   CollaborativeShiftContext,
   CollaborativeShiftContextType,
 } from "../context/CollaborativeShiftContext";
-import { useCellChangeHistory } from "../hooks/useCellChangeHistory";
 import { useCollaborativeShiftData } from "../hooks/useCollaborativeShiftData";
 import { useCollaborativeShiftOffline } from "../hooks/useCollaborativeShiftOffline";
 import { useShiftComments } from "../hooks/useShiftComments";
@@ -25,10 +15,6 @@ import {
   CollaborativeShiftState,
   Mention,
   ShiftCellUpdate,
-  ShiftRequestCommentData,
-  ShiftRequestData,
-  shiftRequestStatusToShiftState,
-  ShiftState,
 } from "../types/collaborative.types";
 
 interface CollaborativeShiftProviderProps {
@@ -52,10 +38,6 @@ export const CollaborativeShiftProvider: React.FC<
 }) => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [showHistory, setShowHistory] = useState(false);
-  const [lastRemoteUpdate, setLastRemoteUpdate] = useState<{
-    staffId: string;
-    timestamp: number;
-  } | null>(null);
 
   // コメント管理フック
   const {
@@ -65,83 +47,7 @@ export const CollaborativeShiftProvider: React.FC<
     getCommentsByCell,
     replyToComment,
     deleteCommentReply,
-    loadCommentsFromShiftRequests,
-    mergeRemoteComments,
-    getCommentsInputForStaff,
   } = useShiftComments();
-
-  // fetchShifts への参照ブリッジ（同期フックをデータフックより先に初期化するため）
-  const fetchShiftsRef = useRef<() => Promise<void>>(() => Promise.resolve());
-
-  // セル単位変更履歴フック
-  const {
-    recordCellChange,
-    recordBatchCellChanges,
-    recordRemoteChange,
-    getCellHistory,
-    getAllCellHistory,
-    getStaffCellHistory,
-  } = useCellChangeHistory();
-
-  // shiftDataMap への参照（リモート差分計算用）
-  const shiftDataMapRef = useRef<
-    Map<string, Map<string, { state: ShiftState; isLocked: boolean }>>
-  >(new Map());
-
-  const handleRemoteUpdate = useCallback(
-    (staffId: string, request: ShiftRequestData) => {
-      setLastRemoteUpdate({ staffId, timestamp: Date.now() });
-
-      // リモート更新のセル単位差分を記録
-      const currentStaffData = shiftDataMapRef.current.get(staffId);
-      const entries = request.entries ?? [];
-      for (const entry of entries) {
-        const dayKey = entry.date;
-        const previousCell = currentStaffData?.get(dayKey);
-        const newState = shiftRequestStatusToShiftState(entry.status);
-        const previousState = previousCell?.state;
-
-        // 変化があった場合のみ記録
-        if (previousState !== newState) {
-          recordRemoteChange(
-            staffId,
-            dayKey,
-            previousState,
-            newState,
-            request.updatedBy ?? "unknown",
-            request.updatedBy ?? "不明",
-          );
-        }
-      }
-    },
-    [recordRemoteChange],
-  );
-
-  const handleCommentsReceived = useCallback(
-    (staffId: string, comments: ShiftRequestCommentData[]) => {
-      mergeRemoteComments(staffId, comments);
-    },
-    [mergeRemoteComments],
-  );
-
-  // 同期コーディネータフック（Subscription ファースト）
-  const {
-    isSyncing,
-    syncError,
-    triggerSync,
-    lastAutoSyncedAt,
-    lastSyncedAt,
-    dataStatus,
-    notifyAutoSyncReceived,
-    notifySaveStarted,
-    notifySaveCompleted,
-    notifySaveFailed,
-    clearSyncError,
-  } = useShiftSync({
-    onManualSync: async () => {
-      await fetchShiftsRef.current();
-    },
-  });
 
   // データ管理フック
   const {
@@ -155,68 +61,11 @@ export const CollaborativeShiftProvider: React.FC<
     updateShift,
     batchUpdateShifts,
     retryPendingChanges,
-    getShiftRequest,
-    getAllShiftRequests,
   } = useCollaborativeShiftData({
     staffIds,
     targetMonth,
     currentUserId,
-    onAutoSyncReceived: notifyAutoSyncReceived,
-    onSaveStarted: notifySaveStarted,
-    onSaveCompleted: notifySaveCompleted,
-    onSaveFailed: notifySaveFailed,
-    onRemoteUpdate: handleRemoteUpdate,
-    onCommentsReceived: handleCommentsReceived,
   });
-
-  // fetchShifts 参照を同期
-  useEffect(() => {
-    fetchShiftsRef.current = fetchShifts;
-  }, [fetchShifts]);
-
-  // shiftDataMapRef をリモート差分計算用に同期
-  useEffect(() => {
-    shiftDataMapRef.current = shiftDataMap;
-  }, [shiftDataMap]);
-
-  // 初期データ読み込み時にコメントをロード
-  const commentsInitializedRef = useRef(false);
-  useEffect(() => {
-    if (isLoading || commentsInitializedRef.current) {
-      return;
-    }
-    const allRequests = getAllShiftRequests();
-    if (allRequests.length > 0) {
-      loadCommentsFromShiftRequests(allRequests);
-      commentsInitializedRef.current = true;
-    }
-  }, [isLoading, getAllShiftRequests, loadCommentsFromShiftRequests]);
-
-  const persistComments = useCallback(
-    async (staffId: string) => {
-      const shiftRequest = getShiftRequest(staffId);
-      if (!shiftRequest) return;
-
-      const commentsInput = getCommentsInputForStaff(staffId);
-      try {
-        await graphqlClient.graphql({
-          query: updateShiftRequest,
-          variables: {
-            input: {
-              id: shiftRequest.id,
-              comments: commentsInput,
-              updatedBy: currentUserId,
-              updatedAt: new Date().toISOString(),
-            },
-          },
-          authMode: "userPool",
-        });
-      } catch (err) {
-        console.error("Failed to persist comments:", err);
-      }
-    },
-    [getShiftRequest, getCommentsInputForStaff, currentUserId],
-  );
 
   // オフライン対応フック
   const {
@@ -261,25 +110,9 @@ export const CollaborativeShiftProvider: React.FC<
         };
       });
 
-      // セル単位の変更履歴を記録（undo）
-      recordBatchCellChanges(
-        undoUpdates,
-        currentUserId,
-        currentUserName,
-        "undo",
-      );
-
       await batchUpdateShiftsWithOfflineSupport(undoUpdates);
     },
     onRedo: async (entry) => {
-      // セル単位の変更履歴を記録（redo）
-      recordBatchCellChanges(
-        entry.updates,
-        currentUserId,
-        currentUserName,
-        "redo",
-      );
-
       // やり直し時は元の操作を再適用
       await batchUpdateShiftsWithOfflineSupport(entry.updates);
     },
@@ -299,9 +132,19 @@ export const CollaborativeShiftProvider: React.FC<
   } = useShiftPresence({
     currentUserId,
     currentUserName,
-    shiftRequestId,
-    targetMonth,
+    _shiftRequestId: shiftRequestId,
+    _targetMonth: targetMonth,
   });
+
+  // 同期フック
+  const { isSyncing, lastSyncedAt, syncError, triggerSync, pause, resume } =
+    useShiftSync({
+      enabled: false, // Phase 1.1では自動同期は不要（ユーザーアクションで都度更新）
+      interval: 5000,
+      onSync: async () => {
+        await fetchShifts();
+      },
+    });
 
   /**
    * シフトセルを更新
@@ -321,9 +164,6 @@ export const CollaborativeShiftProvider: React.FC<
         { userId: currentUserId, userName: currentUserName },
       );
 
-      // セル単位の変更履歴を記録
-      recordCellChange(update, currentUserId, currentUserName, "manual");
-
       // オフライン対応の更新を実行
       await updateShiftWithOfflineSupport(update);
     },
@@ -331,7 +171,6 @@ export const CollaborativeShiftProvider: React.FC<
       updateActivity,
       stopEditingCell,
       pushHistory,
-      recordCellChange,
       updateShiftWithOfflineSupport,
       currentUserId,
       currentUserName,
@@ -356,9 +195,6 @@ export const CollaborativeShiftProvider: React.FC<
         userName: currentUserName,
       });
 
-      // セル単位の変更履歴を一括記録
-      recordBatchCellChanges(updates, currentUserId, currentUserName, "batch");
-
       // オフライン対応のバッチ更新を実行
       await batchUpdateShiftsWithOfflineSupport(updates);
     },
@@ -366,7 +202,6 @@ export const CollaborativeShiftProvider: React.FC<
       updateActivity,
       stopEditingCell,
       pushHistory,
-      recordBatchCellChanges,
       batchUpdateShiftsWithOfflineSupport,
       currentUserId,
       currentUserName,
@@ -435,7 +270,7 @@ export const CollaborativeShiftProvider: React.FC<
       content: string,
       mentions: Mention[],
     ): Promise<CellComment> => {
-      const comment = addComment(
+      return addComment(
         cellKey,
         currentUserId,
         currentUserName,
@@ -443,14 +278,8 @@ export const CollaborativeShiftProvider: React.FC<
         content,
         mentions,
       );
-
-      // cellKey は "staffId#date" 形式
-      const staffId = cellKey.split("#")[0];
-      await persistComments(staffId);
-
-      return comment;
     },
-    [addComment, currentUserId, currentUserName, activeUsers, persistComments],
+    [addComment, currentUserId, currentUserName, activeUsers],
   );
 
   /**
@@ -466,13 +295,9 @@ export const CollaborativeShiftProvider: React.FC<
       if (!updated) {
         throw new Error(`Comment ${commentId} not found`);
       }
-
-      const staffId = updated.cellKey.split("#")[0];
-      await persistComments(staffId);
-
       return updated;
     },
-    [updateComment, persistComments],
+    [updateComment],
   );
 
   /**
@@ -480,13 +305,9 @@ export const CollaborativeShiftProvider: React.FC<
    */
   const handleDeleteComment = useCallback(
     async (commentId: string): Promise<void> => {
-      const { cellKey } = deleteComment(commentId);
-      if (cellKey) {
-        const staffId = cellKey.split("#")[0];
-        await persistComments(staffId);
-      }
+      deleteComment(commentId);
     },
-    [deleteComment, persistComments],
+    [deleteComment],
   );
 
   /**
@@ -519,19 +340,9 @@ export const CollaborativeShiftProvider: React.FC<
       if (!reply) {
         throw new Error(`Parent comment ${parentCommentId} not found`);
       }
-
-      const staffId = reply.cellKey.split("#")[0];
-      await persistComments(staffId);
-
       return reply;
     },
-    [
-      replyToComment,
-      currentUserId,
-      currentUserName,
-      activeUsers,
-      persistComments,
-    ],
+    [replyToComment, currentUserId, currentUserName, activeUsers],
   );
 
   /**
@@ -557,13 +368,10 @@ export const CollaborativeShiftProvider: React.FC<
       isLoading,
       isSyncing,
       lastSyncedAt,
-      lastAutoSyncedAt,
-      dataStatus,
       error: error || syncError || null,
       connectionState,
       isOnline,
       hasPendingChanges,
-      lastRemoteUpdate,
     }),
     [
       shiftDataMap,
@@ -574,14 +382,11 @@ export const CollaborativeShiftProvider: React.FC<
       isLoading,
       isSyncing,
       lastSyncedAt,
-      lastAutoSyncedAt,
-      dataStatus,
       error,
       syncError,
       connectionState,
       isOnline,
       hasPendingChanges,
-      lastRemoteUpdate,
     ],
   );
 
@@ -599,7 +404,8 @@ export const CollaborativeShiftProvider: React.FC<
       forceReleaseCell,
       getAllEditingCells,
       triggerSync: handleTriggerSync,
-      clearSyncError,
+      pauseSync: pause,
+      resumeSync: resume,
       updateUserActivity: handleUpdateUserActivity,
       retryPendingChanges,
       syncPendingChanges,
@@ -614,10 +420,6 @@ export const CollaborativeShiftProvider: React.FC<
       redoHistory,
       showHistory,
       toggleHistory: () => setShowHistory((prev) => !prev),
-      // セル単位変更履歴
-      getCellHistory,
-      getAllCellHistory,
-      getStaffCellHistory,
       // Comments
       addComment: handleAddComment,
       updateComment: handleUpdateComment,
@@ -639,7 +441,8 @@ export const CollaborativeShiftProvider: React.FC<
       forceReleaseCell,
       getAllEditingCells,
       handleTriggerSync,
-      clearSyncError,
+      pause,
+      resume,
       handleUpdateUserActivity,
       retryPendingChanges,
       syncPendingChanges,
@@ -652,9 +455,6 @@ export const CollaborativeShiftProvider: React.FC<
       undoHistory,
       redoHistory,
       showHistory,
-      getCellHistory,
-      getAllCellHistory,
-      getStaffCellHistory,
       handleAddComment,
       handleUpdateComment,
       handleDeleteComment,

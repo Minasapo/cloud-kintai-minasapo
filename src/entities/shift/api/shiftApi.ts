@@ -25,14 +25,6 @@ export type ShiftRequestLite = {
     status: ShiftRequestStatus;
     isLocked?: boolean | null;
   } | null> | null;
-  comments?: Array<{
-    id: string;
-    cellKey: string;
-    staffId: string;
-    authorName?: string | null;
-    body: string;
-    createdAt: string;
-  } | null> | null;
   updatedAt?: string | null;
   updatedBy?: string | null;
   version?: number | null;
@@ -68,14 +60,6 @@ const listShiftRequestsLite = /* GraphQL */ `
           status
           isLocked
         }
-        comments {
-          id
-          cellKey
-          staffId
-          authorName
-          body
-          createdAt
-        }
         updatedAt
         updatedBy
         version
@@ -106,14 +90,6 @@ const shiftRequestsByStaffIdLite = /* GraphQL */ `
           date
           status
           isLocked
-        }
-        comments {
-          id
-          cellKey
-          staffId
-          authorName
-          body
-          createdAt
         }
         updatedAt
         updatedBy

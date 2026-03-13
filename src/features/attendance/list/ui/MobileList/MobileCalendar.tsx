@@ -31,8 +31,6 @@ import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus, isHolidayLike } from "../../lib/attendanceStatusUtils";
 
-const MONTH_QUERY_KEY = "month";
-
 const CalendarContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(1),
   marginBottom: theme.spacing(2),
@@ -367,10 +365,7 @@ export default function MobileCalendar({
     const path = buildNavigatePath
       ? buildNavigatePath(dateStr)
       : `/attendance/${dateStr}/edit`;
-    const monthQuery = new URLSearchParams({
-      [MONTH_QUERY_KEY]: currentMonth.startOf("month").format("YYYY-MM"),
-    }).toString();
-    navigate(`${path}?${monthQuery}`);
+    navigate(path);
   };
 
   // 祝祭日判定のヘルパー関数

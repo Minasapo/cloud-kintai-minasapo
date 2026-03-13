@@ -54,11 +54,6 @@ interface VirtualizedShiftTableProps {
     event: React.MouseEvent,
   ) => void;
   onCellMouseEnter: (staffId: string, date: string) => void;
-  onCellContextMenu?: (
-    staffId: string,
-    date: string,
-    event: React.MouseEvent,
-  ) => void;
   isLoading?: boolean;
   getEventsForDay: (day: dayjs.Dayjs) => Array<{
     label: string;
@@ -79,7 +74,6 @@ interface VirtualizedShiftTableProps {
     onRegisterRef: (element: HTMLElement | null) => void;
     onMouseDown: (event: React.MouseEvent) => void;
     onMouseEnter: () => void;
-    onContextMenu?: (event: React.MouseEvent) => void;
     isFocused: boolean;
     isSelected: boolean;
   }>;
@@ -113,7 +107,6 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
     onCellRegisterRef,
     onCellMouseDown,
     onCellMouseEnter,
-    onCellContextMenu,
     isLoading,
     getEventsForDay,
     ShiftCellComponent,
@@ -267,12 +260,6 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                           onCellMouseDown(staffId, dayKey, event)
                         }
                         onMouseEnter={() => onCellMouseEnter(staffId, dayKey)}
-                        onContextMenu={
-                          onCellContextMenu
-                            ? (event: React.MouseEvent) =>
-                                onCellContextMenu(staffId, dayKey, event)
-                            : undefined
-                        }
                         isFocused={isFocused}
                         isSelected={isSelected}
                       />

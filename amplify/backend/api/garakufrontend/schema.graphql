@@ -228,15 +228,6 @@ type ShiftRequestHistory {
   changeReason: String
 }
 
-type ShiftRequestComment {
-  id: ID!
-  cellKey: String!
-  staffId: String!
-  authorName: String
-  body: String!
-  createdAt: String!
-}
-
 type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   id: ID!
   staffId: String!
@@ -256,8 +247,6 @@ type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   version: Int # 楽観的ロック用バージョン番号
   # 変更履歴（最新が先頭になるようクライアントで整列）
   histories: [ShiftRequestHistory]
-  # セルコメント（共同編集時のセル単位コメント）
-  comments: [ShiftRequestComment]
 }
 
 type ShiftPlanMonthSetting {
@@ -320,7 +309,6 @@ type AppConfig @model {
   amPmHolidayEnabled: Boolean
   officeMode: Boolean
   attendanceStatisticsEnabled: Boolean
-  workflowNotificationEnabled: Boolean
   absentEnabled: Boolean
   hourlyPaidHolidayEnabled: Boolean
   links: [Link]
@@ -331,8 +319,6 @@ type AppConfig @model {
   shiftGroups: [ShiftGroup]
   workflowCategoryOrder: WorkflowCategoryOrder
   overTimeCheckEnabled: Boolean
-  shiftCollaborativeEnabled: Boolean
-  shiftDefaultMode: String
 }
 
 type EmailResult {
@@ -434,34 +420,6 @@ type WorkflowTemplate @model @auth(rules: [{ allow: private }]) {
       name: "workflowTemplatesByOrganizationId"
       queryField: "workflowTemplatesByOrganizationId"
     )
-}
-
-enum WorkflowNotificationEventType {
-  WORKFLOW_COMMENT
-}
-
-type WorkflowNotificationEvent @model @auth(rules: [{ allow: private }]) {
-  id: ID!
-  recipientStaffId: String!
-    @index(
-      name: "workflowNotificationEventsByRecipient"
-      sortKeyFields: ["eventAt"]
-      queryField: "workflowNotificationEventsByRecipient"
-    )
-  actorStaffId: String!
-  workflowId: ID!
-    @index(
-      name: "workflowNotificationEventsByWorkflow"
-      sortKeyFields: ["eventAt"]
-      queryField: "workflowNotificationEventsByWorkflow"
-    )
-  eventType: WorkflowNotificationEventType!
-  commentId: ID
-  title: String!
-  body: String!
-  isRead: Boolean!
-  readAt: String
-  eventAt: String!
 }
 
 type OperationLog @model @auth(rules: [{ allow: private }]) {

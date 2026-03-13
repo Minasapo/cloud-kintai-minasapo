@@ -2,7 +2,6 @@ import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import DeleteIcon from "@mui/icons-material/Delete";
-import HistoryIcon from "@mui/icons-material/History";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import MessageIcon from "@mui/icons-material/Message";
@@ -19,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { memo, type MouseEvent, useState } from "react";
+import { memo, useState } from "react";
 
 import { CellComment, Mention, ShiftState } from "../types/collaborative.types";
 
@@ -34,10 +33,6 @@ interface BatchEditToolbarProps {
   onLock: () => void;
   onUnlock: () => void;
   onAddComments?: (content: string, mentions: Mention[]) => Promise<void>;
-  onShowCellHistory?: (
-    cellKey: string,
-    event: MouseEvent<HTMLButtonElement>,
-  ) => void;
   canUnlock: boolean;
   showLock: boolean;
   showUnlock: boolean;
@@ -66,7 +61,6 @@ const BatchEditToolbarBase = ({
   onLock,
   onUnlock,
   onAddComments,
-  onShowCellHistory,
   canUnlock,
   showLock,
   showUnlock,
@@ -318,29 +312,6 @@ const BatchEditToolbarBase = ({
             <Divider />
           </>
         )}
-
-        {/* セル変更履歴ボタン */}
-        {onShowCellHistory &&
-          selectionCount === 1 &&
-          selectedCells.length === 1 && (
-            <>
-              <Button
-                variant="outlined"
-                startIcon={<HistoryIcon />}
-                onClick={(event) =>
-                  onShowCellHistory(
-                    `${selectedCells[0].staffId}#${selectedCells[0].date}`,
-                    event,
-                  )
-                }
-                size="small"
-                color="primary"
-              >
-                このセルの変更履歴
-              </Button>
-              <Divider />
-            </>
-          )}
 
         {/* ヘルプテキスト */}
         <Typography variant="caption" color="text.secondary">

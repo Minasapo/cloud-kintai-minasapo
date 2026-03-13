@@ -18,12 +18,6 @@ import { useNavigate } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
-import {
-  AttendanceNotificationType,
-  LocalNotificationManager,
-} from "@/shared/lib/localNotification";
-import { createLogger } from "@/shared/lib/logger";
 import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import {
   setSnackbarError,
@@ -33,8 +27,6 @@ import {
 import { ChangeRequestDiffTable } from "./ChangeRequestDiffTable";
 import handleApproveChangeRequest from "./handleApproveChangeRequest";
 import handleRejectChangeRequest from "./handleRejectChangeRequest";
-
-const logger = createLogger("ChangeRequestDialog");
 
 export default function ChangeRequestDialog({
   attendance,
@@ -47,7 +39,6 @@ export default function ChangeRequestDialog({
 }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  useLocalNotification();
   const [comment, setComment] = useState<string | undefined>(undefined);
   const [manualClose, setManualClose] = useState(false);
 
@@ -145,12 +136,12 @@ export default function ChangeRequestDialog({
                 try {
                   await new GenericMailSender(
                     staff,
-                    updatedAttendance,
+                    updatedAttendance
                   ).rejectChangeRequest(comment);
                 } catch (mailError) {
                   console.error(
                     "Failed to send rejection notification mail:",
-                    mailError,
+                    mailError
                   );
                 }
 
@@ -172,7 +163,7 @@ export default function ChangeRequestDialog({
                 } catch (err) {
                   console.error(
                     "Failed to create operation log for reject change request:",
-                    err,
+                    err
                   );
                 }
 
@@ -198,12 +189,12 @@ export default function ChangeRequestDialog({
                 try {
                   await new GenericMailSender(
                     staff,
-                    updatedAttendance,
+                    updatedAttendance
                   ).approveChangeRequest(comment);
                 } catch (mailError) {
                   console.error(
                     "Failed to send approval notification mail:",
-                    mailError,
+                    mailError
                   );
                 }
 
@@ -225,29 +216,14 @@ export default function ChangeRequestDialog({
                 } catch (err) {
                   console.error(
                     "Failed to create operation log for approve change request:",
-                    err,
+                    err
                   );
                 }
 
-                // ローカル通知を表示
-                try {
-                  const manager = LocalNotificationManager.getInstance();
-                  await manager.showAttendanceNotification(
-                    AttendanceNotificationType.ATTENDANCE_CHANGE_REQUEST_APPROVED,
-                    {
-                      date: updatedAttendance.workDate,
-                    },
-                  );
-                } catch (notificationError) {
-                  logger.warn(
-                    "Failed to show attendance change request notification:",
-                    notificationError,
-                  );
-                }
-
+                dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
                 // navigate to staff attendance list
                 navigate(
-                  `/admin/staff/${updatedAttendance.staffId}/attendance`,
+                  `/admin/staff/${updatedAttendance.staffId}/attendance`
                 );
                 handleClose();
               })

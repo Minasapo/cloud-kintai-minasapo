@@ -4,7 +4,6 @@ import { useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
-import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import { E14001, S14001, S14002 } from "@/errors";
 import {
   appendItem,
@@ -61,10 +60,7 @@ export function useAdminConfigForm() {
     getSpecialHolidayEnabled,
     getAbsentEnabled,
     getAttendanceStatisticsEnabled,
-    getWorkflowNotificationEnabled,
     getOverTimeCheckEnabled,
-    getShiftCollaborativeEnabled,
-    getShiftDefaultMode,
     getThemeTokens,
   } = useContext(AppConfigContext);
 
@@ -108,18 +104,12 @@ export function useAdminConfigForm() {
   );
   const [attendanceStatisticsEnabled, setAttendanceStatisticsEnabled] =
     useState<boolean>(false);
-  const [workflowNotificationEnabled, setWorkflowNotificationEnabled] =
-    useState<boolean>(false);
   const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
   const [specialHolidayEnabled, setSpecialHolidayEnabled] =
     useState<boolean>(false);
   const [absentEnabled, setAbsentEnabled] = useState<boolean>(false);
   const [overTimeCheckEnabled, setOverTimeCheckEnabled] =
     useState<boolean>(false);
-  const [shiftCollaborativeEnabled, setShiftCollaborativeEnabled] =
-    useState<boolean>(false);
-  const [shiftDefaultMode, setShiftDefaultMode] =
-    useState<ShiftDisplayMode>("normal");
 
   const dispatch = useAppDispatchV2();
 
@@ -160,16 +150,7 @@ export function useAdminConfigForm() {
       setOverTimeCheckEnabled(getOverTimeCheckEnabled());
     }
 
-    if (typeof getShiftCollaborativeEnabled === "function") {
-      setShiftCollaborativeEnabled(getShiftCollaborativeEnabled());
-    }
-
-    if (typeof getShiftDefaultMode === "function") {
-      setShiftDefaultMode(getShiftDefaultMode());
-    }
-
     setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
-    setWorkflowNotificationEnabled(getWorkflowNotificationEnabled());
 
     if (
       typeof getAmHolidayStartTime === "function" &&
@@ -340,27 +321,6 @@ export function useAdminConfigForm() {
     setOverTimeCheckEnabled(event.target.checked);
   };
 
-  const handleWorkflowNotificationEnabledChange = (
-    _: ChangeEvent<HTMLInputElement>,
-    checked: boolean,
-  ) => {
-    setWorkflowNotificationEnabled(checked);
-  };
-
-  const handleShiftCollaborativeEnabledChange = (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    const enabled = event.target.checked;
-    setShiftCollaborativeEnabled(enabled);
-    if (!enabled) {
-      setShiftDefaultMode("normal");
-    }
-  };
-
-  const handleShiftDefaultModeChange = (mode: ShiftDisplayMode) => {
-    setShiftDefaultMode(mode);
-  };
-
   const handleSave = async () => {
     const validationResult = validateAdminConfigForm({
       startTime,
@@ -390,10 +350,7 @@ export function useAdminConfigForm() {
       amPmHolidayEnabled,
       specialHolidayEnabled,
       attendanceStatisticsEnabled,
-      workflowNotificationEnabled,
       overTimeCheckEnabled,
-      shiftCollaborativeEnabled,
-      shiftDefaultMode,
       startTime: startTime!,
       endTime: endTime!,
       lunchRestStartTime: lunchRestStartTime!,
@@ -440,10 +397,7 @@ export function useAdminConfigForm() {
     specialHolidayEnabled,
     absentEnabled,
     attendanceStatisticsEnabled,
-    workflowNotificationEnabled,
     overTimeCheckEnabled,
-    shiftCollaborativeEnabled,
-    shiftDefaultMode,
     setStartTime,
     setEndTime,
     setLunchRestStartTime,
@@ -458,10 +412,7 @@ export function useAdminConfigForm() {
     handleSpecialHolidayEnabledChange,
     handleAbsentEnabledChange,
     handleAttendanceStatisticsEnabledChange,
-    handleWorkflowNotificationEnabledChange,
     handleOverTimeCheckEnabledChange,
-    handleShiftCollaborativeEnabledChange,
-    handleShiftDefaultModeChange,
     handleAddLink,
     handleLinkChange,
     handleRemoveLink,

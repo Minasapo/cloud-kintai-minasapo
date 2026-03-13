@@ -86,34 +86,11 @@ export const normalizeShiftRequest = (
     });
   });
 
-  const comments = (
-    shiftRequest as {
-      comments?: Array<{
-        id: string;
-        cellKey: string;
-        staffId: string;
-        authorName?: string | null;
-        body: string;
-        createdAt: string;
-      } | null> | null;
-    }
-  ).comments;
-
   return {
     id: shiftRequest.id,
     staffId: shiftRequest.staffId,
     targetMonth: shiftRequest.targetMonth,
     entries,
-    comments: comments
-      ?.filter((c): c is NonNullable<typeof c> => c !== null)
-      .map((c) => ({
-        id: c.id,
-        cellKey: c.cellKey,
-        staffId: c.staffId,
-        authorName: c.authorName ?? undefined,
-        body: c.body,
-        createdAt: c.createdAt,
-      })),
     updatedAt: shiftRequest.updatedAt ?? undefined,
     updatedBy: shiftRequest.updatedBy ?? undefined,
     version: shiftRequest.version ?? undefined,

@@ -1,12 +1,11 @@
-import { Box } from "@mui/material";
+import { Box, Link } from "@mui/material";
 
 import LogoImage from "@/images/logo.png";
 import { designTokenVar } from "@/shared/designSystem";
-import Link from "@/shared/ui/link/Link";
 
 const HEADER_LOGO_MAX_HEIGHT = designTokenVar(
   "component.headerBar.logoMaxHeight",
-  "32px",
+  "32px"
 );
 
 const Logo = () => (

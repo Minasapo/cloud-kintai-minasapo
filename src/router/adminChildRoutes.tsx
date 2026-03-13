@@ -18,20 +18,17 @@ const AdminAttendancePrintRoute = createLazyRoute(
 const AbsentRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Absent"),
 );
+const AdminConfigManagementRoute = createLazyRoute(
+  () => import("@/features/admin/configManagement/ui/AdminConfigManagement"),
+);
 const AmPmHolidayRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/AmPmHoliday"),
-);
-const DeveloperRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/Developer"),
 );
 const LinksRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Links"),
 );
 const AttendanceStatisticsRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/AttendanceStatistics"),
-);
-const OvertimeConfirmationRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/OvertimeConfirmation"),
 );
 const OfficeModeRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/OfficeMode"),
@@ -214,6 +211,10 @@ export const adminChildRoutes: RouteObject[] = [
         lazy: AdminWorkflowCategorySettingsRoute,
       },
       {
+        path: "feature_management",
+        lazy: AdminConfigManagementRoute,
+      },
+      {
         path: "feature_management/working_time",
         lazy: WorkingTimeRoute,
       },
@@ -228,14 +229,6 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "feature_management/attendance_statistics",
         lazy: AttendanceStatisticsRoute,
-      },
-      {
-        path: "feature_management/overtime_confirmation",
-        lazy: OvertimeConfirmationRoute,
-      },
-      {
-        path: "developer",
-        lazy: DeveloperRoute,
       },
       {
         path: "feature_management/links",

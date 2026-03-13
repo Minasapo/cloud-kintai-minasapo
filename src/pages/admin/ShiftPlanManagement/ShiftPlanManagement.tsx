@@ -3,14 +3,15 @@ import { Container, Stack } from "@mui/material";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
+import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import { ShiftPlanFooter, ShiftPlanHeader, ShiftPlanTable } from "./components";
 import { useAutoSave, useDayCellFocus, useShiftPlanData } from "./hooks";
 
 export default function ShiftPlanManagement() {
-  const { notify } = useLocalNotification();
+  const dispatch = useAppDispatchV2();
   const {
     selectedYear,
     currentRows,
@@ -34,14 +35,9 @@ export default function ShiftPlanManagement() {
   useEffect(() => {
     if (holidayCalendarsError) {
       console.error(holidayCalendarsError);
-      void notify("エラー", {
-        body: MESSAGE_CODE.E00001,
-        mode: "await-interaction",
-        priority: "high",
-        tag: "holiday-calendar-error",
-      });
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
     }
-  }, [holidayCalendarsError, notify]);
+  }, [holidayCalendarsError, dispatch]);
 
   const holidayNameMap = useMemo(() => {
     if (!holidayCalendars.length) return new Map<string, string>();
@@ -56,9 +52,7 @@ export default function ShiftPlanManagement() {
   const handleTabNextDay = useCallback(
     (month: number, dayIndex: number) => {
       // 次の日のインデックスを計算
-      const monthCursor = dayjs()
-        .year(selectedYear)
-        .month(month - 1);
+      const monthCursor = dayjs().year(selectedYear).month(month - 1);
       const daysInMonth = monthCursor.daysInMonth();
 
       let nextMonth = month;

@@ -6,34 +6,24 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export default async function fetchStaffs() {
   const staffs: Staff[] = [];
-  let nextToken: string | null = null;
+  const response = (await graphqlClient.graphql({
+    query: listStaff,
+    authMode: "userPool",
+  })) as GraphQLResult<ListStaffQuery>;
 
-  do {
-    const response = (await graphqlClient.graphql({
-      query: listStaff,
-      variables: {
-        limit: 100,
-        nextToken,
-      },
-      authMode: "userPool",
-    })) as GraphQLResult<ListStaffQuery>;
+  if (response.errors) {
+    throw new Error(response.errors[0].message);
+  }
 
-    if (response.errors) {
-      throw new Error(response.errors[0].message);
-    }
+  if (!response.data?.listStaff) {
+    throw new Error("No data returned");
+  }
 
-    if (!response.data?.listStaff) {
-      throw new Error("No data returned");
-    }
-
-    staffs.push(
-      ...response.data.listStaff.items.filter(
-        (item): item is NonNullable<typeof item> => !!item,
-      ),
-    );
-
-    nextToken = response.data.listStaff.nextToken ?? null;
-  } while (nextToken);
+  staffs.push(
+    ...response.data.listStaff.items.filter(
+      (item): item is NonNullable<typeof item> => !!item
+    )
+  );
 
   return staffs;
 }

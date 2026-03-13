@@ -17,6 +17,7 @@ import Page from "@shared/ui/page/Page";
 import { useContext, useState } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
+import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
 import { fetchWorkflowById } from "@/entities/workflow/model/loader";
 import {
@@ -29,10 +30,13 @@ import {
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
 const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
@@ -47,7 +51,7 @@ export default function WorkflowEditPage() {
   const isAuthenticated = authStatus === "authenticated";
   const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const { staffs } = useStaffs({ isAuthenticated });
-  const { notify } = useLocalNotification();
+  const dispatch = useAppDispatchV2();
   const {
     category,
     setCategory,
@@ -136,16 +140,12 @@ export default function WorkflowEditPage() {
         });
 
         await updateWorkflow(baseInput);
-        void notify("保存しました", { mode: "auto-close" });
+        dispatch(setSnackbarSuccess("保存しました"));
         setTimeout(() => navigate(`/workflow/${id}`), 1000);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         logger.error("Workflow update failed:", message);
-        void notify("エラー", {
-          body: message,
-          mode: "await-interaction",
-          priority: "high",
-        });
+        dispatch(setSnackbarError(message));
       }
     })();
   };

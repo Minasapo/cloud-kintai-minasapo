@@ -46,8 +46,6 @@ import {
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
 
-const MONTH_QUERY_KEY = "month";
-
 const DesktopBox = styled(Box)(({ theme }) => ({
   padding: "0px 40px 40px 40px",
   [theme.breakpoints.down("lg")]: {
@@ -130,10 +128,7 @@ export default function DesktopList({
     const formattedWorkDate = dayjs(workDate).format(
       AttendanceDate.QueryParamFormat,
     );
-    const monthQuery = new URLSearchParams({
-      [MONTH_QUERY_KEY]: currentMonth.startOf("month").format("YYYY-MM"),
-    }).toString();
-    navigate(`/attendance/${formattedWorkDate}/edit?${monthQuery}`);
+    navigate(`/attendance/${formattedWorkDate}/edit`);
   };
 
   const errorAttendances = (() => {

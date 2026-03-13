@@ -6,14 +6,14 @@ export class ChangeRequest {
   constructor(changeRequests: Attendance["changeRequests"]) {
     this.changeRequests = changeRequests
       ? changeRequests.filter(
-          (item): item is NonNullable<typeof item> => item !== null,
+          (item): item is NonNullable<typeof item> => item !== null
         )
       : [];
   }
 
   getUnapprovedCount() {
     return this.changeRequests.filter(
-      (changeRequest) => !changeRequest.completed,
+      (changeRequest) => !changeRequest.completed
     ).length;
   }
 
@@ -24,9 +24,3 @@ export class ChangeRequest {
     );
   }
 }
-
-export const hasUnapprovedChangeRequest = (
-  changeRequests: Attendance["changeRequests"],
-) => {
-  return new ChangeRequest(changeRequests).getUnapprovedCount() > 0;
-};

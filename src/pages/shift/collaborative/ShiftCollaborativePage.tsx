@@ -61,10 +61,7 @@ import { useShiftNavigation } from "../../../features/shift/collaborative/hooks/
 import { useShiftSuggestions } from "../../../features/shift/collaborative/hooks/useShiftSuggestions";
 import { CollaborativeShiftProvider } from "../../../features/shift/collaborative/providers/CollaborativeShiftProvider";
 import { SuggestedAction } from "../../../features/shift/collaborative/rules/shiftRules";
-import {
-  DataSyncStatus,
-  ShiftState,
-} from "../../../features/shift/collaborative/types/collaborative.types";
+import { ShiftState } from "../../../features/shift/collaborative/types/collaborative.types";
 
 // シフト状態の表示設定
 const shiftStateConfig: Record<
@@ -105,7 +102,6 @@ interface ShiftCellProps {
   onRegisterRef?: (element: HTMLElement | null) => void;
   onMouseDown?: (event: MouseEvent) => void;
   onMouseEnter?: () => void;
-  onContextMenu?: (event: React.MouseEvent) => void;
   isFocused?: boolean;
   isSelected?: boolean;
 }
@@ -121,7 +117,6 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
   onRegisterRef,
   onMouseDown,
   onMouseEnter,
-  onContextMenu,
   isFocused = false,
   isSelected = false,
 }: ShiftCellProps) => {
@@ -149,7 +144,6 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
       onClick={onClick}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
-      onContextMenu={onContextMenu}
       sx={{
         ...SHIFT_CELL_BASE_SX,
         bgcolor: isEditing
@@ -454,7 +448,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     isCellBeingEdited,
     getCellEditor,
     triggerSync,
-    clearSyncError,
     updateUserActivity,
     canUndo,
     canRedo,
@@ -466,8 +459,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     redoHistory,
     showHistory,
     toggleHistory,
-    getCellHistory,
-    getAllCellHistory,
     addComment,
     updateComment,
     deleteComment,
@@ -916,11 +907,9 @@ const useCollaborativePageState = (targetMonth: string) => {
     handleCellMouseEnter,
     handleMouseUp,
     handleSync,
-    clearSyncError,
     progress,
     calculateDailyCount,
     getEventsForDay,
-    selectedCells,
     selectionCount,
     hasLocked,
     hasUnlocked,
@@ -950,8 +939,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     redoHistory,
     showHistory,
     toggleHistory,
-    getCellHistory,
-    getAllCellHistory,
     addComment,
     updateComment,
     deleteComment,
@@ -1045,41 +1032,6 @@ const ProgressPanelBase: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
 
 const ProgressPanel = memo(ProgressPanelBase);
 
-type SyncPanelProps = {
-  syncError: string | null;
-  onClearError?: () => void;
-};
-
-const dataSyncStatusConfig: Record<
-  DataSyncStatus,
-  {
-    label: string;
-    color: "default" | "primary" | "success" | "warning" | "error";
-    showSpinner: boolean;
-  }
-> = {
-  idle: { label: "未同期", color: "default", showSpinner: false },
-  saving: { label: "保存中", color: "warning", showSpinner: true },
-  syncing: { label: "同期中", color: "primary", showSpinner: true },
-  saved: { label: "保存完了", color: "success", showSpinner: false },
-  synced: { label: "同期完了", color: "success", showSpinner: false },
-  error: { label: "エラー", color: "error", showSpinner: false },
-};
-
-const SyncPanelBase: FC<SyncPanelProps> = ({ syncError, onClearError }) => {
-  return (
-    <>
-      {syncError && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={onClearError}>
-          同期に失敗しました。再試行してください。({syncError})
-        </Alert>
-      )}
-    </>
-  );
-};
-
-const SyncPanel = memo(SyncPanelBase);
-
 ProgressPanelBase.propTypes = {
   progress: PropTypes.shape({
     confirmedCount: PropTypes.number.isRequired,
@@ -1116,11 +1068,9 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       handleCellMouseEnter,
       handleMouseUp,
       handleSync: _handleSync,
-      clearSyncError: _clearSyncError,
       progress,
       calculateDailyCount,
       getEventsForDay,
-      selectedCells,
       selectionCount,
       hasLocked,
       hasUnlocked,
@@ -1149,10 +1099,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       getLastRedo,
       undoHistory,
       redoHistory,
+      showHistory,
+      toggleHistory,
       isBatchUpdating,
       addComment,
       getCommentsByCell,
-      getAllCellHistory,
     } = useCollaborativePageState(targetMonth);
 
     // 現在のユーザーIDを取得
@@ -1165,8 +1116,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     }, [cognitoUser, staffs]);
 
     // プレゼンス通知
-    const { notifications, addNotification, dismissNotification } =
-      usePresenceNotifications();
+    const { notifications, dismissNotification } = usePresenceNotifications();
 
     // 印刷機能
     const { isPrintDialogOpen, openPrintDialog, closePrintDialog } =
@@ -1184,56 +1134,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       [staffs],
     );
 
-    // サブスクリプション経由のリモート更新をトースト通知
-    useEffect(() => {
-      if (!state.lastRemoteUpdate) return;
-      const staffName =
-        staffNameMap.get(state.lastRemoteUpdate.staffId) ??
-        state.lastRemoteUpdate.staffId;
-      addNotification("data-synced", "", { staffName, date: "" });
-    }, [state.lastRemoteUpdate, staffNameMap, addNotification]);
-
     // コンフリクト解決ダイアログ状態
     const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
-
-    // セル単位変更履歴Drawer状態
-    const [cellHistoryDrawerOpen, setCellHistoryDrawerOpen] =
-      useState<boolean>(false);
-    const [cellHistoryFocusKey, setCellHistoryFocusKey] = useState<string>("");
-    const [cellHistoryFocusToken, setCellHistoryFocusToken] =
-      useState<number>(0);
-    const [suggestionsDrawerOpen, setSuggestionsDrawerOpen] =
-      useState<boolean>(false);
-
-    const handleCellContextMenu = useCallback(
-      (staffId: string, date: string, event: React.MouseEvent) => {
-        event.preventDefault();
-        const cellKey = `${staffId}#${date}`;
-        setCellHistoryFocusKey(cellKey);
-        setCellHistoryFocusToken(Date.now());
-        setCellHistoryDrawerOpen(true);
-      },
-      [],
-    );
-
-    const handleCloseCellHistory = useCallback(() => {
-      setCellHistoryDrawerOpen(false);
-    }, []);
-
-    const handleShowCellHistory = useCallback((cellKey: string) => {
-      setCellHistoryFocusKey(cellKey);
-      setCellHistoryFocusToken(Date.now());
-      setCellHistoryDrawerOpen(true);
-    }, []);
-
-    const suggestionsBadgeCount = useMemo(
-      () =>
-        violations.filter(
-          (violation) =>
-            violation.severity === "error" || violation.severity === "warning",
-        ).length,
-      [violations],
-    );
 
     // 複数セルへのコメント一括追加ハンドラー
     const handleAddCommentsToSelectedCells = useCallback(
@@ -1283,36 +1185,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       return ShiftCellWithCommentsComponent;
     }, []) as React.FC<ShiftCellProps>;
 
-    const formattedLastSyncedAt =
-      state.lastAutoSyncedAt > 0
-        ? dayjs(state.lastAutoSyncedAt).format("YYYY/MM/DD HH:mm:ss")
-        : "未同期";
-
-    const syncStatusConfig = dataSyncStatusConfig[state.dataStatus];
-
-    const syncButtonColor: "default" | "primary" | "success" | "error" =
-      state.dataStatus === "error"
-        ? "error"
-        : state.dataStatus === "synced" || state.dataStatus === "saved"
-          ? "success"
-          : state.dataStatus === "syncing"
-            ? "primary"
-            : "default";
-
-    const syncTooltipTitle = (
-      <Box>
-        <Typography variant="caption" component="div">
-          同期状態: {syncStatusConfig.label}
-        </Typography>
-        <Typography variant="caption" component="div">
-          最後に自動同期された日時: {formattedLastSyncedAt}
-        </Typography>
-        <Typography variant="caption" component="div">
-          {state.isSyncing ? "同期中です" : "最新状態を取得"}
-        </Typography>
-      </Box>
-    );
-
     return (
       <Page title="シフト調整(共同)">
         <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
@@ -1330,19 +1202,28 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onRedo={redo}
             lastUndoDescription={getLastUndo()?.description}
             lastRedoDescription={getLastRedo()?.description}
+            showHistory={showHistory}
+            onToggleHistory={toggleHistory}
             onShowHelp={() => setShowHelp(true)}
             onPrint={openPrintDialog}
-            onSync={() => {
-              void _handleSync();
-            }}
-            syncTooltip={syncTooltipTitle}
-            syncColor={syncButtonColor}
-            isSyncing={state.isSyncing}
-            onShowSuggestions={() => setSuggestionsDrawerOpen(true)}
-            suggestionsBadgeCount={suggestionsBadgeCount}
           />
 
-          <SyncPanel syncError={state.error} onClearError={_clearSyncError} />
+          {/* 変更履歴ダイアログ */}
+          <ChangeHistoryPanel
+            undoHistory={undoHistory}
+            redoHistory={redoHistory}
+            staffNameMap={staffNameMap}
+            open={showHistory}
+            onClose={toggleHistory}
+          />
+
+          {/* シフト提案パネル */}
+          <ShiftSuggestionsPanel
+            violations={violations}
+            isAnalyzing={isAnalyzing}
+            onApplyAction={handleApplySuggestion}
+            onRefresh={analyzeShifts}
+          />
 
           {/* 進捗パネル */}
           <ProgressPanel progress={progress} totalDays={days.length} />
@@ -1366,7 +1247,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onCellRegisterRef={registerCell}
             onCellMouseDown={handleCellMouseDown}
             onCellMouseEnter={handleCellMouseEnter}
-            onCellContextMenu={handleCellContextMenu}
             calculateDailyCount={(day) => calculateDailyCount(day.format("DD"))}
             getEventsForDay={getEventsForDay}
             ShiftCellComponent={ShiftCellWithComments}
@@ -1377,11 +1257,9 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           <BatchEditToolbar
             selectionCount={selectionCount}
             selectedCells={
-              selectionCount > 0
-                ? selectedCells
-                : focusedCell
-                  ? [{ staffId: focusedCell.staffId, date: focusedCell.date }]
-                  : []
+              focusedCell
+                ? [{ staffId: focusedCell.staffId, date: focusedCell.date }]
+                : []
             }
             comments={
               focusedCell
@@ -1397,7 +1275,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onLock={handleLockCells}
             onUnlock={handleUnlockCells}
             onAddComments={handleAddCommentsToSelectedCells}
-            onShowCellHistory={(cellKey) => handleShowCellHistory(cellKey)}
             canUnlock={isAdmin}
             showLock={hasUnlocked}
             showUnlock={hasLocked}
@@ -1449,32 +1326,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onDismiss={dismissNotification}
           />
         </Container>
-
-        {/* セル履歴Drawer */}
-        <ChangeHistoryPanel
-          undoHistory={undoHistory}
-          redoHistory={redoHistory}
-          cellHistory={getAllCellHistory()}
-          staffNameMap={staffNameMap}
-          open={cellHistoryDrawerOpen}
-          onClose={handleCloseCellHistory}
-          initialCellKey={cellHistoryFocusKey || undefined}
-          focusCellKey={
-            cellHistoryFocusKey
-              ? `${cellHistoryFocusKey}@${cellHistoryFocusToken}`
-              : undefined
-          }
-          showOperationTab={false}
-        />
-
-        <ShiftSuggestionsPanel
-          open={suggestionsDrawerOpen}
-          onClose={() => setSuggestionsDrawerOpen(false)}
-          violations={violations}
-          isAnalyzing={isAnalyzing}
-          onApplyAction={handleApplySuggestion}
-          onRefresh={analyzeShifts}
-        />
       </Page>
     );
   },

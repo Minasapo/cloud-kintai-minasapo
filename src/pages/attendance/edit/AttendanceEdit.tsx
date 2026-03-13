@@ -27,8 +27,9 @@ import {
   UseFormHandleSubmit,
   useWatch,
 } from "react-hook-form";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
+import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
@@ -42,17 +43,17 @@ import {
 } from "@/features/attendance/edit/model/common";
 import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEditor";
 import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { createLogger } from "@/shared/lib/logger";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 
 import sendChangeRequestMail from "./sendChangeRequestMail";
 
 const logger = createLogger("AttendanceEdit");
 
-const MONTH_QUERY_KEY = "month";
-
 export default function AttendanceEdit() {
-  const { notify } = useLocalNotification();
   const { cognitoUser } = useContext(AuthContext);
   const {
     getHourlyPaidHolidayEnabled,
@@ -62,19 +63,8 @@ export default function AttendanceEdit() {
     getLunchRestEndTime,
   } = useContext(AppConfigContext);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const dispatch = useAppDispatchV2();
   const { targetWorkDate } = useParams();
-
-  const attendanceListPath = useMemo(() => {
-    const month = searchParams.get(MONTH_QUERY_KEY);
-    if (!month) {
-      return "/attendance/list";
-    }
-
-    return `/attendance/list?${new URLSearchParams({
-      [MONTH_QUERY_KEY]: month,
-    }).toString()}`;
-  }, [searchParams]);
 
   const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
 
@@ -217,29 +207,15 @@ export default function AttendanceEdit() {
             );
           } catch (mailError) {
             logger.error("Failed to send change request mail:", mailError);
-            void notify("メール送信エラー", {
-              body: MESSAGE_CODE.E00002,
-              mode: "await-interaction",
-              priority: "normal",
-              tag: "mail-error",
-            });
+            dispatch(setSnackbarError(MESSAGE_CODE.E00002));
           }
 
-          void notify("修正申請完了", {
-            body: MESSAGE_CODE.S02005,
-            mode: "auto-close",
-            tag: "attendance-change-request",
-          });
+          dispatch(setSnackbarSuccess(MESSAGE_CODE.S02005));
 
-          navigate(attendanceListPath);
+          navigate("/attendance/list");
         })
         .catch(() => {
-          void notify("修正申請エラー", {
-            body: MESSAGE_CODE.E02005,
-            mode: "await-interaction",
-            priority: "high",
-            tag: "attendance-change-request-error",
-          });
+          dispatch(setSnackbarError(MESSAGE_CODE.E02005));
         });
     } else {
       if (!staff || !targetWorkDate) return;
@@ -272,11 +248,7 @@ export default function AttendanceEdit() {
         ],
       })
         .then(() => {
-          void notify("修正申請完了", {
-            body: MESSAGE_CODE.S02005,
-            mode: "auto-close",
-            tag: "attendance-change-request",
-          });
+          dispatch(setSnackbarSuccess(MESSAGE_CODE.S02005));
 
           if (!cognitoUser) return;
           try {
@@ -288,23 +260,13 @@ export default function AttendanceEdit() {
             );
           } catch (mailError) {
             console.error("Failed to send change request mail:", mailError);
-            void notify("メール送信エラー", {
-              body: MESSAGE_CODE.E00002,
-              mode: "await-interaction",
-              priority: "normal",
-              tag: "mail-error",
-            });
+            dispatch(setSnackbarError(MESSAGE_CODE.E00002));
           }
-          navigate(attendanceListPath);
+          navigate("/attendance/list");
         })
         .catch((e) => {
           logger.error("Failed to update attendance:", e);
-          void notify("修正申請エラー", {
-            body: MESSAGE_CODE.E02005,
-            mode: "await-interaction",
-            priority: "high",
-            tag: "attendance-change-request-error",
-          });
+          dispatch(setSnackbarError(MESSAGE_CODE.E02005));
         });
     }
   };
@@ -334,13 +296,8 @@ export default function AttendanceEdit() {
       return;
     }
 
-    void notify("データ取得エラー", {
-      body: MESSAGE_CODE.E02001,
-      mode: "await-interaction",
-      priority: "high",
-      tag: "attendance-fetch-error",
-    });
-  }, [attendanceError, shouldFetchAttendance, notify]);
+    dispatch(setSnackbarError(MESSAGE_CODE.E02001));
+  }, [attendanceError, dispatch, shouldFetchAttendance]);
 
   useEffect(() => {
     if (!attendance || !targetWorkDateISO) {
@@ -690,12 +647,7 @@ export default function AttendanceEdit() {
   }
 
   if (staffSError) {
-    void notify("エラー", {
-      body: MESSAGE_CODE.E00001,
-      mode: "await-interaction",
-      priority: "high",
-      tag: "staff-fetch-error",
-    });
+    dispatch(setSnackbarError(MESSAGE_CODE.E00001));
     return null;
   }
 

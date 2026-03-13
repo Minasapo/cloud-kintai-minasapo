@@ -1,22 +1,12 @@
 import {
   HelpOutline as HelpOutlineIcon,
-  Lightbulb as LightbulbIcon,
+  History as HistoryIcon,
   Redo as RedoIcon,
-  Sync as SyncIcon,
   Undo as UndoIcon,
 } from "@mui/icons-material";
 import PrintIcon from "@mui/icons-material/Print";
-import {
-  Badge,
-  Divider,
-  IconButton,
-  Paper,
-  Stack,
-  Tooltip,
-} from "@mui/material";
+import { Divider, IconButton, Paper, Stack, Tooltip } from "@mui/material";
 import React from "react";
-
-const MIN_SYNC_SPIN_DURATION_MS = 2000;
 
 /**
  * 取り消し/やり直しツールバーのProps
@@ -28,16 +18,10 @@ export interface UndoRedoToolbarProps {
   onRedo: () => void;
   lastUndoDescription?: string;
   lastRedoDescription?: string;
-  showHistory?: boolean;
-  onToggleHistory?: () => void;
+  showHistory: boolean;
+  onToggleHistory: () => void;
   onShowHelp?: () => void;
   onPrint?: () => void;
-  onSync?: () => void;
-  syncTooltip?: React.ReactNode;
-  syncColor?: "default" | "primary" | "success" | "error";
-  isSyncing?: boolean;
-  onShowSuggestions?: () => void;
-  suggestionsBadgeCount?: number;
 }
 
 /**
@@ -51,65 +35,11 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
   onRedo,
   lastUndoDescription,
   lastRedoDescription,
+  showHistory,
+  onToggleHistory,
   onShowHelp,
   onPrint,
-  onSync,
-  syncTooltip,
-  syncColor = "default",
-  isSyncing = false,
-  onShowSuggestions,
-  suggestionsBadgeCount,
 }) => {
-  const [isSyncAnimating, setIsSyncAnimating] = React.useState(isSyncing);
-  const syncAnimationStartedAtRef = React.useRef<number | null>(null);
-  const syncAnimationTimerRef = React.useRef<number | null>(null);
-
-  React.useEffect(() => {
-    if (syncAnimationTimerRef.current !== null) {
-      window.clearTimeout(syncAnimationTimerRef.current);
-      syncAnimationTimerRef.current = null;
-    }
-
-    if (isSyncing) {
-      if (syncAnimationStartedAtRef.current === null) {
-        syncAnimationStartedAtRef.current = Date.now();
-      }
-      setIsSyncAnimating(true);
-      return;
-    }
-
-    if (syncAnimationStartedAtRef.current === null) {
-      setIsSyncAnimating(false);
-      return;
-    }
-
-    const elapsed = Date.now() - syncAnimationStartedAtRef.current;
-    const remaining = Math.max(0, MIN_SYNC_SPIN_DURATION_MS - elapsed);
-
-    if (remaining === 0) {
-      syncAnimationStartedAtRef.current = null;
-      setIsSyncAnimating(false);
-      return;
-    }
-
-    syncAnimationTimerRef.current = window.setTimeout(() => {
-      syncAnimationStartedAtRef.current = null;
-      syncAnimationTimerRef.current = null;
-      setIsSyncAnimating(false);
-    }, remaining);
-  }, [isSyncing]);
-
-  React.useEffect(
-    () => () => {
-      if (syncAnimationTimerRef.current !== null) {
-        window.clearTimeout(syncAnimationTimerRef.current);
-      }
-    },
-    [],
-  );
-
-  const isSyncBusy = isSyncing || isSyncAnimating;
-
   return (
     <Paper
       elevation={1}
@@ -159,6 +89,18 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
           </span>
         </Tooltip>
 
+        <Tooltip title={showHistory ? "変更履歴を非表示" : "変更履歴を表示"}>
+          <IconButton
+            size="small"
+            onClick={onToggleHistory}
+            color={showHistory ? "primary" : "default"}
+            aria-label="toggle history"
+            sx={{ ml: 1 }}
+          >
+            <HistoryIcon />
+          </IconButton>
+        </Tooltip>
+
         {onPrint && (
           <>
             <Divider orientation="vertical" flexItem sx={{ mx: 1, my: 0.5 }} />
@@ -172,57 +114,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
                 <PrintIcon />
               </IconButton>
             </Tooltip>
-
-            {onSync && (
-              <Tooltip
-                title={
-                  syncTooltip || (isSyncBusy ? "同期中です" : "最新状態を取得")
-                }
-              >
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={onSync}
-                    color={syncColor}
-                    disabled={isSyncBusy}
-                    aria-label="sync"
-                  >
-                    <SyncIcon
-                      sx={{
-                        animation: isSyncAnimating
-                          ? "copilot-sync-spin 1s linear infinite"
-                          : "none",
-                        "@keyframes copilot-sync-spin": {
-                          from: { transform: "rotate(0deg)" },
-                          to: { transform: "rotate(-360deg)" },
-                        },
-                      }}
-                    />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            )}
           </>
-        )}
-
-        {onShowSuggestions && (
-          <Tooltip title="シフト提案を表示">
-            <Badge
-              color="error"
-              badgeContent={suggestionsBadgeCount}
-              max={9}
-              invisible={!suggestionsBadgeCount || suggestionsBadgeCount <= 0}
-            >
-              <IconButton
-                size="small"
-                onClick={onShowSuggestions}
-                color="primary"
-                aria-label="show suggestions"
-              >
-                <LightbulbIcon />
-              </IconButton>
-            </Badge>
-          </Tooltip>
         )}
 
         {onShowHelp && (

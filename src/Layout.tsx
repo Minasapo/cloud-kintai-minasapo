@@ -47,7 +47,6 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
-import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
 import { createLogger } from "@/shared/lib/logger";
 import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
@@ -61,9 +60,6 @@ import { AuthContext } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
-import { useLocalNotification } from "./hooks/useLocalNotification";
-import { useWorkflowCommentNotification } from "./hooks/useWorkflowCommentNotification";
-import { useWorkflowNotification } from "./hooks/useWorkflowNotification";
 
 const logger = createLogger("Layout");
 
@@ -181,40 +177,6 @@ export default function Layout() {
   // 重複勤怠データの警告をリッスン
   useDuplicateAttendanceWarning();
 
-  // 通知権限をリクエスト
-  const { requestPermission, permission, isSupported } = useLocalNotification();
-
-  // 認証後に通知権限をリクエスト
-  useEffect(() => {
-    if (
-      authStatus === "authenticated" &&
-      isSupported &&
-      permission === "default"
-    ) {
-      logger.info("Requesting notification permission on authentication");
-      requestPermission().catch((error) => {
-        logger.warn("Failed to request notification permission:", error);
-      });
-    }
-  }, [authStatus, isSupported, permission, requestPermission]);
-
-  useEffect(() => {
-    if (authStatus !== "authenticated" || cognitoUserLoading) {
-      return;
-    }
-
-    scheduleIdleRoutePreload({
-      isAdminUser:
-        isCognitoUserRole(StaffRole.ADMIN) ||
-        isCognitoUserRole(StaffRole.STAFF_ADMIN),
-    });
-  }, [authStatus, cognitoUserLoading, isCognitoUserRole]);
-
-  // ワークフロー申請の通知を購読
-  useWorkflowNotification();
-  // ワークフローコメント通知を全画面で購読
-  useWorkflowCommentNotification();
-
   const {
     fetchConfig,
     saveConfig,
@@ -229,6 +191,7 @@ export default function Layout() {
     getShiftGroups,
     getLunchRestStartTime,
     getLunchRestEndTime,
+    loading: appConfigLoading,
     getStandardWorkHours,
     getHourlyPaidHolidayEnabled,
     getAmHolidayStartTime,
@@ -240,24 +203,20 @@ export default function Layout() {
     getAbsentEnabled,
     getWorkflowCategoryOrder,
     getAttendanceStatisticsEnabled,
-    getWorkflowNotificationEnabled,
-    getShiftCollaborativeEnabled,
-    getShiftDefaultMode,
     getThemeColor,
     getThemeTokens,
   } = useAppConfig();
   const isAuthenticated = authStatus === "authenticated";
-  const { data: holidayCalendars = [] } = useGetHolidayCalendarsQuery(
-    undefined,
-    { skip: !isAuthenticated },
-  );
-  const { data: companyHolidayCalendars = [] } =
-    useGetCompanyHolidayCalendarsQuery(undefined, {
-      skip: !isAuthenticated,
-    });
-  const { data: eventCalendars = [] } = useGetEventCalendarsQuery(undefined, {
+  const { data: holidayCalendars = [], isLoading: holidayCalendarLoading } =
+    useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
+  const {
+    data: companyHolidayCalendars = [],
+    isLoading: companyHolidayCalendarLoading,
+  } = useGetCompanyHolidayCalendarsQuery(undefined, {
     skip: !isAuthenticated,
   });
+  const { data: eventCalendars = [], isLoading: eventCalendarLoading } =
+    useGetEventCalendarsQuery(undefined, { skip: !isAuthenticated });
 
   const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
   const [bulkCreateHolidayCalendarsMutation] =
@@ -504,9 +463,6 @@ export default function Layout() {
       getAbsentEnabled,
       getWorkflowCategoryOrder,
       getAttendanceStatisticsEnabled,
-      getWorkflowNotificationEnabled,
-      getShiftCollaborativeEnabled,
-      getShiftDefaultMode,
       getThemeColor,
       getThemeTokens,
     }),
@@ -535,9 +491,6 @@ export default function Layout() {
       getAbsentEnabled,
       getWorkflowCategoryOrder,
       getAttendanceStatisticsEnabled,
-      getWorkflowNotificationEnabled,
-      getShiftCollaborativeEnabled,
-      getShiftDefaultMode,
       getThemeColor,
       getThemeTokens,
     ],
@@ -593,12 +546,15 @@ export default function Layout() {
   const shouldBlockUnauthenticated =
     authStatus === "unauthenticated" && !isLoginRoute;
 
-  const shouldBlockLayoutBootstrap =
+  if (
     authStatus === "configuring" ||
     cognitoUserLoading ||
-    shouldBlockUnauthenticated;
-
-  if (shouldBlockLayoutBootstrap) {
+    appConfigLoading ||
+    holidayCalendarLoading ||
+    companyHolidayCalendarLoading ||
+    eventCalendarLoading ||
+    shouldBlockUnauthenticated
+  ) {
     return (
       <ThemeContextProvider>
         <ThemeProvider theme={appTheme}>

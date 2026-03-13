@@ -10,10 +10,7 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  onCreateShiftRequest,
-  onUpdateShiftRequest,
-} from "@/shared/api/graphql/documents/subscriptions";
+import { onUpdateShiftRequest } from "@/shared/api/graphql/documents/subscriptions";
 
 import {
   applyShiftCellUpdateToMap,
@@ -26,7 +23,6 @@ import {
   PendingChangesMap,
   ShiftCellUpdate,
   ShiftDataMap,
-  ShiftRequestCommentData,
   ShiftRequestData,
   shiftStateToShiftRequestStatus,
 } from "../types/collaborative.types";
@@ -38,27 +34,12 @@ interface UseCollaborativeShiftDataProps {
   staffIds: string[];
   targetMonth?: string; // "YYYY-MM"
   currentUserId: string;
-  onAutoSyncReceived?: () => void;
-  onSaveStarted?: () => void;
-  onSaveCompleted?: () => void;
-  onSaveFailed?: (error: string) => void;
-  onRemoteUpdate?: (staffId: string, request: ShiftRequestData) => void;
-  onCommentsReceived?: (
-    staffId: string,
-    comments: ShiftRequestCommentData[],
-  ) => void;
 }
 
 export const useCollaborativeShiftData = ({
   staffIds,
   targetMonth,
   currentUserId,
-  onAutoSyncReceived,
-  onSaveStarted,
-  onSaveCompleted,
-  onSaveFailed,
-  onRemoteUpdate,
-  onCommentsReceived,
 }: UseCollaborativeShiftDataProps) => {
   const [shiftDataMap, setShiftDataMap] = useState<ShiftDataMap>(new Map());
   const [error, setError] = useState<string | null>(null);
@@ -67,29 +48,6 @@ export const useCollaborativeShiftData = ({
     "connected" | "disconnected" | "error"
   >("connected");
   const [isBatchUpdating, setIsBatchUpdating] = useState(false);
-
-  const onAutoSyncReceivedRef = useRef(onAutoSyncReceived);
-  const onSaveStartedRef = useRef(onSaveStarted);
-  const onSaveCompletedRef = useRef(onSaveCompleted);
-  const onSaveFailedRef = useRef(onSaveFailed);
-  const onRemoteUpdateRef = useRef(onRemoteUpdate);
-  const onCommentsReceivedRef = useRef(onCommentsReceived);
-
-  useEffect(() => {
-    onAutoSyncReceivedRef.current = onAutoSyncReceived;
-    onSaveStartedRef.current = onSaveStarted;
-    onSaveCompletedRef.current = onSaveCompleted;
-    onSaveFailedRef.current = onSaveFailed;
-    onRemoteUpdateRef.current = onRemoteUpdate;
-    onCommentsReceivedRef.current = onCommentsReceived;
-  }, [
-    onAutoSyncReceived,
-    onSaveStarted,
-    onSaveCompleted,
-    onSaveFailed,
-    onRemoteUpdate,
-    onCommentsReceived,
-  ]);
 
   const [updateShiftCell] = useUpdateShiftCellMutation();
   const [createShiftRequest] = useCreateShiftRequestMutation();
@@ -255,7 +213,6 @@ export const useCollaborativeShiftData = ({
       const { message, connection } = buildShiftErrorMessage(err);
       setConnectionState(connection);
       setError(message);
-      throw err;
     }
   }, [shouldSkipFetch, buildShiftErrorMessage]);
 
@@ -325,8 +282,6 @@ export const useCollaborativeShiftData = ({
     async (update: ShiftCellUpdate) => {
       const key = `${update.staffId}-${update.date}`;
 
-      onSaveStartedRef.current?.();
-
       // 先に nextMap を計算してから State に設定
       setShiftDataMap((prev) => {
         const nextMap = applyShiftCellUpdateToMap({
@@ -341,15 +296,16 @@ export const useCollaborativeShiftData = ({
         // 非同期でデータ永続化を実行
         persistShiftUpdate(update, nextMap)
           .then(() => {
+            // 成功時に保留中の変更から削除
             pendingChangesRef.current.delete(key);
+            setError(null);
             setConnectionState("connected");
-            onSaveCompletedRef.current?.();
           })
           .catch((err) => {
             console.error("Failed to update shift:", err);
             const { message, connection } = buildShiftErrorMessage(err);
+            setError(message);
             setConnectionState(connection);
-            onSaveFailedRef.current?.(message);
           });
 
         return nextMap;
@@ -368,7 +324,6 @@ export const useCollaborativeShiftData = ({
       }
 
       setIsBatchUpdating(true);
-      onSaveStartedRef.current?.();
 
       try {
         const nextMap = updates.reduce(
@@ -482,17 +437,15 @@ export const useCollaborativeShiftData = ({
         });
 
         if (result.errors.length > 0) {
-          onSaveFailedRef.current?.(
-            "一部の更新に失敗しました。再試行してください。",
-          );
+          setError("一部の更新に失敗しました。再試行してください。");
         } else {
-          onSaveCompletedRef.current?.();
+          setError(null);
         }
       } catch (err) {
         console.error("Batch update failed:", err);
         const { message, connection } = buildShiftErrorMessage(err);
+        setError(message);
         setConnectionState(connection);
-        onSaveFailedRef.current?.(message);
       } finally {
         setIsBatchUpdating(false);
       }
@@ -537,88 +490,47 @@ export const useCollaborativeShiftData = ({
       return;
     }
 
-    const handleRealtimeEvent = (
-      request: ShiftRequestData,
-      eventLabel: "created" | "updated",
-      staffId: string,
-    ) => {
-      // 自分の更新による無限ループと二重適用を防ぐ
-      // 自分の更新は楽観的更新として既に反映済みのためスキップ
-      if (request.updatedBy === currentUserId) {
-        return;
-      }
-
-      // 他のユーザーの更新をローカルステートに反映
-      updateShiftRequestState(request);
-      onAutoSyncReceivedRef.current?.();
-      onRemoteUpdateRef.current?.(staffId, request);
-
-      // コメントの更新を通知
-      if (request.comments) {
-        onCommentsReceivedRef.current?.(staffId, request.comments);
-      }
-
-      console.log(
-        `[Realtime Update] Shift ${eventLabel} by another user for staff ${staffId}`,
-      );
-    };
-
-    // 各スタッフのシフト新規作成・更新をサブスクライブ
-    const subscriptions = staffIds.flatMap((staffId) => {
-      const variables = {
-        filter: {
-          staffId: { eq: staffId },
-          targetMonth: { eq: targetMonth },
-        },
-      };
-
-      const createSubscription = graphqlClient
-        .graphql({
-          query: onCreateShiftRequest,
-          variables,
-          authMode: "userPool",
-        })
-        .subscribe({
-          next: ({ data }) => {
-            if (!data?.onCreateShiftRequest) return;
-
-            const createdRequest = normalizeShiftRequest(
-              data.onCreateShiftRequest,
-            );
-            handleRealtimeEvent(createdRequest, "created", staffId);
-          },
-          error: (error) => {
-            console.error(
-              `[Subscription Error] Failed to subscribe create for staff ${staffId}:`,
-              error,
-            );
-          },
-        });
-
-      const updateSubscription = graphqlClient
+    // 各スタッフのシフト更新をサブスクライブ
+    const subscriptions = staffIds.map((staffId) => {
+      const subscription = graphqlClient
         .graphql({
           query: onUpdateShiftRequest,
-          variables,
-          authMode: "userPool",
+          variables: {
+            filter: {
+              staffId: { eq: staffId },
+              targetMonth: { eq: targetMonth },
+            },
+          },
         })
         .subscribe({
           next: ({ data }) => {
             if (!data?.onUpdateShiftRequest) return;
 
-            const updatedRequest = normalizeShiftRequest(
-              data.onUpdateShiftRequest,
+            const updatedRequest = data.onUpdateShiftRequest;
+
+            // 自分の更新による無限ループと二重適用を防ぐ
+            // 自分の更新は楽観的更新として既に反映済みのためスキップ
+            if (updatedRequest.updatedBy === currentUserId) {
+              return;
+            }
+
+            // 他のユーザーの更新をローカルステートに反映
+            const normalized = normalizeShiftRequest(updatedRequest);
+            updateShiftRequestState(normalized);
+
+            console.log(
+              `[Realtime Update] Shift updated by another user for staff ${staffId}`,
             );
-            handleRealtimeEvent(updatedRequest, "updated", staffId);
           },
           error: (error) => {
             console.error(
-              `[Subscription Error] Failed to subscribe update for staff ${staffId}:`,
+              `[Subscription Error] Failed to subscribe for staff ${staffId}:`,
               error,
             );
           },
         });
 
-      return [createSubscription, updateSubscription];
+      return subscription;
     });
 
     // クリーンアップ：コンポーネントのアンマウント時や依存配列の変更時にサブスクリプションを解除
@@ -626,16 +538,6 @@ export const useCollaborativeShiftData = ({
       subscriptions.forEach((sub) => sub.unsubscribe());
     };
   }, [staffIdsKey, targetMonth, currentUserId, updateShiftRequestState]);
-
-  const getShiftRequest = useCallback(
-    (staffId: string) => shiftRequestsRef.current.get(staffId),
-    [],
-  );
-
-  const getAllShiftRequests = useCallback(
-    () => Array.from(shiftRequestsRef.current.values()),
-    [],
-  );
 
   return {
     shiftDataMap,
@@ -649,7 +551,5 @@ export const useCollaborativeShiftData = ({
     updateShift,
     batchUpdateShifts,
     retryPendingChanges,
-    getShiftRequest,
-    getAllShiftRequests,
   };
 };

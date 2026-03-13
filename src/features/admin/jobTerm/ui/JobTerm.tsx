@@ -1,11 +1,5 @@
 import useCloseDates from "@entities/attendance/model/useCloseDates";
-import {
-  Box,
-  LinearProgress,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { LinearProgress, Stack, Typography } from "@mui/material";
 import { CloseDate } from "@shared/api/graphql/types";
 // Title removed per admin UI simplification
 import dayjs from "dayjs";
@@ -19,19 +13,10 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+import PageLoader from "@/shared/ui/feedback/PageLoader";
 
 const JobTermTable = lazy(
   () => import("@/features/admin/jobTerm/ui/JobTermTable"),
-);
-
-const JobTermTableSkeleton = () => (
-  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-    <Skeleton variant="rounded" height={42} />
-    <Skeleton variant="rounded" height={42} />
-    <Skeleton variant="rounded" height={42} />
-    <Skeleton variant="rounded" height={42} />
-    <Skeleton variant="rounded" height={42} />
-  </Box>
 );
 
 export default function JobTerm() {
@@ -92,7 +77,7 @@ export default function JobTerm() {
           existingCloseDates={closeDates}
           createCloseDate={createCloseDate}
         />
-        <Suspense fallback={<JobTermTableSkeleton />}>
+        <Suspense fallback={<PageLoader />}>
           <JobTermTable
             rows={closeDates}
             onEdit={(row) => {

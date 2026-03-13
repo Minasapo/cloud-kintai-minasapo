@@ -16,10 +16,14 @@ import {
 import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 
+import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { resolveThemeColor } from "@/shared/config/theme";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 
 const basePalette = [
   "#1976d2",
@@ -64,7 +68,7 @@ const DEFAULT_BRAND_COLOR = resolveThemeColor();
 const paletteCandidates = [
   DEFAULT_BRAND_COLOR,
   ...basePalette.filter(
-    (color) => color.toLowerCase() !== DEFAULT_BRAND_COLOR.toLowerCase(),
+    (color) => color.toLowerCase() !== DEFAULT_BRAND_COLOR.toLowerCase()
   ),
 ];
 
@@ -75,7 +79,7 @@ const TILE_SIZE = 44;
 const MAX_TILES_PER_ROW = 10;
 
 export default function AdminTheme() {
-  const { notify } = useLocalNotification();
+  const dispatch = useAppDispatchV2();
   const {
     getThemeColor,
     getConfigId,
@@ -89,7 +93,7 @@ export default function AdminTheme() {
   const [saving, setSaving] = useState(false);
   const isValidHex = useMemo(
     () => /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(colorCode),
-    [colorCode],
+    [colorCode]
   );
   const themeTokens = getThemeTokens();
   const adminPanelTokens = themeTokens.component.adminPanel;
@@ -106,7 +110,7 @@ export default function AdminTheme() {
     setColorCode(themeColor);
     setCurrentColor(themeColor);
     const matchesPreset = presetPalette.some(
-      (color) => color.toLowerCase() === themeColor.toLowerCase(),
+      (color) => color.toLowerCase() === themeColor.toLowerCase()
     );
     setCustomMode(!matchesPreset);
   }, [getThemeColor]);
@@ -126,7 +130,7 @@ export default function AdminTheme() {
     normalizedColorCode !== normalizedCurrentColor;
   const previewTokens = useMemo(
     () => (isValidHex ? getThemeTokens(normalizedColorCode) : themeTokens),
-    [isValidHex, normalizedColorCode, themeTokens, getThemeTokens],
+    [isValidHex, normalizedColorCode, themeTokens, getThemeTokens]
   );
   const previewPanelTokens = previewTokens.component.adminPanel;
   const previewPanelSpacing = previewPanelTokens.sectionSpacing;
@@ -151,21 +155,13 @@ export default function AdminTheme() {
 
   const handleSave = async () => {
     if (!isValidHex) {
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
-      });
+      dispatch(setSnackbarError(E15001));
       return;
     }
 
     const payloadColor = normalizeColor(colorCode);
     if (!payloadColor) {
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
-      });
+      dispatch(setSnackbarError(E15001));
       return;
     }
 
@@ -185,14 +181,10 @@ export default function AdminTheme() {
       }
       await fetchConfig();
       setCurrentColor(payloadColor);
-      void notify(S15001, { mode: "auto-close" });
+      dispatch(setSnackbarSuccess(S15001));
     } catch (error) {
       console.error(error);
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
-      });
+      dispatch(setSnackbarError(E15001));
     } finally {
       setSaving(false);
     }

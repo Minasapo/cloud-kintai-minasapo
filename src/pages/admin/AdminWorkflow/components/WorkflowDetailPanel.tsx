@@ -10,7 +10,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { GetWorkflowQuery, WorkflowStatus } from "@shared/api/graphql/types";
-import { useCallback, useContext, useMemo } from "react";
+import { useContext } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -22,7 +22,6 @@ import {
 } from "@/entities/attendance/api/attendanceApi";
 import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { createLogger } from "@/shared/lib/logger";
 import {
   setSnackbarError,
@@ -52,7 +51,6 @@ export default function WorkflowDetailPanel({
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { staffs } = useStaffs({ isAuthenticated });
-  const { notify, canNotify } = useLocalNotification();
   const {
     getStartTime,
     getEndTime,
@@ -64,30 +62,8 @@ export default function WorkflowDetailPanel({
   const [getAttendanceByStaffAndDate] =
     useLazyGetAttendanceByStaffAndDateQuery();
   const [updateAttendance] = useUpdateAttendanceMutation();
-  const currentStaffId = useMemo(() => {
-    if (!cognitoUser?.id) return null;
-    return (
-      staffs.find((staff) => staff.cognitoUserId === cognitoUser.id)?.id ?? null
-    );
-  }, [cognitoUser, staffs]);
-
-  const handleNewCommentNotification = useCallback(() => {
-    if (!canNotify) return;
-    void notify("新着コメントがあります", {
-      body: "ワークフローに新しいコメントが投稿されました",
-      tag: `workflow-comment-${workflowId ?? "unknown"}`,
-      mode: "auto-close",
-      priority: "high",
-    });
-  }, [canNotify, notify, workflowId]);
-
-  const { workflow, setWorkflow, loading, error } = useWorkflowDetailData(
-    workflowId,
-    {
-      currentStaffId,
-      onNewComment: handleNewCommentNotification,
-    },
-  );
+  const { workflow, setWorkflow, loading, error } =
+    useWorkflowDetailData(workflowId);
   const dispatch = useAppDispatchV2();
 
   const { staffName, applicationDate, approvalSteps } =
@@ -204,6 +180,11 @@ export default function WorkflowDetailPanel({
               workflow={workflow}
               staffs={staffs}
               cognitoUser={cognitoUser}
+              updateWorkflow={(input) =>
+                updateWorkflow(input) as Promise<
+                  NonNullable<GetWorkflowQuery["getWorkflow"]>
+                >
+              }
               onWorkflowUpdated={setWorkflow}
               onSuccess={(message) => dispatch(setSnackbarSuccess(message))}
               onError={(message) => {

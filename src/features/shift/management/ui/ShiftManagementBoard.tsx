@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -29,9 +30,12 @@ import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
+import {
+  setSnackbarError,
+  setSnackbarSuccess,
+} from "@/shared/lib/store/snackbarSlice";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";
@@ -55,43 +59,43 @@ const SHIFT_BOARD_BASE_PATH = "component.shiftBoard";
 const mixWithTransparent = (
   tokenPath: string,
   fallback: string,
-  opacity: number,
+  opacity: number
 ) => {
   const percentage = Math.round(Math.min(Math.max(opacity, 0), 1) * 100);
   return `color-mix(in srgb, ${designTokenVar(
     tokenPath,
-    fallback,
+    fallback
   )} ${percentage}%, transparent)`;
 };
 
 const SHIFT_BOARD_PADDING_X = designTokenVar(
   `${SHIFT_BOARD_BASE_PATH}.columnGap`,
-  `${shiftBoardTokens.columnGap}px`,
+  `${shiftBoardTokens.columnGap}px`
 );
 const SHIFT_BOARD_PADDING_Y = designTokenVar(
   `${SHIFT_BOARD_BASE_PATH}.rowGap`,
-  `${shiftBoardTokens.rowGap}px`,
+  `${shiftBoardTokens.rowGap}px`
 );
 const SHIFT_BOARD_HALF_PADDING_X = `calc(${SHIFT_BOARD_PADDING_X} / 2)`;
 const SHIFT_BOARD_HALF_PADDING_Y = `calc(${SHIFT_BOARD_PADDING_Y} / 2)`;
 const SHIFT_BOARD_CELL_RADIUS = designTokenVar(
   `${SHIFT_BOARD_BASE_PATH}.cellRadius`,
-  `${shiftBoardTokens.cellRadius}px`,
+  `${shiftBoardTokens.cellRadius}px`
 );
 const SHIFT_BOARD_TRANSITION = `${designTokenVar(
   "motion.duration.medium",
-  `${DEFAULT_THEME_TOKENS.motion.duration.medium}ms`,
+  `${DEFAULT_THEME_TOKENS.motion.duration.medium}ms`
 )} ${designTokenVar(
   "motion.easing.standard",
-  DEFAULT_THEME_TOKENS.motion.easing.standard,
+  DEFAULT_THEME_TOKENS.motion.easing.standard
 )}`;
 const SHIFT_BOARD_FOCUS_RING_COLOR = designTokenVar(
   "color.brand.primary.focusRing",
-  DEFAULT_THEME_TOKENS.color.brand.primary.focusRing,
+  DEFAULT_THEME_TOKENS.color.brand.primary.focusRing
 );
 const SHIFT_BOARD_FOCUS_SHADOW = designTokenVar(
   "shadow.card",
-  DEFAULT_THEME_TOKENS.shadow.card,
+  DEFAULT_THEME_TOKENS.shadow.card
 );
 
 const SHIFT_BOARD_CELL_BASE_SX = {
@@ -110,23 +114,23 @@ const SHIFT_BOARD_INTERACTIVE_FOCUS_SX = {
 const HOLIDAY_BG = mixWithTransparent(
   "color.brand.accent.base",
   DEFAULT_THEME_TOKENS.color.brand.accent.base,
-  0.22,
+  0.22
 );
 const COMPANY_HOLIDAY_BG = mixWithTransparent(
   "color.brand.secondary.base",
   DEFAULT_THEME_TOKENS.color.brand.secondary.base,
-  0.18,
+  0.18
 );
 const SATURDAY_BG = mixWithTransparent(
   "color.brand.primary.base",
   DEFAULT_THEME_TOKENS.color.brand.primary.base,
-  0.12,
+  0.12
 );
 
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
   const navigate = useNavigate();
-  const { notify } = useLocalNotification();
+  const dispatch = useDispatch();
   const { cognitoUser } = useCognitoUser();
   const { getShiftGroups } = useContext(AppConfigContext);
   const { authStatus } = useContext(AuthContext);
@@ -135,7 +139,7 @@ export default function ShiftManagementBoard() {
 
   const shiftStaffs = useMemo(
     () => staffs.filter((s) => s.workType === "shift"),
-    [staffs],
+    [staffs]
   );
 
   const shiftGroupDefinitions = useMemo(
@@ -147,7 +151,7 @@ export default function ShiftManagementBoard() {
         max: group.max ?? null,
         fixed: group.fixed ?? null,
       })),
-    [getShiftGroups],
+    [getShiftGroups]
   );
 
   const groupedShiftStaffs = useMemo(() => {
@@ -203,7 +207,7 @@ export default function ShiftManagementBoard() {
 
   const displayedStaffOrder = useMemo(
     () => groupedShiftStaffs.flatMap((group) => group.members),
-    [groupedShiftStaffs],
+    [groupedShiftStaffs]
   );
 
   const staffIdToIndex = useMemo(() => {
@@ -217,7 +221,7 @@ export default function ShiftManagementBoard() {
   const [currentMonth, setCurrentMonth] = useState(dayjs());
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
-    [currentMonth],
+    [currentMonth]
   );
   const daysInMonth = monthStart.daysInMonth();
   const monthYear = monthStart.year();
@@ -226,15 +230,15 @@ export default function ShiftManagementBoard() {
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
-        monthStart.add(i, "day"),
+        monthStart.add(i, "day")
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [monthYear, monthMonth, daysInMonth],
+    [monthYear, monthMonth, daysInMonth]
   );
 
   const dayKeyList = useMemo(
     () => days.map((day) => day.format("YYYY-MM-DD")),
-    [days],
+    [days]
   );
 
   const {
@@ -262,31 +266,26 @@ export default function ShiftManagementBoard() {
   React.useEffect(() => {
     if (holidayCalendarsError || companyHolidayCalendarsError) {
       console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
-      void notify("エラー", {
-        body: MESSAGE_CODE.E00001,
-        mode: "await-interaction",
-        priority: "high",
-        tag: "holiday-load-error",
-      });
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
     }
-  }, [holidayCalendarsError, companyHolidayCalendarsError, notify]);
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
 
   const holidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),
-    [holidayCalendars],
+    [holidayCalendars]
   );
   const companyHolidaySet = useMemo(
     () => new Set(companyHolidayCalendars.map((h) => h.holidayDate)),
-    [companyHolidayCalendars],
+    [companyHolidayCalendars]
   );
 
   const holidayNameMap = useMemo(
     () => new Map(holidayCalendars.map((h) => [h.holidayDate, h.name])),
-    [holidayCalendars],
+    [holidayCalendars]
   );
   const companyHolidayNameMap = useMemo(
     () => new Map(companyHolidayCalendars.map((h) => [h.holidayDate, h.name])),
-    [companyHolidayCalendars],
+    [companyHolidayCalendars]
   );
 
   const {
@@ -341,7 +340,7 @@ export default function ShiftManagementBoard() {
     const map = generateMockShifts(
       shiftStaffs.map((s) => ({ id: s.id })),
       days,
-      scenario,
+      scenario
     );
     setMockShifts(map);
   }, [shiftStaffs, days, scenario]);
@@ -400,7 +399,7 @@ export default function ShiftManagementBoard() {
     }
     const monthPlan =
       shiftPlanPlans.find(
-        (plan) => typeof plan.month === "number" && plan.month === targetMonth,
+        (plan) => typeof plan.month === "number" && plan.month === targetMonth
       ) ?? null;
     if (!monthPlan) {
       return map;
@@ -410,7 +409,7 @@ export default function ShiftManagementBoard() {
       const value = capacities[index];
       map.set(
         d.format("YYYY-MM-DD"),
-        typeof value === "number" && !Number.isNaN(value) ? value : null,
+        typeof value === "number" && !Number.isNaN(value) ? value : null
       );
     });
     return map;
@@ -418,7 +417,7 @@ export default function ShiftManagementBoard() {
 
   // 変更を追跡するためのRef
   const pendingChangesRef = React.useRef<Map<string, Map<string, ShiftState>>>(
-    new Map(),
+    new Map()
   );
   const [autoSaveCounter, setAutoSaveCounter] = React.useState(0);
 
@@ -435,13 +434,13 @@ export default function ShiftManagementBoard() {
       // カウンターを更新して自動保存をトリガー
       setAutoSaveCounter((prev) => prev + 1);
     },
-    [scenario],
+    [scenario]
   );
 
   const applyShiftState = async (
     staffIds: string[],
     dayKeys: string[],
-    nextState: ShiftState,
+    nextState: ShiftState
   ) => {
     if (!staffIds.length || !dayKeys.length) return;
 
@@ -502,19 +501,11 @@ export default function ShiftManagementBoard() {
     enabled: scenario === "actual" && isAuthenticated,
     delay: 2000, // 2秒のdebounce
     onSaveSuccess: () => {
-      void notify("シフトを自動保存しました", {
-        mode: "auto-close",
-        tag: "shift-autosave-success",
-      });
+      dispatch(setSnackbarSuccess("シフトを自動保存しました"));
     },
     onSaveError: (error) => {
       console.error("Auto-save error:", error);
-      void notify("エラー", {
-        body: "シフトの自動保存に失敗しました",
-        mode: "await-interaction",
-        priority: "high",
-        tag: "shift-autosave-error",
-      });
+      dispatch(setSnackbarError("シフトの自動保存に失敗しました"));
     },
   });
 
@@ -610,7 +601,7 @@ export default function ShiftManagementBoard() {
               {!isAutoSaving && !isAutoSavePending && lastSavedAt && (
                 <Chip
                   label={`最終保存: ${dayjs(lastSavedAt).format(
-                    "M/D HH:mm:ss",
+                    "M/D HH:mm:ss"
                   )}`}
                   size="small"
                   color="success"
@@ -622,6 +613,14 @@ export default function ShiftManagementBoard() {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => navigate("/shift/collaborative")}
+          >
+            🚀 共同編集プロトタイプ
+          </Button>
+
           {hasBulkSelection ? (
             <Badge
               badgeContent={selectedCellCount}
@@ -893,8 +892,8 @@ export default function ShiftManagementBoard() {
                         const displayValue = shiftPlanLoading
                           ? "..."
                           : typeof planned === "number"
-                            ? planned
-                            : "-";
+                          ? planned
+                          : "-";
                         return (
                           <Box
                             sx={{
@@ -1066,14 +1065,14 @@ export default function ShiftManagementBoard() {
                               const actual = coverage?.get(key) ?? 0;
                               const presentation = getGroupCoveragePresentation(
                                 actual,
-                                constraints,
+                                constraints
                               );
                               const highlightBg =
                                 presentation.violationTone === "warning"
                                   ? "rgba(255, 193, 7, 0.18)"
                                   : presentation.violationTone === "error"
-                                    ? "rgba(244, 67, 54, 0.18)"
-                                    : undefined;
+                                  ? "rgba(244, 67, 54, 0.18)"
+                                  : undefined;
                               const valueTypography = (
                                 <Typography
                                   variant="body2"
@@ -1101,7 +1100,7 @@ export default function ShiftManagementBoard() {
                                     bgcolor: highlightBg,
                                     ...(getCellHighlightSx(
                                       false,
-                                      selectedDayKeys.has(key),
+                                      selectedDayKeys.has(key)
                                     ) ?? {}),
                                   }}
                                   align="center"
@@ -1156,7 +1155,7 @@ export default function ShiftManagementBoard() {
                                   textOverflow: "ellipsis",
                                   ...(getCellHighlightSx(
                                     isStaffSelected,
-                                    false,
+                                    false
                                   ) ?? {}),
                                 }}
                               >
@@ -1190,24 +1189,24 @@ export default function ShiftManagementBoard() {
                               {(() => {
                                 const per = displayShifts.get(s.id) || {};
                                 const workCount = Object.values(per).filter(
-                                  (v) => v === "work",
+                                  (v) => v === "work"
                                 ).length;
                                 const fixedOffCount = Object.values(per).filter(
-                                  (v) => v === "fixedOff",
+                                  (v) => v === "fixedOff"
                                 ).length;
                                 const requestedOffCount = Object.values(
-                                  per,
+                                  per
                                 ).filter((v) => v === "requestedOff").length;
                                 const summaryLabel = `${workCount}/${fixedOffCount}/${requestedOffCount}`;
                                 const historyMeta = shiftRequestHistoryMeta.get(
-                                  s.id,
+                                  s.id
                                 );
                                 const changeCount =
                                   historyMeta?.changeCount ?? 0;
                                 const latestChangeLabel =
                                   historyMeta?.latestChangeAt
                                     ? dayjs(historyMeta.latestChangeAt).format(
-                                        "M/D HH:mm",
+                                        "M/D HH:mm"
                                       )
                                     : "-";
                                 const historyLabel = `${latestChangeLabel}(${changeCount}回)`;
@@ -1229,7 +1228,7 @@ export default function ShiftManagementBoard() {
                                         verticalAlign: "middle",
                                         ...(getCellHighlightSx(
                                           isStaffSelected,
-                                          false,
+                                          false
                                         ) ?? {}),
                                       }}
                                       align="center"
@@ -1261,7 +1260,7 @@ export default function ShiftManagementBoard() {
                                         verticalAlign: "middle",
                                         ...(getCellHighlightSx(
                                           isStaffSelected,
-                                          false,
+                                          false
                                         ) ?? {}),
                                       }}
                                       align="center"
@@ -1298,13 +1297,13 @@ export default function ShiftManagementBoard() {
                                       staffName: staffDisplayName,
                                       dateKey: key,
                                     },
-                                    editState,
+                                    editState
                                   );
                                 const isDaySelected = selectedDayKeys.has(key);
                                 const highlightSx =
                                   getCellHighlightSx(
                                     isStaffSelected,
-                                    isDaySelected,
+                                    isDaySelected
                                   ) ?? {};
                                 return (
                                   <TableCell
@@ -1354,7 +1353,7 @@ export default function ShiftManagementBoard() {
                         })}
                       </React.Fragment>
                     );
-                  },
+                  }
                 )}
               </TableBody>
             </Table>

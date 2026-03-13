@@ -1,5 +1,4 @@
 import { usePersonalExternalLinks } from "@entities/staff/model/useStaff/usePersonalExternalLinks";
-import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import ExternalLinksView, {
   ExternalLinkItem,
 } from "@shared/ui/header/ExternalLinks";
@@ -9,8 +8,7 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 
 export function ExternalLinks() {
-  const { cognitoUser, authStatus, isCognitoUserRole } =
-    useContext(AuthContext);
+  const { cognitoUser, authStatus } = useContext(AuthContext);
   const { getLinks } = useContext(AppConfigContext);
 
   const companyLinks = useMemo<ExternalLinkItem[]>(() => {
@@ -32,14 +30,10 @@ export function ExternalLinks() {
 
   const mergedLinks = useMemo(
     () => [...companyLinks, ...personalLinks],
-    [companyLinks, personalLinks],
+    [companyLinks, personalLinks]
   );
 
-  if (
-    isCognitoUserRole(StaffRole.OPERATOR) ||
-    authStatus !== "authenticated" ||
-    !cognitoUser
-  ) {
+  if (authStatus !== "authenticated" || !cognitoUser) {
     return null;
   }
 
@@ -53,5 +47,5 @@ const filterEnabledLinks = (links: ExternalLinkItem[]) =>
       typeof link.label === "string" &&
       link.label.trim() !== "" &&
       typeof link.url === "string" &&
-      link.url.trim() !== "",
+      link.url.trim() !== ""
   );

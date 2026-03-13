@@ -4,7 +4,6 @@ import {
 } from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
 
-import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import {
   DEFAULT_CONFIG_NAME,
   TIME_FORMAT,
@@ -45,10 +44,7 @@ type BuildBasePayloadOptions = {
   amPmHolidayEnabled: boolean;
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
-  workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
-  shiftCollaborativeEnabled: boolean;
-  shiftDefaultMode: ShiftDisplayMode;
 };
 
 export type BaseAppConfigPayload = {
@@ -71,10 +67,7 @@ export type BaseAppConfigPayload = {
   amPmHolidayEnabled: boolean;
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
-  workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
-  shiftCollaborativeEnabled: boolean;
-  shiftDefaultMode: ShiftDisplayMode;
 };
 
 export const buildBasePayload = (
@@ -119,10 +112,7 @@ export const buildBasePayload = (
   amPmHolidayEnabled: opts.amPmHolidayEnabled,
   specialHolidayEnabled: opts.specialHolidayEnabled,
   attendanceStatisticsEnabled: opts.attendanceStatisticsEnabled,
-  workflowNotificationEnabled: opts.workflowNotificationEnabled,
   overTimeCheckEnabled: opts.overTimeCheckEnabled,
-  shiftCollaborativeEnabled: opts.shiftCollaborativeEnabled,
-  shiftDefaultMode: opts.shiftDefaultMode,
 });
 
 /**
@@ -141,10 +131,7 @@ export type ConfigFormState = {
   amPmHolidayEnabled: boolean;
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
-  workflowNotificationEnabled: boolean;
   overTimeCheckEnabled: boolean;
-  shiftCollaborativeEnabled: boolean;
-  shiftDefaultMode: ShiftDisplayMode;
   startTime: Dayjs;
   endTime: Dayjs;
   lunchRestStartTime: Dayjs;
@@ -184,10 +171,7 @@ const transformFormStateToPayload = (
       amPmHolidayEnabled: state.amPmHolidayEnabled,
       specialHolidayEnabled: state.specialHolidayEnabled,
       attendanceStatisticsEnabled: state.attendanceStatisticsEnabled,
-      workflowNotificationEnabled: state.workflowNotificationEnabled,
       overTimeCheckEnabled: state.overTimeCheckEnabled,
-      shiftCollaborativeEnabled: state.shiftCollaborativeEnabled,
-      shiftDefaultMode: state.shiftDefaultMode,
     },
   );
 };

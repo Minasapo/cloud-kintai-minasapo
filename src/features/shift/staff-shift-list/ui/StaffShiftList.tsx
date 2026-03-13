@@ -24,14 +24,15 @@ import {
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 export default function StaffShiftList() {
-  const { notify } = useLocalNotification();
+  const dispatch = useDispatch();
   const { staffId } = useParams();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -48,10 +49,10 @@ export default function StaffShiftList() {
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
-        monthStart.add(i, "day"),
+        monthStart.add(i, "day")
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [monthYear, monthMonth, daysInMonth],
+    [monthYear, monthMonth, daysInMonth]
   );
 
   const {
@@ -75,23 +76,18 @@ export default function StaffShiftList() {
   useEffect(() => {
     if (holidayCalendarsError || companyHolidayCalendarsError) {
       console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
-      void notify("エラー", {
-        body: MESSAGE_CODE.E00001,
-        mode: "await-interaction",
-        priority: "high",
-        tag: "holiday-calendar-error",
-      });
+      dispatch(setSnackbarError(MESSAGE_CODE.E00001));
     }
-  }, [holidayCalendarsError, companyHolidayCalendarsError, notify]);
+  }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
 
   const publicHolidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),
-    [holidayCalendars],
+    [holidayCalendars]
   );
 
   const companyHolidaySet = useMemo(
     () => new Set(companyHolidayCalendars.map((h) => h.holidayDate)),
-    [companyHolidayCalendars],
+    [companyHolidayCalendars]
   );
 
   // モックデータ: 未登録 / 出勤 / 休み を表示・編集できるよう state にする
@@ -101,8 +97,7 @@ export default function StaffShiftList() {
     const map: Record<string, "work" | "off" | undefined> = {};
     days.forEach((d) => {
       const r = Math.random();
-      if (r < 0.2)
-        map[d.format("YYYY-MM-DD")] = undefined; // 未登録
+      if (r < 0.2) map[d.format("YYYY-MM-DD")] = undefined; // 未登録
       else map[d.format("YYYY-MM-DD")] = r > 0.6 ? "work" : "off";
     });
     return map;

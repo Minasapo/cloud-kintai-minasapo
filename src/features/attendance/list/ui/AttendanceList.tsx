@@ -19,12 +19,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import {
-  OnCreateAttendanceSubscription,
-  OnDeleteAttendanceSubscription,
-  OnUpdateAttendanceSubscription,
-  Staff,
-} from "@shared/api/graphql/types";
+import { Staff } from "@shared/api/graphql/types";
 /**
  * 日付操作ライブラリ。日付のフォーマットや計算に使用。
  */
@@ -32,23 +27,14 @@ import {
  * ReactのContext, Hooks。
  */
 import dayjs, { Dayjs } from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import {
-  calcTotalRestTime,
-  calcTotalWorkTime,
-} from "@/entities/attendance/lib/time";
+import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  onCreateAttendance,
-  onDeleteAttendance,
-  onUpdateAttendance,
-} from "@/shared/api/graphql/documents/subscriptions";
 import { designTokenVar } from "@/shared/designSystem";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
@@ -67,21 +53,6 @@ const DescriptionTypography = styled(Typography)(({ theme }) => ({
     padding: "0px 10px",
   },
 }));
-
-const MONTH_QUERY_KEY = "month";
-
-const getCurrentMonthFromQuery = (monthParam: string | null): Dayjs => {
-  if (!monthParam) {
-    return dayjs().startOf("month");
-  }
-
-  const parsedMonth = dayjs(monthParam, "YYYY-MM", true);
-  if (!parsedMonth.isValid()) {
-    return dayjs().startOf("month");
-  }
-
-  return parsedMonth.startOf("month");
-};
 
 /**
  * 勤怠一覧テーブルのメインコンポーネント。
@@ -103,25 +74,18 @@ export default function AttendanceTable() {
    * ページ遷移用navigate関数。
    */
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   /**
    * 勤怠情報取得用カスタムフック。
    */
   const shouldFetchAttendances = Boolean(cognitoUser?.id);
-  const currentMonth = useMemo(
-    () => getCurrentMonthFromQuery(searchParams.get(MONTH_QUERY_KEY)),
-    [searchParams],
+  const [currentMonth, setCurrentMonth] = useState<Dayjs>(() =>
+    dayjs().startOf("month")
   );
 
-  const handleMonthChange = useCallback(
-    (nextMonth: Dayjs) => {
-      const normalizedMonth = nextMonth.startOf("month");
-      const nextParams = new URLSearchParams(searchParams);
-      nextParams.set(MONTH_QUERY_KEY, normalizedMonth.format("YYYY-MM"));
-      setSearchParams(nextParams, { replace: true });
-    },
-    [searchParams, setSearchParams],
-  );
+  const startDate = currentMonth
+    .startOf("month")
+    .format(AttendanceDate.DataFormat);
+  const endDate = currentMonth.endOf("month").format(AttendanceDate.DataFormat);
 
   const {
     data: holidayCalendars = [],
@@ -145,80 +109,19 @@ export default function AttendanceTable() {
     isHolidayCalendarsFetching ||
     isCompanyHolidayCalendarsLoading ||
     isCompanyHolidayCalendarsFetching;
-
-  const effectiveDateRange = useMemo(() => {
-    const monthStart = currentMonth.startOf("month");
-    const monthEnd = currentMonth.endOf("month");
-    const today = dayjs();
-
-    const applicableCloseDates = closeDates.filter((closeDate) => {
-      const start = dayjs(closeDate.startDate);
-      const end = dayjs(closeDate.endDate);
-      return (
-        start.isValid() &&
-        end.isValid() &&
-        !end.isBefore(monthStart, "day") &&
-        !start.isAfter(monthEnd, "day")
-      );
-    });
-
-    if (applicableCloseDates.length > 0) {
-      const containsToday = applicableCloseDates.find((cd) => {
-        const start = dayjs(cd.startDate);
-        const end = dayjs(cd.endDate);
-        return !today.isBefore(start, "day") && !today.isAfter(end, "day");
-      });
-
-      if (containsToday) {
-        return {
-          start: dayjs(containsToday.startDate),
-          end: dayjs(containsToday.endDate),
-          hasValidPeriod: true,
-        };
-      }
-
-      const latest = applicableCloseDates.reduce((prev, current) => {
-        const prevUpdatedAt = dayjs(prev.updatedAt ?? prev.closeDate).valueOf();
-        const currentUpdatedAt = dayjs(
-          current.updatedAt ?? current.closeDate,
-        ).valueOf();
-        return currentUpdatedAt > prevUpdatedAt ? current : prev;
-      });
-
-      return {
-        start: dayjs(latest.startDate),
-        end: dayjs(latest.endDate),
-        hasValidPeriod: true,
-      };
-    }
-
-    return {
-      start: monthStart,
-      end: monthEnd,
-      hasValidPeriod: false,
-    };
-  }, [currentMonth, closeDates]);
-
-  const startDate = effectiveDateRange.start.format(AttendanceDate.DataFormat);
-  const endDate = effectiveDateRange.end.format(AttendanceDate.DataFormat);
-
   const {
     data: attendances = [],
     isLoading: isAttendancesInitialLoading,
     isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
-    refetch: refetchAttendances,
   } = useListAttendancesByDateRangeQuery(
     {
       staffId: cognitoUser?.id ?? "",
       startDate,
       endDate,
     },
-    {
-      skip: !shouldFetchAttendances,
-      refetchOnMountOrArgChange: true,
-    },
+    { skip: !shouldFetchAttendances }
   );
 
   const attendanceLoading =
@@ -227,94 +130,12 @@ export default function AttendanceTable() {
     isAttendancesFetching ||
     isAttendancesUninitialized;
 
-  useEffect(() => {
-    const currentStaffId = cognitoUser?.id;
-    if (!currentStaffId || !shouldFetchAttendances) return;
-
-    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const shouldRefetch = (
-      eventStaffId?: string | null,
-      workDate?: string | null,
-    ) => {
-      if (!eventStaffId || !workDate) return false;
-      if (eventStaffId !== currentStaffId) return false;
-
-      const eventDate = dayjs(workDate);
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
-
-      return eventDate.isBetween(start, end, "day", "[]");
-    };
-
-    const scheduleRefetch = () => {
-      if (refetchTimer) {
-        clearTimeout(refetchTimer);
-      }
-
-      refetchTimer = setTimeout(() => {
-        void refetchAttendances();
-      }, 300);
-    };
-
-    const createSubscription = graphqlClient
-      .graphql({ query: onCreateAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
-          const attendance = data?.onCreateAttendance;
-          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
-            return;
-          }
-          scheduleRefetch();
-        },
-      });
-
-    const updateSubscription = graphqlClient
-      .graphql({ query: onUpdateAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
-          const attendance = data?.onUpdateAttendance;
-          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
-            return;
-          }
-          scheduleRefetch();
-        },
-      });
-
-    const deleteSubscription = graphqlClient
-      .graphql({ query: onDeleteAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
-          const attendance = data?.onDeleteAttendance;
-          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
-            return;
-          }
-          scheduleRefetch();
-        },
-      });
-
-    return () => {
-      createSubscription.unsubscribe();
-      updateSubscription.unsubscribe();
-      deleteSubscription.unsubscribe();
-      if (refetchTimer) {
-        clearTimeout(refetchTimer);
-      }
-    };
-  }, [
-    cognitoUser?.id,
-    shouldFetchAttendances,
-    startDate,
-    endDate,
-    refetchAttendances,
-  ]);
-
   /**
    * スタッフ情報の状態。
    */
   const logger = useMemo(
     () => new Logger("AttendanceList", import.meta.env.DEV ? "DEBUG" : "ERROR"),
-    [],
+    []
   );
   const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
 
@@ -355,6 +176,52 @@ export default function AttendanceTable() {
   }, [attendancesError, dispatch, logger]);
 
   /**
+   * 現在有効期間中の集計期間を解決する。
+   * closeDatesから該当月の有効期間を取得し、フォールバックは月初〜月末。
+   */
+  const effectiveDateRange = useMemo(() => {
+    const monthStart = currentMonth.startOf("month");
+    const monthEnd = currentMonth.endOf("month");
+
+    // 該当月と重複する有効期間を探す
+    const applicableCloseDates = closeDates.filter((closeDate) => {
+      const start = dayjs(closeDate.startDate);
+      const end = dayjs(closeDate.endDate);
+      return (
+        start.isValid() &&
+        end.isValid() &&
+        // 月の範囲と少しでも重なれば対象
+        !end.isBefore(monthStart, "day") &&
+        !start.isAfter(monthEnd, "day")
+      );
+    });
+
+    if (applicableCloseDates.length > 0) {
+      // 有効期間が複数ある場合は、最新の更新日時を優先
+      const latest = applicableCloseDates.reduce((prev, current) => {
+        const prevUpdatedAt = dayjs(prev.updatedAt ?? prev.closeDate).valueOf();
+        const currentUpdatedAt = dayjs(
+          current.updatedAt ?? current.closeDate
+        ).valueOf();
+        return currentUpdatedAt > prevUpdatedAt ? current : prev;
+      });
+
+      return {
+        start: dayjs(latest.startDate),
+        end: dayjs(latest.endDate),
+        hasValidPeriod: true,
+      };
+    }
+
+    // フォールバック: 月初〜月末
+    return {
+      start: monthStart,
+      end: monthEnd,
+      hasValidPeriod: false,
+    };
+  }, [currentMonth, closeDates]);
+
+  /**
    * 勤怠データから合計勤務時間（休憩時間を除く）を計算する。
    * 有効期間内のデータのみを対象とする。
    */
@@ -373,7 +240,7 @@ export default function AttendanceTable() {
       if (!attendance.startTime || !attendance.endTime) return acc;
       const workTime = calcTotalWorkTime(
         attendance.startTime,
-        attendance.endTime,
+        attendance.endTime
       );
       return acc + workTime;
     }, 0);
@@ -396,10 +263,10 @@ export default function AttendanceTable() {
    */
   const rangeLabelForDisplay = useMemo(() => {
     const startLabel = effectiveDateRange.start.format(
-      AttendanceDate.DisplayFormat,
+      AttendanceDate.DisplayFormat
     );
     const endLabel = effectiveDateRange.end.format(
-      AttendanceDate.DisplayFormat,
+      AttendanceDate.DisplayFormat
     );
     return `${startLabel} 〜 ${endLabel}`;
   }, [effectiveDateRange]);
@@ -410,11 +277,11 @@ export default function AttendanceTable() {
 
   const headerBackground = designTokenVar(
     "component.pageSection.background",
-    "#FFFFFF",
+    "#FFFFFF"
   );
   const headerShadow = designTokenVar(
     "component.pageSection.shadow",
-    "0 12px 24px rgba(17, 24, 39, 0.06)",
+    "0 12px 24px rgba(17, 24, 39, 0.06)"
   );
   const headerRadius = designTokenVar("component.pageSection.radius", "12px");
   const headerPaddingX = designTokenVar("spacing.lg", "16px");
@@ -468,7 +335,7 @@ export default function AttendanceTable() {
           closeDatesLoading={closeDatesLoading}
           closeDatesError={closeDatesError}
           currentMonth={currentMonth}
-          onMonthChange={handleMonthChange}
+          onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
         />
       ) : (
         <MobileList
@@ -477,7 +344,7 @@ export default function AttendanceTable() {
           companyHolidayCalendars={companyHolidayCalendars}
           staff={staff}
           currentMonth={currentMonth}
-          onMonthChange={handleMonthChange}
+          onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
           closeDates={closeDates}
         />
       )}
