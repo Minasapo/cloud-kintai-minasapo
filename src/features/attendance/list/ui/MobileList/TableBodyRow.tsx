@@ -30,6 +30,8 @@ import {
 
 import { AttendanceStatusTooltip } from "../AttendanceStatusTooltip";
 
+const MONTH_QUERY_KEY = "month";
+
 export default function TableBodyRow({
   attendance,
   holidayCalendars,
@@ -46,9 +48,12 @@ export default function TableBodyRow({
   const handleEdit = () => {
     const { workDate } = attendance;
     const formattedWorkDate = dayjs(workDate).format(
-      AttendanceDate.QueryParamFormat
+      AttendanceDate.QueryParamFormat,
     );
-    navigate(`/attendance/${formattedWorkDate}/edit`);
+    const monthQuery = new URLSearchParams({
+      [MONTH_QUERY_KEY]: dayjs(workDate).startOf("month").format("YYYY-MM"),
+    }).toString();
+    navigate(`/attendance/${formattedWorkDate}/edit?${monthQuery}`);
   };
 
   const rowVariant: AttendanceRowVariant = (() => {
@@ -61,7 +66,7 @@ export default function TableBodyRow({
     return getAttendanceRowVariant(
       attendance,
       holidayCalendars,
-      companyHolidayCalendars
+      companyHolidayCalendars,
     );
   })();
 

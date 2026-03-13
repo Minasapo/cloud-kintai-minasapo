@@ -5,9 +5,11 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Box, IconButton, Stack } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+
+const MONTH_QUERY_KEY = "month";
 
 export default function MoveDateItem({
   staffId,
@@ -17,6 +19,7 @@ export default function MoveDateItem({
   workDate: dayjs.Dayjs | null;
 }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const today = dayjs();
 
   if (!workDate) {
@@ -29,9 +32,13 @@ export default function MoveDateItem({
     : AttendanceDate.DisplayFormat;
   const buildPath = (date: dayjs.Dayjs) => {
     const formatted = date.format(AttendanceDate.QueryParamFormat);
-    return isAdmin
-      ? `/admin/attendances/edit/${formatted}/${staffId}`
-      : `/attendance/${formatted}/edit`;
+    if (isAdmin) {
+      return `/admin/attendances/edit/${formatted}/${staffId}`;
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set(MONTH_QUERY_KEY, date.startOf("month").format("YYYY-MM"));
+    return `/attendance/${formatted}/edit?${nextParams.toString()}`;
   };
 
   return (
