@@ -11,7 +11,7 @@ import DesktopMenuView, {
   DesktopMenuItem,
 } from "@shared/ui/header/DesktopMenu";
 import MobileMenuView, { MobileMenuItem } from "@shared/ui/header/MobileMenu";
-import { useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -141,6 +141,27 @@ export default function NavigationMenu() {
     ],
   );
 
+  const mobilePreloadTargets = useMemo(() => {
+    const hrefs = desktopMenuItems.map((menu) => menu.href);
+
+    if (isAdminUser) {
+      hrefs.push(adminLink.href);
+    }
+
+    if (cognitoUser) {
+      hrefs.push("/profile");
+    }
+
+    return [...new Set(hrefs)];
+  }, [adminLink.href, cognitoUser, desktopMenuItems, isAdminUser]);
+
+  const handleOpenMobileMenu = useCallback(() => {
+    mobilePreloadTargets.forEach((href) => {
+      preloadRoute(href);
+    });
+    openDrawer();
+  }, [mobilePreloadTargets, openDrawer]);
+
   if (pathName === "/login") return null;
 
   return (
@@ -155,7 +176,7 @@ export default function NavigationMenu() {
       <MobileMenuView
         menuItems={mobileMenuItems}
         isOpen={isOpen}
-        onOpen={openDrawer}
+        onOpen={handleOpenMobileMenu}
         onClose={closeDrawer}
       />
     </>
