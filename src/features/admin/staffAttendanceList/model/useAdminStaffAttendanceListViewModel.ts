@@ -9,7 +9,10 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  mappingStaffRole,
+  StaffType,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Attendance,
   CloseDate,
@@ -22,7 +25,10 @@ import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
+import {
+  ChangeRequest,
+  hasUnapprovedChangeRequest,
+} from "@/entities/attendance/lib/ChangeRequest";
 import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
@@ -39,7 +45,7 @@ export type AdminStaffAttendanceListViewModel = ReturnType<
 
 export const useAdminStaffAttendanceListViewModel = (
   staffId?: string,
-  currentMonth?: Dayjs
+  currentMonth?: Dayjs,
 ) => {
   const dispatch = useDispatch();
   const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
@@ -91,7 +97,7 @@ export const useAdminStaffAttendanceListViewModel = (
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
     },
-    { skip: !shouldFetchAttendances }
+    { skip: !shouldFetchAttendances },
   );
 
   const {
@@ -151,8 +157,8 @@ export const useAdminStaffAttendanceListViewModel = (
         setStaff(null);
         dispatch(
           setSnackbarError(
-            "スタッフ情報の取得に失敗しましたが、勤怠データは表示されます。(エラーコード: E00001)"
-          )
+            "スタッフ情報の取得に失敗しましたが、勤怠データは表示されます。(エラーコード: E00001)",
+          ),
         );
       });
   }, [staffId, dispatch]);
@@ -214,9 +220,8 @@ export const useAdminStaffAttendanceListViewModel = (
   }, [staff]);
 
   const pendingAttendances = useMemo(() => {
-    return attendances.filter(
-      (attendance: Attendance) =>
-        new ChangeRequest(attendance.changeRequests).getUnapprovedCount() > 0
+    return attendances.filter((attendance: Attendance) =>
+      hasUnapprovedChangeRequest(attendance.changeRequests),
     );
   }, [attendances]);
 
@@ -251,14 +256,14 @@ export const useAdminStaffAttendanceListViewModel = (
       changeRequestControls.canBulkApprove,
       changeRequestControls.handleBulkApprove,
       changeRequestControls.handleOpenQuickView,
-    ]
+    ],
   );
 
   const getTableRowVariant = useCallback(
     (
       attendance: Attendance,
       holidayList: HolidayCalendar[] = holidayCalendars,
-      companyHolidayList: CompanyHolidayCalendar[] = companyHolidayCalendars
+      companyHolidayList: CompanyHolidayCalendar[] = companyHolidayCalendars,
     ): AttendanceRowVariant => {
       if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
         return "sunday";
@@ -271,10 +276,10 @@ export const useAdminStaffAttendanceListViewModel = (
       return getAttendanceRowVariant(
         attendance,
         holidayList,
-        companyHolidayList
+        companyHolidayList,
       );
     },
-    [staff, holidayCalendars, companyHolidayCalendars]
+    [staff, holidayCalendars, companyHolidayCalendars],
   );
 
   const getBadgeContent = useCallback((attendance: Attendance) => {
@@ -316,7 +321,7 @@ export const useAdminStaffAttendanceListViewModel = (
     getTableRowVariant: (
       attendance: Attendance,
       holidayList?: HolidayCalendar[],
-      companyHolidayList?: CompanyHolidayCalendar[]
+      companyHolidayList?: CompanyHolidayCalendar[],
     ) => AttendanceRowVariant;
     getBadgeContent: (attendance: Attendance) => number;
   };

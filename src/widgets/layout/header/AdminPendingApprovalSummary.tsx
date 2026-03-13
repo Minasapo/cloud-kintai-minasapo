@@ -5,6 +5,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
+import { hasUnapprovedChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import {
   StaffRole,
   useStaffs,
@@ -21,7 +22,6 @@ import {
   onUpdateAttendance,
 } from "@/shared/api/graphql/documents/subscriptions";
 import {
-  AttendanceChangeRequest,
   GetStaffQuery,
   ListAttendancesQuery,
   Workflow,
@@ -42,26 +42,6 @@ const isWorkflowPendingForCurrentAdmin = (workflow: Workflow) => {
   }
 
   return true;
-};
-
-const isPendingAttendanceRequest = (
-  request: AttendanceChangeRequest | null | undefined,
-) => {
-  if (!request) {
-    return false;
-  }
-
-  if (request.completed === true) {
-    return false;
-  }
-
-  const hasComment =
-    typeof request.staffComment === "string" &&
-    request.staffComment.trim().length > 0;
-  const hasAdminComment =
-    typeof request.comment === "string" && request.comment.trim().length > 0;
-
-  return hasComment || hasAdminComment;
 };
 
 export default function AdminPendingApprovalSummary() {
@@ -173,8 +153,8 @@ export default function AdminPendingApprovalSummary() {
           return;
         }
 
-        const hasPendingRequest = (attendance.changeRequests ?? []).some(
-          (request) => isPendingAttendanceRequest(request),
+        const hasPendingRequest = hasUnapprovedChangeRequest(
+          attendance.changeRequests,
         );
 
         if (hasPendingRequest) {
