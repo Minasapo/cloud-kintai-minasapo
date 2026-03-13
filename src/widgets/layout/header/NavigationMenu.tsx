@@ -17,6 +17,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { useMobileDrawer } from "@/hooks/useMobileDrawer";
+import { preloadRoute } from "@/router/routePreloaders";
 
 const iconByHref: Record<string, JSX.Element> = {
   "/register": <AccessTimeIcon />,
@@ -149,6 +150,7 @@ export default function NavigationMenu() {
         menuItems={desktopMenuItems}
         adminLink={adminLink}
         showAdminMenu={isAdminUser}
+        onItemPreload={preloadRoute}
       />
       <MobileMenuView
         menuItems={mobileMenuItems}
