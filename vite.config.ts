@@ -64,7 +64,7 @@ const manualChunks = (id: string) => {
   return "vendor-misc";
 };
 
-const shouldUseManualChunks = process.env.ENABLE_MANUAL_CHUNKS === "true";
+const shouldUseManualChunks = process.env.ENABLE_MANUAL_CHUNKS !== "false";
 const checkerOverlayEnabled = process.env.VITE_CHECKER_OVERLAY !== "false";
 
 export default defineConfig({
