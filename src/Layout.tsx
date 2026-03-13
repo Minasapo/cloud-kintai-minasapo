@@ -47,6 +47,7 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
+import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
 import { createLogger } from "@/shared/lib/logger";
 import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
@@ -197,6 +198,18 @@ export default function Layout() {
     }
   }, [authStatus, isSupported, permission, requestPermission]);
 
+  useEffect(() => {
+    if (authStatus !== "authenticated" || cognitoUserLoading) {
+      return;
+    }
+
+    scheduleIdleRoutePreload({
+      isAdminUser:
+        isCognitoUserRole(StaffRole.ADMIN) ||
+        isCognitoUserRole(StaffRole.STAFF_ADMIN),
+    });
+  }, [authStatus, cognitoUserLoading, isCognitoUserRole]);
+
   // ワークフロー申請の通知を購読
   useWorkflowNotification();
   // ワークフローコメント通知を全画面で購読
@@ -216,7 +229,6 @@ export default function Layout() {
     getShiftGroups,
     getLunchRestStartTime,
     getLunchRestEndTime,
-    loading: appConfigLoading,
     getStandardWorkHours,
     getHourlyPaidHolidayEnabled,
     getAmHolidayStartTime,
@@ -235,16 +247,17 @@ export default function Layout() {
     getThemeTokens,
   } = useAppConfig();
   const isAuthenticated = authStatus === "authenticated";
-  const { data: holidayCalendars = [], isLoading: holidayCalendarLoading } =
-    useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
-  const {
-    data: companyHolidayCalendars = [],
-    isLoading: companyHolidayCalendarLoading,
-  } = useGetCompanyHolidayCalendarsQuery(undefined, {
+  const { data: holidayCalendars = [] } = useGetHolidayCalendarsQuery(
+    undefined,
+    { skip: !isAuthenticated },
+  );
+  const { data: companyHolidayCalendars = [] } =
+    useGetCompanyHolidayCalendarsQuery(undefined, {
+      skip: !isAuthenticated,
+    });
+  const { data: eventCalendars = [] } = useGetEventCalendarsQuery(undefined, {
     skip: !isAuthenticated,
   });
-  const { data: eventCalendars = [], isLoading: eventCalendarLoading } =
-    useGetEventCalendarsQuery(undefined, { skip: !isAuthenticated });
 
   const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
   const [bulkCreateHolidayCalendarsMutation] =
@@ -580,15 +593,12 @@ export default function Layout() {
   const shouldBlockUnauthenticated =
     authStatus === "unauthenticated" && !isLoginRoute;
 
-  if (
+  const shouldBlockLayoutBootstrap =
     authStatus === "configuring" ||
     cognitoUserLoading ||
-    appConfigLoading ||
-    holidayCalendarLoading ||
-    companyHolidayCalendarLoading ||
-    eventCalendarLoading ||
-    shouldBlockUnauthenticated
-  ) {
+    shouldBlockUnauthenticated;
+
+  if (shouldBlockLayoutBootstrap) {
     return (
       <ThemeContextProvider>
         <ThemeProvider theme={appTheme}>
