@@ -32,9 +32,9 @@ import {
  * ReactのContext, Hooks。
  */
 import dayjs, { Dayjs } from "dayjs";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
@@ -68,6 +68,21 @@ const DescriptionTypography = styled(Typography)(({ theme }) => ({
   },
 }));
 
+const MONTH_QUERY_KEY = "month";
+
+const getCurrentMonthFromQuery = (monthParam: string | null): Dayjs => {
+  if (!monthParam) {
+    return dayjs().startOf("month");
+  }
+
+  const parsedMonth = dayjs(monthParam, "YYYY-MM", true);
+  if (!parsedMonth.isValid()) {
+    return dayjs().startOf("month");
+  }
+
+  return parsedMonth.startOf("month");
+};
+
 /**
  * 勤怠一覧テーブルのメインコンポーネント。
  * ユーザーの勤怠データ取得、合計勤務時間計算、リスト表示を行う。
@@ -88,12 +103,24 @@ export default function AttendanceTable() {
    * ページ遷移用navigate関数。
    */
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   /**
    * 勤怠情報取得用カスタムフック。
    */
   const shouldFetchAttendances = Boolean(cognitoUser?.id);
-  const [currentMonth, setCurrentMonth] = useState<Dayjs>(() =>
-    dayjs().startOf("month"),
+  const currentMonth = useMemo(
+    () => getCurrentMonthFromQuery(searchParams.get(MONTH_QUERY_KEY)),
+    [searchParams],
+  );
+
+  const handleMonthChange = useCallback(
+    (nextMonth: Dayjs) => {
+      const normalizedMonth = nextMonth.startOf("month");
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.set(MONTH_QUERY_KEY, normalizedMonth.format("YYYY-MM"));
+      setSearchParams(nextParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
   );
 
   const {
@@ -441,7 +468,7 @@ export default function AttendanceTable() {
           closeDatesLoading={closeDatesLoading}
           closeDatesError={closeDatesError}
           currentMonth={currentMonth}
-          onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
+          onMonthChange={handleMonthChange}
         />
       ) : (
         <MobileList
@@ -450,7 +477,7 @@ export default function AttendanceTable() {
           companyHolidayCalendars={companyHolidayCalendars}
           staff={staff}
           currentMonth={currentMonth}
-          onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
+          onMonthChange={handleMonthChange}
           closeDates={closeDates}
         />
       )}
