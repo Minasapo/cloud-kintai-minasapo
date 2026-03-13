@@ -69,7 +69,7 @@ const AttendanceListRoute = createLazyRoute(
 const AttendanceStatisticsRoute = createLazyRoute(
   () => import("./pages/attendance/statistics/AttendanceStatisticsPage"),
 );
-const LoginRoute = createLazyRoute(() => import("./pages/Login/Login"));
+const LoginRoute = createLazyRoute(() => import("./pages/Login/LoginShell"));
 const OfficeHomeRoute = createLazyRoute(
   () => import("./pages/office/home/OfficeHomePage"),
 );
@@ -120,6 +120,10 @@ const NewWorkflowRoute = createLazyRoute(
 
 const router = createBrowserRouter([
   {
+    path: "/login",
+    lazy: LoginRoute,
+  },
+  {
     path: "/",
     element: <Layout />,
     children: [
@@ -160,10 +164,6 @@ const router = createBrowserRouter([
             lazy: AttendanceListRoute,
           },
         ],
-      },
-      {
-        path: "login",
-        lazy: LoginRoute,
       },
       {
         path: "workflow",

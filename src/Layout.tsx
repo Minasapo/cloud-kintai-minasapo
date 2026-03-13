@@ -268,7 +268,12 @@ export default function Layout() {
     }
 
     if (authStatus === "unauthenticated") {
-      navigate("/login");
+      navigate("/login", {
+        replace: true,
+        state: {
+          from: `${location.pathname}${location.search}${location.hash}`,
+        },
+      });
       return;
     }
 
@@ -297,7 +302,10 @@ export default function Layout() {
     authStatus,
     cognitoUser,
     cognitoUserLoading,
+    location.hash,
     isLoginRoute,
+    location.pathname,
+    location.search,
     navigate,
     signOut,
   ]);
