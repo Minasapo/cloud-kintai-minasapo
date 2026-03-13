@@ -1,6 +1,6 @@
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { defineConfig, splitVendorChunkPlugin } from "vite";
+import { defineConfig } from "vite";
 import checker from "vite-plugin-checker";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -64,7 +64,7 @@ const manualChunks = (id: string) => {
   return "vendor-misc";
 };
 
-const shouldUseManualChunks = process.env.ENABLE_MANUAL_CHUNKS !== "false";
+const shouldUseManualChunks = process.env.ENABLE_MANUAL_CHUNKS === "true";
 const checkerOverlayEnabled = process.env.VITE_CHECKER_OVERLAY !== "false";
 
 export default defineConfig({
@@ -105,7 +105,6 @@ export default defineConfig({
       //   ],
       // },
     }),
-    splitVendorChunkPlugin(),
     tsconfigPaths(),
     checker({
       typescript: true,
