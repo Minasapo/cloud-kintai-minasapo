@@ -25,7 +25,7 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
 import {
@@ -57,6 +57,7 @@ export const useAdminStaffAttendanceListViewModel = (
   currentMonth?: Dayjs,
 ) => {
   const dispatch = useDispatch();
+  const isBulkApprovingRef = useRef(false);
   const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
 
   const {
@@ -138,6 +139,8 @@ export const useAdminStaffAttendanceListViewModel = (
     };
 
     const scheduleRefetch = () => {
+      if (isBulkApprovingRef.current) return;
+
       if (refetchTimer) {
         clearTimeout(refetchTimer);
       }
@@ -323,6 +326,7 @@ export const useAdminStaffAttendanceListViewModel = (
     refetchAttendances,
     updateAttendance: (input: UpdateAttendanceInput) =>
       updateAttendanceMutation(input).unwrap(),
+    isBulkApprovingRef,
   });
 
   const pendingAttendanceControls = useMemo<PendingAttendanceControls>(
