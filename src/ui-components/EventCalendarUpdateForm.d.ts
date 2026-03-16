@@ -26,11 +26,13 @@ export declare type EventCalendarUpdateFormInputValues = {
     eventDate?: string;
     name?: string;
     description?: string;
+    version?: number;
 };
 export declare type EventCalendarUpdateFormValidationValues = {
     eventDate?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
     description?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type EventCalendarUpdateFormOverridesProps = {
@@ -38,6 +40,7 @@ export declare type EventCalendarUpdateFormOverridesProps = {
     eventDate?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     description?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type EventCalendarUpdateFormProps = React.PropsWithChildren<{
     overrides?: EventCalendarUpdateFormOverridesProps | undefined | null;

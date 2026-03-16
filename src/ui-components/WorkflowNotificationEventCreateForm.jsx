@@ -40,6 +40,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
     isRead: false,
     readAt: "",
     eventAt: "",
+    version: "",
   };
   const [recipientStaffId, setRecipientStaffId] = React.useState(
     initialValues.recipientStaffId
@@ -55,6 +56,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
   const [isRead, setIsRead] = React.useState(initialValues.isRead);
   const [readAt, setReadAt] = React.useState(initialValues.readAt);
   const [eventAt, setEventAt] = React.useState(initialValues.eventAt);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setRecipientStaffId(initialValues.recipientStaffId);
@@ -67,6 +69,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
     setIsRead(initialValues.isRead);
     setReadAt(initialValues.readAt);
     setEventAt(initialValues.eventAt);
+    setVersion(initialValues.version);
     setErrors({});
   };
   const validations = {
@@ -80,6 +83,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
     isRead: [{ type: "Required" }],
     readAt: [],
     eventAt: [{ type: "Required" }],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -117,6 +121,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
           isRead,
           readAt,
           eventAt,
+          version,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -189,6 +194,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.recipientStaffId ?? value;
@@ -222,6 +228,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.actorStaffId ?? value;
@@ -255,6 +262,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.workflowId ?? value;
@@ -288,6 +296,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.eventType ?? value;
@@ -327,6 +336,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.commentId ?? value;
@@ -360,6 +370,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.title ?? value;
@@ -393,6 +404,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.body ?? value;
@@ -426,6 +438,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead: value,
               readAt,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.isRead ?? value;
@@ -459,6 +472,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt: value,
               eventAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.readAt ?? value;
@@ -492,6 +506,7 @@ export default function WorkflowNotificationEventCreateForm(props) {
               isRead,
               readAt,
               eventAt: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.eventAt ?? value;
@@ -505,6 +520,44 @@ export default function WorkflowNotificationEventCreateForm(props) {
         errorMessage={errors.eventAt?.errorMessage}
         hasError={errors.eventAt?.hasError}
         {...getOverrideProps(overrides, "eventAt")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              recipientStaffId,
+              actorStaffId,
+              workflowId,
+              eventType,
+              commentId,
+              title,
+              body,
+              isRead,
+              readAt,
+              eventAt,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

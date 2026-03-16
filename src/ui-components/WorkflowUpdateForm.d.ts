@@ -37,6 +37,7 @@ export declare type WorkflowUpdateFormInputValues = {
     submitterApproverId?: string;
     submitterApproverIds?: string[];
     submitterApproverMultipleMode?: string;
+    version?: number;
 };
 export declare type WorkflowUpdateFormValidationValues = {
     approvedStaffIds?: ValidationFunction<string>;
@@ -53,6 +54,7 @@ export declare type WorkflowUpdateFormValidationValues = {
     submitterApproverId?: ValidationFunction<string>;
     submitterApproverIds?: ValidationFunction<string>;
     submitterApproverMultipleMode?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type WorkflowUpdateFormOverridesProps = {
@@ -71,6 +73,7 @@ export declare type WorkflowUpdateFormOverridesProps = {
     submitterApproverId?: PrimitiveOverrideProps<TextFieldProps>;
     submitterApproverIds?: PrimitiveOverrideProps<TextFieldProps>;
     submitterApproverMultipleMode?: PrimitiveOverrideProps<SelectFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type WorkflowUpdateFormProps = React.PropsWithChildren<{
     overrides?: WorkflowUpdateFormOverridesProps | undefined | null;

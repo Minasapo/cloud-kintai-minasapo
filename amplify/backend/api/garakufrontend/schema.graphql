@@ -30,6 +30,7 @@ type Staff @model @auth(rules: [{ allow: private }]) {
   approverMultipleMode: ApproverMultipleMode
   shiftGroup: String
   attendanceManagementEnabled: Boolean
+  version: Int
 }
 
 enum ApproverSettingMode {
@@ -59,12 +60,14 @@ type HolidayCalendar @model @auth(rules: [{ allow: private }]) {
   id: ID!
   holidayDate: String!
   name: String!
+  version: Int
 }
 
 type CompanyHolidayCalendar @model @auth(rules: [{ allow: private }]) {
   id: ID!
   holidayDate: String!
   name: String!
+  version: Int
 }
 
 type EventCalendar @model @auth(rules: [{ allow: private }]) {
@@ -72,6 +75,7 @@ type EventCalendar @model @auth(rules: [{ allow: private }]) {
   eventDate: String!
   name: String!
   description: String
+  version: Int
 }
 
 type CloseDate @model @auth(rules: [{ allow: private }]) {
@@ -79,6 +83,7 @@ type CloseDate @model @auth(rules: [{ allow: private }]) {
   closeDate: String!
   startDate: String!
   endDate: String!
+  version: Int
 }
 
 type SystemComment {
@@ -127,6 +132,7 @@ type Document @model @auth(rules: [{ allow: private }]) {
 type CheckForUpdate @model {
   id: ID!
   deployUuid: String!
+  version: Int
 }
 
 type Rest {
@@ -280,6 +286,7 @@ type ShiftPlanYear @model @auth(rules: [{ allow: private }]) {
   notes: String
   createdBy: String
   updatedBy: String
+  version: Int
 }
 
 type WorkflowCategoryOrderItem {
@@ -333,6 +340,7 @@ type AppConfig @model {
   overTimeCheckEnabled: Boolean
   shiftCollaborativeEnabled: Boolean
   shiftDefaultMode: String
+  version: Int
 }
 
 type EmailResult {
@@ -422,6 +430,7 @@ type Workflow @model @auth(rules: [{ allow: private }]) {
   submitterApproverMultipleMode: ApproverMultipleMode
   overTimeDetails: OverTimeWorkflow
   comments: [WorkflowComment]
+  version: Int
 }
 
 type WorkflowTemplate @model @auth(rules: [{ allow: private }]) {
@@ -434,6 +443,7 @@ type WorkflowTemplate @model @auth(rules: [{ allow: private }]) {
       name: "workflowTemplatesByOrganizationId"
       queryField: "workflowTemplatesByOrganizationId"
     )
+  version: Int
 }
 
 enum WorkflowNotificationEventType {
@@ -462,6 +472,7 @@ type WorkflowNotificationEvent @model @auth(rules: [{ allow: private }]) {
   isRead: Boolean!
   readAt: String
   eventAt: String!
+  version: Int
 }
 
 type OperationLog @model @auth(rules: [{ allow: private }]) {
@@ -490,6 +501,7 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
   metadata: String
   # 重大度レベル（例: INFO, WARN, ERROR）
   severity: String
+  version: Int
 }
 
 type AuditLog @model @auth(rules: [{ allow: groups, groups: ["Admin"] }]) {
@@ -508,6 +520,7 @@ type AuditLog @model @auth(rules: [{ allow: groups, groups: ["Admin"] }]) {
   createdAt: AWSDateTime!
   ttl: AWSTimestamp
   reason: String
+  version: Int
 }
 
 enum DailyReportStatus {
@@ -552,6 +565,7 @@ type DailyReport @model @auth(rules: [{ allow: private }]) {
   updatedAt: String
   reactions: [DailyReportReaction]
   comments: [DailyReportComment]
+  version: Int
 }
 
 # 共同編集用のバッチ更新型

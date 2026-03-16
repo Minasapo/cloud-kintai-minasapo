@@ -1,4 +1,5 @@
 import {
+  type UpdateCompanyHolidayCalendarPayload,
   useBulkCreateCompanyHolidayCalendarsMutation,
   useCreateCompanyHolidayCalendarMutation,
   useDeleteCompanyHolidayCalendarMutation,
@@ -35,6 +36,10 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
 import { useHolidayCalendarList } from "@/features/admin/holidayCalendar/model/useHolidayCalendarList";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 import { CompanyHolidayCalendarMessage } from "@/shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
 import {
@@ -74,8 +79,19 @@ export default function CompanyHolidayCalendarList() {
   );
 
   const updateCompanyHolidayCalendar = useCallback(
-    async (input: Parameters<typeof updateCompanyHolidayCalendarMutation>[0]) =>
-      updateCompanyHolidayCalendarMutation(input).unwrap(),
+    async (input: CompanyHolidayCalendar) =>
+      updateCompanyHolidayCalendarMutation({
+        input: {
+          id: input.id,
+          holidayDate: input.holidayDate,
+          name: input.name,
+          version: getNextVersion(input.version),
+        },
+        condition: buildVersionOrUpdatedAtCondition(
+          input.version,
+          input.updatedAt,
+        ),
+      } satisfies UpdateCompanyHolidayCalendarPayload).unwrap(),
     [updateCompanyHolidayCalendarMutation]
   );
 

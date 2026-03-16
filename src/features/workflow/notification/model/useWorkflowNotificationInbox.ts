@@ -20,6 +20,10 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("useWorkflowNotificationInbox");
@@ -475,10 +479,15 @@ export const useWorkflowNotificationInbox = () => {
       const response = (await graphqlClient.graphql({
         query: updateWorkflowNotificationEvent,
         variables: {
+          condition: buildVersionOrUpdatedAtCondition(
+            target?.version,
+            target?.updatedAt,
+          ),
           input: {
             id,
             isRead: true,
             readAt,
+            version: getNextVersion(target?.version),
           },
         },
         authMode: "userPool",

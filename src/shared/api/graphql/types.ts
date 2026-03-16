@@ -5,10 +5,12 @@
 export type CreateCheckForUpdateInput = {
   id?: string | null,
   deployUuid: string,
+  version?: number | null,
 };
 
 export type ModelCheckForUpdateConditionInput = {
   deployUuid?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelCheckForUpdateConditionInput | null > | null,
   or?: Array< ModelCheckForUpdateConditionInput | null > | null,
   not?: ModelCheckForUpdateConditionInput | null,
@@ -56,10 +58,23 @@ export type ModelSizeInput = {
   between?: Array< number | null > | null,
 };
 
+export type ModelIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
 export type CheckForUpdate = {
   __typename: "CheckForUpdate",
   id: string,
   deployUuid: string,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -67,6 +82,7 @@ export type CheckForUpdate = {
 export type UpdateCheckForUpdateInput = {
   id: string,
   deployUuid?: string | null,
+  version?: number | null,
 };
 
 export type DeleteCheckForUpdateInput = {
@@ -102,6 +118,7 @@ export type CreateAppConfigInput = {
   overTimeCheckEnabled?: boolean | null,
   shiftCollaborativeEnabled?: boolean | null,
   shiftDefaultMode?: string | null,
+  version?: number | null,
 };
 
 export type LinkInput = {
@@ -171,6 +188,7 @@ export type ModelAppConfigConditionInput = {
   overTimeCheckEnabled?: ModelBooleanInput | null,
   shiftCollaborativeEnabled?: ModelBooleanInput | null,
   shiftDefaultMode?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelAppConfigConditionInput | null > | null,
   or?: Array< ModelAppConfigConditionInput | null > | null,
   not?: ModelAppConfigConditionInput | null,
@@ -227,6 +245,7 @@ export type AppConfig = {
   overTimeCheckEnabled?: boolean | null,
   shiftCollaborativeEnabled?: boolean | null,
   shiftDefaultMode?: string | null,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -302,6 +321,7 @@ export type UpdateAppConfigInput = {
   overTimeCheckEnabled?: boolean | null,
   shiftCollaborativeEnabled?: boolean | null,
   shiftDefaultMode?: string | null,
+  version?: number | null,
 };
 
 export type DeleteAppConfigInput = {
@@ -330,6 +350,7 @@ export type CreateStaffInput = {
   approverMultipleMode?: ApproverMultipleMode | null,
   shiftGroup?: string | null,
   attendanceManagementEnabled?: boolean | null,
+  version?: number | null,
 };
 
 export type NotificationInput = {
@@ -376,6 +397,7 @@ export type ModelStaffConditionInput = {
   approverMultipleMode?: ModelApproverMultipleModeInput | null,
   shiftGroup?: ModelStringInput | null,
   attendanceManagementEnabled?: ModelBooleanInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelStaffConditionInput | null > | null,
   or?: Array< ModelStaffConditionInput | null > | null,
   not?: ModelStaffConditionInput | null,
@@ -416,6 +438,7 @@ export type Staff = {
   approverMultipleMode?: ApproverMultipleMode | null,
   shiftGroup?: string | null,
   attendanceManagementEnabled?: boolean | null,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -456,6 +479,7 @@ export type UpdateStaffInput = {
   approverMultipleMode?: ApproverMultipleMode | null,
   shiftGroup?: string | null,
   attendanceManagementEnabled?: boolean | null,
+  version?: number | null,
 };
 
 export type DeleteStaffInput = {
@@ -466,11 +490,13 @@ export type CreateHolidayCalendarInput = {
   id?: string | null,
   holidayDate: string,
   name: string,
+  version?: number | null,
 };
 
 export type ModelHolidayCalendarConditionInput = {
   holidayDate?: ModelStringInput | null,
   name?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelHolidayCalendarConditionInput | null > | null,
   or?: Array< ModelHolidayCalendarConditionInput | null > | null,
   not?: ModelHolidayCalendarConditionInput | null,
@@ -483,6 +509,7 @@ export type HolidayCalendar = {
   id: string,
   holidayDate: string,
   name: string,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -491,6 +518,7 @@ export type UpdateHolidayCalendarInput = {
   id: string,
   holidayDate?: string | null,
   name?: string | null,
+  version?: number | null,
 };
 
 export type DeleteHolidayCalendarInput = {
@@ -501,11 +529,13 @@ export type CreateCompanyHolidayCalendarInput = {
   id?: string | null,
   holidayDate: string,
   name: string,
+  version?: number | null,
 };
 
 export type ModelCompanyHolidayCalendarConditionInput = {
   holidayDate?: ModelStringInput | null,
   name?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelCompanyHolidayCalendarConditionInput | null > | null,
   or?: Array< ModelCompanyHolidayCalendarConditionInput | null > | null,
   not?: ModelCompanyHolidayCalendarConditionInput | null,
@@ -518,6 +548,7 @@ export type CompanyHolidayCalendar = {
   id: string,
   holidayDate: string,
   name: string,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -526,6 +557,7 @@ export type UpdateCompanyHolidayCalendarInput = {
   id: string,
   holidayDate?: string | null,
   name?: string | null,
+  version?: number | null,
 };
 
 export type DeleteCompanyHolidayCalendarInput = {
@@ -537,12 +569,14 @@ export type CreateEventCalendarInput = {
   eventDate: string,
   name: string,
   description?: string | null,
+  version?: number | null,
 };
 
 export type ModelEventCalendarConditionInput = {
   eventDate?: ModelStringInput | null,
   name?: ModelStringInput | null,
   description?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelEventCalendarConditionInput | null > | null,
   or?: Array< ModelEventCalendarConditionInput | null > | null,
   not?: ModelEventCalendarConditionInput | null,
@@ -556,6 +590,7 @@ export type EventCalendar = {
   eventDate: string,
   name: string,
   description?: string | null,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -565,6 +600,7 @@ export type UpdateEventCalendarInput = {
   eventDate?: string | null,
   name?: string | null,
   description?: string | null,
+  version?: number | null,
 };
 
 export type DeleteEventCalendarInput = {
@@ -576,12 +612,14 @@ export type CreateCloseDateInput = {
   closeDate: string,
   startDate: string,
   endDate: string,
+  version?: number | null,
 };
 
 export type ModelCloseDateConditionInput = {
   closeDate?: ModelStringInput | null,
   startDate?: ModelStringInput | null,
   endDate?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelCloseDateConditionInput | null > | null,
   or?: Array< ModelCloseDateConditionInput | null > | null,
   not?: ModelCloseDateConditionInput | null,
@@ -595,6 +633,7 @@ export type CloseDate = {
   closeDate: string,
   startDate: string,
   endDate: string,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -604,6 +643,7 @@ export type UpdateCloseDateInput = {
   closeDate?: string | null,
   startDate?: string | null,
   endDate?: string | null,
+  version?: number | null,
 };
 
 export type DeleteCloseDateInput = {
@@ -707,18 +747,6 @@ export type ModelAttendanceConditionInput = {
   not?: ModelAttendanceConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-};
-
-export type ModelIntInput = {
-  ne?: number | null,
-  eq?: number | null,
-  le?: number | null,
-  lt?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  between?: Array< number | null > | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
 };
 
 export type Attendance = {
@@ -1030,6 +1058,7 @@ export type CreateShiftPlanYearInput = {
   notes?: string | null,
   createdBy?: string | null,
   updatedBy?: string | null,
+  version?: number | null,
 };
 
 export type ShiftPlanMonthSettingInput = {
@@ -1045,6 +1074,7 @@ export type ModelShiftPlanYearConditionInput = {
   notes?: ModelStringInput | null,
   createdBy?: ModelStringInput | null,
   updatedBy?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelShiftPlanYearConditionInput | null > | null,
   or?: Array< ModelShiftPlanYearConditionInput | null > | null,
   not?: ModelShiftPlanYearConditionInput | null,
@@ -1060,6 +1090,7 @@ export type ShiftPlanYear = {
   notes?: string | null,
   createdBy?: string | null,
   updatedBy?: string | null,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -1080,6 +1111,7 @@ export type UpdateShiftPlanYearInput = {
   notes?: string | null,
   createdBy?: string | null,
   updatedBy?: string | null,
+  version?: number | null,
 };
 
 export type DeleteShiftPlanYearInput = {
@@ -1105,6 +1137,7 @@ export type CreateWorkflowInput = {
   submitterApproverMultipleMode?: ApproverMultipleMode | null,
   overTimeDetails?: OverTimeWorkflowInput | null,
   comments?: Array< WorkflowCommentInput | null > | null,
+  version?: number | null,
 };
 
 export enum WorkflowStatus {
@@ -1163,6 +1196,7 @@ export type ModelWorkflowConditionInput = {
   submitterApproverId?: ModelStringInput | null,
   submitterApproverIds?: ModelStringInput | null,
   submitterApproverMultipleMode?: ModelApproverMultipleModeInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelWorkflowConditionInput | null > | null,
   or?: Array< ModelWorkflowConditionInput | null > | null,
   not?: ModelWorkflowConditionInput | null,
@@ -1200,6 +1234,7 @@ export type Workflow = {
   submitterApproverMultipleMode?: ApproverMultipleMode | null,
   overTimeDetails?: OverTimeWorkflow | null,
   comments?:  Array<WorkflowComment | null > | null,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -1249,6 +1284,7 @@ export type UpdateWorkflowInput = {
   submitterApproverMultipleMode?: ApproverMultipleMode | null,
   overTimeDetails?: OverTimeWorkflowInput | null,
   comments?: Array< WorkflowCommentInput | null > | null,
+  version?: number | null,
 };
 
 export type DeleteWorkflowInput = {
@@ -1261,6 +1297,7 @@ export type CreateWorkflowTemplateInput = {
   title: string,
   content: string,
   organizationId: string,
+  version?: number | null,
 };
 
 export type ModelWorkflowTemplateConditionInput = {
@@ -1268,6 +1305,7 @@ export type ModelWorkflowTemplateConditionInput = {
   title?: ModelStringInput | null,
   content?: ModelStringInput | null,
   organizationId?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelWorkflowTemplateConditionInput | null > | null,
   or?: Array< ModelWorkflowTemplateConditionInput | null > | null,
   not?: ModelWorkflowTemplateConditionInput | null,
@@ -1282,6 +1320,7 @@ export type WorkflowTemplate = {
   title: string,
   content: string,
   organizationId: string,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -1292,6 +1331,7 @@ export type UpdateWorkflowTemplateInput = {
   title?: string | null,
   content?: string | null,
   organizationId?: string | null,
+  version?: number | null,
 };
 
 export type DeleteWorkflowTemplateInput = {
@@ -1310,6 +1350,7 @@ export type CreateWorkflowNotificationEventInput = {
   isRead: boolean,
   readAt?: string | null,
   eventAt: string,
+  version?: number | null,
 };
 
 export enum WorkflowNotificationEventType {
@@ -1328,6 +1369,7 @@ export type ModelWorkflowNotificationEventConditionInput = {
   isRead?: ModelBooleanInput | null,
   readAt?: ModelStringInput | null,
   eventAt?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelWorkflowNotificationEventConditionInput | null > | null,
   or?: Array< ModelWorkflowNotificationEventConditionInput | null > | null,
   not?: ModelWorkflowNotificationEventConditionInput | null,
@@ -1369,6 +1411,7 @@ export type WorkflowNotificationEvent = {
   isRead: boolean,
   readAt?: string | null,
   eventAt: string,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -1385,6 +1428,7 @@ export type UpdateWorkflowNotificationEventInput = {
   isRead?: boolean | null,
   readAt?: string | null,
   eventAt?: string | null,
+  version?: number | null,
 };
 
 export type DeleteWorkflowNotificationEventInput = {
@@ -1403,6 +1447,7 @@ export type CreateOperationLogInput = {
   userAgent?: string | null,
   metadata?: string | null,
   severity?: string | null,
+  version?: number | null,
 };
 
 export type ModelOperationLogConditionInput = {
@@ -1416,6 +1461,7 @@ export type ModelOperationLogConditionInput = {
   userAgent?: ModelStringInput | null,
   metadata?: ModelStringInput | null,
   severity?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelOperationLogConditionInput | null > | null,
   or?: Array< ModelOperationLogConditionInput | null > | null,
   not?: ModelOperationLogConditionInput | null,
@@ -1436,6 +1482,7 @@ export type OperationLog = {
   userAgent?: string | null,
   metadata?: string | null,
   severity?: string | null,
+  version?: number | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -1452,6 +1499,7 @@ export type UpdateOperationLogInput = {
   userAgent?: string | null,
   metadata?: string | null,
   severity?: string | null,
+  version?: number | null,
 };
 
 export type DeleteOperationLogInput = {
@@ -1474,6 +1522,7 @@ export type CreateAuditLogInput = {
   createdAt?: string | null,
   ttl?: number | null,
   reason?: string | null,
+  version?: number | null,
 };
 
 export type ModelAuditLogConditionInput = {
@@ -1491,6 +1540,7 @@ export type ModelAuditLogConditionInput = {
   createdAt?: ModelStringInput | null,
   ttl?: ModelIntInput | null,
   reason?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelAuditLogConditionInput | null > | null,
   or?: Array< ModelAuditLogConditionInput | null > | null,
   not?: ModelAuditLogConditionInput | null,
@@ -1514,6 +1564,7 @@ export type AuditLog = {
   createdAt: string,
   ttl?: number | null,
   reason?: string | null,
+  version?: number | null,
   updatedAt: string,
 };
 
@@ -1533,6 +1584,7 @@ export type UpdateAuditLogInput = {
   createdAt?: string | null,
   ttl?: number | null,
   reason?: string | null,
+  version?: number | null,
 };
 
 export type DeleteAuditLogInput = {
@@ -1549,6 +1601,7 @@ export type CreateDailyReportInput = {
   updatedAt?: string | null,
   reactions?: Array< DailyReportReactionInput | null > | null,
   comments?: Array< DailyReportCommentInput | null > | null,
+  version?: number | null,
 };
 
 export enum DailyReportStatus {
@@ -1587,6 +1640,7 @@ export type ModelDailyReportConditionInput = {
   content?: ModelStringInput | null,
   status?: ModelDailyReportStatusInput | null,
   updatedAt?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   and?: Array< ModelDailyReportConditionInput | null > | null,
   or?: Array< ModelDailyReportConditionInput | null > | null,
   not?: ModelDailyReportConditionInput | null,
@@ -1609,6 +1663,7 @@ export type DailyReport = {
   updatedAt?: string | null,
   reactions?:  Array<DailyReportReaction | null > | null,
   comments?:  Array<DailyReportComment | null > | null,
+  version?: number | null,
   createdAt: string,
 };
 
@@ -1638,6 +1693,7 @@ export type UpdateDailyReportInput = {
   updatedAt?: string | null,
   reactions?: Array< DailyReportReactionInput | null > | null,
   comments?: Array< DailyReportCommentInput | null > | null,
+  version?: number | null,
 };
 
 export type DeleteDailyReportInput = {
@@ -1659,6 +1715,7 @@ export type EmailResult = {
 export type ModelCheckForUpdateFilterInput = {
   id?: ModelIDInput | null,
   deployUuid?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelCheckForUpdateFilterInput | null > | null,
@@ -1695,6 +1752,7 @@ export type ModelAppConfigFilterInput = {
   overTimeCheckEnabled?: ModelBooleanInput | null,
   shiftCollaborativeEnabled?: ModelBooleanInput | null,
   shiftDefaultMode?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelAppConfigFilterInput | null > | null,
@@ -1728,6 +1786,7 @@ export type ModelStaffFilterInput = {
   approverMultipleMode?: ModelApproverMultipleModeInput | null,
   shiftGroup?: ModelStringInput | null,
   attendanceManagementEnabled?: ModelBooleanInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelStaffFilterInput | null > | null,
@@ -1761,6 +1820,7 @@ export type ModelHolidayCalendarFilterInput = {
   id?: ModelIDInput | null,
   holidayDate?: ModelStringInput | null,
   name?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelHolidayCalendarFilterInput | null > | null,
@@ -1778,6 +1838,7 @@ export type ModelCompanyHolidayCalendarFilterInput = {
   id?: ModelIDInput | null,
   holidayDate?: ModelStringInput | null,
   name?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelCompanyHolidayCalendarFilterInput | null > | null,
@@ -1796,6 +1857,7 @@ export type ModelEventCalendarFilterInput = {
   eventDate?: ModelStringInput | null,
   name?: ModelStringInput | null,
   description?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelEventCalendarFilterInput | null > | null,
@@ -1814,6 +1876,7 @@ export type ModelCloseDateFilterInput = {
   closeDate?: ModelStringInput | null,
   startDate?: ModelStringInput | null,
   endDate?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelCloseDateFilterInput | null > | null,
@@ -1913,6 +1976,7 @@ export type ModelShiftPlanYearFilterInput = {
   notes?: ModelStringInput | null,
   createdBy?: ModelStringInput | null,
   updatedBy?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelShiftPlanYearFilterInput | null > | null,
@@ -1942,6 +2006,7 @@ export type ModelWorkflowFilterInput = {
   submitterApproverId?: ModelStringInput | null,
   submitterApproverIds?: ModelStringInput | null,
   submitterApproverMultipleMode?: ModelApproverMultipleModeInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelWorkflowFilterInput | null > | null,
@@ -1961,6 +2026,7 @@ export type ModelWorkflowTemplateFilterInput = {
   title?: ModelStringInput | null,
   content?: ModelStringInput | null,
   organizationId?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelWorkflowTemplateFilterInput | null > | null,
@@ -1986,6 +2052,7 @@ export type ModelWorkflowNotificationEventFilterInput = {
   isRead?: ModelBooleanInput | null,
   readAt?: ModelStringInput | null,
   eventAt?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelWorkflowNotificationEventFilterInput | null > | null,
@@ -2011,6 +2078,7 @@ export type ModelOperationLogFilterInput = {
   userAgent?: ModelStringInput | null,
   metadata?: ModelStringInput | null,
   severity?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelOperationLogFilterInput | null > | null,
@@ -2040,6 +2108,7 @@ export type ModelAuditLogFilterInput = {
   createdAt?: ModelStringInput | null,
   ttl?: ModelIntInput | null,
   reason?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelAuditLogFilterInput | null > | null,
   or?: Array< ModelAuditLogFilterInput | null > | null,
@@ -2060,6 +2129,7 @@ export type ModelDailyReportFilterInput = {
   content?: ModelStringInput | null,
   status?: ModelDailyReportStatusInput | null,
   updatedAt?: ModelStringInput | null,
+  version?: ModelIntInput | null,
   createdAt?: ModelStringInput | null,
   and?: Array< ModelDailyReportFilterInput | null > | null,
   or?: Array< ModelDailyReportFilterInput | null > | null,
@@ -2075,6 +2145,7 @@ export type ModelDailyReportConnection = {
 export type ModelSubscriptionCheckForUpdateFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   deployUuid?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionCheckForUpdateFilterInput | null > | null,
@@ -2111,6 +2182,18 @@ export type ModelSubscriptionStringInput = {
   notIn?: Array< string | null > | null,
 };
 
+export type ModelSubscriptionIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  in?: Array< number | null > | null,
+  notIn?: Array< number | null > | null,
+};
+
 export type ModelSubscriptionAppConfigFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   name?: ModelSubscriptionStringInput | null,
@@ -2134,6 +2217,7 @@ export type ModelSubscriptionAppConfigFilterInput = {
   overTimeCheckEnabled?: ModelSubscriptionBooleanInput | null,
   shiftCollaborativeEnabled?: ModelSubscriptionBooleanInput | null,
   shiftDefaultMode?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionAppConfigFilterInput | null > | null,
@@ -2177,6 +2261,7 @@ export type ModelSubscriptionStaffFilterInput = {
   approverMultipleMode?: ModelSubscriptionStringInput | null,
   shiftGroup?: ModelSubscriptionStringInput | null,
   attendanceManagementEnabled?: ModelSubscriptionBooleanInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionStaffFilterInput | null > | null,
@@ -2187,6 +2272,7 @@ export type ModelSubscriptionHolidayCalendarFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   holidayDate?: ModelSubscriptionStringInput | null,
   name?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionHolidayCalendarFilterInput | null > | null,
@@ -2197,6 +2283,7 @@ export type ModelSubscriptionCompanyHolidayCalendarFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   holidayDate?: ModelSubscriptionStringInput | null,
   name?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionCompanyHolidayCalendarFilterInput | null > | null,
@@ -2208,6 +2295,7 @@ export type ModelSubscriptionEventCalendarFilterInput = {
   eventDate?: ModelSubscriptionStringInput | null,
   name?: ModelSubscriptionStringInput | null,
   description?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionEventCalendarFilterInput | null > | null,
@@ -2219,6 +2307,7 @@ export type ModelSubscriptionCloseDateFilterInput = {
   closeDate?: ModelSubscriptionStringInput | null,
   startDate?: ModelSubscriptionStringInput | null,
   endDate?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionCloseDateFilterInput | null > | null,
@@ -2245,18 +2334,6 @@ export type ModelSubscriptionAttendanceFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionAttendanceFilterInput | null > | null,
   or?: Array< ModelSubscriptionAttendanceFilterInput | null > | null,
-};
-
-export type ModelSubscriptionIntInput = {
-  ne?: number | null,
-  eq?: number | null,
-  le?: number | null,
-  lt?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  between?: Array< number | null > | null,
-  in?: Array< number | null > | null,
-  notIn?: Array< number | null > | null,
 };
 
 export type ModelSubscriptionDocumentFilterInput = {
@@ -2292,6 +2369,7 @@ export type ModelSubscriptionShiftPlanYearFilterInput = {
   notes?: ModelSubscriptionStringInput | null,
   createdBy?: ModelSubscriptionStringInput | null,
   updatedBy?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionShiftPlanYearFilterInput | null > | null,
@@ -2314,6 +2392,7 @@ export type ModelSubscriptionWorkflowFilterInput = {
   submitterApproverId?: ModelSubscriptionStringInput | null,
   submitterApproverIds?: ModelSubscriptionStringInput | null,
   submitterApproverMultipleMode?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionWorkflowFilterInput | null > | null,
@@ -2326,6 +2405,7 @@ export type ModelSubscriptionWorkflowTemplateFilterInput = {
   title?: ModelSubscriptionStringInput | null,
   content?: ModelSubscriptionStringInput | null,
   organizationId?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionWorkflowTemplateFilterInput | null > | null,
@@ -2344,6 +2424,7 @@ export type ModelSubscriptionWorkflowNotificationEventFilterInput = {
   isRead?: ModelSubscriptionBooleanInput | null,
   readAt?: ModelSubscriptionStringInput | null,
   eventAt?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionWorkflowNotificationEventFilterInput | null > | null,
@@ -2362,6 +2443,7 @@ export type ModelSubscriptionOperationLogFilterInput = {
   userAgent?: ModelSubscriptionStringInput | null,
   metadata?: ModelSubscriptionStringInput | null,
   severity?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionOperationLogFilterInput | null > | null,
@@ -2384,6 +2466,7 @@ export type ModelSubscriptionAuditLogFilterInput = {
   createdAt?: ModelSubscriptionStringInput | null,
   ttl?: ModelSubscriptionIntInput | null,
   reason?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionAuditLogFilterInput | null > | null,
   or?: Array< ModelSubscriptionAuditLogFilterInput | null > | null,
@@ -2397,6 +2480,7 @@ export type ModelSubscriptionDailyReportFilterInput = {
   content?: ModelSubscriptionStringInput | null,
   status?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionDailyReportFilterInput | null > | null,
   or?: Array< ModelSubscriptionDailyReportFilterInput | null > | null,
@@ -2412,6 +2496,7 @@ export type CreateCheckForUpdateMutation = {
     __typename: "CheckForUpdate",
     id: string,
     deployUuid: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2427,6 +2512,7 @@ export type UpdateCheckForUpdateMutation = {
     __typename: "CheckForUpdate",
     id: string,
     deployUuid: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2442,6 +2528,7 @@ export type DeleteCheckForUpdateMutation = {
     __typename: "CheckForUpdate",
     id: string,
     deployUuid: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2517,6 +2604,7 @@ export type CreateAppConfigMutation = {
     overTimeCheckEnabled?: boolean | null,
     shiftCollaborativeEnabled?: boolean | null,
     shiftDefaultMode?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2592,6 +2680,7 @@ export type UpdateAppConfigMutation = {
     overTimeCheckEnabled?: boolean | null,
     shiftCollaborativeEnabled?: boolean | null,
     shiftDefaultMode?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2667,6 +2756,7 @@ export type DeleteAppConfigMutation = {
     overTimeCheckEnabled?: boolean | null,
     shiftCollaborativeEnabled?: boolean | null,
     shiftDefaultMode?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2711,6 +2801,7 @@ export type CreateStaffMutation = {
     approverMultipleMode?: ApproverMultipleMode | null,
     shiftGroup?: string | null,
     attendanceManagementEnabled?: boolean | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2755,6 +2846,7 @@ export type UpdateStaffMutation = {
     approverMultipleMode?: ApproverMultipleMode | null,
     shiftGroup?: string | null,
     attendanceManagementEnabled?: boolean | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2799,6 +2891,7 @@ export type DeleteStaffMutation = {
     approverMultipleMode?: ApproverMultipleMode | null,
     shiftGroup?: string | null,
     attendanceManagementEnabled?: boolean | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2815,6 +2908,7 @@ export type CreateHolidayCalendarMutation = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2831,6 +2925,7 @@ export type UpdateHolidayCalendarMutation = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2847,6 +2942,7 @@ export type DeleteHolidayCalendarMutation = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2863,6 +2959,7 @@ export type CreateCompanyHolidayCalendarMutation = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2879,6 +2976,7 @@ export type UpdateCompanyHolidayCalendarMutation = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2895,6 +2993,7 @@ export type DeleteCompanyHolidayCalendarMutation = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2912,6 +3011,7 @@ export type CreateEventCalendarMutation = {
     eventDate: string,
     name: string,
     description?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2929,6 +3029,7 @@ export type UpdateEventCalendarMutation = {
     eventDate: string,
     name: string,
     description?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2946,6 +3047,7 @@ export type DeleteEventCalendarMutation = {
     eventDate: string,
     name: string,
     description?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2963,6 +3065,7 @@ export type CreateCloseDateMutation = {
     closeDate: string,
     startDate: string,
     endDate: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2980,6 +3083,7 @@ export type UpdateCloseDateMutation = {
     closeDate: string,
     startDate: string,
     endDate: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -2997,6 +3101,7 @@ export type DeleteCloseDateMutation = {
     closeDate: string,
     startDate: string,
     endDate: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3563,6 +3668,7 @@ export type CreateShiftPlanYearMutation = {
     notes?: string | null,
     createdBy?: string | null,
     updatedBy?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3589,6 +3695,7 @@ export type UpdateShiftPlanYearMutation = {
     notes?: string | null,
     createdBy?: string | null,
     updatedBy?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3615,6 +3722,7 @@ export type DeleteShiftPlanYearMutation = {
     notes?: string | null,
     createdBy?: string | null,
     updatedBy?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3666,6 +3774,7 @@ export type CreateWorkflowMutation = {
       text: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3717,6 +3826,7 @@ export type UpdateWorkflowMutation = {
       text: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3768,6 +3878,7 @@ export type DeleteWorkflowMutation = {
       text: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3786,6 +3897,7 @@ export type CreateWorkflowTemplateMutation = {
     title: string,
     content: string,
     organizationId: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3804,6 +3916,7 @@ export type UpdateWorkflowTemplateMutation = {
     title: string,
     content: string,
     organizationId: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3822,6 +3935,7 @@ export type DeleteWorkflowTemplateMutation = {
     title: string,
     content: string,
     organizationId: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3846,6 +3960,7 @@ export type CreateWorkflowNotificationEventMutation = {
     isRead: boolean,
     readAt?: string | null,
     eventAt: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3870,6 +3985,7 @@ export type UpdateWorkflowNotificationEventMutation = {
     isRead: boolean,
     readAt?: string | null,
     eventAt: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3894,6 +4010,7 @@ export type DeleteWorkflowNotificationEventMutation = {
     isRead: boolean,
     readAt?: string | null,
     eventAt: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3918,6 +4035,7 @@ export type CreateOperationLogMutation = {
     userAgent?: string | null,
     metadata?: string | null,
     severity?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3942,6 +4060,7 @@ export type UpdateOperationLogMutation = {
     userAgent?: string | null,
     metadata?: string | null,
     severity?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3966,6 +4085,7 @@ export type DeleteOperationLogMutation = {
     userAgent?: string | null,
     metadata?: string | null,
     severity?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -3994,6 +4114,7 @@ export type CreateAuditLogMutation = {
     createdAt: string,
     ttl?: number | null,
     reason?: string | null,
+    version?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -4021,6 +4142,7 @@ export type UpdateAuditLogMutation = {
     createdAt: string,
     ttl?: number | null,
     reason?: string | null,
+    version?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -4048,6 +4170,7 @@ export type DeleteAuditLogMutation = {
     createdAt: string,
     ttl?: number | null,
     reason?: string | null,
+    version?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -4081,6 +4204,7 @@ export type CreateDailyReportMutation = {
       body: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
   } | null,
 };
@@ -4114,6 +4238,7 @@ export type UpdateDailyReportMutation = {
       body: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
   } | null,
 };
@@ -4147,6 +4272,7 @@ export type DeleteDailyReportMutation = {
       body: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
   } | null,
 };
@@ -4172,6 +4298,7 @@ export type GetCheckForUpdateQuery = {
     __typename: "CheckForUpdate",
     id: string,
     deployUuid: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4190,6 +4317,7 @@ export type ListCheckForUpdatesQuery = {
       __typename: "CheckForUpdate",
       id: string,
       deployUuid: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -4266,6 +4394,7 @@ export type GetAppConfigQuery = {
     overTimeCheckEnabled?: boolean | null,
     shiftCollaborativeEnabled?: boolean | null,
     shiftDefaultMode?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4344,6 +4473,7 @@ export type ListAppConfigsQuery = {
       overTimeCheckEnabled?: boolean | null,
       shiftCollaborativeEnabled?: boolean | null,
       shiftDefaultMode?: string | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -4389,6 +4519,7 @@ export type GetStaffQuery = {
     approverMultipleMode?: ApproverMultipleMode | null,
     shiftGroup?: string | null,
     attendanceManagementEnabled?: boolean | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4436,6 +4567,7 @@ export type ListStaffQuery = {
       approverMultipleMode?: ApproverMultipleMode | null,
       shiftGroup?: string | null,
       attendanceManagementEnabled?: boolean | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -4488,6 +4620,7 @@ export type StaffByCognitoUserIdQuery = {
       approverMultipleMode?: ApproverMultipleMode | null,
       shiftGroup?: string | null,
       attendanceManagementEnabled?: boolean | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -4505,6 +4638,7 @@ export type GetHolidayCalendarQuery = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4524,6 +4658,7 @@ export type ListHolidayCalendarsQuery = {
       id: string,
       holidayDate: string,
       name: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -4541,6 +4676,7 @@ export type GetCompanyHolidayCalendarQuery = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4560,6 +4696,7 @@ export type ListCompanyHolidayCalendarsQuery = {
       id: string,
       holidayDate: string,
       name: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -4578,6 +4715,7 @@ export type GetEventCalendarQuery = {
     eventDate: string,
     name: string,
     description?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4598,6 +4736,7 @@ export type ListEventCalendarsQuery = {
       eventDate: string,
       name: string,
       description?: string | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -4616,6 +4755,7 @@ export type GetCloseDateQuery = {
     closeDate: string,
     startDate: string,
     endDate: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -4636,6 +4776,7 @@ export type ListCloseDatesQuery = {
       closeDate: string,
       startDate: string,
       endDate: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5212,6 +5353,7 @@ export type GetShiftPlanYearQuery = {
     notes?: string | null,
     createdBy?: string | null,
     updatedBy?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5241,6 +5383,7 @@ export type ListShiftPlanYearsQuery = {
       notes?: string | null,
       createdBy?: string | null,
       updatedBy?: string | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5275,6 +5418,7 @@ export type ShiftPlanYearByTargetYearQuery = {
       notes?: string | null,
       createdBy?: string | null,
       updatedBy?: string | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5327,6 +5471,7 @@ export type GetWorkflowQuery = {
       text: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5381,6 +5526,7 @@ export type ListWorkflowsQuery = {
         text: string,
         createdAt: string,
       } | null > | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5439,6 +5585,7 @@ export type WorkflowsByStaffIdQuery = {
         text: string,
         createdAt: string,
       } | null > | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5458,6 +5605,7 @@ export type GetWorkflowTemplateQuery = {
     title: string,
     content: string,
     organizationId: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5479,6 +5627,7 @@ export type ListWorkflowTemplatesQuery = {
       title: string,
       content: string,
       organizationId: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5504,6 +5653,7 @@ export type WorkflowTemplatesByOrganizationIdQuery = {
       title: string,
       content: string,
       organizationId: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5529,6 +5679,7 @@ export type GetWorkflowNotificationEventQuery = {
     isRead: boolean,
     readAt?: string | null,
     eventAt: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5556,6 +5707,7 @@ export type ListWorkflowNotificationEventsQuery = {
       isRead: boolean,
       readAt?: string | null,
       eventAt: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5588,6 +5740,7 @@ export type WorkflowNotificationEventsByRecipientQuery = {
       isRead: boolean,
       readAt?: string | null,
       eventAt: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5620,6 +5773,7 @@ export type WorkflowNotificationEventsByWorkflowQuery = {
       isRead: boolean,
       readAt?: string | null,
       eventAt: string,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5645,6 +5799,7 @@ export type GetOperationLogQuery = {
     userAgent?: string | null,
     metadata?: string | null,
     severity?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5672,6 +5827,7 @@ export type ListOperationLogsQuery = {
       userAgent?: string | null,
       metadata?: string | null,
       severity?: string | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5704,6 +5860,7 @@ export type OperationLogsByStaffIdQuery = {
       userAgent?: string | null,
       metadata?: string | null,
       severity?: string | null,
+      version?: number | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5733,6 +5890,7 @@ export type GetAuditLogQuery = {
     createdAt: string,
     ttl?: number | null,
     reason?: string | null,
+    version?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -5763,6 +5921,7 @@ export type ListAuditLogsQuery = {
       createdAt: string,
       ttl?: number | null,
       reason?: string | null,
+      version?: number | null,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -5797,6 +5956,7 @@ export type GetDailyReportQuery = {
       body: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
   } | null,
 };
@@ -5833,6 +5993,7 @@ export type ListDailyReportsQuery = {
         body: string,
         createdAt: string,
       } | null > | null,
+      version?: number | null,
       createdAt: string,
     } | null >,
     nextToken?: string | null,
@@ -5874,6 +6035,7 @@ export type DailyReportsByStaffIdQuery = {
         body: string,
         createdAt: string,
       } | null > | null,
+      version?: number | null,
       createdAt: string,
     } | null >,
     nextToken?: string | null,
@@ -5889,6 +6051,7 @@ export type OnCreateCheckForUpdateSubscription = {
     __typename: "CheckForUpdate",
     id: string,
     deployUuid: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5903,6 +6066,7 @@ export type OnUpdateCheckForUpdateSubscription = {
     __typename: "CheckForUpdate",
     id: string,
     deployUuid: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5917,6 +6081,7 @@ export type OnDeleteCheckForUpdateSubscription = {
     __typename: "CheckForUpdate",
     id: string,
     deployUuid: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5991,6 +6156,7 @@ export type OnCreateAppConfigSubscription = {
     overTimeCheckEnabled?: boolean | null,
     shiftCollaborativeEnabled?: boolean | null,
     shiftDefaultMode?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6065,6 +6231,7 @@ export type OnUpdateAppConfigSubscription = {
     overTimeCheckEnabled?: boolean | null,
     shiftCollaborativeEnabled?: boolean | null,
     shiftDefaultMode?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6139,6 +6306,7 @@ export type OnDeleteAppConfigSubscription = {
     overTimeCheckEnabled?: boolean | null,
     shiftCollaborativeEnabled?: boolean | null,
     shiftDefaultMode?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6182,6 +6350,7 @@ export type OnCreateStaffSubscription = {
     approverMultipleMode?: ApproverMultipleMode | null,
     shiftGroup?: string | null,
     attendanceManagementEnabled?: boolean | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6225,6 +6394,7 @@ export type OnUpdateStaffSubscription = {
     approverMultipleMode?: ApproverMultipleMode | null,
     shiftGroup?: string | null,
     attendanceManagementEnabled?: boolean | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6268,6 +6438,7 @@ export type OnDeleteStaffSubscription = {
     approverMultipleMode?: ApproverMultipleMode | null,
     shiftGroup?: string | null,
     attendanceManagementEnabled?: boolean | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6283,6 +6454,7 @@ export type OnCreateHolidayCalendarSubscription = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6298,6 +6470,7 @@ export type OnUpdateHolidayCalendarSubscription = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6313,6 +6486,7 @@ export type OnDeleteHolidayCalendarSubscription = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6328,6 +6502,7 @@ export type OnCreateCompanyHolidayCalendarSubscription = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6343,6 +6518,7 @@ export type OnUpdateCompanyHolidayCalendarSubscription = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6358,6 +6534,7 @@ export type OnDeleteCompanyHolidayCalendarSubscription = {
     id: string,
     holidayDate: string,
     name: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6374,6 +6551,7 @@ export type OnCreateEventCalendarSubscription = {
     eventDate: string,
     name: string,
     description?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6390,6 +6568,7 @@ export type OnUpdateEventCalendarSubscription = {
     eventDate: string,
     name: string,
     description?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6406,6 +6585,7 @@ export type OnDeleteEventCalendarSubscription = {
     eventDate: string,
     name: string,
     description?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6422,6 +6602,7 @@ export type OnCreateCloseDateSubscription = {
     closeDate: string,
     startDate: string,
     endDate: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6438,6 +6619,7 @@ export type OnUpdateCloseDateSubscription = {
     closeDate: string,
     startDate: string,
     endDate: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6454,6 +6636,7 @@ export type OnDeleteCloseDateSubscription = {
     closeDate: string,
     startDate: string,
     endDate: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7010,6 +7193,7 @@ export type OnCreateShiftPlanYearSubscription = {
     notes?: string | null,
     createdBy?: string | null,
     updatedBy?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7035,6 +7219,7 @@ export type OnUpdateShiftPlanYearSubscription = {
     notes?: string | null,
     createdBy?: string | null,
     updatedBy?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7060,6 +7245,7 @@ export type OnDeleteShiftPlanYearSubscription = {
     notes?: string | null,
     createdBy?: string | null,
     updatedBy?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7110,6 +7296,7 @@ export type OnCreateWorkflowSubscription = {
       text: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7160,6 +7347,7 @@ export type OnUpdateWorkflowSubscription = {
       text: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7210,6 +7398,7 @@ export type OnDeleteWorkflowSubscription = {
       text: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7227,6 +7416,7 @@ export type OnCreateWorkflowTemplateSubscription = {
     title: string,
     content: string,
     organizationId: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7244,6 +7434,7 @@ export type OnUpdateWorkflowTemplateSubscription = {
     title: string,
     content: string,
     organizationId: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7261,6 +7452,7 @@ export type OnDeleteWorkflowTemplateSubscription = {
     title: string,
     content: string,
     organizationId: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7284,6 +7476,7 @@ export type OnCreateWorkflowNotificationEventSubscription = {
     isRead: boolean,
     readAt?: string | null,
     eventAt: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7307,6 +7500,7 @@ export type OnUpdateWorkflowNotificationEventSubscription = {
     isRead: boolean,
     readAt?: string | null,
     eventAt: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7330,6 +7524,7 @@ export type OnDeleteWorkflowNotificationEventSubscription = {
     isRead: boolean,
     readAt?: string | null,
     eventAt: string,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7353,6 +7548,7 @@ export type OnCreateOperationLogSubscription = {
     userAgent?: string | null,
     metadata?: string | null,
     severity?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7376,6 +7572,7 @@ export type OnUpdateOperationLogSubscription = {
     userAgent?: string | null,
     metadata?: string | null,
     severity?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7399,6 +7596,7 @@ export type OnDeleteOperationLogSubscription = {
     userAgent?: string | null,
     metadata?: string | null,
     severity?: string | null,
+    version?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -7426,6 +7624,7 @@ export type OnCreateAuditLogSubscription = {
     createdAt: string,
     ttl?: number | null,
     reason?: string | null,
+    version?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -7452,6 +7651,7 @@ export type OnUpdateAuditLogSubscription = {
     createdAt: string,
     ttl?: number | null,
     reason?: string | null,
+    version?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -7478,6 +7678,7 @@ export type OnDeleteAuditLogSubscription = {
     createdAt: string,
     ttl?: number | null,
     reason?: string | null,
+    version?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -7510,6 +7711,7 @@ export type OnCreateDailyReportSubscription = {
       body: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
   } | null,
 };
@@ -7542,6 +7744,7 @@ export type OnUpdateDailyReportSubscription = {
       body: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
   } | null,
 };
@@ -7574,6 +7777,7 @@ export type OnDeleteDailyReportSubscription = {
       body: string,
       createdAt: string,
     } | null > | null,
+    version?: number | null,
     createdAt: string,
   } | null,
 };

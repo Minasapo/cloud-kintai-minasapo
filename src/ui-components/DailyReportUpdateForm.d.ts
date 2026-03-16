@@ -29,6 +29,7 @@ export declare type DailyReportUpdateFormInputValues = {
     content?: string;
     status?: string;
     updatedAt?: string;
+    version?: number;
 };
 export declare type DailyReportUpdateFormValidationValues = {
     staffId?: ValidationFunction<string>;
@@ -37,6 +38,7 @@ export declare type DailyReportUpdateFormValidationValues = {
     content?: ValidationFunction<string>;
     status?: ValidationFunction<string>;
     updatedAt?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type DailyReportUpdateFormOverridesProps = {
@@ -47,6 +49,7 @@ export declare type DailyReportUpdateFormOverridesProps = {
     content?: PrimitiveOverrideProps<TextFieldProps>;
     status?: PrimitiveOverrideProps<SelectFieldProps>;
     updatedAt?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type DailyReportUpdateFormProps = React.PropsWithChildren<{
     overrides?: DailyReportUpdateFormOverridesProps | undefined | null;

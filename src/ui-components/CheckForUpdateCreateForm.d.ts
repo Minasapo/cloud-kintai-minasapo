@@ -23,14 +23,17 @@ export declare type ValidationResponse = {
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type CheckForUpdateCreateFormInputValues = {
     deployUuid?: string;
+    version?: number;
 };
 export declare type CheckForUpdateCreateFormValidationValues = {
     deployUuid?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type CheckForUpdateCreateFormOverridesProps = {
     CheckForUpdateCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
     deployUuid?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type CheckForUpdateCreateFormProps = React.PropsWithChildren<{
     overrides?: CheckForUpdateCreateFormOverridesProps | undefined | null;

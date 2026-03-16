@@ -33,6 +33,7 @@ export declare type OperationLogUpdateFormInputValues = {
     userAgent?: string;
     metadata?: string;
     severity?: string;
+    version?: number;
 };
 export declare type OperationLogUpdateFormValidationValues = {
     staffId?: ValidationFunction<string>;
@@ -45,6 +46,7 @@ export declare type OperationLogUpdateFormValidationValues = {
     userAgent?: ValidationFunction<string>;
     metadata?: ValidationFunction<string>;
     severity?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type OperationLogUpdateFormOverridesProps = {
@@ -59,6 +61,7 @@ export declare type OperationLogUpdateFormOverridesProps = {
     userAgent?: PrimitiveOverrideProps<TextFieldProps>;
     metadata?: PrimitiveOverrideProps<TextFieldProps>;
     severity?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type OperationLogUpdateFormProps = React.PropsWithChildren<{
     overrides?: OperationLogUpdateFormOverridesProps | undefined | null;

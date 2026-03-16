@@ -1,4 +1,5 @@
 import {
+  type UpdateEventCalendarPayload,
   useBulkCreateEventCalendarsMutation,
   useCreateEventCalendarMutation,
   useDeleteEventCalendarMutation,
@@ -35,6 +36,10 @@ import CreatedAtTableCell from "@/features/admin/holidayCalendar/ui/components/C
 import EventCalendarDelete from "@/features/admin/holidayCalendar/ui/components/EventCalendarDelete";
 import EventDateTableCell from "@/features/admin/holidayCalendar/ui/components/EventDateTableCell";
 import EventNameTableCell from "@/features/admin/holidayCalendar/ui/components/EventNameTableCell";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import { AddEventCalendar } from "./AddEventCalendar";
@@ -69,8 +74,20 @@ export default function EventCalendarList() {
   );
 
   const updateEventCalendar = useCallback(
-    async (input: Parameters<typeof updateEventCalendarMutation>[0]) =>
-      updateEventCalendarMutation(input).unwrap(),
+    async (input: EventCalendar) =>
+      updateEventCalendarMutation({
+        input: {
+          id: input.id,
+          eventDate: input.eventDate,
+          name: input.name,
+          description: input.description ?? undefined,
+          version: getNextVersion(input.version),
+        },
+        condition: buildVersionOrUpdatedAtCondition(
+          input.version,
+          input.updatedAt,
+        ),
+      } satisfies UpdateEventCalendarPayload).unwrap(),
     [updateEventCalendarMutation],
   );
 
