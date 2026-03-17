@@ -1,4 +1,5 @@
 import {
+  type UpdateAppConfigPayload,
   useCreateAppConfigMutation,
   useGetAppConfigQuery,
   useUpdateAppConfigMutation,
@@ -12,6 +13,10 @@ import type {
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 import { resolveThemeColor } from "@/shared/config/theme";
 import {
   applyDesignTokenCssVariables,
@@ -98,7 +103,16 @@ const useAppConfig = () => {
   const saveConfig = useCallback(
     async (newConfig: CreateAppConfigInput | UpdateAppConfigInput) => {
       if ("id" in newConfig && newConfig.id) {
-        await updateAppConfig(newConfig as UpdateAppConfigInput).unwrap();
+        await updateAppConfig({
+          input: {
+            ...(newConfig as UpdateAppConfigInput),
+            version: getNextVersion(config?.version),
+          },
+          condition: buildVersionOrUpdatedAtCondition(
+            config?.version,
+            config?.updatedAt,
+          ),
+        } satisfies UpdateAppConfigPayload).unwrap();
         return;
       }
 

@@ -1,8 +1,10 @@
+import { lazy, type ReactNode,Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import Layout from "./Layout";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
+import RouterFallback from "./shared/ui/feedback/RouterFallback";
 
 const loadAdminDashboardLoader = async () =>
   (await import("./router/loaders/adminDashboardLoader")).adminDashboardLoader();
@@ -27,25 +29,47 @@ const loadWorkflowEditLoader = async (args: Parameters<
 const loadWorkflowListLoader = async () =>
   (await import("./router/loaders/workflowListLoader")).workflowListLoader();
 
+const LazyMuiXDateProvider = lazy(
+  () => import("./shared/providers/MuiXDateProvider"),
+);
+
+const wrapWithMuiXDateProvider = (node: ReactNode) => (
+  <Suspense fallback={<RouterFallback />}>
+    <LazyMuiXDateProvider>{node}</LazyMuiXDateProvider>
+  </Suspense>
+);
+
 const AdminDashboardRoute = createLazyRoute(
   () => import("./pages/admin/AdminDashboard"),
 );
 const AdminLayoutRoute = createLazyRoute(
   () => import("./pages/admin/AdminLayout"),
+  {
+    wrap: wrapWithMuiXDateProvider,
+  },
 );
 const DailyReportRoute = createLazyRoute(
   () => import("./pages/attendance/daily-report/DailyReport"),
+  {
+    wrap: wrapWithMuiXDateProvider,
+  },
 );
 const AttendanceEditRoute = createLazyRoute(
   () => import("./pages/attendance/edit/AttendanceEdit"),
+  {
+    wrap: wrapWithMuiXDateProvider,
+  },
 );
 const AttendanceListRoute = createLazyRoute(
   () => import("./pages/attendance/list/AttendanceListPage"),
+  {
+    wrap: wrapWithMuiXDateProvider,
+  },
 );
 const AttendanceStatisticsRoute = createLazyRoute(
   () => import("./pages/attendance/statistics/AttendanceStatisticsPage"),
 );
-const LoginRoute = createLazyRoute(() => import("./pages/Login/Login"));
+const LoginRoute = createLazyRoute(() => import("./pages/Login/LoginShell"));
 const OfficeHomeRoute = createLazyRoute(
   () => import("./pages/office/home/OfficeHomePage"),
 );
@@ -86,12 +110,19 @@ const WorkflowEditRoute = createLazyRoute(
 );
 const WorkflowListRoute = createLazyRoute(
   () => import("./pages/workflow/list/WorkflowListPage"),
+  {
+    wrap: wrapWithMuiXDateProvider,
+  },
 );
 const NewWorkflowRoute = createLazyRoute(
   () => import("./pages/workflow/new/NewWorkflowPage"),
 );
 
 const router = createBrowserRouter([
+  {
+    path: "/login",
+    lazy: LoginRoute,
+  },
   {
     path: "/",
     element: <Layout />,
@@ -133,10 +164,6 @@ const router = createBrowserRouter([
             lazy: AttendanceListRoute,
           },
         ],
-      },
-      {
-        path: "login",
-        lazy: LoginRoute,
       },
       {
         path: "workflow",

@@ -35,6 +35,9 @@ import type {
   ListCompanyHolidayCalendarsQuery,
   ListEventCalendarsQuery,
   ListHolidayCalendarsQuery,
+  ModelCompanyHolidayCalendarConditionInput,
+  ModelEventCalendarConditionInput,
+  ModelHolidayCalendarConditionInput,
   UpdateCompanyHolidayCalendarInput,
   UpdateCompanyHolidayCalendarMutation,
   UpdateEventCalendarInput,
@@ -42,6 +45,21 @@ import type {
   UpdateHolidayCalendarInput,
   UpdateHolidayCalendarMutation,
 } from "@shared/api/graphql/types";
+
+export type UpdateHolidayCalendarPayload = {
+  input: UpdateHolidayCalendarInput;
+  condition?: ModelHolidayCalendarConditionInput | null;
+};
+
+export type UpdateCompanyHolidayCalendarPayload = {
+  input: UpdateCompanyHolidayCalendarInput;
+  condition?: ModelCompanyHolidayCalendarConditionInput | null;
+};
+
+export type UpdateEventCalendarPayload = {
+  input: UpdateEventCalendarInput;
+  condition?: ModelEventCalendarConditionInput | null;
+};
 
 type CalendarTag = {
   type: "HolidayCalendar" | "CompanyHolidayCalendar" | "EventCalendar";
@@ -225,12 +243,15 @@ export const calendarApi = createApi({
     }),
     updateHolidayCalendar: builder.mutation<
       HolidayCalendar,
-      UpdateHolidayCalendarInput
+      UpdateHolidayCalendarPayload
     >({
-      async queryFn(input, _queryApi, _extraOptions, baseQuery) {
+      async queryFn({ input, condition }, _queryApi, _extraOptions, baseQuery) {
         const result = await baseQuery({
           document: updateHolidayCalendar,
-          variables: { input },
+          variables: {
+            input,
+            condition: condition ?? undefined,
+          },
         });
 
         if (result.error) {
@@ -369,12 +390,15 @@ export const calendarApi = createApi({
     }),
     updateCompanyHolidayCalendar: builder.mutation<
       CompanyHolidayCalendar,
-      UpdateCompanyHolidayCalendarInput
+      UpdateCompanyHolidayCalendarPayload
     >({
-      async queryFn(input, _queryApi, _extraOptions, baseQuery) {
+      async queryFn({ input, condition }, _queryApi, _extraOptions, baseQuery) {
         const result = await baseQuery({
           document: updateCompanyHolidayCalendar,
-          variables: { input },
+          variables: {
+            input,
+            condition: condition ?? undefined,
+          },
         });
 
         if (result.error) {
@@ -563,12 +587,15 @@ export const calendarApi = createApi({
     }),
     updateEventCalendar: builder.mutation<
       EventCalendar,
-      UpdateEventCalendarInput
+      UpdateEventCalendarPayload
     >({
-      async queryFn(input, _queryApi, _extraOptions, baseQuery) {
+      async queryFn({ input, condition }, _queryApi, _extraOptions, baseQuery) {
         const result = await baseQuery({
           document: updateEventCalendar,
-          variables: { input },
+          variables: {
+            input,
+            condition: condition ?? undefined,
+          },
         });
 
         if (result.error) {

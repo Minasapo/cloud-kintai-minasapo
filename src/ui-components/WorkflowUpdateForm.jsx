@@ -206,6 +206,7 @@ export default function WorkflowUpdateForm(props) {
     submitterApproverId: "",
     submitterApproverIds: [],
     submitterApproverMultipleMode: "",
+    version: "",
   };
   const [approvedStaffIds, setApprovedStaffIds] = React.useState(
     initialValues.approvedStaffIds
@@ -240,6 +241,7 @@ export default function WorkflowUpdateForm(props) {
   );
   const [submitterApproverMultipleMode, setSubmitterApproverMultipleMode] =
     React.useState(initialValues.submitterApproverMultipleMode);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = workflowRecord
@@ -263,6 +265,7 @@ export default function WorkflowUpdateForm(props) {
     setSubmitterApproverIds(cleanValues.submitterApproverIds ?? []);
     setCurrentSubmitterApproverIdsValue("");
     setSubmitterApproverMultipleMode(cleanValues.submitterApproverMultipleMode);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [workflowRecord, setWorkflowRecord] = React.useState(workflowModelProp);
@@ -312,6 +315,7 @@ export default function WorkflowUpdateForm(props) {
     submitterApproverId: [],
     submitterApproverIds: [],
     submitterApproverMultipleMode: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -353,6 +357,7 @@ export default function WorkflowUpdateForm(props) {
           submitterApproverId: submitterApproverId ?? null,
           submitterApproverIds: submitterApproverIds ?? null,
           submitterApproverMultipleMode: submitterApproverMultipleMode ?? null,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -423,6 +428,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             values = result?.approvedStaffIds ?? values;
@@ -486,6 +492,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             values = result?.rejectedStaffIds ?? values;
@@ -553,6 +560,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.finalDecisionTimestamp ?? value;
@@ -592,6 +600,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.category ?? value;
@@ -655,6 +664,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.customWorkflowTitle ?? value;
@@ -694,6 +704,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.customWorkflowContent ?? value;
@@ -733,6 +744,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.staffId ?? value;
@@ -770,6 +782,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -834,6 +847,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             values = result?.assignedApproverStaffIds ?? values;
@@ -908,6 +922,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.nextApprovalStepIndex ?? value;
@@ -947,6 +962,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.submitterApproverSetting ?? value;
@@ -1005,6 +1021,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId: value,
               submitterApproverIds,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.submitterApproverId ?? value;
@@ -1040,6 +1057,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds: values,
               submitterApproverMultipleMode,
+              version,
             };
             const result = onChange(modelFields);
             values = result?.submitterApproverIds ?? values;
@@ -1110,6 +1128,7 @@ export default function WorkflowUpdateForm(props) {
               submitterApproverId,
               submitterApproverIds,
               submitterApproverMultipleMode: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.submitterApproverMultipleMode ?? value;
@@ -1146,6 +1165,48 @@ export default function WorkflowUpdateForm(props) {
           )}
         ></option>
       </SelectField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              approvedStaffIds,
+              rejectedStaffIds,
+              finalDecisionTimestamp,
+              category,
+              customWorkflowTitle,
+              customWorkflowContent,
+              staffId,
+              status,
+              assignedApproverStaffIds,
+              nextApprovalStepIndex,
+              submitterApproverSetting,
+              submitterApproverId,
+              submitterApproverIds,
+              submitterApproverMultipleMode,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

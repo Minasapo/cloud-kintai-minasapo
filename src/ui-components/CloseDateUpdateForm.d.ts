@@ -26,11 +26,13 @@ export declare type CloseDateUpdateFormInputValues = {
     closeDate?: string;
     startDate?: string;
     endDate?: string;
+    version?: number;
 };
 export declare type CloseDateUpdateFormValidationValues = {
     closeDate?: ValidationFunction<string>;
     startDate?: ValidationFunction<string>;
     endDate?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type CloseDateUpdateFormOverridesProps = {
@@ -38,6 +40,7 @@ export declare type CloseDateUpdateFormOverridesProps = {
     closeDate?: PrimitiveOverrideProps<TextFieldProps>;
     startDate?: PrimitiveOverrideProps<TextFieldProps>;
     endDate?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type CloseDateUpdateFormProps = React.PropsWithChildren<{
     overrides?: CloseDateUpdateFormOverridesProps | undefined | null;

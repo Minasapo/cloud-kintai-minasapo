@@ -37,6 +37,7 @@ export declare type AuditLogUpdateFormInputValues = {
     createdAt?: string;
     ttl?: number;
     reason?: string;
+    version?: number;
 };
 export declare type AuditLogUpdateFormValidationValues = {
     resourceType?: ValidationFunction<string>;
@@ -53,6 +54,7 @@ export declare type AuditLogUpdateFormValidationValues = {
     createdAt?: ValidationFunction<string>;
     ttl?: ValidationFunction<number>;
     reason?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type AuditLogUpdateFormOverridesProps = {
@@ -71,6 +73,7 @@ export declare type AuditLogUpdateFormOverridesProps = {
     createdAt?: PrimitiveOverrideProps<TextFieldProps>;
     ttl?: PrimitiveOverrideProps<TextFieldProps>;
     reason?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type AuditLogUpdateFormProps = React.PropsWithChildren<{
     overrides?: AuditLogUpdateFormOverridesProps | undefined | null;

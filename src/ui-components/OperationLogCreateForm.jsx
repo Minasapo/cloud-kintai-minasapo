@@ -33,6 +33,7 @@ export default function OperationLogCreateForm(props) {
     userAgent: "",
     metadata: "",
     severity: "",
+    version: "",
   };
   const [staffId, setStaffId] = React.useState(initialValues.staffId);
   const [action, setAction] = React.useState(initialValues.action);
@@ -44,6 +45,7 @@ export default function OperationLogCreateForm(props) {
   const [userAgent, setUserAgent] = React.useState(initialValues.userAgent);
   const [metadata, setMetadata] = React.useState(initialValues.metadata);
   const [severity, setSeverity] = React.useState(initialValues.severity);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setStaffId(initialValues.staffId);
@@ -56,6 +58,7 @@ export default function OperationLogCreateForm(props) {
     setUserAgent(initialValues.userAgent);
     setMetadata(initialValues.metadata);
     setSeverity(initialValues.severity);
+    setVersion(initialValues.version);
     setErrors({});
   };
   const validations = {
@@ -69,6 +72,7 @@ export default function OperationLogCreateForm(props) {
     userAgent: [],
     metadata: [],
     severity: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -106,6 +110,7 @@ export default function OperationLogCreateForm(props) {
           userAgent,
           metadata,
           severity,
+          version,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -178,6 +183,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.staffId ?? value;
@@ -211,6 +217,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.action ?? value;
@@ -244,6 +251,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.resource ?? value;
@@ -277,6 +285,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.resourceId ?? value;
@@ -310,6 +319,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.timestamp ?? value;
@@ -343,6 +353,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.details ?? value;
@@ -376,6 +387,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.ipAddress ?? value;
@@ -409,6 +421,7 @@ export default function OperationLogCreateForm(props) {
               userAgent: value,
               metadata,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.userAgent ?? value;
@@ -442,6 +455,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata: value,
               severity,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.metadata ?? value;
@@ -475,6 +489,7 @@ export default function OperationLogCreateForm(props) {
               userAgent,
               metadata,
               severity: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.severity ?? value;
@@ -488,6 +503,44 @@ export default function OperationLogCreateForm(props) {
         errorMessage={errors.severity?.errorMessage}
         hasError={errors.severity?.hasError}
         {...getOverrideProps(overrides, "severity")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              staffId,
+              action,
+              resource,
+              resourceId,
+              timestamp,
+              details,
+              ipAddress,
+              userAgent,
+              metadata,
+              severity,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"
