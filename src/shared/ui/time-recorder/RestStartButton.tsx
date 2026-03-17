@@ -1,16 +1,6 @@
-import { Button } from "@mui/material";
-import { CSSProperties, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-import { designTokenVar } from "@/shared/designSystem";
-
-const REST_DISABLED_BACKGROUND = designTokenVar(
-  "component.timeRecorder.restButton.disabledBackground",
-  "#D9E2DD"
-);
-const REST_BUTTON_MAX_WIDTH = designTokenVar(
-  "component.timeRecorder.restButton.maxWidth",
-  "220px"
-);
+import { buildRestButtonVars,REST_BUTTON_CLASS_NAME } from "./buttonStyles";
 
 export interface RestStartButtonProps {
   isWorking: boolean;
@@ -23,10 +13,7 @@ const RestStartButton = ({
   onRestStart,
   disabled = false,
 }: RestStartButtonProps) => {
-  const restButtonVars: CSSProperties & Record<`--${string}`, string> = {
-    "--rest-button-max-width": REST_BUTTON_MAX_WIDTH,
-    "--rest-button-disabled-bg": REST_DISABLED_BACKGROUND,
-  };
+  const restButtonVars = buildRestButtonVars();
   const [isPending, setIsPending] = useState(false);
 
   // Derived state: reset isPending when isWorking changes
@@ -40,26 +27,16 @@ const RestStartButton = ({
   }, [onRestStart]);
 
   return (
-    <Button
-      fullWidth
+    <button
+      type="button"
       onClick={handleClick}
       disabled={!isWorking || actualIsPending || disabled}
       data-testid="rest-start-button"
-      className="w-full max-w-[var(--rest-button-max-width)]"
+      className={`${REST_BUTTON_CLASS_NAME} bg-transparent text-[color:var(--rest-button-color)] hover:border-[var(--rest-button-hover-border)] hover:bg-[var(--rest-button-hover-bg)] hover:text-[color:var(--rest-button-hover-text)]`}
       style={restButtonVars}
-      sx={(theme) => ({
-        color: theme.palette.rest.main,
-        "&:hover": {
-          color: theme.palette.rest.contrastText,
-          backgroundColor: theme.palette.rest.main,
-        },
-        "&:disabled": {
-          backgroundColor: "var(--rest-button-disabled-bg)",
-        },
-      })}
     >
       休憩開始
-    </Button>
+    </button>
   );
 };
 

@@ -1,4 +1,3 @@
-import { Box, Stack } from "@mui/material";
 import Link from "@shared/ui/link/Link";
 import { CSSProperties } from "react";
 
@@ -87,10 +86,10 @@ const DesktopMenu = ({
     }`;
 
   return (
-    <Box className="hidden w-full items-center lg:flex" style={menuVars}>
-      <Stack direction="row" className="w-auto gap-[var(--menu-gap)]">
+    <div className="hidden w-full items-center lg:flex" style={menuVars}>
+      <div className="flex w-auto gap-[var(--menu-gap)]">
         {menuItems.map((menu) => (
-          <Box
+          <div
             key={menu.href}
             onMouseEnter={() => onItemPreload?.(menu.href)}
             onFocus={() => onItemPreload?.(menu.href)}
@@ -100,11 +99,11 @@ const DesktopMenu = ({
               href={menu.href}
               className={buildLinkClassName(pathName === menu.href)}
             />
-          </Box>
+          </div>
         ))}
 
         {showAdminMenu && adminLink && (
-          <Box
+          <div
             onMouseEnter={() => onItemPreload?.(adminLink.href)}
             onFocus={() => onItemPreload?.(adminLink.href)}
           >
@@ -113,10 +112,10 @@ const DesktopMenu = ({
               href={adminLink.href}
               className={buildLinkClassName(pathName === adminLink.href)}
             />
-          </Box>
+          </div>
         )}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 };
 

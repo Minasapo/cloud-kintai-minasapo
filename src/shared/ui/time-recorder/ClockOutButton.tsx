@@ -1,32 +1,11 @@
-import { Button, useMediaQuery, useTheme } from "@mui/material";
-import { CSSProperties, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-import { designTokenVar } from "@/shared/designSystem";
-
-const ACTION_BUTTON_SIZE = designTokenVar(
-  "component.timeRecorder.actionButton.size",
-  "120px"
-);
-const ACTION_BUTTON_SIZE_SM = designTokenVar(
-  "component.timeRecorder.actionButton.sizeSm",
-  "96px"
-);
-const ACTION_BUTTON_RADIUS = designTokenVar(
-  "component.timeRecorder.actionButton.borderRadius",
-  "999px"
-);
-const ACTION_BORDER_WIDTH = designTokenVar(
-  "component.timeRecorder.actionButton.borderWidth",
-  "3px"
-);
-const ACTION_DISABLED_BORDER = designTokenVar(
-  "component.timeRecorder.actionButton.disabledBorderColor",
-  "#C3CFC7"
-);
-const ACTION_DISABLED_BACKGROUND = designTokenVar(
-  "component.timeRecorder.actionButton.disabledBackground",
-  "#D9E2DD"
-);
+import {
+  ACTION_BUTTON_CLASS_NAME,
+  ACTION_BUTTON_LABEL_CLASS_NAME,
+  buildActionButtonVars,
+  TIME_RECORDER_BUTTON_PALETTES,
+} from "./buttonStyles";
 
 export interface ClockOutButtonProps {
   isWorking: boolean;
@@ -39,16 +18,9 @@ const ClockOutButton = ({
   onClockOut,
   disabled = false,
 }: ClockOutButtonProps) => {
-  const actionButtonVars: CSSProperties & Record<`--${string}`, string> = {
-    "--action-button-size": ACTION_BUTTON_SIZE,
-    "--action-button-size-sm": ACTION_BUTTON_SIZE_SM,
-    "--action-button-radius": ACTION_BUTTON_RADIUS,
-    "--action-border-width": ACTION_BORDER_WIDTH,
-    "--action-disabled-border": ACTION_DISABLED_BORDER,
-    "--action-disabled-bg": ACTION_DISABLED_BACKGROUND,
-  };
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const actionButtonVars = buildActionButtonVars(
+    TIME_RECORDER_BUTTON_PALETTES.clockOut,
+  );
   const [isClicked, setIsClicked] = useState(false);
 
   // Derived state: button is disabled when not working or user clicked
@@ -64,42 +36,16 @@ const ClockOutButton = ({
   }, [isDisabled, onClockOut]);
 
   return (
-    <Button
+    <button
+      type="button"
       data-testid="clock-out-button"
       disabled={isDisabled}
       onClick={handleClick}
-      size="large"
-      variant={isWorking ? "outlined" : "contained"}
-      className={isSmallScreen ? "whitespace-pre-line leading-[1.2]" : undefined}
+      className={`${ACTION_BUTTON_CLASS_NAME} border-[var(--action-border)] bg-[var(--action-bg)] text-[color:var(--action-text)] hover:border-[var(--action-hover-border)] hover:bg-[var(--action-hover-bg)] hover:text-[color:var(--action-hover-text)]`}
       style={actionButtonVars}
-      sx={(innerTheme) => ({
-        width: "var(--action-button-size)",
-        height: "var(--action-button-size)",
-        minWidth: "var(--action-button-size)",
-        borderRadius: "var(--action-button-radius)",
-        p: 0,
-        color: innerTheme.palette.clock_out.contrastText,
-        backgroundColor: innerTheme.palette.clock_out.main,
-        border: `var(--action-border-width) solid ${innerTheme.palette.clock_out.main}`,
-        [innerTheme.breakpoints.down("sm")]: {
-          width: "var(--action-button-size-sm)",
-          height: "var(--action-button-size-sm)",
-          minWidth: "var(--action-button-size-sm)",
-          fontSize: "0.95rem",
-        },
-        "&:hover": {
-          color: innerTheme.palette.clock_out.main,
-          backgroundColor: innerTheme.palette.clock_out.contrastText,
-          border: `var(--action-border-width) solid ${innerTheme.palette.clock_out.main}`,
-        },
-        "&:disabled": {
-          border: "var(--action-border-width) solid var(--action-disabled-border)",
-          backgroundColor: "var(--action-disabled-bg)",
-        },
-      })}
     >
-      {isSmallScreen ? "勤務\n終了" : "勤務終了"}
-    </Button>
+      <span className={ACTION_BUTTON_LABEL_CLASS_NAME}>{"勤務\n終了"}</span>
+    </button>
   );
 };
 
