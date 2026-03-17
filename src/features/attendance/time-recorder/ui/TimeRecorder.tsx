@@ -10,21 +10,14 @@ import {
 } from "@entities/calendar/api/calendarApi";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
-  Alert,
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  FormControlLabel,
-  Grid,
   LinearProgress,
-  SxProps,
-  Typography,
 } from "@mui/material";
-import { Theme } from "@mui/material/styles";
 import {
   Attendance,
   CreateAttendanceInput,
@@ -33,6 +26,7 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
+import type { CSSProperties } from "react";
 import {
   useCallback,
   useContext,
@@ -385,26 +379,25 @@ export default function TimeRecorder(): JSX.Element {
     "color.feedback.danger.base",
     "#B33D47",
   );
-
-  const clockInBadgeStyles: SxProps<Theme> = {
-    display: "inline-block",
-    px: BADGE_PADDING_X,
-    py: BADGE_PADDING_Y,
-    borderRadius: BADGE_RADIUS,
-    bgcolor: CLOCK_IN_BADGE_BG,
-    color: CLOCK_IN_BADGE_TEXT,
-    fontWeight: BADGE_FONT_WEIGHT,
-  };
-
-  const clockOutBadgeStyles: SxProps<Theme> = {
-    display: "inline-block",
-    px: BADGE_PADDING_X,
-    py: BADGE_PADDING_Y,
-    borderRadius: BADGE_RADIUS,
-    bgcolor: CLOCK_OUT_BADGE_BG,
-    color: CLOCK_OUT_BADGE_TEXT,
-    fontWeight: BADGE_FONT_WEIGHT,
-  };
+  const timeRecorderShellStyles = {
+    "--time-recorder-width-md": TIME_RECORDER_WIDTH_MD,
+    "--time-recorder-margin-xs": TIME_RECORDER_MARGIN_XS,
+    "--time-recorder-surface-bg": TIME_RECORDER_SURFACE_BG,
+    "--time-recorder-border-color": TIME_RECORDER_BORDER_COLOR,
+    "--time-recorder-border-width": TIME_RECORDER_BORDER_WIDTH,
+    "--time-recorder-border-radius": TIME_RECORDER_BORDER_RADIUS,
+    "--time-recorder-surface-shadow": TIME_RECORDER_SURFACE_SHADOW,
+    "--time-recorder-padding-xs": TIME_RECORDER_PADDING_XS,
+    "--time-recorder-padding-md": TIME_RECORDER_PADDING_MD,
+    "--badge-padding-x": BADGE_PADDING_X,
+    "--badge-padding-y": BADGE_PADDING_Y,
+    "--badge-radius": BADGE_RADIUS,
+    "--badge-font-weight": BADGE_FONT_WEIGHT,
+    "--clock-in-badge-bg": CLOCK_IN_BADGE_BG,
+    "--clock-in-badge-text": CLOCK_IN_BADGE_TEXT,
+    "--clock-out-badge-bg": CLOCK_OUT_BADGE_BG,
+    "--clock-out-badge-text": CLOCK_OUT_BADGE_TEXT,
+  } as CSSProperties & Record<`--${string}`, string>;
 
   const handleClockIn = useCallback(
     () => clockInCallback(cognitoUser, today, clockIn, dispatch, staff, logger),
@@ -623,17 +616,12 @@ export default function TimeRecorder(): JSX.Element {
 
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return (
-      <Box
-        sx={{
-          width: { xs: "100%", md: TIME_RECORDER_WIDTH_MD },
-          maxWidth: TIME_RECORDER_WIDTH_MD,
-          px: { xs: TIME_RECORDER_MARGIN_XS, md: 0 },
-          mx: "auto",
-          boxSizing: "border-box",
-        }}
+      <div
+        className="mx-auto box-border w-full max-w-[var(--time-recorder-width-md)] px-[var(--time-recorder-margin-xs)] md:px-0"
+        style={timeRecorderShellStyles}
       >
         <LinearProgress />
-      </Box>
+      </div>
     );
   }
 
@@ -643,79 +631,57 @@ export default function TimeRecorder(): JSX.Element {
   }
 
   return (
-    <Box
-      sx={{
-        width: { xs: "100%", md: TIME_RECORDER_WIDTH_MD },
-        maxWidth: TIME_RECORDER_WIDTH_MD,
-        px: { xs: TIME_RECORDER_MARGIN_XS, md: 0 },
-        mx: "auto",
-        boxSizing: "border-box",
-      }}
+    <div
+      className="mx-auto box-border w-full max-w-[var(--time-recorder-width-md)] px-[var(--time-recorder-margin-xs)] md:px-0"
+      style={timeRecorderShellStyles}
     >
-      <Box
-        sx={{
-          backgroundColor: TIME_RECORDER_SURFACE_BG,
-          borderRadius: TIME_RECORDER_BORDER_RADIUS,
-          borderColor: TIME_RECORDER_BORDER_COLOR,
-          borderWidth: TIME_RECORDER_BORDER_WIDTH,
-          borderStyle: "solid",
-          boxShadow: TIME_RECORDER_SURFACE_SHADOW,
-          p: { xs: TIME_RECORDER_PADDING_XS, md: TIME_RECORDER_PADDING_MD },
-        }}
-      >
-        <Grid container spacing={1}>
-          <Grid item xs={12}>
-            <Typography
-              variant="h3"
-              textAlign="center"
+      <div className="rounded-[var(--time-recorder-border-radius)] border-[var(--time-recorder-border-width)] border-[var(--time-recorder-border-color)] bg-[var(--time-recorder-surface-bg)] px-[var(--time-recorder-padding-xs)] py-[var(--time-recorder-padding-xs)] shadow-[var(--time-recorder-surface-shadow)] md:px-[var(--time-recorder-padding-md)] md:py-[var(--time-recorder-padding-md)]">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <h2
+              className="m-0 text-center text-2xl font-normal leading-tight"
               data-testid="work-status-text"
             >
               {workStatus.text || "読み込み中..."}
-            </Typography>
+            </h2>
             {(clockInDisplayText || clockOutDisplayText) && (
-              <Box display="flex" justifyContent="center" gap={1} mt={0.5}>
+              <div className="mt-2 flex justify-center gap-2">
                 {clockInDisplayText && (
-                  <Typography
-                    variant="body1"
-                    textAlign="center"
+                  <p
+                    className="m-0 inline-block rounded-[var(--badge-radius)] bg-[var(--clock-in-badge-bg)] px-[var(--badge-padding-x)] py-[var(--badge-padding-y)] text-center text-base font-[var(--badge-font-weight)] text-[color:var(--clock-in-badge-text)]"
                     data-testid="clock-in-time-text"
-                    sx={clockInBadgeStyles}
                   >
                     {clockInDisplayText}
-                  </Typography>
+                  </p>
                 )}
                 {clockOutDisplayText && (
-                  <Typography
-                    variant="body1"
-                    textAlign="center"
+                  <p
+                    className="m-0 inline-block rounded-[var(--badge-radius)] bg-[var(--clock-out-badge-bg)] px-[var(--badge-padding-x)] py-[var(--badge-padding-y)] text-center text-base font-[var(--badge-font-weight)] text-[color:var(--clock-out-badge-text)]"
                     data-testid="clock-out-time-text"
-                    sx={clockOutBadgeStyles}
                   >
                     {clockOutDisplayText}
-                  </Typography>
+                  </p>
                 )}
-              </Box>
+              </div>
             )}
-          </Grid>
-          <Grid item xs={12}>
+          </div>
+          <div className="col-span-2">
             <Clock />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <DirectSwitch
-                  onChange={() => setDirectMode(!directMode)}
-                  inputProps={
-                    {
-                      "data-testid": "direct-mode-switch",
-                    } as React.InputHTMLAttributes<HTMLInputElement>
-                  }
-                />
-              }
-              label="直行/直帰モード"
-            />
-          </Grid>
-          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
+          </div>
+          <div className="col-span-2">
+            <label className="inline-flex items-center gap-2">
+              <DirectSwitch
+                onChange={() => setDirectMode(!directMode)}
+                inputProps={
+                  {
+                    "data-testid": "direct-mode-switch",
+                  } as React.InputHTMLAttributes<HTMLInputElement>
+                }
+              />
+              <span>直行/直帰モード</span>
+            </label>
+          </div>
+          <div className="flex justify-center">
             {directMode ? (
               <GoDirectlyItem
                 workStatus={workStatus}
@@ -728,8 +694,8 @@ export default function TimeRecorder(): JSX.Element {
                 disabled={hasChangeRequest}
               />
             )}
-          </Grid>
-          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
+          </div>
+          <div className="flex justify-center">
             {directMode ? (
               <ReturnDirectly
                 workStatus={workStatus}
@@ -742,49 +708,50 @@ export default function TimeRecorder(): JSX.Element {
                 disabled={hasChangeRequest}
               />
             )}
-          </Grid>
+          </div>
 
           {/* 休憩 */}
-          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
+          <div className="flex justify-center">
             <RestStartItem
               workStatus={workStatus}
               onClick={handleRestStart}
               disabled={hasChangeRequest}
             />
-          </Grid>
-          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
+          </div>
+          <div className="flex justify-center">
             <RestEndItem
               workStatus={workStatus}
               onClick={handleRestEnd}
               disabled={hasChangeRequest}
             />
-          </Grid>
+          </div>
 
           {hasChangeRequest && (
-            <Grid item xs={12}>
-              <Alert severity="warning">
+            <div
+              role="alert"
+              className="col-span-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950"
+            >
                 変更リクエスト申請中です。承認されるまで打刻はできません。
-              </Alert>
-            </Grid>
+            </div>
           )}
 
-          <Grid item xs={12}>
+          <div className="col-span-2">
             <QuickDailyReportCard staffId={staff?.id ?? null} date={today} />
-          </Grid>
+          </div>
           {isAttendanceError && (
-            <Grid item xs={12}>
+            <div className="col-span-2">
               <AttendanceErrorAlert />
-            </Grid>
+            </div>
           )}
 
           <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
 
-          <Grid item xs={12}>
+          <div className="col-span-2">
             <RestTimeMessage />
-          </Grid>
-        </Grid>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
