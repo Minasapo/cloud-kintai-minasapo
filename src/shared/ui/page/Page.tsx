@@ -1,9 +1,8 @@
-import { Container, Stack } from "@mui/material";
 import CommonBreadcrumbs, {
   type BreadcrumbItem,
 } from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import Title from "@shared/ui/typography/Title";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -25,14 +24,26 @@ export default function Page({
   maxWidth = "xl",
   showDefaultHeader = true,
 }: PageProps) {
+  const maxWidthStyle: CSSProperties =
+    maxWidth === false
+      ? {}
+      : {
+          maxWidth:
+            {
+              sm: "640px",
+              md: "768px",
+              lg: "1024px",
+              xl: "1280px",
+            }[maxWidth] ?? "1280px",
+          marginInline: "auto",
+        };
+
   return (
-    <Container
-      maxWidth={maxWidth}
-      disableGutters
+    <div
       className="pt-6"
-      style={{ paddingTop: PAGE_PADDING_TOP }}
+      style={{ paddingTop: PAGE_PADDING_TOP, ...maxWidthStyle }}
     >
-      <Stack direction="column" spacing={0} style={{ gap: PAGE_SECTION_GAP }}>
+      <div className="flex flex-col" style={{ gap: PAGE_SECTION_GAP }}>
         {showDefaultHeader && (
           <>
             <CommonBreadcrumbs items={breadcrumbs} current={title} />
@@ -40,7 +51,7 @@ export default function Page({
           </>
         )}
         {children}
-      </Stack>
-    </Container>
+      </div>
+    </div>
   );
 }
