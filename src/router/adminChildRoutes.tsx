@@ -24,6 +24,9 @@ const AmPmHolidayRoute = createLazyRoute(
 const DeveloperRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Developer"),
 );
+const SchemaExportRoute = createLazyRoute(
+  () => import("@/features/admin/schema-export/ui/SchemaExport"),
+);
 const LinksRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Links"),
 );
@@ -236,6 +239,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "developer",
         lazy: DeveloperRoute,
+      },
+      {
+        path: "export",
+        lazy: SchemaExportRoute,
       },
       {
         path: "feature_management/links",

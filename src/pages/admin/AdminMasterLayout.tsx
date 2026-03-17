@@ -70,6 +70,7 @@ export default function AdminMasterLayout() {
       ],
     },
     { name: "開発者", path: "/admin/master/developer" },
+    { name: "エクスポート", path: "/admin/master/export" },
   ];
 
   const menuBoxList = menuList.map((item, index) => {
