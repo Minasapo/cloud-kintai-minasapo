@@ -179,6 +179,7 @@ export default function WorkflowDetailPage() {
         sx={{ gap: SECTION_GAP }}
       >
         <section
+          className="overflow-hidden"
           style={{
             backgroundColor: PANEL_BACKGROUND,
             border: `1px solid ${PANEL_BORDER}`,
@@ -202,10 +203,10 @@ export default function WorkflowDetailPage() {
             </p>
           ) : (
             <div
-              className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]"
+              className="mt-4 grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(22rem,0.9fr)]"
               style={{ gap: PANEL_GAP }}
             >
-              <div>
+              <div className="min-w-0">
                 <WorkflowMetadataPanel
                   workflowId={workflow.id}
                   fallbackId={id}
@@ -221,7 +222,7 @@ export default function WorkflowDetailPage() {
                 />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <WorkflowCommentThread
                   key={workflow?.id ?? "workflow-comment-thread"}
                   messages={messages}

@@ -8,6 +8,8 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
@@ -48,6 +50,8 @@ export default function WorkflowCommentThread({
   sending,
   formatSender,
 }: Props) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const stickToBottomRef = useRef(true);
@@ -98,7 +102,7 @@ export default function WorkflowCommentThread({
   };
 
   return (
-    <Box sx={{ mt: { xs: 2, sm: 0 } }}>
+    <Box sx={{ mt: { xs: 2, sm: 0 }, minWidth: 0 }}>
       <Typography variant="h6" sx={{ mb: 1 }}>
         {title}
       </Typography>
@@ -108,9 +112,11 @@ export default function WorkflowCommentThread({
         onScroll={handleScroll}
         sx={{
           p: 2,
-          maxHeight: PANEL_HEIGHTS.SCROLLABLE_MAX,
+          maxHeight: { xs: 360, sm: PANEL_HEIGHTS.SCROLLABLE_MAX },
           overflow: "auto",
           bgcolor: "background.paper",
+          borderRadius: 3,
+          minWidth: 0,
         }}
       >
         <Stack spacing={2}>
@@ -143,51 +149,57 @@ export default function WorkflowCommentThread({
                   display: "flex",
                   flexDirection: "column",
                   alignItems: isMine ? "flex-end" : "flex-start",
+                  minWidth: 0,
                 }}
               >
                 <Box
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1,
+                    flexDirection: isMine ? "row-reverse" : "row",
+                    justifyContent: isMine ? "flex-end" : "flex-start",
+                    gap: 1.25,
                     mb: 0.5,
+                    width: "100%",
+                    minWidth: 0,
                   }}
                 >
-                  {!isMine && (
-                    <Avatar
-                      sx={{
-                        bgcolor: avatarBg,
-                        width: 32,
-                        height: 32,
-                        fontSize: 12,
-                      }}
-                    >
-                      {avatarText}
-                    </Avatar>
-                  )}
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                    {displayName}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ ml: 1 }}
+                  <Avatar
+                    sx={{
+                      bgcolor: avatarBg,
+                      width: 32,
+                      height: 32,
+                      fontSize: 12,
+                      flexShrink: 0,
+                    }}
                   >
-                    {m.time}
-                  </Typography>
-                  {isMine && (
-                    <Avatar
+                    {avatarText}
+                  </Avatar>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: isMine ? "row-reverse" : "row" },
+                      alignItems: { xs: isMine ? "flex-end" : "flex-start", sm: "center" },
+                      gap: { xs: 0.25, sm: 1 },
+                      minWidth: 0,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
                       sx={{
-                        bgcolor: avatarBg,
-                        width: 32,
-                        height: 32,
-                        fontSize: 12,
-                        ml: 1,
+                        fontWeight: 600,
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {avatarText}
-                    </Avatar>
-                  )}
+                      {displayName}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {m.time}
+                    </Typography>
+                  </Box>
                 </Box>
 
                 <Paper
@@ -196,8 +208,9 @@ export default function WorkflowCommentThread({
                     bgcolor: isMine ? "primary.main" : "grey.100",
                     color: isMine ? "common.white" : "text.primary",
                     p: 1.5,
-                    borderRadius: 2,
-                    maxWidth: "90%",
+                    borderRadius: 3,
+                    maxWidth: { xs: "100%", sm: "90%" },
+                    minWidth: 0,
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                   }}
@@ -230,18 +243,26 @@ export default function WorkflowCommentThread({
         </Stack>
       </Paper>
 
-      <Box sx={{ mt: 1, display: "flex", gap: 1, alignItems: "flex-end" }}>
+      <Box
+        sx={{
+          mt: 1,
+          display: "flex",
+          gap: 1,
+          alignItems: "flex-end",
+          flexDirection: "column",
+        }}
+      >
         <TextField
           size="small"
           fullWidth
           multiline
           minRows={2}
           placeholder="メッセージを入力..."
-          helperText="Command+Enterで送信"
+          helperText="Cmd/Ctrl+Enterで送信"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && e.metaKey) {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
               e.preventDefault();
               onSend();
             }
@@ -253,22 +274,36 @@ export default function WorkflowCommentThread({
               bgcolor: "background.paper",
             },
           }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={onSend}
-                  disabled={sending || !input.trim()}
-                  sx={{ textTransform: "none", minWidth: 64 }}
-                >
-                  送信
-                </Button>
-              </InputAdornment>
-            ),
-          }}
+          InputProps={
+            isMobile
+              ? undefined
+              : {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={onSend}
+                        disabled={sending || !input.trim()}
+                        sx={{ textTransform: "none", minWidth: 64 }}
+                      >
+                        送信
+                      </Button>
+                    </InputAdornment>
+                  ),
+                }
+          }
         />
+        {isMobile && (
+          <Button
+            variant="contained"
+            onClick={onSend}
+            disabled={sending || !input.trim()}
+            sx={{ width: 1, textTransform: "none" }}
+          >
+            送信
+          </Button>
+        )}
       </Box>
     </Box>
   );
