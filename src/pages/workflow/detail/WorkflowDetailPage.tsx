@@ -1,6 +1,5 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import { useCallback, useContext, useMemo } from "react";
@@ -29,6 +28,11 @@ import { PageSection } from "@/shared/ui/layout";
 
 const SECTION_GAP = designTokenVar("spacing.xl", "24px");
 const PANEL_GAP = designTokenVar("spacing.lg", "16px");
+const PANEL_BACKGROUND = designTokenVar("color.surface.primary", "#FFFFFF");
+const PANEL_BORDER = designTokenVar("color.border.subtle", "#D7E0DB");
+const PANEL_RADIUS = designTokenVar("radius.lg", "12px");
+const PANEL_PADDING = designTokenVar("spacing.xl", "24px");
+const ERROR_COLOR = designTokenVar("color.feedback.danger.base", "#D7443E");
 const logger = createLogger("WorkflowDetailPage");
 
 export default function WorkflowDetailPage() {
@@ -174,7 +178,14 @@ export default function WorkflowDetailPage() {
         layoutVariant="detail"
         sx={{ gap: SECTION_GAP }}
       >
-        <Paper sx={{ p: 3, bgcolor: "background.paper" }}>
+        <section
+          style={{
+            backgroundColor: PANEL_BACKGROUND,
+            border: `1px solid ${PANEL_BORDER}`,
+            borderRadius: PANEL_RADIUS,
+            padding: PANEL_PADDING,
+          }}
+        >
           <WorkflowDetailActions
             onBack={() => navigate(-1)}
             onWithdraw={handleWithdraw}
@@ -186,32 +197,31 @@ export default function WorkflowDetailPage() {
           />
 
           {!workflow ? (
-            <Typography color="error">
+            <p style={{ color: ERROR_COLOR }}>
               ワークフローの読み込みに失敗しました。
-            </Typography>
+            </p>
           ) : (
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item xs={12} sm={7}>
-                <Stack spacing={0} sx={{ gap: PANEL_GAP }}>
-                  <WorkflowMetadataPanel
-                    workflowId={workflow.id}
-                    fallbackId={id}
-                    category={workflow.category ?? null}
-                    categoryLabel={categoryLabel}
-                    staffName={staffName}
-                    applicationDate={applicationDate}
-                    status={workflow.status ?? null}
-                    overTimeDetails={workflow.overTimeDetails ?? null}
-                    customWorkflowTitle={workflow.customWorkflowTitle ?? null}
-                    customWorkflowContent={
-                      workflow.customWorkflowContent ?? null
-                    }
-                    approvalSteps={approvalSteps}
-                  />
-                </Stack>
-              </Grid>
+            <div
+              className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]"
+              style={{ gap: PANEL_GAP }}
+            >
+              <div>
+                <WorkflowMetadataPanel
+                  workflowId={workflow.id}
+                  fallbackId={id}
+                  category={workflow.category ?? null}
+                  categoryLabel={categoryLabel}
+                  staffName={staffName}
+                  applicationDate={applicationDate}
+                  status={workflow.status ?? null}
+                  overTimeDetails={workflow.overTimeDetails ?? null}
+                  customWorkflowTitle={workflow.customWorkflowTitle ?? null}
+                  customWorkflowContent={workflow.customWorkflowContent ?? null}
+                  approvalSteps={approvalSteps}
+                />
+              </div>
 
-              <Grid item xs={12} sm={5}>
+              <div>
                 <WorkflowCommentThread
                   key={workflow?.id ?? "workflow-comment-thread"}
                   messages={messages}
@@ -225,10 +235,10 @@ export default function WorkflowDetailPage() {
                   sending={sending}
                   formatSender={formatSender}
                 />
-              </Grid>
-            </Grid>
+              </div>
+            </div>
           )}
-        </Paper>
+        </section>
       </PageSection>
     </Page>
   );
