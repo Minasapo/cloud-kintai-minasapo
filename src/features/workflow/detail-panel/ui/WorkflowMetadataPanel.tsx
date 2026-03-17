@@ -51,7 +51,7 @@ function MetadataRow({
       </div>
       <div
         className={[
-          "min-w-0 text-[15px] leading-8 text-slate-800",
+          "min-w-0 text-[15px] leading-7 text-slate-800 sm:leading-8",
           preserveWhitespace ? "whitespace-pre-wrap" : "",
         ]
           .filter(Boolean)
@@ -90,7 +90,7 @@ export default function WorkflowMetadataPanel({
 
   return (
     <section
-      className="grid grid-cols-1 items-start gap-x-5 gap-y-5 overflow-hidden sm:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]"
+      className="grid grid-cols-1 items-start gap-x-5 gap-y-5 overflow-hidden md:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]"
       style={{
         backgroundColor: PANEL_BACKGROUND,
         border: `1px solid ${PANEL_BORDER}`,

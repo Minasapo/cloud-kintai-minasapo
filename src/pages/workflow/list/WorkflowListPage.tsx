@@ -366,17 +366,28 @@ export default function WorkflowListPage() {
                                 }}
                               >
                                 <Stack
-                                  direction="row"
+                                  direction={{ xs: "column", sm: "row" }}
                                   spacing={MOBILE_ACTION_GAP}
-                                  alignItems="center"
+                                  alignItems={{ xs: "flex-start", sm: "center" }}
                                   justifyContent="space-between"
                                 >
-                                  <Typography variant="subtitle1" fontWeight={600}>
+                                  <Typography
+                                    variant="subtitle1"
+                                    fontWeight={600}
+                                    sx={{ minWidth: 0, wordBreak: "break-word" }}
+                                  >
                                     {item.category || "-"}
                                   </Typography>
-                                  <StatusChip
-                                    status={item.rawStatus || item.status || ""}
-                                  />
+                                  <Box
+                                    sx={{
+                                      maxWidth: "100%",
+                                      alignSelf: { xs: "flex-start", sm: "center" },
+                                    }}
+                                  >
+                                    <StatusChip
+                                      status={item.rawStatus || item.status || ""}
+                                    />
+                                  </Box>
                                 </Stack>
                                 <Stack spacing={MOBILE_META_GAP}>
                                   <Typography variant="caption" color="text.secondary">
@@ -387,7 +398,7 @@ export default function WorkflowListPage() {
                                   </Typography>
                                 </Stack>
                                 <Stack
-                                  direction="row"
+                                  direction={{ xs: "column", sm: "row" }}
                                   spacing={MOBILE_ACTION_GAP}
                                   justifyContent="space-between"
                                 >
@@ -402,7 +413,10 @@ export default function WorkflowListPage() {
                                       {item.createdAt || "-"}
                                     </Typography>
                                   </Stack>
-                                  <Stack spacing={MOBILE_META_GAP} alignItems="flex-end">
+                                  <Stack
+                                    spacing={MOBILE_META_GAP}
+                                    alignItems={{ xs: "flex-start", sm: "flex-end" }}
+                                  >
                                     <Typography
                                       variant="caption"
                                       color="text.secondary"
