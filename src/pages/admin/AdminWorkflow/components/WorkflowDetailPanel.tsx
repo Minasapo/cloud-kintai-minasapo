@@ -54,6 +54,8 @@ const HERO_SUBTLE_BG = designTokenVar("color.surface.secondary", "#F5FAF7");
 const SECTION_TITLE = designTokenVar("color.text.primary", "#1E2A25");
 const LOADING_TEXT = designTokenVar("color.text.muted", "#5E7268");
 const ERROR_TEXT = designTokenVar("color.feedback.danger.base", "#D7443E");
+const PANEL_SPACING = designTokenVar("spacing.xl", "24px");
+const HERO_SPACING = designTokenVar("spacing.lg", "16px");
 
 const logger = createLogger("WorkflowDetailPanel");
 
@@ -149,7 +151,8 @@ export default function WorkflowDetailPanel({
   return (
     <Paper
       sx={{
-        p: { xs: 2, sm: 3 },
+        width: 1,
+        p: { xs: 2.5, sm: 4 },
         borderRadius: PANEL_RADIUS,
         border: `1px solid ${PANEL_BORDER}`,
         backgroundColor: PANEL_BACKGROUND,
@@ -160,9 +163,9 @@ export default function WorkflowDetailPanel({
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: 2,
-          mb: 3,
-          p: { xs: 2, sm: 2.5 },
+          gap: HERO_SPACING,
+          mb: PANEL_SPACING,
+          p: { xs: 2.5, sm: 3 },
           borderRadius: "16px",
           border: `1px solid ${HERO_BORDER}`,
           background: HERO_BACKGROUND,
@@ -174,10 +177,10 @@ export default function WorkflowDetailPanel({
             flexDirection: { xs: "column", lg: "row" },
             justifyContent: "space-between",
             alignItems: { xs: "stretch", lg: "flex-start" },
-            gap: 2,
+            gap: PANEL_SPACING,
           }}
         >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25, minWidth: 0 }}>
             <Typography
               variant="caption"
               sx={{
@@ -187,14 +190,14 @@ export default function WorkflowDetailPanel({
                 color: HERO_LABEL,
               }}
             >
-              ADMIN WORKFLOW DETAIL
+              管理者ワークフロー詳細
             </Typography>
             <Box
               sx={{
                 display: "flex",
                 flexWrap: "wrap",
                 alignItems: "center",
-                gap: 1,
+                gap: 1.25,
               }}
             >
               <Typography
@@ -238,7 +241,7 @@ export default function WorkflowDetailPanel({
               flexDirection: { xs: "column", sm: "row" },
               alignItems: { xs: "stretch", sm: "center" },
               justifyContent: "flex-end",
-              gap: 1,
+              gap: 1.25,
             }}
           >
             {showBackButton && onBack && (
@@ -291,13 +294,13 @@ export default function WorkflowDetailPanel({
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
-            gap: 1,
+            gap: 1.5,
           }}
         >
           <Box
             sx={{
               borderRadius: "12px",
-              p: 1.5,
+              p: 1.75,
               backgroundColor: "rgba(255,255,255,0.72)",
             }}
           >
@@ -311,7 +314,7 @@ export default function WorkflowDetailPanel({
           <Box
             sx={{
               borderRadius: "12px",
-              p: 1.5,
+              p: 1.75,
               backgroundColor: "rgba(255,255,255,0.72)",
             }}
           >
@@ -325,7 +328,7 @@ export default function WorkflowDetailPanel({
           <Box
             sx={{
               borderRadius: "12px",
-              p: 1.5,
+              p: 1.75,
               backgroundColor: "rgba(255,255,255,0.72)",
             }}
           >
@@ -343,12 +346,12 @@ export default function WorkflowDetailPanel({
       {error && <Typography sx={{ color: ERROR_TEXT }}>{error}</Typography>}
 
       {!loading && !error && (
-        <Grid container spacing={2} alignItems="flex-start">
-          <Grid item xs={12} xl={7}>
+        <Grid container spacing={3.5} alignItems="flex-start">
+          <Grid item xs={12} lg={7.5}>
             <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="subtitle1"
-                sx={{ mb: 1, fontWeight: 700, color: SECTION_TITLE }}
+                sx={{ mb: 1.5, fontWeight: 700, color: SECTION_TITLE }}
               >
                 申請情報
               </Typography>
@@ -368,11 +371,11 @@ export default function WorkflowDetailPanel({
             </Box>
           </Grid>
 
-          <Grid item xs={12} xl={5}>
+          <Grid item xs={12} lg={4.5}>
             <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="subtitle1"
-                sx={{ mb: 1, fontWeight: 700, color: SECTION_TITLE }}
+                sx={{ mb: 1.5, fontWeight: 700, color: SECTION_TITLE }}
               >
                 コメントと対応履歴
               </Typography>

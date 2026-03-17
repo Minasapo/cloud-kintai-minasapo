@@ -30,7 +30,7 @@ type WorkflowMetadataPanelProps = {
 const PANEL_BACKGROUND = designTokenVar("color.surface.primary", "#FFFFFF");
 const PANEL_BORDER = designTokenVar("color.border.subtle", "#D7E0DB");
 const PANEL_RADIUS = designTokenVar("radius.lg", "12px");
-const PANEL_PADDING = designTokenVar("spacing.lg", "16px");
+const PANEL_PADDING = designTokenVar("spacing.xl", "24px");
 const LABEL_COLOR = designTokenVar("color.text.muted", "#5E7268");
 
 type MetadataRowProps = {
@@ -90,7 +90,7 @@ export default function WorkflowMetadataPanel({
 
   return (
     <section
-      className="grid grid-cols-1 items-start gap-x-4 gap-y-4 overflow-hidden sm:grid-cols-[minmax(6rem,8.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)]"
+      className="grid grid-cols-1 items-start gap-x-5 gap-y-5 overflow-hidden sm:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]"
       style={{
         backgroundColor: PANEL_BACKGROUND,
         border: `1px solid ${PANEL_BORDER}`,

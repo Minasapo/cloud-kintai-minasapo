@@ -111,7 +111,7 @@ export default function WorkflowCommentThread({
         ref={scrollContainerRef}
         onScroll={handleScroll}
         sx={{
-          p: 2,
+          p: 2.5,
           maxHeight: { xs: 360, sm: PANEL_HEIGHTS.SCROLLABLE_MAX },
           overflow: "auto",
           bgcolor: "background.paper",
@@ -247,7 +247,7 @@ export default function WorkflowCommentThread({
         sx={{
           mt: 1,
           display: "flex",
-          gap: 1,
+          gap: 1.25,
           alignItems: "flex-end",
           flexDirection: "column",
         }}
