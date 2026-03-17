@@ -9,12 +9,12 @@ export function RestTimeMessage() {
 
   const lunchStart = getLunchRestStartTime();
   const lunchEnd = getLunchRestEndTime();
-  const lunchRestStartTime = lunchStart.isValid()
+  const lunchRestStartTime: string = lunchStart.isValid()
     ? lunchStart.format("HH:mm")
-    : DEFAULT_CONFIG.lunchRestStartTime;
-  const lunchRestEndTime = lunchEnd.isValid()
+    : (DEFAULT_CONFIG.lunchRestStartTime ?? "12:00");
+  const lunchRestEndTime: string = lunchEnd.isValid()
     ? lunchEnd.format("HH:mm")
-    : DEFAULT_CONFIG.lunchRestEndTime;
+    : (DEFAULT_CONFIG.lunchRestEndTime ?? "13:00");
 
   return (
     <RestTimeMessageView
