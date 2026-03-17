@@ -172,7 +172,7 @@ const QuickDailyReportCardView = ({
               onClick={onToggle}
               aria-expanded={isOpen}
               aria-controls={contentPanelId}
-              className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              className="mt-0.5 inline-flex h-8 w-8 shrink-0 appearance-none items-center justify-center rounded-full border-0 bg-transparent p-0 text-slate-600 shadow-none transition hover:bg-slate-100 hover:text-slate-900"
             >
               <ExpandMoreIcon isOpen={isOpen} />
             </button>
@@ -180,7 +180,7 @@ const QuickDailyReportCardView = ({
             <button
               type="button"
               onClick={onToggle}
-              className="min-w-0 flex-1 cursor-pointer text-left"
+              className="min-w-0 flex-1 cursor-pointer appearance-none border-0 bg-transparent p-0 text-left shadow-none"
             >
               <p className="m-0 text-sm font-semibold text-slate-900">
                 今日の日報メモ
@@ -201,7 +201,7 @@ const QuickDailyReportCardView = ({
               disabled={!hasStaff || isLoading}
               aria-label="拡大表示"
               title="拡大表示"
-              className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:text-slate-300 ${isOpen ? "visible" : "invisible"}`}
+              className={`inline-flex h-8 w-8 shrink-0 appearance-none items-center justify-center rounded-full border-0 bg-transparent p-0 text-slate-600 shadow-none transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:text-slate-300 ${isOpen ? "visible" : "invisible"}`}
             >
               <OpenInFullIcon />
             </button>
@@ -210,7 +210,7 @@ const QuickDailyReportCardView = ({
               type="button"
               onClick={onSave}
               disabled={!isEditable || isSaving || isSubmitted}
-              className={`shrink-0 whitespace-nowrap rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 ${isOpen ? "visible" : "invisible"}`}
+              className={`shrink-0 appearance-none whitespace-nowrap rounded-md border-0 bg-emerald-600 px-3 py-2 text-sm font-medium text-white shadow-none transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 ${isOpen ? "visible" : "invisible"}`}
             >
               {isSaving ? "提出中" : "提出"}
             </button>
@@ -274,7 +274,7 @@ const QuickDailyReportCardView = ({
               <button
                 type="button"
                 onClick={onDialogClose}
-                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="appearance-none rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-none transition hover:bg-slate-50"
               >
                 閉じる
               </button>
@@ -282,7 +282,7 @@ const QuickDailyReportCardView = ({
                 type="button"
                 onClick={() => void onSave()}
                 disabled={!isEditable || isSaving || isSubmitted}
-                className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="appearance-none rounded-md border-0 bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-none transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {isSaving ? "提出中..." : "提出"}
               </button>
