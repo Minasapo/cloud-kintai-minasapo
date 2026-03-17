@@ -17,11 +17,8 @@ export default function AdminWorkflowDetail() {
   return (
     <Page
       title="申請内容（管理者）"
-      breadcrumbs={[
-        { label: "TOP", href: "/" },
-        { label: "ワークフロー管理", href: "/admin/workflow" },
-      ]}
       maxWidth={false}
+      showDefaultHeader={false}
     >
       <div
         style={{
@@ -33,7 +30,7 @@ export default function AdminWorkflowDetail() {
         <WorkflowDetailPanel
           workflowId={id}
           showBackButton
-          onBack={() => navigate(-1)}
+          onBack={() => navigate("/admin/workflow")}
         />
       </div>
     </Page>

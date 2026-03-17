@@ -1,4 +1,3 @@
-import { Chip } from "@mui/material";
 import { WorkflowStatus } from "@shared/api/graphql/types";
 
 import { REVERSE_STATUS, STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
@@ -129,14 +128,13 @@ export default function StatusChip({ status }: StatusChipProps) {
   const palette = feedbackPalette ?? FALLBACK_COLORS;
 
   return (
-    <Chip
-      label={label}
-      size="small"
+    <span
+      className="inline-flex min-h-6 items-center justify-center whitespace-nowrap"
       style={{
         borderRadius: STATUS_CHIP_BORDER_RADIUS,
         fontSize: STATUS_CHIP_FONT_SIZE,
         fontWeight: STATUS_CHIP_FONT_WEIGHT,
-        columnGap: STATUS_CHIP_GAP,
+        gap: STATUS_CHIP_GAP,
         paddingLeft: STATUS_CHIP_PADDING_X,
         paddingRight: STATUS_CHIP_PADDING_X,
         transition: `background-color ${STATUS_CHIP_DURATION} ${STATUS_CHIP_EASING}, color ${STATUS_CHIP_DURATION} ${STATUS_CHIP_EASING}`,
@@ -144,6 +142,8 @@ export default function StatusChip({ status }: StatusChipProps) {
         color: palette.base,
         border: `1px solid ${palette.border}`,
       }}
-    />
+    >
+      {label}
+    </span>
   );
 }

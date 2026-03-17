@@ -21,7 +21,10 @@ import {
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@/entities/attendance/api/attendanceApi";
-import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
+import {
+  getWorkflowCategoryLabel,
+  STATUS_LABELS,
+} from "@/entities/workflow/lib/workflowLabels";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { designTokenVar } from "@/shared/designSystem";
@@ -119,6 +122,9 @@ export default function WorkflowDetailPanel({
       staffs,
     });
   const categoryLabel = getWorkflowCategoryLabel(workflow);
+  const statusLabel = workflow?.status
+    ? STATUS_LABELS[workflow.status] ?? workflow.status
+    : "—";
   const isApproveDisabled =
     !workflow?.id ||
     workflow?.status === WorkflowStatus.APPROVED ||
@@ -256,7 +262,7 @@ export default function WorkflowDetailPanel({
                 }}
                 onClick={onBack}
               >
-                一覧に戻る
+                ワークフロー一覧へ戻る
               </Button>
             )}
             <Button
@@ -308,7 +314,7 @@ export default function WorkflowDetailPanel({
               現在ステータス
             </Typography>
             <Typography sx={{ mt: 0.5, fontWeight: 700, color: HERO_TITLE }}>
-              {workflow?.status ?? "—"}
+              {statusLabel}
             </Typography>
           </Box>
           <Box
