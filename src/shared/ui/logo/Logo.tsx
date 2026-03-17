@@ -8,13 +8,24 @@ const HEADER_LOGO_MAX_HEIGHT = designTokenVar(
   "component.headerBar.logoMaxHeight",
   "32px",
 );
+const HEADER_LOGO_MAX_WIDTH = designTokenVar(
+  "component.headerBar.logoMaxWidth",
+  "220px",
+);
+const HEADER_LOGO_ASPECT_RATIO = designTokenVar(
+  "component.headerBar.logoAspectRatio",
+  "11 / 2",
+);
 
 const Logo = () => (
   <div
-    className="flex flex-grow-0 items-center justify-center overflow-hidden h-[26px] max-w-[clamp(64px,30vw,180px)] sm:h-[28px] sm:max-w-[220px] md:h-[var(--header-logo-max-height)] md:max-w-none"
+    className="flex flex-grow-0 items-center justify-center overflow-hidden h-[26px] w-[min(100%,var(--header-logo-max-width))] sm:h-[28px] md:h-[var(--header-logo-max-height)]"
     style={
       {
         "--header-logo-max-height": HEADER_LOGO_MAX_HEIGHT,
+        "--header-logo-max-width": HEADER_LOGO_MAX_WIDTH,
+        "--header-logo-aspect-ratio": HEADER_LOGO_ASPECT_RATIO,
+        aspectRatio: "var(--header-logo-aspect-ratio)",
       } as CSSProperties
     }
   >
@@ -23,16 +34,14 @@ const Logo = () => (
       variant="inherit"
       color="inherit"
       underline="none"
-      className="inline-flex h-[26px] max-w-full items-center bg-transparent sm:h-[28px] md:h-[var(--header-logo-max-height)]"
+      className="inline-flex h-full w-full max-w-full items-center bg-transparent"
     >
       <img
         src={LogoImage}
         alt="クラウド勤怠のロゴ"
         style={{
           height: "100%",
-          maxHeight: "100%",
-          maxWidth: "100%",
-          width: "auto",
+          width: "100%",
           display: "block",
           objectFit: "contain",
         }}
