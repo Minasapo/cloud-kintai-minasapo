@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 
 import { AUTO_SAVE_DELAY, ShiftPlanRow } from "../shiftPlanUtils";
+import type { ShiftPlanRecordMeta } from "./useShiftPlanData";
 
 type AutoSaveParams = {
   isDirty: boolean;
   currentRows: ShiftPlanRow[];
   selectedYear: number;
-  yearRecordIds: Record<number, string>;
+  yearRecordIds: Record<number, ShiftPlanRecordMeta>;
   performSave: (
     rows: ShiftPlanRow[],
     year: number,
-    recordIds: Record<number, string>,
+    recordIds: Record<number, ShiftPlanRecordMeta>,
     showNotification?: boolean,
   ) => Promise<boolean>;
 };

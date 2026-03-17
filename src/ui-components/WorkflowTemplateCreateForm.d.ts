@@ -26,12 +26,14 @@ export declare type WorkflowTemplateCreateFormInputValues = {
     title?: string;
     content?: string;
     organizationId?: string;
+    version?: number;
 };
 export declare type WorkflowTemplateCreateFormValidationValues = {
     name?: ValidationFunction<string>;
     title?: ValidationFunction<string>;
     content?: ValidationFunction<string>;
     organizationId?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type WorkflowTemplateCreateFormOverridesProps = {
@@ -40,6 +42,7 @@ export declare type WorkflowTemplateCreateFormOverridesProps = {
     title?: PrimitiveOverrideProps<TextFieldProps>;
     content?: PrimitiveOverrideProps<TextFieldProps>;
     organizationId?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type WorkflowTemplateCreateFormProps = React.PropsWithChildren<{
     overrides?: WorkflowTemplateCreateFormOverridesProps | undefined | null;

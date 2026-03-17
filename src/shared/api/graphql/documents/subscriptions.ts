@@ -14,6 +14,7 @@ export const onCreateCheckForUpdate = /* GraphQL */ `subscription OnCreateCheckF
   onCreateCheckForUpdate(filter: $filter) {
     id
     deployUuid
+    version
     createdAt
     updatedAt
     __typename
@@ -29,6 +30,7 @@ export const onUpdateCheckForUpdate = /* GraphQL */ `subscription OnUpdateCheckF
   onUpdateCheckForUpdate(filter: $filter) {
     id
     deployUuid
+    version
     createdAt
     updatedAt
     __typename
@@ -44,6 +46,7 @@ export const onDeleteCheckForUpdate = /* GraphQL */ `subscription OnDeleteCheckF
   onDeleteCheckForUpdate(filter: $filter) {
     id
     deployUuid
+    version
     createdAt
     updatedAt
     __typename
@@ -117,6 +120,7 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     overTimeCheckEnabled
     shiftCollaborativeEnabled
     shiftDefaultMode
+    version
     createdAt
     updatedAt
     __typename
@@ -190,6 +194,7 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     overTimeCheckEnabled
     shiftCollaborativeEnabled
     shiftDefaultMode
+    version
     createdAt
     updatedAt
     __typename
@@ -263,6 +268,7 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     overTimeCheckEnabled
     shiftCollaborativeEnabled
     shiftDefaultMode
+    version
     createdAt
     updatedAt
     __typename
@@ -305,6 +311,7 @@ export const onCreateStaff = /* GraphQL */ `subscription OnCreateStaff($filter: 
     approverMultipleMode
     shiftGroup
     attendanceManagementEnabled
+    version
     createdAt
     updatedAt
     __typename
@@ -347,6 +354,7 @@ export const onUpdateStaff = /* GraphQL */ `subscription OnUpdateStaff($filter: 
     approverMultipleMode
     shiftGroup
     attendanceManagementEnabled
+    version
     createdAt
     updatedAt
     __typename
@@ -389,6 +397,7 @@ export const onDeleteStaff = /* GraphQL */ `subscription OnDeleteStaff($filter: 
     approverMultipleMode
     shiftGroup
     attendanceManagementEnabled
+    version
     createdAt
     updatedAt
     __typename
@@ -405,6 +414,7 @@ export const onCreateHolidayCalendar = /* GraphQL */ `subscription OnCreateHolid
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -421,6 +431,7 @@ export const onUpdateHolidayCalendar = /* GraphQL */ `subscription OnUpdateHolid
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -437,6 +448,7 @@ export const onDeleteHolidayCalendar = /* GraphQL */ `subscription OnDeleteHolid
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -453,6 +465,7 @@ export const onCreateCompanyHolidayCalendar = /* GraphQL */ `subscription OnCrea
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -469,6 +482,7 @@ export const onUpdateCompanyHolidayCalendar = /* GraphQL */ `subscription OnUpda
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -485,6 +499,7 @@ export const onDeleteCompanyHolidayCalendar = /* GraphQL */ `subscription OnDele
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -502,6 +517,7 @@ export const onCreateEventCalendar = /* GraphQL */ `subscription OnCreateEventCa
     eventDate
     name
     description
+    version
     createdAt
     updatedAt
     __typename
@@ -519,6 +535,7 @@ export const onUpdateEventCalendar = /* GraphQL */ `subscription OnUpdateEventCa
     eventDate
     name
     description
+    version
     createdAt
     updatedAt
     __typename
@@ -536,6 +553,7 @@ export const onDeleteEventCalendar = /* GraphQL */ `subscription OnDeleteEventCa
     eventDate
     name
     description
+    version
     createdAt
     updatedAt
     __typename
@@ -551,6 +569,7 @@ export const onCreateCloseDate = /* GraphQL */ `subscription OnCreateCloseDate($
     closeDate
     startDate
     endDate
+    version
     createdAt
     updatedAt
     __typename
@@ -566,6 +585,7 @@ export const onUpdateCloseDate = /* GraphQL */ `subscription OnUpdateCloseDate($
     closeDate
     startDate
     endDate
+    version
     createdAt
     updatedAt
     __typename
@@ -581,6 +601,7 @@ export const onDeleteCloseDate = /* GraphQL */ `subscription OnDeleteCloseDate($
     closeDate
     startDate
     endDate
+    version
     createdAt
     updatedAt
     __typename
@@ -1141,6 +1162,7 @@ export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPl
     notes
     createdBy
     updatedBy
+    version
     createdAt
     updatedAt
     __typename
@@ -1167,6 +1189,7 @@ export const onUpdateShiftPlanYear = /* GraphQL */ `subscription OnUpdateShiftPl
     notes
     createdBy
     updatedBy
+    version
     createdAt
     updatedAt
     __typename
@@ -1193,6 +1216,7 @@ export const onDeleteShiftPlanYear = /* GraphQL */ `subscription OnDeleteShiftPl
     notes
     createdBy
     updatedBy
+    version
     createdAt
     updatedAt
     __typename
@@ -1242,6 +1266,7 @@ export const onCreateWorkflow = /* GraphQL */ `subscription OnCreateWorkflow($fi
       createdAt
       __typename
     }
+    version
     createdAt
     updatedAt
     __typename
@@ -1291,6 +1316,7 @@ export const onUpdateWorkflow = /* GraphQL */ `subscription OnUpdateWorkflow($fi
       createdAt
       __typename
     }
+    version
     createdAt
     updatedAt
     __typename
@@ -1340,6 +1366,7 @@ export const onDeleteWorkflow = /* GraphQL */ `subscription OnDeleteWorkflow($fi
       createdAt
       __typename
     }
+    version
     createdAt
     updatedAt
     __typename
@@ -1358,6 +1385,7 @@ export const onCreateWorkflowTemplate = /* GraphQL */ `subscription OnCreateWork
     title
     content
     organizationId
+    version
     createdAt
     updatedAt
     __typename
@@ -1376,6 +1404,7 @@ export const onUpdateWorkflowTemplate = /* GraphQL */ `subscription OnUpdateWork
     title
     content
     organizationId
+    version
     createdAt
     updatedAt
     __typename
@@ -1394,6 +1423,7 @@ export const onDeleteWorkflowTemplate = /* GraphQL */ `subscription OnDeleteWork
     title
     content
     organizationId
+    version
     createdAt
     updatedAt
     __typename
@@ -1418,6 +1448,7 @@ export const onCreateWorkflowNotificationEvent = /* GraphQL */ `subscription OnC
     isRead
     readAt
     eventAt
+    version
     createdAt
     updatedAt
     __typename
@@ -1442,6 +1473,7 @@ export const onUpdateWorkflowNotificationEvent = /* GraphQL */ `subscription OnU
     isRead
     readAt
     eventAt
+    version
     createdAt
     updatedAt
     __typename
@@ -1466,6 +1498,7 @@ export const onDeleteWorkflowNotificationEvent = /* GraphQL */ `subscription OnD
     isRead
     readAt
     eventAt
+    version
     createdAt
     updatedAt
     __typename
@@ -1490,6 +1523,7 @@ export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperatio
     userAgent
     metadata
     severity
+    version
     createdAt
     updatedAt
     __typename
@@ -1514,6 +1548,7 @@ export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperatio
     userAgent
     metadata
     severity
+    version
     createdAt
     updatedAt
     __typename
@@ -1538,6 +1573,7 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
     userAgent
     metadata
     severity
+    version
     createdAt
     updatedAt
     __typename
@@ -1564,6 +1600,7 @@ export const onCreateAuditLog = /* GraphQL */ `subscription OnCreateAuditLog($fi
     createdAt
     ttl
     reason
+    version
     updatedAt
     __typename
   }
@@ -1589,6 +1626,7 @@ export const onUpdateAuditLog = /* GraphQL */ `subscription OnUpdateAuditLog($fi
     createdAt
     ttl
     reason
+    version
     updatedAt
     __typename
   }
@@ -1614,6 +1652,7 @@ export const onDeleteAuditLog = /* GraphQL */ `subscription OnDeleteAuditLog($fi
     createdAt
     ttl
     reason
+    version
     updatedAt
     __typename
   }
@@ -1647,6 +1686,7 @@ export const onCreateDailyReport = /* GraphQL */ `subscription OnCreateDailyRepo
       createdAt
       __typename
     }
+    version
     createdAt
     __typename
   }
@@ -1680,6 +1720,7 @@ export const onUpdateDailyReport = /* GraphQL */ `subscription OnUpdateDailyRepo
       createdAt
       __typename
     }
+    version
     createdAt
     __typename
   }
@@ -1713,6 +1754,7 @@ export const onDeleteDailyReport = /* GraphQL */ `subscription OnDeleteDailyRepo
       createdAt
       __typename
     }
+    version
     createdAt
     __typename
   }

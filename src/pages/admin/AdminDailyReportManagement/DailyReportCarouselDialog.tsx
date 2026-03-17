@@ -32,6 +32,11 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getGraphQLErrorMessage,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
 
 import {
@@ -390,6 +395,10 @@ export default function DailyReportCarouselDialog({
       const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
+          condition: buildVersionOrUpdatedAtCondition(
+            report.version,
+            report.updatedAt,
+          ),
           input: {
             id: report.id,
             reactions: nextEntries.map(({ staffId, type, createdAt }) => ({
@@ -398,6 +407,7 @@ export default function DailyReportCarouselDialog({
               createdAt,
             })),
             updatedAt: timestamp,
+            version: getNextVersion(report.version),
           },
         },
         authMode: "userPool",
@@ -405,7 +415,10 @@ export default function DailyReportCarouselDialog({
 
       if (response.errors?.length) {
         throw new Error(
-          response.errors.map((error) => error.message).join("\n")
+          getGraphQLErrorMessage(
+            response.errors,
+            "リアクションの更新に失敗しました。",
+          ),
         );
       }
 
@@ -466,6 +479,10 @@ export default function DailyReportCarouselDialog({
       const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
+          condition: buildVersionOrUpdatedAtCondition(
+            report.version,
+            report.updatedAt,
+          ),
           input: {
             id: report.id,
             comments: nextComments.map(
@@ -484,6 +501,7 @@ export default function DailyReportCarouselDialog({
               })
             ),
             updatedAt: timestamp,
+            version: getNextVersion(report.version),
           },
         },
         authMode: "userPool",
@@ -491,7 +509,10 @@ export default function DailyReportCarouselDialog({
 
       if (response.errors?.length) {
         throw new Error(
-          response.errors.map((error) => error.message).join("\n")
+          getGraphQLErrorMessage(
+            response.errors,
+            "コメントの更新に失敗しました。",
+          ),
         );
       }
 

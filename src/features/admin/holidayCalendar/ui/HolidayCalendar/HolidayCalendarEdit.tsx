@@ -9,7 +9,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { DatePicker } from "@mui/x-date-pickers";
 import {
   HolidayCalendar,
-  UpdateHolidayCalendarInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -41,9 +40,7 @@ export default function HolidayCalendarEdit({
   updateHolidayCalendar,
 }: {
   holidayCalendar: HolidayCalendar;
-  updateHolidayCalendar: (
-    input: UpdateHolidayCalendarInput
-  ) => Promise<HolidayCalendar>;
+  updateHolidayCalendar: (input: HolidayCalendar) => Promise<HolidayCalendar>;
 }) {
   const dispatch = useAppDispatchV2();
 
@@ -80,7 +77,7 @@ export default function HolidayCalendarEdit({
 
     const holidayCalendarMessage = HolidayCalendarMessage();
     await updateHolidayCalendar({
-      id: holidayCalendar.id,
+      ...holidayCalendar,
       holidayDate: holidayDate.toISOString(),
       name,
     })

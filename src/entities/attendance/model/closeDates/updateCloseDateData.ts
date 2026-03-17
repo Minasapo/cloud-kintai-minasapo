@@ -1,6 +1,7 @@
 import { updateCloseDate } from "@shared/api/graphql/documents/mutations";
 import {
   CloseDate,
+  ModelCloseDateConditionInput,
   UpdateCloseDateInput,
   UpdateCloseDateMutation,
 } from "@shared/api/graphql/types";
@@ -8,10 +9,21 @@ import { GraphQLResult } from "aws-amplify/api";
 
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
-export default async function updateCloseDateData(input: UpdateCloseDateInput) {
+export type UpdateCloseDatePayload = {
+  input: UpdateCloseDateInput;
+  condition?: ModelCloseDateConditionInput | null;
+};
+
+export default async function updateCloseDateData({
+  input,
+  condition,
+}: UpdateCloseDatePayload) {
   const response = (await graphqlClient.graphql({
     query: updateCloseDate,
-    variables: { input },
+    variables: {
+      input,
+      condition: condition ?? undefined,
+    },
     authMode: "userPool",
   })) as GraphQLResult<UpdateCloseDateMutation>;
 

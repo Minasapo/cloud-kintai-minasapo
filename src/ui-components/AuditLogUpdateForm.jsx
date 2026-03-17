@@ -45,6 +45,7 @@ export default function AuditLogUpdateForm(props) {
     createdAt: "",
     ttl: "",
     reason: "",
+    version: "",
   };
   const [resourceType, setResourceType] = React.useState(
     initialValues.resourceType
@@ -62,6 +63,7 @@ export default function AuditLogUpdateForm(props) {
   const [createdAt, setCreatedAt] = React.useState(initialValues.createdAt);
   const [ttl, setTtl] = React.useState(initialValues.ttl);
   const [reason, setReason] = React.useState(initialValues.reason);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = auditLogRecord
@@ -93,6 +95,7 @@ export default function AuditLogUpdateForm(props) {
     setCreatedAt(cleanValues.createdAt);
     setTtl(cleanValues.ttl);
     setReason(cleanValues.reason);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [auditLogRecord, setAuditLogRecord] = React.useState(auditLogModelProp);
@@ -126,6 +129,7 @@ export default function AuditLogUpdateForm(props) {
     createdAt: [{ type: "Required" }],
     ttl: [],
     reason: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -190,6 +194,7 @@ export default function AuditLogUpdateForm(props) {
           createdAt,
           ttl: ttl ?? null,
           reason: reason ?? null,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -264,6 +269,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.resourceType ?? value;
@@ -301,6 +307,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.resourceId ?? value;
@@ -338,6 +345,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.action ?? value;
@@ -375,6 +383,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.actorId ?? value;
@@ -412,6 +421,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.actorRole ?? value;
@@ -449,6 +459,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.requestId ?? value;
@@ -486,6 +497,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.ip ?? value;
@@ -523,6 +535,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.userAgent ?? value;
@@ -560,6 +573,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.before ?? value;
@@ -597,6 +611,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.after ?? value;
@@ -634,6 +649,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.diff ?? value;
@@ -673,6 +689,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt: value,
               ttl,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.createdAt ?? value;
@@ -712,6 +729,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl: value,
               reason,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.ttl ?? value;
@@ -749,6 +767,7 @@ export default function AuditLogUpdateForm(props) {
               createdAt,
               ttl,
               reason: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.reason ?? value;
@@ -762,6 +781,48 @@ export default function AuditLogUpdateForm(props) {
         errorMessage={errors.reason?.errorMessage}
         hasError={errors.reason?.hasError}
         {...getOverrideProps(overrides, "reason")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              resourceType,
+              resourceId,
+              action,
+              actorId,
+              actorRole,
+              requestId,
+              ip,
+              userAgent,
+              before,
+              after,
+              diff,
+              createdAt,
+              ttl,
+              reason,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

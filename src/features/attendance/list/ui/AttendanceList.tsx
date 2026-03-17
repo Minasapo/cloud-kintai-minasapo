@@ -19,7 +19,12 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Staff } from "@shared/api/graphql/types";
+import {
+  OnCreateAttendanceSubscription,
+  OnDeleteAttendanceSubscription,
+  OnUpdateAttendanceSubscription,
+  Staff,
+} from "@shared/api/graphql/types";
 /**
  * 日付操作ライブラリ。日付のフォーマットや計算に使用。
  */
@@ -27,9 +32,9 @@ import { Staff } from "@shared/api/graphql/types";
  * ReactのContext, Hooks。
  */
 import dayjs, { Dayjs } from "dayjs";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
@@ -38,6 +43,12 @@ import {
   calcTotalWorkTime,
 } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import {
+  onCreateAttendance,
+  onDeleteAttendance,
+  onUpdateAttendance,
+} from "@/shared/api/graphql/documents/subscriptions";
 import { designTokenVar } from "@/shared/designSystem";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
@@ -56,6 +67,21 @@ const DescriptionTypography = styled(Typography)(({ theme }) => ({
     padding: "0px 10px",
   },
 }));
+
+const MONTH_QUERY_KEY = "month";
+
+const getCurrentMonthFromQuery = (monthParam: string | null): Dayjs => {
+  if (!monthParam) {
+    return dayjs().startOf("month");
+  }
+
+  const parsedMonth = dayjs(monthParam, "YYYY-MM", true);
+  if (!parsedMonth.isValid()) {
+    return dayjs().startOf("month");
+  }
+
+  return parsedMonth.startOf("month");
+};
 
 /**
  * 勤怠一覧テーブルのメインコンポーネント。
@@ -77,12 +103,24 @@ export default function AttendanceTable() {
    * ページ遷移用navigate関数。
    */
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   /**
    * 勤怠情報取得用カスタムフック。
    */
   const shouldFetchAttendances = Boolean(cognitoUser?.id);
-  const [currentMonth, setCurrentMonth] = useState<Dayjs>(() =>
-    dayjs().startOf("month"),
+  const currentMonth = useMemo(
+    () => getCurrentMonthFromQuery(searchParams.get(MONTH_QUERY_KEY)),
+    [searchParams],
+  );
+
+  const handleMonthChange = useCallback(
+    (nextMonth: Dayjs) => {
+      const normalizedMonth = nextMonth.startOf("month");
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.set(MONTH_QUERY_KEY, normalizedMonth.format("YYYY-MM"));
+      setSearchParams(nextParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
   );
 
   const {
@@ -170,13 +208,17 @@ export default function AttendanceTable() {
     isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
+    refetch: refetchAttendances,
   } = useListAttendancesByDateRangeQuery(
     {
       staffId: cognitoUser?.id ?? "",
       startDate,
       endDate,
     },
-    { skip: !shouldFetchAttendances },
+    {
+      skip: !shouldFetchAttendances,
+      refetchOnMountOrArgChange: true,
+    },
   );
 
   const attendanceLoading =
@@ -184,6 +226,88 @@ export default function AttendanceTable() {
     isAttendancesInitialLoading ||
     isAttendancesFetching ||
     isAttendancesUninitialized;
+
+  useEffect(() => {
+    const currentStaffId = cognitoUser?.id;
+    if (!currentStaffId || !shouldFetchAttendances) return;
+
+    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const shouldRefetch = (
+      eventStaffId?: string | null,
+      workDate?: string | null,
+    ) => {
+      if (!eventStaffId || !workDate) return false;
+      if (eventStaffId !== currentStaffId) return false;
+
+      const eventDate = dayjs(workDate);
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
+
+      return eventDate.isBetween(start, end, "day", "[]");
+    };
+
+    const scheduleRefetch = () => {
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+
+      refetchTimer = setTimeout(() => {
+        void refetchAttendances();
+      }, 300);
+    };
+
+    const createSubscription = graphqlClient
+      .graphql({ query: onCreateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
+          const attendance = data?.onCreateAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    const updateSubscription = graphqlClient
+      .graphql({ query: onUpdateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
+          const attendance = data?.onUpdateAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    const deleteSubscription = graphqlClient
+      .graphql({ query: onDeleteAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
+          const attendance = data?.onDeleteAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    return () => {
+      createSubscription.unsubscribe();
+      updateSubscription.unsubscribe();
+      deleteSubscription.unsubscribe();
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+    };
+  }, [
+    cognitoUser?.id,
+    shouldFetchAttendances,
+    startDate,
+    endDate,
+    refetchAttendances,
+  ]);
 
   /**
    * スタッフ情報の状態。
@@ -344,7 +468,7 @@ export default function AttendanceTable() {
           closeDatesLoading={closeDatesLoading}
           closeDatesError={closeDatesError}
           currentMonth={currentMonth}
-          onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
+          onMonthChange={handleMonthChange}
         />
       ) : (
         <MobileList
@@ -353,7 +477,7 @@ export default function AttendanceTable() {
           companyHolidayCalendars={companyHolidayCalendars}
           staff={staff}
           currentMonth={currentMonth}
-          onMonthChange={(nextMonth) => setCurrentMonth(nextMonth)}
+          onMonthChange={handleMonthChange}
           closeDates={closeDates}
         />
       )}

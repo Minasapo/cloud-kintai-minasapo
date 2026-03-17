@@ -27,17 +27,20 @@ export default function ShiftPlanYearCreateForm(props) {
     notes: "",
     createdBy: "",
     updatedBy: "",
+    version: "",
   };
   const [targetYear, setTargetYear] = React.useState(initialValues.targetYear);
   const [notes, setNotes] = React.useState(initialValues.notes);
   const [createdBy, setCreatedBy] = React.useState(initialValues.createdBy);
   const [updatedBy, setUpdatedBy] = React.useState(initialValues.updatedBy);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setTargetYear(initialValues.targetYear);
     setNotes(initialValues.notes);
     setCreatedBy(initialValues.createdBy);
     setUpdatedBy(initialValues.updatedBy);
+    setVersion(initialValues.version);
     setErrors({});
   };
   const validations = {
@@ -45,6 +48,7 @@ export default function ShiftPlanYearCreateForm(props) {
     notes: [],
     createdBy: [],
     updatedBy: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -76,6 +80,7 @@ export default function ShiftPlanYearCreateForm(props) {
           notes,
           createdBy,
           updatedBy,
+          version,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -146,6 +151,7 @@ export default function ShiftPlanYearCreateForm(props) {
               notes,
               createdBy,
               updatedBy,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.targetYear ?? value;
@@ -173,6 +179,7 @@ export default function ShiftPlanYearCreateForm(props) {
               notes: value,
               createdBy,
               updatedBy,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.notes ?? value;
@@ -200,6 +207,7 @@ export default function ShiftPlanYearCreateForm(props) {
               notes,
               createdBy: value,
               updatedBy,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.createdBy ?? value;
@@ -227,6 +235,7 @@ export default function ShiftPlanYearCreateForm(props) {
               notes,
               createdBy,
               updatedBy: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.updatedBy ?? value;
@@ -240,6 +249,38 @@ export default function ShiftPlanYearCreateForm(props) {
         errorMessage={errors.updatedBy?.errorMessage}
         hasError={errors.updatedBy?.hasError}
         {...getOverrideProps(overrides, "updatedBy")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              targetYear,
+              notes,
+              createdBy,
+              updatedBy,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

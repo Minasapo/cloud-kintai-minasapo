@@ -44,6 +44,7 @@ export declare type AppConfigUpdateFormInputValues = {
     overTimeCheckEnabled?: boolean;
     shiftCollaborativeEnabled?: boolean;
     shiftDefaultMode?: string;
+    version?: number;
 };
 export declare type AppConfigUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -67,6 +68,7 @@ export declare type AppConfigUpdateFormValidationValues = {
     overTimeCheckEnabled?: ValidationFunction<boolean>;
     shiftCollaborativeEnabled?: ValidationFunction<boolean>;
     shiftDefaultMode?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type AppConfigUpdateFormOverridesProps = {
@@ -92,6 +94,7 @@ export declare type AppConfigUpdateFormOverridesProps = {
     overTimeCheckEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     shiftCollaborativeEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     shiftDefaultMode?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type AppConfigUpdateFormProps = React.PropsWithChildren<{
     overrides?: AppConfigUpdateFormOverridesProps | undefined | null;

@@ -15,6 +15,11 @@ import {
   publishWorkflowCommentNotifications,
 } from "@/features/workflow/notification/model/workflowNotificationEventService";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+  isConditionalCheckFailed,
+} from "@/shared/api/graphql/concurrency";
 import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("submitWorkflowComment");
@@ -42,10 +47,6 @@ const toCommentInputs = (
       text: comment.text,
       createdAt: comment.createdAt,
     }));
-
-const isConditionalCheckFailed = (message: string) =>
-  message.includes("ConditionalCheckFailed") ||
-  message.includes("The conditional request failed");
 
 const wait = async (milliseconds: number) =>
   new Promise<void>((resolve) => {
@@ -86,12 +87,14 @@ export const submitWorkflowComment = async ({
     const input: UpdateWorkflowInput = {
       id: workflowId,
       comments: [...existingComments, newComment],
+      version: getNextVersion(latestWorkflow.version),
     };
 
     const condition: ModelWorkflowConditionInput | undefined =
-      latestWorkflow.updatedAt
-        ? { updatedAt: { eq: latestWorkflow.updatedAt } }
-        : undefined;
+      buildVersionOrUpdatedAtCondition(
+        latestWorkflow.version,
+        latestWorkflow.updatedAt,
+      );
 
     const updateResult = (await graphqlClient.graphql({
       query: updateWorkflow,

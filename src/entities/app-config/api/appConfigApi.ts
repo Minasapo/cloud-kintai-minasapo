@@ -10,9 +10,15 @@ import type {
   CreateAppConfigInput,
   CreateAppConfigMutation,
   ListAppConfigsQuery,
+  ModelAppConfigConditionInput,
   UpdateAppConfigInput,
   UpdateAppConfigMutation,
 } from "@shared/api/graphql/types";
+
+export type UpdateAppConfigPayload = {
+  input: UpdateAppConfigInput;
+  condition?: ModelAppConfigConditionInput | null;
+};
 
 // Exported for testing
 export const nonNullable = <T>(value: T | null | undefined): value is T =>
@@ -82,11 +88,14 @@ export const appConfigApi = createApi({
       },
       invalidatesTags: [{ type: "AppConfig", id: "LIST" }],
     }),
-    updateAppConfig: builder.mutation<AppConfig, UpdateAppConfigInput>({
-      async queryFn(input, _queryApi, _extraOptions, baseQuery) {
+    updateAppConfig: builder.mutation<AppConfig, UpdateAppConfigPayload>({
+      async queryFn({ input, condition }, _queryApi, _extraOptions, baseQuery) {
         const result = await baseQuery({
           document: updateAppConfig,
-          variables: { input },
+          variables: {
+            input,
+            condition: condition ?? undefined,
+          },
           authMode: "apiKey",
         });
 

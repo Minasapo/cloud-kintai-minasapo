@@ -9,6 +9,10 @@ import {
 import { useEffect, useState } from "react";
 
 import { StaffExternalLink } from "@/entities/staff/externalLink";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 
 import createStaffData from "./createStaffData";
 import deleteStaffData from "./deleteStaffData";
@@ -47,6 +51,7 @@ export type StaffType = {
   status: Staff["status"];
   createdAt: Staff["createdAt"];
   updatedAt: Staff["updatedAt"];
+  version?: Staff["version"];
   usageStartDate?: Staff["usageStartDate"];
   notifications?: Staff["notifications"];
   externalLinks?: (StaffExternalLink | null)[] | null;
@@ -117,6 +122,7 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
             usageStartDate: staff.usageStartDate,
             createdAt: staff.createdAt,
             updatedAt: staff.updatedAt,
+            version: staff.version,
             notifications: staff.notifications,
             externalLinks: staff.externalLinks ?? null,
             sortKey: staff.sortKey,
@@ -163,6 +169,7 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
             status: staff.status,
             createdAt: staff.createdAt,
             updatedAt: staff.updatedAt,
+            version: staff.version,
             notifications: staff.notifications,
             externalLinks: staff.externalLinks ?? null,
             sortKey: staff.sortKey,
@@ -220,6 +227,7 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
             status: staff.status,
             createdAt: staff.createdAt,
             updatedAt: staff.updatedAt,
+            version: staff.version,
             usageStartDate: staff.usageStartDate,
             notifications: staff.notifications,
             externalLinks: staff.externalLinks ?? null,
@@ -245,7 +253,18 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
 
   const updateStaff = async (input: UpdateStaffInput) => {
     ensureAuthenticated();
-    return updateStaffData(input)
+    const currentStaff = staffs.find((staff) => staff.id === input.id);
+
+    return updateStaffData({
+      input: {
+        ...input,
+        version: getNextVersion(currentStaff?.version),
+      },
+      condition: buildVersionOrUpdatedAtCondition(
+        currentStaff?.version,
+        currentStaff?.updatedAt,
+      ),
+    })
       .then((staff) => {
         setStaffs(
           staffs.map((s) => {
@@ -262,6 +281,7 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
                 status: staff.status,
                 createdAt: staff.createdAt,
                 updatedAt: staff.updatedAt,
+                version: staff.version,
                 usageStartDate: staff.usageStartDate,
                 notifications: staff.notifications,
                 externalLinks: staff.externalLinks ?? null,
@@ -316,6 +336,7 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
       usageStartDate: staff.usageStartDate,
       createdAt: staff.createdAt,
       updatedAt: staff.updatedAt,
+      version: staff.version,
       notifications: staff.notifications,
       externalLinks: staff.externalLinks ?? null,
       sortKey: staff.sortKey,

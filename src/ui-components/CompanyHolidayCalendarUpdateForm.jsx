@@ -27,11 +27,13 @@ export default function CompanyHolidayCalendarUpdateForm(props) {
   const initialValues = {
     holidayDate: "",
     name: "",
+    version: "",
   };
   const [holidayDate, setHolidayDate] = React.useState(
     initialValues.holidayDate
   );
   const [name, setName] = React.useState(initialValues.name);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = companyHolidayCalendarRecord
@@ -39,6 +41,7 @@ export default function CompanyHolidayCalendarUpdateForm(props) {
       : initialValues;
     setHolidayDate(cleanValues.holidayDate);
     setName(cleanValues.name);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [companyHolidayCalendarRecord, setCompanyHolidayCalendarRecord] =
@@ -61,6 +64,7 @@ export default function CompanyHolidayCalendarUpdateForm(props) {
   const validations = {
     holidayDate: [{ type: "Required" }],
     name: [{ type: "Required" }],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -90,6 +94,7 @@ export default function CompanyHolidayCalendarUpdateForm(props) {
         let modelFields = {
           holidayDate,
           name,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -152,6 +157,7 @@ export default function CompanyHolidayCalendarUpdateForm(props) {
             const modelFields = {
               holidayDate: value,
               name,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.holidayDate ?? value;
@@ -177,6 +183,7 @@ export default function CompanyHolidayCalendarUpdateForm(props) {
             const modelFields = {
               holidayDate,
               name: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -190,6 +197,36 @@ export default function CompanyHolidayCalendarUpdateForm(props) {
         errorMessage={errors.name?.errorMessage}
         hasError={errors.name?.hasError}
         {...getOverrideProps(overrides, "name")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              holidayDate,
+              name,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

@@ -26,14 +26,17 @@ export default function CheckForUpdateUpdateForm(props) {
   } = props;
   const initialValues = {
     deployUuid: "",
+    version: "",
   };
   const [deployUuid, setDeployUuid] = React.useState(initialValues.deployUuid);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = checkForUpdateRecord
       ? { ...initialValues, ...checkForUpdateRecord }
       : initialValues;
     setDeployUuid(cleanValues.deployUuid);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [checkForUpdateRecord, setCheckForUpdateRecord] = React.useState(
@@ -56,6 +59,7 @@ export default function CheckForUpdateUpdateForm(props) {
   React.useEffect(resetStateValues, [checkForUpdateRecord]);
   const validations = {
     deployUuid: [{ type: "Required" }],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -84,6 +88,7 @@ export default function CheckForUpdateUpdateForm(props) {
         event.preventDefault();
         let modelFields = {
           deployUuid,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -145,6 +150,7 @@ export default function CheckForUpdateUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               deployUuid: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.deployUuid ?? value;
@@ -158,6 +164,35 @@ export default function CheckForUpdateUpdateForm(props) {
         errorMessage={errors.deployUuid?.errorMessage}
         hasError={errors.deployUuid?.hasError}
         {...getOverrideProps(overrides, "deployUuid")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              deployUuid,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

@@ -1,4 +1,5 @@
 import {
+  type UpdateHolidayCalendarPayload,
   useBulkCreateHolidayCalendarsMutation,
   useCreateHolidayCalendarMutation,
   useDeleteHolidayCalendarMutation,
@@ -35,6 +36,10 @@ import CreatedAtTableCell from "@/features/admin/holidayCalendar/ui/components/C
 import HolidayCalendarDelete from "@/features/admin/holidayCalendar/ui/components/HolidayCalendarDelete";
 import HolidayDateTableCell from "@/features/admin/holidayCalendar/ui/components/HolidayDateTableCell";
 import HolidayNameTableCell from "@/features/admin/holidayCalendar/ui/components/HolidayNameTableCell";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import { AddHolidayCalendar } from "./AddHolidayCalendar";
@@ -69,9 +74,20 @@ export default function HolidayCalendarList() {
   );
 
   const updateHolidayCalendar = useCallback(
-    async (input: Parameters<typeof updateHolidayCalendarMutation>[0]) =>
-      updateHolidayCalendarMutation(input).unwrap(),
-    [updateHolidayCalendarMutation]
+    async (input: HolidayCalendar) =>
+      updateHolidayCalendarMutation({
+        input: {
+          id: input.id,
+          holidayDate: input.holidayDate,
+          name: input.name,
+          version: getNextVersion(input.version),
+        },
+        condition: buildVersionOrUpdatedAtCondition(
+          input.version,
+          input.updatedAt,
+        ),
+      } satisfies UpdateHolidayCalendarPayload).unwrap(),
+    [updateHolidayCalendarMutation],
   );
 
   const deleteHolidayCalendar = useCallback(

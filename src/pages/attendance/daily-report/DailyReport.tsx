@@ -47,6 +47,11 @@ import { useSearchParams } from "react-router-dom";
 
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getGraphQLErrorMessage,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
 import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
 
@@ -85,6 +90,7 @@ interface DailyReportItem {
   content: string;
   status: ReportStatus;
   updatedAt?: string | null;
+  version?: number | null;
   createdAt?: string | null;
   reactions: ReportReaction[];
   comments: AdminComment[];
@@ -176,6 +182,7 @@ const mapDailyReport = (
   content: record.content ?? "",
   status: record.status,
   updatedAt: record.updatedAt ?? record.createdAt ?? null,
+  version: record.version,
   createdAt: record.createdAt ?? null,
   reactions: aggregateReactions(record.reactions),
   comments: mapComments(record.comments),
@@ -575,14 +582,30 @@ export default function DailyReport() {
               content: createForm.content,
               status,
               updatedAt: new Date().toISOString(),
+              version: getNextVersion(
+                reports.find(
+                  (candidate) => candidate.id === createdReportIdRef.current,
+                )?.version,
+              ),
             },
+            condition: buildVersionOrUpdatedAtCondition(
+              reports.find(
+                (candidate) => candidate.id === createdReportIdRef.current,
+              )?.version,
+              reports.find(
+                (candidate) => candidate.id === createdReportIdRef.current,
+              )?.updatedAt,
+            ),
           },
           authMode: "userPool",
         })) as GraphQLResult<UpdateDailyReportMutation>;
 
         if (response.errors?.length) {
           throw new Error(
-            response.errors.map((error) => error.message).join("\n"),
+            getGraphQLErrorMessage(
+              response.errors,
+              "日報の更新に失敗しました。",
+            ),
           );
         }
 
@@ -731,6 +754,10 @@ export default function DailyReport() {
       const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
+          condition: buildVersionOrUpdatedAtCondition(
+            reports.find((report) => report.id === editingReportId)?.version,
+            reports.find((report) => report.id === editingReportId)?.updatedAt,
+          ),
           input: {
             id: editingReportId,
             reportDate: editDraft.date,
@@ -738,6 +765,9 @@ export default function DailyReport() {
             content: editDraft.content,
             status,
             updatedAt: new Date().toISOString(),
+            version: getNextVersion(
+              reports.find((report) => report.id === editingReportId)?.version,
+            ),
           },
         },
         authMode: "userPool",
@@ -745,7 +775,10 @@ export default function DailyReport() {
 
       if (response.errors?.length) {
         throw new Error(
-          response.errors.map((error) => error.message).join("\n"),
+          getGraphQLErrorMessage(
+            response.errors,
+            "日報の更新に失敗しました。",
+          ),
         );
       }
 

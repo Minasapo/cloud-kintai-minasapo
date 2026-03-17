@@ -152,8 +152,25 @@ export default function NavigationMenu() {
       hrefs.push("/profile");
     }
 
-    return [...new Set(hrefs)];
-  }, [adminLink.href, cognitoUser, desktopMenuItems, isAdminUser]);
+    const uniqueHrefs = [...new Set(hrefs)];
+    const currentIndex = uniqueHrefs.findIndex((href) => {
+      if (href === pathName) {
+        return true;
+      }
+
+      return pathName.startsWith(`${href}/`);
+    });
+
+    const prioritizedHrefs =
+      currentIndex >= 0
+        ? [
+            ...uniqueHrefs.slice(currentIndex + 1),
+            ...uniqueHrefs.slice(0, currentIndex),
+          ]
+        : uniqueHrefs;
+
+    return prioritizedHrefs.filter((href) => href !== pathName).slice(0, 2);
+  }, [adminLink.href, cognitoUser, desktopMenuItems, isAdminUser, pathName]);
 
   const handleOpenMobileMenu = useCallback(() => {
     mobilePreloadTargets.forEach((href) => {

@@ -33,6 +33,7 @@ export declare type WorkflowNotificationEventUpdateFormInputValues = {
     isRead?: boolean;
     readAt?: string;
     eventAt?: string;
+    version?: number;
 };
 export declare type WorkflowNotificationEventUpdateFormValidationValues = {
     recipientStaffId?: ValidationFunction<string>;
@@ -45,6 +46,7 @@ export declare type WorkflowNotificationEventUpdateFormValidationValues = {
     isRead?: ValidationFunction<boolean>;
     readAt?: ValidationFunction<string>;
     eventAt?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type WorkflowNotificationEventUpdateFormOverridesProps = {
@@ -59,6 +61,7 @@ export declare type WorkflowNotificationEventUpdateFormOverridesProps = {
     isRead?: PrimitiveOverrideProps<SwitchFieldProps>;
     readAt?: PrimitiveOverrideProps<TextFieldProps>;
     eventAt?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type WorkflowNotificationEventUpdateFormProps = React.PropsWithChildren<{
     overrides?: WorkflowNotificationEventUpdateFormOverridesProps | undefined | null;

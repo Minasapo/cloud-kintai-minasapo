@@ -27,7 +27,7 @@ import {
   UseFormHandleSubmit,
   useWatch,
 } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
@@ -49,6 +49,8 @@ import sendChangeRequestMail from "./sendChangeRequestMail";
 
 const logger = createLogger("AttendanceEdit");
 
+const MONTH_QUERY_KEY = "month";
+
 export default function AttendanceEdit() {
   const { notify } = useLocalNotification();
   const { cognitoUser } = useContext(AuthContext);
@@ -60,7 +62,19 @@ export default function AttendanceEdit() {
     getLunchRestEndTime,
   } = useContext(AppConfigContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { targetWorkDate } = useParams();
+
+  const attendanceListPath = useMemo(() => {
+    const month = searchParams.get(MONTH_QUERY_KEY);
+    if (!month) {
+      return "/attendance/list";
+    }
+
+    return `/attendance/list?${new URLSearchParams({
+      [MONTH_QUERY_KEY]: month,
+    }).toString()}`;
+  }, [searchParams]);
 
   const [staff, setStaff] = useState<StaffType | undefined | null>(undefined);
 
@@ -217,7 +231,7 @@ export default function AttendanceEdit() {
             tag: "attendance-change-request",
           });
 
-          navigate("/attendance/list");
+          navigate(attendanceListPath);
         })
         .catch(() => {
           void notify("修正申請エラー", {
@@ -281,7 +295,7 @@ export default function AttendanceEdit() {
               tag: "mail-error",
             });
           }
-          navigate("/attendance/list");
+          navigate(attendanceListPath);
         })
         .catch((e) => {
           logger.error("Failed to update attendance:", e);

@@ -66,6 +66,7 @@ export default function CommonBreadcrumbs({
           <Link
             href={item.href}
             key={idx}
+            variant="body2"
             underline="hover"
             className="text-[color:var(--breadcrumbs-link-color)] no-underline hover:underline"
           >
@@ -73,6 +74,7 @@ export default function CommonBreadcrumbs({
           </Link>
         ) : (
           <Typography
+            variant="body2"
             className="text-[color:var(--breadcrumbs-text-color)]"
             key={idx}
           >
@@ -81,6 +83,7 @@ export default function CommonBreadcrumbs({
         ),
       )}
       <Typography
+        variant="body2"
         className="text-[color:var(--breadcrumbs-text-color)]"
         aria-current="page"
       >

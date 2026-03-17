@@ -17,6 +17,10 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { useAppDispatchV2 } from "@/app/hooks";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
+import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
@@ -33,6 +37,12 @@ import {
   TIME_FORMAT,
 } from "../shiftPlanUtils";
 
+export type ShiftPlanRecordMeta = {
+  id: string;
+  version?: number | null;
+  updatedAt?: string | null;
+};
+
 type ShiftPlanDataState = {
   selectedYear: number;
   currentRows: ShiftPlanRow[];
@@ -41,7 +51,7 @@ type ShiftPlanDataState = {
   isFetchingYear: boolean;
   isSaving: boolean;
   setIsSaving: (value: boolean | ((prev: boolean) => boolean)) => void;
-  yearRecordIds: Record<number, string>;
+  yearRecordIds: Record<number, ShiftPlanRecordMeta>;
   lastAutoSaveTime: string | null;
   handleYearChange: (delta: number) => void;
   handleFieldChange: (month: number, field: EditableField, value: string) => void;
@@ -55,7 +65,7 @@ type ShiftPlanDataState = {
   performSave: (
     rows: ShiftPlanRow[],
     year: number,
-    recordIds: Record<number, string>,
+    recordIds: Record<number, ShiftPlanRecordMeta>,
     showNotification?: boolean,
   ) => Promise<boolean>;
 };
@@ -72,7 +82,9 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
   const [isPending, startTransition] = useTransition();
   const [isFetchingYear, setIsFetchingYear] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [yearRecordIds, setYearRecordIds] = useState<Record<number, string>>(
+  const [yearRecordIds, setYearRecordIds] = useState<
+    Record<number, ShiftPlanRecordMeta>
+  >(
     {},
   );
   const [lastAutoSaveTime, setLastAutoSaveTime] = useState<string | null>(null);
@@ -139,7 +151,11 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
           }));
           setYearRecordIds((prev) => ({
             ...prev,
-            [selectedYear]: record.id,
+            [selectedYear]: {
+              id: record.id,
+              version: record.version,
+              updatedAt: record.updatedAt,
+            },
           }));
         } else {
           setYearRecordIds((prev) => {
@@ -254,21 +270,26 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
     async (
       rows: ShiftPlanRow[],
       year: number,
-      recordIds: Record<number, string>,
+      recordIds: Record<number, ShiftPlanRecordMeta>,
       showNotification = true,
     ) => {
       try {
         const plansInput = convertRowsToPlanInput(rows);
-        const existingId = recordIds[year];
-        if (existingId) {
+        const existingRecord = recordIds[year];
+        if (existingRecord) {
           await graphqlClient.graphql({
             query: updateShiftPlanYear,
             variables: {
               input: {
-                id: existingId,
+                id: existingRecord.id,
                 targetYear: year,
                 plans: plansInput,
+                version: getNextVersion(existingRecord.version),
               },
+              condition: buildVersionOrUpdatedAtCondition(
+                existingRecord.version,
+                existingRecord.updatedAt,
+              ),
             } as UpdateShiftPlanYearMutationVariables,
             authMode: "userPool",
           });
@@ -279,14 +300,22 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
               input: {
                 targetYear: year,
                 plans: plansInput,
+                version: 1,
               },
             } as CreateShiftPlanYearMutationVariables,
             authMode: "userPool",
           })) as GraphQLResult<CreateShiftPlanYearMutation>;
 
-          const createdId = response.data?.createShiftPlanYear?.id;
-          if (createdId) {
-            setYearRecordIds((prev) => ({ ...prev, [year]: createdId }));
+          const createdRecord = response.data?.createShiftPlanYear;
+          if (createdRecord?.id) {
+            setYearRecordIds((prev) => ({
+              ...prev,
+              [year]: {
+                id: createdRecord.id,
+                version: createdRecord.version,
+                updatedAt: createdRecord.updatedAt,
+              },
+            }));
           }
         }
 

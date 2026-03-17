@@ -52,6 +52,7 @@ export default function AppConfigUpdateForm(props) {
     overTimeCheckEnabled: false,
     shiftCollaborativeEnabled: false,
     shiftDefaultMode: "",
+    version: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [workStartTime, setWorkStartTime] = React.useState(
@@ -106,6 +107,7 @@ export default function AppConfigUpdateForm(props) {
   const [shiftDefaultMode, setShiftDefaultMode] = React.useState(
     initialValues.shiftDefaultMode
   );
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = appConfigRecord
@@ -132,6 +134,7 @@ export default function AppConfigUpdateForm(props) {
     setOverTimeCheckEnabled(cleanValues.overTimeCheckEnabled);
     setShiftCollaborativeEnabled(cleanValues.shiftCollaborativeEnabled);
     setShiftDefaultMode(cleanValues.shiftDefaultMode);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [appConfigRecord, setAppConfigRecord] =
@@ -173,6 +176,7 @@ export default function AppConfigUpdateForm(props) {
     overTimeCheckEnabled: [],
     shiftCollaborativeEnabled: [],
     shiftDefaultMode: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -221,6 +225,7 @@ export default function AppConfigUpdateForm(props) {
           overTimeCheckEnabled: overTimeCheckEnabled ?? null,
           shiftCollaborativeEnabled: shiftCollaborativeEnabled ?? null,
           shiftDefaultMode: shiftDefaultMode ?? null,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -302,6 +307,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -346,6 +352,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.workStartTime ?? value;
@@ -390,6 +397,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.workEndTime ?? value;
@@ -434,6 +442,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.lunchRestStartTime ?? value;
@@ -480,6 +489,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.lunchRestEndTime ?? value;
@@ -528,6 +538,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.standardWorkHours ?? value;
@@ -574,6 +585,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.amHolidayStartTime ?? value;
@@ -620,6 +632,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.amHolidayEndTime ?? value;
@@ -664,6 +677,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.pmHolidayStartTime ?? value;
@@ -710,6 +724,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.pmHolidayEndTime ?? value;
@@ -754,6 +769,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.specialHolidayEnabled ?? value;
@@ -800,6 +816,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.amPmHolidayEnabled ?? value;
@@ -846,6 +863,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.officeMode ?? value;
@@ -890,6 +908,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.attendanceStatisticsEnabled ?? value;
@@ -939,6 +958,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.workflowNotificationEnabled ?? value;
@@ -988,6 +1008,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.absentEnabled ?? value;
@@ -1032,6 +1053,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.hourlyPaidHolidayEnabled ?? value;
@@ -1081,6 +1103,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.themeColor ?? value;
@@ -1125,6 +1148,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled: value,
               shiftCollaborativeEnabled,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.overTimeCheckEnabled ?? value;
@@ -1171,6 +1195,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled: value,
               shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.shiftCollaborativeEnabled ?? value;
@@ -1220,6 +1245,7 @@ export default function AppConfigUpdateForm(props) {
               overTimeCheckEnabled,
               shiftCollaborativeEnabled,
               shiftDefaultMode: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.shiftDefaultMode ?? value;
@@ -1233,6 +1259,55 @@ export default function AppConfigUpdateForm(props) {
         errorMessage={errors.shiftDefaultMode?.errorMessage}
         hasError={errors.shiftDefaultMode?.hasError}
         {...getOverrideProps(overrides, "shiftDefaultMode")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+              overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

@@ -26,23 +26,27 @@ export default function EventCalendarCreateForm(props) {
     eventDate: "",
     name: "",
     description: "",
+    version: "",
   };
   const [eventDate, setEventDate] = React.useState(initialValues.eventDate);
   const [name, setName] = React.useState(initialValues.name);
   const [description, setDescription] = React.useState(
     initialValues.description
   );
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setEventDate(initialValues.eventDate);
     setName(initialValues.name);
     setDescription(initialValues.description);
+    setVersion(initialValues.version);
     setErrors({});
   };
   const validations = {
     eventDate: [{ type: "Required" }],
     name: [{ type: "Required" }],
     description: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -73,6 +77,7 @@ export default function EventCalendarCreateForm(props) {
           eventDate,
           name,
           description,
+          version,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -138,6 +143,7 @@ export default function EventCalendarCreateForm(props) {
               eventDate: value,
               name,
               description,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.eventDate ?? value;
@@ -164,6 +170,7 @@ export default function EventCalendarCreateForm(props) {
               eventDate,
               name: value,
               description,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -190,6 +197,7 @@ export default function EventCalendarCreateForm(props) {
               eventDate,
               name,
               description: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -203,6 +211,37 @@ export default function EventCalendarCreateForm(props) {
         errorMessage={errors.description?.errorMessage}
         hasError={errors.description?.hasError}
         {...getOverrideProps(overrides, "description")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              eventDate,
+              name,
+              description,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

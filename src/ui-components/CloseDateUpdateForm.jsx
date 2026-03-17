@@ -28,10 +28,12 @@ export default function CloseDateUpdateForm(props) {
     closeDate: "",
     startDate: "",
     endDate: "",
+    version: "",
   };
   const [closeDate, setCloseDate] = React.useState(initialValues.closeDate);
   const [startDate, setStartDate] = React.useState(initialValues.startDate);
   const [endDate, setEndDate] = React.useState(initialValues.endDate);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = closeDateRecord
@@ -40,6 +42,7 @@ export default function CloseDateUpdateForm(props) {
     setCloseDate(cleanValues.closeDate);
     setStartDate(cleanValues.startDate);
     setEndDate(cleanValues.endDate);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [closeDateRecord, setCloseDateRecord] =
@@ -63,6 +66,7 @@ export default function CloseDateUpdateForm(props) {
     closeDate: [{ type: "Required" }],
     startDate: [{ type: "Required" }],
     endDate: [{ type: "Required" }],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -93,6 +97,7 @@ export default function CloseDateUpdateForm(props) {
           closeDate,
           startDate,
           endDate,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -156,6 +161,7 @@ export default function CloseDateUpdateForm(props) {
               closeDate: value,
               startDate,
               endDate,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.closeDate ?? value;
@@ -182,6 +188,7 @@ export default function CloseDateUpdateForm(props) {
               closeDate,
               startDate: value,
               endDate,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.startDate ?? value;
@@ -208,6 +215,7 @@ export default function CloseDateUpdateForm(props) {
               closeDate,
               startDate,
               endDate: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.endDate ?? value;
@@ -221,6 +229,37 @@ export default function CloseDateUpdateForm(props) {
         errorMessage={errors.endDate?.errorMessage}
         hasError={errors.endDate?.hasError}
         {...getOverrideProps(overrides, "endDate")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              closeDate,
+              startDate,
+              endDate,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

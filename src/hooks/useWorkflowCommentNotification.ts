@@ -12,10 +12,10 @@ import { useLocalNotification } from "./useLocalNotification";
 
 const logger = createLogger("useWorkflowCommentNotification");
 
-export const useWorkflowCommentNotification = () => {
+export const useWorkflowCommentNotification = (enabled = true) => {
   const { authStatus, cognitoUser, isCognitoUserRole } =
     useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
+  const isAuthenticated = authStatus === "authenticated" && enabled;
   const { staffs } = useStaffs({ isAuthenticated });
   const { notify, canNotify } = useLocalNotification();
   const notifiedEventIdsRef = useRef<Set<string>>(new Set());
@@ -66,7 +66,7 @@ export const useWorkflowCommentNotification = () => {
   );
 
   useEffect(() => {
-    if (recipientIds.length === 0) {
+    if (!enabled || !canNotify || recipientIds.length === 0) {
       return;
     }
 
@@ -98,9 +98,9 @@ export const useWorkflowCommentNotification = () => {
       );
       unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
-  }, [handleNotification, recipientIds]);
+  }, [enabled, canNotify, handleNotification, recipientIds]);
 
   return {
-    isSubscribed: recipientIds.length > 0,
+    isSubscribed: enabled && canNotify && recipientIds.length > 0,
   };
 };

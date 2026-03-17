@@ -8,12 +8,17 @@ import {
   CreateAppConfigInput,
   CreateAppConfigMutation,
   ListAppConfigsQuery,
+  ModelAppConfigConditionInput,
   UpdateAppConfigInput,
   UpdateAppConfigMutation,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 
 export class AppConfigDataManager {
   async fetch(name: string = "default") {
@@ -63,9 +68,19 @@ export class AppConfigDataManager {
   }
 
   async update(input: UpdateAppConfigInput) {
+    const current = await this.fetch(input.name ?? "default");
+    const condition: ModelAppConfigConditionInput | undefined =
+      buildVersionOrUpdatedAtCondition(current?.version, current?.updatedAt);
+
     const response = (await graphqlClient.graphql({
       query: updateAppConfig,
-      variables: { input },
+      variables: {
+        input: {
+          ...input,
+          version: getNextVersion(current?.version),
+        },
+        condition,
+      },
       authMode: "apiKey",
     })) as GraphQLResult<UpdateAppConfigMutation>;
 

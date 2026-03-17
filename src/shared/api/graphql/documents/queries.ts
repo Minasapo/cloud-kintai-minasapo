@@ -20,6 +20,7 @@ export const getCheckForUpdate = /* GraphQL */ `query GetCheckForUpdate($id: ID!
   getCheckForUpdate(id: $id) {
     id
     deployUuid
+    version
     createdAt
     updatedAt
     __typename
@@ -38,6 +39,7 @@ export const listCheckForUpdates = /* GraphQL */ `query ListCheckForUpdates(
     items {
       id
       deployUuid
+      version
       createdAt
       updatedAt
       __typename
@@ -114,6 +116,7 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     overTimeCheckEnabled
     shiftCollaborativeEnabled
     shiftDefaultMode
+    version
     createdAt
     updatedAt
     __typename
@@ -192,6 +195,7 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       overTimeCheckEnabled
       shiftCollaborativeEnabled
       shiftDefaultMode
+      version
       createdAt
       updatedAt
       __typename
@@ -237,6 +241,7 @@ export const getStaff = /* GraphQL */ `query GetStaff($id: ID!) {
     approverMultipleMode
     shiftGroup
     attendanceManagementEnabled
+    version
     createdAt
     updatedAt
     __typename
@@ -281,6 +286,7 @@ export const listStaff = /* GraphQL */ `query ListStaff(
       approverMultipleMode
       shiftGroup
       attendanceManagementEnabled
+      version
       createdAt
       updatedAt
       __typename
@@ -338,6 +344,7 @@ export const staffByCognitoUserId = /* GraphQL */ `query StaffByCognitoUserId(
       approverMultipleMode
       shiftGroup
       attendanceManagementEnabled
+      version
       createdAt
       updatedAt
       __typename
@@ -355,6 +362,7 @@ export const getHolidayCalendar = /* GraphQL */ `query GetHolidayCalendar($id: I
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -374,6 +382,7 @@ export const listHolidayCalendars = /* GraphQL */ `query ListHolidayCalendars(
       id
       holidayDate
       name
+      version
       createdAt
       updatedAt
       __typename
@@ -391,6 +400,7 @@ export const getCompanyHolidayCalendar = /* GraphQL */ `query GetCompanyHolidayC
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -414,6 +424,7 @@ export const listCompanyHolidayCalendars = /* GraphQL */ `query ListCompanyHolid
       id
       holidayDate
       name
+      version
       createdAt
       updatedAt
       __typename
@@ -432,6 +443,7 @@ export const getEventCalendar = /* GraphQL */ `query GetEventCalendar($id: ID!) 
     eventDate
     name
     description
+    version
     createdAt
     updatedAt
     __typename
@@ -452,6 +464,7 @@ export const listEventCalendars = /* GraphQL */ `query ListEventCalendars(
       eventDate
       name
       description
+      version
       createdAt
       updatedAt
       __typename
@@ -470,6 +483,7 @@ export const getCloseDate = /* GraphQL */ `query GetCloseDate($id: ID!) {
     closeDate
     startDate
     endDate
+    version
     createdAt
     updatedAt
     __typename
@@ -490,6 +504,7 @@ export const listCloseDates = /* GraphQL */ `query ListCloseDates(
       closeDate
       startDate
       endDate
+      version
       createdAt
       updatedAt
       __typename
@@ -1082,6 +1097,7 @@ export const getShiftPlanYear = /* GraphQL */ `query GetShiftPlanYear($id: ID!) 
     notes
     createdBy
     updatedBy
+    version
     createdAt
     updatedAt
     __typename
@@ -1111,6 +1127,7 @@ export const listShiftPlanYears = /* GraphQL */ `query ListShiftPlanYears(
       notes
       createdBy
       updatedBy
+      version
       createdAt
       updatedAt
       __typename
@@ -1153,6 +1170,7 @@ export const shiftPlanYearByTargetYear = /* GraphQL */ `query ShiftPlanYearByTar
       notes
       createdBy
       updatedBy
+      version
       createdAt
       updatedAt
       __typename
@@ -1205,6 +1223,7 @@ export const getWorkflow = /* GraphQL */ `query GetWorkflow($id: ID!) {
       createdAt
       __typename
     }
+    version
     createdAt
     updatedAt
     __typename
@@ -1259,6 +1278,7 @@ export const listWorkflows = /* GraphQL */ `query ListWorkflows(
         createdAt
         __typename
       }
+      version
       createdAt
       updatedAt
       __typename
@@ -1324,6 +1344,7 @@ export const workflowsByStaffId = /* GraphQL */ `query WorkflowsByStaffId(
         createdAt
         __typename
       }
+      version
       createdAt
       updatedAt
       __typename
@@ -1343,6 +1364,7 @@ export const getWorkflowTemplate = /* GraphQL */ `query GetWorkflowTemplate($id:
     title
     content
     organizationId
+    version
     createdAt
     updatedAt
     __typename
@@ -1364,6 +1386,7 @@ export const listWorkflowTemplates = /* GraphQL */ `query ListWorkflowTemplates(
       title
       content
       organizationId
+      version
       createdAt
       updatedAt
       __typename
@@ -1396,6 +1419,7 @@ export const workflowTemplatesByOrganizationId = /* GraphQL */ `query WorkflowTe
       title
       content
       organizationId
+      version
       createdAt
       updatedAt
       __typename
@@ -1421,6 +1445,7 @@ export const getWorkflowNotificationEvent = /* GraphQL */ `query GetWorkflowNoti
     isRead
     readAt
     eventAt
+    version
     createdAt
     updatedAt
     __typename
@@ -1452,6 +1477,7 @@ export const listWorkflowNotificationEvents = /* GraphQL */ `query ListWorkflowN
       isRead
       readAt
       eventAt
+      version
       createdAt
       updatedAt
       __typename
@@ -1492,6 +1518,7 @@ export const workflowNotificationEventsByRecipient = /* GraphQL */ `query Workfl
       isRead
       readAt
       eventAt
+      version
       createdAt
       updatedAt
       __typename
@@ -1532,6 +1559,7 @@ export const workflowNotificationEventsByWorkflow = /* GraphQL */ `query Workflo
       isRead
       readAt
       eventAt
+      version
       createdAt
       updatedAt
       __typename
@@ -1557,6 +1585,7 @@ export const getOperationLog = /* GraphQL */ `query GetOperationLog($id: ID!) {
     userAgent
     metadata
     severity
+    version
     createdAt
     updatedAt
     __typename
@@ -1584,6 +1613,7 @@ export const listOperationLogs = /* GraphQL */ `query ListOperationLogs(
       userAgent
       metadata
       severity
+      version
       createdAt
       updatedAt
       __typename
@@ -1624,6 +1654,7 @@ export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffI
       userAgent
       metadata
       severity
+      version
       createdAt
       updatedAt
       __typename
@@ -1653,6 +1684,7 @@ export const getAuditLog = /* GraphQL */ `query GetAuditLog($id: ID!) {
     createdAt
     ttl
     reason
+    version
     updatedAt
     __typename
   }
@@ -1683,6 +1715,7 @@ export const listAuditLogs = /* GraphQL */ `query ListAuditLogs(
       createdAt
       ttl
       reason
+      version
       updatedAt
       __typename
     }
@@ -1717,6 +1750,7 @@ export const getDailyReport = /* GraphQL */ `query GetDailyReport($id: ID!) {
       createdAt
       __typename
     }
+    version
     createdAt
     __typename
   }
@@ -1753,6 +1787,7 @@ export const listDailyReports = /* GraphQL */ `query ListDailyReports(
         createdAt
         __typename
       }
+      version
       createdAt
       __typename
     }
@@ -1802,6 +1837,7 @@ export const dailyReportsByStaffId = /* GraphQL */ `query DailyReportsByStaffId(
         createdAt
         __typename
       }
+      version
       createdAt
       __typename
     }

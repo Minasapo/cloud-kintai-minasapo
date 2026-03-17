@@ -25,11 +25,13 @@ export declare type EventCalendarCreateFormInputValues = {
     eventDate?: string;
     name?: string;
     description?: string;
+    version?: number;
 };
 export declare type EventCalendarCreateFormValidationValues = {
     eventDate?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
     description?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type EventCalendarCreateFormOverridesProps = {
@@ -37,6 +39,7 @@ export declare type EventCalendarCreateFormOverridesProps = {
     eventDate?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     description?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type EventCalendarCreateFormProps = React.PropsWithChildren<{
     overrides?: EventCalendarCreateFormOverridesProps | undefined | null;

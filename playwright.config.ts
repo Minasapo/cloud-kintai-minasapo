@@ -14,7 +14,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 const playwrightBaseUrl =
-  process.env.PLAYWRIGHT_BASE_URL || "http://localhost:4173";
+  process.env.PLAYWRIGHT_BASE_URL || "http://localhost:5173";
 
 const useLocalWebServer = !process.env.PLAYWRIGHT_BASE_URL;
 
@@ -50,8 +50,8 @@ export default defineConfig({
   /* Start dev server before running tests */
   webServer: useLocalWebServer
     ? {
-        command: "npm start -- --port 4173",
-        url: "http://localhost:4173",
+        command: "npm start -- --port 5173",
+        url: "http://localhost:5173",
         reuseExistingServer: false,
         env: {
           VITE_CHECKER_OVERLAY: "false",

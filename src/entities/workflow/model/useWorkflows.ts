@@ -1,4 +1,5 @@
 import {
+  type UpdateWorkflowPayload,
   useCreateWorkflowMutation,
   useDeleteWorkflowMutation,
   useGetWorkflowsQuery,
@@ -10,6 +11,11 @@ import {
   Workflow as APIWorkflow,
 } from "@shared/api/graphql/types";
 import { useCallback } from "react";
+
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 
 const extractErrorMessage = (error: unknown) => {
   if (!error) {
@@ -94,10 +100,20 @@ export default function useWorkflows({ isAuthenticated }: UseWorkflowsParams) {
       if (!isAuthenticated) {
         throw new Error("User is not authenticated");
       }
-      const updated = await updateWorkflowMutation(input).unwrap();
+      const currentWorkflow = workflows?.find((workflow) => workflow.id === input.id);
+      const updated = await updateWorkflowMutation({
+        input: {
+          ...input,
+          version: getNextVersion(currentWorkflow?.version),
+        },
+        condition: buildVersionOrUpdatedAtCondition(
+          currentWorkflow?.version,
+          currentWorkflow?.updatedAt,
+        ),
+      } satisfies UpdateWorkflowPayload).unwrap();
       return updated;
     },
-    [isAuthenticated, updateWorkflowMutation]
+    [isAuthenticated, updateWorkflowMutation, workflows]
   );
 
   const remove = useCallback(

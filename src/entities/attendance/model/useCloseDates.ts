@@ -7,6 +7,11 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
+
 import createCloseDateData from "./closeDates/createCloseDateData";
 import deleteCloseDateData from "./closeDates/deleteCloseDateData";
 import fetchCloseDates from "./closeDates/fetchCloseDates";
@@ -44,7 +49,17 @@ export default function useCloseDates() {
       });
 
   const updateCloseDate = async (input: UpdateCloseDateInput) => {
-    const updated = await updateCloseDateData(input);
+    const currentCloseDate = closeDates.find((item) => item.id === input.id);
+    const updated = await updateCloseDateData({
+      input: {
+        ...input,
+        version: getNextVersion(currentCloseDate?.version),
+      },
+      condition: buildVersionOrUpdatedAtCondition(
+        currentCloseDate?.version,
+        currentCloseDate?.updatedAt,
+      ),
+    });
 
     // Replace the target term with the updated one first
     const afterPrimaryUpdate = closeDates.map((item) =>
@@ -70,10 +85,17 @@ export default function useCloseDates() {
       if (gapDays > 0) {
         try {
           const adjustedNext = await updateCloseDateData({
-            id: nextTerm.id,
-            closeDate: nextTerm.closeDate,
-            startDate: desiredNextStart.toISOString(),
-            endDate: nextTerm.endDate,
+            input: {
+              id: nextTerm.id,
+              closeDate: nextTerm.closeDate,
+              startDate: desiredNextStart.toISOString(),
+              endDate: nextTerm.endDate,
+              version: getNextVersion(nextTerm.version),
+            },
+            condition: buildVersionOrUpdatedAtCondition(
+              nextTerm.version,
+              nextTerm.updatedAt,
+            ),
           });
 
           // Slide the next term's start date forward to fill the gap

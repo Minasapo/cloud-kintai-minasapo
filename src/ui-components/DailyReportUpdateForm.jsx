@@ -37,6 +37,7 @@ export default function DailyReportUpdateForm(props) {
     content: "",
     status: "",
     updatedAt: "",
+    version: "",
   };
   const [staffId, setStaffId] = React.useState(initialValues.staffId);
   const [reportDate, setReportDate] = React.useState(initialValues.reportDate);
@@ -44,6 +45,7 @@ export default function DailyReportUpdateForm(props) {
   const [content, setContent] = React.useState(initialValues.content);
   const [status, setStatus] = React.useState(initialValues.status);
   const [updatedAt, setUpdatedAt] = React.useState(initialValues.updatedAt);
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = dailyReportRecord
@@ -55,6 +57,7 @@ export default function DailyReportUpdateForm(props) {
     setContent(cleanValues.content);
     setStatus(cleanValues.status);
     setUpdatedAt(cleanValues.updatedAt);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [dailyReportRecord, setDailyReportRecord] =
@@ -81,6 +84,7 @@ export default function DailyReportUpdateForm(props) {
     content: [],
     status: [{ type: "Required" }],
     updatedAt: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -114,6 +118,7 @@ export default function DailyReportUpdateForm(props) {
           content: content ?? null,
           status,
           updatedAt: updatedAt ?? null,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -180,6 +185,7 @@ export default function DailyReportUpdateForm(props) {
               content,
               status,
               updatedAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.staffId ?? value;
@@ -209,6 +215,7 @@ export default function DailyReportUpdateForm(props) {
               content,
               status,
               updatedAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.reportDate ?? value;
@@ -238,6 +245,7 @@ export default function DailyReportUpdateForm(props) {
               content,
               status,
               updatedAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.title ?? value;
@@ -267,6 +275,7 @@ export default function DailyReportUpdateForm(props) {
               content: value,
               status,
               updatedAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.content ?? value;
@@ -296,6 +305,7 @@ export default function DailyReportUpdateForm(props) {
               content,
               status: value,
               updatedAt,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -341,6 +351,7 @@ export default function DailyReportUpdateForm(props) {
               content,
               status,
               updatedAt: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.updatedAt ?? value;
@@ -354,6 +365,40 @@ export default function DailyReportUpdateForm(props) {
         errorMessage={errors.updatedAt?.errorMessage}
         hasError={errors.updatedAt?.hasError}
         {...getOverrideProps(overrides, "updatedAt")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              staffId,
+              reportDate,
+              title,
+              content,
+              status,
+              updatedAt,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

@@ -40,6 +40,7 @@ export declare type StaffCreateFormInputValues = {
     approverMultipleMode?: string;
     shiftGroup?: string;
     attendanceManagementEnabled?: boolean;
+    version?: number;
 };
 export declare type StaffCreateFormValidationValues = {
     cognitoUserId?: ValidationFunction<string>;
@@ -60,6 +61,7 @@ export declare type StaffCreateFormValidationValues = {
     approverMultipleMode?: ValidationFunction<string>;
     shiftGroup?: ValidationFunction<string>;
     attendanceManagementEnabled?: ValidationFunction<boolean>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type StaffCreateFormOverridesProps = {
@@ -82,6 +84,7 @@ export declare type StaffCreateFormOverridesProps = {
     approverMultipleMode?: PrimitiveOverrideProps<SelectFieldProps>;
     shiftGroup?: PrimitiveOverrideProps<TextFieldProps>;
     attendanceManagementEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type StaffCreateFormProps = React.PropsWithChildren<{
     overrides?: StaffCreateFormOverridesProps | undefined | null;

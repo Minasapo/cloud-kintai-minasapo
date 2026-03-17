@@ -32,6 +32,7 @@ export type AdminDailyReport = {
   content: string;
   status: ReportStatus;
   updatedAt: string;
+  version?: number | null;
   createdAt?: string | null;
   reactions: ReportReaction[];
   comments: AdminComment[];
@@ -102,6 +103,7 @@ export const mapDailyReport = (
   content: record.content ?? "",
   status: record.status,
   updatedAt: record.updatedAt ?? record.createdAt ?? "",
+  version: record.version,
   createdAt: record.createdAt ?? null,
   reactions: aggregateReactions(record.reactions),
   comments: mapComments(record.comments),
