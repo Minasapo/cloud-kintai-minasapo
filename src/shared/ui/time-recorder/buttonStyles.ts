@@ -64,7 +64,7 @@ export const REST_BUTTON_CLASS_NAME =
   "appearance-none border-solid shadow-none inline-flex w-full max-w-[var(--rest-button-max-width)] items-center justify-center rounded-md border border-transparent px-4 py-2 font-medium transition-[color,background-color,border-color] duration-150 ease-in-out disabled:cursor-not-allowed disabled:border-transparent disabled:bg-[var(--rest-button-disabled-bg)] disabled:text-[color:var(--rest-button-color)]";
 
 export const ACTION_BUTTON_LABEL_CLASS_NAME =
-  "whitespace-pre-line leading-[1.2] sm:whitespace-nowrap";
+  "whitespace-pre-line leading-[1.2]";
 
 export const TIME_RECORDER_BUTTON_PALETTES = {
   clockIn: {
