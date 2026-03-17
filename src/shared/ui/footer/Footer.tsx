@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import type { CSSProperties } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -22,25 +22,23 @@ const Footer = ({ themeColor }: FooterProps) => (
   <footer
     role="contentinfo"
     className="border-t"
-    style={{
-      backgroundColor: themeColor ?? FOOTER_BACKGROUND,
-      color: FOOTER_TEXT,
-      borderColor: FOOTER_DIVIDER,
-    }}
+    style={
+      {
+        "--footer-background": themeColor ?? FOOTER_BACKGROUND,
+        "--footer-text": FOOTER_TEXT,
+        "--footer-divider": FOOTER_DIVIDER,
+        "--footer-padding-x": FOOTER_PADDING_X,
+        "--footer-padding-y": FOOTER_PADDING_Y,
+        backgroundColor: "var(--footer-background)",
+        color: "var(--footer-text)",
+        borderColor: "var(--footer-divider)",
+      } as CSSProperties & Record<`--${string}`, string>
+    }
   >
-    <div
-      className="text-center"
-      style={{
-        paddingTop: FOOTER_PADDING_Y,
-        paddingBottom: FOOTER_PADDING_Y,
-        paddingLeft: FOOTER_PADDING_X,
-        paddingRight: FOOTER_PADDING_X,
-        textAlign: "center",
-      }}
-    >
-      <Typography variant="body1" align="center" className="text-center font-medium">
+    <div className="px-[var(--footer-padding-x)] py-[var(--footer-padding-y)] text-center">
+      <p className="text-center text-base font-medium leading-6">
         © 2026 Virtual Tech Japan Inc.
-      </Typography>
+      </p>
     </div>
   </footer>
 );
