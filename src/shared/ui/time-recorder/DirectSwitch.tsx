@@ -1,38 +1,44 @@
-import { styled, Switch } from "@mui/material";
+import type { ChangeEventHandler, CSSProperties, InputHTMLAttributes } from "react";
 
-import { MARGINS } from "@/shared/config/uiDimensions";
+type DirectSwitchProps = {
+  checked?: boolean;
+  disabled?: boolean;
+  onChange?: ChangeEventHandler<HTMLInputElement>;
+  inputProps?: InputHTMLAttributes<HTMLInputElement>;
+};
 
-const DirectSwitch = styled(Switch)(({ theme }) => ({
-  padding: MARGINS.PADDING_STANDARD,
-  "& .MuiSwitch-track": {
-    borderRadius: 22 / 2,
-    "&::before, &::after": {
-      content: '""',
-      position: "absolute",
-      top: "50%",
-      transform: "translateY(-50%)",
-      width: 16,
-      height: 16,
-    },
-    "&::before": {
-      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-        theme.palette.getContrastText(theme.palette.primary.main)
-      )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
-      left: 12,
-    },
-    "&::after": {
-      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-        theme.palette.getContrastText(theme.palette.primary.main)
-      )}" d="M19,13H5V11H19V13Z" /></svg>')`,
-      right: 12,
-    },
-  },
-  "& .MuiSwitch-thumb": {
-    boxShadow: "none",
-    width: 16,
-    height: 16,
-    margin: MARGINS.FORM_MARGIN,
-  },
-}));
+const DirectSwitch = ({
+  checked = false,
+  disabled = false,
+  onChange,
+  inputProps,
+}: DirectSwitchProps) => {
+  const { className, ...restInputProps } = inputProps ?? {};
+  const trackClassName = checked ? "bg-emerald-600" : "bg-slate-300";
+  const thumbStyle: CSSProperties = {
+    left: checked ? "calc(100% - 1.75rem)" : "0.25rem",
+  };
+
+  return (
+    <span className="relative inline-flex h-8 w-14 shrink-0 items-center">
+      <input
+        type="checkbox"
+        role="switch"
+        className={`peer sr-only ${className ?? ""}`.trim()}
+        checked={checked}
+        disabled={disabled}
+        onChange={onChange}
+        {...restInputProps}
+      />
+      <span
+        className={`pointer-events-none absolute inset-0 rounded-full transition-colors duration-200 ${trackClassName} ${disabled ? "cursor-not-allowed opacity-60" : ""}`.trim()}
+      />
+      <span
+        className="pointer-events-none absolute top-1 h-6 w-6 rounded-full bg-white shadow-sm transition-[left] duration-200"
+        style={thumbStyle}
+      />
+    </span>
+  );
+};
 
 export default DirectSwitch;

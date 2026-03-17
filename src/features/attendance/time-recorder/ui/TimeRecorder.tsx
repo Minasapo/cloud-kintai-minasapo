@@ -10,15 +10,6 @@ import {
 } from "@entities/calendar/api/calendarApi";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  LinearProgress,
-} from "@mui/material";
-import {
   Attendance,
   CreateAttendanceInput,
   OnUpdateAttendanceSubscription,
@@ -620,7 +611,12 @@ export default function TimeRecorder(): JSX.Element {
         className="mx-auto box-border w-full max-w-[var(--time-recorder-width-md)] px-[var(--time-recorder-margin-xs)] md:px-0"
         style={timeRecorderShellStyles}
       >
-        <LinearProgress />
+        <div
+          className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200"
+          aria-label="勤怠打刻を読み込み中"
+        >
+          <div className="h-full w-1/3 animate-pulse rounded-full bg-emerald-600" />
+        </div>
       </div>
     );
   }
@@ -671,7 +667,8 @@ export default function TimeRecorder(): JSX.Element {
           <div className="col-span-2">
             <label className="inline-flex items-center gap-2">
               <DirectSwitch
-                onChange={() => setDirectMode(!directMode)}
+                checked={directMode}
+                onChange={(event) => setDirectMode(event.target.checked)}
                 inputProps={
                   {
                     "data-testid": "direct-mode-switch",
@@ -776,43 +773,54 @@ function TimeElapsedErrorDialog({
   };
 
   return (
-    <Dialog
-      open={open}
+    <div
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
+      aria-modal="true"
+      role="dialog"
       data-testid="time-elapsed-error-dialog"
+      className={`${open ? "flex" : "hidden"} fixed inset-0 z-50 items-center justify-center bg-slate-950/50 p-4`}
     >
-      <DialogTitle id="alert-dialog-title">
-        <span data-testid="time-elapsed-error-dialog-title-text">
-          1週間以上経過した打刻エラーがあります
-        </span>
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-          <span data-testid="time-elapsed-error-dialog-description-text">
-            1週間以上経過した打刻エラーがあります。
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+        <h2
+          id="alert-dialog-title"
+          className="m-0 text-lg font-semibold text-slate-900"
+        >
+          <span data-testid="time-elapsed-error-dialog-title-text">
+            1週間以上経過した打刻エラーがあります
           </span>
-          <br />
-          勤怠一覧を確認して打刻修正を申請してください。
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={handleClose}
-          data-testid="time-elapsed-error-dialog-later-btn"
-        >
-          あとで
-        </Button>
-        <Button
-          variant="contained"
-          component={RouterLink}
-          to="/attendance/list"
-          onClick={handleClose}
-          data-testid="time-elapsed-error-dialog-confirm-btn"
-        >
-          確認する
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </h2>
+        <div className="mt-4">
+          <p
+            id="alert-dialog-description"
+            className="m-0 text-sm leading-6 text-slate-700"
+          >
+            <span data-testid="time-elapsed-error-dialog-description-text">
+              1週間以上経過した打刻エラーがあります。
+            </span>
+            <br />
+            勤怠一覧を確認して打刻修正を申請してください。
+          </p>
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleClose}
+            data-testid="time-elapsed-error-dialog-later-btn"
+            className="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            あとで
+          </button>
+          <RouterLink
+            to="/attendance/list"
+            onClick={handleClose}
+            data-testid="time-elapsed-error-dialog-confirm-btn"
+            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+          >
+            確認する
+          </RouterLink>
+        </div>
+      </div>
+    </div>
   );
 }
