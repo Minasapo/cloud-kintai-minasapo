@@ -815,7 +815,7 @@ function TimeElapsedErrorDialog({
             to="/attendance/list"
             onClick={handleClose}
             data-testid="time-elapsed-error-dialog-confirm-btn"
-            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white no-underline transition-colors hover:bg-emerald-700 hover:no-underline"
           >
             確認する
           </RouterLink>
