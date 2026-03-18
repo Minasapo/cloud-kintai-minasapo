@@ -47,14 +47,14 @@ export default function NotFound() {
             <button
               type="button"
               onClick={handleGoHome}
-              className="min-w-40 rounded-md bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:brightness-95"
+              className="min-w-40 appearance-none rounded-md border-0 bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
             >
               ホームに戻る
             </button>
             <button
               type="button"
               onClick={handleGoBack}
-              className="min-w-40 rounded-md border border-primary bg-transparent px-6 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+              className="min-w-40 appearance-none rounded-md border border-primary bg-transparent px-6 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
             >
               前のページに戻る
             </button>

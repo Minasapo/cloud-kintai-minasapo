@@ -41,7 +41,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={signOut}
-                  className="inline-flex w-fit items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+                  className="inline-flex w-fit appearance-none items-center justify-center rounded-md border-0 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
                 >
                   ログアウト
                 </button>

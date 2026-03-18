@@ -9,7 +9,7 @@ export type OfficeQrRegisterPanelProps = {
 };
 
 const ACTION_BUTTON_BASE_CLASS_NAME =
-  "mt-2 inline-flex h-20 w-full max-w-[350px] items-center justify-center rounded-xl px-6 text-2xl font-semibold text-white transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2";
+  "mt-2 inline-flex h-20 w-full max-w-[350px] appearance-none items-center justify-center rounded-xl border-0 px-6 text-2xl font-semibold text-white transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2";
 
 export function OfficeQrRegisterPanel({
   isOfficeModeEnabled,

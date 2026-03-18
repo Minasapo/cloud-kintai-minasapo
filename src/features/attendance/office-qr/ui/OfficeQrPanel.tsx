@@ -68,7 +68,7 @@ export function OfficeQrPanel({
         <button
           type="button"
           onClick={onModeChange}
-          className={`inline-flex items-center justify-center rounded-lg px-5 py-3 text-lg font-semibold text-white transition-colors hover:brightness-95 ${isRegisterMode ? "bg-emerald-600" : "bg-slate-700"}`}
+          className={`inline-flex appearance-none items-center justify-center rounded-lg border-0 px-5 py-3 text-lg font-semibold text-white transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 ${isRegisterMode ? "bg-emerald-600" : "bg-slate-700"}`}
           data-testid="office-qr-mode-toggle"
         >
           {isRegisterMode ? "出勤モード" : "退勤モード"}
@@ -128,7 +128,7 @@ export function OfficeQrPanel({
               type="button"
               onClick={onCopyUrl}
               data-testid="office-qr-copy-button"
-              className="inline-flex items-center justify-center rounded-md border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+              className="inline-flex appearance-none items-center justify-center rounded-md border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
             >
               URLをコピー
             </button>
@@ -137,7 +137,7 @@ export function OfficeQrPanel({
             type="button"
             onClick={onManualRefresh}
             data-testid="office-qr-refresh-button"
-            className="inline-flex items-center justify-center rounded-md border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+            className="inline-flex appearance-none items-center justify-center rounded-md border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
           >
             QRコードを手動更新
           </button>
