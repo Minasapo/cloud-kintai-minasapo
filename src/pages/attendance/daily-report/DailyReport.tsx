@@ -1084,7 +1084,7 @@ export default function DailyReport() {
                       </div>
                     </VStack>
                   ) : isCreateMode ? (
-                    <VStack className="gap-4">
+                    <VStack className="gap-6">
                       <div>
                         <p className="text-sm font-medium text-slate-500">
                           新しい日報を登録
@@ -1098,7 +1098,7 @@ export default function DailyReport() {
                       </AlertBox>
                       <DividerLine />
                       <form onSubmit={(event) => event.preventDefault()}>
-                        <VStack className="gap-6">
+                        <VStack className="gap-8">
                           <DailyReportFormFields
                             form={createForm}
                             onChange={handleCreateChange}
@@ -1109,7 +1109,7 @@ export default function DailyReport() {
                               最終保存: {createFormLastSavedAt}
                             </p>
                           )}
-                          <div className="flex flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center">
+                          <div className="flex flex-col items-stretch justify-end gap-3 sm:flex-row sm:items-center">
                             <ActionButton
                               tone="ghost"
                               onClick={() => {
