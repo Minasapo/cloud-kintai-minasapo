@@ -1,27 +1,7 @@
-import AddIcon from "@mui/icons-material/Add";
-import ClearIcon from "@mui/icons-material/Clear";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Accordion from "@mui/material/Accordion";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import ButtonBase from "@mui/material/ButtonBase";
-import CircularProgress from "@mui/material/CircularProgress";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import { useTheme } from "@mui/material/styles";
-import Table from "@mui/material/Table";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import { WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
@@ -44,17 +24,8 @@ const LOADING_SECTION_MIN_HEIGHT = `calc(${designTokenVar(
   "spacing.xxl",
   "32px"
 )} * 7.5)`;
-const EMPTY_STATE_PADDING_Y = designTokenVar("spacing.lg", "16px");
 const MOBILE_CARD_GAP = designTokenVar("spacing.md", "12px");
-const MOBILE_CARD_PADDING = designTokenVar("spacing.lg", "16px");
-const MOBILE_CARD_RADIUS = designTokenVar("radius.lg", "16px");
 const MOBILE_META_GAP = designTokenVar("spacing.xs", "4px");
-const MOBILE_ACTION_GAP = designTokenVar("spacing.sm", "8px");
-const MOBILE_EMPTY_PADDING = designTokenVar("spacing.xl", "24px");
-const MOBILE_FILTER_PADDING_X = designTokenVar("spacing.md", "12px");
-const MOBILE_FILTER_PADDING_Y = designTokenVar("spacing.sm", "8px");
-const MOBILE_FILTER_BADGE_PADDING = designTokenVar("spacing.xs", "4px");
-const MOBILE_FILTER_BADGE_RADIUS = designTokenVar("radius.md", "12px");
 
 const formatWorkflowDateValue = (value?: string) => value ?? "-";
 
@@ -74,10 +45,52 @@ function Surface({
   );
 }
 
+function Spinner({ size = "md" }: { size?: "sm" | "md" }) {
+  const className = size === "sm" ? "h-4 w-4 border-2" : "h-6 w-6 border-[3px]";
+  return (
+    <span
+      className={`inline-block animate-spin rounded-full border-emerald-600 border-t-transparent ${className}`}
+      aria-hidden="true"
+    />
+  );
+}
+
+function InfoCard({
+  tone = "info",
+  children,
+}: {
+  tone?: "info" | "error";
+  children: React.ReactNode;
+}) {
+  const className =
+    tone === "error"
+      ? "border-rose-200 bg-rose-50 text-rose-900"
+      : "border-sky-200 bg-sky-50 text-sky-900";
+
+  return (
+    <div className={`rounded-[18px] border px-4 py-3 text-sm leading-6 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
 export default function WorkflowListPage() {
-  const theme = useTheme();
-  const isCompact = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
+  const [isCompact, setIsCompact] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const sync = (event?: MediaQueryListEvent) => {
+      setIsCompact(event ? event.matches : mediaQuery.matches);
+    };
+
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
 
   const {
     isAuthenticated,
@@ -130,7 +143,7 @@ export default function WorkflowListPage() {
             className="flex items-center justify-center"
             style={{ minHeight: LOADING_SECTION_MIN_HEIGHT }}
           >
-            <CircularProgress />
+            <Spinner />
           </DashboardInnerSurface>
         </PageSection>
       </Page>
@@ -151,20 +164,17 @@ export default function WorkflowListPage() {
                   申請の一覧、状態確認、新規作成をひとつの画面で進められます。現在の申請状況を見ながら、必要な絞り込みや作成にすぐ移れます。
                 </p>
               </div>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
+              <button
+                type="button"
                 onClick={() => navigate("/workflow/new")}
-                fullWidth={isCompact}
-                sx={{
-                  width: { xs: "100%", lg: "auto" },
-                  minWidth: { lg: "fit-content" },
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                }}
+                className={[
+                  "inline-flex items-center justify-center gap-2 rounded-[1rem] bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_-24px_rgba(5,150,105,0.75)] transition hover:bg-emerald-700",
+                  isCompact ? "w-full" : "w-auto whitespace-nowrap",
+                ].join(" ")}
               >
+                <span className="text-lg leading-none">+</span>
                 {isCompact ? "新規" : "新規作成"}
-              </Button>
+              </button>
             </div>
           </section>
 
@@ -185,7 +195,7 @@ export default function WorkflowListPage() {
                 </Surface>
               </div>
 
-              {error && <Alert severity="error">{error}</Alert>}
+              {error && <InfoCard tone="error">{error}</InfoCard>}
 
               <Surface>
                 <div className="flex flex-col gap-4">
@@ -197,228 +207,134 @@ export default function WorkflowListPage() {
                       </p>
                     </div>
                     {anyFilterActive ? (
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<ClearIcon fontSize="small" />}
+                      <button
+                        type="button"
                         onClick={() => {
                           clearFilters();
                           filterRowRef.current?.closeAllPopovers();
+                          setMobileFiltersOpen(false);
                         }}
+                        className="inline-flex items-center gap-2 self-start rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                       >
+                        <span className="text-base leading-none">×</span>
                         フィルターをクリア
-                      </Button>
+                      </button>
                     ) : null}
                   </div>
 
                   {isCompact ? (
-                    <Accordion
-                      disableGutters
-                      elevation={0}
-                      sx={{
-                        borderRadius: "1.4rem",
-                        border: "1px solid rgba(16, 185, 129, 0.14)",
-                        bgcolor: "#f7fcf8",
-                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
-                        "&:before": { display: "none" },
-                      }}
-                    >
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        sx={{
-                          px: MOBILE_FILTER_PADDING_X,
-                          py: MOBILE_FILTER_PADDING_Y,
-                          "& .MuiAccordionSummary-expandIconWrapper": {
-                            color: "#64748b",
-                          },
-                          "& .MuiAccordionSummary-content": { my: 0 },
-                        }}
+                    <div className="rounded-[1.4rem] border border-emerald-500/15 bg-[#f7fcf8] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                      <button
+                        type="button"
+                        onClick={() => setMobileFiltersOpen((prev) => !prev)}
+                        className="flex w-full items-center justify-between px-3 py-2.5 text-left"
                       >
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          alignItems="center"
-                          sx={{ width: "100%", justifyContent: "space-between" }}
-                        >
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0f172a" }}>
-                            フィルター
-                          </Typography>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-slate-900">フィルター</span>
                           {anyFilterActive && (
-                            <Box
-                              sx={{
-                                px: `calc(${MOBILE_FILTER_BADGE_PADDING} * 2)`,
-                                py: "2px",
-                                borderRadius: MOBILE_FILTER_BADGE_RADIUS,
-                                bgcolor: "rgba(16, 185, 129, 0.1)",
-                                color: "#047857",
-                                fontSize: 12,
-                                fontWeight: 700,
-                                lineHeight: 1.6,
-                              }}
-                            >
+                            <span className="rounded-full bg-emerald-100 px-2 py-[2px] text-[12px] font-bold leading-5 text-emerald-700">
                               適用中
-                            </Box>
+                            </span>
                           )}
-                        </Stack>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ p: MOBILE_FILTER_PADDING_X }}>
-                        <WorkflowListFiltersPanel
-                          ref={filterRowRef}
-                          filters={filters}
-                          setFilter={setFilter}
-                        />
-                      </AccordionDetails>
-                    </Accordion>
+                        </div>
+                        <span className="text-sm text-slate-500">
+                          {mobileFiltersOpen ? "▲" : "▼"}
+                        </span>
+                      </button>
+                      {mobileFiltersOpen ? (
+                        <div className="px-3 pb-3">
+                          <WorkflowListFiltersPanel
+                            ref={filterRowRef}
+                            filters={filters}
+                            setFilter={setFilter}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
                   ) : (
-                    <Box
-                      sx={{
-                        borderRadius: "24px",
-                        border: "1px solid rgba(16, 185, 129, 0.14)",
-                        bgcolor: "#f7fcf8",
-                        p: 1.5,
-                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
-                      }}
-                    >
-                      <Table
-                        size="small"
-                        sx={{
-                          tableLayout: "fixed",
-                          borderCollapse: "separate",
-                          borderSpacing: "0 8px",
-                          "& .MuiTableCell-root": {
-                            borderBottom: "none",
-                          },
-                        }}
-                        aria-hidden
-                      >
-                        <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ px: 1, pb: 0.5, color: "#64748b", fontSize: "0.74rem", fontWeight: 700, letterSpacing: "0.04em" }}>種別</TableCell>
-                          <TableCell sx={{ px: 1, pb: 0.5, color: "#64748b", fontSize: "0.74rem", fontWeight: 700, letterSpacing: "0.04em" }}>申請日</TableCell>
-                          <TableCell sx={{ px: 1, pb: 0.5, color: "#64748b", fontSize: "0.74rem", fontWeight: 700, letterSpacing: "0.04em" }}>ステータス</TableCell>
-                          <TableCell sx={{ px: 1, pb: 0.5, color: "#64748b", fontSize: "0.74rem", fontWeight: 700, letterSpacing: "0.04em" }}>作成日</TableCell>
-                        </TableRow>
-                        <WorkflowListFilters
-                          ref={filterRowRef}
-                          filters={filters}
-                          setFilter={setFilter}
-                        />
-                        </TableHead>
-                      </Table>
-                    </Box>
+                    <div className="rounded-[24px] border border-emerald-500/15 bg-[#f7fcf8] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                      <table className="w-full table-fixed border-separate border-spacing-y-2" aria-hidden>
+                        <thead>
+                          <tr>
+                            <th className="px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">種別</th>
+                            <th className="px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">申請日</th>
+                            <th className="px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">ステータス</th>
+                            <th className="px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">作成日</th>
+                            <th className="w-14" />
+                          </tr>
+                          <WorkflowListFilters
+                            ref={filterRowRef}
+                            filters={filters}
+                            setFilter={setFilter}
+                          />
+                        </thead>
+                      </table>
+                    </div>
                   )}
 
                   {isCompact ? (
-                    <Box>
+                    <div>
                       {loading ? (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            py: MOBILE_EMPTY_PADDING,
-                          }}
-                        >
-                          <CircularProgress />
-                        </Box>
+                        <div className="flex justify-center py-6">
+                          <Spinner />
+                        </div>
                       ) : filteredItems.length === 0 ? (
-                        <Alert severity="info">該当するワークフローがありません。</Alert>
+                        <InfoCard>該当するワークフローがありません。</InfoCard>
                       ) : (
-                        <Stack spacing={MOBILE_CARD_GAP}>
+                        <div className="flex flex-col" style={{ gap: MOBILE_CARD_GAP }}>
                           {filteredItems.map((item) => {
                             const key = resolveWorkflowKey(item);
                             return (
-                              <ButtonBase
+                              <button
                                 key={key}
+                                type="button"
                                 onClick={() => handleCardClick(item)}
-                                sx={{
-                                  width: "100%",
-                                  textAlign: "left",
-                                  borderRadius: MOBILE_CARD_RADIUS,
-                                }}
+                                className="w-full rounded-[16px] text-left"
                               >
-                                <Paper
-                                  sx={{
-                                    width: "100%",
-                                    p: MOBILE_CARD_PADDING,
-                                    borderRadius: MOBILE_CARD_RADIUS,
-                                    border: "1px solid",
-                                    borderColor: "divider",
-                                    bgcolor: "background.paper",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: MOBILE_ACTION_GAP,
-                                  }}
-                                >
-                                  <Stack
-                                    direction={{ xs: "column", sm: "row" }}
-                                    spacing={MOBILE_ACTION_GAP}
-                                    alignItems={{ xs: "flex-start", sm: "center" }}
-                                    justifyContent="space-between"
-                                  >
-                                    <Typography
-                                      variant="subtitle1"
-                                      fontWeight={600}
-                                      sx={{ minWidth: 0, wordBreak: "break-word" }}
-                                    >
+                                <div className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-white px-4 py-4 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.28)] transition hover:border-emerald-200 hover:bg-emerald-50/40">
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="min-w-0 break-words text-base font-semibold text-slate-900">
                                       {item.category || "-"}
-                                    </Typography>
-                                    <Box
-                                      sx={{
-                                        maxWidth: "100%",
-                                        alignSelf: { xs: "flex-start", sm: "center" },
-                                      }}
-                                    >
+                                    </div>
+                                    <div className="max-w-full self-start sm:self-center">
                                       <StatusChip
                                         status={item.rawStatus || item.status || ""}
                                       />
-                                    </Box>
-                                  </Stack>
-                                  <Stack spacing={MOBILE_META_GAP}>
-                                    <Typography variant="caption" color="text.secondary">
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col" style={{ gap: MOBILE_META_GAP }}>
+                                    <div className="text-xs text-slate-500">
                                       申請日
-                                    </Typography>
-                                    <Typography variant="body2">
+                                    </div>
+                                    <div className="text-sm text-slate-900">
                                       {formatWorkflowDateValue(item.applicationDate)}
-                                    </Typography>
-                                  </Stack>
-                                  <Stack
-                                    direction={{ xs: "column", sm: "row" }}
-                                    spacing={MOBILE_ACTION_GAP}
-                                    justifyContent="space-between"
-                                  >
-                                    <Stack spacing={MOBILE_META_GAP}>
-                                      <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                      >
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col justify-between gap-2 sm:flex-row">
+                                    <div className="flex flex-col" style={{ gap: MOBILE_META_GAP }}>
+                                      <div className="text-xs text-slate-500">
                                         作成日
-                                      </Typography>
-                                      <Typography variant="body2">
+                                      </div>
+                                      <div className="text-sm text-slate-900">
                                         {item.createdAt || "-"}
-                                      </Typography>
-                                    </Stack>
-                                    <Stack
-                                      spacing={MOBILE_META_GAP}
-                                      alignItems={{ xs: "flex-start", sm: "flex-end" }}
-                                    >
-                                      <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                      >
+                                      </div>
+                                    </div>
+                                    <div className="flex flex-col sm:items-end" style={{ gap: MOBILE_META_GAP }}>
+                                      <div className="text-xs text-slate-500">
                                         ステータス
-                                      </Typography>
-                                      <Typography variant="body2">
+                                      </div>
+                                      <div className="text-sm text-slate-900">
                                         {item.status || "-"}
-                                      </Typography>
-                                    </Stack>
-                                  </Stack>
-                                </Paper>
-                              </ButtonBase>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
                             );
                           })}
-                        </Stack>
+                        </div>
                       )}
-                    </Box>
+                    </div>
                   ) : (
                     <div className="overflow-hidden rounded-[24px] border border-emerald-500/15 bg-[#f8fffb] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
                       <div className="grid grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] border-b border-slate-200/80 bg-emerald-50/60 px-5 py-3 text-[0.74rem] font-semibold tracking-[0.04em] text-slate-500">
@@ -429,11 +345,11 @@ export default function WorkflowListPage() {
                       </div>
                       {loading ? (
                         <div className="flex justify-center py-10">
-                          <CircularProgress />
+                          <Spinner />
                         </div>
                       ) : filteredItems.length === 0 ? (
                         <div className="px-5 py-8">
-                          <Alert severity="info">該当するワークフローがありません。</Alert>
+                          <InfoCard>該当するワークフローがありません。</InfoCard>
                         </div>
                       ) : (
                         <div>
@@ -469,23 +385,17 @@ export default function WorkflowListPage() {
             </>
           ) : (
             <Surface>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  py: EMPTY_STATE_PADDING_Y,
-                }}
-              >
+              <div className="flex justify-center py-4">
                 {loading ? (
-                  <CircularProgress />
+                  <Spinner />
                 ) : (
-                  <Alert severity="info">
+                  <InfoCard>
                     ログイン中のアカウントに紐づくスタッフ情報が見つからないため、一覧を表示できません。
                     <br />
                     スタッフアカウントが未登録の場合は管理者にお問い合わせください。
-                  </Alert>
+                  </InfoCard>
                 )}
-              </Box>
+              </div>
             </Surface>
           )}
         </div>
