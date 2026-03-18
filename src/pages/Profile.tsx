@@ -27,7 +27,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import Title from "@shared/ui/typography/Title";
 import { updatePassword } from "aws-amplify/auth";
 import dayjs from "dayjs";
@@ -332,10 +331,6 @@ export default function Profile() {
   return (
     <Container maxWidth="xl" sx={{ pt: 2, pb: 2, px: { xs: 2, sm: 3 } }}>
       <Stack direction="column" spacing={{ xs: 1.5, sm: 2 }}>
-        <CommonBreadcrumbs
-          items={[{ label: "TOP", href: "/" }]}
-          current="個人設定"
-        />
         <Title>個人設定</Title>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs
