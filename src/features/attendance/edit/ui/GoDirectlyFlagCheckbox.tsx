@@ -1,17 +1,7 @@
-import {
-  Checkbox,
-  Stack,
-  styled,
-  Switch,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { ChangeEvent, ComponentType, ReactNode } from "react";
+import { ComponentType, ReactNode } from "react";
 import { Controller } from "react-hook-form";
 
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
-import { Label as MobileLabel } from "@/features/attendance/edit/ui/mobile/Label";
 
 import {
   AttendanceBooleanFieldName,
@@ -19,13 +9,10 @@ import {
   AttendanceControllerField,
 } from "../model/types";
 
-const DesktopLabel = styled(Typography)(() => ({
-  width: "150px",
-  fontWeight: "bold",
-}));
-
 type BooleanFieldName = AttendanceBooleanFieldName;
 type BooleanField = AttendanceControllerField<BooleanFieldName>;
+type Layout = "row" | "inline";
+type InputVariant = "checkbox" | "switch";
 
 interface GoDirectlyFlagCheckboxProps {
   control: AttendanceControl;
@@ -34,7 +21,8 @@ interface GoDirectlyFlagCheckboxProps {
   disabled?: boolean;
   onChangeExtra?: (checked: boolean) => void;
   inputComponent?: BooleanInputComponent;
-  mobileLabel?: ReactNode;
+  layout?: Layout;
+  inputVariant?: InputVariant;
 }
 
 type BooleanInputProps = {
@@ -43,10 +31,58 @@ type BooleanInputProps = {
   name?: string;
   inputRef?: BooleanField["ref"];
   onBlur?: BooleanField["onBlur"];
-  onChange?: (event: ChangeEvent<HTMLInputElement>, checked?: boolean) => void;
+  onChange?: () => void;
 };
 
 type BooleanInputComponent = ComponentType<BooleanInputProps>;
+
+function NativeCheckbox({
+  checked = false,
+  disabled = false,
+  name,
+  inputRef,
+  onBlur,
+  onChange,
+}: BooleanInputProps) {
+  return (
+    <input
+      ref={inputRef}
+      type="checkbox"
+      name={name}
+      checked={checked}
+      disabled={disabled}
+      onBlur={onBlur}
+      onChange={onChange}
+      className="h-4 w-4 accent-emerald-600"
+    />
+  );
+}
+
+function NativeSwitch({
+  checked = false,
+  disabled = false,
+  name,
+  inputRef,
+  onBlur,
+  onChange,
+}: BooleanInputProps) {
+  return (
+    <label className="relative inline-flex h-8 w-14 shrink-0 items-center">
+      <input
+        ref={inputRef}
+        type="checkbox"
+        name={name}
+        checked={checked}
+        disabled={disabled}
+        onBlur={onBlur}
+        onChange={onChange}
+        className="peer sr-only"
+      />
+      <span className="absolute inset-0 rounded-full bg-slate-300 transition-colors duration-200 peer-checked:bg-emerald-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" />
+      <span className="absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-6" />
+    </label>
+  );
+}
 
 function RenderInput({
   field,
@@ -66,8 +102,8 @@ function RenderInput({
       name={field.name}
       inputRef={field.ref}
       onBlur={field.onBlur}
-      onChange={(event, checkedFromComponent) => {
-        const checked = checkedFromComponent ?? event.target.checked;
+      onChange={() => {
+        const checked = !(field.value ?? false);
         field.onChange(checked);
         onChangeExtra?.(checked);
       }}
@@ -82,18 +118,18 @@ export function GoDirectlyFlagCheckbox({
   disabled = false,
   onChangeExtra,
   inputComponent,
-  mobileLabel,
+  layout = "row",
+  inputVariant = "checkbox",
 }: GoDirectlyFlagCheckboxProps) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const ComponentToRender = inputComponent ?? (isMobile ? Switch : Checkbox);
+  const ComponentToRender =
+    inputComponent ??
+    (inputVariant === "switch" ? NativeSwitch : NativeCheckbox);
   const InputComponent = ComponentToRender as BooleanInputComponent;
-  const displayLabel = isMobile && mobileLabel ? mobileLabel : label;
 
-  if (isMobile) {
+  if (layout === "inline") {
     return (
-      <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-        <MobileLabel variant="body1">{displayLabel}</MobileLabel>
+      <div className="mb-1 flex items-center gap-2">
+        <p className="m-0 pb-2 font-bold">{label}</p>
         <Controller<AttendanceEditInputs, BooleanFieldName>
           name={name}
           control={control}
@@ -106,14 +142,13 @@ export function GoDirectlyFlagCheckbox({
             />
           )}
         />
-      </Stack>
+      </div>
     );
   }
 
-  // デスクトップ
   return (
-    <Stack direction="row" alignItems="center">
-      <DesktopLabel variant="body1">{label}</DesktopLabel>
+    <div className="flex items-center">
+      <div className="w-[150px] font-bold">{label}</div>
       <Controller<AttendanceEditInputs, BooleanFieldName>
         name={name}
         control={control}
@@ -123,9 +158,9 @@ export function GoDirectlyFlagCheckbox({
             disabled={disabled}
             InputComponent={InputComponent}
             onChangeExtra={onChangeExtra}
-          />
-        )}
-      />
-    </Stack>
+            />
+          )}
+        />
+    </div>
   );
 }

@@ -1,12 +1,9 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Alert,Switch } from "@mui/material";
 import ReturnDirectlyFlagInputBase from "@shared/ui/form/flags/ReturnDirectlyFlagInputBase";
 import { useContext, useState } from "react";
 
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { pulseAnimationStyles } from "@/shared/ui/animations/highlightAnimation";
 
 export function ReturnDirectlyFlagInput() {
   const { control, setValue, workDate, getValues, attendance } = useContext(
@@ -41,23 +38,14 @@ export function ReturnDirectlyFlagInput() {
     <>
       <ReturnDirectlyFlagInputBase
         control={control}
-        inputComponent={Switch}
+        inputVariant="switch"
         layout="inline"
         onChangeFlag={handleChangeFlag}
       />
       {highlightEndTime && (
-        <Alert
-          icon={<CheckCircleIcon fontSize="inherit" />}
-          severity="success"
-          sx={{
-            mt: 1,
-            mb: 1,
-            ...pulseAnimationStyles,
-            fontWeight: "bold",
-          }}
-        >
+        <div className="my-1 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 font-bold text-emerald-900 animate-pulse">
           勤務終了時間が自動設定されました
-        </Alert>
+        </div>
       )}
     </>
   );
