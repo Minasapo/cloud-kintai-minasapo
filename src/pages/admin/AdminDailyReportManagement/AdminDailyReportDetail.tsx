@@ -1,6 +1,7 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { DailyReportCalendar } from "@features/attendance/daily-report";
+import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import {
   Alert,
   Box,
@@ -65,13 +66,13 @@ type LocationState = {
 const DATE_FORMAT = "YYYY-MM-DD";
 
 const normalizeReactions = (
-  entries?: (DailyReportReaction | null)[] | null
+  entries?: (DailyReportReaction | null)[] | null,
 ): DailyReportReaction[] =>
   entries?.filter((entry): entry is DailyReportReaction => Boolean(entry)) ??
   [];
 
 const normalizeComments = (
-  entries?: (DailyReportComment | null)[] | null
+  entries?: (DailyReportComment | null)[] | null,
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
@@ -106,25 +107,25 @@ export default function AdminDailyReportDetail() {
         .join(" ");
       return name || "スタッフ";
     },
-    [staffs]
+    [staffs],
   );
 
   const [report, setReport] = useState<AdminDailyReport | null>(
-    () => state?.report ?? null
+    () => state?.report ?? null,
   );
   const [reports, setReports] = useState<AdminDailyReport[]>([]);
   const [isLoading, setIsLoading] = useState(!state?.report);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reactions, setReactions] = useState<ReportReaction[]>(
-    () => report?.reactions ?? []
+    () => report?.reactions ?? [],
   );
   const [comments, setComments] = useState<AdminComment[]>(
-    () => report?.comments ?? []
+    () => report?.comments ?? [],
   );
   const [commentInput, setCommentInput] = useState<string>("");
   const [selectedReactions, setSelectedReactions] = useState<ReactionType[]>(
-    []
+    [],
   );
   const [reactionEntries, setReactionEntries] = useState<
     DailyReportReaction[] | null
@@ -139,10 +140,10 @@ export default function AdminDailyReportDetail() {
   const [currentStaffName, setCurrentStaffName] = useState<string>("管理者");
   const [isResolvingCurrentStaff, setIsResolvingCurrentStaff] = useState(true);
   const [calendarDate, setCalendarDate] = useState<Dayjs>(() =>
-    dayjs().startOf("day")
+    dayjs().startOf("day"),
   );
   const [staffIdForReports, setStaffIdForReports] = useState<string | null>(
-    null
+    null,
   );
 
   const { dateMap: reportsByDate, dateSet: reportedDateSet } = useMemo(() => {
@@ -193,7 +194,7 @@ export default function AdminDailyReportDetail() {
       }
     } catch (error) {
       setLoadError(
-        error instanceof Error ? error.message : "日報の取得に失敗しました。"
+        error instanceof Error ? error.message : "日報の取得に失敗しました。",
       );
       if (!stateReportId) {
         setReport(null);
@@ -231,13 +232,13 @@ export default function AdminDailyReportDetail() {
 
         if (response.errors?.length) {
           throw new Error(
-            response.errors.map((error) => error.message).join("\n")
+            response.errors.map((error) => error.message).join("\n"),
           );
         }
 
         const items =
           response.data?.dailyReportsByStaffId?.items?.filter(
-            (item): item is NonNullable<typeof item> => item !== null
+            (item): item is NonNullable<typeof item> => item !== null,
           ) ?? [];
 
         items.forEach((item) => {
@@ -287,7 +288,7 @@ export default function AdminDailyReportDetail() {
     setSelectedReactions(
       reactionEntries
         .filter((entry) => entry.staffId === currentStaffId)
-        .map((entry) => entry.type as ReactionType)
+        .map((entry) => entry.type as ReactionType),
     );
   }, [currentStaffId, reactionEntries]);
 
@@ -355,20 +356,20 @@ export default function AdminDailyReportDetail() {
         setSearchParams({ date: dateKey }, { replace: true });
       }
     },
-    [navigate, reportsByDate, staffIdForReports, setSearchParams]
+    [navigate, reportsByDate, staffIdForReports, setSearchParams],
   );
 
   const handleToggleReaction = async (type: ReactionType) => {
     if (!report) return;
     if (!reactionEntries) {
       setActionError(
-        "リアクション情報の取得中です。少し待ってから再度お試しください。"
+        "リアクション情報の取得中です。少し待ってから再度お試しください。",
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、リアクションを登録できません。"
+        "スタッフ情報が取得できないため、リアクションを登録できません。",
       );
       return;
     }
@@ -378,12 +379,12 @@ export default function AdminDailyReportDetail() {
     setActionError(null);
 
     const hasReaction = reactionEntries.some(
-      (entry) => entry.staffId === currentStaffId && entry.type === type
+      (entry) => entry.staffId === currentStaffId && entry.type === type,
     );
     const timestamp = new Date().toISOString();
     const nextEntries = hasReaction
       ? reactionEntries.filter(
-          (entry) => entry.staffId !== currentStaffId || entry.type !== type
+          (entry) => entry.staffId !== currentStaffId || entry.type !== type,
         )
       : [
           ...reactionEntries,
@@ -438,7 +439,7 @@ export default function AdminDailyReportDetail() {
       setActionError(
         error instanceof Error
           ? error.message
-          : "リアクションの登録に失敗しました。"
+          : "リアクションの登録に失敗しました。",
       );
     } finally {
       setIsSavingReaction(false);
@@ -451,13 +452,13 @@ export default function AdminDailyReportDetail() {
     if (!report) return;
     if (!commentEntries) {
       setActionError(
-        "コメント情報の取得中です。少し待ってから再度お試しください。"
+        "コメント情報の取得中です。少し待ってから再度お試しください。",
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、コメントを登録できません。"
+        "スタッフ情報が取得できないため、コメントを登録できません。",
       );
       return;
     }
@@ -502,7 +503,7 @@ export default function AdminDailyReportDetail() {
                 authorName,
                 body: commentBody,
                 createdAt,
-              })
+              }),
             ),
             updatedAt: timestamp,
             version: getNextVersion(report.version),
@@ -525,6 +526,20 @@ export default function AdminDailyReportDetail() {
         throw new Error("コメントの更新に失敗しました。");
       }
 
+      try {
+        await sendDailyReportCommentNotification({
+          staffs,
+          report: updated,
+          commentAuthorName: currentStaffName,
+          commentBody: body,
+        });
+      } catch (mailError) {
+        console.error(
+          "Failed to send daily report comment notification:",
+          mailError,
+        );
+      }
+
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
       setReport(mapDailyReport(updated, buildStaffName(updated.staffId)));
@@ -533,7 +548,7 @@ export default function AdminDailyReportDetail() {
       setActionError(
         error instanceof Error
           ? error.message
-          : "コメントの登録に失敗しました。"
+          : "コメントの登録に失敗しました。",
       );
     } finally {
       setIsSavingComment(false);
@@ -646,7 +661,7 @@ export default function AdminDailyReportDetail() {
                             const meta = REACTION_META[type];
                             const count =
                               reactions.find(
-                                (reaction) => reaction.type === type
+                                (reaction) => reaction.type === type,
                               )?.count ?? 0;
                             const isSelected = selectedReactions.includes(type);
                             return (
@@ -664,7 +679,7 @@ export default function AdminDailyReportDetail() {
                                 }}
                               />
                             );
-                          }
+                          },
                         )}
                       </Stack>
                       {(!reactionEntries || isResolvingCurrentStaff) && (

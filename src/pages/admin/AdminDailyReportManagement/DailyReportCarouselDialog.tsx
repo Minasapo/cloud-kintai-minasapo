@@ -1,5 +1,6 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -57,13 +58,13 @@ interface DailyReportCarouselDialogProps {
 }
 
 const normalizeReactions = (
-  entries?: (DailyReportReaction | null)[] | null
+  entries?: (DailyReportReaction | null)[] | null,
 ): DailyReportReaction[] =>
   entries?.filter((entry): entry is DailyReportReaction => Boolean(entry)) ??
   [];
 
 const normalizeComments = (
-  entries?: (DailyReportComment | null)[] | null
+  entries?: (DailyReportComment | null)[] | null,
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
@@ -84,7 +85,7 @@ export default function DailyReportCarouselDialog({
   const { staffs, loading: isStaffLoading } = useStaffs({ isAuthenticated });
   const { cognitoUser } = useCognitoUser();
   const [currentIndex, setCurrentIndex] = useState(
-    filteredReports.findIndex((r) => r.id === selectedReport.id)
+    filteredReports.findIndex((r) => r.id === selectedReport.id),
   );
   const [report, setReport] = useState<AdminDailyReport>(selectedReport);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,14 +94,14 @@ export default function DailyReportCarouselDialog({
     Map<string, PreloadedReport>
   >(new Map());
   const [reactions, setReactions] = useState<ReportReaction[]>(
-    selectedReport.reactions ?? []
+    selectedReport.reactions ?? [],
   );
   const [comments, setComments] = useState<AdminComment[]>(
-    selectedReport.comments ?? []
+    selectedReport.comments ?? [],
   );
   const [commentInput, setCommentInput] = useState<string>("");
   const [selectedReactions, setSelectedReactions] = useState<ReactionType[]>(
-    []
+    [],
   );
   const [reactionEntries, setReactionEntries] = useState<
     DailyReportReaction[] | null
@@ -124,7 +125,7 @@ export default function DailyReportCarouselDialog({
         .join(" ");
       return name || "スタッフ";
     },
-    [staffs]
+    [staffs],
   );
 
   const currentReport = filteredReports[currentIndex];
@@ -164,7 +165,7 @@ export default function DailyReportCarouselDialog({
       const comments = normalizeComments(record.comments);
       const mappedReport = mapDailyReport(
         record,
-        buildStaffName(record.staffId)
+        buildStaffName(record.staffId),
       );
 
       setReactionEntries(reactions);
@@ -177,11 +178,11 @@ export default function DailyReportCarouselDialog({
           report: mappedReport,
           reactionEntries: reactions,
           commentEntries: comments,
-        })
+        }),
       );
     } catch (error) {
       setLoadError(
-        error instanceof Error ? error.message : "日報の取得に失敗しました。"
+        error instanceof Error ? error.message : "日報の取得に失敗しました。",
       );
     } finally {
       setIsLoading(false);
@@ -191,7 +192,7 @@ export default function DailyReportCarouselDialog({
   useEffect(() => {
     if (open) {
       setCurrentIndex(
-        filteredReports.findIndex((r) => r.id === selectedReport.id)
+        filteredReports.findIndex((r) => r.id === selectedReport.id),
       );
       // Reset preloaded reports when dialog opens
       setPreloadedReports(new Map());
@@ -234,7 +235,7 @@ export default function DailyReportCarouselDialog({
           if (response.errors?.length) {
             console.error(
               `Failed to preload report ${reportToPreload.id}:`,
-              response.errors
+              response.errors,
             );
             continue;
           }
@@ -249,7 +250,7 @@ export default function DailyReportCarouselDialog({
           const comments = normalizeComments(record.comments);
           const mappedReport = mapDailyReport(
             record,
-            buildStaffName(record.staffId)
+            buildStaffName(record.staffId),
           );
 
           if (mounted) {
@@ -258,7 +259,7 @@ export default function DailyReportCarouselDialog({
                 report: mappedReport,
                 reactionEntries: reactions,
                 commentEntries: comments,
-              })
+              }),
             );
           }
 
@@ -267,7 +268,7 @@ export default function DailyReportCarouselDialog({
         } catch (error) {
           console.error(
             `Error preloading report ${reportToPreload.id}:`,
-            error
+            error,
           );
         }
       }
@@ -338,7 +339,7 @@ export default function DailyReportCarouselDialog({
     setSelectedReactions(
       reactionEntries
         .filter((entry) => entry.staffId === currentStaffId)
-        .map((entry) => entry.type as ReactionType)
+        .map((entry) => entry.type as ReactionType),
     );
   }, [currentStaffId, reactionEntries]);
 
@@ -358,13 +359,13 @@ export default function DailyReportCarouselDialog({
     if (!report) return;
     if (!reactionEntries) {
       setActionError(
-        "リアクション情報の取得中です。少し待ってから再度お試しください。"
+        "リアクション情報の取得中です。少し待ってから再度お試しください。",
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、リアクションを登録できません。"
+        "スタッフ情報が取得できないため、リアクションを登録できません。",
       );
       return;
     }
@@ -374,12 +375,12 @@ export default function DailyReportCarouselDialog({
     setActionError(null);
 
     const hasReaction = reactionEntries.some(
-      (entry) => entry.staffId === currentStaffId && entry.type === type
+      (entry) => entry.staffId === currentStaffId && entry.type === type,
     );
     const timestamp = new Date().toISOString();
     const nextEntries = hasReaction
       ? reactionEntries.filter(
-          (entry) => entry.staffId !== currentStaffId || entry.type !== type
+          (entry) => entry.staffId !== currentStaffId || entry.type !== type,
         )
       : [
           ...reactionEntries,
@@ -434,7 +435,7 @@ export default function DailyReportCarouselDialog({
       setActionError(
         error instanceof Error
           ? error.message
-          : "リアクションの登録に失敗しました。"
+          : "リアクションの登録に失敗しました。",
       );
     } finally {
       setIsSavingReaction(false);
@@ -447,13 +448,13 @@ export default function DailyReportCarouselDialog({
     if (!report) return;
     if (!commentEntries) {
       setActionError(
-        "コメント情報の取得中です。少し待ってから再度お試しください。"
+        "コメント情報の取得中です。少し待ってから再度お試しください。",
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、コメントを登録できません。"
+        "スタッフ情報が取得できないため、コメントを登録できません。",
       );
       return;
     }
@@ -498,7 +499,7 @@ export default function DailyReportCarouselDialog({
                 authorName,
                 body: commentBody,
                 createdAt,
-              })
+              }),
             ),
             updatedAt: timestamp,
             version: getNextVersion(report.version),
@@ -521,6 +522,20 @@ export default function DailyReportCarouselDialog({
         throw new Error("コメントの更新に失敗しました。");
       }
 
+      try {
+        await sendDailyReportCommentNotification({
+          staffs,
+          report: updated,
+          commentAuthorName: currentStaffName,
+          commentBody: body,
+        });
+      } catch (mailError) {
+        console.error(
+          "Failed to send daily report comment notification:",
+          mailError,
+        );
+      }
+
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
       setReport(mapDailyReport(updated, buildStaffName(updated.staffId)));
@@ -529,7 +544,7 @@ export default function DailyReportCarouselDialog({
       setActionError(
         error instanceof Error
           ? error.message
-          : "コメントの登録に失敗しました。"
+          : "コメントの登録に失敗しました。",
       );
     } finally {
       setIsSavingComment(false);
@@ -718,7 +733,7 @@ export default function DailyReportCarouselDialog({
                           size="small"
                         />
                       );
-                    }
+                    },
                   )}
                 </Stack>
                 {reactions.length === 0 && (
