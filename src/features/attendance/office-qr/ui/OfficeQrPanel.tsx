@@ -1,13 +1,3 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  LinearProgress,
-  Tooltip,
-  Typography,
-} from "@mui/material";
 import { lazy, Suspense } from "react";
 
 export type OfficeQrPanelProps = {
@@ -48,98 +38,111 @@ export function OfficeQrPanel({
 }: OfficeQrPanelProps) {
   if (!isOfficeModeEnabled) {
     return (
-      <Container>
-        <Box sx={{ mt: 4, textAlign: "center" }}>
-          <Alert severity="warning" data-testid="office-qr-disabled-alert">
-            現在、使用することができません。
-          </Alert>
-        </Box>
-      </Container>
+      <div className="mx-auto w-full max-w-5xl px-4 py-4">
+        <div
+          role="alert"
+          data-testid="office-qr-disabled-alert"
+          className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm font-medium leading-6 text-amber-950"
+        >
+          現在、使用することができません。
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container>
+    <div className="mx-auto w-full max-w-5xl px-4 py-4">
       {showAdminAlert && (
-        <Box sx={{ mt: 4, textAlign: "center" }}>
-          <Alert severity="warning" data-testid="office-qr-admin-alert">
+        <div className="mt-4 text-center">
+          <div
+            role="alert"
+            data-testid="office-qr-admin-alert"
+            className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-6 text-amber-950"
+          >
             管理者権限で表示されています。オペレーター権限を持ったアカウントで表示してから運用してください。
-          </Alert>
-        </Box>
+          </div>
+        </div>
       )}
-      <Box sx={{ mt: 4, textAlign: "center" }}>
-        <Button
-          variant="contained"
-          color={isRegisterMode ? "primary" : "secondary"}
+
+      <div className="mt-4 text-center">
+        <button
+          type="button"
           onClick={onModeChange}
-          sx={{ fontSize: "1.2rem", padding: "10px 20px", mr: 2 }}
+          className={`inline-flex items-center justify-center rounded-lg px-5 py-3 text-lg font-semibold text-white transition-colors hover:brightness-95 ${isRegisterMode ? "bg-emerald-600" : "bg-slate-700"}`}
           data-testid="office-qr-mode-toggle"
         >
           {isRegisterMode ? "出勤モード" : "退勤モード"}
-        </Button>
-      </Box>
-      <Box sx={{ mt: 4, textAlign: "center" }}>
-        <Typography variant="body2" gutterBottom data-testid="office-qr-timer">
+        </button>
+      </div>
+
+      <div className="mt-4 text-center">
+        <p
+          className="mb-2 text-sm leading-6 text-slate-700"
+          data-testid="office-qr-timer"
+        >
           次の更新までの時間: {formatTime(timeLeft)}
-        </Typography>
-        <Box sx={{ width: "500px", margin: "0 auto" }}>
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: 30,
-            }}
+        </p>
+        <div className="mx-auto w-full max-w-[500px]">
+          <div
+            className="h-[30px] overflow-hidden rounded-full bg-slate-200"
             data-testid="office-qr-progress"
-          />
-        </Box>
-      </Box>
-      <Box sx={{ mt: 4, textAlign: "center" }}>
-        <Typography variant="body1" gutterBottom>
+          >
+            <div
+              className="h-full rounded-full bg-emerald-600 transition-[width] duration-300"
+              style={{ width: `${Math.max(0, Math.min(progress, 100))}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 text-center">
+        <p className="mb-2 text-base leading-7 text-slate-900">
           以下のQRコードをスキャンしてください。
-        </Typography>
-        <Box sx={{ mt: 2 }}>
+        </p>
+        <div className="mt-2">
           <Suspense
             fallback={
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <CircularProgress aria-label="QRコード生成中" />
-              </Box>
+              <div className="flex justify-center" aria-label="QRコード生成中">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600" />
+              </div>
             }
           >
-            <LazyQRCodeCanvas
-              value={qrUrl}
-              size={500}
-              data-testid="office-qr-code"
-              aria-label="office-qr-code"
-            />
+            <div className="flex justify-center">
+              <LazyQRCodeCanvas
+                value={qrUrl}
+                size={500}
+                data-testid="office-qr-code"
+                aria-label="office-qr-code"
+              />
+            </div>
           </Suspense>
-        </Box>
-        <Box sx={{ my: 2, display: "flex", justifyContent: "center", gap: 2 }}>
-          <Tooltip
-            title="URLがコピーされました！"
-            open={tooltipOpen}
-            disableFocusListener
-            disableHoverListener
-            disableTouchListener
-          >
-            <Button
-              variant="outlined"
-              color="primary"
+        </div>
+        <div className="my-2 flex flex-col items-center justify-center gap-2 sm:flex-row">
+          <div className="relative inline-flex">
+            {tooltipOpen && (
+              <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-3 py-1 text-xs font-medium text-white shadow-lg">
+                URLがコピーされました！
+              </div>
+            )}
+            <button
+              type="button"
               onClick={onCopyUrl}
               data-testid="office-qr-copy-button"
+              className="inline-flex items-center justify-center rounded-md border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
             >
               URLをコピー
-            </Button>
-          </Tooltip>
-          <Button
-            variant="outlined"
-            color="primary"
+            </button>
+          </div>
+          <button
+            type="button"
             onClick={onManualRefresh}
             data-testid="office-qr-refresh-button"
+            className="inline-flex items-center justify-center rounded-md border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
           >
             QRコードを手動更新
-          </Button>
-        </Box>
-      </Box>
-    </Container>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
