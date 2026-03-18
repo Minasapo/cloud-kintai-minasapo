@@ -1,4 +1,4 @@
-import { Button, Container, Stack, Typography } from "@mui/material";
+import type { CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { designTokenVar } from "@/shared/designSystem";
@@ -18,77 +18,49 @@ export default function NotFound() {
   };
 
   return (
-    <Container
-      maxWidth="xl"
-      disableGutters
-      className="pt-6"
-      style={{ paddingTop: PAGE_PADDING_TOP }}
+    <div
+      className="mx-auto min-h-[60vh] w-full max-w-screen-xl px-4 pt-6"
+      style={
+        {
+          paddingTop: PAGE_PADDING_TOP,
+          "--page-section-gap": PAGE_SECTION_GAP,
+        } as CSSProperties & Record<`--${string}`, string>
+      }
     >
-      <Stack
-        direction="column"
-        spacing={0}
-        alignItems="center"
-        justifyContent="center"
-        className="min-h-[60vh]"
-        style={{ gap: PAGE_SECTION_GAP }}
-      >
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-[var(--page-section-gap)]">
         <div className="py-4 text-center">
-          {/* 404コード */}
-          <Typography
-            variant="h1"
-            component="div"
-            className="mb-2 text-[72px] font-bold leading-none text-primary md:text-[120px]"
-          >
+          <div className="mb-2 text-[72px] font-bold leading-none text-primary md:text-[120px]">
             404
-          </Typography>
+          </div>
 
-          {/* メインメッセージ */}
-          <Typography
-            variant="h2"
-            component="h1"
-            className="mb-1 text-2xl font-semibold text-foreground md:text-[32px]"
-          >
+          <h1 className="mb-1 text-2xl font-semibold text-foreground md:text-[32px]">
             ページが見つかりません
-          </Typography>
+          </h1>
 
-          {/* サブメッセージ */}
-          <Typography
-            variant="body1"
-            className="mb-4 max-w-[500px] text-sm text-[var(--ds-color-neutral-600,#5E726A)] md:text-base"
-          >
+          <p className="mb-4 max-w-[500px] text-sm leading-7 text-[var(--ds-color-neutral-600,#5E726A)] md:text-base">
             お探しのページは存在しないか、移動された可能性があります。
             <br />
             ホームページに戻るか、前のページに戻ってください。
-          </Typography>
+          </p>
 
-          {/* アクションボタン */}
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            justifyContent="center"
-            className="mt-4"
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
+          <div className="mt-4 flex flex-col justify-center gap-4 sm:flex-row">
+            <button
+              type="button"
               onClick={handleGoHome}
-              className="min-w-40"
+              className="min-w-40 rounded-md bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:brightness-95"
             >
               ホームに戻る
-            </Button>
-            <Button
-              variant="outlined"
-              color="primary"
-              size="large"
+            </button>
+            <button
+              type="button"
               onClick={handleGoBack}
-              className="min-w-40"
+              className="min-w-40 rounded-md border border-primary bg-transparent px-6 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
             >
               前のページに戻る
-            </Button>
-          </Stack>
+            </button>
+          </div>
         </div>
-      </Stack>
-    </Container>
+      </div>
+    </div>
   );
 }

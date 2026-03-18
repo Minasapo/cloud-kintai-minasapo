@@ -2,7 +2,6 @@ import "@aws-amplify/ui-react/styles.css";
 import "./styles.scss";
 
 import { Authenticator } from "@aws-amplify/ui-react";
-import { Button, Stack, Typography } from "@mui/material";
 import { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -27,38 +26,36 @@ export default function Login() {
   }, [authStatus, navigate, from, cognitoUser]);
 
   return (
-    <Stack
-      direction="column"
-      spacing={2}
-      justifyContent="center"
-      alignItems="center"
-      className="pt-0 sm:pt-10"
-    >
+    <div className="flex flex-col items-center justify-center gap-4 pt-0 sm:pt-10">
       <div className="hidden sm:block">
-        <img src={logo} height={200} />
+        <img src={logo} height={200} alt="GARAKU" />
       </div>
       <Authenticator hideSignUp>
         {({ signOut }) => {
           if (signOut) {
             return (
-              <Stack direction="column" spacing={2}>
-                <Typography variant="body1">
+              <div className="flex flex-col gap-4">
+                <p className="m-0 text-base leading-7 text-slate-900">
                   画面が切り替わらない場合は、再度、ログインしてください。
-                </Typography>
-                <Button variant="text" size="medium" onClick={signOut}>
+                </p>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className="inline-flex w-fit items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+                >
                   ログアウト
-                </Button>
-              </Stack>
+                </button>
+              </div>
             );
           }
 
           return (
-            <Typography variant="body1">
+            <p className="m-0 text-base leading-7 text-slate-900">
               画面が切り替わらない場合は、ブラウザを再読み込みしてください。
-            </Typography>
+            </p>
           );
         }}
       </Authenticator>
-    </Stack>
+    </div>
   );
 }
