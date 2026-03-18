@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Paper } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 import { lazy, Suspense, useContext, useMemo } from "react";
@@ -108,7 +108,16 @@ export function AttendanceGraph({
   };
 
   return (
-    <Paper elevation={2}>
+    <Box
+      sx={{
+        borderRadius: "24px",
+        border: "1px solid rgba(16, 185, 129, 0.14)",
+        bgcolor: "#f8fffb",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.75)",
+        px: { xs: 1, md: 2 },
+        py: 2,
+      }}
+    >
       <Suspense
         fallback={
           <Box sx={{ py: 3, display: "flex", justifyContent: "center" }}>
@@ -127,6 +136,6 @@ export function AttendanceGraph({
           {...props}
         />
       </Suspense>
-    </Paper>
+    </Box>
   );
 }

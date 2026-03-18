@@ -11,11 +11,7 @@ import {
 } from "@entities/calendar/api/calendarApi";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
-  Box,
   LinearProgress,
-  Stack,
-  styled,
-  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -49,7 +45,6 @@ import {
   onDeleteAttendance,
   onUpdateAttendance,
 } from "@/shared/api/graphql/documents/subscriptions";
-import { designTokenVar } from "@/shared/designSystem";
 /**
  * AmplifyのLogger。デバッグ・エラー出力に使用。
  */
@@ -58,15 +53,6 @@ import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";
-
-/**
- * 勤怠一覧ページの説明文用Typographyコンポーネント。
- */
-const DescriptionTypography = styled(Typography)(({ theme }) => ({
-  [theme.breakpoints.down("md")]: {
-    padding: "0px 10px",
-  },
-}));
 
 const MONTH_QUERY_KEY = "month";
 
@@ -404,83 +390,91 @@ export default function AttendanceTable() {
     return `${startLabel} 〜 ${endLabel}`;
   }, [effectiveDateRange]);
 
+  const monthlyAttendances = useMemo(
+    () =>
+      attendances.filter((attendance) =>
+        attendance.workDate
+          ? dayjs(attendance.workDate).isSame(currentMonth, "month")
+          : false,
+      ),
+    [attendances, currentMonth],
+  );
+
+  const alertDays = useMemo(() => {
+    if (!staff) return 0;
+    return monthlyAttendances.filter((attendance) => {
+      const hasSystemComment =
+        Array.isArray(attendance.systemComments) && attendance.systemComments.length > 0;
+      return hasSystemComment;
+    }).length;
+  }, [monthlyAttendances, staff]);
+
   if (attendanceLoading || calendarLoading || closeDatesLoading) {
     return <LinearProgress />;
   }
 
-  const headerBackground = designTokenVar(
-    "component.pageSection.background",
-    "#FFFFFF",
-  );
-  const headerShadow = designTokenVar(
-    "component.pageSection.shadow",
-    "0 12px 24px rgba(17, 24, 39, 0.06)",
-  );
-  const headerRadius = designTokenVar("component.pageSection.radius", "12px");
-  const headerPaddingX = designTokenVar("spacing.lg", "16px");
-  const headerPaddingY = designTokenVar("spacing.md", "12px");
-  const headerGap = designTokenVar("spacing.sm", "8px");
-
   return (
-    <Stack spacing={2}>
-      <Box
-        sx={{
-          backgroundColor: headerBackground,
-          boxShadow: headerShadow,
-          borderRadius: headerRadius,
-          px: { xs: "12px", sm: headerPaddingX },
-          py: { xs: "10px", sm: headerPaddingY },
-          display: "flex",
-          flexDirection: "column",
-          gap: headerGap,
-        }}
-      >
-        <Stack spacing={0.5}>
-          <Typography
-            variant="h1"
-            sx={{ fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" } }}
-          >
-            勤怠一覧
-          </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ fontSize: { xs: "0.875rem", sm: "0.95rem", md: "1rem" } }}
-          >
-            {rangeLabelForDisplay}の合計勤務時間: {totalTime.toFixed(1)}h
-          </Typography>
-        </Stack>
-        <DescriptionTypography
-          variant="body1"
-          sx={{ fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" } }}
-        >
-          月を選択して勤怠情報を表示・編集できます
-        </DescriptionTypography>
-      </Box>
-      {isDesktop ? (
-        <DesktopList
-          attendances={attendances}
-          holidayCalendars={holidayCalendars}
-          companyHolidayCalendars={companyHolidayCalendars}
-          navigate={navigate}
-          staff={staff}
-          closeDates={closeDates}
-          closeDatesLoading={closeDatesLoading}
-          closeDatesError={closeDatesError}
-          currentMonth={currentMonth}
-          onMonthChange={handleMonthChange}
-        />
-      ) : (
-        <MobileList
-          attendances={attendances}
-          holidayCalendars={holidayCalendars}
-          companyHolidayCalendars={companyHolidayCalendars}
-          staff={staff}
-          currentMonth={currentMonth}
-          onMonthChange={handleMonthChange}
-          closeDates={closeDates}
-        />
-      )}
-    </Stack>
+    <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <section className="rounded-[1.8rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f7fcf8_0%,#ecfdf5_58%,#ffffff_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2">
+            <h1 className="text-[1.85rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+              勤怠一覧
+            </h1>
+            <p className="max-w-3xl text-sm leading-6 text-slate-600 sm:text-[0.95rem]">
+              月ごとの勤怠をカレンダーで確認しながら、必要な日付の編集にすぐ移れます。集計期間の勤務時間もこの画面でまとめて確認できます。
+            </p>
+          </div>
+          <div className="rounded-[1.2rem] border border-emerald-100 bg-white/80 px-4 py-3 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.35)]">
+            <p className="text-xs font-semibold tracking-[0.04em] text-slate-500">
+              集計期間
+            </p>
+            <p className="mt-1 text-sm font-medium text-slate-900">{rangeLabelForDisplay}</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
+          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">合計勤務時間</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-700">{totalTime.toFixed(1)}h</p>
+        </div>
+        <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
+          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">打刻日数</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-950">{monthlyAttendances.length}</p>
+        </div>
+        <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
+          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">要確認日数</p>
+          <p className="mt-2 text-2xl font-semibold text-amber-700">{alertDays}</p>
+        </div>
+      </div>
+
+      <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)] sm:p-5">
+        {isDesktop ? (
+          <DesktopList
+            attendances={attendances}
+            holidayCalendars={holidayCalendars}
+            companyHolidayCalendars={companyHolidayCalendars}
+            navigate={navigate}
+            staff={staff}
+            closeDates={closeDates}
+            closeDatesLoading={closeDatesLoading}
+            closeDatesError={closeDatesError}
+            currentMonth={currentMonth}
+            onMonthChange={handleMonthChange}
+          />
+        ) : (
+          <MobileList
+            attendances={attendances}
+            holidayCalendars={holidayCalendars}
+            companyHolidayCalendars={companyHolidayCalendars}
+            staff={staff}
+            currentMonth={currentMonth}
+            onMonthChange={handleMonthChange}
+            closeDates={closeDates}
+          />
+        )}
+      </div>
+    </div>
   );
 }

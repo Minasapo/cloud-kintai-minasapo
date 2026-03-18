@@ -33,12 +33,14 @@ import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 const DAYS_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
 
 const CalendarWrapper = styled(Box)(({ theme }) => ({
-  padding: "0px 40px 32px 40px",
-  borderRadius: 16,
-  border: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.background.paper,
+  padding: "24px",
+  borderRadius: 28,
+  border: `1px solid rgba(16, 185, 129, 0.14)`,
+  background:
+    "linear-gradient(180deg, rgba(247,252,248,0.96) 0%, rgba(255,255,255,0.98) 100%)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.75)",
   [theme.breakpoints.down("lg")]: {
-    padding: "0px 24px 24px 24px",
+    padding: "20px",
   },
   [theme.breakpoints.down("md")]: {
     display: "none",
@@ -63,15 +65,15 @@ const DayCell = styled(Box, {
   $isHoliday: boolean;
 }>(({ theme, $isCurrentMonth, $isToday, $isHoliday }) => ({
   minHeight: PANEL_HEIGHTS.CALENDAR_MIN,
-  borderRadius: 12,
+  borderRadius: 18,
   padding: theme.spacing(1.5),
-  border: `1px solid ${theme.palette.divider}`,
+  border: `1px solid rgba(148, 163, 184, 0.14)`,
   opacity: $isCurrentMonth ? 1 : 0.4,
   backgroundColor: $isToday
-    ? theme.palette.action.hover
+    ? alpha(theme.palette.success.main, 0.08)
     : $isHoliday
-    ? theme.palette.action.selected
-    : theme.palette.background.default,
+    ? alpha(theme.palette.warning.main, 0.08)
+    : "rgba(255,255,255,0.92)",
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(1),
@@ -80,7 +82,7 @@ const DayCell = styled(Box, {
   position: "relative",
   overflow: "hidden",
   "&:hover": {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: alpha(theme.palette.success.main, 0.07),
   },
   [theme.breakpoints.down("lg")]: {
     minHeight: 110,
@@ -442,17 +444,25 @@ export default function DesktopCalendarView({
             <IconButton
               aria-label="previous-month"
               onClick={() => updateMonth((prev) => prev.add(-1, "month"))}
+              sx={{
+                border: "1px solid rgba(148,163,184,0.18)",
+                bgcolor: "rgba(255,255,255,0.88)",
+              }}
             >
               <ChevronLeftIcon />
             </IconButton>
             <IconButton
               aria-label="next-month"
               onClick={() => updateMonth((prev) => prev.add(1, "month"))}
+              sx={{
+                border: "1px solid rgba(148,163,184,0.18)",
+                bgcolor: "rgba(255,255,255,0.88)",
+              }}
             >
               <ChevronRightIcon />
             </IconButton>
             <Divider orientation="vertical" flexItem />
-            <Typography variant="h6">
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
               {resolvedCurrentMonth.format("YYYY年M月")}
             </Typography>
           </Stack>
@@ -460,6 +470,12 @@ export default function DesktopCalendarView({
             <Tooltip title="今月に戻る">
               <IconButton
                 onClick={() => updateMonth(() => dayjs().startOf("month"))}
+                sx={{
+                  px: 1.5,
+                  borderRadius: "9999px",
+                  border: "1px solid rgba(148,163,184,0.18)",
+                  bgcolor: "rgba(255,255,255,0.88)",
+                }}
               >
                 <Typography variant="body2">今月</Typography>
               </IconButton>
