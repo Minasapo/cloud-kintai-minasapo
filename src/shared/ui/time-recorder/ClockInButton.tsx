@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 
 import {
   ACTION_BUTTON_CLASS_NAME,
@@ -6,6 +6,7 @@ import {
   buildActionButtonVars,
   TIME_RECORDER_BUTTON_PALETTES,
 } from "./buttonStyles";
+import { useActionButtonState } from "./useActionButtonState";
 
 export interface ClockInButtonProps {
   isBeforeWork: boolean;
@@ -21,24 +22,25 @@ const ClockInButton = ({
   const actionButtonVars = buildActionButtonVars(
     TIME_RECORDER_BUTTON_PALETTES.clockIn,
   );
-  const [clicked, setClicked] = useState(false);
-
-  // Derived state: reset clicked when isBeforeWork changes
-  const actualClicked = useMemo(() => {
-    return isBeforeWork ? false : clicked;
-  }, [isBeforeWork, clicked]);
+  const { isDisabled, markPending } = useActionButtonState({
+    canInteract: isBeforeWork,
+    disabled,
+  });
 
   const handleClick = useCallback(() => {
-    setClicked(true);
+    if (!markPending()) {
+      return;
+    }
+
     onClockIn();
-  }, [onClockIn]);
+  }, [markPending, onClockIn]);
 
   return (
     <button
       type="button"
       data-testid="clock-in-button"
       onClick={handleClick}
-      disabled={!isBeforeWork || actualClicked || disabled}
+      disabled={isDisabled}
       className={`${ACTION_BUTTON_CLASS_NAME} border-[var(--action-border)] bg-[var(--action-bg)] text-[color:var(--action-text)] hover:border-[var(--action-hover-border)] hover:bg-[var(--action-hover-bg)] hover:text-[color:var(--action-hover-text)]`}
       style={actionButtonVars}
     >

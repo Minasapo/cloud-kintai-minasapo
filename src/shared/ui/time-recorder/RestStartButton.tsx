@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 
-import { buildRestButtonVars,REST_BUTTON_CLASS_NAME } from "./buttonStyles";
+import { buildRestButtonVars, REST_BUTTON_CLASS_NAME } from "./buttonStyles";
+import { useActionButtonState } from "./useActionButtonState";
 
 export interface RestStartButtonProps {
   isWorking: boolean;
@@ -14,23 +15,24 @@ const RestStartButton = ({
   disabled = false,
 }: RestStartButtonProps) => {
   const restButtonVars = buildRestButtonVars();
-  const [isPending, setIsPending] = useState(false);
-
-  // Derived state: reset isPending when isWorking changes
-  const actualIsPending = useMemo(() => {
-    return isWorking ? false : isPending;
-  }, [isWorking, isPending]);
+  const { isDisabled, markPending } = useActionButtonState({
+    canInteract: isWorking,
+    disabled,
+  });
 
   const handleClick = useCallback(() => {
-    setIsPending(true);
+    if (!markPending()) {
+      return;
+    }
+
     onRestStart();
-  }, [onRestStart]);
+  }, [markPending, onRestStart]);
 
   return (
     <button
       type="button"
       onClick={handleClick}
-      disabled={!isWorking || actualIsPending || disabled}
+      disabled={isDisabled}
       data-testid="rest-start-button"
       className={`${REST_BUTTON_CLASS_NAME} bg-transparent text-[color:var(--rest-button-color)] hover:border-[var(--rest-button-hover-border)] hover:bg-[var(--rest-button-hover-bg)] hover:text-[color:var(--rest-button-hover-text)]`}
       style={restButtonVars}

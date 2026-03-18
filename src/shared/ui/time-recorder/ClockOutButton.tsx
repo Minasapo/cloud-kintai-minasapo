@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 
 import {
   ACTION_BUTTON_CLASS_NAME,
@@ -6,6 +6,7 @@ import {
   buildActionButtonVars,
   TIME_RECORDER_BUTTON_PALETTES,
 } from "./buttonStyles";
+import { useActionButtonState } from "./useActionButtonState";
 
 export interface ClockOutButtonProps {
   isWorking: boolean;
@@ -21,19 +22,18 @@ const ClockOutButton = ({
   const actionButtonVars = buildActionButtonVars(
     TIME_RECORDER_BUTTON_PALETTES.clockOut,
   );
-  const [isClicked, setIsClicked] = useState(false);
-
-  // Derived state: button is disabled when not working or user clicked
-  const isDisabled = useMemo(() => {
-    return !isWorking || isClicked || disabled;
-  }, [isWorking, isClicked, disabled]);
+  const { isDisabled, markPending } = useActionButtonState({
+    canInteract: isWorking,
+    disabled,
+  });
 
   const handleClick = useCallback(() => {
-    if (isDisabled) return;
+    if (!markPending()) {
+      return;
+    }
 
-    setIsClicked(true);
     onClockOut();
-  }, [isDisabled, onClockOut]);
+  }, [markPending, onClockOut]);
 
   return (
     <button

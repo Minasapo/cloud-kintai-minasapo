@@ -679,6 +679,7 @@ export default function TimeRecorder(): JSX.Element {
               <GoDirectlyItem
                 workStatus={workStatus}
                 onClick={handleGoDirectly}
+                disabled={hasChangeRequest}
               />
             ) : (
               <ClockInItem
@@ -693,6 +694,7 @@ export default function TimeRecorder(): JSX.Element {
               <ReturnDirectly
                 workStatus={workStatus}
                 onClick={handleReturnDirectly}
+                disabled={hasChangeRequest}
               />
             ) : (
               <ClockOutItem

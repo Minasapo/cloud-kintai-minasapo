@@ -1,39 +1,44 @@
-import { useMemo, useState } from "react";
+import { useCallback } from "react";
 
 import {
   ACTION_BUTTON_CLASS_NAME,
   buildActionButtonVars,
   TIME_RECORDER_BUTTON_PALETTES,
 } from "./buttonStyles";
+import { useActionButtonState } from "./useActionButtonState";
 
 export interface GoDirectlyButtonProps {
   isBeforeWork: boolean;
   onGoDirectly: () => void;
+  disabled?: boolean;
 }
 
 const GoDirectlyButton = ({
   isBeforeWork,
   onGoDirectly,
+  disabled = false,
 }: GoDirectlyButtonProps) => {
   const actionButtonVars = buildActionButtonVars(
     TIME_RECORDER_BUTTON_PALETTES.clockIn,
   );
-  const [isPending, setIsPending] = useState(false);
+  const { isDisabled, markPending } = useActionButtonState({
+    canInteract: isBeforeWork,
+    disabled,
+  });
+  const handleClick = useCallback(() => {
+    if (!markPending()) {
+      return;
+    }
 
-  // Derived state: reset isPending when isBeforeWork changes
-  const actualIsPending = useMemo(() => {
-    return isBeforeWork ? false : isPending;
-  }, [isBeforeWork, isPending]);
+    onGoDirectly();
+  }, [markPending, onGoDirectly]);
 
   return (
     <button
       type="button"
       data-testid="go-directly-button"
-      onClick={() => {
-        setIsPending(true);
-        onGoDirectly();
-      }}
-      disabled={!isBeforeWork || actualIsPending}
+      onClick={handleClick}
+      disabled={isDisabled}
       className={`${ACTION_BUTTON_CLASS_NAME} border-[var(--action-border)] bg-[var(--action-bg)] text-[color:var(--action-text)] hover:border-[var(--action-hover-border)] hover:bg-[var(--action-hover-bg)] hover:text-[color:var(--action-hover-text)]`}
       style={actionButtonVars}
     >
