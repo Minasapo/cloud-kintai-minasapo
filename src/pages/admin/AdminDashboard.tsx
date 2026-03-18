@@ -191,7 +191,11 @@ function AdminDashboardContent() {
         gap: PAGE_SECTION_GAP,
       }}
     >
-      <PageSection variant="surface" layoutVariant="dashboard" sx={{ gap: 0 }}>
+      <PageSection
+        variant="surface"
+        layoutVariant="dashboard"
+        className="gap-0"
+      >
         <AdminHeader
           actions={
             <Stack spacing={1} alignItems="flex-start">
