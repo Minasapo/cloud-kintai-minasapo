@@ -122,6 +122,7 @@ describe("exportService", () => {
     const definitions = EXPORT_MODEL_DEFINITIONS.filter((definition) =>
       ["Staff", "AppConfig"].includes(definition.modelName)
     );
+    const onProgress = jest.fn();
 
     mockedGraphql
       .mockResolvedValueOnce({
@@ -141,7 +142,7 @@ describe("exportService", () => {
         },
       });
 
-    const artifact = await createBulkExportArtifact(definitions, date);
+    const artifact = await createBulkExportArtifact(definitions, date, onProgress);
 
     expect(artifact.fileName).toBe("garaku-export-all-20260317-010203.json");
     expect(artifact.payload).toEqual({
@@ -154,6 +155,16 @@ describe("exportService", () => {
         AppConfig: [{ id: "config-1" }],
         Staff: [],
       },
+    });
+    expect(onProgress).toHaveBeenNthCalledWith(1, {
+      completedModels: 0,
+      currentModelName: "AppConfig",
+      totalModels: 2,
+    });
+    expect(onProgress).toHaveBeenNthCalledWith(2, {
+      completedModels: 1,
+      currentModelName: "Staff",
+      totalModels: 2,
     });
   });
 

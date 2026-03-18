@@ -35,6 +35,12 @@ export type ExportArtifact<TPayload> = {
   payload: TPayload;
 };
 
+export type BulkExportProgress = {
+  completedModels: number;
+  currentModelName: string;
+  totalModels: number;
+};
+
 export async function fetchAllPages(
   definition: ExportModelDefinition
 ): Promise<ExportedModelItem[]> {
@@ -137,11 +143,18 @@ export async function createSingleExportArtifact(
 
 export async function createBulkExportArtifact(
   definitions: ExportModelDefinition[] = EXPORT_MODEL_DEFINITIONS,
-  date = new Date()
+  date = new Date(),
+  onProgress?: (progress: BulkExportProgress) => void
 ): Promise<ExportArtifact<BulkExportPayload>> {
   const models: Record<string, ExportedModelItem[]> = {};
+  const totalModels = definitions.length;
 
-  for (const definition of definitions) {
+  for (const [index, definition] of definitions.entries()) {
+    onProgress?.({
+      completedModels: index,
+      currentModelName: definition.modelName,
+      totalModels,
+    });
     models[definition.modelName] = await fetchAllPages(definition);
   }
 

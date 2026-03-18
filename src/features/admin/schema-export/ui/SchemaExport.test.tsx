@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { AuthContext } from "@/context/AuthContext";
+
 import SchemaExport from "./SchemaExport";
 
 const mockCreateSingleExportArtifact = jest.fn();
@@ -19,14 +21,46 @@ jest.mock("../model/downloadJsonFile", () => ({
 }));
 
 describe("SchemaExport", () => {
+  const renderSchemaExport = (owner = true) =>
+    render(
+      <AuthContext.Provider
+        value={{
+          signOut: jest.fn(),
+          signIn: jest.fn(),
+          isCognitoUserRole: jest.fn(),
+          cognitoUser: owner
+            ? {
+                id: "user-1",
+                givenName: "Owner",
+                familyName: "User",
+                mailAddress: "owner@example.com",
+                owner: true,
+                roles: [],
+                emailVerified: true,
+              }
+            : {
+                id: "user-2",
+                givenName: "Admin",
+                familyName: "User",
+                mailAddress: "admin@example.com",
+                owner: false,
+                roles: [],
+                emailVerified: true,
+              },
+        }}
+      >
+        <SchemaExport />
+      </AuthContext.Provider>
+    );
+
   beforeEach(() => {
     mockCreateSingleExportArtifact.mockReset();
     mockCreateBulkExportArtifact.mockReset();
     mockDownloadJsonFile.mockReset();
   });
 
-  it("renders export actions and model options", () => {
-    render(<SchemaExport />);
+  it("renders export actions and model options for owner users", () => {
+    renderSchemaExport();
 
     expect(screen.getByText("データエクスポート")).toBeInTheDocument();
     expect(
@@ -44,6 +78,25 @@ describe("SchemaExport", () => {
     expect(screen.queryByText("対象モデル一覧")).not.toBeInTheDocument();
   });
 
+  it("shows an authorization message for non-owner users", () => {
+    renderSchemaExport(false);
+
+    expect(screen.getByText("データエクスポート")).toBeInTheDocument();
+    expect(
+      screen.getByText("この機能はオーナー権限ユーザーのみ利用できます。")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "個別エクスポート" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "全モデルを一括エクスポート" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("対象モデル")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("progressbar", { name: "一括エクスポート進捗" })
+    ).not.toBeInTheDocument();
+  });
+
   it("exports a selected model", async () => {
     const user = userEvent.setup();
     mockCreateSingleExportArtifact.mockResolvedValue({
@@ -51,7 +104,7 @@ describe("SchemaExport", () => {
       payload: { model: "Staff", count: 1, exportedAt: "x", items: [] },
     });
 
-    render(<SchemaExport />);
+    renderSchemaExport();
 
     await user.click(screen.getByRole("button", { name: "個別エクスポート" }));
 
@@ -79,7 +132,7 @@ describe("SchemaExport", () => {
         })
     );
 
-    render(<SchemaExport />);
+    renderSchemaExport();
 
     await user.click(
       screen.getByRole("button", { name: "全モデルを一括エクスポート" })
@@ -115,7 +168,7 @@ describe("SchemaExport", () => {
       new Error("Staff の取得に失敗しました。")
     );
 
-    render(<SchemaExport />);
+    renderSchemaExport();
 
     await user.click(screen.getByRole("button", { name: "個別エクスポート" }));
 
