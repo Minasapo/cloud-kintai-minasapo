@@ -59,9 +59,7 @@ export default function CommonBreadcrumbs({
             {item.href ? (
               <Link
                 href={item.href}
-                variant="body2"
-                underline="hover"
-                className="text-[color:var(--breadcrumbs-link-color)] no-underline"
+                className="text-[color:var(--breadcrumbs-link-color)] no-underline hover:underline focus-visible:underline"
               >
                 {item.label}
               </Link>

@@ -15,15 +15,6 @@ describe("Link", () => {
 
     expect(anchor).toBeInTheDocument();
     expect(anchor).toHaveAttribute("href", "/");
-    expect(anchor.getAttribute("style")).toBeNull();
-  });
-
-  it("applies explicit inherited color when requested", () => {
-    renderWithRouter(<Link href="/attendance/list" label="勤怠一覧" color="inherit" />);
-
-    expect(screen.getByRole("link", { name: "勤怠一覧" })).toHaveStyle({
-      color: "inherit",
-    });
   });
 
   it("prefers children over label", () => {

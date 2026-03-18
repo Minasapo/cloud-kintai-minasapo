@@ -799,15 +799,14 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         )}
         <Box>
           <Breadcrumbs>
-            <Link to="/" color="inherit">
+            <Link to="/">
               TOP
             </Link>
-            <Link to="/admin/attendances" color="inherit">
+            <Link to="/admin/attendances">
               勤怠管理
             </Link>
             <Link
               to={`/admin/staff/${targetStaffId}/attendance`}
-              color="inherit"
             >
               勤怠一覧
             </Link>

@@ -318,9 +318,7 @@ const LinkGridItem = ({
       href={processedUrl}
       target="_blank"
       rel="noopener noreferrer"
-      color="inherit"
-      underline="none"
-      sx={{ display: "block" }}
+      className="block text-inherit no-underline"
     >
       <Stack
         direction="column"

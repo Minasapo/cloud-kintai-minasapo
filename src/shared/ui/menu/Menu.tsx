@@ -18,8 +18,7 @@ const Menu = () => (
         <Link
           label={label}
           href={href}
-          color="secondary"
-          className="block h-full px-1 leading-8"
+          className="block h-full px-1 leading-8 text-[color:var(--ds-color-brand-secondary-base,#0B6D53)]"
         />
       </div>
     ))}

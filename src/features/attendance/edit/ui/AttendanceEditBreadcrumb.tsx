@@ -25,10 +25,10 @@ export default function AttendanceEditBreadcrumb() {
 
   return (
     <Breadcrumbs>
-      <Link href="/" color="inherit">
+      <Link href="/">
         TOP
       </Link>
-      <Link href={attendanceListHref} color="inherit">
+      <Link href={attendanceListHref}>
         勤怠一覧
       </Link>
       <Typography color="text.primary">

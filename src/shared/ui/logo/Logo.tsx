@@ -31,9 +31,6 @@ const Logo = () => (
   >
     <Link
       href="/"
-      variant="inherit"
-      color="inherit"
-      underline="none"
       className="inline-flex h-full w-full max-w-full items-center bg-transparent"
     >
       <img
