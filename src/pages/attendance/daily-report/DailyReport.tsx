@@ -218,6 +218,22 @@ function VStack({
   return <div className={`flex flex-col ${className}`.trim()}>{children}</div>;
 }
 
+function Panel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)] sm:p-5 ${className}`.trim()}
+    >
+      {children}
+    </div>
+  );
+}
+
 function AlertBox({
   children,
   tone,
@@ -1039,11 +1055,22 @@ export default function DailyReport() {
 
   return (
     <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
-      <PageSection layoutVariant="dashboard">
-        <VStack className="gap-6">
-          <div>
-            <h1 className="text-3xl font-semibold text-slate-900">日報</h1>
-          </div>
+      <PageSection
+        layoutVariant="dashboard"
+        variant="plain"
+        className="px-0 py-0 md:px-0"
+      >
+        <VStack className="mx-auto w-full max-w-[1180px] gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+          <section className="rounded-[1.8rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f7fcf8_0%,#ecfdf5_58%,#ffffff_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] sm:p-6">
+            <div className="space-y-2">
+              <h1 className="text-[1.85rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                日報
+              </h1>
+              <p className="max-w-3xl text-sm leading-6 text-slate-600 sm:text-[0.95rem]">
+                日ごとの作業内容、管理者コメント、提出状況をひとつの画面で確認できます。カレンダーから対象日を選んで、そのまま作成や編集に進めます。
+              </p>
+            </div>
+          </section>
 
           {requestError && (
             <AlertBox tone="error" onClose={() => setRequestError(null)}>
@@ -1051,27 +1078,58 @@ export default function DailyReport() {
             </AlertBox>
           )}
 
-          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,9fr)] md:gap-6">
-            <div>
-              <DashboardInnerSurface>
-                <DailyReportCalendar
-                  value={calendarDate}
-                  onChange={handleCalendarChange}
-                  reportedDateSet={reportedDateSet}
-                  isLoadingReports={isLoadingReports}
-                  hasReports={reports.length > 0}
-                />
-              </DashboardInnerSurface>
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(320px,360px)_minmax(0,1fr)] lg:gap-5">
+            <div className="lg:sticky lg:top-4">
+              <Panel className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fcfa_100%)]">
+                <VStack className="gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-slate-900">日付を選択</p>
+                    <p className="text-sm leading-6 text-slate-500">
+                      提出済みの日付は強調表示されます。
+                    </p>
+                  </div>
+                  <DashboardInnerSurface>
+                    <DailyReportCalendar
+                      value={calendarDate}
+                      onChange={handleCalendarChange}
+                      reportedDateSet={reportedDateSet}
+                      isLoadingReports={isLoadingReports}
+                      hasReports={reports.length > 0}
+                    />
+                  </DashboardInnerSurface>
+                </VStack>
+              </Panel>
             </div>
 
             <div>
-              <DashboardInnerSurface>
-                <VStack className="gap-6">
+              <Panel className="bg-[linear-gradient(180deg,#ffffff_0%,#fbfefd_100%)]">
+                <VStack className="gap-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-slate-500">
+                        対象日
+                      </p>
+                      <h2 className="text-[1.2rem] font-semibold text-slate-900 sm:text-[1.45rem]">
+                        {calendarDate.format("YYYY年MM月DD日")}
+                      </h2>
+                    </div>
+                    {!showInitialLoading ? (
+                      <span className="inline-flex w-fit items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                        {selectedReportId === "create"
+                          ? "作成中"
+                          : selectedReport
+                            ? "既存の日報"
+                            : "未作成"}
+                      </span>
+                    ) : null}
+                  </div>
+
                   {actionError && (
                     <AlertBox tone="error" onClose={() => setActionError(null)}>
                       {actionError}
                     </AlertBox>
                   )}
+
                   {showInitialLoading ? (
                     <VStack className="gap-4">
                       <SkeletonBlock className="h-8 w-2/5" />
@@ -1085,20 +1143,20 @@ export default function DailyReport() {
                     </VStack>
                   ) : isCreateMode ? (
                     <VStack className="gap-6">
-                      <div>
+                      <div className="space-y-1">
                         <p className="text-sm font-medium text-slate-500">
                           新しい日報を登録
                         </p>
-                        <h2 className="text-[1.2rem] font-semibold text-slate-900 sm:text-[1.5rem]">
+                        <h3 className="text-[1.15rem] font-semibold text-slate-900 sm:text-[1.35rem]">
                           日報作成フォーム
-                        </h2>
+                        </h3>
                       </div>
                       <AlertBox tone="warning">
                         この日報はまだ提出されていません。下書き保存後、必ず「提出する」ボタンをクリックしてください。
                       </AlertBox>
                       <DividerLine />
                       <form onSubmit={(event) => event.preventDefault()}>
-                        <VStack className="gap-8">
+                        <VStack className="gap-7">
                           <DailyReportFormFields
                             form={createForm}
                             onChange={handleCreateChange}
@@ -1154,211 +1212,212 @@ export default function DailyReport() {
                       </form>
                     </VStack>
                   ) : selectedReportId ? (
-                      (() => {
-                        const report = selectedReport;
-                        if (!report) {
-                          return (
-                            <p className="text-slate-500">
-                              選択中の日報が見つかりません。
-                            </p>
-                          );
-                        }
-                        const statusMeta = STATUS_META[report.status];
-                        const isEditing =
-                          editingReportId === report.id && Boolean(editDraft);
-                        const hasReactions = report.reactions.length > 0;
-                        const hasComments = report.comments.length > 0;
-
+                    (() => {
+                      const report = selectedReport;
+                      if (!report) {
                         return (
-                          <VStack className="gap-4">
-                            <div className="flex flex-col justify-between gap-4 md:flex-row">
-                              <div>
-                                <p className="text-sm font-medium text-slate-500">
-                                  {formatDateSlash(report.date) || report.date}{" "}
-                                  | {report.author}
+                          <p className="text-slate-500">
+                            選択中の日報が見つかりません。
+                          </p>
+                        );
+                      }
+                      const statusMeta = STATUS_META[report.status];
+                      const isEditing =
+                        editingReportId === report.id && Boolean(editDraft);
+                      const hasReactions = report.reactions.length > 0;
+                      const hasComments = report.comments.length > 0;
+
+                      return (
+                        <VStack className="gap-5">
+                          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                            <div className="space-y-1">
+                              <p className="text-sm font-medium text-slate-500">
+                                {formatDateSlash(report.date) || report.date} |{" "}
+                                {report.author}
+                              </p>
+                              <h3 className="break-words text-[1.2rem] font-semibold text-slate-900 sm:text-[1.45rem]">
+                                {report.title}
+                              </h3>
+                              {report.updatedAt && (
+                                <p className="text-sm text-slate-500">
+                                  最終更新:{" "}
+                                  {formatDateTimeReadable(report.updatedAt) ||
+                                    "-"}
                                 </p>
-                                <h2 className="break-words text-[1.2rem] font-semibold text-slate-900 sm:text-[1.5rem]">
-                                  {report.title}
-                                </h2>
-                                {report.updatedAt && (
-                                  <p className="text-sm text-slate-500">
-                                    最終更新:{" "}
-                                    {formatDateTimeReadable(report.updatedAt) ||
-                                      "-"}
-                                  </p>
-                                )}
-                              </div>
-                              <StatusChip
-                                label={statusMeta.label}
-                                className={statusMeta.className}
-                              />
+                              )}
                             </div>
+                            <StatusChip
+                              label={statusMeta.label}
+                              className={statusMeta.className}
+                            />
+                          </div>
 
-                            <DividerLine />
+                          <DividerLine />
 
-                            {report.status === DailyReportStatus.DRAFT && (
-                              <AlertBox tone="warning">
-                                この日報はまだ提出されていません。内容を確認して「提出する」ボタンをクリックしてください。
-                              </AlertBox>
-                            )}
+                          {report.status === DailyReportStatus.DRAFT && (
+                            <AlertBox tone="warning">
+                              この日報はまだ提出されていません。内容を確認して「提出する」ボタンをクリックしてください。
+                            </AlertBox>
+                          )}
 
-                            {isEditing && editDraft ? (
-                              <VStack className="gap-4">
-                                <DailyReportFormFields
-                                  form={editDraft}
-                                  onChange={handleEditChange}
-                                  resolvedAuthorName={resolvedAuthorName}
-                                />
-                                {editDraftLastSavedAt && (
-                                  <p className="text-xs text-slate-500">
-                                    最終保存: {editDraftLastSavedAt}
-                                  </p>
-                                )}
-                              </VStack>
-                            ) : (
+                          {isEditing && editDraft ? (
+                            <VStack className="gap-4">
+                              <DailyReportFormFields
+                                form={editDraft}
+                                onChange={handleEditChange}
+                                resolvedAuthorName={resolvedAuthorName}
+                              />
+                              {editDraftLastSavedAt && (
+                                <p className="text-xs text-slate-500">
+                                  最終保存: {editDraftLastSavedAt}
+                                </p>
+                              )}
+                            </VStack>
+                          ) : (
+                            <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50/70 p-4">
                               <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-slate-900">
                                 {report.content ||
                                   "内容はまだ入力されていません。"}
                               </pre>
-                            )}
+                            </div>
+                          )}
 
-                            {hasReactions && (
-                              <>
-                                <DividerLine />
-                                <div>
-                                  <p className="mb-1 text-sm font-semibold text-slate-900">
-                                    管理者からのリアクション
-                                  </p>
-                                  <div className="mb-2 flex flex-wrap gap-2">
-                                    {report.reactions.map((reaction) => {
-                                      const meta = REACTION_META[reaction.type];
-                                      if (!meta) return null;
-                                      return (
-                                        <StatusChip
-                                          key={reaction.type}
-                                          label={`${meta.emoji} ${meta.label} ×${reaction.count}`}
-                                          className="border border-slate-300 bg-white text-slate-700"
-                                        />
-                                      );
-                                    })}
-                                  </div>
+                          {hasReactions && (
+                            <>
+                              <DividerLine />
+                              <div>
+                                <p className="mb-2 text-sm font-semibold text-slate-900">
+                                  管理者からのリアクション
+                                </p>
+                                <div className="mb-2 flex flex-wrap gap-2">
+                                  {report.reactions.map((reaction) => {
+                                    const meta = REACTION_META[reaction.type];
+                                    if (!meta) return null;
+                                    return (
+                                      <StatusChip
+                                        key={reaction.type}
+                                        label={`${meta.emoji} ${meta.label} ×${reaction.count}`}
+                                        className="border border-slate-300 bg-white text-slate-700"
+                                      />
+                                    );
+                                  })}
                                 </div>
-                              </>
-                            )}
+                              </div>
+                            </>
+                          )}
 
-                            {hasComments && (
-                              <>
-                                <DividerLine />
-                                <div>
-                                  <p className="mb-2 text-sm font-semibold text-slate-900">
-                                    管理者からのコメント
-                                  </p>
-                                  <VStack className="gap-3">
-                                    {report.comments.map((comment) => (
-                                      <CommentCard key={comment.id}>
-                                        <div className="flex flex-col justify-between gap-1 sm:flex-row sm:gap-4">
-                                          <p className="text-sm font-semibold text-slate-900">
-                                            {comment.author}
-                                          </p>
-                                          <p className="text-xs text-slate-500">
-                                            {formatDateTimeReadable(
-                                              comment.createdAt,
-                                            ) || comment.createdAt}
-                                          </p>
-                                        </div>
-                                        <p className="mt-2 text-sm leading-6 text-slate-800">
-                                          {comment.body}
+                          {hasComments && (
+                            <>
+                              <DividerLine />
+                              <div>
+                                <p className="mb-2 text-sm font-semibold text-slate-900">
+                                  管理者からのコメント
+                                </p>
+                                <VStack className="gap-3">
+                                  {report.comments.map((comment) => (
+                                    <CommentCard key={comment.id}>
+                                      <div className="flex flex-col justify-between gap-1 sm:flex-row sm:gap-4">
+                                        <p className="text-sm font-semibold text-slate-900">
+                                          {comment.author}
                                         </p>
-                                      </CommentCard>
-                                    ))}
-                                  </VStack>
-                                </div>
-                              </>
-                            )}
-                          </VStack>
-                        );
-                      })()
-                    ) : (
-                      <VStack className="items-center gap-6 py-4">
-                        <p className="text-center text-slate-500">
-                          {calendarDate.format("YYYY年MM月DD日")}
-                          の日報はまだ登録されていません。
-                        </p>
-                        <ActionButton
-                          tone="primary"
-                          onClick={() => {
-                            setSelectedReportId("create");
-                            setCreateForm(
-                              emptyForm(
-                                calendarDate.format("YYYY-MM-DD"),
-                                resolvedAuthorName,
-                              ),
-                            );
-                            // 新規作成ボタンを押したときは作成済みレポートIDをクリア
-                            createdReportIdRef.current = null;
-                          }}
-                        >
-                          この日の日報を作成する
-                        </ActionButton>
-                      </VStack>
-                    )}
+                                        <p className="text-xs text-slate-500">
+                                          {formatDateTimeReadable(
+                                            comment.createdAt,
+                                          ) || comment.createdAt}
+                                        </p>
+                                      </div>
+                                      <p className="mt-2 text-sm leading-6 text-slate-800">
+                                        {comment.body}
+                                      </p>
+                                    </CommentCard>
+                                  ))}
+                                </VStack>
+                              </div>
+                            </>
+                          )}
+                        </VStack>
+                      );
+                    })()
+                  ) : (
+                    <VStack className="items-center gap-6 rounded-[1.4rem] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-8">
+                      <p className="text-center text-slate-500">
+                        {calendarDate.format("YYYY年MM月DD日")}
+                        の日報はまだ登録されていません。
+                      </p>
+                      <ActionButton
+                        tone="primary"
+                        onClick={() => {
+                          setSelectedReportId("create");
+                          setCreateForm(
+                            emptyForm(
+                              calendarDate.format("YYYY-MM-DD"),
+                              resolvedAuthorName,
+                            ),
+                          );
+                          createdReportIdRef.current = null;
+                        }}
+                      >
+                        この日の日報を作成する
+                      </ActionButton>
+                    </VStack>
+                  )}
 
-                    {!isCreateMode && selectedReportId && (
-                      <VStack className="gap-4">
-                        <DividerLine />
-                        {editingReportId && editDraft ? (
-                          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-                            <ActionButton
-                              tone="secondary"
-                              disabled={!canEditSubmit || isUpdating}
-                              onClick={() => {
-                                void handleSaveEdit(
-                                  DailyReportStatus.DRAFT,
-                                  true,
-                                );
-                              }}
-                            >
-                              下書き保存
-                            </ActionButton>
-                            <ActionButton
-                              tone="primary"
-                              disabled={
-                                !canEditSubmit ||
-                                isUpdating ||
-                                isSelectedReportSubmitted
+                  {!isCreateMode && selectedReportId && (
+                    <VStack className="gap-4">
+                      <DividerLine />
+                      {editingReportId && editDraft ? (
+                        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+                          <ActionButton
+                            tone="secondary"
+                            disabled={!canEditSubmit || isUpdating}
+                            onClick={() => {
+                              void handleSaveEdit(
+                                DailyReportStatus.DRAFT,
+                                true,
+                              );
+                            }}
+                          >
+                            下書き保存
+                          </ActionButton>
+                          <ActionButton
+                            tone="primary"
+                            disabled={
+                              !canEditSubmit ||
+                              isUpdating ||
+                              isSelectedReportSubmitted
+                            }
+                            onClick={() => {
+                              void handleSaveEdit(
+                                DailyReportStatus.SUBMITTED,
+                                true,
+                              );
+                            }}
+                          >
+                            提出する
+                          </ActionButton>
+                          <ActionButton tone="ghost" onClick={handleCancelEdit}>
+                            キャンセル
+                          </ActionButton>
+                        </div>
+                      ) : (
+                        <div className="flex justify-stretch sm:justify-end">
+                          <ActionButton
+                            tone="secondary"
+                            disabled={isUpdating}
+                            onClick={() => {
+                              if (selectedReport) {
+                                handleStartEdit(selectedReport);
                               }
-                              onClick={() => {
-                                void handleSaveEdit(
-                                  DailyReportStatus.SUBMITTED,
-                                  true,
-                                );
-                              }}
-                            >
-                              提出する
-                            </ActionButton>
-                            <ActionButton tone="ghost" onClick={handleCancelEdit}>
-                              キャンセル
-                            </ActionButton>
-                          </div>
-                        ) : (
-                          <div className="flex justify-stretch sm:justify-end">
-                            <ActionButton
-                              tone="secondary"
-                              disabled={isUpdating}
-                              onClick={() => {
-                                if (selectedReport) {
-                                  handleStartEdit(selectedReport);
-                                }
-                              }}
-                            >
-                              編集
-                            </ActionButton>
-                          </div>
-                        )}
-                      </VStack>
-                    )}
+                            }}
+                          >
+                            編集
+                          </ActionButton>
+                        </div>
+                      )}
+                    </VStack>
+                  )}
                 </VStack>
-              </DashboardInnerSurface>
+              </Panel>
             </div>
           </div>
         </VStack>
