@@ -46,19 +46,19 @@ const DesktopMenu = ({
   );
   const MENU_ITEM_COLOR = designTokenVar(
     "component.headerMenu.color",
-    "#FFFFFF",
+    "#45574F",
   );
   const MENU_ITEM_ACTIVE_COLOR = designTokenVar(
     "component.headerMenu.activeColor",
-    "#0FA85E",
+    "#065F46",
   );
   const MENU_ITEM_ACTIVE_BACKGROUND = designTokenVar(
     "component.headerMenu.activeBackground",
-    "#FFFFFF",
+    "#ECFDF3",
   );
   const MENU_ITEM_HOVER_BACKGROUND = designTokenVar(
     "component.headerMenu.hoverBackground",
-    "rgba(255, 255, 255, 0.16)",
+    "rgba(15, 168, 94, 0.1)",
   );
   const MENU_ITEM_TRANSITION = designTokenVar(
     "component.headerMenu.transitionMs",

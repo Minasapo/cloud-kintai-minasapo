@@ -19,7 +19,7 @@ export interface ExternalLinksProps {
 
 const ACTION_ICON_COLOR = designTokenVar(
   "component.headerActions.iconColor",
-  "#FFFFFF",
+  "#45574F",
 );
 const ACTION_ICON_SIZE = designTokenVar(
   "component.headerActions.iconSize",
@@ -31,7 +31,19 @@ const ACTION_ICON_SIZE_SM = designTokenVar(
 );
 const ACTION_ICON_HOVER_BG = designTokenVar(
   "component.headerActions.iconHoverBackground",
-  "rgba(255, 255, 255, 0.16)",
+  "rgba(15, 168, 94, 0.1)",
+);
+const ACTION_BUTTON_BORDER = designTokenVar(
+  "component.headerActions.buttonBorder",
+  "rgba(20, 76, 44, 0.12)",
+);
+const ACTION_BUTTON_BG = designTokenVar(
+  "component.headerActions.buttonBackground",
+  "rgba(255, 255, 255, 0.78)",
+);
+const ACTION_BUTTON_TEXT = designTokenVar(
+  "component.headerActions.buttonText",
+  "#45574F",
 );
 const POPPER_WIDTH = designTokenVar(
   "component.headerActions.popoverWidth",
@@ -143,10 +155,12 @@ function LinksSection({
   title,
   links,
   staffName,
+  useGenericIcon = false,
 }: {
   title: string;
   links: ExternalLinkItem[];
   staffName: string;
+  useGenericIcon?: boolean;
 }) {
   return (
     <div>
@@ -184,7 +198,7 @@ function LinksSection({
             key={`${link.url}-${index}`}
             url={link.url}
             title={link.label}
-            iconType={link.icon}
+            iconType={useGenericIcon ? "LinkIcons" : link.icon}
             staffName={staffName}
           />
         ))}
@@ -312,12 +326,23 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
         aria-expanded={open}
         aria-controls={open ? "external-links-popup" : undefined}
         aria-label="external links"
-        className="inline-flex h-[var(--external-links-button-size-sm)] w-[var(--external-links-button-size-sm)] items-center justify-center appearance-none rounded-full border-0 bg-transparent p-0 shadow-none transition sm:h-[var(--external-links-button-size)] sm:w-[var(--external-links-button-size)]"
+        className="inline-flex h-[var(--external-links-button-size-sm)] min-w-[var(--external-links-button-size-sm)] items-center justify-center gap-2 rounded-full border px-2.5 py-0 text-[color:var(--external-links-button-text)] shadow-none transition sm:h-[var(--external-links-button-size)] sm:min-w-[var(--external-links-button-size)] sm:px-3"
+        style={
+          {
+            "--external-links-button-text": ACTION_BUTTON_TEXT,
+            borderColor: ACTION_BUTTON_BORDER,
+            backgroundColor: open ? ACTION_ICON_HOVER_BG : ACTION_BUTTON_BG,
+          } as CSSProperties & Record<`--${string}`, string>
+        }
         onMouseEnter={(event) => {
           event.currentTarget.style.backgroundColor = ACTION_ICON_HOVER_BG;
+          event.currentTarget.style.borderColor = "rgba(20, 76, 44, 0.2)";
         }}
         onMouseLeave={(event) => {
-          event.currentTarget.style.backgroundColor = "transparent";
+          event.currentTarget.style.backgroundColor = open
+            ? ACTION_ICON_HOVER_BG
+            : ACTION_BUTTON_BG;
+          event.currentTarget.style.borderColor = ACTION_BUTTON_BORDER;
         }}
       >
         <AppsGlyph color={ACTION_ICON_COLOR} />
@@ -362,6 +387,7 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
                     title="プライベート"
                     links={personalLinks}
                     staffName={staffName}
+                    useGenericIcon
                   />
                 ) : null}
                 {companyLinks.length === 0 && personalLinks.length === 0 ? (

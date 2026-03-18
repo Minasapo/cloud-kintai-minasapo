@@ -88,7 +88,7 @@ const MobileMenu = ({
   onOpen,
   onClose,
   hide = false,
-  iconColor = "white",
+  iconColor = "#45574F",
 }: MobileMenuProps) => {
   if (hide) {
     return null;
@@ -101,7 +101,7 @@ const MobileMenu = ({
         onClick={onOpen}
         aria-label="menu"
         aria-expanded={isOpen}
-        className="inline-flex appearance-none rounded-full border-0 bg-transparent p-[3px] shadow-none transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 sm:p-[6px]"
+        className="inline-flex appearance-none rounded-full border-0 bg-transparent p-[3px] shadow-none transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 sm:p-[6px]"
       >
         <MenuGlyph color={iconColor} />
       </button>

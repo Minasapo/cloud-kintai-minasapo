@@ -26,6 +26,10 @@ const LOGOUT_BUTTON_TEXT = designTokenVar(
   "color.brand.primary.contrastText",
   "#FFFFFF"
 );
+const SIGN_BUTTON_TEXT = designTokenVar(
+  "component.headerSignButton.textColor",
+  "#1E2A25",
+);
 
 export interface SignInOutButtonProps {
   isAuthenticated: boolean;
@@ -51,9 +55,10 @@ const SignInOutButton = ({
     "--login-button-text": LOGIN_BUTTON_TEXT,
     "--logout-button-bg": LOGOUT_BUTTON_BG,
     "--logout-button-text": LOGOUT_BUTTON_TEXT,
+    "--sign-button-text": SIGN_BUTTON_TEXT,
   };
   const buttonClassName =
-    "whitespace-nowrap rounded-[var(--sign-button-radius)] border-[3px] px-[var(--sign-button-padding-x)] py-2 font-[var(--sign-button-font-weight)] transition-[color,background-color,border-color] duration-150 ease-in-out";
+    "whitespace-nowrap rounded-[var(--sign-button-radius)] border-[3px] px-[var(--sign-button-padding-x)] py-2 font-[var(--sign-button-font-weight)] text-[color:var(--sign-button-text)] transition-[color,background-color,border-color] duration-150 ease-in-out";
 
   if (isConfiguring) {
     return null;

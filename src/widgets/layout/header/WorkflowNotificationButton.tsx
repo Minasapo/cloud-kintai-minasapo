@@ -25,8 +25,11 @@ export default function WorkflowNotificationButton() {
         aria-label="通知一覧"
         onClick={() => navigate("/notifications")}
         sx={{
-          color: "common.white",
+          color: "#45574F",
           p: { xs: "4px", md: "8px" },
+          "&:hover": {
+            backgroundColor: "rgba(15, 168, 94, 0.1)",
+          },
         }}
       >
         <Badge
