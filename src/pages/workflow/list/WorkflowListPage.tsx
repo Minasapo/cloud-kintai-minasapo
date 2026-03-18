@@ -39,7 +39,7 @@ import {
 } from "@/features/workflow/list/useWorkflowListViewModel";
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
 import { designTokenVar } from "@/shared/designSystem";
-import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 import WorkflowListFilters, {
   type WorkflowListFiltersHandle,
@@ -181,17 +181,12 @@ export default function WorkflowListPage() {
     return (
       <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
         <PageSection layoutVariant="dashboard">
-          <Box
-            sx={{
-              ...dashboardInnerSurfaceSx,
-              display: "flex",
-              minHeight: LOADING_SECTION_MIN_HEIGHT,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+          <DashboardInnerSurface
+            className="flex items-center justify-center"
+            style={{ minHeight: LOADING_SECTION_MIN_HEIGHT }}
           >
             <CircularProgress />
-          </Box>
+          </DashboardInnerSurface>
         </PageSection>
       </Page>
     );
@@ -200,7 +195,7 @@ export default function WorkflowListPage() {
   return (
     <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
       <PageSection layoutVariant="dashboard">
-        <Box sx={dashboardInnerSurfaceSx}>
+        <DashboardInnerSurface>
           <Stack spacing={3}>
             <Stack spacing={2}>
               <Stack
@@ -488,7 +483,7 @@ export default function WorkflowListPage() {
               </Box>
             )}
           </Stack>
-        </Box>
+        </DashboardInnerSurface>
       </PageSection>
     </Page>
   );

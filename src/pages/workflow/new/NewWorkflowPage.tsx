@@ -45,7 +45,7 @@ import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import { parseTimeToISO } from "@/shared/lib/time";
-import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 const logger = createLogger("NewWorkflowPage");
 
@@ -409,7 +409,7 @@ export default function NewWorkflowPage() {
         onSubmit={handleSubmit}
         sx={{ gap: 0 }}
       >
-        <Box sx={dashboardInnerSurfaceSx}>
+        <DashboardInnerSurface>
           <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
             <Grid item xs={12} sm={3}>
               <Typography variant="body2" color="text.secondary">
@@ -560,7 +560,7 @@ export default function NewWorkflowPage() {
               </Box>
             </Grid>
           </Grid>
-        </Box>
+        </DashboardInnerSurface>
       </PageSection>
     </Page>
   );

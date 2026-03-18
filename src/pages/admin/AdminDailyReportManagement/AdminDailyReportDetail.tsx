@@ -46,7 +46,7 @@ import {
   getNextVersion,
 } from "@/shared/api/graphql/concurrency";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
-import { dashboardInnerSurfaceSx } from "@/shared/ui/layout";
+import { DashboardInnerSurface } from "@/shared/ui/layout";
 
 import {
   type AdminComment,
@@ -570,7 +570,7 @@ export default function AdminDailyReportDetail() {
 
         <Grid container spacing={3} alignItems="flex-start">
           <Grid item xs={12} md={3}>
-            <Box sx={dashboardInnerSurfaceSx}>
+            <DashboardInnerSurface>
               <DailyReportCalendar
                 value={calendarDate}
                 onChange={handleCalendarChange}
@@ -578,11 +578,11 @@ export default function AdminDailyReportDetail() {
                 isLoadingReports={isLoadingReports}
                 hasReports={reports.length > 0}
               />
-            </Box>
+            </DashboardInnerSurface>
           </Grid>
 
           <Grid item xs={12} md={9}>
-            <Box sx={dashboardInnerSurfaceSx}>
+            <DashboardInnerSurface>
               {shouldShowLoading ? (
                 <Paper sx={{ p: 4 }}>
                   <Typography align="center">読み込み中...</Typography>
@@ -762,7 +762,7 @@ export default function AdminDailyReportDetail() {
                   </Stack>
                 </Paper>
               )}
-            </Box>
+            </DashboardInnerSurface>
           </Grid>
         </Grid>
       </Stack>

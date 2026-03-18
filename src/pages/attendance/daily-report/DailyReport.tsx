@@ -53,7 +53,7 @@ import {
   getNextVersion,
 } from "@/shared/api/graphql/concurrency";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
-import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 /**
  * 定数定義
@@ -910,7 +910,7 @@ export default function DailyReport() {
               alignItems="flex-start"
             >
               <Grid item xs={12} md={3}>
-                <Box sx={dashboardInnerSurfaceSx}>
+                <DashboardInnerSurface>
                   <DailyReportCalendar
                     value={calendarDate}
                     onChange={handleCalendarChange}
@@ -918,11 +918,11 @@ export default function DailyReport() {
                     isLoadingReports={isLoadingReports}
                     hasReports={reports.length > 0}
                   />
-                </Box>
+                </DashboardInnerSurface>
               </Grid>
 
               <Grid item xs={12} md={9}>
-                <Box sx={dashboardInnerSurfaceSx}>
+                <DashboardInnerSurface>
                   <Stack spacing={3}>
                     {actionError && (
                       <Alert
@@ -1314,7 +1314,7 @@ export default function DailyReport() {
                       </Stack>
                     )}
                   </Stack>
-                </Box>
+                </DashboardInnerSurface>
               </Grid>
             </Grid>
           </Stack>
