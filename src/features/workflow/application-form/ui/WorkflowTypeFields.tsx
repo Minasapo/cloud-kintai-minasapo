@@ -14,6 +14,13 @@ import {
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import { TimeInput } from "@/shared/ui/TimeInput";
 
+const inlineFieldGroupSx = {
+  display: "flex",
+  gap: 1,
+  alignItems: "flex-start",
+  flexWrap: "wrap",
+};
+
 type Props = {
   category: string;
   disabled?: boolean;
@@ -102,7 +109,7 @@ export default function WorkflowTypeFields({
             </Typography>
           </Grid>
           <Grid item xs={12} sm={9}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Box sx={inlineFieldGroupSx}>
               <TextField
                 type="date"
                 size="small"
@@ -209,28 +216,56 @@ export default function WorkflowTypeFields({
             </Typography>
           </Grid>
           <Grid item xs={12} sm={9}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              <TimeInput
-                value={overtimeStart}
-                onChange={setOvertimeStart}
-                baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
-                size="small"
-                error={Boolean(overtimeError)}
-                disabled={disabled}
-                sx={{ maxWidth: 160 }}
-              />
-              <Typography>-</Typography>
-              <TimeInput
-                value={overtimeEnd}
-                onChange={setOvertimeEnd}
-                baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
-                size="small"
-                error={Boolean(overtimeError)}
-                disabled={disabled}
-                sx={{ maxWidth: 160 }}
-              />
+            <Box sx={{ display: "grid", gap: 0.75 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "minmax(0, 1fr)",
+                    sm: "148px 48px 148px",
+                  },
+                  columnGap: 0,
+                  rowGap: 1,
+                  alignItems: "center",
+                }}
+              >
+                <TimeInput
+                  value={overtimeStart}
+                  onChange={setOvertimeStart}
+                  baseDate={
+                    overtimeDate || new Date().toISOString().slice(0, 10)
+                  }
+                  size="small"
+                  error={Boolean(overtimeError)}
+                  disabled={disabled}
+                  sx={{ width: "148px", maxWidth: "100%" }}
+                />
+                <Typography
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    textAlign: "center",
+                    lineHeight: 1,
+                    color: "text.secondary",
+                    justifySelf: "center",
+                    transform: "translateY(-1px)",
+                  }}
+                >
+                  〜
+                </Typography>
+                <TimeInput
+                  value={overtimeEnd}
+                  onChange={setOvertimeEnd}
+                  baseDate={
+                    overtimeDate || new Date().toISOString().slice(0, 10)
+                  }
+                  size="small"
+                  error={Boolean(overtimeError)}
+                  disabled={disabled}
+                  sx={{ width: "148px", maxWidth: "100%" }}
+                />
+              </Box>
               {overtimeError && (
-                <Typography color="error" variant="caption" sx={{ ml: 2 }}>
+                <Typography color="error" variant="caption">
                   {overtimeError}
                 </Typography>
               )}
@@ -346,7 +381,7 @@ export default function WorkflowTypeFields({
             </Typography>
           </Grid>
           <Grid item xs={12} sm={9}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Box sx={inlineFieldGroupSx}>
               <Select
                 size="small"
                 fullWidth

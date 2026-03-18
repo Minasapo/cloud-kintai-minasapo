@@ -433,7 +433,12 @@ export default function NewWorkflowPage() {
         sx={{ gap: 0 }}
       >
         <DashboardInnerSurface>
-          <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
+          <Grid
+            container
+            rowSpacing={3}
+            columnSpacing={2}
+            alignItems="flex-start"
+          >
             <Grid item xs={12} sm={3}>
               <Typography variant="body2" color="text.secondary">
                 種別
