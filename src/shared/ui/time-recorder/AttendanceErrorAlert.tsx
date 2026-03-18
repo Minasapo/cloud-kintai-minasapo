@@ -1,4 +1,4 @@
-import Link from "@/shared/ui/link/Link";
+import { Link as RouterLink } from "react-router-dom";
 
 const AttendanceErrorAlert = () => {
   return (
@@ -12,14 +12,12 @@ const AttendanceErrorAlert = () => {
           打刻エラーがあります。勤怠一覧を確認してください。
         </p>
       </div>
-      <Link
+      <RouterLink
         to="/attendance/list"
-        color="inherit"
-        underline="none"
         className="inline-flex min-w-fit shrink-0 whitespace-nowrap rounded-md border border-current px-3 py-1.5 text-sm font-medium leading-none transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
       >
-          確認
-      </Link>
+        確認
+      </RouterLink>
     </div>
   );
 };

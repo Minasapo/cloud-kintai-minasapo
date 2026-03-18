@@ -1,19 +1,25 @@
-import type { ChangeEventHandler, CSSProperties, InputHTMLAttributes } from "react";
+import type {
+  ChangeEventHandler,
+  CSSProperties,
+  InputHTMLAttributes,
+} from "react";
 
-type DirectSwitchProps = {
+type DirectSwitchProps = Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "checked" | "disabled" | "onChange" | "type"
+> & {
   checked?: boolean;
   disabled?: boolean;
   onChange?: ChangeEventHandler<HTMLInputElement>;
-  inputProps?: InputHTMLAttributes<HTMLInputElement>;
 };
 
 const DirectSwitch = ({
   checked = false,
   disabled = false,
   onChange,
-  inputProps,
+  className,
+  ...restInputProps
 }: DirectSwitchProps) => {
-  const { className, ...restInputProps } = inputProps ?? {};
   const trackClassName = checked ? "bg-emerald-600" : "bg-slate-300";
   const thumbStyle: CSSProperties = {
     left: checked ? "calc(100% - 1.75rem)" : "0.25rem",

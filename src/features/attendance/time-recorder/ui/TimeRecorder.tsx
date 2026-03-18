@@ -669,11 +669,7 @@ export default function TimeRecorder(): JSX.Element {
               <DirectSwitch
                 checked={directMode}
                 onChange={(event) => setDirectMode(event.target.checked)}
-                inputProps={
-                  {
-                    "data-testid": "direct-mode-switch",
-                  } as React.InputHTMLAttributes<HTMLInputElement>
-                }
+                data-testid="direct-mode-switch"
               />
               <span>直行/直帰モード</span>
             </label>
