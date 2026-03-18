@@ -1,9 +1,8 @@
 import { useCallback } from "react";
 
+import ActionCardButton from "./ActionCardButton";
 import {
-  ACTION_BUTTON_CLASS_NAME,
-  ACTION_BUTTON_LABEL_CLASS_NAME,
-  buildActionButtonVars,
+  buildActionCardVars,
   TIME_RECORDER_BUTTON_PALETTES,
 } from "./buttonStyles";
 import { useActionButtonState } from "./useActionButtonState";
@@ -14,12 +13,33 @@ export interface ClockOutButtonProps {
   disabled?: boolean;
 }
 
+function ClockOutIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
+      <path
+        d="M10 4h6.5A1.5 1.5 0 0 1 18 5.5v13a1.5 1.5 0 0 1-1.5 1.5H10"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 12H6M9 8l-4 4 4 4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const ClockOutButton = ({
   isWorking,
   onClockOut,
   disabled = false,
 }: ClockOutButtonProps) => {
-  const actionButtonVars = buildActionButtonVars(
+  const actionButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.clockOut,
   );
   const { isDisabled, markPending } = useActionButtonState({
@@ -36,16 +56,15 @@ const ClockOutButton = ({
   }, [markPending, onClockOut]);
 
   return (
-    <button
-      type="button"
-      data-testid="clock-out-button"
+    <ActionCardButton
+      testId="clock-out-button"
+      style={actionButtonVars}
       disabled={isDisabled}
       onClick={handleClick}
-      className={`${ACTION_BUTTON_CLASS_NAME} border-[var(--action-border)] bg-[var(--action-bg)] text-[color:var(--action-text)] hover:border-[var(--action-hover-border)] hover:bg-[var(--action-hover-bg)] hover:text-[color:var(--action-hover-text)]`}
-      style={actionButtonVars}
-    >
-      <span className={ACTION_BUTTON_LABEL_CLASS_NAME}>{"勤務\n終了"}</span>
-    </button>
+      label={"勤務\n終了"}
+      helper={null}
+      icon={<ClockOutIcon />}
+    />
   );
 };
 

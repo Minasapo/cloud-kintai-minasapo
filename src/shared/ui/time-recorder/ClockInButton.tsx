@@ -1,9 +1,8 @@
 import { useCallback } from "react";
 
+import ActionCardButton from "./ActionCardButton";
 import {
-  ACTION_BUTTON_CLASS_NAME,
-  ACTION_BUTTON_LABEL_CLASS_NAME,
-  buildActionButtonVars,
+  buildActionCardVars,
   TIME_RECORDER_BUTTON_PALETTES,
 } from "./buttonStyles";
 import { useActionButtonState } from "./useActionButtonState";
@@ -14,12 +13,33 @@ export interface ClockInButtonProps {
   disabled?: boolean;
 }
 
+function ClockInIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
+      <path
+        d="M14 4H7.5A1.5 1.5 0 0 0 6 5.5v13A1.5 1.5 0 0 0 7.5 20H14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 12h8M15 8l4 4-4 4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const ClockInButton = ({
   isBeforeWork,
   onClockIn,
   disabled = false,
 }: ClockInButtonProps) => {
-  const actionButtonVars = buildActionButtonVars(
+  const actionButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.clockIn,
   );
   const { isDisabled, markPending } = useActionButtonState({
@@ -36,16 +56,15 @@ const ClockInButton = ({
   }, [markPending, onClockIn]);
 
   return (
-    <button
-      type="button"
-      data-testid="clock-in-button"
-      onClick={handleClick}
-      disabled={isDisabled}
-      className={`${ACTION_BUTTON_CLASS_NAME} border-[var(--action-border)] bg-[var(--action-bg)] text-[color:var(--action-text)] hover:border-[var(--action-hover-border)] hover:bg-[var(--action-hover-bg)] hover:text-[color:var(--action-hover-text)]`}
+    <ActionCardButton
+      testId="clock-in-button"
       style={actionButtonVars}
-    >
-      <span className={ACTION_BUTTON_LABEL_CLASS_NAME}>{"勤務\n開始"}</span>
-    </button>
+      disabled={isDisabled}
+      onClick={handleClick}
+      label={"勤務\n開始"}
+      helper={null}
+      icon={<ClockInIcon />}
+    />
   );
 };
 

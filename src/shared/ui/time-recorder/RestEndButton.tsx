@@ -1,6 +1,10 @@
 import { useCallback } from "react";
 
-import { buildRestButtonVars, REST_BUTTON_CLASS_NAME } from "./buttonStyles";
+import ActionCardButton from "./ActionCardButton";
+import {
+  buildActionCardVars,
+  TIME_RECORDER_BUTTON_PALETTES,
+} from "./buttonStyles";
 import { useActionButtonState } from "./useActionButtonState";
 
 export interface RestEndButtonProps {
@@ -9,12 +13,28 @@ export interface RestEndButtonProps {
   disabled?: boolean;
 }
 
+function RestEndIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
+      <path
+        d="M12 7v5l3 3M20 12a8 8 0 1 1-8-8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const RestEndButton = ({
   isResting,
   onRestEnd,
   disabled = false,
 }: RestEndButtonProps) => {
-  const restButtonVars = buildRestButtonVars();
+  const restButtonVars = buildActionCardVars(
+    TIME_RECORDER_BUTTON_PALETTES.rest,
+  );
   const { isDisabled, markPending } = useActionButtonState({
     canInteract: isResting,
     disabled,
@@ -29,16 +49,16 @@ const RestEndButton = ({
   }, [markPending, onRestEnd]);
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={isDisabled}
-      data-testid="rest-end-button"
-      className={`${REST_BUTTON_CLASS_NAME} bg-transparent text-[color:var(--rest-button-color)] hover:border-[var(--rest-button-hover-border)] hover:bg-[var(--rest-button-hover-bg)] hover:text-[color:var(--rest-button-hover-text)]`}
+    <ActionCardButton
+      testId="rest-end-button"
       style={restButtonVars}
-    >
-      休憩終了
-    </button>
+      size="compact"
+      disabled={isDisabled}
+      onClick={handleClick}
+      label="休憩終了"
+      helper={null}
+      icon={<RestEndIcon />}
+    />
   );
 };
 

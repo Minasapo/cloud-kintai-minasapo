@@ -20,7 +20,9 @@ const DirectSwitch = ({
   className,
   ...restInputProps
 }: DirectSwitchProps) => {
-  const trackClassName = checked ? "bg-emerald-600" : "bg-slate-300";
+  const trackClassName = checked
+    ? "bg-[linear-gradient(135deg,#0FA85E_0%,#0B6D53_100%)]"
+    : "bg-slate-300";
   const thumbStyle: CSSProperties = {
     left: checked ? "calc(100% - 1.75rem)" : "0.25rem",
   };
@@ -37,10 +39,10 @@ const DirectSwitch = ({
         {...restInputProps}
       />
       <span
-        className={`pointer-events-none absolute inset-0 rounded-full transition-colors duration-200 ${trackClassName} ${disabled ? "cursor-not-allowed opacity-60" : ""}`.trim()}
+        className={`pointer-events-none absolute inset-0 rounded-full border border-white/40 shadow-[inset_0_1px_2px_rgba(15,23,42,0.18)] transition duration-200 ${trackClassName} ${disabled ? "cursor-not-allowed opacity-60" : ""}`.trim()}
       />
       <span
-        className="pointer-events-none absolute top-1 h-6 w-6 rounded-full bg-white shadow-sm transition-[left] duration-200"
+        className="pointer-events-none absolute top-1 h-6 w-6 rounded-full bg-white shadow-[0_4px_12px_rgba(15,23,42,0.25)] transition-[left] duration-200"
         style={thumbStyle}
       />
     </span>

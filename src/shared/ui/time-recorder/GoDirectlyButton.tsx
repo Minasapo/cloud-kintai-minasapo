@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 
+import ActionCardButton from "./ActionCardButton";
 import {
-  ACTION_BUTTON_CLASS_NAME,
-  buildActionButtonVars,
+  buildActionCardVars,
   TIME_RECORDER_BUTTON_PALETTES,
 } from "./buttonStyles";
 import { useActionButtonState } from "./useActionButtonState";
@@ -13,18 +13,33 @@ export interface GoDirectlyButtonProps {
   disabled?: boolean;
 }
 
+function GoDirectlyIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
+      <path
+        d="M5 12h10M11 6l6 6-6 6M5 6v12"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const GoDirectlyButton = ({
   isBeforeWork,
   onGoDirectly,
   disabled = false,
 }: GoDirectlyButtonProps) => {
-  const actionButtonVars = buildActionButtonVars(
-    TIME_RECORDER_BUTTON_PALETTES.clockIn,
+  const actionButtonVars = buildActionCardVars(
+    TIME_RECORDER_BUTTON_PALETTES.subtle,
   );
   const { isDisabled, markPending } = useActionButtonState({
     canInteract: isBeforeWork,
     disabled,
   });
+
   const handleClick = useCallback(() => {
     if (!markPending()) {
       return;
@@ -34,16 +49,15 @@ const GoDirectlyButton = ({
   }, [markPending, onGoDirectly]);
 
   return (
-    <button
-      type="button"
-      data-testid="go-directly-button"
-      onClick={handleClick}
-      disabled={isDisabled}
-      className={`${ACTION_BUTTON_CLASS_NAME} border-[var(--action-border)] bg-[var(--action-bg)] text-[color:var(--action-text)] hover:border-[var(--action-hover-border)] hover:bg-[var(--action-hover-bg)] hover:text-[color:var(--action-hover-text)]`}
+    <ActionCardButton
+      testId="go-directly-button"
       style={actionButtonVars}
-    >
-      直行
-    </button>
+      disabled={isDisabled}
+      onClick={handleClick}
+      label="直行"
+      helper={null}
+      icon={<GoDirectlyIcon />}
+    />
   );
 };
 

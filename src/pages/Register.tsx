@@ -33,7 +33,9 @@ export default function Register() {
   }
 
   return (
-    <div className="flex h-full justify-center py-2 md:py-10">
+    <div className="relative flex h-full justify-center overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#ecfdf5_52%,#f8fafc_100%)] py-3 md:py-10">
+      <div className="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(15,168,94,0.18),transparent_60%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-[radial-gradient(circle_at_bottom,rgba(15,23,42,0.08),transparent_65%)]" />
       <TimeRecorder />
     </div>
   );

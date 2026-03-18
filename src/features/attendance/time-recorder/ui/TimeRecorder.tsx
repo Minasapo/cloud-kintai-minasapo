@@ -17,7 +17,6 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import type { CSSProperties } from "react";
 import {
   useCallback,
   useContext,
@@ -48,28 +47,17 @@ import {
 import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
-import { designTokenVar } from "@/shared/designSystem";
 import { Logger } from "@/shared/lib/logger";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
-import Clock from "@/shared/ui/clock/Clock";
-import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
-import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
 
 import { WorkStatus } from "../lib/common";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
 import { goDirectlyCallback } from "./goDirectlyCallback";
-import ClockInItem from "./items/ClockInItem";
-import ClockOutItem from "./items/ClockOutItem";
-import GoDirectlyItem from "./items/GoDirectlyItem";
-import RestEndItem from "./items/RestEndItem";
-import RestStartItem from "./items/RestStartItem";
-import ReturnDirectly from "./items/ReturnDirectlyItem";
-import QuickDailyReportCard from "./QuickDailyReportCard";
 import { restEndCallback } from "./restEndCallback";
 import { restStartCallback } from "./restStartCallback";
-import { RestTimeMessage } from "./RestTimeMessage";
 import { returnDirectlyCallback } from "./returnDirectlyCallback";
+import { TimeRecorderLoadingView, TimeRecorderView } from "./TimeRecorderView";
 
 /**
  * 勤怠打刻用のメインコンポーネント。
@@ -313,83 +301,6 @@ export default function TimeRecorder(): JSX.Element {
     return `${dayjs(attendance.endTime).format("HH:mm")} 退勤`;
   }, [attendance?.endTime]);
 
-  const TIME_RECORDER_WIDTH_MD = designTokenVar(
-    "component.timeRecorder.layout.widthMd",
-    "400px",
-  );
-  const TIME_RECORDER_MARGIN_XS = designTokenVar(
-    "component.timeRecorder.layout.marginXMobile",
-    "24px",
-  );
-  const TIME_RECORDER_SURFACE_BG = designTokenVar(
-    "component.timeRecorder.surface.background",
-    "#FFFFFF",
-  );
-  const TIME_RECORDER_BORDER_COLOR = designTokenVar(
-    "component.timeRecorder.surface.borderColor",
-    "#E5E7EB",
-  );
-  const TIME_RECORDER_BORDER_WIDTH = designTokenVar(
-    "component.timeRecorder.surface.borderWidth",
-    "1px",
-  );
-  const TIME_RECORDER_BORDER_RADIUS = designTokenVar(
-    "component.timeRecorder.surface.borderRadius",
-    "12px",
-  );
-  const TIME_RECORDER_SURFACE_SHADOW = designTokenVar(
-    "component.timeRecorder.surface.shadow",
-    "0 12px 24px rgba(17, 24, 39, 0.08)",
-  );
-  const TIME_RECORDER_PADDING_XS = designTokenVar(
-    "component.timeRecorder.surface.padding.xs",
-    "16px",
-  );
-  const TIME_RECORDER_PADDING_MD = designTokenVar(
-    "component.timeRecorder.surface.padding.md",
-    "24px",
-  );
-
-  const BADGE_PADDING_X = designTokenVar("spacing.sm", "8px");
-  const BADGE_PADDING_Y = designTokenVar("spacing.xs", "4px");
-  const BADGE_RADIUS = designTokenVar("radius.sm", "4px");
-  const BADGE_FONT_WEIGHT = designTokenVar("typography.fontWeight.bold", "600");
-  const CLOCK_IN_BADGE_BG = designTokenVar(
-    "color.feedback.success.surface",
-    "#E4F8C9",
-  );
-  const CLOCK_IN_BADGE_TEXT = designTokenVar(
-    "color.feedback.success.base",
-    "#1EAA6A",
-  );
-  const CLOCK_OUT_BADGE_BG = designTokenVar(
-    "color.feedback.danger.surface",
-    "#FDE0E0",
-  );
-  const CLOCK_OUT_BADGE_TEXT = designTokenVar(
-    "color.feedback.danger.base",
-    "#B33D47",
-  );
-  const timeRecorderShellStyles = {
-    "--time-recorder-width-md": TIME_RECORDER_WIDTH_MD,
-    "--time-recorder-margin-xs": TIME_RECORDER_MARGIN_XS,
-    "--time-recorder-surface-bg": TIME_RECORDER_SURFACE_BG,
-    "--time-recorder-border-color": TIME_RECORDER_BORDER_COLOR,
-    "--time-recorder-border-width": TIME_RECORDER_BORDER_WIDTH,
-    "--time-recorder-border-radius": TIME_RECORDER_BORDER_RADIUS,
-    "--time-recorder-surface-shadow": TIME_RECORDER_SURFACE_SHADOW,
-    "--time-recorder-padding-xs": TIME_RECORDER_PADDING_XS,
-    "--time-recorder-padding-md": TIME_RECORDER_PADDING_MD,
-    "--badge-padding-x": BADGE_PADDING_X,
-    "--badge-padding-y": BADGE_PADDING_Y,
-    "--badge-radius": BADGE_RADIUS,
-    "--badge-font-weight": BADGE_FONT_WEIGHT,
-    "--clock-in-badge-bg": CLOCK_IN_BADGE_BG,
-    "--clock-in-badge-text": CLOCK_IN_BADGE_TEXT,
-    "--clock-out-badge-bg": CLOCK_OUT_BADGE_BG,
-    "--clock-out-badge-text": CLOCK_OUT_BADGE_TEXT,
-  } as CSSProperties & Record<`--${string}`, string>;
-
   const handleClockIn = useCallback(
     () => clockInCallback(cognitoUser, today, clockIn, dispatch, staff, logger),
     [cognitoUser, clockIn, dispatch, staff],
@@ -606,19 +517,7 @@ export default function TimeRecorder(): JSX.Element {
   }, [cognitoUser?.id, logger, refreshTimeRecorderData, today]);
 
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
-    return (
-      <div
-        className="mx-auto box-border w-full max-w-[var(--time-recorder-width-md)] px-[var(--time-recorder-margin-xs)] md:px-0"
-        style={timeRecorderShellStyles}
-      >
-        <div
-          className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200"
-          aria-label="勤怠打刻を読み込み中"
-        >
-          <div className="h-full w-1/3 animate-pulse rounded-full bg-emerald-600" />
-        </div>
-      </div>
-    );
+    return <TimeRecorderLoadingView />;
   }
 
   if (workStatus === null) {
@@ -627,126 +526,26 @@ export default function TimeRecorder(): JSX.Element {
   }
 
   return (
-    <div
-      className="mx-auto box-border w-full max-w-[var(--time-recorder-width-md)] px-[var(--time-recorder-margin-xs)] md:px-0"
-      style={timeRecorderShellStyles}
-    >
-      <div className="rounded-[var(--time-recorder-border-radius)] border-[var(--time-recorder-border-width)] border-[var(--time-recorder-border-color)] bg-[var(--time-recorder-surface-bg)] px-[var(--time-recorder-padding-xs)] py-[var(--time-recorder-padding-xs)] shadow-[var(--time-recorder-surface-shadow)] md:px-[var(--time-recorder-padding-md)] md:py-[var(--time-recorder-padding-md)]">
-        <div className="grid grid-cols-2 gap-2">
-          <div className="col-span-2">
-            <h2
-              className="m-0 text-center text-2xl font-normal leading-tight"
-              data-testid="work-status-text"
-            >
-              {workStatus.text || "読み込み中..."}
-            </h2>
-            {(clockInDisplayText || clockOutDisplayText) && (
-              <div className="mt-2 flex justify-center gap-2">
-                {clockInDisplayText && (
-                  <p
-                    className="m-0 inline-block rounded-[var(--badge-radius)] bg-[var(--clock-in-badge-bg)] px-[var(--badge-padding-x)] py-[var(--badge-padding-y)] text-center text-base font-[var(--badge-font-weight)] text-[color:var(--clock-in-badge-text)]"
-                    data-testid="clock-in-time-text"
-                  >
-                    {clockInDisplayText}
-                  </p>
-                )}
-                {clockOutDisplayText && (
-                  <p
-                    className="m-0 inline-block rounded-[var(--badge-radius)] bg-[var(--clock-out-badge-bg)] px-[var(--badge-padding-x)] py-[var(--badge-padding-y)] text-center text-base font-[var(--badge-font-weight)] text-[color:var(--clock-out-badge-text)]"
-                    data-testid="clock-out-time-text"
-                  >
-                    {clockOutDisplayText}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="col-span-2">
-            <Clock />
-          </div>
-          <div className="col-span-2">
-            <label className="inline-flex items-center gap-2">
-              <DirectSwitch
-                checked={directMode}
-                onChange={(event) => setDirectMode(event.target.checked)}
-                data-testid="direct-mode-switch"
-              />
-              <span>直行/直帰モード</span>
-            </label>
-          </div>
-          <div className="flex justify-center">
-            {directMode ? (
-              <GoDirectlyItem
-                workStatus={workStatus}
-                onClick={handleGoDirectly}
-                disabled={hasChangeRequest}
-              />
-            ) : (
-              <ClockInItem
-                workStatus={workStatus}
-                onClick={handleClockIn}
-                disabled={hasChangeRequest}
-              />
-            )}
-          </div>
-          <div className="flex justify-center">
-            {directMode ? (
-              <ReturnDirectly
-                workStatus={workStatus}
-                onClick={handleReturnDirectly}
-                disabled={hasChangeRequest}
-              />
-            ) : (
-              <ClockOutItem
-                workStatus={workStatus}
-                onClick={handleClockOut}
-                disabled={hasChangeRequest}
-              />
-            )}
-          </div>
-
-          {/* 休憩 */}
-          <div className="flex justify-center">
-            <RestStartItem
-              workStatus={workStatus}
-              onClick={handleRestStart}
-              disabled={hasChangeRequest}
-            />
-          </div>
-          <div className="flex justify-center">
-            <RestEndItem
-              workStatus={workStatus}
-              onClick={handleRestEnd}
-              disabled={hasChangeRequest}
-            />
-          </div>
-
-          {hasChangeRequest && (
-            <div
-              role="alert"
-              className="col-span-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950"
-            >
-                変更リクエスト申請中です。承認されるまで打刻はできません。
-            </div>
-          )}
-
-          <div className="col-span-2">
-            <QuickDailyReportCard staffId={staff?.id ?? null} date={today} />
-          </div>
-          {isAttendanceError && (
-            <div className="col-span-2">
-              <AttendanceErrorAlert />
-            </div>
-          )}
-
-          <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
-
-          <div className="col-span-2">
-            <RestTimeMessage />
-          </div>
-        </div>
-      </div>
-    </div>
+    <TimeRecorderView
+      today={today}
+      staffId={staff?.id ?? null}
+      workStatus={workStatus}
+      directMode={directMode}
+      hasChangeRequest={hasChangeRequest}
+      isAttendanceError={isAttendanceError}
+      clockInDisplayText={clockInDisplayText}
+      clockOutDisplayText={clockOutDisplayText}
+      onDirectModeChange={setDirectMode}
+      onClockIn={handleClockIn}
+      onClockOut={handleClockOut}
+      onGoDirectly={handleGoDirectly}
+      onReturnDirectly={handleReturnDirectly}
+      onRestStart={handleRestStart}
+      onRestEnd={handleRestEnd}
+      timeElapsedErrorDialog={
+        <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
+      }
+    />
   );
 }
 

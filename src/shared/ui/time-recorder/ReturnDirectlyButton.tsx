@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 
+import ActionCardButton from "./ActionCardButton";
 import {
-  ACTION_BUTTON_CLASS_NAME,
-  buildActionButtonVars,
+  buildActionCardVars,
   TIME_RECORDER_BUTTON_PALETTES,
 } from "./buttonStyles";
 import { useActionButtonState } from "./useActionButtonState";
@@ -13,13 +13,27 @@ export interface ReturnDirectlyButtonProps {
   disabled?: boolean;
 }
 
+function ReturnDirectlyIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
+      <path
+        d="M19 12H9M13 6l-6 6 6 6M19 6v12"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const ReturnDirectlyButton = ({
   isWorking,
   onReturnDirectly,
   disabled = false,
 }: ReturnDirectlyButtonProps) => {
-  const actionButtonVars = buildActionButtonVars(
-    TIME_RECORDER_BUTTON_PALETTES.clockOut,
+  const actionButtonVars = buildActionCardVars(
+    TIME_RECORDER_BUTTON_PALETTES.subtleDanger,
   );
   const { isDisabled, markPending } = useActionButtonState({
     canInteract: isWorking,
@@ -34,16 +48,15 @@ const ReturnDirectlyButton = ({
   }, [markPending, onReturnDirectly]);
 
   return (
-    <button
-      type="button"
-      data-testid="return-directly-button"
-      onClick={handleClick}
-      disabled={isDisabled}
-      className={`${ACTION_BUTTON_CLASS_NAME} border-[var(--action-border)] bg-[var(--action-bg)] text-[color:var(--action-text)] hover:border-[var(--action-hover-border)] hover:bg-[var(--action-hover-bg)] hover:text-[color:var(--action-hover-text)]`}
+    <ActionCardButton
+      testId="return-directly-button"
       style={actionButtonVars}
-    >
-      直帰
-    </button>
+      disabled={isDisabled}
+      onClick={handleClick}
+      label="直帰"
+      helper={null}
+      icon={<ReturnDirectlyIcon />}
+    />
   );
 };
 

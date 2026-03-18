@@ -4,7 +4,13 @@ import {
 } from "@entities/app-config/model/useAppConfig";
 import RestTimeMessageView from "@shared/ui/time-recorder/RestTimeMessage";
 
-export function RestTimeMessage() {
+export interface RestTimeMessageContainerProps {
+  displayMode?: "compact" | "detailed";
+}
+
+export function RestTimeMessage({
+  displayMode = "detailed",
+}: RestTimeMessageContainerProps) {
   const { getLunchRestStartTime, getLunchRestEndTime } = useAppConfig();
 
   const lunchStart = getLunchRestStartTime();
@@ -20,6 +26,7 @@ export function RestTimeMessage() {
     <RestTimeMessageView
       lunchRestStartTime={lunchRestStartTime}
       lunchRestEndTime={lunchRestEndTime}
+      displayMode={displayMode}
     />
   );
 }
