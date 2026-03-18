@@ -4,9 +4,7 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
+import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
@@ -20,6 +18,7 @@ import {
   getExportModelDefinition,
 } from "../model/exportRegistry";
 import {
+  type BulkExportProgress,
   createBulkExportArtifact,
   createSingleExportArtifact,
 } from "../model/exportService";
@@ -33,6 +32,8 @@ export default function SchemaExport() {
   );
   const [error, setError] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<ExportMode>(null);
+  const [bulkExportProgress, setBulkExportProgress] =
+    useState<BulkExportProgress | null>(null);
 
   const handleModelChange = (event: SelectChangeEvent<string>) => {
     setSelectedModel(event.target.value);
@@ -64,9 +65,14 @@ export default function SchemaExport() {
 
     setError(null);
     setActiveMode("all");
+    setBulkExportProgress(null);
 
     try {
-      const artifact = await createBulkExportArtifact();
+      const artifact = await createBulkExportArtifact(
+        undefined,
+        undefined,
+        setBulkExportProgress
+      );
       downloadJsonFile(artifact.payload, artifact.fileName);
     } catch (exportError) {
       const message =
@@ -76,10 +82,15 @@ export default function SchemaExport() {
       setError(message);
     } finally {
       setActiveMode(null);
+      setBulkExportProgress(null);
     }
   };
 
   const isExporting = activeMode !== null;
+  const bulkProgressValue =
+    bulkExportProgress && bulkExportProgress.totalModels > 0
+      ? (bulkExportProgress.completedModels / bulkExportProgress.totalModels) * 100
+      : 0;
 
   return (
     <Box>
@@ -131,6 +142,23 @@ export default function SchemaExport() {
             <Typography variant="body2" color="text.secondary">
               対象 {modelOptions.length} モデルを全件取得し、単一 JSON ファイルとしてダウンロードします。
             </Typography>
+            <Alert severity="warning">
+              全モデルの一括エクスポート実行中は、画面を移動せずそのままお待ちください。
+            </Alert>
+            {activeMode === "all" && bulkExportProgress && (
+              <Stack spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                  {bulkExportProgress.totalModels} モデル中{" "}
+                  {bulkExportProgress.completedModels + 1} 件目を処理中:{" "}
+                  {bulkExportProgress.currentModelName}
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={bulkProgressValue}
+                  aria-label="一括エクスポート進捗"
+                />
+              </Stack>
+            )}
             <Stack direction="row" spacing={2} alignItems="center">
               <Button
                 variant="outlined"
@@ -141,22 +169,6 @@ export default function SchemaExport() {
               </Button>
               {activeMode === "all" && <CircularProgress size={20} />}
             </Stack>
-          </Stack>
-        </Paper>
-
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Stack spacing={1}>
-            <Typography variant="h6">対象モデル一覧</Typography>
-            <List dense disablePadding>
-              {modelOptions.map((option) => (
-                <ListItem key={option.modelName} disableGutters>
-                  <ListItemText
-                    primary={option.displayName}
-                    secondary="generated list query で全件取得"
-                  />
-                </ListItem>
-              ))}
-            </List>
           </Stack>
         </Paper>
       </Stack>

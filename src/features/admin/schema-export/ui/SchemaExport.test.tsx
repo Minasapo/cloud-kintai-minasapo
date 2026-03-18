@@ -35,7 +35,13 @@ describe("SchemaExport", () => {
     expect(
       screen.getByRole("button", { name: "全モデルを一括エクスポート" })
     ).toBeInTheDocument();
-    expect(screen.getByText("Staff")).toBeInTheDocument();
+    expect(screen.getByLabelText("対象モデル")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "全モデルの一括エクスポート実行中は、画面を移動せずそのままお待ちください。"
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText("対象モデル一覧")).not.toBeInTheDocument();
   });
 
   it("exports a selected model", async () => {
@@ -62,8 +68,13 @@ describe("SchemaExport", () => {
     const user = userEvent.setup();
     let resolvePromise: ((value: unknown) => void) | undefined;
     mockCreateBulkExportArtifact.mockImplementation(
-      () =>
+      (_definitions, _date, onProgress) =>
         new Promise((resolve) => {
+          onProgress?.({
+            completedModels: 0,
+            currentModelName: "AppConfig",
+            totalModels: 17,
+          });
           resolvePromise = resolve;
         })
     );
@@ -78,6 +89,12 @@ describe("SchemaExport", () => {
       screen.getByRole("button", { name: "全モデルを一括エクスポート" })
     ).toBeDisabled();
     expect(screen.getByRole("button", { name: "個別エクスポート" })).toBeDisabled();
+    expect(
+      screen.getByText("17 モデル中 1 件目を処理中: AppConfig")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("progressbar", { name: "一括エクスポート進捗" })
+    ).toBeInTheDocument();
 
     resolvePromise?.({
       fileName: "bulk.json",
