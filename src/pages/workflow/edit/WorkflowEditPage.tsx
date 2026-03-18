@@ -43,6 +43,7 @@ export default function WorkflowEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { workflow } = useLoaderData() as WorkflowEditLoaderData;
+  const HEADER_GAP = designTokenVar("spacing.md", "12px");
 
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -196,11 +197,8 @@ export default function WorkflowEditPage() {
   return (
     <Page
       title="編集"
-      breadcrumbs={[
-        { label: "TOP", href: "/" },
-        { label: "ワークフロー", href: "/workflow" },
-      ]}
       maxWidth="lg"
+      showDefaultHeader={false}
     >
       <PageSection
         component="form"
@@ -208,6 +206,31 @@ export default function WorkflowEditPage() {
         onSubmit={handleSave}
         sx={{ gap: 0 }}
       >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "center" },
+            flexDirection: { xs: "column", sm: "row" },
+            gap: HEADER_GAP,
+            mb: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="h5" fontWeight={700}>
+              申請を編集
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              申請詳細を起点に、申請内容を更新します。
+            </Typography>
+          </Box>
+          <Button
+            size="small"
+            onClick={() => navigate(id ? `/workflow/${id}` : "/workflow")}
+          >
+            申請詳細へ戻る
+          </Button>
+        </Box>
         <DashboardInnerSurface>
           <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
             <Grid item xs={12} sm={3}>
@@ -337,8 +360,13 @@ export default function WorkflowEditPage() {
             <Grid item xs={12} sm={3} />
             <Grid item xs={12} sm={9}>
               <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
-                <Button size="small" onClick={() => navigate(-1)}>
-                  戻る
+                <Button
+                  size="small"
+                  onClick={() =>
+                    navigate(id ? `/workflow/${id}` : "/workflow")
+                  }
+                >
+                  申請詳細へ戻る
                 </Button>
                 <Button type="submit" variant="contained" size="small">
                   保存

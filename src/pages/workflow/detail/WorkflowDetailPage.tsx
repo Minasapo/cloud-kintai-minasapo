@@ -33,6 +33,7 @@ const PANEL_BORDER = designTokenVar("color.border.subtle", "#D7E0DB");
 const PANEL_RADIUS = designTokenVar("radius.lg", "12px");
 const PANEL_PADDING = designTokenVar("spacing.xl", "24px");
 const ERROR_COLOR = designTokenVar("color.feedback.danger.base", "#D7443E");
+const HEADER_GAP = designTokenVar("spacing.md", "12px");
 const logger = createLogger("WorkflowDetailPage");
 
 export default function WorkflowDetailPage() {
@@ -152,7 +153,7 @@ export default function WorkflowDetailPage() {
       const afterComments = await updateWorkflow(commentUpdate);
       setWorkflow(afterComments as WorkflowEntity);
       void notify("取り下げしました", { mode: "auto-close" });
-      setTimeout(() => navigate(-1), 1000);
+      setTimeout(() => navigate("/workflow"), 1000);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow withdrawal failed:", message);
@@ -167,17 +168,44 @@ export default function WorkflowDetailPage() {
   return (
     <Page
       title="申請内容"
-      breadcrumbs={[
-        { label: "TOP", href: "/" },
-        { label: "ワークフロー", href: "/workflow" },
-      ]}
       maxWidth="lg"
+      showDefaultHeader={false}
     >
       <PageSection
         variant="plain"
         layoutVariant="detail"
         sx={{ gap: SECTION_GAP }}
       >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: HEADER_GAP,
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: "1.5rem",
+                fontWeight: 700,
+              }}
+            >
+              申請内容
+            </h1>
+            <p
+              style={{
+                margin: "4px 0 0",
+                color: "#5F6F68",
+                fontSize: "0.875rem",
+              }}
+            >
+              申請一覧を基点に、内容確認と対応を行います。
+            </p>
+          </div>
+        </div>
         <section
           className="overflow-hidden"
           style={{
@@ -188,7 +216,7 @@ export default function WorkflowDetailPage() {
           }}
         >
           <WorkflowDetailActions
-            onBack={() => navigate(-1)}
+            onBack={() => navigate("/workflow")}
             onWithdraw={handleWithdraw}
             onEdit={() => navigate(`/workflow/${id}/edit`)}
             withdrawDisabled={permissions.withdrawDisabled}

@@ -127,6 +127,7 @@ const generateApprovalSteps = (
 export default function NewWorkflowPage() {
   const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
+  const HEADER_GAP = designTokenVar("spacing.md", "12px");
   const navigate = useNavigate();
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
@@ -420,11 +421,8 @@ export default function NewWorkflowPage() {
   return (
     <Page
       title="新規作成"
-      breadcrumbs={[
-        { label: "TOP", href: "/" },
-        { label: "ワークフロー", href: "/workflow" },
-      ]}
       maxWidth="lg"
+      showDefaultHeader={false}
     >
       <PageSection
         component="form"
@@ -432,6 +430,28 @@ export default function NewWorkflowPage() {
         onSubmit={handleSubmit}
         sx={{ gap: 0 }}
       >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "center" },
+            flexDirection: { xs: "column", sm: "row" },
+            gap: HEADER_GAP,
+            mb: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="h5" fontWeight={700}>
+              新規作成
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              申請一覧を起点に、申請内容を作成します。
+            </Typography>
+          </Box>
+          <Button size="small" onClick={() => navigate("/workflow")}>
+            申請一覧へ戻る
+          </Button>
+        </Box>
         <DashboardInnerSurface>
           <Grid
             container
@@ -574,8 +594,8 @@ export default function NewWorkflowPage() {
             <Grid item xs={12} sm={3} />
             <Grid item xs={12} sm={9}>
               <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
-                <Button size="small" onClick={() => navigate(-1)}>
-                  戻る
+                <Button size="small" onClick={() => navigate("/workflow")}>
+                  申請一覧へ戻る
                 </Button>
                 <Button
                   type="submit"
