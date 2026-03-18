@@ -27,7 +27,7 @@ const ACTION_ICON_SIZE = designTokenVar(
 );
 const ACTION_ICON_SIZE_SM = designTokenVar(
   "component.headerActions.iconSizeSm",
-  "30px",
+  "28px",
 );
 const ACTION_ICON_HOVER_BG = designTokenVar(
   "component.headerActions.iconHoverBackground",
@@ -326,7 +326,7 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
         aria-expanded={open}
         aria-controls={open ? "external-links-popup" : undefined}
         aria-label="external links"
-        className="inline-flex h-[var(--external-links-button-size-sm)] min-w-[var(--external-links-button-size-sm)] items-center justify-center gap-2 rounded-full border px-2.5 py-0 text-[color:var(--external-links-button-text)] shadow-none transition sm:h-[var(--external-links-button-size)] sm:min-w-[var(--external-links-button-size)] sm:px-3"
+        className="inline-flex h-[var(--external-links-button-size-sm)] min-w-[var(--external-links-button-size-sm)] items-center justify-center gap-2 rounded-full border px-2 py-0 text-[color:var(--external-links-button-text)] shadow-none transition sm:h-[var(--external-links-button-size)] sm:min-w-[var(--external-links-button-size)] sm:px-3"
         style={
           {
             "--external-links-button-text": ACTION_BUTTON_TEXT,

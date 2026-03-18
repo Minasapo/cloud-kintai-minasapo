@@ -19,7 +19,7 @@ const HEADER_LOGO_ASPECT_RATIO = designTokenVar(
 
 const Logo = () => (
   <div
-    className="flex flex-grow-0 items-center justify-center overflow-hidden h-[26px] w-[min(100%,var(--header-logo-max-width))] sm:h-[28px] md:h-[var(--header-logo-max-height)]"
+    className="flex h-[26px] w-[min(100%,180px)] flex-grow-0 items-center justify-center overflow-hidden sm:h-[28px] sm:w-[min(100%,var(--header-logo-max-width))] md:h-[var(--header-logo-max-height)]"
     style={
       {
         "--header-logo-max-height": HEADER_LOGO_MAX_HEIGHT,

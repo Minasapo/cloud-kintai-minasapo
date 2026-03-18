@@ -47,6 +47,22 @@ export default function HeaderBar({
   signInOutButton,
 }: HeaderBarProps) {
   const hasCenterContent = Boolean(centerContent);
+  const mobileNavigation = (
+    <div className="block rounded-full bg-white/70 px-1 py-0.5 text-[color:var(--header-text)] sm:px-1.5 sm:py-1 lg:hidden">
+      {navigation}
+    </div>
+  );
+  const mobileActions = (
+    <div className="flex shrink-0 flex-nowrap items-center justify-end gap-0.5 sm:gap-1">
+      <div className="shrink-0 text-[color:var(--header-text)]">
+        {notificationsButton}
+      </div>
+      <div className="shrink-0 text-[color:var(--header-text)]">
+        {externalLinks}
+      </div>
+      {signInOutButton}
+    </div>
+  );
 
   return (
     <header
@@ -72,21 +88,30 @@ export default function HeaderBar({
           "--header-inner-padding-y": HEADER_INNER_PADDING_Y,
         } as CSSProperties & Record<`--${string}`, string>
       }
-      className="border-b border-[var(--header-border)] bg-[linear-gradient(180deg,rgba(15,168,94,0.16)_0%,rgba(236,253,245,0.92)_52%,rgba(248,250,249,0.88)_100%)]"
+      className="overflow-x-clip border-b border-[var(--header-border)] bg-[linear-gradient(180deg,rgba(15,168,94,0.16)_0%,rgba(236,253,245,0.92)_52%,rgba(248,250,249,0.88)_100%)]"
     >
-      <div className="mx-auto w-full max-w-[var(--header-content-max-width)] px-[var(--header-padding-x)] py-[var(--header-padding-y)]">
-        <div className="rounded-[1.6rem] border border-[var(--header-border)] bg-[linear-gradient(135deg,var(--header-surface)_0%,#ECFDF5_52%,#FFFFFF_100%)] text-[color:var(--header-text)] shadow-[0_24px_40px_-34px_rgba(15,23,42,0.26)]">
-          <div className="px-[var(--header-inner-padding-x)] py-[var(--header-inner-padding-y)]">
+      <div className="mx-auto w-full max-w-[var(--header-content-max-width)] px-2 py-2 sm:px-[var(--header-padding-x)] sm:py-[var(--header-padding-y)]">
+        <div className="rounded-[1.15rem] border border-[var(--header-border)] bg-[linear-gradient(135deg,var(--header-surface)_0%,#ECFDF5_52%,#FFFFFF_100%)] text-[color:var(--header-text)] shadow-[0_24px_40px_-34px_rgba(15,23,42,0.26)] sm:rounded-[1.6rem]">
+          <div className="px-2.5 py-2 sm:px-[var(--header-inner-padding-x)] sm:py-[var(--header-inner-padding-y)]">
+            <div className="mb-2 flex min-w-0 items-center justify-between gap-2 lg:hidden">
+              <div className="flex min-w-0 max-w-[min(52vw,180px)] items-center overflow-hidden">
+                {logo}
+              </div>
+              <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+                {mobileNavigation}
+                {mobileActions}
+              </div>
+            </div>
             <div
               className={[
-                "grid min-w-0 items-center gap-2 md:gap-3",
+                "hidden min-w-0 items-center gap-1.5 md:gap-3 lg:grid",
                 "grid-cols-[minmax(0,1fr)_auto]",
                 hasCenterContent
                   ? "lg:grid-cols-[auto_minmax(180px,1fr)_minmax(120px,auto)_auto]"
                   : "lg:grid-cols-[auto_minmax(180px,1fr)_auto]",
               ].join(" ")}
             >
-              <div className="flex min-w-0 items-center overflow-hidden">
+              <div className="flex min-w-0 max-w-[min(54vw,220px)] items-center overflow-hidden sm:max-w-none">
                 {logo}
               </div>
 
@@ -98,10 +123,7 @@ export default function HeaderBar({
                 {centerContent}
               </div>
 
-              <div className="flex min-w-fit flex-nowrap items-center justify-end gap-1 md:gap-1.5">
-                <div className="block text-[color:var(--header-text)] lg:hidden rounded-full bg-white/70 px-1.5 py-1">
-                  {navigation}
-                </div>
+              <div className="flex shrink-0 flex-nowrap items-center justify-end gap-0.5 sm:gap-1 md:gap-1.5">
                 <div className="shrink-0 text-[color:var(--header-text)]">{notificationsButton}</div>
                 <div className="shrink-0 text-[color:var(--header-text)]">{externalLinks}</div>
                 {signInOutButton}

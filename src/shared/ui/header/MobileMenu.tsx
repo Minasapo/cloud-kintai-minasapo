@@ -23,7 +23,7 @@ function MenuGlyph({ color }: { color: string }) {
     <svg
       aria-hidden="true"
       viewBox="0 0 24 24"
-      className="h-7 w-7 sm:h-8 sm:w-8"
+      className="h-6 w-6 sm:h-8 sm:w-8"
       fill="none"
       stroke={color}
       strokeWidth="2"
@@ -101,7 +101,7 @@ const MobileMenu = ({
         onClick={onOpen}
         aria-label="menu"
         aria-expanded={isOpen}
-        className="inline-flex appearance-none rounded-full border-0 bg-transparent p-[3px] shadow-none transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 sm:p-[6px]"
+        className="inline-flex appearance-none rounded-full border-0 bg-transparent p-[2px] shadow-none transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 sm:p-[6px]"
       >
         <MenuGlyph color={iconColor} />
       </button>

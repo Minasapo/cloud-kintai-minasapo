@@ -26,7 +26,7 @@ export default function WorkflowNotificationButton() {
         onClick={() => navigate("/notifications")}
         sx={{
           color: "#45574F",
-          p: { xs: "4px", md: "8px" },
+          p: { xs: "2px", md: "8px" },
           "&:hover": {
             backgroundColor: "rgba(15, 168, 94, 0.1)",
           },

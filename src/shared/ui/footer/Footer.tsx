@@ -45,17 +45,17 @@ const Footer = ({ themeColor }: FooterProps) => (
       } as CSSProperties & Record<`--${string}`, string>
     }
   >
-    <div className="mx-auto flex w-full max-w-[var(--footer-content-max-width)] flex-col items-center gap-1 px-[var(--footer-padding-x)] py-[var(--footer-padding-y)] text-center">
+    <div className="mx-auto flex w-full max-w-[var(--footer-content-max-width)] flex-col items-center gap-0.5 px-4 py-3 text-center sm:gap-1 sm:px-[var(--footer-padding-x)] sm:py-[var(--footer-padding-y)]">
       <div className="flex min-w-0 items-center justify-center">
         <p
-          className="m-0 text-sm font-medium leading-6"
+          className="m-0 text-xs font-medium leading-5 sm:text-sm sm:leading-6"
           style={{ color: "var(--footer-text)" }}
         >
           Virtual Tech Japan Inc.
         </p>
       </div>
       <p
-        className="m-0 break-words text-xs leading-5"
+        className="m-0 break-words text-[11px] leading-4 sm:text-xs sm:leading-5"
         style={{ color: "var(--footer-muted-text)" }}
       >
         © 2026 Virtual Tech Japan Inc.

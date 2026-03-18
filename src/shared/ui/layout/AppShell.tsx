@@ -62,10 +62,14 @@ export default function AppShell({
       {...rootRest}
       style={{
         minHeight,
+        width: "100%",
+        maxWidth: "100vw",
+        minWidth: 0,
         backgroundColor: APP_BACKGROUND,
         color: APP_TEXT_COLOR,
         display: "flex",
         flexDirection: "column",
+        overflowX: "hidden",
         ...rootSx,
         ...rootRest.style,
       }}
@@ -74,6 +78,10 @@ export default function AppShell({
         {...headerRest}
         style={{
           flexShrink: 0,
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          overflowX: "hidden",
           ...headerSx,
           ...headerRest.style,
         }}
@@ -84,7 +92,11 @@ export default function AppShell({
         {...mainRest}
         style={{
           flex: 1,
-          overflow: "auto",
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          overflowX: "hidden",
+          overflowY: "auto",
           backgroundColor: CONTENT_BACKGROUND,
           ...mainSx,
           ...mainRest.style,
@@ -97,6 +109,10 @@ export default function AppShell({
           {...footerRest}
           style={{
             flexShrink: 0,
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            overflowX: "hidden",
             ...footerSx,
             ...footerRest.style,
           }}
@@ -110,6 +126,9 @@ export default function AppShell({
           style={{
             position: "relative",
             zIndex: 1,
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
             ...snackbarSx,
             ...snackbarRest.style,
           }}
