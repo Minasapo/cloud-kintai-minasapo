@@ -253,6 +253,10 @@ function LinkGridItem({
 const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const buttonVars = {
+    "--external-links-button-size": ACTION_ICON_SIZE,
+    "--external-links-button-size-sm": ACTION_ICON_SIZE_SM,
+  } as CSSProperties & Record<`--${string}`, string>;
 
   useEffect(() => {
     if (!open) {
@@ -301,18 +305,14 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
   }, [links]);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className="relative" style={buttonVars}>
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-controls={open ? "external-links-popup" : undefined}
         aria-label="external links"
-        className="inline-flex rounded-full p-[3px] transition sm:p-2"
-        style={{
-          width: ACTION_ICON_SIZE_SM,
-          height: ACTION_ICON_SIZE_SM,
-        }}
+        className="inline-flex h-[var(--external-links-button-size-sm)] w-[var(--external-links-button-size-sm)] items-center justify-center appearance-none rounded-full border-0 bg-transparent p-0 shadow-none transition sm:h-[var(--external-links-button-size)] sm:w-[var(--external-links-button-size)]"
         onMouseEnter={(event) => {
           event.currentTarget.style.backgroundColor = ACTION_ICON_HOVER_BG;
         }}
@@ -320,10 +320,6 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
           event.currentTarget.style.backgroundColor = "transparent";
         }}
       >
-        <span
-          className="hidden sm:inline-flex"
-          style={{ width: ACTION_ICON_SIZE, height: ACTION_ICON_SIZE }}
-        />
         <AppsGlyph color={ACTION_ICON_COLOR} />
       </button>
 
