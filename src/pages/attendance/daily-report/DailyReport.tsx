@@ -1,4 +1,5 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   DailyReportCalendar,
   DailyReportFormChangeHandler,
@@ -42,10 +43,20 @@ import {
 import Page from "@shared/ui/page/Page";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { AuthContext } from "@/context/AuthContext";
+import { sendDailyReportSubmissionNotification } from "@/features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
 import useCognitoUser from "@/hooks/useCognitoUser";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   buildVersionOrUpdatedAtCondition,
@@ -202,7 +213,11 @@ const sortReports = (items: DailyReportItem[]) =>
 export default function DailyReport() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { notify } = useLocalNotification();
   const { cognitoUser, loading: isCognitoUserLoading } = useCognitoUser();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
   const [searchParams, setSearchParams] = useSearchParams();
   const [reports, setReports] = useState<DailyReportItem[]>([]);
   const [createForm, setCreateForm] = useState<DailyReportForm>(() =>
@@ -253,6 +268,29 @@ export default function DailyReport() {
   }, [reports]);
   const isCreateMode = selectedReportId === "create";
   const resolvedAuthorName = authorName || "スタッフ";
+  const notifyAdminsForSubmission = useCallback(
+    async (report: DailyReportModel) => {
+      try {
+        await sendDailyReportSubmissionNotification({
+          staffs,
+          report,
+          fallbackAuthorName: resolvedAuthorName,
+        });
+      } catch (mailError) {
+        console.error(
+          "Failed to send daily report submission notification:",
+          mailError,
+        );
+        void notify("メール送信エラー", {
+          body: "管理者への通知メールの送信に失敗しました。",
+          mode: "await-interaction",
+          priority: "normal",
+          tag: "daily-report-mail-error",
+        });
+      }
+    },
+    [notify, resolvedAuthorName, staffs],
+  );
   const isCreateFormDirty = useMemo(
     () => JSON.stringify(createForm) !== JSON.stringify(createFormSavedState),
     [createForm, createFormSavedState],
@@ -614,6 +652,10 @@ export default function DailyReport() {
           throw new Error("日報の更新に失敗しました。");
         }
 
+        if (showNotification && status === DailyReportStatus.SUBMITTED) {
+          await notifyAdminsForSubmission(updated);
+        }
+
         const mapped = mapDailyReport(updated, resolvedAuthor);
         setReports((prev) =>
           sortReports([
@@ -670,6 +712,10 @@ export default function DailyReport() {
         const created = response.data?.createDailyReport;
         if (!created) {
           throw new Error("日報の作成に失敗しました。");
+        }
+
+        if (showNotification && status === DailyReportStatus.SUBMITTED) {
+          await notifyAdminsForSubmission(created);
         }
 
         const mapped = mapDailyReport(created, resolvedAuthor);
@@ -775,16 +821,17 @@ export default function DailyReport() {
 
       if (response.errors?.length) {
         throw new Error(
-          getGraphQLErrorMessage(
-            response.errors,
-            "日報の更新に失敗しました。",
-          ),
+          getGraphQLErrorMessage(response.errors, "日報の更新に失敗しました。"),
         );
       }
 
       const updated = response.data?.updateDailyReport;
       if (!updated) {
         throw new Error("日報の更新に失敗しました。");
+      }
+
+      if (showNotification && status === DailyReportStatus.SUBMITTED) {
+        await notifyAdminsForSubmission(updated);
       }
 
       const mapped = mapDailyReport(updated, resolvedAuthorName);
@@ -904,11 +951,7 @@ export default function DailyReport() {
               </Alert>
             )}
 
-            <Grid
-              container
-              spacing={{ xs: 2, md: 3 }}
-              alignItems="flex-start"
-            >
+            <Grid container spacing={{ xs: 2, md: 3 }} alignItems="flex-start">
               <Grid item xs={12} md={3}>
                 <DashboardInnerSurface>
                   <DailyReportCalendar

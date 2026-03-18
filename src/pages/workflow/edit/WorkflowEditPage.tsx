@@ -29,6 +29,7 @@ import {
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
+import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 import { designTokenVar } from "@/shared/designSystem";
@@ -135,7 +136,33 @@ export default function WorkflowEditPage() {
           existingComments: normalizedComments,
         });
 
-        await updateWorkflow(baseInput);
+        const updatedWorkflow = await updateWorkflow(baseInput);
+
+        if (!draftMode) {
+          try {
+            const workflowApplicant =
+              applicant ||
+              staffs.find((s) => s.id === workflow.staffId) ||
+              null;
+            await sendWorkflowSubmissionNotification({
+              staffs,
+              applicant: workflowApplicant,
+              workflow: updatedWorkflow,
+            });
+          } catch (mailError) {
+            logger.error(
+              "Failed to send workflow submission notification:",
+              mailError,
+            );
+            void notify("メール送信エラー", {
+              body: "管理者への通知メールの送信に失敗しました。",
+              mode: "await-interaction",
+              priority: "normal",
+              tag: "workflow-mail-error",
+            });
+          }
+        }
+
         void notify("保存しました", { mode: "auto-close" });
         setTimeout(() => navigate(`/workflow/${id}`), 1000);
       } catch (err) {
