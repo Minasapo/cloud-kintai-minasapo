@@ -10,7 +10,13 @@ export type WorkflowData = NonNullable<GetWorkflowQuery["getWorkflow"]>;
 
 export type NotificationStaff = {
   id: string;
+  cognitoUserId?: string | null;
+  familyName?: string | null;
+  givenName?: string | null;
+  mailAddress?: string | null;
   role?: string | null;
+  shiftGroup?: string | null;
+  workType?: string | null;
 };
 
 type CreateWorkflowNotificationEventMutation = {
