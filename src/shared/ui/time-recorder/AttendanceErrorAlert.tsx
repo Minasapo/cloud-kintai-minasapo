@@ -14,7 +14,7 @@ const AttendanceErrorAlert = () => {
       </div>
       <RouterLink
         to="/attendance/list"
-        className="inline-flex min-w-fit shrink-0 whitespace-nowrap rounded-md border border-current px-3 py-1.5 text-sm font-medium leading-none transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+        className="inline-flex min-w-fit shrink-0 whitespace-nowrap rounded-md border border-current px-3 py-1.5 text-sm font-medium leading-none no-underline transition-colors hover:bg-red-100 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
       >
         確認
       </RouterLink>
