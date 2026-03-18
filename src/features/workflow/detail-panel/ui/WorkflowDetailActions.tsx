@@ -1,4 +1,4 @@
-import { designTokenVar } from "@/shared/designSystem";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
 type WorkflowDetailActionsProps = {
   onBack: () => void;
@@ -10,31 +10,10 @@ type WorkflowDetailActionsProps = {
   editTooltip?: string;
 };
 
-const BUTTON_RADIUS = designTokenVar("radius.md", "8px");
-const BUTTON_PADDING_X = designTokenVar("spacing.md", "12px");
-const BUTTON_PADDING_Y = designTokenVar("spacing.sm", "8px");
-const PRIMARY_BUTTON_BG = designTokenVar("color.brand.primary.base", "#0FA85E");
-const PRIMARY_BUTTON_TEXT = designTokenVar(
-  "color.brand.primary.contrast",
-  "#FFFFFF"
-);
-const DANGER_BUTTON_BG = designTokenVar("color.feedback.danger.base", "#D7443E");
-const BUTTON_DISABLED_BG = designTokenVar("color.neutral.200", "#D7E0DB");
-const BUTTON_DISABLED_TEXT = designTokenVar("color.neutral.500", "#6B7C74");
-const SECONDARY_BUTTON_TEXT = designTokenVar("color.text.secondary", "#45574F");
-
-const actionButtonStyle = (
-  backgroundColor: string,
-  color: string,
-  disabled?: boolean
-) => ({
-  border: "none",
-  borderRadius: BUTTON_RADIUS,
-  padding: `${BUTTON_PADDING_Y} ${BUTTON_PADDING_X}`,
-  backgroundColor,
-  color,
-  cursor: disabled ? "not-allowed" : "pointer",
-});
+const pillButtonClassName =
+  "inline-flex items-center justify-center rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none";
+const dangerPillButtonClassName =
+  "inline-flex items-center justify-center rounded-full border border-rose-700/55 bg-[#e05353] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(224,83,83,0.45)] transition hover:bg-[#d64545] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none";
 
 export default function WorkflowDetailActions({
   onBack,
@@ -50,29 +29,17 @@ export default function WorkflowDetailActions({
       <div>
         <button
           type="button"
-          className="rounded text-sm font-medium transition-opacity hover:opacity-80"
-          style={{
-            border: "none",
-            backgroundColor: "transparent",
-            borderRadius: BUTTON_RADIUS,
-            padding: `${BUTTON_PADDING_Y} ${BUTTON_PADDING_X}`,
-            color: SECONDARY_BUTTON_TEXT,
-            cursor: "pointer",
-          }}
+          className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-300/70 bg-white/85 px-4 py-2 text-sm font-semibold text-slate-900 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.25)] transition hover:border-slate-400/70 hover:bg-white"
           onClick={onBack}
         >
+          <ArrowBackRoundedIcon sx={{ fontSize: 18, color: "#475569" }} />
           一覧に戻る
         </button>
       </div>
       <div className="flex flex-wrap items-center justify-end gap-2">
         <button
           type="button"
-          className="text-sm font-medium transition-opacity hover:opacity-90 disabled:hover:opacity-100"
-          style={actionButtonStyle(
-            withdrawDisabled ? BUTTON_DISABLED_BG : DANGER_BUTTON_BG,
-            withdrawDisabled ? BUTTON_DISABLED_TEXT : PRIMARY_BUTTON_TEXT,
-            withdrawDisabled
-          )}
+          className={dangerPillButtonClassName}
           onClick={onWithdraw}
           disabled={withdrawDisabled}
           title={withdrawTooltip}
@@ -81,12 +48,15 @@ export default function WorkflowDetailActions({
         </button>
         <button
           type="button"
-          className="text-sm font-medium transition-opacity hover:opacity-90 disabled:hover:opacity-100"
-          style={actionButtonStyle(
-            editDisabled ? BUTTON_DISABLED_BG : PRIMARY_BUTTON_BG,
-            editDisabled ? BUTTON_DISABLED_TEXT : PRIMARY_BUTTON_TEXT,
+          className={pillButtonClassName}
+          style={
             editDisabled
-          )}
+              ? undefined
+              : {
+                  backgroundColor: "#19b985",
+                  color: "#ffffff",
+                }
+          }
           onClick={onEdit}
           disabled={editDisabled}
           title={editTooltip}

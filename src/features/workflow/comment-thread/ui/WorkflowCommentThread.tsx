@@ -102,9 +102,22 @@ export default function WorkflowCommentThread({
   };
 
   return (
-    <Box sx={{ mt: { xs: 2, sm: 0 }, minWidth: 0 }}>
-      <Typography variant="h6" sx={{ mb: 1 }}>
+    <Box sx={{ minWidth: 0 }}>
+      <Typography
+        variant="h6"
+        sx={{
+          mb: 0.5,
+          fontWeight: 700,
+          color: "#020617",
+        }}
+      >
         {title}
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{ mb: 2, color: "#64748b" }}
+      >
+        申請に関するやり取りをこの場で記録します。
       </Typography>
       <Paper
         variant="outlined"
@@ -114,8 +127,9 @@ export default function WorkflowCommentThread({
           p: 2.5,
           maxHeight: { xs: 360, sm: PANEL_HEIGHTS.SCROLLABLE_MAX },
           overflow: "auto",
-          bgcolor: "background.paper",
-          borderRadius: 3,
+          bgcolor: "#f8fafc",
+          borderColor: "rgba(148, 163, 184, 0.22)",
+          borderRadius: "20px",
           minWidth: 0,
         }}
       >
@@ -205,14 +219,18 @@ export default function WorkflowCommentThread({
                 <Paper
                   elevation={0}
                   sx={{
-                    bgcolor: isMine ? "primary.main" : "grey.100",
-                    color: isMine ? "common.white" : "text.primary",
+                    bgcolor: isMine ? "#19b985" : "#ffffff",
+                    color: isMine ? "#ffffff" : "#0f172a",
                     p: 1.5,
                     borderRadius: 3,
                     maxWidth: { xs: "100%", sm: "90%" },
                     minWidth: 0,
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
+                    border: isMine ? "1px solid rgba(6, 95, 70, 0.28)" : "1px solid rgba(148, 163, 184, 0.2)",
+                    boxShadow: isMine
+                      ? "0 16px 30px -28px rgba(5, 150, 105, 0.5)"
+                      : "0 16px 30px -28px rgba(15, 23, 42, 0.28)",
                   }}
                 >
                   <Typography
@@ -231,7 +249,7 @@ export default function WorkflowCommentThread({
                     <Button
                       size="small"
                       onClick={() => onToggle(m.id)}
-                      sx={{ mt: 0.5 }}
+                      sx={{ mt: 0.5, color: isMine ? "#ffffff" : "#0f766e" }}
                     >
                       {expanded ? "折りたたむ" : "もっと見る"}
                     </Button>
@@ -269,9 +287,14 @@ export default function WorkflowCommentThread({
           }}
           disabled={sending}
           sx={{
-            bgcolor: "background.paper",
+            bgcolor: "transparent",
             "& .MuiInputBase-root": {
-              bgcolor: "background.paper",
+              bgcolor: "#ffffff",
+              borderRadius: "18px",
+            },
+            "& .MuiFormHelperText-root": {
+              marginLeft: "4px",
+              color: "#64748b",
             },
           }}
           InputProps={
@@ -280,29 +303,28 @@ export default function WorkflowCommentThread({
               : {
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Button
-                        variant="contained"
-                        size="small"
+                      <button
+                        type="button"
                         onClick={onSend}
                         disabled={sending || !input.trim()}
-                        sx={{ textTransform: "none", minWidth: 64 }}
+                        className="inline-flex min-w-[88px] items-center justify-center rounded-full border border-emerald-700/55 bg-[#19b985] px-5 py-2.5 text-sm font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
                       >
                         送信
-                      </Button>
+                      </button>
                     </InputAdornment>
                   ),
                 }
           }
         />
         {isMobile && (
-          <Button
-            variant="contained"
+          <button
+            type="button"
             onClick={onSend}
             disabled={sending || !input.trim()}
-            sx={{ width: 1, textTransform: "none" }}
+            className="inline-flex w-full items-center justify-center rounded-full border border-emerald-700/55 bg-[#19b985] px-6 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
           >
             送信
-          </Button>
+          </button>
         )}
       </Box>
     </Box>

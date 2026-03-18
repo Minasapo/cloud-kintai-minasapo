@@ -975,21 +975,57 @@ const CollaborativeHeaderBase: FC<CollaborativeHeaderProps> = ({
   activeUsers,
   editingCells,
 }) => (
-  <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-    <Typography variant="h4">シフト調整(共同)</Typography>
-    <Chip
-      label={currentMonth.format("YYYY年 M月")}
-      color="primary"
-      variant="outlined"
-    />
-
-    <Box sx={{ flex: 1 }} />
-    <ActiveUsersList
-      activeUsers={activeUsers}
-      editingCells={editingCells}
-      compact={false}
-    />
-  </Stack>
+  <Box
+    sx={{
+      mb: 2,
+      borderRadius: "28px",
+      border: "1px solid rgba(16, 185, 129, 0.15)",
+      background:
+        "linear-gradient(135deg, rgba(247,252,248,0.98) 0%, rgba(236,253,245,0.92) 58%, rgba(255,255,255,0.98) 100%)",
+      p: { xs: 2, md: 2.5 },
+      boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
+    }}
+  >
+    <Stack spacing={1.5}>
+      <Stack
+        direction={{ xs: "column", lg: "row" }}
+        alignItems={{ xs: "flex-start", lg: "center" }}
+        spacing={1.5}
+      >
+        <Typography
+          sx={{
+            fontSize: { xs: "1.85rem", md: "2.2rem" },
+            fontWeight: 700,
+            lineHeight: 1.15,
+            letterSpacing: "-0.02em",
+            color: "#020617",
+          }}
+        >
+          シフト調整
+        </Typography>
+        <Chip
+          label={currentMonth.format("YYYY年 M月")}
+          sx={{
+            borderRadius: "9999px",
+            border: "1px solid rgba(148,163,184,0.28)",
+            bgcolor: "rgba(255,255,255,0.82)",
+            color: "#475569",
+            fontWeight: 600,
+          }}
+        />
+      </Stack>
+      <Typography sx={{ maxWidth: 760, color: "#64748b", lineHeight: 1.9 }}>
+        月ごとのシフトを共同で調整できます。選択、確定、コメント追加、同期をひとつの画面で進めてください。
+      </Typography>
+      <Box sx={{ pt: 0.5 }}>
+        <ActiveUsersList
+          activeUsers={activeUsers}
+          editingCells={editingCells}
+          compact={false}
+        />
+      </Box>
+    </Stack>
+  </Box>
 );
 
 const CollaborativeHeader = memo(CollaborativeHeaderBase);
@@ -1017,25 +1053,50 @@ type ProgressPanelProps = {
 };
 
 const ProgressPanelBase: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
-  <Paper sx={{ p: 2, mb: 3 }}>
+  <Paper
+    sx={{
+      p: { xs: 2, md: 2.25 },
+      mb: 2,
+      borderRadius: "24px",
+      border: "1px solid rgba(226,232,240,0.8)",
+      boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
+      bgcolor: "#ffffff",
+    }}
+  >
     <Stack spacing={2}>
       <Box>
-        <Typography variant="subtitle2" gutterBottom>
+        <Typography variant="subtitle2" gutterBottom sx={{ color: "#0f172a", fontWeight: 700 }}>
           調整状況
         </Typography>
         <LinearProgress
           variant="determinate"
           value={progress.confirmedPercent}
-          sx={{ height: 8, borderRadius: 1 }}
+          sx={{
+            height: 8,
+            borderRadius: 9999,
+            backgroundColor: "rgba(226,232,240,0.8)",
+            "& .MuiLinearProgress-bar": {
+              borderRadius: 9999,
+              backgroundColor: "#19b985",
+            },
+          }}
         />
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: "block" }}>
           確定: {progress.confirmedCount} / {totalDays}日 (
           {progress.confirmedPercent.toFixed(0)}%)
         </Typography>
       </Box>
 
       {progress.needsAdjustmentCount > 0 && (
-        <Alert severity="warning" icon={<InfoIcon />}>
+        <Alert
+          severity="warning"
+          icon={<InfoIcon />}
+          sx={{
+            borderRadius: "18px",
+            border: "1px solid rgba(245,158,11,0.18)",
+            bgcolor: "rgba(255,251,235,0.9)",
+          }}
+        >
           調整が必要な日: {progress.needsAdjustmentCount}日
         </Alert>
       )}
@@ -1070,7 +1131,16 @@ const SyncPanelBase: FC<SyncPanelProps> = ({ syncError, onClearError }) => {
   return (
     <>
       {syncError && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={onClearError}>
+        <Alert
+          severity="error"
+          sx={{
+            mb: 2,
+            borderRadius: "18px",
+            border: "1px solid rgba(239,68,68,0.18)",
+            bgcolor: "rgba(254,242,242,0.92)",
+          }}
+          onClose={onClearError}
+        >
           同期に失敗しました。再試行してください。({syncError})
         </Alert>
       )}
@@ -1314,8 +1384,12 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     );
 
     return (
-      <Page title="シフト調整(共同)">
-        <Container maxWidth={false} sx={{ py: 3 }} onMouseUp={handleMouseUp}>
+      <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
+        <Container
+          maxWidth={false}
+          sx={{ py: 1, px: { xs: 1.5, sm: 2.5 }, maxWidth: "1360px !important" }}
+          onMouseUp={handleMouseUp}
+        >
           <CollaborativeHeader
             currentMonth={currentMonth}
             activeUsers={state.activeUsers}
@@ -1534,9 +1608,44 @@ export default function ShiftCollaborativePage() {
 
   if (staffIds.length === 0) {
     return (
-      <Page title="シフト調整(共同)">
-        <Container maxWidth={false} sx={{ py: 3 }}>
-          <Alert severity="info">スタッフデータが見つかりません</Alert>
+      <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
+        <Container
+          maxWidth={false}
+          sx={{ py: 1, px: { xs: 1.5, sm: 2.5 }, maxWidth: "1360px !important" }}
+        >
+          <Box
+            sx={{
+              borderRadius: "28px",
+              border: "1px solid rgba(16, 185, 129, 0.15)",
+              background:
+                "linear-gradient(135deg, rgba(247,252,248,0.98) 0%, rgba(236,253,245,0.92) 58%, rgba(255,255,255,0.98) 100%)",
+              p: { xs: 2, md: 2.5 },
+              boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: { xs: "1.85rem", md: "2.2rem" },
+                fontWeight: 700,
+                lineHeight: 1.15,
+                letterSpacing: "-0.02em",
+                color: "#020617",
+                mb: 1,
+              }}
+            >
+              シフト調整
+            </Typography>
+            <Alert
+              severity="info"
+              sx={{
+                borderRadius: "18px",
+                border: "1px solid rgba(59,130,246,0.16)",
+                bgcolor: "rgba(239,246,255,0.92)",
+              }}
+            >
+              スタッフデータが見つかりません
+            </Alert>
+          </Box>
         </Container>
       </Page>
     );

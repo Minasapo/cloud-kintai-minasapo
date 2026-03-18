@@ -11,13 +11,10 @@ import WorkTypeItem from "@features/attendance/edit/ui/items/WorkTypeItem";
 import QuickInputButtons from "@features/attendance/edit/ui/QuickInputButtons";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
-  Button,
   Checkbox,
-  CircularProgress,
   Divider,
   FormControlLabel,
   IconButton,
-  styled,
   TabsProps,
 } from "@mui/material";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
@@ -48,23 +45,8 @@ import {
 } from "./WorkTimeInput/WorkTimeInput";
 
 const logger = createLogger("DesktopEditor");
-
-const RequestButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.primary.contrastText,
-  backgroundColor: theme.palette.primary.main,
-  border: "none",
-  boxShadow: theme.shadows[2],
-  width: 150,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-    boxShadow: theme.shadows[4],
-  },
-  "&:disabled": {
-    color: theme.palette.text.disabled,
-    backgroundColor: theme.palette.action.disabledBackground,
-    boxShadow: "none",
-  },
-}));
+const requestButtonClassName =
+  "inline-flex min-w-[160px] items-center justify-center gap-2 rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium !text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] hover:!text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:!text-slate-500 disabled:shadow-none";
 
 export default function DesktopEditor() {
   const ctx = useContext(AttendanceEditContext);
@@ -354,8 +336,10 @@ export default function DesktopEditor() {
             <StaffCommentInput register={register} setValue={setValue} />
           </GroupContainer>
           <div className="flex justify-center pb-2">
-            <RequestButton
+            <button
+              type="button"
               data-testid="attendance-submit-button"
+              className={requestButtonClassName}
               onClick={async () => {
                 // capture pressed time and t0 for processing-time measurement
                 const pressedAt = new Date().toISOString();
@@ -399,10 +383,15 @@ export default function DesktopEditor() {
               disabled={
                 !isDirty || !isValid || isSubmitting || changeRequests.length > 0
               }
-              startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
             >
+              {isSubmitting ? (
+                <span
+                  className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/80 border-t-transparent"
+                  aria-hidden="true"
+                />
+              ) : null}
               申請
-            </RequestButton>
+            </button>
           </div>
         </div>
       </div>

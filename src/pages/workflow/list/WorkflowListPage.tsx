@@ -38,7 +38,7 @@ function Surface({
 }) {
   return (
     <div
-      className={`rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)] sm:p-5 ${className}`.trim()}
+      className={`rounded-[1.6rem] border border-emerald-100/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.97)_0%,rgba(248,255,251,0.94)_100%)] p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)] sm:p-5 ${className}`.trim()}
     >
       {children}
     </div>
@@ -153,7 +153,7 @@ export default function WorkflowListPage() {
   return (
     <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
       <PageSection layoutVariant="dashboard" variant="plain" className="px-0 py-0 md:px-0">
-        <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
           <section className="rounded-[1.8rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f7fcf8_0%,#ecfdf5_58%,#ffffff_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] sm:p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
@@ -168,7 +168,7 @@ export default function WorkflowListPage() {
                 type="button"
                 onClick={() => navigate("/workflow/new")}
                 className={[
-                  "inline-flex items-center justify-center gap-2 rounded-[1rem] bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_-24px_rgba(5,150,105,0.75)] transition hover:bg-emerald-700",
+                  "inline-flex items-center justify-center gap-2 rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b]",
                   isCompact ? "w-full" : "w-auto whitespace-nowrap",
                 ].join(" ")}
               >
@@ -223,7 +223,7 @@ export default function WorkflowListPage() {
                   </div>
 
                   {isCompact ? (
-                    <div className="rounded-[1.4rem] border border-emerald-500/15 bg-[#f7fcf8] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                    <div className="rounded-[1.4rem] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(252,255,253,0.98)_0%,rgba(244,252,247,0.94)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                       <button
                         type="button"
                         onClick={() => setMobileFiltersOpen((prev) => !prev)}
@@ -252,7 +252,7 @@ export default function WorkflowListPage() {
                       ) : null}
                     </div>
                   ) : (
-                    <div className="rounded-[24px] border border-emerald-500/15 bg-[#f7fcf8] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                    <div className="rounded-[24px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(252,255,253,0.98)_0%,rgba(244,252,247,0.94)_100%)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                       <table className="w-full table-fixed border-separate border-spacing-y-2" aria-hidden>
                         <thead>
                           <tr>
@@ -336,8 +336,8 @@ export default function WorkflowListPage() {
                       )}
                     </div>
                   ) : (
-                    <div className="overflow-hidden rounded-[24px] border border-emerald-500/15 bg-[#f8fffb] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-                      <div className="grid grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] border-b border-slate-200/80 bg-emerald-50/60 px-5 py-3 text-[0.74rem] font-semibold tracking-[0.04em] text-slate-500">
+                    <div className="overflow-hidden rounded-[24px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(247,253,249,0.94)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
+                      <div className="grid grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] border-b border-slate-200/80 bg-[linear-gradient(180deg,rgba(240,253,244,0.72)_0%,rgba(248,250,252,0.58)_100%)] px-5 py-3 text-[0.74rem] font-semibold tracking-[0.04em] text-slate-500">
                         <div>種別</div>
                         <div>申請日</div>
                         <div>ステータス</div>
@@ -363,7 +363,7 @@ export default function WorkflowListPage() {
                                 type="button"
                                 onClick={() => handleCardClick(item)}
                                 className={[
-                                  "grid w-full grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] items-center gap-4 border-b border-slate-200/80 px-5 py-4 text-left transition last:border-b-0 hover:bg-emerald-50/70",
+                                  "grid w-full grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] items-center gap-4 border-b border-slate-200/80 px-5 py-4 text-left transition last:border-b-0 hover:bg-emerald-50/40",
                                   isCancelled ? "text-slate-400" : "text-slate-900",
                                 ].join(" ")}
                               >

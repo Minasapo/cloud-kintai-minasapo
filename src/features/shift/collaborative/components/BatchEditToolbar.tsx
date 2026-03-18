@@ -93,7 +93,6 @@ const BatchEditToolbarBase = ({
 
   return (
     <Paper
-      elevation={3}
       sx={{
         position: "fixed",
         bottom: 24,
@@ -101,11 +100,14 @@ const BatchEditToolbarBase = ({
         transform: "translateX(-50%)",
         px: 3,
         py: 2,
-        borderRadius: 2,
+        borderRadius: "24px",
+        border: "1px solid rgba(226,232,240,0.9)",
         minWidth: 600,
         zIndex: 1000,
         opacity: isUpdating ? 0.6 : 1,
         pointerEvents: isUpdating ? "none" : "auto",
+        bgcolor: "#ffffff",
+        boxShadow: "0 28px 60px -36px rgba(15,23,42,0.4)",
       }}
     >
       <Stack spacing={2}>

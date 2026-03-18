@@ -126,7 +126,7 @@ function SelectField({
     <select
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="w-full rounded-[18px] border border-emerald-500/20 bg-[#f8fffb] px-3.5 py-2.5 text-[0.92rem] text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none transition focus:border-emerald-500/55 focus:ring-2 focus:ring-emerald-200"
+      className="w-full rounded-[30px] border border-slate-300 bg-white px-6 py-4 text-[0.95rem] text-slate-900 outline-none transition focus:border-emerald-500/45 focus:ring-2 focus:ring-emerald-100"
     >
       {children}
     </select>
@@ -147,10 +147,10 @@ function FilterTrigger({
       type="button"
       onClick={onClick}
       className={[
-        "flex w-full items-center justify-between rounded-[18px] border px-3.5 py-2.5 text-left text-[0.92rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition",
+        "flex w-full items-center justify-between rounded-[30px] border px-6 py-4 text-left text-[0.95rem] transition",
         isOpen
-          ? "border-emerald-500/55 bg-white ring-2 ring-emerald-200"
-          : "border-emerald-500/20 bg-[#f8fffb] hover:border-emerald-500/30",
+          ? "border-emerald-500/45 bg-white ring-2 ring-emerald-100"
+          : "border-slate-300 bg-white hover:border-slate-400",
       ].join(" ")}
     >
       <span className="truncate text-slate-900">{label}</span>
@@ -172,7 +172,7 @@ function FloatingPanel({
 
   return (
     <div
-      className={`absolute left-0 top-[calc(100%+8px)] z-20 w-full rounded-[22px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(248,255,251,0.98)_0%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.45)] backdrop-blur ${className}`.trim()}
+      className={`absolute left-0 top-[calc(100%+8px)] z-20 w-full rounded-[22px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(246,252,248,0.96)_100%)] p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.45)] backdrop-blur ${className}`.trim()}
     >
       {children}
     </div>
@@ -220,7 +220,7 @@ function DateRangeField({
               type="date"
               value={fromValue ?? ""}
               onChange={(event) => onChange(fromKey, event.target.value)}
-              className="w-full rounded-[16px] border border-emerald-500/20 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500/55 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-[30px] border border-slate-300 bg-white px-5 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500/45 focus:ring-2 focus:ring-emerald-100"
             />
           </label>
           <label className="flex min-w-0 flex-1 flex-col gap-1">
@@ -231,7 +231,7 @@ function DateRangeField({
               type="date"
               value={toValue ?? ""}
               onChange={(event) => onChange(toKey, event.target.value)}
-              className="w-full rounded-[16px] border border-emerald-500/20 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500/55 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-[30px] border border-slate-300 bg-white px-5 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500/45 focus:ring-2 focus:ring-emerald-100"
             />
           </label>
           <div className="flex gap-2 sm:flex-col sm:items-stretch">
@@ -472,7 +472,7 @@ export const WorkflowListFiltersPanel = forwardRef(
     );
 
     return (
-      <div className="rounded-[16px] border border-emerald-500/15 bg-[#f7fcf8] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+      <div className="rounded-[16px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(246,252,248,0.95)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <FilterLabel>{FIELD_LABELS.category}</FilterLabel>

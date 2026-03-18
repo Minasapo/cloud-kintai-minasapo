@@ -21,19 +21,10 @@ import {
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
-import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 import { PageSection } from "@/shared/ui/layout";
 
-const SECTION_GAP = designTokenVar("spacing.xl", "24px");
-const PANEL_GAP = designTokenVar("spacing.lg", "16px");
-const PANEL_BACKGROUND = designTokenVar("color.surface.primary", "#FFFFFF");
-const PANEL_BORDER = designTokenVar("color.border.subtle", "#D7E0DB");
-const PANEL_RADIUS = designTokenVar("radius.lg", "12px");
-const PANEL_PADDING = designTokenVar("spacing.xl", "24px");
-const ERROR_COLOR = designTokenVar("color.feedback.danger.base", "#D7443E");
-const HEADER_GAP = designTokenVar("spacing.md", "12px");
 const logger = createLogger("WorkflowDetailPage");
 
 export default function WorkflowDetailPage() {
@@ -168,72 +159,43 @@ export default function WorkflowDetailPage() {
   return (
     <Page
       title="申請内容"
-      maxWidth="lg"
+      maxWidth={false}
       showDefaultHeader={false}
     >
       <PageSection
         variant="plain"
         layoutVariant="detail"
-        sx={{ gap: SECTION_GAP }}
+        sx={{ gap: 0 }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: HEADER_GAP,
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "1.5rem",
-                fontWeight: 700,
-              }}
-            >
-              申請内容
-            </h1>
-            <p
-              style={{
-                margin: "4px 0 0",
-                color: "#5F6F68",
-                fontSize: "0.875rem",
-              }}
-            >
-              申請一覧を基点に、内容確認と対応を行います。
-            </p>
+        <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-6 pb-10 pt-2">
+          <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
+            <div className="flex flex-col gap-3">
+              <WorkflowDetailActions
+                onBack={() => navigate("/workflow")}
+                onWithdraw={handleWithdraw}
+                onEdit={() => navigate(`/workflow/${id}/edit`)}
+                withdrawDisabled={permissions.withdrawDisabled}
+                withdrawTooltip={permissions.withdrawTooltip}
+                editDisabled={permissions.editDisabled}
+                editTooltip={permissions.editTooltip}
+              />
+              <div className="flex flex-col gap-1.5">
+                <h1 className="m-0 text-[1.85rem] font-bold leading-[1.15] tracking-[-0.02em] text-slate-950 md:text-[2.2rem]">
+                  申請内容
+                </h1>
+                <p className="max-w-[760px] leading-8 text-slate-500">
+                  申請内容の確認、コメントのやり取り、編集や取り下げをこの画面で行えます。
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-        <section
-          className="overflow-hidden"
-          style={{
-            backgroundColor: PANEL_BACKGROUND,
-            border: `1px solid ${PANEL_BORDER}`,
-            borderRadius: PANEL_RADIUS,
-            padding: PANEL_PADDING,
-          }}
-        >
-          <WorkflowDetailActions
-            onBack={() => navigate("/workflow")}
-            onWithdraw={handleWithdraw}
-            onEdit={() => navigate(`/workflow/${id}/edit`)}
-            withdrawDisabled={permissions.withdrawDisabled}
-            withdrawTooltip={permissions.withdrawTooltip}
-            editDisabled={permissions.editDisabled}
-            editTooltip={permissions.editTooltip}
-          />
 
           {!workflow ? (
-            <p style={{ color: ERROR_COLOR }}>
+            <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3 text-sm font-medium text-rose-900">
               ワークフローの読み込みに失敗しました。
-            </p>
+            </div>
           ) : (
-            <div
-              className="mt-4 grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(22rem,0.9fr)]"
-              style={{ gap: PANEL_GAP }}
-            >
+            <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(22rem,0.9fr)]">
               <div className="min-w-0">
                 <WorkflowMetadataPanel
                   workflowId={workflow.id}
@@ -250,7 +212,7 @@ export default function WorkflowDetailPage() {
                 />
               </div>
 
-              <div className="min-w-0">
+              <div className="min-w-0 rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
                 <WorkflowCommentThread
                   key={workflow?.id ?? "workflow-comment-thread"}
                   messages={messages}
@@ -267,7 +229,7 @@ export default function WorkflowDetailPage() {
               </div>
             </div>
           )}
-        </section>
+        </div>
       </PageSection>
     </Page>
   );

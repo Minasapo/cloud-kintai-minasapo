@@ -5,8 +5,7 @@ import { useContext } from "react";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborativePage";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
+import { PageSection } from "@/shared/ui/layout";
 
 export const resolveShiftRequestMode = (
   defaultMode: ShiftDisplayMode,
@@ -23,11 +22,9 @@ export default function ShiftRequestPage() {
   }
 
   return (
-    <Page title="希望シフト" maxWidth="xl" showDefaultHeader={false}>
-      <PageSection layoutVariant="dashboard">
-        <DashboardInnerSurface style={{ minHeight: PANEL_HEIGHTS.DASHBOARD_MIN }}>
+    <Page title="希望シフト" maxWidth={false} showDefaultHeader={false}>
+      <PageSection variant="plain" layoutVariant="detail" sx={{ gap: 0 }}>
           <ShiftRequestForm />
-        </DashboardInnerSurface>
       </PageSection>
     </Page>
   );

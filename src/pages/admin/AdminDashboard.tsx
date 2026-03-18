@@ -189,13 +189,11 @@ function AdminDashboardContent() {
         px: PAGE_PADDING_X,
         py: PAGE_PADDING_Y,
         gap: PAGE_SECTION_GAP,
+        maxWidth: "1360px",
+        mx: "auto",
       }}
     >
-      <PageSection
-        variant="surface"
-        layoutVariant="dashboard"
-        className="gap-0"
-      >
+      <PageSection variant="plain" layoutVariant="dashboard" className="gap-0">
         <AdminHeader
           actions={
             <Stack spacing={1} alignItems="flex-start">
@@ -236,7 +234,15 @@ function AdminDashboardContent() {
       <PageSection
         variant="surface"
         layoutVariant="dashboard"
-        sx={{ gap: 0, flex: 1, overflow: "hidden" }}
+        sx={{
+          gap: 0,
+          flex: 1,
+          overflow: "hidden",
+          borderRadius: "28px",
+          border: "1px solid rgba(226,232,240,0.8)",
+          backgroundColor: "#ffffff",
+          boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
+        }}
       >
         {isSplitMode ? (
           <Group orientation="horizontal">
@@ -248,7 +254,7 @@ function AdminDashboardContent() {
             <Separator
               style={{
                 width: "8px",
-                backgroundColor: "#e0e0e0",
+                backgroundColor: "#e2e8f0",
                 cursor: "col-resize",
               }}
             />
