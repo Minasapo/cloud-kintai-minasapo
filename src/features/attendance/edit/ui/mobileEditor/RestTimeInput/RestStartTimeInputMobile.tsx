@@ -1,6 +1,5 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack, TextField } from "@mui/material";
-import dayjs from "dayjs";
+import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
+import { TimeInput } from "@shared/ui/TimeInput";
 import { useContext } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -23,47 +22,29 @@ export default function RestStartTimeInputMobile({
 
   if (!workDate || !restUpdate) return null;
 
-  const value = rest.startTime ? dayjs(rest.startTime).format("HH:mm") : "";
-
   return (
-    <Stack spacing={1}>
-      <TextField
-        type="time"
+    <div className="flex flex-col gap-2">
+      <TimeInput
+        value={rest.startTime ?? null}
+        baseDate={workDate.format("YYYY-MM-DD")}
         size="small"
-        inputProps={{
-          "data-testid": "rest-start-time-input-" + testIdPrefix + "-" + index,
-        }}
-        value={value}
-        onChange={(e) => {
-          const v = e.target.value;
-          if (!v) return restUpdate(index, { ...rest, startTime: null });
-          const iso = dayjs(workDate.format("YYYY-MM-DD") + " " + v)
-            .second(0)
-            .millisecond(0)
-            .toISOString();
-          restUpdate(index, { ...rest, startTime: iso });
+        step={60}
+        data-testid={"rest-start-time-input-" + testIdPrefix + "-" + index}
+        disabled={changeRequests.length > 0}
+        onChange={(value) => {
+          restUpdate(index, { ...rest, startTime: value });
         }}
       />
-      <Box>
-        <Chip
-          label={getLunchRestStartTime().format("HH:mm")}
-          variant="outlined"
-          color="success"
-          icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
+      <div>
+        <QuickInputChips
+          quickInputTimes={[{ time: getLunchRestStartTime().format("HH:mm"), enabled: true }]}
+          workDate={workDate}
           disabled={changeRequests.length > 0}
-          data-testid={`rest-lunch-chip-${index}`}
-          onClick={() => {
-            const lunchRestStartTime = getLunchRestStartTime().format("HH:mm");
-            const startTime = dayjs(
-              `${workDate.format("YYYY-MM-DD")} ${lunchRestStartTime}`
-            )
-              .second(0)
-              .millisecond(0)
-              .toISOString();
+          onSelectTime={(startTime) => {
             restUpdate(index, { ...rest, startTime });
           }}
         />
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }

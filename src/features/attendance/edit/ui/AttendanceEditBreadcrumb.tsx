@@ -1,4 +1,5 @@
-import { Breadcrumbs, Typography } from "@mui/material";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import { Box, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
@@ -24,16 +25,52 @@ export default function AttendanceEditBreadcrumb() {
     : "/attendance/list";
 
   return (
-    <Breadcrumbs>
-      <Link href="/">
-        TOP
+    <Box
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 1,
+        width: "fit-content",
+        maxWidth: "100%",
+        borderRadius: "9999px",
+        border: "1px solid rgba(148,163,184,0.18)",
+        bgcolor: "rgba(255,255,255,0.82)",
+        px: 1.5,
+        py: 0.75,
+      }}
+    >
+      <Link
+        href={attendanceListHref}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          color: "inherit",
+          textDecoration: "none",
+          minWidth: 0,
+        }}
+      >
+        <ArrowBackRoundedIcon sx={{ fontSize: 18, color: "#475569" }} />
+        <Typography
+          sx={{
+            fontSize: "0.9rem",
+            fontWeight: 600,
+            color: "#0f172a",
+            whiteSpace: "nowrap",
+          }}
+        >
+          勤怠一覧に戻る
+        </Typography>
       </Link>
-      <Link href={attendanceListHref}>
-        勤怠一覧
-      </Link>
-      <Typography color="text.primary">
+      <Typography
+        sx={{
+          color: "#94a3b8",
+          fontSize: "0.85rem",
+          whiteSpace: "nowrap",
+        }}
+      >
         {dayjs(workDate).format(AttendanceDate.DisplayFormat)}
       </Typography>
-    </Breadcrumbs>
+    </Box>
   );
 }

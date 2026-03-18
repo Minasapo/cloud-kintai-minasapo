@@ -1,4 +1,3 @@
-import { Box, Checkbox, Stack } from "@mui/material";
 import dayjs from "dayjs";
 import { Controller, UseFieldArrayReplace } from "react-hook-form";
 
@@ -41,13 +40,13 @@ export default function PaidHolidayFlagInputDesktop({
   if (!control || !setValue) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    checked: boolean,
     field: PaidHolidayFlagField
   ) => {
-    setValue("paidHolidayFlag", e.target.checked);
-    field.onChange(e);
+    setValue("paidHolidayFlag", checked);
+    field.onChange(checked);
 
-    if (!e.target.checked || !setPaidHolidayTimes || !workDate) return;
+    if (!checked || !setPaidHolidayTimes || !workDate) return;
 
     const workDayjs = dayjs(workDate);
     setValue(
@@ -100,22 +99,27 @@ export default function PaidHolidayFlagInputDesktop({
   };
 
   return (
-    <Stack direction="row" alignItems={"center"}>
-      <Box sx={{ fontWeight: "bold", width: "150px" }}>{label}</Box>
-      <Box>
+    <div className="flex items-center gap-4">
+      <div className="w-[150px] font-bold text-slate-900">{label}</div>
+      <div>
         <Controller
           name="paidHolidayFlag"
           control={control}
           disabled={disabled}
           render={({ field }) => (
-            <Checkbox
-              {...field}
-              checked={field.value || false}
-              onChange={(e) => handleChange(e, field)}
-            />
+            <label className="inline-flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={field.value || false}
+                onChange={(e) => handleChange(e.target.checked, field)}
+                disabled={disabled}
+                className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200"
+              />
+              <span className="text-sm text-slate-600">有効にする</span>
+            </label>
           )}
         />
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }

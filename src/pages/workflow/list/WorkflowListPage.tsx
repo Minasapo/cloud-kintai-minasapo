@@ -18,14 +18,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import {
-  DataGrid,
-  type GridColDef,
-  type GridRenderCellParams,
-  type GridRowClassNameParams,
-  type GridRowParams,
-  type GridValueFormatter,
-} from "@mui/x-data-grid";
 import { WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
@@ -53,8 +45,6 @@ const LOADING_SECTION_MIN_HEIGHT = `calc(${designTokenVar(
   "32px"
 )} * 7.5)`;
 const EMPTY_STATE_PADDING_Y = designTokenVar("spacing.lg", "16px");
-const DATA_GRID_HEIGHT_SPACING_UNITS = 130;
-const DATA_GRID_ROW_HEIGHT_SPACING_UNITS = 14;
 const MOBILE_CARD_GAP = designTokenVar("spacing.md", "12px");
 const MOBILE_CARD_PADDING = designTokenVar("spacing.lg", "16px");
 const MOBILE_CARD_RADIUS = designTokenVar("radius.lg", "16px");
@@ -67,13 +57,6 @@ const MOBILE_FILTER_BADGE_PADDING = designTokenVar("spacing.xs", "4px");
 const MOBILE_FILTER_BADGE_RADIUS = designTokenVar("radius.md", "12px");
 
 const formatWorkflowDateValue = (value?: string) => value ?? "-";
-
-const formatWorkflowDate: GridValueFormatter<
-  WorkflowListItem,
-  string | undefined,
-  string,
-  string | undefined
-> = (value) => formatWorkflowDateValue(value);
 
 function Surface({
   children,
@@ -94,18 +77,6 @@ function Surface({
 export default function WorkflowListPage() {
   const theme = useTheme();
   const isCompact = useMediaQuery(theme.breakpoints.down("md"));
-  const spacingToNumber = useCallback(
-    (units: number) => parseFloat(theme.spacing(units)),
-    [theme]
-  );
-  const dataGridContainerHeight = useMemo(
-    () => theme.spacing(DATA_GRID_HEIGHT_SPACING_UNITS),
-    [theme]
-  );
-  const dataGridRowHeight = useMemo(
-    () => spacingToNumber(DATA_GRID_ROW_HEIGHT_SPACING_UNITS),
-    [spacingToNumber]
-  );
   const navigate = useNavigate();
 
   const {
@@ -121,54 +92,9 @@ export default function WorkflowListPage() {
   }: WorkflowListViewModel = useWorkflowListViewModel();
   const filterRowRef = useRef<WorkflowListFiltersHandle>(null);
 
-  const columns = useMemo<GridColDef<WorkflowListItem>[]>(
-    () => [
-      {
-        field: "category",
-        headerName: "種別",
-        flex: 1,
-        minWidth: 140,
-        sortable: false,
-      },
-      {
-        field: "applicationDate",
-        headerName: "申請日",
-        flex: 1,
-        minWidth: 160,
-        sortable: false,
-        valueFormatter: formatWorkflowDate,
-      },
-      {
-        field: "status",
-        headerName: "ステータス",
-        flex: 1,
-        minWidth: 160,
-        sortable: false,
-        renderCell: (
-          params: GridRenderCellParams<WorkflowListItem, string | undefined>
-        ) => <StatusChip status={params.row.rawStatus || params.value || ""} />,
-      },
-      {
-        field: "createdAt",
-        headerName: "作成日",
-        flex: 1,
-        minWidth: 160,
-        sortable: false,
-      },
-    ],
-    []
-  );
-
   const resolveWorkflowKey = useCallback((row: WorkflowListItem) => {
     return row.rawId ? row.rawId : `${row.name}-${row.createdAt}`;
   }, []);
-
-  const handleRowClick = useCallback(
-    (params: GridRowParams<WorkflowListItem>) => {
-      navigate(`/workflow/${encodeURIComponent(resolveWorkflowKey(params.row))}`);
-    },
-    [navigate, resolveWorkflowKey]
-  );
 
   const handleCardClick = useCallback(
     (row: WorkflowListItem) => {
@@ -177,19 +103,6 @@ export default function WorkflowListPage() {
     [navigate, resolveWorkflowKey]
   );
 
-  const getRowClassName = useCallback(
-    (params: GridRowClassNameParams<WorkflowListItem>) =>
-      params.row.rawStatus === WorkflowStatus.CANCELLED ||
-      params.row.status === CANCELLED_LABEL
-        ? "status-cancelled"
-        : "",
-    []
-  );
-
-  const getRowId = useCallback(
-    (row: WorkflowListItem) => resolveWorkflowKey(row),
-    [resolveWorkflowKey]
-  );
   const statusSummary = useMemo(() => {
     const counts = new Map<string, number>();
     filteredItems.forEach((item) => {
@@ -412,7 +325,7 @@ export default function WorkflowListPage() {
                       ) : (
                         <Stack spacing={MOBILE_CARD_GAP}>
                           {filteredItems.map((item) => {
-                            const key = getRowId(item);
+                            const key = resolveWorkflowKey(item);
                             return (
                               <ButtonBase
                                 key={key}
@@ -507,70 +420,49 @@ export default function WorkflowListPage() {
                       )}
                     </Box>
                   ) : (
-                    <Box
-                      sx={{
-                        height: dataGridContainerHeight,
-                        width: "100%",
-                        overflow: "hidden",
-                        borderRadius: "24px",
-                        border: "1px solid rgba(16, 185, 129, 0.14)",
-                        bgcolor: "#f8fffb",
-                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
-                      }}
-                    >
-                      <DataGrid
-                        rows={filteredItems}
-                        columns={columns}
-                        getRowId={getRowId}
-                        disableColumnMenu
-                        disableColumnSelector
-                        disableDensitySelector
-                        disableRowSelectionOnClick
-                        hideFooter
-                        loading={loading}
-                        onRowClick={handleRowClick}
-                        rowHeight={dataGridRowHeight}
-                        columnHeaderHeight={0}
-                        getRowClassName={getRowClassName}
-                        sx={{
-                          border: "none",
-                          bgcolor: "transparent",
-                          "& .MuiDataGrid-columnHeaders": { display: "none" },
-                          "& .MuiDataGrid-main": {
-                            bgcolor: "transparent",
-                          },
-                          "& .MuiDataGrid-virtualScroller": {
-                            bgcolor: "transparent",
-                          },
-                          "& .MuiDataGrid-row": {
-                            cursor: "pointer",
-                            bgcolor: "rgba(255,255,255,0.92)",
-                            transition: "background-color 0.18s ease, transform 0.18s ease",
-                          },
-                          "& .MuiDataGrid-row:hover": {
-                            bgcolor: "#ecfdf5",
-                          },
-                          "& .MuiDataGrid-row:not(:last-of-type)": {
-                            borderBottom: "1px solid rgba(226, 232, 240, 0.8)",
-                          },
-                          "& .MuiDataGrid-cell": {
-                            borderBottom: "none",
-                            px: 2.25,
-                            color: "#0f172a",
-                          },
-                          "& .MuiDataGrid-overlay": {
-                            bgcolor: "transparent",
-                          },
-                          "& .status-cancelled .MuiDataGrid-cell": {
-                            color: "text.disabled",
-                          },
-                          "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within":
-                            {
-                              outline: "none",
-                            },
-                        }}
-                      />
-                    </Box>
+                    <div className="overflow-hidden rounded-[24px] border border-emerald-500/15 bg-[#f8fffb] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                      <div className="grid grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] border-b border-slate-200/80 bg-emerald-50/60 px-5 py-3 text-[0.74rem] font-semibold tracking-[0.04em] text-slate-500">
+                        <div>種別</div>
+                        <div>申請日</div>
+                        <div>ステータス</div>
+                        <div>作成日</div>
+                      </div>
+                      {loading ? (
+                        <div className="flex justify-center py-10">
+                          <CircularProgress />
+                        </div>
+                      ) : filteredItems.length === 0 ? (
+                        <div className="px-5 py-8">
+                          <Alert severity="info">該当するワークフローがありません。</Alert>
+                        </div>
+                      ) : (
+                        <div>
+                          {filteredItems.map((item) => {
+                            const isCancelled =
+                              item.rawStatus === WorkflowStatus.CANCELLED ||
+                              item.status === CANCELLED_LABEL;
+                            return (
+                              <button
+                                key={resolveWorkflowKey(item)}
+                                type="button"
+                                onClick={() => handleCardClick(item)}
+                                className={[
+                                  "grid w-full grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] items-center gap-4 border-b border-slate-200/80 px-5 py-4 text-left transition last:border-b-0 hover:bg-emerald-50/70",
+                                  isCancelled ? "text-slate-400" : "text-slate-900",
+                                ].join(" ")}
+                              >
+                                <div className="font-medium">{item.category || "-"}</div>
+                                <div>{formatWorkflowDateValue(item.applicationDate)}</div>
+                                <div>
+                                  <StatusChip status={item.rawStatus || item.status || ""} />
+                                </div>
+                                <div>{item.createdAt || "-"}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </Surface>

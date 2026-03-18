@@ -1,16 +1,3 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  List,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Typography,
-} from "@mui/material";
 import dayjs from "dayjs";
 import { useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
@@ -56,61 +43,70 @@ export default function QuickInputButtonsMobile({
   if (actions.length === 0) return null;
 
   return (
-    <Box sx={{ mb: 1 }}>
-      <Stack
-        direction="row"
-        spacing={1}
-        alignItems="center"
-        sx={{ flexWrap: "wrap" }}
-      >
-        <Box sx={{ fontWeight: "bold", mr: 1 }}>定型入力</Box>
-        <Button variant="outlined" onClick={() => setOpen(true)}>
+    <div className="mb-1">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="mr-1 text-base font-bold text-slate-900">定型入力</div>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="rounded-[14px] border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+        >
           選択
-        </Button>
-      </Stack>
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        fullWidth
-        maxWidth="xs"
-      >
-        <DialogTitle>定型入力</DialogTitle>
-        <DialogContent>
-          <List>
+        </button>
+      </div>
+      {open ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4">
+          <div className="w-full max-w-sm rounded-[24px] border border-emerald-200 bg-white p-5 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.45)]">
+            <div className="text-base font-semibold text-slate-950">定型入力</div>
+            <div className="mt-4 space-y-2">
             {actions.map((action) => (
-              <ListItemButton
+              <button
                 key={action.key}
-                selected={selectedKey === action.key}
+                type="button"
                 onClick={() => setSelectedKey(action.key)}
+                className={[
+                  "flex w-full items-center rounded-[14px] border px-4 py-3 text-left text-sm font-medium transition",
+                  selectedKey === action.key
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+                ].join(" ")}
               >
-                <ListItemText primary={action.label} />
-              </ListItemButton>
+                {action.label}
+              </button>
             ))}
             {actions.length === 0 && (
-              <Typography sx={{ color: "text.secondary" }}>
+              <p className="text-sm text-slate-500">
                 操作可能な項目がありません。
-              </Typography>
+              </p>
             )}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>閉じる</Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              const action = actions.find((a) => a.key === selectedKey);
-              if (action) {
-                action.action();
-                setOpen(false);
-                setSelectedKey(null);
-              }
-            }}
-            disabled={!selectedKey}
-          >
-            適用
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded-[12px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                閉じる
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const action = actions.find((a) => a.key === selectedKey);
+                  if (action) {
+                    action.action();
+                    setOpen(false);
+                    setSelectedKey(null);
+                  }
+                }}
+                disabled={!selectedKey}
+                className="rounded-[12px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                適用
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }

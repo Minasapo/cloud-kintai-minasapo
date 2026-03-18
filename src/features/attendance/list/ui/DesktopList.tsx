@@ -6,7 +6,6 @@ import {
   Box,
   IconButton,
   Stack,
-  styled,
   Table,
   TableBody,
   TableCell,
@@ -47,16 +46,6 @@ import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
 
 const MONTH_QUERY_KEY = "month";
-
-const DesktopBox = styled(Box)(({ theme }) => ({
-  padding: "0px",
-  [theme.breakpoints.down("lg")]: {
-    padding: "0px",
-  },
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
-}));
 
 export default function DesktopList({
   attendances,
@@ -154,7 +143,7 @@ export default function DesktopList({
     });
   })();
   return (
-    <DesktopBox>
+    <div className="hidden md:block">
       {errorAttendances.length > 0 && (
         <Box sx={{ pb: 3 }}>
           <Box
@@ -304,6 +293,6 @@ export default function DesktopList({
           month={currentMonth}
         />
       </Box>
-    </DesktopBox>
+    </div>
   );
 }

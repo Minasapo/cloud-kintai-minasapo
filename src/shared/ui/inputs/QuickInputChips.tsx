@@ -26,12 +26,14 @@ export default function QuickInputChips({
           type="button"
           disabled={disabled}
           aria-label={`${entry.time}を入力`}
-          className="inline-flex min-h-8 items-center gap-1 rounded-full border px-3 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            backgroundColor: entry.enabled ? "#ECF8F1" : "#FFFFFF",
-            borderColor: entry.enabled ? "rgba(30, 170, 106, 0.4)" : "#D0D7D4",
-            color: entry.enabled ? "#1EAA6A" : "#45574F",
-          }}
+          className={[
+            "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 text-[0.95rem] font-medium leading-none transition",
+            "shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]",
+            "hover:-translate-y-[1px] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50",
+            entry.enabled
+              ? "border-emerald-300 bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+              : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
+          ].join(" ")}
           onClick={() => {
             const endTime = dayjs(
               `${workDate.format("YYYY-MM-DD")} ${entry.time}`
@@ -39,8 +41,16 @@ export default function QuickInputChips({
             onSelectTime(endTime);
           }}
         >
-          <span aria-hidden="true" className="inline-flex h-4 w-4 items-center">
-            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+          <span
+            aria-hidden="true"
+            className={[
+              "inline-flex h-5 w-5 items-center justify-center rounded-full border",
+              entry.enabled
+                ? "border-emerald-400/80 bg-white/80"
+                : "border-slate-300 bg-slate-50",
+            ].join(" ")}
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
               <path
                 d="M8 3.333v9.334M3.333 8h9.334"
                 stroke="currentColor"

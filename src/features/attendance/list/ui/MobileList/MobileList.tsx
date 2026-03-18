@@ -1,6 +1,6 @@
 import "./styles.scss";
 
-import { Alert, AlertTitle, Box, styled } from "@mui/material";
+import { Alert, AlertTitle, Box } from "@mui/material";
 import {
   Attendance,
   CloseDate,
@@ -14,13 +14,6 @@ import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus } from "../../lib/attendanceStatusUtils";
 import MobileCalendar from "./MobileCalendar";
-
-const MobileBox = styled(Box)(({ theme }) => ({
-  padding: "0px 0px 8px 0px",
-  [theme.breakpoints.up("md")]: {
-    display: "none",
-  },
-}));
 
 export default function MobileList({
   attendances,
@@ -85,7 +78,7 @@ export default function MobileList({
   })();
 
   return (
-    <MobileBox>
+    <div className="pb-2 md:hidden">
       {hasErrorStatus && (
         <Box sx={{ pb: 2 }}>
           <Alert
@@ -110,6 +103,6 @@ export default function MobileList({
         onMonthChange={onMonthChange}
         closeDates={closeDates}
       />
-    </MobileBox>
+    </div>
   );
 }

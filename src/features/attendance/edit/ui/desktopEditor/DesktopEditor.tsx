@@ -11,23 +11,16 @@ import WorkTypeItem from "@features/attendance/edit/ui/items/WorkTypeItem";
 import QuickInputButtons from "@features/attendance/edit/ui/QuickInputButtons";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
-  Alert,
-  AlertTitle,
-  Box,
   Button,
   Checkbox,
   CircularProgress,
-  Container,
   Divider,
   FormControlLabel,
   IconButton,
-  Stack,
   styled,
   TabsProps,
-  Typography,
 } from "@mui/material";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
-import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useFormState } from "react-hook-form";
 
@@ -55,31 +48,6 @@ import {
 } from "./WorkTimeInput/WorkTimeInput";
 
 const logger = createLogger("DesktopEditor");
-
-const DesktopContainer = styled(Container)(({ theme }) => ({
-  paddingTop: theme.spacing(1),
-  paddingBottom: theme.spacing(5),
-}));
-
-const BodyStack = styled(Stack)(({ theme }) => ({
-  width: "100%",
-  maxWidth: 960,
-  margin: "0 auto",
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
-  [theme.breakpoints.up("md")]: {
-    paddingLeft: theme.spacing(4),
-    paddingRight: theme.spacing(4),
-  },
-  [theme.breakpoints.up("lg")]: {
-    maxWidth: 1080,
-    paddingLeft: theme.spacing(6),
-    paddingRight: theme.spacing(6),
-  },
-  [theme.breakpoints.up("xl")]: {
-    maxWidth: 1200,
-  },
-}));
 
 const RequestButton = styled(Button)(({ theme }) => ({
   color: theme.palette.primary.contrastText,
@@ -180,44 +148,42 @@ export default function DesktopEditor() {
   }
 
   return (
-    <DesktopContainer maxWidth={false}>
-      <Stack direction="column" spacing={2}>
-        <AttendanceEditBreadcrumb />
-        <BodyStack
-          spacing={2}
-          sx={{
-            "& .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline":
-              {
-                borderColor: "divider",
-              },
-            "& .MuiOutlinedInput-root.Mui-error:hover .MuiOutlinedInput-notchedOutline":
-              {
-                borderColor: "divider",
-              },
-            "& .MuiOutlinedInput-root.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline":
-              {
-                borderColor: "divider",
-              },
+    <div className="mx-auto w-full max-w-[1120px] px-6 pb-10 pt-2">
+      <div className="flex flex-col gap-3">
+        <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
+          <div className="flex flex-col gap-1.5">
+            <AttendanceEditBreadcrumb />
+            <h1 className="m-0 text-[1.85rem] font-bold leading-[1.15] tracking-[-0.02em] text-slate-950 md:text-[2.2rem]">
+              勤怠編集
+            </h1>
+            <p className="max-w-[760px] leading-8 text-slate-500">
+              勤務時間、休憩、休暇、備考をひとつの画面で調整できます。必要な内容を入力して修正申請を行ってください。
+            </p>
+          </div>
+        </div>
+        <div
+          className="flex w-full flex-col gap-2"
+          style={{
+            ["--mui-error-border" as string]: "divider",
           }}
         >
-          <Title>勤怠編集</Title>
           {errorMessages.length > 0 && (
-            <Alert severity="error">
-              <AlertTitle>入力内容に誤りがあります。</AlertTitle>
-              <Stack spacing={0.5}>
+            <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3">
+              <div className="text-sm font-semibold text-rose-900">入力内容に誤りがあります。</div>
+              <div className="mt-2 flex flex-col gap-1">
                 {errorMessages.map((message: string) => (
-                  <Typography key={message} variant="body2">
+                  <div key={message} className="text-sm text-rose-900">
                     {message}
-                  </Typography>
+                  </div>
                 ))}
-              </Stack>
-            </Alert>
+              </div>
+            </div>
           )}
-          <Stack direction="column" spacing={2}>
+          <div className="flex flex-col gap-2">
             <ChangeRequestingAlert changeRequests={changeRequests} />
-          </Stack>
+          </div>
           <NoDataAlert />
-          <GroupContainer hideAccent hideBorder>
+          <GroupContainer hideAccent hideBorder className="w-full">
             {setValue && restReplace && hourlyPaidHolidayTimeReplace && (
               <QuickInputButtons
                 setValue={setValue}
@@ -229,16 +195,16 @@ export default function DesktopEditor() {
               />
             )}
           </GroupContainer>
-          <GroupContainer hideAccent hideBorder>
+          <GroupContainer hideAccent hideBorder className="w-full">
             <WorkDateItem />
           </GroupContainer>
-          <GroupContainer hideAccent hideBorder>
-            <Stack spacing={2}>
+          <GroupContainer hideAccent hideBorder className="w-full">
+            <div className="flex flex-col gap-2">
               <StaffNameItem />
               <WorkTypeItem />
-            </Stack>
+            </div>
           </GroupContainer>
-          <GroupContainer hideAccent hideBorder>
+          <GroupContainer hideAccent hideBorder className="w-full">
             <WorkTimeInput
               highlightStartTime={highlightStartTime}
               highlightEndTime={highlightEndTime}
@@ -272,7 +238,7 @@ export default function DesktopEditor() {
               hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
             />
           </GroupContainer>
-          <GroupContainer hideAccent hideBorder>
+          <GroupContainer hideAccent hideBorder className="w-full">
             {(() => {
               const items: { label: string; content: JSX.Element }[] = [];
               items.push({
@@ -287,16 +253,16 @@ export default function DesktopEditor() {
                 items.push({
                   label: "特別休暇",
                   content: (
-                    <Stack direction="row">
-                      <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                        {"特別休暇"}
-                      </Box>
-                      <Stack spacing={1} sx={{ flexGrow: 2 }}>
-                        <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start">
+                      <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
+                        特別休暇
+                      </div>
+                      <div className="flex flex-1 flex-col gap-3">
+                        <div className="text-sm leading-6 text-slate-500">
                           有給休暇ではない特別な休暇(忌引きなど)として扱われます。
                           <br />
                           使用する際は、事前に勤怠管理者へご相談ください。
-                        </Box>
+                        </div>
                         <Controller
                           name="specialHolidayFlag"
                           control={control}
@@ -316,8 +282,8 @@ export default function DesktopEditor() {
                             />
                           )}
                         />
-                      </Stack>
-                    </Stack>
+                      </div>
+                    </div>
                   ),
                 });
               }
@@ -326,15 +292,15 @@ export default function DesktopEditor() {
                 items.push({
                   label: `時間単位(${hourlyPaidHolidayTimeFields.length})`,
                   content: (
-                    <Stack direction="row">
-                      <Box sx={{ fontWeight: "bold", width: "150px" }}>
-                        {"時間単位休暇"}
-                      </Box>
-                      <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start">
+                      <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
+                        時間単位休暇
+                      </div>
+                      <div className="flex flex-1 flex-col gap-3">
                         {hourlyPaidHolidayTimeFields.length === 0 && (
-                          <Box sx={{ color: "text.secondary", fontSize: 14 }}>
+                          <div className="text-sm leading-6 text-slate-500">
                             時間単位休暇の時間帯を追加してください。
-                          </Box>
+                          </div>
                         )}
                         {hourlyPaidHolidayTimeFields.map(
                           (hourlyPaidHolidayTime, index) => (
@@ -345,7 +311,7 @@ export default function DesktopEditor() {
                             />
                           ),
                         )}
-                        <Box>
+                        <div>
                           <IconButton
                             aria-label="add-hourly-paid-holiday-time"
                             onClick={() =>
@@ -358,9 +324,9 @@ export default function DesktopEditor() {
                           >
                             <AddAlarmIcon />
                           </IconButton>
-                        </Box>
-                      </Stack>
-                    </Stack>
+                        </div>
+                      </div>
+                    </div>
                   ),
                 });
               }
@@ -381,79 +347,65 @@ export default function DesktopEditor() {
               );
             })()}
           </GroupContainer>
-          <GroupContainer title="備考" hideAccent hideBorder>
+          <GroupContainer title="備考" hideAccent hideBorder className="w-full">
             <RemarksInput />
           </GroupContainer>
-          <GroupContainer hideAccent hideBorder>
+          <GroupContainer hideAccent hideBorder className="w-full">
             <StaffCommentInput register={register} setValue={setValue} />
           </GroupContainer>
-          <Box>
-            <Stack
-              direction="row"
-              alignItems={"center"}
-              justifyContent={"center"}
-              spacing={3}
+          <div className="flex justify-center pb-2">
+            <RequestButton
+              data-testid="attendance-submit-button"
+              onClick={async () => {
+                // capture pressed time and t0 for processing-time measurement
+                const pressedAt = new Date().toISOString();
+                const t0 = Date.now();
+
+                // call validation + submit and measure duration regardless of success
+                let submitError: unknown = undefined;
+                try {
+                  await handleSubmit(onSubmit)();
+                } catch (e) {
+                  submitError = e;
+                }
+
+                const t1 = Date.now();
+                const processingTimeMs = t1 - t0;
+
+                // Try to create an operation log (best-effort). Include processing time.
+                try {
+                  await createOperationLog({
+                    staffId: staff?.cognitoUserId ?? undefined,
+                    action: "submit_change_request",
+                    resource: "attendance",
+                    resourceId: attendance?.id ?? String(workDate ?? ""),
+                    // primary timestamp: when the user pressed the button
+                    timestamp: pressedAt,
+                    details: JSON.stringify({
+                      startTime: getValues?.("startTime"),
+                      endTime: getValues?.("endTime"),
+                      remarks: getValues?.("remarks"),
+                      processingTimeMs,
+                      success: submitError ? false : true,
+                    }),
+                    metadata: JSON.stringify({ processingTimeMs }),
+                    severity: "INFO",
+                  });
+                } catch (e) {
+                  // ログ作成失敗は握りつぶす。ただしデバッグに出す
+                  logger.error("createOperationLog failed:", e);
+                }
+              }}
+              disabled={
+                !isDirty || !isValid || isSubmitting || changeRequests.length > 0
+              }
+              startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
             >
-              <Box sx={{ paddingBottom: 2 }}>
-                <RequestButton
-                  data-testid="attendance-submit-button"
-                  onClick={async () => {
-                    // capture pressed time and t0 for processing-time measurement
-                    const pressedAt = new Date().toISOString();
-                    const t0 = Date.now();
-
-                    // call validation + submit and measure duration regardless of success
-                    let submitError: unknown = undefined;
-                    try {
-                      await handleSubmit(onSubmit)();
-                    } catch (e) {
-                      submitError = e;
-                    }
-
-                    const t1 = Date.now();
-                    const processingTimeMs = t1 - t0;
-
-                    // Try to create an operation log (best-effort). Include processing time.
-                    try {
-                      await createOperationLog({
-                        staffId: staff?.cognitoUserId ?? undefined,
-                        action: "submit_change_request",
-                        resource: "attendance",
-                        resourceId: attendance?.id ?? String(workDate ?? ""),
-                        // primary timestamp: when the user pressed the button
-                        timestamp: pressedAt,
-                        details: JSON.stringify({
-                          startTime: getValues?.("startTime"),
-                          endTime: getValues?.("endTime"),
-                          remarks: getValues?.("remarks"),
-                          processingTimeMs,
-                          success: submitError ? false : true,
-                        }),
-                        metadata: JSON.stringify({ processingTimeMs }),
-                        severity: "INFO",
-                      });
-                    } catch (e) {
-                      // ログ作成失敗は握りつぶす。ただしデバッグに出す
-                      logger.error("createOperationLog failed:", e);
-                    }
-                  }}
-                  disabled={
-                    !isDirty ||
-                    !isValid ||
-                    isSubmitting ||
-                    changeRequests.length > 0
-                  }
-                  startIcon={
-                    isSubmitting ? <CircularProgress size={20} /> : null
-                  }
-                >
-                  申請
-                </RequestButton>
-              </Box>
-            </Stack>
-          </Box>
-        </BodyStack>
-      </Stack>
-    </DesktopContainer>
+              申請
+            </RequestButton>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

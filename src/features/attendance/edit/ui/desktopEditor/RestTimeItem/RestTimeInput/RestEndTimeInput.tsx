@@ -1,7 +1,5 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
+import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
+import { TimeInput } from "@shared/ui/TimeInput";
 import { useContext } from "react";
 import { Controller, FieldArrayWithId } from "react-hook-form";
 
@@ -32,51 +30,26 @@ export default function RestEndTimeInput({
   if (!workDate || !control || !restUpdate) return null;
 
   return (
-    <Stack direction="row" spacing={1}>
-      <Stack spacing={1}>
+    <div className="flex flex-col gap-2">
         <Controller
           name={`rests.${index}.endTime`}
           control={control}
           render={({ field }) => (
-            <TimePicker
-              value={rest.endTime ? dayjs(rest.endTime) : null}
-              ampm={false}
+            <TimeInput
+              value={field.value ?? null}
+              baseDate={workDate.format("YYYY-MM-DD")}
               disabled={changeRequests.length > 0}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  inputProps: {
-                    "data-testid": `rest-end-time-input-${testIdPrefix}-${index}`,
-                  },
-                },
-              }}
-              onChange={(newEndTime) => {
-                if (!newEndTime) {
-                  field.onChange(null);
-                  return;
-                }
-
-                if (!newEndTime.isValid()) {
-                  return;
-                }
-
-                const formattedEndTime = newEndTime
-                  .year(workDate.year())
-                  .month(workDate.month())
-                  .date(workDate.date())
-                  .second(0)
-                  .millisecond(0)
-                  .toISOString();
-                field.onChange(formattedEndTime);
-              }}
+              size="small"
+              step={60}
+              data-testid={`rest-end-time-input-${testIdPrefix}-${index}`}
+              onChange={(newEndTime) => field.onChange(newEndTime)}
             />
           )}
         />
-        <Box>
+        <div>
           <DefaultEndTimeChip index={index} rest={rest} />
-        </Box>
-      </Stack>
-    </Stack>
+        </div>
+    </div>
   );
 }
 
@@ -111,14 +84,11 @@ function DefaultEndTimeChip({
   };
 
   return (
-    <Chip
-      label={lunchRestEndTime}
-      variant="outlined"
-      color="success"
+    <QuickInputChips
+      quickInputTimes={[{ time: lunchRestEndTime, enabled: true }]}
+      workDate={workDate}
       disabled={changeRequests.length > 0}
-      icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-      onClick={clickHandler}
-      data-testid={`rest-lunch-end-chip-${index}`}
+      onSelectTime={clickHandler}
     />
   );
 }

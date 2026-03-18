@@ -1,13 +1,13 @@
 /**
  * 休憩終了時刻入力コンポーネント。
- * MaterialUIのTimePickerを利用し、休憩終了時刻を選択・編集できる。
+ * ネイティブの時刻入力で、休憩終了時刻を選択・編集できる。
  * デフォルトの昼休憩終了時刻をChipで選択可能。
  *
  * @packageDocumentation
  */
 
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack, TextField } from "@mui/material";
+import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
+import { TimeInput } from "@shared/ui/TimeInput";
 import dayjs from "dayjs";
 import { useContext } from "react";
 import { FieldArrayWithId, UseFieldArrayUpdate } from "react-hook-form";
@@ -57,28 +57,18 @@ export default function RestEndTimeInput({
   const lunchRestEndTime = getLunchRestEndTime().format("H:mm");
 
   return (
-    <Stack direction="column" spacing={1}>
-      <Stack spacing={1}>
-        <TextField
-          type="time"
+    <div className="flex flex-col gap-2">
+        <TimeInput
+          value={rest.endTime ?? null}
+          baseDate={workDate.format("YYYY-MM-DD")}
           size="small"
-          inputProps={{
-            "data-testid": "rest-end-time-input-" + testIdPrefix + "-" + index,
-          }}
-          value={rest.endTime ? dayjs(rest.endTime).format("HH:mm") : ""}
-          onChange={(e) => {
-            const v = e.target.value;
-            const formattedEndTime = v
-              ? dayjs(workDate.format("YYYY-MM-DD") + " " + v)
-                  .second(0)
-                  .millisecond(0)
-                  .toISOString()
-              : null;
-            // call provided restUpdate to change the array element
+          step={60}
+          data-testid={"rest-end-time-input-" + testIdPrefix + "-" + index}
+          onChange={(formattedEndTime) => {
             restUpdate(index, { ...rest, endTime: formattedEndTime });
           }}
         />
-        <Box>
+        <div>
           <DefaultEndTimeChip
             index={index}
             workDate={workDate}
@@ -86,9 +76,8 @@ export default function RestEndTimeInput({
             rest={rest}
             lunchRestEndTime={lunchRestEndTime}
           />
-        </Box>
-      </Stack>
-    </Stack>
+        </div>
+    </div>
   );
 }
 
@@ -112,12 +101,10 @@ function DefaultEndTimeChip({
   lunchRestEndTime: string;
 }): JSX.Element {
   return (
-    <Chip
-      label={lunchRestEndTime}
-      variant="outlined"
-      color="success"
-      icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-      onClick={() => {
+    <QuickInputChips
+      quickInputTimes={[{ time: lunchRestEndTime, enabled: true }]}
+      workDate={workDate}
+      onSelectTime={() => {
         const endTime = new AttendanceDateTime()
           .setDate(workDate)
           .setRestEnd()

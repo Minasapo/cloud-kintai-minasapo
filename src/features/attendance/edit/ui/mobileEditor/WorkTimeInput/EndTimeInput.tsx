@@ -1,6 +1,6 @@
-import { Box, Stack, TextField } from "@mui/material";
 import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
-import dayjs from "dayjs";
+import { TimeInput } from "@shared/ui/TimeInput";
+import type { Dayjs } from "dayjs";
 import { useContext, useMemo } from "react";
 import { UseFormSetValue } from "react-hook-form";
 
@@ -15,7 +15,7 @@ export default function EndTimeInput({
   workDate,
   setValue,
 }: {
-  workDate: dayjs.Dayjs | null;
+  workDate: Dayjs | null;
   setValue: UseFormSetValue<AttendanceEditInputs>;
 }) {
   const { getQuickInputEndTimes } = useContext(AppConfigContext);
@@ -35,31 +35,21 @@ export default function EndTimeInput({
   const { watch, readOnly, isOnBreak } = useContext(AttendanceEditContext);
   if (!workDate) return null;
 
-  const endTime = watch ? watch("endTime") : null;
+  const endTime = watch ? (watch("endTime") ?? null) : null;
 
   return (
-    <Stack direction="column" spacing={1}>
-      <Stack spacing={1}>
-        <TextField
-          type="time"
+    <div className="flex flex-col gap-2">
+        <TimeInput
+          value={endTime}
+          baseDate={workDate.format("YYYY-MM-DD")}
           size="small"
+          step={60}
           disabled={!!readOnly || isOnBreak}
-          value={endTime ? dayjs(endTime).format("HH:mm") : ""}
-          onChange={(e) => {
-            const v = e.target.value;
-            setValue(
-              "endTime",
-              v
-                ? dayjs(workDate.format("YYYY-MM-DD") + " " + v)
-                    .second(0)
-                    .millisecond(0)
-                    .toISOString()
-                : null,
-              { shouldDirty: true }
-            );
+          onChange={(value) => {
+            setValue("endTime", value, { shouldDirty: true });
           }}
         />
-        <Box>
+        <div>
           <QuickInputChips
             quickInputTimes={quickInputEndTimes}
             workDate={workDate}
@@ -69,8 +59,7 @@ export default function EndTimeInput({
               setValue("endTime", endTime, { shouldDirty: true });
             }}
           />
-        </Box>
-      </Stack>
-    </Stack>
+        </div>
+    </div>
   );
 }
