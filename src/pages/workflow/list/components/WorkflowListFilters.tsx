@@ -45,12 +45,77 @@ const DISPLAY_LABEL_CREATED = "作成日で絞込";
 const STATUS_ALL_VALUE = "__ALL__";
 const SELECT_SX = {
   width: "100%",
+  borderRadius: "18px",
+  bgcolor: "#f8fffb",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9)",
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(16, 185, 129, 0.16)",
+  },
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(16, 185, 129, 0.28)",
+  },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(16, 185, 129, 0.55)",
+  },
+  "& .MuiSelect-select": {
+    py: "10px",
+    px: "14px",
+    fontSize: "0.92rem",
+    color: "#0f172a",
+  },
+  "& .MuiSelect-icon": {
+    color: "#64748b",
+  },
   ".MuiSelect-select": {
     display: "block",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
   },
+} as const;
+const TEXT_FIELD_SX = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "18px",
+    bgcolor: "#f8fffb",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9)",
+    "& fieldset": {
+      borderColor: "rgba(16, 185, 129, 0.16)",
+    },
+    "&:hover fieldset": {
+      borderColor: "rgba(16, 185, 129, 0.28)",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "rgba(16, 185, 129, 0.55)",
+    },
+  },
+  "& .MuiOutlinedInput-input": {
+    py: "10px",
+    px: "14px",
+    fontSize: "0.92rem",
+    color: "#0f172a",
+    cursor: "pointer",
+  },
+} as const;
+const POPOVER_PANEL_SX = {
+  mt: 1,
+  borderRadius: "22px",
+  border: "1px solid rgba(16, 185, 129, 0.14)",
+  background:
+    "linear-gradient(180deg, rgba(248,255,251,0.98) 0%, rgba(255,255,255,0.98) 100%)",
+  boxShadow: "0 24px 60px -42px rgba(15, 23, 42, 0.45)",
+  backdropFilter: "blur(10px)",
+} as const;
+const PANEL_LABEL_SX = {
+  fontSize: "0.74rem",
+  fontWeight: 700,
+  letterSpacing: "0.04em",
+  color: "#64748b",
+} as const;
+const DESKTOP_CELL_SX = {
+  borderBottom: "none",
+  px: 1,
+  py: 1,
+  verticalAlign: "top",
 } as const;
 
 const FILTER_PANEL_PADDING = designTokenVar("spacing.lg", "16px");
@@ -185,12 +250,14 @@ const DateRangeField = ({
       value={displayValue}
       onClick={onOpen}
       InputProps={{ readOnly: true }}
+      sx={TEXT_FIELD_SX}
     />
     <Popover
       open={Boolean(anchorEl)}
       anchorEl={anchorEl}
       onClose={onClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+      PaperProps={{ sx: POPOVER_PANEL_SX }}
     >
       <Box
         sx={{
@@ -205,13 +272,13 @@ const DateRangeField = ({
           label="From"
           value={fromValue ? dayjs(fromValue) : null}
           onChange={(v) => onChange(fromKey, v)}
-          slotProps={{ textField: { size: "small" } }}
+          slotProps={{ textField: { size: "small", sx: TEXT_FIELD_SX } }}
         />
         <DatePicker
           label="To"
           value={toValue ? dayjs(toValue) : null}
           onChange={(v) => onChange(toKey, v)}
-          slotProps={{ textField: { size: "small" } }}
+          slotProps={{ textField: { size: "small", sx: TEXT_FIELD_SX } }}
         />
         <Box
           sx={{
@@ -276,7 +343,7 @@ function WorkflowListFilters(
 
   return (
     <TableRow>
-      <TableCell>
+      <TableCell sx={DESKTOP_CELL_SX}>
         <Select
           size="small"
           sx={SELECT_SX}
@@ -292,7 +359,7 @@ function WorkflowListFilters(
           ))}
         </Select>
       </TableCell>
-      <TableCell>
+      <TableCell sx={DESKTOP_CELL_SX}>
         <DateRangeField
           displayValue={
             applicationFrom && applicationTo
@@ -315,7 +382,7 @@ function WorkflowListFilters(
           isCompact={isCompact}
         />
       </TableCell>
-      <TableCell>
+      <TableCell sx={DESKTOP_CELL_SX}>
         <Select
           size="small"
           multiple
@@ -355,7 +422,7 @@ function WorkflowListFilters(
           </MenuItem>
         </Select>
       </TableCell>
-      <TableCell>
+      <TableCell sx={DESKTOP_CELL_SX}>
         <DateRangeField
           displayValue={
             createdFrom && createdTo
@@ -378,7 +445,7 @@ function WorkflowListFilters(
           isCompact={isCompact}
         />
       </TableCell>
-      <TableCell />
+      <TableCell sx={{ ...DESKTOP_CELL_SX, width: 56 }} />
     </TableRow>
   );
 }
@@ -434,9 +501,10 @@ export const WorkflowListFiltersPanel = forwardRef(
         sx={{
           p: FILTER_PANEL_PADDING,
           borderRadius: FILTER_PANEL_RADIUS,
-          bgcolor: "background.paper",
+          bgcolor: "#f7fcf8",
           border: "1px solid",
-          borderColor: "divider",
+          borderColor: "rgba(16, 185, 129, 0.14)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
         }}
       >
         <Stack spacing={FILTER_SECTION_GAP}>
@@ -447,7 +515,7 @@ export const WorkflowListFiltersPanel = forwardRef(
               gap: FILTER_FIELD_GAP,
             }}
           >
-            <Typography variant="caption" color="text.secondary">
+            <Typography sx={PANEL_LABEL_SX}>
               {FIELD_LABELS.category}
             </Typography>
             <Select
@@ -473,7 +541,7 @@ export const WorkflowListFiltersPanel = forwardRef(
               gap: FILTER_FIELD_GAP,
             }}
           >
-            <Typography variant="caption" color="text.secondary">
+            <Typography sx={PANEL_LABEL_SX}>
               {FIELD_LABELS.application}
             </Typography>
             <DateRangeField
@@ -506,7 +574,7 @@ export const WorkflowListFiltersPanel = forwardRef(
               gap: FILTER_FIELD_GAP,
             }}
           >
-            <Typography variant="caption" color="text.secondary">
+            <Typography sx={PANEL_LABEL_SX}>
               {FIELD_LABELS.status}
             </Typography>
             <Select
@@ -557,7 +625,7 @@ export const WorkflowListFiltersPanel = forwardRef(
               gap: FILTER_FIELD_GAP,
             }}
           >
-            <Typography variant="caption" color="text.secondary">
+            <Typography sx={PANEL_LABEL_SX}>
               {FIELD_LABELS.created}
             </Typography>
             <DateRangeField
