@@ -41,6 +41,7 @@ import {
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
+import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
@@ -301,7 +302,29 @@ export default function NewWorkflowPage() {
     }
 
     try {
-      await createWorkflow(input);
+      const createdWorkflow = await createWorkflow(input);
+
+      if (!draftMode) {
+        try {
+          await sendWorkflowSubmissionNotification({
+            staffs,
+            applicant: staff,
+            workflow: createdWorkflow,
+          });
+        } catch (mailError) {
+          logger.error(
+            "Failed to send workflow submission notification:",
+            mailError,
+          );
+          void notify("メール送信エラー", {
+            body: "管理者への通知メールの送信に失敗しました。",
+            mode: "await-interaction",
+            priority: "normal",
+            tag: "workflow-mail-error",
+          });
+        }
+      }
+
       void notify("ワークフローを作成しました。", { mode: "auto-close" });
       navigate("/workflow", { replace: true });
     } catch (err) {

@@ -1,9 +1,5 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import {
-  Workflow,
-  WorkflowCategory,
-  WorkflowStatus,
-} from "@shared/api/graphql/types";
+import { Workflow, WorkflowCategory } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
 import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
@@ -61,10 +57,6 @@ export const sendWorkflowSubmissionNotification = async ({
   applicant,
   workflow,
 }: SendWorkflowSubmissionNotificationParams) => {
-  if (workflow.status !== WorkflowStatus.SUBMITTED) {
-    return;
-  }
-
   if (!workflow.id) {
     throw new Error("Workflow identifier is missing.");
   }
