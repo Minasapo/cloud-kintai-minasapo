@@ -1,20 +1,52 @@
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import {
-  Collapse,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
 import { AttendanceHistory } from "@shared/api/graphql/types";
 import { useContext, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
+
+const cellClassName =
+  "whitespace-nowrap border-b border-slate-200 px-4 py-3 text-sm text-slate-700 align-top";
+
+const expandedTableCellClassName =
+  "border-b border-slate-200 px-4 py-3 text-sm text-slate-700";
+
+function ChevronDownIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      aria-hidden="true"
+      className="h-[18px] w-[18px]"
+    >
+      <path
+        d="M5 7.5L10 12.5L15 7.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronUpIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      aria-hidden="true"
+      className="h-[18px] w-[18px]"
+    >
+      <path
+        d="M15 12.5L10 7.5L5 12.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function AttendanceHistoryRow({
   history,
@@ -30,213 +62,144 @@ export function AttendanceHistoryRow({
       )
     : [];
 
-  const handleToggle = () => {
-    setOpen(!open);
-  };
+  const hourlyPaidHolidayTimes = history.hourlyPaidHolidayTimes
+    ? history.hourlyPaidHolidayTimes.filter(
+        (item): item is NonNullable<typeof item> => item !== null
+      )
+    : [];
 
   return (
     <>
-      <TableRow>
-        <TableCell>
-          <IconButton onClick={handleToggle}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <WorkDateTableCell history={history} />
-        <WorkTimeTableCell history={history} />
-        <GoDirectlyFlagTableCell history={history} />
-        <ReturnDirectlyFlagTableCell history={history} />
-        <PaidHolidayFlagTableCell history={history} />
-        <SpecialHolidayFlagTableCell history={history} />
-        <SubstituteHolidayDateTableCell history={history} />
-        <RemarksTableCell history={history} />
-        <CreatedAtTableCell history={history} />
-        <StaffIdTableCell history={history} />
-        <TableCell sx={{ flexGrow: 1 }} />
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={14}>
-          <Collapse in={open} timeout="auto" unmountOnExit sx={{ py: 1 }}>
-            <Typography variant="h6">休憩</Typography>
-            {rests.length === 0 ? (
-              <Typography variant="body1">登録はありません</Typography>
-            ) : (
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ width: 100 }}>開始</TableCell>
-                    <TableCell sx={{ width: 100 }}>終了</TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rests.map((rest, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        {rest.startTime
-                          ? new AttendanceDateTime()
-                              .setDateString(rest.startTime)
-                              .toTimeFormat()
-                          : "(なし)"}
-                      </TableCell>
-                      <TableCell>
-                        {rest.endTime
-                          ? new AttendanceDateTime()
-                              .setDateString(rest.endTime)
-                              .toTimeFormat()
-                          : "(なし)"}
-                      </TableCell>
-                      <TableCell />
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-            {/* 時間単位休暇セクションをフラグで制御 */}
-            {hourlyPaidHolidayEnabled && (
-              <>
-                <Typography variant="h6" sx={{ mt: 2 }}>
-                  時間単位休暇
-                </Typography>
-                {!history.hourlyPaidHolidayTimes ||
-                history.hourlyPaidHolidayTimes.filter(
-                  (item): item is NonNullable<typeof item> => item !== null
-                ).length === 0 ? (
-                  <Typography variant="body1">登録はありません</Typography>
-                ) : (
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ width: 100 }}>開始</TableCell>
-                        <TableCell sx={{ width: 100 }}>終了</TableCell>
-                        <TableCell />
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {history.hourlyPaidHolidayTimes &&
-                        history.hourlyPaidHolidayTimes
-                          .filter(
-                            (item): item is NonNullable<typeof item> =>
-                              item !== null
-                          )
-                          .map((holiday, index) => (
-                            <TableRow key={index}>
-                              <TableCell>
-                                {holiday.startTime
-                                  ? new AttendanceDateTime()
-                                      .setDateString(holiday.startTime)
-                                      .toTimeFormat()
-                                  : "(なし)"}
-                              </TableCell>
-                              <TableCell>
-                                {holiday.endTime
-                                  ? new AttendanceDateTime()
-                                      .setDateString(holiday.endTime)
-                                      .toTimeFormat()
-                                  : "(なし)"}
-                              </TableCell>
-                              <TableCell />
-                            </TableRow>
-                          ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </>
-            )}
-          </Collapse>
-        </TableCell>
-      </TableRow>
+      <tr className="bg-white transition hover:bg-slate-50/70">
+        <td className={`${cellClassName} w-14`}>
+          <button
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            aria-label={open ? "詳細を閉じる" : "詳細を開く"}
+            aria-expanded={open}
+          >
+            {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+          </button>
+        </td>
+        <Cell>{formatDisplayDate(history.workDate)}</Cell>
+        <Cell>{formatWorkTime(history)}</Cell>
+        <Cell>{history.goDirectlyFlag ? "◯" : "-"}</Cell>
+        <Cell>{history.returnDirectlyFlag ? "◯" : "-"}</Cell>
+        <Cell>{history.paidHolidayFlag ? "◯" : "-"}</Cell>
+        <Cell>{history.specialHolidayFlag ? "◯" : "-"}</Cell>
+        <Cell>
+          {history.substituteHolidayDate
+            ? formatDisplayDate(history.substituteHolidayDate)
+            : "-"}
+        </Cell>
+        <td className={`${cellClassName} min-w-[220px] whitespace-normal break-words`}>
+          {history.remarks || "-"}
+        </td>
+        <Cell>{formatDisplayDateTime(history.createdAt)}</Cell>
+        <td className={`${cellClassName} min-w-[160px] break-all`}>
+          {history.staffId}
+        </td>
+      </tr>
+      {open && (
+        <tr className="bg-slate-50/70">
+          <td colSpan={11} className={expandedTableCellClassName}>
+            <div className="space-y-5 py-2">
+              <DetailSection
+                title="休憩"
+                rows={rests.map((rest) => ({
+                  startTime: rest.startTime,
+                  endTime: rest.endTime,
+                }))}
+              />
+              {hourlyPaidHolidayEnabled && (
+                <DetailSection
+                  title="時間単位休暇"
+                  rows={hourlyPaidHolidayTimes.map((holiday) => ({
+                    startTime: holiday.startTime,
+                    endTime: holiday.endTime,
+                  }))}
+                />
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
     </>
   );
 }
 
-function SubstituteHolidayDateTableCell({
-  history,
+function Cell({ children }: { children: React.ReactNode }) {
+  return <td className={cellClassName}>{children}</td>;
+}
+
+function DetailSection({
+  title,
+  rows,
 }: {
-  history: AttendanceHistory;
+  title: string;
+  rows: { startTime: string | null | undefined; endTime: string | null | undefined }[];
 }) {
-  if (!history.substituteHolidayDate) {
-    return <TableCell>-</TableCell>;
-  }
-
-  const substituteHolidayDate = new AttendanceDateTime()
-    .setDateString(history.substituteHolidayDate)
-    .toDisplayDateFormat();
-
-  return <TableCell>{substituteHolidayDate}</TableCell>;
+  return (
+    <section className="space-y-2">
+      <h3 className="m-0 text-sm font-semibold text-slate-900">{title}</h3>
+      {rows.length === 0 ? (
+        <p className="m-0 text-sm text-slate-500">登録はありません</p>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <table className="min-w-[280px] w-full border-collapse">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="border-b border-slate-200 px-4 py-2 text-left text-xs font-semibold text-slate-500">
+                  開始
+                </th>
+                <th className="border-b border-slate-200 px-4 py-2 text-left text-xs font-semibold text-slate-500">
+                  終了
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={index}>
+                  <td className="border-b border-slate-200 px-4 py-2 text-sm text-slate-700 last:border-b-0">
+                    {formatTime(row.startTime)}
+                  </td>
+                  <td className="border-b border-slate-200 px-4 py-2 text-sm text-slate-700 last:border-b-0">
+                    {formatTime(row.endTime)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
 }
 
-function SpecialHolidayFlagTableCell({
-  history,
-}: {
-  history: AttendanceHistory;
-}) {
-  return <TableCell>{history.specialHolidayFlag ? "◯" : "-"}</TableCell>;
+function formatTime(value: string | null | undefined) {
+  return value
+    ? new AttendanceDateTime().setDateString(value).toTimeFormat()
+    : "(なし)";
 }
 
-function RemarksTableCell({ history }: { history: AttendanceHistory }) {
-  return <TableCell>{history.remarks ? history.remarks : "-"}</TableCell>;
+function formatDisplayDate(value: string) {
+  return new AttendanceDateTime().setDateString(value).toDisplayDateFormat();
 }
 
-function WorkTimeTableCell({ history }: { history: AttendanceHistory }) {
-  if (!history.startTime && !history.endTime) {
-    return <TableCell>-</TableCell>;
-  }
-
-  const startTime = (() => {
-    if (!history.startTime) {
-      return "";
-    }
-
-    return new AttendanceDateTime()
-      .setDateString(history.startTime)
-      .toTimeFormat();
-  })();
-
-  const endTime = (() => {
-    if (!history.endTime) {
-      return "";
-    }
-
-    return new AttendanceDateTime()
-      .setDateString(history.endTime)
-      .toTimeFormat();
-  })();
-
-  return <TableCell>{`${startTime} 〜 ${endTime}`}</TableCell>;
-}
-
-function ReturnDirectlyFlagTableCell({
-  history,
-}: {
-  history: AttendanceHistory;
-}) {
-  return <TableCell>{history.returnDirectlyFlag ? "◯" : "-"}</TableCell>;
-}
-
-function GoDirectlyFlagTableCell({ history }: { history: AttendanceHistory }) {
-  return <TableCell>{history.goDirectlyFlag ? "◯" : "-"}</TableCell>;
-}
-
-function PaidHolidayFlagTableCell({ history }: { history: AttendanceHistory }) {
-  return <TableCell>{history.paidHolidayFlag ? "◯" : "-"}</TableCell>;
-}
-
-function WorkDateTableCell({ history }: { history: AttendanceHistory }) {
-  const workDate = new AttendanceDateTime()
-    .setDateString(history.workDate)
-    .toDisplayDateFormat();
-  return <TableCell>{workDate}</TableCell>;
-}
-
-function StaffIdTableCell({ history }: { history: AttendanceHistory }) {
-  return <TableCell>{history.staffId}</TableCell>;
-}
-
-function CreatedAtTableCell({ history }: { history: AttendanceHistory }) {
-  const createdAt = new AttendanceDateTime()
-    .setDateString(history.createdAt)
+function formatDisplayDateTime(value: string) {
+  return new AttendanceDateTime()
+    .setDateString(value)
     .toDisplayDateTimeFormat();
+}
 
-  return <TableCell>{createdAt}</TableCell>;
+function formatWorkTime(history: AttendanceHistory) {
+  if (!history.startTime && !history.endTime) {
+    return "-";
+  }
+
+  const startTime = history.startTime ? formatTime(history.startTime) : "";
+  const endTime = history.endTime ? formatTime(history.endTime) : "";
+
+  return `${startTime} 〜 ${endTime}`;
 }

@@ -1,23 +1,18 @@
 import "@/features/admin/staff/ui/styles.scss";
 
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
-  Container,
-  LinearProgress,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useContext, useState } from "react";
+  roleLabelMap,
+  StaffRole,
+  useStaffs,
+} from "@entities/staff/model/useStaffs/useStaffs";
+import SearchIcon from "@mui/icons-material/Search";
+import { LinearProgress } from "@mui/material";
+import dayjs from "dayjs";
+import { useContext, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import { getWorkTypeLabel } from "@/entities/staff/lib/workTypeOptions";
 import * as MESSAGE_CODE from "@/errors";
 import {
   CreateStaffDialog,
@@ -25,17 +20,19 @@ import {
   SyncCognitoUser,
 } from "@/features/admin/staff/ui/actions";
 import { EditButton } from "@/features/admin/staff/ui/EditButton";
-import {
-  AccountStatusTableCell,
-  AttendanceManagementTableCell,
-  CreatedAtTableCell,
-  RoleTableCell,
-  StaffNameTableCell,
-  StatusTableCell,
-  UpdatedAtTableCell,
-  WorkTypeTableCell,
-} from "@/features/admin/staff/ui/table";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
+
+const STATUS_LABEL_MAP = new Map<string, string>([
+  ["CONFIRMED", "確認済み"],
+  ["FORCE_CHANGE_PASSWORD", "パスワード変更必要"],
+]);
+
+function getRoleLabel(role: StaffRole, owner?: boolean | null) {
+  if (owner) {
+    return roleLabelMap.get(StaffRole.OWNER) ?? "オーナー";
+  }
+  return roleLabelMap.get(role) ?? roleLabelMap.get(StaffRole.NONE) ?? "未設定";
+}
 
 export default function AdminStaff() {
   const dispatch = useAppDispatchV2();
@@ -53,6 +50,41 @@ export default function AdminStaff() {
   } = useStaffs({ isAuthenticated });
 
   const [searchQuery, setSearchQuery] = useState("");
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+  const filteredStaffs = useMemo(
+    () =>
+      staffs
+        .filter((staff) => {
+          if (!normalizedSearchQuery) {
+            return true;
+          }
+          const familyName = staff.familyName ?? "";
+          const givenName = staff.givenName ?? "";
+          const fullName = `${familyName}${givenName}`.toLowerCase();
+          const fullNameWithSpace = `${familyName} ${givenName}`.toLowerCase();
+          const staffId = (staff.id ?? "").toLowerCase();
+          const mailAddress = (staff.mailAddress ?? "").toLowerCase();
+          return (
+            fullName.includes(normalizedSearchQuery) ||
+            fullNameWithSpace.includes(normalizedSearchQuery) ||
+            staffId.includes(normalizedSearchQuery) ||
+            mailAddress.includes(normalizedSearchQuery)
+          );
+        })
+        .toSorted((a, b) => {
+          const aSortKey = a.sortKey || "";
+          const bSortKey = b.sortKey || "";
+          return aSortKey.localeCompare(bSortKey);
+        }),
+    [normalizedSearchQuery, staffs],
+  );
+
+  const totalStaffCount = staffs.length;
+  const enabledStaffCount = staffs.filter((staff) => staff.enabled).length;
+  const passwordChangeRequiredCount = staffs.filter(
+    (staff) => staff.status === "FORCE_CHANGE_PASSWORD",
+  ).length;
 
   if (staffLoading) {
     return <LinearProgress />;
@@ -64,100 +96,206 @@ export default function AdminStaff() {
   }
 
   return (
-    <>
-      <Container
-        maxWidth="xl"
-        sx={{ height: 1, pt: 2, px: { xs: 1, sm: 2, md: 3 } }}
-      >
-        <Stack spacing={2}>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <CreateStaffDialog
-              staffs={staffs}
-              refreshStaff={refreshStaff}
-              createStaff={createStaff}
-              updateStaff={updateStaff}
-            />
-            <SyncCognitoUser
-              staffs={staffs}
-              refreshStaff={refreshStaff}
-              createStaff={createStaff}
-              updateStaff={updateStaff}
-            />
-          </Stack>
-          <Typography variant="body2" color="text.secondary">
-            まれにユーザー情報が同期されない場合があります。その際は適宜同期を行ってください。
-          </Typography>
-          <TextField
-            label="スタッフ名またはスタッフIDで検索"
-            variant="outlined"
-            size="small"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            fullWidth
-          />
-          <TableContainer sx={{ width: "100%", overflowX: "auto" }}>
-            <Table size="small" sx={{ minWidth: 1100 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell />
-                  <TableCell>アカウント状態</TableCell>
-                  <TableCell>ステータス</TableCell>
-                  <TableCell>名前</TableCell>
-                  <TableCell>メールアドレス</TableCell>
-                  <TableCell>権限</TableCell>
-                  <TableCell>勤怠管理</TableCell>
-                  <TableCell>勤務形態</TableCell>
-                  <TableCell>汎用コード</TableCell>
-                  <TableCell>作成日時</TableCell>
-                  <TableCell>更新日時</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {staffs
-                  .filter((staff) => {
-                    const fullName = `${staff.familyName || ""}${
-                      staff.givenName || ""
-                    }`;
-                    const staffId = staff.id || "";
-                    return (
-                      fullName.includes(searchQuery) ||
-                      staffId.includes(searchQuery)
-                    );
-                  })
-                  .toSorted((a, b) => {
-                    const aSortKey = a.sortKey || "";
-                    const bSortKey = b.sortKey || "";
-                    return aSortKey.localeCompare(bSortKey);
-                  })
-                  .map((staff, index) => (
-                    <TableRow key={index} className="table-row">
-                      <TableCell>
-                        <Stack direction="row" spacing={0}>
+    <div className="mx-auto h-full w-full max-w-[1280px] px-2 pb-3 pt-2 sm:px-4 md:px-6">
+      <div className="space-y-2.5">
+        <section className="admin-staff-hero">
+          <div className="flex flex-col justify-between gap-2 md:flex-row">
+            <div className="space-y-0.5">
+              <h2 className="admin-staff-title text-2xl">スタッフ管理</h2>
+              <p className="admin-staff-subtitle text-sm">
+                アカウント状態と権限を一括管理し、運用状況を即時に把握できます。
+              </p>
+            </div>
+            <div className="flex flex-col items-stretch gap-1 sm:flex-row sm:items-center">
+              <CreateStaffDialog
+                staffs={staffs}
+                refreshStaff={refreshStaff}
+                createStaff={createStaff}
+                updateStaff={updateStaff}
+              />
+              <SyncCognitoUser
+                staffs={staffs}
+                refreshStaff={refreshStaff}
+                createStaff={createStaff}
+                updateStaff={updateStaff}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-1 md:flex-row">
+          <div className="admin-staff-stat-card">
+            <p className="admin-staff-stat-label text-xs leading-tight">登録スタッフ</p>
+            <p className="admin-staff-stat-value text-2xl leading-none">{totalStaffCount}</p>
+          </div>
+          <div className="admin-staff-stat-card">
+            <p className="admin-staff-stat-label text-xs leading-tight">有効アカウント</p>
+            <p className="admin-staff-stat-value text-2xl leading-none">{enabledStaffCount}</p>
+          </div>
+          <div className="admin-staff-stat-card">
+            <p className="admin-staff-stat-label text-xs leading-tight">パスワード変更待ち</p>
+            <p className="admin-staff-stat-value warning text-2xl leading-none">
+              {passwordChangeRequiredCount}
+            </p>
+          </div>
+        </section>
+
+        <section className="admin-staff-toolbar">
+          <div className="w-full space-y-1.5">
+            <p className="text-sm text-slate-600">
+              まれにユーザー情報が同期されない場合があります。必要に応じて「ユーザー同期」を実行してください。
+            </p>
+            <label className="relative block">
+              <SearchIcon
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                fontSize="small"
+              />
+              <input
+                className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                placeholder="スタッフ名・スタッフID・メールで検索"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </label>
+            <p className="admin-staff-filter-result text-xs">
+              表示件数: {filteredStaffs.length} / {totalStaffCount}
+            </p>
+          </div>
+        </section>
+
+        <section className="admin-staff-table-container overflow-auto">
+          <table className="min-w-[1180px] text-sm">
+            <thead>
+              <tr className="admin-staff-table-header-row">
+                <th className="admin-staff-table-header px-4 py-2 text-left" />
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  アカウント状態
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  ステータス
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  名前
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  メールアドレス
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  権限
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  勤怠管理
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  勤務形態
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  汎用コード
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  作成日時
+                </th>
+                <th className="admin-staff-table-header px-4 py-2 text-left">
+                  更新日時
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStaffs.length === 0 ? (
+                <tr>
+                  <td colSpan={11} className="admin-staff-empty">
+                    条件に一致するスタッフが見つかりません。
+                  </td>
+                </tr>
+              ) : (
+                filteredStaffs.map((staff) => {
+                  const fullName = `${staff.familyName ?? ""} ${
+                    staff.givenName ?? ""
+                  }`.trim();
+                  const accountStatusLabel = staff.enabled ? "有効" : "無効";
+                  const statusLabel = STATUS_LABEL_MAP.get(staff.status) ?? "***";
+                  const roleLabel = getRoleLabel(staff.role, staff.owner);
+                  const attendanceManaged =
+                    staff.attendanceManagementEnabled !== false;
+                  const workTypeLabel = getWorkTypeLabel(
+                    (staff as unknown as Record<string, unknown>).workType as
+                      | string
+                      | null,
+                  );
+                  return (
+                    <tr key={staff.id} className="admin-staff-table-row">
+                      <td className="admin-staff-action-cell whitespace-nowrap px-3 py-1.5">
+                        <div className="flex items-center gap-0.5">
                           <EditButton staff={staff} />
                           <MoreActionButton
                             staff={staff}
                             updateStaff={updateStaff}
                             deleteStaff={deleteStaff}
                           />
-                        </Stack>
-                      </TableCell>
-                      <AccountStatusTableCell staff={staff} />
-                      <StatusTableCell staff={staff} />
-                      <StaffNameTableCell staff={staff} />
-                      <TableCell>{staff.mailAddress}</TableCell>
-                      <RoleTableCell staff={staff} />
-                      <AttendanceManagementTableCell staff={staff} />
-                      <WorkTypeTableCell staff={staff} />
-                      <TableCell>{staff.sortKey || ""}</TableCell>
-                      <CreatedAtTableCell staff={staff} />
-                      <UpdatedAtTableCell staff={staff} />
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Stack>
-      </Container>
-    </>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
+                            staff.enabled
+                              ? "border-emerald-300 bg-emerald-100 text-emerald-800"
+                              : "border-slate-300 bg-white text-slate-600"
+                          }`}
+                        >
+                          {accountStatusLabel}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
+                            staff.status === "CONFIRMED"
+                              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                              : "border-amber-300 bg-amber-50 text-amber-800"
+                          }`}
+                        >
+                          {statusLabel}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        <p className="admin-staff-name text-sm">
+                          {fullName || "(未設定)"}
+                        </p>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2">{staff.mailAddress}</td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        <span className="inline-flex items-center rounded-full border border-slate-300 px-2 py-0.5 text-xs text-slate-700">
+                          {roleLabel}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
+                            attendanceManaged
+                              ? "border-sky-300 bg-sky-100 text-sky-700"
+                              : "border-slate-300 bg-white text-slate-600"
+                          }`}
+                        >
+                          {attendanceManaged ? "対象" : "対象外"}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2">{workTypeLabel}</td>
+                      <td className="admin-staff-sort-key whitespace-nowrap px-4 py-2">
+                        {staff.sortKey || ""}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        {dayjs(staff.createdAt).format("YYYY/MM/DD HH:mm")}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        {dayjs(staff.updatedAt).format("YYYY/MM/DD HH:mm")}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </div>
   );
 }

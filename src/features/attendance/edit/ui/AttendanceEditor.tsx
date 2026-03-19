@@ -14,23 +14,9 @@ import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
-  Alert,
-  AlertTitle,
-  Box,
-  Breadcrumbs,
-  Button,
   Checkbox,
-  CircularProgress,
-  FormControlLabel,
   IconButton,
   LinearProgress,
-  List,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  styled,
-  Switch,
-  Typography,
 } from "@mui/material";
 import {
   CreateAttendanceInput,
@@ -42,7 +28,7 @@ import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
@@ -86,23 +72,33 @@ import PaidHolidayFlagInputCommon from "./PaidHolidayFlagInput";
 import QuickInputButtons from "./QuickInputButtons";
 import { SystemCommentList } from "./SystemCommentList";
 
-const SaveButton = styled(Button)(({ theme }) => ({
-  width: 150,
-  color: theme.palette.primary.contrastText,
-  backgroundColor: theme.palette.primary.main,
-  border: "none",
-  boxShadow: theme.shadows[2],
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-    boxShadow: theme.shadows[4],
-  },
-  "&:disabled": {
-    backgroundColor: "#E0E0E0",
-    boxShadow: "none",
-  },
-}));
+const adminSaveButtonClassName =
+  "inline-flex min-w-[160px] items-center justify-center gap-2 rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none";
+const subtleActionButtonClassName =
+  "inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400";
 
-// ヘルパー関数：時間単位休暇データを安全に変換
+function InlineAlert({
+  tone,
+  title,
+  children,
+}: {
+  tone: "error" | "info";
+  title?: string;
+  children: React.ReactNode;
+}) {
+  const toneClassName =
+    tone === "error"
+      ? "border-rose-500/15 bg-rose-50/90 text-rose-900"
+      : "border-sky-500/15 bg-sky-50/90 text-sky-900";
+
+  return (
+    <div className={`rounded-[18px] border px-4 py-3 ${toneClassName}`}>
+      {title ? <div className="text-sm font-semibold">{title}</div> : null}
+      <div className={title ? "mt-2 text-sm" : "text-sm"}>{children}</div>
+    </div>
+  );
+}
+
 function buildHourlyPaidHolidayTimes(
   data: HourlyPaidHolidayTimeInputs[] | undefined,
 ): HourlyPaidHolidayTimeInput[] {
@@ -730,19 +726,17 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
   if (staffSError) {
     return (
-      <Alert severity="error">
-        <AlertTitle>エラー</AlertTitle>
-        <Typography variant="body2">{staffSError.message}</Typography>
-      </Alert>
+      <InlineAlert tone="error" title="エラー">
+        {staffSError.message}
+      </InlineAlert>
     );
   }
 
   if (!targetStaffId) {
     return (
-      <Alert severity="error">
-        <AlertTitle>エラー</AlertTitle>
-        <Typography variant="body2">スタッフが指定されていません。</Typography>
-      </Alert>
+      <InlineAlert tone="error" title="エラー">
+        スタッフが指定されていません。
+      </InlineAlert>
     );
   }
 
@@ -787,56 +781,60 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         isOnBreak,
       }}
     >
-      <Stack spacing={2} sx={{ pb: 5 }}>
+      <div className="flex flex-col gap-2 pb-5">
         {isSubmitting && (
-          <Box sx={{ mt: 1 }}>
-            <LinearProgress />
-            <Typography variant="body2" sx={{ mt: 1, textAlign: "center" }}>
+          <div className="mt-1">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-emerald-100">
+              <div className="h-full w-1/3 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+            <p className="mt-1 text-center text-sm text-slate-600">
               保存中...
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
-        <Box>
-          <Breadcrumbs>
-            <Link to="/">
-              TOP
-            </Link>
-            <Link to="/admin/attendances">
-              勤怠管理
-            </Link>
-            <Link
-              to={`/admin/staff/${targetStaffId}/attendance`}
-            >
-              勤怠一覧
-            </Link>
-            {workDate && (
-              <Typography color="text.primary">
-                {workDate.format(AttendanceDate.DisplayFormat)}
-              </Typography>
-            )}
-          </Breadcrumbs>
-        </Box>
-        <Box>
+        <div className="flex flex-wrap items-center justify-between gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              if (targetStaffId) {
+                navigate(`/admin/staff/${targetStaffId}/attendance`);
+                return;
+              }
+              navigate("/admin/attendances");
+            }}
+            className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+          >
+            <span aria-hidden="true" className="text-base leading-none">
+              ←
+            </span>
+            勤怠一覧に戻る
+          </button>
+          {workDate && (
+            <div className="inline-flex w-fit items-center rounded-full bg-slate-900/5 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-slate-600">
+              {workDate.format(AttendanceDate.DisplayFormat)}
+            </div>
+          )}
+        </div>
+        <div>
           {readOnly && (
-            <Box sx={{ mt: 1 }}>
-              <Alert severity="info">
+            <div className="mt-1">
+              <InlineAlert tone="info">
                 <div>この画面は表示専用です（編集はできません）</div>
                 {sortedHistories[historyIndex] && (
-                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  <div className="mt-0.5 text-sm">
                     履歴作成日時:{" "}
                     {dayjs(sortedHistories[historyIndex].createdAt).format(
                       "YYYY/MM/DD HH:mm:ss",
                     )}
-                  </Typography>
+                  </div>
                 )}
-              </Alert>
-            </Box>
+              </InlineAlert>
+            </div>
           )}
-          {/* 戻るボタンをアラート下に移動 */}
           {readOnly && (
-            <Box sx={{ mt: 1 }}>
-              <Button
-                variant="outlined"
+            <div className="mt-1">
+              <button
+                type="button"
                 onClick={() => {
                   const date = workDate
                     ? workDate.format(AttendanceDate.DataFormat)
@@ -846,43 +844,29 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                     navigate(`/admin/attendances/edit/${date}/${sid}`);
                   }
                 }}
-                sx={{ zIndex: 1500, pointerEvents: "auto" }}
+                className={subtleActionButtonClassName}
               >
                 編集画面に戻る
-              </Button>
-            </Box>
+              </button>
+            </div>
           )}
-        </Box>
+        </div>
 
         {/* 履歴一覧とフォームを左右に並べる（表示専用モード） */}
-        <Box
-          sx={
-            readOnly
-              ? { mt: 1, display: "flex", gap: 2, alignItems: "flex-start" }
-              : {}
-          }
-        >
+        <div className={readOnly ? "mt-1 flex items-start gap-2" : undefined}>
           {/* 左: 履歴リスト（表示専用時） */}
           {readOnly && (
-            <Box
-              sx={{
-                width: 260,
-                maxHeight: "60vh",
-                overflowY: "auto",
-                zIndex: 1500,
-                pointerEvents: "auto",
-              }}
-            >
+            <div className="pointer-events-auto z-[1500] max-h-[60vh] w-[260px] overflow-y-auto">
               {historiesLoading ? (
-                <Box sx={{ p: 2 }}>
+                <div className="p-2">
                   <LinearProgress />
-                </Box>
+                </div>
               ) : sortedHistories && sortedHistories.length > 0 ? (
-                <List dense disablePadding>
+                <div className="flex flex-col gap-1">
                   {sortedHistories.map((h, idx) => (
-                    <ListItemButton
+                    <button
+                      type="button"
                       key={idx}
-                      selected={idx === historyIndex}
                       onClick={() => {
                         setHistoryIndex(idx);
                         try {
@@ -891,63 +875,65 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                           // noop
                         }
                       }}
+                      className={[
+                        "flex w-full flex-col items-start rounded-2xl border px-4 py-3 text-left transition",
+                        idx === historyIndex
+                          ? "border-emerald-300 bg-emerald-50"
+                          : "border-slate-200 bg-white hover:border-emerald-200 hover:bg-slate-50",
+                      ].join(" ")}
                     >
-                      <ListItemText
-                        primary={`履歴 #${sortedHistories.length - idx}`}
-                        secondary={dayjs(h.createdAt).format(
-                          "YYYY/MM/DD HH:mm:ss",
-                        )}
-                      />
-                    </ListItemButton>
+                      <span className="text-sm font-semibold text-slate-900">
+                        {`履歴 #${sortedHistories.length - idx}`}
+                      </span>
+                      <span className="mt-1 text-xs text-slate-500">
+                        {dayjs(h.createdAt).format("YYYY/MM/DD HH:mm:ss")}
+                      </span>
+                    </button>
                   ))}
-                </List>
+                </div>
               ) : (
-                <Box sx={{ p: 2 }}>
-                  <Alert severity="info">履歴がありません。</Alert>
-                </Box>
+                <div className="p-2">
+                  <InlineAlert tone="info">履歴がありません。</InlineAlert>
+                </div>
               )}
-            </Box>
+            </div>
           )}
 
           {/* 右: フォーム（常に表示） */}
-          <Box sx={{ flexGrow: 1 }}>
-            <Stack spacing={2} sx={{ px: 30 }}>
+          <div className="grow">
+            <div className="flex flex-col gap-2 px-[120px]">
               {errorMessages.length > 0 && (
-                <Box>
-                  <Alert severity="error">
-                    <AlertTitle>入力内容に誤りがあります。</AlertTitle>
-                    <Stack spacing={0.5}>
+                <div>
+                  <InlineAlert tone="error" title="入力内容に誤りがあります。">
+                    <div className="flex flex-col gap-0.5">
                       {errorMessages.map((message) => (
-                        <Typography key={message} variant="body2">
-                          {message}
-                        </Typography>
+                        <div key={message}>{message}</div>
                       ))}
-                    </Stack>
-                  </Alert>
-                </Box>
+                    </div>
+                  </InlineAlert>
+                </div>
               )}
 
               {overtimeError && (
-                <Box>
-                  <Alert severity="error">
-                    <AlertTitle>残業チェック</AlertTitle>
-                    <Typography variant="body2">{overtimeError}</Typography>
-                  </Alert>
-                </Box>
+                <div>
+                  <InlineAlert tone="error" title="残業チェック">
+                    {overtimeError}
+                  </InlineAlert>
+                </div>
               )}
 
               {!attendance && (
-                <Box>
-                  <Alert severity="info">
+                <div>
+                  <InlineAlert tone="info">
                     指定された日付に勤怠情報の登録がありません。保存時に新規作成されます。
-                  </Alert>
-                </Box>
+                  </InlineAlert>
+                </div>
               )}
 
-              <Stack direction="row" spacing={1}>
+              <div className="flex gap-1">
                 {!readOnly && <EditAttendanceHistoryList />}
                 {!readOnly && <SystemCommentList />}
-              </Stack>
+              </div>
 
               {!readOnly && (
                 <GroupContainer hideAccent hideBorder>
@@ -964,13 +950,13 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
               )}
 
               <GroupContainer hideAccent hideBorder>
-                <Box>
+                <div>
                   <WorkDateItem
                     staffId={targetStaffId}
                     workDate={workDate}
                     MoveDateItemComponent={MoveDateItem}
                   />
-                </Box>
+                </div>
               </GroupContainer>
 
               <AttendanceEditFormSkeleton
@@ -1032,12 +1018,12 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                     items.push({
                       label: "欠勤",
                       content: (
-                        <Box sx={{ mt: 1 }}>
-                          <Stack direction="row" alignItems={"center"}>
-                            <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                        <div className="mt-1">
+                          <div className="flex items-center">
+                            <div className="w-[150px] font-bold">
                               欠勤
-                            </Box>
-                            <Box>
+                            </div>
+                            <div>
                               <Controller
                                 name="absentFlag"
                                 control={control}
@@ -1051,9 +1037,9 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                                   />
                                 )}
                               />
-                            </Box>
-                          </Stack>
-                        </Box>
+                            </div>
+                          </div>
+                        </div>
                       ),
                     });
                   }
@@ -1061,12 +1047,12 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                     items.push({
                       label: "特別休暇",
                       content: (
-                        <Box sx={{ mt: 1 }}>
-                          <Stack direction="row" alignItems={"center"}>
-                            <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                        <div className="mt-1">
+                          <div className="flex items-center">
+                            <div className="w-[150px] font-bold">
                               特別休暇
-                            </Box>
-                            <Box>
+                            </div>
+                            <div>
                               <Controller
                                 name="specialHolidayFlag"
                                 control={control}
@@ -1080,9 +1066,9 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                                   />
                                 )}
                               />
-                            </Box>
-                          </Stack>
-                        </Box>
+                            </div>
+                          </div>
+                        </div>
                       ),
                     });
                   }
@@ -1090,18 +1076,14 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                     items.push({
                       label: `時間単位(${hourlyPaidHolidayTimeFields.length}件)`,
                       content: (
-                        <Stack spacing={1}>
-                          <Stack direction="row">
-                            <Box
-                              sx={{ fontWeight: "bold", width: "150px" }}
-                            >{`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}</Box>
-                            <Stack spacing={1} sx={{ flexGrow: 2 }}>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex">
+                            <div className="w-[150px] font-bold">{`時間単位休暇(${hourlyPaidHolidayTimeFields.length}件)`}</div>
+                            <div className="flex grow flex-col gap-1">
                               {hourlyPaidHolidayTimeFields.length === 0 && (
-                                <Box
-                                  sx={{ color: "text.secondary", fontSize: 14 }}
-                                >
+                                <div className="text-sm text-slate-500">
                                   時間単位休暇の時間帯を追加してください。
-                                </Box>
+                                </div>
                               )}
                               {hourlyPaidHolidayTimeFields.map(
                                 (hourlyPaidHolidayTime, index) => (
@@ -1112,7 +1094,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                                   />
                                 ),
                               )}
-                              <Box>
+                              <div>
                                 <IconButton
                                   aria-label="add-hourly-paid-holiday-time"
                                   onClick={() =>
@@ -1125,17 +1107,17 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                                 >
                                   <AddAlarmIcon />
                                 </IconButton>
-                              </Box>
-                            </Stack>
-                          </Stack>
-                        </Stack>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       ),
                     });
                   }
                   items.push({
                     label: "指定休日",
                     content: (
-                      <Box sx={{ mt: 1 }}>
+                      <div className="mt-1">
                         <IsDeemedHolidayFlagInput
                           control={control}
                           name="isDeemedHoliday"
@@ -1148,7 +1130,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                               : "※シフト勤務のスタッフのみ設定できます"
                           }
                         />
-                      </Box>
+                      </div>
                     ),
                   });
 
@@ -1170,75 +1152,67 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                   !readOnly ? (
                     <GroupContainer hideAccent hideBorder>
                       {attendance?.updatedAt && (
-                        <Stack direction="row" alignItems={"center"}>
-                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                        <div className="flex items-center">
+                          <div className="w-[150px] font-bold">
                             最終更新日時
-                          </Box>
-                          <Box sx={{ flexGrow: 2 }}>
-                            <Typography
-                              variant="body1"
-                              color="text.secondary"
-                              sx={{ pl: 1 }}
-                            >
+                          </div>
+                          <div className="grow">
+                            <div className="pl-1 text-base text-slate-500">
                               {dayjs(attendance.updatedAt).format(
                                 "YYYY/MM/DD HH:mm:ss",
                               )}
-                            </Typography>
-                          </Box>
-                        </Stack>
+                            </div>
+                          </div>
+                        </div>
                       )}
-                      <Box>
-                        <Stack direction="row" alignItems={"center"}>
-                          <Box sx={{ fontWeight: "bold", width: "150px" }}>
+                      <div>
+                        <div className="flex items-center">
+                          <div className="w-[150px] font-bold">
                             メール設定
-                          </Box>
-                          <Box>
-                            <FormControlLabel
-                              control={
-                                <Switch
-                                  checked={enabledSendMail}
-                                  onChange={() =>
-                                    setEnabledSendMail(!enabledSendMail)
-                                  }
-                                />
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-slate-700">
+                            <input
+                              type="checkbox"
+                              checked={enabledSendMail}
+                              onChange={() =>
+                                setEnabledSendMail((prev) => !prev)
                               }
-                              label="スタッフに変更通知メールを送信する"
+                              className="h-4 w-4 accent-emerald-600"
                             />
-                          </Box>
-                        </Stack>
-                      </Box>
+                            <span>スタッフに変更通知メールを送信する</span>
+                          </div>
+                        </div>
+                      </div>
                     </GroupContainer>
                   ) : undefined
                 }
               />
 
-              <Stack
-                direction="row"
-                alignItems={"center"}
-                justifyContent={"center"}
-                spacing={3}
-              >
-                <Box>
+              <div className="flex items-center justify-center gap-3">
+                <div>
                   {!readOnly && (
-                    <SaveButton
+                    <button
+                      type="button"
                       onClick={handleSubmit(onSubmit)}
+                      className={adminSaveButtonClassName}
                       disabled={
                         !isValid || !isDirty || isSubmitting || !!overtimeError
                       }
-                      startIcon={
-                        isSubmitting ? (
-                          <CircularProgress size={24} sx={{ mr: 1 }} />
-                        ) : null
-                      }
                     >
+                      {isSubmitting ? (
+                        <span
+                          className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/80 border-t-transparent"
+                          aria-hidden="true"
+                        />
+                      ) : null}
                       {isSubmitting ? "保存中..." : "保存"}
-                    </SaveButton>
+                    </button>
                   )}
-                </Box>
-              </Stack>
-            </Stack>
-          </Box>
-        </Box>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <ChangeRequestDialog
           attendance={attendance}
           updateAttendance={handleUpdateAttendance}
@@ -1247,7 +1221,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         {/* readOnly mode: don't overlay the whole page. Inputs/components
             should rely on their own `disabled`/`readOnly` props so the UI
             remains visible but non-editable where appropriate. */}
-      </Stack>
+      </div>
     </AttendanceEditProvider>
   );
 }

@@ -1,5 +1,109 @@
-.table-row {
-  &:hover {
-    background-color: #f5f5f5;
-  }
+.admin-staff-hero {
+  border: 1px solid #d5e6ff;
+  border-radius: 18px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(120, 194, 255, 0.24), transparent 45%),
+    linear-gradient(115deg, #f8fbff 0%, #f0f7ff 100%);
+}
+
+.admin-staff-title {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #123052;
+}
+
+.admin-staff-subtitle {
+  color: #476383;
+}
+
+.admin-staff-stat-card {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #dce7f6;
+  border-radius: 14px;
+  padding: 0px 12px;
+  background-color: #fff;
+}
+
+.admin-staff-stat-label {
+  display: inline-block;
+  color: #6e839e;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.admin-staff-stat-value {
+  font-weight: 800;
+  color: #163351;
+}
+
+.admin-staff-stat-value.warning {
+  color: #ba6d00;
+}
+
+.admin-staff-toolbar {
+  border: 1px solid #dce7f6;
+  border-radius: 16px;
+  padding: 14px;
+  background-color: #fcfdff;
+}
+
+.admin-staff-filter-result {
+  color: #5f7593;
+  font-weight: 600;
+}
+
+.admin-staff-table-container {
+  border: 1px solid #dce7f6;
+  border-radius: 16px;
+  background-color: #fff;
+  max-height: calc(100vh - 320px);
+}
+
+.admin-staff-table-header-row {
+  background-color: #f3f8ff;
+}
+
+.admin-staff-table-header {
+  border-bottom: 1px solid #dce7f6;
+  color: #49617f;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.admin-staff-table-row {
+  transition: background-color 0.16s ease;
+}
+
+.admin-staff-table-row:hover {
+  background-color: #f8fbff;
+}
+
+.admin-staff-action-cell {
+  white-space: nowrap;
+}
+
+.admin-staff-name {
+  color: #182f4d;
+  font-weight: 700;
+}
+
+.admin-staff-id {
+  color: #6e839e;
+  font-family: "SFMono-Regular", "Consolas", "Monaco", monospace;
+}
+
+.admin-staff-sort-key {
+  font-family: "SFMono-Regular", "Consolas", "Monaco", monospace;
+  color: #375478;
+}
+
+.admin-staff-empty {
+  color: #60758f;
+  font-weight: 600;
+  text-align: center;
+  padding: 24px;
 }

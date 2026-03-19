@@ -125,6 +125,10 @@ function AdminDashboardContent() {
 
   const activeMenuHref = useMemo(() => {
     const currentPath = location.pathname;
+    if (/^\/admin\/staff\/[^/]+\/attendance(?:\/|$)/.test(currentPath)) {
+      return "/admin/attendances";
+    }
+
     const exactMatch = menuItems.find((item) => item.href === currentPath);
     if (exactMatch) return exactMatch.href;
 
