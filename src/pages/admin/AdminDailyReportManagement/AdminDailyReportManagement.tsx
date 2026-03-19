@@ -12,6 +12,7 @@ import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { formatDateTimeReadable } from "@/shared/lib/time";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
+import DailyReportDetailPanel from "./DailyReportDetailPanel";
 import {
   type AdminDailyReport,
   DISPLAY_STATUSES,
@@ -212,7 +213,7 @@ export default function AdminDailyReportManagement() {
       setRightPanel({
         id: `daily-report-${report.id}`,
         title: `日報詳細 - ${report.date}`,
-        route: `/admin/daily-report/${report.id}`,
+        component: DailyReportDetailPanel,
       });
     },
     [enableSplitMode, setRightPanel],
@@ -246,17 +247,8 @@ export default function AdminDailyReportManagement() {
   return (
     <div className="mx-auto w-full max-w-[1280px] px-2 pb-6 pt-4 sm:px-4 md:px-6">
       <div className="space-y-3">
-        {/* Header */}
         <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-            <div>
-              <h1 className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
-                日報管理
-              </h1>
-              <p className="text-sm text-emerald-800">
-                スタッフが提出した日報の確認・フィードバックができます。
-              </p>
-            </div>
             <div className="flex flex-wrap gap-2">
               {statusSummary.map((status) => (
                 <span
@@ -273,14 +265,12 @@ export default function AdminDailyReportManagement() {
           </div>
         </section>
 
-        {/* Error */}
         {(loadError || staffError) && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {loadError || staffError?.message || "データの取得に失敗しました。"}
           </div>
         )}
 
-        {/* Filters */}
         <section className="rounded-2xl border border-emerald-100 bg-white/95 px-4 py-3">
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex flex-col gap-1">
@@ -357,7 +347,6 @@ export default function AdminDailyReportManagement() {
           </div>
         </section>
 
-        {/* Actions */}
         <div className="flex flex-col items-stretch justify-between gap-2 sm:flex-row sm:items-center">
           <button
             type="button"
@@ -392,7 +381,6 @@ export default function AdminDailyReportManagement() {
           </button>
         </div>
 
-        {/* Table */}
         <section className="overflow-hidden rounded-2xl border border-emerald-100 bg-white/95">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px] text-sm">
@@ -449,7 +437,7 @@ export default function AdminDailyReportManagement() {
                             e.stopPropagation();
                             handleOpenInRightPanel(report);
                           }}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-800 border-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none"
                         >
                           <svg
                             className="h-4 w-4"
@@ -506,7 +494,6 @@ export default function AdminDailyReportManagement() {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2">
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <span>表示件数:</span>

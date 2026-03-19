@@ -81,11 +81,18 @@ const sortReports = (items: AdminDailyReport[]) =>
     return b.date.localeCompare(a.date);
   });
 
-export default function AdminDailyReportDetail() {
+interface AdminDailyReportDetailProps {
+  overrideId?: string;
+}
+
+export default function AdminDailyReportDetail({
+  overrideId,
+}: AdminDailyReportDetailProps = {}) {
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = overrideId ?? paramId;
   const location = useLocation();
   const state = location.state as LocationState | null;
   const stateReportId = state?.report?.id ?? null;
@@ -165,9 +172,7 @@ export default function AdminDailyReportDetail() {
       })) as GraphQLResult<GetDailyReportQuery>;
 
       if (response.errors?.length) {
-        throw new Error(
-          response.errors.map((err) => err.message).join("\n"),
-        );
+        throw new Error(response.errors.map((err) => err.message).join("\n"));
       }
 
       const record = response.data?.getDailyReport;
@@ -458,7 +463,13 @@ export default function AdminDailyReportDetail() {
           input: {
             id: report.id,
             comments: nextComments.map(
-              ({ id: commentId, staffId, authorName, body: commentBody, createdAt }) => ({
+              ({
+                id: commentId,
+                staffId,
+                authorName,
+                body: commentBody,
+                createdAt,
+              }) => ({
                 id: commentId,
                 staffId,
                 authorName,
@@ -624,8 +635,7 @@ export default function AdminDailyReportDetail() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-slate-400">
-                    最終更新:{" "}
-                    {formatDateTimeReadable(report.updatedAt) || "-"}
+                    最終更新: {formatDateTimeReadable(report.updatedAt) || "-"}
                   </p>
                 </div>
 
