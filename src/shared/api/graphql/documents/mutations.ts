@@ -15,6 +15,7 @@ export const createCheckForUpdate = /* GraphQL */ `mutation CreateCheckForUpdate
   createCheckForUpdate(input: $input, condition: $condition) {
     id
     deployUuid
+    version
     createdAt
     updatedAt
     __typename
@@ -31,6 +32,7 @@ export const updateCheckForUpdate = /* GraphQL */ `mutation UpdateCheckForUpdate
   updateCheckForUpdate(input: $input, condition: $condition) {
     id
     deployUuid
+    version
     createdAt
     updatedAt
     __typename
@@ -47,6 +49,7 @@ export const deleteCheckForUpdate = /* GraphQL */ `mutation DeleteCheckForUpdate
   deleteCheckForUpdate(input: $input, condition: $condition) {
     id
     deployUuid
+    version
     createdAt
     updatedAt
     __typename
@@ -120,6 +123,9 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
+    version
     createdAt
     updatedAt
     __typename
@@ -193,6 +199,9 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
+    version
     createdAt
     updatedAt
     __typename
@@ -266,6 +275,9 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
       __typename
     }
     overTimeCheckEnabled
+    shiftCollaborativeEnabled
+    shiftDefaultMode
+    version
     createdAt
     updatedAt
     __typename
@@ -311,6 +323,7 @@ export const createStaff = /* GraphQL */ `mutation CreateStaff(
     approverMultipleMode
     shiftGroup
     attendanceManagementEnabled
+    version
     createdAt
     updatedAt
     __typename
@@ -356,6 +369,7 @@ export const updateStaff = /* GraphQL */ `mutation UpdateStaff(
     approverMultipleMode
     shiftGroup
     attendanceManagementEnabled
+    version
     createdAt
     updatedAt
     __typename
@@ -401,6 +415,7 @@ export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
     approverMultipleMode
     shiftGroup
     attendanceManagementEnabled
+    version
     createdAt
     updatedAt
     __typename
@@ -418,6 +433,7 @@ export const createHolidayCalendar = /* GraphQL */ `mutation CreateHolidayCalend
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -435,6 +451,7 @@ export const updateHolidayCalendar = /* GraphQL */ `mutation UpdateHolidayCalend
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -452,6 +469,7 @@ export const deleteHolidayCalendar = /* GraphQL */ `mutation DeleteHolidayCalend
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -469,6 +487,7 @@ export const createCompanyHolidayCalendar = /* GraphQL */ `mutation CreateCompan
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -486,6 +505,7 @@ export const updateCompanyHolidayCalendar = /* GraphQL */ `mutation UpdateCompan
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -503,6 +523,7 @@ export const deleteCompanyHolidayCalendar = /* GraphQL */ `mutation DeleteCompan
     id
     holidayDate
     name
+    version
     createdAt
     updatedAt
     __typename
@@ -521,6 +542,7 @@ export const createEventCalendar = /* GraphQL */ `mutation CreateEventCalendar(
     eventDate
     name
     description
+    version
     createdAt
     updatedAt
     __typename
@@ -539,6 +561,7 @@ export const updateEventCalendar = /* GraphQL */ `mutation UpdateEventCalendar(
     eventDate
     name
     description
+    version
     createdAt
     updatedAt
     __typename
@@ -557,6 +580,7 @@ export const deleteEventCalendar = /* GraphQL */ `mutation DeleteEventCalendar(
     eventDate
     name
     description
+    version
     createdAt
     updatedAt
     __typename
@@ -575,6 +599,7 @@ export const createCloseDate = /* GraphQL */ `mutation CreateCloseDate(
     closeDate
     startDate
     endDate
+    version
     createdAt
     updatedAt
     __typename
@@ -593,6 +618,7 @@ export const updateCloseDate = /* GraphQL */ `mutation UpdateCloseDate(
     closeDate
     startDate
     endDate
+    version
     createdAt
     updatedAt
     __typename
@@ -611,6 +637,7 @@ export const deleteCloseDate = /* GraphQL */ `mutation DeleteCloseDate(
     closeDate
     startDate
     endDate
+    version
     createdAt
     updatedAt
     __typename
@@ -1160,6 +1187,7 @@ export const createShiftPlanYear = /* GraphQL */ `mutation CreateShiftPlanYear(
     notes
     createdBy
     updatedBy
+    version
     createdAt
     updatedAt
     __typename
@@ -1187,6 +1215,7 @@ export const updateShiftPlanYear = /* GraphQL */ `mutation UpdateShiftPlanYear(
     notes
     createdBy
     updatedBy
+    version
     createdAt
     updatedAt
     __typename
@@ -1214,6 +1243,7 @@ export const deleteShiftPlanYear = /* GraphQL */ `mutation DeleteShiftPlanYear(
     notes
     createdBy
     updatedBy
+    version
     createdAt
     updatedAt
     __typename
@@ -1266,6 +1296,7 @@ export const createWorkflow = /* GraphQL */ `mutation CreateWorkflow(
       createdAt
       __typename
     }
+    version
     createdAt
     updatedAt
     __typename
@@ -1318,6 +1349,7 @@ export const updateWorkflow = /* GraphQL */ `mutation UpdateWorkflow(
       createdAt
       __typename
     }
+    version
     createdAt
     updatedAt
     __typename
@@ -1370,6 +1402,7 @@ export const deleteWorkflow = /* GraphQL */ `mutation DeleteWorkflow(
       createdAt
       __typename
     }
+    version
     createdAt
     updatedAt
     __typename
@@ -1389,6 +1422,7 @@ export const createWorkflowTemplate = /* GraphQL */ `mutation CreateWorkflowTemp
     title
     content
     organizationId
+    version
     createdAt
     updatedAt
     __typename
@@ -1408,6 +1442,7 @@ export const updateWorkflowTemplate = /* GraphQL */ `mutation UpdateWorkflowTemp
     title
     content
     organizationId
+    version
     createdAt
     updatedAt
     __typename
@@ -1427,6 +1462,7 @@ export const deleteWorkflowTemplate = /* GraphQL */ `mutation DeleteWorkflowTemp
     title
     content
     organizationId
+    version
     createdAt
     updatedAt
     __typename
@@ -1435,6 +1471,84 @@ export const deleteWorkflowTemplate = /* GraphQL */ `mutation DeleteWorkflowTemp
 ` as GeneratedMutation<
   APITypes.DeleteWorkflowTemplateMutationVariables,
   APITypes.DeleteWorkflowTemplateMutation
+>;
+export const createWorkflowNotificationEvent = /* GraphQL */ `mutation CreateWorkflowNotificationEvent(
+  $input: CreateWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  createWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateWorkflowNotificationEventMutationVariables,
+  APITypes.CreateWorkflowNotificationEventMutation
+>;
+export const updateWorkflowNotificationEvent = /* GraphQL */ `mutation UpdateWorkflowNotificationEvent(
+  $input: UpdateWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  updateWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowNotificationEventMutationVariables,
+  APITypes.UpdateWorkflowNotificationEventMutation
+>;
+export const deleteWorkflowNotificationEvent = /* GraphQL */ `mutation DeleteWorkflowNotificationEvent(
+  $input: DeleteWorkflowNotificationEventInput!
+  $condition: ModelWorkflowNotificationEventConditionInput
+) {
+  deleteWorkflowNotificationEvent(input: $input, condition: $condition) {
+    id
+    recipientStaffId
+    actorStaffId
+    workflowId
+    eventType
+    commentId
+    title
+    body
+    isRead
+    readAt
+    eventAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowNotificationEventMutationVariables,
+  APITypes.DeleteWorkflowNotificationEventMutation
 >;
 export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
   $input: CreateOperationLogInput!
@@ -1452,6 +1566,7 @@ export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
     userAgent
     metadata
     severity
+    version
     createdAt
     updatedAt
     __typename
@@ -1477,6 +1592,7 @@ export const updateOperationLog = /* GraphQL */ `mutation UpdateOperationLog(
     userAgent
     metadata
     severity
+    version
     createdAt
     updatedAt
     __typename
@@ -1502,6 +1618,7 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
     userAgent
     metadata
     severity
+    version
     createdAt
     updatedAt
     __typename
@@ -1531,6 +1648,7 @@ export const createAuditLog = /* GraphQL */ `mutation CreateAuditLog(
     createdAt
     ttl
     reason
+    version
     updatedAt
     __typename
   }
@@ -1559,6 +1677,7 @@ export const updateAuditLog = /* GraphQL */ `mutation UpdateAuditLog(
     createdAt
     ttl
     reason
+    version
     updatedAt
     __typename
   }
@@ -1587,6 +1706,7 @@ export const deleteAuditLog = /* GraphQL */ `mutation DeleteAuditLog(
     createdAt
     ttl
     reason
+    version
     updatedAt
     __typename
   }
@@ -1621,6 +1741,7 @@ export const createDailyReport = /* GraphQL */ `mutation CreateDailyReport(
       createdAt
       __typename
     }
+    version
     createdAt
     __typename
   }
@@ -1655,6 +1776,7 @@ export const updateDailyReport = /* GraphQL */ `mutation UpdateDailyReport(
       createdAt
       __typename
     }
+    version
     createdAt
     __typename
   }
@@ -1689,6 +1811,7 @@ export const deleteDailyReport = /* GraphQL */ `mutation DeleteDailyReport(
       createdAt
       __typename
     }
+    version
     createdAt
     __typename
   }

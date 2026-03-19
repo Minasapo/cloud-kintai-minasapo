@@ -47,6 +47,9 @@ export default function AppConfigCreateForm(props) {
     hourlyPaidHolidayEnabled: false,
     themeColor: "",
     overTimeCheckEnabled: false,
+    shiftCollaborativeEnabled: false,
+    shiftDefaultMode: "",
+    version: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [workStartTime, setWorkStartTime] = React.useState(
@@ -94,6 +97,12 @@ export default function AppConfigCreateForm(props) {
   const [overTimeCheckEnabled, setOverTimeCheckEnabled] = React.useState(
     initialValues.overTimeCheckEnabled
   );
+  const [shiftCollaborativeEnabled, setShiftCollaborativeEnabled] =
+    React.useState(initialValues.shiftCollaborativeEnabled);
+  const [shiftDefaultMode, setShiftDefaultMode] = React.useState(
+    initialValues.shiftDefaultMode
+  );
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
@@ -114,6 +123,9 @@ export default function AppConfigCreateForm(props) {
     setHourlyPaidHolidayEnabled(initialValues.hourlyPaidHolidayEnabled);
     setThemeColor(initialValues.themeColor);
     setOverTimeCheckEnabled(initialValues.overTimeCheckEnabled);
+    setShiftCollaborativeEnabled(initialValues.shiftCollaborativeEnabled);
+    setShiftDefaultMode(initialValues.shiftDefaultMode);
+    setVersion(initialValues.version);
     setErrors({});
   };
   const validations = {
@@ -135,6 +147,9 @@ export default function AppConfigCreateForm(props) {
     hourlyPaidHolidayEnabled: [],
     themeColor: [],
     overTimeCheckEnabled: [],
+    shiftCollaborativeEnabled: [],
+    shiftDefaultMode: [],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -180,6 +195,9 @@ export default function AppConfigCreateForm(props) {
           hourlyPaidHolidayEnabled,
           themeColor,
           overTimeCheckEnabled,
+          shiftCollaborativeEnabled,
+          shiftDefaultMode,
+          version,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -260,6 +278,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -301,6 +322,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.workStartTime ?? value;
@@ -342,6 +366,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.workEndTime ?? value;
@@ -383,6 +410,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.lunchRestStartTime ?? value;
@@ -426,6 +456,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.lunchRestEndTime ?? value;
@@ -471,6 +504,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.standardWorkHours ?? value;
@@ -514,6 +550,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.amHolidayStartTime ?? value;
@@ -557,6 +596,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.amHolidayEndTime ?? value;
@@ -598,6 +640,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.pmHolidayStartTime ?? value;
@@ -641,6 +686,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.pmHolidayEndTime ?? value;
@@ -682,6 +730,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.specialHolidayEnabled ?? value;
@@ -725,6 +776,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.amPmHolidayEnabled ?? value;
@@ -768,6 +822,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.officeMode ?? value;
@@ -809,6 +866,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.attendanceStatisticsEnabled ?? value;
@@ -827,6 +887,56 @@ export default function AppConfigCreateForm(props) {
         errorMessage={errors.attendanceStatisticsEnabled?.errorMessage}
         hasError={errors.attendanceStatisticsEnabled?.hasError}
         {...getOverrideProps(overrides, "attendanceStatisticsEnabled")}
+      ></SwitchField>
+      <SwitchField
+        label="Workflow notification enabled"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={workflowNotificationEnabled}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled,
+              workflowNotificationEnabled: value,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+              overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
+            };
+            const result = onChange(modelFields);
+            value = result?.workflowNotificationEnabled ?? value;
+          }
+          if (errors.workflowNotificationEnabled?.hasError) {
+            runValidationTasks("workflowNotificationEnabled", value);
+          }
+          setWorkflowNotificationEnabled(value);
+        }}
+        onBlur={() =>
+          runValidationTasks(
+            "workflowNotificationEnabled",
+            workflowNotificationEnabled
+          )
+        }
+        errorMessage={errors.workflowNotificationEnabled?.errorMessage}
+        hasError={errors.workflowNotificationEnabled?.hasError}
+        {...getOverrideProps(overrides, "workflowNotificationEnabled")}
       ></SwitchField>
       <SwitchField
         label="Absent enabled"
@@ -855,6 +965,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.absentEnabled ?? value;
@@ -896,6 +1009,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled: value,
               themeColor,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.hourlyPaidHolidayEnabled ?? value;
@@ -942,6 +1058,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor: value,
               overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.themeColor ?? value;
@@ -983,6 +1102,9 @@ export default function AppConfigCreateForm(props) {
               hourlyPaidHolidayEnabled,
               themeColor,
               overTimeCheckEnabled: value,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.overTimeCheckEnabled ?? value;
@@ -999,6 +1121,150 @@ export default function AppConfigCreateForm(props) {
         hasError={errors.overTimeCheckEnabled?.hasError}
         {...getOverrideProps(overrides, "overTimeCheckEnabled")}
       ></SwitchField>
+      <SwitchField
+        label="Shift collaborative enabled"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={shiftCollaborativeEnabled}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+              overTimeCheckEnabled,
+              shiftCollaborativeEnabled: value,
+              shiftDefaultMode,
+              version,
+            };
+            const result = onChange(modelFields);
+            value = result?.shiftCollaborativeEnabled ?? value;
+          }
+          if (errors.shiftCollaborativeEnabled?.hasError) {
+            runValidationTasks("shiftCollaborativeEnabled", value);
+          }
+          setShiftCollaborativeEnabled(value);
+        }}
+        onBlur={() =>
+          runValidationTasks(
+            "shiftCollaborativeEnabled",
+            shiftCollaborativeEnabled
+          )
+        }
+        errorMessage={errors.shiftCollaborativeEnabled?.errorMessage}
+        hasError={errors.shiftCollaborativeEnabled?.hasError}
+        {...getOverrideProps(overrides, "shiftCollaborativeEnabled")}
+      ></SwitchField>
+      <TextField
+        label="Shift default mode"
+        isRequired={false}
+        isReadOnly={false}
+        value={shiftDefaultMode}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+              overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode: value,
+              version,
+            };
+            const result = onChange(modelFields);
+            value = result?.shiftDefaultMode ?? value;
+          }
+          if (errors.shiftDefaultMode?.hasError) {
+            runValidationTasks("shiftDefaultMode", value);
+          }
+          setShiftDefaultMode(value);
+        }}
+        onBlur={() => runValidationTasks("shiftDefaultMode", shiftDefaultMode)}
+        errorMessage={errors.shiftDefaultMode?.errorMessage}
+        hasError={errors.shiftDefaultMode?.hasError}
+        {...getOverrideProps(overrides, "shiftDefaultMode")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+              overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

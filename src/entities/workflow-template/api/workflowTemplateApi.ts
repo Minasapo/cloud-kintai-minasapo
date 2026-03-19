@@ -13,10 +13,16 @@ import type {
   DeleteWorkflowTemplateMutation,
   ListWorkflowTemplatesQuery,
   ListWorkflowTemplatesQueryVariables,
+  ModelWorkflowTemplateConditionInput,
   UpdateWorkflowTemplateInput,
   UpdateWorkflowTemplateMutation,
   WorkflowTemplate,
 } from "@shared/api/graphql/types";
+
+export type UpdateWorkflowTemplatePayload = {
+  input: UpdateWorkflowTemplateInput;
+  condition?: ModelWorkflowTemplateConditionInput | null;
+};
 
 type WorkflowTemplateTag = {
   type: "WorkflowTemplate";
@@ -125,12 +131,15 @@ export const workflowTemplateApi = createApi({
     }),
     updateWorkflowTemplate: builder.mutation<
       WorkflowTemplate,
-      UpdateWorkflowTemplateInput
+      UpdateWorkflowTemplatePayload
     >({
-      async queryFn(input, _api, _extraOptions, baseQuery) {
+      async queryFn({ input, condition }, _api, _extraOptions, baseQuery) {
         const result = await baseQuery({
           document: updateWorkflowTemplate,
-          variables: { input },
+          variables: {
+            input,
+            condition: condition ?? undefined,
+          },
         });
 
         if (result.error) {

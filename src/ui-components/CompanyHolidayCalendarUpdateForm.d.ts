@@ -25,16 +25,19 @@ export declare type ValidationFunction<T> = (value: T, validationResponse: Valid
 export declare type CompanyHolidayCalendarUpdateFormInputValues = {
     holidayDate?: string;
     name?: string;
+    version?: number;
 };
 export declare type CompanyHolidayCalendarUpdateFormValidationValues = {
     holidayDate?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type CompanyHolidayCalendarUpdateFormOverridesProps = {
     CompanyHolidayCalendarUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
     holidayDate?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type CompanyHolidayCalendarUpdateFormProps = React.PropsWithChildren<{
     overrides?: CompanyHolidayCalendarUpdateFormOverridesProps | undefined | null;

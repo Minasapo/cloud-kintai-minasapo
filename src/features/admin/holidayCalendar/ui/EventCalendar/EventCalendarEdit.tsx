@@ -9,7 +9,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { DatePicker } from "@mui/x-date-pickers";
 import {
   EventCalendar,
-  UpdateEventCalendarInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -43,9 +42,7 @@ export default function EventCalendarEdit({
   updateEventCalendar,
 }: {
   eventCalendar: EventCalendar;
-  updateEventCalendar: (
-    input: UpdateEventCalendarInput,
-  ) => Promise<EventCalendar>;
+  updateEventCalendar: (input: EventCalendar) => Promise<EventCalendar>;
 }) {
   const dispatch = useAppDispatchV2();
 
@@ -83,7 +80,7 @@ export default function EventCalendarEdit({
 
     const eventCalendarMessage = EventCalendarMessage();
     await updateEventCalendar({
-      id: eventCalendar.id,
+      ...eventCalendar,
       eventDate: eventDate.toISOString(),
       name,
       description: description || undefined,

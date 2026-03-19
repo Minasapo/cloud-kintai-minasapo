@@ -7,7 +7,13 @@ import {
   Staff,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useDispatch } from "react-redux";
 
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
@@ -28,6 +34,7 @@ export type UseAdminAttendanceChangeRequestsParams = {
   pendingAttendances: Attendance[];
   refetchAttendances: () => Promise<unknown>;
   updateAttendance: (input: UpdateAttendanceInput) => Promise<Attendance>;
+  isBulkApprovingRef: MutableRefObject<boolean>;
 };
 
 export const useAdminAttendanceChangeRequests = ({
@@ -37,6 +44,7 @@ export const useAdminAttendanceChangeRequests = ({
   pendingAttendances,
   refetchAttendances,
   updateAttendance,
+  isBulkApprovingRef,
 }: UseAdminAttendanceChangeRequestsParams) => {
   const dispatch = useDispatch();
   const [quickViewAttendance, setQuickViewAttendance] =
@@ -96,12 +104,13 @@ export const useAdminAttendanceChangeRequests = ({
   }, [pendingAttendances]);
 
   useEffect(() => {
+    if (bulkApproving) return;
     setSelectedAttendanceIds((prev) =>
       prev.filter((id) =>
         pendingAttendances.some((attendance) => attendance.id === id)
       )
     );
-  }, [pendingAttendances]);
+  }, [pendingAttendances, bulkApproving]);
 
   const handleBulkApprove = useCallback(async () => {
     if (
@@ -120,47 +129,51 @@ export const useAdminAttendanceChangeRequests = ({
 
     let mailErrorOccurred = false;
     setBulkApproving(true);
+    isBulkApprovingRef.current = true;
     try {
-      for (const attendance of targetAttendances) {
-        // eslint-disable-next-line no-await-in-loop
-        const updatedAttendance = await handleApproveChangeRequest(
-          attendance,
-          (input: UpdateAttendanceInput) => updateAttendance(input),
-          undefined
-        );
+      await Promise.all(
+        targetAttendances.map(async (attendance) => {
+          const updatedAttendance = await handleApproveChangeRequest(
+            attendance,
+            (input: UpdateAttendanceInput) => updateAttendance(input),
+            undefined,
+          );
 
-        try {
-          await new GenericMailSender(
-            staffForMail,
-            updatedAttendance
-          ).approveChangeRequest(undefined);
-        } catch (mailError) {
-          const message =
-            mailError instanceof Error ? mailError.message : String(mailError);
-          logger.error("Failed to send approval notification mail:", message);
-          mailErrorOccurred = true;
-        }
-
-        // eslint-disable-next-line no-await-in-loop
-        await createOperationLogData({
-          staffId: staffForMail.id,
-          action: "approve_change_request",
-          resource: "attendance",
-          resourceId: updatedAttendance.id,
-          timestamp: new Date().toISOString(),
-          details: JSON.stringify({
-            workDate: updatedAttendance.workDate,
-            applicantStaffId: updatedAttendance.staffId,
-            result: "approved",
-            comment: null,
-            bulk: true,
-          }),
-        }).catch((error) => {
-          const message =
-            error instanceof Error ? error.message : String(error);
-          logger.error("Failed to create operation log:", message);
-        });
-      }
+          await Promise.allSettled([
+            new GenericMailSender(staffForMail, updatedAttendance)
+              .approveChangeRequest(undefined)
+              .catch((mailError: unknown) => {
+                const message =
+                  mailError instanceof Error
+                    ? mailError.message
+                    : String(mailError);
+                logger.error(
+                  "Failed to send approval notification mail:",
+                  message,
+                );
+                mailErrorOccurred = true;
+              }),
+            createOperationLogData({
+              staffId: staffForMail.id,
+              action: "approve_change_request",
+              resource: "attendance",
+              resourceId: updatedAttendance.id,
+              timestamp: new Date().toISOString(),
+              details: JSON.stringify({
+                workDate: updatedAttendance.workDate,
+                applicantStaffId: updatedAttendance.staffId,
+                result: "approved",
+                comment: null,
+                bulk: true,
+              }),
+            }).catch((error: unknown) => {
+              const message =
+                error instanceof Error ? error.message : String(error);
+              logger.error("Failed to create operation log:", message);
+            }),
+          ]);
+        }),
+      );
 
       dispatch(setSnackbarSuccess(MESSAGE_CODE.S04006));
       setSelectedAttendanceIds([]);
@@ -173,6 +186,7 @@ export const useAdminAttendanceChangeRequests = ({
       logger.error("Bulk approve failed:", message);
       dispatch(setSnackbarError(MESSAGE_CODE.E04006));
     } finally {
+      isBulkApprovingRef.current = false;
       setBulkApproving(false);
     }
   }, [

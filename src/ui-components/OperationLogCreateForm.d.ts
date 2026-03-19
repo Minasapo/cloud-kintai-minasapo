@@ -32,6 +32,7 @@ export declare type OperationLogCreateFormInputValues = {
     userAgent?: string;
     metadata?: string;
     severity?: string;
+    version?: number;
 };
 export declare type OperationLogCreateFormValidationValues = {
     staffId?: ValidationFunction<string>;
@@ -44,6 +45,7 @@ export declare type OperationLogCreateFormValidationValues = {
     userAgent?: ValidationFunction<string>;
     metadata?: ValidationFunction<string>;
     severity?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type OperationLogCreateFormOverridesProps = {
@@ -58,6 +60,7 @@ export declare type OperationLogCreateFormOverridesProps = {
     userAgent?: PrimitiveOverrideProps<TextFieldProps>;
     metadata?: PrimitiveOverrideProps<TextFieldProps>;
     severity?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type OperationLogCreateFormProps = React.PropsWithChildren<{
     overrides?: OperationLogCreateFormOverridesProps | undefined | null;

@@ -11,16 +11,13 @@ import DesktopMenuView, {
   DesktopMenuItem,
 } from "@shared/ui/header/DesktopMenu";
 import MobileMenuView, { MobileMenuItem } from "@shared/ui/header/MobileMenu";
-import { useContext, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useContext, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { useMobileDrawer } from "@/hooks/useMobileDrawer";
-
-type NavigationMenuProps = {
-  pathName: string;
-};
+import { preloadRoute } from "@/router/routePreloaders";
 
 const iconByHref: Record<string, JSX.Element> = {
   "/register": <AccessTimeIcon />,
@@ -34,12 +31,15 @@ const iconByHref: Record<string, JSX.Element> = {
   "/office/qr": <AccessTimeIcon />,
 };
 
-export default function NavigationMenu({ pathName }: NavigationMenuProps) {
+export default function NavigationMenu() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isOpen, closeDrawer, openDrawer } = useMobileDrawer();
   const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);
   const { getOfficeMode, getAttendanceStatisticsEnabled } =
     useContext(AppConfigContext);
+
+  const pathName = location.pathname === "/" ? "/register" : location.pathname;
 
   const menuList = useMemo<DesktopMenuItem[]>(
     () => [
@@ -50,12 +50,12 @@ export default function NavigationMenu({ pathName }: NavigationMenuProps) {
       { label: "シフト", href: "/shift" },
       { label: "ワークフロー", href: "/workflow" },
     ],
-    []
+    [],
   );
 
   const adminLink = useMemo<DesktopMenuItem>(
     () => ({ label: "管理", href: "/admin" }),
-    []
+    [],
   );
 
   const officeMode = getOfficeMode();
@@ -70,7 +70,7 @@ export default function NavigationMenu({ pathName }: NavigationMenuProps) {
     () =>
       isCognitoUserRole(StaffRole.ADMIN) ||
       isCognitoUserRole(StaffRole.STAFF_ADMIN),
-    [isCognitoUserRole]
+    [isCognitoUserRole],
   );
 
   const desktopMenuItems = useMemo(() => {
@@ -106,34 +106,78 @@ export default function NavigationMenu({ pathName }: NavigationMenuProps) {
   ]);
 
   const mobileMenuItems = useMemo<MobileMenuItem[]>(
-    () =>
-      [
-        ...desktopMenuItems.map((menu) => ({
-          label: menu.label,
-          icon: iconByHref[menu.href] ?? <ViewListIcon />,
-          onClick: () => navigate(menu.href),
-        })),
-        ...(isAdminUser
-          ? [
-              {
-                label: adminLink.label,
-                icon: iconByHref[adminLink.href] ?? <AdminPanelSettingsIcon />,
-                onClick: () => navigate(adminLink.href),
-              },
-            ]
-          : []),
-        ...(cognitoUser
-          ? [
-              {
-                label: "個人設定",
-                icon: iconByHref["/profile"] ?? <AccountCircleIcon />,
-                onClick: () => navigate("/profile"),
-              },
-            ]
-          : []),
-      ],
-    [adminLink.href, adminLink.label, cognitoUser, desktopMenuItems, isAdminUser, navigate]
+    () => [
+      ...desktopMenuItems.map((menu) => ({
+        label: menu.label,
+        icon: iconByHref[menu.href] ?? <ViewListIcon />,
+        onClick: () => navigate(menu.href),
+      })),
+      ...(isAdminUser
+        ? [
+            {
+              label: adminLink.label,
+              icon: iconByHref[adminLink.href] ?? <AdminPanelSettingsIcon />,
+              onClick: () => navigate(adminLink.href),
+            },
+          ]
+        : []),
+      ...(cognitoUser
+        ? [
+            {
+              label: "個人設定",
+              icon: iconByHref["/profile"] ?? <AccountCircleIcon />,
+              onClick: () => navigate("/profile"),
+            },
+          ]
+        : []),
+    ],
+    [
+      adminLink.href,
+      adminLink.label,
+      cognitoUser,
+      desktopMenuItems,
+      isAdminUser,
+      navigate,
+    ],
   );
+
+  const mobilePreloadTargets = useMemo(() => {
+    const hrefs = desktopMenuItems.map((menu) => menu.href);
+
+    if (isAdminUser) {
+      hrefs.push(adminLink.href);
+    }
+
+    if (cognitoUser) {
+      hrefs.push("/profile");
+    }
+
+    const uniqueHrefs = [...new Set(hrefs)];
+    const currentIndex = uniqueHrefs.findIndex((href) => {
+      if (href === pathName) {
+        return true;
+      }
+
+      return pathName.startsWith(`${href}/`);
+    });
+
+    const prioritizedHrefs =
+      currentIndex >= 0
+        ? [
+            ...uniqueHrefs.slice(currentIndex + 1),
+            ...uniqueHrefs.slice(0, currentIndex),
+          ]
+        : uniqueHrefs;
+
+    return prioritizedHrefs.filter((href) => href !== pathName).slice(0, 2);
+  }, [adminLink.href, cognitoUser, desktopMenuItems, isAdminUser, pathName]);
+
+  const handleOpenMobileMenu = useCallback(() => {
+    mobilePreloadTargets.forEach((href) => {
+      preloadRoute(href);
+    });
+    openDrawer();
+  }, [mobilePreloadTargets, openDrawer]);
 
   if (pathName === "/login") return null;
 
@@ -144,11 +188,12 @@ export default function NavigationMenu({ pathName }: NavigationMenuProps) {
         menuItems={desktopMenuItems}
         adminLink={adminLink}
         showAdminMenu={isAdminUser}
+        onItemPreload={preloadRoute}
       />
       <MobileMenuView
         menuItems={mobileMenuItems}
         isOpen={isOpen}
-        onOpen={openDrawer}
+        onOpen={handleOpenMobileMenu}
         onClose={closeDrawer}
       />
     </>

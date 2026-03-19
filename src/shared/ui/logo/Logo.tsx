@@ -22,11 +22,18 @@ const Logo = () => (
   >
     <Link
       href="/"
+      variant="inherit"
+      color="inherit"
+      underline="none"
       sx={{
         display: "inline-flex",
         alignItems: "center",
         height: { xs: "26px", sm: "28px", md: HEADER_LOGO_MAX_HEIGHT },
         maxWidth: "100%",
+        backgroundColor: "transparent",
+        "&:hover": {
+          backgroundColor: "transparent",
+        },
       }}
     >
       <img

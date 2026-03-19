@@ -27,6 +27,7 @@ import dayjs from "dayjs";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { E02004 } from "@/errors";
+import { buildRevisionCondition } from "@/shared/api/graphql/concurrency";
 
 // 重複データの詳細情報
 export type DuplicateAttendanceInfo = {
@@ -48,7 +49,7 @@ const dispatchDuplicateWarning = (message: string) => {
     window.dispatchEvent(
       new CustomEvent("attendance-duplicate-warning", {
         detail: { message },
-      })
+      }),
     );
   }
 };
@@ -61,7 +62,7 @@ export const sanitizeRests = (
   rests?: Array<{
     startTime?: string | null;
     endTime?: string | null;
-  } | null> | null
+  } | null> | null,
 ): RestInput[] =>
   rests?.filter(nonNullable).map(({ startTime, endTime }) => ({
     startTime: startTime ?? undefined,
@@ -73,7 +74,7 @@ export const sanitizeHourlyPaidHolidayTimes = (
   hourlyTimes?: Array<{
     startTime?: string | null;
     endTime?: string | null;
-  } | null> | null
+  } | null> | null,
 ): HourlyPaidHolidayTimeInput[] =>
   hourlyTimes
     ?.filter(nonNullable)
@@ -88,7 +89,7 @@ export const sanitizeHourlyPaidHolidayTimes = (
 // Exported for testing
 export const buildAttendanceHistoryInput = (
   attendance: Attendance,
-  createdAt: string
+  createdAt: string,
 ): AttendanceHistoryInput => ({
   staffId: attendance.staffId,
   workDate: attendance.workDate,
@@ -99,7 +100,7 @@ export const buildAttendanceHistoryInput = (
   returnDirectlyFlag: attendance.returnDirectlyFlag,
   rests: sanitizeRests(attendance.rests ?? []),
   hourlyPaidHolidayTimes: sanitizeHourlyPaidHolidayTimes(
-    attendance.hourlyPaidHolidayTimes ?? []
+    attendance.hourlyPaidHolidayTimes ?? [],
   ),
   remarks: attendance.remarks,
   paidHolidayFlag: attendance.paidHolidayFlag,
@@ -110,7 +111,7 @@ export const buildAttendanceHistoryInput = (
 });
 
 const cloneExistingHistory = (
-  history: AttendanceHistory
+  history: AttendanceHistory,
 ): AttendanceHistoryInput => ({
   staffId: history.staffId,
   workDate: history.workDate,
@@ -121,7 +122,7 @@ const cloneExistingHistory = (
   returnDirectlyFlag: history.returnDirectlyFlag,
   rests: sanitizeRests(history.rests ?? []),
   hourlyPaidHolidayTimes: sanitizeHourlyPaidHolidayTimes(
-    history.hourlyPaidHolidayTimes ?? []
+    history.hourlyPaidHolidayTimes ?? [],
   ),
   remarks: history.remarks,
   paidHolidayFlag: history.paidHolidayFlag,
@@ -133,7 +134,7 @@ const cloneExistingHistory = (
 
 const buildAttendanceForList = (
   targetDate: string,
-  matchAttendance?: Attendance | null
+  matchAttendance?: Attendance | null,
 ): Attendance => ({
   __typename: "Attendance",
   id: matchAttendance?.id ?? "",
@@ -173,7 +174,7 @@ export const attendanceApi = createApi({
         { staffId, workDate },
         _queryApi,
         _extraOptions,
-        baseQuery
+        baseQuery,
       ) {
         const attendances: Attendance[] = [];
         const duplicateDetails: DuplicateAttendanceInfo[] = [];
@@ -299,12 +300,12 @@ export const attendanceApi = createApi({
         { staffId, days = 30 },
         _queryApi,
         _extraOptions,
-        baseQuery
+        baseQuery,
       ) {
         const safeDays = Math.max(1, days);
         const now = dayjs();
         const dateList = Array.from({ length: safeDays }, (_, index) =>
-          now.subtract(index, "day").format(AttendanceDate.DataFormat)
+          now.subtract(index, "day").format(AttendanceDate.DataFormat),
         ).toSorted();
 
         const result = await baseQuery({
@@ -338,7 +339,7 @@ export const attendanceApi = createApi({
           duplicateCheck.set(attendance.workDate, [
             ...(duplicateCheck.get(attendance.workDate) ?? []),
             attendance,
-          ])
+          ]),
         );
 
         for (const attendances of duplicateCheck.values()) {
@@ -398,12 +399,12 @@ export const attendanceApi = createApi({
         { staffId, days = 30 },
         _queryApi,
         _extraOptions,
-        baseQuery
+        baseQuery,
       ) {
         const safeDays = Math.max(1, days);
         const now = dayjs();
         const dateList = Array.from({ length: safeDays }, (_, index) =>
-          now.subtract(index, "day").format(AttendanceDate.DataFormat)
+          now.subtract(index, "day").format(AttendanceDate.DataFormat),
         ).toSorted();
 
         const result = await baseQuery({
@@ -500,7 +501,7 @@ export const attendanceApi = createApi({
         { staffId, startDate, endDate },
         _queryApi,
         _extraOptions,
-        baseQuery
+        baseQuery,
       ) {
         const attendances: Attendance[] = [];
         let nextToken: string | null = null;
@@ -561,7 +562,7 @@ export const attendanceApi = createApi({
 
         // 重複があっても最初のレコードだけを返す
         const uniqueAttendances = Array.from(duplicateCheck.values()).map(
-          (attendancesForDate) => attendancesForDate[0]
+          (attendancesForDate) => attendancesForDate[0],
         );
 
         // 警告がある場合は、meta情報として返す
@@ -577,24 +578,12 @@ export const attendanceApi = createApi({
 
         return { data: uniqueAttendances };
       },
-      providesTags: (result, _error, arg) => {
-        const listTag = {
+      providesTags: (_result, _error, arg) => [
+        {
           type: "Attendance" as const,
-          id: `RANGE-${arg.startDate}-${arg.endDate}`,
-        };
-
-        if (!result) return [listTag];
-
-        return [
-          listTag,
-          ...result.map((attendance) => ({
-            type: "Attendance" as const,
-            id:
-              attendance.id ||
-              buildAttendanceCacheId(attendance.staffId, attendance.workDate),
-          })),
-        ];
-      },
+          id: `RANGE-${arg.staffId}-${arg.startDate}-${arg.endDate}`,
+        },
+      ],
     }),
     createAttendance: builder.mutation<Attendance, CreateAttendanceInput>({
       async queryFn(input, _queryApi, _extraOptions, baseQuery) {
@@ -666,7 +655,7 @@ export const attendanceApi = createApi({
         const createdAt = new AttendanceDateTime().toISOString();
         const historyFromCurrent = buildAttendanceHistoryInput(
           currentAttendance,
-          createdAt
+          createdAt,
         );
 
         const existingHistories = currentAttendance.histories
@@ -683,7 +672,10 @@ export const attendanceApi = createApi({
 
         const result = await baseQuery({
           document: updateAttendance,
-          variables: { input: payload },
+          variables: {
+            input: payload,
+            condition: buildRevisionCondition(inputRevision),
+          },
         });
 
         if (result.error) {
@@ -698,6 +690,73 @@ export const attendanceApi = createApi({
         }
 
         return { data: updatedAttendance };
+      },
+      onQueryStarted: async (
+        _input,
+        { dispatch, queryFulfilled, getState },
+      ) => {
+        try {
+          const { data: updatedAttendance } = await queryFulfilled;
+          const { workDate, staffId } = updatedAttendance;
+
+          type ApiCacheState = {
+            attendanceApi?: {
+              queries?: Record<
+                string,
+                | {
+                    endpointName?: string;
+                    originalArgs?: unknown;
+                    status?: string;
+                  }
+                | undefined
+              >;
+            };
+          };
+
+          const queries = (getState() as ApiCacheState).attendanceApi?.queries;
+          if (!queries) return;
+
+          for (const queryEntry of Object.values(queries)) {
+            if (
+              !queryEntry ||
+              queryEntry.endpointName !== "listAttendancesByDateRange" ||
+              queryEntry.status !== "fulfilled"
+            ) {
+              continue;
+            }
+
+            const args = queryEntry.originalArgs as {
+              staffId: string;
+              startDate: string;
+              endDate: string;
+            };
+
+            if (
+              args.staffId !== staffId ||
+              workDate < args.startDate ||
+              workDate > args.endDate
+            ) {
+              continue;
+            }
+
+            dispatch(
+              attendanceApi.util.updateQueryData(
+                "listAttendancesByDateRange",
+                args,
+                (draft) => {
+                  const index = draft.findIndex(
+                    (a) => a.id === updatedAttendance.id,
+                  );
+                  if (index !== -1) {
+                    Object.assign(draft[index], updatedAttendance);
+                  }
+                },
+              ),
+            );
+          }
+        } catch {
+          // mutation failed, no cache update needed
+        }
       },
       invalidatesTags: (result) => {
         const listTag = { type: "Attendance" as const, id: "LIST" };

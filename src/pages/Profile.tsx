@@ -41,6 +41,10 @@ import {
   StaffExternalLink,
 } from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
 import { predefinedIcons } from "@/shared/config/icons";
 import { MARGINS } from "@/shared/config/uiDimensions";
 import { createLogger } from "@/shared/lib/logger";
@@ -251,21 +255,25 @@ export default function Profile() {
     if (!staff) return;
     const preparedLinks = sanitizeExternalLinks(data.externalLinks ?? []);
     updateStaff({
-      id: staff.id,
-      cognitoUserId: staff.cognitoUserId,
-      familyName: staff.familyName,
-      givenName: staff.givenName,
-      mailAddress: staff.mailAddress,
-      role: staff.role,
-      enabled: staff.enabled,
-      status: staff.status,
-      owner: staff.owner,
-      usageStartDate: staff.usageStartDate,
-      notifications: {
-        workStart: data.workStart,
-        workEnd: data.workEnd,
+      input: {
+        id: staff.id,
+        cognitoUserId: staff.cognitoUserId,
+        familyName: staff.familyName,
+        givenName: staff.givenName,
+        mailAddress: staff.mailAddress,
+        role: staff.role,
+        enabled: staff.enabled,
+        status: staff.status,
+        owner: staff.owner,
+        usageStartDate: staff.usageStartDate,
+        notifications: {
+          workStart: data.workStart,
+          workEnd: data.workEnd,
+        },
+        externalLinks: preparedLinks,
+        version: getNextVersion(staff.version),
       },
-      externalLinks: preparedLinks,
+      condition: buildVersionOrUpdatedAtCondition(staff.version, staff.updatedAt),
     })
       .then(() => dispatch(setSnackbarSuccess(MESSAGE_CODE.S05003)))
       .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E05003)));

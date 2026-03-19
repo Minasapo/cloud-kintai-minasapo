@@ -29,6 +29,7 @@ export default function WorkflowTemplateUpdateForm(props) {
     title: "",
     content: "",
     organizationId: "",
+    version: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [title, setTitle] = React.useState(initialValues.title);
@@ -36,6 +37,7 @@ export default function WorkflowTemplateUpdateForm(props) {
   const [organizationId, setOrganizationId] = React.useState(
     initialValues.organizationId
   );
+  const [version, setVersion] = React.useState(initialValues.version);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = workflowTemplateRecord
@@ -45,6 +47,7 @@ export default function WorkflowTemplateUpdateForm(props) {
     setTitle(cleanValues.title);
     setContent(cleanValues.content);
     setOrganizationId(cleanValues.organizationId);
+    setVersion(cleanValues.version);
     setErrors({});
   };
   const [workflowTemplateRecord, setWorkflowTemplateRecord] = React.useState(
@@ -70,6 +73,7 @@ export default function WorkflowTemplateUpdateForm(props) {
     title: [{ type: "Required" }],
     content: [{ type: "Required" }],
     organizationId: [{ type: "Required" }],
+    version: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -101,6 +105,7 @@ export default function WorkflowTemplateUpdateForm(props) {
           title,
           content,
           organizationId,
+          version: version ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -165,6 +170,7 @@ export default function WorkflowTemplateUpdateForm(props) {
               title,
               content,
               organizationId,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -192,6 +198,7 @@ export default function WorkflowTemplateUpdateForm(props) {
               title: value,
               content,
               organizationId,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.title ?? value;
@@ -219,6 +226,7 @@ export default function WorkflowTemplateUpdateForm(props) {
               title,
               content: value,
               organizationId,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.content ?? value;
@@ -246,6 +254,7 @@ export default function WorkflowTemplateUpdateForm(props) {
               title,
               content,
               organizationId: value,
+              version,
             };
             const result = onChange(modelFields);
             value = result?.organizationId ?? value;
@@ -259,6 +268,38 @@ export default function WorkflowTemplateUpdateForm(props) {
         errorMessage={errors.organizationId?.errorMessage}
         hasError={errors.organizationId?.hasError}
         {...getOverrideProps(overrides, "organizationId")}
+      ></TextField>
+      <TextField
+        label="Version"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={version}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              name,
+              title,
+              content,
+              organizationId,
+              version: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.version ?? value;
+          }
+          if (errors.version?.hasError) {
+            runValidationTasks("version", value);
+          }
+          setVersion(value);
+        }}
+        onBlur={() => runValidationTasks("version", version)}
+        errorMessage={errors.version?.errorMessage}
+        hasError={errors.version?.hasError}
+        {...getOverrideProps(overrides, "version")}
       ></TextField>
       <Flex
         justifyContent="space-between"

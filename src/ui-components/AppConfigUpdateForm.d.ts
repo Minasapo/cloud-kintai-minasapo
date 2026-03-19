@@ -41,6 +41,9 @@ export declare type AppConfigUpdateFormInputValues = {
     hourlyPaidHolidayEnabled?: boolean;
     themeColor?: string;
     overTimeCheckEnabled?: boolean;
+    shiftCollaborativeEnabled?: boolean;
+    shiftDefaultMode?: string;
+    version?: number;
 };
 export declare type AppConfigUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -61,6 +64,9 @@ export declare type AppConfigUpdateFormValidationValues = {
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
     themeColor?: ValidationFunction<string>;
     overTimeCheckEnabled?: ValidationFunction<boolean>;
+    shiftCollaborativeEnabled?: ValidationFunction<boolean>;
+    shiftDefaultMode?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type AppConfigUpdateFormOverridesProps = {
@@ -83,6 +89,9 @@ export declare type AppConfigUpdateFormOverridesProps = {
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     themeColor?: PrimitiveOverrideProps<TextFieldProps>;
     overTimeCheckEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    shiftCollaborativeEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    shiftDefaultMode?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type AppConfigUpdateFormProps = React.PropsWithChildren<{
     overrides?: AppConfigUpdateFormOverridesProps | undefined | null;

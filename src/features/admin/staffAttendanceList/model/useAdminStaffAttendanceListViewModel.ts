@@ -9,25 +9,40 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  mappingStaffRole,
+  StaffType,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Attendance,
   CloseDate,
   CompanyHolidayCalendar,
   HolidayCalendar,
+  OnCreateAttendanceSubscription,
+  OnDeleteAttendanceSubscription,
+  OnUpdateAttendanceSubscription,
   Staff,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
+import {
+  ChangeRequest,
+  hasUnapprovedChangeRequest,
+} from "@/entities/attendance/lib/ChangeRequest";
 import {
   AttendanceRowVariant,
   getAttendanceRowVariant,
 } from "@/entities/attendance/ui/rowVariant";
 import * as MESSAGE_CODE from "@/errors";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import {
+  onCreateAttendance,
+  onDeleteAttendance,
+  onUpdateAttendance,
+} from "@/shared/api/graphql/documents/subscriptions";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import type { PendingAttendanceControls } from "../ui/components";
@@ -39,9 +54,10 @@ export type AdminStaffAttendanceListViewModel = ReturnType<
 
 export const useAdminStaffAttendanceListViewModel = (
   staffId?: string,
-  currentMonth?: Dayjs
+  currentMonth?: Dayjs,
 ) => {
   const dispatch = useDispatch();
+  const isBulkApprovingRef = useRef(false);
   const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
 
   const {
@@ -91,7 +107,7 @@ export const useAdminStaffAttendanceListViewModel = (
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
     },
-    { skip: !shouldFetchAttendances }
+    { skip: !shouldFetchAttendances },
   );
 
   const {
@@ -102,6 +118,89 @@ export const useAdminStaffAttendanceListViewModel = (
     error: attendancesError,
     refetch: refetchAttendances,
   } = queryResult;
+
+  useEffect(() => {
+    if (!staffId || !shouldFetchAttendances) return;
+
+    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const shouldRefetch = (
+      eventStaffId?: string | null,
+      workDate?: string | null,
+    ) => {
+      if (!eventStaffId || !workDate) return false;
+      if (eventStaffId !== staffId) return false;
+
+      const eventDate = dayjs(workDate);
+      const start = dayjs(dateRange.startDate);
+      const end = dayjs(dateRange.endDate);
+
+      return eventDate.isBetween(start, end, "day", "[]");
+    };
+
+    const scheduleRefetch = () => {
+      if (isBulkApprovingRef.current) return;
+
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+
+      refetchTimer = setTimeout(() => {
+        void refetchAttendances();
+      }, 300);
+    };
+
+    const createSubscription = graphqlClient
+      .graphql({ query: onCreateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
+          const attendance = data?.onCreateAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    const updateSubscription = graphqlClient
+      .graphql({ query: onUpdateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
+          const attendance = data?.onUpdateAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    const deleteSubscription = graphqlClient
+      .graphql({ query: onDeleteAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
+          const attendance = data?.onDeleteAttendance;
+          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    return () => {
+      createSubscription.unsubscribe();
+      updateSubscription.unsubscribe();
+      deleteSubscription.unsubscribe();
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+    };
+  }, [
+    staffId,
+    shouldFetchAttendances,
+    dateRange.startDate,
+    dateRange.endDate,
+    refetchAttendances,
+  ]);
 
   // 日付範囲内のすべての日付に対してAttendanceを生成（空の日も含む）
   const attendances: Attendance[] = useMemo(() => {
@@ -151,8 +250,8 @@ export const useAdminStaffAttendanceListViewModel = (
         setStaff(null);
         dispatch(
           setSnackbarError(
-            "スタッフ情報の取得に失敗しましたが、勤怠データは表示されます。(エラーコード: E00001)"
-          )
+            "スタッフ情報の取得に失敗しましたが、勤怠データは表示されます。(エラーコード: E00001)",
+          ),
         );
       });
   }, [staffId, dispatch]);
@@ -214,9 +313,8 @@ export const useAdminStaffAttendanceListViewModel = (
   }, [staff]);
 
   const pendingAttendances = useMemo(() => {
-    return attendances.filter(
-      (attendance: Attendance) =>
-        new ChangeRequest(attendance.changeRequests).getUnapprovedCount() > 0
+    return attendances.filter((attendance: Attendance) =>
+      hasUnapprovedChangeRequest(attendance.changeRequests),
     );
   }, [attendances]);
 
@@ -228,6 +326,7 @@ export const useAdminStaffAttendanceListViewModel = (
     refetchAttendances,
     updateAttendance: (input: UpdateAttendanceInput) =>
       updateAttendanceMutation(input).unwrap(),
+    isBulkApprovingRef,
   });
 
   const pendingAttendanceControls = useMemo<PendingAttendanceControls>(
@@ -251,14 +350,14 @@ export const useAdminStaffAttendanceListViewModel = (
       changeRequestControls.canBulkApprove,
       changeRequestControls.handleBulkApprove,
       changeRequestControls.handleOpenQuickView,
-    ]
+    ],
   );
 
   const getTableRowVariant = useCallback(
     (
       attendance: Attendance,
       holidayList: HolidayCalendar[] = holidayCalendars,
-      companyHolidayList: CompanyHolidayCalendar[] = companyHolidayCalendars
+      companyHolidayList: CompanyHolidayCalendar[] = companyHolidayCalendars,
     ): AttendanceRowVariant => {
       if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
         return "sunday";
@@ -271,10 +370,10 @@ export const useAdminStaffAttendanceListViewModel = (
       return getAttendanceRowVariant(
         attendance,
         holidayList,
-        companyHolidayList
+        companyHolidayList,
       );
     },
-    [staff, holidayCalendars, companyHolidayCalendars]
+    [staff, holidayCalendars, companyHolidayCalendars],
   );
 
   const getBadgeContent = useCallback((attendance: Attendance) => {
@@ -316,7 +415,7 @@ export const useAdminStaffAttendanceListViewModel = (
     getTableRowVariant: (
       attendance: Attendance,
       holidayList?: HolidayCalendar[],
-      companyHolidayList?: CompanyHolidayCalendar[]
+      companyHolidayList?: CompanyHolidayCalendar[],
     ) => AttendanceRowVariant;
     getBadgeContent: (attendance: Attendance) => number;
   };

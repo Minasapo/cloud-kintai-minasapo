@@ -6,23 +6,6 @@
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
-import {
-  useBulkCreateCompanyHolidayCalendarsMutation,
-  useBulkCreateEventCalendarsMutation,
-  useBulkCreateHolidayCalendarsMutation,
-  useCreateCompanyHolidayCalendarMutation,
-  useCreateEventCalendarMutation,
-  useCreateHolidayCalendarMutation,
-  useDeleteCompanyHolidayCalendarMutation,
-  useDeleteEventCalendarMutation,
-  useDeleteHolidayCalendarMutation,
-  useGetCompanyHolidayCalendarsQuery,
-  useGetEventCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-  useUpdateCompanyHolidayCalendarMutation,
-  useUpdateEventCalendarMutation,
-  useUpdateHolidayCalendarMutation,
-} from "@entities/calendar/api/calendarApi";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Button,
@@ -47,6 +30,7 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
+import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
 import { createLogger } from "@/shared/lib/logger";
 import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
@@ -55,11 +39,13 @@ import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";
 
 import { AppConfigContext } from "./context/AppConfigContext";
-import { AppContext } from "./context/AppContext";
 import { AuthContext } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import useCognitoUser from "./hooks/useCognitoUser";
 import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
+import { useLocalNotification } from "./hooks/useLocalNotification";
+import { useWorkflowCommentNotification } from "./hooks/useWorkflowCommentNotification";
+import { useWorkflowNotification } from "./hooks/useWorkflowNotification";
 
 const logger = createLogger("Layout");
 
@@ -137,22 +123,18 @@ type AuthContextValue = ComponentProps<typeof AuthContext.Provider>["value"];
 type AppConfigContextValue = ComponentProps<
   typeof AppConfigContext.Provider
 >["value"];
-type AppContextValue = ComponentProps<typeof AppContext.Provider>["value"];
 
 type AppProvidersProps = {
   children: ReactNode;
   auth: AuthContextValue;
   config: AppConfigContextValue;
-  app: AppContextValue;
 };
 
-function AppProviders({ children, auth, config, app }: AppProvidersProps) {
+function AppProviders({ children, auth, config }: AppProvidersProps) {
   return (
     <AuthContext.Provider value={auth}>
       <AppConfigContext.Provider value={config}>
-        <AppContext.Provider value={app}>
-          <SplitViewProvider>{children}</SplitViewProvider>
-        </AppContext.Provider>
+        <SplitViewProvider>{children}</SplitViewProvider>
       </AppConfigContext.Provider>
     </AuthContext.Provider>
   );
@@ -177,6 +159,37 @@ export default function Layout() {
   // 重複勤怠データの警告をリッスン
   useDuplicateAttendanceWarning();
 
+  // 通知権限をリクエスト
+  const { requestPermission, permission, isSupported } = useLocalNotification();
+
+  // 認証後に通知権限をリクエスト
+  useEffect(() => {
+    if (
+      authStatus === "authenticated" &&
+      isSupported &&
+      permission === "default"
+    ) {
+      logger.info("Requesting notification permission on authentication");
+      requestPermission().catch((error) => {
+        logger.warn("Failed to request notification permission:", error);
+      });
+    }
+  }, [authStatus, isSupported, permission, requestPermission]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated" || cognitoUserLoading) {
+      return;
+    }
+
+    scheduleIdleRoutePreload({
+      currentPathname: location.pathname,
+      isAdminUser:
+        isCognitoUserRole(StaffRole.ADMIN) ||
+        isCognitoUserRole(StaffRole.STAFF_ADMIN),
+      isOperatorUser: isCognitoUserRole(StaffRole.OPERATOR),
+    });
+  }, [authStatus, cognitoUserLoading, isCognitoUserRole, location.pathname]);
+
   const {
     fetchConfig,
     saveConfig,
@@ -191,7 +204,6 @@ export default function Layout() {
     getShiftGroups,
     getLunchRestStartTime,
     getLunchRestEndTime,
-    loading: appConfigLoading,
     getStandardWorkHours,
     getHourlyPaidHolidayEnabled,
     getAmHolidayStartTime,
@@ -203,146 +215,23 @@ export default function Layout() {
     getAbsentEnabled,
     getWorkflowCategoryOrder,
     getAttendanceStatisticsEnabled,
+    getWorkflowNotificationEnabled,
+    getShiftCollaborativeEnabled,
+    getShiftDefaultMode,
     getThemeColor,
     getThemeTokens,
   } = useAppConfig();
-  const isAuthenticated = authStatus === "authenticated";
-  const { data: holidayCalendars = [], isLoading: holidayCalendarLoading } =
-    useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
-  const {
-    data: companyHolidayCalendars = [],
-    isLoading: companyHolidayCalendarLoading,
-  } = useGetCompanyHolidayCalendarsQuery(undefined, {
-    skip: !isAuthenticated,
-  });
-  const { data: eventCalendars = [], isLoading: eventCalendarLoading } =
-    useGetEventCalendarsQuery(undefined, { skip: !isAuthenticated });
 
-  const [createHolidayCalendarMutation] = useCreateHolidayCalendarMutation();
-  const [bulkCreateHolidayCalendarsMutation] =
-    useBulkCreateHolidayCalendarsMutation();
-  const [updateHolidayCalendarMutation] = useUpdateHolidayCalendarMutation();
-  const [deleteHolidayCalendarMutation] = useDeleteHolidayCalendarMutation();
+  const workflowNotificationsEnabled =
+    authStatus === "authenticated" &&
+    isSupported &&
+    permission === "granted" &&
+    getWorkflowNotificationEnabled();
 
-  const [createCompanyHolidayCalendarMutation] =
-    useCreateCompanyHolidayCalendarMutation();
-  const [bulkCreateCompanyHolidayCalendarsMutation] =
-    useBulkCreateCompanyHolidayCalendarsMutation();
-  const [updateCompanyHolidayCalendarMutation] =
-    useUpdateCompanyHolidayCalendarMutation();
-  const [deleteCompanyHolidayCalendarMutation] =
-    useDeleteCompanyHolidayCalendarMutation();
-
-  const [createEventCalendarMutation] = useCreateEventCalendarMutation();
-  const [bulkCreateEventCalendarsMutation] =
-    useBulkCreateEventCalendarsMutation();
-  const [updateEventCalendarMutation] = useUpdateEventCalendarMutation();
-  const [deleteEventCalendarMutation] = useDeleteEventCalendarMutation();
-
-  const createHolidayCalendar = useCallback(
-    async (input: Parameters<typeof createHolidayCalendarMutation>[0]) => {
-      const result = await createHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [createHolidayCalendarMutation],
-  );
-
-  const bulkCreateHolidayCalendar = useCallback(
-    async (
-      inputs: Parameters<typeof bulkCreateHolidayCalendarsMutation>[0],
-    ) => {
-      const result = await bulkCreateHolidayCalendarsMutation(inputs).unwrap();
-      return result;
-    },
-    [bulkCreateHolidayCalendarsMutation],
-  );
-
-  const updateHolidayCalendar = useCallback(
-    async (input: Parameters<typeof updateHolidayCalendarMutation>[0]) => {
-      const result = await updateHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [updateHolidayCalendarMutation],
-  );
-
-  const deleteHolidayCalendar = useCallback(
-    async (input: Parameters<typeof deleteHolidayCalendarMutation>[0]) => {
-      await deleteHolidayCalendarMutation(input).unwrap();
-    },
-    [deleteHolidayCalendarMutation],
-  );
-
-  const createCompanyHolidayCalendar = useCallback(
-    async (
-      input: Parameters<typeof createCompanyHolidayCalendarMutation>[0],
-    ) => {
-      const result = await createCompanyHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [createCompanyHolidayCalendarMutation],
-  );
-
-  const bulkCreateCompanyHolidayCalendar = useCallback(
-    async (
-      inputs: Parameters<typeof bulkCreateCompanyHolidayCalendarsMutation>[0],
-    ) => {
-      const result =
-        await bulkCreateCompanyHolidayCalendarsMutation(inputs).unwrap();
-      return result;
-    },
-    [bulkCreateCompanyHolidayCalendarsMutation],
-  );
-
-  const updateCompanyHolidayCalendar = useCallback(
-    async (
-      input: Parameters<typeof updateCompanyHolidayCalendarMutation>[0],
-    ) => {
-      const result = await updateCompanyHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [updateCompanyHolidayCalendarMutation],
-  );
-
-  const deleteCompanyHolidayCalendar = useCallback(
-    async (
-      input: Parameters<typeof deleteCompanyHolidayCalendarMutation>[0],
-    ) => {
-      const result = await deleteCompanyHolidayCalendarMutation(input).unwrap();
-      return result;
-    },
-    [deleteCompanyHolidayCalendarMutation],
-  );
-
-  const createEventCalendar = useCallback(
-    async (input: Parameters<typeof createEventCalendarMutation>[0]) => {
-      const result = await createEventCalendarMutation(input).unwrap();
-      return result;
-    },
-    [createEventCalendarMutation],
-  );
-
-  const bulkCreateEventCalendar = useCallback(
-    async (inputs: Parameters<typeof bulkCreateEventCalendarsMutation>[0]) => {
-      const result = await bulkCreateEventCalendarsMutation(inputs).unwrap();
-      return result;
-    },
-    [bulkCreateEventCalendarsMutation],
-  );
-
-  const updateEventCalendar = useCallback(
-    async (input: Parameters<typeof updateEventCalendarMutation>[0]) => {
-      const result = await updateEventCalendarMutation(input).unwrap();
-      return result;
-    },
-    [updateEventCalendarMutation],
-  );
-
-  const deleteEventCalendar = useCallback(
-    async (input: Parameters<typeof deleteEventCalendarMutation>[0]) => {
-      await deleteEventCalendarMutation(input).unwrap();
-    },
-    [deleteEventCalendarMutation],
-  );
+  // ワークフロー申請の通知を購読
+  useWorkflowNotification(workflowNotificationsEnabled);
+  // ワークフローコメント通知を全画面で購読
+  useWorkflowCommentNotification(workflowNotificationsEnabled);
 
   const isAdminUser = useMemo(
     () => isCognitoUserRole(StaffRole.ADMIN),
@@ -387,7 +276,12 @@ export default function Layout() {
     }
 
     if (authStatus === "unauthenticated") {
-      navigate("/login");
+      navigate("/login", {
+        replace: true,
+        state: {
+          from: `${location.pathname}${location.search}${location.hash}`,
+        },
+      });
       return;
     }
 
@@ -416,14 +310,13 @@ export default function Layout() {
     authStatus,
     cognitoUser,
     cognitoUserLoading,
+    location.hash,
     isLoginRoute,
+    location.pathname,
+    location.search,
     navigate,
     signOut,
   ]);
-
-  useEffect(() => {
-    void fetchConfig();
-  }, [fetchConfig]);
 
   const authContextValue = useMemo(
     () => ({
@@ -463,6 +356,9 @@ export default function Layout() {
       getAbsentEnabled,
       getWorkflowCategoryOrder,
       getAttendanceStatisticsEnabled,
+      getWorkflowNotificationEnabled,
+      getShiftCollaborativeEnabled,
+      getShiftDefaultMode,
       getThemeColor,
       getThemeTokens,
     }),
@@ -491,45 +387,11 @@ export default function Layout() {
       getAbsentEnabled,
       getWorkflowCategoryOrder,
       getAttendanceStatisticsEnabled,
+      getWorkflowNotificationEnabled,
+      getShiftCollaborativeEnabled,
+      getShiftDefaultMode,
       getThemeColor,
       getThemeTokens,
-    ],
-  );
-
-  const appContextValue = useMemo(
-    () => ({
-      holidayCalendars,
-      companyHolidayCalendars,
-      eventCalendars,
-      createHolidayCalendar,
-      bulkCreateHolidayCalendar,
-      updateHolidayCalendar,
-      deleteHolidayCalendar,
-      createCompanyHolidayCalendar,
-      bulkCreateCompanyHolidayCalendar,
-      updateCompanyHolidayCalendar,
-      deleteCompanyHolidayCalendar,
-      createEventCalendar,
-      bulkCreateEventCalendar,
-      updateEventCalendar,
-      deleteEventCalendar,
-    }),
-    [
-      holidayCalendars,
-      companyHolidayCalendars,
-      eventCalendars,
-      createHolidayCalendar,
-      bulkCreateHolidayCalendar,
-      updateHolidayCalendar,
-      deleteHolidayCalendar,
-      createCompanyHolidayCalendar,
-      bulkCreateCompanyHolidayCalendar,
-      updateCompanyHolidayCalendar,
-      deleteCompanyHolidayCalendar,
-      createEventCalendar,
-      bulkCreateEventCalendar,
-      updateEventCalendar,
-      deleteEventCalendar,
     ],
   );
 
@@ -546,15 +408,12 @@ export default function Layout() {
   const shouldBlockUnauthenticated =
     authStatus === "unauthenticated" && !isLoginRoute;
 
-  if (
+  const shouldBlockLayoutBootstrap =
     authStatus === "configuring" ||
     cognitoUserLoading ||
-    appConfigLoading ||
-    holidayCalendarLoading ||
-    companyHolidayCalendarLoading ||
-    eventCalendarLoading ||
-    shouldBlockUnauthenticated
-  ) {
+    shouldBlockUnauthenticated;
+
+  if (shouldBlockLayoutBootstrap) {
     return (
       <ThemeContextProvider>
         <ThemeProvider theme={appTheme}>
@@ -570,7 +429,6 @@ export default function Layout() {
         <AppProviders
           auth={authContextValue}
           config={appConfigContextValue}
-          app={appContextValue}
         >
           <AppShell
             header={<Header />}

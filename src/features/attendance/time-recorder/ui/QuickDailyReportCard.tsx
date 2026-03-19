@@ -16,6 +16,11 @@ import { useDispatch } from "react-redux";
 
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
+  buildVersionOrUpdatedAtCondition,
+  getGraphQLErrorMessage,
+  getNextVersion,
+} from "@/shared/api/graphql/concurrency";
+import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
@@ -62,6 +67,8 @@ export default function QuickDailyReportCard({
   const [content, setContent] = useState("");
   const [savedContent, setSavedContent] = useState("");
   const [reportId, setReportId] = useState<string | null>(null);
+  const [reportVersion, setReportVersion] = useState<number | null>(null);
+  const [reportUpdatedAt, setReportUpdatedAt] = useState<string | null>(null);
   const [reportStatus, setReportStatus] = useState<DailyReportStatus | null>(
     null
   );
@@ -106,6 +113,8 @@ export default function QuickDailyReportCard({
   useEffect(() => {
     if (!staffId) {
       setReportId(null);
+      setReportVersion(null);
+      setReportUpdatedAt(null);
       setContent("");
       setSavedContent("");
       setIsLoading(false);
@@ -145,12 +154,16 @@ export default function QuickDailyReportCard({
         if (report) {
           const nextContent = report.content ?? "";
           setReportId(report.id);
+          setReportVersion(report.version ?? null);
+          setReportUpdatedAt(report.updatedAt ?? report.createdAt ?? null);
           setContent(nextContent);
           setSavedContent(nextContent);
           setReportStatus(report.status as DailyReportStatus);
         } else {
           // 既存の日報がない場合は空の状態にリセット
           setReportId(null);
+          setReportVersion(null);
+          setReportUpdatedAt(null);
           setContent("");
           setSavedContent("");
           setReportStatus(null);
@@ -220,25 +233,37 @@ export default function QuickDailyReportCard({
           const response = (await graphqlClient.graphql({
             query: updateDailyReport,
             variables: {
+              condition: buildVersionOrUpdatedAtCondition(
+                reportVersion,
+                reportUpdatedAt,
+              ),
               input: {
                 id: reportId,
                 content,
                 status,
                 updatedAt: new Date().toISOString(),
+                version: getNextVersion(reportVersion),
               },
             },
             authMode: "userPool",
           })) as GraphQLResult<UpdateDailyReportMutation>;
 
           if (response.errors?.length) {
-            throw new Error(extractErrorMessage(response.errors));
+            throw new Error(
+              getGraphQLErrorMessage(
+                response.errors,
+                ERROR_MESSAGES.SAVE_FAILED,
+              ),
+            );
           }
 
-          const updatedContent =
-            response.data?.updateDailyReport?.content ?? content;
+          const updatedReport = response.data?.updateDailyReport;
+          const updatedContent = updatedReport?.content ?? content;
           setSavedContent(updatedContent);
           setContent(updatedContent);
           setReportStatus(status);
+          setReportVersion(updatedReport?.version ?? reportVersion);
+          setReportUpdatedAt(updatedReport?.updatedAt ?? reportUpdatedAt);
         } else {
           // 新規日報を作成
           const response = (await graphqlClient.graphql({
@@ -251,6 +276,7 @@ export default function QuickDailyReportCard({
                 content,
                 status,
                 updatedAt: new Date().toISOString(),
+                version: 1,
                 reactions: [],
                 comments: [],
               },
@@ -265,6 +291,8 @@ export default function QuickDailyReportCard({
           const created = response.data?.createDailyReport;
           const nextContent = created?.content ?? content;
           setReportId(created?.id ?? null);
+          setReportVersion(created?.version ?? 1);
+          setReportUpdatedAt(created?.updatedAt ?? new Date().toISOString());
           setSavedContent(nextContent);
           setContent(nextContent);
           setReportStatus(status);
@@ -291,7 +319,9 @@ export default function QuickDailyReportCard({
       content,
       savedContent,
       reportId,
+      reportUpdatedAt,
       reportStatus,
+      reportVersion,
       date,
       defaultTitle,
       dispatch,

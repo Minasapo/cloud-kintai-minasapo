@@ -26,12 +26,14 @@ export declare type ShiftPlanYearCreateFormInputValues = {
     notes?: string;
     createdBy?: string;
     updatedBy?: string;
+    version?: number;
 };
 export declare type ShiftPlanYearCreateFormValidationValues = {
     targetYear?: ValidationFunction<number>;
     notes?: ValidationFunction<string>;
     createdBy?: ValidationFunction<string>;
     updatedBy?: ValidationFunction<string>;
+    version?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type ShiftPlanYearCreateFormOverridesProps = {
@@ -40,6 +42,7 @@ export declare type ShiftPlanYearCreateFormOverridesProps = {
     notes?: PrimitiveOverrideProps<TextFieldProps>;
     createdBy?: PrimitiveOverrideProps<TextFieldProps>;
     updatedBy?: PrimitiveOverrideProps<TextFieldProps>;
+    version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type ShiftPlanYearCreateFormProps = React.PropsWithChildren<{
     overrides?: ShiftPlanYearCreateFormOverridesProps | undefined | null;
