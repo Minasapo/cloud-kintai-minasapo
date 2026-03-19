@@ -1,5 +1,4 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
-import { Box, CircularProgress, Typography } from "@mui/material";
 import { FieldArrayWithId } from "react-hook-form";
 
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
@@ -14,9 +13,12 @@ export default function NoRestTimeMessage({
 
   if (loading) {
     return (
-      <Box>
-        <CircularProgress />
-      </Box>
+      <div className="flex items-center py-2">
+        <span
+          className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-600"
+          aria-label="loading"
+        />
+      </div>
     );
   }
 
@@ -28,12 +30,12 @@ export default function NoRestTimeMessage({
   }
 
   return (
-    <Box>
-      <Typography variant="body1">休憩時間はありません</Typography>
-      <Typography variant="body1">
+    <div className="space-y-1 text-sm leading-6 text-slate-500">
+      <p className="m-0 text-slate-700">休憩時間はありません</p>
+      <p className="m-0">
         ※昼休憩は退勤打刻の際に{lunchRestStartTime}〜{lunchRestEndTime}
         で自動打刻されます
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
+  Box,
   Button,
   Collapse,
   Skeleton,
@@ -133,6 +134,11 @@ function AdminDashboardContent() {
     return prefixMatch?.href ?? menuItems[0]?.href ?? "";
   }, [location.pathname, menuItems]);
 
+  const activeMenuItem = useMemo(
+    () => menuItems.find((item) => item.href === activeMenuHref) ?? null,
+    [activeMenuHref, menuItems],
+  );
+
   React.useEffect(() => {
     if (!isMobile) {
       setIsMenuExpanded(true);
@@ -197,12 +203,6 @@ function AdminDashboardContent() {
         <AdminHeader
           actions={
             <Stack spacing={1} alignItems="flex-start">
-              {!isMobile && (
-                <SplitModeToggle
-                  mode={state.mode}
-                  onToggle={handleToggleSplitMode}
-                />
-              )}
               {isMobile && (
                 <Button
                   variant="text"
@@ -227,6 +227,61 @@ function AdminDashboardContent() {
                   onSelect={(item) => handleSelect(item.href)}
                 />
               </Collapse>
+              {activeMenuItem && (
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  alignItems={{ xs: "flex-start", md: "center" }}
+                  justifyContent="space-between"
+                  spacing={1.5}
+                  sx={{
+                    width: "100%",
+                    borderRadius: "22px",
+                    border: "1px solid rgba(255,255,255,0.6)",
+                    bgcolor: "rgba(255,255,255,0.78)",
+                    px: { xs: 1.5, md: 2 },
+                    py: 1.5,
+                  }}
+                >
+                  <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+                    <Box
+                      sx={{
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.04em",
+                        color: "#0f766e",
+                      }}
+                    >
+                      現在のカテゴリ
+                    </Box>
+                    <Box
+                      sx={{
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        color: "#020617",
+                      }}
+                    >
+                      {activeMenuItem.primaryLabel}
+                    </Box>
+                    {activeMenuItem.description ? (
+                      <Box
+                        sx={{
+                          color: "#64748b",
+                          lineHeight: 1.7,
+                          fontSize: "0.92rem",
+                        }}
+                      >
+                        {activeMenuItem.description}
+                      </Box>
+                    ) : null}
+                  </Stack>
+                  {!isMobile && (
+                    <SplitModeToggle
+                      mode={state.mode}
+                      onToggle={handleToggleSplitMode}
+                    />
+                  )}
+                </Stack>
+              )}
             </Stack>
           }
         />

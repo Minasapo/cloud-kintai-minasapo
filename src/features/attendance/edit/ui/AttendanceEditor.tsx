@@ -38,7 +38,6 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
-import Title from "@shared/ui/typography/Title";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -818,7 +817,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           </Breadcrumbs>
         </Box>
         <Box>
-          <Title>勤怠編集</Title>
           {readOnly && (
             <Box sx={{ mt: 1 }}>
               <Alert severity="info">

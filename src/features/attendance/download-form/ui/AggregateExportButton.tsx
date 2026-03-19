@@ -148,15 +148,26 @@ export default function AggregateExportButton({
       disableElevation
       sx={{
         minWidth: BUTTON_MIN_WIDTH,
-        fontWeight: "bold",
-        transition: "transform 150ms ease",
+        borderRadius: "9999px",
+        border: "1px solid rgba(148,163,184,0.3)",
+        backgroundColor: "#ffffff",
+        color: "#0f172a",
+        fontWeight: 700,
+        boxShadow: "0 8px 24px -20px rgba(15,23,42,0.18)",
+        transition: "transform 150ms ease, background-color 150ms ease",
         "&:hover": {
-          backgroundColor: "secondary.main",
-          boxShadow: "none",
+          backgroundColor: "#f8fafc",
           transform: "translateY(-3px)",
         },
         "&:active": { transform: "translateY(-1px)" },
-        "&.Mui-disabled": { transform: "none", opacity: 0.6 },
+        "&.Mui-disabled": {
+          transform: "none",
+          opacity: 1,
+          backgroundColor: "#f1f5f9",
+          color: "#94a3b8",
+          borderColor: "rgba(148,163,184,0.2)",
+          boxShadow: "none",
+        },
       }}
     >
       集計ダウンロード

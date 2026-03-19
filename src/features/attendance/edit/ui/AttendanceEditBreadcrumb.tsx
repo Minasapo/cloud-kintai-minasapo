@@ -1,5 +1,3 @@
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import { Box, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
@@ -25,52 +23,19 @@ export default function AttendanceEditBreadcrumb() {
     : "/attendance/list";
 
   return (
-    <Box
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 1,
-        width: "fit-content",
-        maxWidth: "100%",
-        borderRadius: "9999px",
-        border: "1px solid rgba(148,163,184,0.18)",
-        bgcolor: "rgba(255,255,255,0.82)",
-        px: 1.5,
-        py: 0.75,
-      }}
-    >
+    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
       <Link
         href={attendanceListHref}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          color: "inherit",
-          textDecoration: "none",
-          minWidth: 0,
-        }}
+        className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
       >
-        <ArrowBackRoundedIcon sx={{ fontSize: 18, color: "#475569" }} />
-        <Typography
-          sx={{
-            fontSize: "0.9rem",
-            fontWeight: 600,
-            color: "#0f172a",
-            whiteSpace: "nowrap",
-          }}
-        >
-          勤怠一覧に戻る
-        </Typography>
+        <span aria-hidden="true" className="text-base leading-none">
+          ←
+        </span>
+        <span>勤怠一覧に戻る</span>
       </Link>
-      <Typography
-        sx={{
-          color: "#94a3b8",
-          fontSize: "0.85rem",
-          whiteSpace: "nowrap",
-        }}
-      >
+      <div className="inline-flex w-fit items-center rounded-full bg-slate-900/5 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-slate-600">
         {dayjs(workDate).format(AttendanceDate.DisplayFormat)}
-      </Typography>
-    </Box>
+      </div>
+    </div>
   );
 }

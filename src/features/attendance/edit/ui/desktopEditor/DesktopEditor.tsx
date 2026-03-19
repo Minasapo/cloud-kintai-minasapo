@@ -9,14 +9,6 @@ import ProductionTimeItem from "@features/attendance/edit/ui/items/ProductionTim
 import StaffNameItem from "@features/attendance/edit/ui/items/StaffNameItem";
 import WorkTypeItem from "@features/attendance/edit/ui/items/WorkTypeItem";
 import QuickInputButtons from "@features/attendance/edit/ui/QuickInputButtons";
-import AddAlarmIcon from "@mui/icons-material/AddAlarm";
-import {
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  IconButton,
-  TabsProps,
-} from "@mui/material";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useFormState } from "react-hook-form";
@@ -32,7 +24,6 @@ import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
 import NoDataAlert from "./NoDataAlert";
 import PaidHolidayFlagInput from "./PaidHolidayFlagInput";
-// add Checkbox and FormControlLabel to top-level @mui/material import
 import RemarksInput from "./RemarksInput";
 import { calcTotalRestTime } from "./RestTimeItem/RestTimeInput/RestTimeInput";
 import RestTimeItem from "./RestTimeItem/RestTimeItem";
@@ -47,6 +38,8 @@ import {
 const logger = createLogger("DesktopEditor");
 const requestButtonClassName =
   "inline-flex min-w-[160px] items-center justify-center gap-2 rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium !text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] hover:!text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:!text-slate-500 disabled:shadow-none";
+const circleActionButtonClassName =
+  "inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300 bg-white text-emerald-700 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400";
 
 export default function DesktopEditor() {
   const ctx = useContext(AttendanceEditContext);
@@ -143,12 +136,7 @@ export default function DesktopEditor() {
             </p>
           </div>
         </div>
-        <div
-          className="flex w-full flex-col gap-2"
-          style={{
-            ["--mui-error-border" as string]: "divider",
-          }}
-        >
+        <div className="flex w-full flex-col gap-2">
           {errorMessages.length > 0 && (
             <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3">
               <div className="text-sm font-semibold text-rose-900">入力内容に誤りがあります。</div>
@@ -214,7 +202,7 @@ export default function DesktopEditor() {
             />
             <ReturnDirectlyFlagInput onHighlightEndTime={setHighlightEndTime} />
             <RestTimeItem />
-            <Divider />
+            <div className="h-px w-full bg-slate-200" />
             <ProductionTimeItem
               time={totalProductionTime}
               hourlyPaidHolidayHours={totalHourlyPaidHolidayTime}
@@ -249,19 +237,23 @@ export default function DesktopEditor() {
                           name="specialHolidayFlag"
                           control={control}
                           render={({ field }) => (
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  {...field}
-                                  checked={!!field.value}
-                                  onChange={(
-                                    e: React.ChangeEvent<HTMLInputElement>,
-                                  ) => field.onChange(e.target.checked)}
-                                  disabled={changeRequests.length > 0}
-                                />
-                              }
-                              label={""}
-                            />
+                            <label className="inline-flex items-center gap-3">
+                              <input
+                                ref={field.ref}
+                                name={field.name}
+                                checked={!!field.value}
+                                onBlur={field.onBlur}
+                                onChange={(
+                                  e: React.ChangeEvent<HTMLInputElement>,
+                                ) => field.onChange(e.target.checked)}
+                                disabled={changeRequests.length > 0}
+                                type="checkbox"
+                                className="h-4 w-4 accent-emerald-600"
+                              />
+                              <span className="text-sm text-slate-600">
+                                特別休暇として申請する
+                              </span>
+                            </label>
                           )}
                         />
                       </div>
@@ -294,7 +286,8 @@ export default function DesktopEditor() {
                           ),
                         )}
                         <div>
-                          <IconButton
+                          <button
+                            type="button"
                             aria-label="add-hourly-paid-holiday-time"
                             onClick={() =>
                               hourlyPaidHolidayTimeAppend({
@@ -303,9 +296,12 @@ export default function DesktopEditor() {
                               })
                             }
                             disabled={changeRequests.length > 0}
+                            className={circleActionButtonClassName}
                           >
-                            <AddAlarmIcon />
-                          </IconButton>
+                            <span aria-hidden="true" className="text-2xl leading-none">
+                              +
+                            </span>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -319,12 +315,9 @@ export default function DesktopEditor() {
                   onChange={setVacationTab}
                   items={items}
                   panelPadding={2}
-                  tabsProps={
-                    {
-                      "aria-label": "vacation-tabs-desktop",
-                      sx: { borderBottom: 1, borderColor: "divider" },
-                    } as TabsProps
-                  }
+                  tabsProps={{
+                    "aria-label": "vacation-tabs-desktop",
+                  }}
                 />
               );
             })()}

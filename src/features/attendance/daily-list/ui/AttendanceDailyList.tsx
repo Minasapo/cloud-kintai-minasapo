@@ -1004,7 +1004,24 @@ export default function AttendanceDailyList() {
         size="small"
         value={searchName}
         onChange={(e) => setSearchName(e.target.value)}
-        sx={{ mb: 1 }}
+        sx={{
+          mb: 1,
+          maxWidth: 360,
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "18px",
+            backgroundColor: "#ffffff",
+            "& fieldset": {
+              borderColor: "rgba(148,163,184,0.35)",
+            },
+            "&:hover fieldset": {
+              borderColor: "rgba(100,116,139,0.45)",
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: "#19b985",
+              borderWidth: "1px",
+            },
+          },
+        }}
       />
       {pendingList.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
