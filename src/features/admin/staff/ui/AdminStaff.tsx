@@ -88,7 +88,7 @@ export default function AdminStaff() {
     return (
       <div className="mx-auto w-full max-w-[1280px] px-2 pt-2 sm:px-4 md:px-6">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
-          <div className="h-full w-1/3 animate-pulse rounded-full bg-sky-500" />
+          <div className="h-full w-1/3 animate-pulse rounded-full bg-teal-500" />
         </div>
       </div>
     );
@@ -103,27 +103,19 @@ export default function AdminStaff() {
     <div className="mx-auto h-full w-full max-w-[1280px] px-2 pb-3 pt-2 sm:px-4 md:px-6">
       <div className="space-y-2.5">
         <section className="admin-staff-hero">
-          <div className="flex flex-col justify-between gap-2 md:flex-row">
-            <div className="space-y-0.5">
-              <h2 className="admin-staff-title text-2xl">スタッフ管理</h2>
-              <p className="admin-staff-subtitle text-sm">
-                アカウント状態と権限を一括管理し、運用状況を即時に把握できます。
-              </p>
-            </div>
-            <div className="flex flex-col items-stretch gap-1 sm:flex-row sm:items-center">
-              <CreateStaffDialog
-                staffs={staffs}
-                refreshStaff={refreshStaff}
-                createStaff={createStaff}
-                updateStaff={updateStaff}
-              />
-              <SyncCognitoUser
-                staffs={staffs}
-                refreshStaff={refreshStaff}
-                createStaff={createStaff}
-                updateStaff={updateStaff}
-              />
-            </div>
+          <div className="flex flex-col items-stretch gap-1 sm:flex-row sm:justify-end sm:items-center">
+            <CreateStaffDialog
+              staffs={staffs}
+              refreshStaff={refreshStaff}
+              createStaff={createStaff}
+              updateStaff={updateStaff}
+            />
+            <SyncCognitoUser
+              staffs={staffs}
+              refreshStaff={refreshStaff}
+              createStaff={createStaff}
+              updateStaff={updateStaff}
+            />
           </div>
         </section>
 
@@ -166,7 +158,7 @@ export default function AdminStaff() {
                 </svg>
               </span>
               <input
-                className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
                 placeholder="スタッフ名・スタッフID・メールで検索"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -253,7 +245,7 @@ export default function AdminStaff() {
                         <span
                           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
                             staff.enabled
-                              ? "border-emerald-300 bg-emerald-100 text-emerald-800"
+                              ? "border-teal-200 bg-teal-50 text-teal-700"
                               : "border-slate-300 bg-white text-slate-600"
                           }`}
                         >
@@ -264,7 +256,7 @@ export default function AdminStaff() {
                         <span
                           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
                             staff.status === "CONFIRMED"
-                              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                              ? "border-teal-200 bg-teal-50 text-teal-700"
                               : "border-amber-300 bg-amber-50 text-amber-800"
                           }`}
                         >
@@ -286,7 +278,7 @@ export default function AdminStaff() {
                         <span
                           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
                             attendanceManaged
-                              ? "border-sky-300 bg-sky-100 text-sky-700"
+                              ? "border-teal-200 bg-teal-50 text-teal-700"
                               : "border-slate-300 bg-white text-slate-600"
                           }`}
                         >
