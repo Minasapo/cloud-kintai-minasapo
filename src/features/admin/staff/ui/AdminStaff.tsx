@@ -5,8 +5,6 @@ import {
   StaffRole,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
-import SearchIcon from "@mui/icons-material/Search";
-import { LinearProgress } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 
@@ -87,7 +85,13 @@ export default function AdminStaff() {
   ).length;
 
   if (staffLoading) {
-    return <LinearProgress />;
+    return (
+      <div className="mx-auto w-full max-w-[1280px] px-2 pt-2 sm:px-4 md:px-6">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+          <div className="h-full w-1/3 animate-pulse rounded-full bg-sky-500" />
+        </div>
+      </div>
+    );
   }
 
   if (staffError) {
@@ -146,10 +150,21 @@ export default function AdminStaff() {
               まれにユーザー情報が同期されない場合があります。必要に応じて「ユーザー同期」を実行してください。
             </p>
             <label className="relative block">
-              <SearchIcon
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                fontSize="small"
-              />
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                <svg
+                  className="h-4 w-4 text-slate-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+              </span>
               <input
                 className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
                 placeholder="スタッフ名・スタッフID・メールで検索"
