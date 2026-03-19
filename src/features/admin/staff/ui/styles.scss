@@ -106,3 +106,64 @@
   text-align: center;
   padding: 24px;
 }
+
+.admin-staff-editor-hero {
+  padding: 16px 20px;
+}
+
+.admin-staff-editor-id-chip {
+  border: 1px solid rgba(16, 185, 129, 0.24) !important;
+  color: #0f766e !important;
+  background-color: rgba(240, 253, 250, 0.75) !important;
+  font-family: "SFMono-Regular", "Consolas", "Monaco", monospace;
+}
+
+.admin-staff-editor-tabs {
+  padding: 8px 14px 0;
+}
+
+.admin-staff-editor-table {
+  overflow-x: auto;
+}
+
+.admin-staff-editor-table table {
+  width: 100%;
+}
+
+.admin-staff-editor-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-staff-editor-label-cell {
+  width: 220px;
+  min-width: 180px;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 700;
+  vertical-align: top;
+}
+
+.admin-staff-editor-value-cell {
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.admin-staff-editor-submit {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .admin-staff-editor-label-cell {
+    width: 160px;
+    min-width: 140px;
+    padding: 10px 12px;
+  }
+
+  .admin-staff-editor-value-cell {
+    padding: 10px 12px;
+  }
+}

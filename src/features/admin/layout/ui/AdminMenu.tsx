@@ -65,7 +65,7 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
               px: { xs: 2, sm: 2.25 },
               py: 1.15,
               minWidth: { xs: "calc(50% - 4px)", sm: 124 },
-              flexGrow: { xs: 1, sm: 0 },
+              flexGrow: 1,
               textAlign: "center",
               boxShadow: isActive
                 ? "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)"

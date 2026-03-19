@@ -4,20 +4,6 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import InfoIcon from "@mui/icons-material/Info";
-import LockIcon from "@mui/icons-material/Lock";
-import {
-  Alert,
-  Box,
-  Chip,
-  Container,
-  LinearProgress,
-  Paper,
-  Stack,
-  TableCell,
-  Tooltip,
-  Typography,
-} from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
@@ -26,9 +12,11 @@ import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import {
+  type CSSProperties,
   type FC,
   memo,
   type MouseEvent,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -69,28 +57,94 @@ import {
 // シフト状態の表示設定
 const shiftStateConfig: Record<
   ShiftState,
-  { label: string; color: string; text: string }
+  { label: string; text: string; textClassName: string }
 > = {
-  work: { label: "○", color: "success.main", text: "出勤" },
-  fixedOff: { label: "固", color: "error.main", text: "固定休" },
-  requestedOff: { label: "希", color: "warning.main", text: "希望休" },
-  auto: { label: "△", color: "info.main", text: "自動調整枠" },
-  empty: { label: "-", color: "text.disabled", text: "未入力" },
+  work: { label: "○", text: "出勤", textClassName: "text-emerald-700" },
+  fixedOff: { label: "固", text: "固定休", textClassName: "text-rose-600" },
+  requestedOff: { label: "希", text: "希望休", textClassName: "text-amber-500" },
+  auto: { label: "△", text: "自動調整枠", textClassName: "text-sky-600" },
+  empty: { label: "-", text: "未入力", textClassName: "text-slate-400" },
 };
 
 const SHIFT_CELL_SIZE = 50;
-const SHIFT_CELL_BASE_SX = {
+const SHIFT_CELL_BASE_STYLE: CSSProperties = {
   position: "relative",
   cursor: "pointer",
   minWidth: SHIFT_CELL_SIZE,
   maxWidth: SHIFT_CELL_SIZE,
   textAlign: "center",
-  p: 0.5,
-  "&:focus": {
-    outline: "none",
-  },
+  padding: "4px",
   userSelect: "none", // ドラッグ選択時のテキスト選択を防止
-} as const;
+};
+
+type InlineAlertProps = {
+  children: ReactNode;
+  tone: "info" | "warning" | "error";
+  icon?: ReactNode;
+  className?: string;
+  onClose?: () => void;
+};
+
+const inlineAlertToneClassName: Record<InlineAlertProps["tone"], string> = {
+  info: "border-sky-500/15 bg-sky-50/90 text-sky-950",
+  warning: "border-amber-500/20 bg-amber-50/90 text-amber-950",
+  error: "border-rose-500/20 bg-rose-50/90 text-rose-950",
+};
+
+const InlineAlert = ({
+  children,
+  tone,
+  icon,
+  className,
+  onClose,
+}: InlineAlertProps) => (
+  <div
+    className={`flex items-start gap-3 rounded-[18px] border px-4 py-3 ${inlineAlertToneClassName[tone]} ${className ?? ""}`}
+  >
+    {icon ? <div className="mt-0.5 shrink-0">{icon}</div> : null}
+    <div className="min-w-0 flex-1 text-sm leading-6">{children}</div>
+    {onClose ? (
+      <button
+        type="button"
+        onClick={onClose}
+        className="shrink-0 rounded-full px-2 py-1 text-xs font-medium text-current/70 transition hover:bg-black/5 hover:text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/20"
+      >
+        閉じる
+      </button>
+    ) : null}
+  </div>
+);
+
+type ProgressBarProps = {
+  value: number;
+};
+
+const ProgressBar = ({ value }: ProgressBarProps) => (
+  <div className="h-2 rounded-full bg-slate-200/80">
+    <div
+      className="h-full rounded-full bg-[#19b985] transition-[width]"
+      style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+    />
+  </div>
+);
+
+const PageLoadingBar = () => (
+  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+    <div className="h-full w-1/3 rounded-full bg-emerald-500 animate-pulse" />
+  </div>
+);
+
+const InfoBadge = () => (
+  <span className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full border border-current/20 text-[11px] font-bold leading-none">
+    i
+  </span>
+);
+
+const LockBadge = () => (
+  <span className="text-[12px] leading-none text-slate-500" aria-hidden="true">
+    &#128274;
+  </span>
+);
 
 interface ShiftCellProps {
   staffId: string;
@@ -115,8 +169,6 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
   isLocked,
   isEditing,
   editorName,
-  lastChangedBy,
-  lastChangedAt,
   onClick,
   onRegisterRef,
   onMouseDown,
@@ -132,81 +184,80 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
   ) : isEditing ? (
     `${editorName}が編集中`
   ) : (
-    <Box>
-      <Typography variant="caption">{config.text}</Typography>
-      {lastChangedBy && (
-        <Typography variant="caption" component="div">
-          {lastChangedBy} ({lastChangedAt})
-        </Typography>
-      )}
-    </Box>
+    <div className="text-xs leading-5 text-slate-900">
+      <div>{config.text}</div>
+    </div>
   );
 
+  const backgroundColor = isEditing
+    ? alpha("#2196f3", 0.1)
+    : isPending
+      ? alpha("#ff9800", 0.1)
+      : isSelected
+        ? alpha("#9c27b0", 0.15)
+        : "#ffffff";
+  const borderColor = isEditing
+    ? "#2196f3"
+    : isFocused
+      ? "#9c27b0"
+      : "rgba(226,232,240,0.7)";
+
   return (
-    <TableCell
+    <td
       ref={onRegisterRef}
       tabIndex={0}
       onClick={onClick}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
       onContextMenu={onContextMenu}
-      sx={{
-        ...SHIFT_CELL_BASE_SX,
-        bgcolor: isEditing
-          ? alpha("#2196f3", 0.1)
-          : isPending
-            ? alpha("#ff9800", 0.1)
-            : isSelected
-              ? alpha("#9c27b0", 0.15)
-              : "background.paper",
-        border: isEditing
-          ? "2px solid #2196f3"
-          : isFocused
-            ? "2px solid #9c27b0"
-            : undefined,
-        "&:hover": isLocked
-          ? {}
-          : {
-              bgcolor: alpha("#2196f3", 0.05),
-            },
-        "&:focus": {
-          border: "2px solid #9c27b0",
-        },
+      className="group relative outline-none transition-colors"
+      style={{
+        ...SHIFT_CELL_BASE_STYLE,
+        backgroundColor,
+        border: `2px solid ${borderColor}`,
+      }}
+      onMouseLeave={(event) => {
+        if (!isLocked && !isEditing && !isPending && !isSelected) {
+          event.currentTarget.style.backgroundColor = "#ffffff";
+        }
+      }}
+      onMouseOver={(event) => {
+        if (!isLocked && !isEditing && !isPending && !isSelected) {
+          event.currentTarget.style.backgroundColor = alpha("#2196f3", 0.05);
+        }
+      }}
+      onFocus={(event) => {
+        event.currentTarget.style.borderColor = "#9c27b0";
+      }}
+      onBlur={(event) => {
+        event.currentTarget.style.borderColor = borderColor;
       }}
     >
-      <Tooltip title={tooltipTitle}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 0.5,
-            opacity: isLocked ? 0.5 : 1,
-          }}
+      <div className="flex items-center justify-center gap-0.5" style={{ opacity: isLocked ? 0.5 : 1 }}>
+        <span
+          className={`text-sm font-semibold ${config.textClassName}`}
         >
-          <Typography
-            variant="body2"
-            sx={{
-              color: config.color,
-              fontWeight: 600,
-            }}
-          >
-            {config.label}
-          </Typography>
-          {isLocked && <LockIcon sx={{ fontSize: 12 }} />}
-          {isPending && (
-            <Box
-              sx={{
-                width: 4,
-                height: 4,
-                borderRadius: "50%",
-                bgcolor: "warning.main",
-              }}
-            />
-          )}
-        </Box>
-      </Tooltip>
-    </TableCell>
+          {config.label}
+        </span>
+        {isLocked && <LockBadge />}
+        {isPending && (
+          <span className="h-1 w-1 rounded-full bg-amber-500" />
+        )}
+      </div>
+      {typeof tooltipTitle === "string" ? (
+        <div
+          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium leading-5 text-slate-900 shadow-[0_18px_30px_-18px_rgba(15,23,42,0.35)] group-hover:block group-focus:block"
+        >
+          {tooltipTitle}
+        </div>
+      ) : (
+        <div
+          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-48 -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs font-medium leading-5 text-slate-900 shadow-[0_18px_30px_-18px_rgba(15,23,42,0.35)] group-hover:block group-focus:block"
+        >
+          {tooltipTitle}
+        </div>
+      )}
+    </td>
   );
 };
 
@@ -975,57 +1026,24 @@ const CollaborativeHeaderBase: FC<CollaborativeHeaderProps> = ({
   activeUsers,
   editingCells,
 }) => (
-  <Box
-    sx={{
-      mb: 2,
-      borderRadius: "28px",
-      border: "1px solid rgba(16, 185, 129, 0.15)",
-      background:
-        "linear-gradient(135deg, rgba(247,252,248,0.98) 0%, rgba(236,253,245,0.92) 58%, rgba(255,255,255,0.98) 100%)",
-      p: { xs: 2, md: 2.5 },
-      boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
-    }}
+  <div
+    className="mb-2 rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5"
   >
-    <Stack spacing={1.5}>
-      <Stack
-        direction={{ xs: "column", lg: "row" }}
-        alignItems={{ xs: "flex-start", lg: "center" }}
-        spacing={1.5}
-      >
-        <Typography
-          sx={{
-            fontSize: { xs: "1.85rem", md: "2.2rem" },
-            fontWeight: 700,
-            lineHeight: 1.15,
-            letterSpacing: "-0.02em",
-            color: "#020617",
-          }}
-        >
-          シフト調整
-        </Typography>
-        <Chip
-          label={currentMonth.format("YYYY年 M月")}
-          sx={{
-            borderRadius: "9999px",
-            border: "1px solid rgba(148,163,184,0.28)",
-            bgcolor: "rgba(255,255,255,0.82)",
-            color: "#475569",
-            fontWeight: 600,
-          }}
-        />
-      </Stack>
-      <Typography sx={{ maxWidth: 760, color: "#64748b", lineHeight: 1.9 }}>
-        月ごとのシフトを共同で調整できます。選択、確定、コメント追加、同期をひとつの画面で進めてください。
-      </Typography>
-      <Box sx={{ pt: 0.5 }}>
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-1.5">
+        <div className="inline-flex rounded-full border border-slate-400/30 bg-white/80 px-4 py-2 font-semibold text-slate-600">
+          {currentMonth.format("YYYY年 M月")}
+        </div>
+      </div>
+      <div className="pt-0.5">
         <ActiveUsersList
           activeUsers={activeUsers}
           editingCells={editingCells}
           compact={false}
         />
-      </Box>
-    </Stack>
-  </Box>
+      </div>
+    </div>
+  </div>
 );
 
 const CollaborativeHeader = memo(CollaborativeHeaderBase);
@@ -1047,61 +1065,21 @@ type ProgressPanelProps = {
   progress: {
     confirmedCount: number;
     confirmedPercent: number;
-    needsAdjustmentCount: number;
   };
   totalDays: number;
 };
 
 const ProgressPanelBase: FC<ProgressPanelProps> = ({ progress, totalDays }) => (
-  <Paper
-    sx={{
-      p: { xs: 2, md: 2.25 },
-      mb: 2,
-      borderRadius: "24px",
-      border: "1px solid rgba(226,232,240,0.8)",
-      boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
-      bgcolor: "#ffffff",
-    }}
-  >
-    <Stack spacing={2}>
-      <Box>
-        <Typography variant="subtitle2" gutterBottom sx={{ color: "#0f172a", fontWeight: 700 }}>
-          調整状況
-        </Typography>
-        <LinearProgress
-          variant="determinate"
-          value={progress.confirmedPercent}
-          sx={{
-            height: 8,
-            borderRadius: 9999,
-            backgroundColor: "rgba(226,232,240,0.8)",
-            "& .MuiLinearProgress-bar": {
-              borderRadius: 9999,
-              backgroundColor: "#19b985",
-            },
-          }}
-        />
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: "block" }}>
-          確定: {progress.confirmedCount} / {totalDays}日 (
-          {progress.confirmedPercent.toFixed(0)}%)
-        </Typography>
-      </Box>
-
-      {progress.needsAdjustmentCount > 0 && (
-        <Alert
-          severity="warning"
-          icon={<InfoIcon />}
-          sx={{
-            borderRadius: "18px",
-            border: "1px solid rgba(245,158,11,0.18)",
-            bgcolor: "rgba(255,251,235,0.9)",
-          }}
-        >
-          調整が必要な日: {progress.needsAdjustmentCount}日
-        </Alert>
-      )}
-    </Stack>
-  </Paper>
+  <div className="mb-2 rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-[18px]">
+    <div>
+      <div className="mb-2 text-sm font-bold text-slate-900">調整状況</div>
+      <ProgressBar value={progress.confirmedPercent} />
+      <div className="mt-[3px] block text-xs text-slate-500">
+        確定: {progress.confirmedCount} / {totalDays}日 (
+        {progress.confirmedPercent.toFixed(0)}%)
+      </div>
+    </div>
+  </div>
 );
 
 const ProgressPanel = memo(ProgressPanelBase);
@@ -1131,18 +1109,13 @@ const SyncPanelBase: FC<SyncPanelProps> = ({ syncError, onClearError }) => {
   return (
     <>
       {syncError && (
-        <Alert
-          severity="error"
-          sx={{
-            mb: 2,
-            borderRadius: "18px",
-            border: "1px solid rgba(239,68,68,0.18)",
-            bgcolor: "rgba(254,242,242,0.92)",
-          }}
+        <InlineAlert
+          tone="error"
+          className="mb-2"
           onClose={onClearError}
         >
           同期に失敗しました。再試行してください。({syncError})
-        </Alert>
+        </InlineAlert>
       )}
     </>
   );
@@ -1154,7 +1127,6 @@ ProgressPanelBase.propTypes = {
   progress: PropTypes.shape({
     confirmedCount: PropTypes.number.isRequired,
     confirmedPercent: PropTypes.number.isRequired,
-    needsAdjustmentCount: PropTypes.number.isRequired,
   }).isRequired,
   totalDays: PropTypes.number.isRequired,
 };
@@ -1370,24 +1342,17 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             : "default";
 
     const syncTooltipTitle = (
-      <Box>
-        <Typography variant="caption" component="div">
-          同期状態: {syncStatusConfig.label}
-        </Typography>
-        <Typography variant="caption" component="div">
-          最後に自動同期された日時: {formattedLastSyncedAt}
-        </Typography>
-        <Typography variant="caption" component="div">
-          {state.isSyncing ? "同期中です" : "最新状態を取得"}
-        </Typography>
-      </Box>
+      <div className="text-xs leading-5">
+        <div>同期状態: {syncStatusConfig.label}</div>
+        <div>最後に自動同期された日時: {formattedLastSyncedAt}</div>
+        <div>{state.isSyncing ? "同期中です" : "最新状態を取得"}</div>
+      </div>
     );
 
     return (
       <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
-        <Container
-          maxWidth={false}
-          sx={{ py: 1, px: { xs: 1.5, sm: 2.5 }, maxWidth: "1360px !important" }}
+        <div
+          className="mx-auto w-full max-w-[1360px] px-1.5 py-1 sm:px-2.5"
           onMouseUp={handleMouseUp}
         >
           <CollaborativeHeader
@@ -1522,7 +1487,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             notifications={notifications}
             onDismiss={dismissNotification}
           />
-        </Container>
+        </div>
 
         {/* セル履歴Drawer */}
         <ChangeHistoryPanel
@@ -1603,50 +1568,22 @@ export default function ShiftCollaborativePage() {
   const shiftRequestId = staffIds[0] ?? "";
 
   if (staffsLoading) {
-    return <LinearProgress />;
+    return <PageLoadingBar />;
   }
 
   if (staffIds.length === 0) {
     return (
       <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
-        <Container
-          maxWidth={false}
-          sx={{ py: 1, px: { xs: 1.5, sm: 2.5 }, maxWidth: "1360px !important" }}
-        >
-          <Box
-            sx={{
-              borderRadius: "28px",
-              border: "1px solid rgba(16, 185, 129, 0.15)",
-              background:
-                "linear-gradient(135deg, rgba(247,252,248,0.98) 0%, rgba(236,253,245,0.92) 58%, rgba(255,255,255,0.98) 100%)",
-              p: { xs: 2, md: 2.5 },
-              boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: { xs: "1.85rem", md: "2.2rem" },
-                fontWeight: 700,
-                lineHeight: 1.15,
-                letterSpacing: "-0.02em",
-                color: "#020617",
-                mb: 1,
-              }}
-            >
-              シフト調整
-            </Typography>
-            <Alert
-              severity="info"
-              sx={{
-                borderRadius: "18px",
-                border: "1px solid rgba(59,130,246,0.16)",
-                bgcolor: "rgba(239,246,255,0.92)",
-              }}
+        <div className="mx-auto w-full max-w-[1360px] px-1.5 py-1 sm:px-2.5">
+          <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
+            <InlineAlert
+              tone="info"
+              icon={<InfoBadge />}
             >
               スタッフデータが見つかりません
-            </Alert>
-          </Box>
-        </Container>
+            </InlineAlert>
+          </div>
+        </div>
       </Page>
     );
   }

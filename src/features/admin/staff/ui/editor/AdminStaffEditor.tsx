@@ -5,35 +5,25 @@ import {
 } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Autocomplete,
-  Box,
   Button,
   Chip,
   CircularProgress,
-  Container,
   FormControlLabel,
   LinearProgress,
   Radio,
   RadioGroup,
-  Stack,
   Switch,
   Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
   Tabs,
   TextField,
-  Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import {
   ApproverMultipleMode,
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
-// Breadcrumbs/Title removed per admin UI simplification
 import dayjs from "dayjs";
-import { Activity, useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Control, Controller, useForm, UseFormRegister } from "react-hook-form";
 import { useParams } from "react-router-dom";
 
@@ -82,6 +72,10 @@ type ExtendedStaff = StaffType & {
   developer?: boolean;
   attendanceManagementEnabled?: boolean | null;
 };
+
+const LABEL_CELL_CLASS =
+  "w-[220px] min-w-[180px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900";
+const VALUE_CELL_CLASS = "border-b border-slate-200 px-4 py-3 align-middle";
 
 export default function AdminStaffEditor() {
   const { staffId } = useParams();
@@ -197,7 +191,6 @@ export default function AdminStaffEditor() {
         attendanceManagementEnabled: data.attendanceManagementEnabled ?? true,
       };
 
-      // approver related
       const approverSetting = watch("approverSetting");
       const approverMultiple = watch("approverMultiple") ?? [];
       const approverMultipleMode = watch("approverMultipleMode");
@@ -211,7 +204,6 @@ export default function AdminStaffEditor() {
           approverMultipleMode as ApproverMultipleMode | null;
       }
 
-      // only include developer if explicitly present (defensive for backend schema)
       if (typeof data.developer !== "undefined") {
         payload.developer = data.developer;
       }
@@ -226,11 +218,32 @@ export default function AdminStaffEditor() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ pt: 2, pb: 8 }}>
-      <Stack spacing={2}>
-        {/* breadcrumbs and page title removed */}
+    <div className="mx-auto h-full w-full max-w-[1280px] px-2 pb-3 pt-2 sm:px-4 md:px-6">
+      <div className="space-y-2.5">
+        <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+            <div>
+              <h1 className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
+                スタッフ編集
+              </h1>
+              <p className="text-sm text-emerald-800">
+                スタッフ情報と承認設定を更新できます。
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-2.5 py-1 font-mono text-slate-700">
+                <span className="font-bold">Cognito ID:</span>
+                <span className="ml-1">{getValues("staffId") ?? "-"}</span>
+              </span>
+              <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-2.5 py-1 font-mono text-slate-700">
+                <span className="font-bold">スタッフID:</span>
+                <span className="ml-1">{getValues("internalId") ?? "-"}</span>
+              </span>
+            </div>
+          </div>
+        </section>
 
-        <Box>
+        <section className="rounded-2xl border border-emerald-100 bg-white/95 px-4 pt-2">
           <Tabs
             value={tabIndex}
             onChange={(_, v) => setTabIndex(v)}
@@ -243,68 +256,44 @@ export default function AdminStaffEditor() {
               data-testid="advanced-tab"
             />
           </Tabs>
-        </Box>
+        </section>
 
-        <TableContainer>
-          <Table>
-            <TableBody>
-              <Activity mode={tabIndex === 0 ? "visible" : "hidden"}>
+        <section className="overflow-x-auto rounded-2xl border border-emerald-100 bg-white/95">
+          <table className="w-full min-w-[860px]">
+            <tbody>
+              {tabIndex === 0 && (
                 <>
-                  <TableRow>
-                    <TableCell>スタッフID</TableCell>
-                    <TableCell>
-                      <Stack spacing={1}>
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Cognito ID:
-                          </Typography>
-                          <Typography variant="body1">
-                            {getValues("staffId")}
-                          </Typography>
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Internal ID:
-                          </Typography>
-                          <Typography variant="body1">
-                            {getValues("internalId")}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow>
-                    <TableCell>汎用コード</TableCell>
-                    <TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>汎用コード</td>
+                    <td className={VALUE_CELL_CLASS}>
                       <TextField
                         {...register("sortKey")}
                         size="small"
-                        sx={{ width: 400 }}
+                        sx={{ width: { xs: "100%", sm: 400 } }}
                         placeholder="例：1、2、3...やZZ001、ZZ002...など"
                       />
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
 
-                  <TableRow>
-                    <TableCell>スタッフ名</TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>スタッフ名</td>
                     <StaffNameTableCell register={register} />
-                  </TableRow>
+                  </tr>
 
-                  <TableRow>
-                    <TableCell>メールアドレス</TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>メールアドレス</td>
                     <MailAddressTableCell register={register} />
-                  </TableRow>
+                  </tr>
 
-                  <TableRow>
-                    <TableCell>権限</TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>権限</td>
                     <StaffRoleTableCell control={control} setValue={setValue} />
-                  </TableRow>
+                  </tr>
 
                   {cognitoUser?.owner && (
-                    <TableRow>
-                      <TableCell>オーナー権限</TableCell>
-                      <TableCell>
+                    <tr>
+                      <td className={LABEL_CELL_CLASS}>オーナー権限</td>
+                      <td className={VALUE_CELL_CLASS}>
                         <Controller
                           name="owner"
                           control={control}
@@ -318,13 +307,13 @@ export default function AdminStaffEditor() {
                             />
                           )}
                         />
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   )}
 
-                  <TableRow>
-                    <TableCell>利用開始日</TableCell>
-                    <TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>利用開始日</td>
+                    <td className={VALUE_CELL_CLASS}>
                       <Controller
                         name="usageStartDate"
                         control={control}
@@ -332,7 +321,6 @@ export default function AdminStaffEditor() {
                           <DatePicker
                             value={field.value ? dayjs(field.value) : null}
                             onChange={(v) => {
-                              // convert dayjs to ISO string (or null)
                               const next = v ? v.format("YYYY-MM-DD") : null;
                               field.onChange(next);
                             }}
@@ -346,36 +334,33 @@ export default function AdminStaffEditor() {
                           />
                         )}
                       />
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
 
-                  <TableRow>
-                    <TableCell>勤怠管理対象</TableCell>
-                    <TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>勤怠管理対象</td>
+                    <td className={VALUE_CELL_CLASS}>
                       <Controller
                         name="attendanceManagementEnabled"
                         control={control}
                         render={({ field }) => (
-                          <Stack spacing={1}>
+                          <div className="space-y-1">
                             <Switch
                               checked={field.value ?? true}
                               onChange={(e) => field.onChange(e.target.checked)}
                             />
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
+                            <p className="text-xs text-slate-500">
                               オフにすると勤怠チェックでエラーとして扱われなくなります
-                            </Typography>
-                          </Stack>
+                            </p>
+                          </div>
                         )}
                       />
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
 
-                  <TableRow>
-                    <TableCell>勤務形態</TableCell>
-                    <TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>勤務形態</td>
+                    <td className={VALUE_CELL_CLASS}>
                       <Controller
                         name="workType"
                         control={control}
@@ -393,7 +378,7 @@ export default function AdminStaffEditor() {
                               <TextField
                                 {...params}
                                 size="small"
-                                sx={{ width: 400 }}
+                                sx={{ width: { xs: "100%", sm: 400 } }}
                               />
                             )}
                             onChange={(_, data) => {
@@ -404,16 +389,16 @@ export default function AdminStaffEditor() {
                           />
                         )}
                       />
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
 
-                  <TableRow>
-                    <TableCell>シフトグループ</TableCell>
-                    <TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>シフトグループ</td>
+                    <td className={VALUE_CELL_CLASS}>
                       {shiftGroupOptions.length === 0 ? (
-                        <Typography color="text.secondary">
+                        <p className="text-sm text-slate-500">
                           利用可能なシフトグループがありません。管理画面の「シフト設定」で登録してください。
-                        </Typography>
+                        </p>
                       ) : (
                         <Controller
                           name="shiftGroup"
@@ -437,7 +422,7 @@ export default function AdminStaffEditor() {
                                   <TextField
                                     {...params}
                                     size="small"
-                                    sx={{ width: 400 }}
+                                    sx={{ width: { xs: "100%", sm: 400 } }}
                                     placeholder="所属させるシフトグループを選択"
                                     onBlur={field.onBlur}
                                   />
@@ -447,12 +432,12 @@ export default function AdminStaffEditor() {
                           }}
                         />
                       )}
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
 
-                  <TableRow>
-                    <TableCell>承認者設定</TableCell>
-                    <TableCell>
+                  <tr>
+                    <td className={LABEL_CELL_CLASS}>承認者設定</td>
+                    <td className={VALUE_CELL_CLASS}>
                       <Controller
                         name="approverSetting"
                         control={control}
@@ -483,8 +468,8 @@ export default function AdminStaffEditor() {
                           </RadioGroup>
                         )}
                       />
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
 
                   <ApproverSettingTableRows
                     control={control}
@@ -493,11 +478,12 @@ export default function AdminStaffEditor() {
                     currentCognitoUserId={cognitoUser?.id}
                   />
                 </>
-              </Activity>
+              )}
 
-              <Activity mode={tabIndex === 1 ? "visible" : "hidden"}>
-                <TableRow>
-                  <TableCell>
+              {tabIndex === 1 && (
+                <tr>
+                  <td className={LABEL_CELL_CLASS}>開発者フラグ</td>
+                  <td className="px-4 py-3 align-middle">
                     <Controller
                       name="developer"
                       control={control}
@@ -514,17 +500,17 @@ export default function AdminStaffEditor() {
                         />
                       )}
                     />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1">開発者フラグ</Typography>
-                  </TableCell>
-                </TableRow>
-              </Activity>
-            </TableBody>
-          </Table>
-        </TableContainer>
+                    <p className="text-sm text-slate-500">
+                      開発用の機能を表示するための設定です。
+                    </p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </section>
 
-        <Box sx={{ mt: 4, mb: 8 }}>
+        <div className="flex justify-end pb-8 pt-2">
           <Button
             data-testid="save-button"
             variant="contained"
@@ -535,13 +521,11 @@ export default function AdminStaffEditor() {
           >
             保存
           </Button>
-        </Box>
-      </Stack>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
-
-// Helper components
 
 function ApproverSettingTableRows({
   control,
@@ -585,9 +569,9 @@ function ApproverSettingTableRows({
   return (
     <>
       {approverSetting === ApproverSettingMode.SINGLE && (
-        <TableRow>
-          <TableCell />
-          <TableCell>
+        <tr>
+          <td className={LABEL_CELL_CLASS} />
+          <td className={VALUE_CELL_CLASS}>
             <Controller
               name="approverSingle"
               control={control}
@@ -617,7 +601,7 @@ function ApproverSettingTableRows({
                       <TextField
                         {...params}
                         size="small"
-                        sx={{ width: 400 }}
+                        sx={{ width: { xs: "100%", sm: 400 } }}
                         label="承認者"
                         placeholder="承認者を検索"
                         error={Boolean(fieldState.error)}
@@ -632,15 +616,15 @@ function ApproverSettingTableRows({
                 );
               }}
             />
-          </TableCell>
-        </TableRow>
+          </td>
+        </tr>
       )}
 
       {approverSetting === ApproverSettingMode.MULTIPLE && (
         <>
-          <TableRow>
-            <TableCell />
-            <TableCell>
+          <tr>
+            <td className={LABEL_CELL_CLASS} />
+            <td className={VALUE_CELL_CLASS}>
               <Controller
                 name="approverMultiple"
                 control={control}
@@ -684,7 +668,7 @@ function ApproverSettingTableRows({
                         <TextField
                           {...params}
                           size="small"
-                          sx={{ width: 400 }}
+                          sx={{ width: { xs: "100%", sm: 400 } }}
                           label="承認者"
                           placeholder="承認者を選択"
                           error={Boolean(fieldState.error)}
@@ -701,12 +685,12 @@ function ApproverSettingTableRows({
                   );
                 }}
               />
-            </TableCell>
-          </TableRow>
+            </td>
+          </tr>
 
-          <TableRow>
-            <TableCell />
-            <TableCell>
+          <tr>
+            <td className={LABEL_CELL_CLASS} />
+            <td className={VALUE_CELL_CLASS}>
               <Controller
                 name="approverMultipleMode"
                 control={control}
@@ -733,44 +717,39 @@ function ApproverSettingTableRows({
                   </RadioGroup>
                 )}
               />
-            </TableCell>
-          </TableRow>
+            </td>
+          </tr>
 
           {approverMultipleMode === ApproverMultipleMode.ORDER && (
-            <TableRow>
-              <TableCell />
-              <TableCell>
-                <Stack spacing={1}>
+            <tr>
+              <td className={LABEL_CELL_CLASS} />
+              <td className={VALUE_CELL_CLASS}>
+                <div className="space-y-1">
                   {selectedMultipleOptions.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">
+                    <p className="text-sm text-slate-500">
                       承認順を設定するスタッフを選択してください。
-                    </Typography>
+                    </p>
                   ) : (
                     selectedMultipleOptions.map((option, index) => (
-                      <Box
-                        key={option.value}
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                      >
-                        <Chip label={index + 1} size="small" />
-                        <Stack spacing={0.5}>
-                          <Typography variant="body2">
-                            {option.label}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
+                      <div key={option.value} className="flex items-center gap-2">
+                        <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-slate-300 bg-slate-50 px-1 text-xs font-semibold text-slate-700">
+                          {index + 1}
+                        </span>
+                        <div>
+                          <p className="text-sm text-slate-900">{option.label}</p>
+                          <p className="text-xs text-slate-500">
                             {option.description}
-                          </Typography>
-                        </Stack>
-                      </Box>
+                          </p>
+                        </div>
+                      </div>
                     ))
                   )}
-                  <Typography variant="caption" color="text.secondary">
+                  <p className="text-xs text-slate-500">
                     選択した順番が承認順として利用されます。
-                  </Typography>
-                </Stack>
-              </TableCell>
-            </TableRow>
+                  </p>
+                </div>
+              </td>
+            </tr>
           )}
         </>
       )}
@@ -784,12 +763,12 @@ function MailAddressTableCell({
   register: UseFormRegister<Inputs>;
 }) {
   return (
-    <TableCell>
+    <td className={VALUE_CELL_CLASS}>
       <TextField
         {...register("mailAddress", { required: true })}
         size="small"
-        sx={{ width: 400 }}
+        sx={{ width: { xs: "100%", sm: 400 } }}
       />
-    </TableCell>
+    </td>
   );
 }

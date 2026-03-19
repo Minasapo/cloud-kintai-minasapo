@@ -203,7 +203,7 @@ function AdminDashboardContent() {
         mx: "auto",
       }}
     >
-      <PageSection variant="plain" layoutVariant="dashboard" className="gap-0">
+      <PageSection variant="plain" layoutVariant="dashboard" className="gap-0" sx={{ px: 0 }}>
         <AdminHeader
           actions={
             <Stack spacing={1} alignItems="flex-start">
