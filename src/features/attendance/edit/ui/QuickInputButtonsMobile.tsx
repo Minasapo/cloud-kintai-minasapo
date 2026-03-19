@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
-import { useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
 
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import { useQuickInputActions } from "../model/useQuickInputActions";
+import { useQuickInputSelection } from "../model/useQuickInputSelection";
 
 type Props = {
   setValue: UseFormSetValue<AttendanceEditInputs>;
@@ -27,9 +27,6 @@ export default function QuickInputButtonsMobile({
   visibleMode,
   readOnly,
 }: Props) {
-  const [open, setOpen] = useState(false);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-
   const actions = useQuickInputActions({
     setValue,
     restReplace,
@@ -38,6 +35,14 @@ export default function QuickInputButtonsMobile({
     visibleMode,
     readOnly,
   });
+  const {
+    open,
+    selectedKey,
+    setOpen,
+    setSelectedKey,
+    applySelectedAction,
+    close,
+  } = useQuickInputSelection(actions);
 
   // ボタンが表示されない場合は null を返す
   if (actions.length === 0) return null;
@@ -83,21 +88,14 @@ export default function QuickInputButtonsMobile({
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={close}
                 className="rounded-[12px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 閉じる
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const action = actions.find((a) => a.key === selectedKey);
-                  if (action) {
-                    action.action();
-                    setOpen(false);
-                    setSelectedKey(null);
-                  }
-                }}
+                onClick={applySelectedAction}
                 disabled={!selectedKey}
                 className="rounded-[12px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
               >

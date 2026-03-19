@@ -1,8 +1,8 @@
 import dayjs from "dayjs";
-import { useRef, useState } from "react";
 
 import { AttendanceGetValues, AttendanceSetValue } from "../model/types";
 import { useQuickInputActions } from "../model/useQuickInputActions";
+import { useQuickInputSelection } from "../model/useQuickInputSelection";
 
 type QuickInputButtonsProps = {
   setValue: AttendanceSetValue;
@@ -40,36 +40,11 @@ export default function QuickInputButtons({
     getValues,
     readOnly,
   });
-
-  // 確認ダイアログ用のstate
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmLabel, setConfirmLabel] = useState<string | null>(null);
-  const pendingActionRef = useRef<(() => void) | null>(null);
+  const { open, confirmLabel, askConfirm, applySelectedAction, close } =
+    useQuickInputSelection(actions);
 
   // どのボタンも表示されない場合はコンポーネントを非表示にする
   if (actions.length === 0) return null;
-
-  const askConfirm = (label: string, action: () => void) => {
-    setConfirmLabel(label);
-    pendingActionRef.current = action;
-    setConfirmOpen(true);
-  };
-
-  const handleConfirm = () => {
-    try {
-      pendingActionRef.current?.();
-    } finally {
-      setConfirmOpen(false);
-      pendingActionRef.current = null;
-      setConfirmLabel(null);
-    }
-  };
-
-  const handleCancel = () => {
-    setConfirmOpen(false);
-    pendingActionRef.current = null;
-    setConfirmLabel(null);
-  };
 
   return (
     <div className="mb-1">
@@ -96,7 +71,7 @@ export default function QuickInputButtons({
         </div>
       </div>
 
-      {confirmOpen ? (
+      {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4">
           <div className="w-full max-w-sm rounded-[24px] border border-emerald-200 bg-white p-5 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.45)]">
             <div className="text-base font-semibold text-slate-950">確認</div>
@@ -104,14 +79,14 @@ export default function QuickInputButtons({
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
-                onClick={handleCancel}
+                onClick={close}
                 className="rounded-[12px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 キャンセル
               </button>
               <button
                 type="button"
-                onClick={handleConfirm}
+                onClick={applySelectedAction}
                 className="rounded-[12px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600"
               >
                 適用
