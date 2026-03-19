@@ -17,6 +17,8 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
 import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditPageHeader } from "@/features/attendance/edit/ui/components/AttendanceEditPageHeader";
+import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
 import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
 import { createLogger } from "@/shared/lib/logger";
 
@@ -125,30 +127,12 @@ export default function DesktopEditor() {
   return (
     <div className="mx-auto w-full max-w-[1120px] px-6 pb-10 pt-2">
       <div className="flex flex-col gap-3">
-        <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
-          <div className="flex flex-col gap-1.5">
-            <AttendanceEditBreadcrumb />
-            <h1 className="m-0 text-[1.85rem] font-bold leading-[1.15] tracking-[-0.02em] text-slate-950 md:text-[2.2rem]">
-              勤怠編集
-            </h1>
-            <p className="max-w-[760px] leading-8 text-slate-500">
-              勤務時間、休憩、休暇、備考をひとつの画面で調整できます。必要な内容を入力して修正申請を行ってください。
-            </p>
-          </div>
-        </div>
+        <AttendanceEditPageHeader
+          breadcrumb={<AttendanceEditBreadcrumb />}
+          description="勤務時間、休憩、休暇、備考をひとつの画面で調整できます。必要な内容を入力して修正申請を行ってください。"
+        />
         <div className="flex w-full flex-col gap-2">
-          {errorMessages.length > 0 && (
-            <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3">
-              <div className="text-sm font-semibold text-rose-900">入力内容に誤りがあります。</div>
-              <div className="mt-2 flex flex-col gap-1">
-                {errorMessages.map((message: string) => (
-                  <div key={message} className="text-sm text-rose-900">
-                    {message}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <AttendanceErrorSummary messages={errorMessages} />
           <div className="flex flex-col gap-2">
             <ChangeRequestingAlert changeRequests={changeRequests} />
           </div>

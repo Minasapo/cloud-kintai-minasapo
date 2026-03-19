@@ -6,6 +6,8 @@ import { useFormState } from "react-hook-form";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditPageHeader } from "@/features/attendance/edit/ui/components/AttendanceEditPageHeader";
+import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import ChangeRequestingAlert from "../desktopEditor/ChangeRequestingMessage";
@@ -64,26 +66,11 @@ export function MobileEditor() {
   if (changeRequests.length > 0) {
     return (
       <div className="flex flex-col gap-2 p-2">
-        <div className="rounded-[24px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-2.5 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
-          <div className="flex flex-col gap-1.5">
-            <AttendanceEditBreadcrumb />
-            <h1 className="m-0 text-[1.9rem] font-bold leading-[1.15] tracking-[-0.02em] text-slate-950">
-              勤怠編集
-            </h1>
-          </div>
-        </div>
-        {errorMessages.length > 0 && (
-          <div className="rounded-[18px] border border-rose-500/15 bg-rose-50/90 px-4 py-3">
-            <div className="text-sm font-semibold text-rose-900">入力内容に誤りがあります。</div>
-            <div className="mt-2 flex flex-col gap-1">
-                {errorMessages.map((message) => (
-                  <div key={message} className="text-sm text-rose-900">
-                    {message}
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
+        <AttendanceEditPageHeader
+          breadcrumb={<AttendanceEditBreadcrumb />}
+          variant="mobile"
+        />
+        <AttendanceErrorSummary messages={errorMessages} variant="mobile" />
         <ChangeRequestingAlert changeRequests={changeRequests} />
       </div>
     );
@@ -106,29 +93,12 @@ export function MobileEditor() {
 
   return (
     <div className="flex flex-col gap-2 p-2 pb-10">
-      <div className="rounded-[24px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-2.5 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
-        <div className="flex flex-col gap-1.5">
-          <AttendanceEditBreadcrumb />
-          <h1 className="m-0 text-[1.9rem] font-bold leading-[1.15] tracking-[-0.02em] text-slate-950">
-            勤怠編集
-          </h1>
-          <p className="leading-8 text-slate-500">
-            勤務時間や休憩、休暇、備考を確認しながら、そのまま修正申請できます。
-          </p>
-        </div>
-      </div>
-      {errorMessages.length > 0 && (
-        <div className="rounded-[18px] border border-rose-500/15 bg-rose-50/90 px-4 py-3">
-          <div className="text-sm font-semibold text-rose-900">入力内容に誤りがあります。</div>
-          <div className="mt-2 flex flex-col gap-1">
-              {errorMessages.map((message) => (
-                <div key={message} className="text-sm text-rose-900">
-                  {message}
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
+      <AttendanceEditPageHeader
+        breadcrumb={<AttendanceEditBreadcrumb />}
+        description="勤務時間や休憩、休暇、備考を確認しながら、そのまま修正申請できます。"
+        variant="mobile"
+      />
+      <AttendanceErrorSummary messages={errorMessages} variant="mobile" />
       <div className="flex flex-col gap-2">
         <NoDataAlert />
         {setValue && restReplace && hourlyPaidHolidayTimeReplace && (

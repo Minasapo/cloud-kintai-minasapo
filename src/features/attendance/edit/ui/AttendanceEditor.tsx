@@ -42,6 +42,7 @@ import {
   HourlyPaidHolidayTimeInputs,
   RestInputs,
 } from "@/features/attendance/edit/model/common";
+import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
 import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
 import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
 import { Logger } from "@/shared/lib/logger";
@@ -903,15 +904,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           <div className="grow">
             <div className="flex flex-col gap-2 px-[120px]">
               {errorMessages.length > 0 && (
-                <div>
-                  <InlineAlert tone="error" title="入力内容に誤りがあります。">
-                    <div className="flex flex-col gap-0.5">
-                      {errorMessages.map((message) => (
-                        <div key={message}>{message}</div>
-                      ))}
-                    </div>
-                  </InlineAlert>
-                </div>
+                <AttendanceErrorSummary messages={errorMessages} />
               )}
 
               {overtimeError && (
