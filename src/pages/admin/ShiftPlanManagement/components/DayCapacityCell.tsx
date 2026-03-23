@@ -1,13 +1,15 @@
-import { Box, TableCell, Tooltip } from "@mui/material";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import React, { memo } from "react";
 
 import {
-  CELL_NOWRAP_SX,
   HOLIDAY_BG,
+  HOLIDAY_TEXT,
+  NORMAL_TEXT,
   SATURDAY_BG,
+  SATURDAY_TEXT,
   SUNDAY_BG,
+  SUNDAY_TEXT,
   WEEKDAY_LABELS,
 } from "../shiftPlanUtils";
 import EditableCapacityCell from "./EditableCapacityCell";
@@ -49,47 +51,32 @@ const DayCapacityCellBase: React.FC<DayCapacityCellProps> = ({
       : isSaturday
         ? SATURDAY_BG
         : undefined;
-  const weekdayColor = isSunday
-    ? "error.main"
-    : isSaturday
-      ? "primary.main"
-      : "text.secondary";
-  const labelColor = isHoliday ? "warning.dark" : weekdayColor;
+  const weekdayColor = isSunday ? SUNDAY_TEXT : isSaturday ? SATURDAY_TEXT : NORMAL_TEXT;
+  const labelColor = isHoliday ? HOLIDAY_TEXT : weekdayColor;
   const labelText = isHoliday ? "祝" : weekdayLabel;
   const cellId = `cell-${selectedYear}-${month}-${dayIndex}`;
 
-  const cellContent = (
-    <EditableCapacityCell
-      value={value}
-      labelText={labelText}
-      labelColor={labelColor}
-      onCommit={onCommit}
-      onTabNextDay={onTabNextDay}
-    />
-  );
-
   return (
-    <TableCell
+    <td
       align="center"
-      sx={{
-        px: 0.25,
+      title={isHoliday ? (holidayName ?? "祝日") : undefined}
+      style={{
+        padding: "0 2px",
         minWidth: 52,
+        whiteSpace: "nowrap",
         backgroundColor: cellBgColor,
-        ...CELL_NOWRAP_SX,
       }}
     >
-      <Box
-        ref={(ref) => onRegisterCellRef(cellId, ref as HTMLElement | null)}
-      >
-        {isHoliday ? (
-          <Tooltip title={holidayName ?? "祝日"} placement="top">
-            {cellContent}
-          </Tooltip>
-        ) : (
-          cellContent
-        )}
-      </Box>
-    </TableCell>
+      <div ref={(ref) => onRegisterCellRef(cellId, ref as HTMLElement | null)}>
+        <EditableCapacityCell
+          value={value}
+          labelText={labelText}
+          labelColor={labelColor}
+          onCommit={onCommit}
+          onTabNextDay={onTabNextDay}
+        />
+      </div>
+    </td>
   );
 };
 
