@@ -57,12 +57,10 @@ export function WorkTimeInput({
       <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:gap-4">
         <div className="flex items-start gap-2">
           <StartTimeInput
-            dataTestId="desktop-start-time-input"
             highlight={highlightStartTime}
           />
           <div className="pt-2 text-sm text-slate-500">～</div>
           <EndTimeInput
-            dataTestId="desktop-end-time-input"
             highlight={highlightEndTime}
           />
         </div>
