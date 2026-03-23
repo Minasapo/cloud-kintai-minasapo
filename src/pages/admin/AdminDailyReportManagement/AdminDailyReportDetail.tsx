@@ -147,6 +147,7 @@ export default function AdminDailyReportDetail({
   const [staffIdForReports, setStaffIdForReports] = useState<string | null>(
     null,
   );
+  const isCompact = overrideId !== undefined;
 
   const { dateMap: reportsByDate, dateSet: reportedDateSet } = useMemo(() => {
     const dateMap = new Map<string, AdminDailyReport>();
@@ -198,6 +199,11 @@ export default function AdminDailyReportDetail({
   }, [buildStaffName, id, stateReportId, staffIdForReports]);
 
   const fetchReports = useCallback(async () => {
+    if (isCompact) {
+      setReports([]);
+      setIsLoadingReports(false);
+      return;
+    }
     if (!staffIdForReports) {
       setReports([]);
       setIsLoadingReports(false);
@@ -241,7 +247,7 @@ export default function AdminDailyReportDetail({
     } finally {
       setIsLoadingReports(false);
     }
-  }, [buildStaffName, staffIdForReports]);
+  }, [buildStaffName, isCompact, staffIdForReports]);
 
   useEffect(() => {
     void fetchReport();
@@ -539,14 +545,17 @@ export default function AdminDailyReportDetail({
     isResolvingCurrentStaff;
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-2 pb-6 pt-4 sm:px-4 md:px-6">
+    <div
+      className={`mx-auto w-full max-w-[1280px] ${isCompact ? "px-2 pb-4 pt-0" : "px-2 pb-6 pt-4 sm:px-4 md:px-6"}`}
+    >
       <div className="space-y-3">
-        {/* Header */}
-        <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
-          <h1 className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
-            日報詳細
-          </h1>
-        </section>
+        {!isCompact && (
+          <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
+            <h1 className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
+              日報詳細
+            </h1>
+          </section>
+        )}
 
         {/* Errors */}
         {loadError && (
@@ -580,17 +589,20 @@ export default function AdminDailyReportDetail({
         )}
 
         {/* Main content grid */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_2fr] md:items-start">
-          {/* Calendar */}
-          <DashboardInnerSurface>
-            <DailyReportCalendar
-              value={calendarDate}
-              onChange={handleCalendarChange}
-              reportedDateSet={reportedDateSet}
-              isLoadingReports={isLoadingReports}
-              hasReports={reports.length > 0}
-            />
-          </DashboardInnerSurface>
+        <div
+          className={`grid grid-cols-1 gap-3 ${!isCompact ? "md:grid-cols-[1fr_2fr] md:items-start" : ""}`}
+        >
+          {!isCompact && (
+            <DashboardInnerSurface>
+              <DailyReportCalendar
+                value={calendarDate}
+                onChange={handleCalendarChange}
+                reportedDateSet={reportedDateSet}
+                isLoadingReports={isLoadingReports}
+                hasReports={reports.length > 0}
+              />
+            </DashboardInnerSurface>
+          )}
 
           {/* Detail panel */}
           <DashboardInnerSurface>
@@ -726,7 +738,7 @@ export default function AdminDailyReportDetail({
                           void handleSubmitComment();
                         }}
                         disabled={isCommentDisabled}
-                        className="inline-flex h-8 items-center rounded-lg bg-emerald-600 px-4 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex h-8 items-center rounded-lg border-0 bg-emerald-600 px-4 text-xs font-semibold text-white shadow-none transition hover:bg-emerald-700 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         コメントを追加
                       </button>

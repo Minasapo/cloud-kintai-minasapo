@@ -203,7 +203,12 @@ function AdminDashboardContent() {
         mx: "auto",
       }}
     >
-      <PageSection variant="plain" layoutVariant="dashboard" className="gap-0" sx={{ px: 0 }}>
+      <PageSection
+        variant="plain"
+        layoutVariant="dashboard"
+        className="gap-0"
+        sx={{ px: 0 }}
+      >
         <AdminHeader
           actions={
             <Stack spacing={1} alignItems="flex-start">
@@ -324,6 +329,9 @@ function AdminDashboardContent() {
                 screenOptions={SCREEN_OPTIONS}
                 selectedScreen={selectedScreen}
                 onScreenChange={handleScreenChange}
+                contentSx={
+                  selectedScreen === "daily-report" ? { pt: 0 } : undefined
+                }
               >
                 {state.rightPanel?.component ? (
                   <Suspense fallback={<SplitPanelSkeleton />}>
