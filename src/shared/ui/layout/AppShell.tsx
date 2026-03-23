@@ -77,11 +77,13 @@ export default function AppShell({
       <div
         {...headerRest}
         style={{
+          position: "relative",
+          zIndex: 2,
           flexShrink: 0,
           width: "100%",
           maxWidth: "100%",
           minWidth: 0,
-          overflowX: "hidden",
+          overflow: "visible",
           ...headerSx,
           ...headerRest.style,
         }}

@@ -88,7 +88,7 @@ export default function HeaderBar({
           "--header-inner-padding-y": HEADER_INNER_PADDING_Y,
         } as CSSProperties & Record<`--${string}`, string>
       }
-      className="overflow-x-clip border-b border-[var(--header-border)] bg-[linear-gradient(180deg,rgba(15,168,94,0.16)_0%,rgba(236,253,245,0.92)_52%,rgba(248,250,249,0.88)_100%)]"
+      className="overflow-visible border-b border-[var(--header-border)] bg-[linear-gradient(180deg,rgba(15,168,94,0.16)_0%,rgba(236,253,245,0.92)_52%,rgba(248,250,249,0.88)_100%)]"
     >
       <div className="mx-auto w-full max-w-[var(--header-content-max-width)] px-2 py-2 sm:px-[var(--header-padding-x)] sm:py-[var(--header-padding-y)]">
         <div className="rounded-[1.15rem] border border-[var(--header-border)] bg-[linear-gradient(135deg,var(--header-surface)_0%,#ECFDF5_52%,#FFFFFF_100%)] text-[color:var(--header-text)] shadow-[0_24px_40px_-34px_rgba(15,23,42,0.26)] sm:rounded-[1.6rem]">
