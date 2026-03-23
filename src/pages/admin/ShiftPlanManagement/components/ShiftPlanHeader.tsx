@@ -25,7 +25,7 @@ const ShiftPlanHeader: React.FC<ShiftPlanHeaderProps> = ({
           aria-label="前の年"
           disabled={isBusy}
           onClick={() => onYearChange(-1)}
-          className="flex items-center justify-center rounded-full w-9 h-9 transition-colors disabled:opacity-40"
+          className="flex items-center justify-center rounded-full w-9 h-9 border-0 transition-colors disabled:opacity-40"
           style={{ color: "#45574F" }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#EDF1EF"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
@@ -42,7 +42,7 @@ const ShiftPlanHeader: React.FC<ShiftPlanHeaderProps> = ({
           aria-label="次の年"
           disabled={isBusy}
           onClick={() => onYearChange(1)}
-          className="flex items-center justify-center rounded-full w-9 h-9 transition-colors disabled:opacity-40"
+          className="flex items-center justify-center rounded-full w-9 h-9 border-0 transition-colors disabled:opacity-40"
           style={{ color: "#45574F" }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#EDF1EF"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
