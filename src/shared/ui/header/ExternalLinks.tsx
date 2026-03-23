@@ -68,15 +68,15 @@ const POPPER_RADIUS = designTokenVar(
 );
 const POPPER_SURFACE = designTokenVar(
   "component.headerActions.popoverSurface",
-  "#F8FCFA",
+  "#FFFFFF",
 );
 const POPPER_SURFACE_ALT = designTokenVar(
   "component.headerActions.popoverSurfaceAlt",
-  "#F1F8F4",
+  "#FFFFFF",
 );
 const POPPER_SHADOW = designTokenVar(
   "component.headerActions.popoverShadow",
-  "0 14px 28px rgba(18, 36, 29, 0.18)",
+  "0 28px 56px rgba(15, 23, 42, 0.28)",
 );
 const GRID_GAP = designTokenVar("component.headerActions.gridGap", "8px");
 const GRID_ITEM_PADDING = designTokenVar(
@@ -85,16 +85,16 @@ const GRID_ITEM_PADDING = designTokenVar(
 );
 const GRID_HOVER_BACKGROUND = designTokenVar(
   "component.headerActions.gridHoverBackground",
-  "#E4F2E9",
+  "#EAF7F0",
 );
 const GRID_ITEM_RADIUS = designTokenVar("radius.sm", "8px");
 const GRID_ICON_SURFACE = designTokenVar(
   "component.headerActions.iconSurface",
-  "#E8F5EC",
+  "#DFF1E7",
 );
 const GRID_ITEM_BORDER = designTokenVar(
   "component.headerActions.gridItemBorder",
-  "1px solid #D4E7DA",
+  "1px solid #BCD7C7",
 );
 const EMPTY_STATE_COLOR = designTokenVar(
   "component.headerActions.emptyStateColor",
@@ -114,7 +114,7 @@ const SECTION_TITLE_MARGIN_BOTTOM = designTokenVar(
 );
 const SECTION_DIVIDER = designTokenVar(
   "component.headerActions.sectionDivider",
-  "#D4E7DA",
+  "#C1D9CB",
 );
 const INTERACTION_TRANSITION_DURATION = designTokenVar(
   "component.headerActions.interaction.transitionDuration",
@@ -229,12 +229,13 @@ function LinkGridItem({
       className="block text-inherit no-underline"
     >
       <div
-        className="flex min-h-[72px] flex-col items-start gap-1 rounded-[var(--grid-item-radius)] border bg-white/70 p-[var(--grid-item-padding)] transition hover:-translate-y-px"
+        className="flex min-h-[72px] flex-col items-start gap-1 rounded-[var(--grid-item-radius)] border bg-white p-[var(--grid-item-padding)] transition hover:-translate-y-px"
         style={
           {
             "--grid-item-padding": GRID_ITEM_PADDING,
             "--grid-item-radius": GRID_ITEM_RADIUS,
             border: GRID_ITEM_BORDER,
+            boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
             transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, transform ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, border-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
           } as CSSProperties & Record<`--${string}`, string>
         }
@@ -243,7 +244,7 @@ function LinkGridItem({
           event.currentTarget.style.borderColor = "rgba(20, 76, 44, 0.28)";
         }}
         onMouseLeave={(event) => {
-          event.currentTarget.style.backgroundColor = "rgba(255,255,255,0.66)";
+          event.currentTarget.style.backgroundColor = "#FFFFFF";
           event.currentTarget.style.borderColor = "";
         }}
       >
@@ -351,15 +352,17 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
       {open ? (
         <div
           id="external-links-popup"
-          className="absolute right-0 top-full z-50 mt-2 w-[min(calc(100vw-16px),var(--popper-width))] min-w-[var(--popper-min-width)] max-w-[var(--popper-width)] overflow-hidden rounded-[var(--popper-radius)] border bg-white shadow-[var(--popper-shadow)]"
+          className="absolute right-0 top-full z-50 mt-3 w-[min(calc(100vw-16px),var(--popper-width))] min-w-[var(--popper-min-width)] max-w-[var(--popper-width)] overflow-hidden rounded-[var(--popper-radius)] border bg-white shadow-[var(--popper-shadow)]"
           style={
             {
               "--popper-width": POPPER_WIDTH,
               "--popper-min-width": POPPER_MIN_WIDTH,
               "--popper-radius": POPPER_RADIUS,
               "--popper-shadow": POPPER_SHADOW,
-              borderColor: "rgba(20, 76, 44, 0.14)",
+              borderColor: "rgba(15, 23, 42, 0.18)",
               background: `linear-gradient(180deg, ${POPPER_SURFACE_ALT} 0%, ${POPPER_SURFACE} 100%)`,
+              boxShadow:
+                "0 28px 56px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
             } as CSSProperties & Record<`--${string}`, string>
           }
         >
