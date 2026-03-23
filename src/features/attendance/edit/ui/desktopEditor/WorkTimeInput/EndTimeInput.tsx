@@ -1,7 +1,5 @@
-import { Box, Stack } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers";
 import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
-import dayjs from "dayjs";
+import { TimeInput } from "@shared/ui/TimeInput";
 import { useContext, useMemo } from "react";
 import { Controller } from "react-hook-form";
 
@@ -31,66 +29,29 @@ export default function EndTimeInput({
   if (!workDate || !control || !setValue) return null;
 
   return (
-    <Stack direction="row" spacing={1}>
-      <Stack spacing={1}>
+    <div className="flex flex-col gap-2">
         <Controller
           key={highlight ? "highlight-on" : "highlight-off"}
           name="endTime"
           control={control}
           render={({ field }) => (
-            <TimePicker
-              value={field.value ? dayjs(field.value) : null}
-              ampm={false}
+            <TimeInput
+              value={field.value ?? null}
+              baseDate={workDate.format("YYYY-MM-DD")}
               disabled={changeRequests.length > 0 || !!readOnly || isOnBreak}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  sx: highlight
-                    ? {
-                        "& .MuiOutlinedInput-root": {
-                          animation: "highlightPulse 2.5s ease-in-out",
-                          "@keyframes highlightPulse": {
-                            "0%, 100%": {
-                              backgroundColor: "transparent",
-                              borderColor: "rgba(0, 0, 0, 0.23)",
-                            },
-                            "15%, 50%": {
-                              backgroundColor: "#FFE082",
-                              borderColor: "#FFC107",
-                              boxShadow: "0 0 12px rgba(255, 193, 7, 0.6)",
-                            },
-                            "85%": {
-                              backgroundColor: "#FFF9C4",
-                              borderColor: "#FFC107",
-                              boxShadow: "0 0 8px rgba(255, 193, 7, 0.4)",
-                            },
-                          },
-                        },
-                      }
-                    : undefined,
-                  inputProps: { "data-testid": dataTestId },
-                },
-              }}
-              onChange={(value) => {
-                if (!value) {
-                  field.onChange(null);
-                  return;
-                }
-                if (!value.isValid()) return;
-
-                const formattedEndTime = value
-                  .year(workDate.year())
-                  .month(workDate.month())
-                  .date(workDate.date())
-                  .second(0)
-                  .millisecond(0)
-                  .toISOString();
-                field.onChange(formattedEndTime);
-              }}
+              size="small"
+              step={60}
+              data-testid={dataTestId}
+              className={
+                highlight
+                  ? "border-amber-400 bg-amber-50 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]"
+                  : undefined
+              }
+              onChange={(value) => field.onChange(value)}
             />
           )}
         />
-        <Box>
+        <div>
           <QuickInputChips
             quickInputTimes={quickInputEndTimes}
             workDate={workDate}
@@ -99,8 +60,7 @@ export default function EndTimeInput({
               setValue("endTime", endTime, { shouldDirty: true })
             }
           />
-        </Box>
-      </Stack>
-    </Stack>
+        </div>
+    </div>
   );
 }

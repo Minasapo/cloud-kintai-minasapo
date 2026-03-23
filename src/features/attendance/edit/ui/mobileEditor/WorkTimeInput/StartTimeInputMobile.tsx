@@ -1,6 +1,5 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack, TextField } from "@mui/material";
-import dayjs from "dayjs";
+import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
+import { TimeInput } from "@shared/ui/TimeInput";
 import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -27,46 +26,32 @@ export default function StartTimeInputMobile({
 
   if (!workDate || !setValue) return null;
 
-  const startTime = watch ? watch("startTime") : null;
+  const startTime = watch ? (watch("startTime") ?? null) : null;
 
   return (
-    <Stack spacing={1}>
-      <TextField
-        type="time"
+    <div className="flex flex-col gap-2">
+      <TimeInput
+        value={startTime}
+        baseDate={workDate.format("YYYY-MM-DD")}
         size="small"
-        inputProps={{ "data-testid": dataTestId }}
-        value={startTime ? dayjs(startTime).format("HH:mm") : ""}
-        onChange={(e) => {
-          const v = e.target.value;
-          if (!v) return setValue("startTime", null, { shouldDirty: true });
-          const iso = dayjs(workDate.format("YYYY-MM-DD") + " " + v)
-            .second(0)
-            .millisecond(0)
-            .toISOString();
-          setValue("startTime", iso, { shouldDirty: true });
+        step={60}
+        data-testid={dataTestId}
+        disabled={changeRequests.length > 0 || !!readOnly}
+        onChange={(value) => {
+          setValue("startTime", value, { shouldDirty: true });
         }}
       />
-      <Box>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          {quickInputStartTimes.map((entry, index) => (
-            <Chip
-              key={index}
-              label={entry.time}
-              color="success"
-              variant="outlined"
-              icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-              disabled={changeRequests.length > 0 || !!readOnly}
-              onClick={() => {
-                if (readOnly) return;
-                const startTime = dayjs(
-                  `${workDate.format("YYYY-MM-DD")} ${entry.time}`
-                ).toISOString();
-                setValue("startTime", startTime, { shouldDirty: true });
-              }}
-            />
-          ))}
-        </Stack>
-      </Box>
-    </Stack>
+      <div>
+        <QuickInputChips
+          quickInputTimes={quickInputStartTimes}
+          workDate={workDate}
+          disabled={changeRequests.length > 0 || !!readOnly}
+          onSelectTime={(startTime) => {
+            if (readOnly) return;
+            setValue("startTime", startTime, { shouldDirty: true });
+          }}
+        />
+      </div>
+    </div>
   );
 }

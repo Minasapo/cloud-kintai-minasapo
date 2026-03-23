@@ -1,5 +1,4 @@
-import { Breadcrumbs, Typography } from "@mui/material";
-import { CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 import Link from "@/shared/ui/link/Link";
@@ -49,46 +48,41 @@ export default function CommonBreadcrumbs({
   };
 
   return (
-    <Breadcrumbs
-      className="[&_.MuiBreadcrumbs-li]:text-[length:var(--breadcrumbs-font-size)] [&_.MuiBreadcrumbs-li]:font-[var(--breadcrumbs-font-weight)] [&_.MuiBreadcrumbs-ol]:gap-[var(--breadcrumbs-gap)]"
+    <nav
+      aria-label="breadcrumb"
+      className="text-[length:var(--breadcrumbs-font-size)] font-[var(--breadcrumbs-font-weight)]"
       style={breadcrumbVars}
-      separator={
-        <Typography
-          component="span"
-          className="text-[color:var(--breadcrumbs-separator-color)]"
-        >
-          /
-        </Typography>
-      }
     >
-      {items.map((item, idx) =>
-        item.href ? (
-          <Link
-            href={item.href}
-            key={idx}
-            variant="body2"
-            underline="hover"
-            className="text-[color:var(--breadcrumbs-link-color)] no-underline hover:underline"
-          >
-            {item.label}
-          </Link>
-        ) : (
-          <Typography
-            variant="body2"
-            className="text-[color:var(--breadcrumbs-text-color)]"
-            key={idx}
-          >
-            {item.label}
-          </Typography>
-        ),
-      )}
-      <Typography
-        variant="body2"
-        className="text-[color:var(--breadcrumbs-text-color)]"
-        aria-current="page"
-      >
-        {current}
-      </Typography>
-    </Breadcrumbs>
+      <ol className="flex flex-wrap items-center gap-[var(--breadcrumbs-gap)]">
+        {items.map((item, idx) => (
+          <li key={`${item.label}-${idx}`} className="flex items-center gap-[var(--breadcrumbs-gap)]">
+            {item.href ? (
+              <Link
+                href={item.href}
+                className="text-[color:var(--breadcrumbs-link-color)] no-underline hover:underline focus-visible:underline"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <span className="text-[color:var(--breadcrumbs-text-color)]">
+                {item.label}
+              </span>
+            )}
+            <span
+              aria-hidden="true"
+              className="text-[color:var(--breadcrumbs-separator-color)]"
+            >
+              /
+            </span>
+          </li>
+        ))}
+        <li
+          className="text-[color:var(--breadcrumbs-text-color)]"
+          aria-current="page"
+        >
+          {current}
+        </li>
+      </ol>
+    </nav>
   );
 }

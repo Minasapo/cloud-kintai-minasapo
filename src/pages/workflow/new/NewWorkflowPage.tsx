@@ -41,13 +41,94 @@ import {
   type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
+import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import { parseTimeToISO } from "@/shared/lib/time";
-import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 const logger = createLogger("NewWorkflowPage");
+
+const INPUT_SX = {
+  borderRadius: "18px",
+  bgcolor: "#f8fffb",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.92)",
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(16, 185, 129, 0.18)",
+  },
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(16, 185, 129, 0.3)",
+  },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(16, 185, 129, 0.55)",
+  },
+  "& .MuiSelect-select, & .MuiOutlinedInput-input": {
+    py: "10px",
+    px: "14px",
+    fontSize: "0.92rem",
+    color: "#0f172a",
+  },
+} as const;
+
+const TEXT_FIELD_SX = {
+  "& .MuiOutlinedInput-root": INPUT_SX,
+  "& .MuiFormHelperText-root": {
+    marginLeft: 0,
+  },
+} as const;
+
+const OUTLINED_BUTTON_SX = {
+  borderRadius: "999px",
+  borderColor: "rgba(4, 120, 87, 0.58)",
+  color: "#ffffff",
+  bgcolor: "#19b985",
+  px: 2.6,
+  py: 1.25,
+  fontWeight: 500,
+  boxShadow:
+    "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
+  "&:hover": {
+    borderColor: "rgba(4, 120, 87, 0.62)",
+    bgcolor: "#17ab7b",
+    boxShadow:
+      "inset 0 -2px 0 rgba(0,0,0,0.12), 0 14px 28px -18px rgba(5,150,105,0.6)",
+  },
+} as const;
+
+const CONTAINED_BUTTON_SX = {
+  borderRadius: "999px",
+  background: "#19b985",
+  px: 2.8,
+  py: 1.25,
+  fontWeight: 500,
+  boxShadow:
+    "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
+  "&:hover": {
+    background: "#17ab7b",
+    boxShadow:
+      "inset 0 -2px 0 rgba(0,0,0,0.12), 0 14px 28px -18px rgba(5,150,105,0.6)",
+  },
+  "&.Mui-disabled": {
+    background: "#e2e8f0",
+    color: "#64748b",
+    boxShadow: "none",
+  },
+} as const;
+
+const SWITCH_SX = {
+  "& .MuiSwitch-switchBase.Mui-checked": {
+    color: "#059669",
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    bgcolor: "#34d399",
+    opacity: 1,
+  },
+  "& .MuiSwitch-track": {
+    bgcolor: "#cbd5e1",
+    opacity: 1,
+  },
+} as const;
 
 /**
  * 今日の日付をスラッシュ区切り形式（YYYY/MM/DD）で取得
@@ -126,6 +207,7 @@ const generateApprovalSteps = (
 export default function NewWorkflowPage() {
   const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
   const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
+  const HEADER_GAP = designTokenVar("spacing.md", "12px");
   const navigate = useNavigate();
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
@@ -301,7 +383,29 @@ export default function NewWorkflowPage() {
     }
 
     try {
-      await createWorkflow(input);
+      const createdWorkflow = await createWorkflow(input);
+
+      if (!draftMode) {
+        try {
+          await sendWorkflowSubmissionNotification({
+            staffs,
+            applicant: staff,
+            workflow: createdWorkflow,
+          });
+        } catch (mailError) {
+          logger.error(
+            "Failed to send workflow submission notification:",
+            mailError,
+          );
+          void notify("メール送信エラー", {
+            body: "管理者への通知メールの送信に失敗しました。",
+            mode: "await-interaction",
+            priority: "normal",
+            tag: "workflow-mail-error",
+          });
+        }
+      }
+
       void notify("ワークフローを作成しました。", { mode: "auto-close" });
       navigate("/workflow", { replace: true });
     } catch (err) {
@@ -397,11 +501,8 @@ export default function NewWorkflowPage() {
   return (
     <Page
       title="新規作成"
-      breadcrumbs={[
-        { label: "TOP", href: "/" },
-        { label: "ワークフロー", href: "/workflow" },
-      ]}
       maxWidth="lg"
+      showDefaultHeader={false}
     >
       <PageSection
         component="form"
@@ -409,8 +510,40 @@ export default function NewWorkflowPage() {
         onSubmit={handleSubmit}
         sx={{ gap: 0 }}
       >
-        <Box sx={dashboardInnerSurfaceSx}>
-          <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "center" },
+            flexDirection: { xs: "column", sm: "row" },
+            gap: HEADER_GAP,
+            mb: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="h5" fontWeight={700}>
+              新規作成
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              申請一覧を起点に、申請内容を作成します。
+            </Typography>
+          </Box>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => navigate("/workflow")}
+            sx={OUTLINED_BUTTON_SX}
+          >
+            申請一覧へ戻る
+          </Button>
+        </Box>
+        <DashboardInnerSurface>
+          <Grid
+            container
+            rowSpacing={3}
+            columnSpacing={2}
+            alignItems="flex-start"
+          >
             <Grid item xs={12} sm={3}>
               <Typography variant="body2" color="text.secondary">
                 種別
@@ -423,6 +556,7 @@ export default function NewWorkflowPage() {
                 onChange={handleCategoryChange}
                 size="small"
                 fullWidth
+                sx={INPUT_SX}
               >
                 <MenuItem value="">
                   <em>種別を選択</em>
@@ -477,6 +611,7 @@ export default function NewWorkflowPage() {
                 InputProps={{ readOnly: true }}
                 size="small"
                 fullWidth
+                sx={TEXT_FIELD_SX}
               />
             </Grid>
 
@@ -536,9 +671,20 @@ export default function NewWorkflowPage() {
             <Grid item xs={12} sm={9}>
               <FormControlLabel
                 control={
-                  <Switch checked={draftMode} onChange={handleDraftToggle} />
+                  <Switch
+                    checked={draftMode}
+                    onChange={handleDraftToggle}
+                    sx={SWITCH_SX}
+                  />
                 }
                 label={draftMode ? "下書きとして保存" : ""}
+                sx={{
+                  m: 0,
+                  "& .MuiFormControlLabel-label": {
+                    fontSize: "0.92rem",
+                    color: "#0f172a",
+                  },
+                }}
               />
             </Grid>
 
@@ -546,21 +692,27 @@ export default function NewWorkflowPage() {
             <Grid item xs={12} sm={3} />
             <Grid item xs={12} sm={9}>
               <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
-                <Button size="small" onClick={() => navigate(-1)}>
-                  戻る
+                <Button
+                  size="small"
+                  onClick={() => navigate("/workflow")}
+                  variant="outlined"
+                  sx={OUTLINED_BUTTON_SX}
+                >
+                  申請一覧へ戻る
                 </Button>
                 <Button
                   type="submit"
                   variant="contained"
                   size="small"
                   disabled={category === ""}
+                  sx={CONTAINED_BUTTON_SX}
                 >
                   作成
                 </Button>
               </Box>
             </Grid>
           </Grid>
-        </Box>
+        </DashboardInnerSurface>
       </PageSection>
     </Page>
   );

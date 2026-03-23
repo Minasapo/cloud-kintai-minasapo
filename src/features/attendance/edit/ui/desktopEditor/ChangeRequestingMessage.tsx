@@ -1,4 +1,3 @@
-import { Alert } from "@mui/material";
 import { AttendanceChangeRequest } from "@shared/api/graphql/types";
 
 export default function ChangeRequestingAlert({
@@ -11,8 +10,8 @@ export default function ChangeRequestingAlert({
   }
 
   return (
-    <Alert severity="warning">
+    <div className="rounded-[18px] border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
       変更リクエスト申請中です。承認されるまで新しい申請はできません。
-    </Alert>
+    </div>
   );
 }

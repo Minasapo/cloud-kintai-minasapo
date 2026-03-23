@@ -1,17 +1,5 @@
-import AppsIcon from "@mui/icons-material/Apps";
-import {
-  Box,
-  IconButton,
-  Link,
-  Paper,
-  Popper,
-  Stack,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
-import { useTheme } from "@mui/material/styles";
-import { MouseEvent, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { predefinedIcons } from "@/shared/config/icons";
 import { designTokenVar } from "@/shared/designSystem";
@@ -31,109 +19,289 @@ export interface ExternalLinksProps {
 
 const ACTION_ICON_COLOR = designTokenVar(
   "component.headerActions.iconColor",
-  "#FFFFFF"
+  "#45574F",
 );
 const ACTION_ICON_SIZE = designTokenVar(
   "component.headerActions.iconSize",
-  "40px"
+  "40px",
 );
 const ACTION_ICON_SIZE_SM = designTokenVar(
   "component.headerActions.iconSizeSm",
-  "30px"
+  "28px",
 );
 const ACTION_ICON_HOVER_BG = designTokenVar(
   "component.headerActions.iconHoverBackground",
-  "rgba(255, 255, 255, 0.16)"
+  "rgba(15, 168, 94, 0.1)",
 );
-const POPPER_WIDTH = designTokenVar("component.headerActions.popoverWidth", "420px");
+const ACTION_BUTTON_BORDER = designTokenVar(
+  "component.headerActions.buttonBorder",
+  "rgba(20, 76, 44, 0.12)",
+);
+const ACTION_BUTTON_BG = designTokenVar(
+  "component.headerActions.buttonBackground",
+  "rgba(255, 255, 255, 0.78)",
+);
+const ACTION_BUTTON_TEXT = designTokenVar(
+  "component.headerActions.buttonText",
+  "#45574F",
+);
+const POPPER_WIDTH = designTokenVar(
+  "component.headerActions.popoverWidth",
+  "420px",
+);
 const POPPER_MIN_WIDTH = designTokenVar(
   "component.headerActions.popoverMinWidth",
-  "280px"
+  "280px",
 );
 const POPPER_MAX_HEIGHT = designTokenVar(
   "component.headerActions.popoverMaxHeight",
-  "560px"
+  "560px",
 );
 const POPPER_PADDING = designTokenVar(
   "component.headerActions.popoverPadding",
-  "16px"
+  "16px",
 );
 const POPPER_GAP = designTokenVar("component.headerActions.popoverGap", "16px");
-const POPPER_RADIUS = designTokenVar("component.headerActions.popoverRadius", "16px");
+const POPPER_RADIUS = designTokenVar(
+  "component.headerActions.popoverRadius",
+  "16px",
+);
 const POPPER_SURFACE = designTokenVar(
   "component.headerActions.popoverSurface",
-  "#F8FCFA"
+  "#F8FCFA",
 );
 const POPPER_SURFACE_ALT = designTokenVar(
   "component.headerActions.popoverSurfaceAlt",
-  "#F1F8F4"
+  "#F1F8F4",
 );
 const POPPER_SHADOW = designTokenVar(
   "component.headerActions.popoverShadow",
-  "0 14px 28px rgba(18, 36, 29, 0.18)"
+  "0 14px 28px rgba(18, 36, 29, 0.18)",
 );
 const GRID_GAP = designTokenVar("component.headerActions.gridGap", "8px");
 const GRID_ITEM_PADDING = designTokenVar(
   "component.headerActions.gridItemPadding",
-  "8px"
+  "8px",
 );
 const GRID_HOVER_BACKGROUND = designTokenVar(
   "component.headerActions.gridHoverBackground",
-  "#E4F2E9"
+  "#E4F2E9",
 );
 const GRID_ITEM_RADIUS = designTokenVar("radius.sm", "8px");
 const GRID_ICON_SURFACE = designTokenVar(
   "component.headerActions.iconSurface",
-  "#E8F5EC"
+  "#E8F5EC",
 );
 const GRID_ITEM_BORDER = designTokenVar(
   "component.headerActions.gridItemBorder",
-  "1px solid #D4E7DA"
+  "1px solid #D4E7DA",
 );
 const EMPTY_STATE_COLOR = designTokenVar(
   "component.headerActions.emptyStateColor",
-  "#7D9288"
+  "#7D9288",
 );
 const SECTION_TITLE_FONT_WEIGHT = designTokenVar(
   "component.headerActions.sectionTitle.fontWeight",
-  "700"
+  "700",
 );
 const SECTION_TITLE_LETTER_SPACING = designTokenVar(
   "component.headerActions.sectionTitle.letterSpacing",
-  "0.5px"
+  "0.5px",
 );
 const SECTION_TITLE_MARGIN_BOTTOM = designTokenVar(
   "component.headerActions.sectionTitle.marginBottom",
-  "8px"
+  "8px",
 );
 const SECTION_DIVIDER = designTokenVar(
   "component.headerActions.sectionDivider",
-  "#D4E7DA"
+  "#D4E7DA",
 );
 const INTERACTION_TRANSITION_DURATION = designTokenVar(
   "component.headerActions.interaction.transitionDuration",
-  "160ms"
+  "160ms",
 );
 const INTERACTION_TRANSITION_EASING = designTokenVar(
   "component.headerActions.interaction.transitionEasing",
-  "ease"
+  "ease",
 );
 
+function AppsGlyph({ color }: { color: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-[22px] w-[22px] sm:h-7 sm:w-7"
+      fill="currentColor"
+      style={{ color }}
+    >
+      <circle cx="6" cy="6" r="2" />
+      <circle cx="12" cy="6" r="2" />
+      <circle cx="18" cy="6" r="2" />
+      <circle cx="6" cy="12" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="18" cy="12" r="2" />
+      <circle cx="6" cy="18" r="2" />
+      <circle cx="12" cy="18" r="2" />
+      <circle cx="18" cy="18" r="2" />
+    </svg>
+  );
+}
+
+const iconMap = new Map(
+  predefinedIcons.map((icon) => [icon.value, icon.component]),
+);
+
+function LinksSection({
+  title,
+  links,
+  staffName,
+  useGenericIcon = false,
+}: {
+  title: string;
+  links: ExternalLinkItem[];
+  staffName: string;
+  useGenericIcon?: boolean;
+}) {
+  return (
+    <div>
+      <div
+        className="mb-[var(--section-title-margin-bottom)] flex items-center gap-1 border-b pb-3"
+        style={
+          {
+            "--section-title-margin-bottom": SECTION_TITLE_MARGIN_BOTTOM,
+            borderColor: SECTION_DIVIDER,
+          } as CSSProperties & Record<`--${string}`, string>
+        }
+      >
+        <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
+        <p
+          className="m-0 text-sm text-slate-900"
+          style={{
+            fontWeight: SECTION_TITLE_FONT_WEIGHT,
+            letterSpacing: SECTION_TITLE_LETTER_SPACING,
+          }}
+        >
+          {title}
+        </p>
+      </div>
+
+      <div
+        className="grid grid-cols-3 gap-[var(--grid-gap)] sm:grid-cols-4"
+        style={
+          {
+            "--grid-gap": GRID_GAP,
+          } as CSSProperties & Record<`--${string}`, string>
+        }
+      >
+        {links.map((link, index) => (
+          <LinkGridItem
+            key={`${link.url}-${index}`}
+            url={link.url}
+            title={link.label}
+            iconType={useGenericIcon ? "LinkIcons" : link.icon}
+            staffName={staffName}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LinkGridItem({
+  url,
+  title,
+  iconType,
+  staffName,
+}: {
+  url: string;
+  title: string;
+  iconType: string;
+  staffName: string;
+}) {
+  const iconComponent = iconMap.get(iconType) || iconMap.get("LinkIcons");
+  const processedUrl = url.replace("{staffName}", staffName);
+
+  return (
+    <a
+      href={processedUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block text-inherit no-underline"
+    >
+      <div
+        className="flex min-h-[72px] flex-col items-start gap-1 rounded-[var(--grid-item-radius)] border bg-white/70 p-[var(--grid-item-padding)] transition hover:-translate-y-px"
+        style={
+          {
+            "--grid-item-padding": GRID_ITEM_PADDING,
+            "--grid-item-radius": GRID_ITEM_RADIUS,
+            border: GRID_ITEM_BORDER,
+            transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, transform ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, border-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
+          } as CSSProperties & Record<`--${string}`, string>
+        }
+        onMouseEnter={(event) => {
+          event.currentTarget.style.backgroundColor = GRID_HOVER_BACKGROUND;
+          event.currentTarget.style.borderColor = "rgba(20, 76, 44, 0.28)";
+        }}
+        onMouseLeave={(event) => {
+          event.currentTarget.style.backgroundColor = "rgba(255,255,255,0.66)";
+          event.currentTarget.style.borderColor = "";
+        }}
+      >
+        <span
+          className="inline-flex h-[26px] w-[26px] items-center justify-center rounded-[8px] text-emerald-800"
+          style={{ backgroundColor: GRID_ICON_SURFACE }}
+        >
+          {iconComponent}
+        </span>
+        <span
+          className="text-[0.7rem] font-semibold leading-[1.2] text-slate-900"
+          style={{ wordBreak: "break-word" }}
+        >
+          {title}
+        </span>
+      </div>
+    </a>
+  );
+}
+
 const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
-  const [anchor, setAnchor] = useState<null | HTMLElement>(null);
-  const theme = useTheme();
-  const isMobileSize = useMediaQuery(theme.breakpoints.down("md"));
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const buttonVars = {
+    "--external-links-button-size": ACTION_ICON_SIZE,
+    "--external-links-button-size-sm": ACTION_ICON_SIZE_SM,
+  } as CSSProperties & Record<`--${string}`, string>;
 
-  const open = Boolean(anchor);
-  const id = open ? "external-links-popup" : undefined;
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
 
-  const handleClick = (event: MouseEvent<HTMLElement>) => {
-    setAnchor(anchor ? null : event.currentTarget);
-  };
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
 
-  const handleClickAway = () => {
-    setAnchor(null);
-  };
+      if (!rootRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open]);
 
   const { companyLinks, personalLinks } = useMemo(() => {
     const company: ExternalLinkItem[] = [];
@@ -151,224 +319,91 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
   }, [links]);
 
   return (
-    <ClickAwayListener onClickAway={handleClickAway}>
-      <Box>
-        <IconButton
-          onClick={handleClick}
-          sx={{
-            color: ACTION_ICON_COLOR,
-            width: { xs: ACTION_ICON_SIZE_SM, sm: ACTION_ICON_SIZE },
-            p: { xs: "3px", sm: "8px" },
-            height: { xs: ACTION_ICON_SIZE_SM, sm: ACTION_ICON_SIZE },
-            borderRadius: "50%",
-            transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
-            "&:hover": {
-              backgroundColor: ACTION_ICON_HOVER_BG,
-            },
-          }}
-        >
-          <AppsIcon sx={{ fontSize: { xs: 22, sm: 28 } }} />
-        </IconButton>
-        <Popper
-          id={id}
-          open={open}
-          anchorEl={anchor}
-          placement={isMobileSize ? "bottom-end" : "bottom"}
-          sx={{ zIndex: 1300 }}
-        >
-          <Paper
-            elevation={3}
-            sx={{
-              width: {
-                xs: `min(calc(100vw - 16px), ${POPPER_WIDTH})`,
-                sm: POPPER_WIDTH,
-              },
-              minWidth: POPPER_MIN_WIDTH,
-              maxHeight: POPPER_MAX_HEIGHT,
-              m: { xs: 1, sm: 2 },
-              p: POPPER_PADDING,
-              borderRadius: POPPER_RADIUS,
-              border: "1px solid rgba(20, 76, 44, 0.14)",
-              boxShadow: POPPER_SHADOW,
+    <div ref={rootRef} className="relative" style={buttonVars}>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        aria-controls={open ? "external-links-popup" : undefined}
+        aria-label="external links"
+        className="inline-flex h-[var(--external-links-button-size-sm)] min-w-[var(--external-links-button-size-sm)] items-center justify-center gap-2 rounded-full border px-2 py-0 text-[color:var(--external-links-button-text)] shadow-none transition sm:h-[var(--external-links-button-size)] sm:min-w-[var(--external-links-button-size)] sm:px-3"
+        style={
+          {
+            "--external-links-button-text": ACTION_BUTTON_TEXT,
+            borderColor: ACTION_BUTTON_BORDER,
+            backgroundColor: open ? ACTION_ICON_HOVER_BG : ACTION_BUTTON_BG,
+          } as CSSProperties & Record<`--${string}`, string>
+        }
+        onMouseEnter={(event) => {
+          event.currentTarget.style.backgroundColor = ACTION_ICON_HOVER_BG;
+          event.currentTarget.style.borderColor = "rgba(20, 76, 44, 0.2)";
+        }}
+        onMouseLeave={(event) => {
+          event.currentTarget.style.backgroundColor = open
+            ? ACTION_ICON_HOVER_BG
+            : ACTION_BUTTON_BG;
+          event.currentTarget.style.borderColor = ACTION_BUTTON_BORDER;
+        }}
+      >
+        <AppsGlyph color={ACTION_ICON_COLOR} />
+      </button>
+
+      {open ? (
+        <div
+          id="external-links-popup"
+          className="absolute right-0 top-full z-50 mt-2 w-[min(calc(100vw-16px),var(--popper-width))] min-w-[var(--popper-min-width)] max-w-[var(--popper-width)] overflow-hidden rounded-[var(--popper-radius)] border bg-white shadow-[var(--popper-shadow)]"
+          style={
+            {
+              "--popper-width": POPPER_WIDTH,
+              "--popper-min-width": POPPER_MIN_WIDTH,
+              "--popper-radius": POPPER_RADIUS,
+              "--popper-shadow": POPPER_SHADOW,
+              borderColor: "rgba(20, 76, 44, 0.14)",
               background: `linear-gradient(180deg, ${POPPER_SURFACE_ALT} 0%, ${POPPER_SURFACE} 100%)`,
-              display: "flex",
-              flexDirection: "column",
-              gap: POPPER_GAP,
-              overflow: "hidden",
-            }}
+            } as CSSProperties & Record<`--${string}`, string>
+          }
+        >
+          <div
+            className="flex max-h-[var(--popper-max-height)] flex-col gap-[var(--popper-gap)] overflow-hidden p-[var(--popper-padding)]"
+            style={
+              {
+                "--popper-max-height": POPPER_MAX_HEIGHT,
+                "--popper-gap": POPPER_GAP,
+                "--popper-padding": POPPER_PADDING,
+              } as CSSProperties & Record<`--${string}`, string>
+            }
           >
-            <Box sx={{ overflowY: "auto", pr: { xs: 0.5, sm: 1 } }}>
-              <Stack sx={{ gap: POPPER_GAP }}>
-                {companyLinks.length > 0 && (
+            <div className="overflow-y-auto pr-2">
+              <div className="space-y-[var(--popper-gap)]">
+                {companyLinks.length > 0 ? (
                   <LinksSection
                     title="共通"
                     links={companyLinks}
                     staffName={staffName}
                   />
-                )}
-                {personalLinks.length > 0 && (
+                ) : null}
+                {personalLinks.length > 0 ? (
                   <LinksSection
                     title="プライベート"
                     links={personalLinks}
                     staffName={staffName}
+                    useGenericIcon
                   />
-                )}
-                {companyLinks.length === 0 && personalLinks.length === 0 && (
-                  <Typography
-                    variant="body2"
-                    sx={{ color: EMPTY_STATE_COLOR }}
-                    textAlign="center"
+                ) : null}
+                {companyLinks.length === 0 && personalLinks.length === 0 ? (
+                  <p
+                    className="m-0 text-center text-sm"
+                    style={{ color: EMPTY_STATE_COLOR }}
                   >
                     表示できるリンクがありません
-                  </Typography>
-                )}
-              </Stack>
-            </Box>
-          </Paper>
-        </Popper>
-      </Box>
-    </ClickAwayListener>
-  );
-};
-
-interface LinksSectionProps {
-  title: string;
-  links: ExternalLinkItem[];
-  staffName: string;
-}
-
-const LinksSection = ({ title, links, staffName }: LinksSectionProps) => {
-  return (
-    <Box>
-      <Stack
-        direction="row"
-        alignItems="center"
-        sx={{
-          gap: 1,
-          mb: SECTION_TITLE_MARGIN_BOTTOM,
-          pb: 0.75,
-          borderBottom: `1px solid ${SECTION_DIVIDER}`,
-        }}
-      >
-        <Box
-          sx={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            bgcolor: "success.main",
-            flexShrink: 0,
-          }}
-        />
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: SECTION_TITLE_FONT_WEIGHT,
-            letterSpacing: SECTION_TITLE_LETTER_SPACING,
-          }}
-        >
-          {title}
-        </Typography>
-      </Stack>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "repeat(3, minmax(0, 1fr))",
-            sm: "repeat(4, minmax(0, 1fr))",
-          },
-          columnGap: GRID_GAP,
-          rowGap: GRID_GAP,
-        }}
-      >
-        {links.map((link, index) => (
-          <LinkGridItem
-            key={`${link.url}-${index}`}
-            url={link.url}
-            title={link.label}
-            iconType={link.icon}
-            staffName={staffName}
-          />
-        ))}
-      </Box>
-    </Box>
-  );
-};
-
-interface LinkGridItemProps {
-  url: string;
-  title: string;
-  iconType: string;
-  staffName: string;
-}
-
-const iconMap = new Map(
-  predefinedIcons.map((icon) => [icon.value, icon.component])
-);
-
-const LinkGridItem = ({
-  url,
-  title,
-  iconType,
-  staffName,
-}: LinkGridItemProps) => {
-  const iconComponent = iconMap.get(iconType) || iconMap.get("LinkIcons");
-  const processedUrl = url.replace("{staffName}", staffName);
-  return (
-    <Link
-      href={processedUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      color="inherit"
-      underline="none"
-      sx={{ display: "block" }}
-    >
-      <Stack
-        direction="column"
-        alignItems="flex-start"
-        sx={{
-          gap: 1,
-          padding: GRID_ITEM_PADDING,
-          borderRadius: GRID_ITEM_RADIUS,
-          minHeight: { xs: 72, sm: 78 },
-          border: GRID_ITEM_BORDER,
-          backgroundColor: "rgba(255,255,255,0.66)",
-          transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, transform ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, border-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
-          "&:hover": {
-            backgroundColor: GRID_HOVER_BACKGROUND,
-            borderColor: "rgba(20, 76, 44, 0.28)",
-            transform: "translateY(-1px)",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            width: 26,
-            height: 26,
-            borderRadius: "8px",
-            bgcolor: GRID_ICON_SURFACE,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "success.dark",
-            "& svg": { fontSize: 15 },
-          }}
-        >
-          {iconComponent}
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 600,
-            color: "text.primary",
-            lineHeight: 1.2,
-            fontSize: "0.7rem",
-            wordBreak: "break-word",
-          }}
-        >
-          {title}
-        </Typography>
-      </Stack>
-    </Link>
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 };
 

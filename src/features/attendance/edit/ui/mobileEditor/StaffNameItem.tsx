@@ -1,11 +1,8 @@
-import { Typography } from "@mui/material";
-import { useContext } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
 import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 
 export function StaffNameItem() {
-  const { staff } = useContext(AttendanceEditContext);
+  const { staff } = useAttendanceEditData();
 
   if (!staff) {
     return null;
@@ -14,9 +11,7 @@ export function StaffNameItem() {
   return (
     <>
       <Label>■ スタッフ</Label>
-      <Typography variant="body1">
-        {`${staff.familyName} ${staff.givenName}`}
-      </Typography>
+      <div className="text-base text-slate-900">{`${staff.familyName} ${staff.givenName}`}</div>
     </>
   );
 }

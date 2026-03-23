@@ -1,32 +1,11 @@
-import { Button, useMediaQuery, useTheme } from "@mui/material";
-import { CSSProperties, useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 
-import { designTokenVar } from "@/shared/designSystem";
-
-const ACTION_BUTTON_SIZE = designTokenVar(
-  "component.timeRecorder.actionButton.size",
-  "120px"
-);
-const ACTION_BUTTON_SIZE_SM = designTokenVar(
-  "component.timeRecorder.actionButton.sizeSm",
-  "96px"
-);
-const ACTION_BUTTON_RADIUS = designTokenVar(
-  "component.timeRecorder.actionButton.borderRadius",
-  "999px"
-);
-const ACTION_BORDER_WIDTH = designTokenVar(
-  "component.timeRecorder.actionButton.borderWidth",
-  "3px"
-);
-const ACTION_DISABLED_BORDER = designTokenVar(
-  "component.timeRecorder.actionButton.disabledBorderColor",
-  "#C3CFC7"
-);
-const ACTION_DISABLED_BACKGROUND = designTokenVar(
-  "component.timeRecorder.actionButton.disabledBackground",
-  "#D9E2DD"
-);
+import ActionCardButton from "./ActionCardButton";
+import {
+  buildActionCardVars,
+  TIME_RECORDER_BUTTON_PALETTES,
+} from "./buttonStyles";
+import { useActionButtonState } from "./useActionButtonState";
 
 export interface ClockOutButtonProps {
   isWorking: boolean;
@@ -34,72 +13,58 @@ export interface ClockOutButtonProps {
   disabled?: boolean;
 }
 
+function ClockOutIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
+      <path
+        d="M10 4h6.5A1.5 1.5 0 0 1 18 5.5v13a1.5 1.5 0 0 1-1.5 1.5H10"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 12H6M9 8l-4 4 4 4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const ClockOutButton = ({
   isWorking,
   onClockOut,
   disabled = false,
 }: ClockOutButtonProps) => {
-  const actionButtonVars: CSSProperties & Record<`--${string}`, string> = {
-    "--action-button-size": ACTION_BUTTON_SIZE,
-    "--action-button-size-sm": ACTION_BUTTON_SIZE_SM,
-    "--action-button-radius": ACTION_BUTTON_RADIUS,
-    "--action-border-width": ACTION_BORDER_WIDTH,
-    "--action-disabled-border": ACTION_DISABLED_BORDER,
-    "--action-disabled-bg": ACTION_DISABLED_BACKGROUND,
-  };
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const [isClicked, setIsClicked] = useState(false);
-
-  // Derived state: button is disabled when not working or user clicked
-  const isDisabled = useMemo(() => {
-    return !isWorking || isClicked || disabled;
-  }, [isWorking, isClicked, disabled]);
+  const actionButtonVars = buildActionCardVars(
+    TIME_RECORDER_BUTTON_PALETTES.clockOut,
+  );
+  const { isDisabled, markPending } = useActionButtonState({
+    canInteract: isWorking,
+    disabled,
+  });
 
   const handleClick = useCallback(() => {
-    if (isDisabled) return;
+    if (!markPending()) {
+      return;
+    }
 
-    setIsClicked(true);
     onClockOut();
-  }, [isDisabled, onClockOut]);
+  }, [markPending, onClockOut]);
 
   return (
-    <Button
-      data-testid="clock-out-button"
+    <ActionCardButton
+      testId="clock-out-button"
+      style={actionButtonVars}
       disabled={isDisabled}
       onClick={handleClick}
-      size="large"
-      variant={isWorking ? "outlined" : "contained"}
-      className={isSmallScreen ? "whitespace-pre-line leading-[1.2]" : undefined}
-      style={actionButtonVars}
-      sx={(innerTheme) => ({
-        width: "var(--action-button-size)",
-        height: "var(--action-button-size)",
-        minWidth: "var(--action-button-size)",
-        borderRadius: "var(--action-button-radius)",
-        p: 0,
-        color: innerTheme.palette.clock_out.contrastText,
-        backgroundColor: innerTheme.palette.clock_out.main,
-        border: `var(--action-border-width) solid ${innerTheme.palette.clock_out.main}`,
-        [innerTheme.breakpoints.down("sm")]: {
-          width: "var(--action-button-size-sm)",
-          height: "var(--action-button-size-sm)",
-          minWidth: "var(--action-button-size-sm)",
-          fontSize: "0.95rem",
-        },
-        "&:hover": {
-          color: innerTheme.palette.clock_out.main,
-          backgroundColor: innerTheme.palette.clock_out.contrastText,
-          border: `var(--action-border-width) solid ${innerTheme.palette.clock_out.main}`,
-        },
-        "&:disabled": {
-          border: "var(--action-border-width) solid var(--action-disabled-border)",
-          backgroundColor: "var(--action-disabled-bg)",
-        },
-      })}
-    >
-      {isSmallScreen ? "勤務\n終了" : "勤務終了"}
-    </Button>
+      label={"勤務\n終了"}
+      helper={null}
+      icon={<ClockOutIcon />}
+    />
   );
 };
 

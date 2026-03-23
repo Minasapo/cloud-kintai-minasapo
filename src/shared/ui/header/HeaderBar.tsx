@@ -1,5 +1,4 @@
-import { Box, Container, Stack } from "@mui/material";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -13,19 +12,29 @@ interface HeaderBarProps {
   signInOutButton: ReactNode;
 }
 
-const HEADER_BACKGROUND = designTokenVar(
-  "component.headerBar.background",
-  "#0FA85E",
+const HEADER_ACCENT = designTokenVar("component.headerBar.accent", "#0FA85E");
+const HEADER_SURFACE = designTokenVar(
+  "component.headerBar.surface",
+  "#F7FCF8",
 );
-const HEADER_TEXT = designTokenVar("component.headerBar.textColor", "#FFFFFF");
-const HEADER_HEIGHT = designTokenVar("component.headerBar.minHeight", "48px");
-const HEADER_PADDING_X = designTokenVar("component.headerBar.paddingX", "16px");
-const HEADER_PADDING_Y = designTokenVar("component.headerBar.paddingY", "8px");
-const HEADER_GAP = designTokenVar("component.headerBar.gap", "8px");
-const HEADER_SIDE_GAP = designTokenVar("spacing.md", "12px");
+const HEADER_BORDER = designTokenVar(
+  "component.headerBar.borderColor",
+  "rgba(15, 168, 94, 0.14)",
+);
+const HEADER_TEXT = designTokenVar("component.headerBar.textColor", "#1E2A25");
 const HEADER_CONTENT_MAX_WIDTH = designTokenVar(
   "component.headerBar.contentMaxWidth",
-  "1200px",
+  "1280px",
+);
+const HEADER_PADDING_X = designTokenVar("component.headerBar.paddingX", "16px");
+const HEADER_PADDING_Y = designTokenVar("component.headerBar.paddingY", "10px");
+const HEADER_INNER_PADDING_X = designTokenVar(
+  "component.headerBar.innerPaddingX",
+  "14px",
+);
+const HEADER_INNER_PADDING_Y = designTokenVar(
+  "component.headerBar.innerPaddingY",
+  "10px",
 );
 
 export default function HeaderBar({
@@ -37,111 +46,92 @@ export default function HeaderBar({
   externalLinks,
   signInOutButton,
 }: HeaderBarProps) {
-  const headerBackground = themeColor ?? HEADER_BACKGROUND;
   const hasCenterContent = Boolean(centerContent);
+  const mobileNavigation = (
+    <div className="block rounded-full bg-white/70 px-1 py-0.5 text-[color:var(--header-text)] sm:px-1.5 sm:py-1 lg:hidden">
+      {navigation}
+    </div>
+  );
+  const mobileActions = (
+    <div className="flex shrink-0 flex-nowrap items-center justify-end gap-0.5 sm:gap-1">
+      <div className="shrink-0 text-[color:var(--header-text)]">
+        {notificationsButton}
+      </div>
+      <div className="shrink-0 text-[color:var(--header-text)]">
+        {externalLinks}
+      </div>
+      {signInOutButton}
+    </div>
+  );
 
   return (
-    <header style={{ width: "100%" }}>
-      <Container
-        maxWidth={false}
-        disableGutters
-        sx={{ p: 0, backgroundColor: headerBackground }}
-      >
-        <Box
-          sx={{
-            width: "100%",
-            maxWidth: { xs: "100%", md: HEADER_CONTENT_MAX_WIDTH },
-            mx: { xs: 0, md: "auto" },
-            px: { xs: "6px", md: HEADER_PADDING_X },
-            boxSizing: "border-box",
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: "100%",
-              minHeight: HEADER_HEIGHT,
-              boxSizing: "border-box",
-              py: HEADER_PADDING_Y,
-              color: HEADER_TEXT,
-              display: "grid",
-              alignItems: "center",
-              gridTemplateColumns: {
-                xs: "minmax(0, 1fr) auto",
-                lg: hasCenterContent
-                  ? "auto minmax(0, 1fr) auto auto"
-                  : "auto minmax(0, 1fr) auto",
-              },
-              columnGap: { xs: "2px", md: HEADER_GAP },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                flexShrink: { xs: 1, md: 0 },
-                minWidth: 0,
-                height: "100%",
-                pr: { xs: "6px", md: 0 },
-                overflow: "hidden",
-              }}
+    <header
+      style={
+        {
+          "--header-accent": themeColor ?? HEADER_ACCENT,
+          "--header-surface": HEADER_SURFACE,
+          "--header-border": HEADER_BORDER,
+          "--header-text": HEADER_TEXT,
+          "--ds-component-header-menu-color": "#45574F",
+          "--ds-component-header-menu-active-color": "#065F46",
+          "--ds-component-header-menu-active-background": "#ECFDF3",
+          "--ds-component-header-menu-hover-background":
+            "rgba(15, 168, 94, 0.1)",
+          "--ds-component-header-actions-icon-color": "#45574F",
+          "--ds-component-header-actions-icon-hover-background":
+            "rgba(15, 168, 94, 0.1)",
+          "--ds-component-header-sign-button-text-color": "#1E2A25",
+          "--header-content-max-width": HEADER_CONTENT_MAX_WIDTH,
+          "--header-padding-x": HEADER_PADDING_X,
+          "--header-padding-y": HEADER_PADDING_Y,
+          "--header-inner-padding-x": HEADER_INNER_PADDING_X,
+          "--header-inner-padding-y": HEADER_INNER_PADDING_Y,
+        } as CSSProperties & Record<`--${string}`, string>
+      }
+      className="overflow-x-clip border-b border-[var(--header-border)] bg-[linear-gradient(180deg,rgba(15,168,94,0.16)_0%,rgba(236,253,245,0.92)_52%,rgba(248,250,249,0.88)_100%)]"
+    >
+      <div className="mx-auto w-full max-w-[var(--header-content-max-width)] px-2 py-2 sm:px-[var(--header-padding-x)] sm:py-[var(--header-padding-y)]">
+        <div className="rounded-[1.15rem] border border-[var(--header-border)] bg-[linear-gradient(135deg,var(--header-surface)_0%,#ECFDF5_52%,#FFFFFF_100%)] text-[color:var(--header-text)] shadow-[0_24px_40px_-34px_rgba(15,23,42,0.26)] sm:rounded-[1.6rem]">
+          <div className="px-2.5 py-2 sm:px-[var(--header-inner-padding-x)] sm:py-[var(--header-inner-padding-y)]">
+            <div className="mb-2 flex min-w-0 items-center justify-between gap-2 lg:hidden">
+              <div className="flex min-w-0 max-w-[min(52vw,180px)] items-center overflow-hidden">
+                {logo}
+              </div>
+              <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+                {mobileNavigation}
+                {mobileActions}
+              </div>
+            </div>
+            <div
+              className={[
+                "hidden min-w-0 items-center gap-1.5 md:gap-3 lg:grid",
+                "grid-cols-[minmax(0,1fr)_auto]",
+                hasCenterContent
+                  ? "lg:grid-cols-[auto_minmax(180px,1fr)_minmax(120px,auto)_auto]"
+                  : "lg:grid-cols-[auto_minmax(180px,1fr)_auto]",
+              ].join(" ")}
             >
-              {logo}
-            </Box>
+              <div className="flex min-w-0 max-w-[min(54vw,220px)] items-center overflow-hidden sm:max-w-none">
+                {logo}
+              </div>
 
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: { xs: "none", lg: "flex" },
-                justifyContent: "center",
-                alignItems: "center",
-                minWidth: 0,
-                px: HEADER_SIDE_GAP,
-                gridColumn: "2",
-              }}
-            >
-              {navigation}
-            </Box>
-
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: { xs: "none", lg: "flex" },
-                justifyContent: "center",
-                alignItems: "center",
-                minWidth: 0,
-                px: HEADER_SIDE_GAP,
-                gridColumn: "3",
-              }}
-            >
-              {centerContent}
-            </Box>
-
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="flex-end"
-              sx={{
-                flexGrow: 0,
-                flexShrink: 0,
-                minWidth: "fit-content",
-                gridColumn: { xs: "2", lg: hasCenterContent ? "4" : "3" },
-                justifySelf: "end",
-                columnGap: { xs: "2px", md: HEADER_GAP },
-                rowGap: { xs: "4px", md: HEADER_GAP },
-              }}
-            >
-              <Box sx={{ display: { xs: "block", lg: "none" } }}>
+              <div className="hidden min-w-0 items-center justify-start rounded-full bg-white/70 px-1.5 py-1 lg:flex">
                 {navigation}
-              </Box>
-              <Box sx={{ display: "block" }}>{notificationsButton}</Box>
-              <Box sx={{ display: "block" }}>{externalLinks}</Box>
-              {signInOutButton}
-            </Stack>
-          </Box>
-        </Box>
-      </Container>
+              </div>
+
+              <div className="hidden min-w-0 items-center justify-center lg:flex">
+                {centerContent}
+              </div>
+
+              <div className="flex shrink-0 flex-nowrap items-center justify-end gap-0.5 sm:gap-1 md:gap-1.5">
+                <div className="shrink-0 text-[color:var(--header-text)]">{notificationsButton}</div>
+                <div className="shrink-0 text-[color:var(--header-text)]">{externalLinks}</div>
+                {signInOutButton}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
   );
 }

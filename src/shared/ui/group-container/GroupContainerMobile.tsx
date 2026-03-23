@@ -1,4 +1,3 @@
-import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { CSSProperties, ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
@@ -45,7 +44,8 @@ export interface GroupContainerMobileProps {
   count?: number;
   hideAccent?: boolean;
   hideBorder?: boolean;
-  sx?: SxProps<Theme>;
+  className?: string;
+  style?: CSSProperties;
   children?: ReactNode;
 }
 
@@ -55,7 +55,8 @@ const GroupContainerMobile = ({
   hideAccent = false,
   hideBorder = false,
   children,
-  sx,
+  className,
+  style,
 }: GroupContainerMobileProps) => {
   const borderClassName = hideBorder
     ? "border-0"
@@ -83,33 +84,32 @@ const GroupContainerMobile = ({
   }
 
   return (
-    <Box
-      className={`rounded-[var(--group-radius)] border-solid bg-[var(--group-background)] p-[var(--group-padding)] ${borderClassName} ${accentClassName}`}
-      style={groupVars}
-      sx={sx}
+    <section
+      className={[
+        "rounded-[var(--group-radius)] border-solid bg-[var(--group-background)] p-[var(--group-padding)]",
+        borderClassName,
+        accentClassName,
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={{ ...groupVars, ...style }}
     >
       {title ? (
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Typography variant="subtitle1" fontWeight={700}>
+        <div className="flex items-center justify-between">
+          <h2 className="m-0 text-base font-bold leading-6 text-slate-900">
             {title}
-          </Typography>
+          </h2>
           {typeof count === "number" && (
-            <Typography
-              variant="caption"
-              className="text-[color:var(--group-count-color)]"
-            >
+            <span className="text-xs leading-5 text-[color:var(--group-count-color)]">
               {`(${count}件)`}
-            </Typography>
+            </span>
           )}
-        </Stack>
+        </div>
       ) : null}
 
-      <Box className="mt-[var(--group-content-gap)]">{children}</Box>
-    </Box>
+      <div className="mt-[var(--group-content-gap)]">{children}</div>
+    </section>
   );
 };
 

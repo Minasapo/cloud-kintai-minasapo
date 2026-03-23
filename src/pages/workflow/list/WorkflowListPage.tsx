@@ -1,35 +1,7 @@
-import AddIcon from "@mui/icons-material/Add";
-import ClearIcon from "@mui/icons-material/Clear";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Accordion from "@mui/material/Accordion";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import ButtonBase from "@mui/material/ButtonBase";
-import CircularProgress from "@mui/material/CircularProgress";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import { useTheme } from "@mui/material/styles";
-import Table from "@mui/material/Table";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import {
-  DataGrid,
-  type GridColDef,
-  type GridRenderCellParams,
-  type GridRowClassNameParams,
-  type GridRowParams,
-  type GridValueFormatter,
-} from "@mui/x-data-grid";
 import { WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import Page from "@shared/ui/page/Page";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
@@ -39,7 +11,7 @@ import {
 } from "@/features/workflow/list/useWorkflowListViewModel";
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
 import { designTokenVar } from "@/shared/designSystem";
-import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 import WorkflowListFilters, {
   type WorkflowListFiltersHandle,
@@ -52,47 +24,73 @@ const LOADING_SECTION_MIN_HEIGHT = `calc(${designTokenVar(
   "spacing.xxl",
   "32px"
 )} * 7.5)`;
-const FILTER_ACTION_GAP = `calc(${designTokenVar("spacing.md", "12px")} * 0.5)`;
-const EMPTY_STATE_PADDING_Y = designTokenVar("spacing.lg", "16px");
-const DATA_GRID_HEIGHT_SPACING_UNITS = 130;
-const DATA_GRID_ROW_HEIGHT_SPACING_UNITS = 14;
 const MOBILE_CARD_GAP = designTokenVar("spacing.md", "12px");
-const MOBILE_CARD_PADDING = designTokenVar("spacing.lg", "16px");
-const MOBILE_CARD_RADIUS = designTokenVar("radius.lg", "16px");
 const MOBILE_META_GAP = designTokenVar("spacing.xs", "4px");
-const MOBILE_ACTION_GAP = designTokenVar("spacing.sm", "8px");
-const MOBILE_EMPTY_PADDING = designTokenVar("spacing.xl", "24px");
-const MOBILE_FILTER_RADIUS = designTokenVar("radius.lg", "16px");
-const MOBILE_FILTER_PADDING_X = designTokenVar("spacing.md", "12px");
-const MOBILE_FILTER_PADDING_Y = designTokenVar("spacing.sm", "8px");
-const MOBILE_FILTER_BADGE_PADDING = designTokenVar("spacing.xs", "4px");
-const MOBILE_FILTER_BADGE_RADIUS = designTokenVar("radius.md", "12px");
 
 const formatWorkflowDateValue = (value?: string) => value ?? "-";
 
-const formatWorkflowDate: GridValueFormatter<
-  WorkflowListItem,
-  string | undefined,
-  string,
-  string | undefined
-> = (value) => formatWorkflowDateValue(value);
+function Surface({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-[1.6rem] border border-emerald-100/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.97)_0%,rgba(248,255,251,0.94)_100%)] p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)] sm:p-5 ${className}`.trim()}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Spinner({ size = "md" }: { size?: "sm" | "md" }) {
+  const className = size === "sm" ? "h-4 w-4 border-2" : "h-6 w-6 border-[3px]";
+  return (
+    <span
+      className={`inline-block animate-spin rounded-full border-emerald-600 border-t-transparent ${className}`}
+      aria-hidden="true"
+    />
+  );
+}
+
+function InfoCard({
+  tone = "info",
+  children,
+}: {
+  tone?: "info" | "error";
+  children: React.ReactNode;
+}) {
+  const className =
+    tone === "error"
+      ? "border-rose-200 bg-rose-50 text-rose-900"
+      : "border-sky-200 bg-sky-50 text-sky-900";
+
+  return (
+    <div className={`rounded-[18px] border px-4 py-3 text-sm leading-6 ${className}`}>
+      {children}
+    </div>
+  );
+}
 
 export default function WorkflowListPage() {
-  const theme = useTheme();
-  const isCompact = useMediaQuery(theme.breakpoints.down("md"));
-  const spacingToNumber = useCallback(
-    (units: number) => parseFloat(theme.spacing(units)),
-    [theme]
-  );
-  const dataGridContainerHeight = useMemo(
-    () => theme.spacing(DATA_GRID_HEIGHT_SPACING_UNITS),
-    [theme]
-  );
-  const dataGridRowHeight = useMemo(
-    () => spacingToNumber(DATA_GRID_ROW_HEIGHT_SPACING_UNITS),
-    [spacingToNumber]
-  );
   const navigate = useNavigate();
+  const [isCompact, setIsCompact] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const sync = (event?: MediaQueryListEvent) => {
+      setIsCompact(event ? event.matches : mediaQuery.matches);
+    };
+
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
 
   const {
     isAuthenticated,
@@ -107,54 +105,9 @@ export default function WorkflowListPage() {
   }: WorkflowListViewModel = useWorkflowListViewModel();
   const filterRowRef = useRef<WorkflowListFiltersHandle>(null);
 
-  const columns = useMemo<GridColDef<WorkflowListItem>[]>(
-    () => [
-      {
-        field: "category",
-        headerName: "種別",
-        flex: 1,
-        minWidth: 140,
-        sortable: false,
-      },
-      {
-        field: "applicationDate",
-        headerName: "申請日",
-        flex: 1,
-        minWidth: 160,
-        sortable: false,
-        valueFormatter: formatWorkflowDate,
-      },
-      {
-        field: "status",
-        headerName: "ステータス",
-        flex: 1,
-        minWidth: 160,
-        sortable: false,
-        renderCell: (
-          params: GridRenderCellParams<WorkflowListItem, string | undefined>
-        ) => <StatusChip status={params.row.rawStatus || params.value || ""} />,
-      },
-      {
-        field: "createdAt",
-        headerName: "作成日",
-        flex: 1,
-        minWidth: 160,
-        sortable: false,
-      },
-    ],
-    []
-  );
-
   const resolveWorkflowKey = useCallback((row: WorkflowListItem) => {
     return row.rawId ? row.rawId : `${row.name}-${row.createdAt}`;
   }, []);
-
-  const handleRowClick = useCallback(
-    (params: GridRowParams<WorkflowListItem>) => {
-      navigate(`/workflow/${encodeURIComponent(resolveWorkflowKey(params.row))}`);
-    },
-    [navigate, resolveWorkflowKey]
-  );
 
   const handleCardClick = useCallback(
     (row: WorkflowListItem) => {
@@ -163,35 +116,35 @@ export default function WorkflowListPage() {
     [navigate, resolveWorkflowKey]
   );
 
-  const getRowClassName = useCallback(
-    (params: GridRowClassNameParams<WorkflowListItem>) =>
-      params.row.rawStatus === WorkflowStatus.CANCELLED ||
-      params.row.status === CANCELLED_LABEL
-        ? "status-cancelled"
-        : "",
-    []
-  );
-
-  const getRowId = useCallback(
-    (row: WorkflowListItem) => resolveWorkflowKey(row),
-    [resolveWorkflowKey]
-  );
+  const statusSummary = useMemo(() => {
+    const counts = new Map<string, number>();
+    filteredItems.forEach((item) => {
+      const key = item.rawStatus || item.status || "UNKNOWN";
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+    return {
+      total: filteredItems.length,
+      pending:
+        counts.get(WorkflowStatus.SUBMITTED) ??
+        counts.get(STATUS_LABELS[WorkflowStatus.SUBMITTED]) ??
+        0,
+      approved:
+        counts.get(WorkflowStatus.APPROVED) ??
+        counts.get(STATUS_LABELS[WorkflowStatus.APPROVED]) ??
+        0,
+    };
+  }, [filteredItems]);
 
   if (!isAuthenticated) {
     return (
       <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
         <PageSection layoutVariant="dashboard">
-          <Box
-            sx={{
-              ...dashboardInnerSurfaceSx,
-              display: "flex",
-              minHeight: LOADING_SECTION_MIN_HEIGHT,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+          <DashboardInnerSurface
+            className="flex items-center justify-center"
+            style={{ minHeight: LOADING_SECTION_MIN_HEIGHT }}
           >
-            <CircularProgress />
-          </Box>
+            <Spinner />
+          </DashboardInnerSurface>
         </PageSection>
       </Page>
     );
@@ -199,282 +152,253 @@ export default function WorkflowListPage() {
 
   return (
     <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
-      <PageSection layoutVariant="dashboard">
-        <Box sx={dashboardInnerSurfaceSx}>
-          <Stack spacing={3}>
-            <Stack spacing={2}>
-              <Stack
-                direction={{ xs: "column", md: "row" }}
-                spacing={2}
-                alignItems={{ xs: "stretch", md: "center" }}
+      <PageSection layoutVariant="dashboard" variant="plain" className="px-0 py-0 md:px-0">
+        <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+          <section className="rounded-[1.8rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f7fcf8_0%,#ecfdf5_58%,#ffffff_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] sm:p-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-2">
+                <h1 className="text-[1.85rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                  ワークフロー
+                </h1>
+                <p className="max-w-3xl text-sm leading-6 text-slate-600 sm:text-[0.95rem]">
+                  申請の一覧、状態確認、新規作成をひとつの画面で進められます。現在の申請状況を見ながら、必要な絞り込みや作成にすぐ移れます。
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/workflow/new")}
+                className={[
+                  "inline-flex items-center justify-center gap-2 rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b]",
+                  isCompact ? "w-full" : "w-auto whitespace-nowrap",
+                ].join(" ")}
               >
-                <Box
-                  sx={{
-                    flex: 1,
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: FILTER_ACTION_GAP,
-                    alignItems: "center",
-                  }}
-                >
-                  {anyFilterActive && (
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<ClearIcon fontSize="small" />}
-                      onClick={() => {
-                        clearFilters();
-                        filterRowRef.current?.closeAllPopovers();
-                      }}
-                    >
-                      すべてのフィルターをクリア
-                    </Button>
-                  )}
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: { xs: "stretch", md: "flex-end" },
-                  }}
-                >
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => navigate("/workflow/new")}
-                    fullWidth={isCompact}
-                  >
-                    新規作成
-                  </Button>
-                </Box>
-              </Stack>
-            </Stack>
+                <span className="text-lg leading-none">+</span>
+                {isCompact ? "新規" : "新規作成"}
+              </button>
+            </div>
+          </section>
 
-            {currentStaffId ? (
-              <Stack spacing={2}>
-                {error && <Alert severity="error">{error}</Alert>}
-                {isCompact ? (
-                  <Accordion
-                    disableGutters
-                    elevation={0}
-                    sx={{
-                      borderRadius: MOBILE_FILTER_RADIUS,
-                      border: "1px solid",
-                      borderColor: "divider",
-                      bgcolor: "background.paper",
-                      "&:before": { display: "none" },
-                    }}
-                  >
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      sx={{
-                        px: MOBILE_FILTER_PADDING_X,
-                        py: MOBILE_FILTER_PADDING_Y,
-                        "& .MuiAccordionSummary-expandIconWrapper": {
-                          color: "text.secondary",
-                        },
-                        "& .MuiAccordionSummary-content": { my: 0 },
-                      }}
-                    >
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                        sx={{ width: "100%", justifyContent: "space-between" }}
-                      >
-                        <Typography variant="subtitle2">フィルター</Typography>
-                        {anyFilterActive && (
-                          <Box
-                            sx={{
-                              px: MOBILE_FILTER_BADGE_PADDING,
-                              py: 0,
-                              borderRadius: MOBILE_FILTER_BADGE_RADIUS,
-                              bgcolor: "action.selected",
-                              color: "text.secondary",
-                              fontSize: 12,
-                              lineHeight: 1.6,
-                            }}
-                          >
-                            適用中
-                          </Box>
-                        )}
-                      </Stack>
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ p: MOBILE_FILTER_PADDING_X }}>
-                      <WorkflowListFiltersPanel
-                        ref={filterRowRef}
-                        filters={filters}
-                        setFilter={setFilter}
-                      />
-                    </AccordionDetails>
-                  </Accordion>
-                ) : (
-                  <Table size="small" sx={{ tableLayout: "fixed" }} aria-hidden>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>種別</TableCell>
-                        <TableCell>申請日</TableCell>
-                        <TableCell>ステータス</TableCell>
-                        <TableCell>作成日</TableCell>
-                      </TableRow>
-                      <WorkflowListFilters
-                        ref={filterRowRef}
-                        filters={filters}
-                        setFilter={setFilter}
-                      />
-                    </TableHead>
-                  </Table>
-                )}
-                {isCompact ? (
-                  <Box>
-                    {loading ? (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          py: MOBILE_EMPTY_PADDING,
+          {currentStaffId ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Surface className="p-4">
+                  <p className="text-xs font-medium tracking-[0.04em] text-slate-500">全件数</p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-950">{statusSummary.total}</p>
+                </Surface>
+                <Surface className="p-4">
+                  <p className="text-xs font-medium tracking-[0.04em] text-slate-500">承認待ち</p>
+                  <p className="mt-2 text-2xl font-semibold text-amber-700">{statusSummary.pending}</p>
+                </Surface>
+                <Surface className="p-4">
+                  <p className="text-xs font-medium tracking-[0.04em] text-slate-500">承認済み</p>
+                  <p className="mt-2 text-2xl font-semibold text-emerald-700">{statusSummary.approved}</p>
+                </Surface>
+              </div>
+
+              {error && <InfoCard tone="error">{error}</InfoCard>}
+
+              <Surface>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div className="space-y-1">
+                      <p className="text-base font-semibold text-slate-900">申請一覧</p>
+                      <p className="text-sm leading-6 text-slate-500">
+                        種別、申請日、ステータス、作成日で確認できます。
+                      </p>
+                    </div>
+                    {anyFilterActive ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearFilters();
+                          filterRowRef.current?.closeAllPopovers();
+                          setMobileFiltersOpen(false);
                         }}
+                        className="inline-flex items-center gap-2 self-start rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                       >
-                        <CircularProgress />
-                      </Box>
-                    ) : filteredItems.length === 0 ? (
-                      <Alert severity="info">該当するワークフローがありません。</Alert>
-                    ) : (
-                      <Stack spacing={MOBILE_CARD_GAP}>
-                        {filteredItems.map((item) => {
-                          const key = getRowId(item);
-                          return (
-                            <ButtonBase
-                              key={key}
-                              onClick={() => handleCardClick(item)}
-                              sx={{
-                                width: "100%",
-                                textAlign: "left",
-                                borderRadius: MOBILE_CARD_RADIUS,
-                              }}
-                            >
-                              <Paper
-                                sx={{
-                                  width: "100%",
-                                  p: MOBILE_CARD_PADDING,
-                                  borderRadius: MOBILE_CARD_RADIUS,
-                                  border: "1px solid",
-                                  borderColor: "divider",
-                                  bgcolor: "background.paper",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: MOBILE_ACTION_GAP,
-                                }}
+                        <span className="text-base leading-none">×</span>
+                        フィルターをクリア
+                      </button>
+                    ) : null}
+                  </div>
+
+                  {isCompact ? (
+                    <div className="rounded-[1.4rem] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(252,255,253,0.98)_0%,rgba(244,252,247,0.94)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                      <button
+                        type="button"
+                        onClick={() => setMobileFiltersOpen((prev) => !prev)}
+                        className="flex w-full items-center justify-between px-3 py-2.5 text-left"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-slate-900">フィルター</span>
+                          {anyFilterActive && (
+                            <span className="rounded-full bg-emerald-100 px-2 py-[2px] text-[12px] font-bold leading-5 text-emerald-700">
+                              適用中
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-sm text-slate-500">
+                          {mobileFiltersOpen ? "▲" : "▼"}
+                        </span>
+                      </button>
+                      {mobileFiltersOpen ? (
+                        <div className="px-3 pb-3">
+                          <WorkflowListFiltersPanel
+                            ref={filterRowRef}
+                            filters={filters}
+                            setFilter={setFilter}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="rounded-[24px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(252,255,253,0.98)_0%,rgba(244,252,247,0.94)_100%)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                      <table className="w-full table-fixed border-separate border-spacing-y-2" aria-hidden>
+                        <thead>
+                          <tr>
+                            <th className="px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">種別</th>
+                            <th className="px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">申請日</th>
+                            <th className="px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">ステータス</th>
+                            <th className="px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">作成日</th>
+                            <th className="w-14" />
+                          </tr>
+                          <WorkflowListFilters
+                            ref={filterRowRef}
+                            filters={filters}
+                            setFilter={setFilter}
+                          />
+                        </thead>
+                      </table>
+                    </div>
+                  )}
+
+                  {isCompact ? (
+                    <div>
+                      {loading ? (
+                        <div className="flex justify-center py-6">
+                          <Spinner />
+                        </div>
+                      ) : filteredItems.length === 0 ? (
+                        <InfoCard>該当するワークフローがありません。</InfoCard>
+                      ) : (
+                        <div className="flex flex-col" style={{ gap: MOBILE_CARD_GAP }}>
+                          {filteredItems.map((item) => {
+                            const key = resolveWorkflowKey(item);
+                            return (
+                              <button
+                                key={key}
+                                type="button"
+                                onClick={() => handleCardClick(item)}
+                                className="w-full rounded-[16px] text-left"
                               >
-                                <Stack
-                                  direction="row"
-                                  spacing={MOBILE_ACTION_GAP}
-                                  alignItems="center"
-                                  justifyContent="space-between"
-                                >
-                                  <Typography variant="subtitle1" fontWeight={600}>
-                                    {item.category || "-"}
-                                  </Typography>
-                                  <StatusChip
-                                    status={item.rawStatus || item.status || ""}
-                                  />
-                                </Stack>
-                                <Stack spacing={MOBILE_META_GAP}>
-                                  <Typography variant="caption" color="text.secondary">
-                                    申請日
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    {formatWorkflowDateValue(item.applicationDate)}
-                                  </Typography>
-                                </Stack>
-                                <Stack
-                                  direction="row"
-                                  spacing={MOBILE_ACTION_GAP}
-                                  justifyContent="space-between"
-                                >
-                                  <Stack spacing={MOBILE_META_GAP}>
-                                    <Typography
-                                      variant="caption"
-                                      color="text.secondary"
-                                    >
-                                      作成日
-                                    </Typography>
-                                    <Typography variant="body2">
-                                      {item.createdAt || "-"}
-                                    </Typography>
-                                  </Stack>
-                                  <Stack spacing={MOBILE_META_GAP} alignItems="flex-end">
-                                    <Typography
-                                      variant="caption"
-                                      color="text.secondary"
-                                    >
-                                      ステータス
-                                    </Typography>
-                                    <Typography variant="body2">
-                                      {item.status || "-"}
-                                    </Typography>
-                                  </Stack>
-                                </Stack>
-                              </Paper>
-                            </ButtonBase>
-                          );
-                        })}
-                      </Stack>
-                    )}
-                  </Box>
-                ) : (
-                  <Box sx={{ height: dataGridContainerHeight, width: "100%" }}>
-                    <DataGrid
-                      rows={filteredItems}
-                      columns={columns}
-                      getRowId={getRowId}
-                      disableColumnMenu
-                      disableColumnSelector
-                      disableDensitySelector
-                      disableRowSelectionOnClick
-                      hideFooter
-                      loading={loading}
-                      onRowClick={handleRowClick}
-                      rowHeight={dataGridRowHeight}
-                      columnHeaderHeight={0}
-                      getRowClassName={getRowClassName}
-                      sx={{
-                        "& .MuiDataGrid-columnHeaders": { display: "none" },
-                        "& .status-cancelled .MuiDataGrid-cell": {
-                          color: "text.disabled",
-                        },
-                        "& .MuiDataGrid-row": {
-                          cursor: "pointer",
-                        },
-                        "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within":
-                          {
-                            outline: "none",
-                          },
-                      }}
-                    />
-                  </Box>
-                )}
-              </Stack>
-            ) : (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  py: EMPTY_STATE_PADDING_Y,
-                }}
-              >
+                                <div className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-white px-4 py-4 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.28)] transition hover:border-emerald-200 hover:bg-emerald-50/40">
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="min-w-0 break-words text-base font-semibold text-slate-900">
+                                      {item.category || "-"}
+                                    </div>
+                                    <div className="max-w-full self-start sm:self-center">
+                                      <StatusChip
+                                        status={item.rawStatus || item.status || ""}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col" style={{ gap: MOBILE_META_GAP }}>
+                                    <div className="text-xs text-slate-500">
+                                      申請日
+                                    </div>
+                                    <div className="text-sm text-slate-900">
+                                      {formatWorkflowDateValue(item.applicationDate)}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col justify-between gap-2 sm:flex-row">
+                                    <div className="flex flex-col" style={{ gap: MOBILE_META_GAP }}>
+                                      <div className="text-xs text-slate-500">
+                                        作成日
+                                      </div>
+                                      <div className="text-sm text-slate-900">
+                                        {item.createdAt || "-"}
+                                      </div>
+                                    </div>
+                                    <div className="flex flex-col sm:items-end" style={{ gap: MOBILE_META_GAP }}>
+                                      <div className="text-xs text-slate-500">
+                                        ステータス
+                                      </div>
+                                      <div className="text-sm text-slate-900">
+                                        {item.status || "-"}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-[24px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(247,253,249,0.94)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
+                      <div className="grid grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] border-b border-slate-200/80 bg-[linear-gradient(180deg,rgba(240,253,244,0.72)_0%,rgba(248,250,252,0.58)_100%)] px-5 py-3 text-[0.74rem] font-semibold tracking-[0.04em] text-slate-500">
+                        <div>種別</div>
+                        <div>申請日</div>
+                        <div>ステータス</div>
+                        <div>作成日</div>
+                      </div>
+                      {loading ? (
+                        <div className="flex justify-center py-10">
+                          <Spinner />
+                        </div>
+                      ) : filteredItems.length === 0 ? (
+                        <div className="px-5 py-8">
+                          <InfoCard>該当するワークフローがありません。</InfoCard>
+                        </div>
+                      ) : (
+                        <div>
+                          {filteredItems.map((item) => {
+                            const isCancelled =
+                              item.rawStatus === WorkflowStatus.CANCELLED ||
+                              item.status === CANCELLED_LABEL;
+                            return (
+                              <button
+                                key={resolveWorkflowKey(item)}
+                                type="button"
+                                onClick={() => handleCardClick(item)}
+                                className={[
+                                  "grid w-full grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] items-center gap-4 border-b border-slate-200/80 px-5 py-4 text-left transition last:border-b-0 hover:bg-emerald-50/40",
+                                  isCancelled ? "text-slate-400" : "text-slate-900",
+                                ].join(" ")}
+                              >
+                                <div className="font-medium">{item.category || "-"}</div>
+                                <div>{formatWorkflowDateValue(item.applicationDate)}</div>
+                                <div>
+                                  <StatusChip status={item.rawStatus || item.status || ""} />
+                                </div>
+                                <div>{item.createdAt || "-"}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Surface>
+            </>
+          ) : (
+            <Surface>
+              <div className="flex justify-center py-4">
                 {loading ? (
-                  <CircularProgress />
+                  <Spinner />
                 ) : (
-                  <Alert severity="info">
+                  <InfoCard>
                     ログイン中のアカウントに紐づくスタッフ情報が見つからないため、一覧を表示できません。
                     <br />
                     スタッフアカウントが未登録の場合は管理者にお問い合わせください。
-                  </Alert>
+                  </InfoCard>
                 )}
-              </Box>
-            )}
-          </Stack>
-        </Box>
+              </div>
+            </Surface>
+          )}
+        </div>
       </PageSection>
     </Page>
   );

@@ -1,19 +1,7 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { DailyReportCalendar } from "@features/attendance/daily-report";
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Container,
-  Divider,
-  Grid,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 import {
   dailyReportsByStaffId,
@@ -46,7 +34,7 @@ import {
   getNextVersion,
 } from "@/shared/api/graphql/concurrency";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
-import { dashboardInnerSurfaceSx } from "@/shared/ui/layout";
+import { DashboardInnerSurface } from "@/shared/ui/layout";
 
 import {
   type AdminComment,
@@ -64,14 +52,22 @@ type LocationState = {
 
 const DATE_FORMAT = "YYYY-MM-DD";
 
+const STATUS_BADGE_CLASS: Record<"default" | "info" | "success", string> = {
+  default:
+    "inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600",
+  info: "inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700",
+  success:
+    "inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700",
+};
+
 const normalizeReactions = (
-  entries?: (DailyReportReaction | null)[] | null
+  entries?: (DailyReportReaction | null)[] | null,
 ): DailyReportReaction[] =>
   entries?.filter((entry): entry is DailyReportReaction => Boolean(entry)) ??
   [];
 
 const normalizeComments = (
-  entries?: (DailyReportComment | null)[] | null
+  entries?: (DailyReportComment | null)[] | null,
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
@@ -85,11 +81,18 @@ const sortReports = (items: AdminDailyReport[]) =>
     return b.date.localeCompare(a.date);
   });
 
-export default function AdminDailyReportDetail() {
+interface AdminDailyReportDetailProps {
+  overrideId?: string;
+}
+
+export default function AdminDailyReportDetail({
+  overrideId,
+}: AdminDailyReportDetailProps = {}) {
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = overrideId ?? paramId;
   const location = useLocation();
   const state = location.state as LocationState | null;
   const stateReportId = state?.report?.id ?? null;
@@ -106,25 +109,25 @@ export default function AdminDailyReportDetail() {
         .join(" ");
       return name || "スタッフ";
     },
-    [staffs]
+    [staffs],
   );
 
   const [report, setReport] = useState<AdminDailyReport | null>(
-    () => state?.report ?? null
+    () => state?.report ?? null,
   );
   const [reports, setReports] = useState<AdminDailyReport[]>([]);
   const [isLoading, setIsLoading] = useState(!state?.report);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reactions, setReactions] = useState<ReportReaction[]>(
-    () => report?.reactions ?? []
+    () => report?.reactions ?? [],
   );
   const [comments, setComments] = useState<AdminComment[]>(
-    () => report?.comments ?? []
+    () => report?.comments ?? [],
   );
   const [commentInput, setCommentInput] = useState<string>("");
   const [selectedReactions, setSelectedReactions] = useState<ReactionType[]>(
-    []
+    [],
   );
   const [reactionEntries, setReactionEntries] = useState<
     DailyReportReaction[] | null
@@ -139,11 +142,12 @@ export default function AdminDailyReportDetail() {
   const [currentStaffName, setCurrentStaffName] = useState<string>("管理者");
   const [isResolvingCurrentStaff, setIsResolvingCurrentStaff] = useState(true);
   const [calendarDate, setCalendarDate] = useState<Dayjs>(() =>
-    dayjs().startOf("day")
+    dayjs().startOf("day"),
   );
   const [staffIdForReports, setStaffIdForReports] = useState<string | null>(
-    null
+    null,
   );
+  const isCompact = overrideId !== undefined;
 
   const { dateMap: reportsByDate, dateSet: reportedDateSet } = useMemo(() => {
     const dateMap = new Map<string, AdminDailyReport>();
@@ -159,7 +163,6 @@ export default function AdminDailyReportDetail() {
 
   const fetchReport = useCallback(async () => {
     if (!id) return;
-
     setIsLoading(true);
     setLoadError(null);
     try {
@@ -170,34 +173,24 @@ export default function AdminDailyReportDetail() {
       })) as GraphQLResult<GetDailyReportQuery>;
 
       if (response.errors?.length) {
-        const messages = response.errors.map((err) => err.message);
-        throw new Error(messages.join("\n"));
+        throw new Error(response.errors.map((err) => err.message).join("\n"));
       }
 
       const record = response.data?.getDailyReport;
-      if (!record) {
-        throw new Error("日報が見つかりませんでした。");
-      }
+      if (!record) throw new Error("日報が見つかりませんでした。");
 
       setReactionEntries(normalizeReactions(record.reactions));
       setCommentEntries(normalizeComments(record.comments));
       setReport(mapDailyReport(record, buildStaffName(record.staffId)));
 
-      // Initialize staffIdForReports and calendarDate from the report
-      if (!staffIdForReports) {
-        setStaffIdForReports(record.staffId);
-      }
+      if (!staffIdForReports) setStaffIdForReports(record.staffId);
       const reportDate = dayjs(record.reportDate, DATE_FORMAT);
-      if (reportDate.isValid()) {
-        setCalendarDate(reportDate.startOf("day"));
-      }
+      if (reportDate.isValid()) setCalendarDate(reportDate.startOf("day"));
     } catch (error) {
       setLoadError(
-        error instanceof Error ? error.message : "日報の取得に失敗しました。"
+        error instanceof Error ? error.message : "日報の取得に失敗しました。",
       );
-      if (!stateReportId) {
-        setReport(null);
-      }
+      if (!stateReportId) setReport(null);
       setReactionEntries(null);
       setCommentEntries(null);
     } finally {
@@ -206,17 +199,20 @@ export default function AdminDailyReportDetail() {
   }, [buildStaffName, id, stateReportId, staffIdForReports]);
 
   const fetchReports = useCallback(async () => {
+    if (isCompact) {
+      setReports([]);
+      setIsLoadingReports(false);
+      return;
+    }
     if (!staffIdForReports) {
       setReports([]);
       setIsLoadingReports(false);
       return;
     }
-
     setIsLoadingReports(true);
     try {
       const aggregated: AdminDailyReport[] = [];
       let nextToken: string | null | undefined = undefined;
-
       do {
         const response = (await graphqlClient.graphql({
           query: dailyReportsByStaffId,
@@ -231,30 +227,27 @@ export default function AdminDailyReportDetail() {
 
         if (response.errors?.length) {
           throw new Error(
-            response.errors.map((error) => error.message).join("\n")
+            response.errors.map((error) => error.message).join("\n"),
           );
         }
 
         const items =
           response.data?.dailyReportsByStaffId?.items?.filter(
-            (item): item is NonNullable<typeof item> => item !== null
+            (item): item is NonNullable<typeof item> => item !== null,
           ) ?? [];
-
         items.forEach((item) => {
           aggregated.push(mapDailyReport(item, buildStaffName(item.staffId)));
         });
-
         nextToken = response.data?.dailyReportsByStaffId?.nextToken;
       } while (nextToken);
 
       setReports(sortReports(aggregated));
     } catch {
-      // Silently fail - reports list is supplementary
       setReports([]);
     } finally {
       setIsLoadingReports(false);
     }
-  }, [buildStaffName, staffIdForReports]);
+  }, [buildStaffName, isCompact, staffIdForReports]);
 
   useEffect(() => {
     void fetchReport();
@@ -287,7 +280,7 @@ export default function AdminDailyReportDetail() {
     setSelectedReactions(
       reactionEntries
         .filter((entry) => entry.staffId === currentStaffId)
-        .map((entry) => entry.type as ReactionType)
+        .map((entry) => entry.type as ReactionType),
     );
   }, [currentStaffId, reactionEntries]);
 
@@ -299,10 +292,8 @@ export default function AdminDailyReportDetail() {
       setIsResolvingCurrentStaff(false);
       return;
     }
-
     let mounted = true;
     setIsResolvingCurrentStaff(true);
-
     const resolveStaff = async () => {
       try {
         const staff = await fetchStaff(cognitoUser.id);
@@ -322,14 +313,10 @@ export default function AdminDailyReportDetail() {
         setCurrentStaffId(null);
         setCurrentStaffName("管理者");
       } finally {
-        if (mounted) {
-          setIsResolvingCurrentStaff(false);
-        }
+        if (mounted) setIsResolvingCurrentStaff(false);
       }
     };
-
     void resolveStaff();
-
     return () => {
       mounted = false;
     };
@@ -338,37 +325,31 @@ export default function AdminDailyReportDetail() {
   const handleCalendarChange = useCallback(
     (newDate: Dayjs | null) => {
       if (!newDate || !staffIdForReports) return;
-
       const dateKey = newDate.format(DATE_FORMAT);
       setCalendarDate(newDate.startOf("day"));
-
-      // Find report for the selected date
       const reportForDate = reportsByDate.get(dateKey);
-
       if (reportForDate) {
-        // Navigate to the report for the selected date
         navigate(`/admin/daily-report/${reportForDate.id}?date=${dateKey}`, {
           replace: true,
         });
       } else {
-        // No report for this date - stay on current page but update calendar
         setSearchParams({ date: dateKey }, { replace: true });
       }
     },
-    [navigate, reportsByDate, staffIdForReports, setSearchParams]
+    [navigate, reportsByDate, staffIdForReports, setSearchParams],
   );
 
   const handleToggleReaction = async (type: ReactionType) => {
     if (!report) return;
     if (!reactionEntries) {
       setActionError(
-        "リアクション情報の取得中です。少し待ってから再度お試しください。"
+        "リアクション情報の取得中です。少し待ってから再度お試しください。",
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、リアクションを登録できません。"
+        "スタッフ情報が取得できないため、リアクションを登録できません。",
       );
       return;
     }
@@ -378,12 +359,12 @@ export default function AdminDailyReportDetail() {
     setActionError(null);
 
     const hasReaction = reactionEntries.some(
-      (entry) => entry.staffId === currentStaffId && entry.type === type
+      (entry) => entry.staffId === currentStaffId && entry.type === type,
     );
     const timestamp = new Date().toISOString();
     const nextEntries = hasReaction
       ? reactionEntries.filter(
-          (entry) => entry.staffId !== currentStaffId || entry.type !== type
+          (entry) => entry.staffId !== currentStaffId || entry.type !== type,
         )
       : [
           ...reactionEntries,
@@ -427,9 +408,7 @@ export default function AdminDailyReportDetail() {
       }
 
       const updated = response.data?.updateDailyReport;
-      if (!updated) {
-        throw new Error("リアクションの更新に失敗しました。");
-      }
+      if (!updated) throw new Error("リアクションの更新に失敗しました。");
 
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
@@ -438,7 +417,7 @@ export default function AdminDailyReportDetail() {
       setActionError(
         error instanceof Error
           ? error.message
-          : "リアクションの登録に失敗しました。"
+          : "リアクションの登録に失敗しました。",
       );
     } finally {
       setIsSavingReaction(false);
@@ -451,13 +430,13 @@ export default function AdminDailyReportDetail() {
     if (!report) return;
     if (!commentEntries) {
       setActionError(
-        "コメント情報の取得中です。少し待ってから再度お試しください。"
+        "コメント情報の取得中です。少し待ってから再度お試しください。",
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、コメントを登録できません。"
+        "スタッフ情報が取得できないため、コメントを登録できません。",
       );
       return;
     }
@@ -502,7 +481,7 @@ export default function AdminDailyReportDetail() {
                 authorName,
                 body: commentBody,
                 createdAt,
-              })
+              }),
             ),
             updatedAt: timestamp,
             version: getNextVersion(report.version),
@@ -521,8 +500,20 @@ export default function AdminDailyReportDetail() {
       }
 
       const updated = response.data?.updateDailyReport;
-      if (!updated) {
-        throw new Error("コメントの更新に失敗しました。");
+      if (!updated) throw new Error("コメントの更新に失敗しました。");
+
+      try {
+        await sendDailyReportCommentNotification({
+          staffs,
+          report: updated,
+          commentAuthorName: currentStaffName,
+          commentBody: body,
+        });
+      } catch (mailError) {
+        console.error(
+          "Failed to send daily report comment notification:",
+          mailError,
+        );
       }
 
       setReactionEntries(normalizeReactions(updated.reactions));
@@ -533,7 +524,7 @@ export default function AdminDailyReportDetail() {
       setActionError(
         error instanceof Error
           ? error.message
-          : "コメントの登録に失敗しました。"
+          : "コメントの登録に失敗しました。",
       );
     } finally {
       setIsSavingComment(false);
@@ -554,23 +545,55 @@ export default function AdminDailyReportDetail() {
     isResolvingCurrentStaff;
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Stack spacing={3}>
-        <Box>
-          <Typography variant="h1">日報詳細</Typography>
-        </Box>
-
-        {loadError && <Alert severity="error">{loadError}</Alert>}
-
-        {actionError && (
-          <Alert severity="error" onClose={() => setActionError(null)}>
-            {actionError}
-          </Alert>
+    <div
+      className={`mx-auto w-full max-w-[1280px] ${isCompact ? "px-2 pb-4 pt-0" : "px-2 pb-6 pt-4 sm:px-4 md:px-6"}`}
+    >
+      <div className="space-y-3">
+        {!isCompact && (
+          <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
+            <h1 className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
+              日報詳細
+            </h1>
+          </section>
         )}
 
-        <Grid container spacing={3} alignItems="flex-start">
-          <Grid item xs={12} md={3}>
-            <Box sx={dashboardInnerSurfaceSx}>
+        {/* Errors */}
+        {loadError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {loadError}
+          </div>
+        )}
+        {actionError && (
+          <div className="flex items-start justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <span>{actionError}</span>
+            <button
+              type="button"
+              onClick={() => setActionError(null)}
+              className="ml-3 shrink-0 text-red-400 hover:text-red-600"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Main content grid */}
+        <div
+          className={`grid grid-cols-1 gap-3 ${!isCompact ? "md:grid-cols-[1fr_2fr] md:items-start" : ""}`}
+        >
+          {!isCompact && (
+            <DashboardInnerSurface>
               <DailyReportCalendar
                 value={calendarDate}
                 onChange={handleCalendarChange}
@@ -578,194 +601,198 @@ export default function AdminDailyReportDetail() {
                 isLoadingReports={isLoadingReports}
                 hasReports={reports.length > 0}
               />
-            </Box>
-          </Grid>
+            </DashboardInnerSurface>
+          )}
 
-          <Grid item xs={12} md={9}>
-            <Box sx={dashboardInnerSurfaceSx}>
-              {shouldShowLoading ? (
-                <Paper sx={{ p: 4 }}>
-                  <Typography align="center">読み込み中...</Typography>
-                </Paper>
-              ) : !report ? (
-                <Paper sx={{ p: 4 }}>
-                  <Stack spacing={2} alignItems="flex-start">
-                    <Typography variant="h6">日報が見つかりません</Typography>
-                    <Typography color="text.secondary">
-                      URLが正しいか、一覧から改めて選択してください。
-                    </Typography>
-                    <Button variant="outlined" onClick={() => navigate(-1)}>
-                      戻る
-                    </Button>
-                  </Stack>
-                </Paper>
-              ) : (
-                <Paper sx={{ p: 4 }}>
-                  <Stack spacing={3}>
-                    <Box>
-                      <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                        {report.title}
-                      </Typography>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                        flexWrap="wrap"
-                      >
-                        <Typography variant="subtitle2" color="text.secondary">
-                          {formatDateSlash(report.date) || report.date} |{" "}
-                          {report.author}
-                        </Typography>
-                        <Chip
-                          label={STATUS_META[report.status].label}
-                          color={STATUS_META[report.status].color}
-                          size="small"
-                        />
-                      </Stack>
-                    </Box>
-
-                    <Typography variant="body2" color="text.secondary">
-                      最終更新:{" "}
-                      {formatDateTimeReadable(report.updatedAt) || "-"}
-                    </Typography>
-
-                    <Typography
-                      component="pre"
-                      sx={{ whiteSpace: "pre-wrap", fontFamily: "inherit" }}
+          {/* Detail panel */}
+          <DashboardInnerSurface>
+            {shouldShowLoading ? (
+              <p className="py-8 text-center text-sm text-slate-400">
+                読み込み中...
+              </p>
+            ) : !report ? (
+              <div className="space-y-3 py-4">
+                <p className="font-semibold text-slate-700">
+                  日報が見つかりません
+                </p>
+                <p className="text-sm text-slate-500">
+                  URLが正しいか、一覧から改めて選択してください。
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="inline-flex h-8 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                >
+                  戻る
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Report header */}
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800">
+                    {report.title}
+                  </h2>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span className="text-sm text-slate-500">
+                      {formatDateSlash(report.date) || report.date} |{" "}
+                      {report.author}
+                    </span>
+                    <span
+                      className={
+                        STATUS_BADGE_CLASS[STATUS_META[report.status].color]
+                      }
                     >
-                      {report.content || "内容は登録されていません"}
-                    </Typography>
+                      {STATUS_META[report.status].label}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    最終更新: {formatDateTimeReadable(report.updatedAt) || "-"}
+                  </p>
+                </div>
 
-                    <Divider />
+                {/* Content */}
+                <pre className="whitespace-pre-wrap font-[inherit] text-sm leading-relaxed text-slate-700">
+                  {report.content || "内容は登録されていません"}
+                </pre>
 
-                    <Stack spacing={1}>
-                      <Typography variant="subtitle2">リアクション</Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap">
-                        {(Object.keys(REACTION_META) as ReactionType[]).map(
-                          (type) => {
-                            const meta = REACTION_META[type];
-                            const count =
-                              reactions.find(
-                                (reaction) => reaction.type === type
-                              )?.count ?? 0;
-                            const isSelected = selectedReactions.includes(type);
-                            return (
-                              <Chip
-                                key={type}
-                                clickable
-                                color={isSelected ? "primary" : undefined}
-                                variant={isSelected ? "filled" : "outlined"}
-                                label={`${meta.emoji} ${meta.label}${
-                                  count > 0 ? ` (${count})` : ""
-                                }`}
-                                disabled={chipsDisabled}
-                                onClick={() => {
-                                  void handleToggleReaction(type);
-                                }}
-                              />
-                            );
-                          }
-                        )}
-                      </Stack>
-                      {(!reactionEntries || isResolvingCurrentStaff) && (
-                        <Typography color="text.secondary" variant="caption">
-                          スタッフ情報およびリアクション履歴の取得完了後に操作できます。
-                        </Typography>
-                      )}
-                      {reactions.length === 0 && (
-                        <Typography color="text.secondary" variant="body2">
-                          まだリアクションはありません。
-                        </Typography>
-                      )}
-                    </Stack>
+                <hr className="border-slate-100" />
 
-                    <Divider />
-
-                    <Stack spacing={2}>
-                      <Typography variant="subtitle2">コメント</Typography>
-                      <Stack spacing={1}>
-                        <TextField
-                          value={commentInput}
-                          onChange={(event) => {
-                            if (actionError) setActionError(null);
-                            setCommentInput(event.target.value);
-                          }}
-                          placeholder="コメントを入力"
-                          multiline
-                          minRows={3}
-                        />
-                        <Stack direction="row" justifyContent="flex-end">
-                          <Button
-                            variant="contained"
-                            onClick={handleSubmitComment}
-                            disabled={isCommentDisabled}
+                {/* Reactions */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    リアクション
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {(Object.keys(REACTION_META) as ReactionType[]).map(
+                      (type) => {
+                        const meta = REACTION_META[type];
+                        const count =
+                          reactions.find((r) => r.type === type)?.count ?? 0;
+                        const isSelected = selectedReactions.includes(type);
+                        return (
+                          <button
+                            key={type}
+                            type="button"
+                            disabled={chipsDisabled}
+                            onClick={() => {
+                              void handleToggleReaction(type);
+                            }}
+                            className={[
+                              "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition",
+                              isSelected
+                                ? "border-emerald-300 bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                              chipsDisabled
+                                ? "cursor-not-allowed opacity-50"
+                                : "",
+                            ]
+                              .filter(Boolean)
+                              .join(" ")}
                           >
-                            コメントを追加
-                          </Button>
-                        </Stack>
-                        {(!commentEntries || isResolvingCurrentStaff) && (
-                          <Typography color="text.secondary" variant="caption">
-                            スタッフ情報およびコメント履歴の取得完了後に登録できます。
-                          </Typography>
-                        )}
-                      </Stack>
+                            {meta.emoji} {meta.label}
+                            {count > 0 && (
+                              <span className="ml-1 text-slate-400">
+                                ({count})
+                              </span>
+                            )}
+                          </button>
+                        );
+                      },
+                    )}
+                  </div>
+                  {(!reactionEntries || isResolvingCurrentStaff) && (
+                    <p className="text-xs text-slate-400">
+                      スタッフ情報およびリアクション履歴の取得完了後に操作できます。
+                    </p>
+                  )}
+                  {reactions.length === 0 && (
+                    <p className="text-xs text-slate-400">
+                      まだリアクションはありません。
+                    </p>
+                  )}
+                </div>
 
-                      {comments.length === 0 ? (
-                        <Typography color="text.secondary" variant="body2">
-                          まだコメントはありません。
-                        </Typography>
-                      ) : (
-                        <Stack spacing={1.5}>
-                          {comments.map((comment) => (
-                            <Paper
-                              key={comment.id}
-                              variant="outlined"
-                              sx={{ p: 2 }}
-                            >
-                              <Stack
-                                direction="row"
-                                justifyContent="space-between"
-                                spacing={2}
-                              >
-                                <Typography variant="body2" fontWeight={600}>
-                                  {comment.author}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                >
-                                  {formatDateTimeReadable(comment.createdAt) ||
-                                    comment.createdAt}
-                                </Typography>
-                              </Stack>
-                              <Typography sx={{ mt: 1 }}>
-                                {comment.body}
-                              </Typography>
-                            </Paper>
-                          ))}
-                        </Stack>
-                      )}
-                    </Stack>
+                <hr className="border-slate-100" />
 
-                    <Stack
-                      direction="row"
-                      spacing={2}
-                      justifyContent="flex-end"
-                    >
-                      <Button
-                        variant="outlined"
-                        onClick={() => navigate("/admin/daily-report")}
+                {/* Comments */}
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    コメント
+                  </p>
+                  <div className="space-y-2">
+                    <textarea
+                      value={commentInput}
+                      onChange={(e) => {
+                        if (actionError) setActionError(null);
+                        setCommentInput(e.target.value);
+                      }}
+                      placeholder="コメントを入力"
+                      rows={3}
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleSubmitComment();
+                        }}
+                        disabled={isCommentDisabled}
+                        className="inline-flex h-8 items-center rounded-lg border-0 bg-emerald-600 px-4 text-xs font-semibold text-white shadow-none transition hover:bg-emerald-700 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        一覧に戻る
-                      </Button>
-                    </Stack>
-                  </Stack>
-                </Paper>
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-      </Stack>
-    </Container>
+                        コメントを追加
+                      </button>
+                    </div>
+                    {(!commentEntries || isResolvingCurrentStaff) && (
+                      <p className="text-xs text-slate-400">
+                        スタッフ情報およびコメント履歴の取得完了後に登録できます。
+                      </p>
+                    )}
+                  </div>
+
+                  {comments.length === 0 ? (
+                    <p className="text-xs text-slate-400">
+                      まだコメントはありません。
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {comments.map((comment) => (
+                        <div
+                          key={comment.id}
+                          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="text-xs font-semibold text-slate-700">
+                              {comment.author}
+                            </span>
+                            <span className="shrink-0 text-xs text-slate-400">
+                              {formatDateTimeReadable(comment.createdAt) ||
+                                comment.createdAt}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm text-slate-600">
+                            {comment.body}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/admin/daily-report")}
+                    className="inline-flex h-8 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                  >
+                    一覧に戻る
+                  </button>
+                </div>
+              </div>
+            )}
+          </DashboardInnerSurface>
+        </div>
+      </div>
+    </div>
   );
 }

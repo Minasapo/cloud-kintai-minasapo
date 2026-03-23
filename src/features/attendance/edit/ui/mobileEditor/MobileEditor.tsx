@@ -1,13 +1,13 @@
 import QuickInputButtonsMobile from "@features/attendance/edit/ui/QuickInputButtonsMobile";
-import { Alert, AlertTitle, Box, Stack, Typography } from "@mui/material";
 import GroupContainerMobile from "@shared/ui/group-container/GroupContainerMobile";
-import Title from "@shared/ui/typography/Title";
 import { useContext, useMemo, useState } from "react";
 import { useFormState } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditPageHeader } from "@/features/attendance/edit/ui/components/AttendanceEditPageHeader";
+import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
 
 import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import ChangeRequestingAlert from "../desktopEditor/ChangeRequestingMessage";
@@ -65,25 +65,14 @@ export function MobileEditor() {
 
   if (changeRequests.length > 0) {
     return (
-      <Stack direction="column" spacing={1} sx={{ p: 1 }}>
-        <AttendanceEditBreadcrumb />
-        <Title>勤怠編集</Title>
-        {errorMessages.length > 0 && (
-          <Box mb={1}>
-            <Alert severity="error">
-              <AlertTitle>入力内容に誤りがあります。</AlertTitle>
-              <Stack spacing={0.5}>
-                {errorMessages.map((message) => (
-                  <Typography key={message} variant="body2">
-                    {message}
-                  </Typography>
-                ))}
-              </Stack>
-            </Alert>
-          </Box>
-        )}
+      <div className="flex flex-col gap-2 p-2">
+        <AttendanceEditPageHeader
+          breadcrumb={<AttendanceEditBreadcrumb />}
+          variant="mobile"
+        />
+        <AttendanceErrorSummary messages={errorMessages} variant="mobile" />
         <ChangeRequestingAlert changeRequests={changeRequests} />
-      </Stack>
+      </div>
     );
   }
 
@@ -103,42 +92,14 @@ export function MobileEditor() {
   }
 
   return (
-    <Stack
-      direction="column"
-      spacing={1}
-      sx={{
-        p: 1,
-        pb: 10,
-        "& .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline": {
-          borderColor: "divider",
-        },
-        "& .MuiOutlinedInput-root.Mui-error:hover .MuiOutlinedInput-notchedOutline":
-          {
-            borderColor: "divider",
-          },
-        "& .MuiOutlinedInput-root.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline":
-          {
-            borderColor: "divider",
-          },
-      }}
-    >
-      <AttendanceEditBreadcrumb />
-      <Title>勤怠編集</Title>
-      {errorMessages.length > 0 && (
-        <Box mb={1}>
-          <Alert severity="error">
-            <AlertTitle>入力内容に誤りがあります。</AlertTitle>
-            <Stack spacing={0.5}>
-              {errorMessages.map((message) => (
-                <Typography key={message} variant="body2">
-                  {message}
-                </Typography>
-              ))}
-            </Stack>
-          </Alert>
-        </Box>
-      )}
-      <Stack direction="column" spacing={2} sx={{ p: 1 }}>
+    <div className="flex flex-col gap-2 p-2 pb-10">
+      <AttendanceEditPageHeader
+        breadcrumb={<AttendanceEditBreadcrumb />}
+        description="勤務時間や休憩、休暇、備考を確認しながら、そのまま修正申請できます。"
+        variant="mobile"
+      />
+      <AttendanceErrorSummary messages={errorMessages} variant="mobile" />
+      <div className="flex flex-col gap-2">
         <NoDataAlert />
         {setValue && restReplace && hourlyPaidHolidayTimeReplace && (
           <QuickInputButtonsMobile
@@ -159,7 +120,7 @@ export function MobileEditor() {
           <WorkTypeItemMobile />
         </GroupContainerMobile>
         <GroupContainerMobile hideAccent hideBorder>
-          <Stack spacing={1}>
+          <div className="flex flex-col gap-2">
             {/* 勤務時間・休憩時間 */}
             <WorkTimeInput />
             <RestTimeInput
@@ -168,7 +129,7 @@ export function MobileEditor() {
               restRemove={restRemove}
               restUpdate={restUpdate}
             />
-          </Stack>
+          </div>
         </GroupContainerMobile>
         <GroupContainerMobile hideAccent hideBorder>
           {/* 休暇タブ */}
@@ -200,7 +161,7 @@ export function MobileEditor() {
           isValid={isValid}
           isSubmitting={isSubmitting}
         />
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 }

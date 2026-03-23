@@ -465,11 +465,11 @@ export default function AdminPendingApprovalSummary() {
         >
           <Box
             sx={{
-              px: 1,
+              px: { lg: 0.75, xl: 1 },
               py: 0.5,
               borderRadius: 1,
               backgroundColor: "common.white",
-              minWidth: { lg: "112px", xl: "124px" },
+              minWidth: { lg: "84px", xl: "112px" },
             }}
           >
             <Typography
@@ -482,7 +482,12 @@ export default function AdminPendingApprovalSummary() {
                 whiteSpace: "nowrap",
               }}
             >
-              勤怠修正申請
+              <Box component="span" sx={{ display: { lg: "inline", xl: "none" } }}>
+                勤怠
+              </Box>
+              <Box component="span" sx={{ display: { xs: "none", xl: "inline" } }}>
+                勤怠修正申請
+              </Box>
             </Typography>
             <Typography
               variant="body2"
@@ -510,11 +515,11 @@ export default function AdminPendingApprovalSummary() {
       >
         <Box
           sx={{
-            px: 1,
+            px: { lg: 0.75, xl: 1 },
             py: 0.5,
             borderRadius: 1,
             backgroundColor: "common.white",
-            minWidth: { lg: "112px", xl: "124px" },
+            minWidth: { lg: "84px", xl: "112px" },
           }}
         >
           <Typography
@@ -527,7 +532,12 @@ export default function AdminPendingApprovalSummary() {
               whiteSpace: "nowrap",
             }}
           >
-            ワークフロー申請
+            <Box component="span" sx={{ display: { lg: "inline", xl: "none" } }}>
+              申請
+            </Box>
+            <Box component="span" sx={{ display: { xs: "none", xl: "inline" } }}>
+              ワークフロー申請
+            </Box>
           </Typography>
           <Typography
             variant="body2"

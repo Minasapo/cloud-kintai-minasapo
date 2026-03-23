@@ -1,4 +1,3 @@
-import { Alert, Box, Button, Container, styled } from "@mui/material";
 import Clock from "@shared/ui/clock/Clock";
 
 export type OfficeQrRegisterPanelProps = {
@@ -9,14 +8,8 @@ export type OfficeQrRegisterPanelProps = {
   onClockOut: () => void;
 };
 
-const ActionButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.clock_in.contrastText,
-  backgroundColor: theme.palette.clock_in.main,
-  "&.clock-out": {
-    backgroundColor: theme.palette.clock_out.main,
-    color: theme.palette.clock_out.contrastText,
-  },
-}));
+const ACTION_BUTTON_BASE_CLASS_NAME =
+  "mt-2 inline-flex h-20 w-full max-w-[350px] appearance-none items-center justify-center rounded-xl border-0 px-6 text-2xl font-semibold text-white transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2";
 
 export function OfficeQrRegisterPanel({
   isOfficeModeEnabled,
@@ -27,85 +20,62 @@ export function OfficeQrRegisterPanel({
 }: OfficeQrRegisterPanelProps) {
   if (!isOfficeModeEnabled) {
     return (
-      <Container>
-        <Box sx={{ mt: 4, textAlign: "center" }}>
-          <Alert
-            severity="warning"
-            data-testid="office-qr-register-disabled-alert"
-          >
-            現在、使用することができません。
-          </Alert>
-        </Box>
-      </Container>
+      <div className="mx-auto w-full max-w-3xl px-4 py-4">
+        <div
+          role="alert"
+          data-testid="office-qr-register-disabled-alert"
+          className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm font-medium leading-6 text-amber-950"
+        >
+          現在、使用することができません。
+        </div>
+      </div>
     );
   }
 
   if (errorMessage) {
     return (
-      <Container>
-        <Alert
-          severity="error"
-          sx={{ mt: 4 }}
+      <div className="mx-auto w-full max-w-3xl px-4 py-4">
+        <div
+          role="alert"
           data-testid="office-qr-register-error-alert"
+          className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium leading-6 text-rose-950"
         >
           {errorMessage}
-        </Alert>
-      </Container>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container>
-      <Box
-        sx={{
-          mt: 4,
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
+    <div className="mx-auto w-full max-w-3xl px-4 py-4">
+      <div
+        className="mt-4 flex flex-col items-center text-center"
         data-testid="office-qr-register-panel"
       >
-        <Box data-testid="office-qr-register-clock">
+        <div data-testid="office-qr-register-clock">
           <Clock />
-        </Box>
+        </div>
         {mode === "clock_in" && (
-          <ActionButton
-            variant="contained"
-            className="clock-in"
+          <button
+            type="button"
             onClick={onClockIn}
-            size="large"
-            sx={{
-              mt: 2,
-              width: 1,
-              maxWidth: 350,
-              height: "80px",
-              fontSize: "1.5rem",
-            }}
+            className={`${ACTION_BUTTON_BASE_CLASS_NAME} bg-emerald-600`}
             data-testid="office-qr-register-clock-in-button"
           >
             出勤
-          </ActionButton>
+          </button>
         )}
         {mode === "clock_out" && (
-          <ActionButton
-            variant="contained"
-            className="clock-out"
+          <button
+            type="button"
             onClick={onClockOut}
-            size="large"
-            sx={{
-              mt: 2,
-              width: 1,
-              maxWidth: 350,
-              height: "80px",
-              fontSize: "1.5rem",
-            }}
+            className={`${ACTION_BUTTON_BASE_CLASS_NAME} bg-rose-600 focus-visible:ring-rose-400`}
             data-testid="office-qr-register-clock-out-button"
           >
             退勤
-          </ActionButton>
+          </button>
         )}
-      </Box>
-    </Container>
+      </div>
+    </div>
   );
 }

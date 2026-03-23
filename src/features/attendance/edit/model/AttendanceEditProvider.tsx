@@ -1,7 +1,7 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 import {
   Control,
   FieldArrayWithId,
@@ -18,21 +18,26 @@ import {
 
 import { AttendanceEditInputs } from "./common";
 
-type AttendanceEditContextProps = {
+type AttendanceEditDataContextProps = {
   workDate: dayjs.Dayjs | null | undefined;
   attendance: Attendance | null | undefined;
   staff: StaffType | null | undefined;
+};
+
+type AttendanceEditUiContextProps = {
   onSubmit: (data: AttendanceEditInputs) => Promise<void>;
   isDirty: boolean;
   isValid: boolean;
   isSubmitting: boolean;
   errorMessages?: string[];
-  restFields: FieldArrayWithId<AttendanceEditInputs, "rests", "id">[];
   changeRequests: AttendanceChangeRequest[];
-  // 表示専用モードかどうか
   readOnly?: boolean;
-  // 休憩中かどうか（勤務開始時間と最初の休憩時間が入力されている状態）
   isOnBreak?: boolean;
+  hourlyPaidHolidayEnabled: boolean;
+};
+
+type AttendanceEditFormContextProps = {
+  restFields: FieldArrayWithId<AttendanceEditInputs, "rests", "id">[];
   restAppend?: UseFieldArrayAppend<AttendanceEditInputs, "rests">;
   restRemove?: UseFieldArrayRemove;
   restUpdate?: UseFieldArrayUpdate<AttendanceEditInputs, "rests">;
@@ -56,7 +61,6 @@ type AttendanceEditContextProps = {
     AttendanceEditInputs,
     "systemComments"
   >;
-  // --- 時間単位休暇時間帯のFieldArray操作もContextで提供 ---
   hourlyPaidHolidayTimeFields: FieldArrayWithId<
     AttendanceEditInputs,
     "hourlyPaidHolidayTimes",
@@ -75,31 +79,72 @@ type AttendanceEditContextProps = {
     AttendanceEditInputs,
     "hourlyPaidHolidayTimes"
   >;
-  // 時間単位休暇の有効フラグ
-  hourlyPaidHolidayEnabled: boolean;
 };
 
-export const AttendanceEditContext = createContext<AttendanceEditContextProps>({
+export type AttendanceEditContextProps = AttendanceEditDataContextProps &
+  AttendanceEditUiContextProps &
+  AttendanceEditFormContextProps;
+
+const defaultDataContextValue: AttendanceEditDataContextProps = {
   workDate: undefined,
   attendance: undefined,
   staff: undefined,
+};
+
+const defaultUiContextValue: AttendanceEditUiContextProps = {
   onSubmit: async () => {},
   isDirty: false,
   isValid: false,
   isSubmitting: false,
   errorMessages: [],
-  restFields: [],
   changeRequests: [],
   readOnly: false,
   isOnBreak: false,
+  hourlyPaidHolidayEnabled: false,
+};
+
+const defaultFormContextValue: AttendanceEditFormContextProps = {
+  restFields: [],
   systemCommentFields: [],
   hourlyPaidHolidayTimeFields: [],
   hourlyPaidHolidayTimeAppend: () => {},
   hourlyPaidHolidayTimeRemove: () => {},
   hourlyPaidHolidayTimeUpdate: () => {},
   hourlyPaidHolidayTimeReplace: () => {},
-  hourlyPaidHolidayEnabled: false,
+};
+
+export const AttendanceEditContext = createContext<AttendanceEditContextProps>({
+  ...defaultDataContextValue,
+  ...defaultUiContextValue,
+  ...defaultFormContextValue,
 });
+
+export const AttendanceEditDataContext =
+  createContext<AttendanceEditDataContextProps>(defaultDataContextValue);
+
+export const AttendanceEditUiContext =
+  createContext<AttendanceEditUiContextProps>(defaultUiContextValue);
+
+export const AttendanceEditFormContext =
+  createContext<AttendanceEditFormContextProps>(defaultFormContextValue);
+
+export function useAttendanceEditData() {
+  return useContext(AttendanceEditDataContext);
+}
+
+export function useAttendanceEditUi() {
+  return useContext(AttendanceEditUiContext);
+}
+
+export function useAttendanceEditForm() {
+  return useContext(AttendanceEditFormContext);
+}
+
+export const defaultAttendanceEditContextValue: AttendanceEditContextProps = {
+  ...defaultDataContextValue,
+  ...defaultUiContextValue,
+  ...defaultFormContextValue,
+};
 
 export default function AttendanceEditProvider({
   children,
@@ -108,9 +153,53 @@ export default function AttendanceEditProvider({
   children: React.ReactNode;
   value: AttendanceEditContextProps;
 }) {
+  const dataValue: AttendanceEditDataContextProps = {
+    workDate: value.workDate,
+    attendance: value.attendance,
+    staff: value.staff,
+  };
+  const uiValue: AttendanceEditUiContextProps = {
+    onSubmit: value.onSubmit,
+    isDirty: value.isDirty,
+    isValid: value.isValid,
+    isSubmitting: value.isSubmitting,
+    errorMessages: value.errorMessages,
+    changeRequests: value.changeRequests,
+    readOnly: value.readOnly,
+    isOnBreak: value.isOnBreak,
+    hourlyPaidHolidayEnabled: value.hourlyPaidHolidayEnabled,
+  };
+  const formValue: AttendanceEditFormContextProps = {
+    restFields: value.restFields,
+    restAppend: value.restAppend,
+    restRemove: value.restRemove,
+    restUpdate: value.restUpdate,
+    restReplace: value.restReplace,
+    register: value.register,
+    control: value.control,
+    setValue: value.setValue,
+    getValues: value.getValues,
+    watch: value.watch,
+    handleSubmit: value.handleSubmit,
+    systemCommentFields: value.systemCommentFields,
+    systemCommentUpdate: value.systemCommentUpdate,
+    systemCommentReplace: value.systemCommentReplace,
+    hourlyPaidHolidayTimeFields: value.hourlyPaidHolidayTimeFields,
+    hourlyPaidHolidayTimeAppend: value.hourlyPaidHolidayTimeAppend,
+    hourlyPaidHolidayTimeRemove: value.hourlyPaidHolidayTimeRemove,
+    hourlyPaidHolidayTimeUpdate: value.hourlyPaidHolidayTimeUpdate,
+    hourlyPaidHolidayTimeReplace: value.hourlyPaidHolidayTimeReplace,
+  };
+
   return (
     <AttendanceEditContext.Provider value={value}>
-      {children}
+      <AttendanceEditDataContext.Provider value={dataValue}>
+        <AttendanceEditUiContext.Provider value={uiValue}>
+          <AttendanceEditFormContext.Provider value={formValue}>
+            {children}
+          </AttendanceEditFormContext.Provider>
+        </AttendanceEditUiContext.Provider>
+      </AttendanceEditDataContext.Provider>
     </AttendanceEditContext.Provider>
   );
 }

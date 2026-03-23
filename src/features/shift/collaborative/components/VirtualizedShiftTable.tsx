@@ -138,17 +138,31 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
     }
 
     return (
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: "24px",
+          border: "1px solid rgba(226,232,240,0.8)",
+          boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
+          bgcolor: "#ffffff",
+          overflowX: "auto",
+          overflowY: "hidden",
+        }}
+      >
         <Table
           size="small"
           stickyHeader
           sx={{
+            minWidth: "max-content",
             "& .MuiTableCell-root": {
               borderRight: "1px solid",
               borderColor: "divider",
             },
             "& .MuiTableCell-root:last-child": {
               borderRight: "none",
+            },
+            "& .MuiTableHead-root .MuiTableCell-root": {
+              bgcolor: "#f8fafc",
             },
           }}
         >

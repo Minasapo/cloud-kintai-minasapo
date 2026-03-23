@@ -1,13 +1,18 @@
 import { useGetHolidayCalendarsQuery } from "@entities/calendar/api/calendarApi";
-import { Container, Stack } from "@mui/material";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { designTokenVar } from "@/shared/designSystem";
 
 import { ShiftPlanFooter, ShiftPlanHeader, ShiftPlanTable } from "./components";
 import { useAutoSave, useDayCellFocus, useShiftPlanData } from "./hooks";
+
+const PAGE_PADDING_X_XS = designTokenVar("spacing.sm", "8px");
+const PAGE_PADDING_X_MD = designTokenVar("spacing.xxl", "32px");
+const PAGE_PADDING_Y = designTokenVar("spacing.xxl", "32px");
+const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
 
 export default function ShiftPlanManagement() {
   const { notify } = useLocalNotification();
@@ -87,8 +92,17 @@ export default function ShiftPlanManagement() {
   const isBusy = isPending || isFetchingYear || isSaving || isAutoSaving;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack spacing={3}>
+    <section
+      className="flex flex-col flex-1 w-full box-border"
+      style={{
+        "--page-px-xs": PAGE_PADDING_X_XS,
+        "--page-px-md": PAGE_PADDING_X_MD,
+        paddingTop: PAGE_PADDING_Y,
+        paddingBottom: PAGE_PADDING_Y,
+        gap: PAGE_SECTION_GAP,
+      } as React.CSSProperties}
+    >
+      <div className="px-[var(--page-px-xs)] md:px-[var(--page-px-md)] flex flex-col gap-[inherit]">
         <ShiftPlanHeader
           selectedYear={selectedYear}
           isBusy={isBusy}
@@ -113,7 +127,7 @@ export default function ShiftPlanManagement() {
           isBusy={isBusy}
           onSaveAll={handleSaveAll}
         />
-      </Stack>
-    </Container>
+      </div>
+    </section>
   );
 }

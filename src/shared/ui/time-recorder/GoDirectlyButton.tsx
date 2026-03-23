@@ -1,93 +1,63 @@
-import { Button } from "@mui/material";
-import { CSSProperties, useMemo, useState } from "react";
+import { useCallback } from "react";
 
-import { designTokenVar } from "@/shared/designSystem";
-
-const ACTION_BUTTON_SIZE = designTokenVar(
-  "component.timeRecorder.actionButton.size",
-  "120px"
-);
-const ACTION_BUTTON_SIZE_SM = designTokenVar(
-  "component.timeRecorder.actionButton.sizeSm",
-  "96px"
-);
-const ACTION_BUTTON_RADIUS = designTokenVar(
-  "component.timeRecorder.actionButton.borderRadius",
-  "999px"
-);
-const ACTION_BORDER_WIDTH = designTokenVar(
-  "component.timeRecorder.actionButton.borderWidth",
-  "3px"
-);
-const ACTION_DISABLED_BORDER = designTokenVar(
-  "component.timeRecorder.actionButton.disabledBorderColor",
-  "#C3CFC7"
-);
-const ACTION_DISABLED_BACKGROUND = designTokenVar(
-  "component.timeRecorder.actionButton.disabledBackground",
-  "#D9E2DD"
-);
+import ActionCardButton from "./ActionCardButton";
+import {
+  buildActionCardVars,
+  TIME_RECORDER_BUTTON_PALETTES,
+} from "./buttonStyles";
+import { useActionButtonState } from "./useActionButtonState";
 
 export interface GoDirectlyButtonProps {
   isBeforeWork: boolean;
   onGoDirectly: () => void;
+  disabled?: boolean;
+}
+
+function GoDirectlyIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
+      <path
+        d="M5 12h10M11 6l6 6-6 6M5 6v12"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 const GoDirectlyButton = ({
   isBeforeWork,
   onGoDirectly,
+  disabled = false,
 }: GoDirectlyButtonProps) => {
-  const actionButtonVars: CSSProperties & Record<`--${string}`, string> = {
-    "--action-button-size": ACTION_BUTTON_SIZE,
-    "--action-button-size-sm": ACTION_BUTTON_SIZE_SM,
-    "--action-button-radius": ACTION_BUTTON_RADIUS,
-    "--action-border-width": ACTION_BORDER_WIDTH,
-    "--action-disabled-border": ACTION_DISABLED_BORDER,
-    "--action-disabled-bg": ACTION_DISABLED_BACKGROUND,
-  };
-  const [isPending, setIsPending] = useState(false);
+  const actionButtonVars = buildActionCardVars(
+    TIME_RECORDER_BUTTON_PALETTES.subtle,
+  );
+  const { isDisabled, markPending } = useActionButtonState({
+    canInteract: isBeforeWork,
+    disabled,
+  });
 
-  // Derived state: reset isPending when isBeforeWork changes
-  const actualIsPending = useMemo(() => {
-    return isBeforeWork ? false : isPending;
-  }, [isBeforeWork, isPending]);
+  const handleClick = useCallback(() => {
+    if (!markPending()) {
+      return;
+    }
+
+    onGoDirectly();
+  }, [markPending, onGoDirectly]);
 
   return (
-    <Button
-      data-testid="go-directly-button"
-      onClick={() => {
-        setIsPending(true);
-        onGoDirectly();
-      }}
-      disabled={!isBeforeWork || actualIsPending}
+    <ActionCardButton
+      testId="go-directly-button"
       style={actionButtonVars}
-      sx={(theme) => ({
-        width: "var(--action-button-size)",
-        height: "var(--action-button-size)",
-        minWidth: "var(--action-button-size)",
-        borderRadius: "var(--action-button-radius)",
-        p: 0,
-        color: theme.palette.clock_in.contrastText,
-        backgroundColor: theme.palette.clock_in.main,
-        border: `var(--action-border-width) solid ${theme.palette.clock_in.main}`,
-        [theme.breakpoints.down("sm")]: {
-          width: "var(--action-button-size-sm)",
-          height: "var(--action-button-size-sm)",
-          minWidth: "var(--action-button-size-sm)",
-          fontSize: "0.95rem",
-        },
-        "&:hover": {
-          color: theme.palette.clock_in.main,
-          backgroundColor: theme.palette.clock_in.contrastText,
-        },
-        "&:disabled": {
-          border: "var(--action-border-width) solid var(--action-disabled-border)",
-          backgroundColor: "var(--action-disabled-bg)",
-        },
-      })}
-    >
-      直行
-    </Button>
+      disabled={isDisabled}
+      onClick={handleClick}
+      label="直行"
+      helper={null}
+      icon={<GoDirectlyIcon />}
+    />
   );
 };
 

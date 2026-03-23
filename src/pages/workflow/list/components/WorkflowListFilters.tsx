@@ -1,35 +1,12 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
-import Popover from "@mui/material/Popover";
-import type { SelectChangeEvent } from "@mui/material/Select";
-import Select from "@mui/material/Select";
-import Stack from "@mui/material/Stack";
-import { useTheme } from "@mui/material/styles";
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { DatePicker } from "@mui/x-date-pickers";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
-import dayjs, { Dayjs } from "dayjs";
-import {
-  forwardRef,
-  type Ref,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from "react";
+import { forwardRef, type Ref, useImperativeHandle, useMemo, useState } from "react";
 
 import {
   CATEGORY_LABELS,
   STATUS_LABELS,
 } from "@/entities/workflow/lib/workflowLabels";
 import type { UseWorkflowListFiltersResult } from "@/features/workflow/list/useWorkflowListFilters";
-import { designTokenVar } from "@/shared/designSystem";
 
 export type WorkflowListFiltersHandle = {
   closeAllPopovers: () => void;
@@ -43,22 +20,6 @@ type WorkflowListFiltersProps = {
 const DISPLAY_LABEL_APPLICATION = "申請日で絞込";
 const DISPLAY_LABEL_CREATED = "作成日で絞込";
 const STATUS_ALL_VALUE = "__ALL__";
-const SELECT_SX = {
-  width: "100%",
-  ".MuiSelect-select": {
-    display: "block",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  },
-} as const;
-
-const FILTER_PANEL_PADDING = designTokenVar("spacing.lg", "16px");
-const FILTER_PANEL_GAP = designTokenVar("spacing.md", "12px");
-const FILTER_PANEL_BUTTON_GAP = designTokenVar("spacing.sm", "8px");
-const FILTER_FIELD_GAP = designTokenVar("spacing.xs", "4px");
-const FILTER_SECTION_GAP = designTokenVar("spacing.md", "12px");
-const FILTER_PANEL_RADIUS = designTokenVar("radius.lg", "16px");
 
 const FIELD_LABELS = {
   category: "種別",
@@ -66,6 +27,15 @@ const FIELD_LABELS = {
   status: "ステータス",
   created: "作成日",
 } as const;
+
+const STATUS_OPTIONS = [
+  WorkflowStatus.DRAFT,
+  WorkflowStatus.SUBMITTED,
+  WorkflowStatus.PENDING,
+  WorkflowStatus.APPROVED,
+  WorkflowStatus.REJECTED,
+  WorkflowStatus.CANCELLED,
+] as const;
 
 type WorkflowListFiltersStateProps = {
   filters: WorkflowListFiltersProps["filters"];
@@ -77,7 +47,7 @@ const useWorkflowListFiltersState = ({
   setFilter,
 }: WorkflowListFiltersStateProps) => {
   const {
-    category: categoryFilter,
+    category: rawCategoryFilter,
     status: statusFilter,
     applicationFrom,
     applicationTo,
@@ -85,48 +55,35 @@ const useWorkflowListFiltersState = ({
     createdTo,
   } = filters;
 
-  const [applicationAnchorEl, setApplicationAnchorEl] =
-    useState<HTMLElement | null>(null);
-  const [createdAnchorEl, setCreatedAnchorEl] = useState<HTMLElement | null>(
-    null,
-  );
+  const categoryFilter = rawCategoryFilter ?? "";
+  const [applicationOpen, setApplicationOpen] = useState(false);
+  const [createdOpen, setCreatedOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
 
-  const closeAllPopovers = useCallback(() => {
-    setApplicationAnchorEl(null);
-    setCreatedAnchorEl(null);
-  }, []);
+  const closeAllPopovers = () => {
+    setApplicationOpen(false);
+    setCreatedOpen(false);
+    setStatusOpen(false);
+  };
 
-  const handleDateChange = useCallback(
-    (
-      key: "applicationFrom" | "applicationTo" | "createdFrom" | "createdTo",
-      value: Dayjs | null,
-    ) => {
-      const str = value ? value.format("YYYY-MM-DD") : "";
-      setFilter(key, str);
-    },
-    [setFilter],
-  );
-
-  const handleApplicationFieldClick = (
-    event: React.MouseEvent<HTMLElement>,
+  const handleDateChange = (
+    key: "applicationFrom" | "applicationTo" | "createdFrom" | "createdTo",
+    value: string,
   ) => {
-    setApplicationAnchorEl(event.currentTarget);
+    setFilter(key, value);
   };
 
-  const handleCreatedFieldClick = (event: React.MouseEvent<HTMLElement>) => {
-    setCreatedAnchorEl(event.currentTarget);
-  };
-
-  const handleStatusChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    const nextValue = typeof value === "string" ? value.split(",") : value;
-
-    if (nextValue.includes(STATUS_ALL_VALUE)) {
+  const handleStatusToggle = (value: string) => {
+    if (value === STATUS_ALL_VALUE) {
       setFilter("status", []);
       return;
     }
 
-    setFilter("status", nextValue);
+    const current = statusFilter ?? [];
+    const next = current.includes(value)
+      ? current.filter((status) => status !== value)
+      : [...current, value];
+    setFilter("status", next);
   };
 
   return {
@@ -136,39 +93,112 @@ const useWorkflowListFiltersState = ({
     applicationTo,
     createdFrom,
     createdTo,
-    applicationAnchorEl,
-    createdAnchorEl,
+    applicationOpen,
+    createdOpen,
+    statusOpen,
     closeAllPopovers,
     handleDateChange,
-    handleApplicationFieldClick,
-    handleCreatedFieldClick,
-    handleStatusChange,
-    setApplicationAnchorEl,
-    setCreatedAnchorEl,
+    handleStatusToggle,
+    setApplicationOpen,
+    setCreatedOpen,
+    setStatusOpen,
   };
 };
 
-type DateFieldProps = {
+function FilterLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[0.74rem] font-bold tracking-[0.04em] text-slate-500">
+      {children}
+    </p>
+  );
+}
+
+function SelectField({
+  value,
+  onChange,
+  children,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className="w-full rounded-[30px] border border-slate-300 bg-white px-6 py-4 text-[0.95rem] text-slate-900 outline-none transition focus:border-emerald-500/45 focus:ring-2 focus:ring-emerald-100"
+    >
+      {children}
+    </select>
+  );
+}
+
+function FilterTrigger({
+  label,
+  isOpen,
+  onClick,
+}: {
+  label: string;
+  isOpen: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "flex w-full items-center justify-between rounded-[30px] border px-6 py-4 text-left text-[0.95rem] transition",
+        isOpen
+          ? "border-emerald-500/45 bg-white ring-2 ring-emerald-100"
+          : "border-slate-300 bg-white hover:border-slate-400",
+      ].join(" ")}
+    >
+      <span className="truncate text-slate-900">{label}</span>
+      <span className="ml-3 text-slate-500">{isOpen ? "▲" : "▼"}</span>
+    </button>
+  );
+}
+
+function FloatingPanel({
+  open,
+  children,
+  className = "",
+}: {
+  open: boolean;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  if (!open) return null;
+
+  return (
+    <div
+      className={`absolute left-0 top-[calc(100%+8px)] z-20 w-full rounded-[22px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(246,252,248,0.96)_100%)] p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.45)] backdrop-blur ${className}`.trim()}
+    >
+      {children}
+    </div>
+  );
+}
+
+type DateRangeFieldProps = {
   displayValue: string;
-  anchorEl: HTMLElement | null;
-  onOpen: (event: React.MouseEvent<HTMLElement>) => void;
+  open: boolean;
+  onOpenToggle: () => void;
   onClose: () => void;
   fromValue: string | undefined;
   toValue: string | undefined;
   onChange: (
     key: "applicationFrom" | "applicationTo" | "createdFrom" | "createdTo",
-    value: Dayjs | null,
+    value: string,
   ) => void;
   fromKey: "applicationFrom" | "createdFrom";
   toKey: "applicationTo" | "createdTo";
   onClear: () => void;
-  isCompact: boolean;
 };
 
-const DateRangeField = ({
+function DateRangeField({
   displayValue,
-  anchorEl,
-  onOpen,
+  open,
+  onOpenToggle,
   onClose,
   fromValue,
   toValue,
@@ -176,84 +206,127 @@ const DateRangeField = ({
   fromKey,
   toKey,
   onClear,
-  isCompact,
-}: DateFieldProps) => (
-  <Box>
-    <TextField
-      size="small"
-      fullWidth
-      value={displayValue}
-      onClick={onOpen}
-      InputProps={{ readOnly: true }}
-    />
-    <Popover
-      open={Boolean(anchorEl)}
-      anchorEl={anchorEl}
-      onClose={onClose}
-      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-    >
-      <Box
-        sx={{
-          p: FILTER_PANEL_PADDING,
-          display: "flex",
-          gap: FILTER_PANEL_GAP,
-          flexDirection: isCompact ? "column" : "row",
-          alignItems: isCompact ? "stretch" : "center",
-        }}
-      >
-        <DatePicker
-          label="From"
-          value={fromValue ? dayjs(fromValue) : null}
-          onChange={(v) => onChange(fromKey, v)}
-          slotProps={{ textField: { size: "small" } }}
-        />
-        <DatePicker
-          label="To"
-          value={toValue ? dayjs(toValue) : null}
-          onChange={(v) => onChange(toKey, v)}
-          slotProps={{ textField: { size: "small" } }}
-        />
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isCompact ? "row" : "column",
-            justifyContent: "flex-end",
-            gap: FILTER_PANEL_BUTTON_GAP,
-          }}
-        >
-          <Button size="small" onClick={onClear}>
-            クリア
-          </Button>
-        </Box>
-      </Box>
-    </Popover>
-  </Box>
-);
+}: DateRangeFieldProps) {
+  return (
+    <div className="relative">
+      <FilterTrigger label={displayValue} isOpen={open} onClick={onOpenToggle} />
+      <FloatingPanel open={open}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-semibold tracking-[0.04em] text-slate-500">
+              From
+            </span>
+            <input
+              type="date"
+              value={fromValue ?? ""}
+              onChange={(event) => onChange(fromKey, event.target.value)}
+              className="w-full rounded-[30px] border border-slate-300 bg-white px-5 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500/45 focus:ring-2 focus:ring-emerald-100"
+            />
+          </label>
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-semibold tracking-[0.04em] text-slate-500">
+              To
+            </span>
+            <input
+              type="date"
+              value={toValue ?? ""}
+              onChange={(event) => onChange(toKey, event.target.value)}
+              className="w-full rounded-[30px] border border-slate-300 bg-white px-5 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500/45 focus:ring-2 focus:ring-emerald-100"
+            />
+          </label>
+          <div className="flex gap-2 sm:flex-col sm:items-stretch">
+            <button
+              type="button"
+              onClick={onClear}
+              className="rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              クリア
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-[14px] border border-emerald-500/20 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:border-emerald-500/35 hover:bg-emerald-100"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      </FloatingPanel>
+    </div>
+  );
+}
+
+function StatusField({
+  value,
+  open,
+  onOpenToggle,
+  onClose,
+  onToggle,
+}: {
+  value: string[];
+  open: boolean;
+  onOpenToggle: () => void;
+  onClose: () => void;
+  onToggle: (value: string) => void;
+}) {
+  const displayValue =
+    value.length === 0
+      ? "すべて"
+      : value
+          .map((status) => STATUS_LABELS[status as WorkflowStatus] || String(status))
+          .join("、");
+
+  return (
+    <div className="relative">
+      <FilterTrigger label={displayValue} isOpen={open} onClick={onOpenToggle} />
+      <FloatingPanel open={open}>
+        <div className="flex flex-col gap-2">
+          <label className="flex cursor-pointer items-center gap-3 rounded-[14px] px-2 py-2 text-sm text-slate-700 transition hover:bg-emerald-50/80">
+            <input
+              type="checkbox"
+              checked={value.length === 0}
+              onChange={() => onToggle(STATUS_ALL_VALUE)}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200"
+            />
+            <span>すべて</span>
+          </label>
+          {STATUS_OPTIONS.map((status) => (
+            <label
+              key={status}
+              className="flex cursor-pointer items-center gap-3 rounded-[14px] px-2 py-2 text-sm text-slate-700 transition hover:bg-emerald-50/80"
+            >
+              <input
+                type="checkbox"
+                checked={value.includes(status)}
+                onChange={() => onToggle(status)}
+                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200"
+              />
+              <span>{STATUS_LABELS[status]}</span>
+            </label>
+          ))}
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-[14px] border border-emerald-500/20 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:border-emerald-500/35 hover:bg-emerald-100"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      </FloatingPanel>
+    </div>
+  );
+}
 
 function WorkflowListFilters(
   { filters, setFilter }: WorkflowListFiltersProps,
   ref: Ref<WorkflowListFiltersHandle>,
 ) {
-  const theme = useTheme();
-  const isCompact = useMediaQuery(theme.breakpoints.down("sm"));
   const { config, getAbsentEnabled, getWorkflowCategoryOrder } = useAppConfig();
-  const {
-    categoryFilter,
-    statusFilter,
-    applicationFrom,
-    applicationTo,
-    createdFrom,
-    createdTo,
-    applicationAnchorEl,
-    createdAnchorEl,
-    closeAllPopovers,
-    handleDateChange,
-    handleApplicationFieldClick,
-    handleCreatedFieldClick,
-    handleStatusChange,
-    setApplicationAnchorEl,
-    setCreatedAnchorEl,
-  } = useWorkflowListFiltersState({ filters, setFilter });
+  const [openKey, setOpenKey] = useState<"application" | "created" | "status" | null>(
+    null,
+  );
 
   const categoryOptions = useMemo(
     () =>
@@ -269,39 +342,46 @@ function WorkflowListFilters(
   useImperativeHandle(
     ref,
     () => ({
-      closeAllPopovers,
+      closeAllPopovers: () => setOpenKey(null),
     }),
-    [closeAllPopovers],
+    [],
   );
 
+  const {
+    categoryFilter,
+    statusFilter,
+    applicationFrom,
+    applicationTo,
+    createdFrom,
+    createdTo,
+    handleDateChange,
+    handleStatusToggle,
+  } = useWorkflowListFiltersState({ filters, setFilter });
+
   return (
-    <TableRow>
-      <TableCell>
-        <Select
-          size="small"
-          sx={SELECT_SX}
-          displayEmpty
-          value={categoryFilter}
-          onChange={(e) => setFilter("category", e.target.value)}
-        >
-          <MenuItem value="">すべて</MenuItem>
+    <tr>
+      <td className="px-1 py-1 align-top">
+        <SelectField value={categoryFilter} onChange={(value) => setFilter("category", value)}>
+          <option value="">すべて</option>
           {categoryOptions.map((item) => (
-            <MenuItem key={item.category} value={item.category}>
+            <option key={item.category} value={item.category}>
               {CATEGORY_LABELS[item.category] ?? item.label}
-            </MenuItem>
+            </option>
           ))}
-        </Select>
-      </TableCell>
-      <TableCell>
+        </SelectField>
+      </td>
+      <td className="px-1 py-1 align-top">
         <DateRangeField
           displayValue={
             applicationFrom && applicationTo
               ? `${applicationFrom} → ${applicationTo}`
               : DISPLAY_LABEL_APPLICATION
           }
-          anchorEl={applicationAnchorEl}
-          onOpen={handleApplicationFieldClick}
-          onClose={() => setApplicationAnchorEl(null)}
+          open={openKey === "application"}
+          onOpenToggle={() =>
+            setOpenKey((prev) => (prev === "application" ? null : "application"))
+          }
+          onClose={() => setOpenKey(null)}
           fromValue={applicationFrom}
           toValue={applicationTo}
           onChange={handleDateChange}
@@ -310,61 +390,31 @@ function WorkflowListFilters(
           onClear={() => {
             setFilter("applicationFrom", "");
             setFilter("applicationTo", "");
-            setApplicationAnchorEl(null);
+            setOpenKey(null);
           }}
-          isCompact={isCompact}
         />
-      </TableCell>
-      <TableCell>
-        <Select
-          size="small"
-          multiple
-          sx={SELECT_SX}
-          displayEmpty
+      </td>
+      <td className="px-1 py-1 align-top">
+        <StatusField
           value={statusFilter ?? []}
-          onChange={handleStatusChange}
-          renderValue={(selected) =>
-            selected.length === 0
-              ? "すべて"
-              : selected
-                  .map(
-                    (status) =>
-                      STATUS_LABELS[status as WorkflowStatus] || String(status),
-                  )
-                  .join("、")
-          }
-        >
-          <MenuItem value={STATUS_ALL_VALUE}>すべて</MenuItem>
-          <MenuItem value={WorkflowStatus.DRAFT}>
-            {STATUS_LABELS[WorkflowStatus.DRAFT]}
-          </MenuItem>
-          <MenuItem value={WorkflowStatus.SUBMITTED}>
-            {STATUS_LABELS[WorkflowStatus.SUBMITTED]}
-          </MenuItem>
-          <MenuItem value={WorkflowStatus.PENDING}>
-            {STATUS_LABELS[WorkflowStatus.PENDING]}
-          </MenuItem>
-          <MenuItem value={WorkflowStatus.APPROVED}>
-            {STATUS_LABELS[WorkflowStatus.APPROVED]}
-          </MenuItem>
-          <MenuItem value={WorkflowStatus.REJECTED}>
-            {STATUS_LABELS[WorkflowStatus.REJECTED]}
-          </MenuItem>
-          <MenuItem value={WorkflowStatus.CANCELLED}>
-            {STATUS_LABELS[WorkflowStatus.CANCELLED]}
-          </MenuItem>
-        </Select>
-      </TableCell>
-      <TableCell>
+          open={openKey === "status"}
+          onOpenToggle={() => setOpenKey((prev) => (prev === "status" ? null : "status"))}
+          onClose={() => setOpenKey(null)}
+          onToggle={handleStatusToggle}
+        />
+      </td>
+      <td className="px-1 py-1 align-top">
         <DateRangeField
           displayValue={
             createdFrom && createdTo
               ? `${createdFrom} → ${createdTo}`
               : DISPLAY_LABEL_CREATED
           }
-          anchorEl={createdAnchorEl}
-          onOpen={handleCreatedFieldClick}
-          onClose={() => setCreatedAnchorEl(null)}
+          open={openKey === "created"}
+          onOpenToggle={() =>
+            setOpenKey((prev) => (prev === "created" ? null : "created"))
+          }
+          onClose={() => setOpenKey(null)}
           fromValue={createdFrom}
           toValue={createdTo}
           onChange={handleDateChange}
@@ -373,13 +423,12 @@ function WorkflowListFilters(
           onClear={() => {
             setFilter("createdFrom", "");
             setFilter("createdTo", "");
-            setCreatedAnchorEl(null);
+            setOpenKey(null);
           }}
-          isCompact={isCompact}
         />
-      </TableCell>
-      <TableCell />
-    </TableRow>
+      </td>
+      <td className="w-14 px-1 py-1" />
+    </tr>
   );
 }
 
@@ -388,10 +437,10 @@ export const WorkflowListFiltersPanel = forwardRef(
     { filters, setFilter }: WorkflowListFiltersProps,
     ref: Ref<WorkflowListFiltersHandle>,
   ) => {
-    const theme = useTheme();
-    const isCompact = useMediaQuery(theme.breakpoints.down("sm"));
-    const { config, getAbsentEnabled, getWorkflowCategoryOrder } =
-      useAppConfig();
+    const { config, getAbsentEnabled, getWorkflowCategoryOrder } = useAppConfig();
+    const [openKey, setOpenKey] = useState<
+      "application" | "created" | "status" | null
+    >(null);
     const {
       categoryFilter,
       statusFilter,
@@ -399,15 +448,8 @@ export const WorkflowListFiltersPanel = forwardRef(
       applicationTo,
       createdFrom,
       createdTo,
-      applicationAnchorEl,
-      createdAnchorEl,
-      closeAllPopovers,
       handleDateChange,
-      handleApplicationFieldClick,
-      handleCreatedFieldClick,
-      handleStatusChange,
-      setApplicationAnchorEl,
-      setCreatedAnchorEl,
+      handleStatusToggle,
     } = useWorkflowListFiltersState({ filters, setFilter });
 
     const categoryOptions = useMemo(
@@ -424,67 +466,39 @@ export const WorkflowListFiltersPanel = forwardRef(
     useImperativeHandle(
       ref,
       () => ({
-        closeAllPopovers,
+        closeAllPopovers: () => setOpenKey(null),
       }),
-      [closeAllPopovers],
+      [],
     );
 
     return (
-      <Box
-        sx={{
-          p: FILTER_PANEL_PADDING,
-          borderRadius: FILTER_PANEL_RADIUS,
-          bgcolor: "background.paper",
-          border: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Stack spacing={FILTER_SECTION_GAP}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: FILTER_FIELD_GAP,
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              {FIELD_LABELS.category}
-            </Typography>
-            <Select
-              size="small"
-              sx={SELECT_SX}
-              displayEmpty
-              value={categoryFilter}
-              onChange={(e) => setFilter("category", e.target.value)}
-            >
-              <MenuItem value="">すべて</MenuItem>
+      <div className="rounded-[16px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(246,252,248,0.95)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <FilterLabel>{FIELD_LABELS.category}</FilterLabel>
+            <SelectField value={categoryFilter} onChange={(value) => setFilter("category", value)}>
+              <option value="">すべて</option>
               {categoryOptions.map((item) => (
-                <MenuItem key={item.category} value={item.category}>
+                <option key={item.category} value={item.category}>
                   {CATEGORY_LABELS[item.category] ?? item.label}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
-          </Box>
+            </SelectField>
+          </div>
 
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: FILTER_FIELD_GAP,
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              {FIELD_LABELS.application}
-            </Typography>
+          <div className="flex flex-col gap-1">
+            <FilterLabel>{FIELD_LABELS.application}</FilterLabel>
             <DateRangeField
               displayValue={
                 applicationFrom && applicationTo
                   ? `${applicationFrom} → ${applicationTo}`
                   : DISPLAY_LABEL_APPLICATION
               }
-              anchorEl={applicationAnchorEl}
-              onOpen={handleApplicationFieldClick}
-              onClose={() => setApplicationAnchorEl(null)}
+              open={openKey === "application"}
+              onOpenToggle={() =>
+                setOpenKey((prev) => (prev === "application" ? null : "application"))
+              }
+              onClose={() => setOpenKey(null)}
               fromValue={applicationFrom}
               toValue={applicationTo}
               onChange={handleDateChange}
@@ -493,82 +507,37 @@ export const WorkflowListFiltersPanel = forwardRef(
               onClear={() => {
                 setFilter("applicationFrom", "");
                 setFilter("applicationTo", "");
-                setApplicationAnchorEl(null);
+                setOpenKey(null);
               }}
-              isCompact={isCompact}
             />
-          </Box>
+          </div>
 
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: FILTER_FIELD_GAP,
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              {FIELD_LABELS.status}
-            </Typography>
-            <Select
-              size="small"
-              multiple
-              sx={SELECT_SX}
-              displayEmpty
+          <div className="flex flex-col gap-1">
+            <FilterLabel>{FIELD_LABELS.status}</FilterLabel>
+            <StatusField
               value={statusFilter ?? []}
-              onChange={handleStatusChange}
-              renderValue={(selected) =>
-                selected.length === 0
-                  ? "すべて"
-                  : selected
-                      .map(
-                        (status) =>
-                          STATUS_LABELS[status as WorkflowStatus] ||
-                          String(status),
-                      )
-                      .join("、")
+              open={openKey === "status"}
+              onOpenToggle={() =>
+                setOpenKey((prev) => (prev === "status" ? null : "status"))
               }
-            >
-              <MenuItem value={STATUS_ALL_VALUE}>すべて</MenuItem>
-              <MenuItem value={WorkflowStatus.DRAFT}>
-                {STATUS_LABELS[WorkflowStatus.DRAFT]}
-              </MenuItem>
-              <MenuItem value={WorkflowStatus.SUBMITTED}>
-                {STATUS_LABELS[WorkflowStatus.SUBMITTED]}
-              </MenuItem>
-              <MenuItem value={WorkflowStatus.PENDING}>
-                {STATUS_LABELS[WorkflowStatus.PENDING]}
-              </MenuItem>
-              <MenuItem value={WorkflowStatus.APPROVED}>
-                {STATUS_LABELS[WorkflowStatus.APPROVED]}
-              </MenuItem>
-              <MenuItem value={WorkflowStatus.REJECTED}>
-                {STATUS_LABELS[WorkflowStatus.REJECTED]}
-              </MenuItem>
-              <MenuItem value={WorkflowStatus.CANCELLED}>
-                {STATUS_LABELS[WorkflowStatus.CANCELLED]}
-              </MenuItem>
-            </Select>
-          </Box>
+              onClose={() => setOpenKey(null)}
+              onToggle={handleStatusToggle}
+            />
+          </div>
 
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: FILTER_FIELD_GAP,
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              {FIELD_LABELS.created}
-            </Typography>
+          <div className="flex flex-col gap-1">
+            <FilterLabel>{FIELD_LABELS.created}</FilterLabel>
             <DateRangeField
               displayValue={
                 createdFrom && createdTo
                   ? `${createdFrom} → ${createdTo}`
                   : DISPLAY_LABEL_CREATED
               }
-              anchorEl={createdAnchorEl}
-              onOpen={handleCreatedFieldClick}
-              onClose={() => setCreatedAnchorEl(null)}
+              open={openKey === "created"}
+              onOpenToggle={() =>
+                setOpenKey((prev) => (prev === "created" ? null : "created"))
+              }
+              onClose={() => setOpenKey(null)}
               fromValue={createdFrom}
               toValue={createdTo}
               onChange={handleDateChange}
@@ -577,13 +546,12 @@ export const WorkflowListFiltersPanel = forwardRef(
               onClear={() => {
                 setFilter("createdFrom", "");
                 setFilter("createdTo", "");
-                setCreatedAnchorEl(null);
+                setOpenKey(null);
               }}
-              isCompact={isCompact}
             />
-          </Box>
-        </Stack>
-      </Box>
+          </div>
+        </div>
+      </div>
     );
   },
 );

@@ -1,14 +1,4 @@
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {
-  Box,
-  Collapse,
-  IconButton,
-  SxProps,
-  Theme,
-  Typography,
-} from "@mui/material";
-import { CSSProperties, ReactNode, useState } from "react";
+import { CSSProperties, ReactNode, useId, useState } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -64,8 +54,26 @@ export interface GroupContainerProps {
   defaultCollapsed?: boolean;
   hideAccent?: boolean;
   hideBorder?: boolean;
-  sx?: SxProps<Theme>;
+  className?: string;
+  style?: CSSProperties;
   children?: ReactNode;
+}
+
+function ChevronIcon({ collapsed }: { collapsed: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {collapsed ? <path d="m6 8 4 4 4-4" /> : <path d="m6 12 4-4 4 4" />}
+    </svg>
+  );
 }
 
 const GroupContainer = ({
@@ -76,9 +84,11 @@ const GroupContainer = ({
   hideAccent = false,
   hideBorder = false,
   children,
-  sx,
+  className,
+  style,
 }: GroupContainerProps) => {
   const [collapsed, setCollapsed] = useState<boolean>(defaultCollapsed);
+  const contentId = useId();
   const borderClassName = hideBorder
     ? "border-0"
     : "border-[var(--group-border-width)] border-[var(--group-border-color)]";
@@ -107,44 +117,54 @@ const GroupContainer = ({
   }
 
   return (
-    <Box
-      className={`rounded-[var(--group-radius)] border-solid bg-[var(--group-background)] p-[var(--group-padding)] shadow-[var(--group-shadow)] ${borderClassName} ${accentClassName}`}
-      style={groupVars}
-      sx={sx}
+    <section
+      className={[
+        "rounded-[var(--group-radius)] border-solid bg-[var(--group-background)] p-[var(--group-padding)] shadow-[var(--group-shadow)]",
+        borderClassName,
+        accentClassName,
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={{ ...groupVars, ...style }}
     >
       {(title || collapsible) && (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-[var(--group-header-gap)]">
             {title ? (
-              <Typography variant="subtitle1" fontWeight={700}>
+              <h2 className="m-0 text-base font-bold leading-6 text-slate-900">
                 {title}
-              </Typography>
+              </h2>
             ) : null}
             {typeof count === "number" && (
-              <Typography
-                variant="caption"
-                className="text-[color:var(--group-count-color)]"
-              >
+              <span className="text-xs leading-5 text-[color:var(--group-count-color)]">
                 {`(${count}件)`}
-              </Typography>
+              </span>
             )}
           </div>
           {collapsible && (
-            <IconButton
-              size="small"
+            <button
+              type="button"
               onClick={() => setCollapsed((s) => !s)}
               aria-label={collapsed ? "expand" : "collapse"}
+              aria-expanded={!collapsed}
+              aria-controls={contentId}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border-0 bg-transparent p-0 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
             >
-              {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-            </IconButton>
+              <ChevronIcon collapsed={collapsed} />
+            </button>
           )}
         </div>
       )}
 
-      <Collapse in={!collapsed}>
-        <Box className="mt-[var(--group-content-gap)]">{children}</Box>
-      </Collapse>
-    </Box>
+      <div
+        id={contentId}
+        hidden={collapsed}
+        className="mt-[var(--group-content-gap)]"
+      >
+        {children}
+      </div>
+    </section>
   );
 };
 

@@ -1,5 +1,3 @@
-import { CircularProgress, Typography } from "@mui/material";
-
 export default function PageLoader() {
   return (
     <div
@@ -7,10 +5,13 @@ export default function PageLoader() {
       role="status"
       aria-live="polite"
     >
-      <CircularProgress size={32} />
-      <Typography variant="body2" color="text.secondary">
+      <div
+        aria-hidden="true"
+        className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600"
+      />
+      <p className="m-0 text-sm text-slate-500">
         読み込み中です…
-      </Typography>
+      </p>
     </div>
   );
 }

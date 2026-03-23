@@ -1,15 +1,19 @@
-import MuiLink, { LinkProps as MuiLinkProps } from "@mui/material/Link";
-import { forwardRef, memo, ReactNode } from "react";
+import {
+  type AnchorHTMLAttributes,
+  forwardRef,
+  memo,
+  type ReactNode,
+} from "react";
 import { Link as RouterLink } from "react-router-dom";
 
-export interface LinkProps extends MuiLinkProps {
+export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   label?: ReactNode;
+  href?: string;
+  to?: string;
 }
 
 const DEFAULT_LABEL: ReactNode = "link";
 const DEFAULT_HREF = "/";
-const DEFAULT_COLOR: LinkProps["color"] = "primary";
-const DEFAULT_VARIANT: LinkProps["variant"] = "button";
 
 const isInternalHref = (href: string) => href.startsWith("/");
 
@@ -17,34 +21,39 @@ const LinkBase = forwardRef<HTMLAnchorElement, LinkProps>(function LinkBase(
   {
     label,
     children,
-    href = DEFAULT_HREF,
-    color = DEFAULT_COLOR,
-    variant = DEFAULT_VARIANT,
+    href,
+    to,
+    className,
     ...rest
   },
   ref,
 ) {
   const content = children ?? label ?? DEFAULT_LABEL;
+  const resolvedHref = href ?? to ?? DEFAULT_HREF;
+  const mergedClassName = ["no-underline", className].filter(Boolean).join(" ");
 
-  if (isInternalHref(href)) {
+  if (isInternalHref(resolvedHref)) {
     return (
-      <MuiLink
+      <RouterLink
         ref={ref}
-        component={RouterLink}
-        to={href}
-        color={color}
-        variant={variant}
+        to={resolvedHref}
+        className={mergedClassName}
         {...rest}
       >
         {content}
-      </MuiLink>
+      </RouterLink>
     );
   }
 
   return (
-    <MuiLink ref={ref} href={href} color={color} variant={variant} {...rest}>
+    <a
+      ref={ref}
+      href={resolvedHref}
+      className={mergedClassName}
+      {...rest}
+    >
       {content}
-    </MuiLink>
+    </a>
   );
 });
 

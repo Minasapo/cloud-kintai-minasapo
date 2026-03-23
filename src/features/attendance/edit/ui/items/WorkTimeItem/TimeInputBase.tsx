@@ -1,11 +1,8 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext } from "react";
+import { useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAttendanceEditUi } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 import {
   AttendanceControl,
@@ -20,113 +17,240 @@ interface TimeInputBaseProps<TFieldName extends AttendanceTimeFieldName> {
   setValue: AttendanceSetValue;
   workDate: dayjs.Dayjs;
   quickInputTimes: { time: string; enabled: boolean }[];
-  chipColor?: (enabled: boolean) => "success" | "default";
   disabled?: boolean;
   highlight?: boolean;
 }
 
+function toTimeValue(value: string | null | undefined) {
+  if (!value) {
+    return "";
+  }
+
+  const parsed = dayjs(value);
+  if (!parsed.isValid()) {
+    return "";
+  }
+
+  return parsed.format("HH:mm");
+}
+
+function toIsoDateTime(value: string, workDate: dayjs.Dayjs): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const [hour, minute] = value.split(":").map(Number);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) {
+    return null;
+  }
+
+  return dayjs(workDate)
+    .hour(hour)
+    .minute(minute)
+    .year(workDate.year())
+    .month(workDate.month())
+    .date(workDate.date())
+    .second(0)
+    .millisecond(0)
+    .toISOString();
+}
+
 export default function TimeInputBase<
-  TFieldName extends AttendanceTimeFieldName
+  TFieldName extends AttendanceTimeFieldName,
 >({
   name,
   control,
   setValue,
   workDate,
   quickInputTimes,
-  chipColor = (enabled) => (enabled ? "success" : "default"),
   disabled = false,
   highlight = false,
 }: TimeInputBaseProps<TFieldName>) {
-  const { readOnly } = useContext(AttendanceEditContext);
+  const { readOnly } = useAttendanceEditUi();
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputDraft, setInputDraft] = useState("");
+  const blurTimeoutRef = useRef<number | null>(null);
+  const selectableTimes = quickInputTimes.filter((entry) => entry.enabled);
+
   if (!workDate || !control || !setValue) return null;
 
+  const normalizeTimeDraft = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 4);
+    if (digits.length <= 2) {
+      return digits;
+    }
+    return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+  };
+
+  const isCompleteTime = (value: string) =>
+    /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+
   return (
-    <Stack direction="row" spacing={1}>
-      <Stack spacing={1}>
+    <div className="flex flex-row gap-1">
+      <div className="relative flex flex-col gap-1">
         <Controller
           key={highlight ? "highlight-on" : "highlight-off"}
           name={name}
           control={control}
           render={({ field }) => (
-            <TimePicker
-              ampm={false}
-              value={(() => (field.value ? dayjs(field.value) : null))()}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  sx: highlight
-                    ? {
-                        "& .MuiOutlinedInput-root": {
-                          animation: "highlightPulse 2.5s ease-in-out",
-                          "@keyframes highlightPulse": {
-                            "0%, 100%": {
-                              backgroundColor: "transparent",
-                              borderColor: "rgba(0, 0, 0, 0.23)",
-                            },
-                            "15%, 50%": {
-                              backgroundColor: "#FFE082",
-                              borderColor: "#FFC107",
-                              boxShadow: "0 0 12px rgba(255, 193, 7, 0.6)",
-                            },
-                            "85%": {
-                              backgroundColor: "#FFF9C4",
-                              borderColor: "#FFC107",
-                              boxShadow: "0 0 8px rgba(255, 193, 7, 0.4)",
-                            },
-                          },
-                        },
+            <>
+              <div
+                className={[
+                  "relative flex h-[46px] min-w-[170px] items-center rounded-[16px] border border-slate-200 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition",
+                  "focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-100",
+                  readOnly || disabled
+                    ? "border-slate-200 bg-slate-100 text-slate-400 shadow-none"
+                    : "text-slate-800",
+                  highlight
+                    ? "animate-pulse border-amber-400 bg-amber-100/70 shadow-[0_0_12px_rgba(255,193,7,0.35)]"
+                    : "",
+                ].join(" ")}
+              >
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="--:--"
+                  value={isEditing ? inputDraft : toTimeValue(field.value)}
+                  disabled={!!readOnly || disabled}
+                  ref={field.ref}
+                  onFocus={() => {
+                    setIsEditing(true);
+                    setInputDraft(toTimeValue(field.value));
+                    if (!readOnly && !disabled && selectableTimes.length > 0) {
+                      if (blurTimeoutRef.current) {
+                        window.clearTimeout(blurTimeoutRef.current);
+                        blurTimeoutRef.current = null;
                       }
-                    : undefined,
-                },
-              }}
-              disabled={!!readOnly || disabled}
-              onChange={(value) => {
-                if (value && !value.isValid()) return;
-                const formatted = (() => {
-                  if (!value) return null;
-                  return value
-                    .year(workDate.year())
-                    .month(workDate.month())
-                    .date(workDate.date())
-                    .second(0)
-                    .millisecond(0)
-                    .toISOString();
-                })();
-                const nextValue = formatted as AttendanceFieldValue<TFieldName>;
-                field.onChange(nextValue);
-                setValue(
-                  name as AttendanceTimeFieldName,
-                  nextValue as AttendanceFieldValue<AttendanceTimeFieldName>
-                );
-              }}
-            />
+                      setIsOptionsOpen(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    field.onBlur();
+                    const nextDraft = normalizeTimeDraft(inputDraft);
+                    if (isCompleteTime(nextDraft)) {
+                      const formatted = toIsoDateTime(
+                        nextDraft,
+                        workDate,
+                      ) as AttendanceFieldValue<TFieldName>;
+                      field.onChange(formatted);
+                      setValue(
+                        name as AttendanceTimeFieldName,
+                        formatted as AttendanceFieldValue<AttendanceTimeFieldName>,
+                      );
+                    } else {
+                      setInputDraft(toTimeValue(field.value));
+                    }
+                    setIsEditing(false);
+                    blurTimeoutRef.current = window.setTimeout(() => {
+                      setIsOptionsOpen(false);
+                      blurTimeoutRef.current = null;
+                    }, 120);
+                  }}
+                  className="h-full min-w-0 flex-1 border-0 bg-transparent px-4 pr-11 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                  onChange={(event) => {
+                    const nextDraft = normalizeTimeDraft(event.target.value);
+                    setInputDraft(nextDraft);
+                    if (!isCompleteTime(nextDraft)) {
+                      return;
+                    }
+                    const formatted = toIsoDateTime(
+                      nextDraft,
+                      workDate,
+                    ) as AttendanceFieldValue<TFieldName>;
+                    const nextValue =
+                      formatted as AttendanceFieldValue<TFieldName>;
+                    field.onChange(nextValue);
+                    setValue(
+                      name as AttendanceTimeFieldName,
+                      nextValue as AttendanceFieldValue<AttendanceTimeFieldName>,
+                    );
+                  }}
+                />
+                <button
+                  type="button"
+                  aria-label={`${name}-time-options`}
+                  disabled={
+                    !!readOnly || disabled || selectableTimes.length === 0
+                  }
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    if (readOnly || disabled || selectableTimes.length === 0) {
+                      return;
+                    }
+                    if (blurTimeoutRef.current) {
+                      window.clearTimeout(blurTimeoutRef.current);
+                      blurTimeoutRef.current = null;
+                    }
+                    setIsEditing(false);
+                    setInputDraft(toTimeValue(field.value));
+                    setIsOptionsOpen((prev) => !prev);
+                  }}
+                  className="absolute inset-y-0 right-0 flex w-10 appearance-none items-center justify-center border-0 bg-transparent p-0 text-slate-400 shadow-none outline-none transition hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-slate-300"
+                >
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    aria-hidden="true"
+                    className="h-4 w-4"
+                  >
+                    <path
+                      d="M6 8l4 4 4-4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+              {isOptionsOpen && selectableTimes.length > 0 ? (
+                <div className="absolute left-0 top-[calc(100%+4px)] z-20 overflow-hidden rounded-[16px] border border-slate-200 bg-white p-1.5 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.28)]">
+                  <div className="min-w-[116px] overflow-hidden bg-white">
+                    {selectableTimes.map((entry) => {
+                      const isActive = entry.time === toTimeValue(field.value);
+                      return (
+                        <button
+                          key={entry.time}
+                          type="button"
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            const nextValue = toIsoDateTime(
+                              entry.time,
+                              workDate,
+                            ) as AttendanceFieldValue<TFieldName>;
+                            setInputDraft(entry.time);
+                            setIsEditing(false);
+                            field.onChange(nextValue);
+                            setValue(
+                              name as AttendanceTimeFieldName,
+                              nextValue as AttendanceFieldValue<AttendanceTimeFieldName>,
+                              { shouldDirty: true },
+                            );
+                            if (blurTimeoutRef.current) {
+                              window.clearTimeout(blurTimeoutRef.current);
+                              blurTimeoutRef.current = null;
+                            }
+                            setIsOptionsOpen(false);
+                          }}
+                          className={[
+                            "mb-0.5 block w-full rounded-[10px] px-3 py-2 text-center text-sm font-medium transition last:mb-0",
+                            isActive
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-transparent text-slate-900 hover:bg-slate-50",
+                          ].join(" ")}
+                        >
+                          {entry.time}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+            </>
           )}
         />
-        <Box>
-          {quickInputTimes.map((entry, index) => (
-            <Chip
-              key={index}
-              label={entry.time}
-              color={chipColor(entry.enabled)}
-              variant="outlined"
-              icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-              onClick={() => {
-                if (readOnly || disabled) return;
-                const time = dayjs(
-                  `${workDate.format("YYYY-MM-DD")} ${entry.time}`
-                ).toISOString();
-                const nextValue = time as AttendanceFieldValue<TFieldName>;
-                setValue(
-                  name as AttendanceTimeFieldName,
-                  nextValue as AttendanceFieldValue<AttendanceTimeFieldName>,
-                  { shouldDirty: true }
-                );
-              }}
-              sx={{ mr: 1, mb: 1 }}
-            />
-          ))}
-        </Box>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,95 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+英語で考えて、日本語で説明してください。
+
+## コマンド
+
+```bash
+npm start          # 開発サーバー起動 (Vite)
+npm run build      # 本番ビルド
+npm run lint       # ESLint
+npm run typecheck  # TypeScript 型チェック（tsc --noEmit）
+npm run test:unit  # Jest ユニットテスト
+npm run test:watch # Jest ウォッチモード
+
+# 特定ファイルのテスト
+npx jest src/path/to/file.test.tsx
+
+# E2E（初回はブラウザインストールが必要）
+npx playwright install --with-deps
+npm run test:e2e:setup              # 認証状態を playwright/.auth/ に生成
+npm run test:e2e -- smoke-test --project=chromium-staff
+```
+
+push 前に `npm run typecheck && npm run test:unit` が自動実行される（`.githooks`）。
+
+## アーキテクチャ概要
+
+### レイヤー構成（FSD ベース）
+
+依存方向: `pages` → `processes` → `features` → `entities` → `shared`
+
+| レイヤー    | パス             | 役割                                                                                    |
+| ----------- | ---------------- | --------------------------------------------------------------------------------------- |
+| `pages`     | `src/pages/`     | ルート単位のページコンポーネント                                                        |
+| `processes` | `src/processes/` | 複数ページをまたぐ業務フロー（例: `office-access`）                                     |
+| `features`  | `src/features/`  | 1画面以下の機能単位（`ui/`, `model/`, `lib/` を持つ）                                   |
+| `entities`  | `src/entities/`  | ドメイン層：型・API クライアント・ビジネスロジック（例: `attendance`, `shift`, `user`） |
+| `shared`    | `src/shared/`    | 横断利用する UI 部品・hooks・lib（`@shared/...` エイリアス経由）                        |
+| `widgets`   | `src/widgets/`   | ページ構成要素の大きな UI ブロック（ヘッダー・フッター・スナックバー）                  |
+
+### パスエイリアス
+
+```
+@/*       → src/*
+@features/* → src/features/*
+@entities/* → src/entities/*
+@shared/*   → src/shared/*
+@pages/*    → src/pages/*
+@processes/* → src/processes/*
+```
+
+### バックエンド
+
+AWS Amplify (AppSync / GraphQL + Cognito)。`src/shared/api/graphql/` 以下と `src/ui-components/` は Amplify CLI 自動生成のため **手動編集禁止**。変更時は `amplify codegen` または `amplify pull` を実行。
+
+### 状態管理・フォーム
+
+- グローバル状態: Redux Toolkit + React Redux（スナックバー等）
+- フォーム: React Hook Form + Zod（バリデーション）
+- 認証・設定は `src/context/` 配下の Context（`AuthContext`, `AppConfigContext`, `ThemeContext` 等）
+
+### デザインシステム
+
+MUI v6 + Tailwind CSS + SCSS の併用。デザイントークンは `src/shared/designSystem/` で管理し、CSS 変数として注入する（`designTokenVar()` で参照）。`src/shared/ui/layout/PageSection.tsx` がページ内カードレイアウトの基本単位。
+
+## 主要機能エリア
+
+### 管理者画面 (`/admin`)
+
+- `AdminDashboard.tsx`: ヘッダーメニュー（`AdminMenu`）＋コンテンツ（`Outlet`）の2ペイン構成。分割表示モード（`SplitViewProvider`）あり。
+- `AdminMasterLayout.tsx`: 設定系サイドバー付きレイアウト（`/admin/master/**`）。
+- 管理メニュー項目は `src/features/admin/layout/model/useHeaderMenu.ts` で定義。
+
+### シフト共同編集 (`/shift/collaborative`)
+
+- GraphQL Subscription（`onCreateShiftRequest` + `onUpdateShiftRequest` の両方）による複数ユーザーのリアルタイム同期。
+- 同期状態は `useShiftSync` と `DataSyncStatus`（`idle/saving/syncing/saved/synced/error`）で管理。
+- `updatedBy === currentUserId` の自己イベントは除外（楽観的更新との二重反映防止）。
+- テーブル UI は `VirtualizedShiftTable` 前提。
+- 競合解決は `ConflictResolutionDialog` 経由（暗黙上書き禁止）。
+
+### 勤怠管理
+
+- 打刻: `src/pages/Register.tsx`（出勤前/勤務中/休憩中/勤務終了）
+- スタッフ向け一覧: `src/pages/attendance/list/AttendanceListPage.tsx`
+- 編集: `src/pages/attendance/edit/AttendanceEdit.tsx`（スタッフ）/ `src/pages/admin/AdminAttendanceEditor.tsx`（管理者）
+- 勤怠ステータス判定ロジック: `src/lib/AttendanceState.ts`
+
+## 自動生成ファイル（編集禁止）
+
+- `src/shared/api/graphql/**`
+- `src/ui-components/**`
+- `src/aws-exports.js`（`amplify pull` で生成）

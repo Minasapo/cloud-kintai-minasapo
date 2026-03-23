@@ -1,26 +1,11 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   DailyReportCalendar,
   DailyReportFormChangeHandler,
   DailyReportFormData,
   DailyReportFormFields,
 } from "@features/attendance/daily-report";
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Grid,
-  Paper,
-  Skeleton,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material"; // 保存時刻の表示形式
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   createDailyReport,
   updateDailyReport,
@@ -42,10 +27,22 @@ import {
 import Page from "@shared/ui/page/Page";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ButtonHTMLAttributes,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { AuthContext } from "@/context/AuthContext";
+import { sendDailyReportSubmissionNotification } from "@/features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
 import useCognitoUser from "@/hooks/useCognitoUser";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   buildVersionOrUpdatedAtCondition,
@@ -53,7 +50,7 @@ import {
   getNextVersion,
 } from "@/shared/api/graphql/concurrency";
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
-import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 /**
  * 定数定義
@@ -100,11 +97,20 @@ type DailyReportForm = DailyReportFormData;
 
 const STATUS_META: Record<
   ReportStatus,
-  { label: string; color: "default" | "info" | "success" }
+  { label: string; className: string }
 > = {
-  DRAFT: { label: "下書き", color: "default" },
-  SUBMITTED: { label: "提出済", color: "info" },
-  APPROVED: { label: "確認済", color: "success" },
+  DRAFT: {
+    label: "下書き",
+    className: "border border-slate-300 bg-slate-100 text-slate-700",
+  },
+  SUBMITTED: {
+    label: "提出済",
+    className: "border border-sky-200 bg-sky-100 text-sky-800",
+  },
+  APPROVED: {
+    label: "確認済",
+    className: "border border-emerald-200 bg-emerald-100 text-emerald-800",
+  },
 };
 
 const REACTION_META: Record<ReactionType, { label: string; emoji: string }> = {
@@ -199,10 +205,136 @@ const sortReports = (items: DailyReportItem[]) =>
     return b.date.localeCompare(a.date);
   });
 
+type AlertTone = "error" | "warning";
+type ButtonTone = "primary" | "secondary" | "ghost";
+
+function VStack({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <div className={`flex flex-col ${className}`.trim()}>{children}</div>;
+}
+
+function Panel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)] sm:p-5 ${className}`.trim()}
+    >
+      {children}
+    </div>
+  );
+}
+
+function AlertBox({
+  children,
+  tone,
+  onClose,
+  className = "",
+}: {
+  children: ReactNode;
+  tone: AlertTone;
+  onClose?: () => void;
+  className?: string;
+}) {
+  const toneClassName =
+    tone === "error"
+      ? "border-rose-200 bg-rose-50 text-rose-950"
+      : "border-amber-200 bg-amber-50 text-amber-950";
+
+  return (
+    <div
+      role="alert"
+      className={`flex items-start justify-between gap-3 rounded-md border px-4 py-3 text-sm leading-6 ${toneClassName} ${className}`.trim()}
+    >
+      <div>{children}</div>
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="閉じる"
+          className="shrink-0 appearance-none rounded-md border-0 px-2 py-1 text-xs font-medium transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+        >
+          閉じる
+        </button>
+      )}
+    </div>
+  );
+}
+
+function DividerLine() {
+  return <div className="h-px w-full bg-slate-200" />;
+}
+
+function StatusChip({
+  label,
+  className,
+}: {
+  label: string;
+  className: string;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${className}`.trim()}
+    >
+      {label}
+    </span>
+  );
+}
+
+function ActionButton({
+  children,
+  tone,
+  className = "",
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  children: ReactNode;
+  tone: ButtonTone;
+}) {
+  const toneClassName =
+    tone === "primary"
+      ? "bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300"
+      : tone === "secondary"
+        ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:text-slate-400"
+        : "bg-transparent text-slate-700 hover:bg-slate-100 disabled:text-slate-400";
+
+  return (
+    <button
+      type="button"
+      className={`inline-flex w-full appearance-none items-center justify-center rounded-md border-0 px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed sm:w-auto ${toneClassName} ${className}`.trim()}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SkeletonBlock({
+  className,
+}: {
+  className: string;
+}) {
+  return <div className={`animate-pulse rounded-md bg-slate-200 ${className}`} />;
+}
+
+function CommentCard({ children }: { children: ReactNode }) {
+  return <div className="rounded-lg border border-slate-200 p-4">{children}</div>;
+}
+
 export default function DailyReport() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { notify } = useLocalNotification();
   const { cognitoUser, loading: isCognitoUserLoading } = useCognitoUser();
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
   const [searchParams, setSearchParams] = useSearchParams();
   const [reports, setReports] = useState<DailyReportItem[]>([]);
   const [createForm, setCreateForm] = useState<DailyReportForm>(() =>
@@ -253,6 +385,29 @@ export default function DailyReport() {
   }, [reports]);
   const isCreateMode = selectedReportId === "create";
   const resolvedAuthorName = authorName || "スタッフ";
+  const notifyAdminsForSubmission = useCallback(
+    async (report: DailyReportModel) => {
+      try {
+        await sendDailyReportSubmissionNotification({
+          staffs,
+          report,
+          fallbackAuthorName: resolvedAuthorName,
+        });
+      } catch (mailError) {
+        console.error(
+          "Failed to send daily report submission notification:",
+          mailError,
+        );
+        void notify("メール送信エラー", {
+          body: "管理者への通知メールの送信に失敗しました。",
+          mode: "await-interaction",
+          priority: "normal",
+          tag: "daily-report-mail-error",
+        });
+      }
+    },
+    [notify, resolvedAuthorName, staffs],
+  );
   const isCreateFormDirty = useMemo(
     () => JSON.stringify(createForm) !== JSON.stringify(createFormSavedState),
     [createForm, createFormSavedState],
@@ -614,6 +769,10 @@ export default function DailyReport() {
           throw new Error("日報の更新に失敗しました。");
         }
 
+        if (showNotification && status === DailyReportStatus.SUBMITTED) {
+          await notifyAdminsForSubmission(updated);
+        }
+
         const mapped = mapDailyReport(updated, resolvedAuthor);
         setReports((prev) =>
           sortReports([
@@ -670,6 +829,10 @@ export default function DailyReport() {
         const created = response.data?.createDailyReport;
         if (!created) {
           throw new Error("日報の作成に失敗しました。");
+        }
+
+        if (showNotification && status === DailyReportStatus.SUBMITTED) {
+          await notifyAdminsForSubmission(created);
         }
 
         const mapped = mapDailyReport(created, resolvedAuthor);
@@ -775,16 +938,17 @@ export default function DailyReport() {
 
       if (response.errors?.length) {
         throw new Error(
-          getGraphQLErrorMessage(
-            response.errors,
-            "日報の更新に失敗しました。",
-          ),
+          getGraphQLErrorMessage(response.errors, "日報の更新に失敗しました。"),
         );
       }
 
       const updated = response.data?.updateDailyReport;
       if (!updated) {
         throw new Error("日報の更新に失敗しました。");
+      }
+
+      if (showNotification && status === DailyReportStatus.SUBMITTED) {
+        await notifyAdminsForSubmission(updated);
       }
 
       const mapped = mapDailyReport(updated, resolvedAuthorName);
@@ -890,436 +1054,374 @@ export default function DailyReport() {
   ]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
-      <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
-        <PageSection layoutVariant="dashboard">
-          <Stack spacing={3}>
-            <Box>
-              <Typography variant="h1">日報</Typography>
-            </Box>
+    <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
+      <PageSection
+        layoutVariant="dashboard"
+        variant="plain"
+        className="px-0 py-0 md:px-0"
+      >
+        <VStack className="mx-auto w-full max-w-[1180px] gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+          <section className="rounded-[1.8rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f7fcf8_0%,#ecfdf5_58%,#ffffff_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] sm:p-6">
+            <div className="space-y-2">
+              <h1 className="text-[1.85rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                日報
+              </h1>
+              <p className="max-w-3xl text-sm leading-6 text-slate-600 sm:text-[0.95rem]">
+                日ごとの作業内容、管理者コメント、提出状況をひとつの画面で確認できます。カレンダーから対象日を選んで、そのまま作成や編集に進めます。
+              </p>
+            </div>
+          </section>
 
-            {requestError && (
-              <Alert severity="error" onClose={() => setRequestError(null)}>
-                {requestError}
-              </Alert>
-            )}
+          {requestError && (
+            <AlertBox tone="error" onClose={() => setRequestError(null)}>
+              {requestError}
+            </AlertBox>
+          )}
 
-            <Grid
-              container
-              spacing={{ xs: 2, md: 3 }}
-              alignItems="flex-start"
-            >
-              <Grid item xs={12} md={3}>
-                <Box sx={dashboardInnerSurfaceSx}>
-                  <DailyReportCalendar
-                    value={calendarDate}
-                    onChange={handleCalendarChange}
-                    reportedDateSet={reportedDateSet}
-                    isLoadingReports={isLoadingReports}
-                    hasReports={reports.length > 0}
-                  />
-                </Box>
-              </Grid>
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(320px,360px)_minmax(0,1fr)] lg:gap-5">
+            <div className="lg:sticky lg:top-4">
+              <Panel className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fcfa_100%)]">
+                <VStack className="gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-slate-900">日付を選択</p>
+                    <p className="text-sm leading-6 text-slate-500">
+                      提出済みの日付は強調表示されます。
+                    </p>
+                  </div>
+                  <DashboardInnerSurface>
+                    <DailyReportCalendar
+                      value={calendarDate}
+                      onChange={handleCalendarChange}
+                      reportedDateSet={reportedDateSet}
+                      isLoadingReports={isLoadingReports}
+                      hasReports={reports.length > 0}
+                    />
+                  </DashboardInnerSurface>
+                </VStack>
+              </Panel>
+            </div>
 
-              <Grid item xs={12} md={9}>
-                <Box sx={dashboardInnerSurfaceSx}>
-                  <Stack spacing={3}>
-                    {actionError && (
-                      <Alert
-                        severity="error"
-                        onClose={() => setActionError(null)}
-                      >
-                        {actionError}
-                      </Alert>
-                    )}
-                    {showInitialLoading ? (
-                      <Stack spacing={2}>
-                        <Skeleton variant="text" width="40%" height={32} />
-                        <Skeleton variant="text" width="60%" height={48} />
-                        <Skeleton variant="rectangular" height={160} />
-                        <Stack
-                          direction={{ xs: "column", sm: "row" }}
-                          spacing={2}
-                        >
-                          <Skeleton variant="rounded" width={120} height={36} />
-                          <Skeleton variant="rounded" width={140} height={36} />
-                          <Skeleton variant="rounded" width={140} height={36} />
-                        </Stack>
-                      </Stack>
-                    ) : isCreateMode ? (
-                      <Stack spacing={2}>
-                        <Box>
-                          <Typography
-                            variant="subtitle2"
-                            color="text.secondary"
-                          >
-                            新しい日報を登録
-                          </Typography>
-                          <Typography
-                            variant="h5"
-                            sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}
-                          >
-                            日報作成フォーム
-                          </Typography>
-                        </Box>
-                        <Alert severity="warning" sx={{ mt: 2 }}>
-                          この日報はまだ提出されていません。下書き保存後、必ず「提出する」ボタンをクリックしてください。
-                        </Alert>
-                        <Divider />
-                        <Box
-                          component="form"
-                          onSubmit={(event) => event.preventDefault()}
-                        >
-                          <Stack spacing={3}>
-                            <DailyReportFormFields
-                              form={createForm}
-                              onChange={handleCreateChange}
-                              resolvedAuthorName={resolvedAuthorName}
-                            />
-                            {createFormLastSavedAt && (
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                最終保存: {createFormLastSavedAt}
-                              </Typography>
-                            )}
-                            <Stack
-                              direction={{ xs: "column", sm: "row" }}
-                              justifyContent="flex-end"
-                              spacing={2}
-                              alignItems={{ xs: "stretch", sm: "center" }}
-                            >
-                              <Button
-                                type="button"
-                                variant="text"
-                                fullWidth={isMobile}
-                                onClick={() => {
-                                  setActionError(null);
-                                  const newForm = emptyForm(
-                                    undefined,
-                                    resolvedAuthorName,
-                                  );
-                                  setCreateForm(() => newForm);
-                                  setCreateFormSavedState(newForm);
-                                  setCreateFormLastSavedAt(null);
-                                }}
-                              >
-                                クリア
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outlined"
-                                fullWidth={isMobile}
-                                disabled={!canSubmit || isSubmitting}
-                                onClick={() => {
-                                  void handleCreateSubmit(
-                                    DailyReportStatus.DRAFT,
-                                    true,
-                                  );
-                                }}
-                              >
-                                下書き保存
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="contained"
-                                fullWidth={isMobile}
-                                disabled={!canSubmit || isSubmitting}
-                                onClick={() => {
-                                  void handleCreateSubmit(
-                                    DailyReportStatus.SUBMITTED,
-                                    true,
-                                  );
-                                }}
-                              >
-                                提出する
-                              </Button>
-                            </Stack>
-                          </Stack>
-                        </Box>
-                      </Stack>
-                    ) : selectedReportId ? (
-                      (() => {
-                        const report = selectedReport;
-                        if (!report) {
-                          return (
-                            <Typography color="text.secondary">
-                              選択中の日報が見つかりません。
-                            </Typography>
-                          );
-                        }
-                        const statusMeta = STATUS_META[report.status];
-                        const isEditing =
-                          editingReportId === report.id && Boolean(editDraft);
-                        const hasReactions = report.reactions.length > 0;
-                        const hasComments = report.comments.length > 0;
+            <div>
+              <Panel className="bg-[linear-gradient(180deg,#ffffff_0%,#fbfefd_100%)]">
+                <VStack className="gap-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-slate-500">
+                        対象日
+                      </p>
+                      <h2 className="text-[1.2rem] font-semibold text-slate-900 sm:text-[1.45rem]">
+                        {calendarDate.format("YYYY年MM月DD日")}
+                      </h2>
+                    </div>
+                    {!showInitialLoading ? (
+                      <span className="inline-flex w-fit items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                        {selectedReportId === "create"
+                          ? "作成中"
+                          : selectedReport
+                            ? "既存の日報"
+                            : "未作成"}
+                      </span>
+                    ) : null}
+                  </div>
 
-                        return (
-                          <Stack spacing={2}>
-                            <Stack
-                              direction={{ xs: "column", md: "row" }}
-                              justifyContent="space-between"
-                              spacing={2}
-                            >
-                              <Box>
-                                <Typography
-                                  variant="subtitle2"
-                                  color="text.secondary"
-                                >
-                                  {formatDateSlash(report.date) || report.date}{" "}
-                                  | {report.author}
-                                </Typography>
-                                <Typography
-                                  variant="h5"
-                                  sx={{
-                                    fontSize: { xs: "1.2rem", sm: "1.5rem" },
-                                    wordBreak: "break-word",
-                                  }}
-                                >
-                                  {report.title}
-                                </Typography>
-                                {report.updatedAt && (
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    最終更新:{" "}
-                                    {formatDateTimeReadable(report.updatedAt) ||
-                                      "-"}
-                                  </Typography>
-                                )}
-                              </Box>
-                              <Chip
-                                label={statusMeta.label}
-                                color={statusMeta.color}
-                                sx={{
-                                  alignSelf: { xs: "flex-start", md: "center" },
-                                }}
-                              />
-                            </Stack>
+                  {actionError && (
+                    <AlertBox tone="error" onClose={() => setActionError(null)}>
+                      {actionError}
+                    </AlertBox>
+                  )}
 
-                            <Divider />
-
-                            {report.status === DailyReportStatus.DRAFT && (
-                              <Alert severity="warning">
-                                この日報はまだ提出されていません。内容を確認して「提出する」ボタンをクリックしてください。
-                              </Alert>
-                            )}
-
-                            {isEditing && editDraft ? (
-                              <Stack spacing={2}>
-                                <DailyReportFormFields
-                                  form={editDraft}
-                                  onChange={handleEditChange}
-                                  resolvedAuthorName={resolvedAuthorName}
-                                />
-                                {editDraftLastSavedAt && (
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                  >
-                                    最終保存: {editDraftLastSavedAt}
-                                  </Typography>
-                                )}
-                              </Stack>
-                            ) : (
-                              <Typography
-                                component="pre"
-                                sx={{
-                                  whiteSpace: "pre-wrap",
-                                  fontFamily: "inherit",
-                                }}
-                              >
-                                {report.content ||
-                                  "内容はまだ入力されていません。"}
-                              </Typography>
-                            )}
-
-                            {hasReactions && (
-                              <>
-                                <Divider />
-                                <Box>
-                                  <Typography
-                                    variant="subtitle2"
-                                    sx={{ mb: 1 }}
-                                  >
-                                    管理者からのリアクション
-                                  </Typography>
-                                  <Stack
-                                    direction="row"
-                                    spacing={1}
-                                    flexWrap="wrap"
-                                    sx={{ mb: 2 }}
-                                  >
-                                    {report.reactions.map((reaction) => {
-                                      const meta = REACTION_META[reaction.type];
-                                      if (!meta) return null;
-                                      return (
-                                        <Chip
-                                          key={reaction.type}
-                                          variant="outlined"
-                                          size="small"
-                                          label={`${meta.emoji} ${meta.label} ×${reaction.count}`}
-                                        />
-                                      );
-                                    })}
-                                  </Stack>
-                                </Box>
-                              </>
-                            )}
-
-                            {hasComments && (
-                              <>
-                                <Divider />
-                                <Box>
-                                  <Typography variant="subtitle2" gutterBottom>
-                                    管理者からのコメント
-                                  </Typography>
-                                  <Stack spacing={1}>
-                                    {report.comments.map((comment) => (
-                                      <Paper
-                                        key={comment.id}
-                                        variant="outlined"
-                                        sx={{ p: 1.5 }}
-                                      >
-                                        <Stack
-                                          direction="row"
-                                          justifyContent="space-between"
-                                        >
-                                          <Typography
-                                            variant="body2"
-                                            fontWeight={600}
-                                          >
-                                            {comment.author}
-                                          </Typography>
-                                          <Typography
-                                            variant="caption"
-                                            color="text.secondary"
-                                          >
-                                            {formatDateTimeReadable(
-                                              comment.createdAt,
-                                            ) || comment.createdAt}
-                                          </Typography>
-                                        </Stack>
-                                        <Typography sx={{ mt: 0.5 }}>
-                                          {comment.body}
-                                        </Typography>
-                                      </Paper>
-                                    ))}
-                                  </Stack>
-                                </Box>
-                              </>
-                            )}
-                          </Stack>
-                        );
-                      })()
-                    ) : (
-                      <Stack spacing={3} alignItems="center" sx={{ py: 4 }}>
-                        <Typography color="text.secondary" textAlign="center">
-                          {calendarDate.format("YYYY年MM月DD日")}
-                          の日報はまだ登録されていません。
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          fullWidth={isMobile}
-                          onClick={() => {
-                            setSelectedReportId("create");
-                            setCreateForm(
-                              emptyForm(
-                                calendarDate.format("YYYY-MM-DD"),
-                                resolvedAuthorName,
-                              ),
-                            );
-                            // 新規作成ボタンを押したときは作成済みレポートIDをクリア
-                            createdReportIdRef.current = null;
-                          }}
-                        >
-                          この日の日報を作成する
-                        </Button>
-                      </Stack>
-                    )}
-
-                    {!isCreateMode && selectedReportId && (
-                      <Stack spacing={2}>
-                        <Divider />
-                        {editingReportId && editDraft ? (
-                          <Stack
-                            direction={{ xs: "column", sm: "row" }}
-                            spacing={1}
-                            alignItems={{ xs: "stretch", sm: "center" }}
-                          >
-                            <Button
-                              variant="outlined"
-                              fullWidth={isMobile}
-                              disabled={!canEditSubmit || isUpdating}
+                  {showInitialLoading ? (
+                    <VStack className="gap-4">
+                      <SkeletonBlock className="h-8 w-2/5" />
+                      <SkeletonBlock className="h-12 w-3/5" />
+                      <SkeletonBlock className="h-40 w-full" />
+                      <div className="flex flex-col gap-4 sm:flex-row">
+                        <SkeletonBlock className="h-9 w-[120px]" />
+                        <SkeletonBlock className="h-9 w-[140px]" />
+                        <SkeletonBlock className="h-9 w-[140px]" />
+                      </div>
+                    </VStack>
+                  ) : isCreateMode ? (
+                    <VStack className="gap-6">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-slate-500">
+                          新しい日報を登録
+                        </p>
+                        <h3 className="text-[1.15rem] font-semibold text-slate-900 sm:text-[1.35rem]">
+                          日報作成フォーム
+                        </h3>
+                      </div>
+                      <AlertBox tone="warning">
+                        この日報はまだ提出されていません。下書き保存後、必ず「提出する」ボタンをクリックしてください。
+                      </AlertBox>
+                      <DividerLine />
+                      <form onSubmit={(event) => event.preventDefault()}>
+                        <VStack className="gap-7">
+                          <DailyReportFormFields
+                            form={createForm}
+                            onChange={handleCreateChange}
+                            resolvedAuthorName={resolvedAuthorName}
+                          />
+                          {createFormLastSavedAt && (
+                            <p className="text-xs text-slate-500">
+                              最終保存: {createFormLastSavedAt}
+                            </p>
+                          )}
+                          <div className="flex flex-col items-stretch justify-end gap-3 sm:flex-row sm:items-center">
+                            <ActionButton
+                              tone="ghost"
                               onClick={() => {
-                                void handleSaveEdit(
+                                setActionError(null);
+                                const newForm = emptyForm(
+                                  undefined,
+                                  resolvedAuthorName,
+                                );
+                                setCreateForm(() => newForm);
+                                setCreateFormSavedState(newForm);
+                                setCreateFormLastSavedAt(null);
+                              }}
+                            >
+                              クリア
+                            </ActionButton>
+                            <ActionButton
+                              tone="secondary"
+                              disabled={!canSubmit || isSubmitting}
+                              onClick={() => {
+                                void handleCreateSubmit(
                                   DailyReportStatus.DRAFT,
                                   true,
                                 );
                               }}
                             >
                               下書き保存
-                            </Button>
-                            <Button
-                              variant="contained"
-                              fullWidth={isMobile}
-                              disabled={
-                                !canEditSubmit ||
-                                isUpdating ||
-                                isSelectedReportSubmitted
-                              }
+                            </ActionButton>
+                            <ActionButton
+                              tone="primary"
+                              disabled={!canSubmit || isSubmitting}
                               onClick={() => {
-                                void handleSaveEdit(
+                                void handleCreateSubmit(
                                   DailyReportStatus.SUBMITTED,
                                   true,
                                 );
                               }}
                             >
                               提出する
-                            </Button>
-                            <Button
-                              variant="text"
-                              fullWidth={isMobile}
-                              onClick={handleCancelEdit}
-                            >
-                              キャンセル
-                            </Button>
-                          </Stack>
-                        ) : (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: {
-                                xs: "stretch",
-                                sm: "flex-end",
-                              },
+                            </ActionButton>
+                          </div>
+                        </VStack>
+                      </form>
+                    </VStack>
+                  ) : selectedReportId ? (
+                    (() => {
+                      const report = selectedReport;
+                      if (!report) {
+                        return (
+                          <p className="text-slate-500">
+                            選択中の日報が見つかりません。
+                          </p>
+                        );
+                      }
+                      const statusMeta = STATUS_META[report.status];
+                      const isEditing =
+                        editingReportId === report.id && Boolean(editDraft);
+                      const hasReactions = report.reactions.length > 0;
+                      const hasComments = report.comments.length > 0;
+
+                      return (
+                        <VStack className="gap-5">
+                          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                            <div className="space-y-1">
+                              <p className="text-sm font-medium text-slate-500">
+                                {formatDateSlash(report.date) || report.date} |{" "}
+                                {report.author}
+                              </p>
+                              <h3 className="break-words text-[1.2rem] font-semibold text-slate-900 sm:text-[1.45rem]">
+                                {report.title}
+                              </h3>
+                              {report.updatedAt && (
+                                <p className="text-sm text-slate-500">
+                                  最終更新:{" "}
+                                  {formatDateTimeReadable(report.updatedAt) ||
+                                    "-"}
+                                </p>
+                              )}
+                            </div>
+                            <StatusChip
+                              label={statusMeta.label}
+                              className={statusMeta.className}
+                            />
+                          </div>
+
+                          <DividerLine />
+
+                          {report.status === DailyReportStatus.DRAFT && (
+                            <AlertBox tone="warning">
+                              この日報はまだ提出されていません。内容を確認して「提出する」ボタンをクリックしてください。
+                            </AlertBox>
+                          )}
+
+                          {isEditing && editDraft ? (
+                            <VStack className="gap-4">
+                              <DailyReportFormFields
+                                form={editDraft}
+                                onChange={handleEditChange}
+                                resolvedAuthorName={resolvedAuthorName}
+                              />
+                              {editDraftLastSavedAt && (
+                                <p className="text-xs text-slate-500">
+                                  最終保存: {editDraftLastSavedAt}
+                                </p>
+                              )}
+                            </VStack>
+                          ) : (
+                            <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50/70 p-4">
+                              <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-slate-900">
+                                {report.content ||
+                                  "内容はまだ入力されていません。"}
+                              </pre>
+                            </div>
+                          )}
+
+                          {hasReactions && (
+                            <>
+                              <DividerLine />
+                              <div>
+                                <p className="mb-2 text-sm font-semibold text-slate-900">
+                                  管理者からのリアクション
+                                </p>
+                                <div className="mb-2 flex flex-wrap gap-2">
+                                  {report.reactions.map((reaction) => {
+                                    const meta = REACTION_META[reaction.type];
+                                    if (!meta) return null;
+                                    return (
+                                      <StatusChip
+                                        key={reaction.type}
+                                        label={`${meta.emoji} ${meta.label} ×${reaction.count}`}
+                                        className="border border-slate-300 bg-white text-slate-700"
+                                      />
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </>
+                          )}
+
+                          {hasComments && (
+                            <>
+                              <DividerLine />
+                              <div>
+                                <p className="mb-2 text-sm font-semibold text-slate-900">
+                                  管理者からのコメント
+                                </p>
+                                <VStack className="gap-3">
+                                  {report.comments.map((comment) => (
+                                    <CommentCard key={comment.id}>
+                                      <div className="flex flex-col justify-between gap-1 sm:flex-row sm:gap-4">
+                                        <p className="text-sm font-semibold text-slate-900">
+                                          {comment.author}
+                                        </p>
+                                        <p className="text-xs text-slate-500">
+                                          {formatDateTimeReadable(
+                                            comment.createdAt,
+                                          ) || comment.createdAt}
+                                        </p>
+                                      </div>
+                                      <p className="mt-2 text-sm leading-6 text-slate-800">
+                                        {comment.body}
+                                      </p>
+                                    </CommentCard>
+                                  ))}
+                                </VStack>
+                              </div>
+                            </>
+                          )}
+                        </VStack>
+                      );
+                    })()
+                  ) : (
+                    <VStack className="items-center gap-6 rounded-[1.4rem] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-8">
+                      <p className="text-center text-slate-500">
+                        {calendarDate.format("YYYY年MM月DD日")}
+                        の日報はまだ登録されていません。
+                      </p>
+                      <ActionButton
+                        tone="primary"
+                        onClick={() => {
+                          setSelectedReportId("create");
+                          setCreateForm(
+                            emptyForm(
+                              calendarDate.format("YYYY-MM-DD"),
+                              resolvedAuthorName,
+                            ),
+                          );
+                          createdReportIdRef.current = null;
+                        }}
+                      >
+                        この日の日報を作成する
+                      </ActionButton>
+                    </VStack>
+                  )}
+
+                  {!isCreateMode && selectedReportId && (
+                    <VStack className="gap-4">
+                      <DividerLine />
+                      {editingReportId && editDraft ? (
+                        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+                          <ActionButton
+                            tone="secondary"
+                            disabled={!canEditSubmit || isUpdating}
+                            onClick={() => {
+                              void handleSaveEdit(
+                                DailyReportStatus.DRAFT,
+                                true,
+                              );
                             }}
                           >
-                            <Button
-                              variant="outlined"
-                              fullWidth={isMobile}
-                              disabled={isUpdating}
-                              onClick={() => {
-                                if (selectedReport) {
-                                  handleStartEdit(selectedReport);
-                                }
-                              }}
-                            >
-                              編集
-                            </Button>
-                          </Box>
-                        )}
-                      </Stack>
-                    )}
-                  </Stack>
-                </Box>
-              </Grid>
-            </Grid>
-          </Stack>
-        </PageSection>
-      </Page>
-    </LocalizationProvider>
+                            下書き保存
+                          </ActionButton>
+                          <ActionButton
+                            tone="primary"
+                            disabled={
+                              !canEditSubmit ||
+                              isUpdating ||
+                              isSelectedReportSubmitted
+                            }
+                            onClick={() => {
+                              void handleSaveEdit(
+                                DailyReportStatus.SUBMITTED,
+                                true,
+                              );
+                            }}
+                          >
+                            提出する
+                          </ActionButton>
+                          <ActionButton tone="ghost" onClick={handleCancelEdit}>
+                            キャンセル
+                          </ActionButton>
+                        </div>
+                      ) : (
+                        <div className="flex justify-stretch sm:justify-end">
+                          <ActionButton
+                            tone="secondary"
+                            disabled={isUpdating}
+                            onClick={() => {
+                              if (selectedReport) {
+                                handleStartEdit(selectedReport);
+                              }
+                            }}
+                          >
+                            編集
+                          </ActionButton>
+                        </div>
+                      )}
+                    </VStack>
+                  )}
+                </VStack>
+              </Panel>
+            </div>
+          </div>
+        </VStack>
+      </PageSection>
+    </Page>
   );
 }

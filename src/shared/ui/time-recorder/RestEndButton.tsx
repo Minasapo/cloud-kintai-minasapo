@@ -1,16 +1,11 @@
-import { Button } from "@mui/material";
-import { CSSProperties, useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 
-import { designTokenVar } from "@/shared/designSystem";
-
-const REST_DISABLED_BACKGROUND = designTokenVar(
-  "component.timeRecorder.restButton.disabledBackground",
-  "#D9E2DD"
-);
-const REST_BUTTON_MAX_WIDTH = designTokenVar(
-  "component.timeRecorder.restButton.maxWidth",
-  "220px"
-);
+import ActionCardButton from "./ActionCardButton";
+import {
+  buildActionCardVars,
+  TIME_RECORDER_BUTTON_PALETTES,
+} from "./buttonStyles";
+import { useActionButtonState } from "./useActionButtonState";
 
 export interface RestEndButtonProps {
   isResting: boolean;
@@ -18,48 +13,52 @@ export interface RestEndButtonProps {
   disabled?: boolean;
 }
 
+function RestEndIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
+      <path
+        d="M12 7v5l3 3M20 12a8 8 0 1 1-8-8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const RestEndButton = ({
   isResting,
   onRestEnd,
   disabled = false,
 }: RestEndButtonProps) => {
-  const restButtonVars: CSSProperties & Record<`--${string}`, string> = {
-    "--rest-button-max-width": REST_BUTTON_MAX_WIDTH,
-    "--rest-button-disabled-bg": REST_DISABLED_BACKGROUND,
-  };
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  // Derived state: reset isProcessing when isResting changes
-  const actualIsProcessing = useMemo(() => {
-    return isResting ? false : isProcessing;
-  }, [isResting, isProcessing]);
+  const restButtonVars = buildActionCardVars(
+    TIME_RECORDER_BUTTON_PALETTES.rest,
+  );
+  const { isDisabled, markPending } = useActionButtonState({
+    canInteract: isResting,
+    disabled,
+  });
 
   const handleClick = useCallback(() => {
-    setIsProcessing(true);
+    if (!markPending()) {
+      return;
+    }
+
     onRestEnd();
-  }, [onRestEnd]);
+  }, [markPending, onRestEnd]);
 
   return (
-    <Button
-      fullWidth
-      onClick={handleClick}
-      disabled={!isResting || actualIsProcessing || disabled}
-      data-testid="rest-end-button"
-      className="w-full max-w-[var(--rest-button-max-width)]"
+    <ActionCardButton
+      testId="rest-end-button"
       style={restButtonVars}
-      sx={(theme) => ({
-        color: theme.palette.rest.main,
-        "&:hover": {
-          color: theme.palette.rest.contrastText,
-          backgroundColor: theme.palette.rest.main,
-        },
-        "&:disabled": {
-          backgroundColor: "var(--rest-button-disabled-bg)",
-        },
-      })}
-    >
-      休憩終了
-    </Button>
+      size="compact"
+      disabled={isDisabled}
+      onClick={handleClick}
+      label="休憩終了"
+      helper={null}
+      icon={<RestEndIcon />}
+    />
   );
 };
 

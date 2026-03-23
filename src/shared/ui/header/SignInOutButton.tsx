@@ -1,4 +1,3 @@
-import { Box, Button, Stack } from "@mui/material";
 import StaffIcon from "@shared/ui/icon/StaffIcon";
 import { CSSProperties } from "react";
 
@@ -16,6 +15,20 @@ const SIGN_BUTTON_RADIUS = designTokenVar(
 const SIGN_BUTTON_FONT_WEIGHT = designTokenVar(
   "component.headerSignButton.fontWeight",
   "500"
+);
+const LOGIN_BUTTON_BG = designTokenVar("color.brand.primary.base", "#0FA85E");
+const LOGIN_BUTTON_TEXT = designTokenVar(
+  "color.brand.primary.contrastText",
+  "#FFFFFF"
+);
+const LOGOUT_BUTTON_BG = designTokenVar("color.feedback.danger.base", "#D7443E");
+const LOGOUT_BUTTON_TEXT = designTokenVar(
+  "color.brand.primary.contrastText",
+  "#FFFFFF"
+);
+const SIGN_BUTTON_TEXT = designTokenVar(
+  "component.headerSignButton.textColor",
+  "#1E2A25",
 );
 
 export interface SignInOutButtonProps {
@@ -38,52 +51,44 @@ const SignInOutButton = ({
     "--sign-button-padding-x": SIGN_BUTTON_PADDING_X,
     "--sign-button-radius": SIGN_BUTTON_RADIUS,
     "--sign-button-font-weight": SIGN_BUTTON_FONT_WEIGHT,
+    "--login-button-bg": LOGIN_BUTTON_BG,
+    "--login-button-text": LOGIN_BUTTON_TEXT,
+    "--logout-button-bg": LOGOUT_BUTTON_BG,
+    "--logout-button-text": LOGOUT_BUTTON_TEXT,
+    "--sign-button-text": SIGN_BUTTON_TEXT,
   };
+  const buttonClassName =
+    "whitespace-nowrap rounded-[var(--sign-button-radius)] border-[3px] px-[var(--sign-button-padding-x)] py-2 font-[var(--sign-button-font-weight)] text-[color:var(--sign-button-text)] transition-[color,background-color,border-color] duration-150 ease-in-out";
 
   if (isConfiguring) {
     return null;
   }
 
   return (
-    <Box className="block" style={signButtonVars}>
-      <Stack direction="row" alignItems="center" className="gap-[var(--sign-button-gap)]">
+    <div className="block" style={signButtonVars}>
+      <div className="flex items-center gap-[var(--sign-button-gap)]">
         {isAuthenticated ? (
           <>
-            <Button
+            <button
+              type="button"
               onClick={onSignOut}
-              className="whitespace-nowrap rounded-[var(--sign-button-radius)] px-[var(--sign-button-padding-x)] font-[var(--sign-button-font-weight)]"
-              sx={(theme) => ({
-                color: theme.palette.logout.contrastText,
-                backgroundColor: theme.palette.logout.main,
-                border: `3px solid ${theme.palette.logout.main}`,
-                "&:hover": {
-                  color: theme.palette.logout.main,
-                  backgroundColor: theme.palette.logout.contrastText,
-                },
-              })}
+              className={`${buttonClassName} border-[var(--logout-button-bg)] bg-[var(--logout-button-bg)] text-[color:var(--logout-button-text)] hover:bg-transparent hover:text-[color:var(--logout-button-bg)]`}
             >
               ログアウト
-            </Button>
+            </button>
             {staffName && <StaffIcon name={staffName} />}
           </>
         ) : (
-          <Button
+          <button
+            type="button"
             onClick={onSignIn}
-            className="whitespace-nowrap rounded-[var(--sign-button-radius)] px-[var(--sign-button-padding-x)] font-[var(--sign-button-font-weight)]"
-            sx={(theme) => ({
-              color: theme.palette.login.contrastText,
-              backgroundColor: theme.palette.login.main,
-              "&:hover": {
-                color: theme.palette.login.main,
-                backgroundColor: theme.palette.login.contrastText,
-              },
-            })}
+            className={`${buttonClassName} border-[var(--login-button-bg)] bg-[var(--login-button-bg)] text-[color:var(--login-button-text)] hover:bg-transparent hover:text-[color:var(--login-button-bg)]`}
           >
             ログイン
-          </Button>
+          </button>
         )}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 };
 

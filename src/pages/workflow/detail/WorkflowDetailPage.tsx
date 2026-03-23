@@ -1,6 +1,5 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import { useCallback, useContext, useMemo } from "react";
@@ -22,13 +21,10 @@ import {
   type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
-import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 import { PageSection } from "@/shared/ui/layout";
 
-const SECTION_GAP = designTokenVar("spacing.xl", "24px");
-const PANEL_GAP = designTokenVar("spacing.lg", "16px");
 const logger = createLogger("WorkflowDetailPage");
 
 export default function WorkflowDetailPage() {
@@ -148,7 +144,7 @@ export default function WorkflowDetailPage() {
       const afterComments = await updateWorkflow(commentUpdate);
       setWorkflow(afterComments as WorkflowEntity);
       void notify("取り下げしました", { mode: "auto-close" });
-      setTimeout(() => navigate(-1), 1000);
+      setTimeout(() => navigate("/workflow"), 1000);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow withdrawal failed:", message);
@@ -163,55 +159,60 @@ export default function WorkflowDetailPage() {
   return (
     <Page
       title="申請内容"
-      breadcrumbs={[
-        { label: "TOP", href: "/" },
-        { label: "ワークフロー", href: "/workflow" },
-      ]}
-      maxWidth="lg"
+      maxWidth={false}
+      showDefaultHeader={false}
     >
       <PageSection
         variant="plain"
         layoutVariant="detail"
-        sx={{ gap: SECTION_GAP }}
+        sx={{ gap: 0 }}
       >
-        <Paper sx={{ p: 3, bgcolor: "background.paper" }}>
-          <WorkflowDetailActions
-            onBack={() => navigate(-1)}
-            onWithdraw={handleWithdraw}
-            onEdit={() => navigate(`/workflow/${id}/edit`)}
-            withdrawDisabled={permissions.withdrawDisabled}
-            withdrawTooltip={permissions.withdrawTooltip}
-            editDisabled={permissions.editDisabled}
-            editTooltip={permissions.editTooltip}
-          />
+        <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-6 pb-10 pt-2">
+          <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
+            <div className="flex flex-col gap-3">
+              <WorkflowDetailActions
+                onBack={() => navigate("/workflow")}
+                onWithdraw={handleWithdraw}
+                onEdit={() => navigate(`/workflow/${id}/edit`)}
+                withdrawDisabled={permissions.withdrawDisabled}
+                withdrawTooltip={permissions.withdrawTooltip}
+                editDisabled={permissions.editDisabled}
+                editTooltip={permissions.editTooltip}
+              />
+              <div className="flex flex-col gap-1.5">
+                <h1 className="m-0 text-[1.85rem] font-bold leading-[1.15] tracking-[-0.02em] text-slate-950 md:text-[2.2rem]">
+                  申請内容
+                </h1>
+                <p className="max-w-[760px] leading-8 text-slate-500">
+                  申請内容の確認、コメントのやり取り、編集や取り下げをこの画面で行えます。
+                </p>
+              </div>
+            </div>
+          </div>
 
           {!workflow ? (
-            <Typography color="error">
+            <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3 text-sm font-medium text-rose-900">
               ワークフローの読み込みに失敗しました。
-            </Typography>
+            </div>
           ) : (
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item xs={12} sm={7}>
-                <Stack spacing={0} sx={{ gap: PANEL_GAP }}>
-                  <WorkflowMetadataPanel
-                    workflowId={workflow.id}
-                    fallbackId={id}
-                    category={workflow.category ?? null}
-                    categoryLabel={categoryLabel}
-                    staffName={staffName}
-                    applicationDate={applicationDate}
-                    status={workflow.status ?? null}
-                    overTimeDetails={workflow.overTimeDetails ?? null}
-                    customWorkflowTitle={workflow.customWorkflowTitle ?? null}
-                    customWorkflowContent={
-                      workflow.customWorkflowContent ?? null
-                    }
-                    approvalSteps={approvalSteps}
-                  />
-                </Stack>
-              </Grid>
+            <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(22rem,0.9fr)]">
+              <div className="min-w-0">
+                <WorkflowMetadataPanel
+                  workflowId={workflow.id}
+                  fallbackId={id}
+                  category={workflow.category ?? null}
+                  categoryLabel={categoryLabel}
+                  staffName={staffName}
+                  applicationDate={applicationDate}
+                  status={workflow.status ?? null}
+                  overTimeDetails={workflow.overTimeDetails ?? null}
+                  customWorkflowTitle={workflow.customWorkflowTitle ?? null}
+                  customWorkflowContent={workflow.customWorkflowContent ?? null}
+                  approvalSteps={approvalSteps}
+                />
+              </div>
 
-              <Grid item xs={12} sm={5}>
+              <div className="min-w-0 rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
                 <WorkflowCommentThread
                   key={workflow?.id ?? "workflow-comment-thread"}
                   messages={messages}
@@ -225,10 +226,10 @@ export default function WorkflowDetailPage() {
                   sending={sending}
                   formatSender={formatSender}
                 />
-              </Grid>
-            </Grid>
+              </div>
+            </div>
           )}
-        </Paper>
+        </div>
       </PageSection>
     </Page>
   );

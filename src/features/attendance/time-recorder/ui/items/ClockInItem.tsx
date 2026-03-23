@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import ClockInButton from "@/shared/ui/time-recorder/ClockInButton";
 
 import { WorkStatus, WorkStatusCodes } from "../../lib/common";
@@ -15,13 +13,11 @@ export default function ClockInItem({
   onClick,
   disabled = false,
 }: ClockInItemProps) {
-  const isBeforeWork = useMemo(
-    () => workStatus.code === WorkStatusCodes.BEFORE_WORK,
-    [workStatus.code]
-  );
+  const isBeforeWork = workStatus.code === WorkStatusCodes.BEFORE_WORK;
 
   return (
     <ClockInButton
+      key={String(isBeforeWork)}
       isBeforeWork={isBeforeWork}
       onClockIn={onClick}
       disabled={disabled}

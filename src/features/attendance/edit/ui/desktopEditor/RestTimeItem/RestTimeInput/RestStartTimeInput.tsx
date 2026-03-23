@@ -1,7 +1,5 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
+import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
+import { TimeInput } from "@shared/ui/TimeInput";
 import { useContext } from "react";
 import { Controller, FieldArrayWithId } from "react-hook-form";
 
@@ -30,64 +28,33 @@ export default function RestStartTimeInput({
   const lunchRestStartTime = getLunchRestStartTime().format("HH:mm");
 
   return (
-    <Stack spacing={1}>
+    <div className="flex flex-col gap-2">
       <Controller
         name={`rests.${index}.startTime`}
         control={control}
         render={({ field }) => (
-          <TimePicker
-            value={rest.startTime ? dayjs(rest.startTime) : null}
-            ampm={false}
+          <TimeInput
+            value={field.value ?? null}
+            baseDate={workDate.format("YYYY-MM-DD")}
             disabled={changeRequests.length > 0}
-            slotProps={{
-              textField: {
-                size: "small",
-                inputProps: {
-                  "data-testid": `rest-start-time-input-${testIdPrefix}-${index}`,
-                },
-              },
-            }}
-            onChange={(newStartTime) => {
-              if (!newStartTime) {
-                field.onChange(null);
-                return;
-              }
-
-              if (!newStartTime.isValid()) {
-                return;
-              }
-
-              const formattedStartTime = newStartTime
-                .year(workDate.year())
-                .month(workDate.month())
-                .date(workDate.date())
-                .second(0)
-                .millisecond(0)
-                .toISOString();
-              field.onChange(formattedStartTime);
-            }}
+            size="small"
+            step={60}
+            data-testid={`rest-start-time-input-${testIdPrefix}-${index}`}
+            onChange={(newStartTime) => field.onChange(newStartTime)}
           />
         )}
       />
-      <Box>
-        <Chip
-          label={lunchRestStartTime}
-          variant="outlined"
-          color="success"
-          icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
+      <div>
+        <QuickInputChips
+          quickInputTimes={[{ time: lunchRestStartTime, enabled: true }]}
+          workDate={workDate}
           disabled={changeRequests.length > 0}
           data-testid={`rest-lunch-chip-${index}`}
-          onClick={() => {
-            const startTime = dayjs(
-              `${workDate.format("YYYY-MM-DD")} ${lunchRestStartTime}`
-            )
-              .second(0)
-              .millisecond(0)
-              .toISOString();
+          onSelectTime={(startTime) => {
             restUpdate(index, { ...rest, startTime });
           }}
         />
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }

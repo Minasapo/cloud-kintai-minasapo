@@ -1,4 +1,3 @@
-import Switch from "@mui/material/Switch";
 import type { FieldValues } from "react-hook-form";
 
 import ReturnDirectlyFlagInputBase, {
@@ -10,14 +9,14 @@ export default function ReturnDirectlyFlagInputBaseMobile<
 >(
   props: Omit<
     ReturnDirectlyFlagInputBaseProps<TFieldValues>,
-    "inputComponent" | "layout"
+    "inputComponent" | "layout" | "inputVariant"
   >
 ) {
   return (
     <ReturnDirectlyFlagInputBase
       {...props}
-      inputComponent={Switch}
       layout="inline"
+      inputVariant="switch"
     />
   );
 }

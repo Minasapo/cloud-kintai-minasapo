@@ -10,22 +10,6 @@ import {
 } from "@entities/calendar/api/calendarApi";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControlLabel,
-  Grid,
-  LinearProgress,
-  SxProps,
-  Typography,
-} from "@mui/material";
-import { Theme } from "@mui/material/styles";
-import {
   Attendance,
   CreateAttendanceInput,
   OnUpdateAttendanceSubscription,
@@ -63,28 +47,17 @@ import {
 import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
-import { designTokenVar } from "@/shared/designSystem";
 import { Logger } from "@/shared/lib/logger";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
-import Clock from "@/shared/ui/clock/Clock";
-import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
-import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
 
 import { WorkStatus } from "../lib/common";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
 import { goDirectlyCallback } from "./goDirectlyCallback";
-import ClockInItem from "./items/ClockInItem";
-import ClockOutItem from "./items/ClockOutItem";
-import GoDirectlyItem from "./items/GoDirectlyItem";
-import RestEndItem from "./items/RestEndItem";
-import RestStartItem from "./items/RestStartItem";
-import ReturnDirectly from "./items/ReturnDirectlyItem";
-import QuickDailyReportCard from "./QuickDailyReportCard";
 import { restEndCallback } from "./restEndCallback";
 import { restStartCallback } from "./restStartCallback";
-import { RestTimeMessage } from "./RestTimeMessage";
 import { returnDirectlyCallback } from "./returnDirectlyCallback";
+import { TimeRecorderLoadingView, TimeRecorderView } from "./TimeRecorderView";
 
 /**
  * 勤怠打刻用のメインコンポーネント。
@@ -328,84 +301,6 @@ export default function TimeRecorder(): JSX.Element {
     return `${dayjs(attendance.endTime).format("HH:mm")} 退勤`;
   }, [attendance?.endTime]);
 
-  const TIME_RECORDER_WIDTH_MD = designTokenVar(
-    "component.timeRecorder.layout.widthMd",
-    "400px",
-  );
-  const TIME_RECORDER_MARGIN_XS = designTokenVar(
-    "component.timeRecorder.layout.marginXMobile",
-    "24px",
-  );
-  const TIME_RECORDER_SURFACE_BG = designTokenVar(
-    "component.timeRecorder.surface.background",
-    "#FFFFFF",
-  );
-  const TIME_RECORDER_BORDER_COLOR = designTokenVar(
-    "component.timeRecorder.surface.borderColor",
-    "#E5E7EB",
-  );
-  const TIME_RECORDER_BORDER_WIDTH = designTokenVar(
-    "component.timeRecorder.surface.borderWidth",
-    "1px",
-  );
-  const TIME_RECORDER_BORDER_RADIUS = designTokenVar(
-    "component.timeRecorder.surface.borderRadius",
-    "12px",
-  );
-  const TIME_RECORDER_SURFACE_SHADOW = designTokenVar(
-    "component.timeRecorder.surface.shadow",
-    "0 12px 24px rgba(17, 24, 39, 0.08)",
-  );
-  const TIME_RECORDER_PADDING_XS = designTokenVar(
-    "component.timeRecorder.surface.padding.xs",
-    "16px",
-  );
-  const TIME_RECORDER_PADDING_MD = designTokenVar(
-    "component.timeRecorder.surface.padding.md",
-    "24px",
-  );
-
-  const BADGE_PADDING_X = designTokenVar("spacing.sm", "8px");
-  const BADGE_PADDING_Y = designTokenVar("spacing.xs", "4px");
-  const BADGE_RADIUS = designTokenVar("radius.sm", "4px");
-  const BADGE_FONT_WEIGHT = designTokenVar("typography.fontWeight.bold", "600");
-  const CLOCK_IN_BADGE_BG = designTokenVar(
-    "color.feedback.success.surface",
-    "#E4F8C9",
-  );
-  const CLOCK_IN_BADGE_TEXT = designTokenVar(
-    "color.feedback.success.base",
-    "#1EAA6A",
-  );
-  const CLOCK_OUT_BADGE_BG = designTokenVar(
-    "color.feedback.danger.surface",
-    "#FDE0E0",
-  );
-  const CLOCK_OUT_BADGE_TEXT = designTokenVar(
-    "color.feedback.danger.base",
-    "#B33D47",
-  );
-
-  const clockInBadgeStyles: SxProps<Theme> = {
-    display: "inline-block",
-    px: BADGE_PADDING_X,
-    py: BADGE_PADDING_Y,
-    borderRadius: BADGE_RADIUS,
-    bgcolor: CLOCK_IN_BADGE_BG,
-    color: CLOCK_IN_BADGE_TEXT,
-    fontWeight: BADGE_FONT_WEIGHT,
-  };
-
-  const clockOutBadgeStyles: SxProps<Theme> = {
-    display: "inline-block",
-    px: BADGE_PADDING_X,
-    py: BADGE_PADDING_Y,
-    borderRadius: BADGE_RADIUS,
-    bgcolor: CLOCK_OUT_BADGE_BG,
-    color: CLOCK_OUT_BADGE_TEXT,
-    fontWeight: BADGE_FONT_WEIGHT,
-  };
-
   const handleClockIn = useCallback(
     () => clockInCallback(cognitoUser, today, clockIn, dispatch, staff, logger),
     [cognitoUser, clockIn, dispatch, staff],
@@ -622,19 +517,7 @@ export default function TimeRecorder(): JSX.Element {
   }, [cognitoUser?.id, logger, refreshTimeRecorderData, today]);
 
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
-    return (
-      <Box
-        sx={{
-          width: { xs: "100%", md: TIME_RECORDER_WIDTH_MD },
-          maxWidth: TIME_RECORDER_WIDTH_MD,
-          px: { xs: TIME_RECORDER_MARGIN_XS, md: 0 },
-          mx: "auto",
-          boxSizing: "border-box",
-        }}
-      >
-        <LinearProgress />
-      </Box>
-    );
+    return <TimeRecorderLoadingView />;
   }
 
   if (workStatus === null) {
@@ -643,148 +526,26 @@ export default function TimeRecorder(): JSX.Element {
   }
 
   return (
-    <Box
-      sx={{
-        width: { xs: "100%", md: TIME_RECORDER_WIDTH_MD },
-        maxWidth: TIME_RECORDER_WIDTH_MD,
-        px: { xs: TIME_RECORDER_MARGIN_XS, md: 0 },
-        mx: "auto",
-        boxSizing: "border-box",
-      }}
-    >
-      <Box
-        sx={{
-          backgroundColor: TIME_RECORDER_SURFACE_BG,
-          borderRadius: TIME_RECORDER_BORDER_RADIUS,
-          borderColor: TIME_RECORDER_BORDER_COLOR,
-          borderWidth: TIME_RECORDER_BORDER_WIDTH,
-          borderStyle: "solid",
-          boxShadow: TIME_RECORDER_SURFACE_SHADOW,
-          p: { xs: TIME_RECORDER_PADDING_XS, md: TIME_RECORDER_PADDING_MD },
-        }}
-      >
-        <Grid container spacing={1}>
-          <Grid item xs={12}>
-            <Typography
-              variant="h3"
-              textAlign="center"
-              data-testid="work-status-text"
-            >
-              {workStatus.text || "読み込み中..."}
-            </Typography>
-            {(clockInDisplayText || clockOutDisplayText) && (
-              <Box display="flex" justifyContent="center" gap={1} mt={0.5}>
-                {clockInDisplayText && (
-                  <Typography
-                    variant="body1"
-                    textAlign="center"
-                    data-testid="clock-in-time-text"
-                    sx={clockInBadgeStyles}
-                  >
-                    {clockInDisplayText}
-                  </Typography>
-                )}
-                {clockOutDisplayText && (
-                  <Typography
-                    variant="body1"
-                    textAlign="center"
-                    data-testid="clock-out-time-text"
-                    sx={clockOutBadgeStyles}
-                  >
-                    {clockOutDisplayText}
-                  </Typography>
-                )}
-              </Box>
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            <Clock />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <DirectSwitch
-                  onChange={() => setDirectMode(!directMode)}
-                  inputProps={
-                    {
-                      "data-testid": "direct-mode-switch",
-                    } as React.InputHTMLAttributes<HTMLInputElement>
-                  }
-                />
-              }
-              label="直行/直帰モード"
-            />
-          </Grid>
-          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
-            {directMode ? (
-              <GoDirectlyItem
-                workStatus={workStatus}
-                onClick={handleGoDirectly}
-              />
-            ) : (
-              <ClockInItem
-                workStatus={workStatus}
-                onClick={handleClockIn}
-                disabled={hasChangeRequest}
-              />
-            )}
-          </Grid>
-          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
-            {directMode ? (
-              <ReturnDirectly
-                workStatus={workStatus}
-                onClick={handleReturnDirectly}
-              />
-            ) : (
-              <ClockOutItem
-                workStatus={workStatus}
-                onClick={handleClockOut}
-                disabled={hasChangeRequest}
-              />
-            )}
-          </Grid>
-
-          {/* 休憩 */}
-          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
-            <RestStartItem
-              workStatus={workStatus}
-              onClick={handleRestStart}
-              disabled={hasChangeRequest}
-            />
-          </Grid>
-          <Grid item xs={6} sx={{ display: "flex", justifyContent: "center" }}>
-            <RestEndItem
-              workStatus={workStatus}
-              onClick={handleRestEnd}
-              disabled={hasChangeRequest}
-            />
-          </Grid>
-
-          {hasChangeRequest && (
-            <Grid item xs={12}>
-              <Alert severity="warning">
-                変更リクエスト申請中です。承認されるまで打刻はできません。
-              </Alert>
-            </Grid>
-          )}
-
-          <Grid item xs={12}>
-            <QuickDailyReportCard staffId={staff?.id ?? null} date={today} />
-          </Grid>
-          {isAttendanceError && (
-            <Grid item xs={12}>
-              <AttendanceErrorAlert />
-            </Grid>
-          )}
-
-          <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
-
-          <Grid item xs={12}>
-            <RestTimeMessage />
-          </Grid>
-        </Grid>
-      </Box>
-    </Box>
+    <TimeRecorderView
+      today={today}
+      staffId={staff?.id ?? null}
+      workStatus={workStatus}
+      directMode={directMode}
+      hasChangeRequest={hasChangeRequest}
+      isAttendanceError={isAttendanceError}
+      clockInDisplayText={clockInDisplayText}
+      clockOutDisplayText={clockOutDisplayText}
+      onDirectModeChange={setDirectMode}
+      onClockIn={handleClockIn}
+      onClockOut={handleClockOut}
+      onGoDirectly={handleGoDirectly}
+      onReturnDirectly={handleReturnDirectly}
+      onRestStart={handleRestStart}
+      onRestEnd={handleRestEnd}
+      timeElapsedErrorDialog={
+        <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
+      }
+    />
   );
 }
 
@@ -809,43 +570,54 @@ function TimeElapsedErrorDialog({
   };
 
   return (
-    <Dialog
-      open={open}
+    <div
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
+      aria-modal="true"
+      role="dialog"
       data-testid="time-elapsed-error-dialog"
+      className={`${open ? "flex" : "hidden"} fixed inset-0 z-50 items-center justify-center bg-slate-950/50 p-4`}
     >
-      <DialogTitle id="alert-dialog-title">
-        <span data-testid="time-elapsed-error-dialog-title-text">
-          1週間以上経過した打刻エラーがあります
-        </span>
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-          <span data-testid="time-elapsed-error-dialog-description-text">
-            1週間以上経過した打刻エラーがあります。
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+        <h2
+          id="alert-dialog-title"
+          className="m-0 text-lg font-semibold text-slate-900"
+        >
+          <span data-testid="time-elapsed-error-dialog-title-text">
+            1週間以上経過した打刻エラーがあります
           </span>
-          <br />
-          勤怠一覧を確認して打刻修正を申請してください。
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={handleClose}
-          data-testid="time-elapsed-error-dialog-later-btn"
-        >
-          あとで
-        </Button>
-        <Button
-          variant="contained"
-          component={RouterLink}
-          to="/attendance/list"
-          onClick={handleClose}
-          data-testid="time-elapsed-error-dialog-confirm-btn"
-        >
-          確認する
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </h2>
+        <div className="mt-4">
+          <p
+            id="alert-dialog-description"
+            className="m-0 text-sm leading-6 text-slate-700"
+          >
+            <span data-testid="time-elapsed-error-dialog-description-text">
+              1週間以上経過した打刻エラーがあります。
+            </span>
+            <br />
+            勤怠一覧を確認して打刻修正を申請してください。
+          </p>
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleClose}
+            data-testid="time-elapsed-error-dialog-later-btn"
+            className="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            あとで
+          </button>
+          <RouterLink
+            to="/attendance/list"
+            onClick={handleClose}
+            data-testid="time-elapsed-error-dialog-confirm-btn"
+            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white no-underline transition-colors hover:bg-emerald-700 hover:no-underline"
+          >
+            確認する
+          </RouterLink>
+        </div>
+      </div>
+    </div>
   );
 }

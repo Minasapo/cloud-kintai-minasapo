@@ -1,6 +1,7 @@
 import { RouteObject } from "react-router-dom";
 
 import AdminShiftGuard from "../pages/admin/AdminShiftGuard";
+import NotFound from "../pages/NotFound";
 import { createLazyRoute } from "./lazyRoute";
 
 const AdminAttendanceRoute = createLazyRoute(
@@ -23,6 +24,9 @@ const AmPmHolidayRoute = createLazyRoute(
 );
 const DeveloperRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Developer"),
+);
+const SchemaExportRoute = createLazyRoute(
+  () => import("@/features/admin/schema-export/ui/SchemaExport"),
 );
 const LinksRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Links"),
@@ -140,7 +144,15 @@ export const adminChildRoutes: RouteObject[] = [
             path: "edit",
             lazy: AdminStaffEditorRoute,
           },
+          {
+            path: "*",
+            element: <NotFound />,
+          },
         ],
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
@@ -166,6 +178,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "print",
         lazy: AdminAttendancePrintRoute,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
@@ -238,6 +254,10 @@ export const adminChildRoutes: RouteObject[] = [
         lazy: DeveloperRoute,
       },
       {
+        path: "export",
+        lazy: SchemaExportRoute,
+      },
+      {
         path: "feature_management/links",
         lazy: LinksRoute,
       },
@@ -257,6 +277,10 @@ export const adminChildRoutes: RouteObject[] = [
         path: "feature_management/absent",
         lazy: AbsentRoute,
       },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
     ],
   },
   {
@@ -269,6 +293,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: ":id",
         lazy: AdminWorkflowDetailRoute,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
@@ -287,6 +315,14 @@ export const adminChildRoutes: RouteObject[] = [
         path: ":id",
         lazy: AdminDailyReportDetailRoute,
       },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ];

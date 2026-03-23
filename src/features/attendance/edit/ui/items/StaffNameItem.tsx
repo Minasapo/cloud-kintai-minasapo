@@ -1,23 +1,16 @@
-import { Stack, Typography } from "@mui/material";
-import { useContext } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export default function StaffNameItem() {
-  const { staff } = useContext(AttendanceEditContext);
+  const { staff } = useAttendanceEditData();
 
   if (!staff?.familyName && !staff?.givenName) {
     return null;
   }
 
   return (
-    <Stack direction="row" alignItems="center">
-      <Typography variant="body1" sx={{ fontWeight: "bold", width: "150px" }}>
-        スタッフ
-      </Typography>
-      <Typography variant="body1">
-        {`${staff.familyName} ${staff.givenName}`}
-      </Typography>
-    </Stack>
+    <div className="flex items-center">
+      <div className="w-[150px] font-bold text-slate-900">スタッフ</div>
+      <div className="text-base text-slate-900">{`${staff.familyName} ${staff.givenName}`}</div>
+    </div>
   );
 }
