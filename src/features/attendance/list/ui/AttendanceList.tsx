@@ -10,11 +10,7 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import {
-  LinearProgress,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { LinearProgress, useMediaQuery, useTheme } from "@mui/material";
 import {
   OnCreateAttendanceSubscription,
   OnDeleteAttendanceSubscription,
@@ -185,8 +181,26 @@ export default function AttendanceTable() {
     };
   }, [currentMonth, closeDates]);
 
-  const startDate = effectiveDateRange.start.format(AttendanceDate.DataFormat);
-  const endDate = effectiveDateRange.end.format(AttendanceDate.DataFormat);
+  const attendanceQueryDateRange = useMemo(() => {
+    const monthStart = currentMonth.startOf("month");
+    const monthEnd = currentMonth.endOf("month");
+
+    return {
+      start: effectiveDateRange.start.isBefore(monthStart, "day")
+        ? effectiveDateRange.start
+        : monthStart,
+      end: effectiveDateRange.end.isAfter(monthEnd, "day")
+        ? effectiveDateRange.end
+        : monthEnd,
+    };
+  }, [currentMonth, effectiveDateRange]);
+
+  const startDate = attendanceQueryDateRange.start.format(
+    AttendanceDate.DataFormat,
+  );
+  const endDate = attendanceQueryDateRange.end.format(
+    AttendanceDate.DataFormat,
+  );
 
   const {
     data: attendances = [],
@@ -404,7 +418,8 @@ export default function AttendanceTable() {
     if (!staff) return 0;
     return monthlyAttendances.filter((attendance) => {
       const hasSystemComment =
-        Array.isArray(attendance.systemComments) && attendance.systemComments.length > 0;
+        Array.isArray(attendance.systemComments) &&
+        attendance.systemComments.length > 0;
       return hasSystemComment;
     }).length;
   }, [monthlyAttendances, staff]);
@@ -429,23 +444,37 @@ export default function AttendanceTable() {
             <p className="text-xs font-semibold tracking-[0.04em] text-slate-500">
               集計期間
             </p>
-            <p className="mt-1 text-sm font-medium text-slate-900">{rangeLabelForDisplay}</p>
+            <p className="mt-1 text-sm font-medium text-slate-900">
+              {rangeLabelForDisplay}
+            </p>
           </div>
         </div>
       </section>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
-          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">合計勤務時間</p>
-          <p className="mt-2 text-2xl font-semibold text-emerald-700">{totalTime.toFixed(1)}h</p>
+          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">
+            合計勤務時間
+          </p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-700">
+            {totalTime.toFixed(1)}h
+          </p>
         </div>
         <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
-          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">打刻日数</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-950">{monthlyAttendances.length}</p>
+          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">
+            打刻日数
+          </p>
+          <p className="mt-2 text-2xl font-semibold text-slate-950">
+            {monthlyAttendances.length}
+          </p>
         </div>
         <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
-          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">要確認日数</p>
-          <p className="mt-2 text-2xl font-semibold text-amber-700">{alertDays}</p>
+          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">
+            要確認日数
+          </p>
+          <p className="mt-2 text-2xl font-semibold text-amber-700">
+            {alertDays}
+          </p>
         </div>
       </div>
 
