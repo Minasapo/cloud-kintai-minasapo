@@ -35,7 +35,7 @@ export default function StaffCommentInput({
           disabled={changeRequests.length > 0}
           data-testid="staff-comment-input-desktop"
           rows={3}
-          className="min-h-[108px] w-full rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+          className="min-h-[108px] w-full rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(15,168,94,0.35)] focus:ring-0 disabled:cursor-not-allowed disabled:bg-slate-50"
         />
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-sm text-slate-600">クイック入力：</span>

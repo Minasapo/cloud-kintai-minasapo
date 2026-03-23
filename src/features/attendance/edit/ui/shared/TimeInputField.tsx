@@ -57,7 +57,7 @@ export default function TimeInputField({
             ? "border-slate-200 bg-slate-100 text-slate-400 shadow-none"
             : [
                 "border-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]",
-                "focus-within:border-emerald-400 focus-within:shadow-[0_0_0_3px_rgba(15,168,94,0.18)]",
+                "focus-within:border-emerald-400 focus-within:shadow-[0_0_0_3px_rgba(15,168,94,0.35)]",
               ].join(" "),
           highlight && !isDisabledOrReadOnly
             ? "animate-pulse border-amber-400 bg-amber-100/70 shadow-[0_0_12px_rgba(255,193,7,0.35)]"
@@ -117,7 +117,7 @@ export default function TimeInputField({
 
       {/* ── Dropdown panel ── */}
       {isOptionsOpen && hasOptions && (
-        <div className="absolute left-0 top-[calc(100%+4px)] z-20 min-w-full rounded-[16px] border border-slate-200 bg-white p-1.5 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.28)]">
+        <div className="animate-dropdown-enter absolute left-0 top-[calc(100%+4px)] z-20 min-w-full rounded-[16px] border border-slate-200 bg-white p-1.5 shadow-[0_12px_34px_rgba(17,24,39,0.2)]">
           {enabledTimes.map((entry) => {
             const isActive = entry.time === value;
             return (

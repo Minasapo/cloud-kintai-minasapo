@@ -9,8 +9,8 @@ export default function StaffNameItem() {
 
   return (
     <div className="flex items-center">
-      <div className="w-[150px] font-bold text-slate-900">スタッフ</div>
-      <div className="text-base text-slate-900">{`${staff.familyName} ${staff.givenName}`}</div>
+      <div className="w-[150px] text-sm font-bold text-slate-900">スタッフ</div>
+      <div className="text-sm text-slate-900">{`${staff.familyName} ${staff.givenName}`}</div>
     </div>
   );
 }
