@@ -48,6 +48,8 @@ export type DefaultAppConfig = Pick<
   | "shiftGroups"
   | "attendanceStatisticsEnabled"
   | "workflowNotificationEnabled"
+  | "timeRecorderAnnouncementEnabled"
+  | "timeRecorderAnnouncementMessage"
   | "overTimeCheckEnabled"
   | "shiftCollaborativeEnabled"
   | "shiftDefaultMode"
@@ -71,6 +73,8 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   shiftGroups: [],
   attendanceStatisticsEnabled: false,
   workflowNotificationEnabled: false,
+  timeRecorderAnnouncementEnabled: false,
+  timeRecorderAnnouncementMessage: "",
   overTimeCheckEnabled: false,
   shiftCollaborativeEnabled: false,
   shiftDefaultMode: "normal",
@@ -214,6 +218,24 @@ const useAppConfig = () => {
   const getWorkflowNotificationEnabled = useCallback(
     () => config?.workflowNotificationEnabled ?? false,
     [config?.workflowNotificationEnabled],
+  );
+
+  const getTimeRecorderAnnouncement = useCallback(
+    () => ({
+      enabled: Boolean(
+        config?.timeRecorderAnnouncementEnabled ??
+          DEFAULT_CONFIG.timeRecorderAnnouncementEnabled,
+      ),
+      message: String(
+        config?.timeRecorderAnnouncementMessage ??
+          DEFAULT_CONFIG.timeRecorderAnnouncementMessage ??
+          "",
+      ),
+    }),
+    [
+      config?.timeRecorderAnnouncementEnabled,
+      config?.timeRecorderAnnouncementMessage,
+    ],
   );
 
   const getShiftCollaborativeEnabled = useCallback(
@@ -380,6 +402,7 @@ const useAppConfig = () => {
     getOfficeMode,
     getAttendanceStatisticsEnabled,
     getWorkflowNotificationEnabled,
+    getTimeRecorderAnnouncement,
     getShiftCollaborativeEnabled,
     getShiftDefaultMode,
     getQuickInputStartTimes,

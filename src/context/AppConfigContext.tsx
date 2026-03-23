@@ -35,6 +35,10 @@ type AppConfigContextProps = {
   getOfficeMode: () => boolean;
   getAttendanceStatisticsEnabled: () => boolean;
   getWorkflowNotificationEnabled: () => boolean;
+  getTimeRecorderAnnouncement: () => {
+    enabled: boolean;
+    message: string;
+  };
   getShiftCollaborativeEnabled: () => boolean;
   getShiftDefaultMode: () => ShiftDisplayMode;
   getQuickInputStartTimes: (onlyEnabled?: boolean) => {
@@ -86,6 +90,10 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getOfficeMode: () => false,
   getAttendanceStatisticsEnabled: () => false,
   getWorkflowNotificationEnabled: () => false,
+  getTimeRecorderAnnouncement: () => ({
+    enabled: false,
+    message: "",
+  }),
   getShiftCollaborativeEnabled: () => false,
   getShiftDefaultMode: () => "normal",
   getQuickInputStartTimes: () => [],

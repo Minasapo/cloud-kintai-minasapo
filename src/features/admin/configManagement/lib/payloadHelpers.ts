@@ -46,6 +46,8 @@ type BuildBasePayloadOptions = {
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
   workflowNotificationEnabled: boolean;
+  timeRecorderAnnouncementEnabled: boolean;
+  timeRecorderAnnouncementMessage: string;
   overTimeCheckEnabled: boolean;
   shiftCollaborativeEnabled: boolean;
   shiftDefaultMode: ShiftDisplayMode;
@@ -72,6 +74,8 @@ export type BaseAppConfigPayload = {
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
   workflowNotificationEnabled: boolean;
+  timeRecorderAnnouncementEnabled: boolean;
+  timeRecorderAnnouncementMessage: string;
   overTimeCheckEnabled: boolean;
   shiftCollaborativeEnabled: boolean;
   shiftDefaultMode: ShiftDisplayMode;
@@ -120,6 +124,8 @@ export const buildBasePayload = (
   specialHolidayEnabled: opts.specialHolidayEnabled,
   attendanceStatisticsEnabled: opts.attendanceStatisticsEnabled,
   workflowNotificationEnabled: opts.workflowNotificationEnabled,
+  timeRecorderAnnouncementEnabled: opts.timeRecorderAnnouncementEnabled,
+  timeRecorderAnnouncementMessage: opts.timeRecorderAnnouncementMessage,
   overTimeCheckEnabled: opts.overTimeCheckEnabled,
   shiftCollaborativeEnabled: opts.shiftCollaborativeEnabled,
   shiftDefaultMode: opts.shiftDefaultMode,
@@ -142,6 +148,8 @@ export type ConfigFormState = {
   specialHolidayEnabled: boolean;
   attendanceStatisticsEnabled: boolean;
   workflowNotificationEnabled: boolean;
+  timeRecorderAnnouncementEnabled: boolean;
+  timeRecorderAnnouncementMessage: string;
   overTimeCheckEnabled: boolean;
   shiftCollaborativeEnabled: boolean;
   shiftDefaultMode: ShiftDisplayMode;
@@ -185,6 +193,8 @@ const transformFormStateToPayload = (
       specialHolidayEnabled: state.specialHolidayEnabled,
       attendanceStatisticsEnabled: state.attendanceStatisticsEnabled,
       workflowNotificationEnabled: state.workflowNotificationEnabled,
+      timeRecorderAnnouncementEnabled: state.timeRecorderAnnouncementEnabled,
+      timeRecorderAnnouncementMessage: state.timeRecorderAnnouncementMessage,
       overTimeCheckEnabled: state.overTimeCheckEnabled,
       shiftCollaborativeEnabled: state.shiftCollaborativeEnabled,
       shiftDefaultMode: state.shiftDefaultMode,

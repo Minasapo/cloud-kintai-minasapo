@@ -2,12 +2,16 @@ import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { AppConfigContext } from "@/context/AppConfigContext";
 import TimeRecorder from "@/features/attendance/time-recorder/ui/TimeRecorder";
+import TimeRecorderAnnouncementBanner from "@/features/attendance/time-recorder/ui/TimeRecorderAnnouncementBanner";
 
 import { AuthContext } from "../context/AuthContext";
 
 export default function Register() {
   const { isCognitoUserRole } = useContext(AuthContext);
+  const { getConfigId, getTimeRecorderAnnouncement } =
+    useContext(AppConfigContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,11 +36,19 @@ export default function Register() {
     );
   }
 
+  const announcement = getTimeRecorderAnnouncement();
+
   return (
-    <div className="relative flex h-full justify-center overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#ecfdf5_52%,#f8fafc_100%)] py-3 md:py-10">
+    <div className="relative flex h-full flex-col overflow-x-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#ecfdf5_52%,#f8fafc_100%)] py-3 md:py-10">
+      <TimeRecorderAnnouncementBanner
+        configId={getConfigId()}
+        announcement={announcement}
+      />
       <div className="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(15,168,94,0.18),transparent_60%)]" />
       <div className="absolute inset-x-0 bottom-0 h-56 bg-[radial-gradient(circle_at_bottom,rgba(15,23,42,0.08),transparent_65%)]" />
-      <TimeRecorder />
+      <div className="flex justify-center">
+        <TimeRecorder />
+      </div>
     </div>
   );
 }

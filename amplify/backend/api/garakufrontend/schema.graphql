@@ -328,6 +328,8 @@ type AppConfig @model {
   officeMode: Boolean
   attendanceStatisticsEnabled: Boolean
   workflowNotificationEnabled: Boolean
+  timeRecorderAnnouncementEnabled: Boolean
+  timeRecorderAnnouncementMessage: String
   absentEnabled: Boolean
   hourlyPaidHolidayEnabled: Boolean
   links: [Link]

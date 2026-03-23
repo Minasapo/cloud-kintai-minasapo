@@ -80,6 +80,8 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
     officeMode
     attendanceStatisticsEnabled
     workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -157,6 +159,8 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
     officeMode
     attendanceStatisticsEnabled
     workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -234,6 +238,8 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
     officeMode
     attendanceStatisticsEnabled
     workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {

@@ -74,6 +74,8 @@ export const onCreateAppConfig = /* GraphQL */ `subscription OnCreateAppConfig($
     officeMode
     attendanceStatisticsEnabled
     workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -148,6 +150,8 @@ export const onUpdateAppConfig = /* GraphQL */ `subscription OnUpdateAppConfig($
     officeMode
     attendanceStatisticsEnabled
     workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -222,6 +226,8 @@ export const onDeleteAppConfig = /* GraphQL */ `subscription OnDeleteAppConfig($
     officeMode
     attendanceStatisticsEnabled
     workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {

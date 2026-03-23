@@ -37,6 +37,9 @@ const AttendanceStatisticsRoute = createLazyRoute(
 const OvertimeConfirmationRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/OvertimeConfirmation"),
 );
+const TimeRecorderAnnouncementRoute = createLazyRoute(
+  () => import("@/features/admin/configManagement/ui/TimeRecorderAnnouncement"),
+);
 const OfficeModeRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/OfficeMode"),
 );
@@ -252,6 +255,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "developer",
         lazy: DeveloperRoute,
+      },
+      {
+        path: "time_recorder_announcement",
+        lazy: TimeRecorderAnnouncementRoute,
       },
       {
         path: "export",
