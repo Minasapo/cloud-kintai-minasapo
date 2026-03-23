@@ -243,14 +243,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     isAuthenticated,
   });
 
-  const lunchRestStartTime = useMemo(
-    () => getLunchRestStartTime().format("HH:mm"),
-    [getLunchRestStartTime],
-  );
-  const lunchRestEndTime = useMemo(
-    () => getLunchRestEndTime().format("HH:mm"),
-    [getLunchRestEndTime],
-  );
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const watchedData = watch();
@@ -326,16 +318,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     [watchedData.hourlyPaidHolidayTimes],
   );
 
-  const visibleRestWarning = useMemo(
-    () =>
-      !!(
-        watchedData.startTime &&
-        watchedData.endTime &&
-        totalWorkTime > 6 &&
-        totalRestTime === 0
-      ),
-    [watchedData.startTime, watchedData.endTime, totalWorkTime, totalRestTime],
-  );
 
   // 休憩中かどうかを判定（勤務開始時間と最初の休憩時間が入力されている状態）
   const isOnBreak = useMemo(
@@ -954,23 +936,13 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
               <AttendanceEditFormSkeleton
                 control={control}
-                setValue={setValue}
-                getValues={getValues}
                 highlightStartTime={highlightStartTime}
                 highlightEndTime={highlightEndTime}
-                onHighlightStartTime={setHighlightStartTime}
                 onHighlightEndTime={setHighlightEndTime}
-                restFields={restFields}
-                restAppend={restAppend}
-                lunchRestStartTime={lunchRestStartTime}
-                lunchRestEndTime={lunchRestEndTime}
-                visibleRestWarning={visibleRestWarning}
                 totalProductionTime={totalProductionTime}
                 totalHourlyPaidHolidayTime={totalHourlyPaidHolidayTime}
                 readOnly={readOnly}
                 changeRequests={changeRequests}
-                isOnBreak={isOnBreak}
-                targetWorkDate={targetWorkDate}
                 onGoDirectlyChange={(checked) => {
                   if (checked) {
                     setValue(

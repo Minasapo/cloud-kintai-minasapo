@@ -92,4 +92,4 @@ MUI v6 + Tailwind CSS + SCSS の併用。デザイントークンは `src/shared
 
 - `src/shared/api/graphql/**`
 - `src/ui-components/**`
-- `src/aws-exports.js`（`amplify pull` で生成）
+- `src/aws-exports.js`（`amplify pull` で生成）。ソースツリー（git worktree）使用時はメインリポジトリのファイルをリンクして使用する

@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "Vite Dev Server",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["start"],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--host"],
       "port": 5173,
       "autoPort": true
     }

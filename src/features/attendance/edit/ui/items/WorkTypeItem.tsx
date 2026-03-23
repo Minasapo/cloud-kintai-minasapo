@@ -17,8 +17,8 @@ export default function WorkTypeItem() {
 
   return (
     <div className="flex items-center">
-      <div className="w-[150px] font-bold text-slate-900">勤務形態</div>
-      <div className="text-base text-slate-900">{label}</div>
+      <div className="w-[150px] text-sm font-bold text-slate-900">勤務形態</div>
+      <div className="text-sm text-slate-900">{label}</div>
     </div>
   );
 }

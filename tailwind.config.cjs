@@ -34,6 +34,15 @@ module.exports = {
           "sans-serif",
         ],
       },
+      keyframes: {
+        "dropdown-enter": {
+          from: { opacity: "0", transform: "scale(0.96) translateY(-4px)" },
+          to: { opacity: "1", transform: "scale(1) translateY(0)" },
+        },
+      },
+      animation: {
+        "dropdown-enter": "dropdown-enter 120ms cubic-bezier(0.2, 0.8, 0.4, 1)",
+      },
     },
   },
   corePlugins: {

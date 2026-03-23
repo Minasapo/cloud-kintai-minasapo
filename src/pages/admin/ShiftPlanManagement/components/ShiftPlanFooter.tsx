@@ -29,7 +29,7 @@ const ShiftPlanFooter: React.FC<ShiftPlanFooterProps> = ({
         type="button"
         disabled={isBusy}
         onClick={onSaveAll}
-        className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50"
+        className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white border-0 transition-colors disabled:opacity-50"
         style={{ backgroundColor: "#0FA85E" }}
         onMouseEnter={(e) => {
           if (!isBusy) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0B8A4C";
