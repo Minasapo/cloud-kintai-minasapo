@@ -549,13 +549,6 @@ export default function AdminDailyReportDetail({
       className={`mx-auto w-full max-w-[1280px] ${isCompact ? "px-2 pb-4 pt-0" : "px-2 pb-6 pt-4 sm:px-4 md:px-6"}`}
     >
       <div className="space-y-3">
-        {!isCompact && (
-          <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
-            <h1 className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
-              日報詳細
-            </h1>
-          </section>
-        )}
 
         {/* Errors */}
         {loadError && (
