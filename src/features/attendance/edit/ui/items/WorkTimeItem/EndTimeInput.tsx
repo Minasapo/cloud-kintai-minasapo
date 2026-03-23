@@ -33,7 +33,6 @@ export default function EndTimeInput({
       setValue={setValue}
       workDate={workDate}
       quickInputTimes={quickInputEndTimes}
-      chipColor={(enabled) => (enabled ? "success" : "default")}
       disabled={isOnBreak}
       highlight={highlight}
     />

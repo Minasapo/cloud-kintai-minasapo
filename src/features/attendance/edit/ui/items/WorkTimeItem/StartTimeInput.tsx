@@ -31,7 +31,6 @@ export default function StartTimeInput({
       setValue={setValue}
       workDate={workDate}
       quickInputTimes={quickInputStartTimes}
-      chipColor={() => "success"}
       highlight={highlight}
     />
   );

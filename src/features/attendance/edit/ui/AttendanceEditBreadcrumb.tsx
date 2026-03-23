@@ -1,14 +1,13 @@
 import dayjs from "dayjs";
-import { useContext } from "react";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
 import Link from "@/shared/ui/link/Link";
 
 const MONTH_QUERY_KEY = "month";
 
 export default function AttendanceEditBreadcrumb() {
-  const { workDate } = useContext(AttendanceEditContext);
+  const { workDate } = useAttendanceEditData();
 
   if (!workDate) return null;
 
