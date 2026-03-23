@@ -17,7 +17,7 @@ type TimeInputProps = Omit<
 };
 
 const inputBaseClassName =
-  "w-full rounded-md border bg-white text-slate-900 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+  "w-full rounded-2xl border bg-white text-slate-900 outline-none transition shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none";
 
 const inputSizeClassName = {
   small: "min-h-9 px-3 py-2 text-sm leading-5",
@@ -56,7 +56,7 @@ export function TimeInput({
     inputSizeClassName[size],
     error
       ? "border-rose-500 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-      : "border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200",
+      : "border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100",
     className,
   ]
     .filter(Boolean)
