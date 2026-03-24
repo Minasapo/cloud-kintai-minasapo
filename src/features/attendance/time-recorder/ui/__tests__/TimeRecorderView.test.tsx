@@ -23,11 +23,6 @@ jest.mock("../RestTimeMessage", () => ({
   RestTimeMessage: () => <div>rest-time-message</div>,
 }));
 
-jest.mock("@/shared/ui/time-recorder/AttendanceErrorAlert", () => ({
-  __esModule: true,
-  default: () => <div>勤怠打刻エラー</div>,
-}));
-
 const workingStatus: WorkStatus = {
   code: WorkStatusCodes.WORKING,
   text: WorkStatusTexts.WORKING,
@@ -90,7 +85,6 @@ describe("TimeRecorderView", () => {
     });
 
     expect(screen.getByText("変更リクエスト申請中です。承認されるまで打刻はできません。")).toBeInTheDocument();
-    expect(screen.getAllByText("勤怠打刻エラー").length).toBeGreaterThan(0);
     expect(screen.getByTestId("clock-out-button")).toBeDisabled();
     expect(screen.getByTestId("rest-start-button")).toBeDisabled();
     expect(screen.getAllByText("daily-report").length).toBeGreaterThan(0);

@@ -1,28 +1,21 @@
-import { Box, ButtonBase, Stack, Tooltip, Typography } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { hasUnapprovedChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
-import {
-  StaffRole,
-  useStaffs,
-} from "@/entities/staff/model/useStaffs/useStaffs";
+import { StaffRole } from "@/entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@/entities/workflow/model/useWorkflows";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  getStaff,
-  listAttendances,
-} from "@/shared/api/graphql/documents/queries";
+import { listAttendances } from "@/shared/api/graphql/documents/queries";
 import {
   onCreateAttendance,
   onDeleteAttendance,
   onUpdateAttendance,
 } from "@/shared/api/graphql/documents/subscriptions";
 import {
-  GetStaffQuery,
   ListAttendancesQuery,
   Workflow,
   WorkflowStatus,
@@ -45,12 +38,6 @@ const isWorkflowPendingForCurrentAdmin = (workflow: Workflow) => {
 };
 
 export default function AdminPendingApprovalSummary() {
-  type PendingAttendanceEntry = {
-    staffId: string;
-    workDate: string;
-  };
-
-  const navigate = useNavigate();
   const { authStatus, isCognitoUserRole } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
 
@@ -62,35 +49,10 @@ export default function AdminPendingApprovalSummary() {
     [isCognitoUserRole],
   );
 
-  const { staffs } = useStaffs({ isAuthenticated });
   const { workflows } = useWorkflows({ isAuthenticated });
 
   const [pendingAttendanceCount, setPendingAttendanceCount] = useState(0);
-  const [pendingAttendanceEntries, setPendingAttendanceEntries] = useState<
-    PendingAttendanceEntry[]
-  >([]);
-  const [resolvedStaffNameById, setResolvedStaffNameById] = useState<
-    Record<string, string>
-  >({});
   const [attendanceLoading, setAttendanceLoading] = useState(false);
-
-  const staffNameById = useMemo(
-    () =>
-      new Map(
-        staffs.flatMap((staff) => {
-          const staffName =
-            `${staff.familyName ?? ""}${staff.givenName ?? ""}` || "不明";
-          const keys = [staff.id];
-
-          if (staff.cognitoUserId) {
-            keys.push(staff.cognitoUserId);
-          }
-
-          return keys.map((key) => [key, staffName] as const);
-        }),
-      ),
-    [staffs],
-  );
 
   const pendingWorkflowCount = useMemo(() => {
     if (!isAdminUser || !workflows) {
@@ -102,20 +64,9 @@ export default function AdminPendingApprovalSummary() {
     ).length;
   }, [isAdminUser, workflows]);
 
-  const tooltipStaffNameById = useMemo(() => {
-    const map = new Map(staffNameById);
-    Object.entries(resolvedStaffNameById).forEach(([staffId, staffName]) => {
-      map.set(staffId, staffName);
-    });
-    return map;
-  }, [resolvedStaffNameById, staffNameById]);
-
-  const fetchPendingAttendanceSummary = useCallback(async () => {
+  const fetchPendingAttendanceCount = useCallback(async () => {
     if (!isAuthenticated || !isAdminUser) {
-      return {
-        pendingStaffCount: 0,
-        pendingEntries: [] as PendingAttendanceEntry[],
-      };
+      return 0;
     }
 
     const sinceWorkDate = dayjs()
@@ -124,7 +75,6 @@ export default function AdminPendingApprovalSummary() {
 
     let nextToken: string | null = null;
     const pendingEntryKeys = new Set<string>();
-    const pendingEntries: PendingAttendanceEntry[] = [];
 
     do {
       const response = (await graphqlClient.graphql({
@@ -153,163 +103,43 @@ export default function AdminPendingApprovalSummary() {
           return;
         }
 
-        const hasPendingRequest = hasUnapprovedChangeRequest(
-          attendance.changeRequests,
-        );
-
-        if (hasPendingRequest) {
-          const workDate = attendance.workDate ?? "";
-          const entryKey = `${attendance.staffId}:${workDate}`;
-          if (!pendingEntryKeys.has(entryKey)) {
-            pendingEntryKeys.add(entryKey);
-            pendingEntries.push({
-              staffId: attendance.staffId,
-              workDate,
-            });
-          }
+        if (!hasUnapprovedChangeRequest(attendance.changeRequests)) {
+          return;
         }
+
+        const workDate = attendance.workDate ?? "";
+        const entryKey = `${attendance.staffId}:${workDate}`;
+        pendingEntryKeys.add(entryKey);
       });
 
       nextToken = connection?.nextToken ?? null;
     } while (nextToken);
 
-    return {
-      pendingStaffCount: pendingEntries.length,
-      pendingEntries,
-    };
+    return pendingEntryKeys.size;
   }, [isAdminUser, isAuthenticated]);
 
   const recalculatePendingAttendanceCount = useCallback(async () => {
     setAttendanceLoading(true);
 
     try {
-      const summary = await fetchPendingAttendanceSummary();
-      setPendingAttendanceCount(summary.pendingStaffCount);
-      setPendingAttendanceEntries(summary.pendingEntries);
+      const count = await fetchPendingAttendanceCount();
+      setPendingAttendanceCount(count);
     } catch (error) {
       logger.error("Failed to fetch pending attendance count", error);
     } finally {
       setAttendanceLoading(false);
     }
-  }, [fetchPendingAttendanceSummary]);
+  }, [fetchPendingAttendanceCount]);
 
   useEffect(() => {
     if (!isAuthenticated || !isAdminUser) {
       setPendingAttendanceCount(0);
-      setPendingAttendanceEntries([]);
       setAttendanceLoading(false);
       return;
     }
 
-    let active = true;
-
-    const run = async () => {
-      await recalculatePendingAttendanceCount();
-
-      if (!active) {
-        return;
-      }
-    };
-
-    void run();
-
-    return () => {
-      active = false;
-    };
+    void recalculatePendingAttendanceCount();
   }, [isAdminUser, isAuthenticated, recalculatePendingAttendanceCount]);
-
-  useEffect(() => {
-    if (
-      !isAuthenticated ||
-      !isAdminUser ||
-      pendingAttendanceEntries.length === 0
-    ) {
-      return;
-    }
-
-    const unknownStaffIds = Array.from(
-      new Set(
-        pendingAttendanceEntries
-          .map((entry) => entry.staffId)
-          .filter(
-            (staffId) =>
-              !tooltipStaffNameById.has(staffId) &&
-              !resolvedStaffNameById[staffId],
-          ),
-      ),
-    );
-
-    if (unknownStaffIds.length === 0) {
-      return;
-    }
-
-    let isActive = true;
-
-    const fetchMissingStaffNames = async () => {
-      const resolvedEntries = await Promise.all(
-        unknownStaffIds.map(async (staffId) => {
-          try {
-            const response = (await graphqlClient.graphql({
-              query: getStaff,
-              variables: { id: staffId },
-              authMode: "userPool",
-            })) as GraphQLResult<GetStaffQuery>;
-
-            if (response.errors?.length) {
-              throw new Error(response.errors[0].message);
-            }
-
-            const staff = response.data?.getStaff;
-            const name =
-              `${staff?.familyName ?? ""}${staff?.givenName ?? ""}`.trim();
-            if (!name) {
-              return null;
-            }
-
-            return [staffId, name] as const;
-          } catch (error) {
-            logger.warn("Failed to resolve staff name for tooltip", {
-              staffId,
-              error,
-            });
-            return null;
-          }
-        }),
-      );
-
-      if (!isActive) {
-        return;
-      }
-
-      const nextResolvedNames = resolvedEntries.filter(
-        (entry): entry is readonly [string, string] => Boolean(entry),
-      );
-
-      if (nextResolvedNames.length === 0) {
-        return;
-      }
-
-      setResolvedStaffNameById((previous) => {
-        const merged = { ...previous };
-        nextResolvedNames.forEach(([staffId, staffName]) => {
-          merged[staffId] = staffName;
-        });
-        return merged;
-      });
-    };
-
-    void fetchMissingStaffNames();
-
-    return () => {
-      isActive = false;
-    };
-  }, [
-    isAdminUser,
-    isAuthenticated,
-    pendingAttendanceEntries,
-    resolvedStaffNameById,
-    tooltipStaffNameById,
-  ]);
 
   useEffect(() => {
     if (!isAuthenticated || !isAdminUser) {
@@ -392,17 +222,6 @@ export default function AdminPendingApprovalSummary() {
     };
   }, [isAdminUser, isAuthenticated, recalculatePendingAttendanceCount]);
 
-  const pendingEntriesForTooltip = useMemo(
-    () =>
-      pendingAttendanceEntries
-        .toSorted((a, b) => a.workDate.localeCompare(b.workDate))
-        .slice(0, 8),
-    [pendingAttendanceEntries],
-  );
-
-  const hiddenPendingEntriesCount =
-    pendingAttendanceEntries.length - pendingEntriesForTooltip.length;
-
   if (!isAuthenticated || !isAdminUser) {
     return null;
   }
@@ -413,147 +232,71 @@ export default function AdminPendingApprovalSummary() {
   const workflowCountLabel = `${pendingWorkflowCount}件`;
 
   return (
-    <Stack
-      direction="row"
-      spacing={1}
-      alignItems="center"
-      justifyContent="center"
-      sx={{ minWidth: 0 }}
+    <div
+      data-testid="admin-pending-approval-summary"
+      className="grid grid-cols-2 gap-4"
     >
-      <Tooltip
-        placement="bottom"
-        title={
-          <Box sx={{ py: 0.5 }}>
-            <Typography variant="caption" sx={{ fontWeight: 700 }}>
-              未承認勤怠（直近30日）
-            </Typography>
-            {pendingEntriesForTooltip.length === 0 ? (
-              <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
-                対象なし
-              </Typography>
-            ) : (
-              pendingEntriesForTooltip.map((entry) => {
-                const staffName =
-                  tooltipStaffNameById.get(entry.staffId) ?? "不明なスタッフ";
-                const displayDate = entry.workDate.replaceAll("-", "/");
-                return (
-                  <Typography
-                    key={`${entry.staffId}-${entry.workDate}`}
-                    variant="caption"
-                    sx={{ display: "block" }}
-                  >
-                    {`${displayDate} の ${staffName}`}
-                  </Typography>
-                );
-              })
-            )}
-            {hiddenPendingEntriesCount > 0 && (
-              <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
-                他 {hiddenPendingEntriesCount} 件
-              </Typography>
-            )}
-          </Box>
-        }
-      >
-        <ButtonBase
-          onClick={() => navigate("/admin/attendances")}
-          sx={{
-            borderRadius: 1,
-            minWidth: 0,
-            display: "block",
-          }}
-        >
-          <Box
-            sx={{
-              px: { lg: 0.75, xl: 1 },
-              py: 0.5,
-              borderRadius: 1,
-              backgroundColor: "common.white",
-              minWidth: { lg: "84px", xl: "112px" },
-            }}
+      <AdminSummaryCard
+        testId="admin-pending-attendance-card"
+        title="勤怠修正申請"
+        description="未承認の勤怠修正申請"
+        countLabel={attendanceCountLabel}
+        to="/admin/attendances"
+      />
+      <AdminSummaryCard
+        testId="admin-pending-workflow-card"
+        title="ワークフロー申請"
+        description="未承認のワークフロー申請"
+        countLabel={workflowCountLabel}
+        to="/admin/workflow"
+      />
+    </div>
+  );
+}
+
+function AdminSummaryCard({
+  testId,
+  title,
+  description,
+  countLabel,
+  to,
+}: {
+  testId: string;
+  title: string;
+  description: string;
+  countLabel: string;
+  to: string;
+}) {
+  return (
+    <RouterLink
+      to={to}
+      data-testid={testId}
+      className="group block rounded-[1.35rem] no-underline transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 hover:no-underline"
+    >
+      <section className="relative h-full rounded-[1.35rem] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.4)] transition group-hover:border-slate-300 group-hover:shadow-[0_22px_36px_-28px_rgba(15,23,42,0.5)]">
+        <Tooltip title={description} arrow>
+          <span
+            data-testid={`${testId}-description-tooltip`}
+            aria-label={description}
+            className="absolute right-3 top-3 inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 bg-white text-[11px] font-semibold leading-none text-slate-600"
           >
-            <Typography
-              variant="caption"
-              sx={{
-                display: "block",
-                color: "text.secondary",
-                lineHeight: 1.1,
-                textAlign: "center",
-                whiteSpace: "nowrap",
-              }}
-            >
-              <Box component="span" sx={{ display: { lg: "inline", xl: "none" } }}>
-                勤怠
-              </Box>
-              <Box component="span" sx={{ display: { xs: "none", xl: "inline" } }}>
-                勤怠修正申請
-              </Box>
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                display: "block",
-                color: "text.primary",
-                fontWeight: 700,
-                lineHeight: 1.2,
-                textAlign: "center",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {attendanceCountLabel}
-            </Typography>
-          </Box>
-        </ButtonBase>
-      </Tooltip>
-      <ButtonBase
-        onClick={() => navigate("/admin/workflow")}
-        sx={{
-          borderRadius: 1,
-          minWidth: 0,
-          display: "block",
-        }}
-      >
-        <Box
-          sx={{
-            px: { lg: 0.75, xl: 1 },
-            py: 0.5,
-            borderRadius: 1,
-            backgroundColor: "common.white",
-            minWidth: { lg: "84px", xl: "112px" },
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{
-              display: "block",
-              color: "text.secondary",
-              lineHeight: 1.1,
-              textAlign: "center",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <Box component="span" sx={{ display: { lg: "inline", xl: "none" } }}>
-              申請
-            </Box>
-            <Box component="span" sx={{ display: { xs: "none", xl: "inline" } }}>
-              ワークフロー申請
-            </Box>
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              display: "block",
-              color: "text.primary",
-              fontWeight: 700,
-              lineHeight: 1.2,
-              textAlign: "center",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {workflowCountLabel}
-          </Typography>
-        </Box>
-      </ButtonBase>
-    </Stack>
+            i
+          </span>
+        </Tooltip>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 pr-7">
+            <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold leading-none tracking-[0.01em] text-slate-700">
+              管理者のみ
+            </span>
+            <h2 className="mt-2 m-0 text-sm font-semibold tracking-[0.01em] text-slate-900">
+              {title}
+            </h2>
+          </div>
+          <p className="m-0 mt-7 shrink-0 text-4xl font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-5xl">
+            {countLabel}
+          </p>
+        </div>
+      </section>
+    </RouterLink>
   );
 }
