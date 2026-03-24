@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import Clock from "@/shared/ui/clock/Clock";
-import AttendanceErrorAlert from "@/shared/ui/time-recorder/AttendanceErrorAlert";
 import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
 
 import type { WorkStatus } from "../lib/common";
@@ -174,12 +173,6 @@ export function TimeRecorderView({
             </div>
 
             <section className="rounded-[1.5rem] bg-white/75 p-3 shadow-[0_28px_52px_-40px_rgba(15,23,42,0.35)] backdrop-blur-sm md:rounded-[1.6rem] md:p-4">
-              {isAttendanceError && (
-                <div className="mb-3 md:mb-4">
-                  <AttendanceErrorAlert displayMode="compact" />
-                </div>
-              )}
-
               <div className="mb-3 rounded-[1.25rem] border border-emerald-200/80 bg-[linear-gradient(135deg,#f0fdf4_0%,#ffffff_100%)] p-3 shadow-[0_20px_40px_-36px_rgba(15,168,94,0.55)] md:mb-4 md:rounded-[1.3rem] md:p-3.5">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-2">

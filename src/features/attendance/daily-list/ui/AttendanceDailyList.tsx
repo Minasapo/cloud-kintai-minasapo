@@ -14,6 +14,7 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
   AlertTitle,
@@ -24,6 +25,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Stack,
   Table,
   TableBody,
@@ -89,6 +91,7 @@ export default function AttendanceDailyList() {
     : undefined;
   const dispatch = useDispatch();
   const [searchName, setSearchName] = useState("");
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [triggerListAttendancesByDateRange] =
     useLazyListAttendancesByDateRangeQuery();
   const {
@@ -1079,32 +1082,69 @@ export default function AttendanceDailyList() {
         </DialogActions>
       </Dialog>
 
-      <MoveDateItem workDate={dayjs(targetWorkDate || today)} />
-      <TextField
-        label="スタッフ名で検索"
-        variant="outlined"
-        size="small"
-        value={searchName}
-        onChange={(e) => setSearchName(e.target.value)}
+      <Box
         sx={{
           mb: 1,
-          maxWidth: 360,
-          "& .MuiOutlinedInput-root": {
-            borderRadius: "18px",
-            backgroundColor: "#ffffff",
-            "& fieldset": {
-              borderColor: "rgba(148,163,184,0.35)",
-            },
-            "&:hover fieldset": {
-              borderColor: "rgba(100,116,139,0.45)",
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: "#19b985",
-              borderWidth: "1px",
-            },
-          },
+          display: "flex",
+          alignItems: { xs: "flex-start", sm: "center" },
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1,
         }}
-      />
+      >
+        <MoveDateItem workDate={dayjs(targetWorkDate || today)} />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <IconButton
+            aria-label="スタッフ名検索を表示"
+            onClick={() => {
+              setIsSearchVisible((prev) => {
+                const next = !prev;
+                if (!next) {
+                  setSearchName("");
+                }
+                return next;
+              });
+            }}
+            size="small"
+            sx={{
+              border: "1px solid rgba(148,163,184,0.35)",
+              backgroundColor: "#ffffff",
+              color: "#475569",
+              "&:hover": {
+                backgroundColor: "#f8fafc",
+              },
+            }}
+          >
+            <SearchIcon fontSize="small" />
+          </IconButton>
+          {isSearchVisible && (
+            <TextField
+              label="スタッフ名で検索"
+              variant="outlined"
+              size="small"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              sx={{
+                maxWidth: 360,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "18px",
+                  backgroundColor: "#ffffff",
+                  "& fieldset": {
+                    borderColor: "rgba(148,163,184,0.35)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(100,116,139,0.45)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#19b985",
+                    borderWidth: "1px",
+                  },
+                },
+              }}
+            />
+          )}
+        </Box>
+      </Box>
       {pendingList.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
           <Box

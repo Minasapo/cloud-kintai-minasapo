@@ -1,5 +1,5 @@
 import Logo from "@shared/ui/logo/Logo";
-import { lazy, Suspense, useContext, useMemo } from "react";
+import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { resolveThemeColor } from "@/shared/config/theme";
@@ -10,10 +10,6 @@ import { ExternalLinks } from "./ExternalLinks/ExternalLinks";
 import NavigationMenu from "./NavigationMenu";
 import { SignInOutButton } from "./SignInOutButton";
 import WorkflowNotificationButton from "./WorkflowNotificationButton";
-
-const AdminPendingApprovalSummary = lazy(
-  () => import("./AdminPendingApprovalSummary"),
-);
 
 export default function Header() {
   const { getThemeColor } = useContext(AppConfigContext);
@@ -35,11 +31,6 @@ export default function Header() {
       themeColor={headerThemeColor}
       logo={<Logo />}
       navigation={<NavigationMenu />}
-      centerContent={
-        <Suspense fallback={null}>
-          <AdminPendingApprovalSummary />
-        </Suspense>
-      }
       notificationsButton={<WorkflowNotificationButton />}
       externalLinks={<ExternalLinks />}
       signInOutButton={<SignInOutButton />}

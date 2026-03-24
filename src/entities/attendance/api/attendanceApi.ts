@@ -832,6 +832,7 @@ export const attendanceApi = createApi({
         return { data: attendances };
       },
       providesTags: (_result, _error, arg) => [
+        { type: "Attendance" as const, id: "LIST" },
         {
           type: "Attendance" as const,
           id: `RANGE-${arg.staffId}-${arg.startDate}-${arg.endDate}`,

@@ -1,5 +1,5 @@
 import { lazy, type ReactNode,Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 
 import Layout from "./Layout";
 import NotFound from "./pages/NotFound";
@@ -43,6 +43,9 @@ const wrapWithMuiXDateProvider = (node: ReactNode) => (
 
 const AdminDashboardRoute = createLazyRoute(
   () => import("./pages/admin/AdminDashboard"),
+);
+const AdminDashboardHomeRoute = createLazyRoute(
+  () => import("./pages/admin/AdminDashboardHome"),
 );
 const AdminLayoutRoute = createLazyRoute(
   () => import("./pages/admin/AdminLayout"),
@@ -231,7 +234,7 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <Navigate to="attendances" replace />,
+                lazy: AdminDashboardHomeRoute,
               },
               ...adminChildRoutes,
             ],

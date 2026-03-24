@@ -4,7 +4,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dayjs from "dayjs";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
@@ -28,9 +28,7 @@ export default function DownloadForm() {
   const [selectedStaff, setSelectedStaff] = useState<StaffType[]>([]);
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-  const [isExpanded, setIsExpanded] = useState(
-    typeof window === "undefined" ? true : window.innerWidth >= 640,
-  );
+  const [isExpanded, setIsExpanded] = useState(false);
   const { staffs, loading: staffLoading, error: staffError } = useStaffs({
     isAuthenticated,
   });
@@ -41,17 +39,6 @@ export default function DownloadForm() {
   } = useCloseDates();
   const [startDate, setStartDate] = useState(formatInputDate(dayjs()));
   const [endDate, setEndDate] = useState(formatInputDate(dayjs()));
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 640) {
-        setIsExpanded(true);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const workDates = useMemo(() => {
     const start = dayjs(startDate);
@@ -114,16 +101,19 @@ export default function DownloadForm() {
           <button
             type="button"
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/70 bg-white text-slate-600 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.18)] sm:hidden"
-            aria-label={isExpanded ? "collapse" : "expand"}
+            className="inline-flex items-center justify-center gap-1 rounded-full border border-slate-300/70 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.18)] transition hover:bg-slate-50"
+            aria-label={isExpanded ? "ダウンロード要素を折りたたむ" : "ダウンロード要素を展開する"}
+            aria-expanded={isExpanded}
+            aria-controls="attendance-download-panel"
           >
-            {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            {isExpanded ? "折りたたむ" : "展開する"}
+            {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </button>
         </div>
       </div>
 
       {isExpanded && (
-        <div className="w-full">
+        <div id="attendance-download-panel" className="w-full">
           <div className="mx-auto flex w-full max-w-[880px] min-w-0 flex-col gap-6 px-1 sm:px-2 md:px-0">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end">

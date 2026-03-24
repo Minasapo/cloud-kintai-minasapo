@@ -51,7 +51,6 @@ const useIsMobile = () => {
       setIsMobile(event.matches);
     };
 
-    setIsMobile(mediaQuery.matches);
     mediaQuery.addEventListener("change", onChange);
     return () => mediaQuery.removeEventListener("change", onChange);
   }, []);
