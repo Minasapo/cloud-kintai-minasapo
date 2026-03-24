@@ -23,7 +23,7 @@ export default function MoveDateItem({ workDate }: MoveDateItemProps) {
   };
 
   return (
-    <div className="mb-3 flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3">
       <button
         type="button"
         onClick={handlePrevDay}
