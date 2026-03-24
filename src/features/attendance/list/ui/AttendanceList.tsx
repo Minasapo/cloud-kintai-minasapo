@@ -30,10 +30,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import {
-  calcTotalRestTime,
-  calcTotalWorkTime,
-} from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
@@ -355,43 +351,6 @@ export default function AttendanceTable() {
   }, [attendancesError, dispatch, logger]);
 
   /**
-   * 勤怠データから合計勤務時間（休憩時間を除く）を計算する。
-   * 有効期間内のデータのみを対象とする。
-   */
-  const totalTime = useMemo(() => {
-    // 有効期間内のデータのみをフィルター
-    const filteredAttendances = attendances.filter((attendance) => {
-      if (!attendance.workDate) return false;
-      const workDate = dayjs(attendance.workDate);
-      return (
-        !workDate.isBefore(effectiveDateRange.start, "day") &&
-        !workDate.isAfter(effectiveDateRange.end, "day")
-      );
-    });
-
-    const totalWorkTime = filteredAttendances.reduce((acc, attendance) => {
-      if (!attendance.startTime || !attendance.endTime) return acc;
-      const workTime = calcTotalWorkTime(
-        attendance.startTime,
-        attendance.endTime,
-      );
-      return acc + workTime;
-    }, 0);
-
-    const totalRestTime = filteredAttendances.reduce((acc, attendance) => {
-      if (!attendance.rests) return acc;
-      const restTime = attendance.rests
-        .filter((item): item is NonNullable<typeof item> => !!item)
-        .reduce((acc, rest) => {
-          if (!rest.startTime || !rest.endTime) return acc;
-          return acc + calcTotalRestTime(rest.startTime, rest.endTime);
-        }, 0);
-      return acc + restTime;
-    }, 0);
-    return totalWorkTime - totalRestTime;
-  }, [attendances, effectiveDateRange]);
-
-  /**
    * 集計期間のラベルを生成する。
    */
   const rangeLabelForDisplay = useMemo(() => {
@@ -403,26 +362,6 @@ export default function AttendanceTable() {
     );
     return `${startLabel} 〜 ${endLabel}`;
   }, [effectiveDateRange]);
-
-  const monthlyAttendances = useMemo(
-    () =>
-      attendances.filter((attendance) =>
-        attendance.workDate
-          ? dayjs(attendance.workDate).isSame(currentMonth, "month")
-          : false,
-      ),
-    [attendances, currentMonth],
-  );
-
-  const alertDays = useMemo(() => {
-    if (!staff) return 0;
-    return monthlyAttendances.filter((attendance) => {
-      const hasSystemComment =
-        Array.isArray(attendance.systemComments) &&
-        attendance.systemComments.length > 0;
-      return hasSystemComment;
-    }).length;
-  }, [monthlyAttendances, staff]);
 
   if (attendanceLoading || calendarLoading || closeDatesLoading) {
     return <LinearProgress />;
@@ -450,33 +389,6 @@ export default function AttendanceTable() {
           </div>
         </div>
       </section>
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
-          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">
-            合計勤務時間
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-emerald-700">
-            {totalTime.toFixed(1)}h
-          </p>
-        </div>
-        <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
-          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">
-            打刻日数
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-slate-950">
-            {monthlyAttendances.length}
-          </p>
-        </div>
-        <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)]">
-          <p className="text-xs font-medium tracking-[0.04em] text-slate-500">
-            要確認日数
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-amber-700">
-            {alertDays}
-          </p>
-        </div>
-      </div>
 
       <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)] sm:p-5">
         {isDesktop ? (

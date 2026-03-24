@@ -21,7 +21,7 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
@@ -29,7 +29,6 @@ import {
   AttendanceState,
   AttendanceStatus,
 } from "@/entities/attendance/lib/AttendanceState";
-import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
@@ -83,20 +82,6 @@ export default function DesktopList({
     }
     setInternalMonth(nextMonth);
   };
-
-  const monthlyAttendances = useMemo(() => {
-    return attendances
-      .filter((attendance) =>
-        attendance.workDate
-          ? dayjs(attendance.workDate).isSame(currentMonth, "month")
-          : false,
-      )
-      .toSorted((a, b) => {
-        const aValue = a.workDate ? dayjs(a.workDate).valueOf() : 0;
-        const bValue = b.workDate ? dayjs(b.workDate).valueOf() : 0;
-        return aValue - bValue;
-      });
-  }, [attendances, currentMonth]);
 
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
     if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
@@ -287,12 +272,6 @@ export default function DesktopList({
         currentMonth={currentMonth}
         onMonthChange={(nextMonth) => handleMonthChange(() => nextMonth)}
       />
-      <Box sx={{ mt: 3 }}>
-        <AttendanceGraph
-          attendances={monthlyAttendances}
-          month={currentMonth}
-        />
-      </Box>
     </div>
   );
 }

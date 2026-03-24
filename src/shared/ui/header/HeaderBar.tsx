@@ -119,9 +119,11 @@ export default function HeaderBar({
                 {navigation}
               </div>
 
-              <div className="hidden min-w-0 items-center justify-center lg:flex">
-                {centerContent}
-              </div>
+              {hasCenterContent && (
+                <div className="hidden min-w-0 items-center justify-center lg:flex">
+                  {centerContent}
+                </div>
+              )}
 
               <div className="flex shrink-0 flex-nowrap items-center justify-end gap-0.5 sm:gap-1 md:gap-1.5">
                 <div className="shrink-0 text-[color:var(--header-text)]">{notificationsButton}</div>
