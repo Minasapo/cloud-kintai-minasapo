@@ -1,6 +1,4 @@
 import { LunchRestTimeNotSetWarning } from "@features/attendance/edit/ui/LunchRestTimeNotSetWarning";
-import AddAlarmIcon from "@mui/icons-material/AddAlarm";
-import { Box, IconButton, Stack, styled, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 
@@ -11,11 +9,6 @@ import {
   calcTotalRestTime,
   RestTimeInput,
 } from "./RestTimeInput/RestTimeInput";
-
-const Label = styled(Typography)(() => ({
-  width: "150px",
-  fontWeight: "bold",
-}));
 
 export default function RestTimeItem() {
   const { restFields, restAppend, changeRequests, watch, workDate, isOnBreak } =
@@ -82,25 +75,26 @@ export default function RestTimeItem() {
   }
 
   return (
-    <Stack direction="row">
-      <Label variant="body1" sx={{ fontWeight: "bold", width: "150px" }}>
+    <div className="flex flex-col gap-3 md:flex-row md:items-start">
+      <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
         休憩時間
-      </Label>
-      <Stack spacing={1} sx={{ flexGrow: 2 }}>
+      </div>
+      <div className="flex flex-1 flex-col gap-3">
         <NoRestTimeMessage restFields={restFields} />
         {restFields.length === 0 && visibleRestWarning && (
-          <Box>
+          <div>
             <LunchRestTimeNotSetWarning
               targetWorkDate={workDate ? workDate.toISOString() : undefined}
             />
-          </Box>
+          </div>
         )}
         {restFields.map((rest, index) => (
           <RestTimeInput key={index} rest={rest} index={index} />
         ))}
-        <Box>
-          <IconButton
-            aria-label="staff-search"
+        <div>
+          <button
+            type="button"
+            aria-label="休憩時間を追加"
             data-testid="add-rest-time"
             disabled={changeRequests.length > 0 || isOnBreak}
             onClick={() =>
@@ -109,11 +103,14 @@ export default function RestTimeItem() {
                 endTime: null,
               })
             }
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300 bg-white text-emerald-700 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
           >
-            <AddAlarmIcon />
-          </IconButton>
-        </Box>
-      </Stack>
-    </Stack>
+            <span aria-hidden="true" className="text-2xl leading-none">
+              +
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

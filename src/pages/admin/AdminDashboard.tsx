@@ -1,6 +1,7 @@
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
+  Box,
   Button,
   Collapse,
   Skeleton,
@@ -124,6 +125,10 @@ function AdminDashboardContent() {
 
   const activeMenuHref = useMemo(() => {
     const currentPath = location.pathname;
+    if (/^\/admin\/staff\/[^/]+\/attendance(?:\/|$)/.test(currentPath)) {
+      return "/admin/attendances";
+    }
+
     const exactMatch = menuItems.find((item) => item.href === currentPath);
     if (exactMatch) return exactMatch.href;
 
@@ -132,6 +137,11 @@ function AdminDashboardContent() {
     );
     return prefixMatch?.href ?? menuItems[0]?.href ?? "";
   }, [location.pathname, menuItems]);
+
+  const activeMenuItem = useMemo(
+    () => menuItems.find((item) => item.href === activeMenuHref) ?? null,
+    [activeMenuHref, menuItems],
+  );
 
   React.useEffect(() => {
     if (!isMobile) {
@@ -189,18 +199,19 @@ function AdminDashboardContent() {
         px: PAGE_PADDING_X,
         py: PAGE_PADDING_Y,
         gap: PAGE_SECTION_GAP,
+        maxWidth: "1360px",
+        mx: "auto",
       }}
     >
-      <PageSection variant="surface" layoutVariant="dashboard" sx={{ gap: 0 }}>
+      <PageSection
+        variant="plain"
+        layoutVariant="dashboard"
+        className="gap-0"
+        sx={{ px: 0 }}
+      >
         <AdminHeader
           actions={
             <Stack spacing={1} alignItems="flex-start">
-              {!isMobile && (
-                <SplitModeToggle
-                  mode={state.mode}
-                  onToggle={handleToggleSplitMode}
-                />
-              )}
               {isMobile && (
                 <Button
                   variant="text"
@@ -225,6 +236,61 @@ function AdminDashboardContent() {
                   onSelect={(item) => handleSelect(item.href)}
                 />
               </Collapse>
+              {activeMenuItem && (
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  alignItems={{ xs: "flex-start", md: "center" }}
+                  justifyContent="space-between"
+                  spacing={1.5}
+                  sx={{
+                    width: "100%",
+                    borderRadius: "22px",
+                    border: "1px solid rgba(255,255,255,0.6)",
+                    bgcolor: "rgba(255,255,255,0.78)",
+                    px: { xs: 1.5, md: 2 },
+                    py: 1.5,
+                  }}
+                >
+                  <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+                    <Box
+                      sx={{
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.04em",
+                        color: "#0f766e",
+                      }}
+                    >
+                      現在のカテゴリ
+                    </Box>
+                    <Box
+                      sx={{
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        color: "#020617",
+                      }}
+                    >
+                      {activeMenuItem.primaryLabel}
+                    </Box>
+                    {activeMenuItem.description ? (
+                      <Box
+                        sx={{
+                          color: "#64748b",
+                          lineHeight: 1.7,
+                          fontSize: "0.92rem",
+                        }}
+                      >
+                        {activeMenuItem.description}
+                      </Box>
+                    ) : null}
+                  </Stack>
+                  {!isMobile && (
+                    <SplitModeToggle
+                      mode={state.mode}
+                      onToggle={handleToggleSplitMode}
+                    />
+                  )}
+                </Stack>
+              )}
             </Stack>
           }
         />
@@ -232,7 +298,15 @@ function AdminDashboardContent() {
       <PageSection
         variant="surface"
         layoutVariant="dashboard"
-        sx={{ gap: 0, flex: 1, overflow: "hidden" }}
+        sx={{
+          gap: 0,
+          flex: 1,
+          overflow: "hidden",
+          borderRadius: "28px",
+          border: "1px solid rgba(226,232,240,0.8)",
+          backgroundColor: "#ffffff",
+          boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
+        }}
       >
         {isSplitMode ? (
           <Group orientation="horizontal">
@@ -244,7 +318,7 @@ function AdminDashboardContent() {
             <Separator
               style={{
                 width: "8px",
-                backgroundColor: "#e0e0e0",
+                backgroundColor: "#e2e8f0",
                 cursor: "col-resize",
               }}
             />
@@ -255,6 +329,9 @@ function AdminDashboardContent() {
                 screenOptions={SCREEN_OPTIONS}
                 selectedScreen={selectedScreen}
                 onScreenChange={handleScreenChange}
+                contentSx={
+                  selectedScreen === "daily-report" ? { pt: 0 } : undefined
+                }
               >
                 {state.rightPanel?.component ? (
                   <Suspense fallback={<SplitPanelSkeleton />}>

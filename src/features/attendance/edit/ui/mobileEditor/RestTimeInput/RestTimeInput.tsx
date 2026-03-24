@@ -1,13 +1,3 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  Button,
-  Divider,
-  IconButton,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
 import { useContext } from "react";
 import {
   FieldArrayMethodProps,
@@ -47,31 +37,33 @@ export function RestTimeInput({
     <>
       <Label>休憩時間</Label>
       {restFields.map((rest, index) => (
-        <Paper elevation={2} key={index} sx={{ p: 2 }}>
-          <Stack direction="column" spacing={1}>
-            <Stack direction="row" spacing={0} alignItems={"center"}>
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: "bold", flexGrow: 1 }}
-              >
+        <div
+          key={index}
+          className="rounded-[18px] border border-slate-200 bg-white p-4 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.28)]"
+        >
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 text-sm font-semibold text-slate-900">
                 開始時刻
-              </Typography>
-              <IconButton
-                aria-label="staff-search"
+              </div>
+              <button
+                type="button"
+                aria-label="休憩を削除"
                 onClick={() => restRemove(index)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
               >
-                <DeleteIcon />
-              </IconButton>
-            </Stack>
+                ×
+              </button>
+            </div>
             <RestStartTimeInput
               rest={rest}
               index={index}
               testIdPrefix="mobile"
             />
-            <Divider />
-            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+            <div className="border-t border-slate-200/80" />
+            <div className="text-sm font-semibold text-slate-900">
               終了時間
-            </Typography>
+            </div>
             <RestEndTimeInput
               workDate={workDate}
               rest={rest}
@@ -79,14 +71,11 @@ export function RestTimeInput({
               restUpdate={restUpdate}
               testIdPrefix="mobile"
             />
-          </Stack>
-        </Paper>
+          </div>
+        </div>
       ))}
-      <Button
-        variant="outlined"
-        size="medium"
-        startIcon={<AddCircleOutlineOutlinedIcon />}
-        fullWidth
+      <button
+        type="button"
         disabled={isOnBreak}
         onClick={() =>
           restAppend({
@@ -94,9 +83,11 @@ export function RestTimeInput({
             endTime: null,
           })
         }
+        className="inline-flex w-full items-center justify-center gap-2 rounded-[16px] border border-emerald-500/25 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:border-emerald-500/40 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
+        <span className="text-base leading-none">+</span>
         休憩時間を追加
-      </Button>
+      </button>
     </>
   );
 }

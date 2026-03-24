@@ -5,8 +5,23 @@
   color-scheme: light;
 }
 
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   font-family: var(
       --ds-typography-font-family,
       'Noto Sans JP',
@@ -19,6 +34,12 @@ body {
   line-height: var(--ds-typography-line-height-relaxed, 1.6);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 code {

@@ -453,6 +453,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                             </Box>
                           </Stack>
                         }
+                        secondaryTypographyProps={{ component: "div" }}
                       />
                       <Chip
                         size="small"
@@ -542,6 +543,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                               />
                             </Stack>
                           }
+                          primaryTypographyProps={{ component: "div" }}
                           secondary={
                             <Stack spacing={0.5} sx={{ mt: 0.5 }}>
                               <Typography
@@ -577,6 +579,7 @@ export const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                               )}
                             </Stack>
                           }
+                          secondaryTypographyProps={{ component: "div" }}
                         />
                       </ListItem>
                     );

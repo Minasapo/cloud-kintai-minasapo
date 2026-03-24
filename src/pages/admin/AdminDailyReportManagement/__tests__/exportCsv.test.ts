@@ -7,8 +7,15 @@ import {
 } from "../AdminDailyReportManagement";
 import type { AdminDailyReport } from "../data";
 
+jest.mock(
+  "@features/attendance/daily-report/lib/sendDailyReportCommentNotification",
+  () => ({
+    sendDailyReportCommentNotification: jest.fn(),
+  }),
+);
+
 const createReport = (
-  overrides: Partial<AdminDailyReport> = {}
+  overrides: Partial<AdminDailyReport> = {},
 ): AdminDailyReport => ({
   id: "report-1",
   staffId: "staff-1",
@@ -52,7 +59,7 @@ describe("buildDailyReportCsv", () => {
         "日付,スタッフID,スタッフ名,タイトル,内容,作成日時,更新日時",
         "2024-01-02,staff-2,佐藤 次郎,二件目,二件目の本文,2024-01-02T08:00:00Z,2024-01-02T09:00:00Z",
         '2024-01-01,staff-1,山田 太郎,"タイトル1 ""引用""","本文1, ""改行"" あり",2024-01-01T09:00:00Z,2024-01-02T10:00:00Z',
-      ].join("\n")
+      ].join("\n"),
     );
   });
 });
@@ -60,7 +67,7 @@ describe("buildDailyReportCsv", () => {
 describe("formatDailyReportFileName", () => {
   test("指定日時をフォーマットしてファイル名を作成する", () => {
     expect(formatDailyReportFileName(dayjs("2026-01-19T14:30:25"))).toBe(
-      "daily_reports_20260119_143025.csv"
+      "daily_reports_20260119_143025.csv",
     );
   });
 });

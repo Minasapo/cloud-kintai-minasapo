@@ -61,6 +61,8 @@ describe("buildBasePayload helpers", () => {
       specialHolidayEnabled: false,
       attendanceStatisticsEnabled: true,
       workflowNotificationEnabled: true,
+      timeRecorderAnnouncementEnabled: true,
+      timeRecorderAnnouncementMessage: "お知らせ本文",
       overTimeCheckEnabled: true,
       shiftCollaborativeEnabled: true,
       shiftDefaultMode: "collaborative",
@@ -72,6 +74,8 @@ describe("buildBasePayload helpers", () => {
     expect(payload.amHolidayStartTime).toBe("09:00");
     expect(payload.pmHolidayEndTime).toBe("18:00");
     expect(payload.workflowNotificationEnabled).toBe(true);
+    expect(payload.timeRecorderAnnouncementEnabled).toBe(true);
+    expect(payload.timeRecorderAnnouncementMessage).toBe("お知らせ本文");
     expect(typeof payload.standardWorkHours).toBe("number");
     expect(Array.isArray(payload.links)).toBe(true);
     expect(Array.isArray(payload.reasons)).toBe(true);

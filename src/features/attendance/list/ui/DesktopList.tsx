@@ -6,7 +6,6 @@ import {
   Box,
   IconButton,
   Stack,
-  styled,
   Table,
   TableBody,
   TableCell,
@@ -47,16 +46,6 @@ import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
 
 const MONTH_QUERY_KEY = "month";
-
-const DesktopBox = styled(Box)(({ theme }) => ({
-  padding: "0px 40px 40px 40px",
-  [theme.breakpoints.down("lg")]: {
-    padding: "0px 24px 32px 24px",
-  },
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
-}));
 
 export default function DesktopList({
   attendances,
@@ -154,44 +143,68 @@ export default function DesktopList({
     });
   })();
   return (
-    <DesktopBox>
+    <div className="hidden md:block">
       {errorAttendances.length > 0 && (
-        <Box sx={{ pb: 2, pt: 2 }}>
+        <Box sx={{ pb: 3 }}>
           <Box
             sx={{
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              p: 2,
-              backgroundColor: "background.paper",
+              border: "1px solid rgba(245, 158, 11, 0.22)",
+              borderRadius: "24px",
+              p: 3,
+              background:
+                "linear-gradient(180deg, rgba(255,251,235,0.92) 0%, rgba(255,255,255,0.96) 100%)",
+              boxShadow: "0 24px 54px -40px rgba(15,23,42,0.32)",
             }}
           >
-            <Typography variant="h4" sx={{ mb: 1 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                mb: 1,
+                fontSize: "1.15rem",
+                fontWeight: 600,
+                color: "text.primary",
+              }}
+            >
               打刻エラー一覧 ({errorAttendances.length})
             </Typography>
-            <Alert severity="warning">
+            <Alert
+              severity="warning"
+              sx={{
+                mb: 2,
+                borderRadius: "18px",
+                border: "1px solid rgba(245, 158, 11, 0.18)",
+                bgcolor: "rgba(255,255,255,0.88)",
+              }}
+            >
               <AlertTitle sx={{ fontWeight: "bold" }}>
                 確認してください
               </AlertTitle>
               打刻エラーがあります
             </Alert>
-            <TableContainer>
+            <TableContainer
+              sx={{
+                borderRadius: "18px",
+                border: "1px solid rgba(148, 163, 184, 0.16)",
+                bgcolor: "rgba(255,255,255,0.9)",
+                overflow: "hidden",
+              }}
+            >
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell />
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ color: "#64748b", fontWeight: 700 }} />
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>勤務日</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
                       勤務時間
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
                       休憩時間(直近)
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>摘要</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
                       作成日時
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
                       更新日時
                     </TableCell>
                     <TableCell />
@@ -280,6 +293,6 @@ export default function DesktopList({
           month={currentMonth}
         />
       </Box>
-    </DesktopBox>
+    </div>
   );
 }

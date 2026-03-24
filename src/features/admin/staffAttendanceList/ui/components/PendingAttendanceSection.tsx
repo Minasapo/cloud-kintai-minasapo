@@ -169,9 +169,10 @@ export function PendingAttendanceSection({
                 holidayCalendars,
                 companyHolidayCalendars
               );
+              const rowKey = attendance.id || `${attendance.workDate}-${index}`;
               return (
                 <TableRow
-                  key={`pending-${index}`}
+                  key={`pending-${rowKey}`}
                   sx={attendanceRowVariantStyles[rowVariant]}
                   data-testid={
                     index === attendances.length - 1

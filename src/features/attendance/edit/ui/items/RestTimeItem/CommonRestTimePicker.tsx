@@ -1,15 +1,13 @@
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext } from "react";
 import {
   Controller,
   FieldArrayWithId,
   UseFieldArrayUpdate,
 } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAttendanceEditUi } from "@/features/attendance/edit/model/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import { AttendanceControl, AttendanceFieldPath } from "../../../model/types";
@@ -37,7 +35,7 @@ export function CommonRestTimePicker({
   chipLabel,
   onChipClick,
 }: CommonRestTimePickerProps) {
-  const { readOnly } = useContext(AttendanceEditContext);
+  const { readOnly } = useAttendanceEditUi();
 
   return (
     <>
@@ -79,18 +77,23 @@ export function CommonRestTimePicker({
           />
         )}
       />
-      <Box>
-        <Chip
-          label={chipLabel}
-          variant="outlined"
-          color="success"
-          icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
+      <div>
+        <button
+          type="button"
           onClick={() => {
             if (readOnly) return;
             onChipClick();
           }}
-        />
-      </Box>
+          className={[
+            "inline-flex items-center gap-1 rounded-full border border-emerald-400 bg-emerald-50 px-3 py-1 text-sm text-emerald-700 transition hover:bg-emerald-100",
+            readOnly ? "cursor-not-allowed opacity-60" : "",
+          ].join(" ")}
+          disabled={!!readOnly}
+        >
+          <AddCircleOutlineOutlinedIcon fontSize="small" />
+          <span>{chipLabel}</span>
+        </button>
+      </div>
     </>
   );
 }

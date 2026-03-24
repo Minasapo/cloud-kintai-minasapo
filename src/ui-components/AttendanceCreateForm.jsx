@@ -30,6 +30,7 @@ export default function AttendanceCreateForm(props) {
   } = props;
   const initialValues = {
     staffId: "",
+    staffWorkDateKey: "",
     workDate: "",
     startTime: "",
     endTime: "",
@@ -45,6 +46,9 @@ export default function AttendanceCreateForm(props) {
     revision: "",
   };
   const [staffId, setStaffId] = React.useState(initialValues.staffId);
+  const [staffWorkDateKey, setStaffWorkDateKey] = React.useState(
+    initialValues.staffWorkDateKey
+  );
   const [workDate, setWorkDate] = React.useState(initialValues.workDate);
   const [startTime, setStartTime] = React.useState(initialValues.startTime);
   const [endTime, setEndTime] = React.useState(initialValues.endTime);
@@ -75,6 +79,7 @@ export default function AttendanceCreateForm(props) {
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setStaffId(initialValues.staffId);
+    setStaffWorkDateKey(initialValues.staffWorkDateKey);
     setWorkDate(initialValues.workDate);
     setStartTime(initialValues.startTime);
     setEndTime(initialValues.endTime);
@@ -92,6 +97,7 @@ export default function AttendanceCreateForm(props) {
   };
   const validations = {
     staffId: [{ type: "Required" }],
+    staffWorkDateKey: [],
     workDate: [{ type: "Required" }],
     startTime: [],
     endTime: [],
@@ -133,6 +139,7 @@ export default function AttendanceCreateForm(props) {
         event.preventDefault();
         let modelFields = {
           staffId,
+          staffWorkDateKey,
           workDate,
           startTime,
           endTime,
@@ -209,6 +216,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId: value,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -237,6 +245,44 @@ export default function AttendanceCreateForm(props) {
         {...getOverrideProps(overrides, "staffId")}
       ></TextField>
       <TextField
+        label="Staff work date key"
+        isRequired={false}
+        isReadOnly={false}
+        value={staffWorkDateKey}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              staffId,
+              staffWorkDateKey: value,
+              workDate,
+              startTime,
+              endTime,
+              goDirectlyFlag,
+              returnDirectlyFlag,
+              absentFlag,
+              remarks,
+              paidHolidayFlag,
+              specialHolidayFlag,
+              isDeemedHoliday,
+              hourlyPaidHolidayHours,
+              substituteHolidayDate,
+              revision,
+            };
+            const result = onChange(modelFields);
+            value = result?.staffWorkDateKey ?? value;
+          }
+          if (errors.staffWorkDateKey?.hasError) {
+            runValidationTasks("staffWorkDateKey", value);
+          }
+          setStaffWorkDateKey(value);
+        }}
+        onBlur={() => runValidationTasks("staffWorkDateKey", staffWorkDateKey)}
+        errorMessage={errors.staffWorkDateKey?.errorMessage}
+        hasError={errors.staffWorkDateKey?.hasError}
+        {...getOverrideProps(overrides, "staffWorkDateKey")}
+      ></TextField>
+      <TextField
         label="Work date"
         isRequired={true}
         isReadOnly={false}
@@ -246,6 +292,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate: value,
               startTime,
               endTime,
@@ -283,6 +330,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime: value,
               endTime,
@@ -320,6 +368,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime: value,
@@ -357,6 +406,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -394,6 +444,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -433,6 +484,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -470,6 +522,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -507,6 +560,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -544,6 +598,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -583,6 +638,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -624,6 +680,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -663,6 +720,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,
@@ -706,6 +764,7 @@ export default function AttendanceCreateForm(props) {
           if (onChange) {
             const modelFields = {
               staffId,
+              staffWorkDateKey,
               workDate,
               startTime,
               endTime,

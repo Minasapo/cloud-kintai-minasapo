@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import ClockOutButton from "@/shared/ui/time-recorder/ClockOutButton";
 
 import { WorkStatus, WorkStatusCodes } from "../../lib/common";
@@ -15,13 +13,11 @@ export default function ClockOutItem({
   onClick,
   disabled = false,
 }: ClockOutItemProps) {
-  const isWorking = useMemo(
-    () => workStatus?.code === WorkStatusCodes.WORKING,
-    [workStatus?.code]
-  );
+  const isWorking = workStatus?.code === WorkStatusCodes.WORKING;
 
   return (
     <ClockOutButton
+      key={String(isWorking)}
       isWorking={Boolean(isWorking)}
       onClockOut={onClick}
       disabled={disabled}

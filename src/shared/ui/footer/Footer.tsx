@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import type { CSSProperties } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -6,41 +6,60 @@ interface FooterProps {
   themeColor?: string;
 }
 
+const FOOTER_ACCENT = designTokenVar("component.footer.accent", "#0B6D53");
 const FOOTER_BACKGROUND = designTokenVar(
   "component.footer.background",
-  "#0B6D53"
+  "#F3F8F5",
 );
-const FOOTER_TEXT = designTokenVar("component.footer.textColor", "#FFFFFF");
-const FOOTER_DIVIDER = designTokenVar(
-  "component.footer.dividerColor",
-  "#D9E2DD"
+const FOOTER_BORDER = designTokenVar(
+  "component.footer.borderColor",
+  "rgba(15, 168, 94, 0.12)",
+);
+const FOOTER_TEXT = designTokenVar("component.footer.textColor", "#45574F");
+const FOOTER_MUTED_TEXT = designTokenVar(
+  "component.footer.mutedTextColor",
+  "#5E726A",
 );
 const FOOTER_PADDING_X = designTokenVar("component.footer.paddingX", "16px");
-const FOOTER_PADDING_Y = designTokenVar("component.footer.paddingY", "12px");
+const FOOTER_PADDING_Y = designTokenVar("component.footer.paddingY", "14px");
+const FOOTER_CONTENT_MAX_WIDTH = designTokenVar(
+  "component.footer.contentMaxWidth",
+  "960px",
+);
 
 const Footer = ({ themeColor }: FooterProps) => (
   <footer
     role="contentinfo"
-    className="border-t"
-    style={{
-      backgroundColor: themeColor ?? FOOTER_BACKGROUND,
-      color: FOOTER_TEXT,
-      borderColor: FOOTER_DIVIDER,
-    }}
+    className="border-t bg-[linear-gradient(180deg,rgba(248,250,249,0.92)_0%,rgba(236,253,245,0.96)_100%)]"
+    style={
+      {
+        "--footer-accent": themeColor ?? FOOTER_ACCENT,
+        "--footer-background": FOOTER_BACKGROUND,
+        "--footer-border": FOOTER_BORDER,
+        "--footer-text": FOOTER_TEXT,
+        "--footer-muted-text": FOOTER_MUTED_TEXT,
+        "--footer-padding-x": FOOTER_PADDING_X,
+        "--footer-padding-y": FOOTER_PADDING_Y,
+        "--footer-content-max-width": FOOTER_CONTENT_MAX_WIDTH,
+        borderColor: "var(--footer-border)",
+      } as CSSProperties & Record<`--${string}`, string>
+    }
   >
-    <div
-      className="text-center"
-      style={{
-        paddingTop: FOOTER_PADDING_Y,
-        paddingBottom: FOOTER_PADDING_Y,
-        paddingLeft: FOOTER_PADDING_X,
-        paddingRight: FOOTER_PADDING_X,
-        textAlign: "center",
-      }}
-    >
-      <Typography variant="body1" align="center" className="text-center font-medium">
+    <div className="mx-auto flex w-full max-w-[var(--footer-content-max-width)] flex-col items-center gap-0.5 px-4 py-3 text-center sm:gap-1 sm:px-[var(--footer-padding-x)] sm:py-[var(--footer-padding-y)]">
+      <div className="flex min-w-0 items-center justify-center">
+        <p
+          className="m-0 text-xs font-medium leading-5 sm:text-sm sm:leading-6"
+          style={{ color: "var(--footer-text)" }}
+        >
+          Virtual Tech Japan Inc.
+        </p>
+      </div>
+      <p
+        className="m-0 break-words text-[11px] leading-4 sm:text-xs sm:leading-5"
+        style={{ color: "var(--footer-muted-text)" }}
+      >
         © 2026 Virtual Tech Japan Inc.
-      </Typography>
+      </p>
     </div>
   </footer>
 );

@@ -1,11 +1,4 @@
-import { Stack, styled, Typography } from "@mui/material";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import { DatePicker } from "@mui/x-date-pickers";
+import { styled, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -19,7 +12,7 @@ const Label = styled(Typography)(() => ({
 }));
 
 export function SubstituteHolidayDateInput() {
-  const { control, setValue, restReplace, changeRequests, readOnly } =
+  const { control, setValue, restReplace, readOnly } =
     useContext(AttendanceEditContext);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -30,7 +23,7 @@ export function SubstituteHolidayDateInput() {
   }
 
   return (
-    <Stack direction="row" spacing={0} alignItems={"center"}>
+    <div className="flex items-center gap-4">
       <Label variant="body1">振替休日</Label>
       <Controller
         name="substituteHolidayDate"
@@ -40,66 +33,37 @@ export function SubstituteHolidayDateInput() {
 
           return (
             <>
-              <DatePicker
-                {...restField}
-                label="勤務した日"
-                format={AttendanceDate.DisplayFormat}
-                value={value ? dayjs(value) : null}
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    error: !!fieldState.error,
-                    helperText: fieldState.error?.message,
-                    sx: {
-                      "& .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline":
-                        {
-                          borderColor: "divider",
-                        },
-                      "& .MuiOutlinedInput-root.Mui-error:hover .MuiOutlinedInput-notchedOutline":
-                        {
-                          borderColor: "divider",
-                        },
-                      "& .MuiOutlinedInput-root.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline":
-                        {
-                          borderColor: "divider",
-                        },
-                    },
-                  },
-                }}
-                disabled={changeRequests.length > 0 || !!readOnly}
-                onChange={(date) => {
-                  // ピッカー内で一時的に Dayjs が渡されるのを防ぎ、明示的なクリアのみ即時反映
-                  if (!date) {
-                    onChange(null);
-                  }
-                }}
-                onAccept={(date) => {
-                  if (readOnly) return;
-                  // 新しい日付が設定された場合は確認ダイアログを表示し、
-                  // ユーザーが承認したときのみフォーム値とフラグをクリアする
-                  if (date) {
-                    setPendingDate(date);
-                    setConfirmOpen(true);
-                  } else {
-                    // クリアした場合はそのまま反映
-                    onChange(null);
-                  }
-                }}
-              />
-
-              <Dialog
-                open={confirmOpen}
-                onClose={() => {
-                  setConfirmOpen(false);
-                  setPendingDate(null);
-                }}
-                aria-labelledby="confirm-clear-dialog"
-              >
-                <DialogTitle id="confirm-clear-dialog">
-                  一部の入力内容をクリアします
-                </DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
+              <div className="min-w-0 flex-1">
+                <input
+                  {...restField}
+                  type="date"
+                  value={value ? dayjs(value).format("YYYY-MM-DD") : ""}
+                  aria-label="勤務した日"
+                  disabled={!!readOnly}
+                  className="w-full max-w-[340px] rounded-[16px] border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  onChange={(e) => {
+                    if (!e.target.value) {
+                      onChange(null);
+                      return;
+                    }
+                    const date = dayjs(e.target.value);
+                    if (date.isValid()) {
+                      setPendingDate(date);
+                      setConfirmOpen(true);
+                    }
+                  }}
+                />
+                {fieldState.error?.message ? (
+                  <p className="mt-2 text-sm text-rose-600">{fieldState.error.message}</p>
+                ) : null}
+              </div>
+              {confirmOpen ? (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4">
+                  <div className="w-full max-w-md rounded-[24px] border border-emerald-200 bg-white p-5 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.45)]">
+                    <div className="text-base font-semibold text-slate-950">
+                      一部の入力内容をクリアします
+                    </div>
+                    <div className="mt-3 text-sm leading-6 text-slate-600">
                     振替休日を設定すると、以下の入力内容がクリアされます。
                     <ul>
                       <li>勤務開始・終了時刻</li>
@@ -109,10 +73,11 @@ export function SubstituteHolidayDateInput() {
                       <li>直帰フラグ</li>
                     </ul>
                     よろしいですか？
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button
+                    </div>
+                    <div className="mt-5 flex flex-wrap justify-end gap-2">
+                      <button
+                        type="button"
+                        className="rounded-[12px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                     onClick={() => {
                       if (pendingDate) {
                         onChange(pendingDate.format(AttendanceDate.DataFormat));
@@ -123,8 +88,10 @@ export function SubstituteHolidayDateInput() {
                     }}
                   >
                     クリアせず設定
-                  </Button>
-                  <Button
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-[12px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600"
                     onClick={() => {
                       if (readOnly) {
                         setConfirmOpen(false);
@@ -146,16 +113,17 @@ export function SubstituteHolidayDateInput() {
                       setConfirmOpen(false);
                       setPendingDate(null);
                     }}
-                    autoFocus
                   >
                     クリアして設定
-                  </Button>
-                </DialogActions>
-              </Dialog>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </>
           );
         }}
       />
-    </Stack>
+    </div>
   );
 }

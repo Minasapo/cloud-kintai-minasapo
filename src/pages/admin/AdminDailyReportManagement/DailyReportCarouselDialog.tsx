@@ -1,23 +1,6 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CloseIcon from "@mui/icons-material/Close";
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
@@ -56,14 +39,22 @@ interface DailyReportCarouselDialogProps {
   filteredReports: AdminDailyReport[];
 }
 
+const STATUS_BADGE_CLASS: Record<"default" | "info" | "success", string> = {
+  default:
+    "inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600",
+  info: "inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700",
+  success:
+    "inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700",
+};
+
 const normalizeReactions = (
-  entries?: (DailyReportReaction | null)[] | null
+  entries?: (DailyReportReaction | null)[] | null,
 ): DailyReportReaction[] =>
   entries?.filter((entry): entry is DailyReportReaction => Boolean(entry)) ??
   [];
 
 const normalizeComments = (
-  entries?: (DailyReportComment | null)[] | null
+  entries?: (DailyReportComment | null)[] | null,
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
@@ -84,7 +75,7 @@ export default function DailyReportCarouselDialog({
   const { staffs, loading: isStaffLoading } = useStaffs({ isAuthenticated });
   const { cognitoUser } = useCognitoUser();
   const [currentIndex, setCurrentIndex] = useState(
-    filteredReports.findIndex((r) => r.id === selectedReport.id)
+    filteredReports.findIndex((r) => r.id === selectedReport.id),
   );
   const [report, setReport] = useState<AdminDailyReport>(selectedReport);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,14 +84,14 @@ export default function DailyReportCarouselDialog({
     Map<string, PreloadedReport>
   >(new Map());
   const [reactions, setReactions] = useState<ReportReaction[]>(
-    selectedReport.reactions ?? []
+    selectedReport.reactions ?? [],
   );
   const [comments, setComments] = useState<AdminComment[]>(
-    selectedReport.comments ?? []
+    selectedReport.comments ?? [],
   );
   const [commentInput, setCommentInput] = useState<string>("");
   const [selectedReactions, setSelectedReactions] = useState<ReactionType[]>(
-    []
+    [],
   );
   const [reactionEntries, setReactionEntries] = useState<
     DailyReportReaction[] | null
@@ -124,7 +115,7 @@ export default function DailyReportCarouselDialog({
         .join(" ");
       return name || "スタッフ";
     },
-    [staffs]
+    [staffs],
   );
 
   const currentReport = filteredReports[currentIndex];
@@ -132,7 +123,6 @@ export default function DailyReportCarouselDialog({
   const fetchReport = useCallback(async () => {
     if (!currentReport) return;
 
-    // Check if report is already preloaded
     const preloaded = preloadedReports.get(currentReport.id);
     if (preloaded) {
       setReport(preloaded.report);
@@ -151,37 +141,32 @@ export default function DailyReportCarouselDialog({
       })) as GraphQLResult<GetDailyReportQuery>;
 
       if (response.errors?.length) {
-        const messages = response.errors.map((err) => err.message);
-        throw new Error(messages.join("\n"));
+        throw new Error(
+          response.errors.map((err) => err.message).join("\n"),
+        );
       }
 
       const record = response.data?.getDailyReport;
-      if (!record) {
-        throw new Error("日報が見つかりませんでした。");
-      }
+      if (!record) throw new Error("日報が見つかりませんでした。");
 
-      const reactions = normalizeReactions(record.reactions);
-      const comments = normalizeComments(record.comments);
-      const mappedReport = mapDailyReport(
-        record,
-        buildStaffName(record.staffId)
-      );
+      const fetchedReactions = normalizeReactions(record.reactions);
+      const fetchedComments = normalizeComments(record.comments);
+      const mappedReport = mapDailyReport(record, buildStaffName(record.staffId));
 
-      setReactionEntries(reactions);
-      setCommentEntries(comments);
+      setReactionEntries(fetchedReactions);
+      setCommentEntries(fetchedComments);
       setReport(mappedReport);
 
-      // Cache the fetched report
       setPreloadedReports((prev) =>
         new Map(prev).set(currentReport.id, {
           report: mappedReport,
-          reactionEntries: reactions,
-          commentEntries: comments,
-        })
+          reactionEntries: fetchedReactions,
+          commentEntries: fetchedComments,
+        }),
       );
     } catch (error) {
       setLoadError(
-        error instanceof Error ? error.message : "日報の取得に失敗しました。"
+        error instanceof Error ? error.message : "日報の取得に失敗しました。",
       );
     } finally {
       setIsLoading(false);
@@ -191,9 +176,8 @@ export default function DailyReportCarouselDialog({
   useEffect(() => {
     if (open) {
       setCurrentIndex(
-        filteredReports.findIndex((r) => r.id === selectedReport.id)
+        filteredReports.findIndex((r) => r.id === selectedReport.id),
       );
-      // Reset preloaded reports when dialog opens
       setPreloadedReports(new Map());
     }
   }, [open, selectedReport.id, filteredReports]);
@@ -202,26 +186,19 @@ export default function DailyReportCarouselDialog({
     void fetchReport();
   }, [fetchReport]);
 
-  // Preload all filtered reports in background
   useEffect(() => {
     if (!open || filteredReports.length === 0) return;
-
     let mounted = true;
-
     const preloadReports = async () => {
-      // Preload reports in sequence to avoid overwhelming the server
       for (let i = 0; i < filteredReports.length; i++) {
         if (!mounted) break;
-
         const reportToPreload = filteredReports[i];
-        // Skip if already preloaded or if it's the current report (will be loaded by fetchReport)
         if (
           preloadedReports.has(reportToPreload.id) ||
           reportToPreload.id === currentReport?.id
         ) {
           continue;
         }
-
         try {
           const response = (await graphqlClient.graphql({
             query: getDailyReport,
@@ -230,51 +207,34 @@ export default function DailyReportCarouselDialog({
           })) as GraphQLResult<GetDailyReportQuery>;
 
           if (!mounted) break;
-
-          if (response.errors?.length) {
-            console.error(
-              `Failed to preload report ${reportToPreload.id}:`,
-              response.errors
-            );
-            continue;
-          }
+          if (response.errors?.length) continue;
 
           const record = response.data?.getDailyReport;
-          if (!record) {
-            console.error(`Report ${reportToPreload.id} not found`);
-            continue;
-          }
+          if (!record) continue;
 
-          const reactions = normalizeReactions(record.reactions);
-          const comments = normalizeComments(record.comments);
+          const preloadedReactions = normalizeReactions(record.reactions);
+          const preloadedComments = normalizeComments(record.comments);
           const mappedReport = mapDailyReport(
             record,
-            buildStaffName(record.staffId)
+            buildStaffName(record.staffId),
           );
 
           if (mounted) {
             setPreloadedReports((prev) =>
               new Map(prev).set(reportToPreload.id, {
                 report: mappedReport,
-                reactionEntries: reactions,
-                commentEntries: comments,
-              })
+                reactionEntries: preloadedReactions,
+                commentEntries: preloadedComments,
+              }),
             );
           }
-
-          // Add a small delay between requests to avoid rate limiting
           await new Promise((resolve) => setTimeout(resolve, 100));
-        } catch (error) {
-          console.error(
-            `Error preloading report ${reportToPreload.id}:`,
-            error
-          );
+        } catch {
+          // silently skip failed preloads
         }
       }
     };
-
     void preloadReports();
-
     return () => {
       mounted = false;
     };
@@ -288,10 +248,8 @@ export default function DailyReportCarouselDialog({
       setIsResolvingCurrentStaff(false);
       return;
     }
-
     let mounted = true;
     setIsResolvingCurrentStaff(true);
-
     const resolveStaff = async () => {
       try {
         const staff = await fetchStaff(cognitoUser.id);
@@ -311,14 +269,10 @@ export default function DailyReportCarouselDialog({
         setCurrentStaffId(null);
         setCurrentStaffName("管理者");
       } finally {
-        if (mounted) {
-          setIsResolvingCurrentStaff(false);
-        }
+        if (mounted) setIsResolvingCurrentStaff(false);
       }
     };
-
     void resolveStaff();
-
     return () => {
       mounted = false;
     };
@@ -338,33 +292,30 @@ export default function DailyReportCarouselDialog({
     setSelectedReactions(
       reactionEntries
         .filter((entry) => entry.staffId === currentStaffId)
-        .map((entry) => entry.type as ReactionType)
+        .map((entry) => entry.type as ReactionType),
     );
   }, [currentStaffId, reactionEntries]);
 
   const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
+    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
   };
 
   const handleNext = () => {
-    if (currentIndex < filteredReports.length - 1) {
+    if (currentIndex < filteredReports.length - 1)
       setCurrentIndex(currentIndex + 1);
-    }
   };
 
   const handleToggleReaction = async (type: ReactionType) => {
     if (!report) return;
     if (!reactionEntries) {
       setActionError(
-        "リアクション情報の取得中です。少し待ってから再度お試しください。"
+        "リアクション情報の取得中です。少し待ってから再度お試しください。",
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、リアクションを登録できません。"
+        "スタッフ情報が取得できないため、リアクションを登録できません。",
       );
       return;
     }
@@ -374,12 +325,12 @@ export default function DailyReportCarouselDialog({
     setActionError(null);
 
     const hasReaction = reactionEntries.some(
-      (entry) => entry.staffId === currentStaffId && entry.type === type
+      (entry) => entry.staffId === currentStaffId && entry.type === type,
     );
     const timestamp = new Date().toISOString();
     const nextEntries = hasReaction
       ? reactionEntries.filter(
-          (entry) => entry.staffId !== currentStaffId || entry.type !== type
+          (entry) => entry.staffId !== currentStaffId || entry.type !== type,
         )
       : [
           ...reactionEntries,
@@ -423,9 +374,7 @@ export default function DailyReportCarouselDialog({
       }
 
       const updated = response.data?.updateDailyReport;
-      if (!updated) {
-        throw new Error("リアクションの更新に失敗しました。");
-      }
+      if (!updated) throw new Error("リアクションの更新に失敗しました。");
 
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
@@ -434,7 +383,7 @@ export default function DailyReportCarouselDialog({
       setActionError(
         error instanceof Error
           ? error.message
-          : "リアクションの登録に失敗しました。"
+          : "リアクションの登録に失敗しました。",
       );
     } finally {
       setIsSavingReaction(false);
@@ -447,13 +396,13 @@ export default function DailyReportCarouselDialog({
     if (!report) return;
     if (!commentEntries) {
       setActionError(
-        "コメント情報の取得中です。少し待ってから再度お試しください。"
+        "コメント情報の取得中です。少し待ってから再度お試しください。",
       );
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
       setActionError(
-        "スタッフ情報が取得できないため、コメントを登録できません。"
+        "スタッフ情報が取得できないため、コメントを登録できません。",
       );
       return;
     }
@@ -486,19 +435,13 @@ export default function DailyReportCarouselDialog({
           input: {
             id: report.id,
             comments: nextComments.map(
-              ({
+              ({ id: commentId, staffId, authorName, body: commentBody, createdAt }) => ({
                 id: commentId,
                 staffId,
                 authorName,
                 body: commentBody,
                 createdAt,
-              }) => ({
-                id: commentId,
-                staffId,
-                authorName,
-                body: commentBody,
-                createdAt,
-              })
+              }),
             ),
             updatedAt: timestamp,
             version: getNextVersion(report.version),
@@ -517,8 +460,20 @@ export default function DailyReportCarouselDialog({
       }
 
       const updated = response.data?.updateDailyReport;
-      if (!updated) {
-        throw new Error("コメントの更新に失敗しました。");
+      if (!updated) throw new Error("コメントの更新に失敗しました。");
+
+      try {
+        await sendDailyReportCommentNotification({
+          staffs,
+          report: updated,
+          commentAuthorName: currentStaffName,
+          commentBody: body,
+        });
+      } catch (mailError) {
+        console.error(
+          "Failed to send daily report comment notification:",
+          mailError,
+        );
       }
 
       setReactionEntries(normalizeReactions(updated.reactions));
@@ -529,7 +484,7 @@ export default function DailyReportCarouselDialog({
       setActionError(
         error instanceof Error
           ? error.message
-          : "コメントの登録に失敗しました。"
+          : "コメントの登録に失敗しました。",
       );
     } finally {
       setIsSavingComment(false);
@@ -548,253 +503,271 @@ export default function DailyReportCarouselDialog({
     isSavingComment ||
     isResolvingCurrentStaff;
 
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: {
-          height: "80vh",
-          maxHeight: "80vh",
-          display: "flex",
-          flexDirection: "column",
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexShrink: 0,
-        }}
-      >
-        <Typography variant="h6">日報を確認</Typography>
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{ color: "inherit" }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+  if (!open) return null;
 
-      {/* Carousel Navigation - Fixed */}
-      <Box
-        sx={{
-          p: 2,
-          bgcolor: "action.hover",
-          borderBottom: 1,
-          borderTop: 1,
-          borderColor: "divider",
-          flexShrink: 0,
-        }}
+  return (
+    <div
+      className="fixed inset-0 z-[1400] flex items-center justify-center bg-slate-900/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="flex h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
       >
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <IconButton
+        {/* Dialog header */}
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3">
+          <h2 className="text-base font-bold text-slate-800">日報を確認</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+          >
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Carousel navigation */}
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-2">
+          <button
+            type="button"
             onClick={handlePrevious}
             disabled={currentIndex <= 0}
-            size="small"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <ChevronLeftIcon />
-          </IconButton>
-          <Typography
-            variant="body2"
-            sx={{ minWidth: 80, textAlign: "center" }}
-          >
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <span className="text-xs text-slate-500">
             {currentIndex + 1} / {filteredReports.length}
-          </Typography>
-          <IconButton
+          </span>
+          <button
+            type="button"
             onClick={handleNext}
             disabled={currentIndex >= filteredReports.length - 1}
-            size="small"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <ChevronRightIcon />
-          </IconButton>
-        </Stack>
-      </Box>
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
 
-      {/* Scrollable Content */}
-      <DialogContent
-        sx={{
-          p: 0,
-          flex: 1,
-          overflow: "auto",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Box sx={{ p: 3 }}>
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
           {isLoading || isStaffLoading ? (
-            <Typography align="center" color="text.secondary">
+            <p className="py-8 text-center text-sm text-slate-400">
               読み込み中...
-            </Typography>
+            </p>
           ) : loadError ? (
-            <Alert severity="error">{loadError}</Alert>
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {loadError}
+            </div>
           ) : !report ? (
-            <Alert severity="warning">日報が見つかりません</Alert>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              日報が見つかりません
+            </div>
           ) : (
-            <Stack spacing={3}>
+            <div className="space-y-4">
               {actionError && (
-                <Alert severity="error" onClose={() => setActionError(null)}>
-                  {actionError}
-                </Alert>
+                <div className="flex items-start justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <span>{actionError}</span>
+                  <button
+                    type="button"
+                    onClick={() => setActionError(null)}
+                    className="ml-3 shrink-0 text-red-400 hover:text-red-600"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
               )}
 
-              {/* Header */}
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {/* Report header */}
+              <div>
+                <h3 className="text-base font-bold text-slate-800">
                   {report.title}
-                </Typography>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
-                  flexWrap="wrap"
-                >
-                  <Typography variant="body2" color="text.secondary">
+                </h3>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-slate-500">
                     {formatDateSlash(report.date) || report.date} |{" "}
                     {report.author}
-                  </Typography>
-                  <Chip
-                    label={STATUS_META[report.status].label}
-                    color={STATUS_META[report.status].color}
-                    size="small"
-                  />
-                </Stack>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ display: "block", mt: 0.5 }}
-                >
+                  </span>
+                  <span
+                    className={
+                      STATUS_BADGE_CLASS[STATUS_META[report.status].color]
+                    }
+                  >
+                    {STATUS_META[report.status].label}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-slate-400">
                   最終更新: {formatDateTimeReadable(report.updatedAt) || "-"}
-                </Typography>
-              </Box>
+                </p>
+              </div>
 
-              <Divider />
+              <hr className="border-slate-100" />
 
               {/* Content */}
-              <Typography
-                component="pre"
-                variant="body2"
-                sx={{ whiteSpace: "pre-wrap", fontFamily: "inherit" }}
-              >
+              <pre className="whitespace-pre-wrap font-[inherit] text-sm leading-relaxed text-slate-700">
                 {report.content || "内容は登録されていません"}
-              </Typography>
+              </pre>
 
-              <Divider />
+              <hr className="border-slate-100" />
 
               {/* Reactions */}
-              <Stack spacing={1}>
-                <Typography variant="subtitle2">リアクション</Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  リアクション
+                </p>
+                <div className="flex flex-wrap gap-2">
                   {(Object.keys(REACTION_META) as ReactionType[]).map(
                     (type) => {
                       const meta = REACTION_META[type];
                       const count =
-                        reactions.find((reaction) => reaction.type === type)
-                          ?.count ?? 0;
+                        reactions.find((r) => r.type === type)?.count ?? 0;
                       const isSelected = selectedReactions.includes(type);
                       return (
-                        <Chip
+                        <button
                           key={type}
-                          clickable
-                          color={isSelected ? "primary" : undefined}
-                          variant={isSelected ? "filled" : "outlined"}
-                          label={`${meta.emoji} ${meta.label}${
-                            count > 0 ? ` (${count})` : ""
-                          }`}
+                          type="button"
                           disabled={chipsDisabled}
                           onClick={() => {
                             void handleToggleReaction(type);
                           }}
-                          size="small"
-                        />
+                          className={[
+                            "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium transition",
+                            isSelected
+                              ? "border-emerald-300 bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                              : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                            chipsDisabled
+                              ? "cursor-not-allowed opacity-50"
+                              : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                        >
+                          {meta.emoji} {meta.label}
+                          {count > 0 && (
+                            <span className="ml-1 text-slate-400">
+                              ({count})
+                            </span>
+                          )}
+                        </button>
                       );
-                    }
+                    },
                   )}
-                </Stack>
+                </div>
                 {reactions.length === 0 && (
-                  <Typography color="text.secondary" variant="caption">
+                  <p className="text-xs text-slate-400">
                     まだリアクションはありません。
-                  </Typography>
+                  </p>
                 )}
-              </Stack>
+              </div>
 
-              <Divider />
+              <hr className="border-slate-100" />
 
               {/* Comments */}
-              <Stack spacing={2}>
-                <Typography variant="subtitle2">コメント</Typography>
-                <TextField
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  コメント
+                </p>
+                <textarea
                   value={commentInput}
-                  onChange={(event) => {
+                  onChange={(e) => {
                     if (actionError) setActionError(null);
-                    setCommentInput(event.target.value);
+                    setCommentInput(e.target.value);
                   }}
                   placeholder="コメントを入力"
-                  multiline
-                  minRows={2}
-                  size="small"
+                  rows={2}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                 />
-                <Stack direction="row" justifyContent="flex-end">
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={handleSubmitComment}
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void handleSubmitComment();
+                    }}
                     disabled={isCommentDisabled}
+                    className="inline-flex h-8 items-center rounded-lg bg-emerald-600 px-4 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     追加
-                  </Button>
-                </Stack>
+                  </button>
+                </div>
 
                 {comments.length === 0 ? (
-                  <Typography color="text.secondary" variant="caption">
+                  <p className="text-xs text-slate-400">
                     まだコメントはありません。
-                  </Typography>
+                  </p>
                 ) : (
-                  <Stack spacing={1}>
+                  <div className="space-y-2">
                     {comments.map((comment) => (
-                      <Paper
+                      <div
                         key={comment.id}
-                        variant="outlined"
-                        sx={{ p: 1.5 }}
+                        className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
                       >
-                        <Stack
-                          direction="row"
-                          justifyContent="space-between"
-                          spacing={2}
-                        >
-                          <Typography variant="caption" fontWeight={600}>
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-xs font-semibold text-slate-700">
                             {comment.author}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
+                          </span>
+                          <span className="shrink-0 text-xs text-slate-400">
                             {formatDateTimeReadable(comment.createdAt) ||
                               comment.createdAt}
-                          </Typography>
-                        </Stack>
-                        <Typography
-                          variant="caption"
-                          sx={{ display: "block", mt: 0.5 }}
-                        >
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-600">
                           {comment.body}
-                        </Typography>
-                      </Paper>
+                        </p>
+                      </div>
                     ))}
-                  </Stack>
+                  </div>
                 )}
-              </Stack>
-            </Stack>
+              </div>
+            </div>
           )}
-        </Box>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </div>
   );
 }

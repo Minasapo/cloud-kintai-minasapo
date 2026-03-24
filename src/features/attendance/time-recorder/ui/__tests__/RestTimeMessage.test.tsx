@@ -7,6 +7,10 @@ import { RestTimeMessage } from "../RestTimeMessage";
 jest.mock("@entities/app-config/model/useAppConfig", () => ({
   __esModule: true,
   default: jest.fn(),
+  DEFAULT_CONFIG: {
+    lunchRestStartTime: "12:00",
+    lunchRestEndTime: "13:00",
+  },
 }));
 
 describe("RestTimeMessage", () => {
@@ -29,10 +33,10 @@ describe("RestTimeMessage", () => {
     render(<RestTimeMessage />);
 
     expect(screen.getByTestId("rest-time-message-autostamp")).toHaveTextContent(
-      "退勤打刻時に11:30〜12:45の昼休憩が自動追加されます。"
+      "退勤打刻時に11:30〜12:45の昼休憩が自動追加されます。",
     );
     expect(screen.getByTestId("rest-time-message-support")).toHaveTextContent(
-      "修正する際は、変更リクエストまたは管理者へ問い合わせてください。"
+      "修正する際は、変更リクエストまたは管理者へ問い合わせてください。",
     );
   });
 
@@ -47,7 +51,20 @@ describe("RestTimeMessage", () => {
     render(<RestTimeMessage />);
 
     expect(screen.getByTestId("rest-time-message-autostamp")).toHaveTextContent(
-      "退勤打刻時に12:00〜13:00の昼休憩が自動追加されます。"
+      "退勤打刻時に12:00〜13:00の昼休憩が自動追加されます。",
+    );
+  });
+
+  it("昼休憩時刻が不正な場合はデフォルト値で表示する", () => {
+    mockUseAppConfig.mockReturnValue({
+      getLunchRestStartTime: () => dayjs(""),
+      getLunchRestEndTime: () => dayjs(""),
+    } as unknown as ReturnType<typeof useAppConfig>);
+
+    render(<RestTimeMessage />);
+
+    expect(screen.getByTestId("rest-time-message-autostamp")).toHaveTextContent(
+      "退勤打刻時に12:00〜13:00の昼休憩が自動追加されます。",
     );
   });
 });

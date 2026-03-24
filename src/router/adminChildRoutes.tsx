@@ -1,6 +1,8 @@
+import { Box, CircularProgress, LinearProgress, Stack, Typography } from "@mui/material";
 import { RouteObject } from "react-router-dom";
 
 import AdminShiftGuard from "../pages/admin/AdminShiftGuard";
+import NotFound from "../pages/NotFound";
 import { createLazyRoute } from "./lazyRoute";
 
 const AdminAttendanceRoute = createLazyRoute(
@@ -24,6 +26,9 @@ const AmPmHolidayRoute = createLazyRoute(
 const DeveloperRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Developer"),
 );
+const SchemaExportRoute = createLazyRoute(
+  () => import("@/features/admin/schema-export/ui/SchemaExport"),
+);
 const LinksRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Links"),
 );
@@ -32,6 +37,9 @@ const AttendanceStatisticsRoute = createLazyRoute(
 );
 const OvertimeConfirmationRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/OvertimeConfirmation"),
+);
+const TimeRecorderAnnouncementRoute = createLazyRoute(
+  () => import("@/features/admin/configManagement/ui/TimeRecorderAnnouncement"),
 );
 const OfficeModeRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/OfficeMode"),
@@ -108,6 +116,29 @@ const ShiftManagementRoute = createLazyRoute(
   () => import("../pages/shift/management"),
   {
     wrap: (node) => <AdminShiftGuard>{node}</AdminShiftGuard>,
+    hydrateFallback: (
+      <Box
+        sx={{
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "background.default",
+        }}
+      >
+        <LinearProgress data-testid="admin-shift-hydrate-loading" />
+        <Stack
+          sx={{ flex: 1 }}
+          alignItems="center"
+          justifyContent="center"
+          spacing={2}
+        >
+          <CircularProgress size={28} />
+          <Typography variant="body2" color="text.secondary">
+            シフト画面を読み込み中です...
+          </Typography>
+        </Stack>
+      </Box>
+    ),
   },
 );
 const StaffShiftListRoute = createLazyRoute(
@@ -140,7 +171,15 @@ export const adminChildRoutes: RouteObject[] = [
             path: "edit",
             lazy: AdminStaffEditorRoute,
           },
+          {
+            path: "*",
+            element: <NotFound />,
+          },
         ],
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
@@ -166,6 +205,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "print",
         lazy: AdminAttendancePrintRoute,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
@@ -238,6 +281,14 @@ export const adminChildRoutes: RouteObject[] = [
         lazy: DeveloperRoute,
       },
       {
+        path: "time_recorder_announcement",
+        lazy: TimeRecorderAnnouncementRoute,
+      },
+      {
+        path: "export",
+        lazy: SchemaExportRoute,
+      },
+      {
         path: "feature_management/links",
         lazy: LinksRoute,
       },
@@ -257,6 +308,10 @@ export const adminChildRoutes: RouteObject[] = [
         path: "feature_management/absent",
         lazy: AbsentRoute,
       },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
     ],
   },
   {
@@ -269,6 +324,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: ":id",
         lazy: AdminWorkflowDetailRoute,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
@@ -287,6 +346,14 @@ export const adminChildRoutes: RouteObject[] = [
         path: ":id",
         lazy: AdminDailyReportDetailRoute,
       },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ];

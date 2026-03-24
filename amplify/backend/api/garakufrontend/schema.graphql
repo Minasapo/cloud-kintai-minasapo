@@ -100,6 +100,9 @@ type Attendance @model @auth(rules: [{ allow: private }]) {
       sortKeyFields: ["workDate"]
       queryField: "attendancesByStaffId"
     )
+  # 重複防止用の論理キー（staffId#workDate）
+  staffWorkDateKey: String
+    @index(name: "byStaffWorkDate", queryField: "attendancesByStaffWorkDate")
   workDate: String!
   startTime: String
   endTime: String
@@ -176,6 +179,43 @@ type AttendanceChangeRequest {
   completed: Boolean
   comment: String
   staffComment: String
+}
+
+input UpsertAttendanceByStaffAndDateInput {
+  staffId: String!
+  workDate: String!
+  occurredAt: String!
+  action: String!
+  idempotencyKey: String!
+  startTime: String
+  endTime: String
+  goDirectlyFlag: Boolean
+  returnDirectlyFlag: Boolean
+  absentFlag: Boolean
+  rests: [UpsertRestInput]
+  hourlyPaidHolidayTimes: [UpsertHourlyPaidHolidayTimeInput]
+  remarks: String
+  paidHolidayFlag: Boolean
+  specialHolidayFlag: Boolean
+  isDeemedHoliday: Boolean
+  hourlyPaidHolidayHours: Int
+  substituteHolidayDate: String
+}
+
+input UpsertRestInput {
+  startTime: String
+  endTime: String
+}
+
+input UpsertHourlyPaidHolidayTimeInput {
+  startTime: String
+  endTime: String
+}
+
+type Mutation {
+  upsertAttendanceByStaffAndDate(
+    input: UpsertAttendanceByStaffAndDateInput!
+  ): Attendance @auth(rules: [{ allow: private }])
 }
 
 type Link {
@@ -328,6 +368,8 @@ type AppConfig @model {
   officeMode: Boolean
   attendanceStatisticsEnabled: Boolean
   workflowNotificationEnabled: Boolean
+  timeRecorderAnnouncementEnabled: Boolean
+  timeRecorderAnnouncementMessage: String
   absentEnabled: Boolean
   hourlyPaidHolidayEnabled: Boolean
   links: [Link]
@@ -499,6 +541,16 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
   userAgent: String
   # 任意の追加メタデータ（JSON 文字列）
   metadata: String
+  # クライアントのタイムゾーン（例: Asia/Tokyo）
+  clientTimezone: String
+  # クライアントで観測した発生時刻（ISO 8601）
+  occurredAt: String
+  # 業務日換算後の勤務日（YYYY-MM-DD）
+  resolvedWorkDate: String
+  # クライアント側で生成した冪等キー
+  idempotencyKey: String
+  # クライアントアプリのバージョン
+  appVersion: String
   # 重大度レベル（例: INFO, WARN, ERROR）
   severity: String
   version: Int

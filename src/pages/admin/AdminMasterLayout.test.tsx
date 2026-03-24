@@ -28,6 +28,7 @@ describe("AdminMasterLayout", () => {
       screen.getByRole("button", { name: "残業確認" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "開発者" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "エクスポート" })).toBeInTheDocument();
   });
 
   it("navigates to developer settings from the attendance menu", async () => {
@@ -40,5 +41,16 @@ describe("AdminMasterLayout", () => {
     await user.click(screen.getByRole("button", { name: "開発者" }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/admin/master/developer");
+  });
+
+  it("navigates to schema export settings", async () => {
+    const user = userEvent.setup();
+
+    render(<AdminMasterLayout />);
+
+    await user.click(screen.getByRole("button", { name: "menu" }));
+    await user.click(screen.getByRole("button", { name: "エクスポート" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/admin/master/export");
   });
 });

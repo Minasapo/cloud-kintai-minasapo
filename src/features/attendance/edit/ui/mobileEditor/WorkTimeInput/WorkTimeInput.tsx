@@ -1,4 +1,3 @@
-import { Divider, Typography } from "@mui/material";
 import { useContext } from "react";
 
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
@@ -19,16 +18,12 @@ export function WorkTimeInput() {
   return (
     <>
       <Label>勤務時間</Label>
-      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-        開始時刻
-      </Typography>
+      <div className="text-sm font-semibold text-slate-900">開始時刻</div>
       {/* 直行 */}
       <GoDirectlyFlagInput />
       <StartTimeInputMobile dataTestId="mobile-start-time-input" />
-      <Divider />
-      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-        終了時刻
-      </Typography>
+      <div className="border-t border-slate-200/80" />
+      <div className="text-sm font-semibold text-slate-900">終了時刻</div>
       {/* 直帰 */}
       <ReturnDirectlyFlagInput />
       <EndTimeInput workDate={workDate} setValue={setValue} />

@@ -1,4 +1,3 @@
-import { ButtonBase, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { INPUT_PLACEHOLDER, sanitizeCapacityValue } from "../shiftPlanUtils";
@@ -64,29 +63,18 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
   );
 
   return (
-    <Stack spacing={0.25} alignItems="center">
-      <Typography
-        variant="caption"
-        sx={{ fontSize: "0.65rem" }}
-        color={labelColor}
+    <div className="flex flex-col items-center gap-0.5">
+      <span
+        style={{ fontSize: "0.65rem", color: labelColor, lineHeight: 1.2 }}
       >
         {labelText}
-      </Typography>
+      </span>
       {isEditing ? (
-        <TextField
+        <input
           autoFocus
           type="number"
-          size="small"
+          min={0}
           value={draft}
-          inputProps={{ min: 0 }}
-          sx={{
-            width: 52,
-            "& input": {
-              textAlign: "center",
-              fontSize: "0.75rem",
-              padding: "4px",
-            },
-          }}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={() => {
             if (skipBlurCommitRef.current) {
@@ -96,29 +84,36 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
             handleCommit();
           }}
           onKeyDown={handleKeyDown}
+          style={{
+            width: 52,
+            textAlign: "center",
+            fontSize: "0.75rem",
+            padding: "4px 2px",
+            border: "1px solid #C3CFC7",
+            borderRadius: 4,
+            outline: "none",
+            boxShadow: "0 0 0 2px rgba(15,168,94,0.25)",
+          }}
         />
       ) : (
-        <ButtonBase
+        <button
+          type="button"
           onClick={() => setIsEditing(true)}
-          sx={{
+          style={{
             width: 52,
-            borderRadius: 1,
-            border: "1px dashed",
-            borderColor: value ? "divider" : "primary.light",
-            px: 0.5,
-            py: 0.5,
+            borderRadius: 4,
+            border: value ? "1px dashed #C3CFC7" : "1px dashed #57D4A0",
+            padding: "2px 4px",
+            background: "transparent",
+            cursor: "pointer",
+            fontSize: "0.75rem",
+            color: value ? "#2E3D36" : "#A0B1A7",
           }}
         >
-          <Typography
-            variant="body2"
-            color={value ? "text.primary" : "text.disabled"}
-            sx={{ fontSize: "0.75rem" }}
-          >
-            {value || INPUT_PLACEHOLDER}
-          </Typography>
-        </ButtonBase>
+          {value || INPUT_PLACEHOLDER}
+        </button>
       )}
-    </Stack>
+    </div>
   );
 };
 

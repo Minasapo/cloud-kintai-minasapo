@@ -2,8 +2,10 @@ import { lazy, type ReactNode,Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import Layout from "./Layout";
+import NotFound from "./pages/NotFound";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
+import RouteErrorBoundary from "./router/RouteErrorBoundary";
 import RouterFallback from "./shared/ui/feedback/RouterFallback";
 
 const loadAdminDashboardLoader = async () =>
@@ -122,10 +124,12 @@ const router = createBrowserRouter([
   {
     path: "/login",
     lazy: LoginRoute,
+    errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/",
     element: <Layout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         index: true,
@@ -161,7 +165,7 @@ const router = createBrowserRouter([
           },
           {
             path: "*",
-            lazy: AttendanceListRoute,
+            element: <NotFound />,
           },
         ],
       },
@@ -185,6 +189,10 @@ const router = createBrowserRouter([
             path: "new",
             lazy: NewWorkflowRoute,
           },
+          {
+            path: "*",
+            element: <NotFound />,
+          },
         ],
       },
       {
@@ -197,6 +205,10 @@ const router = createBrowserRouter([
           {
             path: "collaborative",
             lazy: ShiftCollaborativeRoute,
+          },
+          {
+            path: "*",
+            element: <NotFound />,
           },
         ],
       },
@@ -242,11 +254,15 @@ const router = createBrowserRouter([
             path: "qr/register",
             lazy: OfficeQrRegisterRoute,
           },
+          {
+            path: "*",
+            element: <NotFound />,
+          },
         ],
       },
       {
         path: "*",
-        element: <div>Not Found</div>,
+        element: <NotFound />,
       },
     ],
   },

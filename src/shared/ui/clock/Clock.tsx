@@ -1,6 +1,5 @@
-import { Box, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import React from "react";
+import React, { type CSSProperties } from "react";
 
 const Clock = () => {
   const [time, setTime] = React.useState(dayjs().format("YYYY/MM/DD HH:mm:ss"));
@@ -13,16 +12,18 @@ const Clock = () => {
   }, []);
 
   return (
-    <Box
-      bgcolor="black"
-      textAlign="center"
-      borderRadius="5px"
-      style={{ padding: "12px" }}
+    <div
+      className="rounded-[5px] bg-black px-3 py-3 text-center"
+      style={
+        {
+          "--clock-font-size": "clamp(1.05rem, 3.6vw, 1.5rem)",
+        } as CSSProperties & Record<`--${string}`, string>
+      }
     >
-      <Typography variant="h1" color="white">
+      <p className="m-0 whitespace-nowrap text-[length:var(--clock-font-size)] font-normal leading-none tracking-[-0.02em] text-white [font-variant-numeric:tabular-nums]">
         {time}
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 };
 

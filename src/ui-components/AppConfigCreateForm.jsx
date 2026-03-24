@@ -44,6 +44,8 @@ export default function AppConfigCreateForm(props) {
     officeMode: false,
     attendanceStatisticsEnabled: false,
     workflowNotificationEnabled: false,
+    timeRecorderAnnouncementEnabled: false,
+    timeRecorderAnnouncementMessage: "",
     absentEnabled: false,
     hourlyPaidHolidayEnabled: false,
     themeColor: "",
@@ -91,6 +93,10 @@ export default function AppConfigCreateForm(props) {
     React.useState(initialValues.attendanceStatisticsEnabled);
   const [workflowNotificationEnabled, setWorkflowNotificationEnabled] =
     React.useState(initialValues.workflowNotificationEnabled);
+  const [timeRecorderAnnouncementEnabled, setTimeRecorderAnnouncementEnabled] =
+    React.useState(initialValues.timeRecorderAnnouncementEnabled);
+  const [timeRecorderAnnouncementMessage, setTimeRecorderAnnouncementMessage] =
+    React.useState(initialValues.timeRecorderAnnouncementMessage);
   const [absentEnabled, setAbsentEnabled] = React.useState(
     initialValues.absentEnabled
   );
@@ -123,6 +129,12 @@ export default function AppConfigCreateForm(props) {
     setOfficeMode(initialValues.officeMode);
     setAttendanceStatisticsEnabled(initialValues.attendanceStatisticsEnabled);
     setWorkflowNotificationEnabled(initialValues.workflowNotificationEnabled);
+    setTimeRecorderAnnouncementEnabled(
+      initialValues.timeRecorderAnnouncementEnabled
+    );
+    setTimeRecorderAnnouncementMessage(
+      initialValues.timeRecorderAnnouncementMessage
+    );
     setAbsentEnabled(initialValues.absentEnabled);
     setHourlyPaidHolidayEnabled(initialValues.hourlyPaidHolidayEnabled);
     setThemeColor(initialValues.themeColor);
@@ -148,6 +160,8 @@ export default function AppConfigCreateForm(props) {
     officeMode: [],
     attendanceStatisticsEnabled: [],
     workflowNotificationEnabled: [],
+    timeRecorderAnnouncementEnabled: [],
+    timeRecorderAnnouncementMessage: [],
     absentEnabled: [],
     hourlyPaidHolidayEnabled: [],
     themeColor: [],
@@ -197,6 +211,8 @@ export default function AppConfigCreateForm(props) {
           officeMode,
           attendanceStatisticsEnabled,
           workflowNotificationEnabled,
+          timeRecorderAnnouncementEnabled,
+          timeRecorderAnnouncementMessage,
           absentEnabled,
           hourlyPaidHolidayEnabled,
           themeColor,
@@ -281,6 +297,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -326,6 +344,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -371,6 +391,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -416,6 +438,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -463,6 +487,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -512,6 +538,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -559,6 +587,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -606,6 +636,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -651,6 +683,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -698,6 +732,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -743,6 +779,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -790,6 +828,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -837,6 +877,8 @@ export default function AppConfigCreateForm(props) {
               officeMode: value,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -882,6 +924,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled: value,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -932,6 +976,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled: value,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -959,6 +1005,110 @@ export default function AppConfigCreateForm(props) {
         {...getOverrideProps(overrides, "workflowNotificationEnabled")}
       ></SwitchField>
       <SwitchField
+        label="Time recorder announcement enabled"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={timeRecorderAnnouncementEnabled}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled: value,
+              timeRecorderAnnouncementMessage,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+              overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
+            };
+            const result = onChange(modelFields);
+            value = result?.timeRecorderAnnouncementEnabled ?? value;
+          }
+          if (errors.timeRecorderAnnouncementEnabled?.hasError) {
+            runValidationTasks("timeRecorderAnnouncementEnabled", value);
+          }
+          setTimeRecorderAnnouncementEnabled(value);
+        }}
+        onBlur={() =>
+          runValidationTasks(
+            "timeRecorderAnnouncementEnabled",
+            timeRecorderAnnouncementEnabled
+          )
+        }
+        errorMessage={errors.timeRecorderAnnouncementEnabled?.errorMessage}
+        hasError={errors.timeRecorderAnnouncementEnabled?.hasError}
+        {...getOverrideProps(overrides, "timeRecorderAnnouncementEnabled")}
+      ></SwitchField>
+      <TextField
+        label="Time recorder announcement message"
+        isRequired={false}
+        isReadOnly={false}
+        value={timeRecorderAnnouncementMessage}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              workStartTime,
+              workEndTime,
+              lunchRestStartTime,
+              lunchRestEndTime,
+              standardWorkHours,
+              amHolidayStartTime,
+              amHolidayEndTime,
+              pmHolidayStartTime,
+              pmHolidayEndTime,
+              specialHolidayEnabled,
+              amPmHolidayEnabled,
+              officeMode,
+              attendanceStatisticsEnabled,
+              workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage: value,
+              absentEnabled,
+              hourlyPaidHolidayEnabled,
+              themeColor,
+              overTimeCheckEnabled,
+              shiftCollaborativeEnabled,
+              shiftDefaultMode,
+              version,
+            };
+            const result = onChange(modelFields);
+            value = result?.timeRecorderAnnouncementMessage ?? value;
+          }
+          if (errors.timeRecorderAnnouncementMessage?.hasError) {
+            runValidationTasks("timeRecorderAnnouncementMessage", value);
+          }
+          setTimeRecorderAnnouncementMessage(value);
+        }}
+        onBlur={() =>
+          runValidationTasks(
+            "timeRecorderAnnouncementMessage",
+            timeRecorderAnnouncementMessage
+          )
+        }
+        errorMessage={errors.timeRecorderAnnouncementMessage?.errorMessage}
+        hasError={errors.timeRecorderAnnouncementMessage?.hasError}
+        {...getOverrideProps(overrides, "timeRecorderAnnouncementMessage")}
+      ></TextField>
+      <SwitchField
         label="Absent enabled"
         defaultChecked={false}
         isDisabled={false}
@@ -982,6 +1132,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled: value,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -1027,6 +1179,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled: value,
               themeColor,
@@ -1077,6 +1231,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor: value,
@@ -1122,6 +1278,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -1169,6 +1327,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -1219,6 +1379,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,
@@ -1268,6 +1430,8 @@ export default function AppConfigCreateForm(props) {
               officeMode,
               attendanceStatisticsEnabled,
               workflowNotificationEnabled,
+              timeRecorderAnnouncementEnabled,
+              timeRecorderAnnouncementMessage,
               absentEnabled,
               hourlyPaidHolidayEnabled,
               themeColor,

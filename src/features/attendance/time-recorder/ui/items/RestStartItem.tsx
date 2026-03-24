@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import RestStartButton from "@/shared/ui/time-recorder/RestStartButton";
 
 import { WorkStatus, WorkStatusCodes } from "../../lib/common";
@@ -15,13 +13,11 @@ export default function RestStartItem({
   onClick,
   disabled = false,
 }: RestStartItemProps) {
-  const isWorking = useMemo(
-    () => workStatus?.code === WorkStatusCodes.WORKING,
-    [workStatus?.code]
-  );
+  const isWorking = workStatus?.code === WorkStatusCodes.WORKING;
 
   return (
     <RestStartButton
+      key={String(isWorking)}
       isWorking={Boolean(isWorking)}
       onRestStart={onClick}
       disabled={disabled}

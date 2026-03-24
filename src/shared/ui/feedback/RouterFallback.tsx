@@ -1,4 +1,4 @@
-import { Box, Skeleton, Stack } from "@mui/material";
+import type { CSSProperties } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -11,39 +11,30 @@ const CONTENT_MAX_WIDTH = designTokenVar(
 );
 
 export default function RouterFallback() {
+  const layoutVars = {
+    "--router-fallback-header-height": HEADER_HEIGHT,
+    "--router-fallback-content-max-width": CONTENT_MAX_WIDTH,
+    "--router-fallback-padding-x": PAGE_PADDING_X,
+    "--router-fallback-padding-y": PAGE_PADDING_Y,
+  } as CSSProperties & Record<`--${string}`, string>;
+
   return (
-    <Box
+    <div
       role="status"
       aria-live="polite"
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "background.default",
-      }}
+      className="min-h-screen bg-slate-50"
+      style={layoutVars}
     >
-      <Box
-        sx={{
-          height: HEADER_HEIGHT,
-          backgroundColor: "action.hover",
-        }}
-      />
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: CONTENT_MAX_WIDTH,
-          mx: "auto",
-          px: PAGE_PADDING_X,
-          py: PAGE_PADDING_Y,
-          boxSizing: "border-box",
-        }}
-      >
-        <Stack spacing={2}>
-          <Skeleton variant="text" width="36%" height={42} />
-          <Skeleton variant="rounded" height={56} />
-          <Skeleton variant="rounded" height={56} />
-          <Skeleton variant="rounded" height={56} />
-          <Skeleton variant="rounded" height={220} />
-        </Stack>
-      </Box>
-    </Box>
+      <div className="h-[var(--router-fallback-header-height)] bg-slate-200" />
+      <div className="mx-auto box-border w-full max-w-[var(--router-fallback-content-max-width)] px-[var(--router-fallback-padding-x)] py-[var(--router-fallback-padding-y)]">
+        <div className="space-y-2">
+          <div className="h-[42px] w-[36%] animate-pulse rounded-md bg-slate-200" />
+          <div className="h-14 animate-pulse rounded-lg bg-slate-200" />
+          <div className="h-14 animate-pulse rounded-lg bg-slate-200" />
+          <div className="h-14 animate-pulse rounded-lg bg-slate-200" />
+          <div className="h-[220px] animate-pulse rounded-lg bg-slate-200" />
+        </div>
+      </div>
+    </div>
   );
 }

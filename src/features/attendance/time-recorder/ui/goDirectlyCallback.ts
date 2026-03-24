@@ -8,6 +8,12 @@ import {
 
 import { GoDirectlyFlag } from "@/entities/attendance/lib/actions/attendanceActions";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
+import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
+import {
+  buildAttendanceIdempotencyKey,
+  resolveAppVersion,
+  resolveClientTimeZone,
+} from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
@@ -20,7 +26,6 @@ import {
 
 export async function goDirectlyCallback(
   cognitoUser: CognitoUser | null | undefined,
-  today: string,
   staff: Staff | null | undefined,
   dispatch: Dispatch,
   clockIn: (
@@ -31,40 +36,63 @@ export async function goDirectlyCallback(
   ) => Promise<Attendance>,
   logger: Logger,
   // optional explicit ISO timestamp to use for work start (allows AppConfig-driven times)
-  startTimeIso?: string
+  startTimeIso?: string,
+  occurredAt = getNowISOStringWithZeroSeconds()
 ): Promise<void> {
   if (!cognitoUser) {
     logger.debug("Skipped goDirectlyCallback because cognitoUser is missing");
     return;
   }
 
+  const workDate = resolveBusinessWorkDate(occurredAt);
   const attendanceStartTime = resolveStartTime(startTimeIso);
+  const idempotencyKey = buildAttendanceIdempotencyKey({
+    action: "go_directly",
+    staffId: cognitoUser.id,
+    occurredAt,
+  });
+  const clientTimezone = resolveClientTimeZone();
+  const appVersion = resolveAppVersion();
 
   try {
     const attendance = await clockIn(
       cognitoUser.id,
-      today,
+      workDate,
       attendanceStartTime,
       GoDirectlyFlag.YES
     );
 
-    // record button-press time and include attendance time inside details (best-effort)
     try {
-      const pressedAt = getNowISOStringWithZeroSeconds();
       const input: CreateOperationLogInput = {
         staffId: cognitoUser.id,
         action: "go_directly",
         resource: "attendance",
         resourceId: attendance?.id ?? undefined,
-        // primary timestamp: when the user pressed the button
-        timestamp: pressedAt,
+        timestamp: occurredAt,
         details: JSON.stringify({
-          workDate: today,
+          workDate,
           attendanceTime: attendanceStartTime,
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
           staffName: staff
             ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
             : undefined,
         }),
+        metadata: JSON.stringify({
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
+        }),
+        clientTimezone,
+        occurredAt,
+        resolvedWorkDate: workDate,
+        idempotencyKey,
+        appVersion,
         userAgent:
           typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       };

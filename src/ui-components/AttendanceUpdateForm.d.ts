@@ -24,6 +24,7 @@ export declare type ValidationResponse = {
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type AttendanceUpdateFormInputValues = {
     staffId?: string;
+    staffWorkDateKey?: string;
     workDate?: string;
     startTime?: string;
     endTime?: string;
@@ -40,6 +41,7 @@ export declare type AttendanceUpdateFormInputValues = {
 };
 export declare type AttendanceUpdateFormValidationValues = {
     staffId?: ValidationFunction<string>;
+    staffWorkDateKey?: ValidationFunction<string>;
     workDate?: ValidationFunction<string>;
     startTime?: ValidationFunction<string>;
     endTime?: ValidationFunction<string>;
@@ -58,6 +60,7 @@ export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes
 export declare type AttendanceUpdateFormOverridesProps = {
     AttendanceUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
     staffId?: PrimitiveOverrideProps<TextFieldProps>;
+    staffWorkDateKey?: PrimitiveOverrideProps<TextFieldProps>;
     workDate?: PrimitiveOverrideProps<TextFieldProps>;
     startTime?: PrimitiveOverrideProps<TextFieldProps>;
     endTime?: PrimitiveOverrideProps<TextFieldProps>;

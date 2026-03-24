@@ -14,6 +14,67 @@ import {
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import { TimeInput } from "@/shared/ui/TimeInput";
 
+const inlineFieldGroupSx = {
+  display: "flex",
+  gap: 1,
+  alignItems: "flex-start",
+  flexWrap: "wrap",
+};
+
+const INPUT_SX = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "18px",
+    bgcolor: "#f8fffb",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.92)",
+    "& fieldset": {
+      borderColor: "rgba(16, 185, 129, 0.18)",
+    },
+    "&:hover fieldset": {
+      borderColor: "rgba(16, 185, 129, 0.3)",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "rgba(16, 185, 129, 0.55)",
+    },
+  },
+  "& .MuiOutlinedInput-input": {
+    py: "10px",
+    px: "14px",
+    fontSize: "0.92rem",
+    color: "#0f172a",
+  },
+  "& .MuiFormHelperText-root": {
+    marginLeft: 0,
+  },
+} as const;
+
+const SELECT_SX = {
+  ...INPUT_SX,
+  "& .MuiSelect-select": {
+    py: "10px",
+    px: "14px",
+    fontSize: "0.92rem",
+    color: "#0f172a",
+  },
+} as const;
+
+const OUTLINED_BUTTON_SX = {
+  borderRadius: "999px",
+  borderColor: "rgba(4, 120, 87, 0.58)",
+  color: "#ffffff",
+  bgcolor: "#19b985",
+  px: 2.5,
+  py: 1.15,
+  fontWeight: 500,
+  boxShadow:
+    "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
+  "&:hover": {
+    borderColor: "rgba(4, 120, 87, 0.62)",
+    bgcolor: "#17ab7b",
+    boxShadow:
+      "inset 0 -2px 0 rgba(0,0,0,0.12), 0 14px 28px -18px rgba(5,150,105,0.6)",
+  },
+} as const;
+
 type Props = {
   category: string;
   disabled?: boolean;
@@ -102,7 +163,7 @@ export default function WorkflowTypeFields({
             </Typography>
           </Grid>
           <Grid item xs={12} sm={9}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Box sx={inlineFieldGroupSx}>
               <TextField
                 type="date"
                 size="small"
@@ -112,6 +173,7 @@ export default function WorkflowTypeFields({
                 InputLabelProps={{ shrink: true }}
                 error={Boolean(dateError)}
                 helperText={dateError}
+                sx={INPUT_SX}
               />
               <Typography>-</Typography>
               <TextField
@@ -122,6 +184,7 @@ export default function WorkflowTypeFields({
                 onChange={(e) => setEndDate(e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 error={Boolean(dateError)}
+                sx={INPUT_SX}
               />
             </Box>
           </Grid>
@@ -138,6 +201,7 @@ export default function WorkflowTypeFields({
               disabled={disabled}
               value={paidReason}
               onChange={(e) => setPaidReason(e.target.value)}
+              sx={INPUT_SX}
             />
           </Grid>
         </>
@@ -161,6 +225,7 @@ export default function WorkflowTypeFields({
               error={Boolean(absenceDateError)}
               helperText={absenceDateError}
               disabled={disabled}
+              sx={INPUT_SX}
             />
           </Grid>
 
@@ -173,7 +238,7 @@ export default function WorkflowTypeFields({
             <TextField
               size="small"
               fullWidth
-              sx={{ "& .MuiInputBase-input": { padding: "6px 10px" } }}
+              sx={INPUT_SX}
               value={absenceReason}
               onChange={(e) => setAbsenceReason(e.target.value)}
               disabled={disabled}
@@ -198,7 +263,7 @@ export default function WorkflowTypeFields({
               InputLabelProps={{ shrink: true }}
               error={Boolean(overtimeDateError)}
               helperText={overtimeDateError}
-              sx={{ maxWidth: 200 }}
+              sx={{ ...INPUT_SX, maxWidth: 200 }}
               disabled={disabled}
             />
           </Grid>
@@ -209,28 +274,56 @@ export default function WorkflowTypeFields({
             </Typography>
           </Grid>
           <Grid item xs={12} sm={9}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              <TimeInput
-                value={overtimeStart}
-                onChange={setOvertimeStart}
-                baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
-                size="small"
-                error={Boolean(overtimeError)}
-                disabled={disabled}
-                sx={{ maxWidth: 160 }}
-              />
-              <Typography>-</Typography>
-              <TimeInput
-                value={overtimeEnd}
-                onChange={setOvertimeEnd}
-                baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
-                size="small"
-                error={Boolean(overtimeError)}
-                disabled={disabled}
-                sx={{ maxWidth: 160 }}
-              />
+            <Box sx={{ display: "grid", gap: 0.75 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "minmax(0, 1fr)",
+                    sm: "148px 48px 148px",
+                  },
+                  columnGap: 0,
+                  rowGap: 1,
+                  alignItems: "center",
+                }}
+              >
+                <TimeInput
+                  value={overtimeStart}
+                  onChange={setOvertimeStart}
+                  baseDate={
+                    overtimeDate || new Date().toISOString().slice(0, 10)
+                  }
+                  size="small"
+                  error={Boolean(overtimeError)}
+                  disabled={disabled}
+                  sx={{ width: "148px", maxWidth: "100%" }}
+                />
+                <Typography
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    textAlign: "center",
+                    lineHeight: 1,
+                    color: "text.secondary",
+                    justifySelf: "center",
+                    transform: "translateY(-1px)",
+                  }}
+                >
+                  〜
+                </Typography>
+                <TimeInput
+                  value={overtimeEnd}
+                  onChange={setOvertimeEnd}
+                  baseDate={
+                    overtimeDate || new Date().toISOString().slice(0, 10)
+                  }
+                  size="small"
+                  error={Boolean(overtimeError)}
+                  disabled={disabled}
+                  sx={{ width: "148px", maxWidth: "100%" }}
+                />
+              </Box>
               {overtimeError && (
-                <Typography color="error" variant="caption" sx={{ ml: 2 }}>
+                <Typography color="error" variant="caption">
                   {overtimeError}
                 </Typography>
               )}
@@ -251,6 +344,7 @@ export default function WorkflowTypeFields({
                 setOvertimeReason && setOvertimeReason(e.target.value)
               }
               disabled={disabled}
+              sx={INPUT_SX}
             />
           </Grid>
         </>
@@ -273,7 +367,7 @@ export default function WorkflowTypeFields({
               error={Boolean(overtimeDateError)}
               helperText={overtimeDateError}
               disabled={disabled}
-              sx={{ maxWidth: 200 }}
+              sx={{ ...INPUT_SX, maxWidth: 200 }}
             />
           </Grid>
 
@@ -314,7 +408,7 @@ export default function WorkflowTypeFields({
               error={Boolean(overtimeDateError)}
               helperText={overtimeDateError}
               disabled={disabled}
-              sx={{ maxWidth: 200 }}
+              sx={{ ...INPUT_SX, maxWidth: 200 }}
             />
           </Grid>
 
@@ -346,7 +440,7 @@ export default function WorkflowTypeFields({
             </Typography>
           </Grid>
           <Grid item xs={12} sm={9}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Box sx={inlineFieldGroupSx}>
               <Select
                 size="small"
                 fullWidth
@@ -356,6 +450,7 @@ export default function WorkflowTypeFields({
                 }
                 disabled={disabled}
                 displayEmpty
+                sx={SELECT_SX}
               >
                 <MenuItem value="">
                   <em>テンプレートを選択</em>
@@ -370,6 +465,7 @@ export default function WorkflowTypeFields({
                 variant="outlined"
                 onClick={() => onApplyTemplate && onApplyTemplate()}
                 disabled={disabled || disableTemplateApply}
+                sx={OUTLINED_BUTTON_SX}
               >
                 適用
               </Button>
@@ -392,6 +488,7 @@ export default function WorkflowTypeFields({
               disabled={disabled}
               error={Boolean(customWorkflowTitleError)}
               helperText={customWorkflowTitleError}
+              sx={INPUT_SX}
             />
           </Grid>
 
@@ -414,6 +511,7 @@ export default function WorkflowTypeFields({
               disabled={disabled}
               error={Boolean(customWorkflowContentError)}
               helperText={customWorkflowContentError}
+              sx={INPUT_SX}
             />
           </Grid>
         </>

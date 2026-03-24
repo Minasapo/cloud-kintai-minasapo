@@ -1,47 +1,50 @@
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 import ReturnDirectlyFlagInputBase from "@shared/ui/form/flags/ReturnDirectlyFlagInputBase";
 import { useContext } from "react";
 
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAutoConfiguredTimeFlag } from "@/features/attendance/edit/model/useAutoConfiguredTimeFlag";
 
 interface ReturnDirectlyFlagInputProps {
   onHighlightEndTime?: (highlight: boolean) => void;
+  layout?: "row" | "inline";
+  inputVariant?: "checkbox" | "switch";
+  successMessage?: string;
 }
 
 export default function ReturnDirectlyFlagInput({
   onHighlightEndTime,
+  layout = "row",
+  inputVariant = "checkbox",
+  successMessage,
 }: ReturnDirectlyFlagInputProps) {
-  const { workDate, control, setValue, changeRequests, readOnly } = useContext(
-    AttendanceEditContext
-  );
-  const { getEndTime } = useAppConfig();
-  if (!workDate || !control || !setValue) return null;
-  // getEndTime returns a dayjs with the configured time (HH:mm)
-  const computeEndTimeIso = () => {
-    const configured = getEndTime();
-    const hours = configured.hour();
-    const minutes = configured.minute();
-    const dt = new AttendanceDateTime().setDate(workDate);
-    // apply configured hour/minute to the workDate
-    dt.date = dt.date.hour(hours).minute(minutes).second(0).millisecond(0);
-    return dt.toISOString();
-  };
+  const { changeRequests, readOnly } = useContext(AttendanceEditContext);
+  const { control, disabled, highlighted, applyConfiguredTime } =
+    useAutoConfiguredTimeFlag({
+      timeField: "endTime",
+    });
+
+  if (!control || disabled) return null;
 
   return (
-    <ReturnDirectlyFlagInputBase
-      control={control}
-      disabled={changeRequests?.length > 0 || !!readOnly}
-      onChangeFlag={(checked) => {
-        if (checked) {
-          setValue("endTime", computeEndTimeIso());
-          // トリガーハイライトアニメーション
-          if (onHighlightEndTime) {
+    <>
+      <ReturnDirectlyFlagInputBase
+        control={control}
+        disabled={changeRequests?.length > 0 || !!readOnly}
+        layout={layout}
+        inputVariant={inputVariant}
+        onChangeFlag={(checked) => {
+          applyConfiguredTime(checked);
+          if (checked && onHighlightEndTime) {
             onHighlightEndTime(true);
             setTimeout(() => onHighlightEndTime(false), 2500);
           }
-        }
-      }}
-    />
+        }}
+      />
+      {highlighted && successMessage ? (
+        <div className="my-1 animate-pulse rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 font-bold text-emerald-900">
+          {successMessage}
+        </div>
+      ) : null}
+    </>
   );
 }

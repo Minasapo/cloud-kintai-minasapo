@@ -12,10 +12,6 @@ coverage-summary.json
 *.coverage.json
 .nyc_output
 
-# storybook
-/storybook-static
-.storybook-presets
-
 # production
 /build
 
@@ -96,3 +92,4 @@ amplifytools.xcconfig
 .secret-*
 **.sample
 #amplify-do-not-edit-end
+.claude/settings.local.json

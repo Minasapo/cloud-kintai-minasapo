@@ -29,6 +29,8 @@ describe("Payload Builders", () => {
     specialHolidayEnabled: false,
     attendanceStatisticsEnabled: true,
     workflowNotificationEnabled: true,
+    timeRecorderAnnouncementEnabled: true,
+    timeRecorderAnnouncementMessage: "お知らせ本文",
     overTimeCheckEnabled: true,
     shiftCollaborativeEnabled: true,
     shiftDefaultMode: "collaborative",
@@ -58,6 +60,8 @@ describe("Payload Builders", () => {
       expect(payload.specialHolidayEnabled).toBe(false);
       expect(payload.attendanceStatisticsEnabled).toBe(true);
       expect(payload.workflowNotificationEnabled).toBe(true);
+      expect(payload.timeRecorderAnnouncementEnabled).toBe(true);
+      expect(payload.timeRecorderAnnouncementMessage).toBe("お知らせ本文");
       expect(typeof payload.standardWorkHours).toBe("number");
     });
 
@@ -167,6 +171,12 @@ describe("Payload Builders", () => {
       );
       expect(updatePayload.workflowNotificationEnabled).toBe(
         createPayload.workflowNotificationEnabled,
+      );
+      expect(updatePayload.timeRecorderAnnouncementEnabled).toBe(
+        createPayload.timeRecorderAnnouncementEnabled,
+      );
+      expect(updatePayload.timeRecorderAnnouncementMessage).toBe(
+        createPayload.timeRecorderAnnouncementMessage,
       );
     });
 

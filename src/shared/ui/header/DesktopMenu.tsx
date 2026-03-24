@@ -1,4 +1,3 @@
-import { Box, Stack } from "@mui/material";
 import Link from "@shared/ui/link/Link";
 import { CSSProperties } from "react";
 
@@ -47,19 +46,19 @@ const DesktopMenu = ({
   );
   const MENU_ITEM_COLOR = designTokenVar(
     "component.headerMenu.color",
-    "#FFFFFF",
+    "#45574F",
   );
   const MENU_ITEM_ACTIVE_COLOR = designTokenVar(
     "component.headerMenu.activeColor",
-    "#0FA85E",
+    "#065F46",
   );
   const MENU_ITEM_ACTIVE_BACKGROUND = designTokenVar(
     "component.headerMenu.activeBackground",
-    "#FFFFFF",
+    "#ECFDF3",
   );
   const MENU_ITEM_HOVER_BACKGROUND = designTokenVar(
     "component.headerMenu.hoverBackground",
-    "rgba(255, 255, 255, 0.16)",
+    "rgba(15, 168, 94, 0.1)",
   );
   const MENU_ITEM_TRANSITION = designTokenVar(
     "component.headerMenu.transitionMs",
@@ -87,10 +86,10 @@ const DesktopMenu = ({
     }`;
 
   return (
-    <Box className="hidden w-full items-center lg:flex" style={menuVars}>
-      <Stack direction="row" className="w-auto gap-[var(--menu-gap)]">
+    <div className="hidden w-full items-center lg:flex" style={menuVars}>
+      <div className="flex w-auto gap-[var(--menu-gap)]">
         {menuItems.map((menu) => (
-          <Box
+          <div
             key={menu.href}
             onMouseEnter={() => onItemPreload?.(menu.href)}
             onFocus={() => onItemPreload?.(menu.href)}
@@ -100,11 +99,11 @@ const DesktopMenu = ({
               href={menu.href}
               className={buildLinkClassName(pathName === menu.href)}
             />
-          </Box>
+          </div>
         ))}
 
         {showAdminMenu && adminLink && (
-          <Box
+          <div
             onMouseEnter={() => onItemPreload?.(adminLink.href)}
             onFocus={() => onItemPreload?.(adminLink.href)}
           >
@@ -113,10 +112,10 @@ const DesktopMenu = ({
               href={adminLink.href}
               className={buildLinkClassName(pathName === adminLink.href)}
             />
-          </Box>
+          </div>
         )}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 };
 

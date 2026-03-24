@@ -107,13 +107,17 @@ export const useAdminStaffAttendanceListViewModel = (
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
     },
-    { skip: !shouldFetchAttendances },
+    {
+      skip: !shouldFetchAttendances,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    },
   );
 
   const {
     data: attendancesData,
     isLoading: isAttendancesInitialLoading,
-    isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
     refetch: refetchAttendances,
@@ -233,9 +237,8 @@ export const useAdminStaffAttendanceListViewModel = (
 
   const attendanceLoading =
     (!shouldFetchAttendances ||
-      isAttendancesInitialLoading ||
-      isAttendancesFetching ||
-      isAttendancesUninitialized) &&
+      isAttendancesUninitialized ||
+      (isAttendancesInitialLoading && !attendancesData)) &&
     !attendancesError;
 
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
@@ -323,7 +326,6 @@ export const useAdminStaffAttendanceListViewModel = (
     staff,
     staffForMail,
     pendingAttendances,
-    refetchAttendances,
     updateAttendance: (input: UpdateAttendanceInput) =>
       updateAttendanceMutation(input).unwrap(),
     isBulkApprovingRef,

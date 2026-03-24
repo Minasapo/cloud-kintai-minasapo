@@ -14,6 +14,10 @@ import {
   NotificationStaff,
   publishWorkflowCommentNotifications,
 } from "@/features/workflow/notification/model/workflowNotificationEventService";
+import {
+  buildWorkflowCommentActorName,
+  sendWorkflowCommentNotification,
+} from "@/features/workflow/notifications/sendWorkflowCommentNotification";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   buildVersionOrUpdatedAtCondition,
@@ -136,6 +140,27 @@ export const submitWorkflowComment = async ({
       commentId: newComment.id,
       staffs,
     });
+
+    try {
+      const actorName = buildWorkflowCommentActorName(
+        staffs,
+        actorStaffId,
+        actorDisplayName,
+      );
+      await sendWorkflowCommentNotification({
+        workflow: workflowForNotification,
+        actorStaffId,
+        actorDisplayName: actorName,
+        commentText: newComment.text,
+        staffs,
+      });
+    } catch (error) {
+      logger.warn("Failed to send workflow comment mail notification", {
+        workflowId,
+        actorStaffId,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+    }
 
     return updatedWorkflow as WorkflowData;
   }

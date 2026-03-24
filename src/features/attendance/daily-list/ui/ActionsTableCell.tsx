@@ -18,14 +18,16 @@ import {
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import * as MESSAGE_CODE from "@/errors";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
+
 // attendances are provided by parent (AttendanceDailyList)
+import { resolveAttendanceSummaryStatus } from "../lib/attendanceSummaryStatus";
 
 function getBadgeContent(attendances: Attendance[]) {
   const changeRequestCount = attendances.filter((attendance) =>
@@ -44,52 +46,33 @@ function AttendanceTotalStatus({
   companyHolidayCalendars,
   holidayCalendars,
   staff,
+  targetWorkDate,
 }: {
   attendances: Attendance[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
   holidayCalendars: HolidayCalendar[];
   staff: Staff;
+  targetWorkDate?: string;
 }) {
-  const judgedStatus = attendances.map((attendance) =>
-    new AttendanceState(
-      staff,
-      attendance,
-      holidayCalendars,
-      companyHolidayCalendars
-    ).get()
-  );
+  const baseDate = targetWorkDate ? dayjs(targetWorkDate) : dayjs();
+  const summaryStatus = resolveAttendanceSummaryStatus({
+    attendances,
+    staff,
+    holidayCalendars,
+    companyHolidayCalendars,
+    baseDate: baseDate.isValid() ? baseDate : dayjs(),
+  });
 
-  const hasSystemComment = attendances.some(
-    (attendance) =>
-      Array.isArray(attendance.systemComments) &&
-      attendance.systemComments.length > 0
-  );
-
-  if (hasSystemComment) {
-    return (
-      <Tooltip title="システムコメントがあります">
-        <ErrorIcon color="error" />
-      </Tooltip>
-    );
-  }
-
-  const validDataCount = judgedStatus.filter(
-    (status) => status !== AttendanceStatus.None
-  ).length;
-
-  const statusOkCount = judgedStatus.filter((status) =>
-    [AttendanceStatus.Ok, AttendanceStatus.Working].includes(status)
-  ).length;
-  if (statusOkCount === validDataCount) {
-    return <CheckCircleIcon color="success" />;
-  }
-
-  if (judgedStatus.includes(AttendanceStatus.Requesting)) {
+  if (summaryStatus === "requesting") {
     return (
       <Tooltip title="申請中です。承認されるまで反映されません">
         <HourglassTopIcon color="warning" />
       </Tooltip>
     );
+  }
+
+  if (summaryStatus === "ok" || summaryStatus === "none") {
+    return <CheckCircleIcon color="success" />;
   }
 
   return (
@@ -107,6 +90,7 @@ export function ActionsTableCell({
   holidayCalendars,
   companyHolidayCalendars,
   calendarLoading,
+  targetWorkDate,
 }: {
   row: AttendanceDaily;
   attendances: Attendance[];
@@ -115,6 +99,7 @@ export function ActionsTableCell({
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
   calendarLoading: boolean;
+  targetWorkDate?: string;
 }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -156,6 +141,7 @@ export function ActionsTableCell({
           companyHolidayCalendars={companyHolidayCalendars}
           holidayCalendars={holidayCalendars}
           staff={staff}
+          targetWorkDate={targetWorkDate}
         />
         <IconButton
           size="small"

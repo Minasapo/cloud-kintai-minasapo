@@ -1,4 +1,5 @@
 import {
+  ATTENDANCE_DUPLICATE_CONFLICT,
   DuplicateAttendanceInfo,
   useLazyGetAttendanceByStaffAndDateQuery,
 } from "@entities/attendance/api/attendanceApi";
@@ -132,6 +133,52 @@ export default function useAttendanceDaily({
               });
 
               if (response.error) {
+                const details =
+                  typeof response.error === "object" &&
+                  response.error !== null &&
+                  "details" in response.error &&
+                  typeof (response.error as { details?: unknown }).details ===
+                    "object" &&
+                  (response.error as { details?: unknown }).details !== null
+                    ? (response.error as {
+                        details: {
+                          code?: string;
+                          duplicates?: DuplicateAttendanceInfo[];
+                        };
+                      }).details
+                    : undefined;
+
+                if (
+                  details?.code === ATTENDANCE_DUPLICATE_CONFLICT &&
+                  Array.isArray(details.duplicates)
+                ) {
+                  details.duplicates.forEach((dup) => {
+                    if (
+                      dayjs(dup.workDate).isBetween(
+                        dayjs(firstDayOfMonth),
+                        dayjs(lastDayOfMonth),
+                        null,
+                        "[]",
+                      )
+                    ) {
+                      duplicateBuffer.push({
+                        staffId: cognitoUserId,
+                        staffName: `${safeFamilyName} ${safeGivenName}`.trim(),
+                        workDate: dup.workDate,
+                        ids: dup.ids,
+                      });
+                    }
+                  });
+
+                  return {
+                    sub: cognitoUserId,
+                    givenName: safeGivenName,
+                    familyName: safeFamilyName,
+                    attendance: null,
+                    sortKey: safeSortKey,
+                  } as AttendanceDaily;
+                }
+
                 throw response.error as Error;
               }
 

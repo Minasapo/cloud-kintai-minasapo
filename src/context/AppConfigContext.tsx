@@ -6,10 +6,11 @@ import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
+import type dayjs from "dayjs";
 import { createContext } from "react";
 
 import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
+import { buildClockTimeDayjs } from "@/shared/lib/time";
 
 const DEFAULT_THEME_TOKENS = getDesignTokens();
 
@@ -35,6 +36,10 @@ type AppConfigContextProps = {
   getOfficeMode: () => boolean;
   getAttendanceStatisticsEnabled: () => boolean;
   getWorkflowNotificationEnabled: () => boolean;
+  getTimeRecorderAnnouncement: () => {
+    enabled: boolean;
+    message: string;
+  };
   getShiftCollaborativeEnabled: () => boolean;
   getShiftDefaultMode: () => ShiftDisplayMode;
   getQuickInputStartTimes: (onlyEnabled?: boolean) => {
@@ -69,13 +74,13 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   saveConfig: async () => {
     console.log("The process is not implemented.");
   },
-  getStartTime: () => dayjs(DEFAULT_CONFIG.workStartTime, "HH:mm"),
-  getEndTime: () => dayjs(DEFAULT_CONFIG.workEndTime, "HH:mm"),
+  getStartTime: () => buildClockTimeDayjs(DEFAULT_CONFIG.workStartTime),
+  getEndTime: () => buildClockTimeDayjs(DEFAULT_CONFIG.workEndTime),
   getStandardWorkHours: () => {
-    const start = dayjs(DEFAULT_CONFIG.workStartTime, "HH:mm");
-    const end = dayjs(DEFAULT_CONFIG.workEndTime, "HH:mm");
-    const lunchStart = dayjs(DEFAULT_CONFIG.lunchRestStartTime, "HH:mm");
-    const lunchEnd = dayjs(DEFAULT_CONFIG.lunchRestEndTime, "HH:mm");
+    const start = buildClockTimeDayjs(DEFAULT_CONFIG.workStartTime);
+    const end = buildClockTimeDayjs(DEFAULT_CONFIG.workEndTime);
+    const lunchStart = buildClockTimeDayjs(DEFAULT_CONFIG.lunchRestStartTime);
+    const lunchEnd = buildClockTimeDayjs(DEFAULT_CONFIG.lunchRestEndTime);
     const baseHours = end.diff(start, "hour", true);
     const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
     return Math.max(baseHours - lunchHours, 0);
@@ -86,19 +91,24 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getOfficeMode: () => false,
   getAttendanceStatisticsEnabled: () => false,
   getWorkflowNotificationEnabled: () => false,
+  getTimeRecorderAnnouncement: () => ({
+    enabled: false,
+    message: "",
+  }),
   getShiftCollaborativeEnabled: () => false,
   getShiftDefaultMode: () => "normal",
   getQuickInputStartTimes: () => [],
   getQuickInputEndTimes: () => [],
   getShiftGroups: () => [],
   getLunchRestStartTime: () =>
-    dayjs(DEFAULT_CONFIG.lunchRestStartTime, "HH:mm"),
-  getLunchRestEndTime: () => dayjs(DEFAULT_CONFIG.lunchRestEndTime, "HH:mm"),
+    buildClockTimeDayjs(DEFAULT_CONFIG.lunchRestStartTime),
+  getLunchRestEndTime: () =>
+    buildClockTimeDayjs(DEFAULT_CONFIG.lunchRestEndTime),
   getHourlyPaidHolidayEnabled: () => false,
-  getAmHolidayStartTime: () => dayjs("09:00", "HH:mm"),
-  getAmHolidayEndTime: () => dayjs("12:00", "HH:mm"),
-  getPmHolidayStartTime: () => dayjs("13:00", "HH:mm"),
-  getPmHolidayEndTime: () => dayjs("18:00", "HH:mm"),
+  getAmHolidayStartTime: () => buildClockTimeDayjs("09:00"),
+  getAmHolidayEndTime: () => buildClockTimeDayjs("12:00"),
+  getPmHolidayStartTime: () => buildClockTimeDayjs("13:00"),
+  getPmHolidayEndTime: () => buildClockTimeDayjs("18:00"),
   getAmPmHolidayEnabled: () => false,
   getSpecialHolidayEnabled: () => false,
   getAbsentEnabled: () => false,

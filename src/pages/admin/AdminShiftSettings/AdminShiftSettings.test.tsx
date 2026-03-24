@@ -43,6 +43,7 @@ const contextValue: React.ContextType<typeof AppConfigContext> = {
   getOfficeMode: () => false,
   getAttendanceStatisticsEnabled: () => false,
   getWorkflowNotificationEnabled: () => false,
+  getTimeRecorderAnnouncement: () => ({ enabled: false, message: "" }),
   getShiftGroups: () => [],
   getShiftCollaborativeEnabled: () => false,
   getShiftDefaultMode: () => "normal" as const,

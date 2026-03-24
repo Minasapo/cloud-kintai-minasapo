@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import RestEndButton from "@/shared/ui/time-recorder/RestEndButton";
 
 import { WorkStatus, WorkStatusCodes } from "../../lib/common";
@@ -13,13 +11,11 @@ export default function RestEndItem({
   onClick: () => void;
   disabled?: boolean;
 }) {
-  const isResting = useMemo(
-    () => workStatus?.code === WorkStatusCodes.RESTING,
-    [workStatus]
-  );
+  const isResting = workStatus?.code === WorkStatusCodes.RESTING;
 
   return (
     <RestEndButton
+      key={String(isResting)}
       isResting={Boolean(isResting)}
       onRestEnd={onClick}
       disabled={disabled}

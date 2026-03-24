@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, type SxProps, type Theme } from "@mui/material";
 import React from "react";
 
 import { PanelHeader, ScreenOption } from "./PanelHeader";
@@ -9,6 +9,7 @@ export interface PanelContainerProps {
   screenOptions?: ScreenOption[];
   selectedScreen?: string;
   onScreenChange?: (screenValue: string) => void;
+  contentSx?: SxProps<Theme>;
   children: React.ReactNode;
 }
 
@@ -23,6 +24,7 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
   screenOptions,
   selectedScreen,
   onScreenChange,
+  contentSx,
   children,
 }) => {
   return (
@@ -49,6 +51,7 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
           flex: 1,
           overflow: "auto",
           padding: 2,
+          ...contentSx,
         }}
       >
         {children}

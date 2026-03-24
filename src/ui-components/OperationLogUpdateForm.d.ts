@@ -32,6 +32,11 @@ export declare type OperationLogUpdateFormInputValues = {
     ipAddress?: string;
     userAgent?: string;
     metadata?: string;
+    clientTimezone?: string;
+    occurredAt?: string;
+    resolvedWorkDate?: string;
+    idempotencyKey?: string;
+    appVersion?: string;
     severity?: string;
     version?: number;
 };
@@ -45,6 +50,11 @@ export declare type OperationLogUpdateFormValidationValues = {
     ipAddress?: ValidationFunction<string>;
     userAgent?: ValidationFunction<string>;
     metadata?: ValidationFunction<string>;
+    clientTimezone?: ValidationFunction<string>;
+    occurredAt?: ValidationFunction<string>;
+    resolvedWorkDate?: ValidationFunction<string>;
+    idempotencyKey?: ValidationFunction<string>;
+    appVersion?: ValidationFunction<string>;
     severity?: ValidationFunction<string>;
     version?: ValidationFunction<number>;
 };
@@ -60,6 +70,11 @@ export declare type OperationLogUpdateFormOverridesProps = {
     ipAddress?: PrimitiveOverrideProps<TextFieldProps>;
     userAgent?: PrimitiveOverrideProps<TextFieldProps>;
     metadata?: PrimitiveOverrideProps<TextFieldProps>;
+    clientTimezone?: PrimitiveOverrideProps<TextFieldProps>;
+    occurredAt?: PrimitiveOverrideProps<TextFieldProps>;
+    resolvedWorkDate?: PrimitiveOverrideProps<TextFieldProps>;
+    idempotencyKey?: PrimitiveOverrideProps<TextFieldProps>;
+    appVersion?: PrimitiveOverrideProps<TextFieldProps>;
     severity?: PrimitiveOverrideProps<TextFieldProps>;
     version?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;

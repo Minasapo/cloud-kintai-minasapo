@@ -27,7 +27,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { useWorkflowNotificationInbox } from "@/features/workflow/notification/model/useWorkflowNotificationInbox";
-import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 const formatEventAt = (eventAt: string) =>
   dayjs(eventAt).format("YYYY/MM/DD HH:mm");
@@ -115,7 +115,7 @@ export default function WorkflowNotificationsPage() {
   return (
     <Page title="通知" maxWidth="md" showDefaultHeader={false}>
       <PageSection layoutVariant="dashboard">
-        <Box sx={dashboardInnerSurfaceSx}>
+        <DashboardInnerSurface>
           <Stack spacing={2}>
             <Stack
               direction={{ xs: "column", sm: "row" }}
@@ -213,7 +213,7 @@ export default function WorkflowNotificationsPage() {
               </Box>
             )}
           </Stack>
-        </Box>
+        </DashboardInnerSurface>
       </PageSection>
     </Page>
   );

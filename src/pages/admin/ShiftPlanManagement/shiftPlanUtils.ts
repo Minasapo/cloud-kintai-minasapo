@@ -21,10 +21,15 @@ export const DAY_COLUMNS = Array.from(
   (_, index) => index + 1,
 );
 export const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
-export const SUNDAY_BG = "#ffebee";
-export const SATURDAY_BG = "#e3f2fd";
-export const HOLIDAY_BG = "#fff8e1";
-export const CELL_NOWRAP_SX = { whiteSpace: "nowrap" as const };
+// デザインシステムのフィードバックカラー（feedback.danger/info/warning.surface）
+export const SUNDAY_BG = "#FDECEC";
+export const SATURDAY_BG = "#EDF2FC";
+export const HOLIDAY_BG = "#FFF7EA";
+// テキストカラー（feedback.danger/info/warning.base + neutral.500）
+export const SUNDAY_TEXT = "#D7443E";
+export const SATURDAY_TEXT = "#3C7EDB";
+export const NORMAL_TEXT = "#7D9288";
+export const HOLIDAY_TEXT = "#E8A447";
 export const INPUT_PLACEHOLDER = "入力";
 // 自動保存の遅延時間（ミリ秒）
 export const AUTO_SAVE_DELAY = 1000;

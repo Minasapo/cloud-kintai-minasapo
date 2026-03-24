@@ -1,6 +1,6 @@
 import "./styles.scss";
 
-import { Alert, AlertTitle, Box, styled } from "@mui/material";
+import { Alert, AlertTitle, Box } from "@mui/material";
 import {
   Attendance,
   CloseDate,
@@ -14,13 +14,6 @@ import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus } from "../../lib/attendanceStatusUtils";
 import MobileCalendar from "./MobileCalendar";
-
-const MobileBox = styled(Box)(({ theme }) => ({
-  padding: "0px 0px 40px 0px",
-  [theme.breakpoints.up("md")]: {
-    display: "none",
-  },
-}));
 
 export default function MobileList({
   attendances,
@@ -85,10 +78,17 @@ export default function MobileList({
   })();
 
   return (
-    <MobileBox>
+    <div className="pb-2 md:hidden">
       {hasErrorStatus && (
         <Box sx={{ pb: 2 }}>
-          <Alert severity="warning">
+          <Alert
+            severity="warning"
+            sx={{
+              borderRadius: "20px",
+              border: "1px solid rgba(245, 158, 11, 0.18)",
+              bgcolor: "rgba(255,251,235,0.92)",
+            }}
+          >
             <AlertTitle sx={{ fontWeight: "bold" }}>打刻エラー</AlertTitle>
             カレンダー上で赤色の日付をタップして確認してください
           </Alert>
@@ -103,6 +103,6 @@ export default function MobileList({
         onMonthChange={onMonthChange}
         closeDates={closeDates}
       />
-    </MobileBox>
+    </div>
   );
 }

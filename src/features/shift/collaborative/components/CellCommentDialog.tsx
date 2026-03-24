@@ -187,8 +187,10 @@ export const CellCommentDialog: React.FC<CellCommentDialogProps> = ({
           {/* 既存コメント一覧 */}
           {comments.length > 0 ? (
             <List sx={{ maxHeight: 400, overflow: "auto", mb: 2 }}>
-              {comments.map((comment) => (
-                <React.Fragment key={comment.id}>
+              {comments.map((comment, commentIndex) => (
+                <React.Fragment
+                  key={`${comment.id}-${comment.createdAt}-${commentIndex}`}
+                >
                   <ListItem sx={{ alignItems: "flex-start", py: 1.5 }}>
                     <Avatar
                       sx={{
@@ -229,6 +231,7 @@ export const CellCommentDialog: React.FC<CellCommentDialogProps> = ({
                           )}
                         </Box>
                       }
+                      primaryTypographyProps={{ component: "div" }}
                       secondary={
                         editingCommentId === comment.id ? (
                           <Box sx={{ mt: 1 }}>
@@ -273,6 +276,7 @@ export const CellCommentDialog: React.FC<CellCommentDialogProps> = ({
                           </Typography>
                         )
                       }
+                      secondaryTypographyProps={{ component: "div" }}
                     />
 
                     {editingCommentId !== comment.id &&
@@ -306,9 +310,9 @@ export const CellCommentDialog: React.FC<CellCommentDialogProps> = ({
                     <Box
                       sx={{ ml: 4, borderLeft: "2px solid #e0e0e0", pl: 1.5 }}
                     >
-                      {comment.replies.map((reply) => (
+                      {comment.replies.map((reply, replyIndex) => (
                         <ListItem
-                          key={reply.id}
+                          key={`${reply.id}-${reply.createdAt}-${replyIndex}`}
                           sx={{ alignItems: "flex-start", py: 1 }}
                         >
                           <Avatar
@@ -344,6 +348,8 @@ export const CellCommentDialog: React.FC<CellCommentDialogProps> = ({
                                 {reply.content}
                               </Typography>
                             }
+                            primaryTypographyProps={{ component: "div" }}
+                            secondaryTypographyProps={{ component: "div" }}
                           />
 
                           {currentUserId === reply.userId && (

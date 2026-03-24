@@ -8,11 +8,19 @@ import {
   CreateShiftPlanYearMutationVariables,
   ShiftPlanYearByTargetYearQuery,
   ShiftPlanYearByTargetYearQueryVariables,
+  UpdateShiftPlanYearMutation,
   UpdateShiftPlanYearMutationVariables,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
@@ -87,6 +95,8 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
   >(
     {},
   );
+  const yearRecordIdsRef = useRef<Record<number, ShiftPlanRecordMeta>>({});
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const [lastAutoSaveTime, setLastAutoSaveTime] = useState<string | null>(null);
   const [savedYearlyPlans, setSavedYearlyPlans] = useState<
     Record<number, ShiftPlanRow[]>
@@ -112,6 +122,10 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
       };
     });
   }, [selectedYear]);
+
+  useEffect(() => {
+    yearRecordIdsRef.current = yearRecordIds;
+  }, [yearRecordIds]);
 
   useEffect(() => {
     let isMounted = true;
@@ -273,72 +287,114 @@ export const useShiftPlanData = (): ShiftPlanDataState => {
       recordIds: Record<number, ShiftPlanRecordMeta>,
       showNotification = true,
     ) => {
-      try {
-        const plansInput = convertRowsToPlanInput(rows);
-        const existingRecord = recordIds[year];
-        if (existingRecord) {
-          await graphqlClient.graphql({
-            query: updateShiftPlanYear,
-            variables: {
-              input: {
-                id: existingRecord.id,
-                targetYear: year,
-                plans: plansInput,
-                version: getNextVersion(existingRecord.version),
-              },
-              condition: buildVersionOrUpdatedAtCondition(
-                existingRecord.version,
-                existingRecord.updatedAt,
-              ),
-            } as UpdateShiftPlanYearMutationVariables,
-            authMode: "userPool",
-          });
-        } else {
-          const response = (await graphqlClient.graphql({
-            query: createShiftPlanYear,
-            variables: {
-              input: {
-                targetYear: year,
-                plans: plansInput,
-                version: 1,
-              },
-            } as CreateShiftPlanYearMutationVariables,
-            authMode: "userPool",
-          })) as GraphQLResult<CreateShiftPlanYearMutation>;
+      const queuedSave = saveQueueRef.current.then(async () => {
+        try {
+          const plansInput = convertRowsToPlanInput(rows);
+          const latestRecordIds = yearRecordIdsRef.current;
+          const existingRecord = latestRecordIds[year] ?? recordIds[year];
+          if (existingRecord) {
+            const response = (await graphqlClient.graphql({
+              query: updateShiftPlanYear,
+              variables: {
+                input: {
+                  id: existingRecord.id,
+                  targetYear: year,
+                  plans: plansInput,
+                  version: getNextVersion(existingRecord.version),
+                },
+                condition: buildVersionOrUpdatedAtCondition(
+                  existingRecord.version,
+                  existingRecord.updatedAt,
+                ),
+              } as UpdateShiftPlanYearMutationVariables,
+              authMode: "userPool",
+            })) as GraphQLResult<UpdateShiftPlanYearMutation>;
 
-          const createdRecord = response.data?.createShiftPlanYear;
-          if (createdRecord?.id) {
-            setYearRecordIds((prev) => ({
-              ...prev,
+            if (response.errors?.length) {
+              throw new Error(
+                response.errors.map((error) => error.message).join(","),
+              );
+            }
+
+            const updatedRecord = response.data?.updateShiftPlanYear;
+            if (!updatedRecord?.id) {
+              throw new Error("シフト計画の更新結果が取得できませんでした。");
+            }
+
+            const nextRecordIds = {
+              ...yearRecordIdsRef.current,
+              [year]: {
+                id: updatedRecord.id,
+                version: updatedRecord.version,
+                updatedAt: updatedRecord.updatedAt,
+              },
+            };
+            yearRecordIdsRef.current = nextRecordIds;
+            setYearRecordIds(nextRecordIds);
+          } else {
+            const response = (await graphqlClient.graphql({
+              query: createShiftPlanYear,
+              variables: {
+                input: {
+                  targetYear: year,
+                  plans: plansInput,
+                  version: 1,
+                },
+              } as CreateShiftPlanYearMutationVariables,
+              authMode: "userPool",
+            })) as GraphQLResult<CreateShiftPlanYearMutation>;
+
+            if (response.errors?.length) {
+              throw new Error(
+                response.errors.map((error) => error.message).join(","),
+              );
+            }
+
+            const createdRecord = response.data?.createShiftPlanYear;
+            if (!createdRecord?.id) {
+              throw new Error("シフト計画の作成結果が取得できませんでした。");
+            }
+
+            const nextRecordIds = {
+              ...yearRecordIdsRef.current,
               [year]: {
                 id: createdRecord.id,
                 version: createdRecord.version,
                 updatedAt: createdRecord.updatedAt,
               },
-            }));
+            };
+            yearRecordIdsRef.current = nextRecordIds;
+            setYearRecordIds(nextRecordIds);
           }
-        }
 
-        if (showNotification) {
-          dispatch(setSnackbarSuccess(`${year}年の申請期間を保存しました。`));
-        }
+          if (showNotification) {
+            dispatch(setSnackbarSuccess(`${year}年の申請期間を保存しました。`));
+          }
 
-        // 保存済み状態を記録
-        setSavedYearlyPlans((prev) => ({
-          ...prev,
-          [year]: rows.map((row) => ({ ...row })),
-        }));
-        // 保存時刻を更新
-        setLastAutoSaveTime(dayjs().format(TIME_FORMAT));
+          // 保存済み状態を記録
+          setSavedYearlyPlans((prev) => ({
+            ...prev,
+            [year]: rows.map((row) => ({ ...row })),
+          }));
+          // 保存時刻を更新
+          setLastAutoSaveTime(dayjs().format(TIME_FORMAT));
 
-        return true;
-      } catch (error) {
-        console.error(error);
-        if (showNotification) {
-          dispatch(setSnackbarError("シフト計画の保存に失敗しました。"));
+          return true;
+        } catch (error) {
+          console.error(error);
+          if (showNotification) {
+            dispatch(setSnackbarError("シフト計画の保存に失敗しました。"));
+          }
+          return false;
         }
-        return false;
-      }
+      });
+
+      saveQueueRef.current = queuedSave.then(
+        () => undefined,
+        () => undefined,
+      );
+
+      return queuedSave;
     },
     [dispatch],
   );

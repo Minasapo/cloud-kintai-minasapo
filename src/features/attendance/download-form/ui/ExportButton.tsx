@@ -199,15 +199,27 @@ export default function ExportButton({
       disableElevation
       sx={{
         minWidth: BUTTON_MIN_WIDTH,
-        fontWeight: "bold",
-        transition: "transform 150ms ease",
+        borderRadius: "9999px",
+        border: "1px solid rgba(6,95,70,0.35)",
+        backgroundColor: "#19b985",
+        color: "#ffffff",
+        fontWeight: 700,
+        boxShadow:
+          "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
+        transition: "transform 150ms ease, background-color 150ms ease",
         "&:hover": {
-          backgroundColor: "primary.main",
-          boxShadow: "none",
+          backgroundColor: "#17ab7b",
           transform: "translateY(-3px)",
         },
         "&:active": { transform: "translateY(-1px)" },
-        "&.Mui-disabled": { transform: "none", opacity: 0.6 },
+        "&.Mui-disabled": {
+          transform: "none",
+          opacity: 1,
+          backgroundColor: "#e2e8f0",
+          color: "#64748b",
+          borderColor: "rgba(148,163,184,0.25)",
+          boxShadow: "none",
+        },
       }}
     >
       一括ダウンロード
