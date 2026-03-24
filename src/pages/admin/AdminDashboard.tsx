@@ -13,6 +13,7 @@ import React, { lazy, Suspense, useCallback, useMemo } from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import { resolveActiveMenuHref } from "@/features/admin/layout/model/resolveActiveMenuHref";
 import useHeaderMenu from "@/features/admin/layout/model/useHeaderMenu";
 import AdminHeader from "@/features/admin/layout/ui/AdminHeader";
 import AdminMenu from "@/features/admin/layout/ui/AdminMenu";
@@ -124,18 +125,10 @@ function AdminDashboardContent() {
   );
 
   const activeMenuHref = useMemo(() => {
-    const currentPath = location.pathname;
-    if (/^\/admin\/staff\/[^/]+\/attendance(?:\/|$)/.test(currentPath)) {
-      return "/admin/attendances";
-    }
-
-    const exactMatch = menuItems.find((item) => item.href === currentPath);
-    if (exactMatch) return exactMatch.href;
-
-    const prefixMatch = menuItems.find((item) =>
-      currentPath.startsWith(`${item.href}/`),
-    );
-    return prefixMatch?.href ?? menuItems[0]?.href ?? "";
+    return resolveActiveMenuHref({
+      currentPath: location.pathname,
+      menuItems,
+    });
   }, [location.pathname, menuItems]);
 
   const activeMenuItem = useMemo(

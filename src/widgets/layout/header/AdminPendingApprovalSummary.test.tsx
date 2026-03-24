@@ -33,7 +33,12 @@ const createSubscription = () => ({
   }),
 });
 
-function renderSummary(isAdminUser: boolean) {
+function renderSummary(
+  isAdminUser: boolean,
+  options?: {
+    showAdminOnlyTag?: boolean;
+  },
+) {
   return render(
     <MemoryRouter>
       <AuthContext.Provider
@@ -45,7 +50,9 @@ function renderSummary(isAdminUser: boolean) {
             isAdminUser && role === StaffRole.ADMIN,
         }}
       >
-        <AdminPendingApprovalSummary />
+        <AdminPendingApprovalSummary
+          showAdminOnlyTag={options?.showAdminOnlyTag}
+        />
       </AuthContext.Provider>
     </MemoryRouter>,
   );
@@ -147,5 +154,46 @@ describe("AdminPendingApprovalSummary", () => {
     expect(
       screen.queryByTestId("admin-pending-approval-summary"),
     ).not.toBeInTheDocument();
+  });
+
+  it("showAdminOnlyTag=false の場合は管理者のみタグを表示しない", async () => {
+    mockUseWorkflows.mockReturnValue({
+      workflows: [{ id: "wf-1", status: WorkflowStatus.PENDING }],
+    });
+
+    mockGraphql.mockImplementation(
+      ({ query }: { query: unknown }) => {
+        if (query === listAttendances) {
+          return Promise.resolve({
+            data: {
+              listAttendances: {
+                items: [],
+                nextToken: null,
+              },
+            },
+          });
+        }
+
+        if (
+          query === onCreateAttendance ||
+          query === onUpdateAttendance ||
+          query === onDeleteAttendance
+        ) {
+          return createSubscription();
+        }
+
+        return Promise.resolve({});
+      },
+    );
+
+    renderSummary(true, { showAdminOnlyTag: false });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("admin-pending-approval-summary"),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText("管理者のみ")).not.toBeInTheDocument();
   });
 });

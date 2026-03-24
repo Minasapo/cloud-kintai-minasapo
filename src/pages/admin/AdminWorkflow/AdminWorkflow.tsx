@@ -49,7 +49,6 @@ const useIsMobile = () => {
       setIsMobile(event.matches);
     };
 
-    setIsMobile(mediaQuery.matches);
     mediaQuery.addEventListener("change", onChange);
     return () => mediaQuery.removeEventListener("change", onChange);
   }, []);
@@ -97,8 +96,9 @@ export default function AdminWorkflow() {
   const navigate = useNavigate();
 
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [statusInitialized, setStatusInitialized] = useState(false);
+  const [statusFilterOverride, setStatusFilterOverride] = useState<
+    WorkflowStatus[] | null
+  >(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
@@ -121,17 +121,14 @@ export default function AdminWorkflow() {
     new Set((workflows || []).map((workflow) => workflow.status).filter(Boolean)),
   ) as WorkflowStatus[];
 
-  useEffect(() => {
-    if (statusInitialized) return;
-    if (statuses.length === 0) return;
-
-    const initialStatuses = statuses.filter(
+  const defaultStatusFilter = useMemo(
+    () =>
+      statuses.filter(
       (status) => !STATUS_EXCLUDED_FROM_DEFAULT.includes(status),
-    );
-
-    setStatusFilter(initialStatuses);
-    setStatusInitialized(true);
-  }, [statuses, statusInitialized]);
+      ),
+    [statuses],
+  );
+  const statusFilter = statusFilterOverride ?? defaultStatusFilter;
 
   const filteredWorkflows = (workflows || []).filter((workflow) => {
     if (categoryFilter && workflow.category !== categoryFilter) return false;
@@ -165,29 +162,18 @@ export default function AdminWorkflow() {
   const filteredWorkflowIds = sortedWorkflows.map((workflow) => workflow.id);
 
   const rowsPerPageOptions = isMobile ? [10] : [10, 25, 50];
-
-  useEffect(() => {
-    if (!rowsPerPageOptions.includes(rowsPerPage)) {
-      setRowsPerPage(rowsPerPageOptions[0]);
-    }
-  }, [rowsPerPage, rowsPerPageOptions]);
-
-  useEffect(() => {
-    setPage(0);
-  }, [categoryFilter, statusFilter, rowsPerPage]);
-
-  const totalPages = Math.max(1, Math.ceil(sortedWorkflows.length / rowsPerPage));
-  const normalizedPage = Math.min(page, totalPages - 1);
-  const paginatedWorkflows = sortedWorkflows.slice(
-    normalizedPage * rowsPerPage,
-    normalizedPage * rowsPerPage + rowsPerPage,
+  const activeRowsPerPage = rowsPerPageOptions.includes(rowsPerPage)
+    ? rowsPerPage
+    : rowsPerPageOptions[0];
+  const totalPages = Math.max(
+    1,
+    Math.ceil(sortedWorkflows.length / activeRowsPerPage),
   );
-
-  useEffect(() => {
-    if (normalizedPage !== page) {
-      setPage(normalizedPage);
-    }
-  }, [normalizedPage, page]);
+  const currentPage = Math.min(page, totalPages - 1);
+  const paginatedWorkflows = sortedWorkflows.slice(
+    currentPage * activeRowsPerPage,
+    currentPage * activeRowsPerPage + activeRowsPerPage,
+  );
 
   const createWorkflowPanelComponent = useCallback(
     (workflowId: string): ComponentType<{ panelId: string }> => {
@@ -214,13 +200,15 @@ export default function AdminWorkflow() {
     setIsCarouselOpen(true);
   };
 
-  const toggleStatusFilter = (status: string) => {
-    setStatusFilter((current) => {
-      if (current.includes(status)) {
-        return current.filter((item) => item !== status);
+  const toggleStatusFilter = (status: WorkflowStatus) => {
+    setStatusFilterOverride((current) => {
+      const base = current ?? defaultStatusFilter;
+      if (base.includes(status)) {
+        return base.filter((item) => item !== status);
       }
-      return [...current, status];
+      return [...base, status];
     });
+    setPage(0);
   };
 
   if (loading || staffLoading) {
@@ -253,7 +241,10 @@ export default function AdminWorkflow() {
             <span className="font-medium">種別</span>
             <select
               value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
+              onChange={(event) => {
+                setCategoryFilter(event.target.value);
+                setPage(0);
+              }}
               className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             >
               <option value="">すべて</option>
@@ -274,7 +265,10 @@ export default function AdminWorkflow() {
                 <input
                   type="checkbox"
                   checked={statusFilter.length === 0}
-                  onChange={() => setStatusFilter([])}
+                  onChange={() => {
+                    setStatusFilterOverride([]);
+                    setPage(0);
+                  }}
                   className="h-3.5 w-3.5 accent-emerald-600"
                 />
                 すべて
@@ -418,15 +412,18 @@ export default function AdminWorkflow() {
 
           <div className="mt-3 flex flex-col gap-2 border-t border-slate-200 pt-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
             <p className="m-0">
-              ページ {normalizedPage + 1} / {totalPages}
+              ページ {currentPage + 1} / {totalPages}
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
               <label className="inline-flex items-center gap-2">
                 <span>表示件数</span>
                 <select
-                  value={rowsPerPage}
-                  onChange={(event) => setRowsPerPage(Number(event.target.value))}
+                  value={activeRowsPerPage}
+                  onChange={(event) => {
+                    setRowsPerPage(Number(event.target.value));
+                    setPage(0);
+                  }}
                   className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
                 >
                   {rowsPerPageOptions.map((option) => (
@@ -439,8 +436,8 @@ export default function AdminWorkflow() {
 
               <button
                 type="button"
-                onClick={() => setPage((current) => Math.max(0, current - 1))}
-                disabled={normalizedPage <= 0}
+                onClick={() => setPage(Math.max(0, currentPage - 1))}
+                disabled={currentPage <= 0}
                 className="inline-flex h-9 items-center justify-center rounded-md border border-slate-300 px-3 text-sm text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
               >
                 前へ
@@ -448,10 +445,8 @@ export default function AdminWorkflow() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setPage((current) => Math.min(totalPages - 1, current + 1))
-                }
-                disabled={normalizedPage >= totalPages - 1}
+                onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))}
+                disabled={currentPage >= totalPages - 1}
                 className="inline-flex h-9 items-center justify-center rounded-md border border-slate-300 px-3 text-sm text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
               >
                 次へ
@@ -460,7 +455,7 @@ export default function AdminWorkflow() {
           </div>
         </section>
 
-        {selectedWorkflowId && (
+        {isCarouselOpen && selectedWorkflowId && (
           <WorkflowCarouselDialog
             open={isCarouselOpen}
             onClose={() => {
@@ -474,6 +469,7 @@ export default function AdminWorkflow() {
             onOpenInRightPanel={(workflowId) => {
               handleOpenInRightPanel(workflowId);
               setIsCarouselOpen(false);
+              setSelectedWorkflowId(null);
             }}
             enableApprovalActions
           />

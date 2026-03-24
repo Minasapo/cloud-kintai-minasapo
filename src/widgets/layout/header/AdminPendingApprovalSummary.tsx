@@ -37,7 +37,15 @@ const isWorkflowPendingForCurrentAdmin = (workflow: Workflow) => {
   return true;
 };
 
-export default function AdminPendingApprovalSummary() {
+type AdminPendingApprovalSummaryProps = {
+  layoutMode?: "default" | "inline-cards";
+  showAdminOnlyTag?: boolean;
+};
+
+export default function AdminPendingApprovalSummary({
+  layoutMode = "default",
+  showAdminOnlyTag = true,
+}: AdminPendingApprovalSummaryProps) {
   const { authStatus, isCognitoUserRole } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
 
@@ -230,11 +238,15 @@ export default function AdminPendingApprovalSummary() {
     ? "集計中"
     : `${pendingAttendanceCount}件`;
   const workflowCountLabel = `${pendingWorkflowCount}件`;
+  const compact = layoutMode === "inline-cards";
+  const containerClassName =
+    compact ? "contents" : "grid grid-cols-2 gap-3";
+  const cardClassName = layoutMode === "inline-cards" ? "" : "";
 
   return (
     <div
       data-testid="admin-pending-approval-summary"
-      className="grid grid-cols-2 gap-4"
+      className={containerClassName}
     >
       <AdminSummaryCard
         testId="admin-pending-attendance-card"
@@ -242,6 +254,9 @@ export default function AdminPendingApprovalSummary() {
         description="未承認の勤怠修正申請"
         countLabel={attendanceCountLabel}
         to="/admin/attendances"
+        className={cardClassName}
+        showAdminOnlyTag={showAdminOnlyTag}
+        compact={compact}
       />
       <AdminSummaryCard
         testId="admin-pending-workflow-card"
@@ -249,6 +264,9 @@ export default function AdminPendingApprovalSummary() {
         description="未承認のワークフロー申請"
         countLabel={workflowCountLabel}
         to="/admin/workflow"
+        className={cardClassName}
+        showAdminOnlyTag={showAdminOnlyTag}
+        compact={compact}
       />
     </div>
   );
@@ -260,20 +278,37 @@ function AdminSummaryCard({
   description,
   countLabel,
   to,
+  className,
+  showAdminOnlyTag,
+  compact,
 }: {
   testId: string;
   title: string;
   description: string;
   countLabel: string;
   to: string;
+  className?: string;
+  showAdminOnlyTag: boolean;
+  compact: boolean;
 }) {
+  const titleClassName = showAdminOnlyTag
+    ? "mt-2 m-0 text-[0.95rem] font-bold tracking-[0.01em] text-slate-900"
+    : "m-0 text-[0.95rem] font-bold tracking-[0.01em] text-slate-900";
+  const countClassName = compact
+    ? "m-0 mt-auto pt-2 text-[2rem] font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-[2.15rem]"
+    : showAdminOnlyTag
+      ? "m-0 mt-auto pt-4 text-[2rem] font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-[2.25rem]"
+      : "m-0 mt-auto pt-3 text-[2rem] font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-[2.25rem]";
+
   return (
     <RouterLink
       to={to}
       data-testid={testId}
-      className="group block rounded-[1.35rem] no-underline transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 hover:no-underline"
+      className={`group block rounded-[18px] no-underline transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 hover:no-underline ${className ?? ""}`}
     >
-      <section className="relative h-full rounded-[1.35rem] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.4)] transition group-hover:border-slate-300 group-hover:shadow-[0_22px_36px_-28px_rgba(15,23,42,0.5)]">
+      <section
+        className={`relative rounded-[18px] border-[1.5px] border-[rgba(148,163,184,0.42)] bg-white px-4 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.45)] transition group-hover:border-[rgba(148,163,184,0.55)] group-hover:shadow-[0_18px_32px_-22px_rgba(15,23,42,0.5)] ${compact ? "py-3" : "h-full py-[0.95rem]"}`}
+      >
         <Tooltip title={description} arrow>
           <span
             data-testid={`${testId}-description-tooltip`}
@@ -283,18 +318,18 @@ function AdminSummaryCard({
             i
           </span>
         </Tooltip>
-        <div className="flex items-start justify-between gap-3">
+        <div className={`flex flex-col items-start ${compact ? "min-h-[104px]" : "h-full min-h-[132px]"}`}>
           <div className="min-w-0 pr-7">
-            <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold leading-none tracking-[0.01em] text-slate-700">
-              管理者のみ
-            </span>
-            <h2 className="mt-2 m-0 text-sm font-semibold tracking-[0.01em] text-slate-900">
+            {showAdminOnlyTag ? (
+              <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold leading-none tracking-[0.01em] text-slate-700">
+                管理者のみ
+              </span>
+            ) : null}
+            <h2 className={titleClassName}>
               {title}
             </h2>
           </div>
-          <p className="m-0 mt-7 shrink-0 text-4xl font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-5xl">
-            {countLabel}
-          </p>
+          <p className={countClassName}>{countLabel}</p>
         </div>
       </section>
     </RouterLink>
