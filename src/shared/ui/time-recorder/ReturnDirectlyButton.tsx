@@ -13,20 +13,6 @@ export interface ReturnDirectlyButtonProps {
   disabled?: boolean;
 }
 
-function ReturnDirectlyIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
-      <path
-        d="M19 12H9M13 6l-6 6 6 6M19 6v12"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 const ReturnDirectlyButton = ({
   isWorking,
   onReturnDirectly,
@@ -35,27 +21,24 @@ const ReturnDirectlyButton = ({
   const actionButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.subtleDanger,
   );
-  const { isDisabled, markPending } = useActionButtonState({
+  const { isDisabled, runWithPending } = useActionButtonState({
     canInteract: isWorking,
     disabled,
   });
   const handleClick = useCallback(() => {
-    if (!markPending()) {
-      return;
-    }
-
-    onReturnDirectly();
-  }, [markPending, onReturnDirectly]);
+    runWithPending(onReturnDirectly);
+  }, [onReturnDirectly, runWithPending]);
 
   return (
     <ActionCardButton
       testId="return-directly-button"
       style={actionButtonVars}
+      shape="circle"
+      layout="center"
       disabled={isDisabled}
       onClick={handleClick}
       label="直帰"
       helper={null}
-      icon={<ReturnDirectlyIcon />}
     />
   );
 };

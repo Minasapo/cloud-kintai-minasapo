@@ -1,3 +1,4 @@
+import { Box, CircularProgress, LinearProgress, Stack, Typography } from "@mui/material";
 import { RouteObject } from "react-router-dom";
 
 import AdminShiftGuard from "../pages/admin/AdminShiftGuard";
@@ -36,6 +37,9 @@ const AttendanceStatisticsRoute = createLazyRoute(
 );
 const OvertimeConfirmationRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/OvertimeConfirmation"),
+);
+const TimeRecorderAnnouncementRoute = createLazyRoute(
+  () => import("@/features/admin/configManagement/ui/TimeRecorderAnnouncement"),
 );
 const OfficeModeRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/OfficeMode"),
@@ -112,6 +116,29 @@ const ShiftManagementRoute = createLazyRoute(
   () => import("../pages/shift/management"),
   {
     wrap: (node) => <AdminShiftGuard>{node}</AdminShiftGuard>,
+    hydrateFallback: (
+      <Box
+        sx={{
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "background.default",
+        }}
+      >
+        <LinearProgress data-testid="admin-shift-hydrate-loading" />
+        <Stack
+          sx={{ flex: 1 }}
+          alignItems="center"
+          justifyContent="center"
+          spacing={2}
+        >
+          <CircularProgress size={28} />
+          <Typography variant="body2" color="text.secondary">
+            シフト画面を読み込み中です...
+          </Typography>
+        </Stack>
+      </Box>
+    ),
   },
 );
 const StaffShiftListRoute = createLazyRoute(
@@ -252,6 +279,10 @@ export const adminChildRoutes: RouteObject[] = [
       {
         path: "developer",
         lazy: DeveloperRoute,
+      },
+      {
+        path: "time_recorder_announcement",
+        lazy: TimeRecorderAnnouncementRoute,
       },
       {
         path: "export",

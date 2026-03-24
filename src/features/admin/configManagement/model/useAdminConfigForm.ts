@@ -62,6 +62,7 @@ export function useAdminConfigForm() {
     getAbsentEnabled,
     getAttendanceStatisticsEnabled,
     getWorkflowNotificationEnabled,
+    getTimeRecorderAnnouncement,
     getOverTimeCheckEnabled,
     getShiftCollaborativeEnabled,
     getShiftDefaultMode,
@@ -110,6 +111,10 @@ export function useAdminConfigForm() {
     useState<boolean>(false);
   const [workflowNotificationEnabled, setWorkflowNotificationEnabled] =
     useState<boolean>(false);
+  const [timeRecorderAnnouncementEnabled, setTimeRecorderAnnouncementEnabled] =
+    useState<boolean>(false);
+  const [timeRecorderAnnouncementMessage, setTimeRecorderAnnouncementMessage] =
+    useState<string>("");
   const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
   const [specialHolidayEnabled, setSpecialHolidayEnabled] =
     useState<boolean>(false);
@@ -170,6 +175,9 @@ export function useAdminConfigForm() {
 
     setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
     setWorkflowNotificationEnabled(getWorkflowNotificationEnabled());
+    const timeRecorderAnnouncement = getTimeRecorderAnnouncement();
+    setTimeRecorderAnnouncementEnabled(timeRecorderAnnouncement.enabled);
+    setTimeRecorderAnnouncementMessage(timeRecorderAnnouncement.message);
 
     if (
       typeof getAmHolidayStartTime === "function" &&
@@ -391,6 +399,8 @@ export function useAdminConfigForm() {
       specialHolidayEnabled,
       attendanceStatisticsEnabled,
       workflowNotificationEnabled,
+      timeRecorderAnnouncementEnabled,
+      timeRecorderAnnouncementMessage,
       overTimeCheckEnabled,
       shiftCollaborativeEnabled,
       shiftDefaultMode,
@@ -441,6 +451,8 @@ export function useAdminConfigForm() {
     absentEnabled,
     attendanceStatisticsEnabled,
     workflowNotificationEnabled,
+    timeRecorderAnnouncementEnabled,
+    timeRecorderAnnouncementMessage,
     overTimeCheckEnabled,
     shiftCollaborativeEnabled,
     shiftDefaultMode,
@@ -459,6 +471,8 @@ export function useAdminConfigForm() {
     handleAbsentEnabledChange,
     handleAttendanceStatisticsEnabledChange,
     handleWorkflowNotificationEnabledChange,
+    setTimeRecorderAnnouncementEnabled,
+    setTimeRecorderAnnouncementMessage,
     handleOverTimeCheckEnabledChange,
     handleShiftCollaborativeEnabledChange,
     handleShiftDefaultModeChange,

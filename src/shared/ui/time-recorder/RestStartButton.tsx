@@ -13,20 +13,6 @@ export interface RestStartButtonProps {
   disabled?: boolean;
 }
 
-function RestStartIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
-      <path
-        d="M12 7v5l3 3M20 12a8 8 0 1 1-8-8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 const RestStartButton = ({
   isWorking,
   onRestStart,
@@ -35,29 +21,25 @@ const RestStartButton = ({
   const restButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.rest,
   );
-  const { isDisabled, markPending } = useActionButtonState({
+  const { isDisabled, runWithPending } = useActionButtonState({
     canInteract: isWorking,
     disabled,
   });
 
   const handleClick = useCallback(() => {
-    if (!markPending()) {
-      return;
-    }
-
-    onRestStart();
-  }, [markPending, onRestStart]);
+    runWithPending(onRestStart);
+  }, [onRestStart, runWithPending]);
 
   return (
     <ActionCardButton
       testId="rest-start-button"
       style={restButtonVars}
-      size="compact"
+      size="slim"
+      layout="center"
       disabled={isDisabled}
       onClick={handleClick}
       label="休憩開始"
       helper={null}
-      icon={<RestStartIcon />}
     />
   );
 };

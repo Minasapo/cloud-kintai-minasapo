@@ -137,17 +137,27 @@ export const workflowApi = createApi({
 
         return { data: updated };
       },
-      invalidatesTags: (result) => {
-        const listTag: WorkflowTag = { type: "Workflow", id: "LIST" };
-        if (!result) {
-          return [listTag];
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedWorkflow } = await queryFulfilled;
+          dispatch(
+            workflowApi.util.updateQueryData(
+              "getWorkflows",
+              undefined,
+              (draft) => {
+                const targetIndex = draft.findIndex(
+                  (workflow) => workflow.id === updatedWorkflow.id,
+                );
+                if (targetIndex < 0) return;
+                draft[targetIndex] = updatedWorkflow;
+              },
+            ),
+          );
+        } catch {
+          // noop: keep mutation error handling in caller
         }
-
-        return [
-          listTag,
-          { type: "Workflow" as const, id: buildWorkflowTagId(result) },
-        ];
       },
+      invalidatesTags: () => [],
     }),
     deleteWorkflow: builder.mutation<Workflow, DeleteWorkflowInput>({
       async queryFn(input, _api, _extraOptions, baseQuery) {

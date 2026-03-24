@@ -1,7 +1,8 @@
 import {
-  useCreateAttendanceMutation,
+  type AttendanceUpsertAction,
   useLazyGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
+  useUpsertAttendanceByStaffAndDateMutation,
 } from "@entities/attendance/api/attendanceApi";
 import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import type {
@@ -9,7 +10,6 @@ import type {
   CreateAttendanceInput,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
@@ -20,7 +20,15 @@ import {
   clockInAction,
   clockOutAction,
 } from "@/entities/attendance/lib/actions/attendanceActions";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import {
+  resolveBusinessWorkDate,
+  resolveCurrentBusinessWorkDate,
+} from "@/entities/attendance/lib/businessDate";
+import {
+  buildAttendanceIdempotencyKey,
+  resolveAppVersion,
+  resolveClientTimeZone,
+} from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import { Logger } from "@/shared/lib/logger";
 import {
@@ -46,12 +54,58 @@ export function useOfficeQrRegister() {
   const [isValidToken, setIsValidToken] = useState(false);
   const [attendance, setAttendance] = useState<Attendance | null>(null);
   const [triggerGetAttendance] = useLazyGetAttendanceByStaffAndDateQuery();
-  const [createAttendanceMutation] = useCreateAttendanceMutation();
+  const [upsertAttendanceMutation] = useUpsertAttendanceByStaffAndDateMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 
+  const resolveUpsertAction = useCallback(
+    (input: CreateAttendanceInput): AttendanceUpsertAction => {
+      if (input.goDirectlyFlag) return "go_directly";
+      if (input.returnDirectlyFlag) return "return_directly";
+      if (input.startTime) return "clock_in";
+      if (input.endTime) return "clock_out";
+      const rests = input.rests ?? [];
+      if (rests.some((rest) => Boolean(rest?.startTime) && !rest?.endTime)) {
+        return "rest_start";
+      }
+      if (rests.some((rest) => Boolean(rest?.endTime))) {
+        return "rest_end";
+      }
+      return "manual";
+    },
+    []
+  );
+
+  const resolveOccurredAtFromCreateInput = useCallback(
+    (input: CreateAttendanceInput) =>
+      input.startTime ??
+      input.endTime ??
+      input.rests?.find((rest) => rest?.startTime)?.startTime ??
+      input.rests?.find((rest) => rest?.endTime)?.endTime ??
+      getNowISOStringWithZeroSeconds(),
+    []
+  );
+
   const createAttendance = useCallback(
-    (input: CreateAttendanceInput) => createAttendanceMutation(input).unwrap(),
-    [createAttendanceMutation]
+    (input: CreateAttendanceInput) => {
+      const occurredAt = resolveOccurredAtFromCreateInput(input);
+      const action = resolveUpsertAction(input);
+      const idempotencyKey = buildAttendanceIdempotencyKey({
+        action,
+        staffId: input.staffId,
+        occurredAt,
+      });
+      return upsertAttendanceMutation({
+        input,
+        action,
+        occurredAt,
+        idempotencyKey,
+      }).unwrap();
+    },
+    [
+      resolveOccurredAtFromCreateInput,
+      resolveUpsertAction,
+      upsertAttendanceMutation,
+    ]
   );
 
   const updateAttendance = useCallback(
@@ -64,8 +118,22 @@ export function useOfficeQrRegister() {
     modeParam === "clock_in" || modeParam === "clock_out" ? modeParam : null;
   const timestamp = searchParams.get("timestamp");
   const token = searchParams.get("token");
+  const [currentWorkDate, setCurrentWorkDate] = useState(() =>
+    resolveCurrentBusinessWorkDate()
+  );
 
-  const today = useMemo(() => dayjs().format(AttendanceDate.DataFormat), []);
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      const nextWorkDate = resolveCurrentBusinessWorkDate();
+      setCurrentWorkDate((prev) =>
+        prev === nextWorkDate ? prev : nextWorkDate
+      );
+    }, 30 * 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   useEffect(() => {
     setIsOfficeModeEnabled(getOfficeMode());
@@ -97,7 +165,7 @@ export function useOfficeQrRegister() {
 
     let isMounted = true;
 
-    triggerGetAttendance({ staffId: cognitoUser.id, workDate: today })
+    triggerGetAttendance({ staffId: cognitoUser.id, workDate: currentWorkDate })
       .unwrap()
       .then((data) => {
         if (isMounted) {
@@ -113,8 +181,8 @@ export function useOfficeQrRegister() {
     };
   }, [
     cognitoUser?.id,
+    currentWorkDate,
     isOfficeModeEnabled,
-    today,
     triggerGetAttendance,
     logger,
   ]);
@@ -124,14 +192,22 @@ export function useOfficeQrRegister() {
       return;
     }
 
-    const now = dayjs().second(0).millisecond(0).toISOString();
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    const workDate = resolveBusinessWorkDate(occurredAt);
+    const clientTimezone = resolveClientTimeZone();
+    const appVersion = resolveAppVersion();
+    const idempotencyKey = buildAttendanceIdempotencyKey({
+      action: "clock_in",
+      staffId: cognitoUser.id,
+      occurredAt,
+    });
 
     try {
       const result = await clockInAction({
         attendance,
         staffId: cognitoUser.id,
-        workDate: today,
-        startTime: now,
+        workDate,
+        startTime: occurredAt,
         createAttendance,
         updateAttendance,
       });
@@ -139,17 +215,33 @@ export function useOfficeQrRegister() {
       setAttendance(result);
 
       try {
-        const pressedAt = getNowISOStringWithZeroSeconds();
         const input = {
           staffId: cognitoUser.id,
           action: "clock_in" as const,
           resource: "attendance" as const,
           resourceId: result?.id ?? undefined,
-          timestamp: pressedAt,
+          timestamp: occurredAt,
           details: JSON.stringify({
-            workDate: today,
-            attendanceTime: now,
+            workDate,
+            attendanceTime: occurredAt,
+            clientTimezone,
+            occurredAt,
+            resolvedWorkDate: workDate,
+            idempotencyKey,
+            appVersion,
           }),
+          metadata: JSON.stringify({
+            clientTimezone,
+            occurredAt,
+            resolvedWorkDate: workDate,
+            idempotencyKey,
+            appVersion,
+          }),
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
           userAgent:
             typeof navigator !== "undefined" ? navigator.userAgent : undefined,
         };
@@ -173,7 +265,6 @@ export function useOfficeQrRegister() {
     createAttendance,
     dispatch,
     logger,
-    today,
     updateAttendance,
   ]);
 
@@ -182,14 +273,22 @@ export function useOfficeQrRegister() {
       return;
     }
 
-    const now = dayjs().second(0).millisecond(0).toISOString();
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    const workDate = resolveBusinessWorkDate(occurredAt);
+    const clientTimezone = resolveClientTimeZone();
+    const appVersion = resolveAppVersion();
+    const idempotencyKey = buildAttendanceIdempotencyKey({
+      action: "clock_out",
+      staffId: cognitoUser.id,
+      occurredAt,
+    });
 
     try {
       const result = await clockOutAction({
         attendance,
         staffId: cognitoUser.id,
-        workDate: today,
-        endTime: now,
+        workDate,
+        endTime: occurredAt,
         createAttendance,
         updateAttendance,
       });
@@ -197,17 +296,33 @@ export function useOfficeQrRegister() {
       setAttendance(result);
 
       try {
-        const pressedAt = getNowISOStringWithZeroSeconds();
         const input = {
           staffId: cognitoUser.id,
           action: "clock_out" as const,
           resource: "attendance" as const,
           resourceId: result?.id ?? undefined,
-          timestamp: pressedAt,
+          timestamp: occurredAt,
           details: JSON.stringify({
-            workDate: today,
-            attendanceTime: now,
+            workDate,
+            attendanceTime: occurredAt,
+            clientTimezone,
+            occurredAt,
+            resolvedWorkDate: workDate,
+            idempotencyKey,
+            appVersion,
           }),
+          metadata: JSON.stringify({
+            clientTimezone,
+            occurredAt,
+            resolvedWorkDate: workDate,
+            idempotencyKey,
+            appVersion,
+          }),
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
           userAgent:
             typeof navigator !== "undefined" ? navigator.userAgent : undefined,
         };
@@ -231,7 +346,6 @@ export function useOfficeQrRegister() {
     createAttendance,
     dispatch,
     logger,
-    today,
     updateAttendance,
   ]);
 

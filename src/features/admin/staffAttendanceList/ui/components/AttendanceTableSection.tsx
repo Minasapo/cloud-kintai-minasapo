@@ -80,9 +80,10 @@ export function AttendanceTableSection({
               holidayCalendars,
               companyHolidayCalendars
             );
+            const rowKey = attendance.id || `${attendance.workDate}-${index}`;
             return (
               <TableRow
-                key={index}
+                key={rowKey}
                 sx={attendanceRowVariantStyles[rowVariant]}
                 data-testid={
                   index === attendances.length - 1 ? "last-row" : undefined

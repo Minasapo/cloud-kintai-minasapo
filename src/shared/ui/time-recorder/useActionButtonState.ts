@@ -12,17 +12,24 @@ export function useActionButtonState({
   const [isPending, setIsPending] = useState(false);
   const isDisabled = disabled || !canInteract || isPending;
 
-  const markPending = useCallback(() => {
+  const runWithPending = useCallback((action: () => unknown) => {
     if (isDisabled) {
       return false;
     }
 
     setIsPending(true);
+
+    Promise.resolve(action())
+      .catch(() => undefined)
+      .finally(() => {
+        setIsPending(false);
+      });
+
     return true;
   }, [isDisabled]);
 
   return {
     isDisabled,
-    markPending,
+    runWithPending,
   };
 }

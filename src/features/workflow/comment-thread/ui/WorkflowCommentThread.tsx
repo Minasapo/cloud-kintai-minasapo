@@ -1,17 +1,11 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
-  Avatar,
-  Box,
-  Button,
-  InputAdornment,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
@@ -37,6 +31,34 @@ const LOAD_MORE_COUNT = 20;
 const TOP_THRESHOLD_PX = 32;
 const BOTTOM_STICK_THRESHOLD_PX = 64;
 
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 640px)";
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return false;
+    }
+    return window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT_QUERY);
+    const onChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+    };
+
+    setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
+  }, []);
+
+  return isMobile;
+};
+
 export default function WorkflowCommentThread({
   title = "コメント",
   messages,
@@ -50,8 +72,7 @@ export default function WorkflowCommentThread({
   sending,
   formatSender,
 }: Props) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useIsMobile();
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const stickToBottomRef = useRef(true);
@@ -101,232 +122,161 @@ export default function WorkflowCommentThread({
     }
   };
 
+  const sendDisabled = sending || !input.trim();
+
   return (
-    <Box sx={{ minWidth: 0 }}>
-      <Typography
-        variant="h6"
-        sx={{
-          mb: 0.5,
-          fontWeight: 700,
-          color: "#020617",
-        }}
-      >
-        {title}
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{ mb: 2, color: "#64748b" }}
-      >
+    <div className="min-w-0">
+      <h3 className="mb-1 text-lg font-bold text-slate-950">{title}</h3>
+      <p className="mb-2 text-sm text-slate-500">
         申請に関するやり取りをこの場で記録します。
-      </Typography>
-      <Paper
-        variant="outlined"
+      </p>
+
+      <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        sx={{
-          p: 2.5,
-          maxHeight: { xs: 360, sm: PANEL_HEIGHTS.SCROLLABLE_MAX },
-          overflow: "auto",
-          bgcolor: "#f8fafc",
-          borderColor: "rgba(148, 163, 184, 0.22)",
-          borderRadius: "20px",
-          minWidth: 0,
+        className="min-w-0 overflow-auto rounded-[20px] border border-slate-300/30 bg-slate-50 p-5"
+        style={{
+          maxHeight: isMobile ? 360 : PANEL_HEIGHTS.SCROLLABLE_MAX,
         }}
       >
-        <Stack spacing={2}>
-          {visibleMessages.map((m) => {
-            const displayName = formatSender(m.sender);
-            const staff = m.staffId
-              ? staffs.find((s) => s.id === m.staffId)
+        <div className="flex flex-col gap-4">
+          {visibleMessages.map((message) => {
+            const displayName = formatSender(message.sender);
+            const staff = message.staffId
+              ? staffs.find((item) => item.id === message.staffId)
               : undefined;
+
             const avatarText = staff
               ? `${(staff.familyName || "").slice(0, 1)}${(
                   staff.givenName || ""
                 ).slice(0, 1)}` || displayName.slice(0, 1)
               : displayName.slice(0, 1);
-            const isSystem = m.staffId === "system";
+
+            const isSystem = message.staffId === "system";
             const isMine = Boolean(
-              currentStaff && m.staffId === currentStaff.id,
+              currentStaff && message.staffId === currentStaff.id,
             );
-            const avatarBg = isSystem
-              ? "grey.500"
+            const expanded = Boolean(expandedMessages[message.id]);
+            const isTruncated = shouldTruncateWorkflowMessage(
+              message.text,
+              expanded,
+            );
+
+            const avatarBackgroundClass = isSystem
+              ? "bg-slate-500"
               : isMine
-                ? "primary.main"
-                : "secondary.main";
-            const expanded = Boolean(expandedMessages[m.id]);
-            const long = shouldTruncateWorkflowMessage(m.text, expanded);
+                ? "bg-emerald-600"
+                : "bg-emerald-900";
 
             return (
-              <Box
-                key={m.id}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: isMine ? "flex-end" : "flex-start",
-                  minWidth: 0,
-                }}
+              <div
+                key={message.id}
+                className={[
+                  "flex min-w-0 flex-col",
+                  isMine ? "items-end" : "items-start",
+                ].join(" ")}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    flexDirection: isMine ? "row-reverse" : "row",
-                    justifyContent: isMine ? "flex-end" : "flex-start",
-                    gap: 1.25,
-                    mb: 0.5,
-                    width: "100%",
-                    minWidth: 0,
-                  }}
+                <div
+                  className={[
+                    "mb-1 flex w-full min-w-0 items-center gap-3",
+                    isMine ? "flex-row-reverse justify-end" : "justify-start",
+                  ].join(" ")}
                 >
-                  <Avatar
-                    sx={{
-                      bgcolor: avatarBg,
-                      width: 32,
-                      height: 32,
-                      fontSize: 12,
-                      flexShrink: 0,
-                    }}
+                  <div
+                    className={[
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium text-white",
+                      avatarBackgroundClass,
+                    ].join(" ")}
                   >
                     {avatarText}
-                  </Avatar>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: { xs: "column", sm: isMine ? "row-reverse" : "row" },
-                      alignItems: { xs: isMine ? "flex-end" : "flex-start", sm: "center" },
-                      gap: { xs: 0.25, sm: 1 },
-                      minWidth: 0,
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        fontWeight: 600,
-                        minWidth: 0,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {displayName}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {m.time}
-                    </Typography>
-                  </Box>
-                </Box>
+                  </div>
 
-                <Paper
-                  elevation={0}
-                  sx={{
-                    bgcolor: isMine ? "#19b985" : "#ffffff",
-                    color: isMine ? "#ffffff" : "#0f172a",
-                    p: 1.5,
-                    borderRadius: 3,
-                    maxWidth: { xs: "100%", sm: "90%" },
-                    minWidth: 0,
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    border: isMine ? "1px solid rgba(6, 95, 70, 0.28)" : "1px solid rgba(148, 163, 184, 0.2)",
-                    boxShadow: isMine
-                      ? "0 16px 30px -28px rgba(5, 150, 105, 0.5)"
-                      : "0 16px 30px -28px rgba(15, 23, 42, 0.28)",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    component="div"
-                    sx={{
-                      display: long ? "-webkit-box" : "block",
-                      WebkitLineClamp: long ? 5 : "none",
-                      WebkitBoxOrient: long ? "vertical" : "initial",
-                      overflow: long ? "hidden" : "visible",
-                    }}
+                  <div
+                    className={[
+                      "flex min-w-0 gap-1",
+                      isMine
+                        ? "flex-col items-end sm:flex-row-reverse sm:items-center"
+                        : "flex-col items-start sm:flex-row sm:items-center",
+                    ].join(" ")}
                   >
-                    {m.text}
-                  </Typography>
-                  {long && (
-                    <Button
-                      size="small"
-                      onClick={() => onToggle(m.id)}
-                      sx={{ mt: 0.5, color: isMine ? "#ffffff" : "#0f766e" }}
+                    <span className="truncate text-sm font-semibold text-slate-900">
+                      {displayName}
+                    </span>
+                    <span className="text-xs text-slate-500">{message.time}</span>
+                  </div>
+                </div>
+
+                <div
+                  className={[
+                    "min-w-0 max-w-full rounded-xl border px-4 py-3 text-sm leading-6 shadow-[0_16px_30px_-28px_rgba(15,23,42,0.28)] sm:max-w-[90%]",
+                    isMine
+                      ? "border-emerald-800/30 bg-emerald-500 text-white"
+                      : "border-slate-300/60 bg-white text-slate-900",
+                  ].join(" ")}
+                >
+                  <div
+                    className="whitespace-pre-wrap break-words"
+                    style={
+                      isTruncated
+                        ? {
+                            display: "-webkit-box",
+                            WebkitLineClamp: 5,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }
+                        : undefined
+                    }
+                  >
+                    {message.text}
+                  </div>
+
+                  {isTruncated && (
+                    <button
+                      type="button"
+                      onClick={() => onToggle(message.id)}
+                      className={[
+                        "mt-1 text-xs font-medium underline decoration-transparent transition hover:decoration-current",
+                        isMine ? "text-white" : "text-emerald-700",
+                      ].join(" ")}
                     >
                       {expanded ? "折りたたむ" : "もっと見る"}
-                    </Button>
+                    </button>
                   )}
-                </Paper>
-              </Box>
+                </div>
+              </div>
             );
           })}
-        </Stack>
-      </Paper>
+        </div>
+      </div>
 
-      <Box
-        sx={{
-          mt: 1,
-          display: "flex",
-          gap: 1.25,
-          alignItems: "flex-end",
-          flexDirection: "column",
-        }}
-      >
-        <TextField
-          size="small"
-          fullWidth
-          multiline
-          minRows={2}
-          placeholder="メッセージを入力..."
-          helperText="Cmd/Ctrl+Enterで送信"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-              e.preventDefault();
-              onSend();
-            }
-          }}
-          disabled={sending}
-          sx={{
-            bgcolor: "transparent",
-            "& .MuiInputBase-root": {
-              bgcolor: "#ffffff",
-              borderRadius: "18px",
-            },
-            "& .MuiFormHelperText-root": {
-              marginLeft: "4px",
-              color: "#64748b",
-            },
-          }}
-          InputProps={
-            isMobile
-              ? undefined
-              : {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <button
-                        type="button"
-                        onClick={onSend}
-                        disabled={sending || !input.trim()}
-                        className="inline-flex min-w-[88px] items-center justify-center rounded-full border border-emerald-700/55 bg-[#19b985] px-5 py-2.5 text-sm font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
-                      >
-                        送信
-                      </button>
-                    </InputAdornment>
-                  ),
-                }
-          }
-        />
-        {isMobile && (
-          <button
-            type="button"
-            onClick={onSend}
-            disabled={sending || !input.trim()}
-            className="inline-flex w-full items-center justify-center rounded-full border border-emerald-700/55 bg-[#19b985] px-6 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
-          >
-            送信
-          </button>
-        )}
-      </Box>
-    </Box>
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1">
+          <textarea
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault();
+                onSend();
+              }
+            }}
+            disabled={sending}
+            rows={2}
+            placeholder="メッセージを入力..."
+            className="w-full resize-y rounded-[18px] border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+          />
+          <p className="ml-1 mt-1 text-xs text-slate-500">Cmd/Ctrl+Enterで送信</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onSend}
+          disabled={sendDisabled}
+          className="inline-flex h-11 w-full shrink-0 items-center justify-center rounded-full border border-emerald-700/55 bg-[#19b985] px-6 text-sm font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none sm:w-auto"
+        >
+          送信
+        </button>
+      </div>
+    </div>
   );
 }

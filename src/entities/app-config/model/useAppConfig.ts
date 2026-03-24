@@ -10,7 +10,6 @@ import type {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
 import {
@@ -22,6 +21,7 @@ import {
   applyDesignTokenCssVariables,
   getDesignTokens,
 } from "@/shared/designSystem";
+import { buildClockTimeDayjs } from "@/shared/lib/time";
 
 import type { ShiftGroupConfig } from "./shiftGroupTypes";
 
@@ -48,6 +48,8 @@ export type DefaultAppConfig = Pick<
   | "shiftGroups"
   | "attendanceStatisticsEnabled"
   | "workflowNotificationEnabled"
+  | "timeRecorderAnnouncementEnabled"
+  | "timeRecorderAnnouncementMessage"
   | "overTimeCheckEnabled"
   | "shiftCollaborativeEnabled"
   | "shiftDefaultMode"
@@ -71,6 +73,8 @@ export const DEFAULT_CONFIG: DefaultAppConfig = {
   shiftGroups: [],
   attendanceStatisticsEnabled: false,
   workflowNotificationEnabled: false,
+  timeRecorderAnnouncementEnabled: false,
+  timeRecorderAnnouncementMessage: "",
   overTimeCheckEnabled: false,
   shiftCollaborativeEnabled: false,
   shiftDefaultMode: "normal",
@@ -124,29 +128,37 @@ const useAppConfig = () => {
   const getConfigId = useCallback(() => config?.id ?? null, [config?.id]);
 
   const getStartTime = useCallback(
-    () => dayjs(config?.workStartTime ?? DEFAULT_CONFIG.workStartTime, "HH:mm"),
+    () =>
+      buildClockTimeDayjs(
+        config?.workStartTime ?? undefined,
+        DEFAULT_CONFIG.workStartTime ?? "09:00",
+      ),
     [config?.workStartTime],
   );
 
   const getEndTime = useCallback(
-    () => dayjs(config?.workEndTime ?? DEFAULT_CONFIG.workEndTime, "HH:mm"),
+    () =>
+      buildClockTimeDayjs(
+        config?.workEndTime ?? undefined,
+        DEFAULT_CONFIG.workEndTime ?? "18:00",
+      ),
     [config?.workEndTime],
   );
 
   const getLunchRestStartTime = useCallback(
     () =>
-      dayjs(
-        config?.lunchRestStartTime ?? DEFAULT_CONFIG.lunchRestStartTime,
-        "HH:mm",
+      buildClockTimeDayjs(
+        config?.lunchRestStartTime ?? undefined,
+        DEFAULT_CONFIG.lunchRestStartTime ?? "12:00",
       ),
     [config?.lunchRestStartTime],
   );
 
   const getLunchRestEndTime = useCallback(
     () =>
-      dayjs(
-        config?.lunchRestEndTime ?? DEFAULT_CONFIG.lunchRestEndTime,
-        "HH:mm",
+      buildClockTimeDayjs(
+        config?.lunchRestEndTime ?? undefined,
+        DEFAULT_CONFIG.lunchRestEndTime ?? "13:00",
       ),
     [config?.lunchRestEndTime],
   );
@@ -216,6 +228,24 @@ const useAppConfig = () => {
     [config?.workflowNotificationEnabled],
   );
 
+  const getTimeRecorderAnnouncement = useCallback(
+    () => ({
+      enabled: Boolean(
+        config?.timeRecorderAnnouncementEnabled ??
+          DEFAULT_CONFIG.timeRecorderAnnouncementEnabled,
+      ),
+      message: String(
+        config?.timeRecorderAnnouncementMessage ??
+          DEFAULT_CONFIG.timeRecorderAnnouncementMessage ??
+          "",
+      ),
+    }),
+    [
+      config?.timeRecorderAnnouncementEnabled,
+      config?.timeRecorderAnnouncementMessage,
+    ],
+  );
+
   const getShiftCollaborativeEnabled = useCallback(
     () => config?.shiftCollaborativeEnabled ?? false,
     [config?.shiftCollaborativeEnabled],
@@ -283,22 +313,22 @@ const useAppConfig = () => {
   );
 
   const getAmHolidayStartTime = useCallback(
-    () => dayjs(config?.amHolidayStartTime ?? "09:00", "HH:mm"),
+    () => buildClockTimeDayjs(config?.amHolidayStartTime, "09:00"),
     [config?.amHolidayStartTime],
   );
 
   const getAmHolidayEndTime = useCallback(
-    () => dayjs(config?.amHolidayEndTime ?? "12:00", "HH:mm"),
+    () => buildClockTimeDayjs(config?.amHolidayEndTime, "12:00"),
     [config?.amHolidayEndTime],
   );
 
   const getPmHolidayStartTime = useCallback(
-    () => dayjs(config?.pmHolidayStartTime ?? "13:00", "HH:mm"),
+    () => buildClockTimeDayjs(config?.pmHolidayStartTime, "13:00"),
     [config?.pmHolidayStartTime],
   );
 
   const getPmHolidayEndTime = useCallback(
-    () => dayjs(config?.pmHolidayEndTime ?? "18:00", "HH:mm"),
+    () => buildClockTimeDayjs(config?.pmHolidayEndTime, "18:00"),
     [config?.pmHolidayEndTime],
   );
 
@@ -365,10 +395,15 @@ const useAppConfig = () => {
     () => isLoading || isFetching || isCreating || isUpdating,
     [isLoading, isFetching, isCreating, isUpdating],
   );
+  const isConfigLoading = useMemo(
+    () => isLoading || isFetching,
+    [isLoading, isFetching],
+  );
 
   return {
     config,
     loading,
+    isConfigLoading,
     fetchConfig,
     saveConfig,
     getStartTime,
@@ -380,6 +415,7 @@ const useAppConfig = () => {
     getOfficeMode,
     getAttendanceStatisticsEnabled,
     getWorkflowNotificationEnabled,
+    getTimeRecorderAnnouncement,
     getShiftCollaborativeEnabled,
     getShiftDefaultMode,
     getQuickInputStartTimes,

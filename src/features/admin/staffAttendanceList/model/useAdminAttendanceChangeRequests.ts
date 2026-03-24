@@ -34,7 +34,6 @@ export type UseAdminAttendanceChangeRequestsParams = {
   staff: Staff | undefined | null;
   staffForMail: StaffType | null;
   pendingAttendances: Attendance[];
-  refetchAttendances: () => Promise<unknown>;
   updateAttendance: (input: UpdateAttendanceInput) => Promise<Attendance>;
   isBulkApprovingRef: MutableRefObject<boolean>;
 };
@@ -44,7 +43,6 @@ export const useAdminAttendanceChangeRequests = ({
   staff,
   staffForMail,
   pendingAttendances,
-  refetchAttendances,
   updateAttendance,
   isBulkApprovingRef,
 }: UseAdminAttendanceChangeRequestsParams) => {
@@ -199,7 +197,6 @@ export const useAdminAttendanceChangeRequests = ({
       }
 
       setSelectedAttendanceIds([]);
-      await refetchAttendances();
       if (mailErrorOccurred) {
         dispatch(setSnackbarError(MESSAGE_CODE.E00002));
       }
@@ -218,7 +215,6 @@ export const useAdminAttendanceChangeRequests = ({
     staffForMail,
     pendingAttendances,
     updateAttendance,
-    refetchAttendances,
     dispatch,
   ]);
 

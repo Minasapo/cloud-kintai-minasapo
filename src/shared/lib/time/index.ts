@@ -1,3 +1,4 @@
+export { buildClockTimeDayjs } from "./clockTime";
 export {
   formatDateSlash,
   formatDateTimeReadable,

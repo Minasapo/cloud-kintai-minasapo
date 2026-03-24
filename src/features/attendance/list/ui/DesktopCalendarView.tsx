@@ -178,12 +178,7 @@ function getStatus(
       workDate
     ).isHoliday();
 
-    if (staff.workType === "shift") {
-      // シフトタイプの場合は休日のみチェック
-      if (isHoliday || isCompanyHoliday) {
-        return AttendanceStatus.None;
-      }
-    } else {
+    if (staff.workType !== "shift") {
       // シフトタイプ以外の場合は休日と土日をチェック
       if (isHoliday || isCompanyHoliday || [0, 6].includes(date.day())) {
         return AttendanceStatus.None;

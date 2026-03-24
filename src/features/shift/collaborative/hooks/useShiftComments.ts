@@ -9,6 +9,38 @@ import {
   ShiftRequestData,
 } from "../types/collaborative.types";
 
+const generateCommentId = (): string => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `comment_${crypto.randomUUID()}`;
+  }
+  return `comment_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const ensureUniqueCommentId = (rawId: string, usedIds: Set<string>): string => {
+  const baseId = rawId.trim() || generateCommentId();
+  let candidate = baseId;
+  let suffix = 1;
+  while (usedIds.has(candidate)) {
+    candidate = `${baseId}_${suffix}`;
+    suffix += 1;
+  }
+  usedIds.add(candidate);
+  return candidate;
+};
+
+const collectUsedCommentIds = (commentsMap: CommentsMap): Set<string> => {
+  const usedIds = new Set<string>();
+  commentsMap.forEach((comments) => {
+    comments.forEach((comment) => {
+      usedIds.add(comment.id);
+      comment.replies?.forEach((reply) => {
+        usedIds.add(reply.id);
+      });
+    });
+  });
+  return usedIds;
+};
+
 /**
  * シフトコメント管理フック
  * セルごとのコメント追加、更新、削除を管理
@@ -17,7 +49,6 @@ export const useShiftComments = () => {
   const initialMap = new Map<string, CellComment[]>();
   const commentsMapRef = useRef<CommentsMap>(initialMap);
   const [commentsMap, setCommentsMap] = useState<CommentsMap>(initialMap);
-  const commentIdCounterRef = useRef(0);
 
   const applyUpdate = useCallback((next: CommentsMap) => {
     commentsMapRef.current = next;
@@ -35,10 +66,11 @@ export const useShiftComments = () => {
       userColor: string,
       content: string,
       mentions: Mention[],
+      usedIds: Set<string>,
     ): CellComment => {
       const now = new Date().toISOString();
       return {
-        id: `comment_${commentIdCounterRef.current++}`,
+        id: ensureUniqueCommentId(generateCommentId(), usedIds),
         cellKey,
         userId,
         userName,
@@ -66,6 +98,7 @@ export const useShiftComments = () => {
       content: string,
       mentions: Mention[] = [],
     ): CellComment => {
+      const usedIds = collectUsedCommentIds(commentsMapRef.current);
       const comment = createCommentObject(
         cellKey,
         userId,
@@ -73,6 +106,7 @@ export const useShiftComments = () => {
         userColor,
         content,
         mentions,
+        usedIds,
       );
 
       const next = new Map(commentsMapRef.current);
@@ -166,6 +200,7 @@ export const useShiftComments = () => {
         const parentIndex = comments.findIndex((c) => c.id === parentCommentId);
         if (parentIndex !== -1) {
           const parentComment = comments[parentIndex];
+          const usedIds = collectUsedCommentIds(commentsMapRef.current);
           const reply = createCommentObject(
             parentComment.cellKey,
             userId,
@@ -173,6 +208,7 @@ export const useShiftComments = () => {
             userColor,
             content,
             mentions,
+            usedIds,
           );
 
           const updatedParent: CellComment = {
@@ -300,8 +336,8 @@ export const useShiftComments = () => {
   );
 
   const commentDataToCellComment = useCallback(
-    (c: ShiftRequestCommentData): CellComment => ({
-      id: c.id,
+    (c: ShiftRequestCommentData, usedIds: Set<string>): CellComment => ({
+      id: ensureUniqueCommentId(c.id, usedIds),
       cellKey: c.cellKey,
       userId: c.staffId,
       userName: c.authorName ?? "",
@@ -319,9 +355,10 @@ export const useShiftComments = () => {
   const loadCommentsFromShiftRequests = useCallback(
     (shiftRequests: ShiftRequestData[]) => {
       const next = new Map<string, CellComment[]>();
+      const usedIds = new Set<string>();
       shiftRequests.forEach((sr) => {
         sr.comments?.forEach((c) => {
-          const cellComment = commentDataToCellComment(c);
+          const cellComment = commentDataToCellComment(c, usedIds);
           const existing = next.get(c.cellKey) || [];
           next.set(c.cellKey, [...existing, cellComment]);
         });
@@ -342,9 +379,10 @@ export const useShiftComments = () => {
         }
       }
 
+      const usedIds = collectUsedCommentIds(next);
       // リモートのコメントで上書き
       remoteComments.forEach((c) => {
-        const cellComment = commentDataToCellComment(c);
+        const cellComment = commentDataToCellComment(c, usedIds);
         const existing = next.get(c.cellKey) || [];
         next.set(c.cellKey, [...existing, cellComment]);
       });

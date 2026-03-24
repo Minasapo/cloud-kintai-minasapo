@@ -8,6 +8,12 @@ import {
 
 import { ReturnDirectlyFlag } from "@/entities/attendance/lib/actions/attendanceActions";
 import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
+import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
+import {
+  buildAttendanceIdempotencyKey,
+  resolveAppVersion,
+  resolveClientTimeZone,
+} from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
@@ -20,7 +26,6 @@ import {
 
 export async function returnDirectlyCallback(
   cognitoUser: CognitoUser | null | undefined,
-  today: string,
   staff: Staff | null | undefined,
   dispatch: Dispatch,
   clockOut: (
@@ -31,38 +36,62 @@ export async function returnDirectlyCallback(
   ) => Promise<Attendance>,
   logger: Logger,
   // optional explicit ISO timestamp to use for work end (allows AppConfig-driven times)
-  endTimeIso?: string
+  endTimeIso?: string,
+  occurredAt = getNowISOStringWithZeroSeconds()
 ): Promise<void> {
   if (!cognitoUser) {
     return;
   }
 
+  const workDate = resolveBusinessWorkDate(occurredAt);
   const workEndTime =
     endTimeIso ?? new AttendanceDateTime().setWorkEnd().toISOString();
+  const idempotencyKey = buildAttendanceIdempotencyKey({
+    action: "return_directly",
+    staffId: cognitoUser.id,
+    occurredAt,
+  });
+  const clientTimezone = resolveClientTimeZone();
+  const appVersion = resolveAppVersion();
 
   try {
     const attendance = await clockOut(
       cognitoUser.id,
-      today,
+      workDate,
       workEndTime,
       ReturnDirectlyFlag.YES
     );
     try {
-      const pressedAt = getNowISOStringWithZeroSeconds();
       const input: CreateOperationLogInput = {
         staffId: cognitoUser.id,
         action: "return_directly",
         resource: "attendance",
         resourceId: attendance?.id ?? undefined,
-        // primary timestamp: when the user pressed the button
-        timestamp: pressedAt,
+        timestamp: occurredAt,
         details: JSON.stringify({
-          workDate: today,
+          workDate,
           attendanceTime: workEndTime,
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
           staffName: staff
             ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
             : undefined,
         }),
+        metadata: JSON.stringify({
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
+        }),
+        clientTimezone,
+        occurredAt,
+        resolvedWorkDate: workDate,
+        idempotencyKey,
+        appVersion,
         userAgent:
           typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       };

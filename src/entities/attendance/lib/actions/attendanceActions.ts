@@ -60,7 +60,7 @@ export async function clockInAction({
   createAttendance,
   updateAttendance,
 }: ClockInParams) {
-  if (attendance) {
+  if (attendance && attendance.workDate === workDate) {
     return updateAttendance({
       id: attendance.id,
       startTime,
@@ -87,7 +87,7 @@ export async function clockOutAction({
   createAttendance,
   updateAttendance,
 }: ClockOutParams) {
-  if (attendance) {
+  if (attendance && attendance.workDate === workDate) {
     const startTime = dayjs(attendance.startTime);
     const noon = new AttendanceDateTime().setNoon().toDayjs();
     const isWorkStartBeforeNoon = startTime.isBefore(noon);
@@ -170,7 +170,7 @@ export async function restStartAction({
   createAttendance,
   updateAttendance,
 }: RestParams) {
-  if (attendance) {
+  if (attendance && attendance.workDate === workDate) {
     if (!attendance.startTime) {
       throw new Error("Not clocked in");
     }
@@ -221,7 +221,7 @@ export async function restEndAction({
   createAttendance,
   updateAttendance,
 }: RestParams) {
-  if (attendance) {
+  if (attendance && attendance.workDate === workDate) {
     if (!attendance.startTime) {
       throw new Error("Not clocked in");
     }
@@ -282,7 +282,7 @@ export async function updateRemarksAction({
   createAttendance,
   updateAttendance,
 }: UpdateRemarksParams) {
-  if (attendance) {
+  if (attendance && attendance.workDate === workDate) {
     return updateAttendance({
       id: attendance.id,
       remarks,

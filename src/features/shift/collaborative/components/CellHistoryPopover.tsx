@@ -120,6 +120,7 @@ export const CellHistoryPopover: React.FC<CellHistoryPopoverProps> = ({
                       />
                     </Stack>
                   }
+                  primaryTypographyProps={{ component: "div" }}
                   secondary={
                     <Stack spacing={0}>
                       <Typography variant="caption" color="text.primary">
@@ -131,6 +132,7 @@ export const CellHistoryPopover: React.FC<CellHistoryPopoverProps> = ({
                       </Typography>
                     </Stack>
                   }
+                  secondaryTypographyProps={{ component: "div" }}
                 />
               </ListItem>
             ))}

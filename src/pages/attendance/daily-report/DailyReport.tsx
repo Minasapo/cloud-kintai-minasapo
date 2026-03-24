@@ -1262,6 +1262,11 @@ export default function DailyReport() {
 
                           {isEditing && editDraft ? (
                             <VStack className="gap-4">
+                              {isSelectedReportSubmitted && (
+                                <AlertBox tone="warning">
+                                  この日報は提出済みです。先に「下書き保存」をすると、再提出できるようになります。
+                                </AlertBox>
+                              )}
                               <DailyReportFormFields
                                 form={editDraft}
                                 onChange={handleEditChange}

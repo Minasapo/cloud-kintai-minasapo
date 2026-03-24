@@ -70,6 +70,7 @@ export default function AdminMasterLayout() {
       ],
     },
     { name: "開発者", path: "/admin/master/developer" },
+    { name: "打刻画面アナウンス", path: "/admin/master/time_recorder_announcement" },
     { name: "エクスポート", path: "/admin/master/export" },
   ];
 

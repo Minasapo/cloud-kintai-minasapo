@@ -1,8 +1,8 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { ShiftRequestForm } from "@features/shift/request-form";
+import { LinearProgress } from "@mui/material";
 import Page from "@shared/ui/page/Page";
-import { useContext } from "react";
 
-import { AppConfigContext } from "@/context/AppConfigContext";
 import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborativePage";
 import { PageSection } from "@/shared/ui/layout";
@@ -14,7 +14,18 @@ export const resolveShiftRequestMode = (
 };
 
 export default function ShiftRequestPage() {
-  const { getShiftDefaultMode } = useContext(AppConfigContext);
+  const { config, getShiftDefaultMode, isConfigLoading } = useAppConfig();
+
+  if (isConfigLoading && !config) {
+    return (
+      <Page title="希望シフト" maxWidth={false} showDefaultHeader={false}>
+        <PageSection variant="plain" layoutVariant="detail" sx={{ gap: 0 }}>
+          <LinearProgress data-testid="shift-mode-loading" />
+        </PageSection>
+      </Page>
+    );
+  }
+
   const selectedMode = resolveShiftRequestMode(getShiftDefaultMode());
 
   if (selectedMode === "collaborative") {

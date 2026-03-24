@@ -68,14 +68,17 @@ export const getStatus = (
       return AttendanceStatus.None;
     }
 
-    // 祝日・会社休日・週末は None
-    const holidayLike = isHolidayLike(
-      date,
-      staff,
-      holidayCalendars,
-      companyHolidayCalendars
-    );
-    if (holidayLike) return AttendanceStatus.None;
+    // 非シフト勤務のみ、祝日・会社休日・週末を判定対象外にする。
+    // シフト勤務は祝日でも判定対象とする。
+    if (staff.workType !== "shift") {
+      const holidayLike = isHolidayLike(
+        date,
+        staff,
+        holidayCalendars,
+        companyHolidayCalendars
+      );
+      if (holidayLike) return AttendanceStatus.None;
+    }
 
     // 過去の営業日で打刻データなし → Error
     return AttendanceStatus.Error;
