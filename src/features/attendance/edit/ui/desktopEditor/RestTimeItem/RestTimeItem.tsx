@@ -103,11 +103,12 @@ export default function RestTimeItem() {
                 endTime: null,
               })
             }
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300 bg-white text-emerald-700 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+            className="inline-flex items-center gap-1.5 rounded-[14px] border border-emerald-500/30 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-500/45 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
           >
-            <span aria-hidden="true" className="text-2xl leading-none">
+            <span aria-hidden="true" className="text-lg leading-none">
               +
             </span>
+            <span>追加</span>
           </button>
         </div>
       </div>
