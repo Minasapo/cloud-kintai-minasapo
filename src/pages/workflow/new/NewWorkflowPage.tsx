@@ -80,19 +80,17 @@ const TEXT_FIELD_SX = {
 
 const OUTLINED_BUTTON_SX = {
   borderRadius: "999px",
-  borderColor: "rgba(4, 120, 87, 0.58)",
-  color: "#ffffff",
-  bgcolor: "#19b985",
+  borderColor: "rgba(15, 23, 42, 0.18)",
+  color: "#334155",
+  bgcolor: "#ffffff",
   px: 2.6,
   py: 1.25,
   fontWeight: 500,
-  boxShadow:
-    "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
+  boxShadow: "0 8px 20px -18px rgba(15, 23, 42, 0.55)",
   "&:hover": {
-    borderColor: "rgba(4, 120, 87, 0.62)",
-    bgcolor: "#17ab7b",
-    boxShadow:
-      "inset 0 -2px 0 rgba(0,0,0,0.12), 0 14px 28px -18px rgba(5,150,105,0.6)",
+    borderColor: "rgba(15, 23, 42, 0.32)",
+    bgcolor: "#f8fafc",
+    boxShadow: "0 10px 22px -18px rgba(15, 23, 42, 0.6)",
   },
 } as const;
 
@@ -510,12 +508,21 @@ export default function NewWorkflowPage() {
         onSubmit={handleSubmit}
         sx={{ gap: 0 }}
       >
+        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 2 }}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => navigate("/workflow")}
+            sx={OUTLINED_BUTTON_SX}
+          >
+            申請一覧へ戻る
+          </Button>
+        </Box>
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: { xs: "flex-start", sm: "center" },
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: "column",
+            alignItems: "flex-start",
             gap: HEADER_GAP,
             mb: 2,
           }}
@@ -528,14 +535,6 @@ export default function NewWorkflowPage() {
               申請一覧を起点に、申請内容を作成します。
             </Typography>
           </Box>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => navigate("/workflow")}
-            sx={OUTLINED_BUTTON_SX}
-          >
-            申請一覧へ戻る
-          </Button>
         </Box>
         <DashboardInnerSurface>
           <Grid
@@ -696,14 +695,6 @@ export default function NewWorkflowPage() {
             <Grid item xs={12} sm={3} />
             <Grid item xs={12} sm={9}>
               <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
-                <Button
-                  size="small"
-                  onClick={() => navigate("/workflow")}
-                  variant="outlined"
-                  sx={OUTLINED_BUTTON_SX}
-                >
-                  申請一覧へ戻る
-                </Button>
                 <Button
                   type="submit"
                   variant="contained"

@@ -13,20 +13,6 @@ export interface RestEndButtonProps {
   disabled?: boolean;
 }
 
-function RestEndIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
-      <path
-        d="M12 7v5l3 3M20 12a8 8 0 1 1-8-8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 const RestEndButton = ({
   isResting,
   onRestEnd,
@@ -48,12 +34,12 @@ const RestEndButton = ({
     <ActionCardButton
       testId="rest-end-button"
       style={restButtonVars}
-      size="compact"
+      size="slim"
+      layout="center"
       disabled={isDisabled}
       onClick={handleClick}
       label="休憩終了"
       helper={null}
-      icon={<RestEndIcon />}
     />
   );
 };

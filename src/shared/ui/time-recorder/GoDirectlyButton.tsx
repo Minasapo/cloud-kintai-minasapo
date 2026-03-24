@@ -13,20 +13,6 @@ export interface GoDirectlyButtonProps {
   disabled?: boolean;
 }
 
-function GoDirectlyIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none">
-      <path
-        d="M5 12h10M11 6l6 6-6 6M5 6v12"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 const GoDirectlyButton = ({
   isBeforeWork,
   onGoDirectly,
@@ -48,11 +34,12 @@ const GoDirectlyButton = ({
     <ActionCardButton
       testId="go-directly-button"
       style={actionButtonVars}
+      shape="circle"
+      layout="center"
       disabled={isDisabled}
       onClick={handleClick}
       label="直行"
       helper={null}
-      icon={<GoDirectlyIcon />}
     />
   );
 };
