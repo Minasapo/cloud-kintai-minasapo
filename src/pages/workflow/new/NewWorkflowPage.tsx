@@ -561,26 +561,30 @@ export default function NewWorkflowPage() {
                 <MenuItem value="">
                   <em>種別を選択</em>
                 </MenuItem>
-                {enabledCategoryOptions.map((item) => {
+                {enabledCategoryOptions.flatMap((item) => {
                   if (item.category === WorkflowCategory.CLOCK_CORRECTION) {
-                    return (
-                      <React.Fragment key={item.category}>
-                        <MenuItem value={CLOCK_CORRECTION_LABEL}>
-                          {CLOCK_CORRECTION_LABEL}
-                        </MenuItem>
-                        <MenuItem value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
-                          {CLOCK_CORRECTION_CHECK_OUT_LABEL}
-                        </MenuItem>
-                      </React.Fragment>
-                    );
+                    return [
+                      <MenuItem
+                        key={`${item.category}-clock-in`}
+                        value={CLOCK_CORRECTION_LABEL}
+                      >
+                        {CLOCK_CORRECTION_LABEL}
+                      </MenuItem>,
+                      <MenuItem
+                        key={`${item.category}-clock-out`}
+                        value={CLOCK_CORRECTION_CHECK_OUT_LABEL}
+                      >
+                        {CLOCK_CORRECTION_CHECK_OUT_LABEL}
+                      </MenuItem>,
+                    ];
                   }
 
                   const label = CATEGORY_LABELS[item.category] ?? item.label;
-                  return (
+                  return [
                     <MenuItem key={item.category} value={label}>
                       {label}
-                    </MenuItem>
-                  );
+                    </MenuItem>,
+                  ];
                 })}
               </Select>
             </Grid>

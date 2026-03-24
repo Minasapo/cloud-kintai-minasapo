@@ -35,17 +35,13 @@ const ReturnDirectlyButton = ({
   const actionButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.subtleDanger,
   );
-  const { isDisabled, markPending } = useActionButtonState({
+  const { isDisabled, runWithPending } = useActionButtonState({
     canInteract: isWorking,
     disabled,
   });
   const handleClick = useCallback(() => {
-    if (!markPending()) {
-      return;
-    }
-
-    onReturnDirectly();
-  }, [markPending, onReturnDirectly]);
+    runWithPending(onReturnDirectly);
+  }, [onReturnDirectly, runWithPending]);
 
   return (
     <ActionCardButton

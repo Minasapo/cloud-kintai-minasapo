@@ -8,13 +8,17 @@ import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import {
+  Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   LinearProgress,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { Hub } from "aws-amplify/utils";
@@ -191,6 +195,8 @@ export default function Layout() {
   }, [authStatus, cognitoUserLoading, isCognitoUserRole, location.pathname]);
 
   const {
+    config: appConfig,
+    isConfigLoading,
     fetchConfig,
     saveConfig,
     getStartTime,
@@ -410,17 +416,44 @@ export default function Layout() {
 
   const shouldBlockUnauthenticated =
     authStatus === "unauthenticated" && !isLoginRoute;
+  const shouldBlockAppConfigBootstrap =
+    authStatus === "authenticated" && isConfigLoading && !appConfig;
 
   const shouldBlockLayoutBootstrap =
     authStatus === "configuring" ||
     cognitoUserLoading ||
-    shouldBlockUnauthenticated;
+    shouldBlockUnauthenticated ||
+    shouldBlockAppConfigBootstrap;
 
   if (shouldBlockLayoutBootstrap) {
     return (
       <ThemeContextProvider>
         <ThemeProvider theme={appTheme}>
-          <LinearProgress data-testid="layout-linear-progress" />
+          <Box
+            sx={{
+              minHeight: "100vh",
+              display: "flex",
+              flexDirection: "column",
+              bgcolor: "background.default",
+            }}
+          >
+            <LinearProgress data-testid="layout-linear-progress" />
+            <Stack
+              sx={{ flex: 1 }}
+              alignItems="center"
+              justifyContent="center"
+              spacing={2}
+            >
+              <CircularProgress size={28} />
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                data-testid="layout-loading-message"
+              >
+                画面を更新しています...
+              </Typography>
+            </Stack>
+          </Box>
         </ThemeProvider>
       </ThemeContextProvider>
     );

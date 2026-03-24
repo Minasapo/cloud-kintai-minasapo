@@ -50,15 +50,12 @@ interface WorkflowCarouselDialogProps {
   staffNamesById: Map<string, string>;
   onOpenInRightPanel: (workflowId: string) => void;
   enableApprovalActions?: boolean;
-  onWorkflowActionCompleted?: () => Promise<void> | void;
 }
 
 function WorkflowCarouselActionButtons({
   workflowId,
-  onWorkflowActionCompleted,
 }: {
   workflowId: string;
-  onWorkflowActionCompleted?: () => Promise<void> | void;
 }) {
   const { authStatus, cognitoUser } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -97,16 +94,6 @@ function WorkflowCarouselActionButtons({
     updateAttendance,
   });
 
-  const handleApproveAndRefresh = async () => {
-    await handleApprove();
-    await onWorkflowActionCompleted?.();
-  };
-
-  const handleRejectAndRefresh = async () => {
-    await handleReject();
-    await onWorkflowActionCompleted?.();
-  };
-
   return (
     <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
       <Button
@@ -114,7 +101,7 @@ function WorkflowCarouselActionButtons({
         variant="contained"
         color="success"
         onClick={() => {
-          void handleApproveAndRefresh();
+          void handleApprove();
         }}
         disabled={
           !workflow?.id ||
@@ -129,7 +116,7 @@ function WorkflowCarouselActionButtons({
         variant="contained"
         color="error"
         onClick={() => {
-          void handleRejectAndRefresh();
+          void handleReject();
         }}
         disabled={
           !workflow?.id ||
@@ -152,7 +139,6 @@ export default function WorkflowCarouselDialog({
   staffNamesById,
   onOpenInRightPanel,
   enableApprovalActions = false,
-  onWorkflowActionCompleted,
 }: WorkflowCarouselDialogProps) {
   const initialIndex = useMemo(
     () =>
@@ -262,10 +248,7 @@ export default function WorkflowCarouselDialog({
             </Stack>
 
             {enableApprovalActions && currentWorkflowId && (
-              <WorkflowCarouselActionButtons
-                workflowId={currentWorkflowId}
-                onWorkflowActionCompleted={onWorkflowActionCompleted}
-              />
+              <WorkflowCarouselActionButtons workflowId={currentWorkflowId} />
             )}
 
             <Box>

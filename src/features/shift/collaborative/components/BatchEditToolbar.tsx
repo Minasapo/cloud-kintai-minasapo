@@ -277,8 +277,11 @@ const BatchEditToolbarBase = ({
                   {comments.length}件のコメント
                 </Typography>
                 <Stack spacing={1.5}>
-                  {comments.map((comment) => (
-                    <Box key={comment.id} sx={{ display: "flex", gap: 1 }}>
+                  {comments.map((comment, index) => (
+                    <Box
+                      key={`${comment.id}-${comment.createdAt}-${index}`}
+                      sx={{ display: "flex", gap: 1 }}
+                    >
                       <Avatar
                         sx={{
                           width: 28,

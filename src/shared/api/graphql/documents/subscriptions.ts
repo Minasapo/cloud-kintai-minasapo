@@ -623,6 +623,7 @@ export const onCreateAttendance = /* GraphQL */ `subscription OnCreateAttendance
   onCreateAttendance(filter: $filter) {
     id
     staffId
+    staffWorkDateKey
     workDate
     startTime
     endTime
@@ -721,6 +722,7 @@ export const onUpdateAttendance = /* GraphQL */ `subscription OnUpdateAttendance
   onUpdateAttendance(filter: $filter) {
     id
     staffId
+    staffWorkDateKey
     workDate
     startTime
     endTime
@@ -819,6 +821,7 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
   onDeleteAttendance(filter: $filter) {
     id
     staffId
+    staffWorkDateKey
     workDate
     startTime
     endTime
@@ -1528,6 +1531,11 @@ export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperatio
     ipAddress
     userAgent
     metadata
+    clientTimezone
+    occurredAt
+    resolvedWorkDate
+    idempotencyKey
+    appVersion
     severity
     version
     createdAt
@@ -1553,6 +1561,11 @@ export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperatio
     ipAddress
     userAgent
     metadata
+    clientTimezone
+    occurredAt
+    resolvedWorkDate
+    idempotencyKey
+    appVersion
     severity
     version
     createdAt
@@ -1578,6 +1591,11 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
     ipAddress
     userAgent
     metadata
+    clientTimezone
+    occurredAt
+    resolvedWorkDate
+    idempotencyKey
+    appVersion
     severity
     version
     createdAt

@@ -1,29 +1,17 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { DailyReportCalendar } from "@features/attendance/daily-report";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
-import {
-  dailyReportsByStaffId,
-  getDailyReport,
-} from "@shared/api/graphql/documents/queries";
+import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
   DailyReportComment,
   DailyReportReaction,
-  DailyReportsByStaffIdQuery,
   GetDailyReportQuery,
   UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
-import { ModelSortDirection } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
-import dayjs, { type Dayjs } from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import useCognitoUser from "@/hooks/useCognitoUser";
@@ -50,8 +38,6 @@ type LocationState = {
   report?: AdminDailyReport;
 };
 
-const DATE_FORMAT = "YYYY-MM-DD";
-
 const STATUS_BADGE_CLASS: Record<"default" | "info" | "success", string> = {
   default:
     "inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600",
@@ -71,16 +57,6 @@ const normalizeComments = (
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
 
-const sortReports = (items: AdminDailyReport[]) =>
-  items.toSorted((a, b) => {
-    if (a.date === b.date) {
-      const aTime = a.updatedAt ?? "";
-      const bTime = b.updatedAt ?? "";
-      return bTime.localeCompare(aTime);
-    }
-    return b.date.localeCompare(a.date);
-  });
-
 interface AdminDailyReportDetailProps {
   overrideId?: string;
 }
@@ -98,7 +74,6 @@ export default function AdminDailyReportDetail({
   const stateReportId = state?.report?.id ?? null;
   const { staffs, loading: isStaffLoading } = useStaffs({ isAuthenticated });
   const { cognitoUser } = useCognitoUser();
-  const [, setSearchParams] = useSearchParams();
 
   const buildStaffName = useCallback(
     (staffId: string) => {
@@ -115,9 +90,7 @@ export default function AdminDailyReportDetail({
   const [report, setReport] = useState<AdminDailyReport | null>(
     () => state?.report ?? null,
   );
-  const [reports, setReports] = useState<AdminDailyReport[]>([]);
   const [isLoading, setIsLoading] = useState(!state?.report);
-  const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reactions, setReactions] = useState<ReportReaction[]>(
     () => report?.reactions ?? [],
@@ -141,25 +114,7 @@ export default function AdminDailyReportDetail({
   const [currentStaffId, setCurrentStaffId] = useState<string | null>(null);
   const [currentStaffName, setCurrentStaffName] = useState<string>("管理者");
   const [isResolvingCurrentStaff, setIsResolvingCurrentStaff] = useState(true);
-  const [calendarDate, setCalendarDate] = useState<Dayjs>(() =>
-    dayjs().startOf("day"),
-  );
-  const [staffIdForReports, setStaffIdForReports] = useState<string | null>(
-    null,
-  );
   const isCompact = overrideId !== undefined;
-
-  const { dateMap: reportsByDate, dateSet: reportedDateSet } = useMemo(() => {
-    const dateMap = new Map<string, AdminDailyReport>();
-    const dateSet = new Set<string>();
-    reports.forEach((r) => {
-      if (!dateMap.has(r.date)) {
-        dateMap.set(r.date, r);
-      }
-      dateSet.add(r.date);
-    });
-    return { dateMap, dateSet };
-  }, [reports]);
 
   const fetchReport = useCallback(async () => {
     if (!id) return;
@@ -182,10 +137,6 @@ export default function AdminDailyReportDetail({
       setReactionEntries(normalizeReactions(record.reactions));
       setCommentEntries(normalizeComments(record.comments));
       setReport(mapDailyReport(record, buildStaffName(record.staffId)));
-
-      if (!staffIdForReports) setStaffIdForReports(record.staffId);
-      const reportDate = dayjs(record.reportDate, DATE_FORMAT);
-      if (reportDate.isValid()) setCalendarDate(reportDate.startOf("day"));
     } catch (error) {
       setLoadError(
         error instanceof Error ? error.message : "日報の取得に失敗しました。",
@@ -196,66 +147,11 @@ export default function AdminDailyReportDetail({
     } finally {
       setIsLoading(false);
     }
-  }, [buildStaffName, id, stateReportId, staffIdForReports]);
-
-  const fetchReports = useCallback(async () => {
-    if (isCompact) {
-      setReports([]);
-      setIsLoadingReports(false);
-      return;
-    }
-    if (!staffIdForReports) {
-      setReports([]);
-      setIsLoadingReports(false);
-      return;
-    }
-    setIsLoadingReports(true);
-    try {
-      const aggregated: AdminDailyReport[] = [];
-      let nextToken: string | null | undefined = undefined;
-      do {
-        const response = (await graphqlClient.graphql({
-          query: dailyReportsByStaffId,
-          variables: {
-            staffId: staffIdForReports,
-            sortDirection: ModelSortDirection.DESC,
-            limit: 50,
-            nextToken,
-          },
-          authMode: "userPool",
-        })) as GraphQLResult<DailyReportsByStaffIdQuery>;
-
-        if (response.errors?.length) {
-          throw new Error(
-            response.errors.map((error) => error.message).join("\n"),
-          );
-        }
-
-        const items =
-          response.data?.dailyReportsByStaffId?.items?.filter(
-            (item): item is NonNullable<typeof item> => item !== null,
-          ) ?? [];
-        items.forEach((item) => {
-          aggregated.push(mapDailyReport(item, buildStaffName(item.staffId)));
-        });
-        nextToken = response.data?.dailyReportsByStaffId?.nextToken;
-      } while (nextToken);
-
-      setReports(sortReports(aggregated));
-    } catch {
-      setReports([]);
-    } finally {
-      setIsLoadingReports(false);
-    }
-  }, [buildStaffName, isCompact, staffIdForReports]);
+  }, [buildStaffName, id, stateReportId]);
 
   useEffect(() => {
     void fetchReport();
   }, [fetchReport]);
-
-  useEffect(() => {
-    void fetchReports();
-  }, [fetchReports]);
 
   useEffect(() => {
     setReport((prev) => {
@@ -321,23 +217,6 @@ export default function AdminDailyReportDetail({
       mounted = false;
     };
   }, [cognitoUser]);
-
-  const handleCalendarChange = useCallback(
-    (newDate: Dayjs | null) => {
-      if (!newDate || !staffIdForReports) return;
-      const dateKey = newDate.format(DATE_FORMAT);
-      setCalendarDate(newDate.startOf("day"));
-      const reportForDate = reportsByDate.get(dateKey);
-      if (reportForDate) {
-        navigate(`/admin/daily-report/${reportForDate.id}?date=${dateKey}`, {
-          replace: true,
-        });
-      } else {
-        setSearchParams({ date: dateKey }, { replace: true });
-      }
-    },
-    [navigate, reportsByDate, staffIdForReports, setSearchParams],
-  );
 
   const handleToggleReaction = async (type: ReactionType) => {
     if (!report) return;
@@ -583,20 +462,8 @@ export default function AdminDailyReportDetail({
 
         {/* Main content grid */}
         <div
-          className={`grid grid-cols-1 gap-3 ${!isCompact ? "md:grid-cols-[1fr_2fr] md:items-start" : ""}`}
+          className="grid grid-cols-1 gap-3"
         >
-          {!isCompact && (
-            <DashboardInnerSurface>
-              <DailyReportCalendar
-                value={calendarDate}
-                onChange={handleCalendarChange}
-                reportedDateSet={reportedDateSet}
-                isLoadingReports={isLoadingReports}
-                hasReports={reports.length > 0}
-              />
-            </DashboardInnerSurface>
-          )}
-
           {/* Detail panel */}
           <DashboardInnerSurface>
             {shouldShowLoading ? (
@@ -621,6 +488,16 @@ export default function AdminDailyReportDetail({
               </div>
             ) : (
               <div className="space-y-4">
+                <div className="flex justify-start">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/admin/daily-report")}
+                    className="inline-flex h-8 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                  >
+                    一覧に戻る
+                  </button>
+                </div>
+
                 {/* Report header */}
                 <div>
                   <h2 className="text-lg font-bold text-slate-800">
@@ -772,15 +649,6 @@ export default function AdminDailyReportDetail({
                   )}
                 </div>
 
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/admin/daily-report")}
-                    className="inline-flex h-8 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
-                  >
-                    一覧に戻る
-                  </button>
-                </div>
               </div>
             )}
           </DashboardInnerSurface>

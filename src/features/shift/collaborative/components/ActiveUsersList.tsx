@@ -264,6 +264,7 @@ const UserDetailList: React.FC<UserDetailListProps> = ({ users }) => {
                   />
                 </Box>
               }
+              primaryTypographyProps={{ component: "div" }}
               secondary={
                 <Box>
                   <Typography variant="caption" display="block">
@@ -280,6 +281,7 @@ const UserDetailList: React.FC<UserDetailListProps> = ({ users }) => {
                   )}
                 </Box>
               }
+              secondaryTypographyProps={{ component: "div" }}
             />
           </ListItem>
         ))}

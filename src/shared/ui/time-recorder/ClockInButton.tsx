@@ -42,18 +42,14 @@ const ClockInButton = ({
   const actionButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.clockIn,
   );
-  const { isDisabled, markPending } = useActionButtonState({
+  const { isDisabled, runWithPending } = useActionButtonState({
     canInteract: isBeforeWork,
     disabled,
   });
 
   const handleClick = useCallback(() => {
-    if (!markPending()) {
-      return;
-    }
-
-    onClockIn();
-  }, [markPending, onClockIn]);
+    runWithPending(onClockIn);
+  }, [onClockIn, runWithPending]);
 
   return (
     <ActionCardButton

@@ -35,18 +35,14 @@ const RestEndButton = ({
   const restButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.rest,
   );
-  const { isDisabled, markPending } = useActionButtonState({
+  const { isDisabled, runWithPending } = useActionButtonState({
     canInteract: isResting,
     disabled,
   });
 
   const handleClick = useCallback(() => {
-    if (!markPending()) {
-      return;
-    }
-
-    onRestEnd();
-  }, [markPending, onRestEnd]);
+    runWithPending(onRestEnd);
+  }, [onRestEnd, runWithPending]);
 
   return (
     <ActionCardButton

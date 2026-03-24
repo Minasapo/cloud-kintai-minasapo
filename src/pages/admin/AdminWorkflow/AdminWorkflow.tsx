@@ -60,7 +60,7 @@ export default function AdminWorkflow() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-  const { workflows, loading, error, fetchWorkflows } = useWorkflows({
+  const { workflows, loading, error } = useWorkflows({
     isAuthenticated,
   });
   const { config, getAbsentEnabled, getWorkflowCategoryOrder } = useAppConfig();
@@ -418,7 +418,6 @@ export default function AdminWorkflow() {
               setIsCarouselOpen(false);
             }}
             enableApprovalActions
-            onWorkflowActionCompleted={fetchWorkflows}
           />
         )}
       </Stack>

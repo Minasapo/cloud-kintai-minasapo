@@ -35,18 +35,14 @@ const GoDirectlyButton = ({
   const actionButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.subtle,
   );
-  const { isDisabled, markPending } = useActionButtonState({
+  const { isDisabled, runWithPending } = useActionButtonState({
     canInteract: isBeforeWork,
     disabled,
   });
 
   const handleClick = useCallback(() => {
-    if (!markPending()) {
-      return;
-    }
-
-    onGoDirectly();
-  }, [markPending, onGoDirectly]);
+    runWithPending(onGoDirectly);
+  }, [onGoDirectly, runWithPending]);
 
   return (
     <ActionCardButton

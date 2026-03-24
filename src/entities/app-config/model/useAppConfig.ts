@@ -387,10 +387,15 @@ const useAppConfig = () => {
     () => isLoading || isFetching || isCreating || isUpdating,
     [isLoading, isFetching, isCreating, isUpdating],
   );
+  const isConfigLoading = useMemo(
+    () => isLoading || isFetching,
+    [isLoading, isFetching],
+  );
 
   return {
     config,
     loading,
+    isConfigLoading,
     fetchConfig,
     saveConfig,
     getStartTime,

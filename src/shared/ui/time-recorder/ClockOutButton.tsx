@@ -42,18 +42,14 @@ const ClockOutButton = ({
   const actionButtonVars = buildActionCardVars(
     TIME_RECORDER_BUTTON_PALETTES.clockOut,
   );
-  const { isDisabled, markPending } = useActionButtonState({
+  const { isDisabled, runWithPending } = useActionButtonState({
     canInteract: isWorking,
     disabled,
   });
 
   const handleClick = useCallback(() => {
-    if (!markPending()) {
-      return;
-    }
-
-    onClockOut();
-  }, [markPending, onClockOut]);
+    runWithPending(onClockOut);
+  }, [onClockOut, runWithPending]);
 
   return (
     <ActionCardButton

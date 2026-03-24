@@ -1,8 +1,9 @@
 import {
-  useCreateAttendanceMutation,
+  type AttendanceUpsertAction,
   useGetAttendanceByStaffAndDateQuery,
   useListRecentAttendancesQuery,
   useUpdateAttendanceMutation,
+  useUpsertAttendanceByStaffAndDateMutation,
 } from "@entities/attendance/api/attendanceApi";
 import {
   useGetCompanyHolidayCalendarsQuery,
@@ -39,11 +40,13 @@ import {
   ReturnDirectlyFlag,
 } from "@/entities/attendance/lib/actions/attendanceActions";
 import { getWorkStatus } from "@/entities/attendance/lib/actions/workStatus";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   AttendanceState,
   AttendanceStatus,
 } from "@/entities/attendance/lib/AttendanceState";
+import { resolveCurrentBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
+import { buildAttendanceIdempotencyKey } from "@/entities/attendance/lib/operationContext";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
@@ -73,7 +76,22 @@ export default function TimeRecorder(): JSX.Element {
 
   const { getStartTime, getEndTime } = useContext(AppConfigContext);
 
-  const today = useMemo(() => dayjs().format(AttendanceDate.DataFormat), []);
+  const [currentWorkDate, setCurrentWorkDate] = useState(() =>
+    resolveCurrentBusinessWorkDate(),
+  );
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      const nextWorkDate = resolveCurrentBusinessWorkDate();
+      setCurrentWorkDate((prev) =>
+        prev === nextWorkDate ? prev : nextWorkDate,
+      );
+    }, 30 * 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   const shouldFetchAttendance = Boolean(cognitoUser?.id);
 
@@ -103,7 +121,7 @@ export default function TimeRecorder(): JSX.Element {
     error: attendanceError,
     refetch: refetchAttendance,
   } = useGetAttendanceByStaffAndDateQuery(
-    { staffId: cognitoUser?.id ?? "", workDate: today },
+    { staffId: cognitoUser?.id ?? "", workDate: currentWorkDate },
     { skip: !shouldFetchAttendance },
   );
 
@@ -134,13 +152,59 @@ export default function TimeRecorder(): JSX.Element {
     isAttendancesFetching ||
     isAttendancesUninitialized;
 
-  const [createAttendanceMutation] = useCreateAttendanceMutation();
+  const [upsertAttendanceMutation] = useUpsertAttendanceByStaffAndDateMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
   const localAttendanceUpdateIgnoreUntilRef = useRef(0);
 
+  const resolveUpsertAction = useCallback(
+    (input: CreateAttendanceInput): AttendanceUpsertAction => {
+      if (input.goDirectlyFlag) return "go_directly";
+      if (input.returnDirectlyFlag) return "return_directly";
+      if (input.startTime) return "clock_in";
+      if (input.endTime) return "clock_out";
+      const rests = input.rests ?? [];
+      if (rests.some((rest) => Boolean(rest?.startTime) && !rest?.endTime)) {
+        return "rest_start";
+      }
+      if (rests.some((rest) => Boolean(rest?.endTime))) {
+        return "rest_end";
+      }
+      return "manual";
+    },
+    [],
+  );
+
+  const resolveOccurredAtFromCreateInput = useCallback(
+    (input: CreateAttendanceInput) =>
+      input.startTime ??
+      input.endTime ??
+      input.rests?.find((rest) => rest?.startTime)?.startTime ??
+      input.rests?.find((rest) => rest?.endTime)?.endTime ??
+      getNowISOStringWithZeroSeconds(),
+    [],
+  );
+
   const createAttendance = useCallback(
-    (input: CreateAttendanceInput) => createAttendanceMutation(input).unwrap(),
-    [createAttendanceMutation],
+    (input: CreateAttendanceInput) => {
+      const occurredAt = resolveOccurredAtFromCreateInput(input);
+      const action = resolveUpsertAction(input);
+      const idempotencyKey = buildAttendanceIdempotencyKey({
+        action,
+        staffId: input.staffId,
+        occurredAt,
+      });
+      return upsertAttendanceMutation({
+        input,
+        action,
+        occurredAt,
+        idempotencyKey,
+      }).unwrap();
+    },
+    [
+      resolveOccurredAtFromCreateInput,
+      resolveUpsertAction,
+      upsertAttendanceMutation,
+    ],
   );
 
   const updateAttendance = useCallback(
@@ -302,82 +366,120 @@ export default function TimeRecorder(): JSX.Element {
   }, [attendance?.endTime]);
 
   const handleClockIn = useCallback(
-    () => clockInCallback(cognitoUser, today, clockIn, dispatch, staff, logger),
-    [cognitoUser, clockIn, dispatch, staff],
+    () => {
+      const occurredAt = getNowISOStringWithZeroSeconds();
+      return clockInCallback(
+        cognitoUser,
+        clockIn,
+        dispatch,
+        staff,
+        logger,
+        occurredAt,
+      );
+    },
+    [clockIn, cognitoUser, dispatch, logger, staff],
   );
 
   const handleClockOut = useCallback(
-    () =>
-      clockOutCallback(cognitoUser, today, clockOut, dispatch, staff, logger),
-    [cognitoUser, clockOut, dispatch, staff],
+    () => {
+      const occurredAt = getNowISOStringWithZeroSeconds();
+      return clockOutCallback(
+        cognitoUser,
+        clockOut,
+        dispatch,
+        staff,
+        logger,
+        undefined,
+        occurredAt,
+      );
+    },
+    [clockOut, cognitoUser, dispatch, logger, staff],
   );
 
   const handleGoDirectly = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    const baseDate = dayjs(occurredAt);
     const configured = getStartTime();
-    const startIso = dayjs()
+    const startIso = baseDate
       .hour(configured.hour())
       .minute(configured.minute())
       .second(0)
       .millisecond(0)
       .toISOString();
 
-    goDirectlyCallback(
+    return goDirectlyCallback(
       cognitoUser,
-      today,
       staff,
       dispatch,
       clockIn,
       logger,
       startIso,
+      occurredAt,
     );
   }, [
     cognitoUser,
     clockIn,
     dispatch,
     staff,
-    today,
     logger,
     getStartTime,
-    goDirectlyCallback,
   ]);
 
   const handleReturnDirectly = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    const baseDate = dayjs(occurredAt);
     const configured = getEndTime();
-    const endIso = dayjs()
+    const endIso = baseDate
       .hour(configured.hour())
       .minute(configured.minute())
       .second(0)
       .millisecond(0)
       .toISOString();
 
-    returnDirectlyCallback(
+    return returnDirectlyCallback(
       cognitoUser,
-      today,
       staff,
       dispatch,
       clockOut,
       logger,
       endIso,
+      occurredAt,
     );
   }, [
     cognitoUser,
     staff,
     dispatch,
     clockOut,
-    today,
     logger,
     getEndTime,
-    returnDirectlyCallback,
   ]);
 
   const handleRestStart = useCallback(
-    () => restStartCallback(cognitoUser, today, dispatch, restStart, logger),
-    [cognitoUser, restStart, dispatch],
+    () => {
+      const occurredAt = getNowISOStringWithZeroSeconds();
+      return restStartCallback(
+        cognitoUser,
+        dispatch,
+        restStart,
+        logger,
+        occurredAt,
+      );
+    },
+    [cognitoUser, dispatch, logger, restStart],
   );
 
   const handleRestEnd = useCallback(
-    () => restEndCallback(cognitoUser, today, restEnd, dispatch, logger),
-    [cognitoUser, restEnd, dispatch],
+    () => {
+      const occurredAt = getNowISOStringWithZeroSeconds();
+      return restEndCallback(
+        cognitoUser,
+        restEnd,
+        dispatch,
+        logger,
+        occurredAt,
+      );
+    },
+    [cognitoUser, dispatch, logger, restEnd],
   );
 
   const handleVisibilityChange = useCallback(() => {
@@ -484,7 +586,7 @@ export default function TimeRecorder(): JSX.Element {
         variables: {
           filter: {
             staffId: { eq: cognitoUser.id },
-            workDate: { eq: today },
+            workDate: { eq: currentWorkDate },
           },
         },
         authMode: "userPool",
@@ -514,7 +616,7 @@ export default function TimeRecorder(): JSX.Element {
     return () => {
       subscription.unsubscribe();
     };
-  }, [cognitoUser?.id, logger, refreshTimeRecorderData, today]);
+  }, [cognitoUser?.id, currentWorkDate, logger, refreshTimeRecorderData]);
 
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return <TimeRecorderLoadingView />;
@@ -527,7 +629,7 @@ export default function TimeRecorder(): JSX.Element {
 
   return (
     <TimeRecorderView
-      today={today}
+      today={currentWorkDate}
       staffId={staff?.id ?? null}
       workStatus={workStatus}
       directMode={directMode}

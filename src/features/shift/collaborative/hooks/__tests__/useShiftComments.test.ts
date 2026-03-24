@@ -1,6 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
 
-import { CellComment, Mention } from "../../types/collaborative.types";
+import {
+  CellComment,
+  Mention,
+  ShiftRequestData,
+} from "../../types/collaborative.types";
 import { useShiftComments } from "../useShiftComments";
 
 describe("useShiftComments", () => {
@@ -454,6 +458,91 @@ describe("useShiftComments", () => {
       expect(allComments.size).toBe(2);
       expect(allComments.get("staff1#01")).toHaveLength(1);
       expect(allComments.get("staff2#02")).toHaveLength(1);
+    });
+  });
+
+  describe("重複IDの正規化", () => {
+    it("loadCommentsFromShiftRequests で重複IDを一意化できること", () => {
+      const { result } = renderHook(() => useShiftComments());
+
+      const shiftRequests: ShiftRequestData[] = [
+        {
+          id: "request-1",
+          staffId: "staff1",
+          targetMonth: "2026-03",
+          comments: [
+            {
+              id: "comment_0",
+              cellKey: "staff1#01",
+              staffId: "staff1",
+              authorName: "太郎",
+              body: "1件目",
+              createdAt: "2026-03-01T09:00:00.000Z",
+            },
+            {
+              id: "comment_0",
+              cellKey: "staff1#01",
+              staffId: "staff1",
+              authorName: "花子",
+              body: "2件目",
+              createdAt: "2026-03-01T10:00:00.000Z",
+            },
+          ],
+        },
+      ];
+
+      act(() => {
+        result.current.loadCommentsFromShiftRequests(shiftRequests);
+      });
+
+      const comments = result.current.getCommentsByCell("staff1#01");
+      expect(comments).toHaveLength(2);
+      expect(new Set(comments.map((comment) => comment.id)).size).toBe(2);
+    });
+
+    it("mergeRemoteComments で既存コメントIDと衝突しないこと", () => {
+      const { result } = renderHook(() => useShiftComments());
+
+      const initialShiftRequests: ShiftRequestData[] = [
+        {
+          id: "request-2",
+          staffId: "staff2",
+          targetMonth: "2026-03",
+          comments: [
+            {
+              id: "comment_0",
+              cellKey: "staff2#01",
+              staffId: "staff2",
+              authorName: "次郎",
+              body: "既存コメント",
+              createdAt: "2026-03-01T09:00:00.000Z",
+            },
+          ],
+        },
+      ];
+
+      act(() => {
+        result.current.loadCommentsFromShiftRequests(initialShiftRequests);
+      });
+
+      act(() => {
+        result.current.mergeRemoteComments("staff1", [
+          {
+            id: "comment_0",
+            cellKey: "staff1#01",
+            staffId: "staff1",
+            authorName: "太郎",
+            body: "リモートコメント",
+            createdAt: "2026-03-01T11:00:00.000Z",
+          },
+        ]);
+      });
+
+      const allComments = result.current.getAllComments();
+      const allIds = Array.from(allComments.values())
+        .flat()
+        .map((comment) => comment.id);
+      expect(new Set(allIds).size).toBe(allIds.length);
     });
   });
 });
