@@ -1,23 +1,25 @@
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
-import { calcTotalRestTime, calcTotalWorkTime } from "@entities/attendance/lib/time";
-import useCloseDates from "@entities/attendance/model/useCloseDates";
-import { Tooltip as MuiTooltip } from "@mui/material";
 import {
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
+  calcTotalRestTime,
+  calcTotalWorkTime,
+} from "@entities/attendance/lib/time";
+import useCloseDates from "@entities/attendance/model/useCloseDates";
+import {
+  type ChartData,
   type ChartOptions,
-  Legend,
-  LinearScale,
-  Tooltip as ChartTooltip,
 } from "chart.js";
 import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
-import { Bar } from "react-chartjs-2";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
+
+import RegisterSummaryAttendanceErrorCountCard from "./RegisterSummaryAttendanceErrorCountCard";
+import RegisterSummaryTotalWorkHoursCard from "./RegisterSummaryTotalWorkHoursCard";
+import RegisterSummaryWorkDaysCard from "./RegisterSummaryWorkDaysCard";
+import RegisterSummaryWorkStatusChartCard from "./RegisterSummaryWorkStatusChartCard";
 
 type DateRange = {
   start: dayjs.Dayjs;
@@ -86,15 +88,17 @@ type RegisterAttendanceSummaryCardProps = {
   attendanceErrorCount?: number;
 };
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ChartTooltip, Legend);
-
 export default function RegisterAttendanceSummaryCard({
   attendanceErrorCount = 0,
 }: RegisterAttendanceSummaryCardProps) {
   const { cognitoUser } = useContext(AuthContext);
   const { getStandardWorkHours } = useContext(AppConfigContext);
-  const { closeDates, loading: closeDatesLoading, error: closeDatesError } =
-    useCloseDates();
+  const {
+    closeDates,
+    loading: closeDatesLoading,
+    error: closeDatesError,
+  } = useCloseDates();
+  const today = useMemo(() => dayjs().startOf("day"), []);
 
   const currentMonth = useMemo(() => dayjs().startOf("month"), []);
   const effectiveDateRange = useMemo(
@@ -146,10 +150,11 @@ export default function RegisterAttendanceSummaryCard({
         const workDate = dayjs(attendance.workDate);
         return (
           !workDate.isBefore(effectiveDateRange.start, "day") &&
-          !workDate.isAfter(effectiveDateRange.end, "day")
+          !workDate.isAfter(effectiveDateRange.end, "day") &&
+          workDate.isBefore(today, "day")
         );
       }),
-    [attendances, effectiveDateRange],
+    [attendances, effectiveDateRange, today],
   );
 
   const summary = useMemo(() => {
@@ -185,32 +190,39 @@ export default function RegisterAttendanceSummaryCard({
 
   const chartSummary = useMemo(() => {
     const standardWorkHours = Math.max(getStandardWorkHours(), 0);
-    const netWorkHoursByDate = filteredAttendances.reduce<Record<string, number>>(
-      (acc, attendance) => {
-        if (!attendance.workDate || !attendance.startTime || !attendance.endTime) {
-          return acc;
-        }
-        const totalWorkHours = calcTotalWorkTime(
-          attendance.startTime,
-          attendance.endTime,
-        );
-        const totalRestHours = (attendance.rests ?? [])
-          .filter((item): item is NonNullable<typeof item> => !!item)
-          .reduce((restAcc, rest) => {
-            if (!rest.startTime || !rest.endTime) {
-              return restAcc;
-            }
-            return restAcc + calcTotalRestTime(rest.startTime, rest.endTime);
-          }, 0);
-        const netWorkHours = Math.max(totalWorkHours - totalRestHours, 0);
-        const workDateKey = dayjs(attendance.workDate).format(
-          AttendanceDate.DataFormat,
-        );
-        acc[workDateKey] = (acc[workDateKey] ?? 0) + netWorkHours;
+    const workStatusHoursByDate = filteredAttendances.reduce<
+      Record<string, { netWorkHours: number; restHours: number }>
+    >((acc, attendance) => {
+      if (
+        !attendance.workDate ||
+        !attendance.startTime ||
+        !attendance.endTime
+      ) {
         return acc;
-      },
-      {},
-    );
+      }
+      const totalWorkHours = calcTotalWorkTime(
+        attendance.startTime,
+        attendance.endTime,
+      );
+      const totalRestHours = (attendance.rests ?? [])
+        .filter((item): item is NonNullable<typeof item> => !!item)
+        .reduce((restAcc, rest) => {
+          if (!rest.startTime || !rest.endTime) {
+            return restAcc;
+          }
+          return restAcc + calcTotalRestTime(rest.startTime, rest.endTime);
+        }, 0);
+      const netWorkHours = Math.max(totalWorkHours - totalRestHours, 0);
+      const workDateKey = dayjs(attendance.workDate).format(
+        AttendanceDate.DataFormat,
+      );
+      const existing = acc[workDateKey] ?? { netWorkHours: 0, restHours: 0 };
+      acc[workDateKey] = {
+        netWorkHours: existing.netWorkHours + netWorkHours,
+        restHours: existing.restHours + totalRestHours,
+      };
+      return acc;
+    }, {});
 
     const periodDays = [];
     let cursor = effectiveDateRange.start.startOf("day");
@@ -222,21 +234,32 @@ export default function RegisterAttendanceSummaryCard({
 
     return periodDays.map((workDate) => {
       const workDateKey = workDate.format(AttendanceDate.DataFormat);
-      const netWorkHours = Number((netWorkHoursByDate[workDateKey] ?? 0).toFixed(2));
+      const workStatusHours = workStatusHoursByDate[workDateKey] ?? {
+        netWorkHours: 0,
+        restHours: 0,
+      };
+      const netWorkHours = Number(
+        workStatusHours.netWorkHours.toFixed(2),
+      );
+      const restHours = Number(workStatusHours.restHours.toFixed(2));
       const overtimeHours = Number(
         Math.max(netWorkHours - standardWorkHours, 0).toFixed(2),
+      );
+      const regularWorkHours = Number(
+        Math.max(netWorkHours - overtimeHours, 0).toFixed(2),
       );
 
       return {
         label: workDate.format("M/D"),
-        workHours: netWorkHours,
+        workHours: regularWorkHours,
+        restHours,
         overtimeHours,
         workDateValue: workDate.valueOf(),
       };
     });
   }, [effectiveDateRange, filteredAttendances, getStandardWorkHours]);
 
-  const stackedBarData = useMemo(
+  const stackedBarData = useMemo<ChartData<"bar">>(
     () => ({
       labels: chartSummary.map((item) => item.label),
       datasets: [
@@ -256,13 +279,24 @@ export default function RegisterAttendanceSummaryCard({
           borderWidth: 1,
           stack: "work-status",
         },
+        {
+          label: "休憩時間",
+          data: chartSummary.map((item) => item.restHours),
+          backgroundColor: "rgba(249,115,22,0.76)",
+          borderColor: "rgba(249,115,22,1)",
+          borderWidth: 1,
+          stack: "work-status",
+        },
       ],
     }),
     [chartSummary],
   );
 
   const stackedBarOptions = useMemo<ChartOptions<"bar">>(() => {
-    const maxWork = Math.max(0, ...chartSummary.map((item) => item.workHours));
+    const maxWork = Math.max(
+      0,
+      ...chartSummary.map((item) => item.workHours + item.restHours),
+    );
     const maxOvertime = Math.max(
       0,
       ...chartSummary.map((item) => item.overtimeHours),
@@ -314,15 +348,18 @@ export default function RegisterAttendanceSummaryCard({
   }, [chartSummary]);
 
   const isLoading =
-    closeDatesLoading || attendanceLoading || attendanceFetching || attendanceUninitialized;
+    closeDatesLoading ||
+    attendanceLoading ||
+    attendanceFetching ||
+    attendanceUninitialized;
   const hasError = Boolean(closeDatesError || attendancesError);
 
   const rangeLabel = `${effectiveDateRange.start.format("M/D")}〜${effectiveDateRange.end.format("M/D")}`;
+  const summaryInfoLabel = `集計期間について: ${rangeLabel}`;
 
   const totalHoursLabel =
     hasError || isLoading ? "--" : `${summary.totalHours.toFixed(1)}h`;
   const workDaysLabel = hasError || isLoading ? "--" : `${summary.workDays}日`;
-  const attendanceErrorLabel = `${attendanceErrorCount}件`;
   const workStatusDataCount = filteredAttendances.filter(
     (attendance) => attendance.startTime && attendance.endTime,
   ).length;
@@ -339,18 +376,12 @@ export default function RegisterAttendanceSummaryCard({
             直近の勤務状況
           </h2>
         </div>
-        <span className="absolute right-3 top-3 inline-flex">
-          <MuiTooltip title={`集計期間について: ${rangeLabel}`} arrow>
-            <button
-              type="button"
-              data-testid="register-dashboard-attendance-summary-info"
-              aria-label={`集計期間について: ${rangeLabel}`}
-              className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 bg-white text-[11px] font-semibold leading-none text-slate-600"
-            >
-              i
-            </button>
-          </MuiTooltip>
-        </span>
+        <InfoIconTooltip
+          testId="register-dashboard-attendance-summary-info"
+          ariaLabel={summaryInfoLabel}
+          tooltipContent={summaryInfoLabel}
+          containerClassName="absolute right-3 top-3 inline-flex"
+        />
         {isLoading && (
           <span className="inline-flex rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold leading-none text-slate-700">
             集計中
@@ -359,64 +390,20 @@ export default function RegisterAttendanceSummaryCard({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 px-3.5 py-3">
-          <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">
-            合計勤務時間
-          </p>
-          <p className="m-0 mt-1.5 text-2xl font-extrabold leading-none tracking-[-0.03em] text-slate-950">
-            {totalHoursLabel}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 px-3.5 py-3">
-          <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">
-            勤務日数
-          </p>
-          <p className="m-0 mt-1.5 text-2xl font-extrabold leading-none tracking-[-0.03em] text-slate-950">
-            {workDaysLabel}
-          </p>
-        </div>
+        <RegisterSummaryTotalWorkHoursCard totalHoursLabel={totalHoursLabel} />
+        <RegisterSummaryWorkDaysCard workDaysLabel={workDaysLabel} />
       </div>
 
-      <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/70 px-3.5 py-3">
-        <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">
-          打刻エラー件数
-        </p>
-        <p
-          data-testid="register-dashboard-attendance-error-count"
-          className={`m-0 mt-1.5 text-2xl font-extrabold leading-none tracking-[-0.03em] ${
-            hasAttendanceError ? "text-rose-600" : "text-slate-950"
-          }`}
-        >
-          {attendanceErrorLabel}
-        </p>
-      </div>
-
-      <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3.5">
-        <div className="flex items-center justify-between gap-3">
-          <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">
-            勤務状況チャート
-          </p>
-          <p
-            data-testid="register-dashboard-work-status-chart-count"
-            className="m-0 text-xs font-semibold text-slate-600"
-          >
-            対象データ {workStatusDataCount}件
-          </p>
-        </div>
-        <div className="mt-2 h-52">
-          {chartSummary.length > 0 ? (
-            <Bar
-              data={stackedBarData}
-              options={stackedBarOptions}
-              data-testid="register-dashboard-work-status-chart"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-xs font-medium text-slate-500">
-              表示可能な勤務データがありません
-            </div>
-          )}
-        </div>
-      </div>
+      <RegisterSummaryAttendanceErrorCountCard
+        attendanceErrorCount={attendanceErrorCount}
+        hasAttendanceError={hasAttendanceError}
+      />
+      <RegisterSummaryWorkStatusChartCard
+        chartData={stackedBarData}
+        chartOptions={stackedBarOptions}
+        hasChartData={chartSummary.length > 0}
+        workStatusDataCount={workStatusDataCount}
+      />
     </section>
   );
 }

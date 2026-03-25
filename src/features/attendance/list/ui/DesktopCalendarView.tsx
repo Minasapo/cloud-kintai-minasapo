@@ -20,8 +20,7 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-import { useMemo, useState } from "react";
-import { NavigateFunction } from "react-router-dom";
+import { useMemo } from "react";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
@@ -29,6 +28,8 @@ import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
 import { Holiday } from "@/entities/attendance/lib/Holiday";
 import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
+
+import { useOptionalAttendanceListContext } from "./AttendanceListContext";
 
 const DAYS_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -237,11 +238,11 @@ function getHolidayNames(
 }
 
 type Props = {
-  attendances: Attendance[];
-  staff: Staff | null | undefined;
-  holidayCalendars: HolidayCalendar[];
-  companyHolidayCalendars: CompanyHolidayCalendar[];
-  navigate: NavigateFunction;
+  attendances?: Attendance[];
+  staff?: Staff | null | undefined;
+  holidayCalendars?: HolidayCalendar[];
+  companyHolidayCalendars?: CompanyHolidayCalendar[];
+  navigate?: (path: string) => void;
   buildNavigatePath?: (formattedWorkDate: string) => string;
   closeDates?: CloseDate[];
   closeDatesLoading?: boolean;
@@ -322,32 +323,38 @@ function resolveMonthlyTerms(
 }
 
 export default function DesktopCalendarView({
-  attendances,
-  staff,
-  holidayCalendars,
-  companyHolidayCalendars,
-  navigate,
+  attendances: attendancesProp,
+  staff: staffProp,
+  holidayCalendars: holidayCalendarsProp,
+  companyHolidayCalendars: companyHolidayCalendarsProp,
+  navigate: navigateProp,
   buildNavigatePath,
-  closeDates,
-  closeDatesLoading,
-  closeDatesError,
-  currentMonth,
-  onMonthChange,
+  closeDates: closeDatesProp,
+  closeDatesLoading: closeDatesLoadingProp,
+  closeDatesError: closeDatesErrorProp,
+  currentMonth: currentMonthProp,
+  onMonthChange: onMonthChangeProp,
   onOpenInRightPanel,
 }: Props) {
+  const context = useOptionalAttendanceListContext();
+  const attendances = attendancesProp ?? context?.attendances ?? [];
+  const staff = staffProp ?? context?.staff;
+  const holidayCalendars = holidayCalendarsProp ?? context?.holidayCalendars ?? [];
+  const companyHolidayCalendars =
+    companyHolidayCalendarsProp ?? context?.companyHolidayCalendars ?? [];
+  const navigate = navigateProp ?? context?.navigate;
+  const closeDates = closeDatesProp ?? context?.closeDates ?? [];
+  const closeDatesLoading = closeDatesLoadingProp ?? context?.closeDatesLoading ?? false;
+  const closeDatesError = closeDatesErrorProp ?? context?.closeDatesError ?? null;
+  const currentMonth = currentMonthProp ?? context?.currentMonth ?? dayjs().startOf("month");
+  const onMonthChange = onMonthChangeProp ?? context?.onMonthChange;
   const theme = useTheme();
-  const [internalMonth, setInternalMonth] = useState(
-    () => currentMonth ?? dayjs().startOf("month")
-  );
-  const resolvedCurrentMonth = currentMonth ?? internalMonth;
+  const resolvedCurrentMonth = currentMonth;
 
   const updateMonth = (updater: (prev: Dayjs) => Dayjs) => {
     const nextMonth = updater(resolvedCurrentMonth);
-    if (onMonthChange) {
-      onMonthChange(nextMonth);
-      return;
-    }
-    setInternalMonth(nextMonth);
+    if (!onMonthChange) return;
+    onMonthChange(nextMonth);
   };
 
   const attendanceMap = useMemo(() => {
@@ -365,6 +372,7 @@ export default function DesktopCalendarView({
   );
 
   const handleDayClick = (date: Dayjs) => {
+    if (!navigate) return;
     const formatted = date.format(AttendanceDate.QueryParamFormat);
     const path = buildNavigatePath
       ? buildNavigatePath(formatted)
@@ -391,17 +399,11 @@ export default function DesktopCalendarView({
     () => resolveMonthlyTerms(resolvedCurrentMonth, closeDates, termPalette),
     [closeDates, resolvedCurrentMonth, termPalette]
   );
-  const hasCloseDateContext =
-    closeDates !== undefined ||
-    closeDatesLoading !== undefined ||
-    closeDatesError !== undefined;
-
   const showFallbackNotice =
-    hasCloseDateContext &&
     monthlyTerms.length === 1 &&
     monthlyTerms[0]?.source === "fallback" &&
     !closeDatesLoading;
-  const showCloseDateError = hasCloseDateContext && Boolean(closeDatesError);
+  const showCloseDateError = Boolean(closeDatesError);
 
   return (
     <div className="hidden rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(247,252,248,0.96)_0%,rgba(255,255,255,0.98)_100%)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] md:block lg:p-6">

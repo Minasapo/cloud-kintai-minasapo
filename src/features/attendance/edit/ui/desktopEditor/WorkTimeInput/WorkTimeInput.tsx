@@ -54,17 +54,13 @@ export function WorkTimeInput({
       <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
         勤務時間
       </div>
-      <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:gap-4">
-        <div className="flex items-start gap-2">
-          <StartTimeInput
-            highlight={highlightStartTime}
-          />
-          <div className="pt-2 text-sm text-slate-500">～</div>
-          <EndTimeInput
-            highlight={highlightEndTime}
-          />
+      <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:gap-4">
+        <div className="flex items-center gap-2.5">
+          <StartTimeInput highlight={highlightStartTime} />
+          <div className="text-sm text-slate-500">～</div>
+          <EndTimeInput highlight={highlightEndTime} />
         </div>
-        <div className="text-sm text-slate-700 md:ml-auto md:pt-2 md:text-right">
+        <div className="text-sm text-slate-700 md:ml-auto md:whitespace-nowrap md:text-right">
           {totalWorkTime.toFixed(1)}時間
         </div>
       </div>

@@ -1,0 +1,116 @@
+.attendance-list-header {
+  border: 1px solid rgba(209, 250, 229, 0.8);
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #f7fcf8 0%, #ecfdf5 58%, #ffffff 100%);
+  box-shadow: 0 28px 60px -42px rgba(15, 23, 42, 0.35);
+  padding: 1rem;
+}
+
+.attendance-list-header__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.attendance-list-header__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.attendance-list-header__title {
+  margin: 0;
+  color: #020617;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.attendance-list-header__description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  max-width: 48rem;
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.35rem;
+}
+
+.attendance-list-header__description--expanded {
+  display: block;
+  overflow: visible;
+}
+
+.attendance-list-header__description-toggle {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  color: #0f766e;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0;
+  cursor: pointer;
+}
+
+.attendance-list-header__summary {
+  border: 1px solid #d1fae5;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 18px 42px -36px rgba(15, 23, 42, 0.35);
+  padding: 0.65rem 0.85rem;
+}
+
+.attendance-list-header__summary-inline {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .attendance-list-header {
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+
+  .attendance-list-header__inner {
+    gap: 1rem;
+  }
+
+  .attendance-list-header__content {
+    gap: 0.5rem;
+  }
+
+  .attendance-list-header__title {
+    font-size: 2.2rem;
+  }
+
+  .attendance-list-header__description {
+    display: block;
+    overflow: visible;
+    font-size: 0.95rem;
+  }
+
+  .attendance-list-header__description-toggle {
+    display: none;
+  }
+
+  .attendance-list-header__summary {
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .attendance-list-header__inner {
+    align-items: flex-end;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}

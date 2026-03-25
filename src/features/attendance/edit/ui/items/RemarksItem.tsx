@@ -1,88 +1,93 @@
-import { Box, Chip, Stack, TextField } from "@mui/material";
-import { useContext } from "react";
-import { Controller } from "react-hook-form";
+import "./RemarksItem.scss";
+
+import { useContext, useState } from "react";
 
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
+import { RemarksInputField } from "@/features/attendance/edit/ui/items/RemarksInputField";
+import { toStringArray } from "@/features/attendance/edit/ui/items/remarksItemUtils";
+import { RemarksTags } from "@/features/attendance/edit/ui/items/RemarksTags";
 
 export default function RemarksItem() {
   const { getValues, setValue, control, watch, readOnly } = useContext(
-    AttendanceEditContext
+    AttendanceEditContext,
   );
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (!getValues) return null;
 
-  // subscribe to remarkTags so Chips update when tags change
-  const tags: string[] = watch
-    ? (watch("remarkTags") as string[]) || []
-    : (getValues("remarkTags") as string[]) || [];
+  const tags = watch
+    ? toStringArray(watch("remarkTags"))
+    : toStringArray(getValues("remarkTags"));
+  const remarksValue = watch
+    ? ((watch("remarks") as string | null | undefined) ?? "")
+    : ((getValues("remarks") as string | null | undefined) ?? "");
 
   return (
-    <Stack direction="row" alignItems={"center"} spacing={2}>
-      <Box sx={{ flexGrow: 2 }}>
-        <Box
-          sx={{
-            border: 1,
-            borderColor: "divider",
-            borderRadius: 1,
-            px: 1,
-            py: 1,
-            minHeight: PANEL_HEIGHTS.TEXTAREA_MIN,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 1,
-            bgcolor: "background.paper",
-          }}
-        >
-          {tags.map((t) => (
-            <Chip
-              key={t}
-              label={t}
-              size="small"
-              variant="outlined"
-              color="primary"
-              sx={{ borderColor: "primary.main", color: "primary.main" }}
-            />
-          ))}
+    <>
+      <div className="attendance-remarks-item">
+        <div className="attendance-remarks-item__content">
+          <div className="attendance-remarks-item__panel">
+            <div className="attendance-remarks-item__header">
+              <RemarksTags tags={tags} />
+              <button
+                type="button"
+                className="attendance-remarks-item__expand-button"
+                onClick={() => setIsExpanded(true)}
+                aria-label="備考入力を全画面で開く"
+              >
+                ⤢
+              </button>
+            </div>
 
-          <Box sx={{ width: "100%" }}>
-            {control ? (
-              <Controller
-                name="remarks"
+            <div className="attendance-remarks-item__input-wrap">
+              <RemarksInputField
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    data-testid="remarks-input"
-                    fullWidth
-                    size="small"
-                    placeholder="備考を入力してください（タグは上に表示されます）"
-                    variant="standard"
-                    InputProps={{ disableUnderline: true }}
-                    disabled={!!readOnly}
-                  />
-                )}
+                getValues={getValues}
+                setValue={setValue}
+                readOnly={!!readOnly}
               />
-            ) : (
-              <TextField
-                data-testid="remarks-input"
-                fullWidth
-                size="small"
-                value={(getValues("remarks") as string) || ""}
-                onChange={(e) =>
-                  !readOnly && setValue && setValue("remarks", e.target.value)
-                }
-                placeholder="備考を入力してください（タグは上に表示されます）"
-                variant="standard"
-                InputProps={{ disableUnderline: true }}
-                disabled={!!readOnly}
-              />
-            )}
-          </Box>
-        </Box>
-      </Box>
-    </Stack>
+            </div>
+          </div>
+        </div>
+      </div>
+      {isExpanded ? (
+        <div
+          className="attendance-remarks-item__overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="remarks-expanded-title"
+          onClick={() => setIsExpanded(false)}
+        >
+          <div
+            className="attendance-remarks-item__overlay-panel"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="attendance-remarks-item__overlay-header">
+              <h2 id="remarks-expanded-title" className="attendance-remarks-item__overlay-title">
+                備考入力
+              </h2>
+              <button
+                type="button"
+                className="attendance-remarks-item__close-button"
+                onClick={() => setIsExpanded(false)}
+              >
+                閉じる
+              </button>
+            </div>
+            <textarea
+              value={remarksValue}
+              className="attendance-remarks-item__overlay-textarea"
+              placeholder="備考を入力してください（タグは上に表示されます）"
+              disabled={!!readOnly}
+              onChange={(e) =>
+                setValue?.("remarks", e.target.value, {
+                  shouldDirty: true,
+                })
+              }
+            />
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }

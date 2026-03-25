@@ -35,6 +35,7 @@ const CONTENT_BACKGROUND = designTokenVar(
   "component.appShell.contentBackground",
   "#F8FAF9"
 );
+const HEADER_LAYER_Z_INDEX = 45;
 
 export default function AppShell({
   header,
@@ -78,7 +79,8 @@ export default function AppShell({
         {...headerRest}
         style={{
           position: "relative",
-          zIndex: 2,
+          // Keep header popovers above sticky content in main, but below modal overlays (z-50).
+          zIndex: HEADER_LAYER_Z_INDEX,
           flexShrink: 0,
           width: "100%",
           maxWidth: "100%",

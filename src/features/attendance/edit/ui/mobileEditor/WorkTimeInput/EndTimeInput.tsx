@@ -1,65 +1,33 @@
-import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
-import { TimeInput } from "@shared/ui/TimeInput";
-import type { Dayjs } from "dayjs";
 import { useContext, useMemo } from "react";
-import { UseFormSetValue } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
+import TimeInputBase from "@/features/attendance/edit/ui/items/WorkTimeItem/TimeInputBase";
 
-/**
- * 勤務終了時刻の入力コンポーネント（モバイル用）。
- */
-export default function EndTimeInput({
-  workDate,
-  setValue,
-}: {
-  workDate: Dayjs | null;
-  setValue: UseFormSetValue<AttendanceEditInputs>;
-}) {
+export default function EndTimeInput() {
   const { getQuickInputEndTimes } = useContext(AppConfigContext);
+  const { workDate, control, setValue, changeRequests, readOnly, isOnBreak } =
+    useContext(AttendanceEditContext);
 
-  // Derived state: compute quickInputEndTimes from getQuickInputEndTimes
   const quickInputEndTimes = useMemo(() => {
-    const quickInputTimes = getQuickInputEndTimes(true);
-    if (quickInputTimes.length > 0) {
-      return quickInputTimes.map((entry) => ({
-        time: entry.time,
-        enabled: entry.enabled,
-      }));
-    }
-    return [];
+    const times = getQuickInputEndTimes(true);
+    return times.map((entry) => ({
+      time: entry.time,
+      enabled: entry.enabled,
+    }));
   }, [getQuickInputEndTimes]);
 
-  const { watch, readOnly, isOnBreak } = useContext(AttendanceEditContext);
-  if (!workDate) return null;
-
-  const endTime = watch ? (watch("endTime") ?? null) : null;
+  if (!workDate || !control || !setValue) return null;
 
   return (
-    <div className="flex flex-col gap-2">
-        <TimeInput
-          value={endTime}
-          baseDate={workDate.format("YYYY-MM-DD")}
-          size="small"
-          step={60}
-          disabled={!!readOnly || isOnBreak}
-          onChange={(value) => {
-            setValue("endTime", value, { shouldDirty: true });
-          }}
-        />
-        <div>
-          <QuickInputChips
-            quickInputTimes={quickInputEndTimes}
-            workDate={workDate}
-            disabled={!!readOnly || isOnBreak}
-            onSelectTime={(endTime) => {
-              if (readOnly || isOnBreak) return;
-              setValue("endTime", endTime, { shouldDirty: true });
-            }}
-          />
-        </div>
-    </div>
+    <TimeInputBase<"endTime">
+      name="endTime"
+      control={control}
+      setValue={setValue}
+      workDate={workDate}
+      quickInputTimes={quickInputEndTimes}
+      disabled={changeRequests.length > 0 || !!readOnly || !!isOnBreak}
+      dataTestId="mobile-end-time-input"
+    />
   );
 }

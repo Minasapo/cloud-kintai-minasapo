@@ -49,8 +49,9 @@ export default function RestStartTimeInput({
   index,
   testIdPrefix = "desktop",
 }: Props) {
-  const { workDate, control, changeRequests, restUpdate } =
-    useContext(AttendanceEditContext);
+  const { workDate, control, changeRequests, restUpdate } = useContext(
+    AttendanceEditContext,
+  );
   const { getLunchRestStartTime } = useContext(AppConfigContext);
   const { readOnly } = useAttendanceEditUi();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -65,13 +66,15 @@ export default function RestStartTimeInput({
   const selectableTimes = [{ time: lunchTime, enabled: true }];
 
   return (
-    <div className="flex flex-row gap-1">
+    <div className="flex min-w-0 flex-row gap-1">
       <Controller
         name={`rests.${index}.startTime`}
         control={control}
         render={({ field }) => (
           <TimeInputField
-            value={isEditing ? inputDraft : toTimeValue(field.value as string | null)}
+            value={
+              isEditing ? inputDraft : toTimeValue(field.value as string | null)
+            }
             inputRef={field.ref}
             disabled={disabled}
             readOnly={!!readOnly}
@@ -96,7 +99,8 @@ export default function RestStartTimeInput({
               if (isCompleteTime(nextDraft)) {
                 const formatted = toIsoDateTime(nextDraft, workDate);
                 field.onChange(formatted);
-                if (formatted) restUpdate(index, { ...rest, startTime: formatted });
+                if (formatted)
+                  restUpdate(index, { ...rest, startTime: formatted });
               } else {
                 setInputDraft(toTimeValue(field.value as string | null));
               }
@@ -112,14 +116,16 @@ export default function RestStartTimeInput({
               if (!isCompleteTime(nextDraft)) return;
               const formatted = toIsoDateTime(nextDraft, workDate);
               field.onChange(formatted);
-              if (formatted) restUpdate(index, { ...rest, startTime: formatted });
+              if (formatted)
+                restUpdate(index, { ...rest, startTime: formatted });
             }}
             onSelectTime={(time) => {
               const formatted = toIsoDateTime(time, workDate);
               setInputDraft(time);
               setIsEditing(false);
               field.onChange(formatted);
-              if (formatted) restUpdate(index, { ...rest, startTime: formatted });
+              if (formatted)
+                restUpdate(index, { ...rest, startTime: formatted });
               if (blurTimeoutRef.current) {
                 window.clearTimeout(blurTimeoutRef.current);
                 blurTimeoutRef.current = null;

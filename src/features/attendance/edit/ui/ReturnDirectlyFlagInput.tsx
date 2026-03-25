@@ -6,6 +6,7 @@ import { useAutoConfiguredTimeFlag } from "@/features/attendance/edit/model/useA
 
 interface ReturnDirectlyFlagInputProps {
   onHighlightEndTime?: (highlight: boolean) => void;
+  label?: string;
   layout?: "row" | "inline";
   inputVariant?: "checkbox" | "switch";
   successMessage?: string;
@@ -13,6 +14,7 @@ interface ReturnDirectlyFlagInputProps {
 
 export default function ReturnDirectlyFlagInput({
   onHighlightEndTime,
+  label,
   layout = "row",
   inputVariant = "checkbox",
   successMessage,
@@ -30,6 +32,7 @@ export default function ReturnDirectlyFlagInput({
       <ReturnDirectlyFlagInputBase
         control={control}
         disabled={changeRequests?.length > 0 || !!readOnly}
+        label={label}
         layout={layout}
         inputVariant={inputVariant}
         onChangeFlag={(checked) => {

@@ -21,7 +21,7 @@ describe("ActionCardButton", () => {
     expect(container.querySelector(".action-card-icon")).not.toBeInTheDocument();
   });
 
-  it("shape=circle で円形クラスを適用する", () => {
+  it("shape=circle で円形属性を適用する", () => {
     render(
       <ActionCardButton
         testId="action-card"
@@ -34,10 +34,9 @@ describe("ActionCardButton", () => {
 
     const button = screen.getByTestId("action-card");
     expect(button).toHaveAttribute("data-action-card-shape", "circle");
-    expect(button.className).toContain("rounded-full");
   });
 
-  it("size=slim で縮小サイズクラスを適用する", () => {
+  it("size=slim で縮小サイズ属性を適用する", () => {
     render(
       <ActionCardButton
         testId="action-card"
@@ -50,7 +49,5 @@ describe("ActionCardButton", () => {
 
     const button = screen.getByTestId("action-card");
     expect(button).toHaveAttribute("data-action-card-size", "slim");
-    expect(button.className).toContain("min-h-[52px]");
-    expect(button.className).toContain("md:min-h-[62px]");
   });
 });

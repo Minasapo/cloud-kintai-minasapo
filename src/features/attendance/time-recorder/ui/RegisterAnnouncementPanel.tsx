@@ -2,21 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   buildTimeRecorderAnnouncementDismissKey,
-  dismissTimeRecorderAnnouncement,
   isDismissedTimeRecorderAnnouncement,
   shouldShowTimeRecorderAnnouncement,
   type TimeRecorderAnnouncement,
 } from "@/features/attendance/time-recorder/lib/timeRecorderAnnouncement";
 
-type RegisterDashboardPanelProps = {
+type RegisterAnnouncementPanelProps = {
   configId?: string | null;
   announcement?: TimeRecorderAnnouncement;
 };
 
-export default function RegisterDashboardPanel({
+export default function RegisterAnnouncementPanel({
   configId = null,
   announcement = { enabled: false, message: "" },
-}: RegisterDashboardPanelProps) {
+}: RegisterAnnouncementPanelProps) {
   const dismissKey = useMemo(
     () =>
       buildTimeRecorderAnnouncementDismissKey(configId, announcement.message),
@@ -35,16 +34,11 @@ export default function RegisterDashboardPanel({
     announcementDismissed,
   );
 
-  const handleAnnouncementClose = () => {
-    dismissTimeRecorderAnnouncement(localStorage, dismissKey);
-    setAnnouncementDismissed(true);
-  };
-
   return (
     <div
       data-testid="register-dashboard-panel"
       className="w-full space-y-4"
-      aria-label="打刻ダッシュボード"
+      aria-label="勤怠ダッシュボード"
     >
       {showAnnouncement && (
         <section
@@ -60,15 +54,6 @@ export default function RegisterDashboardPanel({
                 {announcement.message}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleAnnouncementClose}
-              data-testid="register-dashboard-announcement-close-button"
-              aria-label="アナウンスを閉じる"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:border-slate-400 hover:text-slate-900"
-            >
-              <span aria-hidden="true">×</span>
-            </button>
           </div>
         </section>
       )}
