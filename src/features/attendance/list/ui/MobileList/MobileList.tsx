@@ -1,85 +1,17 @@
 import "./styles.scss";
 
-import { Alert, AlertTitle, Box } from "@mui/material";
-import dayjs from "dayjs";
-
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-
-import { getStatus } from "../../lib/attendanceStatusUtils";
 import { useAttendanceListContext } from "../AttendanceListContext";
+import ErrorStatusAlert from "./ErrorStatusAlert";
 import MobileCalendar from "./MobileCalendar";
+import { hasErrorOrLateInMonth } from "./mobileListStatus";
 
 export default function MobileList() {
-  const {
-    attendances,
-    holidayCalendars,
-    companyHolidayCalendars,
-    staff,
-    currentMonth,
-  } = useAttendanceListContext();
-
-  const hasErrorStatus = (() => {
-    if (!staff) return false;
-    const today = dayjs();
-
-    // 月の最初と最後を取得
-    const monthStart = currentMonth.startOf("month");
-    const monthEnd = currentMonth.endOf("month");
-
-    // 該当月のすべての日付をチェック
-    let current = monthStart;
-
-    while (current.isBefore(monthEnd) || current.isSame(monthEnd, "day")) {
-      // 未来の日付はスキップ
-      if (current.isAfter(today, "day")) {
-        current = current.add(1, "day");
-        continue;
-      }
-
-      // その日付の打刻データを探す
-      const attendance = attendances.find((a) =>
-        dayjs(a.workDate).isSame(current, "day")
-      );
-
-      // カレンダーと同じロジックで状態を判定
-      const status = getStatus(
-        attendance,
-        staff,
-        holidayCalendars,
-        companyHolidayCalendars,
-        current
-      );
-
-      if (
-        status === AttendanceStatus.Error ||
-        status === AttendanceStatus.Late
-      ) {
-        return true;
-      }
-
-      current = current.add(1, "day");
-    }
-
-    return false;
-  })();
+  const context = useAttendanceListContext();
+  const hasErrorStatus = hasErrorOrLateInMonth(context);
 
   return (
     <div className="pb-2 md:hidden">
-      {hasErrorStatus && (
-        <Box sx={{ pb: 2 }}>
-          <Alert
-            severity="warning"
-            sx={{
-              borderRadius: "20px",
-              border: "1px solid rgba(245, 158, 11, 0.18)",
-              bgcolor: "rgba(255,251,235,0.92)",
-            }}
-          >
-            <AlertTitle sx={{ fontWeight: "bold" }}>打刻エラー</AlertTitle>
-            カレンダー上で赤色の日付をタップして確認してください
-          </Alert>
-        </Box>
-      )}
+      {hasErrorStatus && <ErrorStatusAlert />}
       <MobileCalendar />
     </div>
   );
