@@ -133,6 +133,12 @@ describe("RegisterAttendanceSummaryCard", () => {
     expect(
       screen.getByTestId("register-dashboard-work-status-chart-count"),
     ).toHaveTextContent("対象データ 2件");
+    expect(
+      screen.getByTestId("register-dashboard-work-status-chart-info"),
+    ).toHaveAttribute(
+      "aria-label",
+      "勤務状況チャートの算出根拠: 勤務時間=退勤時刻-出勤時刻-休憩時間、残業時間=max(勤務時間-所定労働時間,0)、休憩時間=休憩終了時刻-休憩開始時刻の合計",
+    );
     expect(screen.getByText("打刻エラー件数")).toBeInTheDocument();
     expect(
       screen.getByTestId("register-dashboard-attendance-error-count"),

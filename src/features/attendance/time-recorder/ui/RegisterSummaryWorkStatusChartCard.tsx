@@ -1,3 +1,4 @@
+import { Tooltip as MuiTooltip } from "@mui/material";
 import {
   BarElement,
   CategoryScale,
@@ -25,12 +26,34 @@ export default function RegisterSummaryWorkStatusChartCard({
   hasChartData,
   workStatusDataCount,
 }: RegisterSummaryWorkStatusChartCardProps) {
+  const chartInfoAriaLabel =
+    "勤務状況チャートの算出根拠: 勤務時間=退勤時刻-出勤時刻-休憩時間、残業時間=max(勤務時間-所定労働時間,0)、休憩時間=休憩終了時刻-休憩開始時刻の合計";
+  const chartInfoTooltip = (
+    <div className="text-xs leading-relaxed">
+      <div>勤務時間: 退勤時刻 - 出勤時刻 - 休憩時間</div>
+      <div>残業時間: max(勤務時間 - 所定労働時間, 0)</div>
+      <div>休憩時間: 休憩終了時刻 - 休憩開始時刻 の合計</div>
+    </div>
+  );
+
   return (
     <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3.5">
       <div className="flex items-center justify-between gap-3">
-        <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">
-          勤務状況チャート
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">
+            勤務状況チャート
+          </p>
+          <MuiTooltip title={chartInfoTooltip} arrow>
+            <button
+              type="button"
+              data-testid="register-dashboard-work-status-chart-info"
+              aria-label={chartInfoAriaLabel}
+              className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 bg-white text-[11px] font-semibold leading-none text-slate-600"
+            >
+              i
+            </button>
+          </MuiTooltip>
+        </div>
         <p
           data-testid="register-dashboard-work-status-chart-count"
           className="m-0 text-xs font-semibold text-slate-600"
