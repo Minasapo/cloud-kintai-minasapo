@@ -112,8 +112,7 @@ describe("RegisterContent", () => {
       screen.getByTestId("register-dashboard-announcement-card"),
     ).toBeInTheDocument();
     expect(screen.getByText("管理者アナウンス")).toBeInTheDocument();
-    expect(dashboardSlot).toHaveClass("hidden");
-    expect(dashboardSlot).toHaveClass("lg:block");
+    expect(dashboardSlot).toHaveClass("register-dashboard");
   });
 
   it("打刻エラー件数を受け取ると直近の勤務状況カードへ件数を引き渡す", () => {

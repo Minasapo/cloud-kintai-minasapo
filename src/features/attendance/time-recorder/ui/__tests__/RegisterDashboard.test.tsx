@@ -64,8 +64,7 @@ describe("RegisterDashboard", () => {
     );
 
     const dashboardSlot = screen.getByTestId("register-dashboard-slot");
-    expect(dashboardSlot).toHaveClass("hidden");
-    expect(dashboardSlot).toHaveClass("lg:block");
+    expect(dashboardSlot).toHaveClass("register-dashboard");
     expect(
       screen.getByTestId("register-announcement-panel-mock"),
     ).toHaveTextContent("config-id:管理者アナウンス");
