@@ -1,15 +1,15 @@
 import type { ReactNode } from "react";
 
 import Clock from "@/shared/ui/clock/Clock";
+import ClockInButton from "@/shared/ui/time-recorder/ClockInButton";
+import ClockOutButton from "@/shared/ui/time-recorder/ClockOutButton";
 import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
+import GoDirectlyButton from "@/shared/ui/time-recorder/GoDirectlyButton";
+import RestEndButton from "@/shared/ui/time-recorder/RestEndButton";
+import RestStartButton from "@/shared/ui/time-recorder/RestStartButton";
+import ReturnDirectlyButton from "@/shared/ui/time-recorder/ReturnDirectlyButton";
 
-import type { WorkStatus } from "../lib/common";
-import ClockInItem from "./items/ClockInItem";
-import ClockOutItem from "./items/ClockOutItem";
-import GoDirectlyItem from "./items/GoDirectlyItem";
-import RestEndItem from "./items/RestEndItem";
-import RestStartItem from "./items/RestStartItem";
-import ReturnDirectlyItem from "./items/ReturnDirectlyItem";
+import { type WorkStatus, WorkStatusCodes } from "../lib/common";
 import QuickDailyReportCard from "./QuickDailyReportCard";
 import { RestTimeMessage } from "./RestTimeMessage";
 
@@ -132,6 +132,9 @@ export function TimeRecorderView({
 }: TimeRecorderViewProps) {
   const hasSupplementaryInfo =
     hasChangeRequest || isAttendanceError || Boolean(staffId);
+  const isBeforeWork = workStatus.code === WorkStatusCodes.BEFORE_WORK;
+  const isWorking = workStatus.code === WorkStatusCodes.WORKING;
+  const isResting = workStatus.code === WorkStatusCodes.RESTING;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-3 py-3 md:px-4 md:py-4">
@@ -197,45 +200,51 @@ export function TimeRecorderView({
               <div className="grid grid-cols-2 gap-3 md:mx-auto md:max-w-[620px] md:gap-3">
                 <div className="flex">
                   {directMode ? (
-                    <GoDirectlyItem
-                      workStatus={workStatus}
-                      onClick={onGoDirectly}
+                    <GoDirectlyButton
+                      key={String(isBeforeWork)}
+                      isBeforeWork={isBeforeWork}
+                      onGoDirectly={onGoDirectly}
                       disabled={hasChangeRequest}
                     />
                   ) : (
-                    <ClockInItem
-                      workStatus={workStatus}
-                      onClick={onClockIn}
+                    <ClockInButton
+                      key={String(isBeforeWork)}
+                      isBeforeWork={isBeforeWork}
+                      onClockIn={onClockIn}
                       disabled={hasChangeRequest}
                     />
                   )}
                 </div>
                 <div className="flex">
                   {directMode ? (
-                    <ReturnDirectlyItem
-                      workStatus={workStatus}
-                      onClick={onReturnDirectly}
+                    <ReturnDirectlyButton
+                      key={String(isWorking)}
+                      isWorking={isWorking}
+                      onReturnDirectly={onReturnDirectly}
                       disabled={hasChangeRequest}
                     />
                   ) : (
-                    <ClockOutItem
-                      workStatus={workStatus}
-                      onClick={onClockOut}
+                    <ClockOutButton
+                      key={String(isWorking)}
+                      isWorking={isWorking}
+                      onClockOut={onClockOut}
                       disabled={hasChangeRequest}
                     />
                   )}
                 </div>
                 <div className="flex">
-                  <RestStartItem
-                    workStatus={workStatus}
-                    onClick={onRestStart}
+                  <RestStartButton
+                    key={String(isWorking)}
+                    isWorking={isWorking}
+                    onRestStart={onRestStart}
                     disabled={hasChangeRequest}
                   />
                 </div>
                 <div className="flex">
-                  <RestEndItem
-                    workStatus={workStatus}
-                    onClick={onRestEnd}
+                  <RestEndButton
+                    key={String(isResting)}
+                    isResting={isResting}
+                    onRestEnd={onRestEnd}
                     disabled={hasChangeRequest}
                   />
                 </div>
