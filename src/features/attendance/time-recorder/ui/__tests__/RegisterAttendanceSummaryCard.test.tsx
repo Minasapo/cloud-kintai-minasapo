@@ -141,6 +141,12 @@ describe("RegisterAttendanceSummaryCard", () => {
     );
     expect(screen.getByText("打刻エラー件数")).toBeInTheDocument();
     expect(
+      screen.getByTestId("register-dashboard-attendance-error-info"),
+    ).toHaveAttribute(
+      "aria-label",
+      "打刻エラー件数について: 退勤漏れや重複打刻など、修正が必要な打刻エラー件数を表示しています",
+    );
+    expect(
       screen.getByTestId("register-dashboard-attendance-error-count"),
     ).toHaveTextContent("0件");
     expect(
