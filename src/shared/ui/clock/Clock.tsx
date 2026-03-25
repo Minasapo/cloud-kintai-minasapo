@@ -16,7 +16,7 @@ const Clock = () => {
       className="rounded-[5px] bg-black px-3 py-3 text-center"
       style={
         {
-          "--clock-font-size": "clamp(1.05rem, 3.6vw, 1.5rem)",
+          "--clock-font-size": "clamp(1.35rem, 4.6vw, 2rem)",
         } as CSSProperties & Record<`--${string}`, string>
       }
     >

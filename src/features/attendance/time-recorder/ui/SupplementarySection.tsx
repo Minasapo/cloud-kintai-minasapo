@@ -17,7 +17,7 @@ export default function SupplementarySection({
   }
 
   return (
-    <div className="space-y-3 md:space-y-4">
+    <div className="supplementary-section">
       <QuickDailyReportCard staffId={staffId} date={today} />
       <RestTimeMessage displayMode="compact" />
     </div>

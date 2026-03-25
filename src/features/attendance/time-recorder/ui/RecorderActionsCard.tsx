@@ -23,16 +23,16 @@ type RecorderActionsCardProps = {
 
 function HelpTooltip({ message }: { message: string }) {
   return (
-    <span className="relative inline-flex">
+    <span className="recorder-actions-card__tooltip-wrap">
       <button
         type="button"
         aria-label={message}
-        className="group inline-flex h-6 w-6 items-center justify-center rounded-full border border-emerald-300 bg-white text-emerald-700 shadow-sm transition hover:border-emerald-400 hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
+        className="recorder-actions-card__tooltip-trigger"
       >
         <svg
           aria-hidden="true"
           viewBox="0 0 20 20"
-          className="h-3.5 w-3.5"
+          className="recorder-actions-card__tooltip-icon"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -43,7 +43,7 @@ function HelpTooltip({ message }: { message: string }) {
           <path d="M8.9 7.7a1.6 1.6 0 1 1 2.3 1.4c-.7.3-1.2.8-1.2 1.6" />
           <path d="M10 13.8h.01" />
         </svg>
-        <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden w-48 -translate-x-1/2 rounded-xl bg-slate-950 px-3 py-2 text-left text-xs font-medium leading-5 text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.9)] group-hover:block group-focus-visible:block">
+        <span className="recorder-actions-card__tooltip">
           {message}
         </span>
       </button>
@@ -66,30 +66,30 @@ export default function RecorderActionsCard({
   onRestEnd,
 }: RecorderActionsCardProps) {
   return (
-    <section className="rounded-[1.5rem] bg-white/75 p-3 shadow-[0_28px_52px_-40px_rgba(15,23,42,0.35)] backdrop-blur-sm md:rounded-[1.6rem] md:p-4">
-      <div className="mb-3 rounded-[1.25rem] border border-emerald-200/80 bg-[linear-gradient(135deg,#f0fdf4_0%,#ffffff_100%)] p-3 shadow-[0_20px_40px_-36px_rgba(15,168,94,0.55)] md:mb-4 md:rounded-[1.3rem] md:p-3.5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2">
-            <p className="m-0 text-sm font-semibold text-slate-900 md:text-base">
+    <section className="recorder-actions-card">
+      <div className="recorder-actions-card__header">
+        <div className="recorder-actions-card__header-row">
+          <div className="recorder-actions-card__title-row">
+            <p className="recorder-actions-card__title">
               直行 / 直帰
             </p>
             <HelpTooltip message="直行や直帰の日だけ切り替えると、対応する打刻ボタンに切り替わります。" />
           </div>
-          <label className="inline-flex items-center gap-3 self-start rounded-full border border-slate-200 bg-white px-3 py-2.5 md:self-auto md:px-4 md:py-3">
+          <label className="recorder-actions-card__switch-label">
             <DirectSwitch
               checked={directMode}
               onChange={(event) => onDirectModeChange(event.target.checked)}
               data-testid="direct-mode-switch"
             />
-            <span className="text-xs font-semibold text-slate-900 md:text-sm">
+            <span className="recorder-actions-card__switch-text">
               直行/直帰モードを使う
             </span>
           </label>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:mx-auto md:max-w-[620px] md:gap-3">
-        <div className="flex">
+      <div className="recorder-actions-card__actions">
+        <div className="recorder-actions-card__action">
           {directMode ? (
             <GoDirectlyButton
               key={String(isBeforeWork)}
@@ -106,7 +106,7 @@ export default function RecorderActionsCard({
             />
           )}
         </div>
-        <div className="flex">
+        <div className="recorder-actions-card__action">
           {directMode ? (
             <ReturnDirectlyButton
               key={String(isWorking)}
@@ -123,7 +123,7 @@ export default function RecorderActionsCard({
             />
           )}
         </div>
-        <div className="flex">
+        <div className="recorder-actions-card__action">
           <RestStartButton
             key={String(isWorking)}
             isWorking={isWorking}
@@ -131,7 +131,7 @@ export default function RecorderActionsCard({
             disabled={hasChangeRequest}
           />
         </div>
-        <div className="flex">
+        <div className="recorder-actions-card__action">
           <RestEndButton
             key={String(isResting)}
             isResting={isResting}
