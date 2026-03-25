@@ -20,11 +20,8 @@ export default function RegisterDashboard({
   attendanceErrorCount,
 }: RegisterDashboardProps) {
   return (
-    <aside
-      data-testid="register-dashboard-slot"
-      className="hidden lg:block lg:pt-4"
-    >
-      <div className="w-full space-y-4">
+    <aside data-testid="register-dashboard-slot" className="register-dashboard">
+      <div className="register-dashboard__stack">
         {/* アナウンスパネルは常に最上位に表示すること */}
         <RegisterAnnouncementPanel
           configId={configId}
