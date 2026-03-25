@@ -13,16 +13,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import {
-  Attendance,
-  CloseDate,
-  CompanyHolidayCalendar,
-  HolidayCalendar,
-  Staff,
-} from "@shared/api/graphql/types";
-import dayjs, { Dayjs } from "dayjs";
-import { useState } from "react";
-import { NavigateFunction } from "react-router-dom";
+import { Attendance } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
@@ -41,47 +33,21 @@ import {
   getAttendanceRowVariant,
 } from "@/entities/attendance/ui/rowVariant";
 
+import { useAttendanceListContext } from "./AttendanceListContext";
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
 
 const MONTH_QUERY_KEY = "month";
 
-export default function DesktopList({
-  attendances,
-  staff,
-  holidayCalendars,
-  companyHolidayCalendars,
-  navigate,
-  closeDates,
-  closeDatesLoading,
-  closeDatesError,
-  currentMonth: externalCurrentMonth,
-  onMonthChange,
-}: {
-  attendances: Attendance[];
-  staff: Staff | null | undefined;
-  holidayCalendars: HolidayCalendar[];
-  companyHolidayCalendars: CompanyHolidayCalendar[];
-  navigate: NavigateFunction;
-  closeDates?: CloseDate[];
-  closeDatesLoading?: boolean;
-  closeDatesError?: Error | null;
-  currentMonth?: Dayjs;
-  onMonthChange?: (nextMonth: Dayjs) => void;
-}) {
-  const [internalMonth, setInternalMonth] = useState(() =>
-    dayjs().startOf("month"),
-  );
-  const currentMonth = externalCurrentMonth ?? internalMonth;
-
-  const handleMonthChange = (updater: (prev: Dayjs) => Dayjs) => {
-    const nextMonth = updater(currentMonth);
-    if (onMonthChange) {
-      onMonthChange(nextMonth);
-      return;
-    }
-    setInternalMonth(nextMonth);
-  };
+export default function DesktopList() {
+  const {
+    attendances,
+    staff,
+    holidayCalendars,
+    companyHolidayCalendars,
+    navigate,
+    currentMonth,
+  } = useAttendanceListContext();
 
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
     if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
@@ -260,18 +226,7 @@ export default function DesktopList({
           </Box>
         </Box>
       )}
-      <DesktopCalendarView
-        attendances={attendances}
-        staff={staff}
-        holidayCalendars={holidayCalendars}
-        companyHolidayCalendars={companyHolidayCalendars}
-        navigate={navigate}
-        closeDates={closeDates}
-        closeDatesLoading={closeDatesLoading}
-        closeDatesError={closeDatesError}
-        currentMonth={currentMonth}
-        onMonthChange={(nextMonth) => handleMonthChange(() => nextMonth)}
-      />
+      <DesktopCalendarView />
     </div>
   );
 }

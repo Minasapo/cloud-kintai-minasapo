@@ -1,37 +1,23 @@
 import "./styles.scss";
 
 import { Alert, AlertTitle, Box } from "@mui/material";
-import {
-  Attendance,
-  CloseDate,
-  CompanyHolidayCalendar,
-  HolidayCalendar,
-  Staff,
-} from "@shared/api/graphql/types";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
 import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus } from "../../lib/attendanceStatusUtils";
+import { useAttendanceListContext } from "../AttendanceListContext";
 import MobileCalendar from "./MobileCalendar";
 
-export default function MobileList({
-  attendances,
-  holidayCalendars,
-  companyHolidayCalendars,
-  staff,
-  currentMonth,
-  onMonthChange,
-  closeDates,
-}: {
-  attendances: Attendance[];
-  holidayCalendars: HolidayCalendar[];
-  companyHolidayCalendars: CompanyHolidayCalendar[];
-  staff: Staff | null | undefined;
-  currentMonth: Dayjs;
-  onMonthChange?: (newMonth: Dayjs) => void;
-  closeDates?: CloseDate[];
-}) {
+export default function MobileList() {
+  const {
+    attendances,
+    holidayCalendars,
+    companyHolidayCalendars,
+    staff,
+    currentMonth,
+  } = useAttendanceListContext();
+
   const hasErrorStatus = (() => {
     if (!staff) return false;
     const today = dayjs();
@@ -94,15 +80,7 @@ export default function MobileList({
           </Alert>
         </Box>
       )}
-      <MobileCalendar
-        attendances={attendances}
-        holidayCalendars={holidayCalendars}
-        companyHolidayCalendars={companyHolidayCalendars}
-        staff={staff}
-        currentMonth={currentMonth}
-        onMonthChange={onMonthChange}
-        closeDates={closeDates}
-      />
+      <MobileCalendar />
     </div>
   );
 }

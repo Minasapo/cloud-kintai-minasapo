@@ -1,5 +1,6 @@
-import { ReactNode } from "react";
 import "./AttendanceListCard.scss";
+
+import { ReactNode } from "react";
 
 type AttendanceListCardProps = {
   children: ReactNode;

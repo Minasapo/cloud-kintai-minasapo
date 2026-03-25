@@ -24,12 +24,12 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus, isHolidayLike } from "../../lib/attendanceStatusUtils";
+import { useOptionalAttendanceListContext } from "../AttendanceListContext";
 
 const MONTH_QUERY_KEY = "month";
 
@@ -250,28 +250,39 @@ const resolveMonthlyTerms = (
 };
 
 interface MobileCalendarProps {
-  attendances: Attendance[];
-  holidayCalendars: HolidayCalendar[];
-  companyHolidayCalendars: CompanyHolidayCalendar[];
-  staff: Staff | null | undefined;
-  currentMonth: Dayjs;
+  attendances?: Attendance[];
+  holidayCalendars?: HolidayCalendar[];
+  companyHolidayCalendars?: CompanyHolidayCalendar[];
+  staff?: Staff | null | undefined;
+  currentMonth?: Dayjs;
   onMonthChange?: (newMonth: Dayjs) => void;
   closeDates?: CloseDate[];
   buildNavigatePath?: (formattedWorkDate: string) => string;
+  navigate?: (path: string) => void;
 }
 
 export default function MobileCalendar({
-  attendances,
-  holidayCalendars,
-  companyHolidayCalendars,
-  staff,
-  currentMonth,
-  onMonthChange,
-  closeDates,
+  attendances: attendancesProp,
+  holidayCalendars: holidayCalendarsProp,
+  companyHolidayCalendars: companyHolidayCalendarsProp,
+  staff: staffProp,
+  currentMonth: currentMonthProp,
+  onMonthChange: onMonthChangeProp,
+  closeDates: closeDatesProp,
   buildNavigatePath,
+  navigate: navigateProp,
 }: MobileCalendarProps) {
+  const context = useOptionalAttendanceListContext();
+  const attendances = attendancesProp ?? context?.attendances ?? [];
+  const holidayCalendars = holidayCalendarsProp ?? context?.holidayCalendars ?? [];
+  const companyHolidayCalendars =
+    companyHolidayCalendarsProp ?? context?.companyHolidayCalendars ?? [];
+  const staff = staffProp ?? context?.staff;
+  const currentMonth = currentMonthProp ?? context?.currentMonth ?? dayjs().startOf("month");
+  const onMonthChange = onMonthChangeProp ?? context?.onMonthChange;
+  const closeDates = closeDatesProp ?? context?.closeDates ?? [];
+  const navigate = navigateProp ?? context?.navigate;
   const theme = useTheme();
-  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<string | null>(() => {
     const today = dayjs();
     // 今日の日付が表示中の月に含まれる場合のみ選択状態にする
@@ -342,7 +353,7 @@ export default function MobileCalendar({
   );
 
   const monthlyTerms = useMemo(
-    () => resolveMonthlyTerms(currentMonth, closeDates ?? [], termPalette),
+    () => resolveMonthlyTerms(currentMonth, closeDates, termPalette),
     [closeDates, currentMonth, termPalette],
   );
 
@@ -363,6 +374,7 @@ export default function MobileCalendar({
   };
 
   const handleEdit = (date: string) => {
+    if (!navigate) return;
     const dateStr = dayjs(date).format(AttendanceDate.QueryParamFormat);
     const path = buildNavigatePath
       ? buildNavigatePath(dateStr)
@@ -423,7 +435,9 @@ export default function MobileCalendar({
       >
         <IconButton
           size="small"
-          onClick={() => onMonthChange?.(currentMonth.subtract(1, "month"))}
+          onClick={() =>
+            onMonthChange?.(currentMonth.subtract(1, "month"))
+          }
           aria-label="前月"
         >
           <ChevronLeftIcon />

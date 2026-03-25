@@ -32,6 +32,7 @@ import { Logger } from "@/shared/lib/logger";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
 import AttendanceListCard from "./AttendanceListCard";
+import { AttendanceListProvider } from "./AttendanceListContext";
 import AttendanceListHeader from "./AttendanceListHeader";
 import {
   formatDateRangeLabel,
@@ -271,36 +272,28 @@ export default function AttendanceTable() {
     return <LinearProgress />;
   }
 
-  return (
-    <div className="attendance-list">
-      <AttendanceListHeader rangeLabelForDisplay={rangeLabelForDisplay} />
+  const contextValue = {
+    attendances,
+    staff,
+    holidayCalendars,
+    companyHolidayCalendars,
+    navigate,
+    closeDates,
+    closeDatesLoading,
+    closeDatesError,
+    currentMonth,
+    onMonthChange: handleMonthChange,
+  };
 
-      <AttendanceListCard>
-        {isDesktop ? (
-          <DesktopList
-            attendances={attendances}
-            holidayCalendars={holidayCalendars}
-            companyHolidayCalendars={companyHolidayCalendars}
-            navigate={navigate}
-            staff={staff}
-            closeDates={closeDates}
-            closeDatesLoading={closeDatesLoading}
-            closeDatesError={closeDatesError}
-            currentMonth={currentMonth}
-            onMonthChange={handleMonthChange}
-          />
-        ) : (
-          <MobileList
-            attendances={attendances}
-            holidayCalendars={holidayCalendars}
-            companyHolidayCalendars={companyHolidayCalendars}
-            staff={staff}
-            currentMonth={currentMonth}
-            onMonthChange={handleMonthChange}
-            closeDates={closeDates}
-          />
-        )}
-      </AttendanceListCard>
-    </div>
+  return (
+    <AttendanceListProvider value={contextValue}>
+      <div className="attendance-list">
+        <AttendanceListHeader rangeLabelForDisplay={rangeLabelForDisplay} />
+
+        <AttendanceListCard>
+          {isDesktop ? <DesktopList /> : <MobileList />}
+        </AttendanceListCard>
+      </div>
+    </AttendanceListProvider>
   );
 }
