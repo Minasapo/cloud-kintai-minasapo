@@ -1,0 +1,13 @@
+.attendance-list-card {
+  border: 1px solid rgba(209, 250, 229, 0.8);
+  border-radius: 1.6rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 24px 54px -40px rgba(15, 23, 42, 0.35);
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .attendance-list-card {
+    padding: 1.25rem;
+  }
+}
