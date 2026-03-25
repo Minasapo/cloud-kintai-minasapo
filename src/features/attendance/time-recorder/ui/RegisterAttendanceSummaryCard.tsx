@@ -14,6 +14,7 @@ import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
 
 import RegisterSummaryAttendanceErrorCountCard from "./RegisterSummaryAttendanceErrorCountCard";
 import RegisterSummaryTotalWorkHoursCard from "./RegisterSummaryTotalWorkHoursCard";
@@ -375,19 +376,12 @@ export default function RegisterAttendanceSummaryCard({
             直近の勤務状況
           </h2>
         </div>
-        <span className="absolute right-3 top-3 inline-flex">
-          <button
-            type="button"
-            data-testid="register-dashboard-attendance-summary-info"
-            aria-label={summaryInfoLabel}
-            className="peer inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-[11px] font-semibold leading-none text-slate-600"
-          >
-            i
-          </button>
-          <span className="pointer-events-none absolute right-0 top-7 z-10 w-max max-w-[220px] rounded-md bg-slate-900 px-2 py-1 text-[11px] font-medium leading-tight text-white opacity-0 shadow-md transition-opacity duration-150 peer-hover:opacity-100 peer-focus-visible:opacity-100">
-            {summaryInfoLabel}
-          </span>
-        </span>
+        <InfoIconTooltip
+          testId="register-dashboard-attendance-summary-info"
+          ariaLabel={summaryInfoLabel}
+          tooltipContent={summaryInfoLabel}
+          containerClassName="absolute right-3 top-3 inline-flex"
+        />
         {isLoading && (
           <span className="inline-flex rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold leading-none text-slate-700">
             集計中
