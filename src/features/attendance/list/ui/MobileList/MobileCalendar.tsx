@@ -198,6 +198,12 @@ type MonthTerm = {
   color: string;
 };
 
+const formatMobileTermLabel = (start: Dayjs, end: Dayjs) => {
+  const useYear = start.year() !== end.year();
+  const format = useYear ? "YY/M/D" : "M/D";
+  return `${start.format(format)}〜${end.format(format)}`;
+};
+
 const resolveMonthlyTerms = (
   currentMonth: Dayjs,
   closeDates: CloseDate[] = [],
@@ -210,9 +216,7 @@ const resolveMonthlyTerms = (
     start: monthStart,
     end: monthEnd,
     source: "fallback",
-    label: `${monthStart.format(
-      AttendanceDate.DisplayFormat,
-    )} 〜 ${monthEnd.format(AttendanceDate.DisplayFormat)}`,
+    label: formatMobileTermLabel(monthStart, monthEnd),
     color: palette[0] ?? "#90CAF9",
   };
 
@@ -238,9 +242,7 @@ const resolveMonthlyTerms = (
         start: start.startOf("day"),
         end: end.startOf("day"),
         source: "closeDate",
-        label: `${start.format(AttendanceDate.DisplayFormat)} 〜 ${end.format(
-          AttendanceDate.DisplayFormat,
-        )}`,
+        label: formatMobileTermLabel(start, end),
         color: palette[index % palette.length] ?? palette[0] ?? "#90CAF9",
       }),
     );
@@ -431,7 +433,7 @@ export default function MobileCalendar({
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ mb: 1 }}
+        sx={{ mb: 1, gap: 0.5 }}
       >
         <IconButton
           size="small"
@@ -442,7 +444,14 @@ export default function MobileCalendar({
         >
           <ChevronLeftIcon />
         </IconButton>
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1rem",
+            whiteSpace: "nowrap",
+          }}
+        >
           {currentMonth.format("YYYY年M月")}
         </Typography>
         <Stack direction="row" spacing={0.5} alignItems="center">
@@ -488,6 +497,11 @@ export default function MobileCalendar({
                 borderWidth: 1,
                 fontSize: "0.625rem",
                 height: 22,
+                maxWidth: "100%",
+                "& .MuiChip-label": {
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                },
               }}
             />
           ))}

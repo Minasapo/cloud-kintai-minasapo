@@ -1,7 +1,5 @@
 import dayjs, { Dayjs } from "dayjs";
 
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-
 export const MONTH_QUERY_KEY = "month";
 
 export type CloseDatePeriod = {
@@ -114,7 +112,7 @@ export const shouldRefetchForAttendanceEvent = (
 };
 
 export const formatDateRangeLabel = (range: DateRange): string => {
-  const startLabel = range.start.format(AttendanceDate.DisplayFormat);
-  const endLabel = range.end.format(AttendanceDate.DisplayFormat);
-  return `${startLabel} 〜 ${endLabel}`;
+  const startLabel = range.start.format("M/D");
+  const endLabel = range.end.format("M/D");
+  return `${startLabel}〜${endLabel}`;
 };
