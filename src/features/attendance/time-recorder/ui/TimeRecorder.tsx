@@ -55,7 +55,6 @@ import { goDirectlyCallback } from "./goDirectlyCallback";
 import { restEndCallback } from "./restEndCallback";
 import { restStartCallback } from "./restStartCallback";
 import { returnDirectlyCallback } from "./returnDirectlyCallback";
-import TimeElapsedErrorDialog from "./TimeElapsedErrorDialog";
 import {
   formatClockDisplayText,
   hasPendingChangeRequests,
@@ -642,9 +641,7 @@ export default function TimeRecorder({
       onReturnDirectly={handleReturnDirectly}
       onRestStart={handleRestStart}
       onRestEnd={handleRestEnd}
-      timeElapsedErrorDialog={
-        <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
-      }
+      isTimeElapsedError={isTimeElapsedError}
     />
   );
 }
