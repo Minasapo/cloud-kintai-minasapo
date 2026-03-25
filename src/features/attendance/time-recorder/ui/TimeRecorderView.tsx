@@ -1,29 +1,10 @@
 import "./styles.scss";
 
-import { type WorkStatus, WorkStatusCodes } from "../lib/common";
 import RecorderActionsCard from "./RecorderActionsCard";
 import RecorderStatusCard from "./RecorderStatusCard";
 import SupplementarySection from "./SupplementarySection";
 import TimeElapsedErrorDialog from "./TimeElapsedErrorDialog";
-
-type TimeRecorderViewProps = {
-  today: string;
-  staffId: string | null;
-  workStatus: WorkStatus;
-  directMode: boolean;
-  hasChangeRequest: boolean;
-  isAttendanceError: boolean;
-  clockInDisplayText: string | null;
-  clockOutDisplayText: string | null;
-  onDirectModeChange: (checked: boolean) => void;
-  onClockIn: () => void;
-  onClockOut: () => void;
-  onGoDirectly: () => void;
-  onReturnDirectly: () => void;
-  onRestStart: () => void;
-  onRestEnd: () => void;
-  isTimeElapsedError: boolean;
-};
+import { useTimeRecorder } from "./TimeRecorderContext";
 
 export function TimeRecorderLoadingView() {
   return (
@@ -48,29 +29,20 @@ export function TimeRecorderLoadingView() {
   );
 }
 
-export function TimeRecorderView({
-  today,
-  staffId,
-  workStatus,
-  directMode,
-  hasChangeRequest,
-  isAttendanceError,
-  clockInDisplayText,
-  clockOutDisplayText,
-  onDirectModeChange,
-  onClockIn,
-  onClockOut,
-  onGoDirectly,
-  onReturnDirectly,
-  onRestStart,
-  onRestEnd,
-  isTimeElapsedError,
-}: TimeRecorderViewProps) {
+export function TimeRecorderView() {
+  const {
+    today,
+    staffId,
+    workStatus,
+    hasChangeRequest,
+    isAttendanceError,
+    clockInDisplayText,
+    clockOutDisplayText,
+    isTimeElapsedError,
+  } = useTimeRecorder();
+
   const hasSupplementaryInfo =
     hasChangeRequest || isAttendanceError || Boolean(staffId);
-  const isBeforeWork = workStatus.code === WorkStatusCodes.BEFORE_WORK;
-  const isWorking = workStatus.code === WorkStatusCodes.WORKING;
-  const isResting = workStatus.code === WorkStatusCodes.RESTING;
 
   return (
     <div className="time-recorder-view">
@@ -84,20 +56,7 @@ export function TimeRecorderView({
               clockOutDisplayText={clockOutDisplayText}
             />
 
-            <RecorderActionsCard
-              directMode={directMode}
-              hasChangeRequest={hasChangeRequest}
-              isBeforeWork={isBeforeWork}
-              isWorking={isWorking}
-              isResting={isResting}
-              onDirectModeChange={onDirectModeChange}
-              onClockIn={onClockIn}
-              onClockOut={onClockOut}
-              onGoDirectly={onGoDirectly}
-              onReturnDirectly={onReturnDirectly}
-              onRestStart={onRestStart}
-              onRestEnd={onRestEnd}
-            />
+            <RecorderActionsCard />
 
             {hasChangeRequest && (
               <div

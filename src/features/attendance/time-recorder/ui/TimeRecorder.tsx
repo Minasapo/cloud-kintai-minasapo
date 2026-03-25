@@ -56,6 +56,10 @@ import { restEndCallback } from "./restEndCallback";
 import { restStartCallback } from "./restStartCallback";
 import { returnDirectlyCallback } from "./returnDirectlyCallback";
 import {
+  type TimeRecorderContextValue,
+  TimeRecorderProvider,
+} from "./TimeRecorderContext";
+import {
   formatClockDisplayText,
   hasPendingChangeRequests,
   resolveElapsedWorkInfo,
@@ -615,6 +619,50 @@ export default function TimeRecorder({
     };
   }, [cognitoUser?.id, currentWorkDate, logger, refreshTimeRecorderData]);
 
+  const contextValue = useMemo<TimeRecorderContextValue | null>(
+    () => {
+      if (workStatus === undefined || workStatus === null) {
+        return null;
+      }
+
+      return {
+        today: currentWorkDate,
+        staffId: staff?.id ?? null,
+        workStatus,
+        directMode,
+        hasChangeRequest,
+        isAttendanceError,
+        clockInDisplayText,
+        clockOutDisplayText,
+        onDirectModeChange: setDirectMode,
+        onClockIn: handleClockIn,
+        onClockOut: handleClockOut,
+        onGoDirectly: handleGoDirectly,
+        onReturnDirectly: handleReturnDirectly,
+        onRestStart: handleRestStart,
+        onRestEnd: handleRestEnd,
+        isTimeElapsedError,
+      };
+    },
+    [
+      currentWorkDate,
+      staff?.id,
+      workStatus,
+      directMode,
+      hasChangeRequest,
+      isAttendanceError,
+      clockInDisplayText,
+      clockOutDisplayText,
+      handleClockIn,
+      handleClockOut,
+      handleGoDirectly,
+      handleReturnDirectly,
+      handleRestStart,
+      handleRestEnd,
+      isTimeElapsedError,
+    ],
+  );
+
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return <TimeRecorderLoadingView />;
   }
@@ -625,23 +673,8 @@ export default function TimeRecorder({
   }
 
   return (
-    <TimeRecorderView
-      today={currentWorkDate}
-      staffId={staff?.id ?? null}
-      workStatus={workStatus}
-      directMode={directMode}
-      hasChangeRequest={hasChangeRequest}
-      isAttendanceError={isAttendanceError}
-      clockInDisplayText={clockInDisplayText}
-      clockOutDisplayText={clockOutDisplayText}
-      onDirectModeChange={setDirectMode}
-      onClockIn={handleClockIn}
-      onClockOut={handleClockOut}
-      onGoDirectly={handleGoDirectly}
-      onReturnDirectly={handleReturnDirectly}
-      onRestStart={handleRestStart}
-      onRestEnd={handleRestEnd}
-      isTimeElapsedError={isTimeElapsedError}
-    />
+    <TimeRecorderProvider value={contextValue!}>
+      <TimeRecorderView />
+    </TimeRecorderProvider>
   );
 }

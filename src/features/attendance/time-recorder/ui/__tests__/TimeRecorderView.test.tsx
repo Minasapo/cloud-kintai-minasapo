@@ -1,11 +1,15 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import type { ComponentProps } from "react";
+import { MemoryRouter } from "react-router-dom";
 
 import {
   type WorkStatus,
   WorkStatusCodes,
   WorkStatusTexts,
 } from "../../lib/common";
+import {
+  type TimeRecorderContextValue,
+  TimeRecorderProvider,
+} from "../TimeRecorderContext";
 import { TimeRecorderView } from "../TimeRecorderView";
 
 jest.mock("@/shared/ui/clock/Clock", () => ({
@@ -28,27 +32,39 @@ const workingStatus: WorkStatus = {
   text: WorkStatusTexts.WORKING,
 };
 
-function renderView(overrides: Partial<ComponentProps<typeof TimeRecorderView>> = {}) {
+function createContextValue(
+  overrides: Partial<TimeRecorderContextValue> = {},
+): TimeRecorderContextValue {
+  return {
+    today: "2026-03-18",
+    staffId: "staff-1",
+    workStatus: workingStatus,
+    directMode: false,
+    hasChangeRequest: false,
+    isAttendanceError: false,
+    clockInDisplayText: "09:00 出勤",
+    clockOutDisplayText: null,
+    onDirectModeChange: jest.fn(),
+    onClockIn: jest.fn(),
+    onClockOut: jest.fn(),
+    onGoDirectly: jest.fn(),
+    onReturnDirectly: jest.fn(),
+    onRestStart: jest.fn(),
+    onRestEnd: jest.fn(),
+    isTimeElapsedError: false,
+    ...overrides,
+  };
+}
+
+function renderView(overrides: Partial<TimeRecorderContextValue> = {}) {
+  const value = createContextValue(overrides);
+
   return render(
-    <TimeRecorderView
-      today="2026-03-18"
-      staffId="staff-1"
-      workStatus={workingStatus}
-      directMode={false}
-      hasChangeRequest={false}
-      isAttendanceError={false}
-      clockInDisplayText="09:00 出勤"
-      clockOutDisplayText={null}
-      onDirectModeChange={jest.fn()}
-      onClockIn={jest.fn()}
-      onClockOut={jest.fn()}
-      onGoDirectly={jest.fn()}
-      onReturnDirectly={jest.fn()}
-      onRestStart={jest.fn()}
-      onRestEnd={jest.fn()}
-      isTimeElapsedError={false}
-      {...overrides}
-    />,
+    <MemoryRouter>
+      <TimeRecorderProvider value={value}>
+        <TimeRecorderView />
+      </TimeRecorderProvider>
+    </MemoryRouter>,
   );
 }
 

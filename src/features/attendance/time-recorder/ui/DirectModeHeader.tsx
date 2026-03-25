@@ -1,14 +1,10 @@
 import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
 
-export type DirectModeHeaderProps = {
-  directMode: boolean;
-  onDirectModeChange: (checked: boolean) => void;
-};
+import { useTimeRecorder } from "./TimeRecorderContext";
 
-export default function DirectModeHeader({
-  directMode,
-  onDirectModeChange,
-}: DirectModeHeaderProps) {
+export default function DirectModeHeader() {
+  const { directMode, onDirectModeChange } = useTimeRecorder();
+
   return (
     <div className="recorder-actions-card__header">
       <label className="recorder-actions-card__switch-label">

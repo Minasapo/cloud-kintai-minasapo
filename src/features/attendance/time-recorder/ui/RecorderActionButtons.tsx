@@ -5,33 +5,25 @@ import RestEndButton from "@/shared/ui/time-recorder/RestEndButton";
 import RestStartButton from "@/shared/ui/time-recorder/RestStartButton";
 import ReturnDirectlyButton from "@/shared/ui/time-recorder/ReturnDirectlyButton";
 
-export type RecorderActionButtonsProps = {
-  directMode: boolean;
-  hasChangeRequest: boolean;
-  isBeforeWork: boolean;
-  isWorking: boolean;
-  isResting: boolean;
-  onClockIn: () => void;
-  onClockOut: () => void;
-  onGoDirectly: () => void;
-  onReturnDirectly: () => void;
-  onRestStart: () => void;
-  onRestEnd: () => void;
-};
+import { WorkStatusCodes } from "../lib/common";
+import { useTimeRecorder } from "./TimeRecorderContext";
 
-export default function RecorderActionButtons({
-  directMode,
-  hasChangeRequest,
-  isBeforeWork,
-  isWorking,
-  isResting,
-  onClockIn,
-  onClockOut,
-  onGoDirectly,
-  onReturnDirectly,
-  onRestStart,
-  onRestEnd,
-}: RecorderActionButtonsProps) {
+export default function RecorderActionButtons() {
+  const {
+    workStatus,
+    directMode,
+    hasChangeRequest,
+    onClockIn,
+    onClockOut,
+    onGoDirectly,
+    onReturnDirectly,
+    onRestStart,
+    onRestEnd,
+  } = useTimeRecorder();
+  const isBeforeWork = workStatus.code === WorkStatusCodes.BEFORE_WORK;
+  const isWorking = workStatus.code === WorkStatusCodes.WORKING;
+  const isResting = workStatus.code === WorkStatusCodes.RESTING;
+
   return (
     <div className="recorder-actions-card__actions">
       <div className="recorder-actions-card__action">
