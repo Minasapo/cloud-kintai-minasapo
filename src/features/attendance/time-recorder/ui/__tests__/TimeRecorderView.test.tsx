@@ -46,7 +46,7 @@ function renderView(overrides: Partial<ComponentProps<typeof TimeRecorderView>> 
       onReturnDirectly={jest.fn()}
       onRestStart={jest.fn()}
       onRestEnd={jest.fn()}
-      timeElapsedErrorDialog={null}
+      isTimeElapsedError={false}
       {...overrides}
     />,
   );
