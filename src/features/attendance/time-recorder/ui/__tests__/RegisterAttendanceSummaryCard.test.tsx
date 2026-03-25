@@ -48,6 +48,8 @@ jest.mock("react-chartjs-2", () => ({
 
 describe("RegisterAttendanceSummaryCard", () => {
   beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-03-12T09:00:00+09:00"));
     jest.clearAllMocks();
     capturedBarProps = null;
     mockUseCloseDates.mockReturnValue({
@@ -95,6 +97,10 @@ describe("RegisterAttendanceSummaryCard", () => {
       isUninitialized: false,
       error: null,
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("合計勤務時間・勤務日数を表示し、集計期間は情報アイコンのツールチップで確認できる", () => {
@@ -145,7 +151,16 @@ describe("RegisterAttendanceSummaryCard", () => {
     const overtimeDataset = barProps.data.datasets.find(
       (dataset) => dataset.label === "残業時間",
     );
+    const workDataset = barProps.data.datasets.find(
+      (dataset) => dataset.label === "勤務時間",
+    );
+    const restDataset = barProps.data.datasets.find(
+      (dataset) => dataset.label === "休憩時間",
+    );
     expect(overtimeDataset?.data).toContain(-1);
+    expect(workDataset?.data[10]).toBe(8);
+    expect(restDataset?.data[9]).toBe(1);
+    expect(restDataset?.data[10]).toBe(1);
   });
 
   it("期間中に勤務データがない場合は0件として表示する", () => {
@@ -183,8 +198,12 @@ describe("RegisterAttendanceSummaryCard", () => {
     const overtimeDataset = capturedBarProps.data.datasets.find(
       (dataset) => dataset.label === "残業時間",
     );
+    const restDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "休憩時間",
+    );
     expect(workDataset?.data.every((value) => value === 0)).toBe(true);
     expect(overtimeDataset?.data.every((value) => value === 0)).toBe(true);
+    expect(restDataset?.data.every((value) => value === 0)).toBe(true);
   });
 
   it("打刻エラーが1件以上のとき件数を赤色で強調表示する", () => {
@@ -207,5 +226,74 @@ describe("RegisterAttendanceSummaryCard", () => {
     expect(
       screen.getByTestId("register-dashboard-attendance-error-count"),
     ).toHaveClass("text-rose-600");
+  });
+
+  it("当日の勤務はサマリーとチャートの集計対象から除外する", () => {
+    mockUseListAttendancesByDateRangeQuery.mockReturnValue({
+      data: [
+        {
+          id: "a-1",
+          workDate: "2026-03-11",
+          startTime: "2026-03-11T09:00:00+09:00",
+          endTime: "2026-03-11T18:00:00+09:00",
+          rests: [
+            {
+              startTime: "2026-03-11T12:00:00+09:00",
+              endTime: "2026-03-11T13:00:00+09:00",
+            },
+          ],
+        },
+        {
+          id: "a-2",
+          workDate: "2026-03-12",
+          startTime: "2026-03-12T09:00:00+09:00",
+          endTime: "2026-03-12T19:00:00+09:00",
+          rests: [
+            {
+              startTime: "2026-03-12T12:00:00+09:00",
+              endTime: "2026-03-12T13:00:00+09:00",
+            },
+          ],
+        },
+      ],
+      isLoading: false,
+      isFetching: false,
+      isUninitialized: false,
+      error: null,
+    });
+
+    render(
+      <AuthContext.Provider
+        value={{
+          signOut: jest.fn(),
+          signIn: jest.fn(),
+          isCognitoUserRole: () => false,
+          cognitoUser: { id: "staff-1" } as never,
+        }}
+      >
+        <RegisterAttendanceSummaryCard attendanceErrorCount={0} />
+      </AuthContext.Provider>,
+    );
+
+    expect(screen.getByText("8.0h")).toBeInTheDocument();
+    expect(screen.getByText("1日")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("register-dashboard-work-status-chart-count"),
+    ).toHaveTextContent("対象データ 1件");
+
+    if (!capturedBarProps) {
+      throw new Error("Bar props were not captured");
+    }
+
+    const workDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "勤務時間",
+    );
+    const restDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "休憩時間",
+    );
+    expect(workDataset?.data[10]).toBe(8);
+    expect(workDataset?.data[11]).toBe(0);
+    expect(restDataset?.data[10]).toBe(1);
+    expect(restDataset?.data[11]).toBe(0);
   });
 });

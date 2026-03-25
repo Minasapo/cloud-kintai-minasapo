@@ -95,7 +95,7 @@ describe("RegisterContent", () => {
     localStorage.clear();
   });
 
-  it("ダッシュボードスロットを右側カラム向けクラス付きで描画する", () => {
+  it("右側カラムにアナウンスパネルを含むダッシュボードを描画する", () => {
     renderRegisterContent();
 
     const dashboardSlot = screen.getByTestId("register-dashboard-slot");
@@ -138,15 +138,16 @@ describe("RegisterContent", () => {
     expect(
       screen.getByTestId("register-dashboard-elapsed-duration-cards"),
     ).toBeInTheDocument();
-    expect(screen.getByTestId("register-dashboard-current-work-card")).toBeInTheDocument();
-    expect(screen.getByTestId("register-dashboard-current-rest-card")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("register-dashboard-current-work-card"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("register-dashboard-current-rest-card"),
+    ).toBeInTheDocument();
     expect(screen.getByText("現在の勤務時間")).toBeInTheDocument();
     expect(
       screen.getByTestId("register-dashboard-current-work-info"),
-    ).toHaveAttribute(
-      "aria-label",
-      "休憩時間を差し引いた勤務時間を表示します",
-    );
+    ).toHaveAttribute("aria-label", "休憩時間を差し引いた勤務時間を表示します");
     expect(screen.getByText("02:10")).toBeInTheDocument();
     expect(screen.getByText("00:00")).toBeInTheDocument();
   });

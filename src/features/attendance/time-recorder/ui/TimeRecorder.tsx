@@ -46,9 +46,7 @@ import {
 } from "@/entities/attendance/lib/AttendanceState";
 import { resolveCurrentBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
 import { buildAttendanceIdempotencyKey } from "@/entities/attendance/lib/operationContext";
-import {
-  getNowISOStringWithZeroSeconds,
-} from "@/entities/attendance/lib/time";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
@@ -58,6 +56,7 @@ import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 import { WorkStatus, WorkStatusCodes } from "../lib/common";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
+import { getUnrecordedDefaultLunchMinutes } from "./elapsedWorkInfo";
 import { goDirectlyCallback } from "./goDirectlyCallback";
 import { restEndCallback } from "./restEndCallback";
 import { restStartCallback } from "./restStartCallback";
@@ -96,7 +95,10 @@ function calcElapsedMinutes(
     return 0;
   }
 
-  return Math.max(dayjs(endTime ?? dayjs()).diff(dayjs(startTime), "minute"), 0);
+  return Math.max(
+    dayjs(endTime ?? dayjs()).diff(dayjs(startTime), "minute"),
+    0,
+  );
 }
 
 /**
@@ -114,7 +116,12 @@ export default function TimeRecorder({
 
   const dispatch = useDispatch();
 
-  const { getStartTime, getEndTime } = useContext(AppConfigContext);
+  const {
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useContext(AppConfigContext);
 
   const [currentWorkDate, setCurrentWorkDate] = useState(() =>
     resolveCurrentBusinessWorkDate(),
@@ -192,7 +199,8 @@ export default function TimeRecorder({
     isAttendancesFetching ||
     isAttendancesUninitialized;
 
-  const [upsertAttendanceMutation] = useUpsertAttendanceByStaffAndDateMutation();
+  const [upsertAttendanceMutation] =
+    useUpsertAttendanceByStaffAndDateMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
   const localAttendanceUpdateIgnoreUntilRef = useRef(0);
 
@@ -417,36 +425,30 @@ export default function TimeRecorder({
     return `${dayjs(attendance.endTime).format("HH:mm")} 退勤`;
   }, [attendance?.endTime]);
 
-  const handleClockIn = useCallback(
-    () => {
-      const occurredAt = getNowISOStringWithZeroSeconds();
-      return clockInCallback(
-        cognitoUser,
-        clockIn,
-        dispatch,
-        staff,
-        logger,
-        occurredAt,
-      );
-    },
-    [clockIn, cognitoUser, dispatch, logger, staff],
-  );
+  const handleClockIn = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    return clockInCallback(
+      cognitoUser,
+      clockIn,
+      dispatch,
+      staff,
+      logger,
+      occurredAt,
+    );
+  }, [clockIn, cognitoUser, dispatch, logger, staff]);
 
-  const handleClockOut = useCallback(
-    () => {
-      const occurredAt = getNowISOStringWithZeroSeconds();
-      return clockOutCallback(
-        cognitoUser,
-        clockOut,
-        dispatch,
-        staff,
-        logger,
-        undefined,
-        occurredAt,
-      );
-    },
-    [clockOut, cognitoUser, dispatch, logger, staff],
-  );
+  const handleClockOut = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    return clockOutCallback(
+      cognitoUser,
+      clockOut,
+      dispatch,
+      staff,
+      logger,
+      undefined,
+      occurredAt,
+    );
+  }, [clockOut, cognitoUser, dispatch, logger, staff]);
 
   const handleGoDirectly = useCallback(() => {
     const occurredAt = getNowISOStringWithZeroSeconds();
@@ -468,14 +470,7 @@ export default function TimeRecorder({
       startIso,
       occurredAt,
     );
-  }, [
-    cognitoUser,
-    clockIn,
-    dispatch,
-    staff,
-    logger,
-    getStartTime,
-  ]);
+  }, [cognitoUser, clockIn, dispatch, staff, logger, getStartTime]);
 
   const handleReturnDirectly = useCallback(() => {
     const occurredAt = getNowISOStringWithZeroSeconds();
@@ -497,42 +492,23 @@ export default function TimeRecorder({
       endIso,
       occurredAt,
     );
-  }, [
-    cognitoUser,
-    staff,
-    dispatch,
-    clockOut,
-    logger,
-    getEndTime,
-  ]);
+  }, [cognitoUser, staff, dispatch, clockOut, logger, getEndTime]);
 
-  const handleRestStart = useCallback(
-    () => {
-      const occurredAt = getNowISOStringWithZeroSeconds();
-      return restStartCallback(
-        cognitoUser,
-        dispatch,
-        restStart,
-        logger,
-        occurredAt,
-      );
-    },
-    [cognitoUser, dispatch, logger, restStart],
-  );
+  const handleRestStart = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    return restStartCallback(
+      cognitoUser,
+      dispatch,
+      restStart,
+      logger,
+      occurredAt,
+    );
+  }, [cognitoUser, dispatch, logger, restStart]);
 
-  const handleRestEnd = useCallback(
-    () => {
-      const occurredAt = getNowISOStringWithZeroSeconds();
-      return restEndCallback(
-        cognitoUser,
-        restEnd,
-        dispatch,
-        logger,
-        occurredAt,
-      );
-    },
-    [cognitoUser, dispatch, logger, restEnd],
-  );
+  const handleRestEnd = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    return restEndCallback(cognitoUser, restEnd, dispatch, logger, occurredAt);
+  }, [cognitoUser, dispatch, logger, restEnd]);
 
   const handleVisibilityChange = useCallback(() => {
     const now = dayjs();
@@ -651,20 +627,34 @@ export default function TimeRecorder({
         return sum + calcElapsedMinutes(rest.startTime, rest.endTime);
       }, 0);
 
-    const netWorkMinutes = Math.max(grossWorkMinutes - totalRestMinutes, 0);
+    const defaultLunchMinutes = getUnrecordedDefaultLunchMinutes({
+      now: dayjs(),
+      attendanceStartTime: attendance.startTime,
+      rests: attendance.rests,
+      lunchRestStartTime: getLunchRestStartTime(),
+      lunchRestEndTime: getLunchRestEndTime(),
+    });
+
+    const netWorkMinutes = Math.max(
+      grossWorkMinutes - totalRestMinutes - defaultLunchMinutes,
+      0,
+    );
     const activeRest = (attendance.rests ?? [])
       .filter((rest): rest is NonNullable<typeof rest> => rest !== null)
-      .reduce<NonNullable<Attendance["rests"]>[number] | null>((latest, rest) => {
-        if (!rest.startTime || rest.endTime) {
-          return latest;
-        }
-        if (!latest?.startTime) {
-          return rest;
-        }
-        return dayjs(rest.startTime).isAfter(dayjs(latest.startTime))
-          ? rest
-          : latest;
-      }, null);
+      .reduce<NonNullable<Attendance["rests"]>[number] | null>(
+        (latest, rest) => {
+          if (!rest.startTime || rest.endTime) {
+            return latest;
+          }
+          if (!latest?.startTime) {
+            return rest;
+          }
+          return dayjs(rest.startTime).isAfter(dayjs(latest.startTime))
+            ? rest
+            : latest;
+        },
+        null,
+      );
     const activeRestMinutes =
       workStatus.code === WorkStatusCodes.RESTING && activeRest?.startTime
         ? calcElapsedMinutes(activeRest.startTime)
@@ -675,7 +665,13 @@ export default function TimeRecorder({
       workDurationLabel: formatElapsedDurationFromMinutes(netWorkMinutes),
       restDurationLabel: formatElapsedDurationFromMinutes(activeRestMinutes),
     };
-  }, [attendance, workStatus, elapsedWorkTick]);
+  }, [
+    attendance,
+    getLunchRestEndTime,
+    getLunchRestStartTime,
+    workStatus,
+    elapsedWorkTick,
+  ]);
 
   useEffect(() => {
     onAttendanceErrorCountChange?.(attendanceErrorCount);
