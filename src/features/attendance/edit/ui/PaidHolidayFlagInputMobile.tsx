@@ -20,6 +20,7 @@ type PaidHolidayFlagField = AttendanceControllerField<"paidHolidayFlag">;
 interface PaidHolidayFlagInputProps {
   label?: string;
   disabled?: boolean;
+  hideLabel?: boolean;
   control: AttendanceControl;
   setValue: AttendanceSetValue;
   workDate?: string;
@@ -31,6 +32,7 @@ interface PaidHolidayFlagInputProps {
 export default function PaidHolidayFlagInputMobile({
   label = "有給休暇",
   disabled = false,
+  hideLabel = false,
   control,
   setValue,
   workDate,
@@ -121,7 +123,7 @@ export default function PaidHolidayFlagInputMobile({
 
   return (
     <>
-      <Label variant="body1">{label}</Label>
+      {!hideLabel ? <Label variant="body1">{label}</Label> : null}
       <div className="flex flex-col items-start gap-3">
         <div className="text-sm leading-6 text-slate-500">
           1日有給を取得する場合はチェックを入れてください。既定の勤務開始／終了時刻と休憩がセットされます。

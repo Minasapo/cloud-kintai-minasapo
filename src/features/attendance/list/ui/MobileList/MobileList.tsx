@@ -10,7 +10,7 @@ export default function MobileList() {
   const hasErrorStatus = hasErrorOrLateInMonth(context);
 
   return (
-    <div className="pb-2 md:hidden">
+    <div className="mobile-list">
       {hasErrorStatus && <ErrorStatusAlert />}
       <MobileCalendar />
     </div>

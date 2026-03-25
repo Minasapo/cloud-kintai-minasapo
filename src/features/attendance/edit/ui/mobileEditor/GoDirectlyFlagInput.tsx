@@ -7,7 +7,7 @@ import { AttendanceEditContext } from "@/features/attendance/edit/model/Attendan
 
 export function GoDirectlyFlagInput() {
   const { control, setValue, workDate, getValues, attendance } = useContext(
-    AttendanceEditContext
+    AttendanceEditContext,
   );
   const { getStartTime } = useAppConfig();
   const [highlightStartTime, setHighlightStartTime] = useState(false);
@@ -21,14 +21,13 @@ export function GoDirectlyFlagInput() {
       getStartTime(),
       getValues?.("startTime") as string | null | undefined,
       workDate ?? undefined,
-      attendance?.workDate
+      attendance?.workDate,
     );
 
   const handleChangeFlag = (checked: boolean) => {
     if (checked) {
       setValue("goDirectlyFlag", true);
       setValue("startTime", computeStartTimeIso());
-      // トリガーハイライトアニメーション
       setHighlightStartTime(true);
       setTimeout(() => setHighlightStartTime(false), 2500);
     }
@@ -39,7 +38,8 @@ export function GoDirectlyFlagInput() {
       <GoDirectlyFlagCheckbox
         name="goDirectlyFlag"
         control={control}
-        inputVariant="switch"
+        label="直行ですか？"
+        inputVariant="checkbox"
         layout="inline"
         onChangeExtra={handleChangeFlag}
       />

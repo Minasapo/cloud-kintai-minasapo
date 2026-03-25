@@ -52,7 +52,7 @@ export default function TimeInputField({
       {/* ── Input container ── */}
       <div
         className={[
-          "relative flex h-10 min-w-[170px] items-center rounded-[12px] border border-solid border-slate-500 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition",
+          "relative flex h-10 w-full min-w-0 max-w-full items-center rounded-[12px] border border-solid border-slate-500 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition",
           isDisabledOrReadOnly
             ? "border-slate-400 bg-slate-100 text-slate-500 shadow-none"
             : "focus-within:border-emerald-500/70 focus-within:ring-2 focus-within:ring-emerald-100",
@@ -74,7 +74,7 @@ export default function TimeInputField({
           onFocus={onFocus}
           onBlur={onBlur}
           onChange={(e) => onChange(e.target.value)}
-          className="h-full min-w-0 flex-1 border-0 bg-transparent px-4 pr-10 text-sm text-slate-900 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-500"
+          className="box-border h-full w-full min-w-0 flex-1 border-0 bg-transparent pl-4 pr-8 text-sm text-slate-900 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-500"
         />
 
         {/* Chevron button – rotates when open */}

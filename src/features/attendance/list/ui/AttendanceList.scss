@@ -1,21 +1,20 @@
 .attendance-list {
-  margin: 0 auto;
+  margin: 0;
+  padding: 0rem;
   display: flex;
   width: 100%;
-  max-width: 1180px;
   flex-direction: column;
   gap: 1rem;
-  padding: 0.2rem 0.75rem 0.75rem;
 }
 
 @media (min-width: 640px) {
   .attendance-list {
-    padding: 1.5rem;
+    padding: 0rem;
   }
 }
 
 @media (min-width: 1024px) {
   .attendance-list {
-    padding: 2rem;
+    padding: 0rem;
   }
 }

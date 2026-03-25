@@ -37,14 +37,8 @@ export default function AttendanceListHeader({
           </button>
         </div>
         <div className="attendance-list-header__summary">
-          {/* モバイル向け */}
           <p className="attendance-list-header__summary-inline">
             集計期間：{rangeLabelForDisplay}
-          </p>
-          {/* PC向け */}
-          <p className="attendance-list-header__summary-label">集計期間</p>
-          <p className="attendance-list-header__summary-range">
-            {rangeLabelForDisplay}
           </p>
         </div>
       </div>

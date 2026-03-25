@@ -22,7 +22,6 @@ import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components
 import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
 import { createLogger } from "@/shared/lib/logger";
 
-import AttendanceEditBreadcrumb from "../AttendanceEditBreadcrumb";
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
 import NoDataAlert from "./NoDataAlert";
 import PaidHolidayFlagInput from "./PaidHolidayFlagInput";
@@ -128,7 +127,6 @@ export default function DesktopEditor() {
     <div className="mx-auto w-full max-w-[1120px] px-6 pb-10 pt-2">
       <div className="flex flex-col gap-3">
         <AttendanceEditPageHeader
-          breadcrumb={<AttendanceEditBreadcrumb />}
           description="勤務時間、休憩、休暇、備考をひとつの画面で調整できます。必要な内容を入力して修正申請を行ってください。"
         />
         <div className="flex w-full flex-col gap-2">

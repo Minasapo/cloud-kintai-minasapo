@@ -1,6 +1,6 @@
 .attendance-list-header {
   border: 1px solid rgba(209, 250, 229, 0.8);
-  border-radius: 1.2rem;
+  border-radius: 0.75rem;
   background: linear-gradient(135deg, #f7fcf8 0%, #ecfdf5 58%, #ffffff 100%);
   box-shadow: 0 28px 60px -42px rgba(15, 23, 42, 0.35);
   padding: 1rem;
@@ -39,7 +39,6 @@
 }
 
 .attendance-list-header__description--expanded {
-  -webkit-line-clamp: initial;
   display: block;
   overflow: visible;
 }
@@ -58,7 +57,7 @@
 
 .attendance-list-header__summary {
   border: 1px solid #d1fae5;
-  border-radius: 1rem;
+  border-radius: 0.6rem;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 18px 42px -36px rgba(15, 23, 42, 0.35);
   padding: 0.65rem 0.85rem;
@@ -75,31 +74,9 @@
   white-space: nowrap;
 }
 
-.attendance-list-header__summary-label {
-  display: none;
-  margin: 0;
-  color: #64748b;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  line-height: 1rem;
-}
-
-.attendance-list-header__summary-range {
-  display: none;
-  margin: 0.25rem 0 0;
-  color: #0f172a;
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1.25rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (min-width: 640px) {
   .attendance-list-header {
-    border-radius: 1.8rem;
+    border-radius: 1rem;
     padding: 1.5rem;
   }
 
@@ -116,7 +93,6 @@
   }
 
   .attendance-list-header__description {
-    -webkit-line-clamp: initial;
     display: block;
     overflow: visible;
     font-size: 0.95rem;
@@ -128,25 +104,6 @@
 
   .attendance-list-header__summary {
     padding: 0.75rem 1rem;
-  }
-
-  .attendance-list-header__summary-inline {
-    display: none;
-  }
-
-  .attendance-list-header__summary-label {
-    display: block;
-  }
-
-  .attendance-list-header__summary-range {
-    display: block;
-  }
-
-  .attendance-list-header__summary-range {
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-    word-break: break-word;
   }
 }
 

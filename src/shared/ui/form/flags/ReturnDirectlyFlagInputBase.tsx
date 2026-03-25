@@ -128,7 +128,6 @@ export default function ReturnDirectlyFlagInputBase<
 
   return (
     <div className="mb-1 flex items-center gap-2">
-      <p className="m-0 pb-2 font-bold">{label}</p>
       <Controller
         name={checkedValueName}
         control={control}
@@ -142,6 +141,9 @@ export default function ReturnDirectlyFlagInputBase<
           />
         )}
       />
+      <p className="m-0 text-sm font-normal leading-4 text-slate-700">
+        {label}
+      </p>
     </div>
   );
 }

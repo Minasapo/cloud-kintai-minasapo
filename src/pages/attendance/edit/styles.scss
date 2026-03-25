@@ -1,0 +1,59 @@
+.attendance-edit-root {
+  min-height: 100%;
+}
+
+.attendance-edit__loading {
+  padding: 8px 0;
+}
+
+.attendance-edit__loading-track {
+  height: 4px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgb(226 232 240);
+}
+
+.attendance-edit__loading-bar {
+  height: 100%;
+  width: 35%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgb(16 185 129), rgb(5 150 105));
+  animation: attendance-edit-loading 1s ease-in-out infinite;
+}
+
+.attendance-edit-error-alert {
+  border-radius: 12px;
+  border: 1px solid rgb(252 165 165 / 0.7);
+  background: rgb(254 242 242 / 0.95);
+  padding: 12px 16px;
+  color: rgb(127 29 29);
+}
+
+.attendance-edit-error-alert__title {
+  margin: 0 0 6px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+}
+
+.attendance-edit-error-alert__list {
+  margin: 0;
+  padding-left: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.attendance-edit-error-alert__item {
+  margin: 0;
+}
+
+@keyframes attendance-edit-loading {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(320%);
+  }
+}

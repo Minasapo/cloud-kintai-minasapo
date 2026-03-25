@@ -20,7 +20,7 @@ export function RequestButtonItem({
       type="button"
       onClick={handleSubmit(onSubmit)}
       // disabled={!isDirty || !isValid || isSubmitting}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-[12px] border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
     >
       {isSubmitting ? (
         <span

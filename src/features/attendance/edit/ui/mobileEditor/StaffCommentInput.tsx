@@ -1,72 +1,103 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack, TextField } from "@mui/material";
-import { useContext, useEffect, useRef, useState } from "react";
+import "./StaffCommentInput.scss";
+
+import { useContext, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import {
+  createSelectReasonHandler,
+  getEnabledReasons,
+  ReasonItem,
+} from "@/features/attendance/edit/ui/mobileEditor/staffCommentInputUtils";
+import { StaffCommentReasonButtons } from "@/features/attendance/edit/ui/mobileEditor/StaffCommentReasonButtons";
+import { StaffCommentTextarea } from "@/features/attendance/edit/ui/mobileEditor/StaffCommentTextarea";
 
 export default function StaffCommentInput() {
-  const { changeRequests, register, setValue } = useContext(
-    AttendanceEditContext
+  const { changeRequests, register, setValue, watch, getValues } = useContext(
+    AttendanceEditContext,
   );
+  const [isExpanded, setIsExpanded] = useState(false);
   const { getReasons } = useContext(AppConfigContext);
-  const [reasons, setReasons] = useState<
-    { reason: string; enabled: boolean }[]
-  >([]);
-  const staffCommentRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setReasons(getReasons().filter((reason) => reason.enabled)); // 有効な理由のみ設定
-  }, [getReasons]);
+  const reasons: ReasonItem[] = useMemo(
+    () => getEnabledReasons(getReasons()),
+    [getReasons],
+  );
 
   if (!register || !setValue) {
     return null;
   }
 
+  const isDisabled = changeRequests.length > 0;
+  const staffCommentRegister = register("staffComment", { required: false });
+  const handleSelectReason = createSelectReasonHandler(setValue);
+  const staffCommentValue = watch
+    ? ((watch("staffComment") as string | null | undefined) ?? "")
+    : ((getValues?.("staffComment") as string | null | undefined) ?? "");
+
   return (
-    <Box>
-      <TextField
-        {...register("staffComment")}
-        inputRef={(ref) => {
-          staffCommentRef.current = ref;
-          register("staffComment", { required: false });
-        }}
-        multiline
-        fullWidth
-        minRows={2}
-        placeholder="修正理由欄：管理者へ伝えたいことを記載"
-        disabled={changeRequests.length > 0}
-        inputProps={{ "data-testid": "staff-comment-input-mobile" }}
-      />
-      <Box>
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{ mt: 1, flexWrap: "wrap" }}
-          alignItems={"center"}
+    <>
+      <div className="staff-comment-input">
+        <div className="staff-comment-input__header">
+          <button
+            type="button"
+            className="staff-comment-input__expand-button"
+            onClick={() => setIsExpanded(true)}
+            aria-label="修正理由入力を全画面で開く"
+          >
+            ⤢
+          </button>
+        </div>
+        <StaffCommentTextarea
+          disabled={isDisabled}
+          registerProps={staffCommentRegister}
+        />
+        <StaffCommentReasonButtons
+          reasons={reasons}
+          disabled={isDisabled}
+          onSelectReason={handleSelectReason}
+        />
+      </div>
+      {isExpanded ? (
+        <div
+          className="staff-comment-input__overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="staff-comment-expanded-title"
+          onClick={() => setIsExpanded(false)}
         >
-          {reasons.map((reason, index) => (
-            <Chip
-              key={index}
-              data-testid={`staff-comment-reason-chip-${index}`}
-              label={reason.reason}
-              variant="outlined"
-              color="primary"
-              icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-              disabled={changeRequests.length > 0}
-              onClick={() => {
-                if (staffCommentRef.current) {
-                  staffCommentRef.current.value = reason.reason;
-                }
-                setValue("staffComment", reason.reason, {
+          <div
+            className="staff-comment-input__overlay-panel"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="staff-comment-input__overlay-header">
+              <h2
+                id="staff-comment-expanded-title"
+                className="staff-comment-input__overlay-title"
+              >
+                修正理由入力
+              </h2>
+              <button
+                type="button"
+                className="staff-comment-input__close-button"
+                onClick={() => setIsExpanded(false)}
+              >
+                閉じる
+              </button>
+            </div>
+            <textarea
+              value={staffCommentValue}
+              className="staff-comment-input__overlay-textarea"
+              placeholder="修正理由欄：管理者へ伝えたいことを記載"
+              disabled={isDisabled}
+              onChange={(e) =>
+                setValue("staffComment", e.target.value, {
                   shouldDirty: true,
-                });
-              }}
+                })
+              }
             />
-          ))}
-        </Stack>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
