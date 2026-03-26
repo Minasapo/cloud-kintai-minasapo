@@ -58,11 +58,10 @@ const WorkingTimeRoute = createLazyRoute(
 );
 const AdminDailyReportDetailRoute = createLazyRoute(
   () =>
-    import("../pages/admin/AdminDailyReportManagement/AdminDailyReportDetail"),
+    import("../pages/admin/AdminDailyReport/AdminDailyReportDetail"),
 );
-const AdminDailyReportManagementRoute = createLazyRoute(
-  () =>
-    import("../pages/admin/AdminDailyReportManagement/AdminDailyReportManagement"),
+const AdminDailyReportRoute = createLazyRoute(
+  () => import("../pages/admin/AdminDailyReport/AdminDailyReport"),
 );
 const AdminHolidayCalendarRoute = createLazyRoute(
   () =>
@@ -103,8 +102,8 @@ const AdminWorkflowDetailRoute = createLazyRoute(
 const JobTermRoute = createLazyRoute(
   () => import("@/features/admin/jobTerm/ui/JobTerm"),
 );
-const ShiftPlanManagementRoute = createLazyRoute(
-  () => import("../pages/admin/ShiftPlanManagement/ShiftPlanManagement"),
+const AdminShiftPlanRoute = createLazyRoute(
+  () => import("../pages/admin/AdminShiftPlan/AdminShiftPlan"),
 );
 const ShiftDayViewRoute = createLazyRoute(
   () => import("../pages/shift/day-view"),
@@ -226,7 +225,7 @@ export const adminChildRoutes: RouteObject[] = [
   },
   {
     path: "shift-plan",
-    lazy: ShiftPlanManagementRoute,
+    lazy: AdminShiftPlanRoute,
   },
   {
     path: "master",
@@ -340,7 +339,7 @@ export const adminChildRoutes: RouteObject[] = [
     children: [
       {
         index: true,
-        lazy: AdminDailyReportManagementRoute,
+        lazy: AdminDailyReportRoute,
       },
       {
         path: ":id",

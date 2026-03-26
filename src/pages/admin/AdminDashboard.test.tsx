@@ -7,7 +7,7 @@ import {
 } from "@/shared/api/graphql/documents/queries";
 import { DailyReportStatus } from "@/shared/api/graphql/types";
 
-import AdminDashboardHome from "./AdminDashboardHome";
+import AdminDashboard from "./AdminDashboard";
 
 const mockGraphql = jest.fn();
 const mockUseStaffs = jest.fn();
@@ -60,7 +60,7 @@ jest.mock("react-chartjs-2", () => ({
   Bar: (props: unknown) => mockBar(props),
 }));
 
-describe("AdminDashboardHome", () => {
+describe("AdminDashboard", () => {
   beforeEach(() => {
     mockGraphql.mockReset();
     mockUseStaffs.mockReset();
@@ -132,7 +132,7 @@ describe("AdminDashboardHome", () => {
   });
 
   it("勤務状況・日報提出状況・申請件数カード領域を表示する", async () => {
-    render(<AdminDashboardHome />);
+    render(<AdminDashboard />);
 
     expect(
       screen.getByTestId("admin-dashboard-count-cards-grid"),
@@ -279,7 +279,7 @@ describe("AdminDashboardHome", () => {
       return Promise.resolve({});
     });
 
-    render(<AdminDashboardHome />);
+    render(<AdminDashboard />);
 
     await waitFor(() => {
       expect(
