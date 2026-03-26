@@ -23,11 +23,11 @@ import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader
 import { createLogger } from "@/shared/lib/logger";
 import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
-import styles from "./WorkflowEditPage.module.scss";
+import styles from "./WorkflowEdit.module.scss";
 
-const logger = createLogger("WorkflowEditPage");
+const logger = createLogger("WorkflowEdit");
 
-export default function WorkflowEditPage() {
+export default function WorkflowEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { workflow } = useLoaderData() as WorkflowEditLoaderData;

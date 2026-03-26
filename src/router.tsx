@@ -108,7 +108,7 @@ const WorkflowDetailRoute = createLazyRoute(
   },
 );
 const WorkflowEditRoute = createLazyRoute(
-  () => import("./pages/workflow/edit/WorkflowEditPage"),
+  () => import("./pages/workflow/edit/WorkflowEdit"),
   {
     loader: loadWorkflowEditLoader,
   },
