@@ -4,7 +4,7 @@ import {
 } from "@entities/staff/model/useStaffs/useStaffs";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import WorkflowCommentThread from "../WorkflowCommentThread";
+import { WorkflowCommentThreadView as WorkflowCommentThread } from "../WorkflowCommentThread";
 
 describe("WorkflowCommentThread", () => {
   const baseMessages = [

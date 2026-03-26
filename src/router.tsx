@@ -102,25 +102,25 @@ const ShiftCollaborativeRoute = createLazyRoute(
   () => import("./pages/shift/collaborative"),
 );
 const WorkflowDetailRoute = createLazyRoute(
-  () => import("./pages/workflow/detail/WorkflowDetailPage"),
+  () => import("./pages/workflow/detail/WorkflowDetail"),
   {
     loader: loadWorkflowDetailLoader,
   },
 );
 const WorkflowEditRoute = createLazyRoute(
-  () => import("./pages/workflow/edit/WorkflowEditPage"),
+  () => import("./pages/workflow/edit/WorkflowEdit"),
   {
     loader: loadWorkflowEditLoader,
   },
 );
 const WorkflowListRoute = createLazyRoute(
-  () => import("./pages/workflow/list/WorkflowListPage"),
+  () => import("./pages/workflow/list/Workflow"),
   {
     wrap: wrapWithMuiXDateProvider,
   },
 );
 const NewWorkflowRoute = createLazyRoute(
-  () => import("./pages/workflow/new/NewWorkflowPage"),
+  () => import("./pages/workflow/new/NewWorkflow"),
 );
 
 const router = createBrowserRouter([
