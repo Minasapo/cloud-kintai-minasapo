@@ -120,7 +120,7 @@ const WorkflowListRoute = createLazyRoute(
   },
 );
 const NewWorkflowRoute = createLazyRoute(
-  () => import("./pages/workflow/new/NewWorkflowPage"),
+  () => import("./pages/workflow/new/NewWorkflow"),
 );
 
 const router = createBrowserRouter([

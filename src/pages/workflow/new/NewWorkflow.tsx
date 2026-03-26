@@ -36,9 +36,9 @@ import { createLogger } from "@/shared/lib/logger";
 import { parseTimeToISO } from "@/shared/lib/time";
 import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
-import styles from "./NewWorkflowPage.module.scss";
+import styles from "./NewWorkflow.module.scss";
 
-const logger = createLogger("NewWorkflowPage");
+const logger = createLogger("NewWorkflow");
 
 const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
 
@@ -167,7 +167,7 @@ const FormRow = ({
   </div>
 );
 
-export default function NewWorkflowPage() {
+export default function NewWorkflow() {
   const navigate = useNavigate();
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
