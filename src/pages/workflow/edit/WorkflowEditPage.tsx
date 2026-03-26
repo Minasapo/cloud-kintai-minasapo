@@ -18,6 +18,7 @@ import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { fetchWorkflowById } from "@/entities/workflow/model/loader";
+import { WorkflowFormProvider } from "@/features/workflow/application-form/model/WorkflowFormContext";
 import {
   buildUpdateWorkflowInput,
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
@@ -319,38 +320,42 @@ export default function WorkflowEditPage() {
               </div>
             </div>
 
-            {/* 種別固有フィールド（共通コンポーネント） */}
-            <WorkflowTypeFields
-              category={category}
-              startDate={startDate}
-              setStartDate={setStartDate}
-              endDate={endDate}
-              setEndDate={setEndDate}
-              dateError={dateError}
-              paidReason={paidReason}
-              setPaidReason={setPaidReason}
-              absenceDate={absenceDate}
-              setAbsenceDate={setAbsenceDate}
-              absenceDateError={absenceDateError}
-              absenceReason={absenceReason}
-              setAbsenceReason={setAbsenceReason}
-              overtimeDate={overtimeDate}
-              setOvertimeDate={setOvertimeDate}
-              overtimeDateError={overtimeDateError}
-              overtimeStart={overtimeStart}
-              setOvertimeStart={setOvertimeStart}
-              overtimeEnd={overtimeEnd}
-              setOvertimeEnd={setOvertimeEnd}
-              overtimeError={overtimeError}
-              overtimeReason={overtimeReason}
-              setOvertimeReason={setOvertimeReason}
-              customWorkflowTitle={customWorkflowTitle}
-              setCustomWorkflowTitle={setCustomWorkflowTitle}
-              customWorkflowContent={customWorkflowContent}
-              setCustomWorkflowContent={setCustomWorkflowContent}
-              customWorkflowTitleError={customWorkflowTitleError}
-              customWorkflowContentError={customWorkflowContentError}
-            />
+            <WorkflowFormProvider
+              value={{
+                category,
+                disabled: false,
+                startDate,
+                setStartDate,
+                endDate,
+                setEndDate,
+                dateError,
+                paidReason,
+                setPaidReason,
+                absenceDate,
+                setAbsenceDate,
+                absenceDateError,
+                absenceReason,
+                setAbsenceReason,
+                overtimeDate,
+                setOvertimeDate,
+                overtimeDateError,
+                overtimeStart,
+                setOvertimeStart,
+                overtimeEnd,
+                setOvertimeEnd,
+                overtimeError,
+                overtimeReason,
+                setOvertimeReason,
+                customWorkflowTitle,
+                setCustomWorkflowTitle,
+                customWorkflowContent,
+                setCustomWorkflowContent,
+                customWorkflowTitleError,
+                customWorkflowContentError,
+              }}
+            >
+              <WorkflowTypeFields />
+            </WorkflowFormProvider>
 
             <div className={styles.formRow}>
               <div className={styles.formLabel}>
@@ -388,7 +393,6 @@ export default function WorkflowEditPage() {
           </div>
         </DashboardInnerSurface>
       </PageSection>
-      {/* notifications are handled globally by SnackbarGroup */}
     </Page>
   );
 }

@@ -22,6 +22,7 @@ import {
   getEnabledWorkflowCategories,
 } from "@/entities/workflow/lib/workflowLabels";
 import { useNewWorkflowForm } from "@/features/workflow/application-form/model/useNewWorkflowForm";
+import { WorkflowFormProvider } from "@/features/workflow/application-form/model/WorkflowFormContext";
 import {
   buildCreateWorkflowInput,
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
@@ -130,6 +131,41 @@ const extractErrorMessage = (err: unknown): string => {
   }
   return "ワークフローの作成に失敗しました。";
 };
+
+const buildCategoryOptions = (
+  options: ReturnType<typeof getEnabledWorkflowCategories>,
+) =>
+  options.flatMap((item) => {
+    if (item.category === WorkflowCategory.CLOCK_CORRECTION) {
+      return [
+        <option key={`${item.category}-clock-in`} value={CLOCK_CORRECTION_LABEL}>
+          {CLOCK_CORRECTION_LABEL}
+        </option>,
+        <option key={`${item.category}-clock-out`} value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
+          {CLOCK_CORRECTION_CHECK_OUT_LABEL}
+        </option>,
+      ];
+    }
+    const label = CATEGORY_LABELS[item.category] ?? item.label;
+    return [
+      <option key={item.category} value={label}>
+        {label}
+      </option>,
+    ];
+  });
+
+const FormRow = ({
+  label,
+  children,
+}: {
+  label?: string;
+  children: React.ReactNode;
+}) => (
+  <div className={styles.formRow}>
+    {label && <div className={styles.formLabel}>{label}</div>}
+    {children}
+  </div>
+);
 
 export default function NewWorkflowPage() {
   const navigate = useNavigate();
@@ -331,6 +367,44 @@ export default function NewWorkflowPage() {
     setCustomWorkflowContent(targetTemplate.content);
   };
 
+  const workflowFormContextValue = {
+    category,
+    disabled: category === "",
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    dateError: errors.dateError,
+    paidReason,
+    setPaidReason,
+    absenceDate,
+    setAbsenceDate,
+    absenceDateError: errors.absenceDateError,
+    absenceReason,
+    setAbsenceReason,
+    overtimeDate,
+    setOvertimeDate,
+    overtimeDateError: errors.overtimeDateError,
+    overtimeStart,
+    setOvertimeStart,
+    overtimeEnd,
+    setOvertimeEnd,
+    overtimeError: errors.overtimeError,
+    overtimeReason,
+    setOvertimeReason,
+    customWorkflowTitle,
+    setCustomWorkflowTitle,
+    customWorkflowContent,
+    setCustomWorkflowContent,
+    customWorkflowTitleError: errors.customWorkflowTitleError,
+    customWorkflowContentError: errors.customWorkflowContentError,
+    templateOptions: templates.map((t) => ({ id: t.id, name: t.name })),
+    selectedTemplateId,
+    setSelectedTemplateId,
+    onApplyTemplate: handleApplyTemplate,
+    disableTemplateApply: !selectedTemplateId,
+  };
+
   return (
     <Page title="新規作成" maxWidth="lg" showDefaultHeader={false}>
       <PageSection
@@ -360,8 +434,7 @@ export default function NewWorkflowPage() {
 
         <DashboardInnerSurface>
           <div className={styles.formRows}>
-            <div className={styles.formRow}>
-              <div className={styles.formLabel}>種別</div>
+            <FormRow label="種別">
               <div>
                 <div className={styles.selectWrap}>
                   <select
@@ -370,50 +443,22 @@ export default function NewWorkflowPage() {
                     onChange={handleCategoryChange}
                   >
                     <option value="">種別を選択</option>
-                    {enabledCategoryOptions.flatMap((item) => {
-                      if (
-                        item.category === WorkflowCategory.CLOCK_CORRECTION
-                      ) {
-                        return [
-                          <option
-                            key={`${item.category}-clock-in`}
-                            value={CLOCK_CORRECTION_LABEL}
-                          >
-                            {CLOCK_CORRECTION_LABEL}
-                          </option>,
-                          <option
-                            key={`${item.category}-clock-out`}
-                            value={CLOCK_CORRECTION_CHECK_OUT_LABEL}
-                          >
-                            {CLOCK_CORRECTION_CHECK_OUT_LABEL}
-                          </option>,
-                        ];
-                      }
-                      const label =
-                        CATEGORY_LABELS[item.category] ?? item.label;
-                      return [
-                        <option key={item.category} value={label}>
-                          {label}
-                        </option>,
-                      ];
-                    })}
+                    {buildCategoryOptions(enabledCategoryOptions)}
                   </select>
                   <span className={styles.selectIcon} aria-hidden="true">
                     ▼
                   </span>
                 </div>
               </div>
-            </div>
+            </FormRow>
 
-            <div className={styles.formRow}>
-              <div className={styles.formLabel}>申請者</div>
+            <FormRow label="申請者">
               <p className={styles.formValue}>
                 {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
               </p>
-            </div>
+            </FormRow>
 
-            <div className={styles.formRow}>
-              <div className={styles.formLabel}>申請日</div>
+            <FormRow label="申請日">
               <div>
                 <input
                   className={styles.readonlyInput}
@@ -421,51 +466,13 @@ export default function NewWorkflowPage() {
                   readOnly
                 />
               </div>
-            </div>
+            </FormRow>
 
-            <WorkflowTypeFields
-              category={category}
-              disabled={category === ""}
-              startDate={startDate}
-              setStartDate={setStartDate}
-              endDate={endDate}
-              setEndDate={setEndDate}
-              dateError={errors.dateError}
-              paidReason={paidReason}
-              setPaidReason={setPaidReason}
-              absenceDate={absenceDate}
-              setAbsenceDate={setAbsenceDate}
-              absenceDateError={errors.absenceDateError}
-              absenceReason={absenceReason}
-              setAbsenceReason={setAbsenceReason}
-              overtimeDate={overtimeDate}
-              setOvertimeDate={setOvertimeDate}
-              overtimeDateError={errors.overtimeDateError}
-              overtimeStart={overtimeStart}
-              setOvertimeStart={setOvertimeStart}
-              overtimeEnd={overtimeEnd}
-              setOvertimeEnd={setOvertimeEnd}
-              overtimeError={errors.overtimeError}
-              overtimeReason={overtimeReason}
-              setOvertimeReason={setOvertimeReason}
-              customWorkflowTitle={customWorkflowTitle}
-              setCustomWorkflowTitle={setCustomWorkflowTitle}
-              customWorkflowContent={customWorkflowContent}
-              setCustomWorkflowContent={setCustomWorkflowContent}
-              customWorkflowTitleError={errors.customWorkflowTitleError}
-              customWorkflowContentError={errors.customWorkflowContentError}
-              templateOptions={templates.map((t) => ({
-                id: t.id,
-                name: t.name,
-              }))}
-              selectedTemplateId={selectedTemplateId}
-              setSelectedTemplateId={setSelectedTemplateId}
-              onApplyTemplate={handleApplyTemplate}
-              disableTemplateApply={!selectedTemplateId}
-            />
+            <WorkflowFormProvider value={workflowFormContextValue}>
+              <WorkflowTypeFields />
+            </WorkflowFormProvider>
 
-            <div className={styles.formRow}>
-              <div className={styles.formLabel}>下書き</div>
+            <FormRow label="下書き">
               <div>
                 <label className={styles.toggleWrap}>
                   <input
@@ -482,9 +489,9 @@ export default function NewWorkflowPage() {
                   )}
                 </label>
               </div>
-            </div>
+            </FormRow>
 
-            <div className={styles.formRow}>
+            <FormRow>
               <div className={styles.formActions}>
                 <div className={styles.actionsGroup}>
                   <button
@@ -496,7 +503,7 @@ export default function NewWorkflowPage() {
                   </button>
                 </div>
               </div>
-            </div>
+            </FormRow>
           </div>
         </DashboardInnerSurface>
       </PageSection>

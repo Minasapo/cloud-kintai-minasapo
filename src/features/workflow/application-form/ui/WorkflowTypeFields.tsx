@@ -1,3 +1,4 @@
+import { useWorkflowFormContext } from "@/features/workflow/application-form/model/WorkflowFormContext";
 import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   CLOCK_CORRECTION_LABEL,
@@ -6,84 +7,45 @@ import { TimeInput } from "@/shared/ui/TimeInput";
 
 import styles from "./WorkflowTypeFields.module.scss";
 
-type Props = {
-  category: string;
-  disabled?: boolean;
-  startDate: string;
-  setStartDate: (v: string) => void;
-  endDate: string;
-  setEndDate: (v: string) => void;
-  dateError: string;
-  paidReason: string;
-  setPaidReason: (v: string) => void;
-  absenceDate: string;
-  setAbsenceDate: (v: string) => void;
-  absenceDateError: string;
-  absenceReason: string;
-  setAbsenceReason: (v: string) => void;
-  overtimeDate: string;
-  setOvertimeDate: (v: string) => void;
-  overtimeDateError: string;
-  overtimeStart: string | null;
-  setOvertimeStart: (v: string | null) => void;
-  overtimeEnd: string | null;
-  setOvertimeEnd: (v: string | null) => void;
-  overtimeError: string;
-  overtimeReason?: string;
-  setOvertimeReason?: (v: string) => void;
-  customWorkflowTitle?: string;
-  setCustomWorkflowTitle?: (v: string) => void;
-  customWorkflowContent?: string;
-  setCustomWorkflowContent?: (v: string) => void;
-  customWorkflowTitleError?: string;
-  customWorkflowContentError?: string;
-  templateOptions?: Array<{
-    id: string;
-    name: string;
-  }>;
-  selectedTemplateId?: string;
-  setSelectedTemplateId?: (v: string) => void;
-  onApplyTemplate?: () => void;
-  disableTemplateApply?: boolean;
-};
+export default function WorkflowTypeFields() {
+  const {
+    category,
+    disabled,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    dateError,
+    paidReason,
+    setPaidReason,
+    absenceDate,
+    setAbsenceDate,
+    absenceDateError,
+    absenceReason,
+    setAbsenceReason,
+    overtimeDate,
+    setOvertimeDate,
+    overtimeDateError,
+    overtimeStart,
+    setOvertimeStart,
+    overtimeEnd,
+    setOvertimeEnd,
+    overtimeError,
+    overtimeReason,
+    setOvertimeReason,
+    customWorkflowTitle,
+    setCustomWorkflowTitle,
+    customWorkflowContent,
+    setCustomWorkflowContent,
+    customWorkflowTitleError,
+    customWorkflowContentError,
+    templateOptions,
+    selectedTemplateId,
+    setSelectedTemplateId,
+    onApplyTemplate,
+    disableTemplateApply,
+  } = useWorkflowFormContext();
 
-export default function WorkflowTypeFields({
-  category,
-  disabled = false,
-  startDate,
-  setStartDate,
-  endDate,
-  setEndDate,
-  dateError,
-  paidReason,
-  setPaidReason,
-  absenceDate,
-  setAbsenceDate,
-  absenceDateError,
-  absenceReason,
-  setAbsenceReason,
-  overtimeDate,
-  setOvertimeDate,
-  overtimeDateError,
-  overtimeStart,
-  setOvertimeStart,
-  overtimeEnd,
-  setOvertimeEnd,
-  overtimeError,
-  overtimeReason,
-  setOvertimeReason,
-  customWorkflowTitle,
-  setCustomWorkflowTitle,
-  customWorkflowContent,
-  setCustomWorkflowContent,
-  customWorkflowTitleError,
-  customWorkflowContentError,
-  templateOptions,
-  selectedTemplateId,
-  setSelectedTemplateId,
-  onApplyTemplate,
-  disableTemplateApply,
-}: Props) {
   return (
     <>
       {category === "有給休暇申請" && (
@@ -231,10 +193,8 @@ export default function WorkflowTypeFields({
             <div className={styles.formField}>
               <input
                 className={styles.input}
-                value={overtimeReason ?? ""}
-                onChange={(e) =>
-                  setOvertimeReason && setOvertimeReason(e.target.value)
-                }
+                value={overtimeReason}
+                onChange={(e) => setOvertimeReason(e.target.value)}
                 disabled={disabled}
               />
             </div>
@@ -330,10 +290,7 @@ export default function WorkflowTypeFields({
                   <select
                     className={styles.select}
                     value={selectedTemplateId ?? ""}
-                    onChange={(e) =>
-                      setSelectedTemplateId &&
-                      setSelectedTemplateId(e.target.value)
-                    }
+                    onChange={(e) => setSelectedTemplateId?.(e.target.value)}
                     disabled={disabled}
                   >
                     <option value="">
@@ -352,7 +309,7 @@ export default function WorkflowTypeFields({
                 <button
                   type="button"
                   className={styles.applyButton}
-                  onClick={() => onApplyTemplate && onApplyTemplate()}
+                  onClick={() => onApplyTemplate?.()}
                   disabled={disabled || disableTemplateApply}
                 >
                   適用
@@ -369,11 +326,8 @@ export default function WorkflowTypeFields({
                   styles.input,
                   customWorkflowTitleError ? styles.inputError : "",
                 ].join(" ")}
-                value={customWorkflowTitle ?? ""}
-                onChange={(e) =>
-                  setCustomWorkflowTitle &&
-                  setCustomWorkflowTitle(e.target.value)
-                }
+                value={customWorkflowTitle}
+                onChange={(e) => setCustomWorkflowTitle(e.target.value)}
                 disabled={disabled}
               />
               {customWorkflowTitleError && (
@@ -390,11 +344,8 @@ export default function WorkflowTypeFields({
                   styles.textarea,
                   customWorkflowContentError ? styles.inputError : "",
                 ].join(" ")}
-                value={customWorkflowContent ?? ""}
-                onChange={(e) =>
-                  setCustomWorkflowContent &&
-                  setCustomWorkflowContent(e.target.value)
-                }
+                value={customWorkflowContent}
+                onChange={(e) => setCustomWorkflowContent(e.target.value)}
                 disabled={disabled}
                 rows={6}
               />
