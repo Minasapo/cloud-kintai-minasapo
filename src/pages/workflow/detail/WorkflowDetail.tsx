@@ -17,6 +17,8 @@ import { useWorkflowLoaderWorkflow } from "@/features/workflow/hooks/useWorkflow
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { PageSection } from "@/shared/ui/layout";
 
+import styles from "./WorkflowDetail.module.scss";
+
 export default function WorkflowDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -110,16 +112,16 @@ export default function WorkflowDetail() {
     >
       <Page title="申請内容" showDefaultHeader={false}>
         <PageSection variant="plain" layoutVariant="detail">
-          <div className="flex flex-col gap-4 pb-10">
+          <div className={styles.layout}>
             <WorkflowDetailHeader />
 
             {!workflow ? (
-              <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3 text-sm font-medium text-rose-900">
+              <div className={styles.errorMessage}>
                 ワークフローの読み込みに失敗しました。
               </div>
             ) : (
-              <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(22rem,0.9fr)]">
-                <div className="min-w-0">
+              <div className={styles.grid}>
+                <div className={styles.col}>
                   <WorkflowMetadataPanel
                     workflowId={workflow.id}
                     fallbackId={id}
@@ -137,7 +139,7 @@ export default function WorkflowDetail() {
                   />
                 </div>
 
-                <div className="min-w-0 rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
+                <div className={styles.commentThreadPanel}>
                   <WorkflowCommentThread
                     key={workflow?.id ?? "workflow-comment-thread"}
                     messages={messages}
