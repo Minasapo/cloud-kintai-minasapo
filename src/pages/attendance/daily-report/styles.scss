@@ -412,6 +412,10 @@
     align-items: center;
   }
 
+  .dr-edit-actions {
+    @apply mt-1;
+  }
+
   .dr-edit-actions-row {
     flex-direction: row;
     align-items: center;
