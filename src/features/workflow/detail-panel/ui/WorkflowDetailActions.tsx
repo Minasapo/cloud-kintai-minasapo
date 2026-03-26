@@ -1,29 +1,16 @@
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
-type WorkflowDetailActionsProps = {
-  onBack: () => void;
-  onWithdraw: () => void;
-  onEdit: () => void;
-  withdrawDisabled?: boolean;
-  withdrawTooltip?: string;
-  editDisabled?: boolean;
-  editTooltip?: string;
-};
+import { useWorkflowDetailContext } from "../model/WorkflowDetailContext";
 
 const pillButtonClassName =
   "inline-flex items-center justify-center rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none";
 const dangerPillButtonClassName =
   "inline-flex items-center justify-center rounded-full border border-rose-700/55 bg-[#e05353] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(224,83,83,0.45)] transition hover:bg-[#d64545] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none";
 
-export default function WorkflowDetailActions({
-  onBack,
-  onWithdraw,
-  onEdit,
-  withdrawDisabled,
-  withdrawTooltip,
-  editDisabled,
-  editTooltip,
-}: WorkflowDetailActionsProps) {
+export default function WorkflowDetailActions() {
+  const { permissions, onBack, onWithdraw, onEdit } = useWorkflowDetailContext();
+  const { withdrawDisabled, withdrawTooltip, editDisabled, editTooltip } =
+    permissions;
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div>

@@ -10,6 +10,7 @@ import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/u
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
 import { useWorkflowDetailMeta } from "@/features/workflow/detail-panel/model/useWorkflowDetailMeta";
 import { useWorkflowWithdraw } from "@/features/workflow/detail-panel/model/useWorkflowWithdraw";
+import { WorkflowDetailContext } from "@/features/workflow/detail-panel/model/WorkflowDetailContext";
 import WorkflowDetailHeader from "@/features/workflow/detail-panel/ui/WorkflowDetailHeader";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import { useWorkflowLoaderWorkflow } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
@@ -99,60 +100,63 @@ export default function WorkflowDetail() {
   });
 
   return (
-    <Page title="申請内容" showDefaultHeader={false}>
-      <PageSection variant="plain" layoutVariant="detail">
-        <div className="flex flex-col gap-4 pb-10">
-          <WorkflowDetailHeader
-            onBack={() => navigate("/workflow")}
-            onWithdraw={handleWithdraw}
-            onEdit={() => navigate(`/workflow/${id}/edit`)}
-            withdrawDisabled={permissions.withdrawDisabled}
-            withdrawTooltip={permissions.withdrawTooltip}
-            editDisabled={permissions.editDisabled}
-            editTooltip={permissions.editTooltip}
-          />
+    <WorkflowDetailContext.Provider
+      value={{
+        permissions,
+        onBack: () => navigate("/workflow"),
+        onWithdraw: handleWithdraw,
+        onEdit: () => navigate(`/workflow/${id}/edit`),
+      }}
+    >
+      <Page title="申請内容" showDefaultHeader={false}>
+        <PageSection variant="plain" layoutVariant="detail">
+          <div className="flex flex-col gap-4 pb-10">
+            <WorkflowDetailHeader />
 
-          {!workflow ? (
-            <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3 text-sm font-medium text-rose-900">
-              ワークフローの読み込みに失敗しました。
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(22rem,0.9fr)]">
-              <div className="min-w-0">
-                <WorkflowMetadataPanel
-                  workflowId={workflow.id}
-                  fallbackId={id}
-                  category={workflow.category ?? null}
-                  categoryLabel={categoryLabel}
-                  staffName={staffName}
-                  applicationDate={applicationDate}
-                  status={workflow.status ?? null}
-                  overTimeDetails={workflow.overTimeDetails ?? null}
-                  customWorkflowTitle={workflow.customWorkflowTitle ?? null}
-                  customWorkflowContent={workflow.customWorkflowContent ?? null}
-                  approvalSteps={approvalSteps}
-                />
+            {!workflow ? (
+              <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3 text-sm font-medium text-rose-900">
+                ワークフローの読み込みに失敗しました。
               </div>
+            ) : (
+              <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(22rem,0.9fr)]">
+                <div className="min-w-0">
+                  <WorkflowMetadataPanel
+                    workflowId={workflow.id}
+                    fallbackId={id}
+                    category={workflow.category ?? null}
+                    categoryLabel={categoryLabel}
+                    staffName={staffName}
+                    applicationDate={applicationDate}
+                    status={workflow.status ?? null}
+                    overTimeDetails={workflow.overTimeDetails ?? null}
+                    customWorkflowTitle={workflow.customWorkflowTitle ?? null}
+                    customWorkflowContent={
+                      workflow.customWorkflowContent ?? null
+                    }
+                    approvalSteps={approvalSteps}
+                  />
+                </div>
 
-              <div className="min-w-0 rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
-                <WorkflowCommentThread
-                  key={workflow?.id ?? "workflow-comment-thread"}
-                  messages={messages}
-                  staffs={staffs}
-                  currentStaff={currentStaff}
-                  expandedMessages={expandedMessages}
-                  onToggle={toggleExpanded}
-                  input={input}
-                  setInput={setInput}
-                  onSend={sendMessage}
-                  sending={sending}
-                  formatSender={formatSender}
-                />
+                <div className="min-w-0 rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
+                  <WorkflowCommentThread
+                    key={workflow?.id ?? "workflow-comment-thread"}
+                    messages={messages}
+                    staffs={staffs}
+                    currentStaff={currentStaff}
+                    expandedMessages={expandedMessages}
+                    onToggle={toggleExpanded}
+                    input={input}
+                    setInput={setInput}
+                    onSend={sendMessage}
+                    sending={sending}
+                    formatSender={formatSender}
+                  />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      </PageSection>
-    </Page>
+            )}
+          </div>
+        </PageSection>
+      </Page>
+    </WorkflowDetailContext.Provider>
   );
 }

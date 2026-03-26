@@ -1,36 +1,10 @@
 import WorkflowDetailActions from "./WorkflowDetailActions";
 
-type WorkflowDetailHeaderProps = {
-  onBack: () => void;
-  onWithdraw: () => void;
-  onEdit: () => void;
-  withdrawDisabled?: boolean;
-  withdrawTooltip?: string;
-  editDisabled?: boolean;
-  editTooltip?: string;
-};
-
-export default function WorkflowDetailHeader({
-  onBack,
-  onWithdraw,
-  onEdit,
-  withdrawDisabled,
-  withdrawTooltip,
-  editDisabled,
-  editTooltip,
-}: WorkflowDetailHeaderProps) {
+export default function WorkflowDetailHeader() {
   return (
     <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
       <div className="flex flex-col gap-3">
-        <WorkflowDetailActions
-          onBack={onBack}
-          onWithdraw={onWithdraw}
-          onEdit={onEdit}
-          withdrawDisabled={withdrawDisabled}
-          withdrawTooltip={withdrawTooltip}
-          editDisabled={editDisabled}
-          editTooltip={editTooltip}
-        />
+        <WorkflowDetailActions />
         <div className="flex flex-col gap-1.5">
           <h1 className="m-0 text-[1.85rem] font-bold leading-[1.15] tracking-[-0.02em] text-slate-950 md:text-[2.2rem]">
             申請内容
