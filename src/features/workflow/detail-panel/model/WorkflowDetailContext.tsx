@@ -8,21 +8,43 @@ import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoader
 import type { WorkflowDetailPermissions } from "./workflowDetailPermissions";
 
 type WorkflowDetailContextValue = {
-  // ワークフローデータ
+  data: {
+    workflow: WorkflowEntity | null | undefined;
+    id: string | undefined;
+    staffs: StaffType[];
+    staffName: string;
+    applicationDate: string;
+    categoryLabel: string;
+    approvalSteps: WorkflowApprovalStepView[];
+    currentStaff: StaffType | undefined;
+    messages: WorkflowCommentMessage[];
+  };
+  ui: {
+    expandedMessages: Record<string, boolean>;
+    input: string;
+    sending: boolean;
+  };
+  actions: {
+    permissions: WorkflowDetailPermissions;
+    onBack: () => void;
+    onWithdraw: () => void;
+    onEdit: () => void;
+    toggleExpanded: (id: string) => void;
+    setInput: (value: string) => void;
+    formatSender: (sender?: string) => string;
+    sendMessage: () => void;
+  };
   workflow: WorkflowEntity | null | undefined;
   id: string | undefined;
   staffs: StaffType[];
-  // メタ情報
   staffName: string;
   applicationDate: string;
   categoryLabel: string;
   approvalSteps: WorkflowApprovalStepView[];
-  // アクション
   permissions: WorkflowDetailPermissions;
   onBack: () => void;
   onWithdraw: () => void;
   onEdit: () => void;
-  // コメントスレッド
   currentStaff: StaffType | undefined;
   messages: WorkflowCommentMessage[];
   expandedMessages: Record<string, boolean>;

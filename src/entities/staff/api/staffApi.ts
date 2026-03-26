@@ -1,0 +1,199 @@
+import { createApi } from "@reduxjs/toolkit/query/react";
+import {
+  createStaff,
+  deleteStaff,
+  updateStaff,
+} from "@shared/api/graphql/documents/mutations";
+import { listStaff } from "@shared/api/graphql/documents/queries";
+import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
+import type {
+  CreateStaffInput,
+  CreateStaffMutation,
+  DeleteStaffInput,
+  DeleteStaffMutation,
+  ListStaffQuery,
+  ModelStaffConditionInput,
+  Staff,
+  UpdateStaffInput,
+  UpdateStaffMutation,
+} from "@shared/api/graphql/types";
+
+export type UpdateStaffPayload = {
+  input: UpdateStaffInput;
+  condition?: ModelStaffConditionInput | null;
+};
+
+type StaffTag = {
+  type: "Staff";
+  id: string;
+};
+
+const nonNullable = <T>(value: T | null | undefined): value is T =>
+  value !== null && value !== undefined;
+
+const buildStaffTagId = (staff: { id?: string | null }) => staff.id ?? "unknown";
+
+export const staffApi = createApi({
+  reducerPath: "staffApi",
+  baseQuery: graphqlBaseQuery(),
+  tagTypes: ["Staff"],
+  endpoints: (builder) => ({
+    getStaffs: builder.query<Staff[], void>({
+      async queryFn(_arg, _api, _extraOptions, baseQuery) {
+        const staffs: Staff[] = [];
+        let nextToken: string | null = null;
+
+        do {
+          const result = await baseQuery({
+            document: listStaff,
+            variables: {
+              limit: 100,
+              nextToken,
+            },
+          });
+
+          if (result.error) {
+            return { error: result.error };
+          }
+
+          const data = result.data as ListStaffQuery | null;
+          const connection = data?.listStaff;
+
+          if (!connection) {
+            return { error: { message: "Failed to fetch staffs" } };
+          }
+
+          staffs.push(...(connection.items?.filter(nonNullable) ?? []));
+          nextToken = connection.nextToken ?? null;
+        } while (nextToken);
+
+        return { data: staffs };
+      },
+      providesTags: (result) => {
+        const listTag: StaffTag = { type: "Staff", id: "LIST" };
+        if (!result) {
+          return [listTag];
+        }
+
+        return [
+          listTag,
+          ...result.map((staff) => ({
+            type: "Staff" as const,
+            id: buildStaffTagId(staff),
+          })),
+        ];
+      },
+    }),
+    createStaff: builder.mutation<Staff, CreateStaffInput>({
+      async queryFn(input, _api, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: createStaff,
+          variables: { input },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as CreateStaffMutation | null;
+        const created = data?.createStaff;
+        if (!created) {
+          return { error: { message: "Failed to create staff" } };
+        }
+
+        return { data: created };
+      },
+      invalidatesTags: (result) => {
+        const listTag: StaffTag = { type: "Staff", id: "LIST" };
+        if (!result) {
+          return [listTag];
+        }
+
+        return [listTag, { type: "Staff", id: buildStaffTagId(result) }];
+      },
+    }),
+    updateStaff: builder.mutation<Staff, UpdateStaffPayload>({
+      async queryFn({ input, condition }, _api, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: updateStaff,
+          variables: {
+            input,
+            condition: condition ?? undefined,
+          },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as UpdateStaffMutation | null;
+        const updated = data?.updateStaff;
+        if (!updated) {
+          return { error: { message: "Failed to update staff" } };
+        }
+
+        return { data: updated };
+      },
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedStaff } = await queryFulfilled;
+          dispatch(
+            staffApi.util.updateQueryData("getStaffs", undefined, (draft) => {
+              const targetIndex = draft.findIndex(
+                (staff) => staff.id === updatedStaff.id,
+              );
+              if (targetIndex < 0) {
+                draft.push(updatedStaff);
+                return;
+              }
+              draft[targetIndex] = updatedStaff;
+            }),
+          );
+        } catch {
+          // noop
+        }
+      },
+      invalidatesTags: () => [],
+    }),
+    deleteStaff: builder.mutation<Staff, DeleteStaffInput>({
+      async queryFn(input, _api, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: deleteStaff,
+          variables: { input },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as DeleteStaffMutation | null;
+        const deleted = data?.deleteStaff;
+        if (!deleted) {
+          return { error: { message: "Failed to delete staff" } };
+        }
+
+        return { data: deleted };
+      },
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            staffApi.util.updateQueryData("getStaffs", undefined, (draft) =>
+              draft.filter((staff) => staff.id !== arg.id),
+            ),
+          );
+        } catch {
+          // noop
+        }
+      },
+      invalidatesTags: () => [{ type: "Staff", id: "LIST" }],
+    }),
+  }),
+});
+
+export const {
+  useGetStaffsQuery,
+  useCreateStaffMutation,
+  useUpdateStaffMutation,
+  useDeleteStaffMutation,
+} = staffApi;

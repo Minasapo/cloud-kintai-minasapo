@@ -2,14 +2,15 @@ import "@aws-amplify/ui-react/styles.css";
 import "./styles.scss";
 
 import { Authenticator } from "@aws-amplify/ui-react";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { AuthContext } from "../../context/AuthContext";
+import { useSession } from "@/app/providers/session/useSession";
+
 import logo from "./logo_large.png";
 
 export default function Login() {
-  const { authStatus, cognitoUser } = useContext(AuthContext);
+  const { authStatus, cognitoUser } = useSession();
   const location = useLocation();
   const navigate = useNavigate();
   // eslint-disable-next-line max-len
