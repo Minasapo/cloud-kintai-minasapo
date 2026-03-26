@@ -74,6 +74,101 @@ function InfoCard({
   );
 }
 
+function LoadingOrEmptyState({
+  loading,
+  loadingPaddingClassName,
+  emptyPaddingClassName,
+}: {
+  loading: boolean;
+  loadingPaddingClassName: string;
+  emptyPaddingClassName?: string;
+}) {
+  if (loading) {
+    return (
+      <div className={`flex justify-center ${loadingPaddingClassName}`}>
+        <Spinner />
+      </div>
+    );
+  }
+
+  return (
+    <div className={emptyPaddingClassName}>
+      <InfoCard>該当するワークフローがありません。</InfoCard>
+    </div>
+  );
+}
+
+function MobileMetaBlock({ label, value, alignEnd = false }: { label: string; value: string; alignEnd?: boolean }) {
+  return (
+    <div className={`flex flex-col ${alignEnd ? "sm:items-end" : ""}`.trim()} style={{ gap: MOBILE_META_GAP }}>
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className="text-sm text-slate-900">{value}</div>
+    </div>
+  );
+}
+
+function MobileWorkflowCard({
+  item,
+  onClick,
+}: {
+  item: WorkflowListItem;
+  onClick: (item: WorkflowListItem) => void;
+}) {
+  return (
+    <button type="button" onClick={() => onClick(item)} className="w-full rounded-[16px] text-left">
+      <div className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-white px-4 py-4 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.28)] transition hover:border-emerald-200 hover:bg-emerald-50/40">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 break-words text-base font-semibold text-slate-900">
+            {item.category || "-"}
+          </div>
+          <div className="max-w-full self-start sm:self-center">
+            <StatusChip status={item.rawStatus || item.status || ""} />
+          </div>
+        </div>
+
+        <MobileMetaBlock
+          label="申請日"
+          value={formatWorkflowDateValue(item.applicationDate)}
+        />
+
+        <div className="flex flex-col justify-between gap-2 sm:flex-row">
+          <MobileMetaBlock label="作成日" value={item.createdAt || "-"} />
+          <MobileMetaBlock label="ステータス" value={item.status || "-"} alignEnd />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function DesktopWorkflowRow({
+  item,
+  onClick,
+}: {
+  item: WorkflowListItem;
+  onClick: (item: WorkflowListItem) => void;
+}) {
+  const isCancelled =
+    item.rawStatus === WorkflowStatus.CANCELLED || item.status === CANCELLED_LABEL;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(item)}
+      className={[
+        "grid w-full grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] items-center gap-4 border-b border-slate-200/80 px-5 py-4 text-left transition last:border-b-0 hover:bg-emerald-50/40",
+        isCancelled ? "text-slate-400" : "text-slate-900",
+      ].join(" ")}
+    >
+      <div className="font-medium">{item.category || "-"}</div>
+      <div>{formatWorkflowDateValue(item.applicationDate)}</div>
+      <div>
+        <StatusChip status={item.rawStatus || item.status || ""} />
+      </div>
+      <div>{item.createdAt || "-"}</div>
+    </button>
+  );
+}
+
 export default function WorkflowListPage() {
   const navigate = useNavigate();
   const [isCompact, setIsCompact] = useState(false);
@@ -274,64 +369,17 @@ export default function WorkflowListPage() {
 
                   {isCompact ? (
                     <div>
-                      {loading ? (
-                        <div className="flex justify-center py-6">
-                          <Spinner />
-                        </div>
-                      ) : filteredItems.length === 0 ? (
-                        <InfoCard>該当するワークフローがありません。</InfoCard>
+                      {loading || filteredItems.length === 0 ? (
+                        <LoadingOrEmptyState loading={loading} loadingPaddingClassName="py-6" />
                       ) : (
                         <div className="flex flex-col" style={{ gap: MOBILE_CARD_GAP }}>
-                          {filteredItems.map((item) => {
-                            const key = resolveWorkflowKey(item);
-                            return (
-                              <button
-                                key={key}
-                                type="button"
-                                onClick={() => handleCardClick(item)}
-                                className="w-full rounded-[16px] text-left"
-                              >
-                                <div className="flex flex-col gap-2 rounded-[16px] border border-slate-200 bg-white px-4 py-4 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.28)] transition hover:border-emerald-200 hover:bg-emerald-50/40">
-                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                    <div className="min-w-0 break-words text-base font-semibold text-slate-900">
-                                      {item.category || "-"}
-                                    </div>
-                                    <div className="max-w-full self-start sm:self-center">
-                                      <StatusChip
-                                        status={item.rawStatus || item.status || ""}
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="flex flex-col" style={{ gap: MOBILE_META_GAP }}>
-                                    <div className="text-xs text-slate-500">
-                                      申請日
-                                    </div>
-                                    <div className="text-sm text-slate-900">
-                                      {formatWorkflowDateValue(item.applicationDate)}
-                                    </div>
-                                  </div>
-                                  <div className="flex flex-col justify-between gap-2 sm:flex-row">
-                                    <div className="flex flex-col" style={{ gap: MOBILE_META_GAP }}>
-                                      <div className="text-xs text-slate-500">
-                                        作成日
-                                      </div>
-                                      <div className="text-sm text-slate-900">
-                                        {item.createdAt || "-"}
-                                      </div>
-                                    </div>
-                                    <div className="flex flex-col sm:items-end" style={{ gap: MOBILE_META_GAP }}>
-                                      <div className="text-xs text-slate-500">
-                                        ステータス
-                                      </div>
-                                      <div className="text-sm text-slate-900">
-                                        {item.status || "-"}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          })}
+                          {filteredItems.map((item) => (
+                            <MobileWorkflowCard
+                              key={resolveWorkflowKey(item)}
+                              item={item}
+                              onClick={handleCardClick}
+                            />
+                          ))}
                         </div>
                       )}
                     </div>
@@ -343,39 +391,21 @@ export default function WorkflowListPage() {
                         <div>ステータス</div>
                         <div>作成日</div>
                       </div>
-                      {loading ? (
-                        <div className="flex justify-center py-10">
-                          <Spinner />
-                        </div>
-                      ) : filteredItems.length === 0 ? (
-                        <div className="px-5 py-8">
-                          <InfoCard>該当するワークフローがありません。</InfoCard>
-                        </div>
+                      {loading || filteredItems.length === 0 ? (
+                        <LoadingOrEmptyState
+                          loading={loading}
+                          loadingPaddingClassName="py-10"
+                          emptyPaddingClassName="px-5 py-8"
+                        />
                       ) : (
                         <div>
-                          {filteredItems.map((item) => {
-                            const isCancelled =
-                              item.rawStatus === WorkflowStatus.CANCELLED ||
-                              item.status === CANCELLED_LABEL;
-                            return (
-                              <button
-                                key={resolveWorkflowKey(item)}
-                                type="button"
-                                onClick={() => handleCardClick(item)}
-                                className={[
-                                  "grid w-full grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] items-center gap-4 border-b border-slate-200/80 px-5 py-4 text-left transition last:border-b-0 hover:bg-emerald-50/40",
-                                  isCancelled ? "text-slate-400" : "text-slate-900",
-                                ].join(" ")}
-                              >
-                                <div className="font-medium">{item.category || "-"}</div>
-                                <div>{formatWorkflowDateValue(item.applicationDate)}</div>
-                                <div>
-                                  <StatusChip status={item.rawStatus || item.status || ""} />
-                                </div>
-                                <div>{item.createdAt || "-"}</div>
-                              </button>
-                            );
-                          })}
+                          {filteredItems.map((item) => (
+                            <DesktopWorkflowRow
+                              key={resolveWorkflowKey(item)}
+                              item={item}
+                              onClick={handleCardClick}
+                            />
+                          ))}
                         </div>
                       )}
                     </div>
