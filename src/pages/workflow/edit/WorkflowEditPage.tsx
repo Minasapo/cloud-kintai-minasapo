@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   FormControlLabel,
-  Grid,
   ListSubheader,
   MenuItem,
   Select,
@@ -35,6 +34,8 @@ import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
+
+import styles from "./WorkflowEditPage.module.scss";
 
 const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
 const logger = createLogger("WorkflowEditPage");
@@ -232,22 +233,25 @@ export default function WorkflowEditPage() {
           </Button>
         </Box>
         <DashboardInnerSurface>
-          <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                ID
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography variant="body1">{id ?? "—"}</Typography>
-            </Grid>
+          <div className={styles.formRows}>
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>
+                <Typography variant="body2" color="text.secondary">
+                  ID
+                </Typography>
+              </div>
+              <div>
+                <Typography variant="body1">{id ?? "—"}</Typography>
+              </div>
+            </div>
 
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                種別
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>
+                <Typography variant="body2" color="text.secondary">
+                  種別
+                </Typography>
+              </div>
+              <div>
               {id ? (
                 // 編集時は種別の変更を想定しないためテキスト表示
                 <Typography variant="body1">
@@ -277,38 +281,43 @@ export default function WorkflowEditPage() {
                   <MenuItem value="その他">その他</MenuItem>
                 </Select>
               )}
-            </Grid>
+              </div>
+            </div>
 
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                申請者
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography>
-                {applicant
-                  ? `${applicant.familyName} ${applicant.givenName}`
-                  : "—"}
-              </Typography>
-            </Grid>
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>
+                <Typography variant="body2" color="text.secondary">
+                  申請者
+                </Typography>
+              </div>
+              <div>
+                <Typography>
+                  {applicant
+                    ? `${applicant.familyName} ${applicant.givenName}`
+                    : "—"}
+                </Typography>
+              </div>
+            </div>
 
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                申請日
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              {id ? (
-                <Typography variant="body1">{applicationDate}</Typography>
-              ) : (
-                <TextField
-                  value={applicationDate}
-                  InputProps={{ readOnly: true }}
-                  size="small"
-                  fullWidth
-                />
-              )}
-            </Grid>
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>
+                <Typography variant="body2" color="text.secondary">
+                  申請日
+                </Typography>
+              </div>
+              <div>
+                {id ? (
+                  <Typography variant="body1">{applicationDate}</Typography>
+                ) : (
+                  <TextField
+                    value={applicationDate}
+                    InputProps={{ readOnly: true }}
+                    size="small"
+                    fullWidth
+                  />
+                )}
+              </div>
+            </div>
 
             {/* 種別固有フィールド（共通コンポーネント） */}
             <WorkflowTypeFields
@@ -343,37 +352,40 @@ export default function WorkflowEditPage() {
               customWorkflowContentError={customWorkflowContentError}
             />
 
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                下書き
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <FormControlLabel
-                control={
-                  <Switch checked={draftMode} onChange={handleDraftToggle} />
-                }
-                label={draftMode ? "下書きとして保存" : ""}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={3} />
-            <Grid item xs={12} sm={9}>
-              <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
-                <Button
-                  size="small"
-                  onClick={() =>
-                    navigate(id ? `/workflow/${id}` : "/workflow")
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>
+                <Typography variant="body2" color="text.secondary">
+                  下書き
+                </Typography>
+              </div>
+              <div>
+                <FormControlLabel
+                  control={
+                    <Switch checked={draftMode} onChange={handleDraftToggle} />
                   }
-                >
-                  申請詳細へ戻る
-                </Button>
-                <Button type="submit" variant="contained" size="small">
-                  保存
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+                  label={draftMode ? "下書きとして保存" : ""}
+                />
+              </div>
+            </div>
+
+            <div className={styles.formRow}>
+              <div className={styles.formActions}>
+                <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
+                  <Button
+                    size="small"
+                    onClick={() =>
+                      navigate(id ? `/workflow/${id}` : "/workflow")
+                    }
+                  >
+                    申請詳細へ戻る
+                  </Button>
+                  <Button type="submit" variant="contained" size="small">
+                    保存
+                  </Button>
+                </Box>
+              </div>
+            </div>
+          </div>
         </DashboardInnerSurface>
       </PageSection>
       {/* notifications are handled globally by SnackbarGroup */}

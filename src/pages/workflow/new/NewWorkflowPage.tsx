@@ -6,18 +6,6 @@ import {
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import useWorkflowTemplates from "@entities/workflow-template/model/useWorkflowTemplates";
 import {
-  Box,
-  Button,
-  FormControlLabel,
-  Grid,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Switch,
-  TextField,
-  Typography,
-} from "@mui/material";
-import {
   ApprovalStatus,
   ApprovalStepInput,
   ApproverMultipleMode,
@@ -25,7 +13,7 @@ import {
   WorkflowCategory,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
@@ -33,115 +21,26 @@ import {
   CATEGORY_LABELS,
   getEnabledWorkflowCategories,
 } from "@/entities/workflow/lib/workflowLabels";
+import { useNewWorkflowForm } from "@/features/workflow/application-form/model/useNewWorkflowForm";
 import {
   buildCreateWorkflowInput,
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   CLOCK_CORRECTION_LABEL,
   validateWorkflowForm,
-  type WorkflowFormState,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
-import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import { parseTimeToISO } from "@/shared/lib/time";
 import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
+import styles from "./NewWorkflowPage.module.scss";
+
 const logger = createLogger("NewWorkflowPage");
 
-const INPUT_SX = {
-  borderRadius: "18px",
-  bgcolor: "#f8fffb",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.92)",
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderColor: "rgba(16, 185, 129, 0.18)",
-  },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: "rgba(16, 185, 129, 0.3)",
-  },
-  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "rgba(16, 185, 129, 0.55)",
-  },
-  "& .MuiSelect-select, & .MuiOutlinedInput-input": {
-    py: "10px",
-    px: "14px",
-    fontSize: "0.92rem",
-    color: "#0f172a",
-  },
-} as const;
+const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
 
-const TEXT_FIELD_SX = {
-  "& .MuiOutlinedInput-root": INPUT_SX,
-  "& .MuiFormHelperText-root": {
-    marginLeft: 0,
-  },
-} as const;
-
-const OUTLINED_BUTTON_SX = {
-  borderRadius: "999px",
-  borderColor: "rgba(15, 23, 42, 0.18)",
-  color: "#334155",
-  bgcolor: "#ffffff",
-  px: 2.6,
-  py: 1.25,
-  fontWeight: 500,
-  boxShadow: "0 8px 20px -18px rgba(15, 23, 42, 0.55)",
-  "&:hover": {
-    borderColor: "rgba(15, 23, 42, 0.32)",
-    bgcolor: "#f8fafc",
-    boxShadow: "0 10px 22px -18px rgba(15, 23, 42, 0.6)",
-  },
-} as const;
-
-const CONTAINED_BUTTON_SX = {
-  borderRadius: "999px",
-  background: "#19b985",
-  px: 2.8,
-  py: 1.25,
-  fontWeight: 500,
-  boxShadow:
-    "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
-  "&:hover": {
-    background: "#17ab7b",
-    boxShadow:
-      "inset 0 -2px 0 rgba(0,0,0,0.12), 0 14px 28px -18px rgba(5,150,105,0.6)",
-  },
-  "&.Mui-disabled": {
-    background: "#e2e8f0",
-    color: "#64748b",
-    boxShadow: "none",
-  },
-} as const;
-
-const SWITCH_SX = {
-  "& .MuiSwitch-switchBase.Mui-checked": {
-    color: "#059669",
-  },
-  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-    bgcolor: "#34d399",
-    opacity: 1,
-  },
-  "& .MuiSwitch-track": {
-    bgcolor: "#cbd5e1",
-    opacity: 1,
-  },
-} as const;
-
-/**
- * 今日の日付をスラッシュ区切り形式（YYYY/MM/DD）で取得
- */
-const getTodayAsSlash = (): string => {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}/${m}/${day}`;
-};
-
-/**
- * スタッフの承認者設定に基づいて承認ステップを生成
- */
 const generateApprovalSteps = (
   staff: StaffType,
   staffs: StaffType[],
@@ -202,38 +101,41 @@ const generateApprovalSteps = (
   return { approvalSteps, assignedApproverStaffIds };
 };
 
-export default function NewWorkflowPage() {
-  const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
-  const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
-  const HEADER_GAP = designTokenVar("spacing.md", "12px");
-  const navigate = useNavigate();
-  const [draftMode, setDraftMode] = useState(false);
-  const [category, setCategory] = useState("");
-  const [applicationDate, setApplicationDate] = useState(() =>
-    getTodayAsSlash(),
-  );
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [dateError, setDateError] = useState("");
-  const [absenceDate, setAbsenceDate] = useState("");
-  const [absenceDateError, setAbsenceDateError] = useState("");
-  const [absenceReason, setAbsenceReason] = useState("");
-  const [paidReason, setPaidReason] = useState("");
-  const [overtimeStart, setOvertimeStart] = useState<string | null>(null);
-  const [overtimeEnd, setOvertimeEnd] = useState<string | null>(null);
-  const [overtimeError, setOvertimeError] = useState("");
-  const [overtimeDate, setOvertimeDate] = useState("");
-  const [overtimeDateError, setOvertimeDateError] = useState("");
-  const [overtimeReason, setOvertimeReason] = useState("");
-  const [customWorkflowTitle, setCustomWorkflowTitle] = useState("");
-  const [customWorkflowContent, setCustomWorkflowContent] = useState("");
-  const [customWorkflowTitleError, setCustomWorkflowTitleError] = useState("");
-  const [customWorkflowContentError, setCustomWorkflowContentError] =
-    useState("");
-  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+const extractErrorMessage = (err: unknown): string => {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "string") return err;
+  if (typeof err === "object" && err !== null) {
+    if ("data" in err && typeof err.data === "object" && err.data !== null) {
+      const data = err.data as Record<string, unknown>;
+      if ("message" in data && typeof data.message === "string") {
+        return data.message;
+      }
+      if (
+        "errors" in data &&
+        Array.isArray(data.errors) &&
+        data.errors.length > 0
+      ) {
+        const firstError = data.errors[0];
+        if (
+          typeof firstError === "object" &&
+          firstError !== null &&
+          "message" in firstError
+        ) {
+          return String(firstError.message);
+        }
+      }
+    }
+    if ("message" in err && typeof err.message === "string") return err.message;
+    if ("error" in err && typeof err.error === "string") return err.error;
+  }
+  return "ワークフローの作成に失敗しました。";
+};
 
+export default function NewWorkflowPage() {
+  const navigate = useNavigate();
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
+
   const { staffs } = useStaffs({ isAuthenticated });
   const { create: createWorkflow } = useWorkflows({ isAuthenticated });
   const { templates } = useWorkflowTemplates({
@@ -242,6 +144,41 @@ export default function NewWorkflowPage() {
   });
   const { notify } = useLocalNotification();
   const { config, getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
+
+  const {
+    draftMode,
+    handleDraftToggle,
+    category,
+    setCategory,
+    applicationDate,
+    formState,
+    errors,
+    applyValidationErrors,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    absenceDate,
+    setAbsenceDate,
+    absenceReason,
+    setAbsenceReason,
+    paidReason,
+    setPaidReason,
+    overtimeStart,
+    setOvertimeStart,
+    overtimeEnd,
+    setOvertimeEnd,
+    overtimeDate,
+    setOvertimeDate,
+    overtimeReason,
+    setOvertimeReason,
+    customWorkflowTitle,
+    setCustomWorkflowTitle,
+    customWorkflowContent,
+    setCustomWorkflowContent,
+    selectedTemplateId,
+    setSelectedTemplateId,
+  } = useNewWorkflowForm();
 
   const enabledCategoryOptions = useMemo(
     () =>
@@ -254,84 +191,18 @@ export default function NewWorkflowPage() {
     [config, getAbsentEnabled],
   );
 
-  // Derived state: find matching staff from staffs
   const staff = useMemo(() => {
     if (!cognitoUser?.id) return undefined;
     return staffs.find((s) => s.cognitoUserId === cognitoUser.id) || null;
   }, [staffs, cognitoUser]);
 
-  const extractErrorMessage = (err: unknown): string => {
-    if (err instanceof Error) {
-      return err.message;
-    }
-
-    if (typeof err === "string") {
-      return err;
-    }
-
-    if (typeof err === "object" && err !== null) {
-      // RTK Query error format
-      if ("data" in err && typeof err.data === "object" && err.data !== null) {
-        const data = err.data as Record<string, unknown>;
-        if ("message" in data && typeof data.message === "string") {
-          return data.message;
-        }
-        if (
-          "errors" in data &&
-          Array.isArray(data.errors) &&
-          data.errors.length > 0
-        ) {
-          const firstError = data.errors[0];
-          if (
-            typeof firstError === "object" &&
-            firstError !== null &&
-            "message" in firstError
-          ) {
-            return String(firstError.message);
-          }
-        }
-      }
-      if ("message" in err && typeof err.message === "string") {
-        return err.message;
-      }
-      if ("error" in err && typeof err.error === "string") {
-        return err.error;
-      }
-    }
-
-    return "ワークフローの作成に失敗しました。";
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formState: WorkflowFormState = {
-      categoryLabel: category,
-      startDate,
-      endDate,
-      absenceDate,
-      paidReason,
-      absenceReason,
-      overtimeDate,
-      overtimeStart,
-      overtimeEnd,
-      overtimeReason,
-      customWorkflowTitle,
-      customWorkflowContent,
-    };
 
     const validation = validateWorkflowForm(formState);
-    setDateError(validation.errors.dateError ?? "");
-    setAbsenceDateError(validation.errors.absenceDateError ?? "");
-    setOvertimeDateError(validation.errors.overtimeDateError ?? "");
-    setOvertimeError(validation.errors.overtimeError ?? "");
-    setCustomWorkflowTitleError(
-      validation.errors.customWorkflowTitleError ?? "",
-    );
-    setCustomWorkflowContentError(
-      validation.errors.customWorkflowContentError ?? "",
-    );
+    applyValidationErrors(validation.errors);
     if (!validation.isValid) return;
-    // 申請者（staff）が取れていない場合はエラー
+
     if (!staff?.id) {
       void notify("エラー", {
         body: "申請者情報が取得できませんでした。",
@@ -342,10 +213,6 @@ export default function NewWorkflowPage() {
       return;
     }
 
-    // 送信時の申請日は今日に固定する
-    const todaySlash = getTodayAsSlash();
-    setApplicationDate(todaySlash);
-
     const input = buildCreateWorkflowInput({
       staffId: staff.id,
       draftMode,
@@ -353,20 +220,16 @@ export default function NewWorkflowPage() {
       overtimeDateFallbackFactory: () => new Date().toISOString().slice(0, 10),
     });
 
-    // --- 申請時に承認ステップをスナップショットとして保存する ---
-    // staff の approverSetting を参照して approvalSteps / assignedApproverStaffIds を生成
     const { approvalSteps, assignedApproverStaffIds } = generateApprovalSteps(
       staff,
       staffs,
     );
-
     if (approvalSteps.length > 0) {
       input.approvalSteps = approvalSteps;
       input.assignedApproverStaffIds = assignedApproverStaffIds;
       input.nextApprovalStepIndex = 0;
     }
 
-    // 保存用に submitter 側のスナップショット情報も入れておく
     if (staff?.approverSetting) {
       input.submitterApproverSetting =
         staff.approverSetting as ApproverSettingMode;
@@ -409,59 +272,43 @@ export default function NewWorkflowPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow creation failed:", message);
-      const errorMessage = extractErrorMessage(err);
       void notify("エラー", {
-        body: errorMessage,
+        body: extractErrorMessage(err),
         mode: "await-interaction",
         priority: "high",
       });
     }
   };
 
-  const handleDraftToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    setDraftMode(checked);
-  };
-
-  const handleCategoryChange = (e: SelectChangeEvent<string>) => {
-    const v = e.target.value as string;
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const v = e.target.value;
     setCategory(v);
-    // 種別選択時の初期化処理等はここに記述（タイトル入力は廃止されたため削除済）
-    // 有給のときは開始/終了を今日で初期化
     const today = new Date().toISOString().slice(0, 10);
     if (v === "有給休暇申請") {
       setStartDate(today);
       setEndDate(today);
-      // 申請理由のデフォルト
       if (!paidReason) setPaidReason("私用のため");
     } else if (v === CLOCK_CORRECTION_LABEL) {
-      // 打刻修正の場合は対象日を今日に、出勤時間を既定の勤務開始時刻に初期化
       setOvertimeDate(today);
-      const defaultStartTime = getStartTime();
-      const isoTime = parseTimeToISO(defaultStartTime.format("HH:mm"), today);
+      const isoTime = parseTimeToISO(getStartTime().format("HH:mm"), today);
       setOvertimeStart(isoTime);
       setOvertimeEnd(null);
     } else if (v === CLOCK_CORRECTION_CHECK_OUT_LABEL) {
       setOvertimeDate(today);
       const defaultEndTime = getEndTime();
-      if (defaultEndTime) {
-        const isoTime = parseTimeToISO(defaultEndTime.format("HH:mm"), today);
-        setOvertimeEnd(isoTime);
-      } else {
-        setOvertimeEnd(null);
-      }
+      setOvertimeEnd(
+        defaultEndTime
+          ? parseTimeToISO(defaultEndTime.format("HH:mm"), today)
+          : null,
+      );
       setOvertimeStart(null);
     }
   };
 
   const handleApplyTemplate = () => {
-    if (!selectedTemplateId) {
-      return;
-    }
+    if (!selectedTemplateId) return;
 
-    const targetTemplate = templates.find(
-      (template) => template.id === selectedTemplateId,
-    );
+    const targetTemplate = templates.find((t) => t.id === selectedTemplateId);
     if (!targetTemplate) {
       void notify("エラー", {
         body: "テンプレートが見つかりませんでした。",
@@ -475,154 +322,107 @@ export default function NewWorkflowPage() {
     const hasCurrentValue =
       customWorkflowTitle.trim().length > 0 ||
       customWorkflowContent.trim().length > 0;
-
-    if (hasCurrentValue) {
-      const shouldOverwrite = window.confirm(
-        "現在入力しているタイトル・詳細をテンプレート内容で上書きします。よろしいですか？",
-      );
-      if (!shouldOverwrite) {
-        return;
-      }
-    } else {
-      const shouldApply = window.confirm("テンプレートを適用しますか？");
-      if (!shouldApply) {
-        return;
-      }
-    }
+    const confirmMessage = hasCurrentValue
+      ? "現在入力しているタイトル・詳細をテンプレート内容で上書きします。よろしいですか？"
+      : "テンプレートを適用しますか？";
+    if (!window.confirm(confirmMessage)) return;
 
     setCustomWorkflowTitle(targetTemplate.title);
     setCustomWorkflowContent(targetTemplate.content);
-    setCustomWorkflowTitleError("");
-    setCustomWorkflowContentError("");
   };
 
   return (
-    <Page
-      title="新規作成"
-      maxWidth="lg"
-      showDefaultHeader={false}
-    >
+    <Page title="新規作成" maxWidth="lg" showDefaultHeader={false}>
       <PageSection
         component="form"
         layoutVariant="dashboard"
         onSubmit={handleSubmit}
         sx={{ gap: 0 }}
       >
-        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 2 }}>
-          <Button
-            size="small"
-            variant="outlined"
+        <div style={{ marginBottom: "1rem" }}>
+          <button
+            type="button"
+            className={styles.backButton}
             onClick={() => navigate("/workflow")}
-            sx={OUTLINED_BUTTON_SX}
           >
             申請一覧へ戻る
-          </Button>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            gap: HEADER_GAP,
-            mb: 2,
-          }}
-        >
-          <Box>
-            <Typography variant="h5" fontWeight={700}>
-              新規作成
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
+          </button>
+        </div>
+
+        <div className={styles.pageHeader}>
+          <div>
+            <h2 className={styles.pageTitle}>新規作成</h2>
+            <p className={styles.pageSubtitle}>
               申請一覧を起点に、申請内容を作成します。
-            </Typography>
-          </Box>
-        </Box>
+            </p>
+          </div>
+        </div>
+
         <DashboardInnerSurface>
-          <Grid
-            container
-            rowSpacing={3}
-            columnSpacing={2}
-            alignItems="flex-start"
-          >
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                種別
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Select
-                value={category}
-                displayEmpty
-                onChange={handleCategoryChange}
-                size="small"
-                fullWidth
-                sx={INPUT_SX}
-              >
-                <MenuItem value="">
-                  <em>種別を選択</em>
-                </MenuItem>
-                {enabledCategoryOptions.flatMap((item) => {
-                  if (item.category === WorkflowCategory.CLOCK_CORRECTION) {
-                    return [
-                      <MenuItem
-                        key={`${item.category}-clock-in`}
-                        value={CLOCK_CORRECTION_LABEL}
-                      >
-                        {CLOCK_CORRECTION_LABEL}
-                      </MenuItem>,
-                      <MenuItem
-                        key={`${item.category}-clock-out`}
-                        value={CLOCK_CORRECTION_CHECK_OUT_LABEL}
-                      >
-                        {CLOCK_CORRECTION_CHECK_OUT_LABEL}
-                      </MenuItem>,
-                    ];
-                  }
+          <div className={styles.formRows}>
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>種別</div>
+              <div>
+                <div className={styles.selectWrap}>
+                  <select
+                    className={styles.select}
+                    value={category}
+                    onChange={handleCategoryChange}
+                  >
+                    <option value="">種別を選択</option>
+                    {enabledCategoryOptions.flatMap((item) => {
+                      if (
+                        item.category === WorkflowCategory.CLOCK_CORRECTION
+                      ) {
+                        return [
+                          <option
+                            key={`${item.category}-clock-in`}
+                            value={CLOCK_CORRECTION_LABEL}
+                          >
+                            {CLOCK_CORRECTION_LABEL}
+                          </option>,
+                          <option
+                            key={`${item.category}-clock-out`}
+                            value={CLOCK_CORRECTION_CHECK_OUT_LABEL}
+                          >
+                            {CLOCK_CORRECTION_CHECK_OUT_LABEL}
+                          </option>,
+                        ];
+                      }
+                      const label =
+                        CATEGORY_LABELS[item.category] ?? item.label;
+                      return [
+                        <option key={item.category} value={label}>
+                          {label}
+                        </option>,
+                      ];
+                    })}
+                  </select>
+                  <span className={styles.selectIcon} aria-hidden="true">
+                    ▼
+                  </span>
+                </div>
+              </div>
+            </div>
 
-                  const label = CATEGORY_LABELS[item.category] ?? item.label;
-                  return [
-                    <MenuItem key={item.category} value={label}>
-                      {label}
-                    </MenuItem>,
-                  ];
-                })}
-              </Select>
-            </Grid>
-
-            {/* プレビュー機能は廃止されました */}
-
-            {/* 申請者 */}
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                申請者
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography variant="body1">
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>申請者</div>
+              <p className={styles.formValue}>
                 {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
-              </Typography>
-            </Grid>
+              </p>
+            </div>
 
-            {/* 申請日 */}
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                申請日
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <TextField
-                value={applicationDate}
-                InputProps={{ readOnly: true }}
-                size="small"
-                fullWidth
-                sx={TEXT_FIELD_SX}
-              />
-            </Grid>
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>申請日</div>
+              <div>
+                <input
+                  className={styles.readonlyInput}
+                  value={applicationDate}
+                  readOnly
+                />
+              </div>
+            </div>
 
-            {/* タイトル入力は廃止されました（申請はテンプレート/種別で自動的にタイトルを決定します） */}
-
-            {/* 説明: 削除済み */}
-
-            {/* 種別固有フィールド（共通コンポーネント） */}
             <WorkflowTypeFields
               category={category}
               disabled={category === ""}
@@ -630,83 +430,74 @@ export default function NewWorkflowPage() {
               setStartDate={setStartDate}
               endDate={endDate}
               setEndDate={setEndDate}
-              dateError={dateError}
+              dateError={errors.dateError}
               paidReason={paidReason}
               setPaidReason={setPaidReason}
               absenceDate={absenceDate}
               setAbsenceDate={setAbsenceDate}
-              absenceDateError={absenceDateError}
+              absenceDateError={errors.absenceDateError}
               absenceReason={absenceReason}
               setAbsenceReason={setAbsenceReason}
               overtimeDate={overtimeDate}
               setOvertimeDate={setOvertimeDate}
-              overtimeDateError={overtimeDateError}
+              overtimeDateError={errors.overtimeDateError}
               overtimeStart={overtimeStart}
               setOvertimeStart={setOvertimeStart}
               overtimeEnd={overtimeEnd}
               setOvertimeEnd={setOvertimeEnd}
-              overtimeError={overtimeError}
+              overtimeError={errors.overtimeError}
               overtimeReason={overtimeReason}
               setOvertimeReason={setOvertimeReason}
               customWorkflowTitle={customWorkflowTitle}
               setCustomWorkflowTitle={setCustomWorkflowTitle}
               customWorkflowContent={customWorkflowContent}
               setCustomWorkflowContent={setCustomWorkflowContent}
-              customWorkflowTitleError={customWorkflowTitleError}
-              customWorkflowContentError={customWorkflowContentError}
-              templateOptions={templates.map((template) => ({
-                id: template.id,
-                name: template.name,
+              customWorkflowTitleError={errors.customWorkflowTitleError}
+              customWorkflowContentError={errors.customWorkflowContentError}
+              templateOptions={templates.map((t) => ({
+                id: t.id,
+                name: t.name,
               }))}
               selectedTemplateId={selectedTemplateId}
               setSelectedTemplateId={setSelectedTemplateId}
               onApplyTemplate={handleApplyTemplate}
               disableTemplateApply={!selectedTemplateId}
             />
-            {/* 新規作成では "その他" は選択不可のため備考UIは表示しない */}
 
-            {/* 下書き */}
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                下書き
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <FormControlLabel
-                control={
-                  <Switch
+            <div className={styles.formRow}>
+              <div className={styles.formLabel}>下書き</div>
+              <div>
+                <label className={styles.toggleWrap}>
+                  <input
+                    type="checkbox"
+                    className={styles.toggleInput}
                     checked={draftMode}
                     onChange={handleDraftToggle}
-                    sx={SWITCH_SX}
                   />
-                }
-                label={draftMode ? "下書きとして保存" : ""}
-                sx={{
-                  m: 0,
-                  "& .MuiFormControlLabel-label": {
-                    fontSize: "0.92rem",
-                    color: "#0f172a",
-                  },
-                }}
-              />
-            </Grid>
+                  <span className={styles.toggleTrack} />
+                  {draftMode && (
+                    <span className={styles.toggleLabelText}>
+                      下書きとして保存
+                    </span>
+                  )}
+                </label>
+              </div>
+            </div>
 
-            {/* ボタン（右カラムに詰める） */}
-            <Grid item xs={12} sm={3} />
-            <Grid item xs={12} sm={9}>
-              <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="small"
-                  disabled={category === ""}
-                  sx={CONTAINED_BUTTON_SX}
-                >
-                  作成
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+            <div className={styles.formRow}>
+              <div className={styles.formActions}>
+                <div className={styles.actionsGroup}>
+                  <button
+                    type="submit"
+                    className={styles.submitButton}
+                    disabled={category === ""}
+                  >
+                    作成
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </DashboardInnerSurface>
       </PageSection>
     </Page>

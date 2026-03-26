@@ -1,79 +1,10 @@
 import {
-  Box,
-  Button,
-  Grid,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-} from "@mui/material";
-
-import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   CLOCK_CORRECTION_LABEL,
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import { TimeInput } from "@/shared/ui/TimeInput";
 
-const inlineFieldGroupSx = {
-  display: "flex",
-  gap: 1,
-  alignItems: "flex-start",
-  flexWrap: "wrap",
-};
-
-const INPUT_SX = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: "18px",
-    bgcolor: "#f8fffb",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.92)",
-    "& fieldset": {
-      borderColor: "rgba(16, 185, 129, 0.18)",
-    },
-    "&:hover fieldset": {
-      borderColor: "rgba(16, 185, 129, 0.3)",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "rgba(16, 185, 129, 0.55)",
-    },
-  },
-  "& .MuiOutlinedInput-input": {
-    py: "10px",
-    px: "14px",
-    fontSize: "0.92rem",
-    color: "#0f172a",
-  },
-  "& .MuiFormHelperText-root": {
-    marginLeft: 0,
-  },
-} as const;
-
-const SELECT_SX = {
-  ...INPUT_SX,
-  "& .MuiSelect-select": {
-    py: "10px",
-    px: "14px",
-    fontSize: "0.92rem",
-    color: "#0f172a",
-  },
-} as const;
-
-const OUTLINED_BUTTON_SX = {
-  borderRadius: "999px",
-  borderColor: "rgba(4, 120, 87, 0.58)",
-  color: "#ffffff",
-  bgcolor: "#19b985",
-  px: 2.5,
-  py: 1.15,
-  fontWeight: 500,
-  boxShadow:
-    "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
-  "&:hover": {
-    borderColor: "rgba(4, 120, 87, 0.62)",
-    bgcolor: "#17ab7b",
-    boxShadow:
-      "inset 0 -2px 0 rgba(0,0,0,0.12), 0 14px 28px -18px rgba(5,150,105,0.6)",
-  },
-} as const;
+import styles from "./WorkflowTypeFields.module.scss";
 
 type Props = {
   category: string;
@@ -157,363 +88,321 @@ export default function WorkflowTypeFields({
     <>
       {category === "有給休暇申請" && (
         <>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              取得期間
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <Box sx={inlineFieldGroupSx}>
-              <TextField
-                type="date"
-                size="small"
-                disabled={disabled}
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                error={Boolean(dateError)}
-                helperText={dateError}
-                sx={INPUT_SX}
-              />
-              <Typography>-</Typography>
-              <TextField
-                type="date"
-                size="small"
-                disabled={disabled}
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                error={Boolean(dateError)}
-                sx={INPUT_SX}
-              />
-            </Box>
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>取得期間</div>
+            <div className={styles.formField}>
+              <div className={styles.inlineGroup}>
+                <input
+                  type="date"
+                  className={[
+                    styles.dateInput,
+                    dateError ? styles.inputError : "",
+                  ].join(" ")}
+                  disabled={disabled}
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+                <span className={styles.dateSeparator}>-</span>
+                <input
+                  type="date"
+                  className={[
+                    styles.dateInput,
+                    dateError ? styles.inputError : "",
+                  ].join(" ")}
+                  disabled={disabled}
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              {dateError && (
+                <p className={styles.errorText}>{dateError}</p>
+              )}
+            </div>
+          </div>
 
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              申請理由
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              size="small"
-              fullWidth
-              disabled={disabled}
-              value={paidReason}
-              onChange={(e) => setPaidReason(e.target.value)}
-              sx={INPUT_SX}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>申請理由</div>
+            <div className={styles.formField}>
+              <input
+                className={styles.input}
+                disabled={disabled}
+                value={paidReason}
+                onChange={(e) => setPaidReason(e.target.value)}
+              />
+            </div>
+          </div>
         </>
       )}
 
       {category === "欠勤申請" && (
         <>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              欠勤日
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              type="date"
-              size="small"
-              fullWidth
-              value={absenceDate}
-              onChange={(e) => setAbsenceDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              error={Boolean(absenceDateError)}
-              helperText={absenceDateError}
-              disabled={disabled}
-              sx={INPUT_SX}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>欠勤日</div>
+            <div className={styles.formField}>
+              <input
+                type="date"
+                className={[
+                  styles.dateInput,
+                  absenceDateError ? styles.inputError : "",
+                ].join(" ")}
+                value={absenceDate}
+                onChange={(e) => setAbsenceDate(e.target.value)}
+                disabled={disabled}
+              />
+              {absenceDateError && (
+                <p className={styles.errorText}>{absenceDateError}</p>
+              )}
+            </div>
+          </div>
 
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              欠勤理由
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              size="small"
-              fullWidth
-              sx={INPUT_SX}
-              value={absenceReason}
-              onChange={(e) => setAbsenceReason(e.target.value)}
-              disabled={disabled}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>欠勤理由</div>
+            <div className={styles.formField}>
+              <input
+                className={styles.input}
+                value={absenceReason}
+                onChange={(e) => setAbsenceReason(e.target.value)}
+                disabled={disabled}
+              />
+            </div>
+          </div>
         </>
       )}
 
       {category === "残業申請" && (
         <>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              残業予定日
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              type="date"
-              size="small"
-              value={overtimeDate}
-              onChange={(e) => setOvertimeDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              error={Boolean(overtimeDateError)}
-              helperText={overtimeDateError}
-              sx={{ ...INPUT_SX, maxWidth: 200 }}
-              disabled={disabled}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              残業予定時間
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <Box sx={{ display: "grid", gap: 0.75 }}>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "minmax(0, 1fr)",
-                    sm: "148px 48px 148px",
-                  },
-                  columnGap: 0,
-                  rowGap: 1,
-                  alignItems: "center",
-                }}
-              >
-                <TimeInput
-                  value={overtimeStart}
-                  onChange={setOvertimeStart}
-                  baseDate={
-                    overtimeDate || new Date().toISOString().slice(0, 10)
-                  }
-                  size="small"
-                  error={Boolean(overtimeError)}
-                  disabled={disabled}
-                  sx={{ width: "148px", maxWidth: "100%" }}
-                />
-                <Typography
-                  sx={{
-                    display: { xs: "none", sm: "block" },
-                    textAlign: "center",
-                    lineHeight: 1,
-                    color: "text.secondary",
-                    justifySelf: "center",
-                    transform: "translateY(-1px)",
-                  }}
-                >
-                  〜
-                </Typography>
-                <TimeInput
-                  value={overtimeEnd}
-                  onChange={setOvertimeEnd}
-                  baseDate={
-                    overtimeDate || new Date().toISOString().slice(0, 10)
-                  }
-                  size="small"
-                  error={Boolean(overtimeError)}
-                  disabled={disabled}
-                  sx={{ width: "148px", maxWidth: "100%" }}
-                />
-              </Box>
-              {overtimeError && (
-                <Typography color="error" variant="caption">
-                  {overtimeError}
-                </Typography>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>残業予定日</div>
+            <div className={styles.formField}>
+              <input
+                type="date"
+                className={[
+                  styles.dateInput,
+                  overtimeDateError ? styles.inputError : "",
+                ].join(" ")}
+                value={overtimeDate}
+                onChange={(e) => setOvertimeDate(e.target.value)}
+                disabled={disabled}
+              />
+              {overtimeDateError && (
+                <p className={styles.errorText}>{overtimeDateError}</p>
               )}
-            </Box>
-          </Grid>
+            </div>
+          </div>
 
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              残業理由
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              size="small"
-              fullWidth
-              value={overtimeReason}
-              onChange={(e) =>
-                setOvertimeReason && setOvertimeReason(e.target.value)
-              }
-              disabled={disabled}
-              sx={INPUT_SX}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>残業予定時間</div>
+            <div className={styles.formField}>
+              <div className={styles.timeFieldGroup}>
+                <div className={styles.timeInputGroup}>
+                  <TimeInput
+                    value={overtimeStart}
+                    onChange={setOvertimeStart}
+                    baseDate={
+                      overtimeDate || new Date().toISOString().slice(0, 10)
+                    }
+                    size="small"
+                    error={Boolean(overtimeError)}
+                    disabled={disabled}
+                    sx={{ width: "148px", maxWidth: "100%" }}
+                  />
+                  <span className={styles.timeSeparator}>〜</span>
+                  <TimeInput
+                    value={overtimeEnd}
+                    onChange={setOvertimeEnd}
+                    baseDate={
+                      overtimeDate || new Date().toISOString().slice(0, 10)
+                    }
+                    size="small"
+                    error={Boolean(overtimeError)}
+                    disabled={disabled}
+                    sx={{ width: "148px", maxWidth: "100%" }}
+                  />
+                </div>
+                {overtimeError && (
+                  <p className={styles.errorText}>{overtimeError}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>残業理由</div>
+            <div className={styles.formField}>
+              <input
+                className={styles.input}
+                value={overtimeReason ?? ""}
+                onChange={(e) =>
+                  setOvertimeReason && setOvertimeReason(e.target.value)
+                }
+                disabled={disabled}
+              />
+            </div>
+          </div>
         </>
       )}
 
       {category === CLOCK_CORRECTION_LABEL && (
         <>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              対象日
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              type="date"
-              size="small"
-              value={overtimeDate}
-              onChange={(e) => setOvertimeDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              error={Boolean(overtimeDateError)}
-              helperText={overtimeDateError}
-              disabled={disabled}
-              sx={{ ...INPUT_SX, maxWidth: 200 }}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>対象日</div>
+            <div className={styles.formField}>
+              <input
+                type="date"
+                className={[
+                  styles.dateInput,
+                  overtimeDateError ? styles.inputError : "",
+                ].join(" ")}
+                value={overtimeDate}
+                onChange={(e) => setOvertimeDate(e.target.value)}
+                disabled={disabled}
+              />
+              {overtimeDateError && (
+                <p className={styles.errorText}>{overtimeDateError}</p>
+              )}
+            </div>
+          </div>
 
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              出勤時間
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TimeInput
-              value={overtimeStart}
-              onChange={setOvertimeStart}
-              baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
-              size="small"
-              error={Boolean(overtimeError)}
-              helperText={overtimeError}
-              disabled={disabled}
-              sx={{ maxWidth: 160 }}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>出勤時間</div>
+            <div className={styles.formField}>
+              <TimeInput
+                value={overtimeStart}
+                onChange={setOvertimeStart}
+                baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
+                size="small"
+                error={Boolean(overtimeError)}
+                helperText={overtimeError}
+                disabled={disabled}
+                sx={{ maxWidth: 160 }}
+              />
+            </div>
+          </div>
         </>
       )}
 
       {category === CLOCK_CORRECTION_CHECK_OUT_LABEL && (
         <>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              対象日
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              type="date"
-              size="small"
-              value={overtimeDate}
-              onChange={(e) => setOvertimeDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              error={Boolean(overtimeDateError)}
-              helperText={overtimeDateError}
-              disabled={disabled}
-              sx={{ ...INPUT_SX, maxWidth: 200 }}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>対象日</div>
+            <div className={styles.formField}>
+              <input
+                type="date"
+                className={[
+                  styles.dateInput,
+                  overtimeDateError ? styles.inputError : "",
+                ].join(" ")}
+                value={overtimeDate}
+                onChange={(e) => setOvertimeDate(e.target.value)}
+                disabled={disabled}
+              />
+              {overtimeDateError && (
+                <p className={styles.errorText}>{overtimeDateError}</p>
+              )}
+            </div>
+          </div>
 
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              退勤時間
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TimeInput
-              value={overtimeEnd}
-              onChange={setOvertimeEnd}
-              baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
-              size="small"
-              error={Boolean(overtimeError)}
-              helperText={overtimeError}
-              disabled={disabled}
-              sx={{ maxWidth: 160 }}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>退勤時間</div>
+            <div className={styles.formField}>
+              <TimeInput
+                value={overtimeEnd}
+                onChange={setOvertimeEnd}
+                baseDate={overtimeDate || new Date().toISOString().slice(0, 10)}
+                size="small"
+                error={Boolean(overtimeError)}
+                helperText={overtimeError}
+                disabled={disabled}
+                sx={{ maxWidth: 160 }}
+              />
+            </div>
+          </div>
         </>
       )}
 
       {category === "その他" && (
         <>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              テンプレート
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <Box sx={inlineFieldGroupSx}>
-              <Select
-                size="small"
-                fullWidth
-                value={selectedTemplateId ?? ""}
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>テンプレート</div>
+            <div className={styles.formField}>
+              <div className={styles.inlineGroup}>
+                <div className={styles.selectWrap}>
+                  <select
+                    className={styles.select}
+                    value={selectedTemplateId ?? ""}
+                    onChange={(e) =>
+                      setSelectedTemplateId &&
+                      setSelectedTemplateId(e.target.value)
+                    }
+                    disabled={disabled}
+                  >
+                    <option value="">
+                      テンプレートを選択
+                    </option>
+                    {(templateOptions ?? []).map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className={styles.selectIcon} aria-hidden="true">
+                    ▼
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={styles.applyButton}
+                  onClick={() => onApplyTemplate && onApplyTemplate()}
+                  disabled={disabled || disableTemplateApply}
+                >
+                  適用
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>タイトル</div>
+            <div className={styles.formField}>
+              <input
+                className={[
+                  styles.input,
+                  customWorkflowTitleError ? styles.inputError : "",
+                ].join(" ")}
+                value={customWorkflowTitle ?? ""}
                 onChange={(e) =>
-                  setSelectedTemplateId && setSelectedTemplateId(e.target.value)
+                  setCustomWorkflowTitle &&
+                  setCustomWorkflowTitle(e.target.value)
                 }
                 disabled={disabled}
-                displayEmpty
-                sx={SELECT_SX}
-              >
-                <MenuItem value="">
-                  <em>テンプレートを選択</em>
-                </MenuItem>
-                {(templateOptions ?? []).map((option) => (
-                  <MenuItem key={option.id} value={option.id}>
-                    {option.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              <Button
-                variant="outlined"
-                onClick={() => onApplyTemplate && onApplyTemplate()}
-                disabled={disabled || disableTemplateApply}
-                sx={OUTLINED_BUTTON_SX}
-              >
-                適用
-              </Button>
-            </Box>
-          </Grid>
+              />
+              {customWorkflowTitleError && (
+                <p className={styles.errorText}>{customWorkflowTitleError}</p>
+              )}
+            </div>
+          </div>
 
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              タイトル
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              size="small"
-              fullWidth
-              value={customWorkflowTitle ?? ""}
-              onChange={(e) =>
-                setCustomWorkflowTitle && setCustomWorkflowTitle(e.target.value)
-              }
-              disabled={disabled}
-              error={Boolean(customWorkflowTitleError)}
-              helperText={customWorkflowTitleError}
-              sx={INPUT_SX}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">
-              詳細
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={9}>
-            <TextField
-              size="small"
-              fullWidth
-              multiline
-              minRows={6}
-              value={customWorkflowContent ?? ""}
-              onChange={(e) =>
-                setCustomWorkflowContent &&
-                setCustomWorkflowContent(e.target.value)
-              }
-              disabled={disabled}
-              error={Boolean(customWorkflowContentError)}
-              helperText={customWorkflowContentError}
-              sx={INPUT_SX}
-            />
-          </Grid>
+          <div className={styles.formRow}>
+            <div className={styles.formLabel}>詳細</div>
+            <div className={styles.formField}>
+              <textarea
+                className={[
+                  styles.textarea,
+                  customWorkflowContentError ? styles.inputError : "",
+                ].join(" ")}
+                value={customWorkflowContent ?? ""}
+                onChange={(e) =>
+                  setCustomWorkflowContent &&
+                  setCustomWorkflowContent(e.target.value)
+                }
+                disabled={disabled}
+                rows={6}
+              />
+              {customWorkflowContentError && (
+                <p className={styles.errorText}>{customWorkflowContentError}</p>
+              )}
+            </div>
+          </div>
         </>
       )}
     </>
