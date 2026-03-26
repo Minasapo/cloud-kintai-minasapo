@@ -27,8 +27,11 @@ export const useCollaborativePageState = (targetMonth: string) => {
     batchUpdateShifts,
     isBatchUpdating,
     startEditingCell,
+    stopEditingCell,
     isCellBeingEdited,
+    hasEditLock,
     getCellEditor,
+    forceReleaseCell,
     triggerSync,
     clearSyncError,
     updateUserActivity,
@@ -196,10 +199,14 @@ export const useCollaborativePageState = (targetMonth: string) => {
         return;
       }
 
+      if (!hasEditLock(staffId, date)) {
+        return;
+      }
+
       updateUserActivity();
       void updateShift({ staffId, date, newState });
     },
-    [isCellBeingEdited, updateUserActivity, updateShift, isCellLocked],
+    [isCellBeingEdited, hasEditLock, updateUserActivity, updateShift, isCellLocked],
   );
 
   const handleChangeState = useCallback(
@@ -210,7 +217,10 @@ export const useCollaborativePageState = (targetMonth: string) => {
           date,
           newState,
         }));
-        void batchUpdateShifts(updates);
+        const validUpdates = updates.filter(u => hasEditLock(u.staffId, u.date));
+        if (validUpdates.length > 0) {
+          void batchUpdateShifts(validUpdates);
+        }
         return;
       }
 
@@ -224,6 +234,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
       selectionCount,
       batchUpdateShifts,
       changeCellState,
+      hasEditLock,
     ],
   );
 
@@ -299,6 +310,42 @@ export const useCollaborativePageState = (targetMonth: string) => {
     [selectionTargets, getCellData],
   );
 
+  const hasEditLockForSelected = useMemo(() => {
+    return selectionTargets.length > 0 && selectionTargets.every((t) => hasEditLock(t.staffId, t.date));
+  }, [selectionTargets, hasEditLock]);
+
+  const isOthersEditingSelected = useMemo(() => {
+    return selectionTargets.some((t) => isCellBeingEdited(t.staffId, t.date));
+  }, [selectionTargets, isCellBeingEdited]);
+
+  const applyEditLock = useCallback(
+    (acquire: boolean) => {
+      selectionTargets.forEach(({ staffId, date }) => {
+        if (acquire) {
+          if (!isCellBeingEdited(staffId, date) && !hasEditLock(staffId, date)) {
+            startEditingCell(staffId, date);
+          }
+        } else {
+          if (hasEditLock(staffId, date)) {
+            stopEditingCell(staffId, date);
+          }
+        }
+      });
+    },
+    [selectionTargets, isCellBeingEdited, hasEditLock, startEditingCell, stopEditingCell],
+  );
+
+  const handleAcquireEditLock = useCallback(() => applyEditLock(true), [applyEditLock]);
+  const handleReleaseEditLock = useCallback(() => applyEditLock(false), [applyEditLock]);
+
+  const handleForceReleaseLock = useCallback(
+    () => {
+      if (!isAdmin) return;
+      selectionTargets.forEach(({ staffId, date }) => forceReleaseCell(staffId, date));
+    },
+    [selectionTargets, isAdmin, forceReleaseCell]
+  );
+
   const handlePaste = useCallback(() => {
     if (!focusedCell) return;
 
@@ -337,10 +384,6 @@ export const useCollaborativePageState = (targetMonth: string) => {
         return;
       }
 
-      if (isCellBeingEdited(staffId, date)) {
-        return;
-      }
-
       updateUserActivity();
 
       if (event.shiftKey) {
@@ -356,17 +399,14 @@ export const useCollaborativePageState = (targetMonth: string) => {
 
       selectCell(staffId, date);
       focusCell(staffId, date);
-      startEditingCell(staffId, date);
     },
     [
       isBatchUpdating,
-      isCellBeingEdited,
       updateUserActivity,
       selectRange,
       toggleCell,
       focusCell,
       selectCell,
-      startEditingCell,
     ],
   );
 
@@ -469,5 +509,10 @@ export const useCollaborativePageState = (targetMonth: string) => {
     handleEscape,
     handleSelectAll,
     navigate,
+    hasEditLockForSelected,
+    isOthersEditingSelected,
+    handleAcquireEditLock,
+    handleReleaseEditLock,
+    handleForceReleaseLock,
   };
 };

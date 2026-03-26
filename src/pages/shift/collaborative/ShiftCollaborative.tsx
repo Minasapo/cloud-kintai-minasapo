@@ -100,6 +100,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       handleEscape,
       handleSelectAll,
       navigate,
+      hasEditLockForSelected,
+      isOthersEditingSelected,
+      handleAcquireEditLock,
+      handleReleaseEditLock,
+      handleForceReleaseLock,
     } = useCollaborativePageState(targetMonth);
 
     const currentUserId = useMemo(() => {
@@ -357,6 +362,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             hasClipboard={hasClipboard}
             canPaste={focusedCell !== null}
             isUpdating={isBatchUpdating}
+            hasEditLockForSelected={hasEditLockForSelected}
+            isOthersEditingSelected={isOthersEditingSelected}
+            onAcquireEditLock={handleAcquireEditLock}
+            onReleaseEditLock={handleReleaseEditLock}
+            onForceReleaseLock={handleForceReleaseLock}
           />
 
           <ConflictResolutionDialog

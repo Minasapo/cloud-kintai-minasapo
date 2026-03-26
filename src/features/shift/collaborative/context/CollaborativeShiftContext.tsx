@@ -22,6 +22,7 @@ export interface CollaborativeShiftContextType {
   startEditingCell: (staffId: string, date: string) => void;
   stopEditingCell: (staffId: string, date: string) => void;
   isCellBeingEdited: (staffId: string, date: string) => boolean;
+  hasEditLock: (staffId: string, date: string) => boolean;
   getCellEditor: (
     staffId: string,
     date: string,

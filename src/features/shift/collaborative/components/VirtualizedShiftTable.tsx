@@ -73,6 +73,7 @@ interface VirtualizedShiftTableProps {
     isLocked: boolean;
     isEditing: boolean;
     editorName?: string;
+    editorColor?: string;
     lastChangedBy?: string;
     lastChangedAt?: string;
     onClick: (event: React.MouseEvent) => void;
@@ -271,6 +272,7 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                         isLocked={cell.isLocked}
                         isEditing={isEditing}
                         editorName={editor?.userName}
+                        editorColor={editor?.color}
                         lastChangedBy={cell.lastChangedBy}
                         lastChangedAt={cell.lastChangedAt}
                         onClick={(event) => onCellClick(staffId, dayKey, event)}
