@@ -384,7 +384,7 @@ export default function WorkflowListPage() {
                       )}
                     </div>
                   ) : (
-                    <div className="overflow-hidden rounded-[24px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(247,253,249,0.94)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
+                    <div className="mt-1 overflow-hidden rounded-[24px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(247,253,249,0.94)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
                       <div className="grid grid-cols-[minmax(180px,1fr)_minmax(160px,0.9fr)_minmax(180px,0.9fr)_minmax(160px,0.9fr)] border-b border-slate-200/80 bg-[linear-gradient(180deg,rgba(240,253,244,0.72)_0%,rgba(248,250,252,0.58)_100%)] px-5 py-3 text-[0.74rem] font-semibold tracking-[0.04em] text-slate-500">
                         <div>種別</div>
                         <div>申請日</div>
