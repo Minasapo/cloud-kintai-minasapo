@@ -5,21 +5,15 @@ import { useCallback, useContext, useMemo } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
 import type { WorkflowDetailLoaderData } from "@/entities/workflow/model/loader";
-import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow/model/workflowApprovalTimeline";
-import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
+import { useWorkflowDetailMeta } from "@/features/workflow/detail-panel/model/useWorkflowDetailMeta";
 import { useWorkflowWithdraw } from "@/features/workflow/detail-panel/model/useWorkflowWithdraw";
-import { deriveWorkflowDetailPermissions } from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
 import WorkflowDetailHeader from "@/features/workflow/detail-panel/ui/WorkflowDetailHeader";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
-import {
-  useWorkflowLoaderWorkflow,
-} from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
+import { useWorkflowLoaderWorkflow } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
-import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 import { PageSection } from "@/shared/ui/layout";
 
 export default function WorkflowDetail() {
@@ -55,28 +49,13 @@ export default function WorkflowDetail() {
     onNewComment: handleNewCommentNotification,
   });
 
-  const staffName = useMemo(() => {
-    if (!workflow?.staffId) return "—";
-    const s = staffs.find((st) => st.id === workflow.staffId);
-    return s ? `${s.familyName} ${s.givenName}` : workflow.staffId;
-  }, [workflow, staffs]);
-
-  const applicationDate = formatDateSlash(
-    isoDateFromTimestamp(workflow?.createdAt),
-  );
-
-  const categoryLabel = getWorkflowCategoryLabel(workflow);
-
-  const approvalSteps = useMemo<WorkflowApprovalStepView[]>(
-    () =>
-      buildWorkflowApprovalTimeline({
-        workflow,
-        staffs,
-        applicantName: staffName,
-        applicationDate,
-      }),
-    [workflow, staffs, staffName, applicationDate],
-  );
+  const {
+    staffName,
+    applicationDate,
+    categoryLabel,
+    approvalSteps,
+    permissions,
+  } = useWorkflowDetailMeta({ workflow, staffs });
 
   const notifySuccess = useCallback(
     (message: string) => void notify(message, { mode: "auto-close" }),
@@ -111,11 +90,6 @@ export default function WorkflowDetail() {
     notifyError,
   });
 
-  const permissions = useMemo(
-    () => deriveWorkflowDetailPermissions(workflow),
-    [workflow],
-  );
-
   const { handleWithdraw } = useWorkflowWithdraw({
     workflow,
     updateWorkflow,
@@ -125,17 +99,9 @@ export default function WorkflowDetail() {
   });
 
   return (
-    <Page
-      title="申請内容"
-      maxWidth={false}
-      showDefaultHeader={false}
-    >
-      <PageSection
-        variant="plain"
-        layoutVariant="detail"
-        sx={{ gap: 0 }}
-      >
-        <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-6 pb-10 pt-2">
+    <Page title="申請内容" showDefaultHeader={false}>
+      <PageSection variant="plain" layoutVariant="detail">
+        <div className="flex flex-col gap-4 pb-10">
           <WorkflowDetailHeader
             onBack={() => navigate("/workflow")}
             onWithdraw={handleWithdraw}
