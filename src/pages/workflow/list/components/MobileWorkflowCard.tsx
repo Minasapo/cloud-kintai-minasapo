@@ -2,9 +2,15 @@ import StatusChip from "@shared/ui/chips/StatusChip";
 
 import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
 
-import { resolveWorkflowStatusKey } from "../lib/workflowListUtils";
-import MobileMetaBlock from "./MobileMetaBlock";
-import { EMPTY_VALUE, formatWorkflowDateValue } from "./workflowListContentShared";
+import {
+  isCancelledWorkflow,
+  resolveWorkflowStatusKey,
+} from "../lib/workflowListUtils";
+import {
+  cx,
+  EMPTY_VALUE,
+  formatWorkflowDateValue,
+} from "./workflowListContentShared";
 
 export default function MobileWorkflowCard({
   item,
@@ -13,31 +19,41 @@ export default function MobileWorkflowCard({
   item: WorkflowListItem;
   onClick: (item: WorkflowListItem) => void;
 }) {
+  const isCancelled = isCancelledWorkflow(item);
+
   return (
     <button
       type="button"
       onClick={() => onClick(item)}
       className="workflow-mobile-card-button"
     >
-      <div className="workflow-mobile-card">
+      <div
+        className={cx(
+          "workflow-mobile-card",
+          isCancelled && "workflow-mobile-card--cancelled"
+        )}
+      >
         <div className="workflow-mobile-card__header">
           <div className="workflow-mobile-card__title">
             {item.category || EMPTY_VALUE}
           </div>
-          <div className="workflow-mobile-card__status">
+          <div className="workflow-mobile-card__chip">
             <StatusChip status={resolveWorkflowStatusKey(item)} />
           </div>
         </div>
 
-        <MobileMetaBlock label="申請日" value={formatWorkflowDateValue(item.applicationDate)} />
+        <div className="workflow-mobile-card__divider" />
 
-        <div className="workflow-mobile-card__meta-row">
-          <MobileMetaBlock label="作成日" value={item.createdAt || EMPTY_VALUE} />
-          <MobileMetaBlock
-            label="ステータス"
-            value={item.status || EMPTY_VALUE}
-            alignEnd
-          />
+        <div className="workflow-mobile-card__table">
+          <span className="workflow-mobile-card__table-label">申請日</span>
+          <span className="workflow-mobile-card__table-value">
+            {formatWorkflowDateValue(item.applicationDate)}
+          </span>
+
+          <span className="workflow-mobile-card__table-label">作成日</span>
+          <span className="workflow-mobile-card__table-value">
+            {formatWorkflowDateValue(item.createdAt)}
+          </span>
         </div>
       </div>
     </button>

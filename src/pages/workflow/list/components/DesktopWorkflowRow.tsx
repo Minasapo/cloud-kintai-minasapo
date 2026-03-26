@@ -28,7 +28,7 @@ export default function DesktopWorkflowRow({
       <div>
         <StatusChip status={resolveWorkflowStatusKey(item)} />
       </div>
-      <div>{item.createdAt || EMPTY_VALUE}</div>
+      <div>{formatWorkflowDateValue(item.createdAt)}</div>
     </button>
   );
 }

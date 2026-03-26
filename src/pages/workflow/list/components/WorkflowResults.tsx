@@ -35,6 +35,9 @@ export default function WorkflowResults() {
     return (
       <div className={!shouldShowFallback ? "workflow-mobile-results" : undefined}>
         {content}
+        {!shouldShowFallback && (
+          <p className="workflow-mobile-end-message">これ以上ありません。</p>
+        )}
       </div>
     );
   }

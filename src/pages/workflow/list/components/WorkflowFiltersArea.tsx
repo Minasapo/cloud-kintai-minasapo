@@ -118,7 +118,6 @@ export default function WorkflowFiltersArea() {
           >
             <div className="workflow-filter-dialog__header">
               <div>
-                <p className="workflow-filter-dialog__eyebrow">Workflow filters</p>
                 <h2 id={titleId} className="workflow-filter-dialog__title">
                   申請一覧のフィルター
                 </h2>
