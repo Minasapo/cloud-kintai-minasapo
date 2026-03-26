@@ -102,7 +102,7 @@ const ShiftCollaborativeRoute = createLazyRoute(
   () => import("./pages/shift/collaborative"),
 );
 const WorkflowDetailRoute = createLazyRoute(
-  () => import("./pages/workflow/detail/WorkflowDetailPage"),
+  () => import("./pages/workflow/detail/WorkflowDetail"),
   {
     loader: loadWorkflowDetailLoader,
   },
