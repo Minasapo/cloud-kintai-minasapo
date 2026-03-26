@@ -6,7 +6,6 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
-const PAGE_PADDING_TOP = designTokenVar("component.page.paddingTop", "24px");
 const PAGE_SECTION_GAP = designTokenVar("component.page.sectionGap", "16px");
 
 interface PageProps {
@@ -39,10 +38,7 @@ export default function Page({
         };
 
   return (
-    <div
-      className="pt-6"
-      style={{ paddingTop: PAGE_PADDING_TOP, ...maxWidthStyle }}
-    >
+    <div style={{ ...maxWidthStyle }}>
       <div className="flex flex-col" style={{ gap: PAGE_SECTION_GAP }}>
         {showDefaultHeader && (
           <>

@@ -129,7 +129,6 @@ export function GoDirectlyFlagCheckbox({
   if (layout === "inline") {
     return (
       <div className="mb-1 flex items-center gap-2">
-        <p className="m-0 pb-2 font-bold">{label}</p>
         <Controller<AttendanceEditInputs, BooleanFieldName>
           name={name}
           control={control}
@@ -142,6 +141,9 @@ export function GoDirectlyFlagCheckbox({
             />
           )}
         />
+        <p className="m-0 text-sm font-normal leading-4 text-slate-700">
+          {label}
+        </p>
       </div>
     );
   }

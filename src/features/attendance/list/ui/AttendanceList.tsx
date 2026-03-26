@@ -1,8 +1,5 @@
-/**
- * スタッフ向けの勤怠一覧ページのコンポーネント。
- * ユーザーの勤怠情報を取得し、デスクトップ・モバイル両方のリストで表示する。
- * MaterialUIを使用し、日付選択や合計勤務時間の表示も行う。
- */
+import "./AttendanceList.scss";
+
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import {
@@ -17,12 +14,6 @@ import {
   OnUpdateAttendanceSubscription,
   Staff,
 } from "@shared/api/graphql/types";
-/**
- * 日付操作ライブラリ。日付のフォーマットや計算に使用。
- */
-/**
- * ReactのContext, Hooks。
- */
 import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -37,54 +28,30 @@ import {
   onDeleteAttendance,
   onUpdateAttendance,
 } from "@/shared/api/graphql/documents/subscriptions";
-/**
- * AmplifyのLogger。デバッグ・エラー出力に使用。
- */
 import { Logger } from "@/shared/lib/logger";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
+import AttendanceListCard from "./AttendanceListCard";
+import { AttendanceListProvider } from "./AttendanceListContext";
+import AttendanceListHeader from "./AttendanceListHeader";
+import {
+  formatDateRangeLabel,
+  getAttendanceQueryDateRange,
+  getCurrentMonthFromQuery,
+  getEffectiveDateRange,
+  MONTH_QUERY_KEY,
+  shouldRefetchForAttendanceEvent,
+} from "./attendanceListUtils";
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";
 
-const MONTH_QUERY_KEY = "month";
-
-const getCurrentMonthFromQuery = (monthParam: string | null): Dayjs => {
-  if (!monthParam) {
-    return dayjs().startOf("month");
-  }
-
-  const parsedMonth = dayjs(monthParam, "YYYY-MM", true);
-  if (!parsedMonth.isValid()) {
-    return dayjs().startOf("month");
-  }
-
-  return parsedMonth.startOf("month");
-};
-
-/**
- * 勤怠一覧テーブルのメインコンポーネント。
- * ユーザーの勤怠データ取得、合計勤務時間計算、リスト表示を行う。
- * @returns JSX.Element
- */
 export default function AttendanceTable() {
-  /**
-   * 認証済みユーザー情報。
-   */
   const { cognitoUser } = useContext(AuthContext);
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
-  /**
-   * Reduxのdispatch関数。
-   */
   const dispatch = useDispatch();
-  /**
-   * ページ遷移用navigate関数。
-   */
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  /**
-   * 勤怠情報取得用カスタムフック。
-   */
   const shouldFetchAttendances = Boolean(cognitoUser?.id);
   const currentMonth = useMemo(
     () => getCurrentMonthFromQuery(searchParams.get(MONTH_QUERY_KEY)),
@@ -124,72 +91,15 @@ export default function AttendanceTable() {
     isCompanyHolidayCalendarsLoading ||
     isCompanyHolidayCalendarsFetching;
 
-  const effectiveDateRange = useMemo(() => {
-    const monthStart = currentMonth.startOf("month");
-    const monthEnd = currentMonth.endOf("month");
-    const today = dayjs();
+  const effectiveDateRange = useMemo(
+    () => getEffectiveDateRange(currentMonth, closeDates),
+    [currentMonth, closeDates],
+  );
 
-    const applicableCloseDates = closeDates.filter((closeDate) => {
-      const start = dayjs(closeDate.startDate);
-      const end = dayjs(closeDate.endDate);
-      return (
-        start.isValid() &&
-        end.isValid() &&
-        !end.isBefore(monthStart, "day") &&
-        !start.isAfter(monthEnd, "day")
-      );
-    });
-
-    if (applicableCloseDates.length > 0) {
-      const containsToday = applicableCloseDates.find((cd) => {
-        const start = dayjs(cd.startDate);
-        const end = dayjs(cd.endDate);
-        return !today.isBefore(start, "day") && !today.isAfter(end, "day");
-      });
-
-      if (containsToday) {
-        return {
-          start: dayjs(containsToday.startDate),
-          end: dayjs(containsToday.endDate),
-          hasValidPeriod: true,
-        };
-      }
-
-      const latest = applicableCloseDates.reduce((prev, current) => {
-        const prevUpdatedAt = dayjs(prev.updatedAt ?? prev.closeDate).valueOf();
-        const currentUpdatedAt = dayjs(
-          current.updatedAt ?? current.closeDate,
-        ).valueOf();
-        return currentUpdatedAt > prevUpdatedAt ? current : prev;
-      });
-
-      return {
-        start: dayjs(latest.startDate),
-        end: dayjs(latest.endDate),
-        hasValidPeriod: true,
-      };
-    }
-
-    return {
-      start: monthStart,
-      end: monthEnd,
-      hasValidPeriod: false,
-    };
-  }, [currentMonth, closeDates]);
-
-  const attendanceQueryDateRange = useMemo(() => {
-    const monthStart = currentMonth.startOf("month");
-    const monthEnd = currentMonth.endOf("month");
-
-    return {
-      start: effectiveDateRange.start.isBefore(monthStart, "day")
-        ? effectiveDateRange.start
-        : monthStart,
-      end: effectiveDateRange.end.isAfter(monthEnd, "day")
-        ? effectiveDateRange.end
-        : monthEnd,
-    };
-  }, [currentMonth, effectiveDateRange]);
+  const attendanceQueryDateRange = useMemo(
+    () => getAttendanceQueryDateRange(currentMonth, effectiveDateRange),
+    [currentMonth, effectiveDateRange],
+  );
 
   const startDate = attendanceQueryDateRange.start.format(
     AttendanceDate.DataFormat,
@@ -229,19 +139,7 @@ export default function AttendanceTable() {
 
     let refetchTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const shouldRefetch = (
-      eventStaffId?: string | null,
-      workDate?: string | null,
-    ) => {
-      if (!eventStaffId || !workDate) return false;
-      if (eventStaffId !== currentStaffId) return false;
-
-      const eventDate = dayjs(workDate);
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
-
-      return eventDate.isBetween(start, end, "day", "[]");
-    };
+    const queryRange = { start: dayjs(startDate), end: dayjs(endDate) };
 
     const scheduleRefetch = () => {
       if (refetchTimer) {
@@ -258,7 +156,14 @@ export default function AttendanceTable() {
       .subscribe({
         next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
           const attendance = data?.onCreateAttendance;
-          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+          if (
+            !shouldRefetchForAttendanceEvent(
+              currentStaffId,
+              queryRange,
+              attendance?.staffId,
+              attendance?.workDate,
+            )
+          ) {
             return;
           }
           scheduleRefetch();
@@ -270,7 +175,14 @@ export default function AttendanceTable() {
       .subscribe({
         next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
           const attendance = data?.onUpdateAttendance;
-          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+          if (
+            !shouldRefetchForAttendanceEvent(
+              currentStaffId,
+              queryRange,
+              attendance?.staffId,
+              attendance?.workDate,
+            )
+          ) {
             return;
           }
           scheduleRefetch();
@@ -282,7 +194,14 @@ export default function AttendanceTable() {
       .subscribe({
         next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
           const attendance = data?.onDeleteAttendance;
-          if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
+          if (
+            !shouldRefetchForAttendanceEvent(
+              currentStaffId,
+              queryRange,
+              attendance?.staffId,
+              attendance?.workDate,
+            )
+          ) {
             return;
           }
           scheduleRefetch();
@@ -305,18 +224,12 @@ export default function AttendanceTable() {
     refetchAttendances,
   ]);
 
-  /**
-   * スタッフ情報の状態。
-   */
   const logger = useMemo(
     () => new Logger("AttendanceList", import.meta.env.DEV ? "DEBUG" : "ERROR"),
     [],
   );
   const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
 
-  /**
-   * ユーザー情報取得・勤怠情報取得の副作用。
-   */
   useEffect(() => {
     if (!cognitoUser) return;
     fetchStaff(cognitoUser.id)
@@ -350,72 +263,37 @@ export default function AttendanceTable() {
     }
   }, [attendancesError, dispatch, logger]);
 
-  /**
-   * 集計期間のラベルを生成する。
-   */
-  const rangeLabelForDisplay = useMemo(() => {
-    const startLabel = effectiveDateRange.start.format(
-      AttendanceDate.DisplayFormat,
-    );
-    const endLabel = effectiveDateRange.end.format(
-      AttendanceDate.DisplayFormat,
-    );
-    return `${startLabel} 〜 ${endLabel}`;
-  }, [effectiveDateRange]);
+  const rangeLabelForDisplay = useMemo(
+    () => formatDateRangeLabel(effectiveDateRange),
+    [effectiveDateRange],
+  );
 
   if (attendanceLoading || calendarLoading || closeDatesLoading) {
     return <LinearProgress />;
   }
 
-  return (
-    <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-      <section className="rounded-[1.8rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f7fcf8_0%,#ecfdf5_58%,#ffffff_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] sm:p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-[1.85rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
-              勤怠一覧
-            </h1>
-            <p className="max-w-3xl text-sm leading-6 text-slate-600 sm:text-[0.95rem]">
-              月ごとの勤怠をカレンダーで確認しながら、必要な日付の編集にすぐ移れます。集計期間の勤務時間もこの画面でまとめて確認できます。
-            </p>
-          </div>
-          <div className="rounded-[1.2rem] border border-emerald-100 bg-white/80 px-4 py-3 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.35)]">
-            <p className="text-xs font-semibold tracking-[0.04em] text-slate-500">
-              集計期間
-            </p>
-            <p className="mt-1 text-sm font-medium text-slate-900">
-              {rangeLabelForDisplay}
-            </p>
-          </div>
-        </div>
-      </section>
+  const contextValue = {
+    attendances,
+    staff,
+    holidayCalendars,
+    companyHolidayCalendars,
+    navigate,
+    closeDates,
+    closeDatesLoading,
+    closeDatesError,
+    currentMonth,
+    onMonthChange: handleMonthChange,
+  };
 
-      <div className="rounded-[1.6rem] border border-emerald-100/80 bg-white/90 p-4 shadow-[0_24px_54px_-40px_rgba(15,23,42,0.35)] sm:p-5">
-        {isDesktop ? (
-          <DesktopList
-            attendances={attendances}
-            holidayCalendars={holidayCalendars}
-            companyHolidayCalendars={companyHolidayCalendars}
-            navigate={navigate}
-            staff={staff}
-            closeDates={closeDates}
-            closeDatesLoading={closeDatesLoading}
-            closeDatesError={closeDatesError}
-            currentMonth={currentMonth}
-            onMonthChange={handleMonthChange}
-          />
-        ) : (
-          <MobileList
-            attendances={attendances}
-            holidayCalendars={holidayCalendars}
-            companyHolidayCalendars={companyHolidayCalendars}
-            staff={staff}
-            currentMonth={currentMonth}
-            onMonthChange={handleMonthChange}
-            closeDates={closeDates}
-          />
-        )}
+  return (
+    <AttendanceListProvider value={contextValue}>
+      <div className="attendance-list">
+        <AttendanceListHeader rangeLabelForDisplay={rangeLabelForDisplay} />
+
+        <AttendanceListCard>
+          {isDesktop ? <DesktopList /> : <MobileList />}
+        </AttendanceListCard>
       </div>
-    </div>
+    </AttendanceListProvider>
   );
 }

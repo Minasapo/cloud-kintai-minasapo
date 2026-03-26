@@ -1,16 +1,15 @@
-import QuickInputChips from "@shared/ui/inputs/QuickInputChips";
-import { TimeInput } from "@shared/ui/TimeInput";
 import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import TimeInputBase from "@/features/attendance/edit/ui/items/WorkTimeItem/TimeInputBase";
 
 export default function StartTimeInputMobile({
   dataTestId = "mobile-start-time-input",
 }: {
   dataTestId?: string;
 } = {}) {
-  const { workDate, setValue, watch, changeRequests, readOnly } = useContext(
+  const { workDate, control, setValue, changeRequests, readOnly } = useContext(
     AttendanceEditContext
   );
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
@@ -24,34 +23,17 @@ export default function StartTimeInputMobile({
     }));
   }, [getQuickInputStartTimes]);
 
-  if (!workDate || !setValue) return null;
-
-  const startTime = watch ? (watch("startTime") ?? null) : null;
+  if (!workDate || !control || !setValue) return null;
 
   return (
-    <div className="flex flex-col gap-2">
-      <TimeInput
-        value={startTime}
-        baseDate={workDate.format("YYYY-MM-DD")}
-        size="small"
-        step={60}
-        data-testid={dataTestId}
-        disabled={changeRequests.length > 0 || !!readOnly}
-        onChange={(value) => {
-          setValue("startTime", value, { shouldDirty: true });
-        }}
-      />
-      <div>
-        <QuickInputChips
-          quickInputTimes={quickInputStartTimes}
-          workDate={workDate}
-          disabled={changeRequests.length > 0 || !!readOnly}
-          onSelectTime={(startTime) => {
-            if (readOnly) return;
-            setValue("startTime", startTime, { shouldDirty: true });
-          }}
-        />
-      </div>
-    </div>
+    <TimeInputBase<"startTime">
+      name="startTime"
+      control={control}
+      setValue={setValue}
+      workDate={workDate}
+      quickInputTimes={quickInputStartTimes}
+      disabled={changeRequests.length > 0 || !!readOnly}
+      dataTestId={dataTestId}
+    />
   );
 }

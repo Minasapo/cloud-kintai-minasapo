@@ -27,7 +27,6 @@ import {
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
-import { Link as RouterLink } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
@@ -40,28 +39,34 @@ import {
   ReturnDirectlyFlag,
 } from "@/entities/attendance/lib/actions/attendanceActions";
 import { getWorkStatus } from "@/entities/attendance/lib/actions/workStatus";
-import {
-  AttendanceState,
-  AttendanceStatus,
-} from "@/entities/attendance/lib/AttendanceState";
 import { resolveCurrentBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
 import { buildAttendanceIdempotencyKey } from "@/entities/attendance/lib/operationContext";
-import {
-  getNowISOStringWithZeroSeconds,
-} from "@/entities/attendance/lib/time";
+import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
 import { Logger } from "@/shared/lib/logger";
 import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
 
-import { WorkStatus, WorkStatusCodes } from "../lib/common";
+import { WorkStatus } from "../lib/common";
 import { clockInCallback } from "./clockInCallback";
 import { clockOutCallback } from "./clockOutCallback";
 import { goDirectlyCallback } from "./goDirectlyCallback";
 import { restEndCallback } from "./restEndCallback";
 import { restStartCallback } from "./restStartCallback";
 import { returnDirectlyCallback } from "./returnDirectlyCallback";
+import {
+  type TimeRecorderContextValue,
+  TimeRecorderProvider,
+} from "./TimeRecorderContext";
+import {
+  formatClockDisplayText,
+  hasPendingChangeRequests,
+  resolveElapsedWorkInfo,
+  summarizeAttendanceErrors,
+  type TimeRecorderElapsedWorkInfo,
+  toConfiguredTimeISO,
+} from "./timeRecorderUtils";
 import { TimeRecorderLoadingView, TimeRecorderView } from "./TimeRecorderView";
 
 type TimeRecorderProps = {
@@ -69,41 +74,8 @@ type TimeRecorderProps = {
   onElapsedWorkTimeChange?: (payload: TimeRecorderElapsedWorkInfo) => void;
 };
 
-export type TimeRecorderElapsedWorkInfo = {
-  visible: boolean;
-  workDurationLabel: string;
-  restDurationLabel: string;
-};
+export type { TimeRecorderElapsedWorkInfo } from "./timeRecorderUtils";
 
-const DEFAULT_ELAPSED_WORK_INFO: TimeRecorderElapsedWorkInfo = {
-  visible: false,
-  workDurationLabel: "00:00",
-  restDurationLabel: "00:00",
-};
-
-function formatElapsedDurationFromMinutes(totalMinutes: number): string {
-  const safeMinutes = Math.max(0, Math.floor(totalMinutes));
-  const hours = Math.floor(safeMinutes / 60);
-  const minutes = safeMinutes % 60;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-}
-
-function calcElapsedMinutes(
-  startTime: string | null | undefined,
-  endTime?: string | null | undefined,
-): number {
-  if (!startTime) {
-    return 0;
-  }
-
-  return Math.max(dayjs(endTime ?? dayjs()).diff(dayjs(startTime), "minute"), 0);
-}
-
-/**
- * 勤怠打刻用のメインコンポーネント。
- * ユーザーの勤怠状態に応じて打刻・休憩・直行直帰などの操作UIを表示する。
- * @returns {JSX.Element} 勤怠打刻UI
- */
 export default function TimeRecorder({
   onAttendanceErrorCountChange,
   onElapsedWorkTimeChange,
@@ -114,7 +86,12 @@ export default function TimeRecorder({
 
   const dispatch = useDispatch();
 
-  const { getStartTime, getEndTime } = useContext(AppConfigContext);
+  const {
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useContext(AppConfigContext);
 
   const [currentWorkDate, setCurrentWorkDate] = useState(() =>
     resolveCurrentBusinessWorkDate(),
@@ -192,7 +169,8 @@ export default function TimeRecorder({
     isAttendancesFetching ||
     isAttendancesUninitialized;
 
-  const [upsertAttendanceMutation] = useUpsertAttendanceByStaffAndDateMutation();
+  const [upsertAttendanceMutation] =
+    useUpsertAttendanceByStaffAndDateMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
   const localAttendanceUpdateIgnoreUntilRef = useRef(0);
 
@@ -264,88 +242,105 @@ export default function TimeRecorder({
     await Promise.allSettled([refetchAttendance(), refetchAttendances()]);
   }, [refetchAttendance, refetchAttendances, shouldFetchAttendance]);
 
+  const runAttendanceActionWithRefresh = useCallback(
+    async <T,>(action: () => Promise<T>) => {
+      const result = await action();
+      await refreshAttendanceData();
+      return result;
+    },
+    [refreshAttendanceData],
+  );
+
   const clockIn = useCallback(
-    async (
+    (
       staffId: string,
       workDate: string,
       startTime: string,
       goDirectlyFlag = GoDirectlyFlag.NO,
-    ) => {
-      const result = await clockInAction({
-        attendance,
-        staffId,
-        workDate,
-        startTime,
-        goDirectlyFlag,
-        createAttendance,
-        updateAttendance,
-      });
-
-      await refreshAttendanceData();
-
-      return result;
-    },
-    [attendance, createAttendance, updateAttendance, refreshAttendanceData],
+    ) =>
+      runAttendanceActionWithRefresh(() =>
+        clockInAction({
+          attendance,
+          staffId,
+          workDate,
+          startTime,
+          goDirectlyFlag,
+          createAttendance,
+          updateAttendance,
+        }),
+      ),
+    [
+      attendance,
+      createAttendance,
+      runAttendanceActionWithRefresh,
+      updateAttendance,
+    ],
   );
 
   const clockOut = useCallback(
-    async (
+    (
       staffId: string,
       workDate: string,
       endTime: string,
       returnDirectlyFlag = ReturnDirectlyFlag.NO,
-    ) => {
-      const result = await clockOutAction({
-        attendance,
-        staffId,
-        workDate,
-        endTime,
-        returnDirectlyFlag,
-        createAttendance,
-        updateAttendance,
-      });
-
-      await refreshAttendanceData();
-
-      return result;
-    },
-    [attendance, createAttendance, updateAttendance, refreshAttendanceData],
+    ) =>
+      runAttendanceActionWithRefresh(() =>
+        clockOutAction({
+          attendance,
+          staffId,
+          workDate,
+          endTime,
+          returnDirectlyFlag,
+          createAttendance,
+          updateAttendance,
+        }),
+      ),
+    [
+      attendance,
+      createAttendance,
+      runAttendanceActionWithRefresh,
+      updateAttendance,
+    ],
   );
 
   const restStart = useCallback(
-    async (staffId: string, workDate: string, startTime: string) => {
-      const result = await restStartAction({
-        attendance,
-        staffId,
-        workDate,
-        time: startTime,
-        createAttendance,
-        updateAttendance,
-      });
-
-      await refreshAttendanceData();
-
-      return result;
-    },
-    [attendance, createAttendance, updateAttendance, refreshAttendanceData],
+    (staffId: string, workDate: string, startTime: string) =>
+      runAttendanceActionWithRefresh(() =>
+        restStartAction({
+          attendance,
+          staffId,
+          workDate,
+          time: startTime,
+          createAttendance,
+          updateAttendance,
+        }),
+      ),
+    [
+      attendance,
+      createAttendance,
+      runAttendanceActionWithRefresh,
+      updateAttendance,
+    ],
   );
 
   const restEnd = useCallback(
-    async (staffId: string, workDate: string, endTime: string) => {
-      const result = await restEndAction({
-        attendance,
-        staffId,
-        workDate,
-        time: endTime,
-        createAttendance,
-        updateAttendance,
-      });
-
-      await refreshAttendanceData();
-
-      return result;
-    },
-    [attendance, createAttendance, updateAttendance, refreshAttendanceData],
+    (staffId: string, workDate: string, endTime: string) =>
+      runAttendanceActionWithRefresh(() =>
+        restEndAction({
+          attendance,
+          staffId,
+          workDate,
+          time: endTime,
+          createAttendance,
+          updateAttendance,
+        }),
+      ),
+    [
+      attendance,
+      createAttendance,
+      runAttendanceActionWithRefresh,
+      updateAttendance,
+    ],
   );
 
   const [workStatus, setWorkStatus] = useState<WorkStatus | null | undefined>(
@@ -370,12 +365,10 @@ export default function TimeRecorder({
   }, []);
 
   // 変更リクエスト中かどうか
-  const hasChangeRequest = useMemo(() => {
-    if (!attendance?.changeRequests) return false;
-    return attendance.changeRequests
-      .filter((item): item is NonNullable<typeof item> => item !== null)
-      .some((item) => !item.completed);
-  }, [attendance?.changeRequests]);
+  const hasChangeRequest = useMemo(
+    () => hasPendingChangeRequests(attendance),
+    [attendance],
+  );
 
   const logger = new Logger("TimeRecorder", "DEBUG");
 
@@ -403,61 +396,44 @@ export default function TimeRecorder({
     }
   }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch, logger]);
 
-  const clockInDisplayText = useMemo(() => {
-    if (!attendance?.startTime) {
-      return null;
-    }
-    return `${dayjs(attendance.startTime).format("HH:mm")} 出勤`;
-  }, [attendance?.startTime]);
-
-  const clockOutDisplayText = useMemo(() => {
-    if (!attendance?.endTime) {
-      return null;
-    }
-    return `${dayjs(attendance.endTime).format("HH:mm")} 退勤`;
-  }, [attendance?.endTime]);
-
-  const handleClockIn = useCallback(
-    () => {
-      const occurredAt = getNowISOStringWithZeroSeconds();
-      return clockInCallback(
-        cognitoUser,
-        clockIn,
-        dispatch,
-        staff,
-        logger,
-        occurredAt,
-      );
-    },
-    [clockIn, cognitoUser, dispatch, logger, staff],
+  const clockInDisplayText = useMemo(
+    () => formatClockDisplayText(attendance?.startTime, "出勤"),
+    [attendance?.startTime],
   );
 
-  const handleClockOut = useCallback(
-    () => {
-      const occurredAt = getNowISOStringWithZeroSeconds();
-      return clockOutCallback(
-        cognitoUser,
-        clockOut,
-        dispatch,
-        staff,
-        logger,
-        undefined,
-        occurredAt,
-      );
-    },
-    [clockOut, cognitoUser, dispatch, logger, staff],
+  const clockOutDisplayText = useMemo(
+    () => formatClockDisplayText(attendance?.endTime, "退勤"),
+    [attendance?.endTime],
   );
+
+  const handleClockIn = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    return clockInCallback(
+      cognitoUser,
+      clockIn,
+      dispatch,
+      staff,
+      logger,
+      occurredAt,
+    );
+  }, [clockIn, cognitoUser, dispatch, logger, staff]);
+
+  const handleClockOut = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    return clockOutCallback(
+      cognitoUser,
+      clockOut,
+      dispatch,
+      staff,
+      logger,
+      undefined,
+      occurredAt,
+    );
+  }, [clockOut, cognitoUser, dispatch, logger, staff]);
 
   const handleGoDirectly = useCallback(() => {
     const occurredAt = getNowISOStringWithZeroSeconds();
-    const baseDate = dayjs(occurredAt);
-    const configured = getStartTime();
-    const startIso = baseDate
-      .hour(configured.hour())
-      .minute(configured.minute())
-      .second(0)
-      .millisecond(0)
-      .toISOString();
+    const startIso = toConfiguredTimeISO(occurredAt, getStartTime());
 
     return goDirectlyCallback(
       cognitoUser,
@@ -468,25 +444,11 @@ export default function TimeRecorder({
       startIso,
       occurredAt,
     );
-  }, [
-    cognitoUser,
-    clockIn,
-    dispatch,
-    staff,
-    logger,
-    getStartTime,
-  ]);
+  }, [cognitoUser, clockIn, dispatch, staff, logger, getStartTime]);
 
   const handleReturnDirectly = useCallback(() => {
     const occurredAt = getNowISOStringWithZeroSeconds();
-    const baseDate = dayjs(occurredAt);
-    const configured = getEndTime();
-    const endIso = baseDate
-      .hour(configured.hour())
-      .minute(configured.minute())
-      .second(0)
-      .millisecond(0)
-      .toISOString();
+    const endIso = toConfiguredTimeISO(occurredAt, getEndTime());
 
     return returnDirectlyCallback(
       cognitoUser,
@@ -497,42 +459,23 @@ export default function TimeRecorder({
       endIso,
       occurredAt,
     );
-  }, [
-    cognitoUser,
-    staff,
-    dispatch,
-    clockOut,
-    logger,
-    getEndTime,
-  ]);
+  }, [cognitoUser, staff, dispatch, clockOut, logger, getEndTime]);
 
-  const handleRestStart = useCallback(
-    () => {
-      const occurredAt = getNowISOStringWithZeroSeconds();
-      return restStartCallback(
-        cognitoUser,
-        dispatch,
-        restStart,
-        logger,
-        occurredAt,
-      );
-    },
-    [cognitoUser, dispatch, logger, restStart],
-  );
+  const handleRestStart = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    return restStartCallback(
+      cognitoUser,
+      dispatch,
+      restStart,
+      logger,
+      occurredAt,
+    );
+  }, [cognitoUser, dispatch, logger, restStart]);
 
-  const handleRestEnd = useCallback(
-    () => {
-      const occurredAt = getNowISOStringWithZeroSeconds();
-      return restEndCallback(
-        cognitoUser,
-        restEnd,
-        dispatch,
-        logger,
-        occurredAt,
-      );
-    },
-    [cognitoUser, dispatch, logger, restEnd],
-  );
+  const handleRestEnd = useCallback(() => {
+    const occurredAt = getNowISOStringWithZeroSeconds();
+    return restEndCallback(cognitoUser, restEnd, dispatch, logger, occurredAt);
+  }, [cognitoUser, dispatch, logger, restEnd]);
 
   const handleVisibilityChange = useCallback(() => {
     const now = dayjs();
@@ -583,36 +526,16 @@ export default function TimeRecorder({
       return;
     }
 
-    const errorCount = attendances
-      .map((attendance) => {
-        const status = new AttendanceState(
-          staff,
-          attendance,
-          holidayCalendars,
-          companyHolidayCalendars,
-        ).get();
-        return status;
-      })
-      .filter((status) => status === AttendanceStatus.Error).length;
+    const { errorCount, hasTimeElapsedError } = summarizeAttendanceErrors({
+      staff,
+      attendances,
+      holidayCalendars,
+      companyHolidayCalendars,
+    });
 
     setAttendanceErrorCount(errorCount);
     setIsAttendanceError(errorCount > 0);
-
-    // 1週間以上前にエラーがあるかチェック
-    const timeElapsedErrorCount = attendances.filter((attendance) => {
-      const { workDate } = attendance;
-      const isAfterOneWeek = dayjs().isAfter(dayjs(workDate).add(1, "week"));
-      if (!isAfterOneWeek) return false;
-      const status = new AttendanceState(
-        staff,
-        attendance,
-        holidayCalendars,
-        companyHolidayCalendars,
-      ).get();
-      return status === AttendanceStatus.Error;
-    }).length;
-
-    setIsTimeElapsedError(timeElapsedErrorCount > 0);
+    setIsTimeElapsedError(hasTimeElapsedError);
   }, [
     attendanceLoading,
     attendancesLoading,
@@ -629,53 +552,20 @@ export default function TimeRecorder({
 
   const elapsedWorkInfo = useMemo<TimeRecorderElapsedWorkInfo>(() => {
     void elapsedWorkTick;
-
-    if (!attendance?.startTime || !workStatus) {
-      return DEFAULT_ELAPSED_WORK_INFO;
-    }
-
-    if (
-      workStatus.code !== WorkStatusCodes.WORKING &&
-      workStatus.code !== WorkStatusCodes.RESTING
-    ) {
-      return DEFAULT_ELAPSED_WORK_INFO;
-    }
-
-    const grossWorkMinutes = calcElapsedMinutes(attendance.startTime);
-    const totalRestMinutes = (attendance.rests ?? [])
-      .filter((rest): rest is NonNullable<typeof rest> => rest !== null)
-      .reduce((sum, rest) => {
-        if (!rest.startTime) {
-          return sum;
-        }
-        return sum + calcElapsedMinutes(rest.startTime, rest.endTime);
-      }, 0);
-
-    const netWorkMinutes = Math.max(grossWorkMinutes - totalRestMinutes, 0);
-    const activeRest = (attendance.rests ?? [])
-      .filter((rest): rest is NonNullable<typeof rest> => rest !== null)
-      .reduce<NonNullable<Attendance["rests"]>[number] | null>((latest, rest) => {
-        if (!rest.startTime || rest.endTime) {
-          return latest;
-        }
-        if (!latest?.startTime) {
-          return rest;
-        }
-        return dayjs(rest.startTime).isAfter(dayjs(latest.startTime))
-          ? rest
-          : latest;
-      }, null);
-    const activeRestMinutes =
-      workStatus.code === WorkStatusCodes.RESTING && activeRest?.startTime
-        ? calcElapsedMinutes(activeRest.startTime)
-        : 0;
-
-    return {
-      visible: true,
-      workDurationLabel: formatElapsedDurationFromMinutes(netWorkMinutes),
-      restDurationLabel: formatElapsedDurationFromMinutes(activeRestMinutes),
-    };
-  }, [attendance, workStatus, elapsedWorkTick]);
+    return resolveElapsedWorkInfo({
+      attendance,
+      workStatus,
+      now: dayjs(),
+      lunchRestStartTime: getLunchRestStartTime(),
+      lunchRestEndTime: getLunchRestEndTime(),
+    });
+  }, [
+    attendance,
+    getLunchRestEndTime,
+    getLunchRestStartTime,
+    workStatus,
+    elapsedWorkTick,
+  ]);
 
   useEffect(() => {
     onAttendanceErrorCountChange?.(attendanceErrorCount);
@@ -729,6 +619,50 @@ export default function TimeRecorder({
     };
   }, [cognitoUser?.id, currentWorkDate, logger, refreshTimeRecorderData]);
 
+  const contextValue = useMemo<TimeRecorderContextValue | null>(
+    () => {
+      if (workStatus === undefined || workStatus === null) {
+        return null;
+      }
+
+      return {
+        today: currentWorkDate,
+        staffId: staff?.id ?? null,
+        workStatus,
+        directMode,
+        hasChangeRequest,
+        isAttendanceError,
+        clockInDisplayText,
+        clockOutDisplayText,
+        onDirectModeChange: setDirectMode,
+        onClockIn: handleClockIn,
+        onClockOut: handleClockOut,
+        onGoDirectly: handleGoDirectly,
+        onReturnDirectly: handleReturnDirectly,
+        onRestStart: handleRestStart,
+        onRestEnd: handleRestEnd,
+        isTimeElapsedError,
+      };
+    },
+    [
+      currentWorkDate,
+      staff?.id,
+      workStatus,
+      directMode,
+      hasChangeRequest,
+      isAttendanceError,
+      clockInDisplayText,
+      clockOutDisplayText,
+      handleClockIn,
+      handleClockOut,
+      handleGoDirectly,
+      handleReturnDirectly,
+      handleRestStart,
+      handleRestEnd,
+      isTimeElapsedError,
+    ],
+  );
+
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return <TimeRecorderLoadingView />;
   }
@@ -739,98 +673,8 @@ export default function TimeRecorder({
   }
 
   return (
-    <TimeRecorderView
-      today={currentWorkDate}
-      staffId={staff?.id ?? null}
-      workStatus={workStatus}
-      directMode={directMode}
-      hasChangeRequest={hasChangeRequest}
-      isAttendanceError={isAttendanceError}
-      clockInDisplayText={clockInDisplayText}
-      clockOutDisplayText={clockOutDisplayText}
-      onDirectModeChange={setDirectMode}
-      onClockIn={handleClockIn}
-      onClockOut={handleClockOut}
-      onGoDirectly={handleGoDirectly}
-      onReturnDirectly={handleReturnDirectly}
-      onRestStart={handleRestStart}
-      onRestEnd={handleRestEnd}
-      timeElapsedErrorDialog={
-        <TimeElapsedErrorDialog isTimeElapsedError={isTimeElapsedError} />
-      }
-    />
-  );
-}
-
-/**
- * 1週間以上経過した打刻エラーがある場合に表示するダイアログコンポーネント。
- * @param isTimeElapsedError - エラーが存在するかどうかのフラグ
- * @returns {JSX.Element} ダイアログUI
- */
-function TimeElapsedErrorDialog({
-  isTimeElapsedError,
-}: {
-  isTimeElapsedError: boolean;
-}): JSX.Element {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    setOpen(isTimeElapsedError);
-  }, [isTimeElapsedError]);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  return (
-    <div
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
-      aria-modal="true"
-      role="dialog"
-      data-testid="time-elapsed-error-dialog"
-      className={`${open ? "flex" : "hidden"} fixed inset-0 z-50 items-center justify-center bg-slate-950/50 p-4`}
-    >
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <h2
-          id="alert-dialog-title"
-          className="m-0 text-lg font-semibold text-slate-900"
-        >
-          <span data-testid="time-elapsed-error-dialog-title-text">
-            1週間以上経過した打刻エラーがあります
-          </span>
-        </h2>
-        <div className="mt-4">
-          <p
-            id="alert-dialog-description"
-            className="m-0 text-sm leading-6 text-slate-700"
-          >
-            <span data-testid="time-elapsed-error-dialog-description-text">
-              1週間以上経過した打刻エラーがあります。
-            </span>
-            <br />
-            勤怠一覧を確認して打刻修正を申請してください。
-          </p>
-        </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={handleClose}
-            data-testid="time-elapsed-error-dialog-later-btn"
-            className="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
-          >
-            あとで
-          </button>
-          <RouterLink
-            to="/attendance/list"
-            onClick={handleClose}
-            data-testid="time-elapsed-error-dialog-confirm-btn"
-            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white no-underline transition-colors hover:bg-emerald-700 hover:no-underline"
-          >
-            確認する
-          </RouterLink>
-        </div>
-      </div>
-    </div>
+    <TimeRecorderProvider value={contextValue!}>
+      <TimeRecorderView />
+    </TimeRecorderProvider>
   );
 }

@@ -1,8 +1,6 @@
-import { Tooltip } from "@mui/material";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { hasUnapprovedChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
@@ -21,6 +19,8 @@ import {
   WorkflowStatus,
 } from "@/shared/api/graphql/types";
 import { createLogger } from "@/shared/lib/logger";
+
+import AdminSummaryCard from "./AdminSummaryCard";
 
 const logger = createLogger("AdminPendingApprovalSummary");
 const ATTENDANCE_LOOKBACK_DAYS = 30;
@@ -155,14 +155,14 @@ export default function AdminPendingApprovalSummary({
     }
 
     let isMounted = true;
-    let recalcTimer: ReturnType<typeof setTimeout> | null = null;
+    let recalculateTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const scheduleRecalc = () => {
-      if (recalcTimer) {
-        clearTimeout(recalcTimer);
+    const scheduleRecalculate = () => {
+      if (recalculateTimer) {
+        clearTimeout(recalculateTimer);
       }
 
-      recalcTimer = setTimeout(() => {
+      recalculateTimer = setTimeout(() => {
         if (!isMounted) {
           return;
         }
@@ -178,7 +178,7 @@ export default function AdminPendingApprovalSummary({
       })
       .subscribe({
         next: () => {
-          scheduleRecalc();
+          scheduleRecalculate();
         },
         error: (error: unknown) => {
           logger.error("Attendance create subscription error", error);
@@ -192,7 +192,7 @@ export default function AdminPendingApprovalSummary({
       })
       .subscribe({
         next: () => {
-          scheduleRecalc();
+          scheduleRecalculate();
         },
         error: (error: unknown) => {
           logger.error("Attendance update subscription error", error);
@@ -206,7 +206,7 @@ export default function AdminPendingApprovalSummary({
       })
       .subscribe({
         next: () => {
-          scheduleRecalc();
+          scheduleRecalculate();
         },
         error: (error: unknown) => {
           logger.error("Attendance delete subscription error", error);
@@ -222,8 +222,8 @@ export default function AdminPendingApprovalSummary({
     return () => {
       isMounted = false;
 
-      if (recalcTimer) {
-        clearTimeout(recalcTimer);
+      if (recalculateTimer) {
+        clearTimeout(recalculateTimer);
       }
 
       subscriptions.forEach((subscription) => subscription.unsubscribe());
@@ -269,69 +269,5 @@ export default function AdminPendingApprovalSummary({
         compact={compact}
       />
     </div>
-  );
-}
-
-function AdminSummaryCard({
-  testId,
-  title,
-  description,
-  countLabel,
-  to,
-  className,
-  showAdminOnlyTag,
-  compact,
-}: {
-  testId: string;
-  title: string;
-  description: string;
-  countLabel: string;
-  to: string;
-  className?: string;
-  showAdminOnlyTag: boolean;
-  compact: boolean;
-}) {
-  const titleClassName = showAdminOnlyTag
-    ? "mt-2 m-0 text-[0.95rem] font-bold tracking-[0.01em] text-slate-900"
-    : "m-0 text-[0.95rem] font-bold tracking-[0.01em] text-slate-900";
-  const countClassName = compact
-    ? "m-0 mt-auto pt-2 text-[2rem] font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-[2.15rem]"
-    : showAdminOnlyTag
-      ? "m-0 mt-auto pt-4 text-[2rem] font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-[2.25rem]"
-      : "m-0 mt-auto pt-3 text-[2rem] font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-[2.25rem]";
-
-  return (
-    <RouterLink
-      to={to}
-      data-testid={testId}
-      className={`group block rounded-[18px] no-underline transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 hover:no-underline ${className ?? ""}`}
-    >
-      <section
-        className={`relative rounded-[18px] border-[1.5px] border-[rgba(148,163,184,0.42)] bg-white px-4 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.45)] transition group-hover:border-[rgba(148,163,184,0.55)] group-hover:shadow-[0_18px_32px_-22px_rgba(15,23,42,0.5)] ${compact ? "py-3" : "h-full py-[0.95rem]"}`}
-      >
-        <Tooltip title={description} arrow>
-          <span
-            data-testid={`${testId}-description-tooltip`}
-            aria-label={description}
-            className="absolute right-3 top-3 inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 bg-white text-[11px] font-semibold leading-none text-slate-600"
-          >
-            i
-          </span>
-        </Tooltip>
-        <div className={`flex flex-col items-start ${compact ? "min-h-[104px]" : "h-full min-h-[132px]"}`}>
-          <div className="min-w-0 pr-7">
-            {showAdminOnlyTag ? (
-              <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold leading-none tracking-[0.01em] text-slate-700">
-                管理者のみ
-              </span>
-            ) : null}
-            <h2 className={titleClassName}>
-              {title}
-            </h2>
-          </div>
-          <p className={countClassName}>{countLabel}</p>
-        </div>
-      </section>
-    </RouterLink>
   );
 }

@@ -18,15 +18,26 @@ export function WorkTimeInput() {
   return (
     <>
       <Label>勤務時間</Label>
-      <div className="text-sm font-semibold text-slate-900">開始時刻</div>
-      {/* 直行 */}
-      <GoDirectlyFlagInput />
-      <StartTimeInputMobile dataTestId="mobile-start-time-input" />
-      <div className="border-t border-slate-200/80" />
-      <div className="text-sm font-semibold text-slate-900">終了時刻</div>
-      {/* 直帰 */}
-      <ReturnDirectlyFlagInput />
-      <EndTimeInput workDate={workDate} setValue={setValue} />
+      <div className="overflow-visible rounded-lg border border-slate-200/80">
+        <div className="grid grid-cols-[7.5rem_1fr] border-b border-slate-200/80">
+          <div className="bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+            開始時刻
+          </div>
+          <div className="space-y-2 px-3 py-2">
+            <StartTimeInputMobile dataTestId="mobile-start-time-input" />
+            <GoDirectlyFlagInput />
+          </div>
+        </div>
+        <div className="grid grid-cols-[7.5rem_1fr]">
+          <div className="bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+            終了時刻
+          </div>
+          <div className="space-y-2 px-3 py-2">
+            <EndTimeInput />
+            <ReturnDirectlyFlagInput />
+          </div>
+        </div>
+      </div>
     </>
   );
 }

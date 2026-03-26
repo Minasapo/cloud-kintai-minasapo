@@ -1,0 +1,181 @@
+.action-card-button {
+  position: relative;
+  display: flex;
+  min-height: 112px;
+  width: 100%;
+  appearance: none;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 1px solid var(--action-card-border);
+  border-radius: 1.4rem;
+  background: var(--action-card-bg);
+  padding: 1rem;
+  color: var(--action-card-text);
+  text-align: left;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 18px 42px -24px var(--action-card-glow);
+  transition:
+    transform 0.2s ease-out,
+    border-color 0.2s ease-out,
+    background 0.2s ease-out,
+    color 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+}
+
+.action-card-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--action-card-hover-border);
+  background: var(--action-card-hover-bg);
+  color: var(--action-card-hover-text);
+}
+
+.action-card-button:disabled {
+  cursor: not-allowed;
+  border-color: var(--action-card-disabled-border);
+  background: var(--action-card-disabled-bg);
+  color: var(--action-card-disabled-text);
+  box-shadow: none;
+}
+
+.action-card-button[data-action-card-size="compact"] {
+  min-height: 74px;
+  border-radius: 1rem;
+  padding: 0.625rem 0.75rem;
+}
+
+.action-card-button[data-action-card-size="slim"] {
+  min-height: 52px;
+  border-radius: 1rem;
+  padding: 0.375rem 0.75rem;
+}
+
+.action-card-button[data-action-card-shape="circle"] {
+  margin-inline: auto;
+  height: 116px;
+  width: 116px;
+  min-height: 0;
+  border-radius: 9999px;
+  padding: 0;
+}
+
+.action-card-button__top-line {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.action-card-button__content {
+  position: relative;
+}
+
+.action-card-button[data-action-card-layout="center"] .action-card-button__content {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.action-card-button[data-action-card-layout="split"] .action-card-button__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.action-card-button__label-wrap {
+  max-width: 11rem;
+}
+
+.action-card-button[data-action-card-layout="center"] .action-card-button__label-wrap {
+  width: 100%;
+  padding-inline: 0.5rem;
+}
+
+.action-card-button__label {
+  white-space: pre-line;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.action-card-button__helper {
+  margin-top: 0.25rem;
+  color: var(--action-card-muted-text);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1rem;
+  transition: color 0.2s ease-out;
+}
+
+.action-card-button:hover:not(:disabled) .action-card-button__helper {
+  color: var(--action-card-hover-text);
+}
+
+.action-card-button:disabled .action-card-button__helper {
+  color: var(--action-card-disabled-muted);
+}
+
+.action-card-button__icon {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: var(--action-card-icon-bg);
+  color: var(--action-card-icon-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 10px 20px -14px rgba(15, 23, 42, 0.5);
+}
+
+@media (min-width: 768px) {
+  .action-card-button {
+    min-height: var(--action-card-min-height);
+    border-width: var(--action-card-border-width);
+    border-radius: var(--action-card-radius);
+    padding: var(--action-card-padding);
+  }
+
+  .action-card-button[data-action-card-size="compact"] {
+    min-height: 88px;
+    border-radius: 1.1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .action-card-button[data-action-card-size="slim"] {
+    min-height: 62px;
+    border-radius: 1.1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .action-card-button[data-action-card-shape="circle"] {
+    height: 136px;
+    width: 136px;
+  }
+
+  .action-card-button[data-action-card-layout="split"] .action-card-button__content {
+    gap: 0.75rem;
+  }
+
+  .action-card-button__label {
+    font-size: 1.35rem;
+  }
+
+  .action-card-button__helper {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .action-card-button__icon {
+    height: 2.75rem;
+    width: 2.75rem;
+  }
+}

@@ -10,6 +10,7 @@ import type {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
+import { MemoryRouter } from "react-router-dom";
 
 import AttendanceEditProvider, {
   AttendanceEditContext,
@@ -83,9 +84,11 @@ describe("DesktopEditor buttons", () => {
 
     const { default: DesktopEditor } = await import("../DesktopEditor");
     return render(
-      <AttendanceEditProvider value={value}>
-        <DesktopEditor />
-      </AttendanceEditProvider>
+      <MemoryRouter>
+        <AttendanceEditProvider value={value}>
+          <DesktopEditor />
+        </AttendanceEditProvider>
+      </MemoryRouter>
     );
   };
 

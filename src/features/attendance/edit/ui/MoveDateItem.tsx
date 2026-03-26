@@ -1,13 +1,15 @@
 import "@/shared/lib/dayjs-locale";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import dayjs from "dayjs";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-
-const MONTH_QUERY_KEY = "month";
+import { WorkDateInput } from "@/features/attendance/edit/ui/moveDateItemParts";
+import {
+  applyWorkDateValue,
+  buildAttendanceEditPath,
+} from "@/features/attendance/edit/ui/moveDateItemUtils";
 
 export default function MoveDateItem({
   staffId,
@@ -18,67 +20,51 @@ export default function MoveDateItem({
 }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const today = dayjs();
+  const [selectedDate, setSelectedDate] = useState(
+    workDate?.format("YYYY-MM-DD") ?? "",
+  );
 
   if (!workDate) {
     return null;
   }
+  const defaultDateValue = workDate.format("YYYY-MM-DD");
 
   const isAdmin = Boolean(staffId);
   const format = isAdmin
     ? AttendanceDate.DatePickerFormat
     : AttendanceDate.DisplayFormat;
   const buildPath = (date: dayjs.Dayjs) => {
-    const formatted = date.format(AttendanceDate.QueryParamFormat);
-    if (isAdmin) {
-      return `/admin/attendances/edit/${formatted}/${staffId}`;
-    }
-
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set(MONTH_QUERY_KEY, date.startOf("month").format("YYYY-MM"));
-    return `/attendance/${formatted}/edit?${nextParams.toString()}`;
+    return buildAttendanceEditPath({
+      date,
+      isAdmin,
+      staffId,
+      searchParams,
+      queryParamFormat: AttendanceDate.QueryParamFormat,
+    });
   };
 
   return (
-    <div className="flex items-center gap-4">
-      <div>
-        <button
-          type="button"
-          onClick={() => {
-            const prevDate = workDate.add(-1, "day");
-            navigate(buildPath(prevDate));
-          }}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
-        >
-          <ArrowBackIcon />
-        </button>
-      </div>
-      <input
-        type="date"
-        value={workDate.format("YYYY-MM-DD")}
-        aria-label={format}
-        onChange={(e) => {
-          if (!e.target.value) return;
-          const date = dayjs(e.target.value);
-          if (date.isValid()) {
-            navigate(buildPath(date));
-          }
-        }}
-        className="rounded-[16px] border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+    <div className="flex items-center gap-2">
+      <WorkDateInput
+        key={defaultDateValue}
+        defaultValue={defaultDateValue}
+        ariaLabel={format}
+        onChange={(value) => setSelectedDate(value)}
       />
-      <div>
-        <button
-          type="button"
-          disabled={!isAdmin && workDate.isSame(today, "day")}
-          onClick={() => {
-            const nextDate = workDate.add(1, "day");
-            navigate(buildPath(nextDate));
-          }}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <ArrowForwardIcon />
-        </button>
-      </div>
+      <button
+        type="button"
+        disabled={!selectedDate}
+        className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-[10px] border border-emerald-500/25 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 transition hover:border-emerald-500/40 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={() =>
+          applyWorkDateValue({
+            value: selectedDate,
+            navigate,
+            buildPath,
+          })
+        }
+      >
+        移動
+      </button>
     </div>
   );
 }

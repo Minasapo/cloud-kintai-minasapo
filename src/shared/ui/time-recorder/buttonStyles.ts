@@ -87,21 +87,6 @@ type ActionButtonPalette = {
   glow: string;
 };
 
-export const ACTION_CARD_CLASS_NAME =
-  "group relative flex min-h-[112px] w-full appearance-none flex-col justify-between overflow-hidden rounded-[1.4rem] border px-4 py-4 text-left shadow-[0_18px_42px_-24px_var(--action-card-glow)] transition duration-200 ease-out disabled:cursor-not-allowed disabled:border-[var(--action-card-disabled-border)] disabled:bg-[var(--action-card-disabled-bg)] disabled:text-[color:var(--action-card-disabled-text)] disabled:shadow-none md:min-h-[var(--action-card-min-height)] md:rounded-[var(--action-card-radius)] md:border-[var(--action-card-border-width)] md:px-[var(--action-card-padding)] md:py-[var(--action-card-padding)]";
-
-export const ACTION_CARD_TONE_CLASS_NAME =
-  "border-[var(--action-card-border)] bg-[var(--action-card-bg)] text-[color:var(--action-card-text)] ring-1 ring-black/5 hover:-translate-y-0.5 hover:border-[var(--action-card-hover-border)] hover:bg-[var(--action-card-hover-bg)] hover:text-[color:var(--action-card-hover-text)]";
-
-export const ACTION_CARD_LABEL_CLASS_NAME =
-  "whitespace-pre-line text-[1rem] font-bold leading-[1.1] tracking-[-0.02em] md:text-[1.35rem]";
-
-export const ACTION_CARD_HELPER_CLASS_NAME =
-  "mt-1 text-[0.72rem] font-medium leading-4 text-[color:var(--action-card-muted-text)] transition-colors group-hover:text-[color:var(--action-card-hover-text)] disabled:text-[color:var(--action-card-disabled-muted)] md:mt-2 md:text-sm md:leading-5";
-
-export const ACTION_CARD_ICON_WRAPPER_CLASS_NAME =
-  "inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--action-card-icon-bg)] text-[color:var(--action-card-icon-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_10px_20px_-14px_rgba(15,23,42,0.5)] md:h-11 md:w-11";
-
 export const TIME_RECORDER_BUTTON_PALETTES = {
   clockIn: {
     background: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, #ffffff 100%)`,

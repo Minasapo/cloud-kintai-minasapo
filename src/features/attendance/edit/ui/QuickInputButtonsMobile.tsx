@@ -54,14 +54,14 @@ export default function QuickInputButtonsMobile({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-[14px] border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+          className="rounded-[10px] border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
         >
           選択
         </button>
       </div>
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4">
-          <div className="w-full max-w-sm rounded-[24px] border border-emerald-200 bg-white p-5 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.45)]">
+          <div className="w-full max-w-sm rounded-[14px] border border-emerald-200 bg-white p-5 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.45)]">
             <div className="text-base font-semibold text-slate-950">定型入力</div>
             <div className="mt-4 space-y-2">
             {actions.map((action) => (
@@ -70,7 +70,7 @@ export default function QuickInputButtonsMobile({
                 type="button"
                 onClick={() => setSelectedKey(action.key)}
                 className={[
-                  "flex w-full items-center rounded-[14px] border px-4 py-3 text-left text-sm font-medium transition",
+                  "flex w-full items-center rounded-[10px] border px-4 py-3 text-left text-sm font-medium transition",
                   selectedKey === action.key
                     ? "border-emerald-500 bg-emerald-50 text-emerald-700"
                     : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
@@ -89,7 +89,7 @@ export default function QuickInputButtonsMobile({
               <button
                 type="button"
                 onClick={close}
-                className="rounded-[12px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="rounded-[10px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 閉じる
               </button>
@@ -97,7 +97,7 @@ export default function QuickInputButtonsMobile({
                 type="button"
                 onClick={applySelectedAction}
                 disabled={!selectedKey}
-                className="rounded-[12px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-[10px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 適用
               </button>

@@ -1,12 +1,6 @@
-import type { CSSProperties, ReactNode } from "react";
+import "./ActionCardButton.scss";
 
-import {
-  ACTION_CARD_CLASS_NAME,
-  ACTION_CARD_HELPER_CLASS_NAME,
-  ACTION_CARD_ICON_WRAPPER_CLASS_NAME,
-  ACTION_CARD_LABEL_CLASS_NAME,
-  ACTION_CARD_TONE_CLASS_NAME,
-} from "./buttonStyles";
+import type { CSSProperties, ReactNode } from "react";
 
 export interface ActionCardButtonProps {
   className?: string;
@@ -23,6 +17,51 @@ export interface ActionCardButtonProps {
   icon?: ReactNode;
 }
 
+type ActionCardContentProps = Pick<
+  ActionCardButtonProps,
+  "label" | "helper" | "icon"
+>;
+
+const getLayout = ({
+  layout,
+  icon,
+}: Pick<ActionCardButtonProps, "layout" | "icon">) =>
+  layout ?? (icon ? "split" : "center");
+
+const buildActionCardClassName = (className?: string) =>
+  ["action-card-button", className].filter(Boolean).join(" ");
+
+const ActionCardContent = ({
+  label,
+  helper,
+  icon,
+}: ActionCardContentProps) => {
+  return (
+    <span className="action-card-button__content">
+      <span className="action-card-button__label-wrap">
+        <span className="action-card-button__label">{label}</span>
+        {helper ? (
+          <span
+            className={[
+              "action-card-helper",
+              "action-card-button__helper",
+            ].join(" ")}
+          >
+            {helper}
+          </span>
+        ) : null}
+      </span>
+      {icon ? (
+        <span
+          className={["action-card-icon", "action-card-button__icon"].join(" ")}
+        >
+          {icon}
+        </span>
+      ) : null}
+    </span>
+  );
+};
+
 export default function ActionCardButton({
   className,
   style,
@@ -37,22 +76,7 @@ export default function ActionCardButton({
   helper,
   icon,
 }: ActionCardButtonProps) {
-  const sizeClassName =
-    size === "compact"
-      ? "min-h-[74px] rounded-[1rem] px-3 py-2.5 md:min-h-[88px] md:rounded-[1.1rem] md:px-4 md:py-3"
-      : size === "slim"
-        ? "min-h-[52px] rounded-[1rem] px-3 py-1.5 md:min-h-[62px] md:rounded-[1.1rem] md:px-4 md:py-2"
-        : null;
-  const shapeClassName =
-    shape === "circle"
-      ? "!mx-auto !h-[116px] !w-[116px] !min-h-0 !rounded-full !px-0 !py-0 md:!h-[136px] md:!w-[136px]"
-      : null;
-  const resolvedLayout = layout ?? (icon ? "split" : "center");
-  const contentClassName =
-    resolvedLayout === "center"
-      ? "relative flex h-full items-center justify-center text-center"
-      : "relative flex items-center justify-between gap-2 md:gap-3";
-  const labelWrapperClassName = resolvedLayout === "center" ? "w-full px-2" : "max-w-[11rem]";
+  const resolvedLayout = getLayout({ layout, icon });
 
   return (
     <button
@@ -63,38 +87,15 @@ export default function ActionCardButton({
       data-action-card-layout={resolvedLayout}
       disabled={disabled}
       onClick={onClick}
-      className={[
-        ACTION_CARD_CLASS_NAME,
-        ACTION_CARD_TONE_CLASS_NAME,
-        "disabled:[&_.action-card-helper]:text-[color:var(--action-card-disabled-muted)]",
-        sizeClassName,
-        shapeClassName,
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={buildActionCardClassName(className)}
       style={style}
     >
-      <span className="absolute inset-x-0 top-0 h-px bg-white/20" />
-      <span className={contentClassName}>
-        <span className={labelWrapperClassName}>
-          <span className={ACTION_CARD_LABEL_CLASS_NAME}>{label}</span>
-          {helper ? (
-            <span
-              className={["action-card-helper", ACTION_CARD_HELPER_CLASS_NAME].join(" ")}
-            >
-              {helper}
-            </span>
-          ) : null}
-        </span>
-        {icon ? (
-          <span
-            className={["action-card-icon", ACTION_CARD_ICON_WRAPPER_CLASS_NAME].join(" ")}
-          >
-            {icon}
-          </span>
-        ) : null}
-      </span>
+      <span className="action-card-button__top-line" />
+      <ActionCardContent
+        label={label}
+        helper={helper}
+        icon={icon}
+      />
     </button>
   );
 }

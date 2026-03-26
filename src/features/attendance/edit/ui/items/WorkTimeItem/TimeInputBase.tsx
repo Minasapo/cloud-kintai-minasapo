@@ -20,6 +20,7 @@ interface TimeInputBaseProps<TFieldName extends AttendanceTimeFieldName> {
   quickInputTimes: { time: string; enabled: boolean }[];
   disabled?: boolean;
   highlight?: boolean;
+  dataTestId?: string;
 }
 
 function toTimeValue(value: string | null | undefined) {
@@ -78,6 +79,7 @@ export default function TimeInputBase<
   quickInputTimes,
   disabled = false,
   highlight = false,
+  dataTestId,
 }: TimeInputBaseProps<TFieldName>) {
   const { readOnly } = useAttendanceEditUi();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -88,7 +90,7 @@ export default function TimeInputBase<
   if (!workDate || !control || !setValue) return null;
 
   return (
-    <div className="flex flex-row gap-1">
+    <div className="flex w-full min-w-0 flex-row gap-1">
       <Controller
         key={highlight ? "highlight-on" : "highlight-off"}
         name={name}
@@ -103,6 +105,7 @@ export default function TimeInputBase<
             selectableTimes={quickInputTimes}
             isOptionsOpen={isOptionsOpen}
             ariaLabel={`${name}-time-options`}
+            dataTestId={dataTestId}
             onFocus={() => {
               setIsEditing(true);
               setInputDraft(toTimeValue(field.value));

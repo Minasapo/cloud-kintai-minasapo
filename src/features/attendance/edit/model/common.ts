@@ -10,8 +10,8 @@ export type RestInputs = {
 };
 
 export type HourlyPaidHolidayTimeInputs = {
-  startTime: string | null;
-  endTime: string | null;
+  startTime: string | null | undefined;
+  endTime: string | null | undefined;
 };
 
 export type AttendanceEditInputs = {
@@ -22,7 +22,6 @@ export type AttendanceEditInputs = {
   specialHolidayFlag?: UpdateAttendanceInput["specialHolidayFlag"];
   paidHolidayFlag?: UpdateAttendanceInput["paidHolidayFlag"];
   absentFlag?: UpdateAttendanceInput["absentFlag"];
-  // hourlyPaidHolidayHours: UpdateAttendanceInput["hourlyPaidHolidayHours"];
   hourlyPaidHolidayTimes?: HourlyPaidHolidayTimeInputs[];
   substituteHolidayDate?: UpdateAttendanceInput["substituteHolidayDate"];
   goDirectlyFlag?: UpdateAttendanceInput["goDirectlyFlag"];
@@ -43,7 +42,6 @@ export const defaultValues: AttendanceEditInputs = {
   specialHolidayFlag: false,
   endTime: null,
   paidHolidayFlag: false,
-  // hourlyPaidHolidayHours: undefined,
   hourlyPaidHolidayTimes: [],
   substituteHolidayDate: null,
   absentFlag: false,

@@ -1,17 +1,17 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-import RegisterDashboardPanel from "../RegisterDashboardPanel";
+import RegisterAnnouncementPanel from "../RegisterAnnouncementPanel";
 
-describe("RegisterDashboardPanel", () => {
+describe("RegisterAnnouncementPanel", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it("管理者設定アナウンスをダッシュボードカードとして表示する", () => {
+  it("管理者設定アナウンスをアナウンスカードとして表示する", () => {
     render(
       <MemoryRouter>
-        <RegisterDashboardPanel
+        <RegisterAnnouncementPanel
           configId="cfg-1"
           announcement={{ enabled: true, message: "連絡事項です" }}
         />
@@ -22,14 +22,16 @@ describe("RegisterDashboardPanel", () => {
     expect(
       screen.getByTestId("register-dashboard-announcement-card"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "アナウンス" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "アナウンス" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("連絡事項です")).toBeInTheDocument();
   });
 
   it("無効または空メッセージのアナウンスは表示しない", () => {
     render(
       <MemoryRouter>
-        <RegisterDashboardPanel
+        <RegisterAnnouncementPanel
           configId="cfg-1"
           announcement={{ enabled: false, message: "連絡事項です" }}
         />
@@ -42,7 +44,7 @@ describe("RegisterDashboardPanel", () => {
 
     render(
       <MemoryRouter>
-        <RegisterDashboardPanel
+        <RegisterAnnouncementPanel
           configId="cfg-1"
           announcement={{ enabled: true, message: "   " }}
         />
@@ -54,30 +56,15 @@ describe("RegisterDashboardPanel", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("アナウンスを閉じるとlocalStorageに保存され再表示しない", () => {
-    const { rerender } = render(
-      <MemoryRouter>
-        <RegisterDashboardPanel
-          configId="cfg-1"
-          announcement={{ enabled: true, message: "連絡事項です" }}
-        />
-      </MemoryRouter>,
+  it("dismiss済みのアナウンスは再表示しない", () => {
+    localStorage.setItem(
+      "timeRecorderAnnouncementDismissed:cfg-1:連絡事項です",
+      "1",
     );
 
-    fireEvent.click(
-      screen.getByTestId("register-dashboard-announcement-close-button"),
-    );
-
-    expect(
-      localStorage.getItem("timeRecorderAnnouncementDismissed:cfg-1:連絡事項です"),
-    ).toBe("1");
-    expect(
-      screen.queryByTestId("register-dashboard-announcement-card"),
-    ).not.toBeInTheDocument();
-
-    rerender(
+    render(
       <MemoryRouter>
-        <RegisterDashboardPanel
+        <RegisterAnnouncementPanel
           configId="cfg-1"
           announcement={{ enabled: true, message: "連絡事項です" }}
         />
@@ -89,10 +76,10 @@ describe("RegisterDashboardPanel", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("アナウンスが表示されると先頭に固定表示される", () => {
+  it("表示時は先頭カードとして固定表示される", () => {
     render(
       <MemoryRouter>
-        <RegisterDashboardPanel
+        <RegisterAnnouncementPanel
           announcement={{ enabled: true, message: "連絡事項です" }}
         />
       </MemoryRouter>,
@@ -100,10 +87,11 @@ describe("RegisterDashboardPanel", () => {
 
     const panel = screen.getByTestId("register-dashboard-panel");
     const firstCard = panel.firstElementChild as HTMLElement | null;
-    expect(firstCard).toBe(screen.getByTestId("register-dashboard-announcement-card"));
-    expect(screen.getByTestId("register-dashboard-announcement-card")).toHaveClass(
-      "sticky",
-      "top-4",
+    expect(firstCard).toBe(
+      screen.getByTestId("register-dashboard-announcement-card"),
     );
+    expect(
+      screen.getByTestId("register-dashboard-announcement-card"),
+    ).toHaveClass("sticky", "top-4");
   });
 });

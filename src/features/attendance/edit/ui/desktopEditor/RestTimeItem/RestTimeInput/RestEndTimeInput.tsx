@@ -49,8 +49,9 @@ export default function RestEndTimeInput({
   index,
   testIdPrefix = "desktop",
 }: Props) {
-  const { workDate, control, changeRequests, restUpdate } =
-    useContext(AttendanceEditContext);
+  const { workDate, control, changeRequests, restUpdate } = useContext(
+    AttendanceEditContext,
+  );
   const { getLunchRestEndTime } = useContext(AppConfigContext);
   const { readOnly } = useAttendanceEditUi();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -65,13 +66,15 @@ export default function RestEndTimeInput({
   const selectableTimes = [{ time: lunchTime, enabled: true }];
 
   return (
-    <div className="flex flex-row gap-1">
+    <div className="flex min-w-0 flex-row gap-1">
       <Controller
         name={`rests.${index}.endTime`}
         control={control}
         render={({ field }) => (
           <TimeInputField
-            value={isEditing ? inputDraft : toTimeValue(field.value as string | null)}
+            value={
+              isEditing ? inputDraft : toTimeValue(field.value as string | null)
+            }
             inputRef={field.ref}
             disabled={disabled}
             readOnly={!!readOnly}
@@ -96,7 +99,8 @@ export default function RestEndTimeInput({
               if (isCompleteTime(nextDraft)) {
                 const formatted = toIsoDateTime(nextDraft, workDate);
                 field.onChange(formatted);
-                if (formatted) restUpdate(index, { ...rest, endTime: formatted });
+                if (formatted)
+                  restUpdate(index, { ...rest, endTime: formatted });
               } else {
                 setInputDraft(toTimeValue(field.value as string | null));
               }

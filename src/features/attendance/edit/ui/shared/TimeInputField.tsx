@@ -52,15 +52,12 @@ export default function TimeInputField({
       {/* ── Input container ── */}
       <div
         className={[
-          "relative flex h-[46px] min-w-[170px] items-center rounded-[16px] border bg-white transition",
+          "relative flex h-10 w-full min-w-0 max-w-full items-center rounded-[12px] border border-solid border-slate-500 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] transition",
           isDisabledOrReadOnly
-            ? "border-slate-200 bg-slate-100 text-slate-400 shadow-none"
-            : [
-                "border-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]",
-                "focus-within:border-emerald-400 focus-within:shadow-[0_0_0_3px_rgba(15,168,94,0.35)]",
-              ].join(" "),
+            ? "border-slate-400 bg-slate-100 text-slate-500 shadow-none"
+            : "focus-within:border-emerald-500/70 focus-within:ring-2 focus-within:ring-emerald-100",
           highlight && !isDisabledOrReadOnly
-            ? "animate-pulse border-amber-400 bg-amber-100/70 shadow-[0_0_12px_rgba(255,193,7,0.35)]"
+            ? "animate-pulse border-emerald-400 ring-2 ring-emerald-100"
             : "",
         ]
           .filter(Boolean)
@@ -77,7 +74,7 @@ export default function TimeInputField({
           onFocus={onFocus}
           onBlur={onBlur}
           onChange={(e) => onChange(e.target.value)}
-          className="h-full min-w-0 flex-1 border-0 bg-transparent px-4 pr-11 text-sm text-slate-900 outline-none placeholder:text-slate-400 disabled:text-slate-400"
+          className="box-border h-full w-full min-w-0 flex-1 border-0 bg-transparent pl-4 pr-8 text-sm text-slate-900 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-500"
         />
 
         {/* Chevron button – rotates when open */}
@@ -90,11 +87,11 @@ export default function TimeInputField({
             onDropdownToggle();
           }}
           className={[
-            "absolute inset-y-0 right-0 flex w-10 appearance-none items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none transition-all duration-150",
+            "absolute inset-y-0 right-0 flex w-10 appearance-none items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none transition-colors duration-150",
             "focus:outline-none focus:ring-0",
             isDisabledOrReadOnly || !hasOptions
               ? "cursor-not-allowed text-slate-300"
-              : "text-slate-400 hover:text-emerald-600",
+              : "text-slate-600 hover:text-emerald-600",
             isOptionsOpen ? "rotate-180" : "rotate-0",
           ].join(" ")}
         >
@@ -117,7 +114,7 @@ export default function TimeInputField({
 
       {/* ── Dropdown panel ── */}
       {isOptionsOpen && hasOptions && (
-        <div className="animate-dropdown-enter absolute left-0 top-[calc(100%+4px)] z-20 min-w-full rounded-[16px] border border-slate-200 bg-white p-1.5 shadow-[0_12px_34px_rgba(17,24,39,0.2)]">
+        <div className="absolute left-0 top-[calc(100%+6px)] z-20 min-w-full rounded-[12px] border border-solid border-slate-300 bg-white p-1.5 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.4)]">
           {enabledTimes.map((entry) => {
             const isActive = entry.time === value;
             return (
@@ -129,10 +126,10 @@ export default function TimeInputField({
                   onSelectTime(entry.time);
                 }}
                 className={[
-                  "mb-0.5 flex w-full items-center justify-between gap-2 rounded-[10px] px-3 py-2 text-left text-sm font-medium transition last:mb-0",
+                  "mb-0.5 flex w-full items-center justify-between gap-2 rounded-[8px] border border-solid border-transparent px-3 py-2 text-left text-sm font-medium transition-colors last:mb-0",
                   isActive
-                    ? "bg-emerald-100 text-emerald-800"
-                    : "text-slate-900 hover:bg-emerald-50 hover:text-emerald-700",
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "text-slate-900 hover:border-emerald-100 hover:bg-emerald-50 hover:text-emerald-700",
                 ].join(" ")}
               >
                 <span>{entry.time}</span>
