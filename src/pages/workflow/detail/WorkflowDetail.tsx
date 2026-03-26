@@ -1,6 +1,5 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
 import { useCallback, useContext, useMemo } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
@@ -11,23 +10,19 @@ import type { WorkflowDetailLoaderData } from "@/entities/workflow/model/loader"
 import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow/model/workflowApprovalTimeline";
 import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
-import { buildWorkflowCommentsUpdateInput } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
+import { useWorkflowWithdraw } from "@/features/workflow/detail-panel/model/useWorkflowWithdraw";
 import { deriveWorkflowDetailPermissions } from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
-import WorkflowDetailActions from "@/features/workflow/detail-panel/ui/WorkflowDetailActions";
+import WorkflowDetailHeader from "@/features/workflow/detail-panel/ui/WorkflowDetailHeader";
 import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import {
   useWorkflowLoaderWorkflow,
-  type WorkflowEntity,
 } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
-import { createLogger } from "@/shared/lib/logger";
 import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 import { PageSection } from "@/shared/ui/layout";
 
-const logger = createLogger("WorkflowDetailPage");
-
-export default function WorkflowDetailPage() {
+export default function WorkflowDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { cognitoUser, authStatus } = useContext(AuthContext);
@@ -37,6 +32,7 @@ export default function WorkflowDetailPage() {
   const { workflow: initialWorkflow } =
     useLoaderData() as WorkflowDetailLoaderData;
   const { notify, canNotify } = useLocalNotification();
+
   const currentStaffId = useMemo(() => {
     if (!cognitoUser?.id) return null;
     return (
@@ -59,11 +55,11 @@ export default function WorkflowDetailPage() {
     onNewComment: handleNewCommentNotification,
   });
 
-  const staffName = (() => {
+  const staffName = useMemo(() => {
     if (!workflow?.staffId) return "—";
     const s = staffs.find((st) => st.id === workflow.staffId);
     return s ? `${s.familyName} ${s.givenName}` : workflow.staffId;
-  })();
+  }, [workflow, staffs]);
 
   const applicationDate = formatDateSlash(
     isoDateFromTimestamp(workflow?.createdAt),
@@ -95,12 +91,6 @@ export default function WorkflowDetailPage() {
       }),
     [notify],
   );
-  const handleWorkflowChange = useCallback(
-    (nextWorkflow: WorkflowEntity) => {
-      setWorkflow(nextWorkflow);
-    },
-    [setWorkflow],
-  );
 
   const {
     currentStaff,
@@ -116,7 +106,7 @@ export default function WorkflowDetailPage() {
     workflow,
     staffs,
     cognitoUser,
-    onWorkflowChange: handleWorkflowChange,
+    onWorkflowChange: setWorkflow,
     notifySuccess,
     notifyError,
   });
@@ -126,35 +116,13 @@ export default function WorkflowDetailPage() {
     [workflow],
   );
 
-  const handleWithdraw = async () => {
-    if (!workflow?.id) return;
-    if (!window.confirm("本当に取り下げますか？")) return;
-    try {
-      const statusInput: UpdateWorkflowInput = {
-        id: workflow.id,
-        status: WorkflowStatus.CANCELLED,
-      };
-      const afterStatus = await updateWorkflow(statusInput);
-      setWorkflow(afterStatus as WorkflowEntity);
-
-      const commentUpdate = buildWorkflowCommentsUpdateInput(
-        afterStatus as WorkflowEntity,
-        "申請が取り下げされました",
-      );
-      const afterComments = await updateWorkflow(commentUpdate);
-      setWorkflow(afterComments as WorkflowEntity);
-      void notify("取り下げしました", { mode: "auto-close" });
-      setTimeout(() => navigate("/workflow"), 1000);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      logger.error("Workflow withdrawal failed:", message);
-      void notify("エラー", {
-        body: message,
-        mode: "await-interaction",
-        priority: "high",
-      });
-    }
-  };
+  const { handleWithdraw } = useWorkflowWithdraw({
+    workflow,
+    updateWorkflow,
+    setWorkflow,
+    notify,
+    navigate,
+  });
 
   return (
     <Page
@@ -168,27 +136,15 @@ export default function WorkflowDetailPage() {
         sx={{ gap: 0 }}
       >
         <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-6 pb-10 pt-2">
-          <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
-            <div className="flex flex-col gap-3">
-              <WorkflowDetailActions
-                onBack={() => navigate("/workflow")}
-                onWithdraw={handleWithdraw}
-                onEdit={() => navigate(`/workflow/${id}/edit`)}
-                withdrawDisabled={permissions.withdrawDisabled}
-                withdrawTooltip={permissions.withdrawTooltip}
-                editDisabled={permissions.editDisabled}
-                editTooltip={permissions.editTooltip}
-              />
-              <div className="flex flex-col gap-1.5">
-                <h1 className="m-0 text-[1.85rem] font-bold leading-[1.15] tracking-[-0.02em] text-slate-950 md:text-[2.2rem]">
-                  申請内容
-                </h1>
-                <p className="max-w-[760px] leading-8 text-slate-500">
-                  申請内容の確認、コメントのやり取り、編集や取り下げをこの画面で行えます。
-                </p>
-              </div>
-            </div>
-          </div>
+          <WorkflowDetailHeader
+            onBack={() => navigate("/workflow")}
+            onWithdraw={handleWithdraw}
+            onEdit={() => navigate(`/workflow/${id}/edit`)}
+            withdrawDisabled={permissions.withdrawDisabled}
+            withdrawTooltip={permissions.withdrawTooltip}
+            editDisabled={permissions.editDisabled}
+            editTooltip={permissions.editTooltip}
+          />
 
           {!workflow ? (
             <div className="rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3 text-sm font-medium text-rose-900">
