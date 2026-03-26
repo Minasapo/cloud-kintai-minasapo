@@ -1,0 +1,440 @@
+.daily-report-page {
+  @apply mx-auto w-full max-w-[1180px] p-4 flex flex-col gap-4;
+}
+
+.daily-report-section {
+  padding: 0;
+}
+
+.daily-report-hero {
+  @apply border p-5;
+  border: 1px solid rgba(209, 250, 229, 0.8);
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #f7fcf8 0%, #ecfdf5 58%, #ffffff 100%);
+  box-shadow: 0 28px 60px -42px rgba(15, 23, 42, 0.35);
+}
+
+.daily-report-hero-title {
+  margin: 0;
+  color: rgb(2 6 23);
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.daily-report-hero-description {
+  margin: 0;
+  max-width: 48rem;
+  color: rgb(71 85 105);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.daily-report-hero-description--clamped {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.daily-report-hero-description--expanded {
+  display: block;
+}
+
+.daily-report-hero-toggle {
+  margin-top: 0.4rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: rgb(5 150 105);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.daily-report-grid {
+  @apply grid grid-cols-1 gap-4 items-start;
+}
+
+.daily-report-sidebar {
+  position: static;
+}
+
+.daily-report-card-body {
+  @apply flex flex-col gap-5;
+}
+
+.dr-gap-3 {
+  gap: 0.75rem;
+}
+
+.dr-gap-4 {
+  gap: 1rem;
+}
+
+.dr-gap-5 {
+  gap: 1.25rem;
+}
+
+.dr-gap-6 {
+  gap: 1.5rem;
+}
+
+.dr-gap-7 {
+  gap: 1.75rem;
+}
+
+.daily-report-summary-lead {
+  @apply m-0 text-sm font-medium text-slate-500;
+}
+
+.dr-section-heading {
+  @apply m-0 text-[1.15rem] font-semibold text-slate-900;
+}
+
+.dr-subheading {
+  @apply m-0 mb-2 text-sm font-semibold text-slate-900;
+}
+
+.dr-subheading--no-margin {
+  @apply m-0;
+}
+
+.dr-saved-at {
+  @apply m-0 text-xs text-slate-500;
+}
+
+.dr-form-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.daily-report-calendar-label {
+  margin: 0;
+  color: rgb(15 23 42);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.daily-report-calendar-note {
+  @apply mt-1 mb-0 text-sm leading-relaxed text-slate-500;
+}
+
+.dr-vstack {
+  @apply flex flex-col;
+}
+
+.dr-panel {
+  @apply border p-4;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(209, 250, 229, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 24px 54px -40px rgba(15, 23, 42, 0.35);
+}
+
+.dr-panel--calendar {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fcfa 100%);
+}
+
+.dr-panel--detail {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfefd 100%);
+}
+
+.dr-alert {
+  @apply flex items-start justify-between gap-3 rounded-md border px-4 py-3 text-sm;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  line-height: 1.6;
+}
+
+.dr-alert--error {
+  border-color: rgb(254 205 211);
+  background: rgb(255 241 242);
+  color: rgb(76 5 25);
+}
+
+.dr-alert--warning {
+  border-color: rgb(253 230 138);
+  background: rgb(255 251 235);
+  color: rgb(69 26 3);
+}
+
+.dr-alert-close {
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dr-alert-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dr-divider {
+  @apply w-full h-px bg-slate-200;
+}
+
+.dr-action-button {
+  @apply inline-flex w-full items-center justify-center rounded-md border-0 px-4 py-2 text-sm font-medium;
+  transition: background-color 150ms;
+  cursor: pointer;
+}
+
+.dr-action-button:disabled {
+  cursor: not-allowed;
+}
+
+.dr-action-button--primary {
+  background: rgb(5 150 105);
+  color: white;
+}
+
+.dr-action-button--primary:hover {
+  background: rgb(4 120 87);
+}
+
+.dr-action-button--primary:disabled {
+  background: rgb(203 213 225);
+}
+
+.dr-action-button--secondary {
+  border: 1px solid rgb(203 213 225);
+  background: white;
+  color: rgb(51 65 85);
+}
+
+.dr-action-button--secondary:hover {
+  background: rgb(248 250 252);
+}
+
+.dr-action-button--secondary:disabled,
+.dr-action-button--ghost:disabled {
+  color: rgb(148 163 184);
+}
+
+.dr-action-button--ghost {
+  background: transparent;
+  color: rgb(51 65 85);
+}
+
+.dr-action-button--ghost:hover {
+  background: rgb(241 245 249);
+}
+
+.dr-skeleton {
+  border-radius: 0.375rem;
+  background: rgb(226 232 240);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.dr-skeleton-title {
+  height: 2rem;
+  width: 40%;
+}
+
+.dr-skeleton-subtitle {
+  height: 3rem;
+  width: 60%;
+}
+
+.dr-skeleton-body {
+  height: 10rem;
+  width: 100%;
+}
+
+.dr-skeleton-btn-sm {
+  height: 2.25rem;
+  width: 120px;
+}
+
+.dr-skeleton-btn-md {
+  height: 2.25rem;
+  width: 140px;
+}
+
+.dr-loading-button-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dr-summary-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dr-summary-title {
+  margin: 0;
+  color: rgb(100 116 139);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dr-summary-date {
+  margin: 0;
+  color: rgb(15 23 42);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.dr-edit-actions {
+  @apply flex flex-col gap-4;
+}
+
+.dr-edit-actions-row {
+  @apply flex flex-col items-stretch gap-2;
+}
+
+.dr-edit-actions-end {
+  display: flex;
+  justify-content: stretch;
+}
+
+.dr-status-chip {
+  @apply inline-flex items-center rounded-sm px-3 py-1 text-xs font-semibold;
+}
+
+.dr-status-chip--draft {
+  @apply border border-slate-300 bg-slate-100 text-slate-700;
+}
+
+.dr-status-chip--submitted {
+  @apply border border-sky-200 bg-sky-100 text-sky-800;
+}
+
+.dr-status-chip--approved {
+  @apply border border-emerald-200 bg-emerald-100 text-emerald-800;
+}
+
+.dr-status-chip--neutral {
+  @apply border border-slate-300 bg-white text-slate-700;
+}
+
+.dr-detail-header {
+  @apply flex flex-col justify-between gap-4;
+}
+
+.dr-break-word {
+  word-break: break-word;
+}
+
+.dr-content-box {
+  @apply rounded-md border border-slate-200 bg-slate-50/70 p-4;
+}
+
+.dr-feedback-box {
+  @apply flex flex-col gap-3;
+}
+
+.dr-content-text {
+  @apply m-0 whitespace-pre-wrap text-sm leading-7 text-slate-900;
+}
+
+.dr-chip-list {
+  @apply mb-2 flex flex-wrap gap-2;
+}
+
+.dr-comment-card {
+  @apply rounded-md border border-slate-200 p-0;
+}
+
+.dr-comment-header {
+  @apply flex flex-col justify-between gap-1;
+}
+
+.dr-comment-body {
+  @apply mt-2 mb-0 text-sm leading-relaxed text-slate-800;
+}
+
+.dr-not-found-message {
+  @apply m-0 text-slate-500;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (min-width: 640px) {
+  .daily-report-page {
+    @apply p-6;
+  }
+
+  .daily-report-hero {
+    @apply p-6;
+  }
+
+  .daily-report-hero-description--clamped {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+  }
+
+  .daily-report-hero-toggle {
+    display: none;
+  }
+
+  .dr-action-button {
+    width: auto;
+  }
+
+  .dr-loading-button-row {
+    @apply flex-row;
+  }
+
+  .dr-summary-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .dr-section-heading {
+    @apply text-[1.35rem];
+  }
+
+  .dr-form-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .dr-edit-actions-row {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .dr-edit-actions-end {
+    justify-content: flex-end;
+  }
+
+  .dr-detail-header,
+  .dr-comment-header {
+    @apply flex-row items-start;
+  }
+}
+
+@media (min-width: 1024px) {
+  .daily-report-grid {
+    @apply gap-5;
+    grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
+  }
+
+  .daily-report-sidebar {
+    position: sticky;
+    top: 1rem;
+  }
+}
