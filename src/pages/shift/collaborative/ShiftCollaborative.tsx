@@ -54,14 +54,17 @@ import {
   ShiftState,
 } from "../../../features/shift/collaborative/types/collaborative.types";
 
-// シフト状態の表示設定
 const shiftStateConfig: Record<
   ShiftState,
   { label: string; text: string; textClassName: string }
 > = {
   work: { label: "○", text: "出勤", textClassName: "text-emerald-700" },
   fixedOff: { label: "固", text: "固定休", textClassName: "text-rose-600" },
-  requestedOff: { label: "希", text: "希望休", textClassName: "text-amber-500" },
+  requestedOff: {
+    label: "希",
+    text: "希望休",
+    textClassName: "text-amber-500",
+  },
   auto: { label: "△", text: "自動調整枠", textClassName: "text-sky-600" },
   empty: { label: "-", text: "未入力", textClassName: "text-slate-400" },
 };
@@ -74,7 +77,7 @@ const SHIFT_CELL_BASE_STYLE: CSSProperties = {
   maxWidth: SHIFT_CELL_SIZE,
   textAlign: "center",
   padding: "4px",
-  userSelect: "none", // ドラッグ選択時のテキスト選択を防止
+  userSelect: "none",
 };
 
 type InlineAlertProps = {
@@ -178,7 +181,7 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
   isSelected = false,
 }: ShiftCellProps) => {
   const config = shiftStateConfig[state];
-  const isPending = false; // TODO: pendingChangesから取得
+  const isPending = false;
   const tooltipTitle = isLocked ? (
     "確定済み"
   ) : isEditing ? (
@@ -233,27 +236,22 @@ const ShiftCellBase: FC<ShiftCellProps> = ({
         event.currentTarget.style.borderColor = borderColor;
       }}
     >
-      <div className="flex items-center justify-center gap-0.5" style={{ opacity: isLocked ? 0.5 : 1 }}>
-        <span
-          className={`text-sm font-semibold ${config.textClassName}`}
-        >
+      <div
+        className="flex items-center justify-center gap-0.5"
+        style={{ opacity: isLocked ? 0.5 : 1 }}
+      >
+        <span className={`text-sm font-semibold ${config.textClassName}`}>
           {config.label}
         </span>
         {isLocked && <LockBadge />}
-        {isPending && (
-          <span className="h-1 w-1 rounded-full bg-amber-500" />
-        )}
+        {isPending && <span className="h-1 w-1 rounded-full bg-amber-500" />}
       </div>
       {typeof tooltipTitle === "string" ? (
-        <div
-          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium leading-5 text-slate-900 shadow-[0_18px_30px_-18px_rgba(15,23,42,0.35)] group-hover:block group-focus:block"
-        >
+        <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium leading-5 text-slate-900 shadow-[0_18px_30px_-18px_rgba(15,23,42,0.35)] group-hover:block group-focus:block">
           {tooltipTitle}
         </div>
       ) : (
-        <div
-          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-48 -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs font-medium leading-5 text-slate-900 shadow-[0_18px_30px_-18px_rgba(15,23,42,0.35)] group-hover:block group-focus:block"
-        >
+        <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-48 -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs font-medium leading-5 text-slate-900 shadow-[0_18px_30px_-18px_rgba(15,23,42,0.35)] group-hover:block group-focus:block">
           {tooltipTitle}
         </div>
       )}
@@ -531,13 +529,10 @@ const useCollaborativePageState = (targetMonth: string) => {
 
   const currentMonth = useMemo(() => dayjs(targetMonth), [targetMonth]);
 
-  // イベントカレンダーを取得
   const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
 
-  // 祝祭日カレンダーを取得
   const { data: holidays = [] } = useGetHolidayCalendarsQuery();
 
-  // 会社休日カレンダーを取得
   const { data: companyHolidays = [] } = useGetCompanyHolidayCalendarsQuery();
 
   const { days, dateKeys, eventCalendar } = useShiftCalendar(
@@ -547,7 +542,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     companyHolidays,
   );
 
-  // シフト計画データを取得
   const [shiftPlanCapacities, setShiftPlanCapacities] = useState<number[]>([]);
 
   useEffect(() => {
@@ -589,16 +583,13 @@ const useCollaborativePageState = (targetMonth: string) => {
     void fetchShiftPlan();
   }, [currentMonth]);
 
-  // スタッフリストを取得（shiftDataMapから）
   const staffIds = useMemo(
     () => Array.from(state.shiftDataMap.keys()),
     [state.shiftDataMap],
   );
 
-  // キーボードショートカット用の状態
   const [showHelp, setShowHelp] = useState(false);
 
-  // フォーカス管理と複数選択
   const {
     focusedCell,
     registerCell,
@@ -619,7 +610,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     isDragging,
   } = useSelectionState(staffIds, dateKeys);
 
-  // シフト状態取得ヘルパー
   const getShiftState = useCallback(
     (staffId: string, date: string): ShiftState | undefined => {
       return state.shiftDataMap.get(staffId)?.get(date)?.state;
@@ -654,14 +644,12 @@ const useCollaborativePageState = (targetMonth: string) => {
     [getCellData],
   );
 
-  // クリップボード管理
   const { copy, paste, hasClipboard, clearClipboard } = useClipboardOps(
     staffIds,
     dateKeys,
     getShiftState,
   );
 
-  // シフト提案機能
   const { violations, isAnalyzing, analyzeShifts } = useShiftSuggestions({
     shiftDataMap: state.shiftDataMap,
     staffIds,
@@ -671,9 +659,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     days,
   });
 
-  /**
-   * セルの状態を変更
-   */
   const changeCellState = useCallback(
     (staffId: string, date: string, newState: ShiftState) => {
       if (isCellLocked(staffId, date)) {
@@ -690,9 +675,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     [isCellBeingEdited, updateUserActivity, updateShift, isCellLocked],
   );
 
-  /**
-   * フォーカス中のセルまたは選択中のセルの状態を変更
-   */
   const handleChangeState = useCallback(
     (newState: ShiftState) => {
       if (selectionCount > 0) {
@@ -731,7 +713,6 @@ const useCollaborativePageState = (targetMonth: string) => {
             ? [focusedCell]
             : [];
 
-      // ロック状態を変更するセルのみを抽出
       const updates = targets
         .map(({ staffId, date }) => {
           const cell = getCellData(staffId, date);
@@ -747,7 +728,6 @@ const useCollaborativePageState = (targetMonth: string) => {
 
       if (updates.length === 0) return;
 
-      // バッチ更新で一括ロック
       void batchUpdateShifts(updates);
     },
     [
@@ -760,9 +740,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     ],
   );
 
-  /**
-   * コピー処理
-   */
   const handleCopy = useCallback(() => {
     if (selectionCount > 0) {
       copy(selectedCells);
@@ -795,9 +772,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     [selectionTargets, getCellData],
   );
 
-  /**
-   * ペースト処理
-   */
   const handlePaste = useCallback(() => {
     if (!focusedCell) return;
 
@@ -807,16 +781,10 @@ const useCollaborativePageState = (targetMonth: string) => {
     });
   }, [focusedCell, paste, changeCellState]);
 
-  /**
-   * 全セルを選択
-   */
   const handleSelectAll = useCallback(() => {
     selectAll();
   }, [selectAll]);
 
-  /**
-   * 選択解除・モーダルクローズ
-   */
   const handleEscape = useCallback(() => {
     if (showHelp) {
       setShowHelp(false);
@@ -827,9 +795,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     }
   }, [showHelp, clearSelection, clearFocus, clearClipboard]);
 
-  /**
-   * 提案アクションを適用
-   */
   const handleApplySuggestion = useCallback(
     (action: SuggestedAction) => {
       action.changes.forEach(({ staffId, date, newState }) => {
@@ -839,7 +804,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     [changeCellState],
   );
 
-  // キーボードショートカットの設定
   useKeyboardShortcuts({
     enabled: true,
     onNavigate: navigate,
@@ -853,36 +817,29 @@ const useCollaborativePageState = (targetMonth: string) => {
     onRedo: redo,
   });
 
-  /**
-   * セルクリックハンドラー
-   */
   const handleCellClick = useCallback(
     (staffId: string, date: string, event: MouseEvent) => {
-      // バッチ更新中は操作不可
       if (isBatchUpdating) {
         return;
       }
 
       if (isCellBeingEdited(staffId, date)) {
-        return; // 他のユーザーが編集中
+        return;
       }
 
       updateUserActivity();
 
-      // Shift+クリック: 範囲選択
       if (event.shiftKey) {
         selectRange(staffId, date);
         return;
       }
 
-      // Ctrl/Cmd+クリック: 個別追加選択
       if (event.ctrlKey || event.metaKey) {
         toggleCell(staffId, date);
         focusCell(staffId, date);
         return;
       }
 
-      // 通常クリック: 単一選択して編集開始
       selectCell(staffId, date);
       focusCell(staffId, date);
       startEditingCell(staffId, date);
@@ -899,17 +856,12 @@ const useCollaborativePageState = (targetMonth: string) => {
     ],
   );
 
-  /**
-   * セルのマウスダウン（ドラッグ選択開始）
-   */
   const handleCellMouseDown = useCallback(
     (staffId: string, date: string, event: MouseEvent) => {
-      // バッチ更新中は操作不可
       if (isBatchUpdating) {
         return;
       }
 
-      // 修飾キーがある場合はドラッグ選択しない
       if (event.shiftKey || event.ctrlKey || event.metaKey) {
         return;
       }
@@ -919,9 +871,6 @@ const useCollaborativePageState = (targetMonth: string) => {
     [isBatchUpdating, startDragSelect],
   );
 
-  /**
-   * セルのマウスエンター（ドラッグ選択更新）
-   */
   const handleCellMouseEnter = useCallback(
     (staffId: string, date: string) => {
       if (isDragging) {
@@ -931,18 +880,12 @@ const useCollaborativePageState = (targetMonth: string) => {
     [isDragging, updateDragSelect],
   );
 
-  /**
-   * マウスアップ（ドラッグ選択終了）
-   */
   const handleMouseUp = useCallback(() => {
     if (isDragging) {
       endDragSelect();
     }
   }, [isDragging, endDragSelect]);
 
-  /**
-   * 手動同期
-   */
   const handleSync = async () => {
     await triggerSync();
   };
@@ -1026,9 +969,7 @@ const CollaborativeHeaderBase: FC<CollaborativeHeaderProps> = ({
   activeUsers,
   editingCells,
 }) => (
-  <div
-    className="mb-2 rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5"
-  >
+  <div className="mb-2 rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
         <div className="inline-flex rounded-full border border-slate-400/30 bg-white/80 px-4 py-2 font-semibold text-slate-600">
@@ -1109,11 +1050,7 @@ const SyncPanelBase: FC<SyncPanelProps> = ({ syncError, onClearError }) => {
   return (
     <>
       {syncError && (
-        <InlineAlert
-          tone="error"
-          className="mb-2"
-          onClose={onClearError}
-        >
+        <InlineAlert tone="error" className="mb-2" onClose={onClearError}>
           同期に失敗しました。再試行してください。({syncError})
         </InlineAlert>
       )}
@@ -1131,7 +1068,6 @@ ProgressPanelBase.propTypes = {
   totalDays: PropTypes.number.isRequired,
 };
 
-// 週末判定ヘルパー
 const isWeekend = (day: dayjs.Dayjs): boolean =>
   day.day() === 0 || day.day() === 6;
 
@@ -1140,9 +1076,6 @@ interface ShiftCollaborativePageInnerProps {
   targetMonth: string;
 }
 
-/**
- * メインコンポーネント（内部実装）
- */
 const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
   ({ staffs, targetMonth }: ShiftCollaborativePageInnerProps) => {
     const { cognitoUser } = useContext(AuthContext);
@@ -1197,7 +1130,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       getAllCellHistory,
     } = useCollaborativePageState(targetMonth);
 
-    // 現在のユーザーIDを取得
     const currentUserId = useMemo(() => {
       if (!cognitoUser?.id) return "";
       const currentStaff = staffs.find(
@@ -1206,11 +1138,9 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       return currentStaff?.id ?? "";
     }, [cognitoUser, staffs]);
 
-    // プレゼンス通知
     const { notifications, addNotification, dismissNotification } =
       usePresenceNotifications();
 
-    // 印刷機能
     const { isPrintDialogOpen, openPrintDialog, closePrintDialog } =
       usePrintShift();
 
@@ -1226,7 +1156,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       [staffs],
     );
 
-    // サブスクリプション経由のリモート更新をトースト通知
     useEffect(() => {
       if (!state.lastRemoteUpdate) return;
       const staffName =
@@ -1235,10 +1164,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       addNotification("data-synced", "", { staffName, date: "" });
     }, [state.lastRemoteUpdate, staffNameMap, addNotification]);
 
-    // コンフリクト解決ダイアログ状態
     const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
 
-    // セル単位変更履歴Drawer状態
     const [cellHistoryDrawerOpen, setCellHistoryDrawerOpen] =
       useState<boolean>(false);
     const [cellHistoryFocusKey, setCellHistoryFocusKey] = useState<string>("");
@@ -1277,14 +1204,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       [violations],
     );
 
-    // 複数セルへのコメント一括追加ハンドラー
     const handleAddCommentsToSelectedCells = useCallback(
       async (content: string) => {
-        // 選択されているセルがある場合は、最初の10セルまでコメント追加
         const cellCount = Math.min(selectionCount, 10);
         let addedCount = 0;
 
-        // state.shiftDataMap から選択されているセルを取得
         const staffIds = Array.from(state.shiftDataMap.keys());
         for (const staffId of staffIds) {
           if (addedCount >= cellCount) break;
@@ -1310,7 +1234,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       [state.shiftDataMap, isCellSelected, addComment, selectionCount],
     );
 
-    // コメント機能付きのShiftCellコンポーネント
     const ShiftCellWithComments = useMemo(() => {
       const ShiftCellWithCommentsComponent = ({
         staffId,
@@ -1361,7 +1284,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             editingCells={state.editingCells}
           />
 
-          {/* 取り消し/やり直し/変更履歴ツールバー */}
           <UndoRedoToolbar
             canUndo={canUndo}
             canRedo={canRedo}
@@ -1383,10 +1305,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
 
           <SyncPanel syncError={state.error} onClearError={_clearSyncError} />
 
-          {/* 進捗パネル */}
           <ProgressPanel progress={progress} totalDays={days.length} />
 
-          {/* シフト調整テーブル */}
           <VirtualizedShiftTable
             days={days}
             staffIds={staffIds}
@@ -1445,23 +1365,18 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             isUpdating={isBatchUpdating}
           />
 
-          {/* コンフリクト解決ダイアログ */}
           <ConflictResolutionDialog
             open={conflictDialogOpen}
             conflicts={[]}
-            onResolve={async () => {
-              // コンフリクト解決処理
-            }}
+            onResolve={async () => {}}
             onClose={() => setConflictDialogOpen(false)}
           />
 
-          {/* ヘルプダイアログ */}
           <KeyboardShortcutsHelp
             open={showHelp}
             onClose={() => setShowHelp(false)}
           />
 
-          {/* 印刷ダイアログ */}
           <PrintShiftDialog
             open={isPrintDialogOpen}
             onClose={closePrintDialog}
@@ -1482,14 +1397,12 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             targetMonth={targetMonth}
           />
 
-          {/* プレゼンス通知 */}
           <PresenceNotificationContainer
             notifications={notifications}
             onDismiss={dismissNotification}
           />
         </div>
 
-        {/* セル履歴Drawer */}
         <ChangeHistoryPanel
           undoHistory={undoHistory}
           redoHistory={redoHistory}
@@ -1521,9 +1434,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
 
 ShiftCollaborativePageInner.displayName = "ShiftCollaborativePageInner";
 
-/**
- * エクスポート用コンポーネント（Providerでラップ）
- */
 export default function ShiftCollaborativePage() {
   const { authStatus, cognitoUser } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -1531,7 +1441,6 @@ export default function ShiftCollaborativePage() {
 
   const targetMonth = dayjs().format("YYYY-MM");
 
-  // 認証ユーザーのスタッフIDを取得
   const currentUserId = useMemo(() => {
     if (!cognitoUser?.id) return "";
     const currentStaff = staffs.find(
@@ -1540,7 +1449,6 @@ export default function ShiftCollaborativePage() {
     return currentStaff?.id ?? "";
   }, [cognitoUser, staffs]);
 
-  // 認証ユーザーの名前を取得
   const currentUserName = useMemo(() => {
     if (!cognitoUser?.id) return "Current User";
     const currentStaff = staffs.find(
@@ -1551,7 +1459,6 @@ export default function ShiftCollaborativePage() {
       : "Current User";
   }, [cognitoUser, staffs]);
 
-  // シフト勤務で有効なスタッフのみを取得
   const staffIds = useMemo(
     () =>
       staffs
@@ -1564,7 +1471,6 @@ export default function ShiftCollaborativePage() {
     [staffs],
   );
 
-  // 最初のシフトリクエストIDを使用（実装を簡略化）
   const shiftRequestId = staffIds[0] ?? "";
 
   if (staffsLoading) {
@@ -1576,10 +1482,7 @@ export default function ShiftCollaborativePage() {
       <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
         <div className="mx-auto w-full max-w-[1360px] px-1.5 py-1 sm:px-2.5">
           <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
-            <InlineAlert
-              tone="info"
-              icon={<InfoBadge />}
-            >
+            <InlineAlert tone="info" icon={<InfoBadge />}>
               スタッフデータが見つかりません
             </InlineAlert>
           </div>
