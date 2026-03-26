@@ -114,7 +114,7 @@ const WorkflowEditRoute = createLazyRoute(
   },
 );
 const WorkflowListRoute = createLazyRoute(
-  () => import("./pages/workflow/list/WorkflowListPage"),
+  () => import("./pages/workflow/list/Workflow"),
   {
     wrap: wrapWithMuiXDateProvider,
   },

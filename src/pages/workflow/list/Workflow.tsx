@@ -169,7 +169,7 @@ function DesktopWorkflowRow({
   );
 }
 
-export default function WorkflowListPage() {
+export default function Workflow() {
   const navigate = useNavigate();
   const [isCompact, setIsCompact] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
