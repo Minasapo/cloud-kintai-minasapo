@@ -13,7 +13,7 @@ export default function Register() {
 
   useEffect(() => {
     if (hasRole(StaffRole.OPERATOR)) {
-      navigate("/office/qr");
+      navigate("/office/qr", { replace: true });
     }
   }, [hasRole, navigate]);
 
