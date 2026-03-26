@@ -1,19 +1,7 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import {
-  Box,
-  Button,
-  FormControlLabel,
-  ListSubheader,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Switch,
-  TextField,
-  Typography,
-} from "@mui/material";
 import Page from "@shared/ui/page/Page";
-import { useContext, useState } from "react";
+import { type ChangeEvent, type FormEvent, useContext, useState } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
@@ -32,20 +20,17 @@ import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflo
 import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
-import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 import styles from "./WorkflowEditPage.module.scss";
 
-const ACTIONS_GAP = designTokenVar("spacing.sm", "8px");
 const logger = createLogger("WorkflowEditPage");
 
 export default function WorkflowEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { workflow } = useLoaderData() as WorkflowEditLoaderData;
-  const HEADER_GAP = designTokenVar("spacing.md", "12px");
 
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -92,7 +77,7 @@ export default function WorkflowEditPage() {
   const [customWorkflowContentError, setCustomWorkflowContentError] =
     useState("");
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = (e: FormEvent) => {
     e.preventDefault();
     const formState: WorkflowFormState = {
       categoryLabel: category,
@@ -180,13 +165,13 @@ export default function WorkflowEditPage() {
     })();
   };
 
-  const handleDraftToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDraftToggle = (e: ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     setDraftMode(checked);
   };
 
-  const handleCategoryChange = (e: SelectChangeEvent<string>) => {
-    const v = e.target.value as string;
+  const handleCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const v = e.target.value;
     setCategory(v);
     if (v === "有給休暇申請") {
       const today = new Date().toISOString().slice(0, 10);
@@ -208,113 +193,87 @@ export default function WorkflowEditPage() {
         onSubmit={handleSave}
         sx={{ gap: 0 }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: { xs: "flex-start", sm: "center" },
-            flexDirection: { xs: "column", sm: "row" },
-            gap: HEADER_GAP,
-            mb: 2,
-          }}
-        >
-          <Box>
-            <Typography variant="h5" fontWeight={700}>
+        <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <h2 className="m-0 text-2xl font-bold text-slate-900">
               申請を編集
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
+            </h2>
+            <p className="m-0 text-sm text-slate-500">
               申請詳細を起点に、申請内容を更新します。
-            </Typography>
-          </Box>
-          <Button
-            size="small"
+            </p>
+          </div>
+          <button
+            type="button"
+            className={styles.secondaryButton}
             onClick={() => navigate(id ? `/workflow/${id}` : "/workflow")}
           >
             申請詳細へ戻る
-          </Button>
-        </Box>
+          </button>
+        </div>
         <DashboardInnerSurface>
           <div className={styles.formRows}>
             <div className={styles.formRow}>
-              <div className={styles.formLabel}>
-                <Typography variant="body2" color="text.secondary">
-                  ID
-                </Typography>
-              </div>
+              <div className={styles.formLabel}>ID</div>
               <div>
-                <Typography variant="body1">{id ?? "—"}</Typography>
+                <p className={styles.formValue}>{id ?? "—"}</p>
               </div>
             </div>
 
             <div className={styles.formRow}>
-              <div className={styles.formLabel}>
-                <Typography variant="body2" color="text.secondary">
-                  種別
-                </Typography>
-              </div>
+              <div className={styles.formLabel}>種別</div>
               <div>
-              {id ? (
-                // 編集時は種別の変更を想定しないためテキスト表示
-                <Typography variant="body1">
-                  {category || "（未設定）"}
-                </Typography>
-              ) : (
-                <Select
-                  value={category}
-                  onChange={handleCategoryChange}
-                  displayEmpty
-                  size="small"
-                  fullWidth
-                >
-                  <MenuItem value="">
-                    <em>種別を選択</em>
-                  </MenuItem>
-                  <ListSubheader>勤怠</ListSubheader>
-                  <MenuItem value="有給休暇申請">有給休暇申請</MenuItem>
-                  <MenuItem value="欠勤申請">欠勤申請</MenuItem>
-                  <MenuItem value="残業申請">残業申請</MenuItem>
-                  <MenuItem value={CLOCK_CORRECTION_LABEL}>
-                    {CLOCK_CORRECTION_LABEL}
-                  </MenuItem>
-                  <MenuItem value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
-                    {CLOCK_CORRECTION_CHECK_OUT_LABEL}
-                  </MenuItem>
-                  <MenuItem value="その他">その他</MenuItem>
-                </Select>
-              )}
+                {id ? (
+                  <p className={styles.formValue}>{category || "（未設定）"}</p>
+                ) : (
+                  <div className={styles.selectWrap}>
+                    <select
+                      className={styles.select}
+                      value={category}
+                      onChange={handleCategoryChange}
+                    >
+                      <option value="">種別を選択</option>
+                      <optgroup label="勤怠">
+                        <option value="有給休暇申請">有給休暇申請</option>
+                        <option value="欠勤申請">欠勤申請</option>
+                        <option value="残業申請">残業申請</option>
+                        <option value={CLOCK_CORRECTION_LABEL}>
+                          {CLOCK_CORRECTION_LABEL}
+                        </option>
+                        <option value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
+                          {CLOCK_CORRECTION_CHECK_OUT_LABEL}
+                        </option>
+                        <option value="その他">その他</option>
+                      </optgroup>
+                    </select>
+                    <span className={styles.selectIcon} aria-hidden="true">
+                      ▼
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className={styles.formRow}>
-              <div className={styles.formLabel}>
-                <Typography variant="body2" color="text.secondary">
-                  申請者
-                </Typography>
-              </div>
+              <div className={styles.formLabel}>申請者</div>
               <div>
-                <Typography>
+                <p className={styles.formValue}>
                   {applicant
                     ? `${applicant.familyName} ${applicant.givenName}`
                     : "—"}
-                </Typography>
+                </p>
               </div>
             </div>
 
             <div className={styles.formRow}>
-              <div className={styles.formLabel}>
-                <Typography variant="body2" color="text.secondary">
-                  申請日
-                </Typography>
-              </div>
+              <div className={styles.formLabel}>申請日</div>
               <div>
                 {id ? (
-                  <Typography variant="body1">{applicationDate}</Typography>
+                  <p className={styles.formValue}>{applicationDate}</p>
                 ) : (
-                  <TextField
+                  <input
+                    className={styles.readonlyInput}
                     value={applicationDate}
-                    InputProps={{ readOnly: true }}
-                    size="small"
-                    fullWidth
+                    readOnly
                   />
                 )}
               </div>
@@ -358,36 +317,41 @@ export default function WorkflowEditPage() {
             </WorkflowFormProvider>
 
             <div className={styles.formRow}>
-              <div className={styles.formLabel}>
-                <Typography variant="body2" color="text.secondary">
-                  下書き
-                </Typography>
-              </div>
+              <div className={styles.formLabel}>下書き</div>
               <div>
-                <FormControlLabel
-                  control={
-                    <Switch checked={draftMode} onChange={handleDraftToggle} />
-                  }
-                  label={draftMode ? "下書きとして保存" : ""}
-                />
+                <label className={styles.toggleWrap}>
+                  <input
+                    type="checkbox"
+                    className={styles.toggleInput}
+                    checked={draftMode}
+                    onChange={handleDraftToggle}
+                  />
+                  <span className={styles.toggleTrack} />
+                  {draftMode ? (
+                    <span className={styles.toggleLabelText}>
+                      下書きとして保存
+                    </span>
+                  ) : null}
+                </label>
               </div>
             </div>
 
             <div className={styles.formRow}>
               <div className={styles.formActions}>
-                <Box sx={{ display: "flex", gap: ACTIONS_GAP }}>
-                  <Button
-                    size="small"
+                <div className={styles.actionsGroup}>
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
                     onClick={() =>
                       navigate(id ? `/workflow/${id}` : "/workflow")
                     }
                   >
                     申請詳細へ戻る
-                  </Button>
-                  <Button type="submit" variant="contained" size="small">
+                  </button>
+                  <button type="submit" className={styles.submitButton}>
                     保存
-                  </Button>
-                </Box>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
