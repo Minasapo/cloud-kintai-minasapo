@@ -1,11 +1,4 @@
 import useCloseDates from "@entities/attendance/model/useCloseDates";
-import {
-  Box,
-  LinearProgress,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
 import { CloseDate } from "@shared/api/graphql/types";
 import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 
@@ -25,11 +18,11 @@ const JobTermTable = lazy(
 );
 
 const JobTermTableSkeleton = () => (
-  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+  <div className="flex flex-col gap-3">
     {Array.from({ length: 5 }, (_, i) => (
-      <Skeleton key={i} variant="rounded" height={42} />
+      <div key={i} className="h-[42px] animate-pulse rounded-lg bg-slate-200" />
     ))}
-  </Box>
+  </div>
 );
 
 export default function JobTerm() {
@@ -71,25 +64,29 @@ export default function JobTerm() {
   }, [deleteTarget, deleteCloseDate, dispatch]);
 
   if (closeDateLoading) {
-    return <LinearProgress />;
+    return (
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+        <div className="h-full w-1/3 rounded-full bg-emerald-500 animate-pulse" />
+      </div>
+    );
   }
 
   if (closeDateError) {
     return (
-      <Typography variant="body1">
+      <p className="text-sm text-slate-600">
         データ取得中に問題が発生しました。管理者に連絡してください。
-      </Typography>
+      </p>
     );
   }
 
   return (
     <>
-      <Stack spacing={2}>
-        <Typography>
+      <div className="flex flex-col gap-4">
+        <p className="text-sm text-slate-600">
           月ごとに勤怠を締める日付を指定します。
           <br />
           こちらで集計対象月を作成するとファイル出力時に選択して簡単に日付入力ができるようになります。
-        </Typography>
+        </p>
         <JobTermBulkRegister
           existingCloseDates={closeDates}
           createCloseDate={createCloseDate}
@@ -101,7 +98,7 @@ export default function JobTerm() {
             onDelete={handleDelete}
           />
         </Suspense>
-      </Stack>
+      </div>
       <EditJobTermInputDialog
         targetData={editTarget}
         open={editTarget !== null}
