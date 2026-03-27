@@ -1,3 +1,5 @@
+import { store } from "@app/store";
+import { workflowApi } from "@entities/workflow/api/workflowApi";
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import type { GetWorkflowQuery } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
@@ -55,6 +57,9 @@ export async function resolveWorkflowLoaderData(
 
   try {
     const workflow = await fetchWorkflowById(id);
+    store.dispatch(
+      workflowApi.util.upsertQueryData("getWorkflow", id, workflow) as never,
+    );
     return { workflow } satisfies WorkflowDetailLoaderData;
   } catch (error) {
     if (error instanceof WorkflowLoaderError) {

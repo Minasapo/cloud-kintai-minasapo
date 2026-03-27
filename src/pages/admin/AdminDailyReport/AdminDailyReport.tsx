@@ -80,7 +80,7 @@ const SELECT_CLASS =
 const INPUT_DATE_CLASS =
   "rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200";
 
-export default function AdminDailyReportManagement() {
+export default function AdminDailyReport() {
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const navigate = useNavigate();

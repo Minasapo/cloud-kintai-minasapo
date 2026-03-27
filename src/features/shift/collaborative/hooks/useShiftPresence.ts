@@ -319,6 +319,18 @@ export const useShiftPresence = ({
   );
 
   /**
+   * 特定のセルを自分が編集(ロック)中かチェック
+   */
+  const hasEditLock = useCallback(
+    (staffId: string, date: string): boolean => {
+      const cellKey = `${staffId}_${date}`;
+      const editor = editingCells.get(cellKey);
+      return editor !== undefined && editor.userId === currentUserId;
+    },
+    [editingCells, currentUserId],
+  );
+
+  /**
    * 特定のセルを編集中のユーザーを取得
    */
   const getCellEditor = useCallback(
@@ -504,6 +516,7 @@ export const useShiftPresence = ({
     startEditingCell,
     stopEditingCell,
     isCellBeingEdited,
+    hasEditLock,
     getCellEditor,
     updateActivity,
     forceReleaseCell,

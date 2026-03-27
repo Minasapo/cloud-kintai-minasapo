@@ -44,6 +44,11 @@ interface BatchEditToolbarProps {
   hasClipboard: boolean;
   canPaste: boolean;
   isUpdating?: boolean;
+  hasEditLockForSelected: boolean;
+  isOthersEditingSelected: boolean;
+  onAcquireEditLock: () => void;
+  onReleaseEditLock: () => void;
+  onForceReleaseLock: () => void;
 }
 
 const stateOptions: Array<{ state: ShiftState; label: string; color: string }> =
@@ -73,6 +78,11 @@ const BatchEditToolbarBase = ({
   hasClipboard,
   canPaste,
   isUpdating = false,
+  hasEditLockForSelected,
+  isOthersEditingSelected,
+  onAcquireEditLock,
+  onReleaseEditLock,
+  onForceReleaseLock,
 }: BatchEditToolbarProps) => {
   const [commentText, setCommentText] = useState("");
   const [isAddingComment, setIsAddingComment] = useState(false);
@@ -132,6 +142,52 @@ const BatchEditToolbarBase = ({
 
         <Divider />
 
+        {/* 編集ロック制御ボタン */}
+        <Box>
+          <Stack direction="row" spacing={1}>
+            {!hasEditLockForSelected && !isOthersEditingSelected && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={onAcquireEditLock}
+                disabled={isUpdating}
+              >
+                編集開始（ロック取得）
+              </Button>
+            )}
+            {hasEditLockForSelected && (
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={onReleaseEditLock}
+                disabled={isUpdating}
+              >
+                編集終了（ロック解除）
+              </Button>
+            )}
+            {isOthersEditingSelected && canUnlock && (
+              <Button
+                variant="contained"
+                color="error"
+                size="small"
+                onClick={onForceReleaseLock}
+                disabled={isUpdating}
+              >
+                編集ロックを強制剥奪
+              </Button>
+            )}
+            {isOthersEditingSelected && !canUnlock && (
+              <Typography variant="body2" color="error" sx={{ alignSelf: "center" }}>
+                他のユーザーが編集中です
+              </Typography>
+            )}
+          </Stack>
+        </Box>
+
+        <Divider />
+
         {/* 状態変更ボタン */}
         <Box>
           <Typography variant="caption" color="text.secondary" gutterBottom>
@@ -143,7 +199,7 @@ const BatchEditToolbarBase = ({
                 key={option.state}
                 label={option.label}
                 onClick={() => onChangeState(option.state)}
-                disabled={isUpdating}
+                disabled={isUpdating || !hasEditLockForSelected}
                 sx={{
                   bgcolor: option.color,
                   color: "white",
@@ -205,7 +261,7 @@ const BatchEditToolbarBase = ({
             variant="outlined"
             startIcon={<ContentPasteIcon />}
             onClick={onPaste}
-            disabled={!hasClipboard || !canPaste || isUpdating}
+            disabled={!hasClipboard || !canPaste || isUpdating || !hasEditLockForSelected}
             size="small"
           >
             貼り付け

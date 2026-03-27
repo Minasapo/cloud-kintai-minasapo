@@ -83,7 +83,12 @@ type AttendanceEditFormContextProps = {
 
 export type AttendanceEditContextProps = AttendanceEditDataContextProps &
   AttendanceEditUiContextProps &
-  AttendanceEditFormContextProps;
+  AttendanceEditFormContextProps & {
+    data?: AttendanceEditDataContextProps;
+    ui?: AttendanceEditUiContextProps;
+    form?: AttendanceEditFormContextProps;
+    actions?: Pick<AttendanceEditUiContextProps, "onSubmit">;
+  };
 
 const defaultDataContextValue: AttendanceEditDataContextProps = {
   workDate: undefined,
@@ -144,6 +149,12 @@ export const defaultAttendanceEditContextValue: AttendanceEditContextProps = {
   ...defaultDataContextValue,
   ...defaultUiContextValue,
   ...defaultFormContextValue,
+  data: defaultDataContextValue,
+  ui: defaultUiContextValue,
+  form: defaultFormContextValue,
+  actions: {
+    onSubmit: defaultUiContextValue.onSubmit,
+  },
 };
 
 export default function AttendanceEditProvider({
@@ -190,9 +201,17 @@ export default function AttendanceEditProvider({
     hourlyPaidHolidayTimeUpdate: value.hourlyPaidHolidayTimeUpdate,
     hourlyPaidHolidayTimeReplace: value.hourlyPaidHolidayTimeReplace,
   };
+  const groupedValue = {
+    data: dataValue,
+    ui: uiValue,
+    form: formValue,
+    actions: {
+      onSubmit: value.onSubmit,
+    },
+  };
 
   return (
-    <AttendanceEditContext.Provider value={value}>
+    <AttendanceEditContext.Provider value={{ ...value, ...groupedValue }}>
       <AttendanceEditDataContext.Provider value={dataValue}>
         <AttendanceEditUiContext.Provider value={uiValue}>
           <AttendanceEditFormContext.Provider value={formValue}>

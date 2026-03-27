@@ -5,11 +5,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import {
   Alert,
-  Button,
   FormControlLabel,
-  IconButton,
-  Paper,
-  Stack,
   Switch,
   Table,
   TableBody,
@@ -17,7 +13,6 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from "@mui/material";
 import {
   CreateAppConfigInput,
@@ -33,6 +28,7 @@ import {
   type WorkflowCategoryOrderItem,
 } from "@/entities/workflow/lib/workflowLabels";
 import useWorkflowTemplates from "@/entities/workflow-template/model/useWorkflowTemplates";
+import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -248,206 +244,218 @@ export default function AdminWorkflowCategorySettings() {
   };
 
   return (
-    <Stack spacing={2.5}>
-      <Stack spacing={0.5}>
-        <Typography variant="h6">ワークフロー種別</Typography>
-        <Typography variant="body2" color="text.secondary">
-          表示順序の変更と有効/無効の切り替えを行えます。
-        </Typography>
-      </Stack>
+    <AdminSettingsLayout title="ワークフロー設定">
+      <div className="flex flex-col gap-10">
+        {/* === ワークフロー種別 セクション === */}
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xl font-semibold text-slate-800">ワークフロー種別</h2>
+            <p className="text-sm text-slate-500">
+              表示順序の変更と有効/無効の切り替えを行えます。
+            </p>
+          </div>
 
-      <Alert severity="info">
-        並び順は新規申請画面とワークフロー一覧の種別フィルタに反映されます。
-      </Alert>
+          <Alert severity="info" className="mb-2">
+            並び順は新規申請画面とワークフロー一覧の種別フィルタに反映されます。
+          </Alert>
 
-      <Paper sx={{ p: 2 }}>
-        <Stack spacing={1.5}>
-          {items.map((item, index) => (
-            <Stack
-              key={item.category}
-              direction="row"
-              spacing={1}
-              alignItems="center"
-              sx={{ justifyContent: "space-between" }}
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
+            <div className="flex flex-col gap-4">
+              {items.map((item, index) => (
+                <div
+                  key={item.category}
+                  className="flex flex-row items-center justify-between gap-2 p-2 hover:bg-slate-50 rounded transition-colors"
+                >
+                  <div className="flex flex-row items-center gap-2">
+                    <span className="w-6 text-sm text-slate-400 text-center">
+                      {index + 1}
+                    </span>
+                    <span className="text-base font-medium text-slate-700">
+                      {item.label}
+                    </span>
+                  </div>
+                  <div className="flex flex-row items-center gap-1">
+                    <button
+                      className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500"
+                      onClick={() =>
+                        setItems((prev) => moveItem(prev, index, index - 1))
+                      }
+                      disabled={index === 0}
+                      aria-label={`${item.label}を上へ移動`}
+                      type="button"
+                    >
+                      <ArrowUpwardIcon fontSize="small" />
+                    </button>
+                    <button
+                      className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500"
+                      onClick={() =>
+                        setItems((prev) => moveItem(prev, index, index + 1))
+                      }
+                      disabled={index === items.length - 1}
+                      aria-label={`${item.label}を下へ移動`}
+                      type="button"
+                    >
+                      <ArrowDownwardIcon fontSize="small" />
+                    </button>
+                    <div className="ml-2 min-w-[88px]">
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={item.enabled}
+                            onChange={() => handleToggleEnabled(index)}
+                          />
+                        }
+                        label={item.enabled ? "有効" : "無効"}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-row justify-between pt-2">
+            <button
+              className="flex flex-row items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+              onClick={handleReset}
+              disabled={saving}
+              type="button"
             >
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ width: 24 }}
-                >
-                  {index + 1}
-                </Typography>
-                <Typography variant="body1">{item.label}</Typography>
-              </Stack>
-              <Stack direction="row" spacing={0.5} alignItems="center">
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    setItems((prev) => moveItem(prev, index, index - 1))
-                  }
-                  disabled={index === 0}
-                  aria-label={`${item.label}を上へ移動`}
-                >
-                  <ArrowUpwardIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    setItems((prev) => moveItem(prev, index, index + 1))
-                  }
-                  disabled={index === items.length - 1}
-                  aria-label={`${item.label}を下へ移動`}
-                >
-                  <ArrowDownwardIcon fontSize="small" />
-                </IconButton>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={item.enabled}
-                      onChange={() => handleToggleEnabled(index)}
-                    />
-                  }
-                  label={item.enabled ? "有効" : "無効"}
-                  sx={{ ml: 1 }}
-                />
-              </Stack>
-            </Stack>
-          ))}
-        </Stack>
-      </Paper>
-
-      <Stack
-        direction="row"
-        spacing={1}
-        justifyContent="space-between"
-        sx={{ pb: 4 }}
-      >
-        <Button
-          variant="outlined"
-          startIcon={<RestartAltIcon />}
-          onClick={handleReset}
-          disabled={saving}
-        >
-          デフォルトに戻す
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={saving || !hasChanges}
-        >
-          {saving ? "保存中..." : "保存"}
-        </Button>
-      </Stack>
-
-      <Stack spacing={0.5}>
-        <Typography variant="h6">ワークフローテンプレート</Typography>
-        <Typography variant="body2" color="text.secondary">
-          「その他」申請で利用するテンプレートを管理できます。新しいものが上に表示されます。
-        </Typography>
-      </Stack>
-
-      <Alert severity="info">
-        テンプレート適用時は、申請フォームの入力内容を上書きする確認が表示されます。
-      </Alert>
-
-      <Paper sx={{ p: 2 }}>
-        <Stack spacing={2}>
-          <Typography variant="subtitle1">
-            {editingTemplateId ? "テンプレート編集" : "テンプレート作成"}
-          </Typography>
-          <TextField
-            label="テンプレート名"
-            size="small"
-            value={templateName}
-            onChange={(event) => setTemplateName(event.target.value)}
-          />
-          <TextField
-            label="タイトルテンプレート"
-            size="small"
-            value={templateTitle}
-            onChange={(event) => setTemplateTitle(event.target.value)}
-          />
-          <TextField
-            label="詳細内容テンプレート"
-            size="small"
-            multiline
-            minRows={5}
-            value={templateContent}
-            onChange={(event) => setTemplateContent(event.target.value)}
-          />
-          <Stack direction="row" spacing={1} justifyContent="flex-end">
-            {editingTemplateId && (
-              <Button variant="outlined" onClick={resetTemplateForm}>
-                キャンセル
-              </Button>
-            )}
-            <Button
-              variant="contained"
-              onClick={handleTemplateSubmit}
-              disabled={templateSaving}
+              <RestartAltIcon fontSize="small" />
+              <span>デフォルトに戻す</span>
+            </button>
+            <button
+              className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
+              onClick={handleSave}
+              disabled={saving || !hasChanges}
+              type="button"
             >
-              {templateSaving
-                ? "保存中..."
-                : editingTemplateId
-                  ? "更新"
-                  : "作成"}
-            </Button>
-          </Stack>
-        </Stack>
-      </Paper>
+              {saving ? "保存中..." : "保存"}
+            </button>
+          </div>
+        </div>
 
-      <Paper sx={{ p: 2, mb: 4 }}>
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle1">テンプレート一覧</Typography>
-          {templateError && <Alert severity="error">{templateError}</Alert>}
-          {templateLoading ? (
-            <Typography variant="body2" color="text.secondary">
-              読み込み中...
-            </Typography>
-          ) : templates.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              テンプレートはまだありません。
-            </Typography>
-          ) : (
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>テンプレート名</TableCell>
-                  <TableCell>タイトルテンプレート</TableCell>
-                  <TableCell>作成日</TableCell>
-                  <TableCell align="right">操作</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {templates.map((template) => (
-                  <TableRow key={template.id}>
-                    <TableCell>{template.name}</TableCell>
-                    <TableCell>{template.title}</TableCell>
-                    <TableCell>{formatDateSlash(template.createdAt)}</TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleTemplateEdit(template.id)}
-                        aria-label="テンプレートを編集"
-                      >
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleTemplateDelete(template.id)}
-                        aria-label="テンプレートを削除"
-                      >
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </Stack>
-      </Paper>
-    </Stack>
+        {/* === ワークフローテンプレート セクション === */}
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xl font-semibold text-slate-800">ワークフローテンプレート</h2>
+            <p className="text-sm text-slate-500">
+              「その他」申請で利用するテンプレートを管理できます。新しいものが上に表示されます。
+            </p>
+          </div>
+
+          <Alert severity="info" className="mb-2">
+            テンプレート適用時は、申請フォームの入力内容を上書きする確認が表示されます。
+          </Alert>
+
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
+            <div className="flex flex-col gap-4">
+              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
+                {editingTemplateId ? "テンプレート編集" : "テンプレート作成"}
+              </h3>
+              <TextField
+                label="テンプレート名"
+                size="small"
+                value={templateName}
+                onChange={(event) => setTemplateName(event.target.value)}
+              />
+              <TextField
+                label="タイトルテンプレート"
+                size="small"
+                value={templateTitle}
+                onChange={(event) => setTemplateTitle(event.target.value)}
+              />
+              <TextField
+                label="詳細内容テンプレート"
+                size="small"
+                multiline
+                minRows={5}
+                value={templateContent}
+                onChange={(event) => setTemplateContent(event.target.value)}
+              />
+              <div className="flex flex-row justify-end gap-2 pt-2">
+                {editingTemplateId && (
+                  <button
+                    className="px-4 py-2 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                    onClick={resetTemplateForm}
+                    type="button"
+                  >
+                    キャンセル
+                  </button>
+                )}
+                <button
+                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
+                  onClick={handleTemplateSubmit}
+                  disabled={templateSaving}
+                  type="button"
+                >
+                  {templateSaving
+                    ? "保存中..."
+                    : editingTemplateId
+                      ? "更新"
+                      : "作成"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200 mb-8">
+            <div className="flex flex-col gap-4">
+              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">テンプレート一覧</h3>
+              {templateError && <Alert severity="error">{templateError}</Alert>}
+              {templateLoading ? (
+                <p className="text-sm text-slate-500 py-4 text-center">
+                  読み込み中...
+                </p>
+              ) : templates.length === 0 ? (
+                <p className="text-sm text-slate-500 py-4 text-center">
+                  テンプレートはまだありません。
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>テンプレート名</TableCell>
+                        <TableCell>タイトルテンプレート</TableCell>
+                        <TableCell>作成日</TableCell>
+                        <TableCell align="right">操作</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {templates.map((template) => (
+                        <TableRow key={template.id}>
+                          <TableCell>{template.name}</TableCell>
+                          <TableCell>{template.title}</TableCell>
+                          <TableCell>{formatDateSlash(template.createdAt)}</TableCell>
+                          <TableCell align="right">
+                            <button
+                              className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition ml-1"
+                              onClick={() => handleTemplateEdit(template.id)}
+                              aria-label="テンプレートを編集"
+                              type="button"
+                            >
+                              <EditOutlinedIcon fontSize="small" />
+                            </button>
+                            <button
+                              className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition ml-1"
+                              onClick={() => handleTemplateDelete(template.id)}
+                              aria-label="テンプレートを削除"
+                              type="button"
+                            >
+                              <DeleteOutlineIcon fontSize="small" />
+                            </button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </AdminSettingsLayout>
   );
 }

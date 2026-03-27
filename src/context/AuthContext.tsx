@@ -5,21 +5,40 @@ import { createContext } from "react";
 
 import { CognitoUser } from "../hooks/useCognitoUser";
 
-type AuthContextProps = {
+export type SessionSnapshot = {
+  user?: AuthUser;
+  authStatus?: AuthStatus;
+  cognitoUser?: CognitoUser | null;
+  roles: StaffRole[];
+};
+
+export type AuthContextProps = {
+  session?: SessionSnapshot;
   signOut: (data?: AuthEventData | undefined) => void;
   signIn: () => void;
+  hasRole?: (role: StaffRole) => boolean;
   isCognitoUserRole: (role: StaffRole) => boolean;
+  isAuthenticated?: boolean;
+  isLoading?: boolean;
+  roles?: StaffRole[];
   user?: AuthUser;
   authStatus?: AuthStatus;
   cognitoUser?: CognitoUser | null;
 };
 
 export const AuthContext = createContext<AuthContextProps>({
+  session: {
+    roles: [],
+  },
   signOut: () => {
     console.log("The process is not implemented.");
   },
   signIn: () => {
     console.log("The process is not implemented.");
   },
+  hasRole: () => false,
   isCognitoUserRole: () => false,
+  isAuthenticated: false,
+  isLoading: false,
+  roles: [],
 });

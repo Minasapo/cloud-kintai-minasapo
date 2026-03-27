@@ -1,0 +1,77 @@
+import { Tooltip, Typography } from "@mui/material";
+import { type ChartOptions } from "chart.js";
+import { Bar } from "react-chartjs-2";
+
+import { DashboardCard } from "./DashboardCard";
+
+type ChartData = {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string;
+    borderColor: string;
+    borderWidth: number;
+    stack: string;
+  }[];
+};
+
+type Props = {
+  infoLabel: string;
+  isLoading: boolean;
+  hasData: boolean;
+  chartData: ChartData;
+  chartOptions: ChartOptions<"bar">;
+};
+
+export function StaffWorkStatusChartCard({
+  infoLabel,
+  isLoading,
+  hasData,
+  chartData,
+  chartOptions,
+}: Props) {
+  return (
+    <DashboardCard
+      data-testid="admin-dashboard-staff-work-status-chart-card"
+      className="h-full lg:col-span-4"
+      sx={{ py: { xs: 1.5, md: 1.75 } }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <Typography
+          component="h2"
+          sx={{ m: 0, fontSize: "0.95rem", fontWeight: 700, color: "#0f172a" }}
+        >
+          スタッフごとの勤務状況
+        </Typography>
+        <Tooltip title={infoLabel} arrow>
+          <button
+            type="button"
+            data-testid="admin-dashboard-staff-work-status-info"
+            aria-label={infoLabel}
+            className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-[11px] font-semibold leading-none text-slate-600"
+          >
+            i
+          </button>
+        </Tooltip>
+      </div>
+      <div className="mt-1 h-72">
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center text-xs font-medium text-slate-500">
+            集計中
+          </div>
+        ) : hasData ? (
+          <Bar
+            data={chartData}
+            options={chartOptions}
+            data-testid="admin-dashboard-staff-work-status-chart"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-xs font-medium text-slate-500">
+            表示可能な勤務データがありません
+          </div>
+        )}
+      </div>
+    </DashboardCard>
+  );
+}

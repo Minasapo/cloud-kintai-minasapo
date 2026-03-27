@@ -1,7 +1,3 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -11,6 +7,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
+import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -77,11 +75,17 @@ export default function OfficeMode() {
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 1 }}>
-        出勤モード / 時間単位休暇
-      </Typography>
-      <Stack spacing={2} sx={{ mb: 2 }}>
+    <AdminSettingsLayout title="出勤モード / 時間単位休暇">
+      <AdminSettingsSection
+        actions={
+          <button
+            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            onClick={handleSave}
+          >
+            保存
+          </button>
+        }
+      >
         <OfficeModeSection
           officeMode={officeMode}
           onOfficeModeChange={handleOfficeModeChange}
@@ -90,10 +94,7 @@ export default function OfficeMode() {
             handleHourlyPaidHolidayEnabledChange
           }
         />
-        <Button variant="contained" color="primary" onClick={handleSave}>
-          保存
-        </Button>
-      </Stack>
-    </Box>
+      </AdminSettingsSection>
+    </AdminSettingsLayout>
   );
 }

@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import {
   buildDailyReportCsv,
   formatDailyReportFileName,
-} from "../AdminDailyReportManagement";
+} from "../AdminDailyReport";
 import type { AdminDailyReport } from "../data";
 
 jest.mock(

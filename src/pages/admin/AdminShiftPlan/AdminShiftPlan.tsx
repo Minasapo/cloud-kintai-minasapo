@@ -14,7 +14,7 @@ const PAGE_PADDING_X_MD = designTokenVar("spacing.xxl", "32px");
 const PAGE_PADDING_Y = designTokenVar("spacing.xxl", "32px");
 const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
 
-export default function ShiftPlanManagement() {
+export default function AdminShiftPlan() {
   const { notify } = useLocalNotification();
   const {
     selectedYear,

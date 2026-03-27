@@ -41,14 +41,14 @@ const wrapWithMuiXDateProvider = (node: ReactNode) => (
   </Suspense>
 );
 
+const AdminLayoutRoute = createLazyRoute(
+  () => import("./pages/admin/AdminLayout"),
+);
 const AdminDashboardRoute = createLazyRoute(
   () => import("./pages/admin/AdminDashboard"),
 );
-const AdminDashboardHomeRoute = createLazyRoute(
-  () => import("./pages/admin/AdminDashboardHome"),
-);
-const AdminLayoutRoute = createLazyRoute(
-  () => import("./pages/admin/AdminLayout"),
+const AdminGuardRoute = createLazyRoute(
+  () => import("./pages/admin/AdminGuard"),
   {
     wrap: wrapWithMuiXDateProvider,
   },
@@ -225,16 +225,16 @@ const router = createBrowserRouter([
       },
       {
         path: "/admin",
-        lazy: AdminLayoutRoute,
+        lazy: AdminGuardRoute,
         loader: loadAdminDashboardLoader,
         children: [
           {
             path: "",
-            lazy: AdminDashboardRoute,
+            lazy: AdminLayoutRoute,
             children: [
               {
                 index: true,
-                lazy: AdminDashboardHomeRoute,
+                lazy: AdminDashboardRoute,
               },
               ...adminChildRoutes,
             ],
