@@ -6,7 +6,6 @@ import {
   Box,
   IconButton,
   Stack,
-  styled,
   Table,
   TableBody,
   TableCell,
@@ -14,23 +13,14 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import {
-  Attendance,
-  CloseDate,
-  CompanyHolidayCalendar,
-  HolidayCalendar,
-  Staff,
-} from "@shared/api/graphql/types";
-import dayjs, { Dayjs } from "dayjs";
-import { useMemo, useState } from "react";
-import { NavigateFunction } from "react-router-dom";
+import { Attendance } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import {
   AttendanceState,
   AttendanceStatus,
 } from "@/entities/attendance/lib/AttendanceState";
-import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
@@ -43,69 +33,21 @@ import {
   getAttendanceRowVariant,
 } from "@/entities/attendance/ui/rowVariant";
 
+import { useAttendanceListContext } from "./AttendanceListContext";
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
 
-const DesktopBox = styled(Box)(({ theme }) => ({
-  padding: "0px 40px 40px 40px",
-  [theme.breakpoints.down("lg")]: {
-    padding: "0px 24px 32px 24px",
-  },
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
-}));
+const MONTH_QUERY_KEY = "month";
 
-export default function DesktopList({
-  attendances,
-  staff,
-  holidayCalendars,
-  companyHolidayCalendars,
-  navigate,
-  closeDates,
-  closeDatesLoading,
-  closeDatesError,
-  currentMonth: externalCurrentMonth,
-  onMonthChange,
-}: {
-  attendances: Attendance[];
-  staff: Staff | null | undefined;
-  holidayCalendars: HolidayCalendar[];
-  companyHolidayCalendars: CompanyHolidayCalendar[];
-  navigate: NavigateFunction;
-  closeDates?: CloseDate[];
-  closeDatesLoading?: boolean;
-  closeDatesError?: Error | null;
-  currentMonth?: Dayjs;
-  onMonthChange?: (nextMonth: Dayjs) => void;
-}) {
-  const [internalMonth, setInternalMonth] = useState(() =>
-    dayjs().startOf("month"),
-  );
-  const currentMonth = externalCurrentMonth ?? internalMonth;
-
-  const handleMonthChange = (updater: (prev: Dayjs) => Dayjs) => {
-    const nextMonth = updater(currentMonth);
-    if (onMonthChange) {
-      onMonthChange(nextMonth);
-      return;
-    }
-    setInternalMonth(nextMonth);
-  };
-
-  const monthlyAttendances = useMemo(() => {
-    return attendances
-      .filter((attendance) =>
-        attendance.workDate
-          ? dayjs(attendance.workDate).isSame(currentMonth, "month")
-          : false,
-      )
-      .toSorted((a, b) => {
-        const aValue = a.workDate ? dayjs(a.workDate).valueOf() : 0;
-        const bValue = b.workDate ? dayjs(b.workDate).valueOf() : 0;
-        return aValue - bValue;
-      });
-  }, [attendances, currentMonth]);
+export default function DesktopList() {
+  const {
+    attendances,
+    staff,
+    holidayCalendars,
+    companyHolidayCalendars,
+    navigate,
+    currentMonth,
+  } = useAttendanceListContext();
 
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
     if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
@@ -128,7 +70,10 @@ export default function DesktopList({
     const formattedWorkDate = dayjs(workDate).format(
       AttendanceDate.QueryParamFormat,
     );
-    navigate(`/attendance/${formattedWorkDate}/edit`);
+    const monthQuery = new URLSearchParams({
+      [MONTH_QUERY_KEY]: currentMonth.startOf("month").format("YYYY-MM"),
+    }).toString();
+    navigate(`/attendance/${formattedWorkDate}/edit?${monthQuery}`);
   };
 
   const errorAttendances = (() => {
@@ -149,44 +94,68 @@ export default function DesktopList({
     });
   })();
   return (
-    <DesktopBox>
+    <div className="hidden md:block">
       {errorAttendances.length > 0 && (
-        <Box sx={{ pb: 2, pt: 2 }}>
+        <Box sx={{ pb: 3 }}>
           <Box
             sx={{
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              p: 2,
-              backgroundColor: "background.paper",
+              border: "1px solid rgba(245, 158, 11, 0.22)",
+              borderRadius: "24px",
+              p: 3,
+              background:
+                "linear-gradient(180deg, rgba(255,251,235,0.92) 0%, rgba(255,255,255,0.96) 100%)",
+              boxShadow: "0 24px 54px -40px rgba(15,23,42,0.32)",
             }}
           >
-            <Typography variant="h4" sx={{ mb: 1 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                mb: 1,
+                fontSize: "1.15rem",
+                fontWeight: 600,
+                color: "text.primary",
+              }}
+            >
               打刻エラー一覧 ({errorAttendances.length})
             </Typography>
-            <Alert severity="warning">
+            <Alert
+              severity="warning"
+              sx={{
+                mb: 2,
+                borderRadius: "18px",
+                border: "1px solid rgba(245, 158, 11, 0.18)",
+                bgcolor: "rgba(255,255,255,0.88)",
+              }}
+            >
               <AlertTitle sx={{ fontWeight: "bold" }}>
                 確認してください
               </AlertTitle>
               打刻エラーがあります
             </Alert>
-            <TableContainer>
+            <TableContainer
+              sx={{
+                borderRadius: "18px",
+                border: "1px solid rgba(148, 163, 184, 0.16)",
+                bgcolor: "rgba(255,255,255,0.9)",
+                overflow: "hidden",
+              }}
+            >
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell />
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>勤務日</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ color: "#64748b", fontWeight: 700 }} />
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>勤務日</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
                       勤務時間
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
                       休憩時間(直近)
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>摘要</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>摘要</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
                       作成日時
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
                       更新日時
                     </TableCell>
                     <TableCell />
@@ -257,24 +226,7 @@ export default function DesktopList({
           </Box>
         </Box>
       )}
-      <DesktopCalendarView
-        attendances={attendances}
-        staff={staff}
-        holidayCalendars={holidayCalendars}
-        companyHolidayCalendars={companyHolidayCalendars}
-        navigate={navigate}
-        closeDates={closeDates}
-        closeDatesLoading={closeDatesLoading}
-        closeDatesError={closeDatesError}
-        currentMonth={currentMonth}
-        onMonthChange={(nextMonth) => handleMonthChange(() => nextMonth)}
-      />
-      <Box sx={{ mt: 3 }}>
-        <AttendanceGraph
-          attendances={monthlyAttendances}
-          month={currentMonth}
-        />
-      </Box>
-    </DesktopBox>
+      <DesktopCalendarView />
+    </div>
   );
 }

@@ -1,51 +1,36 @@
 /**
  * @file Layout.tsx
- * @description アプリケーション全体のレイアウトを管理するコンポーネント。認証状態や各種設定・カレンダー情報の取得、コンテキストの提供を行う。
+ * @description アプリケーション全体のレイアウトを管理するコンポーネント。認証状態に応じた遷移制御とシェル描画を担う。
  */
 
-import { useAuthenticator } from "@aws-amplify/ui-react";
-import useAppConfig from "@entities/app-config/model/useAppConfig";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import {
+  Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   LinearProgress,
+  Stack,
+  Typography,
 } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
 import { Hub } from "aws-amplify/utils";
 import dayjs from "dayjs";
-import {
-  ComponentProps,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvider";
+import { useSession } from "@/app/providers/session/useSession";
+import { AppConfigContext } from "@/context/AppConfigContext";
 import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
 import { createLogger } from "@/shared/lib/logger";
-import { createAppTheme } from "@/shared/lib/theme";
 import { AppShell } from "@/shared/ui/layout";
 import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";
-
-import { AppConfigContext } from "./context/AppConfigContext";
-import { AuthContext } from "./context/AuthContext";
-import { ThemeContextProvider } from "./context/ThemeContext";
-import useCognitoUser from "./hooks/useCognitoUser";
-import { useDuplicateAttendanceWarning } from "./hooks/useDuplicateAttendanceWarning";
-import { useLocalNotification } from "./hooks/useLocalNotification";
-import { useWorkflowCommentNotification } from "./hooks/useWorkflowCommentNotification";
-import { useWorkflowNotification } from "./hooks/useWorkflowNotification";
 
 const logger = createLogger("Layout");
 
@@ -119,62 +104,25 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
   );
 }
 
-type AuthContextValue = ComponentProps<typeof AuthContext.Provider>["value"];
-type AppConfigContextValue = ComponentProps<
-  typeof AppConfigContext.Provider
->["value"];
-
-type AppProvidersProps = {
-  children: ReactNode;
-  auth: AuthContextValue;
-  config: AppConfigContextValue;
-};
-
-function AppProviders({ children, auth, config }: AppProvidersProps) {
-  return (
-    <AuthContext.Provider value={auth}>
-      <AppConfigContext.Provider value={config}>
-        <SplitViewProvider>{children}</SplitViewProvider>
-      </AppConfigContext.Provider>
-    </AuthContext.Provider>
-  );
-}
-
 /**
  * アプリケーションのレイアウトコンポーネント。
- * 認証状態や各種設定・カレンダー情報の取得、各種コンテキストの提供を行う。
+ * 認証状態や各種設定に応じたナビゲーションとレイアウト描画を行う。
  *
  * @returns レイアウト構造（ヘッダー・フッター・メイン・スナックバー等）を含むReact要素
  */
 export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signOut, authStatus } = useAuthenticator();
   const {
+    signOut,
+    authStatus,
     cognitoUser,
-    isCognitoUserRole,
-    loading: cognitoUserLoading,
-  } = useCognitoUser();
-
-  // 重複勤怠データの警告をリッスン
-  useDuplicateAttendanceWarning();
-
-  // 通知権限をリクエスト
-  const { requestPermission, permission, isSupported } = useLocalNotification();
-
-  // 認証後に通知権限をリクエスト
-  useEffect(() => {
-    if (
-      authStatus === "authenticated" &&
-      isSupported &&
-      permission === "default"
-    ) {
-      logger.info("Requesting notification permission on authentication");
-      requestPermission().catch((error) => {
-        logger.warn("Failed to request notification permission:", error);
-      });
-    }
-  }, [authStatus, isSupported, permission, requestPermission]);
+    isLoading: sessionLoading,
+    hasRole,
+  } = useSession();
+  const { config: appConfig, isConfigLoading = false } =
+    useContext(AppConfigContext);
+  const cognitoUserLoading = sessionLoading;
 
   useEffect(() => {
     if (authStatus !== "authenticated" || cognitoUserLoading) {
@@ -183,59 +131,14 @@ export default function Layout() {
 
     scheduleIdleRoutePreload({
       currentPathname: location.pathname,
-      isAdminUser:
-        isCognitoUserRole(StaffRole.ADMIN) ||
-        isCognitoUserRole(StaffRole.STAFF_ADMIN),
-      isOperatorUser: isCognitoUserRole(StaffRole.OPERATOR),
+      isAdminUser: hasRole(StaffRole.ADMIN) || hasRole(StaffRole.STAFF_ADMIN),
+      isOperatorUser: hasRole(StaffRole.OPERATOR),
     });
-  }, [authStatus, cognitoUserLoading, isCognitoUserRole, location.pathname]);
-
-  const {
-    fetchConfig,
-    saveConfig,
-    getStartTime,
-    getEndTime,
-    getConfigId,
-    getLinks,
-    getReasons,
-    getOfficeMode,
-    getQuickInputStartTimes,
-    getQuickInputEndTimes,
-    getShiftGroups,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-    getStandardWorkHours,
-    getHourlyPaidHolidayEnabled,
-    getAmHolidayStartTime,
-    getAmHolidayEndTime,
-    getPmHolidayStartTime,
-    getPmHolidayEndTime,
-    getAmPmHolidayEnabled,
-    getSpecialHolidayEnabled,
-    getAbsentEnabled,
-    getWorkflowCategoryOrder,
-    getAttendanceStatisticsEnabled,
-    getWorkflowNotificationEnabled,
-    getShiftCollaborativeEnabled,
-    getShiftDefaultMode,
-    getThemeColor,
-    getThemeTokens,
-  } = useAppConfig();
-
-  const workflowNotificationsEnabled =
-    authStatus === "authenticated" &&
-    isSupported &&
-    permission === "granted" &&
-    getWorkflowNotificationEnabled();
-
-  // ワークフロー申請の通知を購読
-  useWorkflowNotification(workflowNotificationsEnabled);
-  // ワークフローコメント通知を全画面で購読
-  useWorkflowCommentNotification(workflowNotificationsEnabled);
+  }, [authStatus, cognitoUserLoading, hasRole, location.pathname]);
 
   const isAdminUser = useMemo(
-    () => isCognitoUserRole(StaffRole.ADMIN),
-    [isCognitoUserRole],
+    () => hasRole(StaffRole.ADMIN),
+    [hasRole],
   );
 
   const isLoginRoute = location.pathname === "/login";
@@ -318,138 +221,67 @@ export default function Layout() {
     signOut,
   ]);
 
-  const authContextValue = useMemo(
-    () => ({
-      signOut,
-      signIn: () => navigate("/login"),
-      isCognitoUserRole,
-      user,
-      authStatus,
-      cognitoUser,
-    }),
-    [signOut, navigate, isCognitoUserRole, user, authStatus, cognitoUser],
-  );
-
-  const appConfigContextValue = useMemo(
-    () => ({
-      fetchConfig,
-      saveConfig,
-      getStartTime,
-      getEndTime,
-      getStandardWorkHours,
-      getConfigId,
-      getLinks,
-      getReasons,
-      getOfficeMode,
-      getQuickInputStartTimes,
-      getQuickInputEndTimes,
-      getShiftGroups,
-      getLunchRestStartTime,
-      getLunchRestEndTime,
-      getHourlyPaidHolidayEnabled,
-      getAmHolidayStartTime,
-      getAmHolidayEndTime,
-      getPmHolidayStartTime,
-      getPmHolidayEndTime,
-      getAmPmHolidayEnabled,
-      getSpecialHolidayEnabled,
-      getAbsentEnabled,
-      getWorkflowCategoryOrder,
-      getAttendanceStatisticsEnabled,
-      getWorkflowNotificationEnabled,
-      getShiftCollaborativeEnabled,
-      getShiftDefaultMode,
-      getThemeColor,
-      getThemeTokens,
-    }),
-    [
-      fetchConfig,
-      saveConfig,
-      getStartTime,
-      getEndTime,
-      getStandardWorkHours,
-      getConfigId,
-      getLinks,
-      getReasons,
-      getOfficeMode,
-      getQuickInputStartTimes,
-      getQuickInputEndTimes,
-      getShiftGroups,
-      getLunchRestStartTime,
-      getLunchRestEndTime,
-      getHourlyPaidHolidayEnabled,
-      getAmHolidayStartTime,
-      getAmHolidayEndTime,
-      getPmHolidayStartTime,
-      getPmHolidayEndTime,
-      getAmPmHolidayEnabled,
-      getSpecialHolidayEnabled,
-      getAbsentEnabled,
-      getWorkflowCategoryOrder,
-      getAttendanceStatisticsEnabled,
-      getWorkflowNotificationEnabled,
-      getShiftCollaborativeEnabled,
-      getShiftDefaultMode,
-      getThemeColor,
-      getThemeTokens,
-    ],
-  );
-
-  const configuredThemeColor = useMemo(
-    () => (typeof getThemeColor === "function" ? getThemeColor() : undefined),
-    [getThemeColor],
-  );
-
-  const appTheme = useMemo(
-    () => createAppTheme(configuredThemeColor),
-    [configuredThemeColor],
-  );
-
   const shouldBlockUnauthenticated =
     authStatus === "unauthenticated" && !isLoginRoute;
+  const shouldBlockAppConfigBootstrap =
+    authStatus === "authenticated" && isConfigLoading && !appConfig;
 
   const shouldBlockLayoutBootstrap =
     authStatus === "configuring" ||
     cognitoUserLoading ||
-    shouldBlockUnauthenticated;
+    shouldBlockUnauthenticated ||
+    shouldBlockAppConfigBootstrap;
 
   if (shouldBlockLayoutBootstrap) {
     return (
-      <ThemeContextProvider>
-        <ThemeProvider theme={appTheme}>
-          <LinearProgress data-testid="layout-linear-progress" />
-        </ThemeProvider>
-      </ThemeContextProvider>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "background.default",
+        }}
+      >
+        <LinearProgress data-testid="layout-linear-progress" />
+        <Stack
+          sx={{ flex: 1 }}
+          alignItems="center"
+          justifyContent="center"
+          spacing={2}
+        >
+          <CircularProgress size={28} />
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            data-testid="layout-loading-message"
+          >
+            画面を更新しています...
+          </Typography>
+        </Stack>
+      </Box>
     );
   }
 
   return (
-    <ThemeContextProvider>
-      <ThemeProvider theme={appTheme}>
-        <AppProviders
-          auth={authContextValue}
-          config={appConfigContextValue}
-        >
-          <AppShell
-            header={<Header />}
-            main={<Outlet />}
-            footer={<Footer />}
-            snackbar={<SnackbarGroup />}
-            slotProps={{
-              root: { "data-testid": "layout-stack" },
-              header: { "data-testid": "layout-header" },
-              main: { "data-testid": "layout-main" },
-              footer: { "data-testid": "layout-footer" },
-              snackbar: { "data-testid": "layout-snackbar" },
-            }}
-          />
-          {isAdminUser && (
-            <MissingCloseDateAlert
-              onConfirm={() => navigate("/admin/master/job_term")}
-            />
-          )}
-        </AppProviders>
-      </ThemeProvider>
-    </ThemeContextProvider>
+    <>
+      <AppShell
+        header={<Header />}
+        main={<Outlet />}
+        footer={<Footer />}
+        snackbar={<SnackbarGroup />}
+        slotProps={{
+          root: { "data-testid": "layout-stack" },
+          header: { "data-testid": "layout-header" },
+          main: { "data-testid": "layout-main" },
+          footer: { "data-testid": "layout-footer" },
+          snackbar: { "data-testid": "layout-snackbar" },
+        }}
+      />
+      {isAdminUser && (
+        <MissingCloseDateAlert
+          onConfirm={() => navigate("/admin/master/job_term")}
+        />
+      )}
+    </>
   );
 }

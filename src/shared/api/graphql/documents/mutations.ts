@@ -79,6 +79,9 @@ export const createAppConfig = /* GraphQL */ `mutation CreateAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -155,6 +158,9 @@ export const updateAppConfig = /* GraphQL */ `mutation UpdateAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -231,6 +237,9 @@ export const deleteAppConfig = /* GraphQL */ `mutation DeleteAppConfig(
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -654,6 +663,7 @@ export const createAttendance = /* GraphQL */ `mutation CreateAttendance(
   createAttendance(input: $input, condition: $condition) {
     id
     staffId
+    staffWorkDateKey
     workDate
     startTime
     endTime
@@ -753,6 +763,7 @@ export const updateAttendance = /* GraphQL */ `mutation UpdateAttendance(
   updateAttendance(input: $input, condition: $condition) {
     id
     staffId
+    staffWorkDateKey
     workDate
     startTime
     endTime
@@ -852,6 +863,7 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
   deleteAttendance(input: $input, condition: $condition) {
     id
     staffId
+    staffWorkDateKey
     workDate
     startTime
     endTime
@@ -1051,6 +1063,15 @@ export const createShiftRequest = /* GraphQL */ `mutation CreateShiftRequest(
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -1106,6 +1127,15 @@ export const updateShiftRequest = /* GraphQL */ `mutation UpdateShiftRequest(
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -1159,6 +1189,15 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
       recordedAt
       recordedByStaffId
       changeReason
+      __typename
+    }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
       __typename
     }
     createdAt
@@ -1565,6 +1604,11 @@ export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
     ipAddress
     userAgent
     metadata
+    clientTimezone
+    occurredAt
+    resolvedWorkDate
+    idempotencyKey
+    appVersion
     severity
     version
     createdAt
@@ -1591,6 +1635,11 @@ export const updateOperationLog = /* GraphQL */ `mutation UpdateOperationLog(
     ipAddress
     userAgent
     metadata
+    clientTimezone
+    occurredAt
+    resolvedWorkDate
+    idempotencyKey
+    appVersion
     severity
     version
     createdAt
@@ -1617,6 +1666,11 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
     ipAddress
     userAgent
     metadata
+    clientTimezone
+    occurredAt
+    resolvedWorkDate
+    idempotencyKey
+    appVersion
     severity
     version
     createdAt
@@ -1819,4 +1873,103 @@ export const deleteDailyReport = /* GraphQL */ `mutation DeleteDailyReport(
 ` as GeneratedMutation<
   APITypes.DeleteDailyReportMutationVariables,
   APITypes.DeleteDailyReportMutation
+>;
+export const upsertAttendanceByStaffAndDate = /* GraphQL */ `mutation UpsertAttendanceByStaffAndDate(
+  $input: UpsertAttendanceByStaffAndDateInput!
+) {
+  upsertAttendanceByStaffAndDate(input: $input) {
+    id
+    staffId
+    staffWorkDateKey
+    workDate
+    startTime
+    endTime
+    goDirectlyFlag
+    returnDirectlyFlag
+    absentFlag
+    rests {
+      startTime
+      endTime
+      __typename
+    }
+    hourlyPaidHolidayTimes {
+      startTime
+      endTime
+      __typename
+    }
+    remarks
+    paidHolidayFlag
+    specialHolidayFlag
+    isDeemedHoliday
+    hourlyPaidHolidayHours
+    substituteHolidayDate
+    histories {
+      staffId
+      workDate
+      startTime
+      endTime
+      goDirectlyFlag
+      absentFlag
+      returnDirectlyFlag
+      rests {
+        startTime
+        endTime
+        __typename
+      }
+      hourlyPaidHolidayTimes {
+        startTime
+        endTime
+        __typename
+      }
+      remarks
+      paidHolidayFlag
+      specialHolidayFlag
+      hourlyPaidHolidayHours
+      substituteHolidayFlag
+      substituteHolidayDate
+      createdAt
+      __typename
+    }
+    changeRequests {
+      startTime
+      endTime
+      goDirectlyFlag
+      absentFlag
+      returnDirectlyFlag
+      rests {
+        startTime
+        endTime
+        __typename
+      }
+      hourlyPaidHolidayTimes {
+        startTime
+        endTime
+        __typename
+      }
+      remarks
+      paidHolidayFlag
+      specialHolidayFlag
+      hourlyPaidHolidayHours
+      substituteHolidayFlag
+      substituteHolidayDate
+      completed
+      comment
+      staffComment
+      __typename
+    }
+    systemComments {
+      comment
+      confirmed
+      createdAt
+      __typename
+    }
+    revision
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpsertAttendanceByStaffAndDateMutationVariables,
+  APITypes.UpsertAttendanceByStaffAndDateMutation
 >;

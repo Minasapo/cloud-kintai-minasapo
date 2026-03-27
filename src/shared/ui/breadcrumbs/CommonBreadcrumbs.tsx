@@ -1,7 +1,7 @@
-import { Breadcrumbs, Link, Typography } from "@mui/material";
-import { CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
+import Link from "@/shared/ui/link/Link";
 
 export type BreadcrumbItem = {
   label: string;
@@ -20,23 +20,23 @@ export default function CommonBreadcrumbs({
   const BREADCRUMB_GAP = designTokenVar("component.breadcrumbs.gap", "8px");
   const BREADCRUMB_SEPARATOR_COLOR = designTokenVar(
     "component.breadcrumbs.separatorColor",
-    "#A0B1A7"
+    "#A0B1A7",
   );
   const BREADCRUMB_LINK_COLOR = designTokenVar(
     "component.breadcrumbs.linkColor",
-    "#0FA85E"
+    "#0FA85E",
   );
   const BREADCRUMB_TEXT_COLOR = designTokenVar(
     "component.breadcrumbs.textColor",
-    "#45574F"
+    "#45574F",
   );
   const BREADCRUMB_FONT_SIZE = designTokenVar(
     "component.breadcrumbs.fontSize",
-    "14px"
+    "14px",
   );
   const BREADCRUMB_FONT_WEIGHT = designTokenVar(
     "component.breadcrumbs.fontWeight",
-    "500"
+    "500",
   );
   const breadcrumbVars: CSSProperties & Record<`--${string}`, string> = {
     "--breadcrumbs-gap": BREADCRUMB_GAP,
@@ -48,43 +48,41 @@ export default function CommonBreadcrumbs({
   };
 
   return (
-    <Breadcrumbs
-      className="[&_.MuiBreadcrumbs-li]:text-[length:var(--breadcrumbs-font-size)] [&_.MuiBreadcrumbs-li]:font-[var(--breadcrumbs-font-weight)] [&_.MuiBreadcrumbs-ol]:gap-[var(--breadcrumbs-gap)]"
+    <nav
+      aria-label="breadcrumb"
+      className="text-[length:var(--breadcrumbs-font-size)] font-[var(--breadcrumbs-font-weight)]"
       style={breadcrumbVars}
-      separator={
-        <Typography
-          component="span"
-          className="text-[color:var(--breadcrumbs-separator-color)]"
-        >
-          /
-        </Typography>
-      }
     >
-      {items.map((item, idx) =>
-        item.href ? (
-          <Link
-            href={item.href}
-            key={idx}
-            underline="hover"
-            className="text-[color:var(--breadcrumbs-link-color)] no-underline hover:underline"
-          >
-            {item.label}
-          </Link>
-        ) : (
-          <Typography
-            className="text-[color:var(--breadcrumbs-text-color)]"
-            key={idx}
-          >
-            {item.label}
-          </Typography>
-        )
-      )}
-      <Typography
-        className="text-[color:var(--breadcrumbs-text-color)]"
-        aria-current="page"
-      >
-        {current}
-      </Typography>
-    </Breadcrumbs>
+      <ol className="flex flex-wrap items-center gap-[var(--breadcrumbs-gap)]">
+        {items.map((item, idx) => (
+          <li key={`${item.label}-${idx}`} className="flex items-center gap-[var(--breadcrumbs-gap)]">
+            {item.href ? (
+              <Link
+                href={item.href}
+                className="text-[color:var(--breadcrumbs-link-color)] no-underline hover:underline focus-visible:underline"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <span className="text-[color:var(--breadcrumbs-text-color)]">
+                {item.label}
+              </span>
+            )}
+            <span
+              aria-hidden="true"
+              className="text-[color:var(--breadcrumbs-separator-color)]"
+            >
+              /
+            </span>
+          </li>
+        ))}
+        <li
+          className="text-[color:var(--breadcrumbs-text-color)]"
+          aria-current="page"
+        >
+          {current}
+        </li>
+      </ol>
+    </nav>
   );
 }

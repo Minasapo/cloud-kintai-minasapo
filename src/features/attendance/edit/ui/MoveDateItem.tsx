@@ -1,13 +1,15 @@
 import "@/shared/lib/dayjs-locale";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Box, IconButton, Stack } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { WorkDateInput } from "@/features/attendance/edit/ui/moveDateItemParts";
+import {
+  applyWorkDateValue,
+  buildAttendanceEditPath,
+} from "@/features/attendance/edit/ui/moveDateItemUtils";
 
 export default function MoveDateItem({
   staffId,
@@ -17,58 +19,52 @@ export default function MoveDateItem({
   workDate: dayjs.Dayjs | null;
 }) {
   const navigate = useNavigate();
-  const today = dayjs();
+  const [searchParams] = useSearchParams();
+  const [selectedDate, setSelectedDate] = useState(
+    workDate?.format("YYYY-MM-DD") ?? "",
+  );
 
   if (!workDate) {
     return null;
   }
+  const defaultDateValue = workDate.format("YYYY-MM-DD");
 
   const isAdmin = Boolean(staffId);
   const format = isAdmin
     ? AttendanceDate.DatePickerFormat
     : AttendanceDate.DisplayFormat;
   const buildPath = (date: dayjs.Dayjs) => {
-    const formatted = date.format(AttendanceDate.QueryParamFormat);
-    return isAdmin
-      ? `/admin/attendances/edit/${formatted}/${staffId}`
-      : `/attendance/${formatted}/edit`;
+    return buildAttendanceEditPath({
+      date,
+      isAdmin,
+      staffId,
+      searchParams,
+      queryParamFormat: AttendanceDate.QueryParamFormat,
+    });
   };
 
   return (
-    <Stack direction="row" spacing={2} alignItems="center">
-      <Box>
-        <IconButton
-          onClick={() => {
-            const prevDate = workDate.add(-1, "day");
-            navigate(buildPath(prevDate));
-          }}
-        >
-          <ArrowBackIcon />
-        </IconButton>
-      </Box>
-      <DatePicker
-        value={workDate}
-        format={format}
-        slotProps={{
-          textField: { size: "small" },
-        }}
-        onChange={(date) => {
-          if (date) {
-            navigate(buildPath(date));
-          }
-        }}
+    <div className="flex items-center gap-2">
+      <WorkDateInput
+        key={defaultDateValue}
+        defaultValue={defaultDateValue}
+        ariaLabel={format}
+        onChange={(value) => setSelectedDate(value)}
       />
-      <Box>
-        <IconButton
-          disabled={!isAdmin && workDate.isSame(today, "day")}
-          onClick={() => {
-            const nextDate = workDate.add(1, "day");
-            navigate(buildPath(nextDate));
-          }}
-        >
-          <ArrowForwardIcon />
-        </IconButton>
-      </Box>
-    </Stack>
+      <button
+        type="button"
+        disabled={!selectedDate}
+        className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-[10px] border border-emerald-500/25 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 transition hover:border-emerald-500/40 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={() =>
+          applyWorkDateValue({
+            value: selectedDate,
+            navigate,
+            buildPath,
+          })
+        }
+      >
+        移動
+      </button>
+    </div>
   );
 }

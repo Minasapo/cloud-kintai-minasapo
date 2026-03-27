@@ -1,29 +1,20 @@
 import AddIcon from "@mui/icons-material/Add";
 import {
-  Box,
   Button,
   ButtonBase,
-  Divider,
-  Paper,
-  Stack,
   TextField,
-  Typography,
 } from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import Title from "@shared/ui/typography/Title";
 import { useContext, useEffect, useMemo, useState } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
+import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { resolveThemeColor } from "@/shared/config/theme";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
 
 const basePalette = [
   "#1976d2",
@@ -68,7 +59,7 @@ const DEFAULT_BRAND_COLOR = resolveThemeColor();
 const paletteCandidates = [
   DEFAULT_BRAND_COLOR,
   ...basePalette.filter(
-    (color) => color.toLowerCase() !== DEFAULT_BRAND_COLOR.toLowerCase()
+    (color) => color.toLowerCase() !== DEFAULT_BRAND_COLOR.toLowerCase(),
   ),
 ];
 
@@ -79,7 +70,7 @@ const TILE_SIZE = 44;
 const MAX_TILES_PER_ROW = 10;
 
 export default function AdminTheme() {
-  const dispatch = useAppDispatchV2();
+  const { notify } = useLocalNotification();
   const {
     getThemeColor,
     getConfigId,
@@ -93,13 +84,11 @@ export default function AdminTheme() {
   const [saving, setSaving] = useState(false);
   const isValidHex = useMemo(
     () => /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(colorCode),
-    [colorCode]
+    [colorCode],
   );
   const themeTokens = getThemeTokens();
   const adminPanelTokens = themeTokens.component.adminPanel;
   const panelSpacing = adminPanelTokens.sectionSpacing;
-  const panelDividerColor = adminPanelTokens.dividerColor;
-  const panelSurface = adminPanelTokens.surface;
 
   useEffect(() => {
     const themeColor =
@@ -110,7 +99,7 @@ export default function AdminTheme() {
     setColorCode(themeColor);
     setCurrentColor(themeColor);
     const matchesPreset = presetPalette.some(
-      (color) => color.toLowerCase() === themeColor.toLowerCase()
+      (color) => color.toLowerCase() === themeColor.toLowerCase(),
     );
     setCustomMode(!matchesPreset);
   }, [getThemeColor]);
@@ -130,10 +119,9 @@ export default function AdminTheme() {
     normalizedColorCode !== normalizedCurrentColor;
   const previewTokens = useMemo(
     () => (isValidHex ? getThemeTokens(normalizedColorCode) : themeTokens),
-    [isValidHex, normalizedColorCode, themeTokens, getThemeTokens]
+    [isValidHex, normalizedColorCode, themeTokens, getThemeTokens],
   );
   const previewPanelTokens = previewTokens.component.adminPanel;
-  const previewPanelSpacing = previewPanelTokens.sectionSpacing;
   const previewPanelDividerColor = previewPanelTokens.dividerColor;
   const previewPanelSurface = previewPanelTokens.surface;
   const brandPrimary = previewTokens.color.brand.primary.base;
@@ -155,13 +143,21 @@ export default function AdminTheme() {
 
   const handleSave = async () => {
     if (!isValidHex) {
-      dispatch(setSnackbarError(E15001));
+      void notify("エラー", {
+        body: E15001,
+        mode: "await-interaction",
+        priority: "high",
+      });
       return;
     }
 
     const payloadColor = normalizeColor(colorCode);
     if (!payloadColor) {
-      dispatch(setSnackbarError(E15001));
+      void notify("エラー", {
+        body: E15001,
+        mode: "await-interaction",
+        priority: "high",
+      });
       return;
     }
 
@@ -181,36 +177,28 @@ export default function AdminTheme() {
       }
       await fetchConfig();
       setCurrentColor(payloadColor);
-      dispatch(setSnackbarSuccess(S15001));
+      void notify(S15001, { mode: "auto-close" });
     } catch (error) {
       console.error(error);
-      dispatch(setSnackbarError(E15001));
+      void notify("エラー", {
+        body: E15001,
+        mode: "await-interaction",
+        priority: "high",
+      });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Stack spacing={0} sx={{ gap: panelSpacing }}>
-      <Title>テーマ</Title>
-      <Paper
-        variant="outlined"
-        sx={{
-          p: panelSpacing,
-          borderColor: panelDividerColor,
-          backgroundColor: panelSurface,
-        }}
-      >
-        <Stack spacing={0} sx={{ gap: panelSpacing }}>
-          <Typography color="text.secondary">
-            テーマを選択すると、ヘッダーとフッターの配色が変更されます。
-          </Typography>
-          <Stack spacing={1}>
-            <Typography variant="subtitle2">テーマ</Typography>
-            <Box
-              sx={{
-                display: "grid",
-                gap: paletteTileGap,
+    <AdminSettingsLayout title="テーマ" description="テーマを選択すると、ヘッダーとフッターの配色が変更されます。">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-4">
+            <h3 className="text-sm font-semibold text-slate-800">テーマカラー</h3>
+            <div
+              className="grid gap-2"
+              style={{
                 gridTemplateColumns: `repeat(auto-fill, minmax(${TILE_SIZE}px, 1fr))`,
                 maxWidth: `${
                   MAX_TILES_PER_ROW * TILE_SIZE +
@@ -272,13 +260,14 @@ export default function AdminTheme() {
               >
                 <AddIcon />
               </ButtonBase>
-            </Box>
-          </Stack>
+            </div>
+          </div>
+
           {customMode && (
-            <Stack spacing={1}>
-              <Typography variant="subtitle2">
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-semibold text-slate-800">
                 カラーコードを直接指定
-              </Typography>
+              </h3>
               <TextField
                 size="small"
                 label="#RRGGBB"
@@ -299,71 +288,61 @@ export default function AdminTheme() {
                   },
                 }}
               />
-            </Stack>
+            </div>
           )}
-          <Stack spacing={1}>
-            <Typography variant="subtitle2">プレビュー</Typography>
-            <Paper
-              elevation={0}
-              sx={{
-                p: previewPanelSpacing,
-                borderRadius: 2,
-                border: `1px solid ${previewPanelDividerColor}`,
+
+          <div className="flex flex-col gap-2">
+            <h3 className="text-sm font-semibold text-slate-800">プレビュー</h3>
+            <div
+              className="p-4 rounded-lg border max-w-sm flex flex-col gap-2"
+              style={{
+                borderColor: previewPanelDividerColor,
                 backgroundColor: previewPanelSurface,
-                maxWidth: 360,
               }}
             >
-              <Stack spacing={0} sx={{ gap: previewPanelSpacing / 2 }}>
-                <Typography variant="subtitle1">
-                  管理パネルプレビュー
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  選択したカラーがフォーカスリングやボタンにどう反映されるかを確認できます。
-                </Typography>
-                <Divider sx={{ borderColor: previewPanelDividerColor }} />
-                <Button
-                  variant="contained"
-                  size="small"
-                  sx={{
-                    alignSelf: "flex-start",
-                    textTransform: "none",
-                    backgroundColor: brandPrimary,
-                    color: previewTokens.color.brand.primary.contrastText,
+              <h4 className="text-base font-medium text-slate-800">
+                管理パネルプレビュー
+              </h4>
+              <p className="text-xs text-slate-500 pb-2 border-b" style={{ borderColor: previewPanelDividerColor }}>
+                選択したカラーがフォーカスリングやボタンにどう反映されるかを確認できます。
+              </p>
+              <Button
+                variant="contained"
+                size="small"
+                sx={{
+                  alignSelf: "flex-start",
+                  textTransform: "none",
+                  backgroundColor: brandPrimary,
+                  color: previewTokens.color.brand.primary.contrastText,
+                  boxShadow: "none",
+                  mt: 1,
+                  "&:hover": {
+                    backgroundColor: previewTokens.color.brand.primary.dark,
                     boxShadow: "none",
-                    "&:hover": {
-                      backgroundColor: previewTokens.color.brand.primary.dark,
-                      boxShadow: "none",
-                    },
-                    "&:focus-visible": {
-                      outline: "none",
-                      boxShadow: `0 0 0 3px ${focusRingColor}`,
-                    },
-                  }}
-                >
-                  プライマリボタン
-                </Button>
-              </Stack>
-            </Paper>
-          </Stack>
-          <Divider sx={{ borderColor: panelDividerColor }} />
-          <Stack direction="row" justifyContent="flex-end">
-            <Button
-              variant="contained"
+                  },
+                  "&:focus-visible": {
+                    outline: "none",
+                    boxShadow: `0 0 0 3px ${focusRingColor}`,
+                  },
+                }}
+              >
+                プライマリボタン
+              </Button>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-200 flex justify-end">
+            <button
+              className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
               onClick={handleSave}
               disabled={!isValidHex || saving || !isDirty}
-              sx={{
-                minWidth: 140,
-                "&:focus-visible": {
-                  outline: "none",
-                  boxShadow: `0 0 0 3px ${focusRingColor}`,
-                },
-              }}
+              type="button"
             >
               {saving ? "保存中..." : "保存"}
-            </Button>
-          </Stack>
-        </Stack>
-      </Paper>
-    </Stack>
+            </button>
+          </div>
+        </div>
+      </div>
+    </AdminSettingsLayout>
   );
 }

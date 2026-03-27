@@ -1,6 +1,4 @@
-import { Box, type BoxProps, Stack, type StackProps } from "@mui/material";
-import type { SxProps, Theme } from "@mui/material/styles";
-import type { ReactNode } from "react";
+import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -9,11 +7,11 @@ type TestableProps<T> = T & {
 };
 
 type SlotProps = {
-  root?: TestableProps<StackProps>;
-  header?: TestableProps<BoxProps>;
-  main?: TestableProps<BoxProps>;
-  footer?: TestableProps<BoxProps>;
-  snackbar?: TestableProps<BoxProps>;
+  root?: TestableProps<HTMLAttributes<HTMLDivElement> & { sx?: CSSProperties }>;
+  header?: TestableProps<HTMLAttributes<HTMLDivElement> & { sx?: CSSProperties }>;
+  main?: TestableProps<HTMLAttributes<HTMLElement> & { sx?: CSSProperties }>;
+  footer?: TestableProps<HTMLAttributes<HTMLElement> & { sx?: CSSProperties }>;
+  snackbar?: TestableProps<HTMLAttributes<HTMLDivElement> & { sx?: CSSProperties }>;
 };
 
 type AppShellProps = {
@@ -37,22 +35,7 @@ const CONTENT_BACKGROUND = designTokenVar(
   "component.appShell.contentBackground",
   "#F8FAF9"
 );
-
-type MergeableSx = SxProps<Theme>;
-
-const normalizeSxArray = (value?: MergeableSx): MergeableSx[] => {
-  if (!value) return [];
-  return Array.isArray(value) ? value : [value];
-};
-
-const mergeSx = (base: MergeableSx, override?: MergeableSx): MergeableSx => {
-  if (!override) {
-    return base;
-  }
-  const baseArray = normalizeSxArray(base);
-  const overrideArray = normalizeSxArray(override);
-  return [...baseArray, ...overrideArray] as MergeableSx;
-};
+const HEADER_LAYER_Z_INDEX = 45;
 
 export default function AppShell({
   header,
@@ -76,70 +59,87 @@ export default function AppShell({
   const { sx: snackbarSx, ...snackbarRest } = snackbarSlot ?? {};
 
   return (
-    <Stack
+    <div
       {...rootRest}
-      sx={mergeSx(
-        {
-          minHeight,
-          backgroundColor: APP_BACKGROUND,
-          color: APP_TEXT_COLOR,
-        },
-        rootSx
-      )}
+      style={{
+        minHeight,
+        width: "100%",
+        maxWidth: "100vw",
+        minWidth: 0,
+        backgroundColor: APP_BACKGROUND,
+        color: APP_TEXT_COLOR,
+        display: "flex",
+        flexDirection: "column",
+        overflowX: "hidden",
+        ...rootSx,
+        ...rootRest.style,
+      }}
     >
-      <Box
+      <div
         {...headerRest}
-        sx={mergeSx(
-          {
-            flexShrink: 0,
-          },
-          headerSx
-        )}
+        style={{
+          position: "relative",
+          // Keep header popovers above sticky content in main, but below modal overlays (z-50).
+          zIndex: HEADER_LAYER_Z_INDEX,
+          flexShrink: 0,
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          overflow: "visible",
+          ...headerSx,
+          ...headerRest.style,
+        }}
       >
         {header}
-      </Box>
-      <Box
-        component="main"
+      </div>
+      <main
         {...mainRest}
-        sx={mergeSx(
-          {
-            flex: 1,
-            overflow: "auto",
-            backgroundColor: CONTENT_BACKGROUND,
-          },
-          mainSx
-        )}
+        style={{
+          flex: 1,
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          overflowX: "hidden",
+          overflowY: "auto",
+          backgroundColor: CONTENT_BACKGROUND,
+          ...mainSx,
+          ...mainRest.style,
+        }}
       >
         {main}
-      </Box>
+      </main>
       {footer && (
-        <Box
-          component="footer"
+        <footer
           {...footerRest}
-          sx={mergeSx(
-            {
-              flexShrink: 0,
-            },
-            footerSx
-          )}
+          style={{
+            flexShrink: 0,
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            overflowX: "hidden",
+            ...footerSx,
+            ...footerRest.style,
+          }}
         >
           {footer}
-        </Box>
+        </footer>
       )}
       {snackbar && (
-        <Box
+        <div
           {...snackbarRest}
-          sx={mergeSx(
-            {
-              position: "relative",
-              zIndex: 1,
-            },
-            snackbarSx
-          )}
+          style={{
+            position: "relative",
+            zIndex: 1,
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            ...snackbarSx,
+            ...snackbarRest.style,
+          }}
         >
           {snackbar}
-        </Box>
+        </div>
       )}
-    </Stack>
+    </div>
   );
 }

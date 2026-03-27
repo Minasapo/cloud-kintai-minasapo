@@ -69,6 +69,9 @@ export const getAppConfig = /* GraphQL */ `query GetAppConfig($id: ID!) {
     amPmHolidayEnabled
     officeMode
     attendanceStatisticsEnabled
+    workflowNotificationEnabled
+    timeRecorderAnnouncementEnabled
+    timeRecorderAnnouncementMessage
     absentEnabled
     hourlyPaidHolidayEnabled
     links {
@@ -147,6 +150,9 @@ export const listAppConfigs = /* GraphQL */ `query ListAppConfigs(
       amPmHolidayEnabled
       officeMode
       attendanceStatisticsEnabled
+      workflowNotificationEnabled
+      timeRecorderAnnouncementEnabled
+      timeRecorderAnnouncementMessage
       absentEnabled
       hourlyPaidHolidayEnabled
       links {
@@ -519,6 +525,7 @@ export const getAttendance = /* GraphQL */ `query GetAttendance($id: ID!) {
   getAttendance(id: $id) {
     id
     staffId
+    staffWorkDateKey
     workDate
     startTime
     endTime
@@ -620,6 +627,7 @@ export const listAttendances = /* GraphQL */ `query ListAttendances(
     items {
       id
       staffId
+      staffWorkDateKey
       workDate
       startTime
       endTime
@@ -734,6 +742,7 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
     items {
       id
       staffId
+      staffWorkDateKey
       workDate
       startTime
       endTime
@@ -829,6 +838,119 @@ export const attendancesByStaffId = /* GraphQL */ `query AttendancesByStaffId(
   APITypes.AttendancesByStaffIdQueryVariables,
   APITypes.AttendancesByStaffIdQuery
 >;
+export const attendancesByStaffWorkDate = /* GraphQL */ `query AttendancesByStaffWorkDate(
+  $staffWorkDateKey: String!
+  $sortDirection: ModelSortDirection
+  $filter: ModelAttendanceFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  attendancesByStaffWorkDate(
+    staffWorkDateKey: $staffWorkDateKey
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      staffId
+      staffWorkDateKey
+      workDate
+      startTime
+      endTime
+      goDirectlyFlag
+      returnDirectlyFlag
+      absentFlag
+      rests {
+        startTime
+        endTime
+        __typename
+      }
+      hourlyPaidHolidayTimes {
+        startTime
+        endTime
+        __typename
+      }
+      remarks
+      paidHolidayFlag
+      specialHolidayFlag
+      isDeemedHoliday
+      hourlyPaidHolidayHours
+      substituteHolidayDate
+      histories {
+        staffId
+        workDate
+        startTime
+        endTime
+        goDirectlyFlag
+        absentFlag
+        returnDirectlyFlag
+        rests {
+          startTime
+          endTime
+          __typename
+        }
+        hourlyPaidHolidayTimes {
+          startTime
+          endTime
+          __typename
+        }
+        remarks
+        paidHolidayFlag
+        specialHolidayFlag
+        hourlyPaidHolidayHours
+        substituteHolidayFlag
+        substituteHolidayDate
+        createdAt
+        __typename
+      }
+      changeRequests {
+        startTime
+        endTime
+        goDirectlyFlag
+        absentFlag
+        returnDirectlyFlag
+        rests {
+          startTime
+          endTime
+          __typename
+        }
+        hourlyPaidHolidayTimes {
+          startTime
+          endTime
+          __typename
+        }
+        remarks
+        paidHolidayFlag
+        specialHolidayFlag
+        hourlyPaidHolidayHours
+        substituteHolidayFlag
+        substituteHolidayDate
+        completed
+        comment
+        staffComment
+        __typename
+      }
+      systemComments {
+        comment
+        confirmed
+        createdAt
+        __typename
+      }
+      revision
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AttendancesByStaffWorkDateQueryVariables,
+  APITypes.AttendancesByStaffWorkDateQuery
+>;
 export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
   getDocument(id: $id) {
     id
@@ -915,6 +1037,15 @@ export const getShiftRequest = /* GraphQL */ `query GetShiftRequest($id: ID!) {
       changeReason
       __typename
     }
+    comments {
+      id
+      cellKey
+      staffId
+      authorName
+      body
+      createdAt
+      __typename
+    }
     createdAt
     __typename
   }
@@ -970,6 +1101,15 @@ export const listShiftRequests = /* GraphQL */ `query ListShiftRequests(
         recordedAt
         recordedByStaffId
         changeReason
+        __typename
+      }
+      comments {
+        id
+        cellKey
+        staffId
+        authorName
+        body
+        createdAt
         __typename
       }
       createdAt
@@ -1040,6 +1180,15 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
         recordedAt
         recordedByStaffId
         changeReason
+        __typename
+      }
+      comments {
+        id
+        cellKey
+        staffId
+        authorName
+        body
+        createdAt
         __typename
       }
       createdAt
@@ -1555,6 +1704,11 @@ export const getOperationLog = /* GraphQL */ `query GetOperationLog($id: ID!) {
     ipAddress
     userAgent
     metadata
+    clientTimezone
+    occurredAt
+    resolvedWorkDate
+    idempotencyKey
+    appVersion
     severity
     version
     createdAt
@@ -1583,6 +1737,11 @@ export const listOperationLogs = /* GraphQL */ `query ListOperationLogs(
       ipAddress
       userAgent
       metadata
+      clientTimezone
+      occurredAt
+      resolvedWorkDate
+      idempotencyKey
+      appVersion
       severity
       version
       createdAt
@@ -1624,6 +1783,11 @@ export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffI
       ipAddress
       userAgent
       metadata
+      clientTimezone
+      occurredAt
+      resolvedWorkDate
+      idempotencyKey
+      appVersion
       severity
       version
       createdAt

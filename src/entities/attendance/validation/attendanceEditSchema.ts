@@ -33,8 +33,8 @@ const dateField = z.union([isoDateSchema, z.null(), z.undefined()]);
 
 const restIntervalSchema = createTimeRangeValidator(
   z.object({
-    startTime: dateTimeField.optional(),
-    endTime: dateTimeField.optional(),
+    startTime: dateTimeField,
+    endTime: dateTimeField,
   }),
   {
     incomplete: validationMessages.attendance.rest.incomplete,
@@ -44,8 +44,8 @@ const restIntervalSchema = createTimeRangeValidator(
 
 const hourlyPaidHolidayTimeSchema = createTimeRangeValidator(
   z.object({
-    startTime: dateTimeField.optional(),
-    endTime: dateTimeField.optional(),
+    startTime: dateTimeField,
+    endTime: dateTimeField,
   }),
   {
     incomplete: validationMessages.attendance.hourlyPaidHoliday.incomplete,

@@ -1,93 +1,150 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext } from "react";
+import { useContext, useRef, useState } from "react";
 import { Controller, FieldArrayWithId } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import {
+  AttendanceEditContext,
+  useAttendanceEditUi,
+} from "@/features/attendance/edit/model/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
+import TimeInputField from "@/features/attendance/edit/ui/shared/TimeInputField";
 
-type RestStartTimeInputProp = {
+type Props = {
   rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;
   index: number;
   testIdPrefix?: string;
 };
 
+function toTimeValue(value: string | null | undefined) {
+  if (!value) return "";
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format("HH:mm") : "";
+}
+
+function toIsoDateTime(value: string, workDate: dayjs.Dayjs): string | null {
+  if (!value) return null;
+  const [hour, minute] = value.split(":").map(Number);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
+  return dayjs(workDate)
+    .hour(hour)
+    .minute(minute)
+    .second(0)
+    .millisecond(0)
+    .toISOString();
+}
+
+function normalizeTimeDraft(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
+
+function isCompleteTime(value: string) {
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+}
+
 export default function RestStartTimeInput({
   rest,
   index,
   testIdPrefix = "desktop",
-}: RestStartTimeInputProp) {
-  const { workDate, changeRequests, control, restUpdate } = useContext(
-    AttendanceEditContext
+}: Props) {
+  const { workDate, control, changeRequests, restUpdate } = useContext(
+    AttendanceEditContext,
   );
   const { getLunchRestStartTime } = useContext(AppConfigContext);
+  const { readOnly } = useAttendanceEditUi();
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputDraft, setInputDraft] = useState("");
+  const blurTimeoutRef = useRef<number | null>(null);
 
   if (!workDate || !control || !restUpdate) return null;
 
-  const lunchRestStartTime = getLunchRestStartTime().format("HH:mm");
+  const disabled = changeRequests.length > 0;
+  const lunchTime = getLunchRestStartTime().format("HH:mm");
+  const selectableTimes = [{ time: lunchTime, enabled: true }];
 
   return (
-    <Stack spacing={1}>
+    <div className="flex min-w-0 flex-row gap-1">
       <Controller
         name={`rests.${index}.startTime`}
         control={control}
         render={({ field }) => (
-          <TimePicker
-            value={rest.startTime ? dayjs(rest.startTime) : null}
-            ampm={false}
-            disabled={changeRequests.length > 0}
-            slotProps={{
-              textField: {
-                size: "small",
-                inputProps: {
-                  "data-testid": `rest-start-time-input-${testIdPrefix}-${index}`,
-                },
-              },
+          <TimeInputField
+            value={
+              isEditing ? inputDraft : toTimeValue(field.value as string | null)
+            }
+            inputRef={field.ref}
+            disabled={disabled}
+            readOnly={!!readOnly}
+            selectableTimes={selectableTimes}
+            isOptionsOpen={isOptionsOpen}
+            ariaLabel={`rest-start-time-${index}-options`}
+            dataTestId={`rest-start-time-input-${testIdPrefix}-${index}`}
+            onFocus={() => {
+              setIsEditing(true);
+              setInputDraft(toTimeValue(field.value as string | null));
+              if (!readOnly && !disabled) {
+                if (blurTimeoutRef.current) {
+                  window.clearTimeout(blurTimeoutRef.current);
+                  blurTimeoutRef.current = null;
+                }
+                setIsOptionsOpen(true);
+              }
             }}
-            onChange={(newStartTime) => {
-              if (!newStartTime) {
-                field.onChange(null);
-                return;
+            onBlur={() => {
+              field.onBlur();
+              const nextDraft = normalizeTimeDraft(inputDraft);
+              if (isCompleteTime(nextDraft)) {
+                const formatted = toIsoDateTime(nextDraft, workDate);
+                field.onChange(formatted);
+                if (formatted)
+                  restUpdate(index, { ...rest, startTime: formatted });
+              } else {
+                setInputDraft(toTimeValue(field.value as string | null));
               }
-
-              if (!newStartTime.isValid()) {
-                return;
+              setIsEditing(false);
+              blurTimeoutRef.current = window.setTimeout(() => {
+                setIsOptionsOpen(false);
+                blurTimeoutRef.current = null;
+              }, 120);
+            }}
+            onChange={(draft) => {
+              const nextDraft = normalizeTimeDraft(draft);
+              setInputDraft(nextDraft);
+              if (!isCompleteTime(nextDraft)) return;
+              const formatted = toIsoDateTime(nextDraft, workDate);
+              field.onChange(formatted);
+              if (formatted)
+                restUpdate(index, { ...rest, startTime: formatted });
+            }}
+            onSelectTime={(time) => {
+              const formatted = toIsoDateTime(time, workDate);
+              setInputDraft(time);
+              setIsEditing(false);
+              field.onChange(formatted);
+              if (formatted)
+                restUpdate(index, { ...rest, startTime: formatted });
+              if (blurTimeoutRef.current) {
+                window.clearTimeout(blurTimeoutRef.current);
+                blurTimeoutRef.current = null;
               }
-
-              const formattedStartTime = newStartTime
-                .year(workDate.year())
-                .month(workDate.month())
-                .date(workDate.date())
-                .second(0)
-                .millisecond(0)
-                .toISOString();
-              field.onChange(formattedStartTime);
+              setIsOptionsOpen(false);
+            }}
+            onDropdownToggle={() => {
+              if (readOnly || disabled) return;
+              if (blurTimeoutRef.current) {
+                window.clearTimeout(blurTimeoutRef.current);
+                blurTimeoutRef.current = null;
+              }
+              setIsEditing(false);
+              setInputDraft(toTimeValue(field.value as string | null));
+              setIsOptionsOpen((prev) => !prev);
             }}
           />
         )}
       />
-      <Box>
-        <Chip
-          label={lunchRestStartTime}
-          variant="outlined"
-          color="success"
-          icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-          disabled={changeRequests.length > 0}
-          data-testid={`rest-lunch-chip-${index}`}
-          onClick={() => {
-            const startTime = dayjs(
-              `${workDate.format("YYYY-MM-DD")} ${lunchRestStartTime}`
-            )
-              .second(0)
-              .millisecond(0)
-              .toISOString();
-            restUpdate(index, { ...rest, startTime });
-          }}
-        />
-      </Box>
-    </Stack>
+    </div>
   );
 }

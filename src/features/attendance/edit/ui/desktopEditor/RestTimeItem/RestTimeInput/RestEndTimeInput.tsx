@@ -1,124 +1,148 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext } from "react";
+import { useContext, useRef, useState } from "react";
 import { Controller, FieldArrayWithId } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import {
+  AttendanceEditContext,
+  useAttendanceEditUi,
+} from "@/features/attendance/edit/model/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
+import TimeInputField from "@/features/attendance/edit/ui/shared/TimeInputField";
 
-/**
- * 休憩終了時刻の入力コンポーネント。
- * @param rest 休憩データ
- * @param index 休憩配列のインデックス
- * @returns JSX.Element | null
- */
+type Props = {
+  rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;
+  index: number;
+  testIdPrefix?: string;
+};
+
+function toTimeValue(value: string | null | undefined) {
+  if (!value) return "";
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format("HH:mm") : "";
+}
+
+function toIsoDateTime(value: string, workDate: dayjs.Dayjs): string | null {
+  if (!value) return null;
+  const [hour, minute] = value.split(":").map(Number);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
+  return dayjs(workDate)
+    .hour(hour)
+    .minute(minute)
+    .second(0)
+    .millisecond(0)
+    .toISOString();
+}
+
+function normalizeTimeDraft(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
+
+function isCompleteTime(value: string) {
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+}
+
 export default function RestEndTimeInput({
   rest,
   index,
   testIdPrefix = "desktop",
-}: {
-  rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;
-  index: number;
-  testIdPrefix?: string;
-}) {
-  const { workDate, control, restUpdate, changeRequests } = useContext(
-    AttendanceEditContext
+}: Props) {
+  const { workDate, control, changeRequests, restUpdate } = useContext(
+    AttendanceEditContext,
   );
+  const { getLunchRestEndTime } = useContext(AppConfigContext);
+  const { readOnly } = useAttendanceEditUi();
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputDraft, setInputDraft] = useState("");
+  const blurTimeoutRef = useRef<number | null>(null);
 
   if (!workDate || !control || !restUpdate) return null;
 
-  return (
-    <Stack direction="row" spacing={1}>
-      <Stack spacing={1}>
-        <Controller
-          name={`rests.${index}.endTime`}
-          control={control}
-          render={({ field }) => (
-            <TimePicker
-              value={rest.endTime ? dayjs(rest.endTime) : null}
-              ampm={false}
-              disabled={changeRequests.length > 0}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  inputProps: {
-                    "data-testid": `rest-end-time-input-${testIdPrefix}-${index}`,
-                  },
-                },
-              }}
-              onChange={(newEndTime) => {
-                if (!newEndTime) {
-                  field.onChange(null);
-                  return;
-                }
-
-                if (!newEndTime.isValid()) {
-                  return;
-                }
-
-                const formattedEndTime = newEndTime
-                  .year(workDate.year())
-                  .month(workDate.month())
-                  .date(workDate.date())
-                  .second(0)
-                  .millisecond(0)
-                  .toISOString();
-                field.onChange(formattedEndTime);
-              }}
-            />
-          )}
-        />
-        <Box>
-          <DefaultEndTimeChip index={index} rest={rest} />
-        </Box>
-      </Stack>
-    </Stack>
-  );
-}
-
-/**
- * デフォルトの休憩終了時刻を設定するチップコンポーネント。
- * @param index 休憩配列のインデックス
- * @param rest 休憩データ
- * @returns JSX.Element | null
- */
-function DefaultEndTimeChip({
-  index,
-  rest,
-}: {
-  index: number;
-  rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;
-}) {
-  const { workDate, restUpdate, changeRequests } = useContext(
-    AttendanceEditContext
-  );
-  const { getLunchRestEndTime } = useContext(AppConfigContext);
-
-  const lunchRestEndTime = getLunchRestEndTime().format("H:mm");
-
-  if (!workDate || !restUpdate) return null;
-
-  const clickHandler = () => {
-    const endTime = new AttendanceDateTime()
-      .setDate(workDate)
-      .setRestEnd()
-      .toISOString();
-    restUpdate(index, { ...rest, endTime });
-  };
+  const disabled = changeRequests.length > 0;
+  const lunchTime = getLunchRestEndTime().format("HH:mm");
+  const selectableTimes = [{ time: lunchTime, enabled: true }];
 
   return (
-    <Chip
-      label={lunchRestEndTime}
-      variant="outlined"
-      color="success"
-      disabled={changeRequests.length > 0}
-      icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-      onClick={clickHandler}
-      data-testid={`rest-lunch-end-chip-${index}`}
-    />
+    <div className="flex min-w-0 flex-row gap-1">
+      <Controller
+        name={`rests.${index}.endTime`}
+        control={control}
+        render={({ field }) => (
+          <TimeInputField
+            value={
+              isEditing ? inputDraft : toTimeValue(field.value as string | null)
+            }
+            inputRef={field.ref}
+            disabled={disabled}
+            readOnly={!!readOnly}
+            selectableTimes={selectableTimes}
+            isOptionsOpen={isOptionsOpen}
+            ariaLabel={`rest-end-time-${index}-options`}
+            dataTestId={`rest-end-time-input-${testIdPrefix}-${index}`}
+            onFocus={() => {
+              setIsEditing(true);
+              setInputDraft(toTimeValue(field.value as string | null));
+              if (!readOnly && !disabled) {
+                if (blurTimeoutRef.current) {
+                  window.clearTimeout(blurTimeoutRef.current);
+                  blurTimeoutRef.current = null;
+                }
+                setIsOptionsOpen(true);
+              }
+            }}
+            onBlur={() => {
+              field.onBlur();
+              const nextDraft = normalizeTimeDraft(inputDraft);
+              if (isCompleteTime(nextDraft)) {
+                const formatted = toIsoDateTime(nextDraft, workDate);
+                field.onChange(formatted);
+                if (formatted)
+                  restUpdate(index, { ...rest, endTime: formatted });
+              } else {
+                setInputDraft(toTimeValue(field.value as string | null));
+              }
+              setIsEditing(false);
+              blurTimeoutRef.current = window.setTimeout(() => {
+                setIsOptionsOpen(false);
+                blurTimeoutRef.current = null;
+              }, 120);
+            }}
+            onChange={(draft) => {
+              const nextDraft = normalizeTimeDraft(draft);
+              setInputDraft(nextDraft);
+              if (!isCompleteTime(nextDraft)) return;
+              const formatted = toIsoDateTime(nextDraft, workDate);
+              field.onChange(formatted);
+              if (formatted) restUpdate(index, { ...rest, endTime: formatted });
+            }}
+            onSelectTime={(time) => {
+              const formatted = toIsoDateTime(time, workDate);
+              setInputDraft(time);
+              setIsEditing(false);
+              field.onChange(formatted);
+              if (formatted) restUpdate(index, { ...rest, endTime: formatted });
+              if (blurTimeoutRef.current) {
+                window.clearTimeout(blurTimeoutRef.current);
+                blurTimeoutRef.current = null;
+              }
+              setIsOptionsOpen(false);
+            }}
+            onDropdownToggle={() => {
+              if (readOnly || disabled) return;
+              if (blurTimeoutRef.current) {
+                window.clearTimeout(blurTimeoutRef.current);
+                blurTimeoutRef.current = null;
+              }
+              setIsEditing(false);
+              setInputDraft(toTimeValue(field.value as string | null));
+              setIsOptionsOpen((prev) => !prev);
+            }}
+          />
+        )}
+      />
+    </div>
   );
 }

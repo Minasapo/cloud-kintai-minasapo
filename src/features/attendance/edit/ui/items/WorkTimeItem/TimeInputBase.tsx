@@ -1,11 +1,9 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext } from "react";
+import { useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAttendanceEditUi } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import TimeInputField from "@/features/attendance/edit/ui/shared/TimeInputField";
 
 import {
   AttendanceControl,
@@ -20,113 +18,175 @@ interface TimeInputBaseProps<TFieldName extends AttendanceTimeFieldName> {
   setValue: AttendanceSetValue;
   workDate: dayjs.Dayjs;
   quickInputTimes: { time: string; enabled: boolean }[];
-  chipColor?: (enabled: boolean) => "success" | "default";
   disabled?: boolean;
   highlight?: boolean;
+  dataTestId?: string;
+}
+
+function toTimeValue(value: string | null | undefined) {
+  if (!value) {
+    return "";
+  }
+
+  const parsed = dayjs(value);
+  if (!parsed.isValid()) {
+    return "";
+  }
+
+  return parsed.format("HH:mm");
+}
+
+function toIsoDateTime(value: string, workDate: dayjs.Dayjs): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const [hour, minute] = value.split(":").map(Number);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) {
+    return null;
+  }
+
+  return dayjs(workDate)
+    .hour(hour)
+    .minute(minute)
+    .year(workDate.year())
+    .month(workDate.month())
+    .date(workDate.date())
+    .second(0)
+    .millisecond(0)
+    .toISOString();
+}
+
+function normalizeTimeDraft(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) {
+    return digits;
+  }
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
+
+function isCompleteTime(value: string): boolean {
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
 }
 
 export default function TimeInputBase<
-  TFieldName extends AttendanceTimeFieldName
+  TFieldName extends AttendanceTimeFieldName,
 >({
   name,
   control,
   setValue,
   workDate,
   quickInputTimes,
-  chipColor = (enabled) => (enabled ? "success" : "default"),
   disabled = false,
   highlight = false,
+  dataTestId,
 }: TimeInputBaseProps<TFieldName>) {
-  const { readOnly } = useContext(AttendanceEditContext);
+  const { readOnly } = useAttendanceEditUi();
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputDraft, setInputDraft] = useState("");
+  const blurTimeoutRef = useRef<number | null>(null);
+
   if (!workDate || !control || !setValue) return null;
 
   return (
-    <Stack direction="row" spacing={1}>
-      <Stack spacing={1}>
-        <Controller
-          key={highlight ? "highlight-on" : "highlight-off"}
-          name={name}
-          control={control}
-          render={({ field }) => (
-            <TimePicker
-              ampm={false}
-              value={(() => (field.value ? dayjs(field.value) : null))()}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  sx: highlight
-                    ? {
-                        "& .MuiOutlinedInput-root": {
-                          animation: "highlightPulse 2.5s ease-in-out",
-                          "@keyframes highlightPulse": {
-                            "0%, 100%": {
-                              backgroundColor: "transparent",
-                              borderColor: "rgba(0, 0, 0, 0.23)",
-                            },
-                            "15%, 50%": {
-                              backgroundColor: "#FFE082",
-                              borderColor: "#FFC107",
-                              boxShadow: "0 0 12px rgba(255, 193, 7, 0.6)",
-                            },
-                            "85%": {
-                              backgroundColor: "#FFF9C4",
-                              borderColor: "#FFC107",
-                              boxShadow: "0 0 8px rgba(255, 193, 7, 0.4)",
-                            },
-                          },
-                        },
-                      }
-                    : undefined,
-                },
-              }}
-              disabled={!!readOnly || disabled}
-              onChange={(value) => {
-                if (value && !value.isValid()) return;
-                const formatted = (() => {
-                  if (!value) return null;
-                  return value
-                    .year(workDate.year())
-                    .month(workDate.month())
-                    .date(workDate.date())
-                    .second(0)
-                    .millisecond(0)
-                    .toISOString();
-                })();
-                const nextValue = formatted as AttendanceFieldValue<TFieldName>;
-                field.onChange(nextValue);
+    <div className="flex w-full min-w-0 flex-row gap-1">
+      <Controller
+        key={highlight ? "highlight-on" : "highlight-off"}
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <TimeInputField
+            value={isEditing ? inputDraft : toTimeValue(field.value)}
+            inputRef={field.ref}
+            disabled={disabled}
+            readOnly={!!readOnly}
+            highlight={highlight}
+            selectableTimes={quickInputTimes}
+            isOptionsOpen={isOptionsOpen}
+            ariaLabel={`${name}-time-options`}
+            dataTestId={dataTestId}
+            onFocus={() => {
+              setIsEditing(true);
+              setInputDraft(toTimeValue(field.value));
+              if (!readOnly && !disabled && quickInputTimes.some((t) => t.enabled)) {
+                if (blurTimeoutRef.current) {
+                  window.clearTimeout(blurTimeoutRef.current);
+                  blurTimeoutRef.current = null;
+                }
+                setIsOptionsOpen(true);
+              }
+            }}
+            onBlur={() => {
+              field.onBlur();
+              const nextDraft = normalizeTimeDraft(inputDraft);
+              if (isCompleteTime(nextDraft)) {
+                const formatted = toIsoDateTime(
+                  nextDraft,
+                  workDate,
+                ) as AttendanceFieldValue<TFieldName>;
+                field.onChange(formatted);
                 setValue(
                   name as AttendanceTimeFieldName,
-                  nextValue as AttendanceFieldValue<AttendanceTimeFieldName>
+                  formatted as AttendanceFieldValue<AttendanceTimeFieldName>,
                 );
-              }}
-            />
-          )}
-        />
-        <Box>
-          {quickInputTimes.map((entry, index) => (
-            <Chip
-              key={index}
-              label={entry.time}
-              color={chipColor(entry.enabled)}
-              variant="outlined"
-              icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-              onClick={() => {
-                if (readOnly || disabled) return;
-                const time = dayjs(
-                  `${workDate.format("YYYY-MM-DD")} ${entry.time}`
-                ).toISOString();
-                const nextValue = time as AttendanceFieldValue<TFieldName>;
-                setValue(
-                  name as AttendanceTimeFieldName,
-                  nextValue as AttendanceFieldValue<AttendanceTimeFieldName>,
-                  { shouldDirty: true }
-                );
-              }}
-              sx={{ mr: 1, mb: 1 }}
-            />
-          ))}
-        </Box>
-      </Stack>
-    </Stack>
+              } else {
+                setInputDraft(toTimeValue(field.value));
+              }
+              setIsEditing(false);
+              blurTimeoutRef.current = window.setTimeout(() => {
+                setIsOptionsOpen(false);
+                blurTimeoutRef.current = null;
+              }, 120);
+            }}
+            onChange={(draft) => {
+              const nextDraft = normalizeTimeDraft(draft);
+              setInputDraft(nextDraft);
+              if (!isCompleteTime(nextDraft)) {
+                return;
+              }
+              const formatted = toIsoDateTime(
+                nextDraft,
+                workDate,
+              ) as AttendanceFieldValue<TFieldName>;
+              field.onChange(formatted);
+              setValue(
+                name as AttendanceTimeFieldName,
+                formatted as AttendanceFieldValue<AttendanceTimeFieldName>,
+              );
+            }}
+            onSelectTime={(time) => {
+              const formatted = toIsoDateTime(
+                time,
+                workDate,
+              ) as AttendanceFieldValue<TFieldName>;
+              setInputDraft(time);
+              setIsEditing(false);
+              field.onChange(formatted);
+              setValue(
+                name as AttendanceTimeFieldName,
+                formatted as AttendanceFieldValue<AttendanceTimeFieldName>,
+                { shouldDirty: true },
+              );
+              if (blurTimeoutRef.current) {
+                window.clearTimeout(blurTimeoutRef.current);
+                blurTimeoutRef.current = null;
+              }
+              setIsOptionsOpen(false);
+            }}
+            onDropdownToggle={() => {
+              if (readOnly || disabled) return;
+              if (blurTimeoutRef.current) {
+                window.clearTimeout(blurTimeoutRef.current);
+                blurTimeoutRef.current = null;
+              }
+              setIsEditing(false);
+              setInputDraft(toTimeValue(field.value));
+              setIsOptionsOpen((prev) => !prev);
+            }}
+          />
+        )}
+      />
+    </div>
   );
 }

@@ -3,6 +3,8 @@ import { act, renderHook } from "@testing-library/react";
 import { useShiftPresence } from "../useShiftPresence";
 
 describe("useShiftPresence", () => {
+  const otherUserStorageKey = "shift_presence_global_user2_test-session";
+
   beforeEach(() => {
     jest.useFakeTimers();
     // テスト前にローカルストレージをクリア
@@ -86,16 +88,15 @@ describe("useShiftPresence", () => {
       // ユーザー2をシミュレート（ローカルストレージに直接追加）
       act(() => {
         const presenceData = {
+          sessionId: "test-session",
           userId: "user2",
           userName: "User Two",
           color: "#4caf50",
           lastActivity: Date.now(),
           timestamp: Date.now(),
+          editingCells: [],
         };
-        localStorage.setItem(
-          "shift_presence_user2",
-          JSON.stringify(presenceData),
-        );
+        localStorage.setItem(otherUserStorageKey, JSON.stringify(presenceData));
       });
 
       // ハートビート実行でローカルストレージから複数ユーザーを読み込む
@@ -126,16 +127,15 @@ describe("useShiftPresence", () => {
       // 非アクティブユーザーをシミュレート
       act(() => {
         const presenceData = {
+          sessionId: "test-session",
           userId: "user2",
           userName: "Inactive User",
           color: "#4caf50",
           lastActivity: Date.now() - 70000, // 70秒前
           timestamp: Date.now() - 70000,
+          editingCells: [],
         };
-        localStorage.setItem(
-          "shift_presence_user2",
-          JSON.stringify(presenceData),
-        );
+        localStorage.setItem(otherUserStorageKey, JSON.stringify(presenceData));
       });
 
       // ハートビート実行（非アクティブユーザーはタイムスタンプが古いので除外される）
@@ -215,24 +215,27 @@ describe("useShiftPresence", () => {
 
       // 他のユーザーのセルを編集中として設定
       act(() => {
-        result.current.editingCells.set("staff2_2024-01-16", {
-          userId: "user2",
-          userName: "Other User",
-          startTime: Date.now(),
-        });
-
-        // activeUsers に他のユーザーを追加
         const presenceData = {
+          sessionId: "test-session",
           userId: "user2",
           userName: "Other User",
           color: "#4caf50",
           lastActivity: Date.now(),
           timestamp: Date.now(),
+          editingCells: [
+            {
+              cellKey: "staff2_2024-01-16",
+              userId: "user2",
+              userName: "Other User",
+              startTime: Date.now(),
+            },
+          ],
         };
-        localStorage.setItem(
-          "shift_presence_user2",
-          JSON.stringify(presenceData),
-        );
+        localStorage.setItem(otherUserStorageKey, JSON.stringify(presenceData));
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(10000);
       });
 
       // 自分が編集中: false

@@ -20,8 +20,7 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-import { useMemo, useState } from "react";
-import { NavigateFunction } from "react-router-dom";
+import { useMemo } from "react";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
@@ -30,29 +29,9 @@ import { Holiday } from "@/entities/attendance/lib/Holiday";
 import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
+import { useOptionalAttendanceListContext } from "./AttendanceListContext";
+
 const DAYS_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
-
-const CalendarWrapper = styled(Box)(({ theme }) => ({
-  padding: "0px 40px 32px 40px",
-  borderRadius: 16,
-  border: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.background.paper,
-  [theme.breakpoints.down("lg")]: {
-    padding: "0px 24px 24px 24px",
-  },
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
-}));
-
-const CalendarGrid = styled(Box)(({ theme }) => ({
-  display: "grid",
-  gridTemplateColumns: "repeat(7, 1fr)",
-  gap: theme.spacing(1),
-  [theme.breakpoints.down("lg")]: {
-    gap: theme.spacing(0.75),
-  },
-}));
 
 const DayCell = styled(Box, {
   shouldForwardProp: (prop) =>
@@ -63,15 +42,15 @@ const DayCell = styled(Box, {
   $isHoliday: boolean;
 }>(({ theme, $isCurrentMonth, $isToday, $isHoliday }) => ({
   minHeight: PANEL_HEIGHTS.CALENDAR_MIN,
-  borderRadius: 12,
+  borderRadius: 18,
   padding: theme.spacing(1.5),
-  border: `1px solid ${theme.palette.divider}`,
+  border: `1px solid rgba(148, 163, 184, 0.14)`,
   opacity: $isCurrentMonth ? 1 : 0.4,
   backgroundColor: $isToday
-    ? theme.palette.action.hover
+    ? alpha(theme.palette.success.main, 0.08)
     : $isHoliday
-    ? theme.palette.action.selected
-    : theme.palette.background.default,
+    ? alpha(theme.palette.warning.main, 0.08)
+    : "rgba(255,255,255,0.92)",
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(1),
@@ -80,7 +59,7 @@ const DayCell = styled(Box, {
   position: "relative",
   overflow: "hidden",
   "&:hover": {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: alpha(theme.palette.success.main, 0.07),
   },
   [theme.breakpoints.down("lg")]: {
     minHeight: 110,
@@ -200,12 +179,7 @@ function getStatus(
       workDate
     ).isHoliday();
 
-    if (staff.workType === "shift") {
-      // シフトタイプの場合は休日のみチェック
-      if (isHoliday || isCompanyHoliday) {
-        return AttendanceStatus.None;
-      }
-    } else {
+    if (staff.workType !== "shift") {
       // シフトタイプ以外の場合は休日と土日をチェック
       if (isHoliday || isCompanyHoliday || [0, 6].includes(date.day())) {
         return AttendanceStatus.None;
@@ -264,11 +238,11 @@ function getHolidayNames(
 }
 
 type Props = {
-  attendances: Attendance[];
-  staff: Staff | null | undefined;
-  holidayCalendars: HolidayCalendar[];
-  companyHolidayCalendars: CompanyHolidayCalendar[];
-  navigate: NavigateFunction;
+  attendances?: Attendance[];
+  staff?: Staff | null | undefined;
+  holidayCalendars?: HolidayCalendar[];
+  companyHolidayCalendars?: CompanyHolidayCalendar[];
+  navigate?: (path: string) => void;
   buildNavigatePath?: (formattedWorkDate: string) => string;
   closeDates?: CloseDate[];
   closeDatesLoading?: boolean;
@@ -349,32 +323,38 @@ function resolveMonthlyTerms(
 }
 
 export default function DesktopCalendarView({
-  attendances,
-  staff,
-  holidayCalendars,
-  companyHolidayCalendars,
-  navigate,
+  attendances: attendancesProp,
+  staff: staffProp,
+  holidayCalendars: holidayCalendarsProp,
+  companyHolidayCalendars: companyHolidayCalendarsProp,
+  navigate: navigateProp,
   buildNavigatePath,
-  closeDates,
-  closeDatesLoading,
-  closeDatesError,
-  currentMonth,
-  onMonthChange,
+  closeDates: closeDatesProp,
+  closeDatesLoading: closeDatesLoadingProp,
+  closeDatesError: closeDatesErrorProp,
+  currentMonth: currentMonthProp,
+  onMonthChange: onMonthChangeProp,
   onOpenInRightPanel,
 }: Props) {
+  const context = useOptionalAttendanceListContext();
+  const attendances = attendancesProp ?? context?.attendances ?? [];
+  const staff = staffProp ?? context?.staff;
+  const holidayCalendars = holidayCalendarsProp ?? context?.holidayCalendars ?? [];
+  const companyHolidayCalendars =
+    companyHolidayCalendarsProp ?? context?.companyHolidayCalendars ?? [];
+  const navigate = navigateProp ?? context?.navigate;
+  const closeDates = closeDatesProp ?? context?.closeDates ?? [];
+  const closeDatesLoading = closeDatesLoadingProp ?? context?.closeDatesLoading ?? false;
+  const closeDatesError = closeDatesErrorProp ?? context?.closeDatesError ?? null;
+  const currentMonth = currentMonthProp ?? context?.currentMonth ?? dayjs().startOf("month");
+  const onMonthChange = onMonthChangeProp ?? context?.onMonthChange;
   const theme = useTheme();
-  const [internalMonth, setInternalMonth] = useState(
-    () => currentMonth ?? dayjs().startOf("month")
-  );
-  const resolvedCurrentMonth = currentMonth ?? internalMonth;
+  const resolvedCurrentMonth = currentMonth;
 
   const updateMonth = (updater: (prev: Dayjs) => Dayjs) => {
     const nextMonth = updater(resolvedCurrentMonth);
-    if (onMonthChange) {
-      onMonthChange(nextMonth);
-      return;
-    }
-    setInternalMonth(nextMonth);
+    if (!onMonthChange) return;
+    onMonthChange(nextMonth);
   };
 
   const attendanceMap = useMemo(() => {
@@ -392,6 +372,7 @@ export default function DesktopCalendarView({
   );
 
   const handleDayClick = (date: Dayjs) => {
+    if (!navigate) return;
     const formatted = date.format(AttendanceDate.QueryParamFormat);
     const path = buildNavigatePath
       ? buildNavigatePath(formatted)
@@ -418,20 +399,14 @@ export default function DesktopCalendarView({
     () => resolveMonthlyTerms(resolvedCurrentMonth, closeDates, termPalette),
     [closeDates, resolvedCurrentMonth, termPalette]
   );
-  const hasCloseDateContext =
-    closeDates !== undefined ||
-    closeDatesLoading !== undefined ||
-    closeDatesError !== undefined;
-
   const showFallbackNotice =
-    hasCloseDateContext &&
     monthlyTerms.length === 1 &&
     monthlyTerms[0]?.source === "fallback" &&
     !closeDatesLoading;
-  const showCloseDateError = hasCloseDateContext && Boolean(closeDatesError);
+  const showCloseDateError = Boolean(closeDatesError);
 
   return (
-    <CalendarWrapper>
+    <div className="hidden rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(180deg,rgba(247,252,248,0.96)_0%,rgba(255,255,255,0.98)_100%)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] md:block lg:p-6">
       <Stack spacing={0.75} sx={{ mb: 2 }}>
         <Stack
           direction="row"
@@ -442,17 +417,25 @@ export default function DesktopCalendarView({
             <IconButton
               aria-label="previous-month"
               onClick={() => updateMonth((prev) => prev.add(-1, "month"))}
+              sx={{
+                border: "1px solid rgba(148,163,184,0.18)",
+                bgcolor: "rgba(255,255,255,0.88)",
+              }}
             >
               <ChevronLeftIcon />
             </IconButton>
             <IconButton
               aria-label="next-month"
               onClick={() => updateMonth((prev) => prev.add(1, "month"))}
+              sx={{
+                border: "1px solid rgba(148,163,184,0.18)",
+                bgcolor: "rgba(255,255,255,0.88)",
+              }}
             >
               <ChevronRightIcon />
             </IconButton>
             <Divider orientation="vertical" flexItem />
-            <Typography variant="h6">
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
               {resolvedCurrentMonth.format("YYYY年M月")}
             </Typography>
           </Stack>
@@ -460,6 +443,12 @@ export default function DesktopCalendarView({
             <Tooltip title="今月に戻る">
               <IconButton
                 onClick={() => updateMonth(() => dayjs().startOf("month"))}
+                sx={{
+                  px: 1.5,
+                  borderRadius: "9999px",
+                  border: "1px solid rgba(148,163,184,0.18)",
+                  bgcolor: "rgba(255,255,255,0.88)",
+                }}
               >
                 <Typography variant="body2">今月</Typography>
               </IconButton>
@@ -507,7 +496,7 @@ export default function DesktopCalendarView({
         </Stack>
       </Stack>
 
-      <CalendarGrid sx={{ mb: 1 }}>
+      <div className="mb-1 grid grid-cols-7 gap-3 lg:gap-2.5">
         {DAYS_OF_WEEK.map((label, index) => (
           <Typography
             key={label}
@@ -525,11 +514,11 @@ export default function DesktopCalendarView({
             {label}
           </Typography>
         ))}
-      </CalendarGrid>
+      </div>
 
       <Stack spacing={1.5}>
         {weeks.map((week, weekIndex) => (
-          <CalendarGrid key={`week-${weekIndex}`}>
+          <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-3 lg:gap-2.5">
             {week.map((date) => {
               const workDate = date.format(AttendanceDate.DataFormat);
               const attendance = attendanceMap.get(workDate);
@@ -689,9 +678,9 @@ export default function DesktopCalendarView({
                 </DayCell>
               );
             })}
-          </CalendarGrid>
+          </div>
         ))}
       </Stack>
-    </CalendarWrapper>
+    </div>
   );
 }

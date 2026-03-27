@@ -4,13 +4,17 @@ import {
   deleteWorkflow,
   updateWorkflow,
 } from "@shared/api/graphql/documents/mutations";
-import { listWorkflows } from "@shared/api/graphql/documents/queries";
+import {
+  getWorkflow as getWorkflowDocument,
+  listWorkflows,
+} from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 import type {
   CreateWorkflowInput,
   CreateWorkflowMutation,
   DeleteWorkflowInput,
   DeleteWorkflowMutation,
+  GetWorkflowQuery,
   ListWorkflowsQuery,
   ModelWorkflowConditionInput,
   UpdateWorkflowInput,
@@ -39,6 +43,24 @@ export const workflowApi = createApi({
   baseQuery: graphqlBaseQuery(),
   tagTypes: ["Workflow"],
   endpoints: (builder) => ({
+    getWorkflow: builder.query<Workflow | null, string>({
+      async queryFn(id, _api, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: getWorkflowDocument,
+          variables: { id },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as GetWorkflowQuery | null;
+        return { data: data?.getWorkflow ?? null };
+      },
+      providesTags: (_result, _error, id) => [
+        { type: "Workflow" as const, id: id ?? "unknown" },
+      ],
+    }),
     getWorkflows: builder.query<Workflow[], void>({
       async queryFn(_arg, _api, _extraOptions, baseQuery) {
         const workflows: Workflow[] = [];
@@ -137,17 +159,34 @@ export const workflowApi = createApi({
 
         return { data: updated };
       },
-      invalidatesTags: (result) => {
-        const listTag: WorkflowTag = { type: "Workflow", id: "LIST" };
-        if (!result) {
-          return [listTag];
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedWorkflow } = await queryFulfilled;
+          dispatch(
+            workflowApi.util.updateQueryData(
+              "getWorkflows",
+              undefined,
+              (draft) => {
+                const targetIndex = draft.findIndex(
+                  (workflow) => workflow.id === updatedWorkflow.id,
+                );
+                if (targetIndex < 0) return;
+                draft[targetIndex] = updatedWorkflow;
+              },
+            ),
+          );
+          dispatch(
+            workflowApi.util.upsertQueryData(
+              "getWorkflow",
+              updatedWorkflow.id,
+              updatedWorkflow,
+            ),
+          );
+        } catch {
+          // noop: keep mutation error handling in caller
         }
-
-        return [
-          listTag,
-          { type: "Workflow" as const, id: buildWorkflowTagId(result) },
-        ];
       },
+      invalidatesTags: () => [],
     }),
     deleteWorkflow: builder.mutation<Workflow, DeleteWorkflowInput>({
       async queryFn(input, _api, _extraOptions, baseQuery) {
@@ -179,6 +218,7 @@ export const workflowApi = createApi({
 });
 
 export const {
+  useGetWorkflowQuery,
   useGetWorkflowsQuery,
   useCreateWorkflowMutation,
   useUpdateWorkflowMutation,

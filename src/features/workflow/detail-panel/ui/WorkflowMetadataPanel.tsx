@@ -1,13 +1,14 @@
-import { Grid, Paper, Typography } from "@mui/material";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
+import type { ReactNode } from "react";
 
 import { formatDateSlash } from "@/shared/lib/time";
 
 import type { WorkflowApprovalStepView } from "../../approval-flow/types";
 import WorkflowApprovalTimeline from "../../approval-flow/ui/WorkflowApprovalTimeline";
+import { useWorkflowDetailContext } from "../model/WorkflowDetailContext";
 
-type WorkflowMetadataPanelProps = {
+export type WorkflowMetadataPanelProps = {
   workflowId?: string | null;
   fallbackId?: string;
   category?: WorkflowCategory | null;
@@ -26,7 +27,38 @@ type WorkflowMetadataPanelProps = {
   approvalSteps: WorkflowApprovalStepView[];
 };
 
-export default function WorkflowMetadataPanel({
+type MetadataRowProps = {
+  label: string;
+  value: ReactNode;
+  preserveWhitespace?: boolean;
+};
+
+function MetadataRow({
+  label,
+  value,
+  preserveWhitespace = false,
+}: MetadataRowProps) {
+  return (
+    <>
+      <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-600 md:border-r">
+        {label}
+      </div>
+      <div
+        className={[
+          "min-w-0 border-b border-slate-200 px-4 py-2.5 text-[15px] leading-7 text-slate-800",
+          preserveWhitespace ? "whitespace-pre-wrap" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {value}
+      </div>
+    </>
+  );
+}
+
+/** props渡し版（管理者画面など、Providerの外で使う場合） */
+export function WorkflowMetadataPanelBase({
   workflowId,
   fallbackId,
   category,
@@ -52,215 +84,122 @@ export default function WorkflowMetadataPanel({
     : "-";
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, bgcolor: "background.paper" }}>
-      <Grid container rowSpacing={2} columnSpacing={1} alignItems="center">
-        <Grid item xs={12} sm={3}>
-          <Typography variant="body2" color="text.secondary">
-            ID
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={9}>
-          <Typography>{displayId}</Typography>
-        </Grid>
+    <section
+      className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5"
+    >
+      <div className="flex flex-col gap-1.5 border-b border-slate-200/80 pb-4">
+        <h2 className="m-0 text-xl font-semibold text-slate-950">申請情報</h2>
+        <p className="m-0 text-sm leading-6 text-slate-500">
+          申請内容と現在のステータスを確認できます。
+        </p>
+      </div>
 
-        <Grid item xs={12} sm={3}>
-          <Typography variant="body2" color="text.secondary">
-            種別
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={9}>
-          <Typography>{categoryLabel}</Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={3}>
-          <Typography variant="body2" color="text.secondary">
-            申請者
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={9}>
-          <Typography>{staffName}</Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={3}>
-          <Typography variant="body2" color="text.secondary">
-            申請日
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={9}>
-          <Typography>{applicationDate}</Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={3}>
-          <Typography variant="body2" color="text.secondary">
-            ステータス
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={9}>
-          <StatusChip status={status} />
-        </Grid>
+      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+      <div className="grid grid-cols-1 items-start md:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]">
+        <MetadataRow label="ID" value={displayId} />
+        <MetadataRow label="種別" value={categoryLabel} />
+        <MetadataRow label="申請者" value={staffName} />
+        <MetadataRow label="申請日" value={applicationDate} />
+        <MetadataRow label="ステータス" value={<StatusChip status={status} />} />
 
         {isPaidLeave && (
           <>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                取得期間
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography>
-                {overTimeDetails?.startTime && overTimeDetails?.endTime
+            <MetadataRow
+              label="取得期間"
+              value={
+                overTimeDetails?.startTime && overTimeDetails?.endTime
                   ? overTimeDetails.startTime === overTimeDetails.endTime
                     ? formatDateSlash(overTimeDetails.startTime)
-                    : `${formatDateSlash(
-                        overTimeDetails.startTime,
-                      )} ～ ${formatDateSlash(overTimeDetails.endTime)}`
-                  : "-"}
-              </Typography>
-            </Grid>
+                    : `${formatDateSlash(overTimeDetails.startTime)} ～ ${formatDateSlash(
+                        overTimeDetails.endTime,
+                      )}`
+                  : "-"
+              }
+            />
             {overTimeDetails?.reason && (
-              <>
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    申請理由
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{overTimeDetails.reason}</Typography>
-                </Grid>
-              </>
+              <MetadataRow label="申請理由" value={overTimeDetails.reason} />
             )}
           </>
         )}
 
         {isAbsence && (
           <>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                欠勤日
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography>
-                {formatDateSlash(overTimeDetails?.date) || "-"}
-              </Typography>
-            </Grid>
+            <MetadataRow label="欠勤日" value={formatDateSlash(overTimeDetails?.date) || "-"} />
             {overTimeDetails?.reason && (
-              <>
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    申請理由
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{overTimeDetails.reason}</Typography>
-                </Grid>
-              </>
+              <MetadataRow label="申請理由" value={overTimeDetails.reason} />
             )}
           </>
         )}
 
         {isOvertime && (
           <>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                残業予定日
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography>{overtimeDate || "-"}</Typography>
-            </Grid>
-
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                残業予定時間
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography>{overtimeTimeRange}</Typography>
-            </Grid>
+            <MetadataRow label="残業予定日" value={overtimeDate || "-"} />
+            <MetadataRow label="残業予定時間" value={overtimeTimeRange} />
             {overTimeDetails?.reason && (
-              <>
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    残業理由
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{overTimeDetails.reason}</Typography>
-                </Grid>
-              </>
+              <MetadataRow label="残業理由" value={overTimeDetails.reason} />
             )}
           </>
         )}
 
         {isClockCorrection && (
           <>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                対象日
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography>
-                {formatDateSlash(overTimeDetails?.date) || "-"}
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                修正時刻
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography>
-                {overTimeDetails?.startTime || overTimeDetails?.endTime
+            <MetadataRow label="対象日" value={formatDateSlash(overTimeDetails?.date) || "-"} />
+            <MetadataRow
+              label="修正時刻"
+              value={
+                overTimeDetails?.startTime || overTimeDetails?.endTime
                   ? `${overTimeDetails.startTime || overTimeDetails.endTime}`
-                  : "-"}
-              </Typography>
-            </Grid>
+                  : "-"
+              }
+            />
             {overTimeDetails?.reason && (
-              <>
-                <Grid item xs={12} sm={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    修正理由
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                  <Typography>{overTimeDetails.reason}</Typography>
-                </Grid>
-              </>
+              <MetadataRow label="修正理由" value={overTimeDetails.reason} />
             )}
           </>
         )}
 
         {isCustom && (
           <>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                タイトル
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography>{customWorkflowTitle || "-"}</Typography>
-            </Grid>
-
-            <Grid item xs={12} sm={3}>
-              <Typography variant="body2" color="text.secondary">
-                詳細
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={9}>
-              <Typography sx={{ whiteSpace: "pre-wrap" }}>
-                {customWorkflowContent || "-"}
-              </Typography>
-            </Grid>
+            <MetadataRow label="タイトル" value={customWorkflowTitle || "-"} />
+            <MetadataRow
+              label="詳細"
+              value={customWorkflowContent || "-"}
+              preserveWhitespace
+            />
           </>
         )}
+      </div>
+      </div>
 
-        <Grid item xs={12}>
-          <WorkflowApprovalTimeline steps={approvalSteps} />
-        </Grid>
-      </Grid>
-    </Paper>
+      <div className="mt-6">
+        <WorkflowApprovalTimeline steps={approvalSteps} />
+      </div>
+    </section>
   );
+}
+
+/** context接続版（WorkflowDetailProvider 内で使う場合） */
+export function WorkflowMetadataPanelView() {
+  const { workflow, id, categoryLabel, staffName, applicationDate, approvalSteps } =
+    useWorkflowDetailContext();
+
+  return (
+    <WorkflowMetadataPanelBase
+      workflowId={workflow?.id}
+      fallbackId={id}
+      category={workflow?.category ?? null}
+      categoryLabel={categoryLabel}
+      staffName={staffName}
+      applicationDate={applicationDate}
+      status={workflow?.status ?? null}
+      overTimeDetails={workflow?.overTimeDetails ?? null}
+      customWorkflowTitle={workflow?.customWorkflowTitle ?? null}
+      customWorkflowContent={workflow?.customWorkflowContent ?? null}
+      approvalSteps={approvalSteps}
+    />
+  );
+}
+
+export default function WorkflowMetadataPanel() {
+  return <WorkflowMetadataPanelView />;
 }

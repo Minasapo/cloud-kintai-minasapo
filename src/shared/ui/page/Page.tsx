@@ -1,14 +1,21 @@
-import { Container, Stack } from "@mui/material";
 import CommonBreadcrumbs, {
   type BreadcrumbItem,
 } from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
 import Title from "@shared/ui/typography/Title";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
 
-const PAGE_PADDING_TOP = designTokenVar("component.page.paddingTop", "24px");
 const PAGE_SECTION_GAP = designTokenVar("component.page.sectionGap", "16px");
+const PAGE_MAX_WIDTH_STYLES = {
+  sm: "640px",
+  md: "768px",
+  lg: "1024px",
+  xl: "1250px",
+} as const;
+const PAGE_CENTERED_STYLE: CSSProperties = {
+  marginInline: "auto",
+};
 
 interface PageProps {
   title: string;
@@ -25,14 +32,17 @@ export default function Page({
   maxWidth = "xl",
   showDefaultHeader = true,
 }: PageProps) {
+  const maxWidthStyle: CSSProperties =
+    maxWidth === false
+      ? {}
+      : {
+          ...PAGE_CENTERED_STYLE,
+          maxWidth: PAGE_MAX_WIDTH_STYLES[maxWidth],
+        };
+
   return (
-    <Container
-      maxWidth={maxWidth}
-      disableGutters
-      className="pt-6"
-      style={{ paddingTop: PAGE_PADDING_TOP }}
-    >
-      <Stack direction="column" spacing={0} style={{ gap: PAGE_SECTION_GAP }}>
+    <div style={maxWidthStyle}>
+      <div className="flex flex-col" style={{ gap: PAGE_SECTION_GAP }}>
         {showDefaultHeader && (
           <>
             <CommonBreadcrumbs items={breadcrumbs} current={title} />
@@ -40,7 +50,7 @@ export default function Page({
           </>
         )}
         {children}
-      </Stack>
-    </Container>
+      </div>
+    </div>
   );
 }

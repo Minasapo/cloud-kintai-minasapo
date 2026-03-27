@@ -1,7 +1,5 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Box, IconButton, Stack } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
@@ -11,51 +9,46 @@ type MoveDateItemProps = {
   workDate: dayjs.Dayjs;
 };
 
-export default function MoveDateItem(props: MoveDateItemProps) {
+export default function MoveDateItem({ workDate }: MoveDateItemProps) {
   const navigate = useNavigate();
 
   const handlePrevDay = () => {
-    const prevDay = props.workDate.subtract(1, "day");
-    navigate(
-      `/admin/attendances/${prevDay.format(AttendanceDate.QueryParamFormat)}`
-    );
+    const prevDay = workDate.subtract(1, "day");
+    navigate(`/admin/attendances/${prevDay.format(AttendanceDate.QueryParamFormat)}`);
   };
 
   const handleNextDay = () => {
-    const nextDay = props.workDate.add(1, "day");
-    navigate(
-      `/admin/attendances/${nextDay.format(AttendanceDate.QueryParamFormat)}`
-    );
+    const nextDay = workDate.add(1, "day");
+    navigate(`/admin/attendances/${nextDay.format(AttendanceDate.QueryParamFormat)}`);
   };
 
   return (
-    <Stack direction="row" spacing={2} alignItems="center">
-      <Box>
-        <IconButton onClick={handlePrevDay}>
-          <ArrowBackIcon />
-        </IconButton>
-      </Box>
-      <DatePicker
-        value={props.workDate}
-        format={AttendanceDate.DisplayFormat}
-        slotProps={{
-          textField: { size: "small" },
-        }}
-        onChange={(date) => {
-          if (date) {
-            navigate(
-              `/admin/attendances/${date.format(
-                AttendanceDate.QueryParamFormat
-              )}`
-            );
+    <div className="flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        onClick={handlePrevDay}
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/70 bg-white text-slate-600 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.18)] transition hover:bg-slate-50"
+      >
+        <ArrowBackIcon fontSize="small" />
+      </button>
+      <input
+        type="date"
+        value={workDate.format("YYYY-MM-DD")}
+        onChange={(event) => {
+          const date = dayjs(event.target.value);
+          if (date.isValid()) {
+            navigate(`/admin/attendances/${date.format(AttendanceDate.QueryParamFormat)}`);
           }
         }}
+        className="rounded-[18px] border border-slate-300/70 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
       />
-      <Box>
-        <IconButton onClick={handleNextDay}>
-          <ArrowForwardIcon />
-        </IconButton>
-      </Box>
-    </Stack>
+      <button
+        type="button"
+        onClick={handleNextDay}
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/70 bg-white text-slate-600 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.18)] transition hover:bg-slate-50"
+      >
+        <ArrowForwardIcon fontSize="small" />
+      </button>
+    </div>
   );
 }

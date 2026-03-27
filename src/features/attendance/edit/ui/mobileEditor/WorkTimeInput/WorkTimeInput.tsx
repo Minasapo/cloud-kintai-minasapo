@@ -1,4 +1,3 @@
-import { Divider, Typography } from "@mui/material";
 import { useContext } from "react";
 
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
@@ -19,19 +18,26 @@ export function WorkTimeInput() {
   return (
     <>
       <Label>勤務時間</Label>
-      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-        開始時刻
-      </Typography>
-      {/* 直行 */}
-      <GoDirectlyFlagInput />
-      <StartTimeInputMobile dataTestId="mobile-start-time-input" />
-      <Divider />
-      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-        終了時刻
-      </Typography>
-      {/* 直帰 */}
-      <ReturnDirectlyFlagInput />
-      <EndTimeInput workDate={workDate} setValue={setValue} />
+      <div className="overflow-visible rounded-lg border border-slate-200/80">
+        <div className="grid grid-cols-[7.5rem_1fr] border-b border-slate-200/80">
+          <div className="bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+            開始時刻
+          </div>
+          <div className="space-y-2 px-3 py-2">
+            <StartTimeInputMobile dataTestId="mobile-start-time-input" />
+            <GoDirectlyFlagInput />
+          </div>
+        </div>
+        <div className="grid grid-cols-[7.5rem_1fr]">
+          <div className="bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+            終了時刻
+          </div>
+          <div className="space-y-2 px-3 py-2">
+            <EndTimeInput />
+            <ReturnDirectlyFlagInput />
+          </div>
+        </div>
+      </div>
     </>
   );
 }

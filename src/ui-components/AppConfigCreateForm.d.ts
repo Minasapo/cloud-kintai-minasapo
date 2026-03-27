@@ -36,6 +36,9 @@ export declare type AppConfigCreateFormInputValues = {
     amPmHolidayEnabled?: boolean;
     officeMode?: boolean;
     attendanceStatisticsEnabled?: boolean;
+    workflowNotificationEnabled?: boolean;
+    timeRecorderAnnouncementEnabled?: boolean;
+    timeRecorderAnnouncementMessage?: string;
     absentEnabled?: boolean;
     hourlyPaidHolidayEnabled?: boolean;
     themeColor?: string;
@@ -59,6 +62,9 @@ export declare type AppConfigCreateFormValidationValues = {
     amPmHolidayEnabled?: ValidationFunction<boolean>;
     officeMode?: ValidationFunction<boolean>;
     attendanceStatisticsEnabled?: ValidationFunction<boolean>;
+    workflowNotificationEnabled?: ValidationFunction<boolean>;
+    timeRecorderAnnouncementEnabled?: ValidationFunction<boolean>;
+    timeRecorderAnnouncementMessage?: ValidationFunction<string>;
     absentEnabled?: ValidationFunction<boolean>;
     hourlyPaidHolidayEnabled?: ValidationFunction<boolean>;
     themeColor?: ValidationFunction<string>;
@@ -84,6 +90,9 @@ export declare type AppConfigCreateFormOverridesProps = {
     amPmHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     officeMode?: PrimitiveOverrideProps<SwitchFieldProps>;
     attendanceStatisticsEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    workflowNotificationEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    timeRecorderAnnouncementEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
+    timeRecorderAnnouncementMessage?: PrimitiveOverrideProps<TextFieldProps>;
     absentEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     hourlyPaidHolidayEnabled?: PrimitiveOverrideProps<SwitchFieldProps>;
     themeColor?: PrimitiveOverrideProps<TextFieldProps>;

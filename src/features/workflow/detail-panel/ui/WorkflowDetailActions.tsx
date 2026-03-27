@@ -1,61 +1,44 @@
-import { Box, Button } from "@mui/material";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
-type WorkflowDetailActionsProps = {
-  onBack: () => void;
-  onWithdraw: () => void;
-  onEdit: () => void;
-  withdrawDisabled?: boolean;
-  withdrawTooltip?: string;
-  editDisabled?: boolean;
-  editTooltip?: string;
-};
+import { useWorkflowDetailContext } from "../model/WorkflowDetailContext";
+import styles from "./WorkflowDetailActions.module.scss";
 
-export default function WorkflowDetailActions({
-  onBack,
-  onWithdraw,
-  onEdit,
-  withdrawDisabled,
-  withdrawTooltip,
-  editDisabled,
-  editTooltip,
-}: WorkflowDetailActionsProps) {
+export default function WorkflowDetailActions() {
+  const { permissions, onBack, onWithdraw, onEdit } = useWorkflowDetailContext();
+  const { withdrawDisabled, withdrawTooltip, editDisabled, editTooltip } =
+    permissions;
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        mb: 2,
-      }}
-    >
-      <Box>
-        <Button size="small" sx={{ mr: 1 }} onClick={onBack}>
+    <div className={styles.actions}>
+      <div>
+        <button
+          type="button"
+          className={styles.backButton}
+          onClick={onBack}
+        >
+          <ArrowBackRoundedIcon sx={{ fontSize: 18, color: "#475569" }} />
           一覧に戻る
-        </Button>
-      </Box>
-      <Box>
-        <Button
-          size="small"
-          variant="contained"
-          color="error"
-          sx={{ mr: 1 }}
+        </button>
+      </div>
+      <div className={styles.actionsRight}>
+        <button
+          type="button"
+          className={styles.dangerPillButton}
           onClick={onWithdraw}
           disabled={withdrawDisabled}
           title={withdrawTooltip}
         >
           取り下げ
-        </Button>
-
-        <Button
-          size="small"
-          variant="contained"
+        </button>
+        <button
+          type="button"
+          className={styles.pillButton}
           onClick={onEdit}
           disabled={editDisabled}
           title={editTooltip}
         >
           編集
-        </Button>
-      </Box>
-    </Box>
+        </button>
+      </div>
+    </div>
   );
 }

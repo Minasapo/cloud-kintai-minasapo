@@ -43,20 +43,16 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
+import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import {
   loadShiftPatterns,
   saveShiftPatterns,
 } from "@/shared/lib/storage/shiftPatternStorage";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
 
 import { normalizeStatus, ShiftRequestDayStatus } from "../model/statusMapping";
 import { useShiftRequestData } from "../model/useShiftRequestData";
@@ -65,7 +61,7 @@ import { useShiftRequestPersist } from "../model/useShiftRequestPersist";
 type Status = ShiftRequestDayStatus;
 
 export default function ShiftRequestForm() {
-  const dispatch = useDispatch();
+  const { notify } = useLocalNotification();
   const { cognitoUser, loading: cognitoUserLoading } = useCognitoUser();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -105,7 +101,7 @@ export default function ShiftRequestForm() {
       requestedOff: alpha(theme.palette.warning.main, 0.3),
       auto: alpha(theme.palette.info.main, 0.18),
     }),
-    [theme]
+    [theme],
   );
   const [focusedDateKey, setFocusedDateKey] = useState<string | null>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -135,16 +131,16 @@ export default function ShiftRequestForm() {
 
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
-    [currentMonth]
+    [currentMonth],
   );
   const daysInMonth = monthStart.daysInMonth();
 
   const days = useMemo(
     () =>
       Array.from({ length: daysInMonth }).map((_, i) =>
-        monthStart.add(i, "day")
+        monthStart.add(i, "day"),
       ),
-    [monthStart.year(), monthStart.month(), daysInMonth]
+    [monthStart.year(), monthStart.month(), daysInMonth],
   );
 
   const calendarDays = useMemo(() => {
@@ -163,7 +159,7 @@ export default function ShiftRequestForm() {
 
   const dayKeyList = useMemo(
     () => days.map((d) => d.format("YYYY-MM-DD")),
-    [days]
+    [days],
   );
 
   const {
@@ -220,13 +216,13 @@ export default function ShiftRequestForm() {
       // summary を saveFn 内で計算
       const currentSummary = {
         workDays: Object.values(selectedDates).filter(
-          (v) => v.status === "work"
+          (v) => v.status === "work",
         ).length,
         fixedOffDays: Object.values(selectedDates).filter(
-          (v) => v.status === "fixedOff"
+          (v) => v.status === "fixedOff",
         ).length,
         requestedOffDays: Object.values(selectedDates).filter(
-          (v) => v.status === "requestedOff"
+          (v) => v.status === "requestedOff",
         ).length,
       };
       await saveShiftRequest(currentSummary);
@@ -239,17 +235,26 @@ export default function ShiftRequestForm() {
       !isLoadingShiftRequest,
     delay: 2000, // 2秒のdebounce
     onSaveSuccess: () => {
-      dispatch(setSnackbarSuccess("シフトを自動保存しました"));
+      void notify("自動保存完了", {
+        body: "シフトを自動保存しました",
+        mode: "auto-close",
+        tag: "shift-auto-save-success",
+      });
     },
     onSaveError: (error) => {
       console.error("Auto-save error:", error);
-      dispatch(setSnackbarError("シフトの自動保存に失敗しました"));
+      void notify("自動保存エラー", {
+        body: "シフトの自動保存に失敗しました",
+        mode: "await-interaction",
+        priority: "high",
+        tag: "shift-auto-save-error",
+      });
     },
   });
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [selectionAnchorKey, setSelectionAnchorKey] = useState<string | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -300,7 +305,7 @@ export default function ShiftRequestForm() {
         return Array.from(merged);
       });
     },
-    [dayKeyList]
+    [dayKeyList],
   );
 
   const applyStatusToSelection = (status: Status) => {
@@ -350,7 +355,7 @@ export default function ShiftRequestForm() {
           extendSelectionRange(selectionAnchorKey, key);
         } else {
           setSelectedRowKeys((prev) =>
-            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
           );
         }
         setSelectionAnchorKey(key);
@@ -364,7 +369,7 @@ export default function ShiftRequestForm() {
       isSelectionMode,
       monthStart,
       selectionAnchorKey,
-    ]
+    ],
   );
 
   const handleWeekdayLabelClick = useCallback(
@@ -379,7 +384,7 @@ export default function ShiftRequestForm() {
       setSelectedRowKeys((prev) => {
         const prevSet = new Set(prev);
         const isColumnAlreadySelected = columnKeys.every((key) =>
-          prevSet.has(key)
+          prevSet.has(key),
         );
 
         if (isColumnAlreadySelected) {
@@ -396,7 +401,7 @@ export default function ShiftRequestForm() {
       });
       setSelectionAnchorKey(nextAnchor ?? null);
     },
-    [dayKeyList, days, isMobile, isSelectionMode, selectionAnchorKey]
+    [dayKeyList, days, isMobile, isSelectionMode, selectionAnchorKey],
   );
 
   useEffect(() => {
@@ -440,15 +445,20 @@ export default function ShiftRequestForm() {
               Object.entries(pattern.mapping).map(([weekday, status]) => [
                 Number(weekday),
                 normalizeStatus(status),
-              ])
+              ]),
             ) as Record<number, Status>,
-          }))
+          })),
         );
       } catch (error) {
         if (isMounted) {
           console.error("Failed to load shift patterns", error);
           setPatterns([]);
-          dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+          notify("エラー", {
+            body: MESSAGE_CODE.E00001,
+            mode: "await-interaction",
+            priority: "high",
+            tag: "shift-pattern-load-error",
+          });
         }
       } finally {
         if (isMounted) {
@@ -462,7 +472,7 @@ export default function ShiftRequestForm() {
     return () => {
       isMounted = false;
     };
-  }, [cognitoUser, cognitoUserLoading, dispatch]);
+  }, [cognitoUser, cognitoUserLoading, notify]);
 
   const serializePatterns = useCallback(
     (patternList: Pattern[]) =>
@@ -473,10 +483,10 @@ export default function ShiftRequestForm() {
           Object.entries(pattern.mapping).map(([weekday, status]) => [
             String(weekday),
             status,
-          ])
+          ]),
         ),
       })),
-    []
+    [],
   );
 
   const persistPatterns = useCallback(
@@ -489,10 +499,15 @@ export default function ShiftRequestForm() {
         await saveShiftPatterns(serializePatterns(nextPatterns));
       } catch (error) {
         console.error("Failed to save shift patterns", error);
-        dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+        void notify("エラー", {
+          body: MESSAGE_CODE.E00001,
+          mode: "await-interaction",
+          priority: "high",
+          tag: "shift-pattern-save-error",
+        });
       }
     },
-    [cognitoUser, cognitoUserLoading, dispatch, serializePatterns]
+    [cognitoUser, cognitoUserLoading, notify, serializePatterns],
   );
 
   const applyPattern = (pattern: Pattern) => {
@@ -526,19 +541,19 @@ export default function ShiftRequestForm() {
   const workCount = useMemo(
     () =>
       Object.values(selectedDates).filter((v) => v.status === "work").length,
-    [selectedDates]
+    [selectedDates],
   );
   const fixedOffCount = useMemo(
     () =>
       Object.values(selectedDates).filter((v) => v.status === "fixedOff")
         .length,
-    [selectedDates]
+    [selectedDates],
   );
   const requestedOffCount = useMemo(
     () =>
       Object.values(selectedDates).filter((v) => v.status === "requestedOff")
         .length,
-    [selectedDates]
+    [selectedDates],
   );
 
   const summary = useMemo(
@@ -547,7 +562,7 @@ export default function ShiftRequestForm() {
       fixedOffDays: fixedOffCount,
       requestedOffDays: requestedOffCount,
     }),
-    [fixedOffCount, requestedOffCount, workCount]
+    [fixedOffCount, requestedOffCount, workCount],
   );
 
   const interactionDisabled =
@@ -752,147 +767,206 @@ export default function ShiftRequestForm() {
   return (
     <Container
       disableGutters={isMobile}
-      sx={{ py: { xs: 2, sm: 3 }, pb: isMobile ? 10 : 3, px: { xs: 1.5, sm: 2 } }}
+      sx={{
+        py: { xs: 1, sm: 2 },
+        pb: isMobile ? 10 : 4,
+        px: { xs: 1.5, sm: 2.5 },
+        maxWidth: "1120px !important",
+      }}
     >
-      <Paper sx={{ p: { xs: 1.5, sm: 2.5 } }}>
-        <Typography variant="h1">希望シフト</Typography>
-        <Box
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Typography
+              sx={{
+                margin: 0,
+                fontSize: { xs: "1.85rem", md: "2.2rem" },
+                fontWeight: 700,
+                lineHeight: 1.15,
+                letterSpacing: "-0.02em",
+                color: "#020617",
+              }}
+            >
+              希望シフト
+            </Typography>
+            <Typography
+              sx={{
+                maxWidth: 760,
+                color: "#64748b",
+                lineHeight: 1.9,
+              }}
+            >
+              出勤日、固定休、希望休をひとつの画面で整理できます。月ごとの希望を調整しながら保存してください。
+            </Typography>
+          </Box>
+        </Box>
+
+        <Paper
           sx={{
-            display: "flex",
-            alignItems: { xs: "flex-start", sm: "center" },
-            justifyContent: "space-between",
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 1.5, sm: 2 },
-            mb: 2,
+            p: { xs: 1.5, sm: 2.25 },
+            borderRadius: "24px",
+            border: "1px solid rgba(226,232,240,0.8)",
+            boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
+            bgcolor: "#ffffff",
           }}
         >
           <Box
             sx={{
               display: "flex",
               alignItems: { xs: "flex-start", sm: "center" },
-              gap: 1,
-              flexWrap: "wrap",
+              justifyContent: "space-between",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 1.5, sm: 2 },
             }}
           >
-            <IconButton size="small" onClick={prevMonth} aria-label="前の月">
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography>{monthStart.format("YYYY年 M月")}</Typography>
-            <IconButton size="small" onClick={nextMonth} aria-label="次の月">
-              <ArrowForwardIcon />
-            </IconButton>
-
-            {/* 自動保存ステータス表示 */}
-            <Box
-              sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 1 }}
-            >
-              {isAutoSaving && (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <CircularProgress size={14} />
-                  <Typography variant="caption" color="text.secondary">
-                    保存中...
-                  </Typography>
-                </Box>
-              )}
-              {isAutoSavePending && !isAutoSaving && (
-                <Typography variant="caption" color="text.secondary">
-                  保存待ち
-                  {lastChangedAt &&
-                    ` (${dayjs(lastChangedAt).format("M/D HH:mm:ss")})`}
-                </Typography>
-              )}
-              {!isAutoSaving && !isAutoSavePending && lastSavedAt && (
-                <Typography variant="caption" color="success.main">
-                  最終保存: {dayjs(lastSavedAt).format("M/D HH:mm:ss")}
-                </Typography>
-              )}
-            </Box>
-          </Box>
-
-          <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
-            <Button
-              startIcon={<AddIcon />}
-              onClick={() => setPatternDialogOpen(true)}
-              fullWidth={isMobile}
-            >
-              マイパターン
-            </Button>
-          </Box>
-        </Box>
-
-        {(isLoadingStaff || isLoadingShiftRequest) && (
-          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-            <CircularProgress size={24} />
-          </Box>
-        )}
-
-        <Box sx={{ mb: 2 }}>
-          <Stack spacing={2}>
-            <Box>
-              <Stack spacing={1}>
-                <Stack
-                  direction={isMobile ? "column" : "row"}
-                  alignItems={isMobile ? "flex-start" : "center"}
-                  justifyContent="space-between"
-                  rowGap={1}
-                >
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={isSelectionMode}
-                        onChange={(_, checked) => setIsSelectionMode(checked)}
-                        disabled={interactionDisabled}
-                      />
-                    }
-                    label="選択モード"
-                  />
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    flexWrap="wrap"
-                    justifyContent={isMobile ? "flex-start" : "flex-end"}
-                  >
-                    <Button
-                      size="small"
-                      disabled={interactionDisabled || !isSelectionMode}
-                      onClick={toggleAllRowsSelection}
-                    >
-                      すべて選択
-                    </Button>
-                    <Button
-                      size="small"
-                      disabled={interactionDisabled || !isSelectionMode}
-                      onClick={clearRowSelection}
-                    >
-                      選択解除
-                    </Button>
-                  </Stack>
-                </Stack>
-              </Stack>
-            </Box>
             <Box
               sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "minmax(0, 1fr)",
-                  md: "minmax(0, 2fr) minmax(0, 1fr)",
-                },
-                gap: 2,
-                alignItems: "start",
+                display: "flex",
+                alignItems: { xs: "flex-start", sm: "center" },
+                gap: 1,
+                flexWrap: "wrap",
               }}
             >
+              <IconButton size="small" onClick={prevMonth} aria-label="前の月">
+                <ArrowBackIcon />
+              </IconButton>
+              <Typography sx={{ fontSize: "1.05rem", fontWeight: 700, color: "#0f172a" }}>
+                {monthStart.format("YYYY年 M月")}
+              </Typography>
+              <IconButton size="small" onClick={nextMonth} aria-label="次の月">
+                <ArrowForwardIcon />
+              </IconButton>
+
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 0.75, ml: { xs: 0, sm: 1 } }}
+              >
+                {isAutoSaving && (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <CircularProgress size={14} />
+                    <Typography variant="caption" color="text.secondary">
+                      保存中...
+                    </Typography>
+                  </Box>
+                )}
+                {isAutoSavePending && !isAutoSaving && (
+                  <Typography variant="caption" color="text.secondary">
+                    保存待ち
+                    {lastChangedAt &&
+                      ` (${dayjs(lastChangedAt).format("M/D HH:mm:ss")})`}
+                  </Typography>
+                )}
+                {!isAutoSaving && !isAutoSavePending && lastSavedAt && (
+                  <Typography variant="caption" color="success.main">
+                    最終保存: {dayjs(lastSavedAt).format("M/D HH:mm:ss")}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
+              <Button
+                startIcon={<AddIcon />}
+                onClick={() => setPatternDialogOpen(true)}
+                fullWidth={isMobile}
+                sx={{
+                  minWidth: 140,
+                  borderRadius: "9999px",
+                  border: "1px solid rgba(6,95,70,0.35)",
+                  backgroundColor: "#19b985",
+                  color: "#ffffff",
+                  boxShadow:
+                    "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
+                  "&:hover": { backgroundColor: "#17ab7b" },
+                }}
+              >
+                マイパターン
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
+
+        <Paper
+          sx={{
+            p: { xs: 1.5, sm: 2.25 },
+            borderRadius: "24px",
+            border: "1px solid rgba(226,232,240,0.8)",
+            boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
+            bgcolor: "#ffffff",
+          }}
+        >
+          {(isLoadingStaff || isLoadingShiftRequest) && (
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
+
+          <Box sx={{ mb: 2 }}>
+            <Stack spacing={2}>
               <Box>
-                <Typography variant="subtitle2" gutterBottom>
-                  カレンダー
-                </Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
-                    gap: { xs: 0.25, sm: 0.5 },
-                    textAlign: "center",
-                  }}
-                >
+                <Stack spacing={1}>
+                  <Stack
+                    direction={isMobile ? "column" : "row"}
+                    alignItems={isMobile ? "flex-start" : "center"}
+                    justifyContent="space-between"
+                    rowGap={1}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={isSelectionMode}
+                          onChange={(_, checked) => setIsSelectionMode(checked)}
+                          disabled={interactionDisabled}
+                        />
+                      }
+                      label="選択モード"
+                    />
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      flexWrap="wrap"
+                      justifyContent={isMobile ? "flex-start" : "flex-end"}
+                    >
+                      <Button
+                        size="small"
+                        disabled={interactionDisabled || !isSelectionMode}
+                        onClick={toggleAllRowsSelection}
+                      >
+                        すべて選択
+                      </Button>
+                      <Button
+                        size="small"
+                        disabled={interactionDisabled || !isSelectionMode}
+                        onClick={clearRowSelection}
+                      >
+                        選択解除
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </Box>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "minmax(0, 1fr)",
+                    md: "minmax(0, 2fr) minmax(0, 1fr)",
+                  },
+                  gap: 2,
+                  alignItems: "start",
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom sx={{ color: "#475569", fontWeight: 700 }}>
+                    カレンダー
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
+                      gap: { xs: 0.25, sm: 0.5 },
+                      textAlign: "center",
+                    }}
+                  >
                   {weekdayLabels.map((label, idx) => (
                     <Typography
                       key={`weekday-${idx}`}
@@ -929,7 +1003,7 @@ export default function ShiftRequestForm() {
                     const status = selectedDates[key]?.status;
                     const isCurrentMonthDay = dayValue.isSame(
                       monthStart,
-                      "month"
+                      "month",
                     );
                     const isFocused = focusedDateKey === key;
                     const isSelectedDate = selectedRowKeys.includes(key);
@@ -939,13 +1013,13 @@ export default function ShiftRequestForm() {
                     const boxShadowValue = isFocused
                       ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.8)}`
                       : isSelectedDate
-                      ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.5)}`
-                      : undefined;
+                        ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.5)}`
+                        : undefined;
                     const borderColor = isFocused
                       ? theme.palette.primary.main
                       : isSelectedDate
-                      ? alpha(theme.palette.primary.main, 0.5)
-                      : "divider";
+                        ? alpha(theme.palette.primary.main, 0.5)
+                        : "divider";
                     return (
                       <Box
                         key={`calendar-${key}`}
@@ -954,7 +1028,10 @@ export default function ShiftRequestForm() {
                         }
                         sx={{
                           position: "relative",
-                          minHeight: { xs: 42, sm: PANEL_HEIGHTS.FORM_ITEM_MIN },
+                          minHeight: {
+                            xs: 42,
+                            sm: PANEL_HEIGHTS.FORM_ITEM_MIN,
+                          },
                           px: { xs: 0.25, sm: 0.5 },
                           py: { xs: 0.25, sm: 0.5 },
                           borderRadius: 1,
@@ -980,8 +1057,8 @@ export default function ShiftRequestForm() {
                         {status && (
                           <Typography variant="caption" sx={{ fontSize: 10 }}>
                             {isMobile
-                              ? statusMobileLabelMap[status] ??
-                                statusLabelMap[status]
+                              ? (statusMobileLabelMap[status] ??
+                                statusLabelMap[status])
                               : statusLabelMap[status]}
                           </Typography>
                         )}
@@ -992,46 +1069,66 @@ export default function ShiftRequestForm() {
                 <Box sx={{ mt: 1 }}>{renderSummary()}</Box>
               </Box>
               <Box>{renderDayDetail({ isMobileView: isMobile })}</Box>
-            </Box>
-          </Stack>
-        </Box>
+              </Box>
+            </Stack>
+          </Box>
+        </Paper>
 
-        <Box
-          component="form"
-          sx={{ mt: 3 }}
-          onSubmit={(e) => e.preventDefault()}
+        <Paper
+          sx={{
+            p: { xs: 1.5, sm: 2.25 },
+            borderRadius: "24px",
+            border: "1px solid rgba(226,232,240,0.8)",
+            boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
+            bgcolor: "#ffffff",
+          }}
         >
-          <Stack spacing={2} alignItems="stretch">
-            <TextField
-              label="備考"
-              multiline
-              rows={2}
-              value={note}
-              disabled={interactionDisabled}
-              onChange={(e) => setNote(e.target.value)}
-            />
+          <Box
+            component="form"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <Stack spacing={2} alignItems="stretch">
+              <TextField
+                label="備考"
+                multiline
+                rows={2}
+                value={note}
+                disabled={interactionDisabled}
+                onChange={(e) => setNote(e.target.value)}
+              />
 
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-                flexWrap: "wrap",
-              }}
-            >
-              <Button
-                variant="contained"
-                onClick={() => saveShiftRequest(summary)}
-                disabled={!hasSelection || interactionDisabled}
-                fullWidth={isMobile}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 2,
+                  flexWrap: "wrap",
+                }}
               >
-                保存
-              </Button>
-              {isSaving && <CircularProgress size={20} />}
-            </Box>
-          </Stack>
-        </Box>
+                <Button
+                  variant="contained"
+                  onClick={() => saveShiftRequest(summary)}
+                  disabled={!hasSelection || interactionDisabled}
+                  fullWidth={isMobile}
+                  sx={{
+                    minWidth: 160,
+                    borderRadius: "9999px",
+                    border: "1px solid rgba(6,95,70,0.35)",
+                    backgroundColor: "#19b985",
+                    color: "#ffffff",
+                    boxShadow:
+                      "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
+                    "&:hover": { backgroundColor: "#17ab7b" },
+                  }}
+                >
+                  保存
+                </Button>
+                {isSaving && <CircularProgress size={20} />}
+              </Box>
+            </Stack>
+          </Box>
+        </Paper>
         {/* パターン管理ダイアログ */}
         <Dialog
           open={patternDialogOpen}
@@ -1091,7 +1188,7 @@ export default function ShiftRequestForm() {
                               <TableRow>
                                 {weekdayLabels.map((_, idx) => {
                                   const normalized = normalizeStatus(
-                                    p.mapping[idx] as string
+                                    p.mapping[idx] as string,
                                   );
                                   return (
                                     <TableCell
@@ -1100,8 +1197,8 @@ export default function ShiftRequestForm() {
                                       sx={{ py: 0.5, whiteSpace: "nowrap" }}
                                     >
                                       {isMobile
-                                        ? statusMobileLabelMap[normalized] ??
-                                          statusLabelMap[normalized]
+                                        ? (statusMobileLabelMap[normalized] ??
+                                          statusLabelMap[normalized])
                                         : statusLabelMap[normalized]}
                                     </TableCell>
                                   );
@@ -1222,7 +1319,7 @@ export default function ShiftRequestForm() {
             </Button>
           </DialogActions>
         </Dialog>
-      </Paper>
+      </Box>
     </Container>
   );
 }

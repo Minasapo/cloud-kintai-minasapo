@@ -2,6 +2,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import DeleteIcon from "@mui/icons-material/Delete";
+import HistoryIcon from "@mui/icons-material/History";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import MessageIcon from "@mui/icons-material/Message";
@@ -18,7 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { memo, useState } from "react";
+import { memo, type MouseEvent, useState } from "react";
 
 import { CellComment, Mention, ShiftState } from "../types/collaborative.types";
 
@@ -33,12 +34,21 @@ interface BatchEditToolbarProps {
   onLock: () => void;
   onUnlock: () => void;
   onAddComments?: (content: string, mentions: Mention[]) => Promise<void>;
+  onShowCellHistory?: (
+    cellKey: string,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void;
   canUnlock: boolean;
   showLock: boolean;
   showUnlock: boolean;
   hasClipboard: boolean;
   canPaste: boolean;
   isUpdating?: boolean;
+  hasEditLockForSelected: boolean;
+  isOthersEditingSelected: boolean;
+  onAcquireEditLock: () => void;
+  onReleaseEditLock: () => void;
+  onForceReleaseLock: () => void;
 }
 
 const stateOptions: Array<{ state: ShiftState; label: string; color: string }> =
@@ -61,12 +71,18 @@ const BatchEditToolbarBase = ({
   onLock,
   onUnlock,
   onAddComments,
+  onShowCellHistory,
   canUnlock,
   showLock,
   showUnlock,
   hasClipboard,
   canPaste,
   isUpdating = false,
+  hasEditLockForSelected,
+  isOthersEditingSelected,
+  onAcquireEditLock,
+  onReleaseEditLock,
+  onForceReleaseLock,
 }: BatchEditToolbarProps) => {
   const [commentText, setCommentText] = useState("");
   const [isAddingComment, setIsAddingComment] = useState(false);
@@ -87,7 +103,6 @@ const BatchEditToolbarBase = ({
 
   return (
     <Paper
-      elevation={3}
       sx={{
         position: "fixed",
         bottom: 24,
@@ -95,11 +110,14 @@ const BatchEditToolbarBase = ({
         transform: "translateX(-50%)",
         px: 3,
         py: 2,
-        borderRadius: 2,
+        borderRadius: "24px",
+        border: "1px solid rgba(226,232,240,0.9)",
         minWidth: 600,
         zIndex: 1000,
         opacity: isUpdating ? 0.6 : 1,
         pointerEvents: isUpdating ? "none" : "auto",
+        bgcolor: "#ffffff",
+        boxShadow: "0 28px 60px -36px rgba(15,23,42,0.4)",
       }}
     >
       <Stack spacing={2}>
@@ -124,6 +142,52 @@ const BatchEditToolbarBase = ({
 
         <Divider />
 
+        {/* 編集ロック制御ボタン */}
+        <Box>
+          <Stack direction="row" spacing={1}>
+            {!hasEditLockForSelected && !isOthersEditingSelected && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={onAcquireEditLock}
+                disabled={isUpdating}
+              >
+                編集開始（ロック取得）
+              </Button>
+            )}
+            {hasEditLockForSelected && (
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={onReleaseEditLock}
+                disabled={isUpdating}
+              >
+                編集終了（ロック解除）
+              </Button>
+            )}
+            {isOthersEditingSelected && canUnlock && (
+              <Button
+                variant="contained"
+                color="error"
+                size="small"
+                onClick={onForceReleaseLock}
+                disabled={isUpdating}
+              >
+                編集ロックを強制剥奪
+              </Button>
+            )}
+            {isOthersEditingSelected && !canUnlock && (
+              <Typography variant="body2" color="error" sx={{ alignSelf: "center" }}>
+                他のユーザーが編集中です
+              </Typography>
+            )}
+          </Stack>
+        </Box>
+
+        <Divider />
+
         {/* 状態変更ボタン */}
         <Box>
           <Typography variant="caption" color="text.secondary" gutterBottom>
@@ -135,7 +199,7 @@ const BatchEditToolbarBase = ({
                 key={option.state}
                 label={option.label}
                 onClick={() => onChangeState(option.state)}
-                disabled={isUpdating}
+                disabled={isUpdating || !hasEditLockForSelected}
                 sx={{
                   bgcolor: option.color,
                   color: "white",
@@ -197,7 +261,7 @@ const BatchEditToolbarBase = ({
             variant="outlined"
             startIcon={<ContentPasteIcon />}
             onClick={onPaste}
-            disabled={!hasClipboard || !canPaste || isUpdating}
+            disabled={!hasClipboard || !canPaste || isUpdating || !hasEditLockForSelected}
             size="small"
           >
             貼り付け
@@ -269,8 +333,11 @@ const BatchEditToolbarBase = ({
                   {comments.length}件のコメント
                 </Typography>
                 <Stack spacing={1.5}>
-                  {comments.map((comment) => (
-                    <Box key={comment.id} sx={{ display: "flex", gap: 1 }}>
+                  {comments.map((comment, index) => (
+                    <Box
+                      key={`${comment.id}-${comment.createdAt}-${index}`}
+                      sx={{ display: "flex", gap: 1 }}
+                    >
                       <Avatar
                         sx={{
                           width: 28,
@@ -312,6 +379,29 @@ const BatchEditToolbarBase = ({
             <Divider />
           </>
         )}
+
+        {/* セル変更履歴ボタン */}
+        {onShowCellHistory &&
+          selectionCount === 1 &&
+          selectedCells.length === 1 && (
+            <>
+              <Button
+                variant="outlined"
+                startIcon={<HistoryIcon />}
+                onClick={(event) =>
+                  onShowCellHistory(
+                    `${selectedCells[0].staffId}#${selectedCells[0].date}`,
+                    event,
+                  )
+                }
+                size="small"
+                color="primary"
+              >
+                このセルの変更履歴
+              </Button>
+              <Divider />
+            </>
+          )}
 
         {/* ヘルプテキスト */}
         <Typography variant="caption" color="text.secondary">

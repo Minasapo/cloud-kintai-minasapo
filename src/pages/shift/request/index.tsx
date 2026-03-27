@@ -1,13 +1,11 @@
+import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { ShiftRequestForm } from "@features/shift/request-form";
-import Box from "@mui/material/Box";
+import { LinearProgress } from "@mui/material";
 import Page from "@shared/ui/page/Page";
-import { useContext } from "react";
 
-import { AppConfigContext } from "@/context/AppConfigContext";
 import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
-import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborativePage";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import { dashboardInnerSurfaceSx, PageSection } from "@/shared/ui/layout";
+import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborative";
+import { PageSection } from "@/shared/ui/layout";
 
 export const resolveShiftRequestMode = (
   defaultMode: ShiftDisplayMode,
@@ -16,7 +14,18 @@ export const resolveShiftRequestMode = (
 };
 
 export default function ShiftRequestPage() {
-  const { getShiftDefaultMode } = useContext(AppConfigContext);
+  const { config, getShiftDefaultMode, isConfigLoading } = useAppConfig();
+
+  if (isConfigLoading && !config) {
+    return (
+      <Page title="希望シフト" maxWidth={false} showDefaultHeader={false}>
+        <PageSection variant="plain" layoutVariant="detail" sx={{ gap: 0 }}>
+          <LinearProgress data-testid="shift-mode-loading" />
+        </PageSection>
+      </Page>
+    );
+  }
+
   const selectedMode = resolveShiftRequestMode(getShiftDefaultMode());
 
   if (selectedMode === "collaborative") {
@@ -24,16 +33,9 @@ export default function ShiftRequestPage() {
   }
 
   return (
-    <Page title="希望シフト" maxWidth="xl" showDefaultHeader={false}>
-      <PageSection layoutVariant="dashboard">
-        <Box
-          sx={{
-            ...dashboardInnerSurfaceSx,
-            minHeight: PANEL_HEIGHTS.DASHBOARD_MIN,
-          }}
-        >
-          <ShiftRequestForm />
-        </Box>
+    <Page title="希望シフト" maxWidth={false} showDefaultHeader={false}>
+      <PageSection variant="plain" layoutVariant="detail" sx={{ gap: 0 }}>
+        <ShiftRequestForm />
       </PageSection>
     </Page>
   );

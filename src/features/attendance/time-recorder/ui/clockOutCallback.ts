@@ -13,6 +13,12 @@ import {
 } from "@shared/api/graphql/types";
 
 import { ReturnDirectlyFlag } from "@/entities/attendance/lib/actions/attendanceActions";
+import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
+import {
+  buildAttendanceIdempotencyKey,
+  resolveAppVersion,
+  resolveClientTimeZone,
+} from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
@@ -27,7 +33,6 @@ import {
  * 退勤打刻時の処理を行うコールバック関数です。
  *
  * @param cognitoUser - 現在ログイン中のCognitoユーザー情報
- * @param today - 本日の日付（YYYY-MM-DD形式）
  * @param clockOut - 退勤打刻を行う非同期関数
  * @param dispatch - Reduxのdispatch関数
  * @param staff - スタッフ情報
@@ -35,7 +40,6 @@ import {
  */
 export async function clockOutCallback(
   cognitoUser: CognitoUser | null | undefined,
-  today: string,
   clockOut: (
     staffId: string,
     workDate: string,
@@ -45,7 +49,8 @@ export async function clockOutCallback(
   dispatch: Dispatch,
   staff: Staff | null | undefined,
   logger: Logger,
-  endTimeIso?: string
+  endTimeIso?: string,
+  occurredAt = getNowISOStringWithZeroSeconds()
 ): Promise<void> {
   if (!cognitoUser) {
     logger.debug("Skipped clockOutCallback because cognitoUser is missing");
@@ -57,35 +62,56 @@ export async function clockOutCallback(
     return;
   }
 
-  const clockOutTime = resolveClockOutTime(endTimeIso);
+  const workDate = resolveBusinessWorkDate(occurredAt);
+  const clockOutTime = endTimeIso ?? occurredAt;
+  const idempotencyKey = buildAttendanceIdempotencyKey({
+    action: "clock_out",
+    staffId: cognitoUser.id,
+    occurredAt,
+  });
+  const clientTimezone = resolveClientTimeZone();
+  const appVersion = resolveAppVersion();
 
-  // capture pressed time and t0 immediately to measure processing duration
-  const pressedAt = getNowISOStringWithZeroSeconds();
   const t0 = Date.now();
 
   try {
-    const attendance = await clockOut(cognitoUser.id, today, clockOutTime);
+    const attendance = await clockOut(cognitoUser.id, workDate, clockOutTime);
     const t1 = Date.now();
     const processingTimeMs = t1 - t0;
 
-    // record button-press time and include attendance time + processing time inside details (best-effort)
     try {
       const input: CreateOperationLogInput = {
         staffId: cognitoUser.id,
         action: "clock_out",
         resource: "attendance",
         resourceId: attendance?.id ?? undefined,
-        // primary timestamp: when the user pressed the button
-        timestamp: pressedAt,
+        timestamp: occurredAt,
         details: JSON.stringify({
-          workDate: today,
+          workDate,
           attendanceTime: clockOutTime,
           processingTimeMs,
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
           staffName: staff
             ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
             : undefined,
         }),
-        metadata: JSON.stringify({ processingTimeMs }),
+        metadata: JSON.stringify({
+          processingTimeMs,
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
+        }),
+        clientTimezone,
+        occurredAt,
+        resolvedWorkDate: workDate,
+        idempotencyKey,
+        appVersion,
         userAgent:
           typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       };
@@ -105,12 +131,4 @@ export async function clockOutCallback(
     logger.error("Failed to clock out", error);
     dispatch(setSnackbarError(MESSAGE_CODE.E01002));
   }
-}
-
-function resolveClockOutTime(endTimeIso?: string) {
-  if (endTimeIso) {
-    return endTimeIso;
-  }
-
-  return getNowISOStringWithZeroSeconds();
 }

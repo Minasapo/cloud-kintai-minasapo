@@ -3,32 +3,13 @@ import { StaffType, useStaffs } from "@entities/staff/model/useStaffs/useStaffs"
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {
-  Box,
-  Chip,
-  CircularProgress,
-  Collapse,
-  IconButton,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { DesktopDatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-// ...existing code
-import {
-  CARD_BORDER_WIDTH,
-  LIST_WIDTHS,
-  SELECTOR_MAX_WIDTH,
-  STANDARD_PADDING,
-} from "@/shared/config/uiDimensions";
+import { STANDARD_PADDING } from "@/shared/config/uiDimensions";
 
 import AggregateExportButton from "./AggregateExportButton";
 import ExportButton from "./ExportButton";
@@ -40,20 +21,14 @@ export type Inputs = {
   staffs: StaffType[];
 };
 
-const defaultValues: Inputs = {
-  startDate: undefined,
-  endDate: undefined,
-  staffs: [],
-};
+const formatInputDate = (value: dayjs.Dayjs) => value.format("YYYY-MM-DD");
 
 export default function DownloadForm() {
   const navigate = useNavigate();
   const [selectedStaff, setSelectedStaff] = useState<StaffType[]>([]);
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [isExpanded, setIsExpanded] = useState(!isMobile);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { staffs, loading: staffLoading, error: staffError } = useStaffs({
     isAuthenticated,
   });
@@ -62,237 +37,174 @@ export default function DownloadForm() {
     loading: closeDateLoading,
     error: closeDateError,
   } = useCloseDates();
+  const [startDate, setStartDate] = useState(formatInputDate(dayjs()));
+  const [endDate, setEndDate] = useState(formatInputDate(dayjs()));
 
-  const { control, setValue, watch } = useForm<Inputs>({
-    mode: "onChange",
-    defaultValues,
-  });
-
-  // special holiday inclusion is determined inside the export components via AppConfig
-
-  // derive workDates from watched start/end date so we can pass to ExportButton
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const startDate = watch("startDate") ?? dayjs();
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const endDate = watch("endDate") ?? dayjs();
-
-  // Derived state: compute workDates from startDate and endDate
   const workDates = useMemo(() => {
+    const start = dayjs(startDate);
+    const end = dayjs(endDate);
+    if (!start.isValid() || !end.isValid() || start.isAfter(end)) {
+      return [];
+    }
+
     const dates: string[] = [];
-    let date = startDate;
-    while (date.isBefore(endDate) || date.isSame(endDate)) {
+    let date = start;
+    while (date.isBefore(end) || date.isSame(end, "day")) {
       dates.push(date.format(AttendanceDate.DataFormat));
       date = date.add(1, "day");
     }
     return dates;
   }, [startDate, endDate]);
 
-  useEffect(() => {
-    if (!isMobile) {
-      setIsExpanded(true);
-      return;
-    }
-    setIsExpanded(false);
-  }, [isMobile]);
+  const selectedCloseDate = useMemo(() => {
+    const matched = closeDates.find(
+      (closeDate) =>
+        formatInputDate(dayjs(closeDate.startDate)) === startDate &&
+        formatInputDate(dayjs(closeDate.endDate)) === endDate,
+    );
+    return matched?.closeDate ?? "";
+  }, [closeDates, endDate, startDate]);
 
   if (staffLoading || closeDateLoading) {
-    return <CircularProgress />;
+    return (
+      <div className="flex justify-center py-8 text-sm text-slate-500">
+        読み込み中...
+      </div>
+    );
   }
 
   if (staffError || closeDateError) {
-    return <div>エラーが発生しました</div>;
+    return (
+      <div className="rounded-[18px] border border-rose-200 bg-rose-50/90 px-4 py-3 text-sm text-rose-900">
+        エラーが発生しました
+      </div>
+    );
   }
 
   return (
-    <Stack
-      spacing={4}
-      alignItems={{ xs: "stretch", md: "center" }}
-      sx={{
-        border: CARD_BORDER_WIDTH,
-        borderColor: "primary.main",
-        borderRadius: "5px",
-        pb: STANDARD_PADDING.CARD,
-        width: "100%",
-        minWidth: 0,
-        overflowX: "hidden",
-      }}
+    <div
+      className="flex w-full min-w-0 flex-col gap-4 overflow-x-hidden"
+      style={{ paddingBottom: STANDARD_PADDING.CARD }}
     >
-      <Box
-        sx={{
-          p: STANDARD_PADDING.SMALL,
-          width: LIST_WIDTHS.FULL,
-          boxSizing: "border-box",
-          textAlign: "center",
-          backgroundColor: "primary.main",
-          color: "primary.contrastText",
-          borderRadius: "3px 3px 0 0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 1,
-        }}
+      <div
+        className="flex w-full flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between"
       >
-        <Typography
-          component="span"
-          sx={{ fontWeight: 700, letterSpacing: "0.02em" }}
-        >
-          ダウンロードオプション
-        </Typography>
-        {isMobile && (
-          <IconButton
-            size="small"
+        <div>
+          <div className="text-[1.05rem] font-bold text-slate-900">
+            ダウンロード
+          </div>
+          <div className="mt-0.5 text-[0.92rem] leading-7 text-slate-500">
+            期間と対象スタッフを選択して、勤怠データを出力できます。
+          </div>
+        </div>
+        <div className="self-end sm:self-center">
+          <button
+            type="button"
             onClick={() => setIsExpanded((prev) => !prev)}
-            sx={{ color: "primary.contrastText" }}
-            aria-label={isExpanded ? "collapse" : "expand"}
+            className="inline-flex items-center justify-center gap-1 rounded-full border border-slate-300/70 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.18)] transition hover:bg-slate-50"
+            aria-label={isExpanded ? "ダウンロード要素を折りたたむ" : "ダウンロード要素を展開する"}
+            aria-expanded={isExpanded}
+            aria-controls="attendance-download-panel"
           >
-            {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </IconButton>
-        )}
-      </Box>
-      <Collapse in={isExpanded} timeout="auto" unmountOnExit={false}>
-        <Box sx={{ width: "100%" }}>
-          <Stack
-            spacing={3}
-            sx={{
-              width: "100%",
-              maxWidth: 880,
-              px: { xs: 1, sm: 2, md: 0 },
-              boxSizing: "border-box",
-              margin: "0 auto",
-              minWidth: 0,
-            }}
-          >
-            <Box>
-              <Stack spacing={1}>
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={1}
-                  alignItems={{ xs: "stretch", sm: "center" }}
-                  sx={{ width: "100%" }}
-                >
-                  <Box sx={{ flex: 1 }}>
-                    <Controller
-                      name="startDate"
-                      control={control}
-                      render={({ field }) => (
-                        <DesktopDatePicker
-                          {...field}
-                          label="開始日"
-                          format={AttendanceDate.DisplayFormat}
-                          slotProps={{
-                            textField: {
-                              variant: "outlined",
-                              size: "small",
-                              fullWidth: true,
-                            },
-                          }}
-                        />
-                      )}
-                    />
-                  </Box>
-                  <Box sx={{ display: { xs: "none", sm: "block" } }}>〜</Box>
-                  <Box sx={{ flex: 1 }}>
-                    <Controller
-                      name="endDate"
-                      control={control}
-                      render={({ field }) => (
-                        <DesktopDatePicker
-                          {...field}
-                          label="終了日"
-                          format={AttendanceDate.DisplayFormat}
-                          slotProps={{
-                            textField: {
-                              variant: "outlined",
-                              size: "small",
-                              fullWidth: true,
-                            },
-                          }}
-                        />
-                      )}
-                    />
-                  </Box>
-                </Stack>
-                <Stack spacing={2} sx={{ maxWidth: SELECTOR_MAX_WIDTH }}>
-                  <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    spacing={1}
-                    alignItems={{ xs: "flex-start", sm: "center" }}
-                    sx={{
-                      flexWrap: "wrap",
-                      rowGap: 1,
-                      columnGap: 1,
-                    }}
-                  >
-                    <Box sx={{ whiteSpace: "nowrap" }}>集計対象月から:</Box>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      sx={{ flexWrap: "wrap", rowGap: 1 }}
-                    >
-                      <Chip
-                        icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-                        label="新規"
-                        variant="outlined"
-                        color="primary"
-                        onClick={() => {
-                          navigate("/admin/master/job_term");
-                        }}
-                      />
-                      {closeDates
-                        .toSorted((a, b) =>
-                          dayjs(b.closeDate).diff(dayjs(a.closeDate))
-                        )
-                        .map((closeDate, index) => (
-                          <Chip
-                            key={index}
-                            label={dayjs(closeDate.closeDate).format("YYYY/MM")}
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => {
-                              setValue("startDate", dayjs(closeDate.startDate));
-                              setValue("endDate", dayjs(closeDate.endDate));
-                            }}
-                          />
-                        ))}
-                    </Stack>
-                  </Stack>
-                </Stack>
-              </Stack>
-            </Box>
-            <Box>
-              <Stack spacing={1}>
-                <Box sx={{ mt: 2 }}>
-                  <StaffSelector
-                    control={control}
-                    staffs={staffs}
-                    selectedStaff={selectedStaff}
-                    setSelectedStaff={setSelectedStaff}
-                    setValue={setValue}
+            {isExpanded ? "折りたたむ" : "展開する"}
+            {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+          </button>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div id="attendance-download-panel" className="w-full">
+          <div className="mx-auto flex w-full max-w-[880px] min-w-0 flex-col gap-6 px-1 sm:px-2 md:px-0">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                <div className="flex-1">
+                  <label className="mb-1 block text-sm font-medium text-slate-600">
+                    開始日
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(event) => setStartDate(event.target.value)}
+                    className="w-full rounded-[18px] border border-slate-300/70 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
                   />
-                </Box>
-              </Stack>
-            </Box>
-          </Stack>
-        </Box>
-        <Box>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1}
-            sx={{ width: "100%" }}
-          >
-            <ExportButton
-              workDates={workDates}
+                </div>
+                <div className="hidden self-center pb-[11px] text-slate-400 sm:block">
+                  〜
+                </div>
+                <div className="flex-1">
+                  <label className="mb-1 block text-sm font-medium text-slate-600">
+                    終了日
+                  </label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(event) => setEndDate(event.target.value)}
+                    className="w-full rounded-[18px] border border-slate-300/70 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex max-w-[560px] flex-col gap-2">
+                <div className="flex flex-col gap-2">
+                  <span className="whitespace-nowrap text-sm text-slate-600">
+                    集計対象月から:
+                  </span>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <select
+                      value={selectedCloseDate}
+                      onChange={(event) => {
+                        const closeDate = closeDates.find(
+                          (item) => item.closeDate === event.target.value,
+                        );
+                        if (!closeDate) return;
+                        setStartDate(formatInputDate(dayjs(closeDate.startDate)));
+                        setEndDate(formatInputDate(dayjs(closeDate.endDate)));
+                      }}
+                      className="min-w-0 flex-1 rounded-[18px] border border-slate-300/70 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                    >
+                      <option value="">対象月を選択</option>
+                      {closeDates
+                        .toSorted((a, b) => dayjs(b.closeDate).diff(dayjs(a.closeDate)))
+                        .map((closeDate, index) => (
+                          <option key={index} value={closeDate.closeDate}>
+                            {dayjs(closeDate.closeDate).format("YYYY/MM")}
+                          </option>
+                        ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/admin/master/job_term")}
+                      className="inline-flex items-center justify-center gap-1 rounded-full border border-slate-300/70 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.18)] transition hover:bg-slate-50"
+                    >
+                      <AddCircleOutlineOutlinedIcon fontSize="small" />
+                      新規
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <StaffSelector
+              staffs={staffs}
               selectedStaff={selectedStaff}
-              fullWidth={isMobile}
+              setSelectedStaff={setSelectedStaff}
             />
-            <AggregateExportButton
-              workDates={workDates}
-              selectedStaff={selectedStaff}
-              fullWidth={isMobile}
-            />
-          </Stack>
-        </Box>
-      </Collapse>
-    </Stack>
+
+            <div className="flex w-full flex-col gap-2 sm:flex-row">
+              <ExportButton
+                workDates={workDates}
+                selectedStaff={selectedStaff}
+                fullWidth
+              />
+              <AggregateExportButton
+                workDates={workDates}
+                selectedStaff={selectedStaff}
+                fullWidth
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

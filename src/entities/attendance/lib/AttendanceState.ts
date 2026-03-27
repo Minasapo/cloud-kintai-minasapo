@@ -45,8 +45,9 @@ export class AttendanceState {
       return AttendanceStatus.None;
     }
 
-    // 当日の勤怠は確定前のためステータス判定から除外する
-    if (this.isToday()) {
+    // 当日の勤怠は確定前のため通常はステータス判定から除外する。
+    // ただし未承認の修正申請がある場合は「申請中」を優先表示する。
+    if (this.isToday() && !this.isChangeRequesting()) {
       return AttendanceStatus.None;
     }
 

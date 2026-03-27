@@ -1,11 +1,8 @@
-import { Stack, Typography } from "@mui/material";
-import { useContext } from "react";
-
 import { getWorkTypeLabel } from "@/entities/staff/lib/workTypeOptions";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export default function WorkTypeItem() {
-  const { staff } = useContext(AttendanceEditContext);
+  const { staff } = useAttendanceEditData();
 
   if (!staff) {
     return null;
@@ -19,11 +16,9 @@ export default function WorkTypeItem() {
   if (!label) return null;
 
   return (
-    <Stack direction="row" alignItems="center">
-      <Typography variant="body1" sx={{ fontWeight: "bold", width: "150px" }}>
-        勤務形態
-      </Typography>
-      <Typography variant="body1">{label}</Typography>
-    </Stack>
+    <div className="flex items-center">
+      <div className="w-[150px] text-sm font-bold text-slate-900">勤務形態</div>
+      <div className="text-sm text-slate-900">{label}</div>
+    </div>
   );
 }

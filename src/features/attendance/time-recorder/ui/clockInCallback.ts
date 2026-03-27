@@ -12,6 +12,12 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 
+import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
+import {
+  buildAttendanceIdempotencyKey,
+  resolveAppVersion,
+  resolveClientTimeZone,
+} from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
@@ -26,15 +32,14 @@ import {
  * 出勤打刻時のコールバック関数。
  *
  * @param cognitoUser - 現在のCognitoユーザー情報
- * @param today - 本日の日付（YYYY-MM-DD形式）
  * @param clockIn - 出勤打刻を行う非同期関数
  * @param dispatch - Reduxのdispatch関数
  * @param staff - スタッフ情報
  * @param logger - デバッグ用ロガー
+ * @param occurredAt - 打刻発生時刻（ISO）
  */
 export async function clockInCallback(
   cognitoUser: CognitoUser | null | undefined,
-  today: string,
   clockIn: (
     staffId: string,
     workDate: string,
@@ -42,7 +47,8 @@ export async function clockInCallback(
   ) => Promise<Attendance>,
   dispatch: Dispatch,
   staff: Staff | null | undefined,
-  logger: Logger
+  logger: Logger,
+  occurredAt = getNowISOStringWithZeroSeconds()
 ): Promise<void> {
   if (!cognitoUser) {
     logger.debug("Skipped clockInCallback because cognitoUser is missing");
@@ -54,36 +60,56 @@ export async function clockInCallback(
     return;
   }
 
-  const startTimeIso = resolveClockInTime();
+  const workDate = resolveBusinessWorkDate(occurredAt);
+  const startTimeIso = occurredAt;
+  const idempotencyKey = buildAttendanceIdempotencyKey({
+    action: "clock_in",
+    staffId: cognitoUser.id,
+    occurredAt,
+  });
+  const clientTimezone = resolveClientTimeZone();
+  const appVersion = resolveAppVersion();
 
-  // capture pressed time immediately to measure processing duration
-  const pressedAt = getNowISOStringWithZeroSeconds();
   const t0 = Date.now();
 
   try {
-    const attendance = await clockIn(cognitoUser.id, today, startTimeIso);
+    const attendance = await clockIn(cognitoUser.id, workDate, startTimeIso);
     const t1 = Date.now();
     const processingTimeMs = t1 - t0;
 
-    // record button-press time and include attendance time + processing time inside details (best-effort)
     try {
       const input: CreateOperationLogInput = {
         staffId: cognitoUser.id,
         action: "clock_in",
         resource: "attendance",
         resourceId: attendance?.id ?? undefined,
-        // primary timestamp: when the user pressed the button
-        timestamp: pressedAt,
+        timestamp: occurredAt,
         details: JSON.stringify({
-          workDate: today,
+          workDate,
           attendanceTime: startTimeIso,
           processingTimeMs,
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
           staffName: staff
             ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
             : undefined,
         }),
-        // metadata is a good place to store structured diagnostic info
-        metadata: JSON.stringify({ processingTimeMs }),
+        metadata: JSON.stringify({
+          processingTimeMs,
+          clientTimezone,
+          occurredAt,
+          resolvedWorkDate: workDate,
+          idempotencyKey,
+          appVersion,
+        }),
+        clientTimezone,
+        occurredAt,
+        resolvedWorkDate: workDate,
+        idempotencyKey,
+        appVersion,
         userAgent:
           typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       };
@@ -103,8 +129,4 @@ export async function clockInCallback(
     logger.error("Failed to clock in", error);
     dispatch(setSnackbarError(MESSAGE_CODE.E01001));
   }
-}
-
-function resolveClockInTime() {
-  return getNowISOStringWithZeroSeconds();
 }

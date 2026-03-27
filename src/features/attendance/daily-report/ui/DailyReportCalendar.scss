@@ -1,0 +1,76 @@
+.dr-calendar-card {
+  @apply h-full overflow-hidden rounded-sm border border-slate-200 bg-white;
+}
+
+.dr-calendar-card-body {
+  @apply p-0;
+}
+
+.dr-calendar {
+  @apply mx-auto w-full max-w-[360px];
+}
+
+.dr-calendar-header {
+  @apply mb-2 flex items-center justify-between px-1;
+}
+
+.dr-calendar-header-label {
+  @apply m-0 text-[clamp(0.9rem,3.4vw,1.05rem)] font-semibold text-slate-800;
+}
+
+.dr-calendar-nav {
+  @apply h-8 w-8 rounded-sm border border-slate-200 bg-white text-lg leading-none text-slate-700;
+}
+
+.dr-calendar-nav:hover {
+  @apply bg-slate-50;
+}
+
+.dr-calendar-weekdays,
+.dr-calendar-grid {
+  @apply grid grid-cols-7 gap-1;
+}
+
+.dr-calendar-grid--week {
+  @apply grid-cols-7;
+}
+
+.dr-calendar-weekday {
+  @apply flex items-center justify-center text-[clamp(0.7rem,2.6vw,0.85rem)] font-medium text-slate-500;
+  width: clamp(28px, 9.5vw, 36px);
+  height: clamp(28px, 9.5vw, 36px);
+  margin: 0 auto;
+}
+
+.dr-calendar-day {
+  @apply rounded-sm text-[clamp(0.75rem,2.8vw,0.9rem)] text-slate-800;
+  border: 0;
+  background: transparent;
+  width: clamp(28px, 9.5vw, 36px);
+  height: clamp(28px, 9.5vw, 36px);
+  margin: 0 auto;
+}
+
+.dr-calendar-day:hover {
+  @apply bg-slate-100;
+}
+
+.dr-calendar-day--outside {
+  @apply text-slate-300;
+}
+
+.dr-calendar-day--reported:not(.dr-calendar-day--selected):not(.dr-calendar-day--outside) {
+  @apply bg-emerald-200 text-emerald-950;
+}
+
+.dr-calendar-day--reported:not(.dr-calendar-day--selected):not(.dr-calendar-day--outside):hover {
+  @apply bg-emerald-300;
+}
+
+.dr-calendar-day--selected {
+  @apply bg-emerald-600 text-white;
+}
+
+.dr-calendar-day--selected:hover {
+  @apply bg-emerald-700;
+}

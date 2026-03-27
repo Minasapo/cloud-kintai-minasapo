@@ -54,6 +54,11 @@ interface VirtualizedShiftTableProps {
     event: React.MouseEvent,
   ) => void;
   onCellMouseEnter: (staffId: string, date: string) => void;
+  onCellContextMenu?: (
+    staffId: string,
+    date: string,
+    event: React.MouseEvent,
+  ) => void;
   isLoading?: boolean;
   getEventsForDay: (day: dayjs.Dayjs) => Array<{
     label: string;
@@ -68,12 +73,14 @@ interface VirtualizedShiftTableProps {
     isLocked: boolean;
     isEditing: boolean;
     editorName?: string;
+    editorColor?: string;
     lastChangedBy?: string;
     lastChangedAt?: string;
     onClick: (event: React.MouseEvent) => void;
     onRegisterRef: (element: HTMLElement | null) => void;
     onMouseDown: (event: React.MouseEvent) => void;
     onMouseEnter: () => void;
+    onContextMenu?: (event: React.MouseEvent) => void;
     isFocused: boolean;
     isSelected: boolean;
   }>;
@@ -107,6 +114,7 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
     onCellRegisterRef,
     onCellMouseDown,
     onCellMouseEnter,
+    onCellContextMenu,
     isLoading,
     getEventsForDay,
     ShiftCellComponent,
@@ -131,17 +139,31 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
     }
 
     return (
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: "24px",
+          border: "1px solid rgba(226,232,240,0.8)",
+          boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
+          bgcolor: "#ffffff",
+          overflowX: "auto",
+          overflowY: "hidden",
+        }}
+      >
         <Table
           size="small"
           stickyHeader
           sx={{
+            minWidth: "max-content",
             "& .MuiTableCell-root": {
               borderRight: "1px solid",
               borderColor: "divider",
             },
             "& .MuiTableCell-root:last-child": {
               borderRight: "none",
+            },
+            "& .MuiTableHead-root .MuiTableCell-root": {
+              bgcolor: "#f8fafc",
             },
           }}
         >
@@ -250,6 +272,7 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                         isLocked={cell.isLocked}
                         isEditing={isEditing}
                         editorName={editor?.userName}
+                        editorColor={editor?.color}
                         lastChangedBy={cell.lastChangedBy}
                         lastChangedAt={cell.lastChangedAt}
                         onClick={(event) => onCellClick(staffId, dayKey, event)}
@@ -260,6 +283,12 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                           onCellMouseDown(staffId, dayKey, event)
                         }
                         onMouseEnter={() => onCellMouseEnter(staffId, dayKey)}
+                        onContextMenu={
+                          onCellContextMenu
+                            ? (event: React.MouseEvent) =>
+                                onCellContextMenu(staffId, dayKey, event)
+                            : undefined
+                        }
                         isFocused={isFocused}
                         isSelected={isSelected}
                       />

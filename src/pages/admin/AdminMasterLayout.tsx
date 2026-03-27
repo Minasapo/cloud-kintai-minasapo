@@ -52,6 +52,10 @@ export default function AdminMasterLayout() {
           name: "稼働統計",
           path: "/admin/master/feature_management/attendance_statistics",
         },
+        {
+          name: "残業確認",
+          path: "/admin/master/feature_management/overtime_confirmation",
+        },
         { name: "外部リンク", path: "/admin/master/feature_management/links" },
         { name: "打刻理由", path: "/admin/master/feature_management/reasons" },
         {
@@ -65,6 +69,9 @@ export default function AdminMasterLayout() {
         { name: "欠勤", path: "/admin/master/feature_management/absent" },
       ],
     },
+    { name: "開発者", path: "/admin/master/developer" },
+    { name: "打刻画面アナウンス", path: "/admin/master/time_recorder_announcement" },
+    { name: "エクスポート", path: "/admin/master/export" },
   ];
 
   const menuBoxList = menuList.map((item, index) => {
@@ -123,18 +130,32 @@ export default function AdminMasterLayout() {
     <Box
       sx={{
         width: 260,
-        p: 1,
+        p: 1.25,
         transition: "width 200ms",
+        bgcolor: "transparent",
       }}
       role="presentation"
     >
-      <List>{menuBoxList}</List>
+      <List
+        sx={{
+          borderRadius: "24px",
+          border: "1px solid rgba(226,232,240,0.85)",
+          bgcolor: "#ffffff",
+          boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
+          overflow: "hidden",
+        }}
+      >
+        {menuBoxList}
+      </List>
     </Box>
   );
 
   return (
-    <Container maxWidth="xl">
-      <Stack direction="row" sx={{ height: 1, pt: 2 }}>
+    <Container
+      maxWidth={false}
+      sx={{ maxWidth: "1360px !important", pt: 1, px: { xs: 1.5, sm: 2.5 } }}
+    >
+      <Stack direction="row" sx={{ height: 1, pt: 1, gap: 2 }}>
         {/* Mobile menu button */}
         {!isMdUp && (
           <Box sx={{ position: "absolute", left: 16, top: 12 }}>
@@ -143,6 +164,11 @@ export default function AdminMasterLayout() {
               color="inherit"
               aria-label="menu"
               onClick={() => setMobileOpen(true)}
+              sx={{
+                borderRadius: "9999px",
+                border: "1px solid rgba(148,163,184,0.28)",
+                bgcolor: "rgba(255,255,255,0.88)",
+              }}
             >
               <MenuIcon />
             </IconButton>
@@ -154,7 +180,6 @@ export default function AdminMasterLayout() {
           <Box
             sx={{
               width: 260,
-              pr: 2,
               transition: "width 200ms",
             }}
           >
@@ -170,8 +195,18 @@ export default function AdminMasterLayout() {
           </Drawer>
         )}
 
-        <Box sx={{ flexGrow: 2 }}>
-          <Stack spacing={1} sx={{ px: 5 }}>
+        <Box sx={{ flexGrow: 2, minWidth: 0 }}>
+          <Stack
+            spacing={1}
+            sx={{
+              borderRadius: "28px",
+              border: "1px solid rgba(226,232,240,0.8)",
+              bgcolor: "#ffffff",
+              boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
+              px: { xs: 2, md: 3 },
+              py: { xs: 2, md: 3 },
+            }}
+          >
             <Box>
               <Outlet />
             </Box>

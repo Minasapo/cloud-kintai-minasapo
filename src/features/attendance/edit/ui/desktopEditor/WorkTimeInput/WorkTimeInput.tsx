@@ -1,4 +1,3 @@
-import { Box, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 
@@ -51,42 +50,20 @@ export function WorkTimeInput({
   }
 
   return (
-    <Stack
-      direction="row"
-      alignItems={"center"}
-      sx={{ boxSizing: "border-box" }}
-    >
-      <Box sx={{ fontWeight: "bold", width: "150px" }}>勤務時間</Box>
-      <Box sx={{ flexGrow: 1 }}>
-        <Stack direction="row" spacing={2} alignItems={"center"}>
-          <Box>
-            <Stack direction="row" spacing={1}>
-              <Box>
-                <StartTimeInput
-                  dataTestId="desktop-start-time-input"
-                  highlight={highlightStartTime}
-                />
-              </Box>
-              <Box>
-                <Typography variant="body1" sx={{ py: 1 }}>
-                  ～
-                </Typography>
-              </Box>
-              <Box>
-                <EndTimeInput
-                  dataTestId="desktop-end-time-input"
-                  highlight={highlightEndTime}
-                />
-              </Box>
-            </Stack>
-          </Box>
-          <Box sx={{ flexGrow: 1 }} textAlign={"right"}>
-            <Typography variant="body1">
-              {totalWorkTime.toFixed(1)}時間
-            </Typography>
-          </Box>
-        </Stack>
-      </Box>
-    </Stack>
+    <div className="flex flex-col gap-3 md:flex-row md:items-center">
+      <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
+        勤務時間
+      </div>
+      <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:gap-4">
+        <div className="flex items-center gap-2.5">
+          <StartTimeInput highlight={highlightStartTime} />
+          <div className="text-sm text-slate-500">～</div>
+          <EndTimeInput highlight={highlightEndTime} />
+        </div>
+        <div className="text-sm text-slate-700 md:ml-auto md:whitespace-nowrap md:text-right">
+          {totalWorkTime.toFixed(1)}時間
+        </div>
+      </div>
+    </div>
   );
 }

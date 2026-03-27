@@ -1,31 +1,6 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
-import {
-  Button,
-  Container,
-  FormControl,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  SelectChangeEvent,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import {
@@ -49,18 +24,66 @@ import { useSplitView } from "@/features/splitView";
 import WorkflowCarouselDialog from "./components/WorkflowCarouselDialog";
 import WorkflowDetailPanel from "./components/WorkflowDetailPanel";
 
-const STATUS_ALL_VALUE = "__ALL__";
 const STATUS_EXCLUDED_FROM_DEFAULT: WorkflowStatus[] = [
   WorkflowStatus.CANCELLED,
   WorkflowStatus.APPROVED,
 ];
 
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 640px)";
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return false;
+    }
+    return window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT_QUERY);
+    const onChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
+  }, []);
+
+  return isMobile;
+};
+
+function OpenInPanelIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
+      <path
+        d="M7 5h8v8m0-8-8 8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13 11v4H5V7h4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function AdminWorkflow() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useIsMobile();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-  const { workflows, loading, error, fetchWorkflows } = useWorkflows({
+  const { workflows, loading, error } = useWorkflows({
     isAuthenticated,
   });
   const { config, getAbsentEnabled, getWorkflowCategoryOrder } = useAppConfig();
@@ -72,10 +95,10 @@ export default function AdminWorkflow() {
   const { enableSplitMode, setRightPanel } = useSplitView();
   const navigate = useNavigate();
 
-  // フィルター/ページネーション state
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [statusInitialized, setStatusInitialized] = useState(false);
+  const [statusFilterOverride, setStatusFilterOverride] = useState<
+    WorkflowStatus[] | null
+  >(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
@@ -94,43 +117,32 @@ export default function AdminWorkflow() {
     [config, getAbsentEnabled, getWorkflowCategoryOrder],
   );
 
-  // 利用可能なステータスをワークフローから抽出
   const statuses = Array.from(
-    new Set((workflows || []).map((w) => w.status).filter(Boolean)),
-  ) as Array<WorkflowStatus>;
+    new Set((workflows || []).map((workflow) => workflow.status).filter(Boolean)),
+  ) as WorkflowStatus[];
 
-  useEffect(() => {
-    if (statusInitialized) return;
-    if (statuses.length === 0) return;
+  const defaultStatusFilter = useMemo(
+    () =>
+      statuses.filter(
+      (status) => !STATUS_EXCLUDED_FROM_DEFAULT.includes(status),
+      ),
+    [statuses],
+  );
+  const statusFilter = statusFilterOverride ?? defaultStatusFilter;
 
-    const initialStatuses = statuses.filter(
-      (s) => !STATUS_EXCLUDED_FROM_DEFAULT.includes(s),
-    );
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setStatusFilter(initialStatuses);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setStatusInitialized(true);
-  }, [statuses, statusInitialized]);
-
-  // フィルタ適用
-  const filteredWorkflows = (workflows || []).filter((w) => {
-    if (categoryFilter && w.category !== categoryFilter) return false;
-    if (statusFilter.length > 0 && !statusFilter.includes(w.status))
+  const filteredWorkflows = (workflows || []).filter((workflow) => {
+    if (categoryFilter && workflow.category !== categoryFilter) return false;
+    if (statusFilter.length > 0 && !statusFilter.includes(workflow.status)) {
       return false;
+    }
     return true;
   });
 
-  // 作成日で降順にソートしてからページネーションを適用
   const sortedWorkflows = filteredWorkflows.toSorted((a, b) => {
-    const at = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const bt = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    return bt - at; // 降順
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bTime - aTime;
   });
-
-  const paginatedWorkflows = sortedWorkflows.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  );
 
   const workflowsById = new Map(
     sortedWorkflows.map((workflow) => [workflow.id, workflow]),
@@ -149,29 +161,23 @@ export default function AdminWorkflow() {
 
   const filteredWorkflowIds = sortedWorkflows.map((workflow) => workflow.id);
 
-  // ページングリセット: フィルター変更時にページを先頭に戻す
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPage(0);
-  }, [categoryFilter, statusFilter]);
-
-  const handleStatusChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    const nextValue = typeof value === "string" ? value.split(",") : value;
-
-    if (nextValue.includes(STATUS_ALL_VALUE)) {
-      setStatusFilter([]);
-      return;
-    }
-
-    setStatusFilter(nextValue);
-  };
+  const rowsPerPageOptions = isMobile ? [10] : [10, 25, 50];
+  const activeRowsPerPage = rowsPerPageOptions.includes(rowsPerPage)
+    ? rowsPerPage
+    : rowsPerPageOptions[0];
+  const totalPages = Math.max(
+    1,
+    Math.ceil(sortedWorkflows.length / activeRowsPerPage),
+  );
+  const currentPage = Math.min(page, totalPages - 1);
+  const paginatedWorkflows = sortedWorkflows.slice(
+    currentPage * activeRowsPerPage,
+    currentPage * activeRowsPerPage + activeRowsPerPage,
+  );
 
   const createWorkflowPanelComponent = useCallback(
     (workflowId: string): ComponentType<{ panelId: string }> => {
-      const WorkflowPanel = () => (
-        <WorkflowDetailPanel workflowId={workflowId} />
-      );
+      const WorkflowPanel = () => <WorkflowDetailPanel workflowId={workflowId} />;
       WorkflowPanel.displayName = `WorkflowPanel_${workflowId}`;
       return WorkflowPanel;
     },
@@ -194,215 +200,262 @@ export default function AdminWorkflow() {
     setIsCarouselOpen(true);
   };
 
-  if (loading || staffLoading) return <LinearProgress />;
-  if (error || staffError)
+  const toggleStatusFilter = (status: WorkflowStatus) => {
+    setStatusFilterOverride((current) => {
+      const base = current ?? defaultStatusFilter;
+      if (base.includes(status)) {
+        return base.filter((item) => item !== status);
+      }
+      return [...base, status];
+    });
+    setPage(0);
+  };
+
+  if (loading || staffLoading) {
     return (
-      <Typography>
-        データ取得中に問題が発生しました。管理者に連絡してください。
-      </Typography>
+      <div className="w-full">
+        <div className="h-1 w-full overflow-hidden bg-slate-200">
+          <div className="h-full w-1/3 animate-pulse bg-emerald-600" />
+        </div>
+      </div>
     );
+  }
+
+  if (error || staffError) {
+    return (
+      <p className="px-4 py-6 text-sm text-rose-700">
+        データ取得中に問題が発生しました。管理者に連絡してください。
+      </p>
+    );
+  }
 
   return (
-    <Container maxWidth="xl" sx={{ height: 1, pt: 2 }}>
-      <Stack spacing={2}>
-        <Typography variant="body2" color="text.secondary">
+    <div className="h-full w-full px-3 pt-2 sm:px-4 lg:px-6">
+      <div className="space-y-4">
+        <p className="text-sm text-slate-600">
           ワークフローの一覧を表示します。管理者用の画面です。
-        </Typography>
+        </p>
 
-        {/* フィルター */}
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          alignItems={{ xs: "stretch", sm: "center" }}
-        >
-          <FormControl size="small" sx={{ minWidth: { sm: 160 } }}>
-            <InputLabel id="category-filter-label">種別</InputLabel>
-            <Select
-              labelId="category-filter-label"
+        <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:grid-cols-2 lg:grid-cols-3">
+          <label className="flex min-w-0 flex-col gap-1 text-sm text-slate-600">
+            <span className="font-medium">種別</span>
+            <select
               value={categoryFilter}
-              label="種別"
-              onChange={(e) => setCategoryFilter(String(e.target.value))}
+              onChange={(event) => {
+                setCategoryFilter(event.target.value);
+                setPage(0);
+              }}
+              className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             >
-              <MenuItem value="">すべて</MenuItem>
-              {categories.map((c) => (
-                <MenuItem key={c.category} value={c.category}>
-                  {CATEGORY_LABELS[c.category] || c.label}
-                </MenuItem>
+              <option value="">すべて</option>
+              {categories.map((category) => (
+                <option key={category.category} value={category.category}>
+                  {CATEGORY_LABELS[category.category] || category.label}
+                </option>
               ))}
-            </Select>
-          </FormControl>
+            </select>
+          </label>
 
-          <FormControl size="small" sx={{ minWidth: { sm: 160 } }}>
-            <InputLabel id="status-filter-label">ステータス</InputLabel>
-            <Select
-              labelId="status-filter-label"
-              multiple
-              value={statusFilter}
-              label="ステータス"
-              onChange={handleStatusChange}
-              renderValue={(selected) =>
-                selected.length === 0
-                  ? "すべて"
-                  : selected
-                      .map(
-                        (s) =>
-                          STATUS_LABELS[String(s) as WorkflowStatus] ||
-                          String(s),
-                      )
-                      .join("、")
-              }
-            >
-              <MenuItem value={STATUS_ALL_VALUE}>すべて</MenuItem>
-              {statuses.map((s) => (
-                <MenuItem key={String(s)} value={String(s)}>
-                  {STATUS_LABELS[String(s) as WorkflowStatus] || String(s)}
-                </MenuItem>
+          <div className="sm:col-span-2 lg:col-span-2">
+            <span className="mb-1 block text-sm font-medium text-slate-600">
+              ステータス
+            </span>
+            <div className="flex flex-wrap gap-2">
+              <label className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={statusFilter.length === 0}
+                  onChange={() => {
+                    setStatusFilterOverride([]);
+                    setPage(0);
+                  }}
+                  className="h-3.5 w-3.5 accent-emerald-600"
+                />
+                すべて
+              </label>
+
+              {statuses.map((status) => (
+                <label
+                  key={status}
+                  className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-3 py-1 text-xs text-slate-700"
+                >
+                  <input
+                    type="checkbox"
+                    checked={statusFilter.includes(status)}
+                    onChange={() => toggleStatusFilter(status)}
+                    className="h-3.5 w-3.5 accent-emerald-600"
+                  />
+                  {STATUS_LABELS[status] || status}
+                </label>
               ))}
-            </Select>
-          </FormControl>
-        </Stack>
+            </div>
+          </div>
+        </div>
 
-        <Paper sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            justifyContent="space-between"
-            alignItems={{ xs: "stretch", sm: "center" }}
-            mb={2}
-          >
-            <Typography variant="body2" color="text.secondary">
-              {filteredWorkflows.length} 件の申請
-            </Typography>
-            <Button
-              variant="contained"
+        <section className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-slate-600">{filteredWorkflows.length} 件の申請</p>
+            <button
+              type="button"
               onClick={handleOpenCarousel}
               disabled={filteredWorkflowIds.length === 0}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-emerald-700/60 bg-emerald-600 px-4 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300 disabled:text-slate-600"
             >
               まとめて確認
-            </Button>
-          </Stack>
+            </button>
+          </div>
 
-          {isMobile ? (
-            <Stack spacing={1.5}>
-              {paginatedWorkflows.map((w) => {
-                const staff = staffs.find((s) => s.id === w.staffId);
+          {paginatedWorkflows.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+              条件に一致する申請はありません。
+            </p>
+          ) : isMobile ? (
+            <div className="space-y-2">
+              {paginatedWorkflows.map((workflow) => {
+                const staff = staffs.find((item) => item.id === workflow.staffId);
                 const staffName = staff
                   ? `${staff.familyName || ""}${staff.givenName || ""}`
-                  : w.staffId || "不明";
-                const categoryLabel = getWorkflowCategoryLabel(w);
+                  : workflow.staffId || "不明";
+                const categoryLabel = getWorkflowCategoryLabel(workflow);
 
                 return (
-                  <Paper
-                    key={w.id}
-                    variant="outlined"
-                    onClick={() => navigate(`/admin/workflow/${w.id}`)}
-                    sx={{ p: 1.5, cursor: "pointer" }}
+                  <article
+                    key={workflow.id}
+                    onClick={() => navigate(`/admin/workflow/${workflow.id}`)}
+                    className="cursor-pointer rounded-lg border border-slate-200 bg-white p-3 transition hover:border-emerald-400 hover:shadow-sm"
                   >
-                    <Stack spacing={1}>
-                      <Stack direction="row" justifyContent="space-between">
-                        <Typography variant="subtitle2">
-                          {categoryLabel}
-                        </Typography>
-                        <Tooltip title="右側で開く">
-                          <IconButton
-                            size="small"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleOpenInRightPanel(w.id);
-                            }}
-                          >
-                            <OpenInNewOutlinedIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
-                      <Typography variant="body2">{staffName}</Typography>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <h3 className="m-0 text-sm font-semibold text-slate-900">
+                        {categoryLabel}
+                      </h3>
+                      <button
+                        type="button"
+                        title="右側で開く"
+                        aria-label="右側で開く"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleOpenInRightPanel(workflow.id);
+                        }}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-emerald-400 hover:text-emerald-700"
                       >
-                        <StatusChip status={w.status} />
-                        <Typography variant="caption" color="text.secondary">
-                          {w.createdAt ? w.createdAt.split("T")[0] : ""}
-                        </Typography>
-                      </Stack>
-                    </Stack>
-                  </Paper>
+                        <OpenInPanelIcon />
+                      </button>
+                    </div>
+
+                    <p className="mb-2 text-sm text-slate-800">{staffName}</p>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <StatusChip status={workflow.status} />
+                      <span className="text-xs text-slate-500">
+                        {workflow.createdAt ? workflow.createdAt.split("T")[0] : ""}
+                      </span>
+                    </div>
+                  </article>
                 );
               })}
-            </Stack>
+            </div>
           ) : (
-            <TableContainer sx={{ overflowX: "auto" }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ width: "50px" }} />
-                    <TableCell>種別</TableCell>
-                    <TableCell>申請者</TableCell>
-                    <TableCell>ステータス</TableCell>
-                    <TableCell>作成日</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedWorkflows.map((w) => {
-                    const staff = staffs.find((s) => s.id === w.staffId);
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-slate-600">
+                    <th className="w-12 px-2 py-2" />
+                    <th className="px-2 py-2 font-medium">種別</th>
+                    <th className="px-2 py-2 font-medium">申請者</th>
+                    <th className="px-2 py-2 font-medium">ステータス</th>
+                    <th className="px-2 py-2 font-medium">作成日</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedWorkflows.map((workflow) => {
+                    const staff = staffs.find((item) => item.id === workflow.staffId);
                     const staffName = staff
                       ? `${staff.familyName || ""}${staff.givenName || ""}`
-                      : w.staffId || "不明";
-                    const categoryLabel = getWorkflowCategoryLabel(w);
+                      : workflow.staffId || "不明";
+                    const categoryLabel = getWorkflowCategoryLabel(workflow);
 
                     return (
-                      <TableRow
-                        key={w.id}
-                        hover
-                        onClick={() => navigate(`/admin/workflow/${w.id}`)}
-                        sx={{ cursor: "pointer" }}
+                      <tr
+                        key={workflow.id}
+                        onClick={() => navigate(`/admin/workflow/${workflow.id}`)}
+                        className="cursor-pointer border-b border-slate-100 transition hover:bg-emerald-50/60"
                       >
-                        <TableCell
-                          sx={{ width: "50px", padding: "8px 4px" }}
+                        <td
+                          className="px-2 py-2"
                           onClick={(event) => event.stopPropagation()}
                         >
-                          <Tooltip title="右側で開く">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleOpenInRightPanel(w.id)}
-                            >
-                              <OpenInNewOutlinedIcon
-                                sx={{ fontSize: "18px" }}
-                              />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell>{categoryLabel}</TableCell>
-                        <TableCell>{staffName}</TableCell>
-                        <TableCell>
-                          <StatusChip status={w.status} />
-                        </TableCell>
-                        <TableCell>
-                          {w.createdAt ? w.createdAt.split("T")[0] : ""}
-                        </TableCell>
-                      </TableRow>
+                          <button
+                            type="button"
+                            title="右側で開く"
+                            aria-label="右側で開く"
+                            onClick={() => handleOpenInRightPanel(workflow.id)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-emerald-400 hover:text-emerald-700"
+                          >
+                            <OpenInPanelIcon />
+                          </button>
+                        </td>
+                        <td className="px-2 py-2 text-slate-900">{categoryLabel}</td>
+                        <td className="px-2 py-2 text-slate-900">{staffName}</td>
+                        <td className="px-2 py-2">
+                          <StatusChip status={workflow.status} />
+                        </td>
+                        <td className="px-2 py-2 text-slate-600">
+                          {workflow.createdAt ? workflow.createdAt.split("T")[0] : ""}
+                        </td>
+                      </tr>
                     );
                   })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                </tbody>
+              </table>
+            </div>
           )}
 
-          <TablePagination
-            component="div"
-            count={filteredWorkflows.length}
-            page={page}
-            onPageChange={(_, newPage) => setPage(newPage)}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(e) => {
-              setRowsPerPage(parseInt(e.target.value, 10));
-              setPage(0);
-            }}
-            rowsPerPageOptions={isMobile ? [10] : [10, 25, 50]}
-          />
-        </Paper>
+          <div className="mt-3 flex flex-col gap-2 border-t border-slate-200 pt-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+            <p className="m-0">
+              ページ {currentPage + 1} / {totalPages}
+            </p>
 
-        {selectedWorkflowId && (
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="inline-flex items-center gap-2">
+                <span>表示件数</span>
+                <select
+                  value={activeRowsPerPage}
+                  onChange={(event) => {
+                    setRowsPerPage(Number(event.target.value));
+                    setPage(0);
+                  }}
+                  className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                >
+                  {rowsPerPageOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setPage(Math.max(0, currentPage - 1))}
+                disabled={currentPage <= 0}
+                className="inline-flex h-9 items-center justify-center rounded-md border border-slate-300 px-3 text-sm text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
+              >
+                前へ
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))}
+                disabled={currentPage >= totalPages - 1}
+                className="inline-flex h-9 items-center justify-center rounded-md border border-slate-300 px-3 text-sm text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
+              >
+                次へ
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {isCarouselOpen && selectedWorkflowId && (
           <WorkflowCarouselDialog
             open={isCarouselOpen}
             onClose={() => {
@@ -416,12 +469,12 @@ export default function AdminWorkflow() {
             onOpenInRightPanel={(workflowId) => {
               handleOpenInRightPanel(workflowId);
               setIsCarouselOpen(false);
+              setSelectedWorkflowId(null);
             }}
             enableApprovalActions
-            onWorkflowActionCompleted={fetchWorkflows}
           />
         )}
-      </Stack>
-    </Container>
+      </div>
+    </div>
   );
 }

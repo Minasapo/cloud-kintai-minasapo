@@ -3,7 +3,7 @@ import "./styles.scss";
 import {
   useDeleteAttendanceMutation,
   useLazyGetAttendanceByIdQuery,
-  useLazyListRecentAttendancesQuery,
+  useLazyListAttendancesByDateRangeQuery,
 } from "@entities/attendance/api/attendanceApi";
 import useAttendanceDaily, {
   AttendanceDaily,
@@ -14,6 +14,7 @@ import {
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
   AlertTitle,
@@ -24,6 +25,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Stack,
   Table,
   TableBody,
@@ -89,7 +91,9 @@ export default function AttendanceDailyList() {
     : undefined;
   const dispatch = useDispatch();
   const [searchName, setSearchName] = useState("");
-  const [triggerListAttendances] = useLazyListRecentAttendancesQuery();
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [triggerListAttendancesByDateRange] =
+    useLazyListAttendancesByDateRangeQuery();
   const {
     data: holidayCalendars = [],
     isLoading: isHolidayCalendarsLoading,
@@ -147,64 +151,67 @@ export default function AttendanceDailyList() {
     });
   }, [attendanceDailyList]);
 
-  const renderSummaryMessage = useCallback((row: AttendanceDaily) => {
-    if (!row.attendance) return "";
-    const {
-      substituteHolidayDate,
-      remarks,
-      specialHolidayFlag,
-      paidHolidayFlag,
-      absentFlag,
-    } = row.attendance;
+  const renderSummaryMessage = useCallback(
+    (attendance: Attendance | null | undefined) => {
+      if (!attendance) return "";
+      const {
+        substituteHolidayDate,
+        remarks,
+        specialHolidayFlag,
+        paidHolidayFlag,
+        absentFlag,
+      } = attendance;
 
-    const isSubstituteHoliday = substituteHolidayDate
-      ? dayjs(substituteHolidayDate).isValid()
-      : false;
+      const isSubstituteHoliday = substituteHolidayDate
+        ? dayjs(substituteHolidayDate).isValid()
+        : false;
 
-    const full = (() => {
-      const parts: string[] = [];
-      if (isSubstituteHoliday) parts.push("振替休日");
-      if (remarks) parts.push(remarks);
-      return parts.join(" ");
-    })();
+      const full = (() => {
+        const parts: string[] = [];
+        if (isSubstituteHoliday) parts.push("振替休日");
+        if (remarks) parts.push(remarks);
+        return parts.join(" ");
+      })();
 
-    const MAX = 32;
-    const needTruncate = full && full.length > MAX;
-    const visible = needTruncate ? `${full.slice(0, MAX)}...` : full;
+      const MAX = 32;
+      const needTruncate = full && full.length > MAX;
+      const visible = needTruncate ? `${full.slice(0, MAX)}...` : full;
 
-    return (
-      <Box component="span">
-        <Stack direction="row" spacing={0.5} alignItems="center">
-          {specialHolidayFlag && (
-            <Chip size="small" label="特別休暇" color="info" />
-          )}
-          {paidHolidayFlag && (
-            <Chip size="small" label="有給休暇" color="success" />
-          )}
-          {absentFlag && <Chip size="small" label="欠勤" color="error" />}
+      return (
+        <Box component="span">
+          <Stack direction="row" spacing={0.5} alignItems="center">
+            {specialHolidayFlag && (
+              <Chip size="small" label="特別休暇" color="info" />
+            )}
+            {paidHolidayFlag && (
+              <Chip size="small" label="有給休暇" color="success" />
+            )}
+            {absentFlag && <Chip size="small" label="欠勤" color="error" />}
 
-          {needTruncate ? (
-            <Tooltip title={full} arrow placement="top">
-              <Box
-                component="span"
-                sx={{
-                  display: "inline-block",
-                  verticalAlign: "middle",
-                  ml: 0.5,
-                }}
-              >
+            {needTruncate ? (
+              <Tooltip title={full} arrow placement="top">
+                <Box
+                  component="span"
+                  sx={{
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                    ml: 0.5,
+                  }}
+                >
+                  {visible}
+                </Box>
+              </Tooltip>
+            ) : (
+              <Box component="span" sx={{ ml: 0.5 }}>
                 {visible}
               </Box>
-            </Tooltip>
-          ) : (
-            <Box component="span" sx={{ ml: 0.5 }}>
-              {visible}
-            </Box>
-          )}
-        </Stack>
-      </Box>
-    );
-  }, []);
+            )}
+          </Stack>
+        </Box>
+      );
+    },
+    []
+  );
 
   const filteredAttendanceList = useMemo(() => {
     if (!searchName) return sortedAttendanceList;
@@ -294,6 +301,34 @@ export default function AttendanceDailyList() {
   const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
   const [deleteAttendance] = useDeleteAttendanceMutation();
 
+  const getAttendanceForDisplayDate = useCallback(
+    (row: AttendanceDaily) => {
+      const attendances = attendanceMap[row.sub] ?? [];
+      if (displayDateFormatted) {
+        const matched = attendances.find(
+          (attendance) => attendance.workDate === displayDateFormatted
+        );
+        if (matched) {
+          return matched;
+        }
+      }
+
+      if (!row.attendance) {
+        return null;
+      }
+
+      if (
+        displayDateFormatted &&
+        row.attendance.workDate !== displayDateFormatted
+      ) {
+        return null;
+      }
+
+      return row.attendance;
+    },
+    [attendanceMap, displayDateFormatted]
+  );
+
   const overtimeMinutesMap = useMemo(() => {
     return Object.entries(attendanceMap).reduce(
       (acc, [staffId, attendances]) => {
@@ -314,14 +349,15 @@ export default function AttendanceDailyList() {
       if (typeof mapped === "number") {
         return mapped;
       }
-      if (!row.attendance) return 0;
+      const targetAttendance = getAttendanceForDisplayDate(row);
+      if (!targetAttendance) return 0;
       return calculateTotalOvertimeMinutes(
-        [row.attendance],
+        [targetAttendance],
         scheduledHour,
         scheduledMinute
       );
     },
-    [overtimeMinutesMap, scheduledHour, scheduledMinute]
+    [getAttendanceForDisplayDate, overtimeMinutesMap, scheduledHour, scheduledMinute]
   );
 
   const renderOvertimeValue = useCallback(
@@ -344,23 +380,23 @@ export default function AttendanceDailyList() {
       setAttendanceLoadingMap((state) => ({ ...state, [staffId]: true }));
       setAttendanceErrorMap((state) => ({ ...state, [staffId]: null }));
 
-      triggerListAttendances({ staffId })
+      const baseDate =
+        displayDateFormatted ?? dayjs().format(AttendanceDate.DataFormat);
+      const startDate = dayjs(baseDate)
+        .startOf("month")
+        .format(AttendanceDate.DataFormat);
+      const endDate = dayjs(baseDate)
+        .endOf("month")
+        .format(AttendanceDate.DataFormat);
+
+      triggerListAttendancesByDateRange({ staffId, startDate, endDate })
         .unwrap()
-        .then((res) => {
+        .then((attendances) => {
           if (!isMounted) return;
-          const attendances = res.attendances ?? [];
           setAttendanceMap((map) => ({ ...map, [staffId]: attendances }));
-
-          const duplicates = (res.duplicates ?? []).map((dup) => ({
-            staffId: dup.staffId ?? staffId,
-            staffName: staffNameMap[staffId] ?? staffId,
-            workDate: dup.workDate,
-            ids: dup.ids,
-          }));
-
           setDuplicateSummaryMap((state) => ({
             ...state,
-            [staffId]: duplicates,
+            [staffId]: [],
           }));
         })
         .catch((err) => {
@@ -372,6 +408,62 @@ export default function AttendanceDailyList() {
           setAttendanceErrorMap((state) => ({
             ...state,
             [staffId]: errorInstance,
+          }));
+
+          const details =
+            typeof err === "object" &&
+            err !== null &&
+            "details" in err &&
+            typeof (err as { details?: unknown }).details === "object" &&
+            (err as { details?: unknown }).details !== null
+              ? ((err as { details: { duplicates?: unknown } }).details
+                  .duplicates ?? [])
+              : [];
+
+          const duplicateList = Array.isArray(details)
+            ? details
+                .map((dup) => {
+                  if (
+                    !dup ||
+                    typeof dup !== "object" ||
+                    !("workDate" in dup) ||
+                    !("ids" in dup)
+                  ) {
+                    return null;
+                  }
+                  const candidate = dup as {
+                    workDate?: unknown;
+                    ids?: unknown;
+                    staffId?: unknown;
+                  };
+                  if (
+                    typeof candidate.workDate !== "string" ||
+                    !Array.isArray(candidate.ids)
+                  ) {
+                    return null;
+                  }
+                  const ids = candidate.ids.filter(
+                    (id): id is string => typeof id === "string"
+                  );
+                  return {
+                    staffId:
+                      typeof candidate.staffId === "string"
+                        ? candidate.staffId
+                        : staffId,
+                    staffName: staffNameMap[staffId] ?? staffId,
+                    workDate: candidate.workDate,
+                    ids,
+                  } satisfies DuplicateAttendanceDaily;
+                })
+                .filter(
+                  (dup): dup is DuplicateAttendanceDaily =>
+                    dup !== null && dup.ids.length > 1
+                )
+            : [];
+
+          setDuplicateSummaryMap((state) => ({
+            ...state,
+            [staffId]: duplicateList,
           }));
         })
         .finally(() => {
@@ -386,31 +478,24 @@ export default function AttendanceDailyList() {
     return () => {
       isMounted = false;
     };
-  }, [attendanceDailyList, triggerListAttendances, staffNameMap]);
+  }, [
+    attendanceDailyList,
+    displayDateFormatted,
+    staffNameMap,
+    triggerListAttendancesByDateRange,
+  ]);
 
   const isRequesting = useCallback((row: AttendanceDaily) => {
-    if (!row.attendance?.changeRequests) return false;
-    const changeRequests = row.attendance.changeRequests || [];
+    const targetAttendance = getAttendanceForDisplayDate(row);
+    if (!targetAttendance?.changeRequests) return false;
+    const changeRequests = targetAttendance.changeRequests || [];
     return changeRequests.filter((item) => item && !item.completed).length > 0;
-  }, []);
+  }, [getAttendanceForDisplayDate]);
 
   const pendingList = useMemo(() => {
     if (loading) return [];
-    return attendanceDailyList.filter((row) => {
-      // prefer loaded attendance records from attendanceMap
-      const attendances = attendanceMap[row.sub] ?? [];
-      const hasPendingInAttendances = attendances.some((att) => {
-        if (!att) return false;
-        const changeRequests = (att as Attendance).changeRequests || [];
-        return (
-          changeRequests.filter((item) => item && !item.completed).length > 0
-        );
-      });
-      if (hasPendingInAttendances) return true;
-      // fallback to the row.attendance (existing behavior) when attendanceMap has no data
-      return isRequesting(row);
-    });
-  }, [loading, attendanceDailyList, attendanceMap, isRequesting]);
+    return attendanceDailyList.filter((row) => isRequesting(row));
+  }, [loading, attendanceDailyList, isRequesting]);
 
   const summaryDuplicateList = useMemo(
     () => Object.values(duplicateSummaryMap).flat(),
@@ -997,15 +1082,69 @@ export default function AttendanceDailyList() {
         </DialogActions>
       </Dialog>
 
-      <MoveDateItem workDate={dayjs(targetWorkDate || today)} />
-      <TextField
-        label="スタッフ名で検索"
-        variant="outlined"
-        size="small"
-        value={searchName}
-        onChange={(e) => setSearchName(e.target.value)}
-        sx={{ mb: 1 }}
-      />
+      <Box
+        sx={{
+          mb: 1,
+          display: "flex",
+          alignItems: { xs: "flex-start", sm: "center" },
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        <MoveDateItem workDate={dayjs(targetWorkDate || today)} />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <IconButton
+            aria-label="スタッフ名検索を表示"
+            onClick={() => {
+              setIsSearchVisible((prev) => {
+                const next = !prev;
+                if (!next) {
+                  setSearchName("");
+                }
+                return next;
+              });
+            }}
+            size="small"
+            sx={{
+              border: "1px solid rgba(148,163,184,0.35)",
+              backgroundColor: "#ffffff",
+              color: "#475569",
+              "&:hover": {
+                backgroundColor: "#f8fafc",
+              },
+            }}
+          >
+            <SearchIcon fontSize="small" />
+          </IconButton>
+          {isSearchVisible && (
+            <TextField
+              label="スタッフ名で検索"
+              variant="outlined"
+              size="small"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              sx={{
+                maxWidth: 360,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "18px",
+                  backgroundColor: "#ffffff",
+                  "& fieldset": {
+                    borderColor: "rgba(148,163,184,0.35)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(100,116,139,0.45)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#19b985",
+                    borderWidth: "1px",
+                  },
+                },
+              }}
+            />
+          )}
+        </Box>
+      </Box>
       {pendingList.length > 0 && (
         <Box sx={{ pb: 2, pt: 2 }}>
           <Box
@@ -1065,6 +1204,7 @@ export default function AttendanceDailyList() {
                         holidayCalendars={holidayCalendars}
                         companyHolidayCalendars={companyHolidayCalendars}
                         calendarLoading={calendarsLoading}
+                        targetWorkDate={displayDateFormatted}
                       />
                       <TableCell sx={{ width: 90 }}>
                         {renderDuplicateBadge(row)}
@@ -1084,7 +1224,7 @@ export default function AttendanceDailyList() {
                         {renderOvertimeValue(row)}
                       </TableCell>
                       <TableCell sx={summaryCellSx}>
-                        {renderSummaryMessage(row)}
+                        {renderSummaryMessage(getAttendanceForDisplayDate(row))}
                       </TableCell>
                       <TableCell sx={{ whiteSpace: "nowrap" }} />
                     </TableRow>
@@ -1132,6 +1272,7 @@ export default function AttendanceDailyList() {
                   holidayCalendars={holidayCalendars}
                   companyHolidayCalendars={companyHolidayCalendars}
                   calendarLoading={calendarsLoading}
+                  targetWorkDate={displayDateFormatted}
                 />
                 <TableCell sx={{ width: 90 }}>
                   {renderDuplicateBadge(row)}
@@ -1151,7 +1292,7 @@ export default function AttendanceDailyList() {
                   {renderOvertimeValue(row)}
                 </TableCell>
                 <TableCell sx={summaryCellSx}>
-                  {renderSummaryMessage(row)}
+                  {renderSummaryMessage(getAttendanceForDisplayDate(row))}
                 </TableCell>
                 <TableCell sx={{ whiteSpace: "nowrap" }} />
               </TableRow>

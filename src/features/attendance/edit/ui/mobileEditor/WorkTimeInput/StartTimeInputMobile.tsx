@@ -1,17 +1,15 @@
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Box, Chip, Stack, TextField } from "@mui/material";
-import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import TimeInputBase from "@/features/attendance/edit/ui/items/WorkTimeItem/TimeInputBase";
 
 export default function StartTimeInputMobile({
   dataTestId = "mobile-start-time-input",
 }: {
   dataTestId?: string;
 } = {}) {
-  const { workDate, setValue, watch, changeRequests, readOnly } = useContext(
+  const { workDate, control, setValue, changeRequests, readOnly } = useContext(
     AttendanceEditContext
   );
   const { getQuickInputStartTimes } = useContext(AppConfigContext);
@@ -25,48 +23,17 @@ export default function StartTimeInputMobile({
     }));
   }, [getQuickInputStartTimes]);
 
-  if (!workDate || !setValue) return null;
-
-  const startTime = watch ? watch("startTime") : null;
+  if (!workDate || !control || !setValue) return null;
 
   return (
-    <Stack spacing={1}>
-      <TextField
-        type="time"
-        size="small"
-        inputProps={{ "data-testid": dataTestId }}
-        value={startTime ? dayjs(startTime).format("HH:mm") : ""}
-        onChange={(e) => {
-          const v = e.target.value;
-          if (!v) return setValue("startTime", null, { shouldDirty: true });
-          const iso = dayjs(workDate.format("YYYY-MM-DD") + " " + v)
-            .second(0)
-            .millisecond(0)
-            .toISOString();
-          setValue("startTime", iso, { shouldDirty: true });
-        }}
-      />
-      <Box>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          {quickInputStartTimes.map((entry, index) => (
-            <Chip
-              key={index}
-              label={entry.time}
-              color="success"
-              variant="outlined"
-              icon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-              disabled={changeRequests.length > 0 || !!readOnly}
-              onClick={() => {
-                if (readOnly) return;
-                const startTime = dayjs(
-                  `${workDate.format("YYYY-MM-DD")} ${entry.time}`
-                ).toISOString();
-                setValue("startTime", startTime, { shouldDirty: true });
-              }}
-            />
-          ))}
-        </Stack>
-      </Box>
-    </Stack>
+    <TimeInputBase<"startTime">
+      name="startTime"
+      control={control}
+      setValue={setValue}
+      workDate={workDate}
+      quickInputTimes={quickInputStartTimes}
+      disabled={changeRequests.length > 0 || !!readOnly}
+      dataTestId={dataTestId}
+    />
   );
 }

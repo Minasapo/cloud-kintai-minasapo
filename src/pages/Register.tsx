@@ -1,38 +1,47 @@
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
-import { Alert, Container } from "@mui/material";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import TimeRecorder from "@/features/attendance/time-recorder/ui/TimeRecorder";
-
-import { AuthContext } from "../context/AuthContext";
+import { useSession } from "@/app/providers/session/useSession";
+import { AppConfigContext } from "@/context/AppConfigContext";
+import RegisterContent from "@/pages/register/RegisterContent";
 
 export default function Register() {
-  const { isCognitoUserRole } = useContext(AuthContext);
+  const { hasRole } = useSession();
+  const { derived } = useContext(AppConfigContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isCognitoUserRole(StaffRole.OPERATOR)) {
-      navigate("/office/qr");
+    if (hasRole(StaffRole.OPERATOR)) {
+      navigate("/office/qr", { replace: true });
     }
-  }, [isCognitoUserRole, navigate]);
+  }, [hasRole, navigate]);
 
   const isRegisterDisabled =
     import.meta.env.VITE_STANDARD_REGISTER_DISABLE === "true";
 
   if (isRegisterDisabled) {
     return (
-      <Container>
-        <div className="mt-4 text-center">
-          <Alert severity="warning">現在、こちらの機能は使用できません</Alert>
+      <div className="mx-auto w-full max-w-3xl px-4 py-4">
+        <div
+          role="alert"
+          className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm font-medium leading-6 text-amber-950"
+        >
+          現在、こちらの機能は使用できません
         </div>
-      </Container>
+      </div>
     );
   }
 
+  const announcement = derived?.timeRecorderAnnouncement ?? {
+    enabled: false,
+    message: "",
+  };
+
   return (
-    <div className="flex h-full justify-center py-2 md:py-10">
-      <TimeRecorder />
-    </div>
+    <RegisterContent
+      configId={derived?.configId ?? null}
+      announcement={announcement}
+    />
   );
 }

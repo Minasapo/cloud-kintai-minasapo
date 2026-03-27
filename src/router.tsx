@@ -1,9 +1,11 @@
 import { lazy, type ReactNode,Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 
 import Layout from "./Layout";
+import NotFound from "./pages/NotFound";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
+import RouteErrorBoundary from "./router/RouteErrorBoundary";
 import RouterFallback from "./shared/ui/feedback/RouterFallback";
 
 const loadAdminDashboardLoader = async () =>
@@ -39,11 +41,14 @@ const wrapWithMuiXDateProvider = (node: ReactNode) => (
   </Suspense>
 );
 
+const AdminLayoutRoute = createLazyRoute(
+  () => import("./pages/admin/AdminLayout"),
+);
 const AdminDashboardRoute = createLazyRoute(
   () => import("./pages/admin/AdminDashboard"),
 );
-const AdminLayoutRoute = createLazyRoute(
-  () => import("./pages/admin/AdminLayout"),
+const AdminGuardRoute = createLazyRoute(
+  () => import("./pages/admin/AdminGuard"),
   {
     wrap: wrapWithMuiXDateProvider,
   },
@@ -97,35 +102,37 @@ const ShiftCollaborativeRoute = createLazyRoute(
   () => import("./pages/shift/collaborative"),
 );
 const WorkflowDetailRoute = createLazyRoute(
-  () => import("./pages/workflow/detail/WorkflowDetailPage"),
+  () => import("./pages/workflow/detail/WorkflowDetail"),
   {
     loader: loadWorkflowDetailLoader,
   },
 );
 const WorkflowEditRoute = createLazyRoute(
-  () => import("./pages/workflow/edit/WorkflowEditPage"),
+  () => import("./pages/workflow/edit/WorkflowEdit"),
   {
     loader: loadWorkflowEditLoader,
   },
 );
 const WorkflowListRoute = createLazyRoute(
-  () => import("./pages/workflow/list/WorkflowListPage"),
+  () => import("./pages/workflow/list/Workflow"),
   {
     wrap: wrapWithMuiXDateProvider,
   },
 );
 const NewWorkflowRoute = createLazyRoute(
-  () => import("./pages/workflow/new/NewWorkflowPage"),
+  () => import("./pages/workflow/new/NewWorkflow"),
 );
 
 const router = createBrowserRouter([
   {
     path: "/login",
     lazy: LoginRoute,
+    errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/",
     element: <Layout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         index: true,
@@ -161,7 +168,7 @@ const router = createBrowserRouter([
           },
           {
             path: "*",
-            lazy: AttendanceListRoute,
+            element: <NotFound />,
           },
         ],
       },
@@ -185,6 +192,10 @@ const router = createBrowserRouter([
             path: "new",
             lazy: NewWorkflowRoute,
           },
+          {
+            path: "*",
+            element: <NotFound />,
+          },
         ],
       },
       {
@@ -198,6 +209,10 @@ const router = createBrowserRouter([
             path: "collaborative",
             lazy: ShiftCollaborativeRoute,
           },
+          {
+            path: "*",
+            element: <NotFound />,
+          },
         ],
       },
       {
@@ -210,16 +225,16 @@ const router = createBrowserRouter([
       },
       {
         path: "/admin",
-        lazy: AdminLayoutRoute,
+        lazy: AdminGuardRoute,
         loader: loadAdminDashboardLoader,
         children: [
           {
             path: "",
-            lazy: AdminDashboardRoute,
+            lazy: AdminLayoutRoute,
             children: [
               {
                 index: true,
-                element: <Navigate to="attendances" replace />,
+                lazy: AdminDashboardRoute,
               },
               ...adminChildRoutes,
             ],
@@ -242,11 +257,15 @@ const router = createBrowserRouter([
             path: "qr/register",
             lazy: OfficeQrRegisterRoute,
           },
+          {
+            path: "*",
+            element: <NotFound />,
+          },
         ],
       },
       {
         path: "*",
-        element: <div>Not Found</div>,
+        element: <NotFound />,
       },
     ],
   },

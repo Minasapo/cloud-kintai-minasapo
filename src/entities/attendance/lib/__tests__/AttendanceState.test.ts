@@ -60,6 +60,23 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
+  it("returns Requesting when the work date is today and there is an incomplete change request", () => {
+    const today = "2024-01-05";
+    const state = buildState({
+      workDate: today,
+      changeRequests: [
+        {
+          __typename: "AttendanceChangeRequest",
+          completed: false,
+        },
+      ],
+    });
+
+    setMockToday(state, today);
+
+    expect(state.get()).toBe(AttendanceStatus.Requesting);
+  });
+
   it("returns None when attendance management is disabled", () => {
     const state = buildState(
       {

@@ -4,6 +4,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import {
   Avatar,
   AvatarGroup,
+  Badge,
   Box,
   Chip,
   IconButton,
@@ -148,29 +149,50 @@ const ActiveUsersListBase: React.FC<ActiveUsersListProps> = ({
       >
         <AvatarGroup max={5}>
           {usersWithStatus.map((user) => (
-            <Tooltip key={user.userId} title={user.userName}>
-              <Avatar
+            <Tooltip
+              key={user.userId}
+              title={`${user.userName}${user.editingCount > 0 ? ` (${user.editingCount}箇所を編集中)` : ""}`}
+            >
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                badgeContent={user.editingCount > 0 ? user.editingCount : 0}
+                color="primary"
                 sx={{
-                  bgcolor: user.color,
-                  width: 32,
-                  height: 32,
-                  fontSize: "0.875rem",
-                  position: "relative",
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    bottom: 0,
-                    right: 0,
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    bgcolor: getStatusColor(user.status),
-                    border: `2px solid ${theme.palette.background.paper}`,
+                  "& .MuiBadge-badge": {
+                    fontSize: "0.65rem",
+                    height: "16px",
+                    minWidth: "16px",
                   },
                 }}
               >
-                {user.userName.charAt(0)}
-              </Avatar>
+                <Avatar
+                  sx={{
+                    bgcolor: user.color,
+                    width: 32,
+                    height: 32,
+                    fontSize: "0.875rem",
+                    position: "relative",
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      bottom: 0,
+                      right: 0,
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      bgcolor: getStatusColor(user.status),
+                      border: `2px solid ${theme.palette.background.paper}`,
+                      boxShadow:
+                        user.status === "online"
+                          ? `0 0 4px ${getStatusColor(user.status)}`
+                          : "none",
+                    },
+                  }}
+                >
+                  {user.userName.charAt(0)}
+                </Avatar>
+              </Badge>
             </Tooltip>
           ))}
         </AvatarGroup>
@@ -220,25 +242,43 @@ const UserDetailList: React.FC<UserDetailListProps> = ({ users }) => {
         {users.map((user) => (
           <ListItem key={user.userId}>
             <ListItemAvatar>
-              <Avatar
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                badgeContent={user.editingCount > 0 ? user.editingCount : 0}
+                color="primary"
                 sx={{
-                  bgcolor: user.color,
-                  position: "relative",
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    bottom: 2,
-                    right: 2,
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    bgcolor: getStatusColor(user.status),
-                    border: `2px solid ${theme.palette.background.paper}`,
+                  "& .MuiBadge-badge": {
+                    fontSize: "0.65rem",
+                    height: "16px",
+                    minWidth: "16px",
                   },
                 }}
               >
-                {user.userName.charAt(0)}
-              </Avatar>
+                <Avatar
+                  sx={{
+                    bgcolor: user.color,
+                    position: "relative",
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      bottom: 2,
+                      right: 2,
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      bgcolor: getStatusColor(user.status),
+                      border: `2px solid ${theme.palette.background.paper}`,
+                      boxShadow:
+                        user.status === "online"
+                          ? `0 0 4px ${getStatusColor(user.status)}`
+                          : "none",
+                    },
+                  }}
+                >
+                  {user.userName.charAt(0)}
+                </Avatar>
+              </Badge>
             </ListItemAvatar>
             <ListItemText
               primary={
@@ -264,6 +304,7 @@ const UserDetailList: React.FC<UserDetailListProps> = ({ users }) => {
                   />
                 </Box>
               }
+              primaryTypographyProps={{ component: "div" }}
               secondary={
                 <Box>
                   <Typography variant="caption" display="block">
@@ -280,6 +321,7 @@ const UserDetailList: React.FC<UserDetailListProps> = ({ users }) => {
                   )}
                 </Box>
               }
+              secondaryTypographyProps={{ component: "div" }}
             />
           </ListItem>
         ))}

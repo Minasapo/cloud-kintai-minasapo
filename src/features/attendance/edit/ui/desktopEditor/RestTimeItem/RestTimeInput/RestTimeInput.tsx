@@ -1,5 +1,3 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
 import { FieldArrayWithId, useWatch } from "react-hook-form";
@@ -48,29 +46,23 @@ export function RestTimeInput({
   if (!restRemove) return null;
 
   return (
-    <Box>
-      <Stack direction="row" spacing={1}>
-        <RestStartTimeInput rest={rest} index={index} testIdPrefix="desktop" />
-        <Box>
-          <Typography variant="body1" sx={{ my: 1 }}>
-            ～
-          </Typography>
-        </Box>
-        <RestEndTimeInput rest={rest} index={index} testIdPrefix="desktop" />
-        <Box>
-          <IconButton
-            aria-label="staff-search"
-            disabled={changeRequests.length > 0}
-            onClick={() => restRemove(index)}
-            data-testid={`rest-delete-button-${index}`}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-        <Box sx={{ flexGrow: 1 }} textAlign={"right"}>
-          {`${totalRestTime.toFixed(1)} 時間`}
-        </Box>
-      </Stack>
-    </Box>
+    <div className="flex flex-col gap-2.5 md:flex-row md:items-center">
+      <RestStartTimeInput rest={rest} index={index} testIdPrefix="desktop" />
+      <div className="text-sm text-slate-500">～</div>
+      <RestEndTimeInput rest={rest} index={index} testIdPrefix="desktop" />
+      <button
+        type="button"
+        aria-label="休憩を削除"
+        disabled={changeRequests.length > 0}
+        onClick={() => restRemove(index)}
+        data-testid={`rest-delete-button-${index}`}
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        ×
+      </button>
+      <div className="text-sm text-slate-700 md:ml-auto md:whitespace-nowrap md:text-right">
+        {`${totalRestTime.toFixed(1)} 時間`}
+      </div>
+    </div>
   );
 }

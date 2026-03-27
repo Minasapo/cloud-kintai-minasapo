@@ -1,117 +1,141 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { DataSyncStatus } from "../types/collaborative.types";
+
 /**
- * ポーリングベース同期のフック
+ * Subscription ファーストの同期コーディネータ
+ *
+ * リアルタイム同期（GraphQL Subscription）を主軸とし、
+ * 手動同期をフォールバック手段として提供する。
+ * データ保存・同期の状態を一元管理し、UI へステータスを公開する。
  */
 interface UseShiftSyncProps {
-  enabled: boolean;
-  interval?: number; // ミリ秒（デフォルト: 5000）
-  onSync: () => Promise<void>;
+  onManualSync: () => Promise<void>;
 }
 
-export const useShiftSync = ({
-  enabled,
-  interval = 5000,
-  onSync,
-}: UseShiftSyncProps) => {
+export const useShiftSync = ({ onManualSync }: UseShiftSyncProps) => {
   const [isSyncing, setIsSyncing] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [lastSyncedAt, setLastSyncedAt] = useState<number>(0);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [lastAutoSyncedAt, setLastAutoSyncedAt] = useState<number>(0);
+  const [lastManualSyncedAt, setLastManualSyncedAt] = useState<number>(0);
+  const [dataStatus, setDataStatus] = useState<DataSyncStatus>("idle");
 
-  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const isMountedRef = useRef(true);
-  const onSyncRef = useRef(onSync);
+  const isSyncingRef = useRef(false);
+  const statusTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const onManualSyncRef = useRef(onManualSync);
 
-  // onSyncの最新版を保持
   useEffect(() => {
-    onSyncRef.current = onSync;
-  }, [onSync]);
+    onManualSyncRef.current = onManualSync;
+  }, [onManualSync]);
 
   /**
-   * 同期を実行
+   * 成功ステータス（saved / synced）を一定時間後に idle へ戻す
    */
-  const sync = useCallback(async () => {
-    if (!enabled || isPaused || isSyncing) return;
-
-    setIsSyncing(true);
-    setSyncError(null);
-
-    try {
-      await onSyncRef.current();
-      if (isMountedRef.current) {
-        setLastSyncedAt(Date.now());
-      }
-    } catch (error) {
-      console.error("Sync error:", error);
-      if (isMountedRef.current) {
-        setSyncError(
-          error instanceof Error ? error.message : "同期に失敗しました",
-        );
-      }
-    } finally {
-      if (isMountedRef.current) {
-        setIsSyncing(false);
-      }
+  const scheduleStatusClear = useCallback(() => {
+    if (statusTimerRef.current) {
+      clearTimeout(statusTimerRef.current);
     }
-  }, [enabled, isPaused, isSyncing]);
-
-  /**
-   * 同期を一時停止
-   */
-  const pause = useCallback(() => {
-    setIsPaused(true);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = undefined;
-    }
+    statusTimerRef.current = setTimeout(() => {
+      setDataStatus((prev) =>
+        prev === "saved" || prev === "synced" ? "idle" : prev,
+      );
+    }, 3000);
   }, []);
 
   /**
-   * 同期を再開
-   */
-  const resume = useCallback(() => {
-    setIsPaused(false);
-  }, []);
-
-  /**
-   * 手動で同期をトリガー
+   * 手動同期を実行（二重実行防止付き）
    */
   const triggerSync = useCallback(async () => {
-    await sync();
-  }, [sync]);
+    if (isSyncingRef.current) return;
+    isSyncingRef.current = true;
+    setIsSyncing(true);
+    setSyncError(null);
+    setDataStatus("syncing");
+
+    try {
+      await onManualSyncRef.current();
+      setLastManualSyncedAt(Date.now());
+      setDataStatus("synced");
+      scheduleStatusClear();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "同期に失敗しました";
+      setSyncError(message);
+      setDataStatus("error");
+    } finally {
+      isSyncingRef.current = false;
+      setIsSyncing(false);
+    }
+  }, [scheduleStatusClear]);
 
   /**
-   * ポーリングのセットアップ
+   * Subscription 経由の自動同期を受信した際の通知
    */
-  useEffect(() => {
-    isMountedRef.current = true;
+  const notifyAutoSyncReceived = useCallback(() => {
+    setLastAutoSyncedAt(Date.now());
+    setSyncError(null);
+    setDataStatus((prev) =>
+      prev === "saving" || prev === "syncing" ? prev : "synced",
+    );
+    scheduleStatusClear();
+  }, [scheduleStatusClear]);
 
-    if (enabled && !isPaused) {
-      // 初回同期
-      void sync();
-
-      // 定期同期
-      intervalRef.current = setInterval(() => {
-        void sync();
-      }, interval);
+  /**
+   * データ保存開始の通知
+   */
+  const notifySaveStarted = useCallback(() => {
+    setDataStatus("saving");
+    if (statusTimerRef.current) {
+      clearTimeout(statusTimerRef.current);
     }
+  }, []);
 
+  /**
+   * データ保存完了の通知
+   */
+  const notifySaveCompleted = useCallback(() => {
+    setSyncError(null);
+    setDataStatus("saved");
+    scheduleStatusClear();
+  }, [scheduleStatusClear]);
+
+  /**
+   * データ保存失敗の通知
+   */
+  const notifySaveFailed = useCallback((error: string) => {
+    setSyncError(error);
+    setDataStatus("error");
+  }, []);
+
+  /**
+   * エラーをクリア
+   */
+  const clearSyncError = useCallback(() => {
+    setSyncError(null);
+    setDataStatus("idle");
+  }, []);
+
+  const lastSyncedAt = Math.max(lastAutoSyncedAt, lastManualSyncedAt);
+
+  useEffect(() => {
     return () => {
-      isMountedRef.current = false;
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (statusTimerRef.current) {
+        clearTimeout(statusTimerRef.current);
       }
     };
-  }, [enabled, isPaused, interval, sync]);
+  }, []);
 
   return {
     isSyncing,
-    isPaused,
-    lastSyncedAt,
     syncError,
     triggerSync,
-    pause,
-    resume,
+    lastAutoSyncedAt,
+    lastSyncedAt,
+    dataStatus,
+    notifyAutoSyncReceived,
+    notifySaveStarted,
+    notifySaveCompleted,
+    notifySaveFailed,
+    clearSyncError,
   };
 };
