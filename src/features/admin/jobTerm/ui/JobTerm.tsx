@@ -7,12 +7,11 @@ import {
   Typography,
 } from "@mui/material";
 import { CloseDate } from "@shared/api/graphql/types";
-// Title removed per admin UI simplification
-import dayjs from "dayjs";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
+import { buildCandidateCloseDates } from "@/features/admin/jobTerm/lib/common";
 import EditJobTermInputDialog from "@/features/admin/jobTerm/ui/EditJobTermInputDialog";
 import JobTermBulkRegister from "@/features/admin/jobTerm/ui/JobTermBulkRegister";
 import {
@@ -26,18 +25,15 @@ const JobTermTable = lazy(
 
 const JobTermTableSkeleton = () => (
   <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-    <Skeleton variant="rounded" height={42} />
-    <Skeleton variant="rounded" height={42} />
-    <Skeleton variant="rounded" height={42} />
-    <Skeleton variant="rounded" height={42} />
-    <Skeleton variant="rounded" height={42} />
+    {Array.from({ length: 5 }, (_, i) => (
+      <Skeleton key={i} variant="rounded" height={42} />
+    ))}
   </Box>
 );
 
 export default function JobTerm() {
   const dispatch = useAppDispatchV2();
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editRow, setEditRow] = useState<CloseDate | null>(null);
+  const [editTarget, setEditTarget] = useState<CloseDate | null>(null);
 
   const {
     closeDates,
@@ -48,25 +44,29 @@ export default function JobTerm() {
     deleteCloseDate,
   } = useCloseDates();
 
-  const candidateCloseDates = useMemo(() => {
-    const upcoming = Array.from(Array(12).keys()).map((i) =>
-      dayjs().add(i, "month").startOf("month"),
-    );
-    const existing = closeDates.map((item) =>
-      dayjs(item.closeDate).startOf("month"),
-    );
+  const candidateCloseDates = useMemo(
+    () => buildCandidateCloseDates(closeDates),
+    [closeDates],
+  );
 
-    const merged = [...upcoming, ...existing];
-    const uniqueByMonth = merged.reduce<dayjs.Dayjs[]>((acc, current) => {
-      const exists = acc.some((item) => item.isSame(current, "month"));
-      if (!exists) {
-        acc.push(current);
+  const handleEdit = useCallback((row: CloseDate) => {
+    setEditTarget(row);
+  }, []);
+
+  const handleDelete = useCallback(
+    async (row: CloseDate) => {
+      // eslint-disable-next-line no-alert
+      if (!window.confirm("本当に削除しますか？この操作は取り消せません。")) return;
+
+      try {
+        await deleteCloseDate({ id: row.id });
+        dispatch(setSnackbarSuccess(MESSAGE_CODE.S09004));
+      } catch {
+        dispatch(setSnackbarError(MESSAGE_CODE.E09004));
       }
-      return acc;
-    }, []);
-
-    return uniqueByMonth.toSorted((a, b) => a.valueOf() - b.valueOf());
-  }, [closeDates]);
+    },
+    [deleteCloseDate, dispatch],
+  );
 
   if (closeDateLoading) {
     return <LinearProgress />;
@@ -95,28 +95,15 @@ export default function JobTerm() {
         <Suspense fallback={<JobTermTableSkeleton />}>
           <JobTermTable
             rows={closeDates}
-            onEdit={(row) => {
-              setEditRow(row);
-              setEditDialogOpen(true);
-            }}
-            onDelete={(row) => {
-              // eslint-disable-next-line no-alert
-              const result = window.confirm(
-                "本当に削除しますか？この操作は取り消せません。",
-              );
-              if (!result) return;
-
-              deleteCloseDate({ id: row.id })
-                .then(() => dispatch(setSnackbarSuccess(MESSAGE_CODE.S09004)))
-                .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E09004)));
-            }}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
           />
         </Suspense>
       </Stack>
       <EditJobTermInputDialog
-        targetData={editRow}
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
+        targetData={editTarget}
+        open={editTarget !== null}
+        onClose={() => setEditTarget(null)}
         candidateCloseDates={candidateCloseDates}
         updateCloseDate={updateCloseDate}
       />
