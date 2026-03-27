@@ -18,6 +18,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+import ConfirmDialog from "@/shared/ui/feedback/ConfirmDialog";
 
 const JobTermTable = lazy(
   () => import("@/features/admin/jobTerm/ui/JobTermTable"),
@@ -34,6 +35,7 @@ const JobTermTableSkeleton = () => (
 export default function JobTerm() {
   const dispatch = useAppDispatchV2();
   const [editTarget, setEditTarget] = useState<CloseDate | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CloseDate | null>(null);
 
   const {
     closeDates,
@@ -53,20 +55,20 @@ export default function JobTerm() {
     setEditTarget(row);
   }, []);
 
-  const handleDelete = useCallback(
-    async (row: CloseDate) => {
-      // eslint-disable-next-line no-alert
-      if (!window.confirm("本当に削除しますか？この操作は取り消せません。")) return;
+  const handleDelete = useCallback((row: CloseDate) => {
+    setDeleteTarget(row);
+  }, []);
 
-      try {
-        await deleteCloseDate({ id: row.id });
-        dispatch(setSnackbarSuccess(MESSAGE_CODE.S09004));
-      } catch {
-        dispatch(setSnackbarError(MESSAGE_CODE.E09004));
-      }
-    },
-    [deleteCloseDate, dispatch],
-  );
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+    setDeleteTarget(null);
+    try {
+      await deleteCloseDate({ id: deleteTarget.id });
+      dispatch(setSnackbarSuccess(MESSAGE_CODE.S09004));
+    } catch {
+      dispatch(setSnackbarError(MESSAGE_CODE.E09004));
+    }
+  }, [deleteTarget, deleteCloseDate, dispatch]);
 
   if (closeDateLoading) {
     return <LinearProgress />;
@@ -106,6 +108,12 @@ export default function JobTerm() {
         onClose={() => setEditTarget(null)}
         candidateCloseDates={candidateCloseDates}
         updateCloseDate={updateCloseDate}
+      />
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        message="本当に削除しますか？この操作は取り消せません。"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
       />
     </>
   );
