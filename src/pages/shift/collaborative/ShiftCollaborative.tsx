@@ -43,10 +43,12 @@ const isWeekend = (day: dayjs.Dayjs): boolean =>
 interface ShiftCollaborativePageInnerProps {
   staffs: ReturnType<typeof useStaffs>["staffs"];
   targetMonth: string;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
 }
 
 const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
-  ({ staffs, targetMonth }: ShiftCollaborativePageInnerProps) => {
+  ({ staffs, targetMonth, onPrevMonth, onNextMonth }: ShiftCollaborativePageInnerProps) => {
     const { cognitoUser } = useContext(AuthContext);
     const {
       state,
@@ -281,6 +283,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             currentMonth={currentMonth}
             activeUsers={state.activeUsers}
             editingCells={state.editingCells}
+            onPrevMonth={onPrevMonth}
+            onNextMonth={onNextMonth}
           />
 
           <UndoRedoToolbar
@@ -443,7 +447,15 @@ export default function ShiftCollaborativePage() {
   const isAuthenticated = authStatus === "authenticated";
   const { staffs, loading: staffsLoading } = useStaffs({ isAuthenticated });
 
-  const targetMonth = dayjs().format("YYYY-MM");
+  const [targetMonth, setTargetMonth] = useState(() => dayjs().format("YYYY-MM"));
+
+  const handlePrevMonth = useCallback(() => {
+    setTargetMonth((prev) => dayjs(prev).subtract(1, "month").format("YYYY-MM"));
+  }, []);
+
+  const handleNextMonth = useCallback(() => {
+    setTargetMonth((prev) => dayjs(prev).add(1, "month").format("YYYY-MM"));
+  }, []);
 
   const currentUserId = useMemo(() => {
     if (!cognitoUser?.id) return "";
@@ -503,7 +515,12 @@ export default function ShiftCollaborativePage() {
       currentUserName={currentUserName}
       shiftRequestId={shiftRequestId}
     >
-      <ShiftCollaborativePageInner staffs={staffs} targetMonth={targetMonth} />
+      <ShiftCollaborativePageInner 
+        staffs={staffs} 
+        targetMonth={targetMonth} 
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+      />
     </CollaborativeShiftProvider>
   );
 }
