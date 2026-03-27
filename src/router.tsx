@@ -41,14 +41,14 @@ const wrapWithMuiXDateProvider = (node: ReactNode) => (
   </Suspense>
 );
 
+const AdminLayoutRoute = createLazyRoute(
+  () => import("./pages/admin/AdminLayout"),
+);
 const AdminDashboardRoute = createLazyRoute(
   () => import("./pages/admin/AdminDashboard"),
 );
-const AdminDashboardHomeRoute = createLazyRoute(
-  () => import("./pages/admin/AdminDashboardHome"),
-);
-const AdminLayoutRoute = createLazyRoute(
-  () => import("./pages/admin/AdminLayout"),
+const AdminGuardRoute = createLazyRoute(
+  () => import("./pages/admin/AdminGuard"),
   {
     wrap: wrapWithMuiXDateProvider,
   },
@@ -102,25 +102,25 @@ const ShiftCollaborativeRoute = createLazyRoute(
   () => import("./pages/shift/collaborative"),
 );
 const WorkflowDetailRoute = createLazyRoute(
-  () => import("./pages/workflow/detail/WorkflowDetailPage"),
+  () => import("./pages/workflow/detail/WorkflowDetail"),
   {
     loader: loadWorkflowDetailLoader,
   },
 );
 const WorkflowEditRoute = createLazyRoute(
-  () => import("./pages/workflow/edit/WorkflowEditPage"),
+  () => import("./pages/workflow/edit/WorkflowEdit"),
   {
     loader: loadWorkflowEditLoader,
   },
 );
 const WorkflowListRoute = createLazyRoute(
-  () => import("./pages/workflow/list/WorkflowListPage"),
+  () => import("./pages/workflow/list/Workflow"),
   {
     wrap: wrapWithMuiXDateProvider,
   },
 );
 const NewWorkflowRoute = createLazyRoute(
-  () => import("./pages/workflow/new/NewWorkflowPage"),
+  () => import("./pages/workflow/new/NewWorkflow"),
 );
 
 const router = createBrowserRouter([
@@ -225,16 +225,16 @@ const router = createBrowserRouter([
       },
       {
         path: "/admin",
-        lazy: AdminLayoutRoute,
+        lazy: AdminGuardRoute,
         loader: loadAdminDashboardLoader,
         children: [
           {
             path: "",
-            lazy: AdminDashboardRoute,
+            lazy: AdminLayoutRoute,
             children: [
               {
                 index: true,
-                lazy: AdminDashboardHomeRoute,
+                lazy: AdminDashboardRoute,
               },
               ...adminChildRoutes,
             ],

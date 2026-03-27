@@ -7,6 +7,15 @@ import type { CSSProperties, ReactNode } from "react";
 import { designTokenVar } from "@/shared/designSystem";
 
 const PAGE_SECTION_GAP = designTokenVar("component.page.sectionGap", "16px");
+const PAGE_MAX_WIDTH_STYLES = {
+  sm: "640px",
+  md: "768px",
+  lg: "1024px",
+  xl: "1250px",
+} as const;
+const PAGE_CENTERED_STYLE: CSSProperties = {
+  marginInline: "auto",
+};
 
 interface PageProps {
   title: string;
@@ -27,18 +36,12 @@ export default function Page({
     maxWidth === false
       ? {}
       : {
-          maxWidth:
-            {
-              sm: "640px",
-              md: "768px",
-              lg: "1024px",
-              xl: "1280px",
-            }[maxWidth] ?? "1280px",
-          marginInline: "auto",
+          ...PAGE_CENTERED_STYLE,
+          maxWidth: PAGE_MAX_WIDTH_STYLES[maxWidth],
         };
 
   return (
-    <div style={{ ...maxWidthStyle }}>
+    <div style={maxWidthStyle}>
       <div className="flex flex-col" style={{ gap: PAGE_SECTION_GAP }}>
         {showDefaultHeader && (
           <>

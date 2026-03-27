@@ -1,3 +1,11 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import {
+  staffApi,
+  useCreateStaffMutation,
+  useDeleteStaffMutation,
+  useGetStaffsQuery,
+  useUpdateStaffMutation,
+} from "@entities/staff/api/staffApi";
 import {
   ApproverMultipleMode,
   ApproverSettingMode,
@@ -6,7 +14,7 @@ import {
   Staff,
   UpdateStaffInput,
 } from "@shared/api/graphql/types";
-import { useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { StaffExternalLink } from "@/entities/staff/externalLink";
 import {
@@ -14,10 +22,7 @@ import {
   getNextVersion,
 } from "@/shared/api/graphql/concurrency";
 
-import createStaffData from "./createStaffData";
-import deleteStaffData from "./deleteStaffData";
 import fetchStaffs from "./fetchStaffs";
-import updateStaffData from "./updateStaffData";
 
 export enum StaffRole {
   OWNER = "Owner",
@@ -87,120 +92,110 @@ export type UseStaffsParams = {
   isAuthenticated: boolean;
 };
 
-export function useStaffs({ isAuthenticated }: UseStaffsParams) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [staffs, setStaffs] = useState<StaffType[]>([]);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoading(false);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError(null);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStaffs([]);
-      return;
-    }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(true);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setError(null);
-    fetchStaffs()
-      .then((res) =>
-        setStaffs(
-          res.map((staff) => ({
-            id: staff.id,
-            cognitoUserId: staff.cognitoUserId,
-            familyName: staff.familyName,
-            givenName: staff.givenName,
-            mailAddress: staff.mailAddress,
-            owner: staff.owner ?? false,
-            role: mappingStaffRole(staff.role),
-            enabled: staff.enabled,
-            status: staff.status,
-            usageStartDate: staff.usageStartDate,
-            createdAt: staff.createdAt,
-            updatedAt: staff.updatedAt,
-            version: staff.version,
-            notifications: staff.notifications,
-            externalLinks: staff.externalLinks ?? null,
-            sortKey: staff.sortKey,
-            workType: (staff as unknown as Record<string, unknown>).workType as
-              | string
-              | null,
-            developer: (staff as unknown as Record<string, unknown>)
-              .developer as boolean | undefined,
-            approverSetting: staff.approverSetting ?? null,
-            approverSingle: staff.approverSingle ?? null,
-            approverMultiple: staff.approverMultiple ?? null,
-            approverMultipleMode: staff.approverMultipleMode ?? null,
-            shiftGroup: staff.shiftGroup ?? null,
-            attendanceManagementEnabled: (
-              staff as unknown as Record<string, unknown>
-            ).attendanceManagementEnabled as boolean | null | undefined,
-          })),
-        ),
-      )
-      .catch((e: Error) => {
-        setError(e);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [isAuthenticated]);
-
-  const refreshStaff = () => {
-    if (!isAuthenticated) {
-      return Promise.reject(new Error("User is not authenticated"));
-    }
-    return fetchStaffs()
-      .then((res) => {
-        setStaffs(
-          res.map((staff) => ({
-            id: staff.id,
-            cognitoUserId: staff.cognitoUserId,
-            familyName: staff.familyName,
-            givenName: staff.givenName,
-            mailAddress: staff.mailAddress,
-            owner: staff.owner ?? false,
-            role: mappingStaffRole(staff.role),
-            enabled: staff.enabled,
-            status: staff.status,
-            createdAt: staff.createdAt,
-            updatedAt: staff.updatedAt,
-            version: staff.version,
-            notifications: staff.notifications,
-            externalLinks: staff.externalLinks ?? null,
-            sortKey: staff.sortKey,
-            usageStartDate: staff.usageStartDate,
-            workType: staff.workType,
-            developer: (staff as unknown as Record<string, unknown>)
-              .developer as boolean | undefined,
-            approverSetting: staff.approverSetting ?? null,
-            approverSingle: staff.approverSingle ?? null,
-            approverMultiple: staff.approverMultiple ?? null,
-            approverMultipleMode: staff.approverMultipleMode ?? null,
-            shiftGroup: staff.shiftGroup ?? null,
-            attendanceManagementEnabled: (
-              staff as unknown as Record<string, unknown>
-            ).attendanceManagementEnabled as boolean | null | undefined,
-          })),
-        );
-      })
-      .catch((e: Error) => {
-        throw e;
-      });
+function mapStaff(staff: Staff): StaffType {
+  return {
+    id: staff.id,
+    cognitoUserId: staff.cognitoUserId,
+    familyName: staff.familyName,
+    givenName: staff.givenName,
+    mailAddress: staff.mailAddress,
+    owner: staff.owner ?? false,
+    role: mappingStaffRole(staff.role),
+    enabled: staff.enabled,
+    status: staff.status,
+    createdAt: staff.createdAt,
+    updatedAt: staff.updatedAt,
+    version: staff.version,
+    usageStartDate: staff.usageStartDate,
+    notifications: staff.notifications,
+    externalLinks: staff.externalLinks ?? null,
+    sortKey: staff.sortKey,
+    workType: (staff as unknown as Record<string, unknown>).workType as
+      | string
+      | null,
+    developer: (staff as unknown as Record<string, unknown>).developer as
+      | boolean
+      | undefined,
+    approverSetting: staff.approverSetting ?? null,
+    approverSingle: staff.approverSingle ?? null,
+    approverMultiple: staff.approverMultiple ?? null,
+    approverMultipleMode: staff.approverMultipleMode ?? null,
+    shiftGroup: staff.shiftGroup ?? null,
+    attendanceManagementEnabled: (
+      staff as unknown as Record<string, unknown>
+    ).attendanceManagementEnabled as boolean | null | undefined,
   };
+}
 
-  const ensureAuthenticated = () => {
+function toError(
+  error: unknown,
+): Error | null {
+  if (!error) {
+    return null;
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    return new Error((error as { message: string }).message);
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "error" in error &&
+    typeof (error as { error?: unknown }).error === "string"
+  ) {
+    return new Error((error as { error: string }).error);
+  }
+
+  return new Error("Unknown staff error");
+}
+
+export function useStaffs({ isAuthenticated }: UseStaffsParams) {
+  const dispatch = useAppDispatchV2();
+  const {
+    data,
+    isLoading,
+    isFetching,
+    error: queryError,
+    refetch,
+  } = useGetStaffsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  const [createStaffMutation, createState] = useCreateStaffMutation();
+  const [updateStaffMutation, updateState] = useUpdateStaffMutation();
+  const [deleteStaffMutation, deleteState] = useDeleteStaffMutation();
+
+  const staffs = useMemo(() => (data ?? []).map(mapStaff), [data]);
+  const loading =
+    isAuthenticated &&
+    (isLoading ||
+      isFetching ||
+      createState.isLoading ||
+      updateState.isLoading ||
+      deleteState.isLoading);
+  const error =
+    toError(queryError) ??
+    toError(createState.error) ??
+    toError(updateState.error) ??
+    toError(deleteState.error);
+
+  const refreshStaff = useCallback(async () => {
     if (!isAuthenticated) {
       throw new Error("User is not authenticated");
     }
-  };
 
-  const createStaff = async (input: CreateStaffInput) => {
-    ensureAuthenticated();
+    await refetch();
+  }, [isAuthenticated, refetch]);
+
+  const createStaff = useCallback(async (input: CreateStaffInput) => {
+    if (!isAuthenticated) {
+      throw new Error("User is not authenticated");
+    }
     const inputWithDefault = {
       ...input,
       attendanceManagementEnabled:
@@ -211,51 +206,16 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
         ).attendanceManagementEnabled ?? true,
     } as CreateStaffInput;
 
-    return createStaffData(inputWithDefault)
-      .then((staff) => {
-        setStaffs([
-          ...staffs,
-          {
-            id: staff.id,
-            cognitoUserId: staff.cognitoUserId,
-            familyName: staff.familyName,
-            givenName: staff.givenName,
-            mailAddress: staff.mailAddress,
-            owner: staff.owner ?? false,
-            role: mappingStaffRole(staff.role),
-            enabled: staff.enabled,
-            status: staff.status,
-            createdAt: staff.createdAt,
-            updatedAt: staff.updatedAt,
-            version: staff.version,
-            usageStartDate: staff.usageStartDate,
-            notifications: staff.notifications,
-            externalLinks: staff.externalLinks ?? null,
-            sortKey: staff.sortKey,
-            workType: staff.workType,
-            developer: (staff as unknown as Record<string, unknown>)
-              .developer as boolean | undefined,
-            approverSetting: staff.approverSetting ?? null,
-            approverSingle: staff.approverSingle ?? null,
-            approverMultiple: staff.approverMultiple ?? null,
-            approverMultipleMode: staff.approverMultipleMode ?? null,
-            shiftGroup: staff.shiftGroup ?? null,
-            attendanceManagementEnabled: (
-              staff as unknown as Record<string, unknown>
-            ).attendanceManagementEnabled as boolean | null | undefined,
-          },
-        ]);
-      })
-      .catch((e: Error) => {
-        throw e;
-      });
-  };
+    await createStaffMutation(inputWithDefault).unwrap();
+  }, [createStaffMutation, isAuthenticated]);
 
-  const updateStaff = async (input: UpdateStaffInput) => {
-    ensureAuthenticated();
+  const updateStaff = useCallback(async (input: UpdateStaffInput) => {
+    if (!isAuthenticated) {
+      throw new Error("User is not authenticated");
+    }
     const currentStaff = staffs.find((staff) => staff.id === input.id);
 
-    return updateStaffData({
+    await updateStaffMutation({
       input: {
         ...input,
         version: getNextVersion(currentStaff?.version),
@@ -264,95 +224,26 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
         currentStaff?.version,
         currentStaff?.updatedAt,
       ),
-    })
-      .then((staff) => {
-        setStaffs(
-          staffs.map((s) => {
-            if (s.id === staff.id) {
-              return {
-                id: staff.id,
-                cognitoUserId: staff.cognitoUserId,
-                familyName: staff.familyName,
-                givenName: staff.givenName,
-                mailAddress: staff.mailAddress,
-                owner: staff.owner ?? false,
-                role: mappingStaffRole(staff.role),
-                enabled: staff.enabled,
-                status: staff.status,
-                createdAt: staff.createdAt,
-                updatedAt: staff.updatedAt,
-                version: staff.version,
-                usageStartDate: staff.usageStartDate,
-                notifications: staff.notifications,
-                externalLinks: staff.externalLinks ?? null,
-                sortKey: staff.sortKey,
-                workType: staff.workType,
-                developer: (staff as unknown as Record<string, unknown>)
-                  .developer as boolean | undefined,
-                approverSetting: staff.approverSetting ?? null,
-                approverSingle: staff.approverSingle ?? null,
-                approverMultiple: staff.approverMultiple ?? null,
-                approverMultipleMode: staff.approverMultipleMode ?? null,
-                shiftGroup: staff.shiftGroup ?? null,
-                attendanceManagementEnabled: (
-                  staff as unknown as Record<string, unknown>
-                ).attendanceManagementEnabled as boolean | null | undefined,
-              };
-            }
-            return s;
-          }),
-        );
-        return; // keep Promise<void> signature
-      })
-      .catch((e: Error) => {
-        throw e;
-      });
-  };
+    }).unwrap();
+  }, [isAuthenticated, staffs, updateStaffMutation]);
 
-  const deleteStaff = async (input: DeleteStaffInput) => {
-    ensureAuthenticated();
-    return deleteStaffData(input)
-      .then((staff) => {
-        setStaffs(staffs.filter((s) => s.id !== staff.id));
-      })
-      .catch((e: Error) => {
-        throw e;
-      });
-  };
+  const deleteStaff = useCallback(async (input: DeleteStaffInput) => {
+    if (!isAuthenticated) {
+      throw new Error("User is not authenticated");
+    }
+    await deleteStaffMutation(input).unwrap();
+  }, [deleteStaffMutation, isAuthenticated]);
 
-  const getAllStaffs = async (): Promise<StaffType[]> => {
-    ensureAuthenticated();
+  const getAllStaffs = useCallback(async (): Promise<StaffType[]> => {
+    if (!isAuthenticated) {
+      throw new Error("User is not authenticated");
+    }
     const res = await fetchStaffs();
-    return res.map((staff) => ({
-      id: staff.id,
-      cognitoUserId: staff.cognitoUserId,
-      familyName: staff.familyName,
-      givenName: staff.givenName,
-      mailAddress: staff.mailAddress,
-      owner: staff.owner ?? false,
-      role: mappingStaffRole(staff.role),
-      enabled: staff.enabled,
-      status: staff.status,
-      usageStartDate: staff.usageStartDate,
-      createdAt: staff.createdAt,
-      updatedAt: staff.updatedAt,
-      version: staff.version,
-      notifications: staff.notifications,
-      externalLinks: staff.externalLinks ?? null,
-      sortKey: staff.sortKey,
-      workType: staff.workType,
-      developer: (staff as unknown as Record<string, unknown>).developer as
-        | boolean
-        | undefined,
-      approverSetting: staff.approverSetting ?? null,
-      approverSingle: staff.approverSingle ?? null,
-      approverMultiple: staff.approverMultiple ?? null,
-      approverMultipleMode: staff.approverMultipleMode ?? null,
-      shiftGroup: staff.shiftGroup ?? null,
-      attendanceManagementEnabled: (staff as unknown as Record<string, unknown>)
-        .attendanceManagementEnabled as boolean | null | undefined,
-    }));
-  };
+    dispatch(
+      staffApi.util.upsertQueryData("getStaffs", undefined, res) as never,
+    );
+    return res.map(mapStaff);
+  }, [dispatch, isAuthenticated]);
 
   return {
     loading,

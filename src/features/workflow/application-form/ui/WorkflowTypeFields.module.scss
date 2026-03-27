@@ -1,0 +1,182 @@
+%inputBase {
+  width: 100%;
+  appearance: none;
+  border: 1px solid rgb(16 185 129 / 0.18);
+  border-radius: 18px;
+  background: #f8fffb;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.92);
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  color: #0f172a;
+  outline: none;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+
+  &:hover:not(:disabled) {
+    border-color: rgb(16 185 129 / 0.3);
+  }
+
+  &:focus {
+    border-color: rgb(16 185 129 / 0.55);
+    box-shadow: 0 0 0 2px rgb(209 250 229 / 0.5);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.formRow {
+  display: grid;
+  column-gap: 1rem;
+  grid-template-columns: 1fr;
+  align-items: start;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 3fr;
+  }
+}
+
+.formLabel {
+  padding-top: 0.375rem;
+  font-size: 0.875rem;
+  color: rgb(100 116 139);
+}
+
+.formField {
+  min-width: 0;
+}
+
+.input {
+  @extend %inputBase;
+
+  &.inputError {
+    border-color: rgb(239 68 68 / 0.6);
+  }
+}
+
+.dateInput {
+  @extend %inputBase;
+  max-width: 200px;
+
+  &.inputError {
+    border-color: rgb(239 68 68 / 0.6);
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    opacity: 0.4;
+    cursor: pointer;
+  }
+}
+
+.textarea {
+  @extend %inputBase;
+  resize: vertical;
+  min-height: 9rem;
+  line-height: 1.5;
+
+  &.inputError {
+    border-color: rgb(239 68 68 / 0.6);
+  }
+}
+
+.errorText {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: rgb(220 38 38);
+}
+
+.inlineGroup {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.dateSeparator {
+  padding-top: 0.625rem;
+  font-size: 0.875rem;
+  color: rgb(100 116 139);
+}
+
+.timeFieldGroup {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.timeInputGroup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 0.5rem;
+  align-items: center;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 148px 48px 148px;
+    column-gap: 0;
+  }
+}
+
+.timeSeparator {
+  display: none;
+  text-align: center;
+  color: rgb(100 116 139);
+
+  @media (min-width: 600px) {
+    display: block;
+  }
+}
+
+.selectWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.select {
+  @extend %inputBase;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.selectIcon {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: rgb(100 116 139);
+  font-size: 0.7rem;
+}
+
+.applyButton {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid rgb(4 120 87 / 0.58);
+  background: #19b985;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.12), 0 12px 24px -18px rgb(5 150 105 / 0.55);
+  cursor: pointer;
+  transition:
+    background-color 150ms,
+    box-shadow 150ms;
+
+  &:hover:not(:disabled) {
+    background: #17ab7b;
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.12), 0 14px 28px -18px rgb(5 150 105 / 0.6);
+  }
+
+  &:disabled {
+    background: #e2e8f0;
+    color: #64748b;
+    border-color: transparent;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}

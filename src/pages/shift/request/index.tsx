@@ -4,7 +4,7 @@ import { LinearProgress } from "@mui/material";
 import Page from "@shared/ui/page/Page";
 
 import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
-import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborativePage";
+import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborative";
 import { PageSection } from "@/shared/ui/layout";
 
 export const resolveShiftRequestMode = (
@@ -35,7 +35,7 @@ export default function ShiftRequestPage() {
   return (
     <Page title="希望シフト" maxWidth={false} showDefaultHeader={false}>
       <PageSection variant="plain" layoutVariant="detail" sx={{ gap: 0 }}>
-          <ShiftRequestForm />
+        <ShiftRequestForm />
       </PageSection>
     </Page>
   );

@@ -1,1 +1,1 @@
-export { default } from "./ShiftCollaborativePage";
+export { default } from "./ShiftCollaborative";

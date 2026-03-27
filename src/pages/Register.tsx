@@ -2,22 +2,20 @@ import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useSession } from "@/app/providers/session/useSession";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import RegisterContent from "@/pages/register/RegisterContent";
 
-import { AuthContext } from "../context/AuthContext";
-
 export default function Register() {
-  const { isCognitoUserRole } = useContext(AuthContext);
-  const { getConfigId, getTimeRecorderAnnouncement } =
-    useContext(AppConfigContext);
+  const { hasRole } = useSession();
+  const { derived } = useContext(AppConfigContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isCognitoUserRole(StaffRole.OPERATOR)) {
-      navigate("/office/qr");
+    if (hasRole(StaffRole.OPERATOR)) {
+      navigate("/office/qr", { replace: true });
     }
-  }, [isCognitoUserRole, navigate]);
+  }, [hasRole, navigate]);
 
   const isRegisterDisabled =
     import.meta.env.VITE_STANDARD_REGISTER_DISABLE === "true";
@@ -35,7 +33,15 @@ export default function Register() {
     );
   }
 
-  const announcement = getTimeRecorderAnnouncement();
+  const announcement = derived?.timeRecorderAnnouncement ?? {
+    enabled: false,
+    message: "",
+  };
 
-  return <RegisterContent configId={getConfigId()} announcement={announcement} />;
+  return (
+    <RegisterContent
+      configId={derived?.configId ?? null}
+      announcement={announcement}
+    />
+  );
 }

@@ -7,7 +7,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import { submitWorkflowComment } from "@/features/workflow/comment-thread/model/submitWorkflowComment";
-import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
+import { WorkflowCommentThreadView as WorkflowCommentThread } from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
 
 type WorkflowData = NonNullable<GetWorkflowQuery["getWorkflow"]>;
 

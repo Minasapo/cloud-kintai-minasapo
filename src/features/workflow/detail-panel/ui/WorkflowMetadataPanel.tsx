@@ -6,8 +6,9 @@ import { formatDateSlash } from "@/shared/lib/time";
 
 import type { WorkflowApprovalStepView } from "../../approval-flow/types";
 import WorkflowApprovalTimeline from "../../approval-flow/ui/WorkflowApprovalTimeline";
+import { useWorkflowDetailContext } from "../model/WorkflowDetailContext";
 
-type WorkflowMetadataPanelProps = {
+export type WorkflowMetadataPanelProps = {
   workflowId?: string | null;
   fallbackId?: string;
   category?: WorkflowCategory | null;
@@ -39,12 +40,12 @@ function MetadataRow({
 }: MetadataRowProps) {
   return (
     <>
-      <div className="text-sm font-medium text-slate-500 sm:py-1">
+      <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-600 md:border-r">
         {label}
       </div>
       <div
         className={[
-          "min-w-0 text-[15px] leading-7 text-slate-800 sm:leading-8",
+          "min-w-0 border-b border-slate-200 px-4 py-2.5 text-[15px] leading-7 text-slate-800",
           preserveWhitespace ? "whitespace-pre-wrap" : "",
         ]
           .filter(Boolean)
@@ -56,7 +57,8 @@ function MetadataRow({
   );
 }
 
-export default function WorkflowMetadataPanel({
+/** props渡し版（管理者画面など、Providerの外で使う場合） */
+export function WorkflowMetadataPanelBase({
   workflowId,
   fallbackId,
   category,
@@ -92,7 +94,8 @@ export default function WorkflowMetadataPanel({
         </p>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 items-start gap-x-5 gap-y-5 md:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]">
+      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+      <div className="grid grid-cols-1 items-start md:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]">
         <MetadataRow label="ID" value={displayId} />
         <MetadataRow label="種別" value={categoryLabel} />
         <MetadataRow label="申請者" value={staffName} />
@@ -166,10 +169,37 @@ export default function WorkflowMetadataPanel({
           </>
         )}
       </div>
+      </div>
 
       <div className="mt-6">
         <WorkflowApprovalTimeline steps={approvalSteps} />
       </div>
     </section>
   );
+}
+
+/** context接続版（WorkflowDetailProvider 内で使う場合） */
+export function WorkflowMetadataPanelView() {
+  const { workflow, id, categoryLabel, staffName, applicationDate, approvalSteps } =
+    useWorkflowDetailContext();
+
+  return (
+    <WorkflowMetadataPanelBase
+      workflowId={workflow?.id}
+      fallbackId={id}
+      category={workflow?.category ?? null}
+      categoryLabel={categoryLabel}
+      staffName={staffName}
+      applicationDate={applicationDate}
+      status={workflow?.status ?? null}
+      overTimeDetails={workflow?.overTimeDetails ?? null}
+      customWorkflowTitle={workflow?.customWorkflowTitle ?? null}
+      customWorkflowContent={workflow?.customWorkflowContent ?? null}
+      approvalSteps={approvalSteps}
+    />
+  );
+}
+
+export default function WorkflowMetadataPanel() {
+  return <WorkflowMetadataPanelView />;
 }

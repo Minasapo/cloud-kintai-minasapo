@@ -15,7 +15,7 @@ import {
   getWorkflowCategoryLabel,
   STATUS_LABELS,
 } from "@/entities/workflow/lib/workflowLabels";
-import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
+import { WorkflowMetadataPanelBase } from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
@@ -307,7 +307,7 @@ export default function WorkflowDetailPanel({
             >
               申請情報
             </h3>
-            <WorkflowMetadataPanel
+            <WorkflowMetadataPanelBase
               workflowId={workflow?.id ?? undefined}
               fallbackId={workflowId}
               category={workflow?.category ?? null}

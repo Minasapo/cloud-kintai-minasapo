@@ -2,16 +2,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import {
   Alert,
-  Box,
-  Button,
   FormLabel,
-  Paper,
-  Stack,
   Tab,
   Tabs,
   ToggleButton,
   ToggleButtonGroup,
-  Typography,
 } from "@mui/material";
 import {
   CreateAppConfigInput,
@@ -25,6 +20,7 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import { E14001, S14001, S14002 } from "@/errors";
+import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -218,43 +214,44 @@ export default function AdminShiftSettings() {
   };
 
   return (
-    <Stack spacing={2.5}>
-      <Paper sx={{ p: 1 }}>
-        <Tabs
-          value={activeTab}
-          onChange={(_, value: ShiftSettingsTab) => setActiveTab(value)}
-          variant="fullWidth"
+    <AdminSettingsLayout title="シフト設定">
+      <div className="flex flex-col gap-6">
+        <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-200">
+          <Tabs
+            value={activeTab}
+            onChange={(_, value: ShiftSettingsTab) => setActiveTab(value)}
+            variant="fullWidth"
+          >
+            <Tab label="シフトグループ" value="shift-group" />
+            <Tab label="シフト表示" value="shift-display" />
+          </Tabs>
+        </div>
+
+        <div
+          role="tabpanel"
+          hidden={activeTab !== "shift-group"}
+          aria-labelledby="shift-group-tab"
         >
-          <Tab label="シフトグループ" value="shift-group" />
-          <Tab label="シフト表示" value="shift-display" />
-        </Tabs>
-      </Paper>
+          {activeTab === "shift-group" && (
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-800">
+                  {SHIFT_GROUP_UI_TEXTS.introTitle}
+                </span>
+                <ul className="list-disc pl-6 m-0 text-sm text-slate-600">
+                  {SHIFT_GROUP_UI_TEXTS.introBullets.map((text) => (
+                    <li key={text}>
+                      {text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <Alert severity="info">{SHIFT_GROUP_UI_TEXTS.saveInfo}</Alert>
 
-      <Box
-        role="tabpanel"
-        hidden={activeTab !== "shift-group"}
-        aria-labelledby="shift-group-tab"
-      >
-        {activeTab === "shift-group" && (
-          <Stack spacing={2.5}>
-            <Stack spacing={0.5}>
-              <Typography variant="subtitle2">
-                {SHIFT_GROUP_UI_TEXTS.introTitle}
-              </Typography>
-              <Stack component="ul" sx={{ m: 0, pl: 3 }}>
-                {SHIFT_GROUP_UI_TEXTS.introBullets.map((text) => (
-                  <Typography key={text} component="li" variant="body2">
-                    {text}
-                  </Typography>
-                ))}
-              </Stack>
-            </Stack>
-            <Alert severity="info">{SHIFT_GROUP_UI_TEXTS.saveInfo}</Alert>
-
-            <Paper sx={{ p: 2 }}>
-              <Stack spacing={3}>
-                <Typography variant="h6">シフトグループ</Typography>
-                <Stack spacing={1.5}>
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
+                <div className="flex flex-col gap-6">
+                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフトグループ</h3>
+                  <div className="flex flex-col gap-4">
                   {fields.length === 0 ? (
                     <Alert severity="info" variant="outlined">
                       {SHIFT_GROUP_UI_TEXTS.emptyGroups}
@@ -269,103 +266,105 @@ export default function AdminShiftSettings() {
                       />
                     ))
                   )}
-                </Stack>
-                <Button
-                  variant="outlined"
-                  onClick={handleAddGroup}
-                  startIcon={<AddCircleOutlineIcon />}
+                  </div>
+                  <button
+                    className="flex flex-row items-center gap-2 self-start px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition"
+                    onClick={handleAddGroup}
+                    type="button"
+                  >
+                    <AddCircleOutlineIcon className="text-slate-500" fontSize="small" />
+                    <span>グループを追加</span>
+                  </button>
+                  {hasValidationError && (
+                    <Alert severity="warning">
+                      <div className="flex flex-col gap-2">
+                        <span className="text-sm">
+                          {SHIFT_GROUP_UI_TEXTS.validationWarning}
+                        </span>
+                        <ul className="list-disc pl-6 m-0 text-sm">
+                          {validationDetails.map((detail) => (
+                            <li key={detail}>
+                              {detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </Alert>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-row justify-end pb-8">
+                <button
+                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+                  onClick={handleSave}
+                  disabled={hasValidationError || savingShiftGroup}
+                  type="button"
                 >
-                  グループを追加
-                </Button>
-                {hasValidationError && (
-                  <Alert severity="warning">
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2">
-                        {SHIFT_GROUP_UI_TEXTS.validationWarning}
-                      </Typography>
-                      <Stack component="ul" sx={{ m: 0, pl: 3 }}>
-                        {validationDetails.map((detail) => (
-                          <Typography
-                            key={detail}
-                            component="li"
-                            variant="body2"
-                          >
-                            {detail}
-                          </Typography>
-                        ))}
-                      </Stack>
-                    </Stack>
-                  </Alert>
-                )}
-              </Stack>
-            </Paper>
+                  {savingShiftGroup ? "保存中..." : "保存"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
-            <Stack direction="row" justifyContent="flex-end" sx={{ pb: 4 }}>
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                disabled={hasValidationError || savingShiftGroup}
-              >
-                {savingShiftGroup ? "保存中..." : "保存"}
-              </Button>
-            </Stack>
-          </Stack>
-        )}
-      </Box>
+        <div
+          role="tabpanel"
+          hidden={activeTab !== "shift-display"}
+          aria-labelledby="shift-display-tab"
+        >
+          {activeTab === "shift-display" && (
+            <div className="flex flex-col gap-6">
+              <Alert severity="info">
+                シフト管理画面の表示モードを設定します。
+              </Alert>
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
+                <div className="flex flex-col gap-6">
+                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフト表示</h3>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <FormLabel>表示モード</FormLabel>
+                      <div>
+                        <ToggleButtonGroup
+                          color="primary"
+                          exclusive
+                          size="small"
+                          value={shiftDefaultMode}
+                          onChange={(_, value: ShiftDisplayMode | null) => {
+                            if (!value) {
+                              return;
+                            }
+                            setShiftDefaultMode(value);
+                          }}
+                        >
+                          <ToggleButton value="normal">通常モード</ToggleButton>
+                          <ToggleButton value="collaborative">
+                            共同編集モード
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      </div>
+                    </div>
+                    <span className="text-sm text-slate-500">
+                      スタッフ側への設定反映には数分程度かかる場合があります。
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-      <Box
-        role="tabpanel"
-        hidden={activeTab !== "shift-display"}
-        aria-labelledby="shift-display-tab"
-      >
-        {activeTab === "shift-display" && (
-          <Stack spacing={2.5}>
-            <Alert severity="info">
-              シフト管理画面の表示モードを設定します。
-            </Alert>
-            <Paper sx={{ p: 2 }}>
-              <Stack spacing={3}>
-                <Typography variant="h6">シフト表示</Typography>
-                <Stack spacing={1.5}>
-                  <Stack spacing={1}>
-                    <FormLabel>表示モード</FormLabel>
-                    <ToggleButtonGroup
-                      color="primary"
-                      exclusive
-                      size="small"
-                      value={shiftDefaultMode}
-                      onChange={(_, value: ShiftDisplayMode | null) => {
-                        if (!value) {
-                          return;
-                        }
-                        setShiftDefaultMode(value);
-                      }}
-                    >
-                      <ToggleButton value="normal">通常モード</ToggleButton>
-                      <ToggleButton value="collaborative">
-                        共同編集モード
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </Stack>
-                  <Typography variant="body2" color="textSecondary">
-                    スタッフ側への設定反映には数分程度かかる場合があります。
-                  </Typography>
-                </Stack>
-              </Stack>
-            </Paper>
-
-            <Stack direction="row" justifyContent="flex-end" sx={{ pb: 4 }}>
-              <Button
-                variant="contained"
-                onClick={handleShiftDisplaySave}
-                disabled={savingShiftDisplay}
-              >
-                {savingShiftDisplay ? "保存中..." : "保存"}
-              </Button>
-            </Stack>
-          </Stack>
-        )}
-      </Box>
-    </Stack>
+              <div className="flex flex-row justify-end pb-8">
+                <button
+                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+                  onClick={handleShiftDisplaySave}
+                  disabled={savingShiftDisplay}
+                  type="button"
+                >
+                  {savingShiftDisplay ? "保存中..." : "保存"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </AdminSettingsLayout>
   );
 }

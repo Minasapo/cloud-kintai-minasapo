@@ -1,0 +1,409 @@
+.workflow-auth-loading {
+  @apply flex items-center justify-center;
+}
+
+.workflow-page-section {
+  @apply px-0 py-0;
+}
+
+.workflow-page-container {
+  @apply mx-auto flex w-full max-w-[1180px] flex-col gap-4 p-4;
+}
+
+.workflow-hero {
+  @apply p-4 sm:p-6;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(209, 250, 229, 0.8);
+  background: linear-gradient(135deg, #f7fcf8 0%, #ecfdf5 58%, #ffffff 100%);
+  box-shadow: 0 28px 60px -42px rgba(15, 23, 42, 0.35);
+}
+
+.workflow-hero__inner {
+  @apply flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between;
+}
+
+.workflow-hero__copy {
+  @apply space-y-2;
+}
+
+.workflow-hero__title {
+  @apply m-0 text-[1.5rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem];
+}
+
+.workflow-hero__description {
+  @apply max-w-3xl text-[0.86rem] leading-6 text-slate-600 sm:text-[0.95rem];
+}
+
+.workflow-create-button {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border px-7 py-3 text-base font-medium text-white transition;
+  border-color: rgba(4, 120, 87, 0.55);
+  background: #19b985;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 24px -18px rgba(5, 150, 105, 0.55);
+}
+
+.workflow-create-button:hover {
+  background: #17ab7b;
+}
+
+.workflow-create-button--compact {
+  @apply w-full;
+}
+
+.workflow-create-button:not(.workflow-create-button--compact) {
+  @apply w-auto whitespace-nowrap;
+}
+
+.workflow-create-button__icon {
+  @apply text-lg leading-none;
+}
+
+.workflow-no-staff-state {
+  @apply flex justify-center py-4;
+}
+
+.workflow-surface {
+  @apply border p-4 sm:p-5;
+  border-radius: 0.625rem;
+  border-color: rgba(209, 250, 229, 0.8);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 255, 251, 0.94) 100%);
+  box-shadow: 0 24px 54px -40px rgba(15, 23, 42, 0.35);
+}
+
+.workflow-spinner {
+  @apply inline-block animate-spin rounded-full border-emerald-600 border-t-transparent;
+}
+
+.workflow-spinner--sm {
+  @apply h-4 w-4 border-2;
+}
+
+.workflow-spinner--md {
+  @apply h-6 w-6 border-[3px];
+}
+
+.workflow-info-card {
+  @apply rounded-[8px] border px-4 py-3 text-sm leading-6;
+}
+
+.workflow-info-card--error {
+  @apply border-rose-200 bg-rose-50 text-rose-900;
+}
+
+.workflow-info-card--info {
+  @apply border-sky-200 bg-sky-50 text-sky-900;
+}
+
+.workflow-summary-grid {
+  @apply grid grid-cols-4 gap-2;
+}
+
+.workflow-summary-card {
+  @apply flex items-center justify-between gap-3 px-3.5 py-3;
+  border-radius: 0.7rem;
+}
+
+.workflow-summary-card__label {
+  @apply text-[0.78rem] font-medium leading-none tracking-[0.03em] text-slate-500;
+}
+
+.workflow-summary-card__value {
+  @apply text-[1.25rem] font-semibold leading-none text-slate-950;
+}
+
+.workflow-summary-card__value--pending {
+  @apply text-amber-700;
+}
+
+.workflow-summary-card__value--approved {
+  @apply text-emerald-700;
+}
+
+.workflow-list-content {
+  @apply flex flex-col gap-4;
+}
+
+.workflow-list-header {
+  @apply flex flex-col gap-3 md:flex-row md:items-center md:justify-between;
+}
+
+.workflow-list-header__copy {
+  @apply space-y-1;
+}
+
+.workflow-list-header__title {
+  @apply text-base font-semibold text-slate-900;
+}
+
+.workflow-list-header__description {
+  @apply text-sm leading-6 text-slate-500;
+}
+
+.workflow-clear-filters-button {
+  @apply inline-flex items-center gap-2 self-start rounded-[10px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition;
+}
+
+.workflow-clear-filters-button:hover {
+  @apply border-slate-300 bg-slate-50;
+}
+
+.workflow-clear-filters-button__icon {
+  @apply text-base leading-none;
+}
+
+.workflow-filter-actions {
+  @apply flex justify-end;
+}
+
+.workflow-filter-toolbar {
+  @apply flex justify-end;
+}
+
+.workflow-filter-toolbar__actions {
+  @apply flex items-center justify-end;
+}
+
+.workflow-filter-trigger-button {
+  @apply inline-flex items-center justify-center gap-2 self-start rounded-xl border px-4 py-2.5 text-sm font-medium text-white transition;
+  border-color: rgba(4, 120, 87, 0.55);
+  background: #19b985;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 24px -18px rgba(5, 150, 105, 0.55);
+}
+
+.workflow-filter-trigger-button:hover {
+  background: #17ab7b;
+}
+
+.workflow-filter-trigger-button__icon {
+  @apply h-4 w-4;
+}
+
+.workflow-filter-trigger-button__badge {
+  @apply inline-flex min-w-6 items-center justify-center rounded-full bg-white/20 px-2 py-0.5 text-[11px] leading-4 text-white;
+}
+
+.workflow-filter-dialog {
+  @apply fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-3 md:items-center md:p-6;
+}
+
+.workflow-filter-dialog__panel {
+  @apply flex w-full max-w-3xl flex-col overflow-hidden bg-white;
+  max-height: min(88vh, 860px);
+  border-radius: 0.875rem;
+  box-shadow: 0 32px 80px -42px rgba(15, 23, 42, 0.6);
+}
+
+.workflow-filter-dialog__header {
+  @apply flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-5 md:px-7;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.92) 0%, rgba(255, 255, 255, 0.98) 100%);
+}
+
+.workflow-filter-dialog__title {
+  @apply m-0 pt-1 text-xl font-semibold text-slate-950;
+}
+
+.workflow-filter-dialog__description {
+  @apply m-0 pt-2 text-sm leading-6 text-slate-500;
+}
+
+.workflow-filter-dialog__close {
+  @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-xl leading-none text-slate-500 transition;
+}
+
+.workflow-filter-dialog__close:hover {
+  @apply border-slate-300 bg-slate-50 text-slate-700;
+}
+
+.workflow-filter-dialog__body {
+  @apply overflow-y-auto px-4 py-4 md:px-6;
+}
+
+.workflow-filter-dialog__footer {
+  @apply flex flex-col-reverse gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-7;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%);
+}
+
+.workflow-filter-dialog__submit {
+  @apply inline-flex items-center justify-center self-end rounded-xl border px-5 py-2.5 text-sm font-medium text-white transition sm:self-auto;
+  border-color: rgba(4, 120, 87, 0.55);
+  background: #19b985;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 24px -18px rgba(5, 150, 105, 0.55);
+}
+
+.workflow-filter-dialog__submit:hover {
+  background: #17ab7b;
+}
+
+.workflow-desktop-filter-shell {
+  @apply p-1.5;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  background: linear-gradient(180deg, rgba(252, 255, 253, 0.98) 0%, rgba(244, 252, 247, 0.94) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.workflow-desktop-filter-table {
+  @apply w-full table-fixed border-separate border-spacing-y-2;
+}
+
+.workflow-desktop-filter-head {
+  @apply px-1 pb-0.5 text-left text-[0.74rem] font-bold tracking-[0.04em] text-slate-500;
+}
+
+.workflow-desktop-filter-head--spacer {
+  @apply w-14;
+}
+
+.workflow-loading-state {
+  @apply flex justify-center;
+}
+
+.workflow-loading-state--compact {
+  @apply py-6;
+}
+
+.workflow-loading-state--desktop {
+  @apply py-10;
+}
+
+.workflow-empty-state--desktop {
+  @apply px-5 py-8;
+}
+
+.workflow-mobile-results {
+  @apply flex flex-col;
+  gap: 12px;
+}
+
+.workflow-mobile-end-message {
+  @apply m-0 py-2 text-center text-xs text-slate-400;
+}
+
+.workflow-mobile-card-button {
+  @apply w-full border-0 bg-transparent p-0 text-left;
+  border-radius: 10px;
+}
+
+.workflow-mobile-card {
+  @apply flex flex-col border bg-white transition;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border-color: transparent;
+  border-left: 3px solid transparent;
+  box-shadow: 0 18px 38px -30px rgba(15, 23, 42, 0.22);
+  gap: 10px;
+}
+
+.workflow-mobile-card:hover {
+  border-color: rgba(167, 243, 208, 0.9);
+  border-left-color: rgba(16, 185, 129, 0.55);
+  background: rgba(236, 253, 245, 0.35);
+}
+
+.workflow-mobile-card--cancelled {
+  @apply opacity-60;
+}
+
+.workflow-mobile-card__header {
+  @apply flex items-center justify-between gap-3;
+}
+
+.workflow-mobile-card__title {
+  @apply min-w-0 truncate text-[0.95rem] font-semibold text-slate-900;
+}
+
+.workflow-mobile-card__chip {
+  @apply shrink-0;
+}
+
+.workflow-mobile-card__divider {
+  @apply border-t border-slate-100;
+  margin: 0 -2px;
+}
+
+.workflow-mobile-card__table {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  align-items: baseline;
+}
+
+.workflow-mobile-card__table-label {
+  @apply text-[0.72rem] font-medium tracking-wide text-slate-400;
+  white-space: nowrap;
+}
+
+.workflow-mobile-card__table-value {
+  @apply text-[0.85rem] text-slate-700;
+}
+
+.workflow-desktop-results-shell {
+  @apply mt-1 overflow-hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 253, 249, 0.94) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.workflow-desktop-results-head {
+  @apply grid items-center gap-4 border-b px-5 py-3 text-[0.74rem] font-bold uppercase tracking-[0.06em] text-slate-400;
+  grid-template-columns: minmax(180px, 1fr) minmax(160px, 0.9fr) minmax(180px, 0.9fr) minmax(160px, 0.9fr);
+  border-color: rgba(226, 232, 240, 0.8);
+  background: linear-gradient(180deg, rgba(240, 253, 244, 0.72) 0%, rgba(248, 250, 252, 0.58) 100%);
+}
+
+.workflow-desktop-results-body {
+  background: #fff;
+}
+
+.workflow-desktop-row {
+  @apply grid w-full items-center gap-4 border-b px-5 py-3.5 text-left transition last:border-b-0 text-slate-900 bg-white;
+  grid-template-columns: minmax(180px, 1fr) minmax(160px, 0.9fr) minmax(180px, 0.9fr) minmax(160px, 0.9fr);
+  border-color: rgba(226, 232, 240, 0.6);
+  border-left: 3px solid transparent;
+}
+
+.workflow-desktop-row:hover {
+  background: rgba(236, 253, 245, 0.5);
+  border-left-color: rgba(16, 185, 129, 0.5);
+}
+
+.workflow-desktop-row--cancelled {
+  @apply text-slate-400;
+}
+
+.workflow-desktop-row__category {
+  @apply truncate font-medium;
+}
+
+@media (max-width: 767px) {
+  .workflow-page-container {
+    @apply gap-3;
+  }
+
+  .workflow-surface {
+    @apply p-3;
+    border-radius: 0.625rem;
+  }
+
+  .workflow-summary-card {
+    @apply gap-1.5 px-2.5 py-2;
+    border-radius: 0.6rem;
+  }
+
+  .workflow-summary-card__label {
+    @apply text-[0.65rem];
+  }
+
+  .workflow-summary-card__value {
+    @apply text-[0.95rem];
+  }
+
+  .workflow-list-header__description {
+    @apply text-[0.82rem] leading-5;
+  }
+
+  .workflow-clear-filters-button {
+    @apply w-full justify-center;
+  }
+}
+

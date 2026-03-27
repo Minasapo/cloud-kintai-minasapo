@@ -4,7 +4,7 @@ import { LinearProgress, Stack, Typography } from "@mui/material";
 import Page from "@shared/ui/page/Page";
 
 import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
-import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborativePage";
+import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborative";
 import { PageSection } from "@/shared/ui/layout";
 
 export const resolveShiftManagementMode = (

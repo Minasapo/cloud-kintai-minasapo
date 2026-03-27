@@ -4,13 +4,17 @@ import {
   deleteWorkflow,
   updateWorkflow,
 } from "@shared/api/graphql/documents/mutations";
-import { listWorkflows } from "@shared/api/graphql/documents/queries";
+import {
+  getWorkflow as getWorkflowDocument,
+  listWorkflows,
+} from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 import type {
   CreateWorkflowInput,
   CreateWorkflowMutation,
   DeleteWorkflowInput,
   DeleteWorkflowMutation,
+  GetWorkflowQuery,
   ListWorkflowsQuery,
   ModelWorkflowConditionInput,
   UpdateWorkflowInput,
@@ -39,6 +43,24 @@ export const workflowApi = createApi({
   baseQuery: graphqlBaseQuery(),
   tagTypes: ["Workflow"],
   endpoints: (builder) => ({
+    getWorkflow: builder.query<Workflow | null, string>({
+      async queryFn(id, _api, _extraOptions, baseQuery) {
+        const result = await baseQuery({
+          document: getWorkflowDocument,
+          variables: { id },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as GetWorkflowQuery | null;
+        return { data: data?.getWorkflow ?? null };
+      },
+      providesTags: (_result, _error, id) => [
+        { type: "Workflow" as const, id: id ?? "unknown" },
+      ],
+    }),
     getWorkflows: builder.query<Workflow[], void>({
       async queryFn(_arg, _api, _extraOptions, baseQuery) {
         const workflows: Workflow[] = [];
@@ -153,6 +175,13 @@ export const workflowApi = createApi({
               },
             ),
           );
+          dispatch(
+            workflowApi.util.upsertQueryData(
+              "getWorkflow",
+              updatedWorkflow.id,
+              updatedWorkflow,
+            ),
+          );
         } catch {
           // noop: keep mutation error handling in caller
         }
@@ -189,6 +218,7 @@ export const workflowApi = createApi({
 });
 
 export const {
+  useGetWorkflowQuery,
   useGetWorkflowsQuery,
   useCreateWorkflowMutation,
   useUpdateWorkflowMutation,

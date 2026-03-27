@@ -1,7 +1,5 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -19,6 +17,8 @@ import {
   updateItem,
 } from "@/features/admin/configManagement/lib/arrayHelpers";
 import { TIME_FORMAT } from "@/features/admin/configManagement/lib/constants";
+import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -132,27 +132,39 @@ export default function QuickInput() {
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 1 }}>
-        クイック入力(打刻)
-      </Typography>
-      <Stack spacing={2} sx={{ mb: 2 }}>
-        <QuickInputSection
-          quickInputStartTimes={quickInputStartTimes}
-          quickInputEndTimes={quickInputEndTimes}
-          onAddQuickInputStartTime={handleAddQuickInputStartTime}
-          onQuickInputStartTimeChange={handleQuickInputStartTimeChange}
-          onQuickInputStartTimeToggle={handleQuickInputStartTimeToggle}
-          onRemoveQuickInputStartTime={handleRemoveQuickInputStartTime}
-          onAddQuickInputEndTime={handleAddQuickInputEndTime}
-          onQuickInputEndTimeChange={handleQuickInputEndTimeChange}
-          onQuickInputEndTimeToggle={handleQuickInputEndTimeToggle}
-          onRemoveQuickInputEndTime={handleRemoveQuickInputEndTime}
-        />
-        <Button variant="contained" color="primary" onClick={handleSave}>
-          保存
-        </Button>
-      </Stack>
-    </Box>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <AdminSettingsLayout
+        title="簡単時間入力"
+        description={<>
+          勤怠編集画面でボタンを押すと時刻が簡単に入力されます。
+          <br />
+          この機能は、勤務開始時刻と勤務終了時刻のみを設定できます。
+        </>}
+      >
+        <AdminSettingsSection
+          actions={
+            <button
+              className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+              onClick={handleSave}
+            >
+              保存
+            </button>
+          }
+        >
+          <QuickInputSection
+            quickInputStartTimes={quickInputStartTimes}
+            quickInputEndTimes={quickInputEndTimes}
+            onAddQuickInputStartTime={handleAddQuickInputStartTime}
+            onQuickInputStartTimeChange={handleQuickInputStartTimeChange}
+            onQuickInputStartTimeToggle={handleQuickInputStartTimeToggle}
+            onRemoveQuickInputStartTime={handleRemoveQuickInputStartTime}
+            onAddQuickInputEndTime={handleAddQuickInputEndTime}
+            onQuickInputEndTimeChange={handleQuickInputEndTimeChange}
+            onQuickInputEndTimeToggle={handleQuickInputEndTimeToggle}
+            onRemoveQuickInputEndTime={handleRemoveQuickInputEndTime}
+          />
+        </AdminSettingsSection>
+      </AdminSettingsLayout>
+    </LocalizationProvider>
   );
 }

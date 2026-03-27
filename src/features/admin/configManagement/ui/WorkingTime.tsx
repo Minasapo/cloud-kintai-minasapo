@@ -1,7 +1,3 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import {
@@ -14,6 +10,8 @@ import { useContext, useEffect, useState } from "react";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, E14002, S14001, S14002 } from "@/errors";
+import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -91,12 +89,18 @@ export default function WorkingTime() {
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box>
-        <Typography variant="h4" sx={{ mb: 1 }}>
-          勤務時間設定
-        </Typography>
-        <Stack spacing={2} sx={{ mb: 2 }}>
+    <AdminSettingsLayout title="勤務時間設定">
+      <AdminSettingsSection
+        actions={
+          <button
+            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            onClick={handleSave}
+          >
+            保存
+          </button>
+        }
+      >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
           <WorkingTimeSection
             startTime={startTime}
             endTime={endTime}
@@ -107,11 +111,8 @@ export default function WorkingTime() {
             setLunchRestStartTime={setLunchRestStartTime}
             setLunchRestEndTime={setLunchRestEndTime}
           />
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            保存
-          </Button>
-        </Stack>
-      </Box>
-    </LocalizationProvider>
+        </LocalizationProvider>
+      </AdminSettingsSection>
+    </AdminSettingsLayout>
   );
 }

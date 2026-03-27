@@ -1,6 +1,8 @@
 import type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
-import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
-import { DEFAULT_CONFIG } from "@entities/app-config/model/useAppConfig";
+import type {
+  DefaultAppConfig,
+  ShiftDisplayMode,
+} from "@entities/app-config/model/useAppConfig";
 import type { WorkflowCategoryOrderItem } from "@entities/workflow/lib/workflowLabels";
 import {
   CreateAppConfigInput,
@@ -9,12 +11,90 @@ import {
 import type dayjs from "dayjs";
 import { createContext } from "react";
 
+import { resolveThemeColor } from "@/shared/config/theme";
 import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
 import { buildClockTimeDayjs } from "@/shared/lib/time";
 
 const DEFAULT_THEME_TOKENS = getDesignTokens();
+const FALLBACK_CONFIG: DefaultAppConfig = {
+  name: "default",
+  workStartTime: "09:00",
+  workEndTime: "18:00",
+  lunchRestStartTime: "12:00",
+  lunchRestEndTime: "13:00",
+  officeMode: false,
+  links: [],
+  reasons: [],
+  quickInputStartTimes: [],
+  quickInputEndTimes: [],
+  themeColor: resolveThemeColor(),
+  shiftGroups: [],
+  attendanceStatisticsEnabled: false,
+  workflowNotificationEnabled: false,
+  timeRecorderAnnouncementEnabled: false,
+  timeRecorderAnnouncementMessage: "",
+  overTimeCheckEnabled: false,
+  shiftCollaborativeEnabled: false,
+  shiftDefaultMode: "normal",
+};
 
 type AppConfigContextProps = {
+  config?: DefaultAppConfig | Record<string, unknown> | null;
+  derived?: {
+    startTime: dayjs.Dayjs;
+    endTime: dayjs.Dayjs;
+    standardWorkHours: number;
+    configId: string | null;
+    links: {
+      label: string;
+      url: string;
+      enabled: boolean;
+      icon: string;
+    }[];
+    reasons: {
+      reason: string;
+      enabled: boolean;
+    }[];
+    officeMode: boolean;
+    attendanceStatisticsEnabled: boolean;
+    workflowNotificationEnabled: boolean;
+    timeRecorderAnnouncement: {
+      enabled: boolean;
+      message: string;
+    };
+    shiftCollaborativeEnabled: boolean;
+    shiftDefaultMode: ShiftDisplayMode;
+    quickInputStartTimes: {
+      time: string;
+      enabled: boolean;
+    }[];
+    quickInputEndTimes: {
+      time: string;
+      enabled: boolean;
+    }[];
+    shiftGroups: ShiftGroupConfig[];
+    lunchRestStartTime: dayjs.Dayjs;
+    lunchRestEndTime: dayjs.Dayjs;
+    hourlyPaidHolidayEnabled: boolean;
+    amHolidayStartTime: dayjs.Dayjs;
+    amHolidayEndTime: dayjs.Dayjs;
+    pmHolidayStartTime: dayjs.Dayjs;
+    pmHolidayEndTime: dayjs.Dayjs;
+    amPmHolidayEnabled: boolean;
+    specialHolidayEnabled: boolean;
+    absentEnabled: boolean;
+    overTimeCheckEnabled: boolean;
+    workflowCategoryOrder: WorkflowCategoryOrderItem[];
+    themeColor: string;
+    themeTokens: DesignTokens;
+  };
+  loading?: boolean;
+  isLoading?: boolean;
+  isConfigLoading?: boolean;
+  refetch?: () => Promise<void>;
+  save?: (
+    newConfig: CreateAppConfigInput | UpdateAppConfigInput,
+  ) => Promise<void>;
   fetchConfig: () => Promise<void>;
   saveConfig: (
     newConfig: CreateAppConfigInput | UpdateAppConfigInput,
@@ -68,19 +148,63 @@ type AppConfigContextProps = {
 };
 
 export const AppConfigContext = createContext<AppConfigContextProps>({
+  config: FALLBACK_CONFIG,
+  derived: {
+    startTime: buildClockTimeDayjs(FALLBACK_CONFIG.workStartTime),
+    endTime: buildClockTimeDayjs(FALLBACK_CONFIG.workEndTime),
+    standardWorkHours: 8,
+    configId: null,
+    links: [],
+    reasons: [],
+    officeMode: false,
+    attendanceStatisticsEnabled: false,
+    workflowNotificationEnabled: false,
+    timeRecorderAnnouncement: {
+      enabled: false,
+      message: "",
+    },
+    shiftCollaborativeEnabled: false,
+    shiftDefaultMode: "normal",
+    quickInputStartTimes: [],
+    quickInputEndTimes: [],
+    shiftGroups: [],
+    lunchRestStartTime: buildClockTimeDayjs(FALLBACK_CONFIG.lunchRestStartTime),
+    lunchRestEndTime: buildClockTimeDayjs(FALLBACK_CONFIG.lunchRestEndTime),
+    hourlyPaidHolidayEnabled: false,
+    amHolidayStartTime: buildClockTimeDayjs("09:00"),
+    amHolidayEndTime: buildClockTimeDayjs("12:00"),
+    pmHolidayStartTime: buildClockTimeDayjs("13:00"),
+    pmHolidayEndTime: buildClockTimeDayjs("18:00"),
+    amPmHolidayEnabled: false,
+    specialHolidayEnabled: false,
+    absentEnabled: false,
+    overTimeCheckEnabled: false,
+    workflowCategoryOrder: [],
+    themeColor: FALLBACK_CONFIG.themeColor ?? "",
+    themeTokens: DEFAULT_THEME_TOKENS,
+  },
+  loading: false,
+  isLoading: false,
+  isConfigLoading: false,
+  refetch: async () => {
+    console.log("The process is not implemented.");
+  },
+  save: async () => {
+    console.log("The process is not implemented.");
+  },
   fetchConfig: async () => {
     console.log("The process is not implemented.");
   },
   saveConfig: async () => {
     console.log("The process is not implemented.");
   },
-  getStartTime: () => buildClockTimeDayjs(DEFAULT_CONFIG.workStartTime),
-  getEndTime: () => buildClockTimeDayjs(DEFAULT_CONFIG.workEndTime),
+  getStartTime: () => buildClockTimeDayjs(FALLBACK_CONFIG.workStartTime),
+  getEndTime: () => buildClockTimeDayjs(FALLBACK_CONFIG.workEndTime),
   getStandardWorkHours: () => {
-    const start = buildClockTimeDayjs(DEFAULT_CONFIG.workStartTime);
-    const end = buildClockTimeDayjs(DEFAULT_CONFIG.workEndTime);
-    const lunchStart = buildClockTimeDayjs(DEFAULT_CONFIG.lunchRestStartTime);
-    const lunchEnd = buildClockTimeDayjs(DEFAULT_CONFIG.lunchRestEndTime);
+    const start = buildClockTimeDayjs(FALLBACK_CONFIG.workStartTime);
+    const end = buildClockTimeDayjs(FALLBACK_CONFIG.workEndTime);
+    const lunchStart = buildClockTimeDayjs(FALLBACK_CONFIG.lunchRestStartTime);
+    const lunchEnd = buildClockTimeDayjs(FALLBACK_CONFIG.lunchRestEndTime);
     const baseHours = end.diff(start, "hour", true);
     const lunchHours = Math.max(lunchEnd.diff(lunchStart, "hour", true), 0);
     return Math.max(baseHours - lunchHours, 0);
@@ -101,9 +225,9 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getQuickInputEndTimes: () => [],
   getShiftGroups: () => [],
   getLunchRestStartTime: () =>
-    buildClockTimeDayjs(DEFAULT_CONFIG.lunchRestStartTime),
+    buildClockTimeDayjs(FALLBACK_CONFIG.lunchRestStartTime),
   getLunchRestEndTime: () =>
-    buildClockTimeDayjs(DEFAULT_CONFIG.lunchRestEndTime),
+    buildClockTimeDayjs(FALLBACK_CONFIG.lunchRestEndTime),
   getHourlyPaidHolidayEnabled: () => false,
   getAmHolidayStartTime: () => buildClockTimeDayjs("09:00"),
   getAmHolidayEndTime: () => buildClockTimeDayjs("12:00"),
@@ -115,6 +239,6 @@ export const AppConfigContext = createContext<AppConfigContextProps>({
   getOverTimeCheckEnabled: () => false,
   getWorkflowCategoryOrder: () => [],
   // Ensure a string is always returned to satisfy the context type
-  getThemeColor: () => DEFAULT_CONFIG.themeColor ?? "",
+  getThemeColor: () => FALLBACK_CONFIG.themeColor ?? "",
   getThemeTokens: () => DEFAULT_THEME_TOKENS,
 });

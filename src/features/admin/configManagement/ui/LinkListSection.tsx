@@ -1,14 +1,10 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Button,
   Checkbox,
   FormControlLabel,
-  IconButton,
   MenuItem,
   Select,
-  Stack,
   TextField,
-  Typography,
 } from "@mui/material";
 
 import { predefinedIcons } from "@/shared/config/icons";
@@ -37,22 +33,21 @@ const LinkListSection = ({
   onLinkChange,
   onRemoveLink,
 }: LinkListSectionProps) => (
-  <>
-    <Typography variant="h6">リンク集</Typography>
-    <Typography variant="body2" color="textSecondary">
-      ヘッダーのリンク集に表示するリンクを設定してください。
-      <br />
-      URL内で<code>{"{staffName}"}</code>
-      を使用すると、スタッフ名が動的に挿入されます。
-    </Typography>
-    <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
+  <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-1">
+      <h3 className="text-base font-semibold text-slate-800">リンク集</h3>
+      <p className="text-sm text-slate-500">
+        ヘッダーのリンク集に表示するリンクを設定してください。
+        <br />
+        URL内で<code className="bg-slate-100 px-1 rounded text-pink-600">{"{staffName}"}</code>
+        を使用すると、スタッフ名が動的に挿入されます。
+      </p>
+    </div>
+    <div className="flex flex-col gap-4">
       {links.map((link, index) => (
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
+        <div
+          className="flex flex-row flex-wrap items-center gap-4"
           key={index}
-          sx={{ flexWrap: "wrap", rowGap: 1.5 }}
         >
           <TextField
             label="ラベル"
@@ -76,40 +71,45 @@ const LinkListSection = ({
           >
             {predefinedIcons.map((icon) => (
               <MenuItem key={icon.value} value={icon.value}>
-                <Stack direction="row" alignItems="center" spacing={1}>
+                <div className="flex flex-row items-center gap-2">
                   {icon.component}
                   <span>{icon.label}</span>
-                </Stack>
+                </div>
               </MenuItem>
             ))}
           </Select>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={link.enabled}
-                onChange={(e) =>
-                  onLinkChange(index, "enabled", e.target.checked)
-                }
-              />
-            }
-            label="有効"
-            sx={{ minWidth: 88 }}
-          />
-          <IconButton onClick={() => onRemoveLink(index)} color="error">
+          <div className="min-w-[88px]">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={link.enabled}
+                  onChange={(e) =>
+                    onLinkChange(index, "enabled", e.target.checked)
+                  }
+                />
+              }
+              label="有効"
+            />
+          </div>
+          <button
+            className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+            type="button"
+            onClick={() => onRemoveLink(index)}
+            aria-label="削除"
+          >
             <DeleteIcon />
-          </IconButton>
-        </Stack>
+          </button>
+        </div>
       ))}
-      <Button
-        variant="text"
-        size="small"
+      <button
+        className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start transition"
+        type="button"
         onClick={onAddLink}
-        sx={{ alignSelf: "flex-start" }}
       >
-        リンクを追加
-      </Button>
-    </Stack>
-  </>
+        + リンクを追加
+      </button>
+    </div>
+  </div>
 );
 
 export default LinkListSection;

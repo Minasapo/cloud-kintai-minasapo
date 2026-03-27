@@ -1,8 +1,10 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import { useGetWorkflowQuery, workflowApi } from "@entities/workflow/api/workflowApi";
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import { onUpdateWorkflow } from "@shared/api/graphql/documents/subscriptions";
 import type { GetWorkflowQuery } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { subscribeWorkflowCommentNotifications } from "@/features/workflow/notification/model/workflowNotificationEventService";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
@@ -21,8 +23,14 @@ export function useWorkflowLoaderWorkflow(
   initialWorkflow: WorkflowEntity | null,
   options?: UseWorkflowLoaderWorkflowOptions,
 ) {
-  const [workflow, setWorkflow] = useState<WorkflowEntity | null>(
-    initialWorkflow,
+  const dispatch = useAppDispatchV2();
+  const workflowId = initialWorkflow?.id ?? null;
+  const { data } = useGetWorkflowQuery(workflowId ?? "", {
+    skip: !workflowId,
+  });
+  const workflow = useMemo(
+    () => (data as WorkflowEntity | null | undefined) ?? initialWorkflow,
+    [data, initialWorkflow],
   );
   const lastNotifiedCommentIdRef = useRef<string | null>(null);
 
@@ -43,9 +51,22 @@ export function useWorkflowLoaderWorkflow(
     [options?.onNewComment],
   );
 
-  useEffect(() => {
-    setWorkflow(initialWorkflow);
-  }, [initialWorkflow]);
+  const setWorkflow = useCallback(
+    (nextWorkflow: WorkflowEntity) => {
+      if (!nextWorkflow.id) {
+        return;
+      }
+
+      dispatch(
+        workflowApi.util.upsertQueryData(
+          "getWorkflow",
+          nextWorkflow.id,
+          nextWorkflow,
+        ) as never,
+      );
+    },
+    [dispatch],
+  );
 
   // 最新のワークフロー情報を取得（コメント競合を防ぐため）
   const refetchWorkflow = useCallback(async () => {

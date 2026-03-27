@@ -1,9 +1,5 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
-import Typography from "@mui/material/Typography";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -13,6 +9,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
+import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -59,28 +57,35 @@ export default function Absent() {
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 1 }}>
-        欠勤
-      </Typography>
-      <Stack spacing={2} sx={{ mb: 2 }}>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={absentEnabled}
-              onChange={handleChange}
-              color="primary"
+    <AdminSettingsLayout title="欠勤">
+      <AdminSettingsSection
+        actions={
+          <button
+            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            onClick={handleSave}
+          >
+            保存
+          </button>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <div>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={absentEnabled}
+                  onChange={handleChange}
+                  color="primary"
+                />
+              }
+              label={absentEnabled ? "有効" : "無効"}
             />
-          }
-          label={absentEnabled ? "有効" : "無効"}
-        />
-        <Typography variant="body2" color="textSecondary">
-          欠勤設定を有効にすると、勤怠編集画面で欠勤の管理が可能になります。
-        </Typography>
-        <Button variant="contained" color="primary" onClick={handleSave}>
-          保存
-        </Button>
-      </Stack>
-    </Box>
+          </div>
+          <p className="text-sm text-slate-500">
+            欠勤設定を有効にすると、勤怠編集画面で欠勤の管理が可能になります。
+          </p>
+        </div>
+      </AdminSettingsSection>
+    </AdminSettingsLayout>
   );
 }

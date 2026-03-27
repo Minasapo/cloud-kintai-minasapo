@@ -1,12 +1,7 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
+import { useWorkflowDetailContext } from "@/features/workflow/detail-panel/model/WorkflowDetailContext";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
@@ -35,14 +30,20 @@ const MOBILE_BREAKPOINT_QUERY = "(max-width: 640px)";
 
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
       return false;
     }
     return window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
   });
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
       return;
     }
 
@@ -58,7 +59,7 @@ const useIsMobile = () => {
   return isMobile;
 };
 
-export default function WorkflowCommentThread({
+export function WorkflowCommentThreadView({
   title = "コメント",
   messages,
   staffs,
@@ -201,7 +202,9 @@ export default function WorkflowCommentThread({
                     <span className="truncate text-sm font-semibold text-slate-900">
                       {displayName}
                     </span>
-                    <span className="text-xs text-slate-500">{message.time}</span>
+                    <span className="text-xs text-slate-500">
+                      {message.time}
+                    </span>
                   </div>
                 </div>
 
@@ -264,7 +267,9 @@ export default function WorkflowCommentThread({
             placeholder="メッセージを入力..."
             className="w-full resize-y rounded-[18px] border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100"
           />
-          <p className="ml-1 mt-1 text-xs text-slate-500">Cmd/Ctrl+Enterで送信</p>
+          <p className="ml-1 mt-1 text-xs text-slate-500">
+            Cmd/Ctrl+Enterで送信
+          </p>
         </div>
 
         <button
@@ -277,5 +282,37 @@ export default function WorkflowCommentThread({
         </button>
       </div>
     </div>
+  );
+}
+
+export default function WorkflowCommentThread() {
+  const {
+    workflow,
+    staffs,
+    currentStaff,
+    messages,
+    expandedMessages,
+    toggleExpanded,
+    input,
+    setInput,
+    sending,
+    formatSender,
+    sendMessage,
+  } = useWorkflowDetailContext();
+
+  return (
+    <WorkflowCommentThreadView
+      key={workflow?.id ?? "workflow-comment-thread"}
+      messages={messages}
+      staffs={staffs}
+      currentStaff={currentStaff}
+      expandedMessages={expandedMessages}
+      onToggle={toggleExpanded}
+      input={input}
+      setInput={setInput}
+      onSend={sendMessage}
+      sending={sending}
+      formatSender={formatSender}
+    />
   );
 }

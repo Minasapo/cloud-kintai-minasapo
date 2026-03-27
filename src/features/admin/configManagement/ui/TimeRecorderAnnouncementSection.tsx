@@ -1,8 +1,6 @@
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import type React from "react";
 
 type TimeRecorderAnnouncementSectionProps = {
@@ -22,30 +20,35 @@ export default function TimeRecorderAnnouncementSection({
   onMessageChange,
 }: TimeRecorderAnnouncementSectionProps) {
   return (
-    <Stack spacing={1.5}>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={enabled}
-            onChange={onEnabledChange}
-            color="primary"
-            inputProps={{ "aria-label": "打刻画面アナウンスの表示切り替え" }}
-          />
-        }
-        label={enabled ? "表示" : "非表示"}
-      />
-      <TextField
-        label="アナウンス本文"
-        value={message}
-        onChange={onMessageChange}
-        multiline
-        minRows={3}
-        fullWidth
-        placeholder="例: 本日18:00〜18:30はシステムメンテナンスのため打刻が反映されにくくなる場合があります。"
-      />
-      <Typography variant="body2" color="textSecondary">
+    <div className="flex flex-col gap-4">
+      <div>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={enabled}
+              onChange={onEnabledChange}
+              color="primary"
+              inputProps={{ "aria-label": "打刻画面アナウンスの表示切り替え" }}
+            />
+          }
+          label={enabled ? "表示" : "非表示"}
+        />
+      </div>
+      <div className="flex flex-col gap-1 w-full max-w-[640px]">
+        <span className="text-sm font-semibold text-slate-700">アナウンス本文</span>
+        <TextField
+          value={message}
+          onChange={onMessageChange}
+          multiline
+          minRows={3}
+          fullWidth
+          size="small"
+          placeholder="例: 本日18:00〜18:30はシステムメンテナンスのため打刻が反映されにくくなる場合があります。"
+        />
+      </div>
+      <p className="text-sm text-slate-500">
         /register のヘッダー直下に固定表示します。本文が空の場合は表示されません。
-      </Typography>
-    </Stack>
+      </p>
+    </div>
   );
 }
