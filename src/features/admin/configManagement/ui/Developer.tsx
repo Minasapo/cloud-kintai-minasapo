@@ -1,9 +1,5 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
-import Typography from "@mui/material/Typography";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -13,6 +9,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
+import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -83,40 +81,45 @@ export default function Developer() {
   ];
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 1 }}>
-        開発者
-      </Typography>
-      <Stack spacing={2} sx={{ mb: 2 }}>
-        <Typography variant="body2" color="textSecondary">
-          実験中または内部向けの設定をまとめて管理します。項目の追加や削除があっても、この画面内で一覧できます。
-        </Typography>
-        {developerSettings.map((setting) => (
-          <Box key={setting.id}>
-            <Typography variant="h6" sx={{ mb: 1 }}>
-              {setting.title}
-            </Typography>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={setting.checked}
-                  onChange={handleChange}
-                  color="primary"
-                />
-              }
-              label={setting.checked ? "有効" : "無効"}
-            />
-            <Typography variant="body2" color="textSecondary">
-              {setting.description}
-            </Typography>
-          </Box>
-        ))}
-        <Stack direction="row" justifyContent="flex-end">
-          <Button variant="contained" color="primary" onClick={handleSave}>
+    <AdminSettingsLayout
+      title="開発者"
+      description="実験中または内部向けの設定をまとめて管理します。項目の追加や削除があっても、この画面内で一覧できます。"
+    >
+      <AdminSettingsSection
+        actions={
+          <button
+            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            onClick={handleSave}
+          >
             保存
-          </Button>
-        </Stack>
-      </Stack>
-    </Box>
+          </button>
+        }
+      >
+        <div className="flex flex-col gap-6">
+          {developerSettings.map((setting) => (
+            <div key={setting.id} className="flex flex-col gap-2 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+              <h3 className="text-base font-semibold text-slate-800">
+                {setting.title}
+              </h3>
+              <div>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={setting.checked}
+                      onChange={handleChange}
+                      color="primary"
+                    />
+                  }
+                  label={setting.checked ? "有効" : "無効"}
+                />
+              </div>
+              <p className="text-sm text-slate-500">
+                {setting.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </AdminSettingsSection>
+    </AdminSettingsLayout>
   );
 }

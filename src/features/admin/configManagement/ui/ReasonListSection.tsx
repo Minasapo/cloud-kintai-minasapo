@@ -1,13 +1,5 @@
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  Button,
-  Checkbox,
-  FormControlLabel,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Checkbox, FormControlLabel, TextField } from "@mui/material";
 
 interface Reason {
   reason: string;
@@ -31,27 +23,20 @@ const ReasonListSection = ({
   onReasonChange,
   onRemoveReason,
 }: ReasonListSectionProps) => (
-  <>
-    <Typography variant="h4">修正理由</Typography>
-    <Typography variant="body1" color="textSecondary">
-      修正理由のテキスト一覧を管理してください。
-    </Typography>
-    <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
-      {reasons.map((reason, index) => (
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          key={index}
-          sx={{ flexWrap: "wrap", rowGap: 1.5 }}
-        >
-          <TextField
-            label={`理由 ${index + 1}`}
-            value={reason.reason}
-            onChange={(e) => onReasonChange(index, "reason", e.target.value)}
-            size="small"
-            sx={{ width: 320, maxWidth: "100%" }}
-          />
+  <div className="flex flex-col gap-4">
+    {reasons.map((reason, index) => (
+      <div
+        className="flex flex-row flex-wrap items-center gap-4"
+        key={index}
+      >
+        <TextField
+          label={`理由 ${index + 1}`}
+          value={reason.reason}
+          onChange={(e) => onReasonChange(index, "reason", e.target.value)}
+          size="small"
+          sx={{ width: 320, maxWidth: "100%" }}
+        />
+        <div className="min-w-[88px]">
           <FormControlLabel
             control={
               <Checkbox
@@ -62,23 +47,26 @@ const ReasonListSection = ({
               />
             }
             label="有効"
-            sx={{ minWidth: 88 }}
           />
-          <IconButton onClick={() => onRemoveReason(index)} color="error">
-            <DeleteIcon />
-          </IconButton>
-        </Stack>
-      ))}
-      <Button
-        variant="text"
-        size="small"
-        onClick={onAddReason}
-        sx={{ alignSelf: "flex-start" }}
-      >
-        理由を追加
-      </Button>
-    </Stack>
-  </>
+        </div>
+        <button
+          className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+          type="button"
+          onClick={() => onRemoveReason(index)}
+          aria-label="削除"
+        >
+          <DeleteIcon />
+        </button>
+      </div>
+    ))}
+    <button
+      className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start mt-2 transition"
+      type="button"
+      onClick={onAddReason}
+    >
+      + 理由を追加
+    </button>
+  </div>
 );
 
 export default ReasonListSection;
