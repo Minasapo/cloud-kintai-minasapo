@@ -8,7 +8,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React, { lazy, Suspense, useCallback, useMemo } from "react";
+import React, { lazy, memo, Suspense, useCallback, useMemo } from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -75,6 +75,140 @@ const SplitPanelSkeleton = () => (
     <Skeleton variant="rounded" height={54} />
   </Stack>
 );
+
+const PAGE_CONTAINER_SX = {
+  flex: 1,
+  width: "100%",
+  boxSizing: "border-box",
+  px: PAGE_PADDING_X,
+  py: PAGE_PADDING_Y,
+  gap: PAGE_SECTION_GAP,
+  maxWidth: "1360px",
+  mx: "auto",
+} as const;
+
+const SURFACE_SECTION_SX = {
+  gap: 0,
+  flex: 1,
+  overflow: "hidden",
+  borderRadius: "16px",
+  border: "1px solid rgba(226,232,240,0.8)",
+  backgroundColor: "#ffffff",
+  boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
+} as const;
+
+function AdminHeaderActions({
+  isMobile,
+  isMenuExpanded,
+  onToggleMenu,
+  menuItems,
+  activeMenuHref,
+  onSelect,
+  activeMenuItem,
+  splitMode,
+  onToggleSplitMode,
+}: {
+  isMobile: boolean;
+  isMenuExpanded: boolean;
+  onToggleMenu: () => void;
+  menuItems: ReturnType<typeof useHeaderMenu>;
+  activeMenuHref: string;
+  onSelect: (itemHref: string) => void;
+  activeMenuItem: ReturnType<typeof useHeaderMenu>[number] | null;
+  splitMode: "single" | "split";
+  onToggleSplitMode: () => void;
+}) {
+  return (
+    <Stack spacing={1} alignItems="flex-start">
+      {isMobile && (
+        <Button
+          variant="text"
+          size="small"
+          onClick={onToggleMenu}
+          startIcon={isMenuExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          sx={{ fontWeight: 600 }}
+        >
+          {isMenuExpanded ? "メニューを閉じる" : "メニューを開く"}
+        </Button>
+      )}
+      <Collapse in={isMenuExpanded} timeout="auto" unmountOnExit={false}>
+        <AdminMenu
+          items={menuItems}
+          selectedHref={activeMenuHref}
+          onSelect={(item) => onSelect(item.href)}
+        />
+      </Collapse>
+      {activeMenuItem && (
+        <ActiveMenuInfo
+          primaryLabel={activeMenuItem.primaryLabel}
+          description={activeMenuItem.description}
+          isMobile={isMobile}
+          splitMode={splitMode}
+          onToggleSplitMode={onToggleSplitMode}
+        />
+      )}
+    </Stack>
+  );
+}
+
+const MemoizedAdminHeaderActions = memo(AdminHeaderActions);
+
+const MemoizedOutlet = memo(function MemoizedOutlet() {
+  return <Outlet />;
+});
+
+const SinglePanelContent = memo(function SinglePanelContent() {
+  return <MemoizedOutlet />;
+});
+
+const SplitLayoutPanels = memo(function SplitLayoutPanels({
+  rightPanelTitle,
+  selectedScreen,
+  onCloseRightPanel,
+  onScreenChange,
+  RightPanelComponent,
+}: {
+  rightPanelTitle?: string;
+  selectedScreen: string;
+  onCloseRightPanel: () => void;
+  onScreenChange: (screenValue: string) => void;
+  RightPanelComponent?: React.ComponentType<{ panelId: string }>;
+}) {
+  return (
+    <Group orientation="horizontal">
+      <Panel defaultSize={50} minSize={30}>
+        <PanelContainer onClose={undefined}>
+          <MemoizedOutlet />
+        </PanelContainer>
+      </Panel>
+      <Separator
+        style={{
+          width: "8px",
+          backgroundColor: "#e2e8f0",
+          cursor: "col-resize",
+        }}
+      />
+      <Panel defaultSize={50} minSize={30}>
+        <PanelContainer
+          title={rightPanelTitle || "画面を選択"}
+          onClose={onCloseRightPanel}
+          screenOptions={SCREEN_OPTIONS}
+          selectedScreen={selectedScreen}
+          onScreenChange={onScreenChange}
+          contentSx={selectedScreen === "daily-report" ? { pt: 0 } : undefined}
+        >
+          {RightPanelComponent ? (
+            <Suspense fallback={<SplitPanelSkeleton />}>
+              <RightPanelComponent panelId={selectedScreen} />
+            </Suspense>
+          ) : (
+            <div>パネルが選択されていません</div>
+          )}
+        </PanelContainer>
+      </Panel>
+    </Group>
+  );
+});
 
 /**
  * AdminLayoutContent
@@ -151,20 +285,15 @@ function AdminLayoutContent() {
   }, [state.rightPanel]);
 
   const isSplitMode = state.mode === "split";
+  const RightPanelComponent = state.rightPanel?.component;
+  const handleToggleMenu = useCallback(() => {
+    setIsMenuExpanded((prev) => !prev);
+  }, []);
 
   return (
     <Stack
       component="section"
-      sx={{
-        flex: 1,
-        width: "100%",
-        boxSizing: "border-box",
-        px: PAGE_PADDING_X,
-        py: PAGE_PADDING_Y,
-        gap: PAGE_SECTION_GAP,
-        maxWidth: "1360px",
-        mx: "auto",
-      }}
+      sx={PAGE_CONTAINER_SX}
     >
       <PageSection
         variant="plain"
@@ -172,92 +301,35 @@ function AdminLayoutContent() {
         className="gap-0"
         sx={{ px: 0 }}
       >
-        <AdminHeader
-          actions={
-            <Stack spacing={1} alignItems="flex-start">
-              {isMobile && (
-                <Button
-                  variant="text"
-                  size="small"
-                  onClick={() => setIsMenuExpanded((prev) => !prev)}
-                  startIcon={
-                    isMenuExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />
-                  }
-                  sx={{ fontWeight: 600 }}
-                >
-                  {isMenuExpanded ? "メニューを閉じる" : "メニューを開く"}
-                </Button>
-              )}
-              <Collapse in={isMenuExpanded} timeout="auto" unmountOnExit={false}>
-                <AdminMenu
-                  items={menuItems}
-                  selectedHref={activeMenuHref}
-                  onSelect={(item) => handleSelect(item.href)}
-                />
-              </Collapse>
-              {activeMenuItem && (
-                <ActiveMenuInfo
-                  primaryLabel={activeMenuItem.primaryLabel}
-                  description={activeMenuItem.description}
-                  isMobile={isMobile}
-                  splitMode={state.mode}
-                  onToggleSplitMode={handleToggleSplitMode}
-                />
-              )}
-            </Stack>
-          }
-        />
+        <AdminHeader>
+          <MemoizedAdminHeaderActions
+            isMobile={isMobile}
+            isMenuExpanded={isMenuExpanded}
+            onToggleMenu={handleToggleMenu}
+            menuItems={menuItems}
+            activeMenuHref={activeMenuHref}
+            onSelect={handleSelect}
+            activeMenuItem={activeMenuItem}
+            splitMode={state.mode}
+            onToggleSplitMode={handleToggleSplitMode}
+          />
+        </AdminHeader>
       </PageSection>
       <PageSection
         variant="surface"
         layoutVariant="dashboard"
-        sx={{
-          gap: 0,
-          flex: 1,
-          overflow: "hidden",
-          borderRadius: "16px",
-          border: "1px solid rgba(226,232,240,0.8)",
-          backgroundColor: "#ffffff",
-          boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
-        }}
+        sx={SURFACE_SECTION_SX}
       >
         {isSplitMode ? (
-          <Group orientation="horizontal">
-            <Panel defaultSize={50} minSize={30}>
-              <PanelContainer onClose={undefined}>
-                <Outlet />
-              </PanelContainer>
-            </Panel>
-            <Separator
-              style={{
-                width: "8px",
-                backgroundColor: "#e2e8f0",
-                cursor: "col-resize",
-              }}
-            />
-            <Panel defaultSize={50} minSize={30}>
-              <PanelContainer
-                title={state.rightPanel?.title || "画面を選択"}
-                onClose={handleCloseRightPanel}
-                screenOptions={SCREEN_OPTIONS}
-                selectedScreen={selectedScreen}
-                onScreenChange={handleScreenChange}
-                contentSx={
-                  selectedScreen === "daily-report" ? { pt: 0 } : undefined
-                }
-              >
-                {state.rightPanel?.component ? (
-                  <Suspense fallback={<SplitPanelSkeleton />}>
-                    <state.rightPanel.component panelId={state.rightPanel.id} />
-                  </Suspense>
-                ) : (
-                  <div>パネルが選択されていません</div>
-                )}
-              </PanelContainer>
-            </Panel>
-          </Group>
+          <SplitLayoutPanels
+            rightPanelTitle={state.rightPanel?.title}
+            selectedScreen={selectedScreen}
+            onCloseRightPanel={handleCloseRightPanel}
+            onScreenChange={handleScreenChange}
+            RightPanelComponent={RightPanelComponent}
+          />
         ) : (
-          <Outlet />
+          <SinglePanelContent />
         )}
       </PageSection>
     </Stack>

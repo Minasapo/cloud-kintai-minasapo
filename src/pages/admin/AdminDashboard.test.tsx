@@ -69,6 +69,12 @@ jest.mock("react-chartjs-2", () => ({
   Bar: (props: unknown) => mockBar(props),
 }));
 
+const createSubscriptionMock = () => ({
+  subscribe: jest.fn(() => ({
+    unsubscribe: jest.fn(),
+  })),
+});
+
 describe("AdminDashboard", () => {
   beforeEach(() => {
     mockGraphql.mockReset();
@@ -136,7 +142,7 @@ describe("AdminDashboard", () => {
         });
       }
 
-      return Promise.resolve({});
+      return createSubscriptionMock();
     });
   });
 
@@ -293,7 +299,7 @@ describe("AdminDashboard", () => {
         });
       }
 
-      return Promise.resolve({});
+      return createSubscriptionMock();
     });
 
     render(<AdminDashboard />);
@@ -372,7 +378,7 @@ describe("AdminDashboard", () => {
         });
       }
 
-      return Promise.resolve({});
+      return createSubscriptionMock();
     });
 
     render(<AdminDashboard />);
@@ -438,7 +444,7 @@ describe("AdminDashboard", () => {
         });
       }
 
-      return Promise.resolve({});
+      return createSubscriptionMock();
     });
 
     render(<AdminDashboard />);

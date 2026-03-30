@@ -1,5 +1,5 @@
 import { Box, ButtonBase, Stack } from "@mui/material";
-import type { MouseEvent } from "react";
+import { memo, type MouseEvent } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import type { AdminHeaderMenuItem } from "@/features/admin/layout/model/useHeaderMenu";
@@ -106,4 +106,4 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
   );
 };
 
-export default AdminMenu;
+export default memo(AdminMenu);

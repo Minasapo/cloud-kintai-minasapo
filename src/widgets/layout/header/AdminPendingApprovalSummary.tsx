@@ -1,11 +1,11 @@
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { AuthContext } from "@/context/AuthContext";
 import { hasUnapprovedChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import { StaffRole } from "@/entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@/entities/workflow/model/useWorkflows";
+import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { listAttendances } from "@/shared/api/graphql/documents/queries";
 import {
@@ -48,8 +48,7 @@ export default function AdminPendingApprovalSummary({
   showAdminOnlyTag = true,
   visualVariant = "default",
 }: AdminPendingApprovalSummaryProps) {
-  const { authStatus, isCognitoUserRole } = useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
+  const { isAuthenticated, isCognitoUserRole } = useAuthSessionSummary();
 
   const isAdminUser = useMemo(
     () =>

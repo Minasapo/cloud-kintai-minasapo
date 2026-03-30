@@ -1,11 +1,11 @@
 import { Stack, Typography } from "@mui/material";
-import { ReactNode } from "react";
+import { memo,ReactNode } from "react";
 
 interface AdminHeaderProps {
-  actions?: ReactNode;
+  children?: ReactNode;
 }
 
-const AdminHeader = ({ actions }: AdminHeaderProps) => (
+const AdminHeader = ({ children }: AdminHeaderProps) => (
   <Stack
     spacing={2}
     component="header"
@@ -34,8 +34,8 @@ const AdminHeader = ({ actions }: AdminHeaderProps) => (
     <Typography sx={{ color: "#64748b", lineHeight: 1.9 }}>
       各カテゴリを選択して詳細な管理画面に移動してください。
     </Typography>
-    {actions}
+    {children}
   </Stack>
 );
 
-export default AdminHeader;
+export default memo(AdminHeader);

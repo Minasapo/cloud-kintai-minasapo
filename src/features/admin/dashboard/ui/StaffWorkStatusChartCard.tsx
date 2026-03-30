@@ -1,5 +1,6 @@
 import { Tooltip, Typography } from "@mui/material";
 import { type ChartOptions } from "chart.js";
+import { memo } from "react";
 import { Bar } from "react-chartjs-2";
 
 import { DashboardCard } from "./DashboardCard";
@@ -26,7 +27,7 @@ type Props = {
   chartOptions: ChartOptions<"bar">;
 };
 
-export function StaffWorkStatusChartCard({
+function StaffWorkStatusChartCardComponent({
   infoLabel,
   isLoading,
   hasData,
@@ -87,3 +88,5 @@ export function StaffWorkStatusChartCard({
     </DashboardCard>
   );
 }
+
+export const StaffWorkStatusChartCard = memo(StaffWorkStatusChartCardComponent);

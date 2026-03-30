@@ -1,6 +1,9 @@
 import { Stack } from "@mui/material";
+import { memo } from "react";
 
-import { useAdminDashboard } from "@/features/admin/dashboard/model/useAdminDashboard";
+import { useAdminCurrentWorkingStaffCard } from "@/features/admin/dashboard/model/useAdminCurrentWorkingStaffCard";
+import { useAdminDailyReportStatusCard } from "@/features/admin/dashboard/model/useAdminDailyReportStatusCard";
+import { useAdminStaffWorkStatusChart } from "@/features/admin/dashboard/model/useAdminStaffWorkStatusChart";
 import { CurrentWorkingStaffCard } from "@/features/admin/dashboard/ui/CurrentWorkingStaffCard";
 import { DailyReportStatusCard } from "@/features/admin/dashboard/ui/DailyReportStatusCard";
 import { StaffWorkStatusChartCard } from "@/features/admin/dashboard/ui/StaffWorkStatusChartCard";
@@ -11,24 +14,32 @@ import AdminPendingApprovalSummary from "@/widgets/layout/header/AdminPendingApp
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
 
-export default function AdminDashboard() {
-  const {
-    isLoadingPeriodAttendances,
-    isLoadingDailyReportStatus,
-    staffLoading,
-    closeDatesLoading,
-    currentWorkingStaffCountLabel,
-    submittedDailyReportCountLabel,
-    approvedDailyReportCountLabel,
-    currentWorkingStaffInfoLabel,
-    aggregationPeriodInfoLabel,
-    hasDuplicateAttendances,
-    duplicateAttendanceDayCount,
-    staffWorkStatusSummary,
-    staffWorkStatusChartData,
-    staffWorkStatusChartOptions,
-  } = useAdminDashboard();
+const CurrentWorkingStaffCardContainer = memo(function CurrentWorkingStaffCardContainer() {
+  const { countLabel, infoLabel } = useAdminCurrentWorkingStaffCard();
 
+  return <CurrentWorkingStaffCard countLabel={countLabel} infoLabel={infoLabel} />;
+});
+
+const DailyReportStatusCardContainer = memo(function DailyReportStatusCardContainer() {
+  const { submittedCountLabel, approvedCountLabel, isLoading } =
+    useAdminDailyReportStatusCard();
+
+  return (
+    <DailyReportStatusCard
+      submittedCountLabel={submittedCountLabel}
+      approvedCountLabel={approvedCountLabel}
+      isLoading={isLoading}
+    />
+  );
+});
+
+const StaffWorkStatusChartCardContainer = memo(function StaffWorkStatusChartCardContainer() {
+  const viewModel = useAdminStaffWorkStatusChart();
+
+  return <StaffWorkStatusChartCard {...viewModel} />;
+});
+
+export default function AdminDashboard() {
   return (
     <Stack
       component="section"
@@ -46,16 +57,9 @@ export default function AdminDashboard() {
           data-testid="admin-dashboard-count-cards-grid"
           className="grid grid-cols-1 gap-3 lg:grid-cols-4"
         >
-          <CurrentWorkingStaffCard
-            countLabel={currentWorkingStaffCountLabel}
-            infoLabel={currentWorkingStaffInfoLabel}
-          />
+          <CurrentWorkingStaffCardContainer />
 
-          <DailyReportStatusCard
-            submittedCountLabel={submittedDailyReportCountLabel}
-            approvedCountLabel={approvedDailyReportCountLabel}
-            isLoading={isLoadingDailyReportStatus}
-          />
+          <DailyReportStatusCardContainer />
 
           <AdminPendingApprovalSummary
             layoutMode="inline-cards"
@@ -63,15 +67,7 @@ export default function AdminDashboard() {
             visualVariant="dashboard"
           />
 
-          <StaffWorkStatusChartCard
-            infoLabel={aggregationPeriodInfoLabel}
-            isLoading={isLoadingPeriodAttendances || staffLoading || closeDatesLoading}
-            hasData={staffWorkStatusSummary.length > 0}
-            hasDuplicateAttendances={hasDuplicateAttendances}
-            duplicateAttendanceDayCount={duplicateAttendanceDayCount}
-            chartData={staffWorkStatusChartData}
-            chartOptions={staffWorkStatusChartOptions}
-          />
+          <StaffWorkStatusChartCardContainer />
         </div>
       </PageSection>
     </Stack>

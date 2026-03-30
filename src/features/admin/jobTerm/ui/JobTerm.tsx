@@ -1,6 +1,7 @@
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { CloseDate } from "@shared/api/graphql/types";
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import dayjs from "dayjs";
+import { lazy, memo, Suspense, useCallback, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
@@ -24,6 +25,68 @@ const JobTermTableSkeleton = () => (
     ))}
   </div>
 );
+
+const JobTermDescription = memo(function JobTermDescription() {
+  return (
+    <p className="text-sm text-slate-600">
+      月ごとに勤怠を締める日付を指定します。
+      <br />
+      こちらで集計対象月を作成するとファイル出力時に選択して簡単に日付入力ができるようになります。
+    </p>
+  );
+});
+
+const JobTermDialogs = memo(function JobTermDialogs({
+  editTarget,
+  deleteTarget,
+  candidateCloseDates,
+  updateCloseDate,
+  onCloseEdit,
+  onConfirmDelete,
+  onCancelDelete,
+}: {
+  editTarget: CloseDate | null;
+  deleteTarget: CloseDate | null;
+  candidateCloseDates: dayjs.Dayjs[];
+  updateCloseDate: ReturnType<typeof useCloseDates>["updateCloseDate"];
+  onCloseEdit: () => void;
+  onConfirmDelete: () => void;
+  onCancelDelete: () => void;
+}) {
+  return (
+    <>
+      <EditJobTermInputDialog
+        targetData={editTarget}
+        open={editTarget !== null}
+        onClose={onCloseEdit}
+        candidateCloseDates={candidateCloseDates}
+        updateCloseDate={updateCloseDate}
+      />
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        message="本当に削除しますか？この操作は取り消せません。"
+        onConfirm={onConfirmDelete}
+        onCancel={onCancelDelete}
+      />
+    </>
+  );
+});
+
+const JobTermTableSection = memo(function JobTermTableSection({
+  closeDates,
+  onEdit,
+  onDelete,
+}: {
+  closeDates: CloseDate[];
+  onEdit: (row: CloseDate) => void;
+  onDelete: (row: CloseDate) => void;
+}) {
+  return (
+    <Suspense fallback={<JobTermTableSkeleton />}>
+      <JobTermTable rows={closeDates} onEdit={onEdit} onDelete={onDelete} />
+    </Suspense>
+  );
+});
 
 export default function JobTerm() {
   const dispatch = useAppDispatchV2();
@@ -82,35 +145,27 @@ export default function JobTerm() {
   return (
     <>
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-slate-600">
-          月ごとに勤怠を締める日付を指定します。
-          <br />
-          こちらで集計対象月を作成するとファイル出力時に選択して簡単に日付入力ができるようになります。
-        </p>
+        <JobTermDescription />
         <JobTermBulkRegister
           existingCloseDates={closeDates}
           createCloseDate={createCloseDate}
         />
-        <Suspense fallback={<JobTermTableSkeleton />}>
-          <JobTermTable
-            rows={closeDates}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </Suspense>
+        <JobTermTableSection
+          closeDates={closeDates}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
-      <EditJobTermInputDialog
-        targetData={editTarget}
-        open={editTarget !== null}
-        onClose={() => setEditTarget(null)}
+      <JobTermDialogs
+        editTarget={editTarget}
+        deleteTarget={deleteTarget}
         candidateCloseDates={candidateCloseDates}
         updateCloseDate={updateCloseDate}
-      />
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        message="本当に削除しますか？この操作は取り消せません。"
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
+        onCloseEdit={() => setEditTarget(null)}
+        onConfirmDelete={() => {
+          void handleDeleteConfirm();
+        }}
+        onCancelDelete={() => setDeleteTarget(null)}
       />
     </>
   );
