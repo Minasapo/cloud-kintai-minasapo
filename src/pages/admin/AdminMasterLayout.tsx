@@ -228,7 +228,7 @@ const MasterLayoutNavigation = memo(function MasterLayoutNavigation({
               color: "#64748b",
             }}
           >
-            Settings
+            設定
           </Typography>
         </Box>
         {menuBoxList}

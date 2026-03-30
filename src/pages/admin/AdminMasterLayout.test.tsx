@@ -25,6 +25,7 @@ describe("AdminMasterLayout", () => {
 
     await user.click(screen.getByRole("button", { name: "menu" }));
 
+    expect(screen.getByText("設定")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^基本設定/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^勤務ルール/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^運用設定/ })).toBeInTheDocument();
