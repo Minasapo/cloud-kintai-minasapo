@@ -75,7 +75,7 @@ const SettingsContextHeader = memo(function SettingsContextHeader() {
 
 const MasterLayoutContent = memo(function MasterLayoutContent() {
   return (
-    <div className="min-w-0 flex-1">
+    <div className="w-full max-w-[960px] pr-4 sm:pr-6">
       <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm md:px-6 md:py-6">
         <SettingsContextHeader />
         <div>
@@ -119,7 +119,7 @@ const MasterLayoutNavigation = memo(function MasterLayoutNavigation({
                 key={item.path}
                 type="button"
                 className={[
-                  "flex w-full items-center border-l-2 px-3 py-1.5 text-left text-[0.875rem] transition-colors",
+                  "flex w-full items-center border-l-2 bg-transparent px-3 py-1.5 text-left text-[0.875rem] transition-colors focus:outline-none",
                   isActive
                     ? "border-emerald-500 font-medium text-emerald-700"
                     : "border-transparent text-slate-600 hover:border-slate-200 hover:text-slate-900",
@@ -146,14 +146,14 @@ export default function AdminMasterLayout() {
   const isDesktop = useIsDesktopNavigation();
 
   return (
-    <div className="admin-master-layout relative mx-auto max-w-[1360px] px-4 pb-4 pt-2 sm:px-6">
+    <div className="admin-master-layout relative w-full pb-4 pt-2">
       {!isDesktop ? (
         <>
           <button
             type="button"
             aria-label="menu"
             onClick={() => setMobileOpen(true)}
-            className="absolute left-4 top-3 z-30 inline-flex rounded-full border border-slate-300 bg-white/90 p-2 text-slate-700 shadow-sm transition hover:bg-white"
+            className="absolute left-0 top-3 z-30 inline-flex rounded-full border border-slate-300 bg-white/90 p-2 text-slate-700 shadow-sm transition hover:bg-white"
           >
             <SettingsIcon name="menu" />
           </button>
@@ -184,7 +184,7 @@ export default function AdminMasterLayout() {
             />
           </div>
         ) : null}
-        <div className={isDesktop ? "" : "pt-6"}>
+        <div className={isDesktop ? "flex-1 min-w-0" : "flex-1 min-w-0 pt-6"}>
           <MasterLayoutContent />
         </div>
       </div>
