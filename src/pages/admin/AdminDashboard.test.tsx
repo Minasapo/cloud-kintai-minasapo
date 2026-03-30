@@ -44,7 +44,16 @@ jest.mock("@/shared/api/amplify/graphqlClient", () => ({
 
 jest.mock("@/widgets/layout/header/AdminPendingApprovalSummary", () => ({
   __esModule: true,
-  default: () => <div data-testid="admin-pending-approval-summary-mock" />,
+  default: ({
+    visualVariant,
+  }: {
+    visualVariant?: "default" | "dashboard";
+  }) => (
+    <div
+      data-testid="admin-pending-approval-summary-mock"
+      data-visual-variant={visualVariant ?? "default"}
+    />
+  ),
 }));
 
 jest.mock("@/entities/staff/model/useStaffs/useStaffs", () => ({
@@ -149,6 +158,9 @@ describe("AdminDashboard", () => {
     expect(
       screen.getByTestId("admin-pending-approval-summary-mock"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("admin-pending-approval-summary-mock"),
+    ).toHaveAttribute("data-visual-variant", "dashboard");
     expect(
       screen.getByTestId("admin-dashboard-staff-work-status-chart-card"),
     ).toBeInTheDocument();

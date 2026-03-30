@@ -40,11 +40,13 @@ const isWorkflowPendingForCurrentAdmin = (workflow: Workflow) => {
 type AdminPendingApprovalSummaryProps = {
   layoutMode?: "default" | "inline-cards";
   showAdminOnlyTag?: boolean;
+  visualVariant?: "default" | "dashboard";
 };
 
 export default function AdminPendingApprovalSummary({
   layoutMode = "default",
   showAdminOnlyTag = true,
+  visualVariant = "default",
 }: AdminPendingApprovalSummaryProps) {
   const { authStatus, isCognitoUserRole } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -257,6 +259,7 @@ export default function AdminPendingApprovalSummary({
         className={cardClassName}
         showAdminOnlyTag={showAdminOnlyTag}
         compact={compact}
+        visualVariant={visualVariant}
       />
       <AdminSummaryCard
         testId="admin-pending-workflow-card"
@@ -267,6 +270,7 @@ export default function AdminPendingApprovalSummary({
         className={cardClassName}
         showAdminOnlyTag={showAdminOnlyTag}
         compact={compact}
+        visualVariant={visualVariant}
       />
     </div>
   );

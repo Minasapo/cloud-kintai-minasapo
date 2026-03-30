@@ -60,6 +60,7 @@ export default function AdminDashboard() {
           <AdminPendingApprovalSummary
             layoutMode="inline-cards"
             showAdminOnlyTag={false}
+            visualVariant="dashboard"
           />
 
           <StaffWorkStatusChartCard
