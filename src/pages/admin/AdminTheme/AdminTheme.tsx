@@ -191,7 +191,7 @@ export default function AdminTheme() {
   };
 
   return (
-    <AdminSettingsLayout title="テーマ" description="テーマを選択すると、ヘッダーとフッターの配色が変更されます。">
+    <AdminSettingsLayout description="テーマを選択すると、ヘッダーとフッターの配色が変更されます。">
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-4">

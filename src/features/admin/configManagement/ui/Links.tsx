@@ -83,7 +83,7 @@ export default function Links() {
   };
 
   return (
-    <AdminSettingsLayout title="外部リンク">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

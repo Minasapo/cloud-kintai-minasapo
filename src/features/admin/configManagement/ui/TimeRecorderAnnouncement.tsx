@@ -58,7 +58,7 @@ export default function TimeRecorderAnnouncement() {
   };
 
   return (
-    <AdminSettingsLayout title="打刻画面アナウンス">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

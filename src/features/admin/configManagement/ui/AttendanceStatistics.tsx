@@ -63,7 +63,7 @@ export default function AttendanceStatistics() {
   };
 
   return (
-    <AdminSettingsLayout title="稼働統計">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

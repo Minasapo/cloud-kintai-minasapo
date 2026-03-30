@@ -89,7 +89,7 @@ export default function WorkingTime() {
   };
 
   return (
-    <AdminSettingsLayout title="勤務時間設定">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

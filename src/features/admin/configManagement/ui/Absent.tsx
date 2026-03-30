@@ -57,7 +57,7 @@ export default function Absent() {
   };
 
   return (
-    <AdminSettingsLayout title="欠勤">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

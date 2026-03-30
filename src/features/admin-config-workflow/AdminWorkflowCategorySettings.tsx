@@ -244,7 +244,7 @@ export default function AdminWorkflowCategorySettings() {
   };
 
   return (
-    <AdminSettingsLayout title="ワークフロー設定">
+    <AdminSettingsLayout>
       <div className="flex flex-col gap-10">
         {/* === ワークフロー種別 セクション === */}
         <div className="flex flex-col gap-6">

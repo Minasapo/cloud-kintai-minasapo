@@ -58,7 +58,7 @@ export default function OvertimeConfirmation() {
   };
 
   return (
-    <AdminSettingsLayout title="残業確認">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

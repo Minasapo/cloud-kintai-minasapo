@@ -78,7 +78,6 @@ export default function Reasons() {
 
   return (
     <AdminSettingsLayout
-      title="修正理由"
       description="修正理由のテキスト一覧を管理してください。"
     >
       <AdminSettingsSection

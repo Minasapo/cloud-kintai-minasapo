@@ -214,7 +214,7 @@ export default function AdminShiftSettings() {
   };
 
   return (
-    <AdminSettingsLayout title="シフト設定">
+    <AdminSettingsLayout>
       <div className="flex flex-col gap-6">
         <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-200">
           <Tabs

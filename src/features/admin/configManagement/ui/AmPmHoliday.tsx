@@ -121,7 +121,7 @@ export default function AmPmHoliday() {
   };
 
   return (
-    <AdminSettingsLayout title="午前/午後休">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

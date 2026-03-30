@@ -75,7 +75,7 @@ export default function OfficeMode() {
   };
 
   return (
-    <AdminSettingsLayout title="出勤モード / 時間単位休暇">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

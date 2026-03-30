@@ -58,7 +58,7 @@ export default function SpecialHoliday() {
   };
 
   return (
-    <AdminSettingsLayout title="特別休暇">
+    <AdminSettingsLayout>
       <AdminSettingsSection
         actions={
           <button

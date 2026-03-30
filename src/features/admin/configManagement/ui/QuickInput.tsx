@@ -134,7 +134,6 @@ export default function QuickInput() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <AdminSettingsLayout
-        title="簡単時間入力"
         description={<>
           勤怠編集画面でボタンを押すと時刻が簡単に入力されます。
           <br />

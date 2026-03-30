@@ -82,7 +82,6 @@ export default function Developer() {
 
   return (
     <AdminSettingsLayout
-      title="開発者"
       description="実験中または内部向けの設定をまとめて管理します。項目の追加や削除があっても、この画面内で一覧できます。"
     >
       <AdminSettingsSection
