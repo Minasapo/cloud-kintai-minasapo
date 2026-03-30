@@ -46,7 +46,7 @@ const ReasonListSection = ({
           />
         </div>
         <button
-          className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+          className="text-rose-500 hover:bg-rose-50 p-2 rounded-full transition"
           type="button"
           onClick={() => onRemoveReason(index)}
           aria-label="削除"
@@ -56,7 +56,7 @@ const ReasonListSection = ({
       </div>
     ))}
     <button
-      className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start mt-2 transition"
+      className="text-emerald-600 hover:text-emerald-700 text-sm font-medium self-start mt-2 transition"
       type="button"
       onClick={onAddReason}
     >

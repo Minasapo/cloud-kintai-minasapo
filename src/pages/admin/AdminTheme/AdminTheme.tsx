@@ -8,7 +8,7 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
-import { SettingsTextField } from "@/features/admin/layout/ui/SettingsPrimitives";
+import { SettingsButton, SettingsTextField } from "@/features/admin/layout/ui/SettingsPrimitives";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { resolveThemeColor } from "@/shared/config/theme";
 
@@ -289,14 +289,12 @@ export default function AdminTheme() {
           </div>
 
           <div className="pt-4 border-t border-slate-200 flex justify-end">
-            <button
-              className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
+            <SettingsButton
               onClick={handleSave}
               disabled={!isValidHex || saving || !isDirty}
-              type="button"
             >
               {saving ? "保存中..." : "保存"}
-            </button>
+            </SettingsButton>
           </div>
         </div>
       </div>

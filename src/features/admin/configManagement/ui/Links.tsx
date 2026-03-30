@@ -10,6 +10,7 @@ import { E14001, S14001, S14002 } from "@/errors";
 import { appendItem, removeItemAt, updateItem } from "@/features/admin/configManagement/lib/arrayHelpers";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
+import { SettingsButton } from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -85,14 +86,7 @@ export default function Links() {
   return (
     <AdminSettingsLayout>
       <AdminSettingsSection
-        actions={
-          <button
-            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
-            onClick={handleSave}
-          >
-            保存
-          </button>
-        }
+        actions={<SettingsButton onClick={handleSave}>保存</SettingsButton>}
       >
         <LinkListSection
           links={links}

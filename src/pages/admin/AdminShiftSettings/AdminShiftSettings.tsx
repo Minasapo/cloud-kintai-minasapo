@@ -15,6 +15,7 @@ import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout"
 import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
 import {
   SettingsAlert,
+  SettingsButton,
 } from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
@@ -302,14 +303,12 @@ export default function AdminShiftSettings() {
               </div>
 
               <div className="flex flex-row justify-end pb-8">
-                <button
-                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+                <SettingsButton
                   onClick={handleSave}
                   disabled={hasValidationError || savingShiftGroup}
-                  type="button"
                 >
                   {savingShiftGroup ? "保存中..." : "保存"}
-                </button>
+                </SettingsButton>
               </div>
             </div>
           )}
@@ -364,14 +363,12 @@ export default function AdminShiftSettings() {
               </div>
 
               <div className="flex flex-row justify-end pb-8">
-                <button
-                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+                <SettingsButton
                   onClick={handleShiftDisplaySave}
                   disabled={savingShiftDisplay}
-                  type="button"
                 >
                   {savingShiftDisplay ? "保存中..." : "保存"}
-                </button>
+                </SettingsButton>
               </div>
             </div>
           )}

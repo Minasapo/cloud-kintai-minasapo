@@ -18,6 +18,7 @@ import {
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
 import {
+  SettingsButton,
   SettingsSwitch,
   SettingsTimeField,
 } from "@/features/admin/layout/ui/SettingsPrimitives";
@@ -122,14 +123,7 @@ export default function AmPmHoliday() {
   return (
     <AdminSettingsLayout>
       <AdminSettingsSection
-        actions={
-          <button
-            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
-            onClick={handleSave}
-          >
-            保存
-          </button>
-        }
+        actions={<SettingsButton onClick={handleSave}>保存</SettingsButton>}
       >
         <div className="flex flex-col gap-6">
           <p className="text-sm text-slate-500">

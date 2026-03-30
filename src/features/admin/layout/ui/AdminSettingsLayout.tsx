@@ -11,7 +11,7 @@ export default function AdminSettingsLayout({
 }: AdminSettingsLayoutProps) {
   return (
     <div className="flex flex-col gap-6 max-w-5xl w-full">
-      {description && <p className="text-sm text-gray-500">{description}</p>}
+      {description && <p className="text-sm text-slate-500">{description}</p>}
       <div className="flex flex-col gap-6">
         {children}
       </div>
