@@ -11,16 +11,25 @@ import {
   ApproverSettingMode,
   CreateStaffInput,
   DeleteStaffInput,
+  OnCreateStaffSubscription,
+  OnDeleteStaffSubscription,
+  OnUpdateStaffSubscription,
   Staff,
   UpdateStaffInput,
 } from "@shared/api/graphql/types";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { StaffExternalLink } from "@/entities/staff/externalLink";
+import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   buildVersionOrUpdatedAtCondition,
   getNextVersion,
 } from "@/shared/api/graphql/concurrency";
+import {
+  onCreateStaff,
+  onDeleteStaff,
+  onUpdateStaff,
+} from "@/shared/api/graphql/documents/subscriptions";
 
 import fetchStaffs from "./fetchStaffs";
 
@@ -190,6 +199,71 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
     }
 
     await refetch();
+  }, [isAuthenticated, refetch]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
+    let isMounted = true;
+    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleRefetch = () => {
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+
+      refetchTimer = setTimeout(() => {
+        if (!isMounted) {
+          return;
+        }
+        void refetch();
+      }, 300);
+    };
+
+    const createSubscription = graphqlClient
+      .graphql({ query: onCreateStaff, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnCreateStaffSubscription }) => {
+          if (!data?.onCreateStaff) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    const updateSubscription = graphqlClient
+      .graphql({ query: onUpdateStaff, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnUpdateStaffSubscription }) => {
+          if (!data?.onUpdateStaff) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    const deleteSubscription = graphqlClient
+      .graphql({ query: onDeleteStaff, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnDeleteStaffSubscription }) => {
+          if (!data?.onDeleteStaff) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+
+    return () => {
+      isMounted = false;
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+      createSubscription.unsubscribe();
+      updateSubscription.unsubscribe();
+      deleteSubscription.unsubscribe();
+    };
   }, [isAuthenticated, refetch]);
 
   const createStaff = useCallback(async (input: CreateStaffInput) => {
