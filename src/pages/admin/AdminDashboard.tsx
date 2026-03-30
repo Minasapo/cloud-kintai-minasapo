@@ -22,8 +22,8 @@ export default function AdminDashboard() {
     approvedDailyReportCountLabel,
     currentWorkingStaffInfoLabel,
     aggregationPeriodInfoLabel,
-    hasExcludedDuplicateAttendances,
-    excludedDuplicateAttendanceCount,
+    hasDuplicateAttendances,
+    duplicateAttendanceDayCount,
     staffWorkStatusSummary,
     staffWorkStatusChartData,
     staffWorkStatusChartOptions,
@@ -67,8 +67,8 @@ export default function AdminDashboard() {
             infoLabel={aggregationPeriodInfoLabel}
             isLoading={isLoadingPeriodAttendances || staffLoading || closeDatesLoading}
             hasData={staffWorkStatusSummary.length > 0}
-            hasExcludedDuplicateAttendances={hasExcludedDuplicateAttendances}
-            excludedDuplicateAttendanceCount={excludedDuplicateAttendanceCount}
+            hasDuplicateAttendances={hasDuplicateAttendances}
+            duplicateAttendanceDayCount={duplicateAttendanceDayCount}
             chartData={staffWorkStatusChartData}
             chartOptions={staffWorkStatusChartOptions}
           />
