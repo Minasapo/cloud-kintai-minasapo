@@ -31,19 +31,4 @@
   &__mobile-nav--open {
     transform: translateX(0);
   }
-
-  &__group-content {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 200ms ease;
-  }
-
-  &__group-content-inner {
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  &__group-content--open {
-    grid-template-rows: 1fr;
-  }
 }
