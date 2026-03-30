@@ -448,7 +448,7 @@ const BUTTON_VARIANT_CLASSES: Record<SettingsButtonVariant, string> = {
   primary:
     "bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-100",
   secondary:
-    "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-slate-100",
+    "bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-100",
   danger: "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-100",
 };
 
@@ -472,7 +472,7 @@ export function SettingsButton({
       disabled={disabled}
       onClick={onClick}
       className={[
-        "text-sm font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+        "text-sm font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
         BUTTON_VARIANT_CLASSES[variant],
         BUTTON_SIZE_CLASSES[size],
         className,
