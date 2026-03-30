@@ -1,12 +1,10 @@
-import { FormControlLabel, Switch } from "@mui/material";
+import { SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
 
 interface OfficeModeSectionProps {
   officeMode: boolean;
-  onOfficeModeChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onOfficeModeChange: (checked: boolean) => void;
   hourlyPaidHolidayEnabled: boolean;
-  onHourlyPaidHolidayEnabledChange: (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => void;
+  onHourlyPaidHolidayEnabledChange: (checked: boolean) => void;
 }
 
 const OfficeModeSection = ({
@@ -26,14 +24,9 @@ const OfficeModeSection = ({
         </p>
       </div>
       <div className="min-w-[140px]">
-        <FormControlLabel
-          control={
-            <Switch
-              checked={officeMode}
-              onChange={onOfficeModeChange}
-              color="primary"
-            />
-          }
+        <SettingsSwitch
+          checked={officeMode}
+          onChange={onOfficeModeChange}
           label={officeMode ? "有効" : "無効"}
         />
       </div>
@@ -47,14 +40,9 @@ const OfficeModeSection = ({
         </p>
       </div>
       <div className="min-w-[140px]">
-        <FormControlLabel
-          control={
-            <Switch
-              checked={hourlyPaidHolidayEnabled}
-              onChange={onHourlyPaidHolidayEnabledChange}
-              color="primary"
-            />
-          }
+        <SettingsSwitch
+          checked={hourlyPaidHolidayEnabled}
+          onChange={onHourlyPaidHolidayEnabledChange}
           label={hourlyPaidHolidayEnabled ? "有効" : "無効"}
         />
       </div>

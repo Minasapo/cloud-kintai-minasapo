@@ -1,16 +1,15 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
+import { SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -34,10 +33,7 @@ export default function AttendanceStatistics() {
     setId(getConfigId());
   }, [getAttendanceStatisticsEnabled, getConfigId]);
 
-  const handleChange = (
-    _: React.ChangeEvent<HTMLInputElement>,
-    checked: boolean
-  ) => {
+  const handleChange = (checked: boolean) => {
     setEnabled(checked);
   };
 
@@ -76,16 +72,11 @@ export default function AttendanceStatistics() {
       >
         <div className="flex flex-col gap-4">
           <div>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={enabled}
-                  onChange={handleChange}
-                  color="primary"
-                  inputProps={{ "aria-label": "稼働統計の表示切り替え" }}
-                />
-              }
+            <SettingsSwitch
+              checked={enabled}
+              onChange={handleChange}
               label={enabled ? "有効" : "無効"}
+              ariaLabel="稼働統計の表示切り替え"
             />
           </div>
           <p className="text-sm text-slate-500">

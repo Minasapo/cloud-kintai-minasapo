@@ -1,8 +1,3 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -22,6 +17,10 @@ import {
 } from "@/features/admin/configManagement/lib/constants";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
+import {
+  SettingsSwitch,
+  SettingsTimeField,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -132,71 +131,56 @@ export default function AmPmHoliday() {
           </button>
         }
       >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <div className="flex flex-col gap-6">
-            <p className="text-sm text-slate-500">
-              この機能が有効な場合、午前休暇と午後休暇の時間帯を設定できます。
-            </p>
-            <div>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={amPmHolidayEnabled}
-                    onChange={(_, checked) => setAmPmHolidayEnabled(checked)}
-                    color="primary"
-                  />
-                }
-                label={amPmHolidayEnabled ? "有効" : "無効"}
-              />
-            </div>
-
-            <div className="flex flex-row items-center gap-4">
-              <span className="text-sm font-semibold text-slate-700 w-12">午前</span>
-              <TimePicker
-                label="開始"
-                value={amHolidayStartTime}
-                onChange={setAmHolidayStartTime}
-                ampm={false}
-                format="HH:mm"
-                slotProps={{ textField: { size: "small" } }}
-                disabled={!amPmHolidayEnabled}
-              />
-              <span className="text-base text-slate-800">〜</span>
-              <TimePicker
-                label="終了"
-                value={amHolidayEndTime}
-                onChange={setAmHolidayEndTime}
-                ampm={false}
-                format="HH:mm"
-                slotProps={{ textField: { size: "small" } }}
-                disabled={!amPmHolidayEnabled}
-              />
-            </div>
-
-            <div className="flex flex-row items-center gap-4">
-              <span className="text-sm font-semibold text-slate-700 w-12">午後</span>
-              <TimePicker
-                label="開始"
-                value={pmHolidayStartTime}
-                onChange={setPmHolidayStartTime}
-                ampm={false}
-                format="HH:mm"
-                slotProps={{ textField: { size: "small" } }}
-                disabled={!amPmHolidayEnabled}
-              />
-              <span className="text-base text-slate-800">〜</span>
-              <TimePicker
-                label="終了"
-                value={pmHolidayEndTime}
-                onChange={setPmHolidayEndTime}
-                ampm={false}
-                format="HH:mm"
-                slotProps={{ textField: { size: "small" } }}
-                disabled={!amPmHolidayEnabled}
-              />
-            </div>
+        <div className="flex flex-col gap-6">
+          <p className="text-sm text-slate-500">
+            この機能が有効な場合、午前休暇と午後休暇の時間帯を設定できます。
+          </p>
+          <div>
+            <SettingsSwitch
+              checked={amPmHolidayEnabled}
+              onChange={setAmPmHolidayEnabled}
+              label={amPmHolidayEnabled ? "有効" : "無効"}
+            />
           </div>
-        </LocalizationProvider>
+
+          <div className="flex flex-row flex-wrap items-end gap-4">
+            <span className="w-12 text-sm font-semibold text-slate-700">午前</span>
+            <SettingsTimeField
+              label="開始"
+              value={amHolidayStartTime}
+              onChange={setAmHolidayStartTime}
+              disabled={!amPmHolidayEnabled}
+              className="w-full max-w-[200px]"
+            />
+            <span className="text-base text-slate-800">〜</span>
+            <SettingsTimeField
+              label="終了"
+              value={amHolidayEndTime}
+              onChange={setAmHolidayEndTime}
+              disabled={!amPmHolidayEnabled}
+              className="w-full max-w-[200px]"
+            />
+          </div>
+
+          <div className="flex flex-row flex-wrap items-end gap-4">
+            <span className="w-12 text-sm font-semibold text-slate-700">午後</span>
+            <SettingsTimeField
+              label="開始"
+              value={pmHolidayStartTime}
+              onChange={setPmHolidayStartTime}
+              disabled={!amPmHolidayEnabled}
+              className="w-full max-w-[200px]"
+            />
+            <span className="text-base text-slate-800">〜</span>
+            <SettingsTimeField
+              label="終了"
+              value={pmHolidayEndTime}
+              onChange={setPmHolidayEndTime}
+              disabled={!amPmHolidayEnabled}
+              className="w-full max-w-[200px]"
+            />
+          </div>
+        </div>
       </AdminSettingsSection>
     </AdminSettingsLayout>
   );

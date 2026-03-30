@@ -1,9 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
-import {
-  Button,
-  ButtonBase,
-  TextField,
-} from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -13,6 +7,8 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import { SettingsTextField } from "@/features/admin/layout/ui/SettingsPrimitives";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { resolveThemeColor } from "@/shared/config/theme";
 
@@ -211,55 +207,37 @@ export default function AdminTheme() {
                   normalizedColorCode !== "" &&
                   normalizedColorCode === normalizeColor(color);
                 return (
-                  <ButtonBase
+                  <button
                     key={color}
                     onClick={() => handlePresetSelect(color)}
-                    sx={{
+                    type="button"
+                    className="rounded-md border-2 transition focus:outline-none"
+                    aria-label={`テーマカラー ${color}`}
+                    style={{
                       width: TILE_SIZE,
                       height: TILE_SIZE,
-                      borderRadius: 1,
-                      border: "2px solid",
-                      borderColor: isSelected
-                        ? brandPrimary
-                        : previewPanelDividerColor,
+                      borderColor: isSelected ? brandPrimary : previewPanelDividerColor,
                       backgroundColor: color,
-                      boxShadow: isSelected
-                        ? `0 0 0 2px ${focusRingColor}`
-                        : "none",
-                      transition: "box-shadow 120ms ease",
-                      "&:focus-visible": {
-                        outline: "none",
-                        boxShadow: `0 0 0 3px ${focusRingColor}`,
-                      },
+                      boxShadow: isSelected ? `0 0 0 2px ${focusRingColor}` : "none",
                     }}
-                    aria-label={`テーマカラー ${color}`}
                   />
                 );
               })}
-              <ButtonBase
+              <button
                 onClick={() => setCustomMode(true)}
-                sx={{
+                type="button"
+                className="flex items-center justify-center rounded-md border-2 border-dashed bg-transparent focus:outline-none"
+                aria-label="その他のカラーコードを入力"
+                style={{
                   width: TILE_SIZE,
                   height: TILE_SIZE,
-                  borderRadius: 1,
-                  border: "2px dashed",
-                  borderColor: customMode
-                    ? brandPrimary
-                    : previewPanelDividerColor,
-                  color: customMode ? brandPrimary : "text.secondary",
-                  backgroundColor: "transparent",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  "&:focus-visible": {
-                    outline: "none",
-                    boxShadow: `0 0 0 3px ${focusRingColor}`,
-                  },
+                  borderColor: customMode ? brandPrimary : previewPanelDividerColor,
+                  color: customMode ? brandPrimary : "#64748b",
+                  boxShadow: customMode ? `0 0 0 2px ${focusRingColor}` : "none",
                 }}
-                aria-label="その他のカラーコードを入力"
               >
-                <AddIcon />
-              </ButtonBase>
+                <SettingsIcon name="plus" />
+              </button>
             </div>
           </div>
 
@@ -268,25 +246,15 @@ export default function AdminTheme() {
               <h3 className="text-sm font-semibold text-slate-800">
                 カラーコードを直接指定
               </h3>
-              <TextField
-                size="small"
+              <SettingsTextField
                 label="#RRGGBB"
                 value={colorCode}
-                onChange={(e) => handleHexInput(e.target.value)}
-                error={!isValidHex}
-                helperText={
+                onChange={handleHexInput}
+                errorText={
                   isValidHex ? "" : "正しい16進数カラーコードを入力してください"
                 }
-                sx={{
-                  maxWidth: 240,
-                  "& .MuiOutlinedInput-root.Mui-focused": {
-                    boxShadow: `0 0 0 3px ${focusRingColor}`,
-                    borderRadius: 1,
-                  },
-                  "& .MuiOutlinedInput-root.Mui-focused fieldset": {
-                    borderColor: brandPrimary,
-                  },
-                }}
+                className="max-w-[240px]"
+                inputClassName="uppercase"
               />
             </div>
           )}
@@ -306,28 +274,17 @@ export default function AdminTheme() {
               <p className="text-xs text-slate-500 pb-2 border-b" style={{ borderColor: previewPanelDividerColor }}>
                 選択したカラーがフォーカスリングやボタンにどう反映されるかを確認できます。
               </p>
-              <Button
-                variant="contained"
-                size="small"
-                sx={{
-                  alignSelf: "flex-start",
-                  textTransform: "none",
+              <button
+                type="button"
+                className="mt-1 self-start rounded-lg px-4 py-2 text-sm font-medium focus:outline-none"
+                style={{
                   backgroundColor: brandPrimary,
                   color: previewTokens.color.brand.primary.contrastText,
-                  boxShadow: "none",
-                  mt: 1,
-                  "&:hover": {
-                    backgroundColor: previewTokens.color.brand.primary.dark,
-                    boxShadow: "none",
-                  },
-                  "&:focus-visible": {
-                    outline: "none",
-                    boxShadow: `0 0 0 3px ${focusRingColor}`,
-                  },
+                  boxShadow: `0 0 0 0 ${focusRingColor}`,
                 }}
               >
                 プライマリボタン
-              </Button>
+              </button>
             </div>
           </div>
 

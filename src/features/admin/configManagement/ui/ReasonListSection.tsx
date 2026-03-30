@@ -1,5 +1,8 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Checkbox, FormControlLabel, TextField } from "@mui/material";
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import {
+  SettingsCheckbox,
+  SettingsTextField,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 
 interface Reason {
   reason: string;
@@ -29,23 +32,16 @@ const ReasonListSection = ({
         className="flex flex-row flex-wrap items-center gap-4"
         key={index}
       >
-        <TextField
+        <SettingsTextField
           label={`理由 ${index + 1}`}
           value={reason.reason}
-          onChange={(e) => onReasonChange(index, "reason", e.target.value)}
-          size="small"
-          sx={{ width: 320, maxWidth: "100%" }}
+          onChange={(value) => onReasonChange(index, "reason", value)}
+          className="w-[320px] max-w-full"
         />
         <div className="min-w-[88px]">
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={reason.enabled}
-                onChange={(e) =>
-                  onReasonChange(index, "enabled", e.target.checked)
-                }
-              />
-            }
+          <SettingsCheckbox
+            checked={reason.enabled}
+            onChange={(checked) => onReasonChange(index, "enabled", checked)}
             label="有効"
           />
         </div>
@@ -55,7 +51,7 @@ const ReasonListSection = ({
           onClick={() => onRemoveReason(index)}
           aria-label="削除"
         >
-          <DeleteIcon />
+          <SettingsIcon name="delete" />
         </button>
       </div>
     ))}

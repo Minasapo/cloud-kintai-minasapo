@@ -1,16 +1,15 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
+import { SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -30,10 +29,6 @@ export default function Absent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [getAbsentEnabled, getConfigId]);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAbsentEnabled(event.target.checked);
-  };
 
   const handleSave = async () => {
     try {
@@ -70,14 +65,9 @@ export default function Absent() {
       >
         <div className="flex flex-col gap-4">
           <div>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={absentEnabled}
-                  onChange={handleChange}
-                  color="primary"
-                />
-              }
+            <SettingsSwitch
+              checked={absentEnabled}
+              onChange={setAbsentEnabled}
               label={absentEnabled ? "有効" : "無効"}
             />
           </div>

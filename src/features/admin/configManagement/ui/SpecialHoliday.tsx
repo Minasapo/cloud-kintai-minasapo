@@ -1,16 +1,15 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
+import { SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -31,10 +30,6 @@ export default function SpecialHoliday() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [getSpecialHolidayEnabled, getConfigId]);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSpecialHolidayEnabled(event.target.checked);
-  };
 
   const handleSave = async () => {
     try {
@@ -71,14 +66,9 @@ export default function SpecialHoliday() {
       >
         <div className="flex flex-col gap-4">
           <div>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={specialHolidayEnabled}
-                  onChange={handleChange}
-                  color="primary"
-                />
-              }
+            <SettingsSwitch
+              checked={specialHolidayEnabled}
+              onChange={setSpecialHolidayEnabled}
               label={specialHolidayEnabled ? "有効" : "無効"}
             />
           </div>

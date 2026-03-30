@@ -2,7 +2,7 @@ import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -38,18 +38,6 @@ export default function OfficeMode() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [getOfficeMode, getHourlyPaidHolidayEnabled, getConfigId]);
-
-  const handleOfficeModeChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setOfficeMode(event.target.checked);
-  };
-
-  const handleHourlyPaidHolidayEnabledChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setHourlyPaidHolidayEnabled(event.target.checked);
-  };
 
   const handleSave = async () => {
     try {
@@ -88,11 +76,9 @@ export default function OfficeMode() {
       >
         <OfficeModeSection
           officeMode={officeMode}
-          onOfficeModeChange={handleOfficeModeChange}
+          onOfficeModeChange={setOfficeMode}
           hourlyPaidHolidayEnabled={hourlyPaidHolidayEnabled}
-          onHourlyPaidHolidayEnabledChange={
-            handleHourlyPaidHolidayEnabledChange
-          }
+          onHourlyPaidHolidayEnabledChange={setHourlyPaidHolidayEnabled}
         />
       </AdminSettingsSection>
     </AdminSettingsLayout>

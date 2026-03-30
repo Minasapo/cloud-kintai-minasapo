@@ -1,5 +1,3 @@
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -100,18 +98,16 @@ export default function WorkingTime() {
           </button>
         }
       >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <WorkingTimeSection
-            startTime={startTime}
-            endTime={endTime}
-            lunchRestStartTime={lunchRestStartTime}
-            lunchRestEndTime={lunchRestEndTime}
-            setStartTime={setStartTime}
-            setEndTime={setEndTime}
-            setLunchRestStartTime={setLunchRestStartTime}
-            setLunchRestEndTime={setLunchRestEndTime}
-          />
-        </LocalizationProvider>
+        <WorkingTimeSection
+          startTime={startTime}
+          endTime={endTime}
+          lunchRestStartTime={lunchRestStartTime}
+          lunchRestEndTime={lunchRestEndTime}
+          setStartTime={setStartTime}
+          setEndTime={setEndTime}
+          setLunchRestStartTime={setLunchRestStartTime}
+          setLunchRestEndTime={setLunchRestEndTime}
+        />
       </AdminSettingsSection>
     </AdminSettingsLayout>
   );

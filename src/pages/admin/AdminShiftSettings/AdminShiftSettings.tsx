@@ -1,13 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import {
-  Alert,
-  FormLabel,
-  Tab,
-  Tabs,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -21,6 +12,10 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import { E14001, S14001, S14002 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import {
+  SettingsAlert,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -217,14 +212,26 @@ export default function AdminShiftSettings() {
     <AdminSettingsLayout>
       <div className="flex flex-col gap-6">
         <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-200">
-          <Tabs
-            value={activeTab}
-            onChange={(_, value: ShiftSettingsTab) => setActiveTab(value)}
-            variant="fullWidth"
-          >
-            <Tab label="シフトグループ" value="shift-group" />
-            <Tab label="シフト表示" value="shift-display" />
-          </Tabs>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { value: "shift-group" as const, label: "シフトグループ" },
+              { value: "shift-display" as const, label: "シフト表示" },
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setActiveTab(tab.value)}
+                className={[
+                  "rounded-xl px-4 py-3 text-sm font-medium transition",
+                  activeTab === tab.value
+                    ? "bg-emerald-600 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200",
+                ].join(" ")}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div
@@ -246,16 +253,16 @@ export default function AdminShiftSettings() {
                   ))}
                 </ul>
               </div>
-              <Alert severity="info">{SHIFT_GROUP_UI_TEXTS.saveInfo}</Alert>
+              <SettingsAlert>{SHIFT_GROUP_UI_TEXTS.saveInfo}</SettingsAlert>
 
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex flex-col gap-6">
                   <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフトグループ</h3>
                   <div className="flex flex-col gap-4">
                   {fields.length === 0 ? (
-                    <Alert severity="info" variant="outlined">
+                    <SettingsAlert>
                       {SHIFT_GROUP_UI_TEXTS.emptyGroups}
-                    </Alert>
+                    </SettingsAlert>
                   ) : (
                     fields.map((group, index) => (
                       <ShiftGroupRow
@@ -272,11 +279,11 @@ export default function AdminShiftSettings() {
                     onClick={handleAddGroup}
                     type="button"
                   >
-                    <AddCircleOutlineIcon className="text-slate-500" fontSize="small" />
+                    <SettingsIcon name="plus" className="text-slate-500" />
                     <span>グループを追加</span>
                   </button>
                   {hasValidationError && (
-                    <Alert severity="warning">
+                    <SettingsAlert variant="warning">
                       <div className="flex flex-col gap-2">
                         <span className="text-sm">
                           {SHIFT_GROUP_UI_TEXTS.validationWarning}
@@ -289,7 +296,7 @@ export default function AdminShiftSettings() {
                           ))}
                         </ul>
                       </div>
-                    </Alert>
+                    </SettingsAlert>
                   )}
                 </div>
               </div>
@@ -315,33 +322,38 @@ export default function AdminShiftSettings() {
         >
           {activeTab === "shift-display" && (
             <div className="flex flex-col gap-6">
-              <Alert severity="info">
-                シフト管理画面の表示モードを設定します。
-              </Alert>
+              <SettingsAlert>シフト管理画面の表示モードを設定します。</SettingsAlert>
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex flex-col gap-6">
                   <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフト表示</h3>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
-                      <FormLabel>表示モード</FormLabel>
-                      <div>
-                        <ToggleButtonGroup
-                          color="primary"
-                          exclusive
-                          size="small"
-                          value={shiftDefaultMode}
-                          onChange={(_, value: ShiftDisplayMode | null) => {
-                            if (!value) {
-                              return;
-                            }
-                            setShiftDefaultMode(value);
-                          }}
+                      <span className="text-sm font-medium text-slate-700">表示モード</span>
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setShiftDefaultMode("normal")}
+                          className={[
+                            "rounded-xl border px-4 py-2 text-sm font-medium transition",
+                            shiftDefaultMode === "normal"
+                              ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                              : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
+                          ].join(" ")}
                         >
-                          <ToggleButton value="normal">通常モード</ToggleButton>
-                          <ToggleButton value="collaborative">
-                            共同編集モード
-                          </ToggleButton>
-                        </ToggleButtonGroup>
+                          通常モード
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShiftDefaultMode("collaborative")}
+                          className={[
+                            "rounded-xl border px-4 py-2 text-sm font-medium transition",
+                            shiftDefaultMode === "collaborative"
+                              ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                              : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
+                          ].join(" ")}
+                        >
+                          共同編集モード
+                        </button>
                       </div>
                     </div>
                     <span className="text-sm text-slate-500">

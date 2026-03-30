@@ -1,21 +1,5 @@
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import MenuIcon from "@mui/icons-material/Menu";
-import {
-  Box,
-  Chip,
-  Collapse,
-  Container,
-  Drawer,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import "./AdminMasterLayout.scss";
+
 import React, { memo, useMemo } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -25,21 +9,7 @@ import {
   getAdminSettingsNavigationGroups,
   resolveAdminSettingsCategory,
 } from "@/features/admin/layout/model/adminSettingsNavigation";
-
-const DRAWER_BOX_SX = {
-  width: 260,
-  p: 1.25,
-  transition: "width 200ms",
-  bgcolor: "transparent",
-} as const;
-
-const DRAWER_LIST_SX = {
-  borderRadius: "24px",
-  border: "1px solid rgba(226,232,240,0.85)",
-  bgcolor: "#ffffff",
-  boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
-  overflow: "hidden",
-} as const;
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
 
 const MASTER_MENU_GROUPS = getAdminSettingsNavigationGroups();
 
@@ -48,6 +18,36 @@ const createCategoryOpenState = (activeCategoryKey: AdminSettingsCategoryKey | n
     MASTER_MENU_GROUPS.map((group) => [group.key, group.key === activeCategoryKey]),
   ) as Record<AdminSettingsCategoryKey, boolean>;
 
+const useIsDesktopNavigation = () => {
+  const getMatch = () =>
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(min-width: 768px)").matches;
+
+  const [isDesktop, setIsDesktop] = React.useState(getMatch);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const handleChange = (event: MediaQueryListEvent) => setIsDesktop(event.matches);
+
+    setIsDesktop(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
+  return isDesktop;
+};
+
 const SettingsContextHeader = memo(function SettingsContextHeader() {
   const location = useLocation();
   const currentItem = findAdminSettingsItemByPath(location.pathname);
@@ -55,88 +55,50 @@ const SettingsContextHeader = memo(function SettingsContextHeader() {
 
   if (!currentItem || !currentCategory) {
     return (
-      <Stack spacing={1.25}>
-        <Typography
-          component="h1"
-          sx={{
-            m: 0,
-            fontSize: { xs: "1.8rem", md: "2.15rem" },
-            fontWeight: 700,
-            lineHeight: 1.1,
-            letterSpacing: "-0.03em",
-            color: "#020617",
-          }}
-        >
+      <div className="flex flex-col gap-3">
+        <h1 className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.15rem]">
           設定
-        </Typography>
-        <Typography sx={{ color: "#64748b", lineHeight: 1.85, maxWidth: "72ch" }}>
+        </h1>
+        <p className="m-0 max-w-[72ch] text-slate-500">
           業務ごとに設定を整理しています。カテゴリから必要な項目を選んで詳細を確認してください。
-        </Typography>
-      </Stack>
+        </p>
+      </div>
     );
   }
 
   return (
-    <Stack spacing={1.25}>
-      <Chip
-        label={currentCategory.title}
-        sx={{
-          alignSelf: "flex-start",
-          bgcolor: "rgba(16,185,129,0.12)",
-          color: "#047857",
-          fontWeight: 700,
-        }}
-      />
-      <Typography
-        component="h1"
-        sx={{
-          m: 0,
-          fontSize: { xs: "1.8rem", md: "2.1rem" },
-          fontWeight: 700,
-          lineHeight: 1.1,
-          letterSpacing: "-0.03em",
-          color: "#020617",
-        }}
-      >
+    <div className="flex flex-col gap-3">
+      <span className="inline-flex w-fit rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
+        {currentCategory.title}
+      </span>
+      <h1 className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.1rem]">
         {currentItem.title}
-      </Typography>
-      <Typography sx={{ color: "#64748b", lineHeight: 1.8, maxWidth: "72ch" }}>
-        {currentItem.description}
-      </Typography>
-    </Stack>
+      </h1>
+      <p className="m-0 max-w-[72ch] text-slate-500">{currentItem.description}</p>
+    </div>
   );
 });
 
 const MasterLayoutContent = memo(function MasterLayoutContent() {
   return (
-    <Box sx={{ flexGrow: 2, minWidth: 0 }}>
-      <Stack
-        spacing={1}
-        sx={{
-          borderRadius: "28px",
-          border: "1px solid rgba(226,232,240,0.8)",
-          bgcolor: "#ffffff",
-          boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
-          px: { xs: 2, md: 3 },
-          py: { xs: 2, md: 3 },
-        }}
-      >
+    <div className="min-w-0 flex-1">
+      <section className="flex flex-col gap-4 rounded-[28px] border border-slate-200 bg-white px-4 py-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:px-6 md:py-6">
         <SettingsContextHeader />
-        <Box>
+        <div>
           <Outlet />
-        </Box>
-      </Stack>
-    </Box>
+        </div>
+      </section>
+    </div>
   );
 });
 
 type MasterLayoutNavigationProps = {
-  isMdUp: boolean;
+  isDesktop?: boolean;
   onNavigateComplete: () => void;
 };
 
 const MasterLayoutNavigation = memo(function MasterLayoutNavigation({
-  isMdUp,
+  isDesktop = false,
   onNavigateComplete,
 }: MasterLayoutNavigationProps) {
   const navigate = useNavigate();
@@ -153,146 +115,134 @@ const MasterLayoutNavigation = memo(function MasterLayoutNavigation({
         const isActiveGroup = activeCategoryKey === group.key;
 
         return (
-          <Box key={group.key}>
-            <ListItemButton
-              sx={{
-                p: 2,
-                alignItems: "flex-start",
-                borderBottom: isOpen ? "1px solid rgba(241,245,249,0.85)" : "none",
-              }}
+          <div key={group.key} className="border-b border-slate-100 last:border-b-0">
+            <button
+              type="button"
+              aria-expanded={isOpen}
+              className={[
+                "flex w-full items-start gap-3 px-4 py-4 text-left transition-colors",
+                isActiveGroup ? "bg-emerald-50/60" : "hover:bg-slate-50",
+              ].join(" ")}
               onClick={() =>
                 setOpenGroups((current) => ({
                   ...current,
                   [group.key]: !current[group.key],
                 }))
               }
-              selected={isActiveGroup}
             >
-              <Box sx={{ flex: 1 }}>
-                <ListItemText
-                  primary={group.title}
-                  secondary={group.description}
-                  secondaryTypographyProps={{
-                    sx: { mt: 0.5, color: "rgba(100,116,139,0.92)", lineHeight: 1.5 },
-                  }}
-                />
-              </Box>
-              {isOpen ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-            <Collapse in={isOpen} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding sx={{ py: 1 }}>
-                {group.items.map((item) => (
-                  <ListItemButton
-                    key={item.path}
-                    sx={{
-                      p: 1.25,
-                      pl: 3,
-                      pr: 2,
-                      mx: 1,
-                      my: 0.25,
-                      borderRadius: "14px",
-                    }}
-                    onClick={() => {
-                      navigate(item.path);
-                      if (!isMdUp) onNavigateComplete();
-                    }}
-                    selected={location.pathname === item.path}
-                  >
-                    <ListItemText
-                      primary={item.title}
-                      secondary={item.description}
-                      secondaryTypographyProps={{
-                        sx: { mt: 0.5, color: "rgba(100,116,139,0.92)", lineHeight: 1.45 },
-                      }}
-                    />
-                  </ListItemButton>
-                ))}
-              </List>
-            </Collapse>
-          </Box>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-slate-900">{group.title}</div>
+                <div className="mt-1 text-sm leading-6 text-slate-500">{group.description}</div>
+              </div>
+              <SettingsIcon
+                name={isOpen ? "chevron-up" : "chevron-down"}
+                className="mt-1 text-slate-500"
+              />
+            </button>
+            <div
+              className={[
+                "admin-master-layout__group-content",
+                isOpen ? "admin-master-layout__group-content--open" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <div className="admin-master-layout__group-content-inner">
+                <div className="flex flex-col gap-1 px-2 py-2">
+                  {isOpen
+                    ? group.items.map((item) => (
+                        <button
+                          key={item.path}
+                          type="button"
+                          className={[
+                            "mx-1 flex flex-col rounded-2xl px-4 py-3 text-left transition-colors",
+                            location.pathname === item.path
+                              ? "bg-emerald-100/70 text-slate-950"
+                              : "text-slate-700 hover:bg-slate-50",
+                          ].join(" ")}
+                          onClick={() => {
+                            navigate(item.path);
+                            if (!isDesktop) {
+                              onNavigateComplete();
+                            }
+                          }}
+                        >
+                          <span className="font-medium">{item.title}</span>
+                          <span className="mt-1 text-sm leading-6 text-slate-500">
+                            {item.description}
+                          </span>
+                        </button>
+                      ))
+                    : null}
+                </div>
+              </div>
+            </div>
+          </div>
         );
       }),
-    [activeCategoryKey, isMdUp, location.pathname, navigate, onNavigateComplete, openGroups],
+    [activeCategoryKey, isDesktop, location.pathname, navigate, onNavigateComplete, openGroups],
   );
 
   return (
-    <Box sx={DRAWER_BOX_SX} role="presentation">
-      <List sx={DRAWER_LIST_SX}>
-        <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-          <Typography
-            sx={{
-              fontSize: "0.82rem",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "#64748b",
-            }}
-          >
-            設定
-          </Typography>
-        </Box>
-        {menuBoxList}
-      </List>
-    </Box>
+    <nav
+      className="flex h-full w-[260px] flex-col rounded-[24px] border border-slate-200 bg-white p-2 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)]"
+      aria-label="設定ナビゲーション"
+    >
+      <div className="px-4 pb-2 pt-3 text-[0.82rem] font-bold uppercase tracking-[0.08em] text-slate-500">
+        設定
+      </div>
+      <div>{menuBoxList}</div>
+    </nav>
   );
 });
 
 export default function AdminMasterLayout() {
-  const theme = useTheme();
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const isDesktop = useIsDesktopNavigation();
 
   return (
-    <Container
-      maxWidth={false}
-      sx={{ maxWidth: "1360px !important", pt: 1, px: { xs: 1.5, sm: 2.5 } }}
-    >
-      <Stack direction="row" sx={{ height: 1, pt: 1, gap: 2 }}>
-        {!isMdUp && (
-          <Box sx={{ position: "absolute", left: 16, top: 12 }}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              onClick={() => setMobileOpen(true)}
-              sx={{
-                borderRadius: "9999px",
-                border: "1px solid rgba(148,163,184,0.28)",
-                bgcolor: "rgba(255,255,255,0.88)",
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-          </Box>
-        )}
-
-        {isMdUp ? (
-          <Box
-            sx={{
-              width: 260,
-              transition: "width 200ms",
-            }}
+    <div className="admin-master-layout relative mx-auto max-w-[1360px] px-4 pb-4 pt-2 sm:px-6">
+      {!isDesktop ? (
+        <>
+          <button
+            type="button"
+            aria-label="menu"
+            onClick={() => setMobileOpen(true)}
+            className="absolute left-4 top-3 z-30 inline-flex rounded-full border border-slate-300 bg-white/90 p-2 text-slate-700 shadow-sm transition hover:bg-white"
           >
+            <SettingsIcon name="menu" />
+          </button>
+
+          {mobileOpen ? (
+            <>
+              <div
+                className="admin-master-layout__mobile-backdrop admin-master-layout__mobile-backdrop--open"
+                onClick={() => setMobileOpen(false)}
+              />
+
+              <div className="admin-master-layout__mobile-nav admin-master-layout__mobile-nav--open">
+                <div className="h-full bg-transparent p-3">
+                  <MasterLayoutNavigation onNavigateComplete={() => setMobileOpen(false)} />
+                </div>
+              </div>
+            </>
+          ) : null}
+        </>
+      ) : null}
+
+      <div className="flex h-full flex-row gap-4 pt-4">
+        {isDesktop ? (
+          <div>
             <MasterLayoutNavigation
-              isMdUp={isMdUp}
+              isDesktop
               onNavigateComplete={() => setMobileOpen(false)}
             />
-          </Box>
-        ) : (
-          <Drawer
-            anchor="left"
-            open={mobileOpen}
-            onClose={() => setMobileOpen(false)}
-          >
-            <MasterLayoutNavigation
-              isMdUp={isMdUp}
-              onNavigateComplete={() => setMobileOpen(false)}
-            />
-          </Drawer>
-        )}
-
-        <MasterLayoutContent />
-      </Stack>
-    </Container>
+          </div>
+        ) : null}
+        <div className={isDesktop ? "" : "pt-6"}>
+          <MasterLayoutContent />
+        </div>
+      </div>
+    </div>
   );
 }

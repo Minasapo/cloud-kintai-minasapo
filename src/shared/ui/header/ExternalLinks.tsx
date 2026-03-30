@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { predefinedIcons } from "@/shared/config/icons";
+import { predefinedIcons, type PredefinedIconValue } from "@/shared/config/icons";
 import { designTokenVar } from "@/shared/designSystem";
 
 export type ExternalLinkItem = {
@@ -147,7 +147,7 @@ function AppsGlyph({ color }: { color: string }) {
   );
 }
 
-const iconMap = new Map(
+const iconMap = new Map<PredefinedIconValue, JSX.Element>(
   predefinedIcons.map((icon) => [icon.value, icon.component]),
 );
 
@@ -218,7 +218,10 @@ function LinkGridItem({
   iconType: string;
   staffName: string;
 }) {
-  const iconComponent = iconMap.get(iconType) || iconMap.get("LinkIcons");
+  const normalizedIconType = predefinedIcons.some((icon) => icon.value === iconType)
+    ? (iconType as PredefinedIconValue)
+    : "LinkIcons";
+  const iconComponent = iconMap.get(normalizedIconType) || iconMap.get("LinkIcons");
   const processedUrl = url.replace("{staffName}", staffName);
 
   return (

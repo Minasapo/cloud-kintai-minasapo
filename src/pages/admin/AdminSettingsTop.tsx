@@ -1,17 +1,10 @@
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import {
-  Box,
-  ButtonBase,
-  Chip,
-  Stack,
-  Typography,
-} from "@mui/material";
 import { memo } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import {
   getAdminSettingsNavigationGroups,
 } from "@/features/admin/layout/model/adminSettingsNavigation";
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
 
 const SettingsCard = memo(function SettingsCard({
   title,
@@ -25,64 +18,19 @@ const SettingsCard = memo(function SettingsCard({
   ctaLabel: string;
 }) {
   return (
-    <ButtonBase
-      component={RouterLink}
+    <RouterLink
       to={path}
-      sx={{
-        width: "100%",
-        display: "flex",
-        alignItems: "stretch",
-        textAlign: "left",
-        borderRadius: "24px",
-      }}
+      className="flex min-h-[196px] flex-col gap-4 rounded-[24px] border border-slate-200 bg-white p-6 text-left no-underline shadow-[0_18px_42px_-34px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_28px_54px_-34px_rgba(15,23,42,0.4)]"
     >
-      <Stack
-        spacing={2}
-        sx={{
-          width: "100%",
-          minHeight: 196,
-          borderRadius: "24px",
-          border: "1px solid rgba(226,232,240,0.9)",
-          bgcolor: "#ffffff",
-          p: 3,
-          boxShadow: "0 18px 42px -34px rgba(15,23,42,0.45)",
-          transition: "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease",
-          "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 28px 54px -34px rgba(15,23,42,0.4)",
-            borderColor: "rgba(16,185,129,0.38)",
-          },
-        }}
-      >
-        <Stack spacing={1}>
-          <Typography
-            component="h3"
-            sx={{
-              fontSize: "1.05rem",
-              fontWeight: 700,
-              color: "#0f172a",
-            }}
-          >
-            {title}
-          </Typography>
-          <Typography sx={{ color: "#475569", lineHeight: 1.7 }}>
-            {description}
-          </Typography>
-        </Stack>
-        <Box sx={{ mt: "auto", display: "flex", alignItems: "center", gap: 0.75 }}>
-          <Typography
-            sx={{
-              color: "#059669",
-              fontWeight: 700,
-              fontSize: "0.95rem",
-            }}
-          >
-            {ctaLabel}
-          </Typography>
-          <ChevronRightIcon sx={{ color: "#059669", fontSize: 20 }} />
-        </Box>
-      </Stack>
-    </ButtonBase>
+      <div className="flex flex-col gap-2">
+        <h3 className="m-0 text-[1.05rem] font-bold text-slate-900">{title}</h3>
+        <p className="m-0 leading-7 text-slate-600">{description}</p>
+      </div>
+      <div className="mt-auto flex items-center gap-2 text-emerald-600">
+        <span className="text-[0.95rem] font-bold">{ctaLabel}</span>
+        <SettingsIcon name="chevron-right" />
+      </div>
+    </RouterLink>
   );
 });
 
@@ -90,51 +38,26 @@ export default function AdminSettingsTop() {
   const groups = getAdminSettingsNavigationGroups();
 
   return (
-    <Stack spacing={4}>
+    <div className="flex flex-col gap-10">
       {groups.map((group) => (
-        <Stack key={group.key} spacing={2.5}>
-          <Stack spacing={1.25}>
-            <Chip
-              label={group.title}
-              sx={{
-                alignSelf: "flex-start",
-                bgcolor: "rgba(15,23,42,0.06)",
-                color: "#0f172a",
-                fontWeight: 700,
-              }}
-            />
-            <Typography
-              component="h2"
-              sx={{
-                fontSize: { xs: "1.35rem", md: "1.55rem" },
-                fontWeight: 700,
-                color: "#020617",
-                letterSpacing: "-0.02em",
-              }}
-            >
+        <section key={group.key} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
+            <span className="inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-sm font-bold text-slate-900">
               {group.title}
-            </Typography>
-            <Typography sx={{ color: "#64748b", lineHeight: 1.8, maxWidth: "72ch" }}>
-              {group.description}
-            </Typography>
-          </Stack>
+            </span>
+            <h2 className="m-0 text-[1.35rem] font-bold tracking-[-0.02em] text-slate-950 md:text-[1.55rem]">
+              {group.title}
+            </h2>
+            <p className="m-0 max-w-[72ch] leading-7 text-slate-500">{group.description}</p>
+          </div>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                lg: "repeat(2, minmax(0, 1fr))",
-              },
-              gap: 2,
-            }}
-          >
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {group.items.map((item) => (
               <SettingsCard key={item.path} {...item} />
             ))}
-          </Box>
-        </Stack>
+          </div>
+        </section>
       ))}
-    </Stack>
+    </div>
   );
 }

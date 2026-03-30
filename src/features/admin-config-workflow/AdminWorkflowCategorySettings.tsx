@@ -1,19 +1,3 @@
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import {
-  Alert,
-  FormControlLabel,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TextField,
-} from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -29,6 +13,13 @@ import {
 } from "@/entities/workflow/lib/workflowLabels";
 import useWorkflowTemplates from "@/entities/workflow-template/model/useWorkflowTemplates";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import {
+  SettingsAlert,
+  SettingsSwitch,
+  SettingsTextAreaField,
+  SettingsTextField,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -255,9 +246,9 @@ export default function AdminWorkflowCategorySettings() {
             </p>
           </div>
 
-          <Alert severity="info" className="mb-2">
+          <SettingsAlert className="mb-2">
             並び順は新規申請画面とワークフロー一覧の種別フィルタに反映されます。
-          </Alert>
+          </SettingsAlert>
 
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
             <div className="flex flex-col gap-4">
@@ -284,7 +275,7 @@ export default function AdminWorkflowCategorySettings() {
                       aria-label={`${item.label}を上へ移動`}
                       type="button"
                     >
-                      <ArrowUpwardIcon fontSize="small" />
+                      <SettingsIcon name="arrow-up" />
                     </button>
                     <button
                       className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500"
@@ -295,16 +286,12 @@ export default function AdminWorkflowCategorySettings() {
                       aria-label={`${item.label}を下へ移動`}
                       type="button"
                     >
-                      <ArrowDownwardIcon fontSize="small" />
+                      <SettingsIcon name="arrow-down" />
                     </button>
                     <div className="ml-2 min-w-[88px]">
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={item.enabled}
-                            onChange={() => handleToggleEnabled(index)}
-                          />
-                        }
+                      <SettingsSwitch
+                        checked={item.enabled}
+                        onChange={() => handleToggleEnabled(index)}
                         label={item.enabled ? "有効" : "無効"}
                       />
                     </div>
@@ -321,7 +308,7 @@ export default function AdminWorkflowCategorySettings() {
               disabled={saving}
               type="button"
             >
-              <RestartAltIcon fontSize="small" />
+              <SettingsIcon name="reset" />
               <span>デフォルトに戻す</span>
             </button>
             <button
@@ -344,34 +331,30 @@ export default function AdminWorkflowCategorySettings() {
             </p>
           </div>
 
-          <Alert severity="info" className="mb-2">
+          <SettingsAlert className="mb-2">
             テンプレート適用時は、申請フォームの入力内容を上書きする確認が表示されます。
-          </Alert>
+          </SettingsAlert>
 
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
             <div className="flex flex-col gap-4">
               <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
                 {editingTemplateId ? "テンプレート編集" : "テンプレート作成"}
               </h3>
-              <TextField
+              <SettingsTextField
                 label="テンプレート名"
-                size="small"
                 value={templateName}
-                onChange={(event) => setTemplateName(event.target.value)}
+                onChange={setTemplateName}
               />
-              <TextField
+              <SettingsTextField
                 label="タイトルテンプレート"
-                size="small"
                 value={templateTitle}
-                onChange={(event) => setTemplateTitle(event.target.value)}
+                onChange={setTemplateTitle}
               />
-              <TextField
+              <SettingsTextAreaField
                 label="詳細内容テンプレート"
-                size="small"
-                multiline
-                minRows={5}
                 value={templateContent}
-                onChange={(event) => setTemplateContent(event.target.value)}
+                onChange={setTemplateContent}
+                minRows={5}
               />
               <div className="flex flex-row justify-end gap-2 pt-2">
                 {editingTemplateId && (
@@ -402,7 +385,7 @@ export default function AdminWorkflowCategorySettings() {
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200 mb-8">
             <div className="flex flex-col gap-4">
               <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">テンプレート一覧</h3>
-              {templateError && <Alert severity="error">{templateError}</Alert>}
+              {templateError ? <SettingsAlert variant="error">{templateError}</SettingsAlert> : null}
               {templateLoading ? (
                 <p className="text-sm text-slate-500 py-4 text-center">
                   読み込み中...
@@ -413,29 +396,29 @@ export default function AdminWorkflowCategorySettings() {
                 </p>
               ) : (
                 <div className="overflow-x-auto">
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>テンプレート名</TableCell>
-                        <TableCell>タイトルテンプレート</TableCell>
-                        <TableCell>作成日</TableCell>
-                        <TableCell align="right">操作</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
+                  <table className="min-w-full border-separate border-spacing-0 text-sm">
+                    <thead>
+                      <tr className="text-left text-slate-500">
+                        <th className="border-b border-slate-200 px-4 py-3 font-medium">テンプレート名</th>
+                        <th className="border-b border-slate-200 px-4 py-3 font-medium">タイトルテンプレート</th>
+                        <th className="border-b border-slate-200 px-4 py-3 font-medium">作成日</th>
+                        <th className="border-b border-slate-200 px-4 py-3 text-right font-medium">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
                       {templates.map((template) => (
-                        <TableRow key={template.id}>
-                          <TableCell>{template.name}</TableCell>
-                          <TableCell>{template.title}</TableCell>
-                          <TableCell>{formatDateSlash(template.createdAt)}</TableCell>
-                          <TableCell align="right">
+                        <tr key={template.id} className="text-slate-700">
+                          <td className="border-b border-slate-100 px-4 py-3">{template.name}</td>
+                          <td className="border-b border-slate-100 px-4 py-3">{template.title}</td>
+                          <td className="border-b border-slate-100 px-4 py-3">{formatDateSlash(template.createdAt)}</td>
+                          <td className="border-b border-slate-100 px-4 py-3 text-right">
                             <button
                               className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition ml-1"
                               onClick={() => handleTemplateEdit(template.id)}
                               aria-label="テンプレートを編集"
                               type="button"
                             >
-                              <EditOutlinedIcon fontSize="small" />
+                              <SettingsIcon name="edit" />
                             </button>
                             <button
                               className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition ml-1"
@@ -443,13 +426,13 @@ export default function AdminWorkflowCategorySettings() {
                               aria-label="テンプレートを削除"
                               type="button"
                             >
-                              <DeleteOutlineIcon fontSize="small" />
+                              <SettingsIcon name="delete" />
                             </button>
-                          </TableCell>
-                        </TableRow>
+                          </td>
+                        </tr>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>

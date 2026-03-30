@@ -1,16 +1,15 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
+import { SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -31,10 +30,6 @@ export default function OvertimeConfirmation() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setId(getConfigId());
   }, [getOverTimeCheckEnabled, getConfigId]);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEnabled(event.target.checked);
-  };
 
   const handleSave = async () => {
     try {
@@ -71,10 +66,9 @@ export default function OvertimeConfirmation() {
       >
         <div className="flex flex-col gap-4">
           <div>
-            <FormControlLabel
-              control={
-                <Switch checked={enabled} onChange={handleChange} color="primary" />
-              }
+            <SettingsSwitch
+              checked={enabled}
+              onChange={setEnabled}
               label={enabled ? "有効" : "無効"}
             />
           </div>

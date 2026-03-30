@@ -1,18 +1,10 @@
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import LinearProgress from "@mui/material/LinearProgress";
-import MenuItem from "@mui/material/MenuItem";
-import Paper from "@mui/material/Paper";
-import Select, { type SelectChangeEvent } from "@mui/material/Select";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import {
+  SettingsAlert,
+  SettingsSelect,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 
 import { downloadJsonFile } from "../model/downloadJsonFile";
 import {
@@ -31,17 +23,13 @@ export default function SchemaExport() {
   const { cognitoUser } = useContext(AuthContext);
   const modelOptions = useMemo(() => EXPORT_MODEL_DEFINITIONS, []);
   const [selectedModel, setSelectedModel] = useState(
-    modelOptions[0]?.modelName ?? ""
+    modelOptions[0]?.modelName ?? "",
   );
   const [error, setError] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<ExportMode>(null);
   const [bulkExportProgress, setBulkExportProgress] =
     useState<BulkExportProgress | null>(null);
   const canUseExport = Boolean(cognitoUser?.owner);
-
-  const handleModelChange = (event: SelectChangeEvent<string>) => {
-    setSelectedModel(event.target.value);
-  };
 
   const handleSingleExport = async () => {
     const definition = getExportModelDefinition(selectedModel);
@@ -75,7 +63,7 @@ export default function SchemaExport() {
       const artifact = await createBulkExportArtifact(
         undefined,
         undefined,
-        setBulkExportProgress
+        setBulkExportProgress,
       );
       downloadJsonFile(artifact.payload, artifact.fileName);
     } catch (exportError) {
@@ -97,95 +85,97 @@ export default function SchemaExport() {
       : 0;
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 1 }}>
-        データエクスポート
-      </Typography>
-      <Stack spacing={3}>
-        <Typography variant="body2" color="text.secondary">
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="m-0 text-2xl font-semibold text-slate-900">データエクスポート</h2>
+        <p className="mt-2 text-sm text-slate-500">
           システム内の設定や登録データを、まとめて JSON ファイルとして保存できる保守機能です。
-        </Typography>
+        </p>
+      </div>
 
-        {!canUseExport && (
-          <Alert severity="warning">
-            この機能はオーナー権限ユーザーのみ利用できます。
-          </Alert>
-        )}
+      {!canUseExport && (
+        <SettingsAlert variant="warning">
+          この機能はオーナー権限ユーザーのみ利用できます。
+        </SettingsAlert>
+      )}
 
-        {error && <Alert severity="error">{error}</Alert>}
+      {error ? <SettingsAlert variant="error">{error}</SettingsAlert> : null}
 
-        {canUseExport && (
-          <>
-            <Paper variant="outlined" sx={{ p: 3 }}>
-              <Stack spacing={1}>
-                <Typography variant="h6">個別エクスポート</Typography>
-                <FormControl fullWidth>
-                  <InputLabel id="schema-export-model-label">対象モデル</InputLabel>
-                  <Select
-                    labelId="schema-export-model-label"
-                    value={selectedModel}
-                    label="対象モデル"
-                    onChange={handleModelChange}
-                    disabled={isExporting}
+      {canUseExport ? (
+        <>
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4">
+              <h3 className="m-0 text-lg font-semibold text-slate-900">個別エクスポート</h3>
+              <SettingsSelect
+                label="対象モデル"
+                value={selectedModel}
+                onChange={setSelectedModel}
+                disabled={isExporting}
+                options={modelOptions.map((option) => ({
+                  value: option.modelName,
+                  label: option.displayName,
+                }))}
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleSingleExport}
+                  disabled={!selectedModel || isExporting}
+                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  個別エクスポート
+                </button>
+                {activeMode === "single" ? (
+                  <span className="text-sm text-slate-500">処理中...</span>
+                ) : null}
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4">
+              <h3 className="m-0 text-lg font-semibold text-slate-900">一括エクスポート</h3>
+              <p className="m-0 text-sm text-slate-500">
+                対象 {modelOptions.length} モデルを全件取得し、単一 JSON ファイルとしてダウンロードします。
+              </p>
+              <SettingsAlert variant="warning">
+                全モデルの一括エクスポート実行中は、画面を移動せずそのままお待ちください。
+              </SettingsAlert>
+              {activeMode === "all" && bulkExportProgress ? (
+                <div className="flex flex-col gap-2">
+                  <p className="m-0 text-sm text-slate-500">
+                    {bulkExportProgress.totalModels} モデル中{" "}
+                    {bulkExportProgress.completedModels + 1} 件目を処理中:{" "}
+                    {bulkExportProgress.currentModelName}
+                  </p>
+                  <div
+                    className="h-2 w-full overflow-hidden rounded-full bg-slate-200"
+                    aria-label="一括エクスポート進捗"
                   >
-                    {modelOptions.map((option) => (
-                      <MenuItem key={option.modelName} value={option.modelName}>
-                        {option.displayName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Button
-                    variant="contained"
-                    onClick={handleSingleExport}
-                    disabled={!selectedModel || isExporting}
-                  >
-                    個別エクスポート
-                  </Button>
-                  {activeMode === "single" && <CircularProgress size={20} />}
-                </Stack>
-              </Stack>
-            </Paper>
-
-            <Paper variant="outlined" sx={{ p: 3 }}>
-              <Stack spacing={2}>
-                <Typography variant="h6">一括エクスポート</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  対象 {modelOptions.length} モデルを全件取得し、単一 JSON ファイルとしてダウンロードします。
-                </Typography>
-                <Alert severity="warning">
-                  全モデルの一括エクスポート実行中は、画面を移動せずそのままお待ちください。
-                </Alert>
-                {activeMode === "all" && bulkExportProgress && (
-                  <Stack spacing={1}>
-                    <Typography variant="body2" color="text.secondary">
-                      {bulkExportProgress.totalModels} モデル中{" "}
-                      {bulkExportProgress.completedModels + 1} 件目を処理中:{" "}
-                      {bulkExportProgress.currentModelName}
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={bulkProgressValue}
-                      aria-label="一括エクスポート進捗"
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all"
+                      style={{ width: `${bulkProgressValue}%` }}
                     />
-                  </Stack>
-                )}
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Button
-                    variant="outlined"
-                    onClick={handleBulkExport}
-                    disabled={isExporting}
-                  >
-                    全モデルを一括エクスポート
-                  </Button>
-                  {activeMode === "all" && <CircularProgress size={20} />}
-                </Stack>
-              </Stack>
-            </Paper>
-          </>
-        )}
-      </Stack>
-    </Box>
+                  </div>
+                </div>
+              ) : null}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleBulkExport}
+                  disabled={isExporting}
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  全モデルを一括エクスポート
+                </button>
+                {activeMode === "all" ? (
+                  <span className="text-sm text-slate-500">処理中...</span>
+                ) : null}
+              </div>
+            </div>
+          </section>
+        </>
+      ) : null}
+    </div>
   );
 }

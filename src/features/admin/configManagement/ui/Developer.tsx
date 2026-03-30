@@ -1,16 +1,15 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E14001, S14001, S14002 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@/features/admin/layout/ui/AdminSettingsSection";
+import { SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
 import {
   setSnackbarError,
   setSnackbarSuccess,
@@ -42,10 +41,7 @@ export default function Developer() {
     setId(getConfigId());
   }, [getConfigId, getWorkflowNotificationEnabled]);
 
-  const handleChange = (
-    _: React.ChangeEvent<HTMLInputElement>,
-    checked: boolean,
-  ) => {
+  const handleChange = (checked: boolean) => {
     setWorkflowNotificationEnabled(checked);
   };
 
@@ -85,6 +81,7 @@ export default function Developer() {
       description="実験中または内部向けの設定をまとめて管理します。項目の追加や削除があっても、この画面内で一覧できます。"
     >
       <AdminSettingsSection
+        title="開発者"
         actions={
           <button
             className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
@@ -101,14 +98,9 @@ export default function Developer() {
                 {setting.title}
               </h3>
               <div>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={setting.checked}
-                      onChange={handleChange}
-                      color="primary"
-                    />
-                  }
+                <SettingsSwitch
+                  checked={setting.checked}
+                  onChange={handleChange}
                   label={setting.checked ? "有効" : "無効"}
                 />
               </div>

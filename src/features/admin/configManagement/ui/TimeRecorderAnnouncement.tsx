@@ -72,8 +72,8 @@ export default function TimeRecorderAnnouncement() {
         <TimeRecorderAnnouncementSection
           enabled={enabled}
           message={message}
-          onEnabledChange={(_, checked) => setEnabled(checked)}
-          onMessageChange={(event) => setMessage(event.target.value)}
+          onEnabledChange={setEnabled}
+          onMessageChange={setMessage}
         />
       </AdminSettingsSection>
     </AdminSettingsLayout>

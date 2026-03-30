@@ -1,5 +1,3 @@
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -132,38 +130,38 @@ export default function QuickInput() {
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <AdminSettingsLayout
-        description={<>
+    <AdminSettingsLayout
+      description={
+        <>
           勤怠編集画面でボタンを押すと時刻が簡単に入力されます。
           <br />
           この機能は、勤務開始時刻と勤務終了時刻のみを設定できます。
-        </>}
+        </>
+      }
+    >
+      <AdminSettingsSection
+        actions={
+          <button
+            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            onClick={handleSave}
+          >
+            保存
+          </button>
+        }
       >
-        <AdminSettingsSection
-          actions={
-            <button
-              className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
-              onClick={handleSave}
-            >
-              保存
-            </button>
-          }
-        >
-          <QuickInputSection
-            quickInputStartTimes={quickInputStartTimes}
-            quickInputEndTimes={quickInputEndTimes}
-            onAddQuickInputStartTime={handleAddQuickInputStartTime}
-            onQuickInputStartTimeChange={handleQuickInputStartTimeChange}
-            onQuickInputStartTimeToggle={handleQuickInputStartTimeToggle}
-            onRemoveQuickInputStartTime={handleRemoveQuickInputStartTime}
-            onAddQuickInputEndTime={handleAddQuickInputEndTime}
-            onQuickInputEndTimeChange={handleQuickInputEndTimeChange}
-            onQuickInputEndTimeToggle={handleQuickInputEndTimeToggle}
-            onRemoveQuickInputEndTime={handleRemoveQuickInputEndTime}
-          />
-        </AdminSettingsSection>
-      </AdminSettingsLayout>
-    </LocalizationProvider>
+        <QuickInputSection
+          quickInputStartTimes={quickInputStartTimes}
+          quickInputEndTimes={quickInputEndTimes}
+          onAddQuickInputStartTime={handleAddQuickInputStartTime}
+          onQuickInputStartTimeChange={handleQuickInputStartTimeChange}
+          onQuickInputStartTimeToggle={handleQuickInputStartTimeToggle}
+          onRemoveQuickInputStartTime={handleRemoveQuickInputStartTime}
+          onAddQuickInputEndTime={handleAddQuickInputEndTime}
+          onQuickInputEndTimeChange={handleQuickInputEndTimeChange}
+          onQuickInputEndTimeToggle={handleQuickInputEndTimeToggle}
+          onRemoveQuickInputEndTime={handleRemoveQuickInputEndTime}
+        />
+      </AdminSettingsSection>
+    </AdminSettingsLayout>
   );
 }
