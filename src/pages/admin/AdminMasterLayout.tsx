@@ -3,6 +3,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   Box,
+  Chip,
   Collapse,
   Container,
   Drawer,
@@ -11,17 +12,19 @@ import {
   ListItemButton,
   ListItemText,
   Stack,
+  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import React, { memo, useMemo } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-type AdminMasterMenuItem = {
-  name: string;
-  path: string;
-  children?: readonly AdminMasterMenuItem[];
-};
+import type { AdminSettingsCategoryKey } from "@/features/admin/layout/model/adminSettingsNavigation";
+import {
+  findAdminSettingsItemByPath,
+  getAdminSettingsNavigationGroups,
+  resolveAdminSettingsCategory,
+} from "@/features/admin/layout/model/adminSettingsNavigation";
 
 const DRAWER_BOX_SX = {
   width: 260,
@@ -38,38 +41,71 @@ const DRAWER_LIST_SX = {
   overflow: "hidden",
 } as const;
 
-const MASTER_MENU_ITEMS: readonly AdminMasterMenuItem[] = [
-  { name: "集計対象月", path: "/admin/master/job_term" },
-  { name: "カレンダー設定", path: "/admin/master/holiday_calendar" },
-  { name: "テーマ", path: "/admin/master/theme" },
-  { name: "シフト", path: "/admin/master/shift" },
-  { name: "ワークフロー", path: "/admin/master/workflow" },
-  {
-    name: "勤怠",
-    path: "/admin/master/feature_management",
-    children: [
-      { name: "勤務時間", path: "/admin/master/feature_management/working_time" },
-      { name: "午前/午後休", path: "/admin/master/feature_management/am_pm_holiday" },
-      { name: "出勤モード", path: "/admin/master/feature_management/office_mode" },
-      {
-        name: "稼働統計",
-        path: "/admin/master/feature_management/attendance_statistics",
-      },
-      {
-        name: "残業確認",
-        path: "/admin/master/feature_management/overtime_confirmation",
-      },
-      { name: "外部リンク", path: "/admin/master/feature_management/links" },
-      { name: "打刻理由", path: "/admin/master/feature_management/reasons" },
-      { name: "クイック入力", path: "/admin/master/feature_management/quick_input" },
-      { name: "特別休暇", path: "/admin/master/feature_management/special_holiday" },
-      { name: "欠勤", path: "/admin/master/feature_management/absent" },
-    ],
-  },
-  { name: "開発者", path: "/admin/master/developer" },
-  { name: "打刻画面アナウンス", path: "/admin/master/time_recorder_announcement" },
-  { name: "エクスポート", path: "/admin/master/export" },
-];
+const MASTER_MENU_GROUPS = getAdminSettingsNavigationGroups();
+
+const createCategoryOpenState = (activeCategoryKey: AdminSettingsCategoryKey | null) =>
+  Object.fromEntries(
+    MASTER_MENU_GROUPS.map((group) => [group.key, group.key === activeCategoryKey]),
+  ) as Record<AdminSettingsCategoryKey, boolean>;
+
+const SettingsContextHeader = memo(function SettingsContextHeader() {
+  const location = useLocation();
+  const currentItem = findAdminSettingsItemByPath(location.pathname);
+  const currentCategory = resolveAdminSettingsCategory(location.pathname);
+
+  if (!currentItem || !currentCategory) {
+    return (
+      <Stack spacing={1.25}>
+        <Typography
+          component="h1"
+          sx={{
+            m: 0,
+            fontSize: { xs: "1.8rem", md: "2.15rem" },
+            fontWeight: 700,
+            lineHeight: 1.1,
+            letterSpacing: "-0.03em",
+            color: "#020617",
+          }}
+        >
+          設定
+        </Typography>
+        <Typography sx={{ color: "#64748b", lineHeight: 1.85, maxWidth: "72ch" }}>
+          業務ごとに設定を整理しています。カテゴリから必要な項目を選んで詳細を確認してください。
+        </Typography>
+      </Stack>
+    );
+  }
+
+  return (
+    <Stack spacing={1.25}>
+      <Chip
+        label={currentCategory.title}
+        sx={{
+          alignSelf: "flex-start",
+          bgcolor: "rgba(16,185,129,0.12)",
+          color: "#047857",
+          fontWeight: 700,
+        }}
+      />
+      <Typography
+        component="h1"
+        sx={{
+          m: 0,
+          fontSize: { xs: "1.8rem", md: "2.1rem" },
+          fontWeight: 700,
+          lineHeight: 1.1,
+          letterSpacing: "-0.03em",
+          color: "#020617",
+        }}
+      >
+        {currentItem.title}
+      </Typography>
+      <Typography sx={{ color: "#64748b", lineHeight: 1.8, maxWidth: "72ch" }}>
+        {currentItem.description}
+      </Typography>
+    </Stack>
+  );
+});
 
 const MasterLayoutContent = memo(function MasterLayoutContent() {
   return (
@@ -85,6 +121,7 @@ const MasterLayoutContent = memo(function MasterLayoutContent() {
           py: { xs: 2, md: 3 },
         }}
       >
+        <SettingsContextHeader />
         <Box>
           <Outlet />
         </Box>
@@ -104,68 +141,98 @@ const MasterLayoutNavigation = memo(function MasterLayoutNavigation({
 }: MasterLayoutNavigationProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [settingsOpen, setSettingsOpen] = React.useState(true);
+  const activeCategoryKey = resolveAdminSettingsCategory(location.pathname)?.key ?? null;
+  const [openGroups, setOpenGroups] = React.useState<Record<AdminSettingsCategoryKey, boolean>>(
+    () => createCategoryOpenState(activeCategoryKey),
+  );
 
   const menuBoxList = useMemo(
     () =>
-      MASTER_MENU_ITEMS.map((item) => {
-        const selected =
-          location.pathname === item.path ||
-          location.pathname.startsWith(item.path + "/");
-
-        if (item.children) {
-          return (
-            <Box key={item.path}>
-              <ListItemButton
-                sx={{ p: 2 }}
-                onClick={() => setSettingsOpen((current) => !current)}
-                selected={selected}
-              >
-                <ListItemText primary={item.name} />
-                {settingsOpen ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-              <Collapse in={settingsOpen} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {item.children.map((child) => (
-                    <ListItemButton
-                      key={child.path}
-                      sx={{ p: 1, pl: 4 }}
-                      onClick={() => {
-                        navigate(child.path);
-                        if (!isMdUp) onNavigateComplete();
-                      }}
-                      selected={location.pathname === child.path}
-                    >
-                      <ListItemText primary={child.name} />
-                    </ListItemButton>
-                  ))}
-                </List>
-              </Collapse>
-            </Box>
-          );
-        }
+      MASTER_MENU_GROUPS.map((group) => {
+        const isOpen = openGroups[group.key] || activeCategoryKey === group.key;
+        const isActiveGroup = activeCategoryKey === group.key;
 
         return (
-          <Box key={item.path}>
+          <Box key={group.key}>
             <ListItemButton
-              sx={{ p: 2 }}
-              onClick={() => {
-                navigate(item.path);
-                if (!isMdUp) onNavigateComplete();
+              sx={{
+                p: 2,
+                alignItems: "flex-start",
+                borderBottom: isOpen ? "1px solid rgba(241,245,249,0.85)" : "none",
               }}
-              selected={selected}
+              onClick={() =>
+                setOpenGroups((current) => ({
+                  ...current,
+                  [group.key]: !current[group.key],
+                }))
+              }
+              selected={isActiveGroup}
             >
-              <ListItemText primary={item.name} />
+              <Box sx={{ flex: 1 }}>
+                <ListItemText
+                  primary={group.title}
+                  secondary={group.description}
+                  secondaryTypographyProps={{
+                    sx: { mt: 0.5, color: "rgba(100,116,139,0.92)", lineHeight: 1.5 },
+                  }}
+                />
+              </Box>
+              {isOpen ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
+            <Collapse in={isOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding sx={{ py: 1 }}>
+                {group.items.map((item) => (
+                  <ListItemButton
+                    key={item.path}
+                    sx={{
+                      p: 1.25,
+                      pl: 3,
+                      pr: 2,
+                      mx: 1,
+                      my: 0.25,
+                      borderRadius: "14px",
+                    }}
+                    onClick={() => {
+                      navigate(item.path);
+                      if (!isMdUp) onNavigateComplete();
+                    }}
+                    selected={location.pathname === item.path}
+                  >
+                    <ListItemText
+                      primary={item.title}
+                      secondary={item.description}
+                      secondaryTypographyProps={{
+                        sx: { mt: 0.5, color: "rgba(100,116,139,0.92)", lineHeight: 1.45 },
+                      }}
+                    />
+                  </ListItemButton>
+                ))}
+              </List>
+            </Collapse>
           </Box>
         );
       }),
-    [isMdUp, location.pathname, navigate, onNavigateComplete, settingsOpen],
+    [activeCategoryKey, isMdUp, location.pathname, navigate, onNavigateComplete, openGroups],
   );
 
   return (
     <Box sx={DRAWER_BOX_SX} role="presentation">
-      <List sx={DRAWER_LIST_SX}>{menuBoxList}</List>
+      <List sx={DRAWER_LIST_SX}>
+        <Box sx={{ px: 2, pt: 2, pb: 1 }}>
+          <Typography
+            sx={{
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#64748b",
+            }}
+          >
+            Settings
+          </Typography>
+        </Box>
+        {menuBoxList}
+      </List>
     </Box>
   );
 });
@@ -181,7 +248,6 @@ export default function AdminMasterLayout() {
       sx={{ maxWidth: "1360px !important", pt: 1, px: { xs: 1.5, sm: 2.5 } }}
     >
       <Stack direction="row" sx={{ height: 1, pt: 1, gap: 2 }}>
-        {/* Mobile menu button */}
         {!isMdUp && (
           <Box sx={{ position: "absolute", left: 16, top: 12 }}>
             <IconButton
@@ -200,7 +266,6 @@ export default function AdminMasterLayout() {
           </Box>
         )}
 
-        {/* Sidebar: permanent on md+, drawer on mobile */}
         {isMdUp ? (
           <Box
             sx={{

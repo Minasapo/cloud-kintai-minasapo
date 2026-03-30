@@ -73,6 +73,9 @@ const AdminLogsRoute = createLazyRoute(
 const AdminMasterLayoutRoute = createLazyRoute(
   () => import("../pages/admin/AdminMasterLayout"),
 );
+const AdminSettingsTopRoute = createLazyRoute(
+  () => import("../pages/admin/AdminSettingsTop"),
+);
 const AdminShiftSettingsRoute = createLazyRoute(
   () => import("../pages/admin/AdminShiftSettings/AdminShiftSettings"),
 );
@@ -233,7 +236,7 @@ export const adminChildRoutes: RouteObject[] = [
     children: [
       {
         index: true,
-        lazy: JobTermRoute,
+        lazy: AdminSettingsTopRoute,
       },
       {
         path: "job_term",

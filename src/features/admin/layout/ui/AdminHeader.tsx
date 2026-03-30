@@ -29,10 +29,10 @@ const AdminHeader = ({ children }: AdminHeaderProps) => (
         color: "#020617",
       }}
     >
-      管理メニュー
+      設定
     </Typography>
     <Typography sx={{ color: "#64748b", lineHeight: 1.9 }}>
-      各カテゴリを選択して詳細な管理画面に移動してください。
+      設定カテゴリを整理しながら、必要な詳細画面へ移動できます。
     </Typography>
     {children}
   </Stack>
