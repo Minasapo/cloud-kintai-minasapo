@@ -20,6 +20,8 @@ type Props = {
   infoLabel: string;
   isLoading: boolean;
   hasData: boolean;
+  hasExcludedDuplicateAttendances?: boolean;
+  excludedDuplicateAttendanceCount?: number;
   chartData: ChartData;
   chartOptions: ChartOptions<"bar">;
 };
@@ -28,6 +30,8 @@ export function StaffWorkStatusChartCard({
   infoLabel,
   isLoading,
   hasData,
+  hasExcludedDuplicateAttendances = false,
+  excludedDuplicateAttendanceCount = 0,
   chartData,
   chartOptions,
 }: Props) {
@@ -55,6 +59,14 @@ export function StaffWorkStatusChartCard({
           </button>
         </Tooltip>
       </div>
+      {hasExcludedDuplicateAttendances ? (
+        <Typography
+          data-testid="admin-dashboard-staff-work-status-warning"
+          sx={{ mt: 1, fontSize: "0.75rem", color: "#b45309" }}
+        >
+          重複勤怠がある{excludedDuplicateAttendanceCount}日分を除外して集計しています
+        </Typography>
+      ) : null}
       <div className="mt-1 h-72">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-xs font-medium text-slate-500">

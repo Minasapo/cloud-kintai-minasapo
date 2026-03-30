@@ -19,7 +19,10 @@ import {
 } from "@/entities/attendance/lib/actions/workStatus";
 import { calcTotalRestTime, calcTotalWorkTime } from "@/entities/attendance/lib/time";
 import useCloseDates from "@/entities/attendance/model/useCloseDates";
-import { useStaffs } from "@/entities/staff/model/useStaffs/useStaffs";
+import {
+  type StaffType,
+  useStaffs,
+} from "@/entities/staff/model/useStaffs/useStaffs";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   listAttendances,
@@ -43,6 +46,17 @@ const isAttendanceCurrentWorking = (attendance: Attendance) => {
   const { code } = getWorkStatus(attendance);
   return code === WorkStatusCodes.WORKING || code === WorkStatusCodes.RESTING;
 };
+
+const buildStaffLabelMap = (staffs: StaffType[]) =>
+  staffs.reduce<Record<string, string>>((acc, staff) => {
+    if (!staff.id) return acc;
+    const displayName = [staff.familyName, staff.givenName]
+      .filter((part): part is string => Boolean(part && part.trim()))
+      .join(" ");
+    if (!displayName) return acc;
+    acc[staff.id] = displayName;
+    return acc;
+  }, {});
 
 export function useAdminDashboard() {
   const { authStatus } = useContext(AuthContext);
@@ -199,33 +213,25 @@ export function useAdminDashboard() {
 
   const staffWorkStatusSummary = useMemo(() => {
     const standardWorkHours = Math.max(getStandardWorkHours(), 0);
-    const { staffLabelsByCanonicalId, staffAliasToCanonicalId } = staffs.reduce<{
-      staffLabelsByCanonicalId: Record<string, string>;
-      staffAliasToCanonicalId: Record<string, string>;
-    }>(
-      (acc, staff) => {
-        if (!staff.id) return acc;
-        const displayName = [staff.familyName, staff.givenName]
-          .filter((part): part is string => Boolean(part && part.trim()))
-          .join(" ");
-        if (!displayName) return acc;
-        acc.staffLabelsByCanonicalId[staff.id] = displayName;
-        acc.staffAliasToCanonicalId[staff.id] = staff.id;
-        if (staff.cognitoUserId) {
-          acc.staffAliasToCanonicalId[staff.cognitoUserId] = staff.id;
-        }
+    const staffLabelsById = buildStaffLabelMap(staffs);
+    const staffIds = Object.keys(staffLabelsById);
+    const attendancesByStaffDate = periodAttendances.reduce<Record<string, Attendance[]>>(
+      (acc, attendance) => {
+        if (!attendance.staffId || !attendance.workDate) return acc;
+        if (!(attendance.staffId in staffLabelsById)) return acc;
+        const key = `${attendance.staffId}#${attendance.workDate}`;
+        acc[key] = [...(acc[key] ?? []), attendance];
         return acc;
       },
-      { staffLabelsByCanonicalId: {}, staffAliasToCanonicalId: {} },
+      {},
     );
 
-    const staffIds = Object.keys(staffLabelsByCanonicalId);
-    const totalsByStaff = periodAttendances.reduce<
+    const totalsByStaff = Object.entries(attendancesByStaffDate).reduce<
       Record<string, { workHours: number; overtimeHours: number }>
-    >((acc, attendance) => {
-      if (!attendance.staffId || !attendance.startTime || !attendance.endTime) return acc;
-      const canonicalStaffId = staffAliasToCanonicalId[attendance.staffId];
-      if (!canonicalStaffId) return acc;
+    >((acc, [staffDateKey, attendances]) => {
+      if (attendances.length !== 1) return acc;
+      const attendance = attendances[0];
+      if (!attendance?.staffId || !attendance.startTime || !attendance.endTime) return acc;
 
       const workHours = calcTotalWorkTime(attendance.startTime, attendance.endTime);
       if (!Number.isFinite(workHours)) return acc;
@@ -241,9 +247,11 @@ export function useAdminDashboard() {
       const netWorkHours = Math.max(workHours - restHours, 0);
       if (!Number.isFinite(netWorkHours)) return acc;
 
-      const current = acc[canonicalStaffId] ?? { workHours: 0, overtimeHours: 0 };
+      const [staffId] = staffDateKey.split("#");
+      if (!staffId) return acc;
+      const current = acc[staffId] ?? { workHours: 0, overtimeHours: 0 };
       const dailyOvertimeHours = Math.max(netWorkHours - standardWorkHours, 0);
-      acc[canonicalStaffId] = {
+      acc[staffId] = {
         workHours: Number((current.workHours + netWorkHours).toFixed(2)),
         overtimeHours: Number((current.overtimeHours + dailyOvertimeHours).toFixed(2)),
       };
@@ -257,13 +265,29 @@ export function useAdminDashboard() {
 
     return Object.entries(totalsByStaff)
       .map(([staffId, totals]) => {
-        const label = staffLabelsByCanonicalId[staffId];
+        const label = staffLabelsById[staffId];
         if (!label) return null;
         return { label, workHours: totals.workHours, overtimeHours: totals.overtimeHours };
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
       .toSorted((left, right) => right.workHours - left.workHours);
   }, [getStandardWorkHours, periodAttendances, staffs]);
+
+  const excludedDuplicateAttendanceCount = useMemo(() => {
+    const staffLabelsById = buildStaffLabelMap(staffs);
+    const attendancesByStaffDate = periodAttendances.reduce<Record<string, number>>(
+      (acc, attendance) => {
+        if (!attendance.staffId || !attendance.workDate) return acc;
+        if (!(attendance.staffId in staffLabelsById)) return acc;
+        const key = `${attendance.staffId}#${attendance.workDate}`;
+        acc[key] = (acc[key] ?? 0) + 1;
+        return acc;
+      },
+      {},
+    );
+
+    return Object.values(attendancesByStaffDate).filter((count) => count > 1).length;
+  }, [periodAttendances, staffs]);
 
   const staffWorkStatusChartData = useMemo(
     () => ({
@@ -354,6 +378,8 @@ export function useAdminDashboard() {
     approvedDailyReportCountLabel,
     currentWorkingStaffInfoLabel,
     aggregationPeriodInfoLabel,
+    excludedDuplicateAttendanceCount,
+    hasExcludedDuplicateAttendances: excludedDuplicateAttendanceCount > 0,
     // チャート
     staffWorkStatusSummary,
     staffWorkStatusChartData,
