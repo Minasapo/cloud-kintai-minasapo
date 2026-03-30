@@ -1,18 +1,3 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
 import { CloseDate, CreateCloseDateInput } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
@@ -28,6 +13,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+import DateField from "@/shared/ui/form/DateField";
 
 type BulkFormValues = {
   startMonth: dayjs.Dayjs | null;
@@ -263,38 +249,30 @@ export default function JobTermBulkRegister({
   const disableSubmit = submitting || !isValid || creatableItems.length === 0;
 
   return (
-    <Stack spacing={2} sx={{ border: 1, borderColor: "divider", p: 2 }}>
-      <Stack spacing={0.5}>
-        <Typography variant="h6">締め日指定でまとめて登録</Typography>
-        <Typography variant="body2" color="text.secondary">
+    <div className="flex flex-col gap-5 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-1">
+        <h3 className="text-lg font-semibold text-slate-900">締め日指定でまとめて登録</h3>
+        <p className="text-sm text-slate-600">
           締め日が存在しない月は月末を締め日として扱います。既に登録済みの月はスキップ対象として表示します。
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
+        </p>
+        <p className="text-sm text-slate-600">
           土日・休日カレンダー・会社休日カレンダーに該当する場合は、指定方向にずらして締め日を決定します。
-        </Typography>
-      </Stack>
+        </p>
+      </div>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+      <div className="grid gap-4 lg:grid-cols-3">
         <Controller
           name="startMonth"
           control={control}
           rules={{ required: true }}
           render={({ field, fieldState }) => (
-            <DatePicker
-              {...field}
-              views={["year", "month"]}
+            <DateField
               label="開始月"
               format="YYYY/MM"
-              slotProps={{
-                textField: {
-                  size: "small",
-                  error: !!fieldState.error,
-                  helperText: fieldState.error ? "必須項目です" : undefined,
-                },
-              }}
-              onChange={(value) =>
-                field.onChange(value?.startOf("month") ?? null)
-              }
+              monthOnly
+              value={field.value}
+              onChange={(value) => field.onChange(value?.startOf("month") ?? null)}
+              errorText={fieldState.error ? "必須項目です" : undefined}
             />
           )}
         />
@@ -304,21 +282,25 @@ export default function JobTermBulkRegister({
           control={control}
           rules={{ required: true, min: 1, max: 31 }}
           render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              type="number"
-              label="締め日"
-              size="small"
-              inputProps={{ min: 1, max: 31 }}
-              error={!!fieldState.error}
-              helperText={
-                fieldState.error ? "1〜31で入力してください" : undefined
-              }
-              onChange={(e) => {
-                const value = e.target.value;
-                field.onChange(value === "" ? null : Number(value));
-              }}
-            />
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-slate-700">締め日</span>
+              <input
+                type="number"
+                min={1}
+                max={31}
+                value={field.value ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  field.onChange(value === "" ? null : Number(value));
+                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              />
+              {fieldState.error ? (
+                <p className="m-0 text-xs leading-5 text-rose-600">
+                  1〜31で入力してください
+                </p>
+              ) : null}
+            </label>
           )}
         />
 
@@ -327,157 +309,167 @@ export default function JobTermBulkRegister({
           control={control}
           rules={{ required: true, min: 1, max: 12 }}
           render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              type="number"
-              label="登録月数"
-              size="small"
-              inputProps={{ min: 1, max: 12 }}
-              error={!!fieldState.error}
-              helperText={
-                fieldState.error ? "1〜12で入力してください" : undefined
-              }
-              onChange={(e) => {
-                const value = e.target.value;
-                field.onChange(value === "" ? null : Number(value));
-              }}
-            />
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-slate-700">登録月数</span>
+              <input
+                type="number"
+                min={1}
+                max={12}
+                value={field.value ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  field.onChange(value === "" ? null : Number(value));
+                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              />
+              {fieldState.error ? (
+                <p className="m-0 text-xs leading-5 text-rose-600">
+                  1〜12で入力してください
+                </p>
+              ) : null}
+            </label>
           )}
         />
-      </Stack>
+      </div>
 
-      <Stack spacing={1.5}>
-        <FormLabel>非稼働日の調整</FormLabel>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-          <RadioGroup
-            row
-            value={adjustDirection}
-            onChange={(e) =>
-              setValue(
-                "adjustDirection",
-                e.target.value as "previous" | "next",
-                {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                },
-              )
-            }
-          >
-            <FormControlLabel
-              value="previous"
-              control={<Radio />}
-              label="前倒し（直近の稼働日）"
-            />
-            <FormControlLabel
-              value="next"
-              control={<Radio />}
-              label="後ろ倒し（次の稼働日）"
-            />
-          </RadioGroup>
-
-          <FormGroup row>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={considerWeekend}
-                  onChange={(e) =>
-                    setValue("considerWeekend", e.target.checked, {
-                      shouldDirty: true,
-                    })
-                  }
-                />
-              }
-              label="土日を考慮"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={considerHolidayCalendar}
-                  onChange={(e) =>
-                    setValue("considerHolidayCalendar", e.target.checked, {
-                      shouldDirty: true,
-                    })
-                  }
-                />
-              }
-              label="休日カレンダーを考慮"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={considerCompanyHolidayCalendar}
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-semibold text-slate-800">非稼働日の調整</p>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-wrap gap-3">
+            {[
+              {
+                value: "previous",
+                label: "前倒し（直近の稼働日）",
+              },
+              {
+                value: "next",
+                label: "後ろ倒し（次の稼働日）",
+              },
+            ].map((option) => (
+              <label
+                key={option.value}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700"
+              >
+                <input
+                  type="radio"
+                  name="adjust-direction"
+                  value={option.value}
+                  checked={adjustDirection === option.value}
                   onChange={(e) =>
                     setValue(
-                      "considerCompanyHolidayCalendar",
-                      e.target.checked,
+                      "adjustDirection",
+                      e.target.value as "previous" | "next",
                       {
+                        shouldValidate: true,
                         shouldDirty: true,
                       },
-                    )
-                  }
+                    )}
                 />
-              }
-              label="会社休日カレンダーを考慮"
-            />
-          </FormGroup>
-        </Stack>
-        {(loadingHoliday || loadingCompany) && (
-          <Typography variant="body2" color="text.secondary">
-            休日カレンダー情報を読み込み中です…
-          </Typography>
-        )}
-      </Stack>
+                {option.label}
+              </label>
+            ))}
+          </div>
 
-      <Box>
-        <Typography variant="subtitle1" gutterBottom>
+          <div className="flex flex-wrap gap-3">
+            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={considerWeekend}
+                onChange={(e) =>
+                  setValue("considerWeekend", e.target.checked, {
+                    shouldDirty: true,
+                  })
+                }
+              />
+              土日を考慮
+            </label>
+            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={considerHolidayCalendar}
+                onChange={(e) =>
+                  setValue("considerHolidayCalendar", e.target.checked, {
+                    shouldDirty: true,
+                  })
+                }
+              />
+              休日カレンダーを考慮
+            </label>
+            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={considerCompanyHolidayCalendar}
+                onChange={(e) =>
+                  setValue("considerCompanyHolidayCalendar", e.target.checked, {
+                    shouldDirty: true,
+                  })
+                }
+              />
+              会社休日カレンダーを考慮
+            </label>
+          </div>
+        </div>
+        {(loadingHoliday || loadingCompany) && (
+          <p className="text-sm text-slate-500">
+            休日カレンダー情報を読み込み中です…
+          </p>
+        )}
+      </div>
+
+      <div>
+        <p className="mb-3 text-sm font-semibold text-slate-800">
           登録内容プレビュー
-        </Typography>
+        </p>
         {previewItems.length === 0 ? (
-          <Typography color="text.secondary">
+          <p className="text-sm text-slate-500">
             条件を入力するとプレビューが表示されます。
-          </Typography>
+          </p>
         ) : (
-          <Stack spacing={1}>
+          <div className="flex flex-col gap-2">
             {previewItems.map((item) => (
-              <Alert
+              <div
                 key={item.closeMonth.format("YYYY-MM")}
-                severity={item.isDuplicate ? "info" : "success"}
+                className={[
+                  "rounded-2xl border px-4 py-3",
+                  item.isDuplicate
+                    ? "border-sky-200 bg-sky-50"
+                    : "border-emerald-200 bg-emerald-50",
+                ].join(" ")}
               >
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-                  <Box sx={{ minWidth: 120 }}>
+                <div className="flex flex-col gap-1 text-sm text-slate-700 md:flex-row md:items-start md:gap-4">
+                  <div className="min-w-[120px] font-semibold text-slate-900">
                     {item.closeMonth.format("YYYY年M月")}
                     {item.isDuplicate ? " (登録済み)" : ""}
-                  </Box>
-                  <Box>
+                  </div>
+                  <div>
                     {item.startDate.format(AttendanceDate.DisplayFormat)} 〜{" "}
                     {item.endDate.format(AttendanceDate.DisplayFormat)}
                     {item.baseEndDate.isSame(item.endDate, "day") ? null : (
-                      <Typography
-                        component="span"
-                        color="text.secondary"
-                        sx={{ ml: 1 }}
-                      >
+                      <span className="ml-1 text-slate-500">
                         (元の締め日{" "}
                         {item.baseEndDate.format(AttendanceDate.DisplayFormat)}{" "}
                         → 調整後)
-                      </Typography>
+                      </span>
                     )}
-                  </Box>
-                  <Box sx={{ color: "text.secondary" }}>
-                    {item.adjustmentReason}
-                  </Box>
-                </Stack>
-              </Alert>
+                  </div>
+                  <div className="text-slate-500">{item.adjustmentReason}</div>
+                </div>
+              </div>
             ))}
-          </Stack>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Box>
-        <Button variant="contained" onClick={onSubmit} disabled={disableSubmit}>
+      <div>
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={disableSubmit}
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        >
           まとめて登録
-        </Button>
-      </Box>
-    </Stack>
+        </button>
+      </div>
+    </div>
   );
 }

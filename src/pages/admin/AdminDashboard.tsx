@@ -1,4 +1,3 @@
-import { Stack } from "@mui/material";
 import { memo } from "react";
 
 import { useAdminCurrentWorkingStaffCard } from "@/features/admin/dashboard/model/useAdminCurrentWorkingStaffCard";
@@ -7,7 +6,6 @@ import { useAdminStaffWorkStatusChart } from "@/features/admin/dashboard/model/u
 import { CurrentWorkingStaffCard } from "@/features/admin/dashboard/ui/CurrentWorkingStaffCard";
 import { DailyReportStatusCard } from "@/features/admin/dashboard/ui/DailyReportStatusCard";
 import { StaffWorkStatusChartCard } from "@/features/admin/dashboard/ui/StaffWorkStatusChartCard";
-import { PAGE_PADDING_X, PAGE_PADDING_Y } from "@/features/admin/layout/adminLayoutTokens";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
 import AdminPendingApprovalSummary from "@/widgets/layout/header/AdminPendingApprovalSummary";
@@ -41,14 +39,10 @@ const StaffWorkStatusChartCardContainer = memo(function StaffWorkStatusChartCard
 
 export default function AdminDashboard() {
   return (
-    <Stack
-      component="section"
-      sx={{
-        flex: 1,
-        width: "100%",
+    <section
+      className="flex w-full flex-1 flex-col px-4 py-6 md:px-8 md:py-8"
+      style={{
         boxSizing: "border-box",
-        px: PAGE_PADDING_X,
-        py: PAGE_PADDING_Y,
         gap: PAGE_SECTION_GAP,
       }}
     >
@@ -70,6 +64,6 @@ export default function AdminDashboard() {
           <StaffWorkStatusChartCardContainer />
         </div>
       </PageSection>
-    </Stack>
+    </section>
   );
 }

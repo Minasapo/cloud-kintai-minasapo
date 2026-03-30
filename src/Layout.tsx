@@ -5,19 +5,6 @@
 
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  LinearProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
 import { Hub } from "aws-amplify/utils";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -27,6 +14,8 @@ import { useSession } from "@/app/providers/session/useSession";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
 import { createLogger } from "@/shared/lib/logger";
+import BaseDialog from "@/shared/ui/feedback/BaseDialog";
+import { FullPageLoading } from "@/shared/ui/feedback/LoadingPrimitives";
 import { AppShell } from "@/shared/ui/layout";
 import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
 import Footer from "@/widgets/layout/footer/Footer";
@@ -87,20 +76,31 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
   }, [onConfirm]);
 
   return (
-    <Dialog open={open} onClose={handleLater} maxWidth="xs" fullWidth>
-      <DialogTitle>集計対象月の未登録</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          現在日付を含む集計対象月が登録されていません。設定画面で登録を確認してください。
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleLater}>あとで</Button>
-        <Button variant="contained" onClick={handleConfirm}>
-          確認する
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDialog
+      open={open}
+      onClose={handleLater}
+      title="集計対象月の未登録"
+      description="現在日付を含む集計対象月が登録されていません。設定画面で登録を確認してください。"
+      widthClassName="max-w-md"
+      actions={
+        <>
+          <button
+            type="button"
+            onClick={handleLater}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            あとで
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
+          >
+            確認する
+          </button>
+        </>
+      }
+    />
   );
 }
 
@@ -233,33 +233,7 @@ export default function Layout() {
     shouldBlockAppConfigBootstrap;
 
   if (shouldBlockLayoutBootstrap) {
-    return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          bgcolor: "background.default",
-        }}
-      >
-        <LinearProgress data-testid="layout-linear-progress" />
-        <Stack
-          sx={{ flex: 1 }}
-          alignItems="center"
-          justifyContent="center"
-          spacing={2}
-        >
-          <CircularProgress size={28} />
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            data-testid="layout-loading-message"
-          >
-            画面を更新しています...
-          </Typography>
-        </Stack>
-      </Box>
-    );
+    return <FullPageLoading message="画面を更新しています..." />;
   }
 
   return (

@@ -1,3 +1,5 @@
+import BaseDialog from "./BaseDialog";
+
 type Props = {
   open: boolean;
   message: string;
@@ -22,15 +24,14 @@ export default function ConfirmDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="m-0 text-lg font-semibold text-slate-900">{title}</h2>
-        </div>
-        <div className="px-6 py-5">
-          <p className="m-0 text-sm leading-6 text-slate-600">{message}</p>
-        </div>
-        <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
+    <BaseDialog
+      open={open}
+      onClose={onCancel}
+      title={title}
+      description={message}
+      widthClassName="max-w-sm"
+      actions={
+        <>
           <button
             type="button"
             onClick={onCancel}
@@ -45,8 +46,8 @@ export default function ConfirmDialog({
           >
             {confirmLabel}
           </button>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }
