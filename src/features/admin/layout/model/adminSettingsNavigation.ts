@@ -1,8 +1,9 @@
 export type AdminSettingsCategoryKey =
   | "basic"
   | "attendanceRules"
-  | "operations"
-  | "integration";
+  | "shiftApproval"
+  | "dataIntegration"
+  | "system";
 
 export type AdminSettingsCategory = {
   key: AdminSettingsCategoryKey;
@@ -23,8 +24,8 @@ export type AdminSettingsItem = {
 export const ADMIN_SETTINGS_CATEGORIES: readonly AdminSettingsCategory[] = [
   {
     key: "basic",
-    title: "基本設定",
-    description: "集計期間やカレンダー、見た目など、運用全体の土台となる設定です。",
+    title: "基本",
+    description: "集計期間やカレンダーなど、運用全体の土台となる設定です。",
     order: 1,
   },
   {
@@ -34,16 +35,22 @@ export const ADMIN_SETTINGS_CATEGORIES: readonly AdminSettingsCategory[] = [
     order: 2,
   },
   {
-    key: "operations",
-    title: "運用設定",
+    key: "shiftApproval",
+    title: "シフト・申請",
     description: "シフト運用や申請フローなど、現場オペレーションに関わる設定です。",
     order: 3,
   },
   {
-    key: "integration",
-    title: "外部連携・補助",
-    description: "外部公開情報、補助項目、エクスポートなどの周辺設定を管理します。",
+    key: "dataIntegration",
+    title: "データ・連携",
+    description: "打刻画面のカスタマイズ、外部連携、データ出力に関する設定です。",
     order: 4,
+  },
+  {
+    key: "system",
+    title: "システム",
+    description: "外観や開発者向けの補助設定を管理します。",
+    order: 5,
   },
 ] as const;
 
@@ -63,14 +70,6 @@ export const ADMIN_SETTINGS_ITEMS: readonly AdminSettingsItem[] = [
     description: "会社休日やイベント日を管理し、勤務判定の基準日を整えます。",
     order: 2,
     ctaLabel: "カレンダー設定を開く",
-  },
-  {
-    title: "テーマ",
-    path: "/admin/master/theme",
-    category: "basic",
-    description: "ヘッダーとフッターの配色テーマを切り替えます。",
-    order: 3,
-    ctaLabel: "テーマを開く",
   },
   {
     title: "勤務時間",
@@ -115,7 +114,7 @@ export const ADMIN_SETTINGS_ITEMS: readonly AdminSettingsItem[] = [
   {
     title: "シフト",
     path: "/admin/master/shift",
-    category: "operations",
+    category: "shiftApproval",
     description: "シフトグループや表示モードなど、シフト管理の基本挙動を設定します。",
     order: 1,
     ctaLabel: "シフト設定を開く",
@@ -123,73 +122,81 @@ export const ADMIN_SETTINGS_ITEMS: readonly AdminSettingsItem[] = [
   {
     title: "ワークフロー",
     path: "/admin/master/workflow",
-    category: "operations",
+    category: "shiftApproval",
     description: "申請カテゴリごとの承認フローを設定します。",
     order: 2,
     ctaLabel: "ワークフローを開く",
   },
   {
-    title: "稼働統計",
-    path: "/admin/master/feature_management/attendance_statistics",
-    category: "operations",
-    description: "稼働統計の集計表示に関する設定を管理します。",
-    order: 3,
-    ctaLabel: "稼働統計を開く",
-  },
-  {
     title: "残業確認",
     path: "/admin/master/feature_management/overtime_confirmation",
-    category: "operations",
+    category: "shiftApproval",
     description: "残業確認フローや表示条件を設定します。",
-    order: 4,
+    order: 3,
     ctaLabel: "残業確認を開く",
   },
   {
     title: "クイック入力",
     path: "/admin/master/feature_management/quick_input",
-    category: "operations",
+    category: "shiftApproval",
     description: "勤怠入力時に使うクイック入力候補を整備します。",
-    order: 5,
+    order: 4,
     ctaLabel: "クイック入力を開く",
-  },
-  {
-    title: "外部リンク",
-    path: "/admin/master/feature_management/links",
-    category: "integration",
-    description: "打刻画面などから参照する外部リンクを管理します。",
-    order: 1,
-    ctaLabel: "外部リンクを開く",
   },
   {
     title: "打刻理由",
     path: "/admin/master/feature_management/reasons",
-    category: "integration",
+    category: "dataIntegration",
     description: "打刻理由の候補を整備し、入力補助に使います。",
-    order: 2,
+    order: 1,
     ctaLabel: "打刻理由を開く",
   },
   {
     title: "打刻画面アナウンス",
     path: "/admin/master/time_recorder_announcement",
-    category: "integration",
+    category: "dataIntegration",
     description: "打刻画面に表示するお知らせ文を設定します。",
-    order: 3,
+    order: 2,
     ctaLabel: "アナウンス設定を開く",
+  },
+  {
+    title: "外部リンク",
+    path: "/admin/master/feature_management/links",
+    category: "dataIntegration",
+    description: "打刻画面などから参照する外部リンクを管理します。",
+    order: 3,
+    ctaLabel: "外部リンクを開く",
   },
   {
     title: "エクスポート",
     path: "/admin/master/export",
-    category: "integration",
+    category: "dataIntegration",
     description: "外部連携向けのエクスポート設定や出力内容を確認します。",
     order: 4,
     ctaLabel: "エクスポートを開く",
   },
   {
+    title: "稼働統計",
+    path: "/admin/master/feature_management/attendance_statistics",
+    category: "dataIntegration",
+    description: "稼働統計の集計表示に関する設定を管理します。",
+    order: 5,
+    ctaLabel: "稼働統計を開く",
+  },
+  {
+    title: "テーマ",
+    path: "/admin/master/theme",
+    category: "system",
+    description: "ヘッダーとフッターの配色テーマを切り替えます。",
+    order: 1,
+    ctaLabel: "テーマを開く",
+  },
+  {
     title: "開発者",
     path: "/admin/master/developer",
-    category: "integration",
+    category: "system",
     description: "開発・検証向けの補助設定を管理します。",
-    order: 5,
+    order: 2,
     ctaLabel: "開発者設定を開く",
   },
 ] as const;
