@@ -47,6 +47,9 @@ function renderSummary(
           signOut: jest.fn(),
           signIn: jest.fn(),
           authStatus: "authenticated",
+          isAuthenticated: true,
+          isLoading: false,
+          roles: isAdminUser ? [StaffRole.ADMIN] : [],
           isCognitoUserRole: (role: StaffRole) =>
             isAdminUser && role === StaffRole.ADMIN,
         }}
