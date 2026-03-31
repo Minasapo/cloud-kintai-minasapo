@@ -34,6 +34,9 @@ PLAYWRIGHT_LAZY_USER_PASSWORD=
 ## 最短実行手順（smoke-test）
 
 ```bash
+# `http://localhost:5173` が起動中ならそのまま再利用
+# 未起動なら Playwright が `npm start -- --port 5173` を起動
+
 # 認証状態を作成
 npm run test:e2e --project=setup
 
@@ -58,3 +61,4 @@ npm run test:e2e -- smoke-test --project=chromium-admin
 
 - 設定は `playwright.config.ts` を参照
 - smoke-test の実装は `playwright/tests/smoke-test.spec.ts` を参照
+- `PLAYWRIGHT_BASE_URL` を指定すると、その URL に対して実行し、ローカル `webServer` は起動しない
