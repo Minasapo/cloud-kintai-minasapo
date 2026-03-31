@@ -306,6 +306,18 @@ type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   comments: [ShiftRequestComment]
 }
 
+type ShiftEditLock @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  targetMonth: String!
+  staffId: String!
+  date: String!
+  holderUserId: String!
+  holderUserName: String!
+  acquiredAt: AWSDateTime!
+  expiresAt: AWSDateTime!
+  version: Int!
+}
+
 type ShiftPlanMonthSetting {
   month: Int!
   editStart: String

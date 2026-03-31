@@ -1154,6 +1154,72 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
   APITypes.OnDeleteShiftRequestSubscriptionVariables,
   APITypes.OnDeleteShiftRequestSubscription
 >;
+export const onCreateShiftEditLock = /* GraphQL */ `subscription OnCreateShiftEditLock(
+  $filter: ModelSubscriptionShiftEditLockFilterInput
+) {
+  onCreateShiftEditLock(filter: $filter) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateShiftEditLockSubscriptionVariables,
+  APITypes.OnCreateShiftEditLockSubscription
+>;
+export const onUpdateShiftEditLock = /* GraphQL */ `subscription OnUpdateShiftEditLock(
+  $filter: ModelSubscriptionShiftEditLockFilterInput
+) {
+  onUpdateShiftEditLock(filter: $filter) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateShiftEditLockSubscriptionVariables,
+  APITypes.OnUpdateShiftEditLockSubscription
+>;
+export const onDeleteShiftEditLock = /* GraphQL */ `subscription OnDeleteShiftEditLock(
+  $filter: ModelSubscriptionShiftEditLockFilterInput
+) {
+  onDeleteShiftEditLock(filter: $filter) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteShiftEditLockSubscriptionVariables,
+  APITypes.OnDeleteShiftEditLockSubscription
+>;
 export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPlanYear(
   $filter: ModelSubscriptionShiftPlanYearFilterInput
 ) {

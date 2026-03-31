@@ -1202,6 +1202,54 @@ export const shiftRequestsByStaffId = /* GraphQL */ `query ShiftRequestsByStaffI
   APITypes.ShiftRequestsByStaffIdQueryVariables,
   APITypes.ShiftRequestsByStaffIdQuery
 >;
+export const getShiftEditLock = /* GraphQL */ `query GetShiftEditLock($id: ID!) {
+  getShiftEditLock(id: $id) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetShiftEditLockQueryVariables,
+  APITypes.GetShiftEditLockQuery
+>;
+export const listShiftEditLocks = /* GraphQL */ `query ListShiftEditLocks(
+  $filter: ModelShiftEditLockFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listShiftEditLocks(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      targetMonth
+      staffId
+      date
+      holderUserId
+      holderUserName
+      acquiredAt
+      expiresAt
+      version
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListShiftEditLocksQueryVariables,
+  APITypes.ListShiftEditLocksQuery
+>;
 export const getShiftPlanYear = /* GraphQL */ `query GetShiftPlanYear($id: ID!) {
   getShiftPlanYear(id: $id) {
     id

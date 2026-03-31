@@ -1208,6 +1208,75 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
   APITypes.DeleteShiftRequestMutationVariables,
   APITypes.DeleteShiftRequestMutation
 >;
+export const createShiftEditLock = /* GraphQL */ `mutation CreateShiftEditLock(
+  $input: CreateShiftEditLockInput!
+  $condition: ModelShiftEditLockConditionInput
+) {
+  createShiftEditLock(input: $input, condition: $condition) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateShiftEditLockMutationVariables,
+  APITypes.CreateShiftEditLockMutation
+>;
+export const updateShiftEditLock = /* GraphQL */ `mutation UpdateShiftEditLock(
+  $input: UpdateShiftEditLockInput!
+  $condition: ModelShiftEditLockConditionInput
+) {
+  updateShiftEditLock(input: $input, condition: $condition) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateShiftEditLockMutationVariables,
+  APITypes.UpdateShiftEditLockMutation
+>;
+export const deleteShiftEditLock = /* GraphQL */ `mutation DeleteShiftEditLock(
+  $input: DeleteShiftEditLockInput!
+  $condition: ModelShiftEditLockConditionInput
+) {
+  deleteShiftEditLock(input: $input, condition: $condition) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteShiftEditLockMutationVariables,
+  APITypes.DeleteShiftEditLockMutation
+>;
 export const createShiftPlanYear = /* GraphQL */ `mutation CreateShiftPlanYear(
   $input: CreateShiftPlanYearInput!
   $condition: ModelShiftPlanYearConditionInput

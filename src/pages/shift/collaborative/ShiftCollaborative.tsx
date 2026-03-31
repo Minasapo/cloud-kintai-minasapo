@@ -15,7 +15,6 @@ import { AuthContext } from "@/context/AuthContext";
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
 import { CollaborativeHeader } from "../../../features/shift/collaborative/components/CollaborativeHeader";
-import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import {
   PresenceNotificationContainer,
@@ -104,6 +103,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       navigate,
       hasEditLockForSelected,
       isOthersEditingSelected,
+      editLockError,
+      clearEditLockError,
       handleAcquireEditLock,
       handleReleaseEditLock,
       handleForceReleaseLock,
@@ -142,8 +143,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
         state.lastRemoteUpdate.staffId;
       addNotification("data-synced", "", { staffName, date: "" });
     }, [state.lastRemoteUpdate, staffNameMap, addNotification]);
-
-    const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
 
     const [cellHistoryDrawerOpen, setCellHistoryDrawerOpen] =
       useState<boolean>(false);
@@ -308,6 +307,23 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
 
           <SyncPanel syncError={state.error} onClearError={_clearSyncError} />
 
+          {!state.isOnline || state.connectionState === "disconnected" ? (
+            <InlineAlert tone="warning" icon={<InfoBadge />} className="mb-3">
+              通信が切断されています。再接続後に編集を再開してください。
+            </InlineAlert>
+          ) : null}
+
+          {editLockError ? (
+            <InlineAlert
+              tone="warning"
+              icon={<InfoBadge />}
+              className="mb-3"
+              onClose={clearEditLockError}
+            >
+              {editLockError}
+            </InlineAlert>
+          ) : null}
+
           <ProgressPanel progress={progress} totalDays={days.length} />
 
           <VirtualizedShiftTable
@@ -371,13 +387,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onAcquireEditLock={handleAcquireEditLock}
             onReleaseEditLock={handleReleaseEditLock}
             onForceReleaseLock={handleForceReleaseLock}
-          />
-
-          <ConflictResolutionDialog
-            open={conflictDialogOpen}
-            conflicts={[]}
-            onResolve={async () => {}}
-            onClose={() => setConflictDialogOpen(false)}
           />
 
           <KeyboardShortcutsHelp

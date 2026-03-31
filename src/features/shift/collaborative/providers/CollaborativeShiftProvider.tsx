@@ -15,8 +15,9 @@ import {
 } from "../context/CollaborativeShiftContext";
 import { useCellChangeHistory } from "../hooks/useCellChangeHistory";
 import { useCollaborativeShiftData } from "../hooks/useCollaborativeShiftData";
-import { useCollaborativeShiftOffline } from "../hooks/useCollaborativeShiftOffline";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useShiftComments } from "../hooks/useShiftComments";
+import { useShiftEditLocks } from "../hooks/useShiftEditLocks";
 import { useShiftPresence } from "../hooks/useShiftPresence";
 import { useShiftSync } from "../hooks/useShiftSync";
 import { useUndoRedo } from "../hooks/useUndoRedo";
@@ -56,6 +57,7 @@ export const CollaborativeShiftProvider: React.FC<
     staffId: string;
     timestamp: number;
   } | null>(null);
+  const isOnline = useOnlineStatus();
 
   // コメント管理フック
   const {
@@ -218,23 +220,6 @@ export const CollaborativeShiftProvider: React.FC<
     [getShiftRequest, getCommentsInputForStaff, currentUserId],
   );
 
-  // オフライン対応フック
-  const {
-    isOnline,
-    hasPendingChanges,
-    updateShiftWithOfflineSupport,
-    batchUpdateShiftsWithOfflineSupport,
-    syncPendingChanges,
-  } = useCollaborativeShiftOffline({
-    enabled: true,
-    onUpdateShift: updateShift,
-    onBatchUpdateShifts: batchUpdateShifts,
-    onConflictDetected: () => {
-      // TODO: コンフリクト解決ダイアログを表示
-      console.warn("Conflicts detected, need to implement resolution UI");
-    },
-  });
-
   // 取り消し/やり直しフック
   const {
     canUndo,
@@ -269,7 +254,7 @@ export const CollaborativeShiftProvider: React.FC<
         "undo",
       );
 
-      await batchUpdateShiftsWithOfflineSupport(undoUpdates);
+      await batchUpdateShifts(undoUpdates);
     },
     onRedo: async (entry) => {
       // セル単位の変更履歴を記録（redo）
@@ -281,26 +266,34 @@ export const CollaborativeShiftProvider: React.FC<
       );
 
       // やり直し時は元の操作を再適用
-      await batchUpdateShiftsWithOfflineSupport(entry.updates);
+      await batchUpdateShifts(entry.updates);
     },
   });
 
   // プレゼンス管理フック
   const {
     activeUsers,
-    editingCells,
-    startEditingCell,
-    stopEditingCell,
-    isCellBeingEdited,
-    hasEditLock,
-    getCellEditor,
     updateActivity,
-    forceReleaseCell,
-    getAllEditingCells,
   } = useShiftPresence({
     currentUserId,
     currentUserName,
     shiftRequestId,
+    targetMonth,
+  });
+
+  const {
+    editingCells,
+    acquireEditLock,
+    releaseEditLock,
+    isCellBeingEdited,
+    hasEditLock,
+    getCellEditor,
+    forceReleaseLock,
+    getAllEditingCells,
+    refreshLocks,
+  } = useShiftEditLocks({
+    currentUserId,
+    currentUserName,
     targetMonth,
   });
 
@@ -312,9 +305,6 @@ export const CollaborativeShiftProvider: React.FC<
       // アクティビティを記録
       updateActivity();
 
-      // 編集中の通知を停止
-      stopEditingCell(update.staffId, update.date);
-
       // 履歴に追加
       pushHistory(
         [update],
@@ -325,15 +315,13 @@ export const CollaborativeShiftProvider: React.FC<
       // セル単位の変更履歴を記録
       recordCellChange(update, currentUserId, currentUserName, "manual");
 
-      // オフライン対応の更新を実行
-      await updateShiftWithOfflineSupport(update);
+      await updateShift(update);
     },
     [
       updateActivity,
-      stopEditingCell,
       pushHistory,
       recordCellChange,
-      updateShiftWithOfflineSupport,
+      updateShift,
       currentUserId,
       currentUserName,
     ],
@@ -346,11 +334,6 @@ export const CollaborativeShiftProvider: React.FC<
     async (updates: ShiftCellUpdate[]) => {
       updateActivity();
 
-      // すべての編集中通知を停止
-      updates.forEach((update) => {
-        stopEditingCell(update.staffId, update.date);
-      });
-
       // 履歴に追加
       pushHistory(updates, `${updates.length} 件のシフトを一括更新`, {
         userId: currentUserId,
@@ -360,15 +343,13 @@ export const CollaborativeShiftProvider: React.FC<
       // セル単位の変更履歴を一括記録
       recordBatchCellChanges(updates, currentUserId, currentUserName, "batch");
 
-      // オフライン対応のバッチ更新を実行
-      await batchUpdateShiftsWithOfflineSupport(updates);
+      await batchUpdateShifts(updates);
     },
     [
       updateActivity,
-      stopEditingCell,
       pushHistory,
       recordBatchCellChanges,
-      batchUpdateShiftsWithOfflineSupport,
+      batchUpdateShifts,
       currentUserId,
       currentUserName,
     ],
@@ -396,21 +377,28 @@ export const CollaborativeShiftProvider: React.FC<
    * セルの編集開始
    */
   const handleStartEditingCell = useCallback(
-    (staffId: string, date: string) => {
+    async (staffId: string, date: string) => {
       updateActivity();
-      startEditingCell(staffId, date);
+      return acquireEditLock(staffId, date);
     },
-    [updateActivity, startEditingCell],
+    [updateActivity, acquireEditLock],
   );
 
   /**
    * セルの編集終了（更新なし）
    */
   const handleStopEditingCell = useCallback(
-    (staffId: string, date: string) => {
-      stopEditingCell(staffId, date);
+    async (staffId: string, date: string) => {
+      await releaseEditLock(staffId, date);
     },
-    [stopEditingCell],
+    [releaseEditLock],
+  );
+
+  const handleForceReleaseCell = useCallback(
+    async (staffId: string, date: string) => {
+      await forceReleaseLock(staffId, date);
+    },
+    [forceReleaseLock],
   );
 
   /**
@@ -563,7 +551,6 @@ export const CollaborativeShiftProvider: React.FC<
       error: error || syncError || null,
       connectionState,
       isOnline,
-      hasPendingChanges,
       lastRemoteUpdate,
     }),
     [
@@ -581,7 +568,6 @@ export const CollaborativeShiftProvider: React.FC<
       syncError,
       connectionState,
       isOnline,
-      hasPendingChanges,
       lastRemoteUpdate,
     ],
   );
@@ -598,13 +584,13 @@ export const CollaborativeShiftProvider: React.FC<
       isCellBeingEdited,
       hasEditLock,
       getCellEditor,
-      forceReleaseCell,
+      forceReleaseCell: handleForceReleaseCell,
       getAllEditingCells,
       triggerSync: handleTriggerSync,
       clearSyncError,
       updateUserActivity: handleUpdateUserActivity,
       retryPendingChanges,
-      syncPendingChanges,
+      refreshLocks,
       // Undo/Redo
       canUndo,
       canRedo,
@@ -639,13 +625,13 @@ export const CollaborativeShiftProvider: React.FC<
       isCellBeingEdited,
       hasEditLock,
       getCellEditor,
-      forceReleaseCell,
+      handleForceReleaseCell,
       getAllEditingCells,
       handleTriggerSync,
       clearSyncError,
       handleUpdateUserActivity,
       retryPendingChanges,
-      syncPendingChanges,
+      refreshLocks,
       canUndo,
       canRedo,
       undoAction,

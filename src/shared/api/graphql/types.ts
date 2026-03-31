@@ -1094,6 +1094,65 @@ export type DeleteShiftRequestInput = {
   id: string,
 };
 
+export type CreateShiftEditLockInput = {
+  id?: string | null,
+  targetMonth: string,
+  staffId: string,
+  date: string,
+  holderUserId: string,
+  holderUserName: string,
+  acquiredAt: string,
+  expiresAt: string,
+  version: number,
+};
+
+export type ModelShiftEditLockConditionInput = {
+  targetMonth?: ModelStringInput | null,
+  staffId?: ModelStringInput | null,
+  date?: ModelStringInput | null,
+  holderUserId?: ModelStringInput | null,
+  holderUserName?: ModelStringInput | null,
+  acquiredAt?: ModelStringInput | null,
+  expiresAt?: ModelStringInput | null,
+  version?: ModelIntInput | null,
+  and?: Array< ModelShiftEditLockConditionInput | null > | null,
+  or?: Array< ModelShiftEditLockConditionInput | null > | null,
+  not?: ModelShiftEditLockConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ShiftEditLock = {
+  __typename: "ShiftEditLock",
+  id: string,
+  targetMonth: string,
+  staffId: string,
+  date: string,
+  holderUserId: string,
+  holderUserName: string,
+  acquiredAt: string,
+  expiresAt: string,
+  version: number,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateShiftEditLockInput = {
+  id: string,
+  targetMonth?: string | null,
+  staffId?: string | null,
+  date?: string | null,
+  holderUserId?: string | null,
+  holderUserName?: string | null,
+  acquiredAt?: string | null,
+  expiresAt?: string | null,
+  version?: number | null,
+};
+
+export type DeleteShiftEditLockInput = {
+  id: string,
+};
+
 export type CreateShiftPlanYearInput = {
   id?: string | null,
   targetYear: number,
@@ -2036,6 +2095,29 @@ export type ModelShiftRequestConnection = {
   nextToken?: string | null,
 };
 
+export type ModelShiftEditLockFilterInput = {
+  id?: ModelIDInput | null,
+  targetMonth?: ModelStringInput | null,
+  staffId?: ModelStringInput | null,
+  date?: ModelStringInput | null,
+  holderUserId?: ModelStringInput | null,
+  holderUserName?: ModelStringInput | null,
+  acquiredAt?: ModelStringInput | null,
+  expiresAt?: ModelStringInput | null,
+  version?: ModelIntInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelShiftEditLockFilterInput | null > | null,
+  or?: Array< ModelShiftEditLockFilterInput | null > | null,
+  not?: ModelShiftEditLockFilterInput | null,
+};
+
+export type ModelShiftEditLockConnection = {
+  __typename: "ModelShiftEditLockConnection",
+  items:  Array<ShiftEditLock | null >,
+  nextToken?: string | null,
+};
+
 export type ModelShiftPlanYearFilterInput = {
   id?: ModelIDInput | null,
   targetYear?: ModelIntInput | null,
@@ -2213,14 +2295,20 @@ export type ModelDailyReportConnection = {
   nextToken?: string | null,
 };
 
-export type ModelSubscriptionCheckForUpdateFilterInput = {
+export type ModelSubscriptionShiftEditLockFilterInput = {
   id?: ModelSubscriptionIDInput | null,
-  deployUuid?: ModelSubscriptionStringInput | null,
+  targetMonth?: ModelSubscriptionStringInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  date?: ModelSubscriptionStringInput | null,
+  holderUserId?: ModelSubscriptionStringInput | null,
+  holderUserName?: ModelSubscriptionStringInput | null,
+  acquiredAt?: ModelSubscriptionStringInput | null,
+  expiresAt?: ModelSubscriptionStringInput | null,
   version?: ModelSubscriptionIntInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionCheckForUpdateFilterInput | null > | null,
-  or?: Array< ModelSubscriptionCheckForUpdateFilterInput | null > | null,
+  and?: Array< ModelSubscriptionShiftEditLockFilterInput | null > | null,
+  or?: Array< ModelSubscriptionShiftEditLockFilterInput | null > | null,
 };
 
 export type ModelSubscriptionIDInput = {
@@ -2263,6 +2351,16 @@ export type ModelSubscriptionIntInput = {
   between?: Array< number | null > | null,
   in?: Array< number | null > | null,
   notIn?: Array< number | null > | null,
+};
+
+export type ModelSubscriptionCheckForUpdateFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  deployUuid?: ModelSubscriptionStringInput | null,
+  version?: ModelSubscriptionIntInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionCheckForUpdateFilterInput | null > | null,
+  or?: Array< ModelSubscriptionCheckForUpdateFilterInput | null > | null,
 };
 
 export type ModelSubscriptionAppConfigFilterInput = {
@@ -3769,6 +3867,72 @@ export type DeleteShiftRequestMutation = {
       createdAt: string,
     } | null > | null,
     createdAt: string,
+  } | null,
+};
+
+export type CreateShiftEditLockMutationVariables = {
+  input: CreateShiftEditLockInput,
+  condition?: ModelShiftEditLockConditionInput | null,
+};
+
+export type CreateShiftEditLockMutation = {
+  createShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateShiftEditLockMutationVariables = {
+  input: UpdateShiftEditLockInput,
+  condition?: ModelShiftEditLockConditionInput | null,
+};
+
+export type UpdateShiftEditLockMutation = {
+  updateShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteShiftEditLockMutationVariables = {
+  input: DeleteShiftEditLockInput,
+  condition?: ModelShiftEditLockConditionInput | null,
+};
+
+export type DeleteShiftEditLockMutation = {
+  deleteShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
@@ -5684,6 +5848,54 @@ export type ShiftRequestsByStaffIdQuery = {
   } | null,
 };
 
+export type GetShiftEditLockQueryVariables = {
+  id: string,
+};
+
+export type GetShiftEditLockQuery = {
+  getShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListShiftEditLocksQueryVariables = {
+  filter?: ModelShiftEditLockFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListShiftEditLocksQuery = {
+  listShiftEditLocks?:  {
+    __typename: "ModelShiftEditLockConnection",
+    items:  Array< {
+      __typename: "ShiftEditLock",
+      id: string,
+      targetMonth: string,
+      staffId: string,
+      date: string,
+      holderUserId: string,
+      holderUserName: string,
+      acquiredAt: string,
+      expiresAt: string,
+      version: number,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
 export type GetShiftPlanYearQueryVariables = {
   id: string,
 };
@@ -6405,6 +6617,183 @@ export type DailyReportsByStaffIdQuery = {
       createdAt: string,
     } | null >,
     nextToken?: string | null,
+  } | null,
+};
+
+export type CustomGetShiftEditLockQueryVariables = {
+  id: string,
+};
+
+export type CustomGetShiftEditLockQuery = {
+  getShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CustomListShiftEditLocksQueryVariables = {
+  filter?: ModelShiftEditLockFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type CustomListShiftEditLocksQuery = {
+  listShiftEditLocks?:  {
+    __typename: "ModelShiftEditLockConnection",
+    items:  Array< {
+      __typename: "ShiftEditLock",
+      id: string,
+      targetMonth: string,
+      staffId: string,
+      date: string,
+      holderUserId: string,
+      holderUserName: string,
+      acquiredAt: string,
+      expiresAt: string,
+      version: number,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type CustomCreateShiftEditLockMutationVariables = {
+  input: CreateShiftEditLockInput,
+  condition?: ModelShiftEditLockConditionInput | null,
+};
+
+export type CustomCreateShiftEditLockMutation = {
+  createShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CustomUpdateShiftEditLockMutationVariables = {
+  input: UpdateShiftEditLockInput,
+  condition?: ModelShiftEditLockConditionInput | null,
+};
+
+export type CustomUpdateShiftEditLockMutation = {
+  updateShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CustomDeleteShiftEditLockMutationVariables = {
+  input: DeleteShiftEditLockInput,
+  condition?: ModelShiftEditLockConditionInput | null,
+};
+
+export type CustomDeleteShiftEditLockMutation = {
+  deleteShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CustomOnCreateShiftEditLockSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftEditLockFilterInput | null,
+};
+
+export type CustomOnCreateShiftEditLockSubscription = {
+  onCreateShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CustomOnUpdateShiftEditLockSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftEditLockFilterInput | null,
+};
+
+export type CustomOnUpdateShiftEditLockSubscription = {
+  onUpdateShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CustomOnDeleteShiftEditLockSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftEditLockFilterInput | null,
+};
+
+export type CustomOnDeleteShiftEditLockSubscription = {
+  onDeleteShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
@@ -7545,6 +7934,69 @@ export type OnDeleteShiftRequestSubscription = {
       createdAt: string,
     } | null > | null,
     createdAt: string,
+  } | null,
+};
+
+export type OnCreateShiftEditLockSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftEditLockFilterInput | null,
+};
+
+export type OnCreateShiftEditLockSubscription = {
+  onCreateShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateShiftEditLockSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftEditLockFilterInput | null,
+};
+
+export type OnUpdateShiftEditLockSubscription = {
+  onUpdateShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteShiftEditLockSubscriptionVariables = {
+  filter?: ModelSubscriptionShiftEditLockFilterInput | null,
+};
+
+export type OnDeleteShiftEditLockSubscription = {
+  onDeleteShiftEditLock?:  {
+    __typename: "ShiftEditLock",
+    id: string,
+    targetMonth: string,
+    staffId: string,
+    date: string,
+    holderUserId: string,
+    holderUserName: string,
+    acquiredAt: string,
+    expiresAt: string,
+    version: number,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
