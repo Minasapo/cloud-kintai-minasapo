@@ -174,4 +174,174 @@ describe("useShiftEditLocks", () => {
       expect(result.current.isCellBeingEdited("staff-1", "01")).toBe(false),
     );
   });
+
+  it("releaseEditLock は deleteShiftEditLock に id のみを渡す", async () => {
+    const ownLock = {
+      ...activeLock,
+      holderUserId: "user-1",
+      holderUserName: "User One",
+    };
+
+    mockGraphql.mockImplementation(
+      ({
+        query,
+        variables,
+      }: {
+        query: string;
+        variables?: Record<string, unknown>;
+      }) => {
+        if (query.includes("ListShiftEditLocks")) {
+          return Promise.resolve({
+            data: { listShiftEditLocks: { items: [], nextToken: null } },
+          });
+        }
+
+        if (query.includes("GetShiftEditLock")) {
+          return Promise.resolve({
+            data: { getShiftEditLock: ownLock },
+          });
+        }
+
+        if (query.includes("OnCreateShiftEditLock")) {
+          return {
+            subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+          };
+        }
+
+        if (query.includes("OnUpdateShiftEditLock")) {
+          return {
+            subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+          };
+        }
+
+        if (query.includes("OnDeleteShiftEditLock")) {
+          return {
+            subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+          };
+        }
+
+        if (query.includes("DeleteShiftEditLock")) {
+          return Promise.resolve({
+            data: {
+              deleteShiftEditLock: {
+                ...ownLock,
+                ...(variables?.input as Record<string, unknown> | undefined),
+              },
+            },
+          });
+        }
+
+        return Promise.resolve({ data: {} });
+      },
+    );
+
+    const { result } = renderHook(() =>
+      useShiftEditLocks({
+        currentUserId: "user-1",
+        currentUserName: "User One",
+        targetMonth: "2026-03",
+      }),
+    );
+
+    await waitFor(() => expect(mockGraphql).toHaveBeenCalled());
+
+    await act(async () => {
+      await result.current.releaseEditLock("staff-1", "01");
+    });
+
+    expect(mockGraphql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.stringContaining("DeleteShiftEditLock"),
+        variables: {
+          input: { id: "2026-03#staff-1#01" },
+          condition: {
+            version: { eq: 3 },
+          },
+        },
+        authMode: "userPool",
+      }),
+    );
+  });
+
+  it("forceReleaseLock は deleteShiftEditLock に id のみを渡す", async () => {
+    mockGraphql.mockImplementation(
+      ({
+        query,
+        variables,
+      }: {
+        query: string;
+        variables?: Record<string, unknown>;
+      }) => {
+        if (query.includes("ListShiftEditLocks")) {
+          return Promise.resolve({
+            data: { listShiftEditLocks: { items: [], nextToken: null } },
+          });
+        }
+
+        if (query.includes("GetShiftEditLock")) {
+          return Promise.resolve({
+            data: { getShiftEditLock: activeLock },
+          });
+        }
+
+        if (query.includes("OnCreateShiftEditLock")) {
+          return {
+            subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+          };
+        }
+
+        if (query.includes("OnUpdateShiftEditLock")) {
+          return {
+            subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+          };
+        }
+
+        if (query.includes("OnDeleteShiftEditLock")) {
+          return {
+            subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+          };
+        }
+
+        if (query.includes("DeleteShiftEditLock")) {
+          return Promise.resolve({
+            data: {
+              deleteShiftEditLock: {
+                ...activeLock,
+                ...(variables?.input as Record<string, unknown> | undefined),
+              },
+            },
+          });
+        }
+
+        return Promise.resolve({ data: {} });
+      },
+    );
+
+    const { result } = renderHook(() =>
+      useShiftEditLocks({
+        currentUserId: "user-1",
+        currentUserName: "User One",
+        targetMonth: "2026-03",
+      }),
+    );
+
+    await waitFor(() => expect(mockGraphql).toHaveBeenCalled());
+
+    await act(async () => {
+      await result.current.forceReleaseLock("staff-1", "01");
+    });
+
+    expect(mockGraphql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.stringContaining("DeleteShiftEditLock"),
+        variables: {
+          input: { id: "2026-03#staff-1#01" },
+          condition: {
+            version: { eq: 3 },
+          },
+        },
+        authMode: "userPool",
+      }),
+    );
+  });
 });

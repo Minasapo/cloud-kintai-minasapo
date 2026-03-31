@@ -2,7 +2,10 @@ import { alpha } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import React, { type CSSProperties, type FC, memo, type MouseEvent } from "react";
 
-import type { ShiftState } from "../types/collaborative.types";
+import type {
+  ShiftCellEditLockOwner,
+  ShiftState,
+} from "../types/collaborative.types";
 import { LockBadge } from "./ui/Badges";
 
 export const shiftStateConfig: Record<
@@ -37,6 +40,7 @@ export interface ShiftCellProps {
   state: ShiftState;
   isLocked: boolean;
   isEditing: boolean;
+  editLockOwner?: ShiftCellEditLockOwner;
   editorName?: string;
   editorColor?: string;
   lastChangedBy?: string;
@@ -54,6 +58,7 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
   state,
   isLocked,
   isEditing,
+  editLockOwner = null,
   editorName,
   editorColor,
   onClick,
@@ -66,9 +71,13 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
 }: ShiftCellProps) => {
   const config = shiftStateConfig[state];
   const isPending = false;
+  const isSelfEditing = editLockOwner === "self";
+  const isOtherEditing = editLockOwner === "other" && isEditing;
   const tooltipTitle = isLocked ? (
     "確定済み"
-  ) : isEditing ? (
+  ) : isSelfEditing ? (
+    "編集中（ロック取得中）"
+  ) : isOtherEditing ? (
     `${editorName}が編集中`
   ) : (
     <div className="text-xs leading-5 text-slate-900">
@@ -77,25 +86,34 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
   );
 
   const themeColor = editorColor || "#2196f3";
+  const selfEditingColor = "#2196f3";
 
-  const backgroundColor = isEditing
+  const backgroundColor = isLocked
+    ? "#ffffff"
+    : isSelfEditing
+      ? alpha(selfEditingColor, 0.14)
+      : isOtherEditing
     ? alpha(themeColor, 0.1)
     : isPending
       ? alpha("#ff9800", 0.1)
       : isSelected
         ? alpha("#9c27b0", 0.15)
         : "#ffffff";
-  const borderColor = isEditing
+  const borderColor = isLocked
+    ? "rgba(226,232,240,0.7)"
+    : isSelfEditing
+      ? selfEditingColor
+      : isOtherEditing
     ? themeColor
     : isFocused
       ? "#9c27b0"
       : "rgba(226,232,240,0.7)";
 
   const editorTab =
-    isEditing && editorName ? (
+    !isLocked && isEditing && editorName ? (
       <div
         className="absolute right-[-2px] top-[-2px] z-10 flex h-4 w-4 items-center justify-center rounded-sm text-[9px] font-bold text-white shadow-sm"
-        style={{ backgroundColor: themeColor }}
+        style={{ backgroundColor: isSelfEditing ? selfEditingColor : themeColor }}
       >
         {editorName.charAt(0)}
       </div>
@@ -114,14 +132,18 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
         ...SHIFT_CELL_BASE_STYLE,
         backgroundColor,
         border: `2px solid ${borderColor}`,
+        boxShadow:
+          isSelfEditing && !isLocked
+            ? `inset 0 0 0 1px ${alpha(selfEditingColor, 0.2)}`
+            : "none",
       }}
       onMouseLeave={(event) => {
-        if (!isLocked && !isEditing && !isPending && !isSelected) {
+        if (!isLocked && !isOtherEditing && !isSelfEditing && !isPending && !isSelected) {
           event.currentTarget.style.backgroundColor = "#ffffff";
         }
       }}
       onMouseOver={(event) => {
-        if (!isLocked && !isEditing && !isPending && !isSelected) {
+        if (!isLocked && !isOtherEditing && !isSelfEditing && !isPending && !isSelected) {
           event.currentTarget.style.backgroundColor = alpha("#2196f3", 0.05);
         }
       }}
@@ -161,6 +183,7 @@ ShiftCellBase.propTypes = {
     .isRequired as any,
   isLocked: PropTypes.bool.isRequired,
   isEditing: PropTypes.bool.isRequired,
+  editLockOwner: PropTypes.oneOf(["self", "other", null] as const),
   editorName: PropTypes.string,
   editorColor: PropTypes.string,
   lastChangedBy: PropTypes.string,

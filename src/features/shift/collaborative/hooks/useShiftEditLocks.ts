@@ -495,7 +495,6 @@ export const useShiftEditLocks = ({
         variables: {
           input: {
             id,
-            version: existingLock.version,
           },
           condition: {
             version: { eq: existingLock.version },
@@ -527,7 +526,6 @@ export const useShiftEditLocks = ({
         variables: {
           input: {
             id,
-            version: existingLock.version,
           },
           condition: {
             version: { eq: existingLock.version },

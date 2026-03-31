@@ -13,7 +13,11 @@ import {
 import dayjs from "dayjs";
 import { memo, useMemo } from "react";
 
-import { CollaborativeUser, ShiftState } from "../types/collaborative.types";
+import {
+  type CollaborativeUser,
+  type ShiftCellEditLockOwner,
+  type ShiftState,
+} from "../types/collaborative.types";
 
 interface VirtualizedShiftTableProps {
   days: dayjs.Dayjs[];
@@ -72,6 +76,7 @@ interface VirtualizedShiftTableProps {
     state: ShiftState;
     isLocked: boolean;
     isEditing: boolean;
+    editLockOwner?: ShiftCellEditLockOwner;
     editorName?: string;
     editorColor?: string;
     lastChangedBy?: string;
@@ -258,6 +263,11 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
 
                     const isEditing = isCellBeingEdited(staffId, dayKey);
                     const editor = getCellEditor(staffId, dayKey);
+                    const editLockOwner: ShiftCellEditLockOwner = editor
+                      ? editor.userId === currentUserId
+                        ? "self"
+                        : "other"
+                      : null;
                     const isFocused =
                       focusedCell?.staffId === staffId &&
                       focusedCell?.date === dayKey;
@@ -271,6 +281,7 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                         state={cell.state}
                         isLocked={cell.isLocked}
                         isEditing={isEditing}
+                        editLockOwner={editLockOwner}
                         editorName={editor?.userName}
                         editorColor={editor?.color}
                         lastChangedBy={cell.lastChangedBy}

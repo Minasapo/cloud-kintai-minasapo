@@ -197,16 +197,25 @@ export const useCollaborativePageState = (targetMonth: string) => {
 
   const isEditingDisabled = !state.isOnline || state.connectionState === "disconnected";
 
+  const releaseEditLocks = useCallback(
+    async (targets: Array<{ staffId: string; date: string }>) => {
+      await Promise.all(
+        targets.map(({ staffId, date }) => stopEditingCell(staffId, date)),
+      );
+    },
+    [stopEditingCell],
+  );
+
   const changeCellState = useCallback(
-    (staffId: string, date: string, newState: ShiftState) => {
+    async (staffId: string, date: string, newState: ShiftState) => {
       if (isEditingDisabled) {
         setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
-        return;
+        return false;
       }
 
       if (isCellLocked(staffId, date)) {
         setEditLockError("確定済みのセルは変更できません。");
-        return;
+        return false;
       }
 
       if (isCellBeingEdited(staffId, date)) {
@@ -224,17 +233,19 @@ export const useCollaborativePageState = (targetMonth: string) => {
             version: 0,
           }),
         );
-        return;
+        return false;
       }
 
       if (!hasEditLock(staffId, date)) {
         setEditLockError("編集前にロックを取得してください。");
-        return;
+        return false;
       }
 
       setEditLockError(null);
       updateUserActivity();
-      void updateShift({ staffId, date, newState });
+      await updateShift({ staffId, date, newState });
+      await releaseEditLocks([{ staffId, date }]);
+      return true;
     },
     [
       getCellEditor,
@@ -242,6 +253,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
       isCellBeingEdited,
       isCellLocked,
       isEditingDisabled,
+      releaseEditLocks,
       targetMonth,
       updateShift,
       updateUserActivity,
@@ -250,32 +262,42 @@ export const useCollaborativePageState = (targetMonth: string) => {
 
   const handleChangeState = useCallback(
     (newState: ShiftState) => {
-      if (isEditingDisabled) {
-        setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
-        return;
-      }
+      const run = async () => {
+        try {
+          if (isEditingDisabled) {
+            setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+            return;
+          }
 
-      if (selectionCount > 0) {
-        const updates = selectedCells.map(({ staffId, date }) => ({
-          staffId,
-          date,
-          newState,
-        }));
-        const validUpdates = updates.filter((u) =>
-          hasEditLock(u.staffId, u.date),
-        );
-        if (validUpdates.length > 0) {
-          setEditLockError(null);
-          void batchUpdateShifts(validUpdates);
-        } else {
-          setEditLockError("一括編集前に対象セルのロックを取得してください。");
+          if (selectionCount > 0) {
+            const updates = selectedCells.map(({ staffId, date }) => ({
+              staffId,
+              date,
+              newState,
+            }));
+            const validUpdates = updates.filter((u) =>
+              hasEditLock(u.staffId, u.date),
+            );
+            if (validUpdates.length > 0) {
+              setEditLockError(null);
+              updateUserActivity();
+              await batchUpdateShifts(validUpdates);
+              await releaseEditLocks(validUpdates);
+            } else {
+              setEditLockError("一括編集前に対象セルのロックを取得してください。");
+            }
+            return;
+          }
+
+          if (focusedCell) {
+            await changeCellState(focusedCell.staffId, focusedCell.date, newState);
+          }
+        } catch (error) {
+          console.error("Failed to change shift state:", error);
         }
-        return;
-      }
+      };
 
-      if (focusedCell) {
-        changeCellState(focusedCell.staffId, focusedCell.date, newState);
-      }
+      void run();
     },
     [
       focusedCell,
@@ -285,6 +307,8 @@ export const useCollaborativePageState = (targetMonth: string) => {
       changeCellState,
       hasEditLock,
       isEditingDisabled,
+      releaseEditLocks,
+      updateUserActivity,
     ],
   );
 

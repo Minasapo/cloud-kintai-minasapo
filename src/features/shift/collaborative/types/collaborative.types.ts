@@ -39,6 +39,8 @@ export interface CollaborativeUser {
   lastActivity: number; // timestamp
 }
 
+export type ShiftCellEditLockOwner = "self" | "other" | null;
+
 export interface ShiftEditLockData {
   id: string;
   targetMonth: string;
