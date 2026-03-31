@@ -3,7 +3,6 @@ import {
   Box,
   Chip,
   CircularProgress,
-  Container,
   List,
   ListItem,
   Stack,
@@ -18,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { getOperationLogLabel } from "@/entities/operation-log/lib/operationLogLabels";
 import useAdminOperationLogs from "@/hooks/useAdminOperationLogs/useAdminOperationLogs";
+import { PageContent } from "@/shared/ui/layout";
 
 export default function AdminLogsClean() {
   const theme = useTheme();
@@ -79,7 +79,7 @@ export default function AdminLogsClean() {
   }, [nextToken, loadMore, loading]);
 
   return (
-    <Container maxWidth="xl">
+    <PageContent width="dashboard">
       <Stack spacing={2} sx={{ pt: 1 }}>
         <Stack spacing={1}>
           <Box>
@@ -222,6 +222,6 @@ export default function AdminLogsClean() {
           </Box>
         </Stack>
       </Stack>
-    </Container>
+    </PageContent>
   );
 }

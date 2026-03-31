@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import { PageContent } from "@/shared/ui/layout";
 
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
@@ -273,9 +274,10 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     });
 
     return (
-      <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
-        <div
-          className="mx-auto w-full max-w-[1360px] px-1.5 py-1 sm:px-2.5"
+      <Page title="シフト調整(共同)" width="full" showDefaultHeader={false}>
+        <PageContent
+          width="wide"
+          className="px-1.5 py-1 sm:px-2.5"
           onMouseUp={handleMouseUp}
         >
           <CollaborativeHeader
@@ -418,7 +420,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             notifications={notifications}
             onDismiss={dismissNotification}
           />
-        </div>
+        </PageContent>
 
         <ChangeHistoryPanel
           undoHistory={undoHistory}
@@ -504,14 +506,14 @@ export default function ShiftCollaborativePage() {
 
   if (staffIds.length === 0) {
     return (
-      <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
-        <div className="mx-auto w-full max-w-[1360px] px-1.5 py-1 sm:px-2.5">
+      <Page title="シフト調整(共同)" width="full" showDefaultHeader={false}>
+        <PageContent width="wide" className="px-1.5 py-1 sm:px-2.5">
           <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
             <InlineAlert tone="info" icon={<InfoBadge />}>
               スタッフデータが見つかりません
             </InlineAlert>
           </div>
-        </div>
+        </PageContent>
       </Page>
     );
   }

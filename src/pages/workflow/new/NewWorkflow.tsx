@@ -34,7 +34,11 @@ import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifica
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { createLogger } from "@/shared/lib/logger";
 import { parseTimeToISO } from "@/shared/lib/time";
-import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@/shared/ui/layout";
 
 import styles from "./NewWorkflow.module.scss";
 
@@ -406,107 +410,109 @@ export default function NewWorkflow() {
   };
 
   return (
-    <Page title="新規作成" maxWidth="lg" showDefaultHeader={false}>
-      <PageSection
-        component="form"
-        layoutVariant="dashboard"
-        onSubmit={handleSubmit}
-        sx={{ gap: 0 }}
-      >
-        <div style={{ marginBottom: "1rem" }}>
-          <button
-            type="button"
-            className={styles.backButton}
-            onClick={() => navigate("/workflow")}
-          >
-            申請一覧へ戻る
-          </button>
-        </div>
-
-        <div className={styles.pageHeader}>
-          <div>
-            <h2 className={styles.pageTitle}>新規作成</h2>
-            <p className={styles.pageSubtitle}>
-              申請一覧を起点に、申請内容を作成します。
-            </p>
+    <Page title="新規作成" width="full" showDefaultHeader={false}>
+      <PageContent width="form">
+        <PageSection
+          component="form"
+          layoutVariant="dashboard"
+          onSubmit={handleSubmit}
+          sx={{ gap: 0 }}
+        >
+          <div style={{ marginBottom: "1rem" }}>
+            <button
+              type="button"
+              className={styles.backButton}
+              onClick={() => navigate("/workflow")}
+            >
+              申請一覧へ戻る
+            </button>
           </div>
-        </div>
 
-        <DashboardInnerSurface>
-          <div className={styles.formRows}>
-            <FormRow label="種別">
-              <div>
-                <div className={styles.selectWrap}>
-                  <select
-                    className={styles.select}
-                    value={category}
-                    onChange={handleCategoryChange}
-                  >
-                    <option value="">種別を選択</option>
-                    {buildCategoryOptions(enabledCategoryOptions)}
-                  </select>
-                  <span className={styles.selectIcon} aria-hidden="true">
-                    ▼
-                  </span>
-                </div>
-              </div>
-            </FormRow>
-
-            <FormRow label="申請者">
-              <p className={styles.formValue}>
-                {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
+          <div className={styles.pageHeader}>
+            <div>
+              <h2 className={styles.pageTitle}>新規作成</h2>
+              <p className={styles.pageSubtitle}>
+                申請一覧を起点に、申請内容を作成します。
               </p>
-            </FormRow>
-
-            <FormRow label="申請日">
-              <div>
-                <input
-                  className={styles.readonlyInput}
-                  value={applicationDate}
-                  readOnly
-                />
-              </div>
-            </FormRow>
-
-            <WorkflowFormProvider value={workflowFormContextValue}>
-              <WorkflowTypeFields />
-            </WorkflowFormProvider>
-
-            <FormRow label="下書き">
-              <div>
-                <label className={styles.toggleWrap}>
-                  <input
-                    type="checkbox"
-                    className={styles.toggleInput}
-                    checked={draftMode}
-                    onChange={handleDraftToggle}
-                  />
-                  <span className={styles.toggleTrack} />
-                  {draftMode && (
-                    <span className={styles.toggleLabelText}>
-                      下書きとして保存
-                    </span>
-                  )}
-                </label>
-              </div>
-            </FormRow>
-
-            <FormRow>
-              <div className={styles.formActions}>
-                <div className={styles.actionsGroup}>
-                  <button
-                    type="submit"
-                    className={styles.submitButton}
-                    disabled={category === ""}
-                  >
-                    作成
-                  </button>
-                </div>
-              </div>
-            </FormRow>
+            </div>
           </div>
-        </DashboardInnerSurface>
-      </PageSection>
+
+          <DashboardInnerSurface>
+            <div className={styles.formRows}>
+              <FormRow label="種別">
+                <div>
+                  <div className={styles.selectWrap}>
+                    <select
+                      className={styles.select}
+                      value={category}
+                      onChange={handleCategoryChange}
+                    >
+                      <option value="">種別を選択</option>
+                      {buildCategoryOptions(enabledCategoryOptions)}
+                    </select>
+                    <span className={styles.selectIcon} aria-hidden="true">
+                      ▼
+                    </span>
+                  </div>
+                </div>
+              </FormRow>
+
+              <FormRow label="申請者">
+                <p className={styles.formValue}>
+                  {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
+                </p>
+              </FormRow>
+
+              <FormRow label="申請日">
+                <div>
+                  <input
+                    className={styles.readonlyInput}
+                    value={applicationDate}
+                    readOnly
+                  />
+                </div>
+              </FormRow>
+
+              <WorkflowFormProvider value={workflowFormContextValue}>
+                <WorkflowTypeFields />
+              </WorkflowFormProvider>
+
+              <FormRow label="下書き">
+                <div>
+                  <label className={styles.toggleWrap}>
+                    <input
+                      type="checkbox"
+                      className={styles.toggleInput}
+                      checked={draftMode}
+                      onChange={handleDraftToggle}
+                    />
+                    <span className={styles.toggleTrack} />
+                    {draftMode && (
+                      <span className={styles.toggleLabelText}>
+                        下書きとして保存
+                      </span>
+                    )}
+                  </label>
+                </div>
+              </FormRow>
+
+              <FormRow>
+                <div className={styles.formActions}>
+                  <div className={styles.actionsGroup}>
+                    <button
+                      type="submit"
+                      className={styles.submitButton}
+                      disabled={category === ""}
+                    >
+                      作成
+                    </button>
+                  </div>
+                </div>
+              </FormRow>
+            </div>
+          </DashboardInnerSurface>
+        </PageSection>
+      </PageContent>
     </Page>
   );
 }

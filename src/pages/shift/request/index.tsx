@@ -18,7 +18,7 @@ export default function ShiftRequestPage() {
 
   if (isConfigLoading && !config) {
     return (
-      <Page title="希望シフト" maxWidth={false} showDefaultHeader={false}>
+      <Page title="希望シフト" width="full" showDefaultHeader={false}>
         <PageSection variant="plain" layoutVariant="detail" sx={{ gap: 0 }}>
           <LinearProgress data-testid="shift-mode-loading" />
         </PageSection>
@@ -33,7 +33,7 @@ export default function ShiftRequestPage() {
   }
 
   return (
-    <Page title="希望シフト" maxWidth={false} showDefaultHeader={false}>
+    <Page title="希望シフト" width="full" showDefaultHeader={false}>
       <PageSection variant="plain" layoutVariant="detail" sx={{ gap: 0 }}>
         <ShiftRequestForm />
       </PageSection>

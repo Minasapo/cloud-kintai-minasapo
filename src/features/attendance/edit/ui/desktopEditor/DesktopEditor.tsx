@@ -120,7 +120,7 @@ export default function DesktopEditor() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-6 pb-10 pt-2">
+    <div className="w-full px-6 pb-10 pt-2">
       <div className="flex flex-col gap-3">
         <AttendanceEditPageHeader
           description="勤務時間、休憩、休暇、備考をひとつの画面で調整できます。必要な内容を入力して修正申請を行ってください。"

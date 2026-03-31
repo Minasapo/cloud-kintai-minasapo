@@ -26,6 +26,7 @@ import {
 } from "@/features/splitView";
 import { designTokenVar } from "@/shared/designSystem";
 import { PageSection } from "@/shared/ui/layout";
+import { getPageWidthMaxWidth } from "@/shared/ui/layout/pageWidthPresets";
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
 
@@ -83,7 +84,7 @@ const PAGE_CONTAINER_SX = {
   px: PAGE_PADDING_X,
   py: PAGE_PADDING_Y,
   gap: PAGE_SECTION_GAP,
-  maxWidth: "1360px",
+  maxWidth: getPageWidthMaxWidth("wide"),
   mx: "auto",
 } as const;
 

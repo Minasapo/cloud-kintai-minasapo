@@ -44,7 +44,11 @@ import {
   getGraphQLErrorMessage,
   getNextVersion,
 } from "@/shared/api/graphql/concurrency";
-import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@/shared/ui/layout";
 
 import {
   AlertBox,
@@ -793,13 +797,14 @@ export default function DailyReport() {
   ]);
 
   return (
-    <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
-      <PageSection
-        layoutVariant="dashboard"
-        variant="plain"
-        className="daily-report-section"
-      >
-        <VStack className="daily-report-page">
+    <Page title="日報" width="full" showDefaultHeader={false}>
+      <PageContent width="content">
+        <PageSection
+          layoutVariant="dashboard"
+          variant="plain"
+          className="daily-report-section"
+        >
+          <VStack className="daily-report-page">
           <HeroSection
             isDescriptionExpanded={isHeroDescriptionExpanded}
             onToggleDescription={() =>
@@ -897,8 +902,9 @@ export default function DailyReport() {
               </Panel>
             </div>
           </div>
-        </VStack>
-      </PageSection>
+          </VStack>
+        </PageSection>
+      </PageContent>
     </Page>
   );
 }

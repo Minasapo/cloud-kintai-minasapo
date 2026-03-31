@@ -5,7 +5,11 @@ import { Navigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@/shared/ui/layout";
 
 export default function AttendanceStatisticsPage() {
   const { getAttendanceStatisticsEnabled } = useContext(AppConfigContext);
@@ -16,15 +20,17 @@ export default function AttendanceStatisticsPage() {
   }
 
   return (
-    <Page title="稼働統計" maxWidth="xl" showDefaultHeader={false}>
-      <PageSection layoutVariant="dashboard">
-        <DashboardInnerSurface
-          className="sm:p-6"
-          style={{ minHeight: PANEL_HEIGHTS.STATISTICS_MIN }}
-        >
-          <AttendanceStatistics />
-        </DashboardInnerSurface>
-      </PageSection>
+    <Page title="稼働統計" width="full" showDefaultHeader={false}>
+      <PageContent width="content">
+        <PageSection layoutVariant="dashboard">
+          <DashboardInnerSurface
+            className="sm:p-6"
+            style={{ minHeight: PANEL_HEIGHTS.STATISTICS_MIN }}
+          >
+            <AttendanceStatistics />
+          </DashboardInnerSurface>
+        </PageSection>
+      </PageContent>
     </Page>
   );
 }

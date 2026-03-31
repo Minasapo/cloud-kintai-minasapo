@@ -36,6 +36,7 @@ import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEd
 import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { createLogger } from "@/shared/lib/logger";
+import { PageContent } from "@/shared/ui/layout";
 
 import { AttendanceEditErrorAlert } from "./AttendanceEditErrorAlert";
 import { buildChangeRequestPayload } from "./attendanceEditUtils";
@@ -363,9 +364,10 @@ export default function AttendanceEdit() {
 
   return (
     <AttendanceEditProvider value={attendanceEditContextValue}>
-      <div
+      <PageContent
+        width="content"
         data-testid="attendance-edit-root"
-        className="attendance-edit-root mx-auto w-full md:max-w-[1280px]"
+        className="attendance-edit-root"
       >
         <AttendanceEditErrorAlert messages={errorMessages} />
         <div className="block md:hidden" data-testid="attendance-mobile-editor">
@@ -377,7 +379,7 @@ export default function AttendanceEdit() {
         >
           <DesktopEditor />
         </div>
-      </div>
+      </PageContent>
     </AttendanceEditProvider>
   );
 }

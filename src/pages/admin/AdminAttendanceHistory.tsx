@@ -1,13 +1,13 @@
 import AttendanceEditor from "@features/attendance/edit/ui/AttendanceEditor";
-import { Container } from "@mui/material";
+
+import { PageContent } from "@/shared/ui/layout";
 
 export default function AdminAttendanceHistory(): JSX.Element {
   // AttendanceEditor reads route params internally when needed, so this page
   // doesn't need to pull params itself.
   return (
-    <Container maxWidth="xl" sx={{ pt: 1 }}>
-      {/* render editor in readOnly mode */}
+    <PageContent width="dashboard" className="pt-1">
       <AttendanceEditor readOnly />
-    </Container>
+    </PageContent>
   );
 }

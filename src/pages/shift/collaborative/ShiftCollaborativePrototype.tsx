@@ -7,7 +7,6 @@ import {
   Box,
   Button,
   Chip,
-  Container,
   LinearProgress,
   Paper,
   Stack,
@@ -24,6 +23,8 @@ import { alpha } from "@mui/material/styles";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
+
+import { PageContent } from "@/shared/ui/layout";
 
 // モックデータ型定義
 interface MockUser {
@@ -218,8 +219,8 @@ export default function ShiftCollaborativePrototype() {
   const nextMonth = () => setCurrentMonth((m) => m.add(1, "month"));
 
   return (
-    <Page title="シフト調整(共同) プロトタイプ" maxWidth={false}>
-      <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Page title="シフト調整(共同) プロトタイプ" width="full">
+      <PageContent width="wide" className="py-3">
         <Stack spacing={3}>
           {/* ヘッダーエリア */}
           <Paper sx={{ p: 2 }}>
@@ -594,7 +595,7 @@ export default function ShiftCollaborativePrototype() {
             </Stack>
           </Paper>
         </Stack>
-      </Container>
+      </PageContent>
     </Page>
   );
 }
