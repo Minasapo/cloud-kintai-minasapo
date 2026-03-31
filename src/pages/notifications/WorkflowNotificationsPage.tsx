@@ -4,7 +4,6 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import {
   Alert,
   Box,
-  Button,
   Chip,
   CircularProgress,
   List,
@@ -27,6 +26,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { useWorkflowNotificationInbox } from "@/features/workflow/notification/model/useWorkflowNotificationInbox";
+import { AppButton } from "@/shared/ui/button";
 import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
 
 const formatEventAt = (eventAt: string) =>
@@ -131,8 +131,10 @@ export default function WorkflowNotificationsPage() {
                   variant="outlined"
                 />
               </Stack>
-              <Button
-                variant="outlined"
+              <AppButton
+                variant="outline"
+                tone="neutral"
+                size="sm"
                 startIcon={<MarkEmailReadIcon />}
                 disabled={unreadCount === 0 || loading}
                 onClick={() => {
@@ -140,7 +142,7 @@ export default function WorkflowNotificationsPage() {
                 }}
               >
                 すべて既読にする
-              </Button>
+              </AppButton>
             </Stack>
 
             {error && <Alert severity="error">{error}</Alert>}

@@ -11,10 +11,10 @@ describe("AdminSettingsTop", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("heading", { name: "基本設定" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "基本" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "勤務ルール" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "運用設定" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "外部連携・補助" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "シフト・申請" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "データ・連携" })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /集計対象月.*集計対象月を開く/i }),
     ).toHaveAttribute("href", "/admin/master/job_term");

@@ -1,6 +1,8 @@
 import dayjs, { type Dayjs } from "dayjs";
 import type { ChangeEvent, CSSProperties, ReactNode, TextareaHTMLAttributes } from "react";
 
+import { AppButton } from "@/shared/ui/button";
+
 type SettingsButtonVariant = "primary" | "secondary" | "danger";
 type SettingsButtonSize = "sm" | "md";
 
@@ -257,20 +259,26 @@ export function SettingsSelect({
   value,
   onChange,
   options,
+  id,
   ...props
 }: SettingsSelectProps) {
   const hasError = Boolean(errorText);
+  const selectId = id ?? (typeof label === "string" ? `settings-select-${label.replace(/\s+/g, "-")}` : undefined);
 
   return (
     <div className={[fieldContainerClassName, className].filter(Boolean).join(" ")}>
       {label ? (
-        <label className={[fieldLabelClassName, labelClassName].filter(Boolean).join(" ")}>
+        <label
+          htmlFor={selectId}
+          className={[fieldLabelClassName, labelClassName].filter(Boolean).join(" ")}
+        >
           {label}
           {required ? <span className="ml-1 text-rose-600">*</span> : null}
         </label>
       ) : null}
       <select
         {...props}
+        id={selectId}
         disabled={disabled}
         required={required}
         value={value}
@@ -444,19 +452,6 @@ export function readChecked(
   return checked ?? event.target.checked;
 }
 
-const BUTTON_VARIANT_CLASSES: Record<SettingsButtonVariant, string> = {
-  primary:
-    "bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-100",
-  secondary:
-    "bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-100",
-  danger: "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-100",
-};
-
-const BUTTON_SIZE_CLASSES: Record<SettingsButtonSize, string> = {
-  md: "px-4 py-2",
-  sm: "px-3 py-1.5",
-};
-
 export function SettingsButton({
   variant = "primary",
   size = "md",
@@ -466,22 +461,24 @@ export function SettingsButton({
   children,
   className,
 }: SettingsButtonProps) {
+  const toneByVariant: Record<SettingsButtonVariant, "primary" | "secondary" | "danger"> = {
+    primary: "primary",
+    secondary: "secondary",
+    danger: "danger",
+  };
+
   return (
-    <button
+    <AppButton
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={[
-        "text-sm font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-        BUTTON_VARIANT_CLASSES[variant],
-        BUTTON_SIZE_CLASSES[size],
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      tone={toneByVariant[variant]}
+      variant={variant === "secondary" ? "outline" : "solid"}
+      size={size}
+      className={className}
     >
       {children}
-    </button>
+    </AppButton>
   );
 }
 

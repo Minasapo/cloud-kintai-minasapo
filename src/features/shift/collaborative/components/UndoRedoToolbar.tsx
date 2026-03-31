@@ -9,12 +9,13 @@ import PrintIcon from "@mui/icons-material/Print";
 import {
   Badge,
   Divider,
-  IconButton,
   Paper,
   Stack,
   Tooltip,
 } from "@mui/material";
 import React from "react";
+
+import { AppIconButton } from "@/shared/ui/button";
 
 const MIN_SYNC_SPIN_DURATION_MS = 2000;
 
@@ -130,15 +131,15 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
           }
         >
           <span>
-            <IconButton
-              size="small"
+            <AppIconButton
               onClick={onUndo}
               disabled={!canUndo}
-              color="primary"
+              tone="primary"
+              size="sm"
               aria-label="undo"
             >
               <UndoIcon />
-            </IconButton>
+            </AppIconButton>
           </span>
         </Tooltip>
 
@@ -150,15 +151,15 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
           }
         >
           <span>
-            <IconButton
-              size="small"
+            <AppIconButton
               onClick={onRedo}
               disabled={!canRedo}
-              color="primary"
+              tone="primary"
+              size="sm"
               aria-label="redo"
             >
               <RedoIcon />
-            </IconButton>
+            </AppIconButton>
           </span>
         </Tooltip>
 
@@ -166,14 +167,14 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
           <>
             <Divider orientation="vertical" flexItem sx={{ mx: 1, my: 0.5 }} />
             <Tooltip title="シフト調整表を印刷">
-              <IconButton
-                size="small"
+              <AppIconButton
                 onClick={onPrint}
-                color="primary"
+                tone="primary"
+                size="sm"
                 aria-label="print"
               >
                 <PrintIcon />
-              </IconButton>
+              </AppIconButton>
             </Tooltip>
 
             {onSync && (
@@ -183,10 +184,16 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
                 }
               >
                 <span>
-                  <IconButton
-                    size="small"
+                  <AppIconButton
                     onClick={onSync}
-                    color={syncColor}
+                    tone={
+                      syncColor === "error"
+                        ? "danger"
+                        : syncColor === "primary" || syncColor === "success"
+                          ? "primary"
+                          : "neutral"
+                    }
+                    size="sm"
                     disabled={isSyncBusy}
                     aria-label="sync"
                   >
@@ -201,7 +208,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
                         },
                       }}
                     />
-                  </IconButton>
+                  </AppIconButton>
                 </span>
               </Tooltip>
             )}
@@ -216,28 +223,28 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
               max={9}
               invisible={!suggestionsBadgeCount || suggestionsBadgeCount <= 0}
             >
-              <IconButton
-                size="small"
+              <AppIconButton
                 onClick={onShowSuggestions}
-                color="primary"
+                tone="primary"
+                size="sm"
                 aria-label="show suggestions"
               >
                 <LightbulbIcon />
-              </IconButton>
+              </AppIconButton>
             </Badge>
           </Tooltip>
         )}
 
         {onShowHelp && (
           <Tooltip title="ヘルプ">
-            <IconButton
-              size="small"
+            <AppIconButton
               onClick={onShowHelp}
-              color="default"
+              tone="neutral"
+              size="sm"
               aria-label="show help"
             >
               <HelpOutlineIcon />
-            </IconButton>
+            </AppIconButton>
           </Tooltip>
         )}
       </Stack>

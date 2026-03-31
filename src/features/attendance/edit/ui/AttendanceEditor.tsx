@@ -15,7 +15,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import AddAlarmIcon from "@mui/icons-material/AddAlarm";
 import {
   Checkbox,
-  IconButton,
   LinearProgress,
 } from "@mui/material";
 import {
@@ -51,6 +50,7 @@ import {
   setSnackbarError,
   setSnackbarSuccess,
 } from "@/shared/lib/store/snackbarSlice";
+import { AppButton, AppIconButton } from "@/shared/ui/button";
 
 import { useAttendanceRecord } from "../model/useAttendanceRecord";
 import ChangeRequestDialog from "./ChangeRequestDialog/ChangeRequestDialog";
@@ -72,11 +72,6 @@ import MoveDateItem from "./MoveDateItem";
 import PaidHolidayFlagInputCommon from "./PaidHolidayFlagInput";
 import QuickInputButtons from "./QuickInputButtons";
 import { SystemCommentList } from "./SystemCommentList";
-
-const adminSaveButtonClassName =
-  "inline-flex min-w-[160px] items-center justify-center gap-2 rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none";
-const subtleActionButtonClassName =
-  "inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400";
 
 function InlineAlert({
   tone,
@@ -776,8 +771,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           </div>
         )}
         <div className="flex flex-wrap items-center justify-between gap-1.5">
-          <button
-            type="button"
+          <AppButton
             onClick={() => {
               if (targetStaffId) {
                 navigate(`/admin/staff/${targetStaffId}/attendance`);
@@ -785,13 +779,15 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
               }
               navigate("/admin/attendances");
             }}
-            className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            variant="outline"
+            tone="neutral"
+            size="sm"
           >
             <span aria-hidden="true" className="text-base leading-none">
               ←
             </span>
             勤怠一覧に戻る
-          </button>
+          </AppButton>
           {workDate && (
             <div className="inline-flex w-fit items-center rounded-full bg-slate-900/5 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-slate-600">
               {workDate.format(AttendanceDate.DisplayFormat)}
@@ -816,8 +812,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           )}
           {readOnly && (
             <div className="mt-1">
-              <button
-                type="button"
+              <AppButton
                 onClick={() => {
                   const date = workDate
                     ? workDate.format(AttendanceDate.DataFormat)
@@ -827,10 +822,12 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                     navigate(`/admin/attendances/edit/${date}/${sid}`);
                   }
                 }}
-                className={subtleActionButtonClassName}
+                variant="outline"
+                tone="neutral"
+                size="sm"
               >
                 編集画面に戻る
-              </button>
+              </AppButton>
             </div>
           )}
         </div>
@@ -847,8 +844,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
               ) : sortedHistories && sortedHistories.length > 0 ? (
                 <div className="flex flex-col gap-1">
                   {sortedHistories.map((h, idx) => (
-                    <button
-                      type="button"
+                    <AppButton
                       key={idx}
                       onClick={() => {
                         setHistoryIndex(idx);
@@ -858,12 +854,11 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                           // noop
                         }
                       }}
-                      className={[
-                        "flex w-full flex-col items-start rounded-2xl border px-4 py-3 text-left transition",
-                        idx === historyIndex
-                          ? "border-emerald-300 bg-emerald-50"
-                          : "border-slate-200 bg-white hover:border-emerald-200 hover:bg-slate-50",
-                      ].join(" ")}
+                      variant={idx === historyIndex ? "solid" : "outline"}
+                      tone={idx === historyIndex ? "primary" : "neutral"}
+                      size="sm"
+                      fullWidth
+                      className="flex-col items-start"
                     >
                       <span className="text-sm font-semibold text-slate-900">
                         {`履歴 #${sortedHistories.length - idx}`}
@@ -871,7 +866,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                       <span className="mt-1 text-xs text-slate-500">
                         {dayjs(h.createdAt).format("YYYY/MM/DD HH:mm:ss")}
                       </span>
-                    </button>
+                    </AppButton>
                   ))}
                 </div>
               ) : (
@@ -1060,7 +1055,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                                 ),
                               )}
                               <div>
-                                <IconButton
+                                <AppIconButton
                                   aria-label="add-hourly-paid-holiday-time"
                                   onClick={() =>
                                     hourlyPaidHolidayTimeAppend({
@@ -1069,9 +1064,10 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                                     })
                                   }
                                   disabled={!!readOnly}
+                                  tone="primary"
                                 >
                                   <AddAlarmIcon />
-                                </IconButton>
+                                </AppIconButton>
                               </div>
                             </div>
                           </div>
@@ -1156,22 +1152,16 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
               <div className="flex items-center justify-center gap-3">
                 <div>
                   {!readOnly && (
-                    <button
-                      type="button"
+                    <AppButton
                       onClick={handleSubmit(onSubmit)}
-                      className={adminSaveButtonClassName}
                       disabled={
                         !isValid || !isDirty || isSubmitting || !!overtimeError
                       }
+                      loading={isSubmitting}
+                      size="lg"
                     >
-                      {isSubmitting ? (
-                        <span
-                          className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/80 border-t-transparent"
-                          aria-hidden="true"
-                        />
-                      ) : null}
                       {isSubmitting ? "保存中..." : "保存"}
-                    </button>
+                    </AppButton>
                   )}
                 </div>
               </div>

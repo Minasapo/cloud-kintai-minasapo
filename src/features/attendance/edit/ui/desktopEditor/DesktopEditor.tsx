@@ -21,6 +21,7 @@ import { AttendanceEditPageHeader } from "@/features/attendance/edit/ui/componen
 import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
 import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
 import { createLogger } from "@/shared/lib/logger";
+import { AppButton, AppIconButton } from "@/shared/ui/button";
 
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
 import NoDataAlert from "./NoDataAlert";
@@ -37,11 +38,6 @@ import {
 } from "./WorkTimeInput/WorkTimeInput";
 
 const logger = createLogger("DesktopEditor");
-const requestButtonClassName =
-  "inline-flex min-w-[160px] items-center justify-center gap-2 rounded-full border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium !text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] hover:!text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:!text-slate-500 disabled:shadow-none";
-const circleActionButtonClassName =
-  "inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300 bg-white text-emerald-700 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400";
-
 export default function DesktopEditor() {
   const ctx = useContext(AttendanceEditContext);
   const {
@@ -268,8 +264,7 @@ export default function DesktopEditor() {
                           ),
                         )}
                         <div>
-                          <button
-                            type="button"
+                          <AppIconButton
                             aria-label="add-hourly-paid-holiday-time"
                             onClick={() =>
                               hourlyPaidHolidayTimeAppend({
@@ -278,12 +273,12 @@ export default function DesktopEditor() {
                               })
                             }
                             disabled={changeRequests.length > 0}
-                            className={circleActionButtonClassName}
+                            tone="primary"
                           >
                             <span aria-hidden="true" className="text-2xl leading-none">
                               +
                             </span>
-                          </button>
+                          </AppIconButton>
                         </div>
                       </div>
                     </div>
@@ -311,10 +306,10 @@ export default function DesktopEditor() {
             <StaffCommentInput register={register} setValue={setValue} />
           </GroupContainer>
           <div className="flex justify-center pb-2">
-            <button
-              type="button"
+            <AppButton
               data-testid="attendance-submit-button"
-              className={requestButtonClassName}
+              size="lg"
+              loading={isSubmitting}
               onClick={async () => {
                 // capture pressed time and t0 for processing-time measurement
                 const pressedAt = new Date().toISOString();
@@ -359,14 +354,8 @@ export default function DesktopEditor() {
                 !isDirty || !isValid || isSubmitting || changeRequests.length > 0
               }
             >
-              {isSubmitting ? (
-                <span
-                  className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/80 border-t-transparent"
-                  aria-hidden="true"
-                />
-              ) : null}
               申請
-            </button>
+            </AppButton>
           </div>
         </div>
       </div>

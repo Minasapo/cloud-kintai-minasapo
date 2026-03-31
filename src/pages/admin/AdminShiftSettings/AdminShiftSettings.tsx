@@ -221,6 +221,8 @@ export default function AdminShiftSettings() {
               <button
                 key={tab.value}
                 type="button"
+                role="tab"
+                aria-selected={activeTab === tab.value}
                 onClick={() => setActiveTab(tab.value)}
                 className={[
                   "rounded-xl px-4 py-3 text-sm font-medium transition",

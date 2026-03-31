@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import type { UseFormSetValue } from "react-hook-form";
 
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
+import { AppButton } from "@/shared/ui/button";
 
 import { useQuickInputActions } from "../model/useQuickInputActions";
 import { useQuickInputSelection } from "../model/useQuickInputSelection";
@@ -51,13 +52,14 @@ export default function QuickInputButtonsMobile({
     <div className="mb-1">
       <div className="flex flex-wrap items-center gap-2">
         <div className="mr-1 text-base font-bold text-slate-900">定型入力</div>
-        <button
-          type="button"
+        <AppButton
           onClick={() => setOpen(true)}
-          className="rounded-[10px] border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+          variant="outline"
+          tone="primary"
+          size="sm"
         >
           選択
-        </button>
+        </AppButton>
       </div>
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4">
@@ -65,19 +67,17 @@ export default function QuickInputButtonsMobile({
             <div className="text-base font-semibold text-slate-950">定型入力</div>
             <div className="mt-4 space-y-2">
             {actions.map((action) => (
-              <button
+              <AppButton
                 key={action.key}
-                type="button"
                 onClick={() => setSelectedKey(action.key)}
-                className={[
-                  "flex w-full items-center rounded-[10px] border px-4 py-3 text-left text-sm font-medium transition",
-                  selectedKey === action.key
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
-                ].join(" ")}
+                variant={selectedKey === action.key ? "solid" : "outline"}
+                tone={selectedKey === action.key ? "primary" : "neutral"}
+                size="sm"
+                fullWidth
+                className="justify-start"
               >
                 {action.label}
-              </button>
+              </AppButton>
             ))}
             {actions.length === 0 && (
               <p className="text-sm text-slate-500">
@@ -86,21 +86,23 @@ export default function QuickInputButtonsMobile({
             )}
             </div>
             <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
+              <AppButton
                 onClick={close}
-                className="rounded-[10px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                variant="outline"
+                tone="neutral"
+                size="sm"
               >
                 閉じる
-              </button>
-              <button
-                type="button"
+              </AppButton>
+              <AppButton
                 onClick={applySelectedAction}
                 disabled={!selectedKey}
-                className="rounded-[10px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                variant="solid"
+                tone="primary"
+                size="sm"
               >
                 適用
-              </button>
+              </AppButton>
             </div>
           </div>
         </div>

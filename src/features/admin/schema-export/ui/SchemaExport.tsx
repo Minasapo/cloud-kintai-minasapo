@@ -149,8 +149,12 @@ export default function SchemaExport() {
                     {bulkExportProgress.currentModelName}
                   </p>
                   <div
-                    className="h-2 w-full overflow-hidden rounded-full bg-slate-200"
+                    role="progressbar"
+                    aria-valuenow={bulkProgressValue}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
                     aria-label="一括エクスポート進捗"
+                    className="h-2 w-full overflow-hidden rounded-full bg-slate-200"
                   >
                     <div
                       className="h-full rounded-full bg-emerald-500 transition-all"

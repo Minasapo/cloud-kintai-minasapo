@@ -26,12 +26,12 @@ describe("AdminMasterLayout", () => {
     await user.click(screen.getByRole("button", { name: "menu" }));
 
     expect(screen.getByText("設定")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^基本設定/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^勤務ルール/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^運用設定/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^外部連携・補助/ })).toBeInTheDocument();
+    expect(screen.getByText("基本")).toBeInTheDocument();
+    expect(screen.getByText("勤務ルール")).toBeInTheDocument();
+    expect(screen.getByText("シフト・申請")).toBeInTheDocument();
+    expect(screen.getByText("データ・連携")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^集計対象月/ })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /^勤務時間/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^勤務時間/ })).toBeInTheDocument();
   });
 
   it("opens another category and navigates to a nested setting", async () => {
@@ -40,8 +40,6 @@ describe("AdminMasterLayout", () => {
     render(<AdminMasterLayout />);
 
     await user.click(screen.getByRole("button", { name: "menu" }));
-    await user.click(screen.getByRole("button", { name: /^外部連携・補助/ }));
-
     await user.click(screen.getByRole("button", { name: /^開発者/ }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/admin/master/developer");
@@ -52,7 +50,7 @@ describe("AdminMasterLayout", () => {
 
     render(<AdminMasterLayout />);
 
-    expect(screen.getByText("外部連携・補助")).toBeInTheDocument();
+    expect(screen.getByText("データ・連携")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "エクスポート" })).toBeInTheDocument();
     expect(
       screen.getByText("外部連携向けのエクスポート設定や出力内容を確認します。"),
