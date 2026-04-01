@@ -17,12 +17,13 @@ import {
   PAGE_PADDING_Y,
 } from "@/features/admin/layout/adminLayoutTokens";
 import {
-  ADMIN_SPLIT_PANEL_COMPONENTS,
   ADMIN_SPLIT_PANEL_OPTIONS,
+  buildAdminSplitPanelConfig,
 } from "@/features/admin/layout/model/adminSplitPanelRegistry";
 import { resolveActiveMenuHref } from "@/features/admin/layout/model/resolveActiveMenuHref";
 import useHeaderMenu from "@/features/admin/layout/model/useHeaderMenu";
 import AdminHeader from "@/features/admin/layout/ui/AdminHeader";
+import NavItemPanelMenu from "@/features/admin/layout/ui/NavItemPanelMenu";
 import {
   PanelContainer,
   SplitModeToggle,
@@ -149,33 +150,55 @@ const AdminContextRail = memo(function AdminContextRail({
           const isActive = item.href === activeMenuHref;
 
           return (
-            <Button
+            <Box
               key={item.href}
-              variant="text"
-              onClick={() => onSelect(item.href)}
               sx={{
-                justifyContent: "space-between",
-                textTransform: "none",
-                borderRadius: "10px",
-                px: 1.25,
-                py: 1,
-                color: isActive ? "#065f46" : "#1e293b",
-                backgroundColor: isActive
-                  ? "rgba(16,185,129,0.14)"
-                  : "transparent",
-                fontWeight: isActive ? 700 : 500,
-                "&:hover": {
-                  backgroundColor: isActive
-                    ? "rgba(16,185,129,0.2)"
-                    : "rgba(148,163,184,0.12)",
-                },
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger":
+                  {
+                    visibility: "visible",
+                  },
               }}
             >
-              <Box component="span">{item.primaryLabel}</Box>
-              <Box component="span" sx={{ fontSize: "0.72rem", opacity: 0.75 }}>
-                {item.secondaryLabel ?? ""}
-              </Box>
-            </Button>
+              <Button
+                variant="text"
+                onClick={() => onSelect(item.href)}
+                sx={{
+                  flex: 1,
+                  justifyContent: "space-between",
+                  textTransform: "none",
+                  borderRadius: "10px",
+                  px: 1.25,
+                  py: 1,
+                  color: isActive ? "#065f46" : "#1e293b",
+                  backgroundColor: isActive
+                    ? "rgba(16,185,129,0.14)"
+                    : "transparent",
+                  fontWeight: isActive ? 700 : 500,
+                  "&:hover": {
+                    backgroundColor: isActive
+                      ? "rgba(16,185,129,0.2)"
+                      : "rgba(148,163,184,0.12)",
+                  },
+                }}
+              >
+                <Box component="span">{item.primaryLabel}</Box>
+                <Box
+                  component="span"
+                  sx={{ fontSize: "0.72rem", opacity: 0.75 }}
+                >
+                  {item.secondaryLabel ?? ""}
+                </Box>
+              </Button>
+              <NavItemPanelMenu
+                href={item.href}
+                label={item.primaryLabel}
+                className="rail-panel-menu-trigger"
+                sx={{ visibility: "hidden" }}
+              />
+            </Box>
           );
         })}
       </Stack>
@@ -189,20 +212,39 @@ const AdminContextRail = memo(function AdminContextRail({
           QUICK ROUTES
         </Typography>
         {RAIL_ACTION_LINKS.map((link) => (
-          <Button
+          <Box
             key={link.href}
-            variant="outlined"
-            onClick={() => onSelect(link.href)}
             sx={{
-              justifyContent: "flex-start",
-              textTransform: "none",
-              borderColor: "rgba(148,163,184,0.38)",
-              color: "#0f172a",
-              borderRadius: "999px",
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger":
+                {
+                  visibility: "visible",
+                },
             }}
           >
-            {link.label}
-          </Button>
+            <Button
+              variant="outlined"
+              onClick={() => onSelect(link.href)}
+              sx={{
+                flex: 1,
+                justifyContent: "flex-start",
+                textTransform: "none",
+                borderColor: "rgba(148,163,184,0.38)",
+                color: "#0f172a",
+                borderRadius: "999px",
+              }}
+            >
+              {link.label}
+            </Button>
+            <NavItemPanelMenu
+              href={link.href}
+              label={link.label}
+              className="rail-panel-menu-trigger"
+              sx={{ visibility: "hidden" }}
+            />
+          </Box>
         ))}
       </Stack>
     </Stack>
@@ -375,23 +417,6 @@ function AdminLayoutContent() {
     [activeMenuHref, menuItems],
   );
 
-  const buildPanelConfig = useCallback((screenValue: string) => {
-    const selectedOption = ADMIN_SPLIT_PANEL_OPTIONS.find(
-      (option) => option.value === screenValue,
-    );
-    const component = ADMIN_SPLIT_PANEL_COMPONENTS[screenValue];
-
-    if (!selectedOption || !component) {
-      return null;
-    }
-
-    return {
-      id: selectedOption.value,
-      title: selectedOption.label,
-      component,
-    };
-  }, []);
-
   const ensureRightPanel = useCallback(() => {
     if (state.rightPanel) {
       return;
@@ -402,11 +427,11 @@ function AdminLayoutContent() {
       return;
     }
 
-    const fallback = buildPanelConfig(fallbackValue);
+    const fallback = buildAdminSplitPanelConfig(fallbackValue);
     if (fallback) {
       setRightPanel(fallback);
     }
-  }, [buildPanelConfig, setRightPanel, state.rightPanel]);
+  }, [setRightPanel, state.rightPanel]);
 
   const ensureMiddlePanel = useCallback(() => {
     if (state.leftPanel) {
@@ -418,11 +443,11 @@ function AdminLayoutContent() {
       return;
     }
 
-    const fallback = buildPanelConfig(fallbackValue);
+    const fallback = buildAdminSplitPanelConfig(fallbackValue);
     if (fallback) {
       setLeftPanel(fallback);
     }
-  }, [buildPanelConfig, setLeftPanel, state.leftPanel]);
+  }, [setLeftPanel, state.leftPanel]);
 
   const handleToggleSplitMode = useCallback(() => {
     if (isMobile) {
@@ -495,24 +520,24 @@ function AdminLayoutContent() {
 
   const handleMiddleScreenChange = useCallback(
     (screenValue: string) => {
-      const panel = buildPanelConfig(screenValue);
+      const panel = buildAdminSplitPanelConfig(screenValue);
       if (!panel) {
         return;
       }
       setLeftPanel(panel);
     },
-    [buildPanelConfig, setLeftPanel],
+    [setLeftPanel],
   );
 
   const handleRightScreenChange = useCallback(
     (screenValue: string) => {
-      const panel = buildPanelConfig(screenValue);
+      const panel = buildAdminSplitPanelConfig(screenValue);
       if (!panel) {
         return;
       }
       setRightPanel(panel);
     },
-    [buildPanelConfig, setRightPanel],
+    [setRightPanel],
   );
 
   const selectedMiddleScreen = useMemo(
