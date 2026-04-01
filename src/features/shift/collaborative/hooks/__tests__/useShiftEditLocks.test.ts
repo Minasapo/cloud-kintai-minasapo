@@ -2,6 +2,10 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 
 import { useShiftEditLocks } from "../useShiftEditLocks";
 
+type HookProps = {
+  targetMonth?: string;
+};
+
 const mockGraphql = jest.fn();
 const mockUnsubscribe = jest.fn();
 
@@ -206,15 +210,17 @@ describe("useShiftEditLocks", () => {
       return Promise.resolve({ data: {} });
     });
 
+    const initialProps: HookProps = { targetMonth: "2026-03" };
+
     const { result, rerender } = renderHook(
-      ({ targetMonth }: { targetMonth?: string }) =>
+      ({ targetMonth }: HookProps) =>
         useShiftEditLocks({
           currentUserId: "user-1",
           currentUserName: "User One",
           targetMonth,
         }),
       {
-        initialProps: { targetMonth: "2026-03" },
+        initialProps,
       },
     );
 
