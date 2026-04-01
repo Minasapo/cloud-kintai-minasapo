@@ -15,8 +15,8 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs, { type Dayjs } from "dayjs";
 import type { ReactNode } from "react";
-import { useCallback, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useMemo } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
@@ -44,15 +44,51 @@ const PAGE_PADDING_Y = {
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
 const SECTION_CONTENT_GAP = designTokenVar("spacing.md", "12px");
+const MONTH_QUERY_KEY = "month";
+
+const getCurrentMonthFromQuery = (monthParam: string | null): Dayjs => {
+  if (!monthParam) {
+    return dayjs().startOf("month");
+  }
+
+  const parsedMonth = dayjs(monthParam, "YYYY-MM", true);
+  if (!parsedMonth.isValid()) {
+    return dayjs().startOf("month");
+  }
+
+  return parsedMonth.startOf("month");
+};
 
 export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { enableSplitMode, setRightPanel } = useSplitView();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
+  const currentMonth = useMemo(
+    () => getCurrentMonthFromQuery(searchParams.get(MONTH_QUERY_KEY)),
+    [searchParams],
+  );
+
+  const monthQuery = useMemo(
+    () =>
+      new URLSearchParams({
+        [MONTH_QUERY_KEY]: currentMonth.startOf("month").format("YYYY-MM"),
+      }).toString(),
+    [currentMonth],
+  );
+
+  const handleMonthChange = useCallback(
+    (nextMonth: Dayjs) => {
+      const normalizedMonth = nextMonth.startOf("month");
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.set(MONTH_QUERY_KEY, normalizedMonth.format("YYYY-MM"));
+      setSearchParams(nextParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
 
   const {
     staff,
@@ -100,9 +136,9 @@ export default function AdminStaffAttendanceList() {
       const workDate = dayjs(attendance.workDate).format(
         AttendanceDate.QueryParamFormat,
       );
-      navigate(`/admin/attendances/edit/${workDate}/${staffId}`);
+      navigate(`/admin/attendances/edit/${workDate}/${staffId}?${monthQuery}`);
     },
-    [navigate, staffId],
+    [monthQuery, navigate, staffId],
   );
 
   const handleOpenInRightPanel = useCallback(
@@ -115,20 +151,20 @@ export default function AdminStaffAttendanceList() {
       setRightPanel({
         id: `attendance-${workDate}`,
         title: `勤怠編集 - ${dayjs(attendance.workDate).format("YYYY/MM/DD")}`,
-        route: `/admin/attendances/edit/${workDate}/${staffId}`,
+        route: `/admin/attendances/edit/${workDate}/${staffId}?${monthQuery}`,
       });
     },
-    [staffId, enableSplitMode, setRightPanel],
+    [staffId, enableSplitMode, monthQuery, setRightPanel],
   );
 
   const buildCalendarNavigatePath = useCallback(
     (formattedWorkDate: string) => {
       if (!staffId) {
-        return "/admin/attendances";
+        return `/admin/attendances?${monthQuery}`;
       }
-      return `/admin/attendances/edit/${formattedWorkDate}/${staffId}`;
+      return `/admin/attendances/edit/${formattedWorkDate}/${staffId}?${monthQuery}`;
     },
-    [staffId],
+    [monthQuery, staffId],
   );
 
   const renderStandaloneSection = (content: ReactNode) => (
@@ -251,7 +287,7 @@ export default function AdminStaffAttendanceList() {
                 holidayCalendars={holidayCalendars}
                 companyHolidayCalendars={companyHolidayCalendars}
                 currentMonth={currentMonth}
-                onMonthChange={setCurrentMonth}
+                onMonthChange={handleMonthChange}
                 closeDates={closeDates}
                 buildNavigatePath={buildCalendarNavigatePath}
               />
@@ -267,7 +303,7 @@ export default function AdminStaffAttendanceList() {
                 closeDatesLoading={closeDatesLoading}
                 closeDatesError={closeDatesError}
                 currentMonth={currentMonth}
-                onMonthChange={setCurrentMonth}
+                onMonthChange={handleMonthChange}
                 onOpenInRightPanel={handleOpenInRightPanel}
               />
             )}

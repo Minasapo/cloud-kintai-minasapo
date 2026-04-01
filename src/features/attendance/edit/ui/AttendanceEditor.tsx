@@ -25,7 +25,7 @@ import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
@@ -112,6 +112,8 @@ function buildHourlyPaidHolidayTimes(
   }, []);
 }
 
+const MONTH_QUERY_KEY = "month";
+
 export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const {
     getLunchRestStartTime,
@@ -129,6 +131,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
 
   const { targetWorkDate, staffId: targetStaffId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { loading: staffsLoading, error: staffSError } = useStaffs({
@@ -159,6 +162,17 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       new Logger("AttendanceEditor", import.meta.env.DEV ? "DEBUG" : "ERROR"),
     [],
   );
+
+  const attendanceListPath = useMemo(() => {
+    const month = searchParams.get(MONTH_QUERY_KEY);
+    const basePath = targetStaffId
+      ? `/admin/staff/${targetStaffId}/attendance`
+      : "/admin/attendances";
+    if (!month) {
+      return basePath;
+    }
+    return `${basePath}?${new URLSearchParams({ [MONTH_QUERY_KEY]: month }).toString()}`;
+  }, [searchParams, targetStaffId]);
 
   const {
     register,
@@ -216,7 +230,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     historyIndex,
     setHistoryIndex,
     applyHistory,
-    refetchAttendance,
     hasAttendanceFetched,
   } = useAttendanceRecord({
     targetStaffId,
@@ -424,12 +437,8 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
             logger.error(`Failed to send edit mail: ${mailError}`);
           }
 
-          // 更新後は最新の勤怠を再取得してフォームを最新化する
-          if (staff && targetWorkDate) {
-            await refetchAttendance();
-          }
-
           dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
+          navigate(attendanceListPath);
         } catch (error) {
           logger.error(`Update attendance error:`, error);
           const errorMessage =
@@ -529,6 +538,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         }
 
         dispatch(setSnackbarSuccess(MESSAGE_CODE.S04001));
+        navigate(attendanceListPath);
       } catch (error) {
         logger.error(`Create attendance error:`, error);
         const errorMessage =
@@ -546,9 +556,10 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
       targetStaffId,
       targetWorkDate,
       dispatch,
-      refetchAttendance,
       getStartTime,
       getEndTime,
+      navigate,
+      attendanceListPath,
       overtimeError,
     ],
   );
@@ -779,11 +790,7 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
         <div className="flex flex-wrap items-center justify-between gap-1.5">
           <AppButton
             onClick={() => {
-              if (targetStaffId) {
-                navigate(`/admin/staff/${targetStaffId}/attendance`);
-                return;
-              }
-              navigate("/admin/attendances");
+              navigate(attendanceListPath);
             }}
             variant="outline"
             tone="neutral"
@@ -825,7 +832,15 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
                     : targetWorkDate;
                   const sid = targetStaffId;
                   if (date && sid) {
-                    navigate(`/admin/attendances/edit/${date}/${sid}`);
+                    const month = searchParams.get(MONTH_QUERY_KEY);
+                    const editPath = `/admin/attendances/edit/${date}/${sid}`;
+                    if (!month) {
+                      navigate(editPath);
+                      return;
+                    }
+                    navigate(
+                      `${editPath}?${new URLSearchParams({ [MONTH_QUERY_KEY]: month }).toString()}`,
+                    );
                   }
                 }}
                 variant="outline"

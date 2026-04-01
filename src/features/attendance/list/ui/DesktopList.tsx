@@ -70,10 +70,14 @@ export default function DesktopList() {
     const formattedWorkDate = dayjs(workDate).format(
       AttendanceDate.QueryParamFormat,
     );
+    navigate(buildNavigatePath(formattedWorkDate));
+  };
+
+  const buildNavigatePath = (formattedWorkDate: string) => {
     const monthQuery = new URLSearchParams({
       [MONTH_QUERY_KEY]: currentMonth.startOf("month").format("YYYY-MM"),
     }).toString();
-    navigate(`/attendance/${formattedWorkDate}/edit?${monthQuery}`);
+    return `/attendance/${formattedWorkDate}/edit?${monthQuery}`;
   };
 
   const errorAttendances = (() => {
@@ -226,7 +230,7 @@ export default function DesktopList() {
           </Box>
         </Box>
       )}
-      <DesktopCalendarView />
+      <DesktopCalendarView buildNavigatePath={buildNavigatePath} />
     </div>
   );
 }
