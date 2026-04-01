@@ -55,7 +55,7 @@ interface QuickDailyReportCardProps {
  * GraphQLレスポンスからエラーメッセージを抽出するヘルパー関数
  */
 const extractErrorMessage = (
-  errors: readonly { message: string }[]
+  errors: readonly { message: string }[],
 ): string => {
   return errors.map((err) => err.message).join("\n");
 };
@@ -71,7 +71,7 @@ export default function QuickDailyReportCard({
   const [reportVersion, setReportVersion] = useState<number | null>(null);
   const [reportUpdatedAt, setReportUpdatedAt] = useState<string | null>(null);
   const [reportStatus, setReportStatus] = useState<DailyReportStatus | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -147,7 +147,7 @@ export default function QuickDailyReportCard({
 
         const report =
           response.data?.dailyReportsByStaffId?.items?.filter(
-            (item): item is NonNullable<typeof item> => Boolean(item)
+            (item): item is NonNullable<typeof item> => Boolean(item),
           )[0] ?? null;
 
         if (!mounted) return;
@@ -172,7 +172,7 @@ export default function QuickDailyReportCard({
       } catch (err) {
         if (!mounted) return;
         setError(
-          err instanceof Error ? err.message : ERROR_MESSAGES.FETCH_FAILED
+          err instanceof Error ? err.message : ERROR_MESSAGES.FETCH_FAILED,
         );
       } finally {
         if (mounted) {
@@ -225,8 +225,8 @@ export default function QuickDailyReportCard({
       const status = isManualSave
         ? DailyReportStatus.SUBMITTED
         : reportStatus === DailyReportStatus.SUBMITTED
-        ? DailyReportStatus.SUBMITTED
-        : DailyReportStatus.DRAFT;
+          ? DailyReportStatus.SUBMITTED
+          : DailyReportStatus.DRAFT;
 
       try {
         if (reportId) {
@@ -271,17 +271,13 @@ export default function QuickDailyReportCard({
 
           const updatedReport = response.data?.updateDailyReport;
           if (updatedReport && showNotification) {
-            try {
-              await logDailyReportMutation({
-                actorStaffId: staffId,
-                before: beforeReport,
-                after: updatedReport,
-                action:
-                  status === DailyReportStatus.SUBMITTED ? "submit" : "update",
-              });
-            } catch (logError) {
-              console.error("Failed to write daily report operation log:", logError);
-            }
+            await logDailyReportMutation({
+              actorStaffId: staffId,
+              before: beforeReport,
+              after: updatedReport,
+              action:
+                status === DailyReportStatus.SUBMITTED ? "submit" : "update",
+            });
           }
 
           const updatedContent = updatedReport?.content ?? content;
@@ -316,17 +312,13 @@ export default function QuickDailyReportCard({
 
           const created = response.data?.createDailyReport;
           if (created && showNotification) {
-            try {
-              await logDailyReportMutation({
-                actorStaffId: staffId,
-                before: null,
-                after: created,
-                action:
-                  status === DailyReportStatus.SUBMITTED ? "submit" : "create",
-              });
-            } catch (logError) {
-              console.error("Failed to write daily report operation log:", logError);
-            }
+            await logDailyReportMutation({
+              actorStaffId: staffId,
+              before: null,
+              after: created,
+              action:
+                status === DailyReportStatus.SUBMITTED ? "submit" : "create",
+            });
           }
 
           const nextContent = created?.content ?? content;
@@ -365,7 +357,7 @@ export default function QuickDailyReportCard({
       date,
       defaultTitle,
       dispatch,
-    ]
+    ],
   );
 
   /**

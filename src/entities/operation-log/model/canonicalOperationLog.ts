@@ -4,11 +4,7 @@ import type {
 } from "@shared/api/graphql/types";
 import { getCurrentUser } from "aws-amplify/auth";
 
-import { createLogger } from "@/shared/lib/logger";
-
 import createOperationLogData from "./createOperationLogData";
-
-const logger = createLogger("operationLog");
 
 export const OPERATION_LOG_FORMAT_VERSION = 1;
 
@@ -261,16 +257,7 @@ export const writeOperationLogEvent = async (
 export const logOperationEvent = async (
   payload: CanonicalOperationLogPayload,
 ): Promise<void> => {
-  try {
-    await writeOperationLogEvent(payload);
-  } catch (error) {
-    logger.error("Operation log write failed", {
-      action: payload.action,
-      resource: payload.resource,
-      resourceId: payload.resourceId,
-      error,
-    });
-  }
+  await writeOperationLogEvent(payload);
 };
 
 export const isCanonicalOperationLog = (

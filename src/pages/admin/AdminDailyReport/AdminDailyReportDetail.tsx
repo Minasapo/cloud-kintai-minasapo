@@ -320,17 +320,13 @@ export default function AdminDailyReportDetail({
       const updated = response.data?.updateDailyReport;
       if (!updated) throw new Error("リアクションの更新に失敗しました。");
 
-      try {
-        await logDailyReportReactionUpdate({
-          actorStaffId: currentStaffId,
-          before: beforeReport,
-          after: updated,
-          operation: hasReaction ? "remove" : "add",
-          reactionType: type,
-        });
-      } catch (logError) {
-        console.error("Failed to write daily report reaction log:", logError);
-      }
+      await logDailyReportReactionUpdate({
+        actorStaffId: currentStaffId,
+        before: beforeReport,
+        after: updated,
+        operation: hasReaction ? "remove" : "add",
+        reactionType: type,
+      });
 
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
@@ -443,16 +439,12 @@ export default function AdminDailyReportDetail({
         );
       }
 
-      try {
-        await logDailyReportCommentAdd({
-          actorStaffId: currentStaffId,
-          before: beforeReport,
-          after: updated,
-          comment: newCommentEntry,
-        });
-      } catch (logError) {
-        console.error("Failed to write daily report comment log:", logError);
-      }
+      await logDailyReportCommentAdd({
+        actorStaffId: currentStaffId,
+        before: beforeReport,
+        after: updated,
+        comment: newCommentEntry,
+      });
 
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
@@ -487,7 +479,6 @@ export default function AdminDailyReportDetail({
       className={`mx-auto w-full max-w-[1280px] ${isCompact ? "px-2 pb-4 pt-0" : "px-2 pb-6 pt-4 sm:px-4 md:px-6"}`}
     >
       <div className="space-y-3">
-
         {/* Errors */}
         {loadError && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -520,9 +511,7 @@ export default function AdminDailyReportDetail({
         )}
 
         {/* Main content grid */}
-        <div
-          className="grid grid-cols-1 gap-3"
-        >
+        <div className="grid grid-cols-1 gap-3">
           {/* Detail panel */}
           <DashboardInnerSurface>
             {shouldShowLoading ? (
@@ -707,7 +696,6 @@ export default function AdminDailyReportDetail({
                     </div>
                   )}
                 </div>
-
               </div>
             )}
           </DashboardInnerSurface>

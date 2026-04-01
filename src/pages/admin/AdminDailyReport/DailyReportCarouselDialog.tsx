@@ -167,9 +167,7 @@ export default function DailyReportCarouselDialog({
       })) as GraphQLResult<GetDailyReportQuery>;
 
       if (response.errors?.length) {
-        throw new Error(
-          response.errors.map((err) => err.message).join("\n"),
-        );
+        throw new Error(response.errors.map((err) => err.message).join("\n"));
       }
 
       const record = response.data?.getDailyReport;
@@ -177,7 +175,10 @@ export default function DailyReportCarouselDialog({
 
       const fetchedReactions = normalizeReactions(record.reactions);
       const fetchedComments = normalizeComments(record.comments);
-      const mappedReport = mapDailyReport(record, buildStaffName(record.staffId));
+      const mappedReport = mapDailyReport(
+        record,
+        buildStaffName(record.staffId),
+      );
 
       setReactionEntries(fetchedReactions);
       setCommentEntries(fetchedComments);
@@ -407,17 +408,13 @@ export default function DailyReportCarouselDialog({
       const updated = response.data?.updateDailyReport;
       if (!updated) throw new Error("リアクションの更新に失敗しました。");
 
-      try {
-        await logDailyReportReactionUpdate({
-          actorStaffId: currentStaffId,
-          before: beforeReport,
-          after: updated,
-          operation: hasReaction ? "remove" : "add",
-          reactionType: type,
-        });
-      } catch (logError) {
-        console.error("Failed to write daily report reaction log:", logError);
-      }
+      await logDailyReportReactionUpdate({
+        actorStaffId: currentStaffId,
+        before: beforeReport,
+        after: updated,
+        operation: hasReaction ? "remove" : "add",
+        reactionType: type,
+      });
 
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
@@ -483,7 +480,13 @@ export default function DailyReportCarouselDialog({
           input: {
             id: report.id,
             comments: nextComments.map(
-              ({ id: commentId, staffId, authorName, body: commentBody, createdAt }) => ({
+              ({
+                id: commentId,
+                staffId,
+                authorName,
+                body: commentBody,
+                createdAt,
+              }) => ({
                 id: commentId,
                 staffId,
                 authorName,
@@ -524,16 +527,12 @@ export default function DailyReportCarouselDialog({
         );
       }
 
-      try {
-        await logDailyReportCommentAdd({
-          actorStaffId: currentStaffId,
-          before: beforeReport,
-          after: updated,
-          comment: newCommentEntry,
-        });
-      } catch (logError) {
-        console.error("Failed to write daily report comment log:", logError);
-      }
+      await logDailyReportCommentAdd({
+        actorStaffId: currentStaffId,
+        before: beforeReport,
+        after: updated,
+        comment: newCommentEntry,
+      });
 
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));

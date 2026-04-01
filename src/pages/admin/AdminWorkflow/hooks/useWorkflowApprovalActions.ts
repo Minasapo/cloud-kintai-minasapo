@@ -227,24 +227,20 @@ export const useWorkflowApprovalActions = ({
         );
       }
 
-      try {
-        await logOperationEvent({
-          action: "workflow.approve",
-          resource: "workflow",
-          resourceId: updated.id,
-          targetStaffId: updated.staffId ?? undefined,
-          before: workflow,
-          after: updated,
-          details: {
-            workflowId: updated.id,
-            category: updated.category ?? null,
-            applicantStaffId: updated.staffId ?? null,
-            result: "approved",
-          },
-        });
-      } catch (err) {
-        logger.error("Failed to create operation log for approve:", err);
-      }
+      await logOperationEvent({
+        action: "workflow.approve",
+        resource: "workflow",
+        resourceId: updated.id,
+        targetStaffId: updated.staffId ?? undefined,
+        before: workflow,
+        after: updated,
+        details: {
+          workflowId: updated.id,
+          category: updated.category ?? null,
+          applicantStaffId: updated.staffId ?? null,
+          result: "approved",
+        },
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow approval failed:", message);
@@ -325,24 +321,20 @@ export const useWorkflowApprovalActions = ({
         );
       }
 
-      try {
-        await logOperationEvent({
-          action: "workflow.reject",
-          resource: "workflow",
-          resourceId: updated.id,
-          targetStaffId: updated.staffId ?? undefined,
-          before: workflow,
-          after: updated,
-          details: {
-            workflowId: updated.id,
-            category: updated.category ?? null,
-            applicantStaffId: updated.staffId ?? null,
-            result: "rejected",
-          },
-        });
-      } catch (err) {
-        logger.error("Failed to create operation log for reject:", err);
-      }
+      await logOperationEvent({
+        action: "workflow.reject",
+        resource: "workflow",
+        resourceId: updated.id,
+        targetStaffId: updated.staffId ?? undefined,
+        before: workflow,
+        after: updated,
+        details: {
+          workflowId: updated.id,
+          category: updated.category ?? null,
+          applicantStaffId: updated.staffId ?? null,
+          result: "rejected",
+        },
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow rejection failed:", message);

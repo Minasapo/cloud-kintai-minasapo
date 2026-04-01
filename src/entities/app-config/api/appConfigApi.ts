@@ -16,7 +16,6 @@ import type {
 } from "@shared/api/graphql/types";
 
 import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
-import { createLogger } from "@/shared/lib/logger";
 
 export type UpdateAppConfigPayload = {
   input: UpdateAppConfigInput;
@@ -26,8 +25,6 @@ export type UpdateAppConfigPayload = {
 // Exported for testing
 export const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
-
-const logger = createLogger("appConfigApi");
 
 export const appConfigApi = createApi({
   reducerPath: "appConfigApi",
@@ -89,20 +86,16 @@ export const appConfigApi = createApi({
           return { error: { message: "Failed to create app config" } };
         }
 
-        try {
-          await logOperationEvent({
-            action: "app_config.create",
-            resource: "app_config",
-            resourceId: created.id,
-            before: null,
-            after: created,
-            details: {
-              name: created.name,
-            },
-          });
-        } catch (error) {
-          logger.error("Failed to write app config create log", error);
-        }
+        await logOperationEvent({
+          action: "app_config.create",
+          resource: "app_config",
+          resourceId: created.id,
+          before: null,
+          after: created,
+          details: {
+            name: created.name,
+          },
+        });
 
         return { data: created };
       },
@@ -123,7 +116,8 @@ export const appConfigApi = createApi({
         }
 
         const currentData = currentResult.data as ListAppConfigsQuery | null;
-        const current = currentData?.listAppConfigs?.items?.filter(nonNullable)[0];
+        const current =
+          currentData?.listAppConfigs?.items?.filter(nonNullable)[0];
 
         const result = await baseQuery({
           document: updateAppConfig,
@@ -145,20 +139,16 @@ export const appConfigApi = createApi({
           return { error: { message: "Failed to update app config" } };
         }
 
-        try {
-          await logOperationEvent({
-            action: "app_config.update",
-            resource: "app_config",
-            resourceId: updated.id,
-            before: current ?? null,
-            after: updated,
-            details: {
-              name: updated.name,
-            },
-          });
-        } catch (error) {
-          logger.error("Failed to write app config update log", error);
-        }
+        await logOperationEvent({
+          action: "app_config.update",
+          resource: "app_config",
+          resourceId: updated.id,
+          before: current ?? null,
+          after: updated,
+          details: {
+            name: updated.name,
+          },
+        });
 
         return { data: updated };
       },

@@ -31,7 +31,6 @@ import {
   buildRevisionCondition,
   isConditionalCheckFailed,
 } from "@/shared/api/graphql/concurrency";
-import { createLogger } from "@/shared/lib/logger";
 
 // 重複データの詳細情報
 export type DuplicateAttendanceInfo = {
@@ -92,8 +91,6 @@ export type DeleteAttendanceMutationArg = {
   id: string;
   logContext?: AttendanceOperationLogContext;
 };
-
-const logger = createLogger("attendanceApi");
 
 // 重複データ警告を通知するカスタムイベント
 const dispatchDuplicateWarning = (message: string) => {
@@ -318,7 +315,9 @@ const isUnknownAttendanceWriteFieldError = (error: unknown) => {
   );
 };
 
-const stripStaffWorkDateKey = <T extends Record<string, unknown>>(input: T): T => {
+const stripStaffWorkDateKey = <T extends Record<string, unknown>>(
+  input: T,
+): T => {
   if (!Object.prototype.hasOwnProperty.call(input, "staffWorkDateKey")) {
     return input;
   }
@@ -388,7 +387,10 @@ const buildDuplicateConflictError = (
   },
 });
 
-const buildRevisionConflictError = (attendanceId: string, revision: number) => ({
+const buildRevisionConflictError = (
+  attendanceId: string,
+  revision: number,
+) => ({
   message: "Attendance revision conflict",
   details: {
     code: ATTENDANCE_REVISION_CONFLICT,
@@ -440,10 +442,8 @@ const fetchAttendancesByStaffDate = async (
   return { attendances };
 };
 
-const resolveAttendanceLogAction = (
-  defaultAction: string,
-  override?: string,
-) => override ?? defaultAction;
+const resolveAttendanceLogAction = (defaultAction: string, override?: string) =>
+  override ?? defaultAction;
 
 const mapUpsertActionToLogAction = (action: AttendanceUpsertAction) => {
   switch (action) {
@@ -478,33 +478,28 @@ const writeAttendanceOperationLog = async ({
   logContext?: AttendanceOperationLogContext;
   metadata?: Record<string, unknown>;
 }) => {
-  try {
-    await logOperationEvent({
-      action: resolveAttendanceLogAction(action, logContext?.action),
-      resource: "attendance",
-      resourceId: attendance.id,
-      actorStaffId: logContext?.actorStaffId ?? undefined,
-      targetStaffId:
-        logContext?.targetStaffId ?? attendance.staffId ?? undefined,
-      summary: logContext?.summary,
-      before: before ?? null,
-      after: attendance,
-      details: {
-        workDate: attendance.workDate,
-        staffId: attendance.staffId,
-        ...logContext?.details,
-      },
-      metadata: {
-        workDate: attendance.workDate,
-        staffId: attendance.staffId,
-        ...metadata,
-        ...logContext?.metadata,
-      },
-      resolvedWorkDate: attendance.workDate,
-    });
-  } catch (error) {
-    logger.error("Failed to write attendance operation log", error);
-  }
+  await logOperationEvent({
+    action: resolveAttendanceLogAction(action, logContext?.action),
+    resource: "attendance",
+    resourceId: attendance.id,
+    actorStaffId: logContext?.actorStaffId ?? undefined,
+    targetStaffId: logContext?.targetStaffId ?? attendance.staffId ?? undefined,
+    summary: logContext?.summary,
+    before: before ?? null,
+    after: attendance,
+    details: {
+      workDate: attendance.workDate,
+      staffId: attendance.staffId,
+      ...logContext?.details,
+    },
+    metadata: {
+      workDate: attendance.workDate,
+      staffId: attendance.staffId,
+      ...metadata,
+      ...logContext?.metadata,
+    },
+    resolvedWorkDate: attendance.workDate,
+  });
 };
 
 export const attendanceApi = createApi({
@@ -565,24 +560,24 @@ export const attendanceApi = createApi({
         ];
       },
     }),
-    deleteAttendance: builder.mutation<Attendance, DeleteAttendanceMutationArg>({
-      async queryFn({ id, logContext }, _queryApi, _extraOptions, baseQuery) {
-        const result = await baseQuery({
-          document: deleteAttendanceDocument,
-          variables: { input: { id } },
-        });
-        if (result.error) {
-          return { error: result.error };
-        }
-        const data = result.data as {
-          deleteAttendance?: Attendance | null;
-        } | null;
-        const deleted = data?.deleteAttendance;
-        if (!deleted) {
-          return { error: { message: "Failed to delete attendance" } };
-        }
+    deleteAttendance: builder.mutation<Attendance, DeleteAttendanceMutationArg>(
+      {
+        async queryFn({ id, logContext }, _queryApi, _extraOptions, baseQuery) {
+          const result = await baseQuery({
+            document: deleteAttendanceDocument,
+            variables: { input: { id } },
+          });
+          if (result.error) {
+            return { error: result.error };
+          }
+          const data = result.data as {
+            deleteAttendance?: Attendance | null;
+          } | null;
+          const deleted = data?.deleteAttendance;
+          if (!deleted) {
+            return { error: { message: "Failed to delete attendance" } };
+          }
 
-        try {
           await logOperationEvent({
             action: resolveAttendanceLogAction(
               "attendance.delete",
@@ -591,7 +586,8 @@ export const attendanceApi = createApi({
             resource: "attendance",
             resourceId: deleted.id,
             actorStaffId: logContext?.actorStaffId ?? undefined,
-            targetStaffId: logContext?.targetStaffId ?? deleted.staffId ?? undefined,
+            targetStaffId:
+              logContext?.targetStaffId ?? deleted.staffId ?? undefined,
             summary: logContext?.summary,
             before: deleted,
             after: null,
@@ -607,14 +603,12 @@ export const attendanceApi = createApi({
             },
             resolvedWorkDate: deleted.workDate,
           });
-        } catch (error) {
-          logger.error("Failed to write attendance delete log", error);
-        }
 
-        return { data: deleted };
+          return { data: deleted };
+        },
+        invalidatesTags: ["Attendance"],
       },
-      invalidatesTags: ["Attendance"],
-    }),
+    ),
     getAttendanceById: builder.query<Attendance | null, { id: string }>({
       async queryFn({ id }, _queryApi, _extraOptions, baseQuery) {
         const result = await baseQuery({
@@ -939,104 +933,119 @@ export const attendanceApi = createApi({
         },
       ],
     }),
-    createAttendance: builder.mutation<Attendance, CreateAttendanceMutationArg>({
-      async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
-        const { logContext, ...input } = arg;
-        const { attendances: existingAttendances, error: existingError } =
-          await fetchAttendancesByStaffDate(baseQuery, input.staffId, input.workDate);
+    createAttendance: builder.mutation<Attendance, CreateAttendanceMutationArg>(
+      {
+        async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
+          const { logContext, ...input } = arg;
+          const { attendances: existingAttendances, error: existingError } =
+            await fetchAttendancesByStaffDate(
+              baseQuery,
+              input.staffId,
+              input.workDate,
+            );
 
-        if (existingError) {
-          return { error: existingError };
-        }
+          if (existingError) {
+            return { error: existingError };
+          }
 
-        if (existingAttendances.length > 1) {
-          const ids = existingAttendances
-            .map((attendance) => attendance.id)
-            .filter(Boolean);
-          dispatchDuplicateWarning(E02004);
-          return {
-            error: buildDuplicateConflictError(input.staffId, input.workDate, ids),
-          };
-        }
-
-        if (existingAttendances.length === 1) {
-          return {
-            error: buildDuplicateConflictError(input.staffId, input.workDate, [
-              existingAttendances[0].id,
-            ]),
-          };
-        }
-
-        const payload: CreateAttendanceInput & AttendanceWriteInputExtras = {
-          ...input,
-          id: buildAttendanceRecordId(input.staffId, input.workDate),
-          revision: 1,
-          staffWorkDateKey: buildStaffWorkDateKey(input.staffId, input.workDate),
-        };
-
-        const result = await runCreateAttendanceMutation(baseQuery, payload);
-
-        if (result.error) {
-          const message = extractErrorText(result.error);
-          if (isConditionalCheckFailed(message)) {
-            const { attendances: reloadedAttendances, error: reloadError } =
-              await fetchAttendancesByStaffDate(
-                baseQuery,
+          if (existingAttendances.length > 1) {
+            const ids = existingAttendances
+              .map((attendance) => attendance.id)
+              .filter(Boolean);
+            dispatchDuplicateWarning(E02004);
+            return {
+              error: buildDuplicateConflictError(
                 input.staffId,
                 input.workDate,
-              );
-            if (reloadError) {
-              return { error: reloadError };
-            }
+                ids,
+              ),
+            };
+          }
 
-            if (reloadedAttendances.length > 0) {
-              return {
-                error: buildDuplicateConflictError(
+          if (existingAttendances.length === 1) {
+            return {
+              error: buildDuplicateConflictError(
+                input.staffId,
+                input.workDate,
+                [existingAttendances[0].id],
+              ),
+            };
+          }
+
+          const payload: CreateAttendanceInput & AttendanceWriteInputExtras = {
+            ...input,
+            id: buildAttendanceRecordId(input.staffId, input.workDate),
+            revision: 1,
+            staffWorkDateKey: buildStaffWorkDateKey(
+              input.staffId,
+              input.workDate,
+            ),
+          };
+
+          const result = await runCreateAttendanceMutation(baseQuery, payload);
+
+          if (result.error) {
+            const message = extractErrorText(result.error);
+            if (isConditionalCheckFailed(message)) {
+              const { attendances: reloadedAttendances, error: reloadError } =
+                await fetchAttendancesByStaffDate(
+                  baseQuery,
                   input.staffId,
                   input.workDate,
-                  reloadedAttendances
-                    .map((attendance) => attendance.id)
-                    .filter(Boolean),
-                ),
-              };
+                );
+              if (reloadError) {
+                return { error: reloadError };
+              }
+
+              if (reloadedAttendances.length > 0) {
+                return {
+                  error: buildDuplicateConflictError(
+                    input.staffId,
+                    input.workDate,
+                    reloadedAttendances
+                      .map((attendance) => attendance.id)
+                      .filter(Boolean),
+                  ),
+                };
+              }
             }
+            return { error: result.error };
           }
-          return { error: result.error };
-        }
 
-        const data = result.data as CreateAttendanceMutation | null;
-        const createdAttendance = data?.createAttendance;
+          const data = result.data as CreateAttendanceMutation | null;
+          const createdAttendance = data?.createAttendance;
 
-        if (!createdAttendance) {
-          return { error: { message: "Failed to create attendance" } };
-        }
+          if (!createdAttendance) {
+            return { error: { message: "Failed to create attendance" } };
+          }
 
-        await writeAttendanceOperationLog({
-          action: "attendance.create",
-          attendance: createdAttendance,
-          before: null,
-          logContext,
-        });
+          await writeAttendanceOperationLog({
+            action: "attendance.create",
+            attendance: createdAttendance,
+            before: null,
+            logContext,
+          });
 
-        return { data: createdAttendance };
+          return { data: createdAttendance };
+        },
+        invalidatesTags: (result) => {
+          const listTag = { type: "Attendance" as const, id: "LIST" };
+          if (!result) {
+            return [listTag];
+          }
+
+          return [
+            listTag,
+            {
+              type: "Attendance" as const,
+              id:
+                result.id ||
+                buildAttendanceCacheId(result.staffId, result.workDate),
+            },
+          ];
+        },
       },
-      invalidatesTags: (result) => {
-        const listTag = { type: "Attendance" as const, id: "LIST" };
-        if (!result) {
-          return [listTag];
-        }
-
-        return [
-          listTag,
-          {
-            type: "Attendance" as const,
-            id:
-              result.id ||
-              buildAttendanceCacheId(result.staffId, result.workDate),
-          },
-        ];
-      },
-    }),
+    ),
     upsertAttendanceByStaffAndDate: builder.mutation<
       Attendance,
       UpsertAttendanceByStaffAndDateInput
@@ -1058,8 +1067,7 @@ export const attendanceApi = createApi({
         }
 
         const loadByStaffDate = async (): Promise<
-          | { attendance: Attendance | null }
-          | { error: AttendanceQueryError }
+          { attendance: Attendance | null } | { error: AttendanceQueryError }
         > => {
           const loaded = await fetchAttendancesByStaffDate(
             baseQuery,
@@ -1149,9 +1157,7 @@ export const attendanceApi = createApi({
         const applyUpdate = async (
           sourceAttendance: Attendance,
           hasRetried = false,
-        ): Promise<
-          { data: Attendance } | { error: AttendanceQueryError }
-        > => {
+        ): Promise<{ data: Attendance } | { error: AttendanceQueryError }> => {
           const expectedRevision = sourceAttendance.revision ?? 1;
 
           const updatePayload: UpdateAttendanceInput &
@@ -1159,7 +1165,10 @@ export const attendanceApi = createApi({
             id: sourceAttendance.id,
             staffId,
             workDate,
-            startTime: resolveInputField("startTime", sourceAttendance.startTime),
+            startTime: resolveInputField(
+              "startTime",
+              sourceAttendance.startTime,
+            ),
             endTime: resolveInputField("endTime", sourceAttendance.endTime),
             goDirectlyFlag: resolveInputField(
               "goDirectlyFlag",
@@ -1169,7 +1178,10 @@ export const attendanceApi = createApi({
               "returnDirectlyFlag",
               sourceAttendance.returnDirectlyFlag,
             ),
-            absentFlag: resolveInputField("absentFlag", sourceAttendance.absentFlag),
+            absentFlag: resolveInputField(
+              "absentFlag",
+              sourceAttendance.absentFlag,
+            ),
             rests: resolveInputField("rests", sourceAttendance.rests),
             hourlyPaidHolidayTimes: resolveInputField(
               "hourlyPaidHolidayTimes",
@@ -1326,186 +1338,193 @@ export const attendanceApi = createApi({
         ];
       },
     }),
-    updateAttendance: builder.mutation<Attendance, UpdateAttendanceMutationArg>({
-      async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
-        const { logContext, ...input } = arg;
-        const loadCurrentAttendance = async () => {
-          const currentResult = await baseQuery({
-            document: getAttendance,
-            variables: { id: input.id },
-          });
+    updateAttendance: builder.mutation<Attendance, UpdateAttendanceMutationArg>(
+      {
+        async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
+          const { logContext, ...input } = arg;
+          const loadCurrentAttendance = async () => {
+            const currentResult = await baseQuery({
+              document: getAttendance,
+              variables: { id: input.id },
+            });
 
-          if (currentResult.error) {
-            return { error: currentResult.error as { message: string } };
-          }
+            if (currentResult.error) {
+              return { error: currentResult.error as { message: string } };
+            }
 
-          const currentData = currentResult.data as GetAttendanceQuery | null;
-          const currentAttendance = currentData?.getAttendance;
+            const currentData = currentResult.data as GetAttendanceQuery | null;
+            const currentAttendance = currentData?.getAttendance;
 
-          if (!currentAttendance) {
-            return {
-              error: { message: "Failed to load current attendance" } as const,
-            };
-          }
-
-          return { currentAttendance };
-        };
-
-        const loaded = await loadCurrentAttendance();
-        if ("error" in loaded) {
-          return { error: loaded.error };
-        }
-
-        let currentAttendance = loaded.currentAttendance;
-        let expectedRevision = input.revision ?? (currentAttendance.revision ?? 1);
-        let hasRetried = false;
-
-        while (true) {
-          const currentRevision = currentAttendance.revision ?? 1;
-          if (expectedRevision !== currentRevision) {
-            if (hasRetried) {
+            if (!currentAttendance) {
               return {
-                error: buildRevisionConflictError(input.id, currentRevision),
+                error: {
+                  message: "Failed to load current attendance",
+                } as const,
               };
             }
-            expectedRevision = currentRevision;
+
+            return { currentAttendance };
+          };
+
+          const loaded = await loadCurrentAttendance();
+          if ("error" in loaded) {
+            return { error: loaded.error };
+          }
+
+          let currentAttendance = loaded.currentAttendance;
+          let expectedRevision =
+            input.revision ?? currentAttendance.revision ?? 1;
+          let hasRetried = false;
+
+          while (true) {
+            const currentRevision = currentAttendance.revision ?? 1;
+            if (expectedRevision !== currentRevision) {
+              if (hasRetried) {
+                return {
+                  error: buildRevisionConflictError(input.id, currentRevision),
+                };
+              }
+              expectedRevision = currentRevision;
+              hasRetried = true;
+            }
+
+            const payload: UpdateAttendanceInput & AttendanceWriteInputExtras =
+              {
+                ...input,
+                revision: expectedRevision + 1,
+                staffWorkDateKey: buildStaffWorkDateKey(
+                  currentAttendance.staffId,
+                  currentAttendance.workDate,
+                ),
+              };
+
+            const result = await runUpdateAttendanceMutation(
+              baseQuery,
+              payload,
+              buildRevisionCondition(expectedRevision),
+            );
+
+            if (!result.error) {
+              const data = result.data as UpdateAttendanceMutation | null;
+              const updatedAttendance = data?.updateAttendance;
+              if (!updatedAttendance) {
+                return { error: { message: "Failed to update attendance" } };
+              }
+              await writeAttendanceOperationLog({
+                action: "attendance.update",
+                attendance: updatedAttendance,
+                before: currentAttendance,
+                logContext,
+              });
+              return { data: updatedAttendance };
+            }
+
+            const message = extractErrorText(result.error);
+            if (!isConditionalCheckFailed(message) || hasRetried) {
+              if (isConditionalCheckFailed(message)) {
+                return {
+                  error: buildRevisionConflictError(input.id, expectedRevision),
+                };
+              }
+              return { error: result.error };
+            }
+
+            const latest = await loadCurrentAttendance();
+            if ("error" in latest) {
+              return { error: latest.error };
+            }
+
+            currentAttendance = latest.currentAttendance;
+            expectedRevision = currentAttendance.revision ?? 1;
             hasRetried = true;
           }
+        },
+        onQueryStarted: async (
+          _input,
+          { dispatch, queryFulfilled, getState },
+        ) => {
+          try {
+            const { data: updatedAttendance } = await queryFulfilled;
+            const { workDate, staffId } = updatedAttendance;
 
-          const payload: UpdateAttendanceInput & AttendanceWriteInputExtras = {
-            ...input,
-            revision: expectedRevision + 1,
-            staffWorkDateKey: buildStaffWorkDateKey(
-              currentAttendance.staffId,
-              currentAttendance.workDate,
-            ),
-          };
-
-          const result = await runUpdateAttendanceMutation(
-            baseQuery,
-            payload,
-            buildRevisionCondition(expectedRevision),
-          );
-
-          if (!result.error) {
-            const data = result.data as UpdateAttendanceMutation | null;
-            const updatedAttendance = data?.updateAttendance;
-            if (!updatedAttendance) {
-              return { error: { message: "Failed to update attendance" } };
-            }
-            await writeAttendanceOperationLog({
-              action: "attendance.update",
-              attendance: updatedAttendance,
-              before: currentAttendance,
-              logContext,
-            });
-            return { data: updatedAttendance };
-          }
-
-          const message = extractErrorText(result.error);
-          if (!isConditionalCheckFailed(message) || hasRetried) {
-            if (isConditionalCheckFailed(message)) {
-              return {
-                error: buildRevisionConflictError(input.id, expectedRevision),
+            type ApiCacheState = {
+              attendanceApi?: {
+                queries?: Record<
+                  string,
+                  | {
+                      endpointName?: string;
+                      originalArgs?: unknown;
+                      status?: string;
+                    }
+                  | undefined
+                >;
               };
-            }
-            return { error: result.error };
-          }
-
-          const latest = await loadCurrentAttendance();
-          if ("error" in latest) {
-            return { error: latest.error };
-          }
-
-          currentAttendance = latest.currentAttendance;
-          expectedRevision = currentAttendance.revision ?? 1;
-          hasRetried = true;
-        }
-      },
-      onQueryStarted: async (
-        _input,
-        { dispatch, queryFulfilled, getState },
-      ) => {
-        try {
-          const { data: updatedAttendance } = await queryFulfilled;
-          const { workDate, staffId } = updatedAttendance;
-
-          type ApiCacheState = {
-            attendanceApi?: {
-              queries?: Record<
-                string,
-                | {
-                    endpointName?: string;
-                    originalArgs?: unknown;
-                    status?: string;
-                  }
-                | undefined
-              >;
-            };
-          };
-
-          const queries = (getState() as ApiCacheState).attendanceApi?.queries;
-          if (!queries) return;
-
-          for (const queryEntry of Object.values(queries)) {
-            if (
-              !queryEntry ||
-              queryEntry.endpointName !== "listAttendancesByDateRange" ||
-              queryEntry.status !== "fulfilled"
-            ) {
-              continue;
-            }
-
-            const args = queryEntry.originalArgs as {
-              staffId: string;
-              startDate: string;
-              endDate: string;
             };
 
-            if (
-              args.staffId !== staffId ||
-              workDate < args.startDate ||
-              workDate > args.endDate
-            ) {
-              continue;
+            const queries = (getState() as ApiCacheState).attendanceApi
+              ?.queries;
+            if (!queries) return;
+
+            for (const queryEntry of Object.values(queries)) {
+              if (
+                !queryEntry ||
+                queryEntry.endpointName !== "listAttendancesByDateRange" ||
+                queryEntry.status !== "fulfilled"
+              ) {
+                continue;
+              }
+
+              const args = queryEntry.originalArgs as {
+                staffId: string;
+                startDate: string;
+                endDate: string;
+              };
+
+              if (
+                args.staffId !== staffId ||
+                workDate < args.startDate ||
+                workDate > args.endDate
+              ) {
+                continue;
+              }
+
+              dispatch(
+                attendanceApi.util.updateQueryData(
+                  "listAttendancesByDateRange",
+                  args,
+                  (draft) => {
+                    const index = draft.findIndex(
+                      (a) => a.id === updatedAttendance.id,
+                    );
+                    if (index !== -1) {
+                      Object.assign(draft[index], updatedAttendance);
+                    }
+                  },
+                ),
+              );
             }
-
-            dispatch(
-              attendanceApi.util.updateQueryData(
-                "listAttendancesByDateRange",
-                args,
-                (draft) => {
-                  const index = draft.findIndex(
-                    (a) => a.id === updatedAttendance.id,
-                  );
-                  if (index !== -1) {
-                    Object.assign(draft[index], updatedAttendance);
-                  }
-                },
-              ),
-            );
+          } catch {
+            // mutation failed, no cache update needed
           }
-        } catch {
-          // mutation failed, no cache update needed
-        }
-      },
-      invalidatesTags: (result) => {
-        const listTag = { type: "Attendance" as const, id: "LIST" };
-        if (!result) {
-          return [listTag];
-        }
+        },
+        invalidatesTags: (result) => {
+          const listTag = { type: "Attendance" as const, id: "LIST" };
+          if (!result) {
+            return [listTag];
+          }
 
-        return [
-          listTag,
-          {
-            type: "Attendance" as const,
-            id:
-              result.id ||
-              buildAttendanceCacheId(result.staffId, result.workDate),
-          },
-        ];
+          return [
+            listTag,
+            {
+              type: "Attendance" as const,
+              id:
+                result.id ||
+                buildAttendanceCacheId(result.staffId, result.workDate),
+            },
+          ];
+        },
       },
-    }),
+    ),
   }),
 });
 

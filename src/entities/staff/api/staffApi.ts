@@ -20,7 +20,6 @@ import type {
 } from "@shared/api/graphql/types";
 
 import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
-import { createLogger } from "@/shared/lib/logger";
 
 export type UpdateStaffPayload = {
   input: UpdateStaffInput;
@@ -35,8 +34,8 @@ type StaffTag = {
 const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
 
-const buildStaffTagId = (staff: { id?: string | null }) => staff.id ?? "unknown";
-const logger = createLogger("staffApi");
+const buildStaffTagId = (staff: { id?: string | null }) =>
+  staff.id ?? "unknown";
 
 export const staffApi = createApi({
   reducerPath: "staffApi",
@@ -106,22 +105,18 @@ export const staffApi = createApi({
           return { error: { message: "Failed to create staff" } };
         }
 
-        try {
-          await logOperationEvent({
-            action: "staff.create",
-            resource: "staff",
-            resourceId: created.id,
-            targetStaffId: created.cognitoUserId,
-            before: null,
-            after: created,
-            details: {
-              cognitoUserId: created.cognitoUserId,
-              role: created.role,
-            },
-          });
-        } catch (error) {
-          logger.error("Failed to write staff create log", error);
-        }
+        await logOperationEvent({
+          action: "staff.create",
+          resource: "staff",
+          resourceId: created.id,
+          targetStaffId: created.cognitoUserId,
+          before: null,
+          after: created,
+          details: {
+            cognitoUserId: created.cognitoUserId,
+            role: created.role,
+          },
+        });
 
         return { data: created };
       },
@@ -169,29 +164,25 @@ export const staffApi = createApi({
           return { error: { message: "Failed to update staff" } };
         }
 
-        try {
-          const action =
-            currentStaff.enabled !== updated.enabled
-              ? updated.enabled
-                ? "staff.enable"
-                : "staff.disable"
-              : "staff.update";
+        const action =
+          currentStaff.enabled !== updated.enabled
+            ? updated.enabled
+              ? "staff.enable"
+              : "staff.disable"
+            : "staff.update";
 
-          await logOperationEvent({
-            action,
-            resource: "staff",
-            resourceId: updated.id,
-            targetStaffId: updated.cognitoUserId,
-            before: currentStaff,
-            after: updated,
-            details: {
-              cognitoUserId: updated.cognitoUserId,
-              role: updated.role,
-            },
-          });
-        } catch (error) {
-          logger.error("Failed to write staff update log", error);
-        }
+        await logOperationEvent({
+          action,
+          resource: "staff",
+          resourceId: updated.id,
+          targetStaffId: updated.cognitoUserId,
+          before: currentStaff,
+          after: updated,
+          details: {
+            cognitoUserId: updated.cognitoUserId,
+            role: updated.role,
+          },
+        });
 
         return { data: updated };
       },
@@ -233,22 +224,18 @@ export const staffApi = createApi({
           return { error: { message: "Failed to delete staff" } };
         }
 
-        try {
-          await logOperationEvent({
-            action: "staff.delete",
-            resource: "staff",
-            resourceId: deleted.id,
-            targetStaffId: deleted.cognitoUserId,
-            before: deleted,
-            after: null,
-            details: {
-              cognitoUserId: deleted.cognitoUserId,
-              role: deleted.role,
-            },
-          });
-        } catch (error) {
-          logger.error("Failed to write staff delete log", error);
-        }
+        await logOperationEvent({
+          action: "staff.delete",
+          resource: "staff",
+          resourceId: deleted.id,
+          targetStaffId: deleted.cognitoUserId,
+          before: deleted,
+          after: null,
+          details: {
+            cognitoUserId: deleted.cognitoUserId,
+            role: deleted.role,
+          },
+        });
 
         return { data: deleted };
       },
