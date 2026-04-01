@@ -26,23 +26,30 @@ export default async function fetchOperationLogsByStaffId(
     limit,
   };
 
-  let response = (await graphqlClient.graphql({
-    query: operationLogsByStaffId,
-    variables,
-    authMode: "userPool",
-  })) as GraphQLResult<OperationLogsByStaffIdQuery>;
+  const executeQuery = async (
+    vars: OperationLogsByStaffIdQueryVariables,
+  ): Promise<GraphQLResult<OperationLogsByStaffIdQuery>> => {
+    try {
+      return (await graphqlClient.graphql({
+        query: operationLogsByStaffId,
+        variables: vars,
+        authMode: "userPool",
+      })) as GraphQLResult<OperationLogsByStaffIdQuery>;
+    } catch (thrown: unknown) {
+      if (thrown !== null && typeof thrown === "object" && "errors" in thrown) {
+        return thrown as GraphQLResult<OperationLogsByStaffIdQuery>;
+      }
+      throw thrown;
+    }
+  };
+
+  let response = await executeQuery(variables);
 
   if (response.errors && hasNullableResourceKeyError(response.errors)) {
-    response = (await graphqlClient.graphql({
-      query: operationLogsByStaffId,
-      variables: {
-        ...variables,
-        filter: buildSafeResourceKeyFilter(
-          null,
-        ) as ModelOperationLogFilterInput,
-      },
-      authMode: "userPool",
-    })) as GraphQLResult<OperationLogsByStaffIdQuery>;
+    response = await executeQuery({
+      ...variables,
+      filter: buildSafeResourceKeyFilter(null) as ModelOperationLogFilterInput,
+    });
   }
 
   if (response.errors) {

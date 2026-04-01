@@ -36,16 +36,25 @@ const executeListOperationLogs = async ({
   filter?: ModelOperationLogFilterInput | null;
   nextToken: string | null;
   limit: number;
-}) => {
-  return (await graphqlClient.graphql({
-    query: listOperationLogs,
-    variables: {
-      filter: filter ?? undefined,
-      limit,
-      nextToken,
-    },
-    authMode: "userPool",
-  })) as GraphQLResult<ListOperationLogsQuery>;
+}): Promise<GraphQLResult<ListOperationLogsQuery>> => {
+  try {
+    return (await graphqlClient.graphql({
+      query: listOperationLogs,
+      variables: {
+        filter: filter ?? undefined,
+        limit,
+        nextToken,
+      },
+      authMode: "userPool",
+    })) as GraphQLResult<ListOperationLogsQuery>;
+  } catch (thrown: unknown) {
+    // Amplify v6 throws the GraphQLResult object when the response contains errors.
+    // Re-surface it as a return value so the caller can inspect response.errors.
+    if (thrown !== null && typeof thrown === "object" && "errors" in thrown) {
+      return thrown as GraphQLResult<ListOperationLogsQuery>;
+    }
+    throw thrown;
+  }
 };
 
 export default async function fetchOperationLogs({
