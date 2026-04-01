@@ -266,38 +266,38 @@ const SplitLayoutPanels = memo(function SplitLayoutPanels({
   onScreenChange: (screenValue: string) => void;
   SplitPanelComponent?: React.ComponentType<{ panelId: string }>;
 }) {
-  const splitPanel = (
-    <Panel defaultSize={50} minSize={30}>
-      <PanelContainer
-        title={splitPanelTitle || "画面を選択"}
-        onClose={onClosePanel}
-        screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
-        selectedScreen={selectedScreen}
-        onScreenChange={onScreenChange}
-        contentSx={selectedScreen === "daily-report" ? { pt: 0 } : undefined}
-      >
-        {SplitPanelComponent ? (
-          <Suspense fallback={<SplitPanelSkeleton />}>
-            <SplitPanelComponent panelId={selectedScreen} />
-          </Suspense>
-        ) : (
-          <EmptyPanelState label="パネルが選択されていません" />
-        )}
-      </PanelContainer>
-    </Panel>
+  const renderSplitPanelContent = () => (
+    <PanelContainer
+      title={splitPanelTitle || "画面を選択"}
+      onClose={onClosePanel}
+      screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
+      selectedScreen={selectedScreen}
+      onScreenChange={onScreenChange}
+      contentSx={selectedScreen === "daily-report" ? { pt: 0 } : undefined}
+    >
+      {SplitPanelComponent ? (
+        <Suspense fallback={<SplitPanelSkeleton />}>
+          <SplitPanelComponent panelId={selectedScreen} />
+        </Suspense>
+      ) : (
+        <EmptyPanelState label="パネルが選択されていません" />
+      )}
+    </PanelContainer>
   );
 
-  const mainPanel = (
-    <Panel defaultSize={50} minSize={30}>
-      <PanelContainer onClose={undefined}>
-        <MemoizedOutlet />
-      </PanelContainer>
-    </Panel>
+  const renderMainPanelContent = () => (
+    <PanelContainer onClose={undefined}>
+      <MemoizedOutlet />
+    </PanelContainer>
   );
 
   return (
     <Group orientation="horizontal">
-      {splitPanelPosition === "left" ? splitPanel : mainPanel}
+      <Panel defaultSize={50} minSize={30}>
+        {splitPanelPosition === "left"
+          ? renderSplitPanelContent()
+          : renderMainPanelContent()}
+      </Panel>
       <Separator
         style={{
           width: "8px",
@@ -305,7 +305,11 @@ const SplitLayoutPanels = memo(function SplitLayoutPanels({
           cursor: "col-resize",
         }}
       />
-      {splitPanelPosition === "left" ? mainPanel : splitPanel}
+      <Panel defaultSize={50} minSize={30}>
+        {splitPanelPosition === "left"
+          ? renderMainPanelContent()
+          : renderSplitPanelContent()}
+      </Panel>
     </Group>
   );
 });
