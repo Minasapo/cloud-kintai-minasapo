@@ -4,20 +4,10 @@
  * Reduxのdispatchやユーザー情報、スタッフ情報を受け取り、打刻処理・メール送信・スナックバー表示を行う。
  */
 
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { Dispatch } from "@reduxjs/toolkit";
-import {
-  Attendance,
-  CreateOperationLogInput,
-  Staff,
-} from "@shared/api/graphql/types";
+import { Attendance, Staff } from "@shared/api/graphql/types";
 
 import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
-import {
-  buildAttendanceIdempotencyKey,
-  resolveAppVersion,
-  resolveClientTimeZone,
-} from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
@@ -62,62 +52,11 @@ export async function clockInCallback(
 
   const workDate = resolveBusinessWorkDate(occurredAt);
   const startTimeIso = occurredAt;
-  const idempotencyKey = buildAttendanceIdempotencyKey({
-    action: "clock_in",
-    staffId: cognitoUser.id,
-    occurredAt,
-  });
-  const clientTimezone = resolveClientTimeZone();
-  const appVersion = resolveAppVersion();
-
   const t0 = Date.now();
 
   try {
     const attendance = await clockIn(cognitoUser.id, workDate, startTimeIso);
-    const t1 = Date.now();
-    const processingTimeMs = t1 - t0;
-
-    try {
-      const input: CreateOperationLogInput = {
-        staffId: cognitoUser.id,
-        action: "clock_in",
-        resource: "attendance",
-        resourceId: attendance?.id ?? undefined,
-        timestamp: occurredAt,
-        details: JSON.stringify({
-          workDate,
-          attendanceTime: startTimeIso,
-          processingTimeMs,
-          clientTimezone,
-          occurredAt,
-          resolvedWorkDate: workDate,
-          idempotencyKey,
-          appVersion,
-          staffName: staff
-            ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
-            : undefined,
-        }),
-        metadata: JSON.stringify({
-          processingTimeMs,
-          clientTimezone,
-          occurredAt,
-          resolvedWorkDate: workDate,
-          idempotencyKey,
-          appVersion,
-        }),
-        clientTimezone,
-        occurredAt,
-        resolvedWorkDate: workDate,
-        idempotencyKey,
-        appVersion,
-        userAgent:
-          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-      };
-
-      await createOperationLogData(input);
-    } catch (logErr) {
-      logger.error("Failed to create operation log for clockIn", logErr);
-    }
+    void t0;
 
     dispatch(setSnackbarSuccess(MESSAGE_CODE.S01001));
     try {

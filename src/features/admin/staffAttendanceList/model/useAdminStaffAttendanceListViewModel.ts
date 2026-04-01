@@ -22,7 +22,6 @@ import {
   OnDeleteAttendanceSubscription,
   OnUpdateAttendanceSubscription,
   Staff,
-  UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -326,7 +325,7 @@ export const useAdminStaffAttendanceListViewModel = (
     staff,
     staffForMail,
     pendingAttendances,
-    updateAttendance: (input: UpdateAttendanceInput) =>
+    updateAttendance: (input: Parameters<typeof updateAttendanceMutation>[0]) =>
       updateAttendanceMutation(input).unwrap(),
     isBulkApprovingRef,
   });

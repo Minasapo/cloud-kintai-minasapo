@@ -1,10 +1,13 @@
-import { OperationLog } from "@shared/api/graphql/types";
+import { ModelOperationLogFilterInput, OperationLog } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useState } from "react";
 
 import fetchOperationLogs from "./fetchOperationLogs";
 
-export default function useAdminOperationLogs(initialLimit = 30) {
+export default function useAdminOperationLogs(
+  initialLimit = 30,
+  filter?: ModelOperationLogFilterInput | null,
+) {
   const [logs, setLogs] = useState<OperationLog[]>([]);
   const [nextToken, setNextToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -14,7 +17,7 @@ export default function useAdminOperationLogs(initialLimit = 30) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchOperationLogs(null, initialLimit);
+      const res = await fetchOperationLogs(null, initialLimit, filter);
       // ensure newest-first order by timestamp
       const sorted = res.items.toSorted((a, b) => {
         // Use timestamp when available, otherwise fall back to createdAt.
@@ -31,14 +34,14 @@ export default function useAdminOperationLogs(initialLimit = 30) {
     } finally {
       setLoading(false);
     }
-  }, [initialLimit]);
+  }, [filter, initialLimit]);
 
   const loadMore = useCallback(async () => {
     if (!nextToken) return [] as OperationLog[];
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchOperationLogs(nextToken, initialLimit);
+      const res = await fetchOperationLogs(nextToken, initialLimit, filter);
       setLogs((prev) => {
         const merged = [...prev, ...res.items];
         // sort merged list newest-first; prefer timestamp, then createdAt
@@ -56,7 +59,7 @@ export default function useAdminOperationLogs(initialLimit = 30) {
     } finally {
       setLoading(false);
     }
-  }, [nextToken, initialLimit]);
+  }, [filter, nextToken, initialLimit]);
 
   return {
     logs,

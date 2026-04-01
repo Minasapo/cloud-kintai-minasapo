@@ -35,6 +35,7 @@ import {
 import { useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
+import { logDailyReportMutation } from "@/entities/operation-log/model/dailyReportOperationLog";
 import { sendDailyReportSubmissionNotification } from "@/features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
@@ -499,6 +500,7 @@ export default function DailyReport() {
 
     try {
       if (createdReportIdRef.current) {
+        const beforeReport = reportsById.get(createdReportIdRef.current) ?? null;
         const concurrencyState = getReportConcurrencyState(
           createdReportIdRef.current,
         );
@@ -541,6 +543,20 @@ export default function DailyReport() {
           await notifyAdminsForSubmission(updated);
         }
 
+        if (showNotification) {
+          try {
+            await logDailyReportMutation({
+              actorStaffId: staffId,
+              before: beforeReport,
+              after: updated,
+              action:
+                status === DailyReportStatus.SUBMITTED ? "submit" : "update",
+            });
+          } catch (logError) {
+            console.error("Failed to write daily report operation log:", logError);
+          }
+        }
+
         const mapped = mapDailyReport(updated, resolvedAuthor);
         upsertReport(mapped);
         applyCreateSaveResult({
@@ -579,6 +595,20 @@ export default function DailyReport() {
 
         if (showNotification && status === DailyReportStatus.SUBMITTED) {
           await notifyAdminsForSubmission(created);
+        }
+
+        if (showNotification) {
+          try {
+            await logDailyReportMutation({
+              actorStaffId: staffId,
+              before: null,
+              after: created,
+              action:
+                status === DailyReportStatus.SUBMITTED ? "submit" : "create",
+            });
+          } catch (logError) {
+            console.error("Failed to write daily report operation log:", logError);
+          }
         }
 
         const mapped = mapDailyReport(created, resolvedAuthor);
@@ -638,6 +668,7 @@ export default function DailyReport() {
     }
 
     try {
+      const beforeReport = reportsById.get(editingReportId) ?? null;
       const concurrencyState = getReportConcurrencyState(editingReportId);
 
       const response = (await graphqlClient.graphql({
@@ -673,6 +704,20 @@ export default function DailyReport() {
 
       if (showNotification && status === DailyReportStatus.SUBMITTED) {
         await notifyAdminsForSubmission(updated);
+      }
+
+      if (showNotification && staffId) {
+        try {
+          await logDailyReportMutation({
+            actorStaffId: staffId,
+            before: beforeReport,
+            after: updated,
+            action:
+              status === DailyReportStatus.SUBMITTED ? "submit" : "update",
+          });
+        } catch (logError) {
+          console.error("Failed to write daily report operation log:", logError);
+        }
       }
 
       const mapped = mapDailyReport(updated, resolvedAuthorName);

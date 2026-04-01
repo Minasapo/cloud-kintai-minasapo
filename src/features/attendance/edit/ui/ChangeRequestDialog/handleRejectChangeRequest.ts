@@ -1,8 +1,9 @@
-import { Attendance, UpdateAttendanceInput } from "@shared/api/graphql/types";
+import { type UpdateAttendanceMutationArg } from "@entities/attendance/api/attendanceApi";
+import { Attendance } from "@shared/api/graphql/types";
 
 export default async function handleRejectChangeRequest(
   attendance: Attendance | null,
-  updateAttendance: (input: UpdateAttendanceInput) => Promise<Attendance>,
+  updateAttendance: (input: UpdateAttendanceMutationArg) => Promise<Attendance>,
   comment: string | undefined
 ) {
   if (!attendance || !attendance.changeRequests) {
@@ -36,6 +37,12 @@ export default async function handleRejectChangeRequest(
       comment,
     })),
     revision: attendance.revision,
+    logContext: {
+      action: "attendance.request.reject",
+      details: {
+        comment: comment ?? null,
+      },
+    },
   }).catch((e: Error) => {
     throw e;
   });

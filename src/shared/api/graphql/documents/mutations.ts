@@ -1665,10 +1665,16 @@ export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
   createOperationLog(input: $input, condition: $condition) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1679,6 +1685,7 @@ export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1696,10 +1703,16 @@ export const updateOperationLog = /* GraphQL */ `mutation UpdateOperationLog(
   updateOperationLog(input: $input, condition: $condition) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1710,6 +1723,7 @@ export const updateOperationLog = /* GraphQL */ `mutation UpdateOperationLog(
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1727,10 +1741,16 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
   deleteOperationLog(input: $input, condition: $condition) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1741,6 +1761,7 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt

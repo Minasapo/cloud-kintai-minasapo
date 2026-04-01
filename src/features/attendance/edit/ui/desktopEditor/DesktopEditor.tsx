@@ -1,5 +1,4 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
-import useOperationLog from "@entities/operation-log/model/useOperationLog";
 import { VacationTabs } from "@features/attendance/edit/ui/components/VacationTabs";
 import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/ui/GoDirectlyFlagCheckbox";
 import HourlyPaidHolidayTimeItem, {
@@ -20,7 +19,6 @@ import { AttendanceEditContext } from "@/features/attendance/edit/model/Attendan
 import { AttendanceEditPageHeader } from "@/features/attendance/edit/ui/components/AttendanceEditPageHeader";
 import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
 import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
-import { createLogger } from "@/shared/lib/logger";
 import { AppButton, AppIconButton } from "@/shared/ui/button";
 
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
@@ -37,7 +35,6 @@ import {
   WorkTimeInput,
 } from "./WorkTimeInput/WorkTimeInput";
 
-const logger = createLogger("DesktopEditor");
 export default function DesktopEditor() {
   const ctx = useContext(AttendanceEditContext);
   const {
@@ -63,9 +60,6 @@ export default function DesktopEditor() {
     errorMessages: contextErrorMessages,
   } = ctx;
   const { errors } = useFormState({ control });
-
-  // OperationLog を作成するためのフック
-  const { create: createOperationLog } = useOperationLog();
   const { getStartTime } = useAppConfig();
   const { hourlyPaidHolidayEnabled } = useContext(AttendanceEditContext);
   const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
@@ -311,43 +305,10 @@ export default function DesktopEditor() {
               size="lg"
               loading={isSubmitting}
               onClick={async () => {
-                // capture pressed time and t0 for processing-time measurement
-                const pressedAt = new Date().toISOString();
-                const t0 = Date.now();
-
-                // call validation + submit and measure duration regardless of success
-                let submitError: unknown = undefined;
                 try {
                   await handleSubmit(onSubmit)();
-                } catch (e) {
-                  submitError = e;
-                }
-
-                const t1 = Date.now();
-                const processingTimeMs = t1 - t0;
-
-                // Try to create an operation log (best-effort). Include processing time.
-                try {
-                  await createOperationLog({
-                    staffId: staff?.cognitoUserId ?? undefined,
-                    action: "submit_change_request",
-                    resource: "attendance",
-                    resourceId: attendance?.id ?? String(workDate ?? ""),
-                    // primary timestamp: when the user pressed the button
-                    timestamp: pressedAt,
-                    details: JSON.stringify({
-                      startTime: getValues?.("startTime"),
-                      endTime: getValues?.("endTime"),
-                      remarks: getValues?.("remarks"),
-                      processingTimeMs,
-                      success: submitError ? false : true,
-                    }),
-                    metadata: JSON.stringify({ processingTimeMs }),
-                    severity: "INFO",
-                  });
-                } catch (e) {
-                  // ログ作成失敗は握りつぶす。ただしデバッグに出す
-                  logger.error("createOperationLog failed:", e);
+                } catch {
+                  // onSubmit 側でエラーを通知する
                 }
               }}
               disabled={

@@ -18,9 +18,7 @@ import {
   LinearProgress,
 } from "@mui/material";
 import {
-  CreateAttendanceInput,
   HourlyPaidHolidayTimeInput,
-  UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import dayjs from "dayjs";
@@ -140,12 +138,14 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 
   const handleUpdateAttendance = useCallback(
-    (input: UpdateAttendanceInput) => updateAttendanceMutation(input).unwrap(),
+    (input: Parameters<typeof updateAttendanceMutation>[0]) =>
+      updateAttendanceMutation(input).unwrap(),
     [updateAttendanceMutation],
   );
 
   const handleCreateAttendance = useCallback(
-    (input: CreateAttendanceInput) => createAttendanceMutation(input).unwrap(),
+    (input: Parameters<typeof createAttendanceMutation>[0]) =>
+      createAttendanceMutation(input).unwrap(),
     [createAttendanceMutation],
   );
   const [enabledSendMail, setEnabledSendMail] = useState<boolean>(true);
@@ -401,6 +401,9 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           hourlyPaidHolidayTimes: data.paidHolidayFlag
             ? []
             : buildHourlyPaidHolidayTimes(data.hourlyPaidHolidayTimes),
+          logContext: {
+            action: "attendance.update",
+          },
         };
 
         try {
@@ -500,6 +503,9 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
           hourlyPaidHolidayTimes: data.paidHolidayFlag
             ? []
             : buildHourlyPaidHolidayTimes(data.hourlyPaidHolidayTimes),
+          logContext: {
+            action: "attendance.create",
+          },
         });
 
         if (!staff) {

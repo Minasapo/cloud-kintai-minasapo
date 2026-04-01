@@ -52,6 +52,8 @@ type ShiftEditLockItemResponse = {
   onDeleteShiftEditLock?: ShiftEditLockData | null;
 };
 
+const EMPTY_EDITING_CELLS: ShiftEditLockMap = new Map();
+
 const toCellKey = (staffId: string, date: string) => `${staffId}_${date}`;
 const toLockId = (targetMonth: string, staffId: string, date: string) =>
   `${targetMonth}#${staffId}#${date}`;
@@ -67,6 +69,14 @@ const toEditingMapEntry = (lock: ShiftEditLockData) => ({
   expiresAt: toMs(lock.expiresAt),
   version: lock.version,
 });
+
+const toEditingCellsMap = (locks: ShiftEditLockData[]): ShiftEditLockMap =>
+  new Map(
+    locks.map((lock) => [
+      toCellKey(lock.staffId, lock.date),
+      toEditingMapEntry(lock),
+    ]),
+  );
 
 const normalizeErrorMessage = (error: unknown) => {
   if (
@@ -168,12 +178,7 @@ export const useShiftEditLocks = ({
     return lock && isActiveLock(lock) ? lock : null;
   }, []);
 
-  const refreshLocks = useCallback(async () => {
-    if (!targetMonth) {
-      setEditingCells(new Map());
-      return [];
-    }
-
+  const fetchCurrentLocks = useCallback(async (targetMonthValue: string) => {
     const collected: ShiftEditLockData[] = [];
     let nextToken: string | null | undefined = null;
 
@@ -181,7 +186,7 @@ export const useShiftEditLocks = ({
       const result = (await graphqlClient.graphql({
         query: listShiftEditLocks,
         variables: {
-          filter: { targetMonth: { eq: targetMonth } },
+          filter: { targetMonth: { eq: targetMonthValue } },
           limit: 200,
           nextToken,
         },
@@ -199,21 +204,48 @@ export const useShiftEditLocks = ({
       nextToken = connection?.nextToken;
     } while (nextToken);
 
-    setEditingCells(
-      new Map(
-        collected.map((lock) => [
-          toCellKey(lock.staffId, lock.date),
-          toEditingMapEntry(lock),
-        ]),
-      ),
-    );
-
     return collected;
-  }, [targetMonth]);
+  }, []);
+
+  const refreshLocks = useCallback(async () => {
+    if (!targetMonth) {
+      return [];
+    }
+
+    const collected = await fetchCurrentLocks(targetMonth);
+    setEditingCells(toEditingCellsMap(collected));
+    return collected;
+  }, [fetchCurrentLocks, targetMonth]);
 
   useEffect(() => {
-    void refreshLocks();
-  }, [refreshLocks]);
+    if (!targetMonth) {
+      return;
+    }
+
+    let active = true;
+
+    void fetchCurrentLocks(targetMonth)
+      .then((collected) => {
+        if (active) {
+          setEditingCells(toEditingCellsMap(collected));
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to refresh shift edit locks:", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [fetchCurrentLocks, targetMonth]);
+
+  const visibleEditingCells = targetMonth
+    ? new Map(
+        Array.from(editingCells.entries()).filter(([, lock]) =>
+          lock.id.startsWith(`${targetMonth}#`),
+        ),
+      )
+    : EMPTY_EDITING_CELLS;
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -541,27 +573,27 @@ export const useShiftEditLocks = ({
 
   const isCellBeingEdited = useCallback(
     (staffId: string, date: string) => {
-      const editor = editingCells.get(toCellKey(staffId, date));
+      const editor = visibleEditingCells.get(toCellKey(staffId, date));
       return Boolean(
         editor && editor.userId !== currentUserId && editor.expiresAt > Date.now(),
       );
     },
-    [currentUserId, editingCells],
+    [currentUserId, visibleEditingCells],
   );
 
   const hasEditLock = useCallback(
     (staffId: string, date: string) => {
-      const editor = editingCells.get(toCellKey(staffId, date));
+      const editor = visibleEditingCells.get(toCellKey(staffId, date));
       return Boolean(
         editor && editor.userId === currentUserId && editor.expiresAt > Date.now(),
       );
     },
-    [currentUserId, editingCells],
+    [currentUserId, visibleEditingCells],
   );
 
   const getCellEditor = useCallback(
     (staffId: string, date: string): CollaborativeUser | undefined => {
-      const editor = editingCells.get(toCellKey(staffId, date));
+      const editor = visibleEditingCells.get(toCellKey(staffId, date));
       if (!editor || editor.expiresAt <= Date.now()) {
         return undefined;
       }
@@ -573,12 +605,12 @@ export const useShiftEditLocks = ({
         lastActivity: editor.startTime,
       };
     },
-    [currentUserId, editingCells],
+    [currentUserId, visibleEditingCells],
   );
 
   const getAllEditingCells = useCallback(
     () =>
-      Array.from(editingCells.entries())
+      Array.from(visibleEditingCells.entries())
         .filter(([, editor]) => editor.expiresAt > Date.now())
         .map(([cellKey, editor]) => {
           const [staffId, date] = cellKey.split("_");
@@ -591,11 +623,11 @@ export const useShiftEditLocks = ({
             startTime: editor.startTime,
           };
         }),
-    [editingCells],
+    [visibleEditingCells],
   );
 
   return {
-    editingCells,
+    editingCells: visibleEditingCells,
     acquireEditLock,
     releaseEditLock,
     forceReleaseLock,

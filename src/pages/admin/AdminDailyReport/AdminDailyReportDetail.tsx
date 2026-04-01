@@ -14,6 +14,10 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
+import {
+  logDailyReportCommentAdd,
+  logDailyReportReactionUpdate,
+} from "@/entities/operation-log/model/dailyReportOperationLog";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
@@ -56,6 +60,28 @@ const normalizeComments = (
   entries?: (DailyReportComment | null)[] | null,
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
+
+const buildDailyReportBeforeSnapshot = ({
+  report,
+  reactionEntries,
+  commentEntries,
+}: {
+  report: AdminDailyReport;
+  reactionEntries: DailyReportReaction[] | null;
+  commentEntries: DailyReportComment[] | null;
+}) => ({
+  id: report.id,
+  staffId: report.staffId,
+  reportDate: report.date,
+  title: report.title,
+  content: report.content,
+  status: report.status,
+  reactions: reactionEntries ?? [],
+  comments: commentEntries ?? [],
+  createdAt: report.createdAt ?? null,
+  updatedAt: report.updatedAt,
+  version: report.version ?? null,
+});
 
 interface AdminDailyReportDetailProps {
   overrideId?: string;
@@ -256,6 +282,11 @@ export default function AdminDailyReportDetail({
         ];
 
     try {
+      const beforeReport = buildDailyReportBeforeSnapshot({
+        report,
+        reactionEntries,
+        commentEntries,
+      });
       const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
@@ -288,6 +319,18 @@ export default function AdminDailyReportDetail({
 
       const updated = response.data?.updateDailyReport;
       if (!updated) throw new Error("リアクションの更新に失敗しました。");
+
+      try {
+        await logDailyReportReactionUpdate({
+          actorStaffId: currentStaffId,
+          before: beforeReport,
+          after: updated,
+          operation: hasReaction ? "remove" : "add",
+          reactionType: type,
+        });
+      } catch (logError) {
+        console.error("Failed to write daily report reaction log:", logError);
+      }
 
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
@@ -338,6 +381,11 @@ export default function AdminDailyReportDetail({
     const nextComments = [newCommentEntry, ...commentEntries];
 
     try {
+      const beforeReport = buildDailyReportBeforeSnapshot({
+        report,
+        reactionEntries,
+        commentEntries,
+      });
       const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
@@ -393,6 +441,17 @@ export default function AdminDailyReportDetail({
           "Failed to send daily report comment notification:",
           mailError,
         );
+      }
+
+      try {
+        await logDailyReportCommentAdd({
+          actorStaffId: currentStaffId,
+          before: beforeReport,
+          after: updated,
+          comment: newCommentEntry,
+        });
+      } catch (logError) {
+        console.error("Failed to write daily report comment log:", logError);
       }
 
       setReactionEntries(normalizeReactions(updated.reactions));

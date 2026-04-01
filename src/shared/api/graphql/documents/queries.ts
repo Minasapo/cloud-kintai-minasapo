@@ -1744,10 +1744,16 @@ export const getOperationLog = /* GraphQL */ `query GetOperationLog($id: ID!) {
   getOperationLog(id: $id) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1758,6 +1764,7 @@ export const getOperationLog = /* GraphQL */ `query GetOperationLog($id: ID!) {
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1777,10 +1784,16 @@ export const listOperationLogs = /* GraphQL */ `query ListOperationLogs(
     items {
       id
       staffId
+      resourceKey
+      targetStaffId
       action
       resource
       resourceId
+      summary
       timestamp
+      before
+      after
+      diff
       details
       ipAddress
       userAgent
@@ -1791,6 +1804,7 @@ export const listOperationLogs = /* GraphQL */ `query ListOperationLogs(
       idempotencyKey
       appVersion
       severity
+      logFormatVersion
       version
       createdAt
       updatedAt
@@ -1823,10 +1837,16 @@ export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffI
     items {
       id
       staffId
+      resourceKey
+      targetStaffId
       action
       resource
       resourceId
+      summary
       timestamp
+      before
+      after
+      diff
       details
       ipAddress
       userAgent
@@ -1837,6 +1857,7 @@ export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffI
       idempotencyKey
       appVersion
       severity
+      logFormatVersion
       version
       createdAt
       updatedAt
@@ -1849,6 +1870,59 @@ export const operationLogsByStaffId = /* GraphQL */ `query OperationLogsByStaffI
 ` as GeneratedQuery<
   APITypes.OperationLogsByStaffIdQueryVariables,
   APITypes.OperationLogsByStaffIdQuery
+>;
+export const operationLogsByResourceKey = /* GraphQL */ `query OperationLogsByResourceKey(
+  $resourceKey: String!
+  $timestamp: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelOperationLogFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  operationLogsByResourceKey(
+    resourceKey: $resourceKey
+    timestamp: $timestamp
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      staffId
+      resourceKey
+      targetStaffId
+      action
+      resource
+      resourceId
+      summary
+      timestamp
+      before
+      after
+      diff
+      details
+      ipAddress
+      userAgent
+      metadata
+      clientTimezone
+      occurredAt
+      resolvedWorkDate
+      idempotencyKey
+      appVersion
+      severity
+      logFormatVersion
+      version
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.OperationLogsByResourceKeyQueryVariables,
+  APITypes.OperationLogsByResourceKeyQuery
 >;
 export const getAuditLog = /* GraphQL */ `query GetAuditLog($id: ID!) {
   getAuditLog(id: $id) {

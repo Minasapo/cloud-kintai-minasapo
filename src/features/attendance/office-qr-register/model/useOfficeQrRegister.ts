@@ -4,11 +4,9 @@ import {
   useUpdateAttendanceMutation,
   useUpsertAttendanceByStaffAndDateMutation,
 } from "@entities/attendance/api/attendanceApi";
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import type {
   Attendance,
   CreateAttendanceInput,
-  UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -24,11 +22,7 @@ import {
   resolveBusinessWorkDate,
   resolveCurrentBusinessWorkDate,
 } from "@/entities/attendance/lib/businessDate";
-import {
-  buildAttendanceIdempotencyKey,
-  resolveAppVersion,
-  resolveClientTimeZone,
-} from "@/entities/attendance/lib/operationContext";
+import { buildAttendanceIdempotencyKey } from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import { Logger } from "@/shared/lib/logger";
 import {
@@ -109,7 +103,8 @@ export function useOfficeQrRegister() {
   );
 
   const updateAttendance = useCallback(
-    (input: UpdateAttendanceInput) => updateAttendanceMutation(input).unwrap(),
+    (input: Parameters<typeof updateAttendanceMutation>[0]) =>
+      updateAttendanceMutation(input).unwrap(),
     [updateAttendanceMutation]
   );
 
@@ -194,9 +189,7 @@ export function useOfficeQrRegister() {
 
     const occurredAt = getNowISOStringWithZeroSeconds();
     const workDate = resolveBusinessWorkDate(occurredAt);
-    const clientTimezone = resolveClientTimeZone();
-    const appVersion = resolveAppVersion();
-    const idempotencyKey = buildAttendanceIdempotencyKey({
+    buildAttendanceIdempotencyKey({
       action: "clock_in",
       staffId: cognitoUser.id,
       occurredAt,
@@ -213,46 +206,6 @@ export function useOfficeQrRegister() {
       });
 
       setAttendance(result);
-
-      try {
-        const input = {
-          staffId: cognitoUser.id,
-          action: "clock_in" as const,
-          resource: "attendance" as const,
-          resourceId: result?.id ?? undefined,
-          timestamp: occurredAt,
-          details: JSON.stringify({
-            workDate,
-            attendanceTime: occurredAt,
-            clientTimezone,
-            occurredAt,
-            resolvedWorkDate: workDate,
-            idempotencyKey,
-            appVersion,
-          }),
-          metadata: JSON.stringify({
-            clientTimezone,
-            occurredAt,
-            resolvedWorkDate: workDate,
-            idempotencyKey,
-            appVersion,
-          }),
-          clientTimezone,
-          occurredAt,
-          resolvedWorkDate: workDate,
-          idempotencyKey,
-          appVersion,
-          userAgent:
-            typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-        };
-
-        await createOperationLogData(input);
-      } catch (logErr) {
-        logger.error(
-          "Failed to create operation log for office QR clockIn",
-          logErr
-        );
-      }
 
       dispatch(setSnackbarSuccess("出勤が記録されました。"));
     } catch (error) {
@@ -275,9 +228,7 @@ export function useOfficeQrRegister() {
 
     const occurredAt = getNowISOStringWithZeroSeconds();
     const workDate = resolveBusinessWorkDate(occurredAt);
-    const clientTimezone = resolveClientTimeZone();
-    const appVersion = resolveAppVersion();
-    const idempotencyKey = buildAttendanceIdempotencyKey({
+    buildAttendanceIdempotencyKey({
       action: "clock_out",
       staffId: cognitoUser.id,
       occurredAt,
@@ -294,46 +245,6 @@ export function useOfficeQrRegister() {
       });
 
       setAttendance(result);
-
-      try {
-        const input = {
-          staffId: cognitoUser.id,
-          action: "clock_out" as const,
-          resource: "attendance" as const,
-          resourceId: result?.id ?? undefined,
-          timestamp: occurredAt,
-          details: JSON.stringify({
-            workDate,
-            attendanceTime: occurredAt,
-            clientTimezone,
-            occurredAt,
-            resolvedWorkDate: workDate,
-            idempotencyKey,
-            appVersion,
-          }),
-          metadata: JSON.stringify({
-            clientTimezone,
-            occurredAt,
-            resolvedWorkDate: workDate,
-            idempotencyKey,
-            appVersion,
-          }),
-          clientTimezone,
-          occurredAt,
-          resolvedWorkDate: workDate,
-          idempotencyKey,
-          appVersion,
-          userAgent:
-            typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-        };
-
-        await createOperationLogData(input);
-      } catch (logErr) {
-        logger.error(
-          "Failed to create operation log for office QR clockOut",
-          logErr
-        );
-      }
 
       dispatch(setSnackbarSuccess("退勤が記録されました。"));
     } catch (error) {

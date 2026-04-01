@@ -1,4 +1,4 @@
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
+import { type UpdateAttendanceMutationArg } from "@entities/attendance/api/attendanceApi";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Button,
@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Attendance, UpdateAttendanceInput } from "@shared/api/graphql/types";
+import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -42,7 +42,7 @@ export default function ChangeRequestDialog({
   staff,
 }: {
   attendance: Attendance | null;
-  updateAttendance: (input: UpdateAttendanceInput) => Promise<Attendance>;
+  updateAttendance: (input: UpdateAttendanceMutationArg) => Promise<Attendance>;
   staff: StaffType | null | undefined;
 }) {
   const dispatch = useDispatch();
@@ -154,28 +154,6 @@ export default function ChangeRequestDialog({
                   );
                 }
 
-                // OperationLog を作成（失敗しても処理を止めない）
-                try {
-                  await createOperationLogData({
-                    staffId: staff.id,
-                    action: "reject_change_request",
-                    resource: "attendance",
-                    resourceId: updatedAttendance.id,
-                    timestamp: new Date().toISOString(),
-                    details: JSON.stringify({
-                      workDate: updatedAttendance.workDate,
-                      applicantStaffId: updatedAttendance.staffId,
-                      result: "rejected",
-                      comment: comment ?? null,
-                    }),
-                  });
-                } catch (err) {
-                  console.error(
-                    "Failed to create operation log for reject change request:",
-                    err,
-                  );
-                }
-
                 dispatch(setSnackbarSuccess(MESSAGE_CODE.S04007));
                 handleClose();
               })
@@ -204,28 +182,6 @@ export default function ChangeRequestDialog({
                   console.error(
                     "Failed to send approval notification mail:",
                     mailError,
-                  );
-                }
-
-                // OperationLog を作成（失敗しても処理を止めない）
-                try {
-                  await createOperationLogData({
-                    staffId: staff.id,
-                    action: "approve_change_request",
-                    resource: "attendance",
-                    resourceId: updatedAttendance.id,
-                    timestamp: new Date().toISOString(),
-                    details: JSON.stringify({
-                      workDate: updatedAttendance.workDate,
-                      applicantStaffId: updatedAttendance.staffId,
-                      result: "approved",
-                      comment: comment ?? null,
-                    }),
-                  });
-                } catch (err) {
-                  console.error(
-                    "Failed to create operation log for approve change request:",
-                    err,
                   );
                 }
 

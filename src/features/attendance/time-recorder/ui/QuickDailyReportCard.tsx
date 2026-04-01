@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
+import { logDailyReportMutation } from "@/entities/operation-log/model/dailyReportOperationLog";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   buildVersionOrUpdatedAtCondition,
@@ -229,6 +230,17 @@ export default function QuickDailyReportCard({
 
       try {
         if (reportId) {
+          const beforeReport = {
+            id: reportId,
+            staffId,
+            reportDate: date,
+            title: defaultTitle,
+            content: savedContent,
+            status: reportStatus ?? DailyReportStatus.DRAFT,
+            updatedAt: reportUpdatedAt,
+            version: reportVersion,
+          };
+
           // 既存の日報を更新
           const response = (await graphqlClient.graphql({
             query: updateDailyReport,
@@ -258,6 +270,20 @@ export default function QuickDailyReportCard({
           }
 
           const updatedReport = response.data?.updateDailyReport;
+          if (updatedReport && showNotification) {
+            try {
+              await logDailyReportMutation({
+                actorStaffId: staffId,
+                before: beforeReport,
+                after: updatedReport,
+                action:
+                  status === DailyReportStatus.SUBMITTED ? "submit" : "update",
+              });
+            } catch (logError) {
+              console.error("Failed to write daily report operation log:", logError);
+            }
+          }
+
           const updatedContent = updatedReport?.content ?? content;
           setSavedContent(updatedContent);
           setContent(updatedContent);
@@ -289,6 +315,20 @@ export default function QuickDailyReportCard({
           }
 
           const created = response.data?.createDailyReport;
+          if (created && showNotification) {
+            try {
+              await logDailyReportMutation({
+                actorStaffId: staffId,
+                before: null,
+                after: created,
+                action:
+                  status === DailyReportStatus.SUBMITTED ? "submit" : "create",
+              });
+            } catch (logError) {
+              console.error("Failed to write daily report operation log:", logError);
+            }
+          }
+
           const nextContent = created?.content ?? content;
           setReportId(created?.id ?? null);
           setReportVersion(created?.version ?? 1);

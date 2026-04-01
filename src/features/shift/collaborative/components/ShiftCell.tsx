@@ -1,5 +1,5 @@
 import { alpha } from "@mui/material/styles";
-import PropTypes from "prop-types";
+import PropTypes, { type Validator } from "prop-types";
 import React, { type CSSProperties, type FC, memo, type MouseEvent } from "react";
 
 import type {
@@ -180,10 +180,12 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
 
 ShiftCellBase.propTypes = {
   state: PropTypes.oneOf(["work", "fixedOff", "requestedOff", "auto", "empty"] as const)
-    .isRequired as any,
+    .isRequired as Validator<ShiftState>,
   isLocked: PropTypes.bool.isRequired,
   isEditing: PropTypes.bool.isRequired,
-  editLockOwner: PropTypes.oneOf(["self", "other", null] as const),
+  editLockOwner: PropTypes.oneOf(["self", "other", null] as const) as Validator<
+    ShiftCellEditLockOwner | null | undefined
+  >,
   editorName: PropTypes.string,
   editorColor: PropTypes.string,
   lastChangedBy: PropTypes.string,
@@ -192,6 +194,7 @@ ShiftCellBase.propTypes = {
   onRegisterRef: PropTypes.func,
   onMouseDown: PropTypes.func,
   onMouseEnter: PropTypes.func,
+  onContextMenu: PropTypes.func,
   isFocused: PropTypes.bool,
   isSelected: PropTypes.bool,
 };

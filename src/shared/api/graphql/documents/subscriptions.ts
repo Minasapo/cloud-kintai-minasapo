@@ -1589,10 +1589,16 @@ export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperatio
   onCreateOperationLog(filter: $filter) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1603,6 +1609,7 @@ export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperatio
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1619,10 +1626,16 @@ export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperatio
   onUpdateOperationLog(filter: $filter) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1633,6 +1646,7 @@ export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperatio
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1649,10 +1663,16 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
   onDeleteOperationLog(filter: $filter) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1663,6 +1683,7 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt

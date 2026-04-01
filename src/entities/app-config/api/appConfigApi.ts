@@ -15,6 +15,9 @@ import type {
   UpdateAppConfigMutation,
 } from "@shared/api/graphql/types";
 
+import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
+import { createLogger } from "@/shared/lib/logger";
+
 export type UpdateAppConfigPayload = {
   input: UpdateAppConfigInput;
   condition?: ModelAppConfigConditionInput | null;
@@ -23,6 +26,8 @@ export type UpdateAppConfigPayload = {
 // Exported for testing
 export const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
+
+const logger = createLogger("appConfigApi");
 
 export const appConfigApi = createApi({
   reducerPath: "appConfigApi",
@@ -84,12 +89,42 @@ export const appConfigApi = createApi({
           return { error: { message: "Failed to create app config" } };
         }
 
+        try {
+          await logOperationEvent({
+            action: "app_config.create",
+            resource: "app_config",
+            resourceId: created.id,
+            before: null,
+            after: created,
+            details: {
+              name: created.name,
+            },
+          });
+        } catch (error) {
+          logger.error("Failed to write app config create log", error);
+        }
+
         return { data: created };
       },
       invalidatesTags: [{ type: "AppConfig", id: "LIST" }],
     }),
     updateAppConfig: builder.mutation<AppConfig, UpdateAppConfigPayload>({
       async queryFn({ input, condition }, _queryApi, _extraOptions, baseQuery) {
+        const currentResult = await baseQuery({
+          document: listAppConfigs,
+          variables: {
+            filter: { name: { eq: input.name ?? "default" } },
+          },
+          authMode: "apiKey",
+        });
+
+        if (currentResult.error) {
+          return { error: currentResult.error };
+        }
+
+        const currentData = currentResult.data as ListAppConfigsQuery | null;
+        const current = currentData?.listAppConfigs?.items?.filter(nonNullable)[0];
+
         const result = await baseQuery({
           document: updateAppConfig,
           variables: {
@@ -108,6 +143,21 @@ export const appConfigApi = createApi({
 
         if (!updated) {
           return { error: { message: "Failed to update app config" } };
+        }
+
+        try {
+          await logOperationEvent({
+            action: "app_config.update",
+            resource: "app_config",
+            resourceId: updated.id,
+            before: current ?? null,
+            after: updated,
+            details: {
+              name: updated.name,
+            },
+          });
+        } catch (error) {
+          logger.error("Failed to write app config update log", error);
         }
 
         return { data: updated };

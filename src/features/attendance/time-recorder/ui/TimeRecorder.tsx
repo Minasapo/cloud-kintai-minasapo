@@ -15,7 +15,6 @@ import {
   CreateAttendanceInput,
   OnUpdateAttendanceSubscription,
   Staff,
-  UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import {
@@ -226,7 +225,7 @@ export default function TimeRecorder({
   );
 
   const updateAttendance = useCallback(
-    (input: UpdateAttendanceInput) => {
+    (input: Parameters<typeof updateAttendanceMutation>[0]) => {
       localAttendanceUpdateIgnoreUntilRef.current =
         Date.now() + LOCAL_ATTENDANCE_UPDATE_IGNORE_MS;
       return updateAttendanceMutation(input).unwrap();

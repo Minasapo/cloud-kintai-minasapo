@@ -1,11 +1,10 @@
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
+import { type UpdateAttendanceMutationArg } from "@entities/attendance/api/attendanceApi";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import handleApproveChangeRequest from "@features/attendance/edit/ui/ChangeRequestDialog/handleApproveChangeRequest";
 import {
   Attendance,
   AttendanceChangeRequest,
   Staff,
-  UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import {
   type MutableRefObject,
@@ -34,7 +33,7 @@ export type UseAdminAttendanceChangeRequestsParams = {
   staff: Staff | undefined | null;
   staffForMail: StaffType | null;
   pendingAttendances: Attendance[];
-  updateAttendance: (input: UpdateAttendanceInput) => Promise<Attendance>;
+  updateAttendance: (input: UpdateAttendanceMutationArg) => Promise<Attendance>;
   isBulkApprovingRef: MutableRefObject<boolean>;
 };
 
@@ -136,7 +135,7 @@ export const useAdminAttendanceChangeRequests = ({
         targetAttendances.map(async (attendance) => {
           const updatedAttendance = await handleApproveChangeRequest(
             attendance,
-            (input: UpdateAttendanceInput) => updateAttendance(input),
+            (input: UpdateAttendanceMutationArg) => updateAttendance(input),
             undefined,
           );
 
@@ -154,24 +153,6 @@ export const useAdminAttendanceChangeRequests = ({
                 );
                 mailErrorOccurred = true;
               }),
-            createOperationLogData({
-              staffId: staffForMail.id,
-              action: "approve_change_request",
-              resource: "attendance",
-              resourceId: updatedAttendance.id,
-              timestamp: new Date().toISOString(),
-              details: JSON.stringify({
-                workDate: updatedAttendance.workDate,
-                applicantStaffId: updatedAttendance.staffId,
-                result: "approved",
-                comment: null,
-                bulk: true,
-              }),
-            }).catch((error: unknown) => {
-              const message =
-                error instanceof Error ? error.message : String(error);
-              logger.error("Failed to create operation log:", message);
-            }),
           ]);
         }),
       );

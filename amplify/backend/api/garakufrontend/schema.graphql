@@ -537,14 +537,25 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
       sortKeyFields: ["timestamp"]
       queryField: "operationLogsByStaffId"
     )
+  resourceKey: String!
+    @index(
+      name: "byResourceKey"
+      sortKeyFields: ["timestamp"]
+      queryField: "operationLogsByResourceKey"
+    )
+  targetStaffId: String
   # 行った操作の種類（例: "LOGIN", "ATTENDANCE_UPDATE"）
   action: String!
   # 対象リソースの種類（例: "Attendance", "Workflow", "AppConfig"）
   resource: String
   # 対象リソースの ID（あれば）
   resourceId: String
+  summary: String
   # ISO 8601 形式のタイムスタンプ
   timestamp: String!
+  before: AWSJSON
+  after: AWSJSON
+  diff: AWSJSON
   # 操作の詳細を JSON 文字列などで保存
   details: String
   # オプション: 発生元 IP
@@ -565,6 +576,7 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
   appVersion: String
   # 重大度レベル（例: INFO, WARN, ERROR）
   severity: String
+  logFormatVersion: Int!
   version: Int
 }
 

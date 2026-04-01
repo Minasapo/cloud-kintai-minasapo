@@ -175,6 +175,60 @@ describe("useShiftEditLocks", () => {
     );
   });
 
+  it("targetMonth がないときは公開状態を空として扱う", async () => {
+    const listShiftEditLocksResponse = {
+      data: { listShiftEditLocks: { items: [activeLock], nextToken: null } },
+    };
+
+    mockGraphql.mockImplementation(({ query }: { query: string }) => {
+      if (query.includes("ListShiftEditLocks")) {
+        return Promise.resolve(listShiftEditLocksResponse);
+      }
+
+      if (query.includes("OnCreateShiftEditLock")) {
+        return {
+          subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+        };
+      }
+
+      if (query.includes("OnUpdateShiftEditLock")) {
+        return {
+          subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+        };
+      }
+
+      if (query.includes("OnDeleteShiftEditLock")) {
+        return {
+          subscribe: jest.fn(() => ({ unsubscribe: mockUnsubscribe })),
+        };
+      }
+
+      return Promise.resolve({ data: {} });
+    });
+
+    const { result, rerender } = renderHook(
+      ({ targetMonth }: { targetMonth?: string }) =>
+        useShiftEditLocks({
+          currentUserId: "user-1",
+          currentUserName: "User One",
+          targetMonth,
+        }),
+      {
+        initialProps: { targetMonth: "2026-03" },
+      },
+    );
+
+    await waitFor(() =>
+      expect(result.current.isCellBeingEdited("staff-1", "01")).toBe(true),
+    );
+
+    rerender({ targetMonth: undefined });
+
+    expect(result.current.editingCells.size).toBe(0);
+    expect(result.current.isCellBeingEdited("staff-1", "01")).toBe(false);
+    expect(result.current.getAllEditingCells()).toEqual([]);
+  });
+
   it("releaseEditLock は deleteShiftEditLock に id のみを渡す", async () => {
     const ownLock = {
       ...activeLock,

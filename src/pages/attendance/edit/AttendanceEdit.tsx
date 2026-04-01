@@ -181,6 +181,9 @@ export default function AttendanceEdit() {
         id: attendance.id,
         changeRequests: [changeRequestPayload],
         revision: attendance.revision,
+        logContext: {
+          action: "attendance.request.submit",
+        },
       })
         .then(() => {
           if (!cognitoUser) return;
@@ -225,6 +228,9 @@ export default function AttendanceEdit() {
         staffId: staff.cognitoUserId,
         workDate: dayjs(targetWorkDate).format(AttendanceDate.DataFormat),
         changeRequests: [changeRequestPayload],
+        logContext: {
+          action: "attendance.request.submit",
+        },
       })
         .then(() => {
           void notify("修正申請完了", {

@@ -1,4 +1,3 @@
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import {
   ApprovalStatus,
   GetWorkflowQuery,
@@ -8,6 +7,7 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
+import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
 import {
   LocalNotificationManager,
   WorkflowNotificationType,
@@ -228,18 +228,19 @@ export const useWorkflowApprovalActions = ({
       }
 
       try {
-        await createOperationLogData({
-          staffId: currentStaffLocal.id,
-          action: "approve_workflow",
+        await logOperationEvent({
+          action: "workflow.approve",
           resource: "workflow",
           resourceId: updated.id,
-          timestamp: new Date().toISOString(),
-          details: JSON.stringify({
+          targetStaffId: updated.staffId ?? undefined,
+          before: workflow,
+          after: updated,
+          details: {
             workflowId: updated.id,
             category: updated.category ?? null,
             applicantStaffId: updated.staffId ?? null,
             result: "approved",
-          }),
+          },
         });
       } catch (err) {
         logger.error("Failed to create operation log for approve:", err);
@@ -325,18 +326,19 @@ export const useWorkflowApprovalActions = ({
       }
 
       try {
-        await createOperationLogData({
-          staffId: currentStaffLocal.id,
-          action: "reject_workflow",
+        await logOperationEvent({
+          action: "workflow.reject",
           resource: "workflow",
           resourceId: updated.id,
-          timestamp: new Date().toISOString(),
-          details: JSON.stringify({
+          targetStaffId: updated.staffId ?? undefined,
+          before: workflow,
+          after: updated,
+          details: {
             workflowId: updated.id,
             category: updated.category ?? null,
             applicantStaffId: updated.staffId ?? null,
             result: "rejected",
-          }),
+          },
         });
       } catch (err) {
         logger.error("Failed to create operation log for reject:", err);

@@ -4,21 +4,11 @@
  * @packageDocumentation
  */
 
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
 import { Dispatch } from "@reduxjs/toolkit";
-import {
-  Attendance,
-  CreateOperationLogInput,
-  Staff,
-} from "@shared/api/graphql/types";
+import { Attendance, Staff } from "@shared/api/graphql/types";
 
 import { ReturnDirectlyFlag } from "@/entities/attendance/lib/actions/attendanceActions";
 import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
-import {
-  buildAttendanceIdempotencyKey,
-  resolveAppVersion,
-  resolveClientTimeZone,
-} from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
@@ -64,62 +54,11 @@ export async function clockOutCallback(
 
   const workDate = resolveBusinessWorkDate(occurredAt);
   const clockOutTime = endTimeIso ?? occurredAt;
-  const idempotencyKey = buildAttendanceIdempotencyKey({
-    action: "clock_out",
-    staffId: cognitoUser.id,
-    occurredAt,
-  });
-  const clientTimezone = resolveClientTimeZone();
-  const appVersion = resolveAppVersion();
-
   const t0 = Date.now();
 
   try {
     const attendance = await clockOut(cognitoUser.id, workDate, clockOutTime);
-    const t1 = Date.now();
-    const processingTimeMs = t1 - t0;
-
-    try {
-      const input: CreateOperationLogInput = {
-        staffId: cognitoUser.id,
-        action: "clock_out",
-        resource: "attendance",
-        resourceId: attendance?.id ?? undefined,
-        timestamp: occurredAt,
-        details: JSON.stringify({
-          workDate,
-          attendanceTime: clockOutTime,
-          processingTimeMs,
-          clientTimezone,
-          occurredAt,
-          resolvedWorkDate: workDate,
-          idempotencyKey,
-          appVersion,
-          staffName: staff
-            ? `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim()
-            : undefined,
-        }),
-        metadata: JSON.stringify({
-          processingTimeMs,
-          clientTimezone,
-          occurredAt,
-          resolvedWorkDate: workDate,
-          idempotencyKey,
-          appVersion,
-        }),
-        clientTimezone,
-        occurredAt,
-        resolvedWorkDate: workDate,
-        idempotencyKey,
-        appVersion,
-        userAgent:
-          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-      };
-
-      await createOperationLogData(input);
-    } catch (logErr) {
-      logger.error("Failed to create operation log for clockOut", logErr);
-    }
+    void t0;
 
     dispatch(setSnackbarSuccess(MESSAGE_CODE.S01002));
     try {
