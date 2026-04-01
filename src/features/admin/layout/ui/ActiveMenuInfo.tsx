@@ -5,6 +5,7 @@ import { SplitModeToggle } from "@/features/splitView";
 type ActiveMenuInfoProps = {
   primaryLabel: string;
   description?: string | null;
+  ctaLabel?: string | null;
   isMobile: boolean;
   splitMode: "single" | "split";
   onToggleSplitMode: () => void;
@@ -17,6 +18,7 @@ type ActiveMenuInfoProps = {
 export function ActiveMenuInfo({
   primaryLabel,
   description,
+  ctaLabel,
   isMobile,
   splitMode,
   onToggleSplitMode,
@@ -53,6 +55,24 @@ export function ActiveMenuInfo({
         {description ? (
           <Box sx={{ color: "#64748b", lineHeight: 1.7, fontSize: "0.92rem" }}>
             {description}
+          </Box>
+        ) : null}
+        {ctaLabel ? (
+          <Box
+            sx={{
+              mt: 0.35,
+              width: "fit-content",
+              borderRadius: "999px",
+              border: "1px solid rgba(16,185,129,0.35)",
+              bgcolor: "rgba(236,253,245,0.9)",
+              px: 1.1,
+              py: 0.35,
+              fontSize: "0.74rem",
+              fontWeight: 700,
+              color: "#047857",
+            }}
+          >
+            {ctaLabel}
           </Box>
         ) : null}
       </Stack>

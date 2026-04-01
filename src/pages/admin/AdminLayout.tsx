@@ -1,18 +1,28 @@
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
+  Box,
   Button,
   Collapse,
+  Divider,
   Skeleton,
   Stack,
+  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React, { lazy, memo, Suspense, useCallback, useMemo } from "react";
+import React, { memo, Suspense, useCallback, useMemo } from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { PAGE_PADDING_X, PAGE_PADDING_Y } from "@/features/admin/layout/adminLayoutTokens";
+import {
+  PAGE_PADDING_X,
+  PAGE_PADDING_Y,
+} from "@/features/admin/layout/adminLayoutTokens";
+import {
+  ADMIN_SPLIT_PANEL_COMPONENTS,
+  ADMIN_SPLIT_PANEL_OPTIONS,
+} from "@/features/admin/layout/model/adminSplitPanelRegistry";
 import { resolveActiveMenuHref } from "@/features/admin/layout/model/resolveActiveMenuHref";
 import useHeaderMenu from "@/features/admin/layout/model/useHeaderMenu";
 import { ActiveMenuInfo } from "@/features/admin/layout/ui/ActiveMenuInfo";
@@ -20,7 +30,6 @@ import AdminHeader from "@/features/admin/layout/ui/AdminHeader";
 import AdminMenu from "@/features/admin/layout/ui/AdminMenu";
 import {
   PanelContainer,
-  ScreenOption,
   SplitViewProvider,
   useSplitView,
 } from "@/features/splitView";
@@ -29,43 +38,6 @@ import { PageSection } from "@/shared/ui/layout";
 import { getPageWidthMaxWidth } from "@/shared/ui/layout/pageWidthPresets";
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
-
-// 右側パネル用のコンポーネント
-const AdminAttendanceComponent = lazy(() => import("./AdminAttendance"));
-const AdminDailyReportComponent = lazy(
-  () => import("./AdminDailyReport/AdminDailyReport"),
-);
-const AdminStaffComponent = lazy(
-  () => import("@/features/admin/staff/ui/AdminStaff"),
-);
-const AdminShiftPlanComponent = lazy(
-  () => import("./AdminShiftPlan/AdminShiftPlan"),
-);
-
-// 画面IDとコンポーネントのマッピング
-const SCREEN_COMPONENTS: Record<
-  string,
-  React.ComponentType<{ panelId: string }>
-> = {
-  "attendance-edit": AdminAttendanceComponent as React.ComponentType<{
-    panelId: string;
-  }>,
-  "daily-report": AdminDailyReportComponent as React.ComponentType<{
-    panelId: string;
-  }>,
-  "staff-list": AdminStaffComponent as React.ComponentType<{ panelId: string }>,
-  "shift-plan": AdminShiftPlanComponent as React.ComponentType<{
-    panelId: string;
-  }>,
-};
-
-// 右側パネルで選択可能な画面オプション
-const SCREEN_OPTIONS: ScreenOption[] = [
-  { value: "attendance-edit", label: "勤怠編集", route: "/admin/attendances" },
-  { value: "daily-report", label: "日報詳細", route: "/admin/daily-report" },
-  { value: "staff-list", label: "スタッフ一覧", route: "/admin/staff" },
-  { value: "shift-plan", label: "シフト管理", route: "/admin/shift" },
-];
 
 const SplitPanelSkeleton = () => (
   <Stack spacing={1.5} sx={{ p: 2 }}>
@@ -97,6 +69,13 @@ const SURFACE_SECTION_SX = {
   backgroundColor: "#ffffff",
   boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
 } as const;
+
+const RAIL_ACTION_LINKS = [
+  { label: "勤怠修正申請", href: "/admin/attendances" },
+  { label: "シフト運用", href: "/admin/shift" },
+  { label: "ワークフロー承認", href: "/admin/workflow" },
+  { label: "設定ハブ", href: "/admin/master" },
+] as const;
 
 function AdminHeaderActions({
   isMobile,
@@ -143,6 +122,7 @@ function AdminHeaderActions({
         <ActiveMenuInfo
           primaryLabel={activeMenuItem.primaryLabel}
           description={activeMenuItem.description}
+          ctaLabel={activeMenuItem.ctaLabel}
           isMobile={isMobile}
           splitMode={splitMode}
           onToggleSplitMode={onToggleSplitMode}
@@ -153,6 +133,113 @@ function AdminHeaderActions({
 }
 
 const MemoizedAdminHeaderActions = memo(AdminHeaderActions);
+
+const AdminContextRail = memo(function AdminContextRail({
+  menuItems,
+  activeMenuHref,
+  activeMenuItem,
+  onSelect,
+}: {
+  menuItems: ReturnType<typeof useHeaderMenu>;
+  activeMenuHref: string;
+  activeMenuItem: ReturnType<typeof useHeaderMenu>[number] | null;
+  onSelect: (itemHref: string) => void;
+}) {
+  return (
+    <Stack
+      spacing={2}
+      sx={{
+        width: 280,
+        minWidth: 280,
+        borderRight: "1px solid rgba(226,232,240,0.85)",
+        background:
+          "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(255,255,255,0.9) 100%)",
+        p: 2,
+      }}
+    >
+      <Stack spacing={0.5}>
+        <Typography
+          sx={{ fontSize: "0.74rem", fontWeight: 700, color: "#0f766e" }}
+        >
+          CONTROL RAIL
+        </Typography>
+        <Typography
+          sx={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a" }}
+        >
+          {activeMenuItem?.primaryLabel ?? "カテゴリ"}
+        </Typography>
+        <Typography
+          sx={{ fontSize: "0.82rem", color: "#64748b", lineHeight: 1.6 }}
+        >
+          {activeMenuItem?.ctaLabel ?? "頻出操作へすばやく遷移できます。"}
+        </Typography>
+      </Stack>
+
+      <Divider flexItem />
+
+      <Stack spacing={1}>
+        {menuItems.map((item) => {
+          const isActive = item.href === activeMenuHref;
+          return (
+            <Button
+              key={item.href}
+              variant="text"
+              onClick={() => onSelect(item.href)}
+              sx={{
+                justifyContent: "space-between",
+                textTransform: "none",
+                borderRadius: "10px",
+                px: 1.25,
+                py: 1,
+                color: isActive ? "#065f46" : "#1e293b",
+                backgroundColor: isActive
+                  ? "rgba(16,185,129,0.14)"
+                  : "transparent",
+                fontWeight: isActive ? 700 : 500,
+                "&:hover": {
+                  backgroundColor: isActive
+                    ? "rgba(16,185,129,0.2)"
+                    : "rgba(148,163,184,0.12)",
+                },
+              }}
+            >
+              <Box component="span">{item.primaryLabel}</Box>
+              <Box component="span" sx={{ fontSize: "0.72rem", opacity: 0.75 }}>
+                {item.secondaryLabel ?? ""}
+              </Box>
+            </Button>
+          );
+        })}
+      </Stack>
+
+      <Divider flexItem />
+
+      <Stack spacing={0.8}>
+        <Typography
+          sx={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}
+        >
+          QUICK ROUTES
+        </Typography>
+        {RAIL_ACTION_LINKS.map((link) => (
+          <Button
+            key={link.href}
+            variant="outlined"
+            onClick={() => onSelect(link.href)}
+            sx={{
+              justifyContent: "flex-start",
+              textTransform: "none",
+              borderColor: "rgba(148,163,184,0.38)",
+              color: "#0f172a",
+              borderRadius: "999px",
+            }}
+          >
+            {link.label}
+          </Button>
+        ))}
+      </Stack>
+    </Stack>
+  );
+});
 
 const MemoizedOutlet = memo(function MemoizedOutlet() {
   return <Outlet />;
@@ -193,7 +280,7 @@ const SplitLayoutPanels = memo(function SplitLayoutPanels({
         <PanelContainer
           title={rightPanelTitle || "画面を選択"}
           onClose={onCloseRightPanel}
-          screenOptions={SCREEN_OPTIONS}
+          screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
           selectedScreen={selectedScreen}
           onScreenChange={onScreenChange}
           contentSx={selectedScreen === "daily-report" ? { pt: 0 } : undefined}
@@ -219,7 +306,8 @@ function AdminLayoutContent() {
   const menuItems = useHeaderMenu();
   const navigate = useNavigate();
   const location = useLocation();
-  const { state, enableSplitMode, disableSplitMode, setRightPanel } = useSplitView();
+  const { state, enableSplitMode, disableSplitMode, setRightPanel } =
+    useSplitView();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [isMenuExpanded, setIsMenuExpanded] = React.useState(!isMobile);
@@ -265,10 +353,10 @@ function AdminLayoutContent() {
 
   const handleScreenChange = useCallback(
     (screenValue: string) => {
-      const selectedOption = SCREEN_OPTIONS.find(
+      const selectedOption = ADMIN_SPLIT_PANEL_OPTIONS.find(
         (option) => option.value === screenValue,
       );
-      const component = SCREEN_COMPONENTS[screenValue];
+      const component = ADMIN_SPLIT_PANEL_COMPONENTS[screenValue];
       if (selectedOption && component) {
         setRightPanel({
           id: selectedOption.value,
@@ -292,17 +380,17 @@ function AdminLayoutContent() {
   }, []);
 
   return (
-    <Stack
-      component="section"
-      sx={PAGE_CONTAINER_SX}
-    >
+    <Stack component="section" sx={PAGE_CONTAINER_SX}>
       <PageSection
         variant="plain"
         layoutVariant="dashboard"
         className="gap-0"
         sx={{ px: 0 }}
       >
-        <AdminHeader>
+        <AdminHeader
+          title={activeMenuItem?.primaryLabel ?? undefined}
+          subtitle={activeMenuItem?.description ?? undefined}
+        >
           <MemoizedAdminHeaderActions
             isMobile={isMobile}
             isMenuExpanded={isMenuExpanded}
@@ -321,17 +409,32 @@ function AdminLayoutContent() {
         layoutVariant="dashboard"
         sx={SURFACE_SECTION_SX}
       >
-        {isSplitMode ? (
-          <SplitLayoutPanels
-            rightPanelTitle={state.rightPanel?.title}
-            selectedScreen={selectedScreen}
-            onCloseRightPanel={handleCloseRightPanel}
-            onScreenChange={handleScreenChange}
-            RightPanelComponent={RightPanelComponent}
-          />
-        ) : (
-          <SinglePanelContent />
-        )}
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          sx={{ width: "100%", flex: 1 }}
+        >
+          {!isMobile && (
+            <AdminContextRail
+              menuItems={menuItems}
+              activeMenuHref={activeMenuHref}
+              activeMenuItem={activeMenuItem}
+              onSelect={handleSelect}
+            />
+          )}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {isSplitMode ? (
+              <SplitLayoutPanels
+                rightPanelTitle={state.rightPanel?.title}
+                selectedScreen={selectedScreen}
+                onCloseRightPanel={handleCloseRightPanel}
+                onScreenChange={handleScreenChange}
+                RightPanelComponent={RightPanelComponent}
+              />
+            ) : (
+              <SinglePanelContent />
+            )}
+          </Box>
+        </Stack>
       </PageSection>
     </Stack>
   );

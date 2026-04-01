@@ -26,11 +26,14 @@ describe("AdminMasterLayout", () => {
     await user.click(screen.getByRole("button", { name: "menu" }));
     const nav = screen.getByRole("navigation", { name: "設定ナビゲーション" });
 
-    expect(screen.getByText("設定")).toBeInTheDocument();
-    expect(within(nav).getByText("基本")).toBeInTheDocument();
-    expect(within(nav).getByText("勤務ルール")).toBeInTheDocument();
-    expect(within(nav).getByText("シフト・申請")).toBeInTheDocument();
-    expect(within(nav).getByText("データ・連携")).toBeInTheDocument();
+    expect(screen.getByText("SETTINGS HUB")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "ダッシュボードに戻る" }),
+    ).toBeInTheDocument();
+    expect(within(nav).getByText(/基本/)).toBeInTheDocument();
+    expect(within(nav).getByText(/勤務ルール/)).toBeInTheDocument();
+    expect(within(nav).getByText(/シフト・申請/)).toBeInTheDocument();
+    expect(within(nav).getByText(/データ・連携/)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^集計対象月/ }),
     ).toBeInTheDocument();

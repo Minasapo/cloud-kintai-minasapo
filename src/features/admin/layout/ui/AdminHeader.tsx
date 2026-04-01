@@ -1,11 +1,21 @@
 import { Stack, Typography } from "@mui/material";
-import { memo,ReactNode } from "react";
+import { memo, ReactNode } from "react";
 
 interface AdminHeaderProps {
+  title?: string;
+  subtitle?: string;
   children?: ReactNode;
 }
 
-const AdminHeader = ({ children }: AdminHeaderProps) => (
+const DEFAULT_TITLE = "Admin Control Deck";
+const DEFAULT_SUBTITLE =
+  "業務全体を俯瞰しながら、優先度の高い管理タスクへすばやく移動できます。";
+
+const AdminHeader = ({
+  title = DEFAULT_TITLE,
+  subtitle = DEFAULT_SUBTITLE,
+  children,
+}: AdminHeaderProps) => (
   <Stack
     spacing={2}
     component="header"
@@ -29,10 +39,10 @@ const AdminHeader = ({ children }: AdminHeaderProps) => (
         color: "#020617",
       }}
     >
-      設定
+      {title}
     </Typography>
     <Typography sx={{ color: "#64748b", lineHeight: 1.9 }}>
-      設定カテゴリを整理しながら、必要な詳細画面へ移動できます。
+      {subtitle}
     </Typography>
     {children}
   </Stack>
