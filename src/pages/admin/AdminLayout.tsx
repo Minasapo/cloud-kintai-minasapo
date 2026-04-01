@@ -22,7 +22,6 @@ import {
 } from "@/features/admin/layout/model/adminSplitPanelRegistry";
 import { resolveActiveMenuHref } from "@/features/admin/layout/model/resolveActiveMenuHref";
 import useHeaderMenu from "@/features/admin/layout/model/useHeaderMenu";
-import AdminHeader from "@/features/admin/layout/ui/AdminHeader";
 import NavItemPanelMenu from "@/features/admin/layout/ui/NavItemPanelMenu";
 import {
   PanelContainer,
@@ -586,22 +585,6 @@ function AdminLayoutContent() {
     setIsMobileRailOpen((prev) => !prev);
   }, []);
 
-  const splitHintLabel = useMemo(() => {
-    if (state.mode === "single") return "単一表示";
-    if (state.mode === "split") return "2ペイン表示";
-    return "3ペイン表示";
-  }, [state.mode]);
-
-  const activeMenuLabel = useMemo(() => {
-    if (!activeMenuItem) {
-      return "管理者画面";
-    }
-
-    return activeMenuItem.secondaryLabel
-      ? `${activeMenuItem.primaryLabel} / ${activeMenuItem.secondaryLabel}`
-      : activeMenuItem.primaryLabel;
-  }, [activeMenuItem]);
-
   React.useEffect(() => {
     if (!isMobile) {
       setIsMobileRailOpen(false);
@@ -635,63 +618,33 @@ function AdminLayoutContent() {
   return (
     <Stack component="section" sx={PAGE_CONTAINER_SX}>
       <PageSection
-        variant="plain"
-        layoutVariant="dashboard"
-        className="gap-0"
-        sx={{ px: 0 }}
-      >
-        <AdminHeader
-          title={activeMenuItem?.primaryLabel ?? undefined}
-          subtitle={activeMenuItem?.description ?? undefined}
-        >
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            alignItems={{ xs: "flex-start", sm: "center" }}
-            justifyContent="space-between"
-            spacing={1.25}
-            sx={{ width: "100%" }}
-          >
-            <Stack spacing={0.25}>
-              <Typography
-                sx={{ fontSize: "0.82rem", color: "#0f766e", fontWeight: 700 }}
-              >
-                CURRENT CONTEXT
-              </Typography>
-              <Typography
-                sx={{ fontSize: "0.96rem", color: "#0f172a", fontWeight: 600 }}
-              >
-                {activeMenuLabel}
-              </Typography>
-              <Typography sx={{ fontSize: "0.78rem", color: "#64748b" }}>
-                {splitHintLabel}
-              </Typography>
-            </Stack>
-
-            <Stack direction="row" spacing={1} alignItems="center">
-              {isMobile && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={handleToggleMobileRail}
-                  sx={{ textTransform: "none", borderRadius: "999px" }}
-                >
-                  {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
-                </Button>
-              )}
-              <SplitModeToggle
-                mode={state.mode}
-                onToggle={handleToggleSplitMode}
-              />
-            </Stack>
-          </Stack>
-        </AdminHeader>
-      </PageSection>
-
-      <PageSection
         variant="surface"
         layoutVariant="dashboard"
         sx={SURFACE_SECTION_SX}
       >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: 1,
+            p: 1.5,
+            borderBottom: "1px solid rgba(226,232,240,0.85)",
+          }}
+        >
+          {isMobile && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleToggleMobileRail}
+              sx={{ textTransform: "none", borderRadius: "999px" }}
+            >
+              {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
+            </Button>
+          )}
+          <SplitModeToggle mode={state.mode} onToggle={handleToggleSplitMode} />
+        </Box>
+
         <Stack
           direction={{ xs: "column", md: "row" }}
           sx={{ width: "100%", flex: 1 }}

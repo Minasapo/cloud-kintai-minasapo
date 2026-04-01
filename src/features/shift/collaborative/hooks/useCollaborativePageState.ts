@@ -3,12 +3,20 @@ import {
   useGetEventCalendarsQuery,
   useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
 import { type GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
-import { type MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
@@ -60,7 +68,14 @@ export const useCollaborativePageState = (targetMonth: string) => {
     deleteCommentReply,
   } = useCollaborativeShift();
 
-  const isAdmin = true; // TODO: 認可情報から取得する
+  const { isCognitoUserRole } = useAuthSessionSummary();
+  const isAdmin = useMemo(
+    () =>
+      isCognitoUserRole(StaffRole.ADMIN) ||
+      isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
+      isCognitoUserRole(StaffRole.OWNER),
+    [isCognitoUserRole],
+  );
 
   const currentMonth = useMemo(() => dayjs(targetMonth), [targetMonth]);
 
@@ -195,7 +210,8 @@ export const useCollaborativePageState = (targetMonth: string) => {
     days,
   });
 
-  const isEditingDisabled = !state.isOnline || state.connectionState === "disconnected";
+  const isEditingDisabled =
+    !state.isOnline || state.connectionState === "disconnected";
 
   const releaseEditLocks = useCallback(
     async (targets: Array<{ staffId: string; date: string }>) => {
@@ -284,13 +300,19 @@ export const useCollaborativePageState = (targetMonth: string) => {
               await batchUpdateShifts(validUpdates);
               await releaseEditLocks(validUpdates);
             } else {
-              setEditLockError("一括編集前に対象セルのロックを取得してください。");
+              setEditLockError(
+                "一括編集前に対象セルのロックを取得してください。",
+              );
             }
             return;
           }
 
           if (focusedCell) {
-            await changeCellState(focusedCell.staffId, focusedCell.date, newState);
+            await changeCellState(
+              focusedCell.staffId,
+              focusedCell.date,
+              newState,
+            );
           }
         } catch (error) {
           console.error("Failed to change shift state:", error);
@@ -473,15 +495,12 @@ export const useCollaborativePageState = (targetMonth: string) => {
     void applyEditLock(false);
   }, [applyEditLock]);
 
-  const handleForceReleaseLock = useCallback(
-    () => {
-      if (!isAdmin) return;
-      selectionTargets.forEach(({ staffId, date }) => {
-        void forceReleaseCell(staffId, date);
-      });
-    },
-    [selectionTargets, isAdmin, forceReleaseCell],
-  );
+  const handleForceReleaseLock = useCallback(() => {
+    if (!isAdmin) return;
+    selectionTargets.forEach(({ staffId, date }) => {
+      void forceReleaseCell(staffId, date);
+    });
+  }, [selectionTargets, isAdmin, forceReleaseCell]);
 
   const handlePaste = useCallback(() => {
     if (!focusedCell) return;
