@@ -42,7 +42,7 @@ export default function TimeRecorderAnnouncementBanner({
       <div
         role="status"
         data-testid="time-recorder-announcement-banner"
-        className="mx-auto flex w-full max-w-3xl items-start gap-3 rounded-xl border border-cyan-200 bg-cyan-50/95 px-4 py-3 text-cyan-950 shadow-[0_14px_28px_-22px_rgba(8,145,178,0.55)] backdrop-blur"
+        className="mx-auto flex w-full max-w-3xl items-start gap-3 rounded-[6px] border border-cyan-200 bg-cyan-50/95 px-4 py-3 text-cyan-950 shadow-[0_14px_28px_-22px_rgba(8,145,178,0.55)] backdrop-blur"
       >
         <p className="m-0 flex-1 whitespace-pre-wrap text-sm font-medium leading-6">
           {announcement.message}

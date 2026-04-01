@@ -5,10 +5,7 @@ import {
   calcTotalWorkTime,
 } from "@entities/attendance/lib/time";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
-import {
-  type ChartData,
-  type ChartOptions,
-} from "chart.js";
+import { type ChartData, type ChartOptions } from "chart.js";
 import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
 
@@ -238,9 +235,7 @@ export default function RegisterAttendanceSummaryCard({
         netWorkHours: 0,
         restHours: 0,
       };
-      const netWorkHours = Number(
-        workStatusHours.netWorkHours.toFixed(2),
-      );
+      const netWorkHours = Number(workStatusHours.netWorkHours.toFixed(2));
       const restHours = Number(workStatusHours.restHours.toFixed(2));
       const overtimeHours = Number(
         Math.max(netWorkHours - standardWorkHours, 0).toFixed(2),
@@ -368,7 +363,7 @@ export default function RegisterAttendanceSummaryCard({
   return (
     <section
       data-testid="register-dashboard-attendance-summary-card"
-      className="relative rounded-[1.35rem] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
+      className="relative rounded-[8px] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div>

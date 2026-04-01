@@ -78,41 +78,39 @@ describe("AdminPendingApprovalSummary", () => {
       ],
     });
 
-    mockGraphql.mockImplementation(
-      ({ query }: { query: unknown }) => {
-        if (query === listAttendances) {
-          return Promise.resolve({
-            data: {
-              listAttendances: {
-                items: [
-                  {
-                    staffId: "staff-1",
-                    workDate: "2026-03-01",
-                    changeRequests: [{ completed: false }],
-                  },
-                  {
-                    staffId: "staff-2",
-                    workDate: "2026-03-02",
-                    changeRequests: [{ completed: true }],
-                  },
-                ],
-                nextToken: null,
-              },
+    mockGraphql.mockImplementation(({ query }: { query: unknown }) => {
+      if (query === listAttendances) {
+        return Promise.resolve({
+          data: {
+            listAttendances: {
+              items: [
+                {
+                  staffId: "staff-1",
+                  workDate: "2026-03-01",
+                  changeRequests: [{ completed: false }],
+                },
+                {
+                  staffId: "staff-2",
+                  workDate: "2026-03-02",
+                  changeRequests: [{ completed: true }],
+                },
+              ],
+              nextToken: null,
             },
-          });
-        }
+          },
+        });
+      }
 
-        if (
-          query === onCreateAttendance ||
-          query === onUpdateAttendance ||
-          query === onDeleteAttendance
-        ) {
-          return createSubscription();
-        }
+      if (
+        query === onCreateAttendance ||
+        query === onUpdateAttendance ||
+        query === onDeleteAttendance
+      ) {
+        return createSubscription();
+      }
 
-        return Promise.resolve({});
-      },
-    );
+      return Promise.resolve({});
+    });
 
     renderSummary(true);
 
@@ -125,11 +123,11 @@ describe("AdminPendingApprovalSummary", () => {
     expect(
       screen.getByRole("heading", { name: "ワークフロー申請" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("admin-pending-approval-summary"),
-    ).toHaveClass("grid-cols-2");
+    expect(screen.getByTestId("admin-pending-approval-summary")).toHaveClass(
+      "grid-cols-2",
+    );
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
-      "rounded-[18px]",
+      "rounded-[8px]",
     );
     expect(screen.getAllByText("管理者のみ")).toHaveLength(2);
     expect(
@@ -169,30 +167,28 @@ describe("AdminPendingApprovalSummary", () => {
       workflows: [{ id: "wf-1", status: WorkflowStatus.PENDING }],
     });
 
-    mockGraphql.mockImplementation(
-      ({ query }: { query: unknown }) => {
-        if (query === listAttendances) {
-          return Promise.resolve({
-            data: {
-              listAttendances: {
-                items: [],
-                nextToken: null,
-              },
+    mockGraphql.mockImplementation(({ query }: { query: unknown }) => {
+      if (query === listAttendances) {
+        return Promise.resolve({
+          data: {
+            listAttendances: {
+              items: [],
+              nextToken: null,
             },
-          });
-        }
+          },
+        });
+      }
 
-        if (
-          query === onCreateAttendance ||
-          query === onUpdateAttendance ||
-          query === onDeleteAttendance
-        ) {
-          return createSubscription();
-        }
+      if (
+        query === onCreateAttendance ||
+        query === onUpdateAttendance ||
+        query === onDeleteAttendance
+      ) {
+        return createSubscription();
+      }
 
-        return Promise.resolve({});
-      },
-    );
+      return Promise.resolve({});
+    });
 
     renderSummary(true, { showAdminOnlyTag: false });
 
@@ -210,30 +206,28 @@ describe("AdminPendingApprovalSummary", () => {
       workflows: [{ id: "wf-1", status: WorkflowStatus.PENDING }],
     });
 
-    mockGraphql.mockImplementation(
-      ({ query }: { query: unknown }) => {
-        if (query === listAttendances) {
-          return Promise.resolve({
-            data: {
-              listAttendances: {
-                items: [],
-                nextToken: null,
-              },
+    mockGraphql.mockImplementation(({ query }: { query: unknown }) => {
+      if (query === listAttendances) {
+        return Promise.resolve({
+          data: {
+            listAttendances: {
+              items: [],
+              nextToken: null,
             },
-          });
-        }
+          },
+        });
+      }
 
-        if (
-          query === onCreateAttendance ||
-          query === onUpdateAttendance ||
-          query === onDeleteAttendance
-        ) {
-          return createSubscription();
-        }
+      if (
+        query === onCreateAttendance ||
+        query === onUpdateAttendance ||
+        query === onDeleteAttendance
+      ) {
+        return createSubscription();
+      }
 
-        return Promise.resolve({});
-      },
-    );
+      return Promise.resolve({});
+    });
 
     renderSummary(true, {
       showAdminOnlyTag: false,
@@ -247,7 +241,7 @@ describe("AdminPendingApprovalSummary", () => {
     });
 
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
-      "rounded-[12px]",
+      "rounded-[6px]",
     );
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
       "h-full",

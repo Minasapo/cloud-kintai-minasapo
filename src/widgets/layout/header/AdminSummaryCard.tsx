@@ -37,11 +37,11 @@ export default function AdminSummaryCard({
         ? "m-0 mt-2 text-[2rem] font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-[2.25rem]"
         : "m-0 mt-1.5 text-[2rem] font-extrabold leading-none tracking-[-0.03em] text-slate-950 md:text-[2.25rem]";
   const linkClassName = isDashboardVariant
-    ? "block h-full rounded-[12px] no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 hover:no-underline"
-    : `group block rounded-[18px] no-underline transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 hover:no-underline ${className ?? ""}`;
+    ? "block h-full rounded-[6px] no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 hover:no-underline"
+    : `group block rounded-[8px] no-underline transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 hover:no-underline ${className ?? ""}`;
   const sectionClassName = isDashboardVariant
-    ? "relative flex h-full min-h-[140px] flex-col rounded-[12px] border-[1.5px] border-solid border-[rgba(148,163,184,0.42)] bg-white px-3 py-3 md:px-4 md:py-[10px] shadow-[0_14px_28px_-24px_rgba(15,23,42,0.45)]"
-    : `relative rounded-[18px] border-[1.5px] border-solid border-[rgba(148,163,184,0.42)] bg-white px-4 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.45)] transition group-hover:border-[rgba(148,163,184,0.55)] group-hover:shadow-[0_18px_32px_-22px_rgba(15,23,42,0.5)] ${compact ? "pt-2.5 pb-1.5" : "h-full pt-3 pb-2"} ${className ?? ""}`;
+    ? "relative flex h-full min-h-[140px] flex-col rounded-[6px] border-[1.5px] border-solid border-[rgba(148,163,184,0.42)] bg-white px-3 py-3 md:px-4 md:py-[10px] shadow-[0_14px_28px_-24px_rgba(15,23,42,0.45)]"
+    : `relative rounded-[8px] border-[1.5px] border-solid border-[rgba(148,163,184,0.42)] bg-white px-4 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.45)] transition group-hover:border-[rgba(148,163,184,0.55)] group-hover:shadow-[0_18px_32px_-22px_rgba(15,23,42,0.5)] ${compact ? "pt-2.5 pb-1.5" : "h-full pt-3 pb-2"} ${className ?? ""}`;
   const contentClassName = isDashboardVariant
     ? "flex h-full flex-col items-start"
     : `flex flex-col items-start ${compact ? "min-h-[92px]" : "h-full min-h-[116px]"}`;
@@ -56,11 +56,7 @@ export default function AdminSummaryCard({
     : "absolute right-3 top-3 inline-flex";
 
   return (
-    <RouterLink
-      to={to}
-      data-testid={testId}
-      className={linkClassName}
-    >
+    <RouterLink to={to} data-testid={testId} className={linkClassName}>
       <section className={sectionClassName}>
         <InfoIconTooltip
           testId={`${testId}-description-tooltip`}

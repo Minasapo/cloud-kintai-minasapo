@@ -6,7 +6,7 @@ export default function RegisterSummaryWorkDaysCard({
   workDaysLabel,
 }: RegisterSummaryWorkDaysCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 px-3.5 py-3">
+    <div className="rounded-[6px] border border-slate-200/90 bg-slate-50/70 px-3.5 py-3">
       <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">
         勤務日数
       </p>

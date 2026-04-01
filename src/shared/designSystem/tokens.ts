@@ -131,9 +131,9 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
   } as const;
 
   const radius = {
-    sm: 4,
-    md: 8,
-    lg: 12,
+    sm: 2,
+    md: 4,
+    lg: 6,
     pill: 999,
   } as const;
 
