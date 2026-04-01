@@ -8,6 +8,11 @@ import { GraphQLResult } from "aws-amplify/api";
 
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
+import {
+  buildOperationLogMutationError,
+  OperationLogMutationError,
+} from "./operationLogError";
+
 type CreateOperationLogInputWithContext = CreateOperationLogInput & {
   clientTimezone?: string | null;
   occurredAt?: string | null;
@@ -122,9 +127,38 @@ const createOperationLogMutation = async (input: Record<string, unknown>) =>
     authMode: "userPool",
   })) as GraphQLResult<CreateOperationLogMutation>;
 
+const assertRequiredOperationLogInput = (input: CreateOperationLogInput) => {
+  const missingFields: string[] = [];
+  if (!input.staffId) {
+    missingFields.push("staffId");
+  }
+  if (!input.resource) {
+    missingFields.push("resource");
+  }
+  if (!input.resourceKey) {
+    missingFields.push("resourceKey");
+  }
+  if (!input.action) {
+    missingFields.push("action");
+  }
+  if (!input.timestamp) {
+    missingFields.push("timestamp");
+  }
+
+  if (missingFields.length > 0) {
+    throw new OperationLogMutationError(
+      "validation",
+      `OperationLog input validation failed: ${missingFields.join(", ")}`,
+      missingFields,
+    );
+  }
+};
+
 export default async function createOperationLogData(
   input: CreateOperationLogInput,
 ) {
+  assertRequiredOperationLogInput(input);
+
   let mutationInput: Record<string, unknown> = enrichOperationLogInput(input);
   let response = await createOperationLogMutation(mutationInput);
 
@@ -137,11 +171,13 @@ export default async function createOperationLogData(
   }
 
   if (response.errors) {
-    throw new Error(response.errors[0].message);
+    throw buildOperationLogMutationError(response.errors);
   }
 
   if (!response.data?.createOperationLog) {
-    throw new Error("No data returned");
+    throw new OperationLogMutationError("unknown", "No data returned", [
+      "No data returned",
+    ]);
   }
 
   const created: OperationLog = response.data.createOperationLog;

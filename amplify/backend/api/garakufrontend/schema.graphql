@@ -556,14 +556,14 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
   before: AWSJSON
   after: AWSJSON
   diff: AWSJSON
-  # 操作の詳細を JSON 文字列などで保存
-  details: String
+  # 操作の詳細（JSON）
+  details: AWSJSON
   # オプション: 発生元 IP
   ipAddress: String
   # オプション: ユーザーエージェント
   userAgent: String
-  # 任意の追加メタデータ（JSON 文字列）
-  metadata: String
+  # 任意の追加メタデータ（JSON）
+  metadata: AWSJSON
   # クライアントのタイムゾーン（例: Asia/Tokyo）
   clientTimezone: String
   # クライアントで観測した発生時刻（ISO 8601）

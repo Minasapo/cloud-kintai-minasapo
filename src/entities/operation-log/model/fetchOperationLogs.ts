@@ -1,13 +1,19 @@
 import { listOperationLogs } from "@shared/api/graphql/documents/queries";
 import {
   ListOperationLogsQuery,
-  ModelAttributeTypes,
   ModelOperationLogFilterInput,
   OperationLog,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+
+import {
+  buildSafeResourceKeyFilter,
+  extractInvalidResourceKeyItemCount,
+  hasNullableResourceKeyError,
+  normalizeLegacyOperationLog,
+} from "./operationLogLegacyCompatibility";
 
 export type FetchOperationLogsParams = {
   filter?: ModelOperationLogFilterInput | null;
@@ -20,55 +26,6 @@ export type FetchOperationLogsResult = {
   nextToken: string | null;
   excludedInvalidRecords?: boolean;
   excludedInvalidRecordCount?: number;
-};
-
-const hasNullableResourceKeyError = (
-  errors?: readonly { message?: string }[],
-) =>
-  Boolean(
-    errors?.some((error) =>
-      (error.message ?? "").includes(
-        "Cannot return null for non-nullable type: 'String' within parent 'OperationLog'",
-      ),
-    ),
-  );
-
-const extractInvalidResourceKeyItemCount = (
-  errors?: readonly { message?: string }[],
-) => {
-  if (!errors) {
-    return 0;
-  }
-
-  const indices = new Set<number>();
-  const pattern = /\/listOperationLogs\/items\[(\d+)\]\/resourceKey/;
-
-  for (const error of errors) {
-    const message = error.message ?? "";
-    const match = message.match(pattern);
-    if (match && match[1]) {
-      indices.add(Number(match[1]));
-    }
-  }
-
-  return indices.size;
-};
-
-const VALID_RESOURCE_KEY_FILTER: ModelOperationLogFilterInput = {
-  resourceKey: {
-    attributeExists: true,
-    attributeType: ModelAttributeTypes.string,
-  },
-};
-
-const buildSafeFilter = (filter?: ModelOperationLogFilterInput | null) => {
-  if (!filter) {
-    return VALID_RESOURCE_KEY_FILTER;
-  }
-
-  return {
-    and: [filter, VALID_RESOURCE_KEY_FILTER],
-  } as ModelOperationLogFilterInput;
 };
 
 const executeListOperationLogs = async ({
@@ -111,7 +68,7 @@ export default async function fetchOperationLogs({
       );
       excludedInvalidRecordCount = countFromError > 0 ? countFromError : 1;
       response = await executeListOperationLogs({
-        filter: buildSafeFilter(filter),
+        filter: buildSafeResourceKeyFilter(filter),
         nextToken,
         limit,
       });
@@ -142,9 +99,9 @@ export default async function fetchOperationLogs({
   }
 
   items.push(
-    ...response.data.listOperationLogs.items.filter(
-      (item): item is NonNullable<typeof item> => Boolean(item),
-    ),
+    ...response.data.listOperationLogs.items
+      .filter((item): item is NonNullable<typeof item> => Boolean(item))
+      .map(normalizeLegacyOperationLog),
   );
 
   return {

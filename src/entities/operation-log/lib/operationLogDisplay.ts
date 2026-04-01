@@ -1,6 +1,6 @@
 import type { OperationLog } from "@shared/api/graphql/types";
 
-import { parseOperationLogJson } from "@/entities/operation-log/model/canonicalOperationLog";
+import { parseOperationLogJsonLike } from "@/entities/operation-log/model/operationLogLegacyCompatibility";
 
 import { getOperationLogLabel } from "./operationLogLabels";
 
@@ -54,8 +54,8 @@ export const formatOperationLogInlineValue = (
   return toInlineJson(value);
 };
 
-const getDetailsSummary = (details?: string | null): unknown => {
-  const parsed = parseOperationLogJson(details);
+const getDetailsSummary = (details?: unknown): unknown => {
+  const parsed = parseOperationLogJsonLike(details);
 
   if (!parsed || typeof parsed !== "object" || !("summary" in parsed)) {
     return undefined;

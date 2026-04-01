@@ -1,6 +1,5 @@
 import { operationLogsByStaffId } from "@shared/api/graphql/documents/queries";
 import {
-  ModelAttributeTypes,
   ModelOperationLogFilterInput,
   OperationLog,
   OperationLogsByStaffIdQuery,
@@ -10,29 +9,17 @@ import { GraphQLResult } from "aws-amplify/api";
 
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
+import {
+  buildSafeResourceKeyFilter,
+  hasNullableResourceKeyError,
+  normalizeLegacyOperationLog,
+} from "./operationLogLegacyCompatibility";
+
 export default async function fetchOperationLogsByStaffId(
   staffId: string,
   limit = 50,
 ) {
   const logs: OperationLog[] = [];
-
-  const hasNullableResourceKeyError = (
-    errors?: readonly { message?: string }[],
-  ) =>
-    Boolean(
-      errors?.some((error) =>
-        (error.message ?? "").includes(
-          "Cannot return null for non-nullable type: 'String' within parent 'OperationLog'",
-        ),
-      ),
-    );
-
-  const VALID_RESOURCE_KEY_FILTER: ModelOperationLogFilterInput = {
-    resourceKey: {
-      attributeExists: true,
-      attributeType: ModelAttributeTypes.string,
-    },
-  };
 
   const variables: OperationLogsByStaffIdQueryVariables = {
     staffId,
@@ -50,7 +37,9 @@ export default async function fetchOperationLogsByStaffId(
       query: operationLogsByStaffId,
       variables: {
         ...variables,
-        filter: VALID_RESOURCE_KEY_FILTER,
+        filter: buildSafeResourceKeyFilter(
+          null,
+        ) as ModelOperationLogFilterInput,
       },
       authMode: "userPool",
     })) as GraphQLResult<OperationLogsByStaffIdQuery>;
@@ -65,9 +54,9 @@ export default async function fetchOperationLogsByStaffId(
   }
 
   logs.push(
-    ...response.data.operationLogsByStaffId.items.filter(
-      (item): item is NonNullable<typeof item> => !!item,
-    ),
+    ...response.data.operationLogsByStaffId.items
+      .filter((item): item is NonNullable<typeof item> => !!item)
+      .map(normalizeLegacyOperationLog),
   );
 
   return logs;
