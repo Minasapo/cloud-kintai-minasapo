@@ -140,8 +140,8 @@ describe("AdminLogsClean", () => {
 
     render(<AdminLogsClean />);
 
-    expect(screen.getByText('Actor: {"raw":"actor-1"}')).toBeInTheDocument();
-    expect(screen.getByText('Target: {"raw":"target-1"}')).toBeInTheDocument();
+    expect(screen.getByText('操作者: {"raw":"actor-1"}')).toBeInTheDocument();
+    expect(screen.getByText('対象者: {"raw":"target-1"}')).toBeInTheDocument();
     expect(screen.queryByText("Chrome")).not.toBeInTheDocument();
     expect(screen.queryByText("[object Object]")).not.toBeInTheDocument();
   });

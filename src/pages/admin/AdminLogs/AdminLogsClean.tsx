@@ -164,34 +164,34 @@ export default function AdminLogsClean() {
             >
               <TextField
                 size="small"
-                label="Resource"
+                label="リソース"
                 value={resourceFilter}
                 onChange={(event) => setResourceFilter(event.target.value)}
               />
               <TextField
                 size="small"
-                label="Actor"
+                label="操作者"
                 value={actorFilter}
                 onChange={(event) => setActorFilter(event.target.value)}
-                helperText="cognitoUserId"
+                helperText="Cognito ユーザー ID"
               />
               <TextField
                 size="small"
-                label="Target"
+                label="対象者"
                 value={targetFilter}
                 onChange={(event) => setTargetFilter(event.target.value)}
-                helperText="cognitoUserId"
+                helperText="Cognito ユーザー ID"
               />
               <TextField
                 size="small"
-                label="Action"
+                label="アクション"
                 value={actionFilter}
                 onChange={(event) => setActionFilter(event.target.value)}
               />
               <TextField
                 size="small"
                 type="date"
-                label="From"
+                label="開始日"
                 value={fromDate}
                 onChange={(event) => setFromDate(event.target.value)}
                 InputLabelProps={{ shrink: true }}
@@ -199,7 +199,7 @@ export default function AdminLogsClean() {
               <TextField
                 size="small"
                 type="date"
-                label="To"
+                label="終了日"
                 value={toDate}
                 onChange={(event) => setToDate(event.target.value)}
                 InputLabelProps={{ shrink: true }}
@@ -238,35 +238,35 @@ export default function AdminLogsClean() {
                       : undefined;
                   const actorLabel = (() => {
                     if (!actorIdText) {
-                      return "Actor: -";
+                      return "操作者: -";
                     }
                     if (!isNonEmptyString(actorId)) {
-                      return `Actor: ${actorIdText}`;
+                      return `操作者: ${actorIdText}`;
                     }
                     if (!(actorId in staffMap)) {
-                      return "Actor: 読み込み中...";
+                      return "操作者: 読み込み中...";
                     }
                     if (actorEntry === null) {
-                      return `Actor: ${actorIdText}`;
+                      return `操作者: ${actorIdText}`;
                     }
-                    return `Actor: ${`${actorEntry?.familyName ?? ""} ${
+                    return `操作者: ${`${actorEntry?.familyName ?? ""} ${
                       actorEntry?.givenName ?? ""
                     }`.trim()}`;
                   })();
                   const targetLabel = (() => {
                     if (!targetIdText) {
-                      return "Target: -";
+                      return "対象者: -";
                     }
                     if (!isNonEmptyString(targetStaffId)) {
-                      return `Target: ${targetIdText}`;
+                      return `対象者: ${targetIdText}`;
                     }
                     if (!(targetStaffId in staffMap)) {
-                      return "Target: 読み込み中...";
+                      return "対象者: 読み込み中...";
                     }
                     if (targetEntry === null) {
-                      return `Target: ${targetIdText}`;
+                      return `対象者: ${targetIdText}`;
                     }
-                    return `Target: ${`${targetEntry?.familyName ?? ""} ${
+                    return `対象者: ${`${targetEntry?.familyName ?? ""} ${
                       targetEntry?.givenName ?? ""
                     }`.trim()}`;
                   })();

@@ -68,7 +68,7 @@ export function OperationLogDetailDialog({
   );
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
       <DialogTitle
         component="div"
         sx={{ display: "flex", alignItems: "center", gap: 1, pr: 6 }}

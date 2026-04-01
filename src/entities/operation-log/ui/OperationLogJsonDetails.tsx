@@ -3,6 +3,8 @@ import { useMemo } from "react";
 
 import { parseOperationLogJson } from "@/entities/operation-log/model/canonicalOperationLog";
 
+import { OperationLogDiffViewer } from "./OperationLogDiffViewer";
+
 type JsonSection = {
   label: string;
   value: unknown;
@@ -16,6 +18,36 @@ function JsonPre({ value }: { value: unknown }) {
   );
 }
 
+type FullDiff = {
+  mode: string;
+  before: unknown;
+  after: unknown;
+};
+
+function isFullDiff(value: unknown): value is FullDiff {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "before" in (value as object) &&
+    "after" in (value as object)
+  );
+}
+
+function resolveDiffSources(
+  diff: unknown,
+  before: unknown,
+  after: unknown,
+): { before: unknown; after: unknown } | null {
+  if (isFullDiff(diff)) {
+    return { before: diff.before, after: diff.after };
+  }
+  if (before !== null || after !== null) {
+    return { before, after };
+  }
+  return null;
+}
+
 export function OperationLogJsonDetails({
   log,
   className,
@@ -23,25 +55,34 @@ export function OperationLogJsonDetails({
   log: Pick<OperationLog, "before" | "after" | "diff" | "details" | "metadata">;
   className?: string;
 }) {
-  const sections = useMemo<JsonSection[]>(() => {
+  const diffSources = useMemo(() => {
+    const parsedDiff = parseOperationLogJson(log.diff);
+    const parsedBefore = parseOperationLogJson(log.before);
+    const parsedAfter = parseOperationLogJson(log.after);
+    return resolveDiffSources(parsedDiff, parsedBefore, parsedAfter);
+  }, [log.diff, log.before, log.after]);
+
+  const extraSections = useMemo<JsonSection[]>(() => {
     const candidates: JsonSection[] = [
-      { label: "差分", value: parseOperationLogJson(log.diff) },
-      { label: "変更前", value: parseOperationLogJson(log.before) },
-      { label: "変更後", value: parseOperationLogJson(log.after) },
       { label: "詳細", value: parseOperationLogJson(log.details) },
       { label: "メタデータ", value: parseOperationLogJson(log.metadata) },
     ];
-
     return candidates.filter((section) => section.value !== null);
-  }, [log.after, log.before, log.details, log.diff, log.metadata]);
+  }, [log.details, log.metadata]);
 
-  if (sections.length === 0) {
+  if (!diffSources && extraSections.length === 0) {
     return null;
   }
 
   return (
     <div className={className}>
-      {sections.map((section) => (
+      {diffSources && (
+        <OperationLogDiffViewer
+          before={diffSources.before}
+          after={diffSources.after}
+        />
+      )}
+      {extraSections.map((section) => (
         <details
           key={section.label}
           className="rounded-2xl border border-slate-200 bg-white"
