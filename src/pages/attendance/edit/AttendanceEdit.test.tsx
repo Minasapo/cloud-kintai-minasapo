@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import dayjs from "dayjs";
 import type { ContextType } from "react";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
@@ -77,8 +78,22 @@ jest.mock("./sendChangeRequestMail", () => ({
 }));
 
 describe("AttendanceEdit layout", () => {
+  const renderWithRouter = (ui: React.ReactElement) => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: "/",
+          element: ui,
+        },
+      ],
+      { initialEntries: ["/"] },
+    );
+
+    return render(<RouterProvider router={router} />);
+  };
+
   it("renders inside the content width preset", async () => {
-    const { container } = render(
+    const { container } = renderWithRouter(
       <AuthContext.Provider
         value={{
           signOut: jest.fn(),

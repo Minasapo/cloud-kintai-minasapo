@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import dayjs from "dayjs";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { getDesignTokens } from "@/shared/designSystem";
@@ -66,12 +67,26 @@ const contextValue: React.ContextType<typeof AppConfigContext> = {
 };
 
 describe("AdminShiftSettings", () => {
+  const renderWithRouter = (ui: React.ReactElement) => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: "/",
+          element: ui,
+        },
+      ],
+      { initialEntries: ["/"] },
+    );
+
+    return render(<RouterProvider router={router} />);
+  };
+
   it("switches between shift group and shift display tabs", async () => {
     const user = userEvent.setup();
     const shiftGroupTab = "シフトグループ";
     const shiftDisplayTab = "シフト表示";
 
-    render(
+    renderWithRouter(
       <AppConfigContext.Provider value={contextValue}>
         <AdminShiftSettings />
       </AppConfigContext.Provider>,

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import dayjs from "dayjs";
 import type { ReactNode } from "react";
-import { MemoryRouter } from "react-router-dom";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 
@@ -117,21 +117,33 @@ jest.mock("@/features/workflow/notifications/sendWorkflowSubmissionNotification"
 }));
 
 describe("NewWorkflow page layout", () => {
+  const renderWithRouter = (ui: React.ReactElement) => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: "/",
+          element: ui,
+        },
+      ],
+      { initialEntries: ["/"] },
+    );
+
+    return render(<RouterProvider router={router} />);
+  };
+
   it("renders inside the form width preset", () => {
-    const { container } = render(
-      <MemoryRouter>
-        <AuthContext.Provider
-          value={{
-            signOut: jest.fn(),
-            signIn: jest.fn(),
-            isCognitoUserRole: () => false,
-            authStatus: "authenticated",
-            cognitoUser: { id: "user-1" } as never,
-          }}
-        >
-          <NewWorkflow />
-        </AuthContext.Provider>
-      </MemoryRouter>,
+    const { container } = renderWithRouter(
+      <AuthContext.Provider
+        value={{
+          signOut: jest.fn(),
+          signIn: jest.fn(),
+          isCognitoUserRole: () => false,
+          authStatus: "authenticated",
+          cognitoUser: { id: "user-1" } as never,
+        }}
+      >
+        <NewWorkflow />
+      </AuthContext.Provider>,
     );
 
     expect(screen.getAllByText("新規作成")[0]).toBeInTheDocument();

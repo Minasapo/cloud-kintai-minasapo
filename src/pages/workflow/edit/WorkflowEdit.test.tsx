@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 
 import WorkflowEdit from "./WorkflowEdit";
 
@@ -103,8 +104,22 @@ jest.mock("@/features/workflow/notifications/sendWorkflowSubmissionNotification"
 }));
 
 describe("WorkflowEdit page layout", () => {
+  const renderWithRouter = (ui: React.ReactElement) => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: "/",
+          element: ui,
+        },
+      ],
+      { initialEntries: ["/"] },
+    );
+
+    return render(<RouterProvider router={router} />);
+  };
+
   it("renders inside the form width preset", () => {
-    const { container } = render(<WorkflowEdit />);
+    const { container } = renderWithRouter(<WorkflowEdit />);
 
     expect(screen.getByText("申請を編集")).toBeInTheDocument();
     expect(screen.getByText("workflow-type-fields")).toBeInTheDocument();
