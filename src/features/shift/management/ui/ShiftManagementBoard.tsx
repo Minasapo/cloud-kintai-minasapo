@@ -1,7 +1,4 @@
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Alert,
@@ -249,18 +246,15 @@ export default function ShiftManagementBoard() {
     staffIdToIndex,
   });
 
-  const { data: holidayCalendars = [], error: holidayCalendarsError } =
-    useGetHolidayCalendarsQuery(undefined, { skip: !isAuthenticated });
   const {
-    data: companyHolidayCalendars = [],
-    error: companyHolidayCalendarsError,
-  } = useGetCompanyHolidayCalendarsQuery(undefined, {
-    skip: !isAuthenticated,
-  });
+    holidayCalendars,
+    companyHolidayCalendars,
+    error: calendarsError,
+  } = useCalendars({ skip: !isAuthenticated });
 
   React.useEffect(() => {
-    if (holidayCalendarsError || companyHolidayCalendarsError) {
-      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+    if (calendarsError) {
+      console.error(calendarsError);
       void notify("エラー", {
         body: MESSAGE_CODE.E00001,
         mode: "await-interaction",
@@ -268,7 +262,7 @@ export default function ShiftManagementBoard() {
         tag: "holiday-load-error",
       });
     }
-  }, [holidayCalendarsError, companyHolidayCalendarsError, notify]);
+  }, [calendarsError, notify]);
 
   const holidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),

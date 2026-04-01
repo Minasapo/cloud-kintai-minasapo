@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { useGetCompanyHolidayCalendarsQuery, useGetHolidayCalendarsQuery, } from "@/entities/calendar/api/calendarApi";
+import { useCalendars } from "@/entities/calendar/model/useCalendars";
 import { pushNotification } from "@/shared/lib/store/notificationSlice";
 import DateField from "@/shared/ui/form/DateField";
 
@@ -42,8 +42,7 @@ const defaultValues: BulkFormValues = {
 export default function JobTermBulkRegister({ existingCloseDates, createCloseDate, }: Props) {
     const dispatch = useAppDispatchV2();
     const [submitting, setSubmitting] = useState(false);
-    const { data: holidayCalendars = [], isLoading: loadingHoliday } = useGetHolidayCalendarsQuery();
-    const { data: companyHolidayCalendars = [], isLoading: loadingCompany } = useGetCompanyHolidayCalendarsQuery();
+    const { holidayCalendars, companyHolidayCalendars, isLoading: loadingCalendars } = useCalendars();
     const { control, handleSubmit, watch, formState: { isValid }, setValue, } = useForm<BulkFormValues>({
         mode: "onChange",
         defaultValues,
@@ -271,7 +270,7 @@ export default function JobTermBulkRegister({ existingCloseDates, createCloseDat
             </label>
           </div>
         </div>
-        {(loadingHoliday || loadingCompany) && (<p className="text-sm text-slate-500">
+        {loadingCalendars && (<p className="text-sm text-slate-500">
             休日カレンダー情報を読み込み中です…
           </p>)}
       </div>

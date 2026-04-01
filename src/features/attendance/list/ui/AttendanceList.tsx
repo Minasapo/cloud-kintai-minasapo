@@ -2,7 +2,7 @@ import "./AttendanceList.scss";
 
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
-import { useGetCompanyHolidayCalendarsQuery, useGetHolidayCalendarsQuery, } from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { LinearProgress, useMediaQuery, useTheme } from "@mui/material";
 import { OnCreateAttendanceSubscription, OnDeleteAttendanceSubscription, OnUpdateAttendanceSubscription, Staff, } from "@shared/api/graphql/types";
@@ -41,13 +41,8 @@ export default function AttendanceTable() {
         nextParams.set(MONTH_QUERY_KEY, normalizedMonth.format("YYYY-MM"));
         setSearchParams(nextParams, { replace: true });
     }, [searchParams, setSearchParams]);
-    const { data: holidayCalendars = [], isLoading: isHolidayCalendarsLoading, isFetching: isHolidayCalendarsFetching, error: holidayCalendarsError, } = useGetHolidayCalendarsQuery();
-    const { data: companyHolidayCalendars = [], isLoading: isCompanyHolidayCalendarsLoading, isFetching: isCompanyHolidayCalendarsFetching, error: companyHolidayCalendarsError, } = useGetCompanyHolidayCalendarsQuery();
+    const { holidayCalendars, companyHolidayCalendars, isLoading: calendarLoading, error: calendarsError, } = useCalendars();
     const { closeDates, loading: closeDatesLoading, error: closeDatesError, } = useCloseDates();
-    const calendarLoading = isHolidayCalendarsLoading ||
-        isHolidayCalendarsFetching ||
-        isCompanyHolidayCalendarsLoading ||
-        isCompanyHolidayCalendarsFetching;
     const effectiveDateRange = useMemo(() => getEffectiveDateRange(currentMonth, closeDates), [currentMonth, closeDates]);
     const attendanceQueryDateRange = useMemo(() => getAttendanceQueryDateRange(currentMonth, effectiveDateRange), [currentMonth, effectiveDateRange]);
     const startDate = attendanceQueryDateRange.start.format(AttendanceDate.DataFormat);
@@ -150,14 +145,14 @@ export default function AttendanceTable() {
         });
     }, [cognitoUser, dispatch, logger]);
     useEffect(() => {
-        if (holidayCalendarsError || companyHolidayCalendarsError) {
-            logger.debug(holidayCalendarsError ?? companyHolidayCalendarsError);
+        if (calendarsError) {
+            logger.debug(calendarsError);
             dispatch(pushNotification({
                 tone: "error",
                 message: MESSAGE_CODE.E00001
             }));
         }
-    }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch, logger]);
+    }, [calendarsError, dispatch, logger]);
     useEffect(() => {
         if (closeDatesError) {
             logger.debug(closeDatesError);

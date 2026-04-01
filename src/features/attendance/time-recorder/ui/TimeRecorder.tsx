@@ -1,5 +1,5 @@
 import { type AttendanceUpsertAction, useGetAttendanceByStaffAndDateQuery, useListRecentAttendancesQuery, useUpdateAttendanceMutation, useUpsertAttendanceByStaffAndDateMutation, } from "@entities/attendance/api/attendanceApi";
-import { useGetCompanyHolidayCalendarsQuery, useGetHolidayCalendarsQuery, } from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { Attendance, CreateAttendanceInput, OnUpdateAttendanceSubscription, Staff, } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
@@ -52,12 +52,7 @@ export default function TimeRecorder({ onAttendanceErrorCountChange, onElapsedWo
         };
     }, []);
     const shouldFetchAttendance = Boolean(cognitoUser?.id);
-    const { data: holidayCalendars = [], isLoading: isHolidayCalendarsLoading, isFetching: isHolidayCalendarsFetching, error: holidayCalendarsError, } = useGetHolidayCalendarsQuery();
-    const { data: companyHolidayCalendars = [], isLoading: isCompanyHolidayCalendarsLoading, isFetching: isCompanyHolidayCalendarsFetching, error: companyHolidayCalendarsError, } = useGetCompanyHolidayCalendarsQuery();
-    const calendarLoading = isHolidayCalendarsLoading ||
-        isHolidayCalendarsFetching ||
-        isCompanyHolidayCalendarsLoading ||
-        isCompanyHolidayCalendarsFetching;
+    const { holidayCalendars, companyHolidayCalendars, isLoading: calendarLoading, error: calendarsError, } = useCalendars();
     const { data: attendanceData, isLoading: isAttendanceInitialLoading, isFetching: isAttendanceFetching, isUninitialized: isAttendanceUninitialized, error: attendanceError, refetch: refetchAttendance, } = useGetAttendanceByStaffAndDateQuery({ staffId: cognitoUser?.id ?? "", workDate: currentWorkDate }, { skip: !shouldFetchAttendance });
     const { data: attendancesData, isLoading: isAttendancesInitialLoading, isFetching: isAttendancesFetching, isUninitialized: isAttendancesUninitialized, error: attendancesError, refetch: refetchAttendances, } = useListRecentAttendancesQuery({ staffId: cognitoUser?.id ?? "" }, { skip: !shouldFetchAttendance });
     const attendance = attendanceData;
@@ -223,14 +218,14 @@ export default function TimeRecorder({ onAttendanceErrorCountChange, onElapsedWo
         await Promise.allSettled([refreshStaff(), refreshAttendanceData()]);
     }, [refreshAttendanceData, refreshStaff]);
     useEffect(() => {
-        if (holidayCalendarsError || companyHolidayCalendarsError) {
-            logger.debug(holidayCalendarsError ?? companyHolidayCalendarsError);
+        if (calendarsError) {
+            logger.debug(calendarsError);
             dispatch(pushNotification({
                 tone: "error",
                 message: MESSAGE_CODE.E00001
             }));
         }
-    }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch, logger]);
+    }, [calendarsError, dispatch, logger]);
     const clockInDisplayText = useMemo(() => formatClockDisplayText(attendance?.startTime, "出勤"), [attendance?.startTime]);
     const clockOutDisplayText = useMemo(() => formatClockDisplayText(attendance?.endTime, "退勤"), [attendance?.endTime]);
     const handleClockIn = useCallback(() => {

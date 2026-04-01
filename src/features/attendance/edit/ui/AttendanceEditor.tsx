@@ -25,7 +25,6 @@ import AttendanceEditProvider from "@/features/attendance/edit/model/AttendanceE
 import { AttendanceEditInputs, defaultValues, HourlyPaidHolidayTimeInputs, RestInputs, } from "@/features/attendance/edit/model/common";
 import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
 import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
-import useAuthenticatedUser from "@/hooks/useAuthenticatedUser";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { Logger } from "@/shared/lib/logger";
 import { AttendanceEditMailSender } from "@/shared/lib/mail/AttendanceEditMailSender";
@@ -84,11 +83,10 @@ export default function AttendanceEditor({ readOnly }: {
 }) {
     const { getLunchRestStartTime, getLunchRestEndTime, getHourlyPaidHolidayEnabled, getSpecialHolidayEnabled, getStartTime, getEndTime, getAbsentEnabled, loading: appConfigLoading, config: appConfig, } = useAppConfig();
     const dispatch = useDispatch();
-    const { authenticatedUser } = useAuthenticatedUser();
     const { targetWorkDate, staffId: targetStaffId } = useParams();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const { authStatus } = useContext(AuthContext);
+    const { authStatus, cognitoUser: currentUser } = useContext(AuthContext);
     const isAuthenticated = authStatus === "authenticated";
     const { loading: staffsLoading, error: staffSError } = useStaffs({
         isAuthenticated,
@@ -265,8 +263,8 @@ export default function AttendanceEditor({ readOnly }: {
                 const res = await handleUpdateAttendance(payload);
                 try {
                     const isEditingOtherStaff = staff &&
-                        authenticatedUser &&
-                        staff.cognitoUserId !== authenticatedUser.cognitoUserId;
+                        currentUser &&
+                        staff.cognitoUserId !== currentUser.id;
                     if (isEditingOtherStaff && res && enabledSendMail) {
                         await new AttendanceEditMailSender(staff, res).changeRequest();
                     }
@@ -352,8 +350,8 @@ export default function AttendanceEditor({ readOnly }: {
             }
             if (enabledSendMail) {
                 try {
-                    const isEditingOtherStaff = authenticatedUser &&
-                        staff.cognitoUserId !== authenticatedUser.cognitoUserId;
+                    const isEditingOtherStaff = currentUser &&
+                        staff.cognitoUserId !== currentUser.id;
                     if (isEditingOtherStaff) {
                         await new AttendanceEditMailSender(staff, res).changeRequest();
                     }

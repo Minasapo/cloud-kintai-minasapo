@@ -1,8 +1,7 @@
 import {
-  useGetCompanyHolidayCalendarsQuery,
   useGetEventCalendarsQuery,
-  useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
@@ -81,9 +80,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
 
   const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
 
-  const { data: holidays = [] } = useGetHolidayCalendarsQuery();
-
-  const { data: companyHolidays = [] } = useGetCompanyHolidayCalendarsQuery();
+  const { holidayCalendars: holidays, companyHolidayCalendars: companyHolidays } = useCalendars();
 
   const { days, dateKeys, eventCalendar } = useShiftCalendar(
     currentMonth,

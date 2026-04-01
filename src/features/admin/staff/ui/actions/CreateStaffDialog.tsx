@@ -1,10 +1,12 @@
 import { StaffRole, StaffType, } from "@entities/staff/model/useStaffs/useStaffs";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Autocomplete, Button, Chip, CircularProgress, FormControlLabel, Radio, RadioGroup, Switch, TextField, } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { ApproverMultipleMode, ApproverSettingMode, CreateStaffInput, UpdateStaffInput, } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 import { Control, Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -18,32 +20,34 @@ import createCognitoUser from "@/hooks/common/createCognitoUser";
 import { useDialogCloseGuard } from "@/hooks/useDialogCloseGuard";
 import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
-type Inputs = {
-    familyName?: string;
-    givenName?: string;
-    mailAddress?: string;
-    role: string;
-    owner: boolean;
-    sortKey?: string | null;
-    usageStartDate?: string | null;
-    workType?: string | null;
-    shiftGroup?: string | null;
-    attendanceManagementEnabled?: boolean;
-    approverSetting?: ApproverSettingMode | null;
-    approverSingle?: string | null;
-    approverMultiple?: string[] | null;
-    approverMultipleMode?: ApproverMultipleMode | null;
-    developer?: boolean;
-};
+const createStaffSchema = z.object({
+    familyName: z.string().min(1, "姓を入力してください"),
+    givenName: z.string().min(1, "名を入力してください"),
+    mailAddress: z.string().email("有効なメールアドレスを入力してください"),
+    role: z.string().min(1, "ロールを選択してください"),
+    owner: z.boolean(),
+    sortKey: z.string().nullable().optional(),
+    usageStartDate: z.string().nullable().optional(),
+    workType: z.string().nullable().optional(),
+    shiftGroup: z.string().nullable().optional(),
+    attendanceManagementEnabled: z.boolean().optional(),
+    approverSetting: z.nativeEnum(ApproverSettingMode).nullable().optional(),
+    approverSingle: z.string().nullable().optional(),
+    approverMultiple: z.array(z.string()).nullable().optional(),
+    approverMultipleMode: z.nativeEnum(ApproverMultipleMode).nullable().optional(),
+    developer: z.boolean().optional(),
+});
+
+type Inputs = z.infer<typeof createStaffSchema>;
 type AutocompleteOption = {
     value: string;
     label: string;
     description?: string;
 };
 const defaultValues: Inputs = {
-    familyName: undefined,
-    givenName: undefined,
-    mailAddress: undefined,
+    familyName: "",
+    givenName: "",
+    mailAddress: "",
     role: StaffRole.STAFF,
     owner: false,
     sortKey: null,
@@ -77,6 +81,7 @@ export default function CreateStaffDialog({ staffs, refreshStaff, createStaff, u
     const { register, control, watch, handleSubmit, reset, setValue, formState: { isDirty, isValid, isSubmitting }, } = useForm<Inputs>({
         mode: "onChange",
         defaultValues,
+        resolver: zodResolver(createStaffSchema),
     });
     const { dialog, requestClose, closeWithoutGuard } = useDialogCloseGuard({
         isDirty,
@@ -226,8 +231,8 @@ export default function CreateStaffDialog({ staffs, refreshStaff, createStaff, u
                       <td className={LABEL_CELL_CLASS}>スタッフ名</td>
                       <td className={VALUE_CELL_CLASS}>
                         <div className="flex flex-col gap-2 sm:flex-row">
-                          <TextField {...register("familyName", { required: true })} size="small" label="姓" sx={{ width: { xs: "100%", sm: 200 } }}/>
-                          <TextField {...register("givenName", { required: true })} size="small" label="名" sx={{ width: { xs: "100%", sm: 200 } }}/>
+                          <TextField {...register("familyName")} size="small" label="姓" sx={{ width: { xs: "100%", sm: 200 } }}/>
+                          <TextField {...register("givenName")} size="small" label="名" sx={{ width: { xs: "100%", sm: 200 } }}/>
                         </div>
                       </td>
                     </tr>
@@ -235,14 +240,14 @@ export default function CreateStaffDialog({ staffs, refreshStaff, createStaff, u
                     <tr>
                       <td className={LABEL_CELL_CLASS}>メールアドレス</td>
                       <td className={VALUE_CELL_CLASS}>
-                        <TextField {...register("mailAddress", { required: true })} type="email" size="small" sx={{ width: { xs: "100%", sm: 400 } }}/>
+                        <TextField {...register("mailAddress")} type="email" size="small" sx={{ width: { xs: "100%", sm: 400 } }}/>
                       </td>
                     </tr>
 
                     <tr>
                       <td className={LABEL_CELL_CLASS}>権限</td>
                       <td className={VALUE_CELL_CLASS}>
-                        <Controller name="role" control={control} rules={{ required: true }} render={({ field }) => (<Autocomplete {...field} value={ROLE_OPTIONS.find((option) => String(option.value) === field.value) ?? null} options={ROLE_OPTIONS} getOptionLabel={(option) => option.label} renderInput={(params) => (<TextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }}/>)} onChange={(_, data) => {
+                        <Controller name="role" control={control} render={({ field }) => (<Autocomplete {...field} value={ROLE_OPTIONS.find((option) => String(option.value) === field.value) ?? null} options={ROLE_OPTIONS} getOptionLabel={(option) => option.label} renderInput={(params) => (<TextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }}/>)} onChange={(_, data) => {
                     if (!data)
                         return;
                     setValue("role", data.value, {

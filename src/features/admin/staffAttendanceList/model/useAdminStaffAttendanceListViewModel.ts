@@ -1,6 +1,6 @@
 import { type DuplicateAttendanceInfo, useListAttendancesByDateRangeQuery, useUpdateAttendanceMutation, } from "@entities/attendance/api/attendanceApi";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
-import { useGetCompanyHolidayCalendarsQuery, useGetHolidayCalendarsQuery, } from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType, } from "@entities/staff/model/useStaffs/useStaffs";
 import { Attendance, CloseDate, CompanyHolidayCalendar, HolidayCalendar, OnCreateAttendanceSubscription, OnDeleteAttendanceSubscription, OnUpdateAttendanceSubscription, Staff, } from "@shared/api/graphql/types";
@@ -23,12 +23,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string, currentMo
     const dispatch = useDispatch();
     const isBulkApprovingRef = useRef(false);
     const [staff, setStaff] = useState<Staff | undefined | null>(undefined);
-    const { data: holidayCalendars = [], isLoading: isHolidayCalendarsLoading, isFetching: isHolidayCalendarsFetching, error: holidayCalendarsError, } = useGetHolidayCalendarsQuery();
-    const { data: companyHolidayCalendars = [], isLoading: isCompanyHolidayCalendarsLoading, isFetching: isCompanyHolidayCalendarsFetching, error: companyHolidayCalendarsError, } = useGetCompanyHolidayCalendarsQuery();
-    const calendarLoading = isHolidayCalendarsLoading ||
-        isHolidayCalendarsFetching ||
-        isCompanyHolidayCalendarsLoading ||
-        isCompanyHolidayCalendarsFetching;
+    const { holidayCalendars, companyHolidayCalendars, isLoading: calendarLoading, error: calendarsError, } = useCalendars();
     const { closeDates, loading: closeDatesLoading, error: closeDatesError, } = useCloseDates();
     // データ取得範囲の計算
     // 表示月に対して、その前月の1日から当月の末日までのデータを取得する
@@ -204,14 +199,14 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string, currentMo
         }
     }, [attendancesError, dispatch]);
     useEffect(() => {
-        if (holidayCalendarsError || companyHolidayCalendarsError) {
-            console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+        if (calendarsError) {
+            console.error(calendarsError);
             dispatch(pushNotification({
                 tone: "error",
                 message: MESSAGE_CODE.E00001
             }));
         }
-    }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
+    }, [calendarsError, dispatch]);
     const staffForMail = useMemo<StaffType | null>(() => {
         if (!staff)
             return null;

@@ -2,7 +2,7 @@ import "./styles.scss";
 
 import { useDeleteAttendanceMutation, useLazyGetAttendanceByIdQuery, useLazyListAttendancesByDateRangeQuery, } from "@entities/attendance/api/attendanceApi";
 import useAttendanceDaily, { AttendanceDaily, DuplicateAttendanceDaily, } from "@entities/attendance/model/useAttendanceDaily";
-import { useGetCompanyHolidayCalendarsQuery, useGetHolidayCalendarsQuery, } from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import SearchIcon from "@mui/icons-material/Search";
 import { Alert, AlertTitle, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, } from "@mui/material";
@@ -46,12 +46,7 @@ export default function AttendanceDailyList() {
     const [searchName, setSearchName] = useState("");
     const [isSearchVisible, setIsSearchVisible] = useState(false);
     const [triggerListAttendancesByDateRange] = useLazyListAttendancesByDateRangeQuery();
-    const { data: holidayCalendars = [], isLoading: isHolidayCalendarsLoading, isFetching: isHolidayCalendarsFetching, error: holidayCalendarsError, } = useGetHolidayCalendarsQuery();
-    const { data: companyHolidayCalendars = [], isLoading: isCompanyHolidayCalendarsLoading, isFetching: isCompanyHolidayCalendarsFetching, error: companyHolidayCalendarsError, } = useGetCompanyHolidayCalendarsQuery();
-    const calendarsLoading = isHolidayCalendarsLoading ||
-        isHolidayCalendarsFetching ||
-        isCompanyHolidayCalendarsLoading ||
-        isCompanyHolidayCalendarsFetching;
+    const { holidayCalendars, companyHolidayCalendars, isLoading: calendarsLoading, error: calendarsError, } = useCalendars();
     const scheduledEnd = useMemo(() => {
         const parsed = getEndTime();
         return { hour: parsed.hour(), minute: parsed.minute() };
@@ -77,14 +72,14 @@ export default function AttendanceDailyList() {
         }
     }, [error]);
     useEffect(() => {
-        if (holidayCalendarsError || companyHolidayCalendarsError) {
+        if (calendarsError) {
             dispatch(pushNotification({
                 tone: "error",
                 message: MESSAGE_CODE.E00001
             }));
-            console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+            console.error(calendarsError);
         }
-    }, [holidayCalendarsError, companyHolidayCalendarsError, dispatch]);
+    }, [calendarsError, dispatch]);
     const sortedAttendanceList = useMemo(() => {
         // create a copy before sort to avoid mutating the original attendanceDailyList
         return (attendanceDailyList || []).toSorted((a, b) => {

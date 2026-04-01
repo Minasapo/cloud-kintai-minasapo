@@ -31,7 +31,6 @@ export const useNetworkStatusNotification = () => {
       previousStatusRef.current = isOnline;
 
       if (!isOnline) {
-        dispatch(dismissNotification(NETWORK_ONLINE_NOTIFICATION_ID));
         dispatch(
           pushNotification({
             id: NETWORK_OFFLINE_NOTIFICATION_ID,

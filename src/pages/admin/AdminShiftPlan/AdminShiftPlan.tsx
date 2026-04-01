@@ -1,4 +1,4 @@
-import { useGetHolidayCalendarsQuery } from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -34,12 +34,11 @@ export default function AdminShiftPlan() {
     performSave,
   } = useShiftPlanData();
   const { registerCellRef, focusCell } = useDayCellFocus();
-  const { data: holidayCalendars = [], error: holidayCalendarsError } =
-    useGetHolidayCalendarsQuery();
+  const { holidayCalendars, error: calendarsError } = useCalendars();
 
   useEffect(() => {
-    if (holidayCalendarsError) {
-      console.error(holidayCalendarsError);
+    if (calendarsError) {
+      console.error(calendarsError);
       void notify("エラー", {
         body: MESSAGE_CODE.E00001,
         mode: "await-interaction",
@@ -47,7 +46,7 @@ export default function AdminShiftPlan() {
         tag: "holiday-calendar-error",
       });
     }
-  }, [holidayCalendarsError, notify]);
+  }, [calendarsError, notify]);
 
   const holidayNameMap = useMemo(() => {
     if (!holidayCalendars.length) return new Map<string, string>();

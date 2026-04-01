@@ -20,8 +20,10 @@ jest.mock("@entities/app-config/model/useAppConfig", () => () => ({
   getAbsentEnabled: () => true,
   loading: false,
 }));
-jest.mock("@/hooks/useAuthenticatedUser", () => () => ({
-  authenticatedUser: null,
+jest.mock("@/context/AuthContext", () => ({
+  AuthContext: {
+    _currentValue: { authStatus: "authenticated", cognitoUser: null },
+  },
 }));
 jest.mock("@entities/staff/model/useStaffs/useStaffs", () => ({
   useStaffs: () => ({ loading: false, error: null }),

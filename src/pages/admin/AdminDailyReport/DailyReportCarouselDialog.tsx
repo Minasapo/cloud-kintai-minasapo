@@ -1,4 +1,3 @@
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
@@ -10,7 +9,7 @@ import type {
   UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import {
@@ -27,14 +26,13 @@ import {
 import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
 
 import {
-  type AdminComment,
   type AdminDailyReport,
   mapDailyReport,
   REACTION_META,
   type ReactionType,
-  type ReportReaction,
   STATUS_META,
 } from "./data";
+import { useCurrentStaff } from "./useCurrentStaff";
 
 interface DailyReportCarouselDialogProps {
   open: boolean;
@@ -109,16 +107,7 @@ export default function DailyReportCarouselDialog({
   const [preloadedReports, setPreloadedReports] = useState<
     Map<string, PreloadedReport>
   >(new Map());
-  const [reactions, setReactions] = useState<ReportReaction[]>(
-    selectedReport.reactions ?? [],
-  );
-  const [comments, setComments] = useState<AdminComment[]>(
-    selectedReport.comments ?? [],
-  );
   const [commentInput, setCommentInput] = useState<string>("");
-  const [selectedReactions, setSelectedReactions] = useState<ReactionType[]>(
-    [],
-  );
   const [reactionEntries, setReactionEntries] = useState<
     DailyReportReaction[] | null
   >(null);
@@ -128,9 +117,20 @@ export default function DailyReportCarouselDialog({
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSavingReaction, setIsSavingReaction] = useState(false);
   const [isSavingComment, setIsSavingComment] = useState(false);
-  const [currentStaffId, setCurrentStaffId] = useState<string | null>(null);
-  const [currentStaffName, setCurrentStaffName] = useState<string>("管理者");
-  const [isResolvingCurrentStaff, setIsResolvingCurrentStaff] = useState(true);
+  const {
+    currentStaffId,
+    currentStaffName,
+    isResolving: isResolvingCurrentStaff,
+  } = useCurrentStaff(cognitoUser);
+
+  const reactions = useMemo(() => report?.reactions ?? [], [report]);
+  const comments = useMemo(() => report?.comments ?? [], [report]);
+  const selectedReactions = useMemo(() => {
+    if (!reactionEntries || !currentStaffId) return [];
+    return reactionEntries
+      .filter((entry) => entry.staffId === currentStaffId)
+      .map((entry) => entry.type as ReactionType);
+  }, [currentStaffId, reactionEntries]);
 
   const buildStaffName = useCallback(
     (staffId: string) => {
@@ -268,60 +268,8 @@ export default function DailyReportCarouselDialog({
   }, [open, filteredReports, buildStaffName, currentReport, preloadedReports]);
 
   useEffect(() => {
-    if (cognitoUser === undefined) return;
-    if (!cognitoUser) {
-      setCurrentStaffId(null);
-      setCurrentStaffName("管理者");
-      setIsResolvingCurrentStaff(false);
-      return;
-    }
-    let mounted = true;
-    setIsResolvingCurrentStaff(true);
-    const resolveStaff = async () => {
-      try {
-        const staff = await fetchStaff(cognitoUser.id);
-        if (!mounted) return;
-        if (staff) {
-          const name = [staff.familyName, staff.givenName]
-            .filter((part): part is string => Boolean(part && part.trim()))
-            .join(" ");
-          setCurrentStaffId(staff.id);
-          setCurrentStaffName(name || "管理者");
-        } else {
-          setCurrentStaffId(null);
-          setCurrentStaffName("管理者");
-        }
-      } catch {
-        if (!mounted) return;
-        setCurrentStaffId(null);
-        setCurrentStaffName("管理者");
-      } finally {
-        if (mounted) setIsResolvingCurrentStaff(false);
-      }
-    };
-    void resolveStaff();
-    return () => {
-      mounted = false;
-    };
-  }, [cognitoUser]);
-
-  useEffect(() => {
-    setReactions(report?.reactions ?? []);
-    setComments(report?.comments ?? []);
     setCommentInput("");
   }, [report]);
-
-  useEffect(() => {
-    if (!reactionEntries || !currentStaffId) {
-      setSelectedReactions([]);
-      return;
-    }
-    setSelectedReactions(
-      reactionEntries
-        .filter((entry) => entry.staffId === currentStaffId)
-        .map((entry) => entry.type as ReactionType),
-    );
-  }, [currentStaffId, reactionEntries]);
 
   const handlePrevious = () => {
     if (currentIndex > 0) setCurrentIndex(currentIndex - 1);

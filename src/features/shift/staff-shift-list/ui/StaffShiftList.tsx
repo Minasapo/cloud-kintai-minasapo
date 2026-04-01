@@ -1,7 +1,4 @@
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import {
@@ -55,26 +52,15 @@ export default function StaffShiftList() {
   );
 
   const {
-    data: holidayCalendars = [],
-    isLoading: isHolidayCalendarsLoading,
-    isFetching: isHolidayCalendarsFetching,
-    error: holidayCalendarsError,
-  } = useGetHolidayCalendarsQuery();
-  const {
-    data: companyHolidayCalendars = [],
-    isLoading: isCompanyHolidayCalendarsLoading,
-    isFetching: isCompanyHolidayCalendarsFetching,
-    error: companyHolidayCalendarsError,
-  } = useGetCompanyHolidayCalendarsQuery();
-  const calendarLoading =
-    isHolidayCalendarsLoading ||
-    isHolidayCalendarsFetching ||
-    isCompanyHolidayCalendarsLoading ||
-    isCompanyHolidayCalendarsFetching;
+    holidayCalendars,
+    companyHolidayCalendars,
+    isLoading: calendarLoading,
+    error: calendarsError,
+  } = useCalendars();
 
   useEffect(() => {
-    if (holidayCalendarsError || companyHolidayCalendarsError) {
-      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
+    if (calendarsError) {
+      console.error(calendarsError);
       void notify("エラー", {
         body: MESSAGE_CODE.E00001,
         mode: "await-interaction",
@@ -82,7 +68,7 @@ export default function StaffShiftList() {
         tag: "holiday-calendar-error",
       });
     }
-  }, [holidayCalendarsError, companyHolidayCalendarsError, notify]);
+  }, [calendarsError, notify]);
 
   const publicHolidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),
