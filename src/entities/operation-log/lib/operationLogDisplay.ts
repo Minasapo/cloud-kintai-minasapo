@@ -76,7 +76,7 @@ export const getOperationLogResourceDisplay = (
   const resourceId = formatOperationLogInlineValue(log.resourceId);
   const fallback = [resource, resourceId].filter(Boolean).join(" ");
 
-  return fallback || "(no resource)";
+  return fallback || "(リソースなし)";
 };
 
 export const getOperationLogDisplaySummary = (

@@ -1,4 +1,5 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
   Box,
   Chip,
@@ -12,7 +13,11 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { ModelOperationLogFilterInput, Staff } from "@shared/api/graphql/types";
+import {
+  ModelOperationLogFilterInput,
+  OperationLog,
+  Staff,
+} from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -22,8 +27,9 @@ import {
   getOperationLogResourceDisplay,
 } from "@/entities/operation-log/lib/operationLogDisplay";
 import { getOperationLogLabel } from "@/entities/operation-log/lib/operationLogLabels";
-import { OperationLogJsonDetails } from "@/entities/operation-log/ui/OperationLogJsonDetails";
+import { OperationLogDetailDialog } from "@/entities/operation-log/ui/OperationLogDetailDialog";
 import useAdminOperationLogs from "@/hooks/useAdminOperationLogs/useAdminOperationLogs";
+import { AppIconButton } from "@/shared/ui/button";
 import { PageContent } from "@/shared/ui/layout";
 
 const isNonEmptyString = (value: unknown): value is string =>
@@ -94,6 +100,7 @@ export default function AdminLogsClean() {
   }, [loadInitial]);
 
   const [staffMap, setStaffMap] = useState<Record<string, Staff | null>>({});
+  const [selectedLog, setSelectedLog] = useState<OperationLog | null>(null);
 
   useEffect(() => {
     const ids = Array.from(
@@ -268,21 +275,17 @@ export default function AdminLogsClean() {
                     resourceId: log.resourceId as unknown,
                     resourceKey: log.resourceKey as unknown,
                   });
-                  const userAgentText = isNonEmptyString(log.userAgent)
-                    ? log.userAgent
-                    : null;
-
                   return (
                     <ListItem
                       key={log.id}
                       divider
-                      alignItems="flex-start"
+                      alignItems="center"
                       sx={{
-                        py: 1.5,
+                        py: 1,
                         px: { xs: 0, sm: 1 },
                         display: "flex",
                         flexDirection: { xs: "column", sm: "row" },
-                        gap: { xs: 1, sm: 0 },
+                        gap: { xs: 0.5, sm: 0 },
                       }}
                     >
                       {/* 日時 + アクション */}
@@ -290,8 +293,8 @@ export default function AdminLogsClean() {
                         sx={{
                           display: "flex",
                           alignItems: { xs: "flex-start", sm: "center" },
-                          width: { xs: "100%", sm: 320 },
-                          minWidth: { xs: 0, sm: 320 },
+                          width: { xs: "100%", sm: 300 },
+                          minWidth: { xs: 0, sm: 300 },
                           flexDirection: { xs: "column", sm: "row" },
                           gap: { xs: 0.5, sm: 0 },
                         }}
@@ -300,13 +303,6 @@ export default function AdminLogsClean() {
                           variant="caption"
                           color="text.secondary"
                           noWrap={!isMobile}
-                          title={
-                            log.timestamp
-                              ? dayjs(log.timestamp).format(
-                                  "YYYY-MM-DD HH:mm:ss",
-                                )
-                              : undefined
-                          }
                           sx={{ display: "block" }}
                         >
                           {log.timestamp
@@ -320,84 +316,66 @@ export default function AdminLogsClean() {
                         />
                       </Box>
 
-                      {/* スタッフ名を独立列として表示 */}
+                      {/* Actor / Target */}
                       <Box
                         sx={{
-                          width: { xs: "100%", sm: 240 },
-                          minWidth: { xs: 0, sm: 240 },
-                          ml: { xs: 0, sm: 2 },
-                        }}
-                      >
-                        <Typography variant="body2" color="text.secondary">
-                          {actorLabel}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {targetLabel}
-                        </Typography>
-                      </Box>
-
-                      {/* リソース情報 */}
-                      <Box
-                        sx={{
-                          flex: 1,
-                          ml: { xs: 0, sm: 2 },
-                          width: { xs: "100%", sm: "auto" },
-                        }}
-                      >
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ wordBreak: "break-word" }}
-                        >
-                          {resourceLabel}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {getOperationLogDisplaySummary(log)}
-                        </Typography>
-                      </Box>
-
-                      {/* 詳細 */}
-                      <Box
-                        sx={{
-                          width: { xs: "100%", sm: "40%" },
-                          minWidth: { xs: 0, sm: 240 },
+                          width: { xs: "100%", sm: 200 },
+                          minWidth: { xs: 0, sm: 200 },
                           ml: { xs: 0, sm: 2 },
                         }}
                       >
                         <Typography
                           variant="body2"
-                          sx={{
-                            whiteSpace: "pre-wrap",
-                            wordBreak: "break-word",
-                          }}
+                          color="text.secondary"
+                          noWrap
+                        >
+                          {actorLabel}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          {targetLabel}
+                        </Typography>
+                      </Box>
+
+                      {/* リソース + サマリー1行 */}
+                      <Box
+                        sx={{
+                          flex: 1,
+                          ml: { xs: 0, sm: 2 },
+                          width: { xs: "100%", sm: "auto" },
+                          minWidth: 0,
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ maxWidth: "100%" }}
+                        >
+                          {resourceLabel}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                          sx={{ maxWidth: "100%" }}
                         >
                           {getOperationLogDisplaySummary(log)}
                         </Typography>
+                      </Box>
 
-                        {userAgentText && (
-                          <Tooltip title={userAgentText} placement="top-start">
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontFamily: "monospace",
-                                mt: 1,
-                                display: "block",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: { xs: "normal", sm: "nowrap" },
-                                wordBreak: "break-word",
-                              }}
-                            >
-                              {userAgentText.length > 140
-                                ? `${userAgentText.slice(0, 137)}...`
-                                : userAgentText}
-                            </Typography>
-                          </Tooltip>
-                        )}
-
-                        <OperationLogJsonDetails
-                          log={log}
-                          className="mt-3 flex flex-col gap-2"
-                        />
+                      {/* 詳細ボタン */}
+                      <Box sx={{ ml: { xs: 0, sm: 1 }, flexShrink: 0 }}>
+                        <Tooltip title="詳細を表示">
+                          <AppIconButton
+                            aria-label="詳細を表示"
+                            onClick={() => setSelectedLog(log)}
+                          >
+                            <InfoOutlinedIcon fontSize="small" />
+                          </AppIconButton>
+                        </Tooltip>
                       </Box>
                     </ListItem>
                   );
@@ -421,6 +399,13 @@ export default function AdminLogsClean() {
               </Typography>
             )}
           </Box>
+
+          <OperationLogDetailDialog
+            log={selectedLog}
+            open={selectedLog !== null}
+            onClose={() => setSelectedLog(null)}
+            staffMap={staffMap}
+          />
         </Stack>
       </Stack>
     </PageContent>

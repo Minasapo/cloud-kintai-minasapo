@@ -1,9 +1,7 @@
 import { OperationLog } from "@shared/api/graphql/types";
 import { useMemo } from "react";
 
-import {
-  parseOperationLogJson,
-} from "@/entities/operation-log/model/canonicalOperationLog";
+import { parseOperationLogJson } from "@/entities/operation-log/model/canonicalOperationLog";
 
 type JsonSection = {
   label: string;
@@ -27,11 +25,11 @@ export function OperationLogJsonDetails({
 }) {
   const sections = useMemo<JsonSection[]>(() => {
     const candidates: JsonSection[] = [
-      { label: "Diff", value: parseOperationLogJson(log.diff) },
-      { label: "Before", value: parseOperationLogJson(log.before) },
-      { label: "After", value: parseOperationLogJson(log.after) },
-      { label: "Details", value: parseOperationLogJson(log.details) },
-      { label: "Metadata", value: parseOperationLogJson(log.metadata) },
+      { label: "差分", value: parseOperationLogJson(log.diff) },
+      { label: "変更前", value: parseOperationLogJson(log.before) },
+      { label: "変更後", value: parseOperationLogJson(log.after) },
+      { label: "詳細", value: parseOperationLogJson(log.details) },
+      { label: "メタデータ", value: parseOperationLogJson(log.metadata) },
     ];
 
     return candidates.filter((section) => section.value !== null);
