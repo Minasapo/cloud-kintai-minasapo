@@ -9,48 +9,34 @@ import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";
 import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
-export async function returnDirectlyCallback(
-  cognitoUser: CognitoUser | null | undefined,
-  staff: Staff | null | undefined,
-  dispatch: Dispatch,
-  clockOut: (
-    staffId: string,
-    workDate: string,
-    endTime: string,
-    returnDirectlyFlag?: ReturnDirectlyFlag
-  ) => Promise<Attendance>,
-  logger: Logger,
-  // optional explicit ISO timestamp to use for work end (allows AppConfig-driven times)
-  endTimeIso?: string,
-  occurredAt = getNowISOStringWithZeroSeconds()
-): Promise<void> {
-  if (!cognitoUser) {
-    return;
-  }
-
-  const workDate = resolveBusinessWorkDate(occurredAt);
-  const workEndTime =
-    endTimeIso ?? new AttendanceDateTime().setWorkEnd().toISOString();
-  try {
-    const attendance = await clockOut(
-      cognitoUser.id,
-      workDate,
-      workEndTime,
-      ReturnDirectlyFlag.YES
-    );
-    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01004));
-    try {
-      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
-    } catch (mailErr) {
-      logger.error("Failed to send return directly mail", mailErr);
+export async function returnDirectlyCallback(cognitoUser: CognitoUser | null | undefined, staff: Staff | null | undefined, dispatch: Dispatch, clockOut: (staffId: string, workDate: string, endTime: string, returnDirectlyFlag?: ReturnDirectlyFlag) => Promise<Attendance>, logger: Logger, 
+// optional explicit ISO timestamp to use for work end (allows AppConfig-driven times)
+endTimeIso?: string, occurredAt = getNowISOStringWithZeroSeconds()): Promise<void> {
+    if (!cognitoUser) {
+        return;
     }
-  } catch (error) {
-    logger.debug(error);
-    dispatch(setSnackbarError(MESSAGE_CODE.E01006));
-  }
+    const workDate = resolveBusinessWorkDate(occurredAt);
+    const workEndTime = endTimeIso ?? new AttendanceDateTime().setWorkEnd().toISOString();
+    try {
+        const attendance = await clockOut(cognitoUser.id, workDate, workEndTime, ReturnDirectlyFlag.YES);
+        dispatch(pushNotification({
+            tone: "success",
+            message: MESSAGE_CODE.S01004
+        }));
+        try {
+            await new TimeRecordMailSender(cognitoUser, attendance, staff).clockOut();
+        }
+        catch (mailErr) {
+            logger.error("Failed to send return directly mail", mailErr);
+        }
+    }
+    catch (error) {
+        logger.debug(error);
+        dispatch(pushNotification({
+            tone: "error",
+            message: MESSAGE_CODE.E01006
+        }));
+    }
 }

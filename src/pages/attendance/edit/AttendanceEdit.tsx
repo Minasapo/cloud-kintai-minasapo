@@ -35,6 +35,7 @@ import {
 import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEditor";
 import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { createLogger } from "@/shared/lib/logger";
 import { PageContent } from "@/shared/ui/layout";
 
@@ -172,6 +173,10 @@ export default function AttendanceEdit() {
   });
 
   const hourlyPaidHolidayEnabled = getHourlyPaidHolidayEnabled();
+  const { dialog, runWithoutGuard } = usePageLeaveGuard({
+    isDirty,
+    isBusy: isSubmitting,
+  });
 
   const onSubmit = async (data: AttendanceEditInputs) => {
     const changeRequestPayload = buildChangeRequestPayload(data);
@@ -211,7 +216,7 @@ export default function AttendanceEdit() {
             tag: "attendance-change-request",
           });
 
-          navigate(attendanceListPath);
+          runWithoutGuard(() => navigate(attendanceListPath));
         })
         .catch(() => {
           void notify("修正申請エラー", {
@@ -256,7 +261,7 @@ export default function AttendanceEdit() {
               tag: "mail-error",
             });
           }
-          navigate(attendanceListPath);
+          runWithoutGuard(() => navigate(attendanceListPath));
         })
         .catch((e) => {
           logger.error("Failed to update attendance:", e);
@@ -375,6 +380,7 @@ export default function AttendanceEdit() {
         data-testid="attendance-edit-root"
         className="attendance-edit-root"
       >
+        {dialog}
         <AttendanceEditErrorAlert messages={errorMessages} />
         <div className="block md:hidden" data-testid="attendance-mobile-editor">
           <MobileEditor />

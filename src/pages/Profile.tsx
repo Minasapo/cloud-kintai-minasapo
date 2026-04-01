@@ -21,6 +21,7 @@ import {
 } from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import {
   buildVersionOrUpdatedAtCondition,
   getNextVersion,
@@ -238,6 +239,7 @@ export default function Profile() {
     control,
     setValue,
     handleSubmit,
+    reset,
     formState: { isValid, isDirty, isSubmitting },
   } = useForm<StaffProfileFormInputs>({
     mode: "onChange",
@@ -251,7 +253,11 @@ export default function Profile() {
   const {
     control: passwordControl,
     handleSubmit: handlePasswordSubmit,
-    formState: { isValid: isPasswordValid, isSubmitting: isPasswordSubmitting },
+    formState: {
+      isValid: isPasswordValid,
+      isSubmitting: isPasswordSubmitting,
+      isDirty: isPasswordDirty,
+    },
     reset: resetPasswordForm,
     getValues: getPasswordValues,
   } = useForm<PasswordChangeInputs>({
@@ -274,6 +280,10 @@ export default function Profile() {
 
   const canAddMoreLinks =
     externalLinkFields.length < STAFF_EXTERNAL_LINKS_LIMIT;
+  const { dialog } = usePageLeaveGuard({
+    isDirty: isDirty || isPasswordDirty,
+    isBusy: isSubmitting || isPasswordSubmitting,
+  });
 
   const handleAddLink = () => {
     if (!canAddMoreLinks) return;
@@ -352,6 +362,7 @@ export default function Profile() {
       condition: buildVersionOrUpdatedAtCondition(staff.version, staff.updatedAt),
     })
       .then(() => void notify(MESSAGE_CODE.S05003, { mode: "auto-close" }))
+      .then(() => reset(data))
       .catch(
         () =>
           void notify("エラー", {
@@ -416,6 +427,7 @@ export default function Profile() {
 
   return (
     <div className="mx-auto w-full max-w-[1280px] overflow-x-hidden px-4 py-3 sm:px-8 sm:py-6 lg:px-12">
+      {dialog}
       <div className="min-w-0 space-y-3 sm:space-y-5">
         <section
           className="w-full overflow-hidden rounded-[1.5rem] border border-emerald-100/80 bg-[linear-gradient(135deg,#f7fcf8_0%,#ecfdf5_55%,#ffffff_100%)] shadow-[0_28px_60px_-40px_rgba(15,23,42,0.35)] sm:rounded-[2rem]"

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { designTokenVar } from "@/shared/designSystem";
 
 import { ShiftPlanFooter, ShiftPlanHeader, ShiftPlanTable } from "./components";
@@ -90,6 +91,10 @@ export default function AdminShiftPlan() {
     performSave,
   });
   const isBusy = isPending || isFetchingYear || isSaving || isAutoSaving;
+  const { dialog } = usePageLeaveGuard({
+    isDirty,
+    isBusy: isSaving || isAutoSaving,
+  });
 
   return (
     <section
@@ -102,6 +107,7 @@ export default function AdminShiftPlan() {
         gap: PAGE_SECTION_GAP,
       } as React.CSSProperties}
     >
+      {dialog}
       <div className="px-[var(--page-px-xs)] md:px-[var(--page-px-md)] flex flex-col gap-[inherit]">
         <ShiftPlanHeader
           selectedYear={selectedYear}

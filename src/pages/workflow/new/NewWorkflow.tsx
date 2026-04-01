@@ -13,7 +13,7 @@ import {
   WorkflowCategory,
 } from "@shared/api/graphql/types";
 import Page from "@shared/ui/page/Page";
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
@@ -32,6 +32,7 @@ import {
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { createLogger } from "@/shared/lib/logger";
 import { parseTimeToISO } from "@/shared/lib/time";
 import {
@@ -218,7 +219,13 @@ export default function NewWorkflow() {
     setCustomWorkflowContent,
     selectedTemplateId,
     setSelectedTemplateId,
+    isDirty,
   } = useNewWorkflowForm();
+  const [isSaving, setIsSaving] = useState(false);
+  const { dialog, runWithoutGuard } = usePageLeaveGuard({
+    isDirty,
+    isBusy: isSaving,
+  });
 
   const enabledCategoryOptions = useMemo(
     () =>
@@ -284,6 +291,7 @@ export default function NewWorkflow() {
     }
 
     try {
+      setIsSaving(true);
       const createdWorkflow = await createWorkflow(input);
 
       if (!draftMode) {
@@ -308,7 +316,7 @@ export default function NewWorkflow() {
       }
 
       void notify("ワークフローを作成しました。", { mode: "auto-close" });
-      navigate("/workflow", { replace: true });
+      runWithoutGuard(() => navigate("/workflow", { replace: true }));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow creation failed:", message);
@@ -317,6 +325,8 @@ export default function NewWorkflow() {
         mode: "await-interaction",
         priority: "high",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -411,6 +421,7 @@ export default function NewWorkflow() {
 
   return (
     <Page title="新規作成" width="full" showDefaultHeader={false}>
+      {dialog}
       <PageContent width="form">
         <PageSection
           component="form"

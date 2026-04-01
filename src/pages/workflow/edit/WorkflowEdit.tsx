@@ -19,6 +19,7 @@ import { extractExistingWorkflowComments } from "@/features/workflow/comment-thr
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
 import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 import { createLogger } from "@/shared/lib/logger";
 import {
@@ -72,6 +73,7 @@ export default function WorkflowEdit() {
     applicant,
     existingComments,
     setExistingComments,
+    isDirty,
   } = useWorkflowEditLoaderState(workflow, staffs);
   const [dateError, setDateError] = useState("");
   const [absenceDateError, setAbsenceDateError] = useState("");
@@ -80,6 +82,11 @@ export default function WorkflowEdit() {
   const [customWorkflowTitleError, setCustomWorkflowTitleError] = useState("");
   const [customWorkflowContentError, setCustomWorkflowContentError] =
     useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const { dialog, runWithoutGuard } = usePageLeaveGuard({
+    isDirty,
+    isBusy: isSaving,
+  });
 
   const handleSave = (e: FormEvent) => {
     e.preventDefault();
@@ -113,6 +120,7 @@ export default function WorkflowEdit() {
 
     (async () => {
       try {
+        setIsSaving(true);
         if (!id) throw new Error("IDが不明です");
         let normalizedComments = existingComments;
         if (!draftMode) {
@@ -156,7 +164,9 @@ export default function WorkflowEdit() {
         }
 
         void notify("保存しました", { mode: "auto-close" });
-        setTimeout(() => navigate(`/workflow/${id}`), 1000);
+        setTimeout(() => {
+          runWithoutGuard(() => navigate(`/workflow/${id}`));
+        }, 1000);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         logger.error("Workflow update failed:", message);
@@ -165,6 +175,8 @@ export default function WorkflowEdit() {
           mode: "await-interaction",
           priority: "high",
         });
+      } finally {
+        setIsSaving(false);
       }
     })();
   };
@@ -191,6 +203,7 @@ export default function WorkflowEdit() {
       width="full"
       showDefaultHeader={false}
     >
+      {dialog}
       <PageContent width="form">
         <PageSection
           component="form"

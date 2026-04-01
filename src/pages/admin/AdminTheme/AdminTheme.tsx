@@ -10,6 +10,7 @@ import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout"
 import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
 import { SettingsButton, SettingsTextField } from "@/features/admin/layout/ui/SettingsPrimitives";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { resolveThemeColor } from "@/shared/config/theme";
 
 const basePalette = [
@@ -113,6 +114,10 @@ export default function AdminTheme() {
   const isDirty =
     normalizedColorCode !== "" &&
     normalizedColorCode !== normalizedCurrentColor;
+  const { dialog } = usePageLeaveGuard({
+    isDirty,
+    isBusy: saving,
+  });
   const previewTokens = useMemo(
     () => (isValidHex ? getThemeTokens(normalizedColorCode) : themeTokens),
     [isValidHex, normalizedColorCode, themeTokens, getThemeTokens],
@@ -188,6 +193,7 @@ export default function AdminTheme() {
 
   return (
     <AdminSettingsLayout description="テーマを選択すると、ヘッダーとフッターの配色が変更されます。">
+      {dialog}
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-4">

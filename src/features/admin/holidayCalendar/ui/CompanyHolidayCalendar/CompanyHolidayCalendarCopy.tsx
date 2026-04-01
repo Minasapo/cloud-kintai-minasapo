@@ -1,157 +1,93 @@
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Stack,
-  TextField,
-} from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Stack, TextField, } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
-import {
-  CompanyHolidayCalendar,
-  CreateCompanyHolidayCalendarInput,
-} from "@shared/api/graphql/types";
+import { CompanyHolidayCalendar, CreateCompanyHolidayCalendarInput, } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
+import { useDialogCloseGuard } from "@/hooks/useDialogCloseGuard";
 import { CompanyHolidayCalendarMessage } from "@/shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 type Inputs = {
-  holidayDate: string;
-  name: string;
+    holidayDate: string;
+    name: string;
 };
-
 const defaultValues: Inputs = {
-  holidayDate: "",
-  name: "",
+    holidayDate: "",
+    name: "",
 };
-
-export default function CompanyHolidayCalendarCopy({
-  companyHolidayCalendar,
-  createCompanyHolidayCalendar,
-}: {
-  companyHolidayCalendar: CompanyHolidayCalendar;
-  createCompanyHolidayCalendar: (
-    input: CreateCompanyHolidayCalendarInput
-  ) => Promise<void | CompanyHolidayCalendar>;
+export default function CompanyHolidayCalendarCopy({ companyHolidayCalendar, createCompanyHolidayCalendar, }: {
+    companyHolidayCalendar: CompanyHolidayCalendar;
+    createCompanyHolidayCalendar: (input: CreateCompanyHolidayCalendarInput) => Promise<void | CompanyHolidayCalendar>;
 }) {
-  const dispatch = useAppDispatchV2();
-  const [open, setOpen] = useState(false);
-
-  const {
-    register,
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { isValid, isDirty, isSubmitting },
-  } = useForm<Inputs>({
-    mode: "onChange",
-    defaultValues,
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    setValue("holidayDate", companyHolidayCalendar.holidayDate ?? "");
-    setValue("name", companyHolidayCalendar.name ?? "");
-  }, [open, companyHolidayCalendar, setValue]);
-
-  const handleClose = () => {
-    reset(defaultValues);
-    setOpen(false);
-  };
-
-  const onSubmit = async (data: Inputs) => {
-    const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
-    await createCompanyHolidayCalendar(data)
-      .then(() => {
-        dispatch(
-          setSnackbarSuccess(
-            companyHolidayCalendarMessage.create(MessageStatus.SUCCESS)
-          )
-        );
-        reset(defaultValues);
-        setOpen(false);
-      })
-      .catch(() =>
-        dispatch(
-          setSnackbarError(
-            companyHolidayCalendarMessage.create(MessageStatus.ERROR)
-          )
-        )
-      );
-  };
-
-  return (
-    <>
+    const dispatch = useAppDispatchV2();
+    const [open, setOpen] = useState(false);
+    const { register, control, handleSubmit, reset, setValue, formState: { isValid, isDirty, isSubmitting }, } = useForm<Inputs>({
+        mode: "onChange",
+        defaultValues,
+    });
+    const { dialog, requestClose, closeWithoutGuard } = useDialogCloseGuard({
+        isDirty,
+        isBusy: isSubmitting,
+        onClose: () => {
+            reset(defaultValues);
+            setOpen(false);
+        },
+    });
+    useEffect(() => {
+        if (!open)
+            return;
+        setValue("holidayDate", companyHolidayCalendar.holidayDate ?? "");
+        setValue("name", companyHolidayCalendar.name ?? "");
+    }, [open, companyHolidayCalendar, setValue]);
+    const onSubmit = async (data: Inputs) => {
+        const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
+        await createCompanyHolidayCalendar(data)
+            .then(() => {
+            dispatch(pushNotification({
+                tone: "success",
+                message: companyHolidayCalendarMessage.create(MessageStatus.SUCCESS)
+            }));
+            closeWithoutGuard();
+        })
+            .catch(() => dispatch(pushNotification({
+            tone: "error",
+            message: companyHolidayCalendarMessage.create(MessageStatus.ERROR)
+        })));
+    };
+    return (<>
       <IconButton onClick={() => setOpen(true)}>
-        <ContentCopyIcon fontSize="small" />
+        <ContentCopyIcon fontSize="small"/>
       </IconButton>
-      <Dialog
-        open={open}
-        onClose={() => {
-          handleClose();
-        }}
-      >
+      {dialog}
+      <Dialog open={open} onClose={requestClose}>
         <DialogTitle>会社休日をコピーして新規作成</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <DialogContentText>
               コピー元の内容を編集してから登録してください。
             </DialogContentText>
-            <Controller
-              name="holidayDate"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <DatePicker
-                  label="日付"
-                  format={AttendanceDate.DisplayFormat}
-                  value={field.value ? dayjs(field.value) : null}
-                  onChange={(date) => field.onChange(date?.toISOString() ?? "")}
-                  slotProps={{
-                    textField: {
-                      required: true,
-                    },
-                  }}
-                />
-              )}
-            />
-            <TextField
-              label="休日名"
-              required
-              {...register("name", { required: true })}
-            />
+            <Controller name="holidayDate" control={control} rules={{ required: true }} render={({ field }) => (<DatePicker label="日付" format={AttendanceDate.DisplayFormat} value={field.value ? dayjs(field.value) : null} onChange={(date) => field.onChange(date?.toISOString() ?? "")} slotProps={{
+                textField: {
+                    required: true,
+                },
+            }}/>)}/>
+            <TextField label="休日名" required {...register("name", { required: true })}/>
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => {
-              handleClose();
-            }}
-          >
+          <Button onClick={requestClose}>
             キャンセル
           </Button>
-          <Button
-            disabled={!isValid || !isDirty || isSubmitting}
-            onClick={handleSubmit(onSubmit)}
-          >
+          <Button disabled={!isValid || !isDirty || isSubmitting} onClick={handleSubmit(onSubmit)}>
             登録
           </Button>
         </DialogActions>
       </Dialog>
-    </>
-  );
+    </>);
 }

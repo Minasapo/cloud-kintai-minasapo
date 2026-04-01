@@ -5,6 +5,7 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import { useDuplicateAttendanceWarning } from "@/hooks/useDuplicateAttendanceWarning";
 import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useNetworkStatusNotification } from "@/hooks/useNetworkStatusNotification";
 import { useWorkflowCommentNotification } from "@/hooks/useWorkflowCommentNotification";
 import { useWorkflowNotification } from "@/hooks/useWorkflowNotification";
 import { createLogger } from "@/shared/lib/logger";
@@ -17,6 +18,7 @@ function AppRuntimeEffects() {
   const { requestPermission, permission, isSupported } = useLocalNotification();
 
   useDuplicateAttendanceWarning();
+  useNetworkStatusNotification();
 
   useEffect(() => {
     if (

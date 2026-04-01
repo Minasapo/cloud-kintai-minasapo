@@ -3,7 +3,6 @@
  * @description 出勤打刻時のコールバック処理を提供するユーティリティ。
  * Reduxのdispatchやユーザー情報、スタッフ情報を受け取り、打刻処理・メール送信・スナックバー表示を行う。
  */
-
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance, Staff } from "@shared/api/graphql/types";
 
@@ -13,11 +12,7 @@ import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";
 import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
-
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 /**
  * 出勤打刻時のコールバック関数。
  *
@@ -28,44 +23,37 @@ import {
  * @param logger - デバッグ用ロガー
  * @param occurredAt - 打刻発生時刻（ISO）
  */
-export async function clockInCallback(
-  cognitoUser: CognitoUser | null | undefined,
-  clockIn: (
-    staffId: string,
-    workDate: string,
-    startTime: string
-  ) => Promise<Attendance>,
-  dispatch: Dispatch,
-  staff: Staff | null | undefined,
-  logger: Logger,
-  occurredAt = getNowISOStringWithZeroSeconds()
-): Promise<void> {
-  if (!cognitoUser) {
-    logger.debug("Skipped clockInCallback because cognitoUser is missing");
-    return;
-  }
-
-  if (!staff) {
-    logger.debug("Skipped clockInCallback because staff is missing");
-    return;
-  }
-
-  const workDate = resolveBusinessWorkDate(occurredAt);
-  const startTimeIso = occurredAt;
-  const t0 = Date.now();
-
-  try {
-    const attendance = await clockIn(cognitoUser.id, workDate, startTimeIso);
-    void t0;
-
-    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01001));
-    try {
-      await new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();
-    } catch (mailErr) {
-      logger.error("Failed to send clock in mail", mailErr);
+export async function clockInCallback(cognitoUser: CognitoUser | null | undefined, clockIn: (staffId: string, workDate: string, startTime: string) => Promise<Attendance>, dispatch: Dispatch, staff: Staff | null | undefined, logger: Logger, occurredAt = getNowISOStringWithZeroSeconds()): Promise<void> {
+    if (!cognitoUser) {
+        logger.debug("Skipped clockInCallback because cognitoUser is missing");
+        return;
     }
-  } catch (error) {
-    logger.error("Failed to clock in", error);
-    dispatch(setSnackbarError(MESSAGE_CODE.E01001));
-  }
+    if (!staff) {
+        logger.debug("Skipped clockInCallback because staff is missing");
+        return;
+    }
+    const workDate = resolveBusinessWorkDate(occurredAt);
+    const startTimeIso = occurredAt;
+    const t0 = Date.now();
+    try {
+        const attendance = await clockIn(cognitoUser.id, workDate, startTimeIso);
+        void t0;
+        dispatch(pushNotification({
+            tone: "success",
+            message: MESSAGE_CODE.S01001
+        }));
+        try {
+            await new TimeRecordMailSender(cognitoUser, attendance, staff).clockIn();
+        }
+        catch (mailErr) {
+            logger.error("Failed to send clock in mail", mailErr);
+        }
+    }
+    catch (error) {
+        logger.error("Failed to clock in", error);
+        dispatch(pushNotification({
+            tone: "error",
+            message: MESSAGE_CODE.E01001
+        }));
+    }
 }

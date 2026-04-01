@@ -20,10 +20,8 @@ import {
   SettingsTextAreaField,
   SettingsTextField,
 } from "@/features/admin/layout/ui/SettingsPrimitives";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 import { formatDateSlash } from "@/shared/lib/time";
 
 const resetDisplayOrder = (
@@ -33,7 +31,6 @@ const resetDisplayOrder = (
     ...item,
     displayOrder: index,
   }));
-
 const moveItem = (
   items: WorkflowCategoryOrderItem[],
   from: number,
@@ -42,17 +39,14 @@ const moveItem = (
   if (to < 0 || to >= items.length) {
     return items;
   }
-
   const moved = items[from];
   if (!moved) {
     return items;
   }
-
   const withoutMoved = items.toSpliced(from, 1);
   const next = withoutMoved.toSpliced(to, 0, moved);
   return resetDisplayOrder(next);
 };
-
 export default function AdminWorkflowCategorySettings() {
   const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
   const dispatch = useAppDispatchV2();
@@ -71,7 +65,6 @@ export default function AdminWorkflowCategorySettings() {
     isAuthenticated,
     organizationId: WORKFLOW_TEMPLATE_ORGANIZATION_ID,
   });
-
   const [configId, setConfigId] = useState<string | null>(null);
   const [items, setItems] = useState<WorkflowCategoryOrderItem[]>([]);
   const [saving, setSaving] = useState(false);
@@ -82,12 +75,13 @@ export default function AdminWorkflowCategorySettings() {
     null,
   );
   const [templateSaving, setTemplateSaving] = useState(false);
-
+  const [initialTemplateName, setInitialTemplateName] = useState("");
+  const [initialTemplateTitle, setInitialTemplateTitle] = useState("");
+  const [initialTemplateContent, setInitialTemplateContent] = useState("");
   useEffect(() => {
     setItems(getWorkflowCategoryOrder());
     setConfigId(getConfigId());
   }, [getConfigId, getWorkflowCategoryOrder]);
-
   const hasChanges = useMemo(() => {
     const current = JSON.stringify(resetDisplayOrder(items));
     const original = JSON.stringify(
@@ -95,7 +89,14 @@ export default function AdminWorkflowCategorySettings() {
     );
     return current !== original;
   }, [getWorkflowCategoryOrder, items]);
-
+  const hasTemplateChanges =
+    templateName !== initialTemplateName ||
+    templateTitle !== initialTemplateTitle ||
+    templateContent !== initialTemplateContent;
+  const { dialog } = usePageLeaveGuard({
+    isDirty: hasChanges || hasTemplateChanges,
+    isBusy: saving || templateSaving,
+  });
   const handleToggleEnabled = (index: number) => {
     setItems((prev) =>
       prev.map((item, itemIndex) =>
@@ -103,16 +104,13 @@ export default function AdminWorkflowCategorySettings() {
       ),
     );
   };
-
   const handleReset = () => {
     setItems(getDefaultWorkflowCategoryOrder());
   };
-
   const handleSave = async () => {
     if (saving) {
       return;
     }
-
     setSaving(true);
     const workflowCategoryOrder = {
       categories: resetDisplayOrder(items).map((item) => ({
@@ -122,7 +120,6 @@ export default function AdminWorkflowCategorySettings() {
         enabled: item.enabled,
       })),
     };
-
     try {
       if (configId) {
         await saveConfig({
@@ -137,40 +134,50 @@ export default function AdminWorkflowCategorySettings() {
       }
       await fetchConfig();
       setConfigId(getConfigId());
-      dispatch(setSnackbarSuccess("ワークフロー種別設定を保存しました。"));
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: "ワークフロー種別設定を保存しました。",
+        }),
+      );
     } catch (error) {
       console.error(error);
-      dispatch(setSnackbarError("ワークフロー種別設定の保存に失敗しました。"));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: "ワークフロー種別設定の保存に失敗しました。",
+        }),
+      );
     } finally {
       setSaving(false);
     }
   };
-
   const resetTemplateForm = () => {
     setTemplateName("");
     setTemplateTitle("");
     setTemplateContent("");
     setEditingTemplateId(null);
+    setInitialTemplateName("");
+    setInitialTemplateTitle("");
+    setInitialTemplateContent("");
   };
-
   const handleTemplateSubmit = async () => {
     const normalizedName = templateName.trim();
     const normalizedTitle = templateTitle.trim();
     const normalizedContent = templateContent.trim();
-
     if (!normalizedName || !normalizedTitle || !normalizedContent) {
       dispatch(
-        setSnackbarError(
-          "テンプレート名・タイトルテンプレート・詳細内容テンプレートを入力してください。",
-        ),
+        pushNotification({
+          tone: "error",
+          message:
+            "テンプレート名・タイトルテンプレート・詳細内容テンプレートを入力してください。",
+        }),
       );
       return;
     }
-
     if (templateSaving) {
       return;
     }
-
     setTemplateSaving(true);
     try {
       if (editingTemplateId) {
@@ -180,24 +187,38 @@ export default function AdminWorkflowCategorySettings() {
           title: normalizedTitle,
           content: normalizedContent,
         });
-        dispatch(setSnackbarSuccess("テンプレートを更新しました。"));
+        dispatch(
+          pushNotification({
+            tone: "success",
+            message: "テンプレートを更新しました。",
+          }),
+        );
       } else {
         await createTemplate({
           name: normalizedName,
           title: normalizedTitle,
           content: normalizedContent,
         });
-        dispatch(setSnackbarSuccess("テンプレートを作成しました。"));
+        dispatch(
+          pushNotification({
+            tone: "success",
+            message: "テンプレートを作成しました。",
+          }),
+        );
       }
       resetTemplateForm();
     } catch (error) {
       console.error(error);
-      dispatch(setSnackbarError("テンプレートの保存に失敗しました。"));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: "テンプレートの保存に失敗しました。",
+        }),
+      );
     } finally {
       setTemplateSaving(false);
     }
   };
-
   const handleTemplateEdit = (templateId: string) => {
     const target = templates.find((template) => template.id === templateId);
     if (!target) {
@@ -207,40 +228,52 @@ export default function AdminWorkflowCategorySettings() {
     setTemplateName(target.name);
     setTemplateTitle(target.title);
     setTemplateContent(target.content);
+    setInitialTemplateName(target.name);
+    setInitialTemplateTitle(target.title);
+    setInitialTemplateContent(target.content);
   };
-
   const handleTemplateDelete = async (templateId: string) => {
     const target = templates.find((template) => template.id === templateId);
     if (!target) {
       return;
     }
-
     const confirmed = window.confirm(
       `テンプレート「${target.name}」を削除します。よろしいですか？`,
     );
     if (!confirmed) {
       return;
     }
-
     try {
       await removeTemplate(templateId);
       if (editingTemplateId === templateId) {
         resetTemplateForm();
       }
-      dispatch(setSnackbarSuccess("テンプレートを削除しました。"));
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: "テンプレートを削除しました。",
+        }),
+      );
     } catch (error) {
       console.error(error);
-      dispatch(setSnackbarError("テンプレートの削除に失敗しました。"));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: "テンプレートの削除に失敗しました。",
+        }),
+      );
     }
   };
-
   return (
     <AdminSettingsLayout>
+      {dialog}
       <div className="flex flex-col gap-10">
         {/* === ワークフロー種別 セクション === */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-semibold text-slate-800">ワークフロー種別</h2>
+            <h2 className="text-xl font-semibold text-slate-800">
+              ワークフロー種別
+            </h2>
             <p className="text-sm text-slate-500">
               表示順序の変更と有効/無効の切り替えを行えます。
             </p>
@@ -325,7 +358,9 @@ export default function AdminWorkflowCategorySettings() {
         {/* === ワークフローテンプレート セクション === */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-semibold text-slate-800">ワークフローテンプレート</h2>
+            <h2 className="text-xl font-semibold text-slate-800">
+              ワークフローテンプレート
+            </h2>
             <p className="text-sm text-slate-500">
               「その他」申請で利用するテンプレートを管理できます。新しいものが上に表示されます。
             </p>
@@ -384,8 +419,12 @@ export default function AdminWorkflowCategorySettings() {
 
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200 mb-8">
             <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">テンプレート一覧</h3>
-              {templateError ? <SettingsAlert variant="error">{templateError}</SettingsAlert> : null}
+              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
+                テンプレート一覧
+              </h3>
+              {templateError ? (
+                <SettingsAlert variant="error">{templateError}</SettingsAlert>
+              ) : null}
               {templateLoading ? (
                 <p className="text-sm text-slate-500 py-4 text-center">
                   読み込み中...
@@ -399,18 +438,32 @@ export default function AdminWorkflowCategorySettings() {
                   <table className="min-w-full border-separate border-spacing-0 text-sm">
                     <thead>
                       <tr className="text-left text-slate-500">
-                        <th className="border-b border-slate-200 px-4 py-3 font-medium">テンプレート名</th>
-                        <th className="border-b border-slate-200 px-4 py-3 font-medium">タイトルテンプレート</th>
-                        <th className="border-b border-slate-200 px-4 py-3 font-medium">作成日</th>
-                        <th className="border-b border-slate-200 px-4 py-3 text-right font-medium">操作</th>
+                        <th className="border-b border-slate-200 px-4 py-3 font-medium">
+                          テンプレート名
+                        </th>
+                        <th className="border-b border-slate-200 px-4 py-3 font-medium">
+                          タイトルテンプレート
+                        </th>
+                        <th className="border-b border-slate-200 px-4 py-3 font-medium">
+                          作成日
+                        </th>
+                        <th className="border-b border-slate-200 px-4 py-3 text-right font-medium">
+                          操作
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {templates.map((template) => (
                         <tr key={template.id} className="text-slate-700">
-                          <td className="border-b border-slate-100 px-4 py-3">{template.name}</td>
-                          <td className="border-b border-slate-100 px-4 py-3">{template.title}</td>
-                          <td className="border-b border-slate-100 px-4 py-3">{formatDateSlash(template.createdAt)}</td>
+                          <td className="border-b border-slate-100 px-4 py-3">
+                            {template.name}
+                          </td>
+                          <td className="border-b border-slate-100 px-4 py-3">
+                            {template.title}
+                          </td>
+                          <td className="border-b border-slate-100 px-4 py-3">
+                            {formatDateSlash(template.createdAt)}
+                          </td>
                           <td className="border-b border-slate-100 px-4 py-3 text-right">
                             <button
                               className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition ml-1"
