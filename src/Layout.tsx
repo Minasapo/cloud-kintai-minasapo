@@ -17,7 +17,7 @@ import { createLogger } from "@/shared/lib/logger";
 import BaseDialog from "@/shared/ui/feedback/BaseDialog";
 import { FullPageLoading } from "@/shared/ui/feedback/LoadingPrimitives";
 import { AppShell } from "@/shared/ui/layout";
-import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
+import NotificationViewport from "@/widgets/feedback/notification/NotificationViewport";
 import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";
 
@@ -242,15 +242,14 @@ export default function Layout() {
         header={<Header />}
         main={<Outlet />}
         footer={<Footer />}
-        snackbar={<SnackbarGroup />}
         slotProps={{
           root: { "data-testid": "layout-stack" },
           header: { "data-testid": "layout-header" },
           main: { "data-testid": "layout-main" },
           footer: { "data-testid": "layout-footer" },
-          snackbar: { "data-testid": "layout-snackbar" },
         }}
       />
+      <NotificationViewport />
       {isAdminUser && (
         <MissingCloseDateAlert
           onConfirm={() => navigate("/admin/master/job_term")}

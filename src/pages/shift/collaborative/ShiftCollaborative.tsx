@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { PageContent } from "@/shared/ui/layout";
 
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
@@ -18,7 +19,6 @@ import { ChangeHistoryPanel } from "../../../features/shift/collaborative/compon
 import { CollaborativeHeader } from "../../../features/shift/collaborative/components/CollaborativeHeader";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import {
-  PresenceNotificationContainer,
   usePresenceNotifications,
 } from "../../../features/shift/collaborative/components/PresenceNotification";
 import { PrintShiftDialog } from "../../../features/shift/collaborative/components/PrintShiftDialog";
@@ -127,8 +127,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       return currentStaff?.id ?? "";
     }, [cognitoUser, staffs]);
 
-    const { notifications, addNotification, dismissNotification } =
-      usePresenceNotifications();
+    const { addNotification } = usePresenceNotifications();
 
     const { isPrintDialogOpen, openPrintDialog, closePrintDialog } =
       usePrintShift();
@@ -280,9 +279,15 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       onUndo: undo,
       onRedo: redo,
     });
+    const { dialog } = usePageLeaveGuard({
+      isDirty: state.pendingChanges.size > 0,
+      isBusy:
+        state.dataStatus === "saving" || state.dataStatus === "syncing",
+    });
 
     return (
       <Page title="シフト調整(共同)" width="full" showDefaultHeader={false}>
+        {dialog}
         <PageContent
           width="full"
           className="px-1.5 py-1 sm:px-2.5"
@@ -422,11 +427,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
               }))}
             shiftDataMap={state.shiftDataMap}
             targetMonth={targetMonth}
-          />
-
-          <PresenceNotificationContainer
-            notifications={notifications}
-            onDismiss={dismissNotification}
           />
         </PageContent>
 

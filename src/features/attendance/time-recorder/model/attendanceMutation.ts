@@ -4,17 +4,13 @@ import { Attendance } from "@shared/api/graphql/types";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
-type SnackbarMessage = Parameters<typeof setSnackbarSuccess>[0];
-
+type NotificationMessage = string;
 type AttendanceMutation = (
   staffId: string,
   workDate: string,
-  isoTime: string
+  isoTime: string,
 ) => Promise<Attendance>;
 
 export interface AttendanceMutationOptions {
@@ -22,8 +18,8 @@ export interface AttendanceMutationOptions {
   today: string;
   mutation: AttendanceMutation;
   dispatch: Dispatch;
-  successMessage: SnackbarMessage;
-  errorMessage: SnackbarMessage;
+  successMessage: NotificationMessage;
+  errorMessage: NotificationMessage;
   logger: Logger;
   actionLabel?: string;
 }
@@ -47,10 +43,20 @@ export function executeAttendanceMutation({
 
   mutation(cognitoUser.id, today, timestamp)
     .then(() => {
-      dispatch(setSnackbarSuccess(successMessage));
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: successMessage,
+        }),
+      );
     })
     .catch((error) => {
       logger.error(`[${actionLabel}] failed`, error);
-      dispatch(setSnackbarError(errorMessage));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: errorMessage,
+        }),
+      );
     });
 }

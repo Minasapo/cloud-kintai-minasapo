@@ -1,16 +1,11 @@
 import { act, renderHook } from "@testing-library/react";
 
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
+
 import { useDuplicateAttendanceWarning } from "../useDuplicateAttendanceWarning";
 
 jest.mock("@app/hooks", () => ({
   useAppDispatchV2: jest.fn(),
-}));
-
-jest.mock("@/shared/lib/store/snackbarSlice", () => ({
-  setSnackbarError: jest.fn((message: string) => ({
-    type: "snackbar/setError",
-    payload: message,
-  })),
 }));
 
 describe("useDuplicateAttendanceWarning", () => {
@@ -22,30 +17,37 @@ describe("useDuplicateAttendanceWarning", () => {
     useAppDispatchV2.mockReturnValue(dispatch);
   });
 
-  it("カスタムイベントを受信するとスナックバーエラーをdispatchする", () => {
+  it("カスタムイベントを受信すると通知を dispatch する", () => {
     const { unmount } = renderHook(() => useDuplicateAttendanceWarning());
-    const { setSnackbarError } = jest.requireMock(
-      "@/shared/lib/store/snackbarSlice"
-    );
 
     act(() => {
       window.dispatchEvent(
         new CustomEvent("attendance-duplicate-warning", {
           detail: { message: "duplicate" },
-        })
+        }),
       );
     });
 
-    expect(dispatch).toHaveBeenCalledWith(setSnackbarError("duplicate"));
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: pushNotification({
+          tone: "error",
+          message: "duplicate",
+        }).type,
+        payload: expect.objectContaining({
+          tone: "error",
+          message: "duplicate",
+          placement: "top-right",
+          source: "global",
+        }),
+      }),
+    );
 
     unmount();
   });
 
   it("アンマウント後はイベントを無視する", () => {
     const { unmount } = renderHook(() => useDuplicateAttendanceWarning());
-    const { setSnackbarError } = jest.requireMock(
-      "@/shared/lib/store/snackbarSlice"
-    );
 
     unmount();
 
@@ -53,10 +55,17 @@ describe("useDuplicateAttendanceWarning", () => {
       window.dispatchEvent(
         new CustomEvent("attendance-duplicate-warning", {
           detail: { message: "ignored" },
-        })
+        }),
       );
     });
 
-    expect(dispatch).not.toHaveBeenCalledWith(setSnackbarError("ignored"));
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          tone: "error",
+          message: "ignored",
+        }),
+      }),
+    );
   });
 });
