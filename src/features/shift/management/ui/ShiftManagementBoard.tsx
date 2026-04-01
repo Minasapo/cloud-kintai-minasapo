@@ -23,9 +23,9 @@ import { useNavigate } from "react-router-dom";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
@@ -122,7 +122,7 @@ const SATURDAY_BG = mixWithTransparent(
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
   const navigate = useNavigate();
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { cognitoUser } = useCognitoUser();
   const { getShiftGroups } = useContext(AppConfigContext);
   const { authStatus } = useContext(AuthContext);
@@ -255,11 +255,11 @@ export default function ShiftManagementBoard() {
   React.useEffect(() => {
     if (calendarsError) {
       console.error(calendarsError);
-      void notify("エラー", {
-        body: MESSAGE_CODE.E00001,
-        mode: "await-interaction",
-        priority: "high",
-        tag: "holiday-load-error",
+      notify({
+        title: "エラー",
+        description: MESSAGE_CODE.E00001,
+        tone: "error",
+        dedupeKey: "holiday-load-error",
       });
     }
   }, [calendarsError, notify]);
@@ -495,18 +495,19 @@ export default function ShiftManagementBoard() {
     enabled: scenario === "actual" && isAuthenticated,
     delay: 2000, // 2秒のdebounce
     onSaveSuccess: () => {
-      void notify("シフトを自動保存しました", {
-        mode: "auto-close",
-        tag: "shift-autosave-success",
+      notify({
+        title: "シフトを自動保存しました",
+        tone: "success",
+        dedupeKey: "shift-autosave-success",
       });
     },
     onSaveError: (error) => {
       console.error("Auto-save error:", error);
-      void notify("エラー", {
-        body: "シフトの自動保存に失敗しました",
-        mode: "await-interaction",
-        priority: "high",
-        tag: "shift-autosave-error",
+      notify({
+        title: "エラー",
+        description: "シフトの自動保存に失敗しました",
+        tone: "error",
+        dedupeKey: "shift-autosave-error",
       });
     },
   });

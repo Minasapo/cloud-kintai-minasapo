@@ -175,9 +175,16 @@ function NotificationCard({
           <ToneIcon tone={notification.tone} />
         </span>
 
-        <p className="m-0 min-w-0 flex-1 text-sm font-medium leading-6 tracking-[0.01em]">
-          {notification.message}
-        </p>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-sm font-medium leading-6 tracking-[0.01em]">
+            {notification.message}
+          </p>
+          {notification.description ? (
+            <p className="m-0 text-sm leading-5 opacity-80">
+              {notification.description}
+            </p>
+          ) : null}
+        </div>
 
         <button
           type="button"

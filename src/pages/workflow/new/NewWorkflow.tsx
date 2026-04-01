@@ -31,7 +31,7 @@ import {
 } from "@/features/workflow/application-form/model/workflowFormModel";
 import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
 import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { createLogger } from "@/shared/lib/logger";
 import { parseTimeToISO } from "@/shared/lib/time";
@@ -183,7 +183,7 @@ export default function NewWorkflow() {
     isAuthenticated,
     organizationId: WORKFLOW_TEMPLATE_ORGANIZATION_ID,
   });
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { config, getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
 
   const {
@@ -251,11 +251,11 @@ export default function NewWorkflow() {
     if (!validation.isValid) return;
 
     if (!staff?.id) {
-      void notify("エラー", {
-        body: "申請者情報が取得できませんでした。",
-        mode: "await-interaction",
-        priority: "high",
-        tag: "workflow-applicant-error",
+      notify({
+        title: "エラー",
+        description: "申請者情報が取得できませんでした。",
+        tone: "error",
+        dedupeKey: "workflow-applicant-error",
       });
       return;
     }
@@ -306,24 +306,27 @@ export default function NewWorkflow() {
             "Failed to send workflow submission notification:",
             mailError,
           );
-          void notify("メール送信エラー", {
-            body: "管理者への通知メールの送信に失敗しました。",
-            mode: "await-interaction",
-            priority: "normal",
-            tag: "workflow-mail-error",
+          notify({
+            title: "メール送信エラー",
+            description: "管理者への通知メールの送信に失敗しました。",
+            tone: "error",
+            dedupeKey: "workflow-mail-error",
           });
         }
       }
 
-      void notify("ワークフローを作成しました。", { mode: "auto-close" });
+      notify({
+        title: "ワークフローを作成しました。",
+        tone: "success",
+      });
       runWithoutGuard(() => navigate("/workflow", { replace: true }));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow creation failed:", message);
-      void notify("エラー", {
-        body: extractErrorMessage(err),
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: extractErrorMessage(err),
+        tone: "error",
       });
     } finally {
       setIsSaving(false);
@@ -360,11 +363,11 @@ export default function NewWorkflow() {
 
     const targetTemplate = templates.find((t) => t.id === selectedTemplateId);
     if (!targetTemplate) {
-      void notify("エラー", {
-        body: "テンプレートが見つかりませんでした。",
-        mode: "await-interaction",
-        priority: "high",
-        tag: "workflow-template-not-found",
+      notify({
+        title: "エラー",
+        description: "テンプレートが見つかりませんでした。",
+        tone: "error",
+        dedupeKey: "workflow-template-not-found",
       });
       return;
     }

@@ -9,7 +9,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { useCreateAttendanceMutation, useLazyGetAttendanceByStaffAndDateQuery, useUpdateAttendanceMutation, } from "@/entities/attendance/api/attendanceApi";
 import { getWorkflowCategoryLabel, STATUS_LABELS, } from "@/entities/workflow/lib/workflowLabels";
 import { WorkflowMetadataPanelBase } from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { designTokenVar } from "@/shared/designSystem";
 import { createLogger } from "@/shared/lib/logger";
 import { pushNotification } from "@/shared/lib/store/notificationSlice";
@@ -46,7 +46,7 @@ export default function WorkflowDetailPanel({ workflowId, onBack, showBackButton
     const { cognitoUser, authStatus } = useContext(AuthContext);
     const isAuthenticated = authStatus === "authenticated";
     const { staffs } = useStaffs({ isAuthenticated });
-    const { notify, canNotify } = useLocalNotification();
+    const { notify } = useAppNotification();
     const { getStartTime, getEndTime, getLunchRestStartTime, getLunchRestEndTime, } = useContext(AppConfigContext);
     const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
     const [createAttendance] = useCreateAttendanceMutation();
@@ -58,15 +58,13 @@ export default function WorkflowDetailPanel({ workflowId, onBack, showBackButton
         return (staffs.find((staff) => staff.cognitoUserId === cognitoUser.id)?.id ?? null);
     }, [cognitoUser, staffs]);
     const handleNewCommentNotification = useCallback(() => {
-        if (!canNotify)
-            return;
-        void notify("新着コメントがあります", {
-            body: "ワークフローに新しいコメントが投稿されました",
-            tag: `workflow-comment-${workflowId ?? "unknown"}`,
-            mode: "auto-close",
-            priority: "high",
+        notify({
+            title: "新着コメントがあります",
+            description: "ワークフローに新しいコメントが投稿されました",
+            tone: "info",
+            dedupeKey: `workflow-comment-${workflowId ?? "unknown"}`,
         });
-    }, [canNotify, notify, workflowId]);
+    }, [notify, workflowId]);
     const { workflow, setWorkflow, loading, error } = useWorkflowDetailData(workflowId, {
         currentStaffId,
         onNewComment: handleNewCommentNotification,
@@ -99,6 +97,12 @@ export default function WorkflowDetailPanel({ workflowId, onBack, showBackButton
         notifyError: (message) => dispatch(pushNotification({
             tone: "error",
             message: message
+        })),
+        notifyInfo: (title, description) => dispatch(pushNotification({
+            tone: "info",
+            message: title,
+            description: description,
+            autoHideMs: null
         })),
         getStartTime,
         getEndTime,

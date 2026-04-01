@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { designTokenVar } from "@/shared/designSystem";
 
@@ -16,7 +16,7 @@ const PAGE_PADDING_Y = designTokenVar("spacing.xxl", "32px");
 const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
 
 export default function AdminShiftPlan() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const {
     selectedYear,
     currentRows,
@@ -39,11 +39,11 @@ export default function AdminShiftPlan() {
   useEffect(() => {
     if (calendarsError) {
       console.error(calendarsError);
-      void notify("エラー", {
-        body: MESSAGE_CODE.E00001,
-        mode: "await-interaction",
-        priority: "high",
-        tag: "holiday-calendar-error",
+      notify({
+        title: "エラー",
+        description: MESSAGE_CODE.E00001,
+        tone: "error",
+        dedupeKey: "holiday-calendar-error",
       });
     }
   }, [calendarsError, notify]);

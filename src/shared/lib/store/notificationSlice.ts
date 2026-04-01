@@ -9,6 +9,7 @@ export type NotificationSource = "global" | "presence";
 export type NotificationItem = {
   id: string;
   message: string;
+  description?: string;
   tone: NotificationTone;
   placement: NotificationPlacement;
   autoHideMs: number | null;
@@ -19,6 +20,7 @@ export type NotificationItem = {
 export type PushNotificationInput = {
   id?: string;
   message: string;
+  description?: string;
   tone: NotificationTone;
   placement?: NotificationPlacement;
   autoHideMs?: number | null;
@@ -102,6 +104,7 @@ const notificationsSlice = createSlice({
           payload: {
             id: input.id ?? createNotificationId(),
             message: input.message,
+            description: input.description,
             tone: input.tone,
             placement: input.placement ?? resolveDefaultPlacement(source),
             autoHideMs:

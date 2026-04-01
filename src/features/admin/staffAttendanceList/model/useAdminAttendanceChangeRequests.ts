@@ -7,8 +7,6 @@ import { useDispatch } from "react-redux";
 
 import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
-import { AttendanceNotificationType, LocalNotificationManager, } from "@/shared/lib/localNotification";
 import { createLogger } from "@/shared/lib/logger";
 import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import { pushNotification } from "@/shared/lib/store/notificationSlice";
@@ -24,7 +22,6 @@ export type UseAdminAttendanceChangeRequestsParams = {
 };
 export const useAdminAttendanceChangeRequests = ({ staffId, staff, staffForMail, pendingAttendances, updateAttendance, isBulkApprovingRef, }: UseAdminAttendanceChangeRequestsParams) => {
     const dispatch = useDispatch();
-    useLocalNotification();
     const [quickViewAttendance, setQuickViewAttendance] = useState<Attendance | null>(null);
     const [quickViewChangeRequest, setQuickViewChangeRequest] = useState<AttendanceChangeRequest | null>(null);
     const [quickViewOpen, setQuickViewOpen] = useState(false);
@@ -98,18 +95,15 @@ export const useAdminAttendanceChangeRequests = ({ staffId, staff, staffForMail,
                     }),
                 ]);
             }));
-            // ローカル通知を表示
-            try {
-                const manager = LocalNotificationManager.getInstance();
-                const firstAttendance = selectedAttendanceIds[0];
-                const attendance = pendingAttendances.find((a) => a.id === firstAttendance);
-                await manager.showAttendanceNotification(AttendanceNotificationType.ATTENDANCE_CHANGE_REQUEST_APPROVED, {
-                    date: attendance?.workDate || "",
-                });
-            }
-            catch (notificationError) {
-                logger.warn("Failed to show attendance change request notification:", notificationError);
-            }
+            const firstAttendanceId = selectedAttendanceIds[0];
+            const attendance = pendingAttendances.find((a) => a.id === firstAttendanceId);
+            dispatch(pushNotification({
+                tone: "success",
+                message: "勤怠情報の変更リクエストを承認しました",
+                description: attendance?.workDate
+                    ? `${attendance.workDate} の勤怠情報の変更リクエストが承認されました`
+                    : undefined
+            }));
             setSelectedAttendanceIds([]);
             if (mailErrorOccurred) {
                 dispatch(pushNotification({

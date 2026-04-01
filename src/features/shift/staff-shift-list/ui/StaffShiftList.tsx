@@ -25,10 +25,10 @@ import { useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 
 export default function StaffShiftList() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { staffId } = useParams();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -61,11 +61,11 @@ export default function StaffShiftList() {
   useEffect(() => {
     if (calendarsError) {
       console.error(calendarsError);
-      void notify("エラー", {
-        body: MESSAGE_CODE.E00001,
-        mode: "await-interaction",
-        priority: "high",
-        tag: "holiday-calendar-error",
+      notify({
+        title: "エラー",
+        description: MESSAGE_CODE.E00001,
+        tone: "error",
+        dedupeKey: "holiday-calendar-error",
       });
     }
   }, [calendarsError, notify]);

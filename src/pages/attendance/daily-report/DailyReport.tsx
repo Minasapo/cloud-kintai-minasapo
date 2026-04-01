@@ -37,8 +37,8 @@ import { useSearchParams } from "react-router-dom";
 import { AuthContext } from "@/context/AuthContext";
 import { logDailyReportMutation } from "@/entities/operation-log/model/dailyReportOperationLog";
 import { sendDailyReportSubmissionNotification } from "@/features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   buildVersionOrUpdatedAtCondition,
@@ -84,7 +84,7 @@ const buildDisplayName = (family?: string | null, given?: string | null) =>
     .join(" ");
 
 export default function DailyReport() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { cognitoUser, loading: isCognitoUserLoading } = useCognitoUser();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -159,11 +159,11 @@ export default function DailyReport() {
           "Failed to send daily report submission notification:",
           mailError,
         );
-        void notify("メール送信エラー", {
-          body: "管理者への通知メールの送信に失敗しました。",
-          mode: "await-interaction",
-          priority: "normal",
-          tag: "daily-report-mail-error",
+        notify({
+          title: "メール送信エラー",
+          description: "管理者への通知メールの送信に失敗しました。",
+          tone: "error",
+          dedupeKey: "daily-report-mail-error",
         });
       }
     },

@@ -18,7 +18,7 @@ import WorkflowTypeFields from "@/features/workflow/application-form/ui/Workflow
 import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@/features/workflow/hooks/useWorkflowEditLoaderState";
 import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import type { WorkflowEditLoaderData } from "@/router/loaders/workflowEditLoader";
 import { createLogger } from "@/shared/lib/logger";
@@ -41,7 +41,7 @@ export default function WorkflowEdit() {
   const isAuthenticated = authStatus === "authenticated";
   const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const { staffs } = useStaffs({ isAuthenticated });
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const {
     category,
     setCategory,
@@ -154,26 +154,26 @@ export default function WorkflowEdit() {
               "Failed to send workflow submission notification:",
               mailError,
             );
-            void notify("メール送信エラー", {
-              body: "管理者への通知メールの送信に失敗しました。",
-              mode: "await-interaction",
-              priority: "normal",
-              tag: "workflow-mail-error",
+            notify({
+              title: "メール送信エラー",
+              description: "管理者への通知メールの送信に失敗しました。",
+              tone: "error",
+              dedupeKey: "workflow-mail-error",
             });
           }
         }
 
-        void notify("保存しました", { mode: "auto-close" });
+        notify({ title: "保存しました", tone: "success" });
         setTimeout(() => {
           runWithoutGuard(() => navigate(`/workflow/${id}`));
         }, 1000);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         logger.error("Workflow update failed:", message);
-        void notify("エラー", {
-          body: message,
-          mode: "await-interaction",
-          priority: "high",
+        notify({
+          title: "エラー",
+          description: message,
+          tone: "error",
         });
       } finally {
         setIsSaving(false);

@@ -9,7 +9,7 @@ import { E15001, S15001 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
 import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
 import { SettingsButton, SettingsTextField } from "@/features/admin/layout/ui/SettingsPrimitives";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { resolveThemeColor } from "@/shared/config/theme";
 
@@ -67,7 +67,7 @@ const TILE_SIZE = 44;
 const MAX_TILES_PER_ROW = 10;
 
 export default function AdminTheme() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const {
     getThemeColor,
     getConfigId,
@@ -144,20 +144,20 @@ export default function AdminTheme() {
 
   const handleSave = async () => {
     if (!isValidHex) {
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: E15001,
+        tone: "error",
       });
       return;
     }
 
     const payloadColor = normalizeColor(colorCode);
     if (!payloadColor) {
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: E15001,
+        tone: "error",
       });
       return;
     }
@@ -178,13 +178,13 @@ export default function AdminTheme() {
       }
       await fetchConfig();
       setCurrentColor(payloadColor);
-      void notify(S15001, { mode: "auto-close" });
+      notify({ title: S15001, tone: "success" });
     } catch (error) {
       console.error(error);
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: E15001,
+        tone: "error",
       });
     } finally {
       setSaving(false);

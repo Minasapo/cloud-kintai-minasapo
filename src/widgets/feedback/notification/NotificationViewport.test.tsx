@@ -48,6 +48,7 @@ describe("NotificationViewport", () => {
           id: "global-1",
           tone: "error",
           message: "保存に失敗しました",
+          description: "通信状況を確認してください",
         }),
       );
       store.dispatch(
@@ -61,6 +62,9 @@ describe("NotificationViewport", () => {
     });
 
     expect(screen.getByText("保存に失敗しました")).toBeInTheDocument();
+    expect(
+      screen.getByText("通信状況を確認してください"),
+    ).toBeInTheDocument();
     expect(screen.getByText("他のユーザーが更新しました")).toBeInTheDocument();
     expect(screen.getByTestId("notification-viewport-top-right")).toHaveStyle({
       zIndex: `${APP_LAYER_Z_INDEX.notification}`,

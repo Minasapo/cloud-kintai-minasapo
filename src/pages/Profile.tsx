@@ -20,7 +20,7 @@ import {
   StaffExternalLink,
 } from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import {
   buildVersionOrUpdatedAtCondition,
@@ -223,7 +223,7 @@ function PasswordField({
 }
 
 export default function Profile() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { cognitoUser, signOut } = useContext(AuthContext);
   const [staff, setStaff] = useState<StaffType | null | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<ProfileTab>("general");
@@ -361,14 +361,14 @@ export default function Profile() {
       },
       condition: buildVersionOrUpdatedAtCondition(staff.version, staff.updatedAt),
     })
-      .then(() => void notify(MESSAGE_CODE.S05003, { mode: "auto-close" }))
+      .then(() => notify({ title: MESSAGE_CODE.S05003, tone: "success" }))
       .then(() => reset(data))
       .catch(
         () =>
-          void notify("エラー", {
-            body: MESSAGE_CODE.E05003,
-            mode: "await-interaction",
-            priority: "high",
+          notify({
+            title: "エラー",
+            description: MESSAGE_CODE.E05003,
+            tone: "error",
           }),
       );
   };

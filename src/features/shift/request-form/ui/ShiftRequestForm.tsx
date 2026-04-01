@@ -45,9 +45,9 @@ import React, {
 } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import {
   loadShiftPatterns,
@@ -61,7 +61,7 @@ import { useShiftRequestPersist } from "../model/useShiftRequestPersist";
 type Status = ShiftRequestDayStatus;
 
 export default function ShiftRequestForm() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { cognitoUser, loading: cognitoUserLoading } = useCognitoUser();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -235,19 +235,20 @@ export default function ShiftRequestForm() {
       !isLoadingShiftRequest,
     delay: 2000, // 2秒のdebounce
     onSaveSuccess: () => {
-      void notify("自動保存完了", {
-        body: "シフトを自動保存しました",
-        mode: "auto-close",
-        tag: "shift-auto-save-success",
+      notify({
+        title: "自動保存完了",
+        description: "シフトを自動保存しました",
+        tone: "success",
+        dedupeKey: "shift-auto-save-success",
       });
     },
     onSaveError: (error) => {
       console.error("Auto-save error:", error);
-      void notify("自動保存エラー", {
-        body: "シフトの自動保存に失敗しました",
-        mode: "await-interaction",
-        priority: "high",
-        tag: "shift-auto-save-error",
+      notify({
+        title: "自動保存エラー",
+        description: "シフトの自動保存に失敗しました",
+        tone: "error",
+        dedupeKey: "shift-auto-save-error",
       });
     },
   });
@@ -453,11 +454,11 @@ export default function ShiftRequestForm() {
         if (isMounted) {
           console.error("Failed to load shift patterns", error);
           setPatterns([]);
-          notify("エラー", {
-            body: MESSAGE_CODE.E00001,
-            mode: "await-interaction",
-            priority: "high",
-            tag: "shift-pattern-load-error",
+          notify({
+            title: "エラー",
+            description: MESSAGE_CODE.E00001,
+            tone: "error",
+            dedupeKey: "shift-pattern-load-error",
           });
         }
       } finally {
@@ -499,11 +500,11 @@ export default function ShiftRequestForm() {
         await saveShiftPatterns(serializePatterns(nextPatterns));
       } catch (error) {
         console.error("Failed to save shift patterns", error);
-        void notify("エラー", {
-          body: MESSAGE_CODE.E00001,
-          mode: "await-interaction",
-          priority: "high",
-          tag: "shift-pattern-save-error",
+        notify({
+          title: "エラー",
+          description: MESSAGE_CODE.E00001,
+          tone: "error",
+          dedupeKey: "shift-pattern-save-error",
         });
       }
     },

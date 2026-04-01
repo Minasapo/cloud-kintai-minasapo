@@ -42,8 +42,8 @@ jest.mock("@entities/attendance/api/attendanceApi", () => ({
   }),
 }));
 
-jest.mock("@/hooks/useLocalNotification", () => ({
-  useLocalNotification: () => ({
+jest.mock("@/hooks/useAppNotification", () => ({
+  useAppNotification: () => ({
     notify: jest.fn(),
   }),
 }));

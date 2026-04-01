@@ -6,9 +6,8 @@ import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import { subscribeWorkflowCommentNotifications } from "@/features/workflow/notification/model/workflowNotificationEventService";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { createLogger } from "@/shared/lib/logger";
-
-import { useLocalNotification } from "./useLocalNotification";
 
 const logger = createLogger("useWorkflowCommentNotification");
 
@@ -17,7 +16,7 @@ export const useWorkflowCommentNotification = (enabled = true) => {
     useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated" && enabled;
   const { staffs } = useStaffs({ isAuthenticated });
-  const { notify, canNotify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const notifiedEventIdsRef = useRef<Set<string>>(new Set());
 
   const currentStaffId = (() => {
@@ -51,22 +50,21 @@ export const useWorkflowCommentNotification = (enabled = true) => {
 
   const handleNotification = useCallback(
     (eventId: string, title: string, body: string) => {
-      if (!canNotify) return;
       if (notifiedEventIdsRef.current.has(eventId)) return;
 
       notifiedEventIdsRef.current.add(eventId);
-      void notify(title, {
-        body,
-        tag: `workflow-comment-event-${eventId}`,
-        mode: "auto-close",
-        priority: "high",
+      notify({
+        title,
+        description: body,
+        tone: "info",
+        dedupeKey: `workflow-comment-event-${eventId}`,
       });
     },
-    [canNotify, notify],
+    [notify],
   );
 
   useEffect(() => {
-    if (!enabled || !canNotify || recipientIds.length === 0) {
+    if (!enabled || recipientIds.length === 0) {
       return;
     }
 
@@ -98,9 +96,9 @@ export const useWorkflowCommentNotification = (enabled = true) => {
       );
       unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
-  }, [enabled, canNotify, handleNotification, recipientIds]);
+  }, [enabled, handleNotification, recipientIds]);
 
   return {
-    isSubscribed: enabled && canNotify && recipientIds.length > 0,
+    isSubscribed: enabled && recipientIds.length > 0,
   };
 };

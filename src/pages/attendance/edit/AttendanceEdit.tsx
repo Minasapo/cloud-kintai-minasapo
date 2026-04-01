@@ -34,7 +34,7 @@ import {
 } from "@/features/attendance/edit/model/common";
 import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEditor";
 import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { createLogger } from "@/shared/lib/logger";
 import { PageContent } from "@/shared/ui/layout";
@@ -49,7 +49,7 @@ const logger = createLogger("AttendanceEdit");
 const MONTH_QUERY_KEY = "month";
 
 export default function AttendanceEdit() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const {
     getHourlyPaidHolidayEnabled,
@@ -202,28 +202,29 @@ export default function AttendanceEdit() {
             );
           } catch (mailError) {
             logger.error("Failed to send change request mail:", mailError);
-            void notify("メール送信エラー", {
-              body: MESSAGE_CODE.E00002,
-              mode: "await-interaction",
-              priority: "normal",
-              tag: "mail-error",
+            notify({
+              title: "メール送信エラー",
+              description: MESSAGE_CODE.E00002,
+              tone: "error",
+              dedupeKey: "mail-error",
             });
           }
 
-          void notify("修正申請完了", {
-            body: MESSAGE_CODE.S02005,
-            mode: "auto-close",
-            tag: "attendance-change-request",
+          notify({
+            title: "修正申請完了",
+            description: MESSAGE_CODE.S02005,
+            tone: "success",
+            dedupeKey: "attendance-change-request",
           });
 
           runWithoutGuard(() => navigate(attendanceListPath));
         })
         .catch(() => {
-          void notify("修正申請エラー", {
-            body: MESSAGE_CODE.E02005,
-            mode: "await-interaction",
-            priority: "high",
-            tag: "attendance-change-request-error",
+          notify({
+            title: "修正申請エラー",
+            description: MESSAGE_CODE.E02005,
+            tone: "error",
+            dedupeKey: "attendance-change-request-error",
           });
         });
     } else {
@@ -238,10 +239,11 @@ export default function AttendanceEdit() {
         },
       })
         .then(() => {
-          void notify("修正申請完了", {
-            body: MESSAGE_CODE.S02005,
-            mode: "auto-close",
-            tag: "attendance-change-request",
+          notify({
+            title: "修正申請完了",
+            description: MESSAGE_CODE.S02005,
+            tone: "success",
+            dedupeKey: "attendance-change-request",
           });
 
           if (!cognitoUser) return;
@@ -254,22 +256,22 @@ export default function AttendanceEdit() {
             );
           } catch (mailError) {
             console.error("Failed to send change request mail:", mailError);
-            void notify("メール送信エラー", {
-              body: MESSAGE_CODE.E00002,
-              mode: "await-interaction",
-              priority: "normal",
-              tag: "mail-error",
+            notify({
+              title: "メール送信エラー",
+              description: MESSAGE_CODE.E00002,
+              tone: "error",
+              dedupeKey: "mail-error",
             });
           }
           runWithoutGuard(() => navigate(attendanceListPath));
         })
         .catch((e) => {
           logger.error("Failed to update attendance:", e);
-          void notify("修正申請エラー", {
-            body: MESSAGE_CODE.E02005,
-            mode: "await-interaction",
-            priority: "high",
-            tag: "attendance-change-request-error",
+          notify({
+            title: "修正申請エラー",
+            description: MESSAGE_CODE.E02005,
+            tone: "error",
+            dedupeKey: "attendance-change-request-error",
           });
         });
     }
@@ -280,11 +282,11 @@ export default function AttendanceEdit() {
       return;
     }
 
-    void notify("データ取得エラー", {
-      body: MESSAGE_CODE.E02001,
-      mode: "await-interaction",
-      priority: "high",
-      tag: "attendance-fetch-error",
+    notify({
+      title: "データ取得エラー",
+      description: MESSAGE_CODE.E02001,
+      tone: "error",
+      dedupeKey: "attendance-fetch-error",
     });
   }, [attendanceError, shouldFetchAttendance, notify]);
 
@@ -333,11 +335,11 @@ export default function AttendanceEdit() {
   }
 
   if (staffSError) {
-    void notify("エラー", {
-      body: MESSAGE_CODE.E00001,
-      mode: "await-interaction",
-      priority: "high",
-      tag: "staff-fetch-error",
+    notify({
+      title: "エラー",
+      description: MESSAGE_CODE.E00001,
+      tone: "error",
+      dedupeKey: "staff-fetch-error",
     });
     return null;
   }

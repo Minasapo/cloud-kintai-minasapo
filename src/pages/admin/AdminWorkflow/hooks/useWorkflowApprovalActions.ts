@@ -8,10 +8,6 @@ import {
 import dayjs from "dayjs";
 
 import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
-import {
-  LocalNotificationManager,
-  WorkflowNotificationType,
-} from "@/shared/lib/localNotification";
 import { createLogger } from "@/shared/lib/logger";
 
 import {
@@ -46,6 +42,7 @@ type UseWorkflowApprovalActionsArgs = {
   setWorkflow: (workflow: WorkflowData) => void;
   notifySuccess: (message: string) => void;
   notifyError: (message: string) => void;
+  notifyInfo?: (title: string, description?: string) => void;
   getStartTime: () => dayjs.Dayjs;
   getEndTime: () => dayjs.Dayjs;
   getLunchRestStartTime: () => dayjs.Dayjs;
@@ -63,6 +60,7 @@ export const useWorkflowApprovalActions = ({
   setWorkflow,
   notifySuccess,
   notifyError,
+  notifyInfo: notifyInfoProp,
   getStartTime,
   getEndTime,
   getLunchRestStartTime,
@@ -71,6 +69,8 @@ export const useWorkflowApprovalActions = ({
   createAttendance,
   updateAttendance,
 }: UseWorkflowApprovalActionsArgs) => {
+  const notifyInfo = notifyInfoProp ?? (() => undefined);
+
   const resolveCurrentStaff = () =>
     cognitoUser?.id
       ? staffs.find((staff) => staff.cognitoUserId === cognitoUser.id)
@@ -207,25 +207,15 @@ export const useWorkflowApprovalActions = ({
       }
 
       notifySuccess("承認しました");
-
-      // ローカル通知を表示
-      try {
-        const approverName = currentStaffLocal
-          ? `${currentStaffLocal.familyName} ${currentStaffLocal.givenName}`
-          : undefined;
-        const manager = LocalNotificationManager.getInstance();
-        await manager.showWorkflowNotification(
-          WorkflowNotificationType.WORKFLOW_APPROVED,
-          {
-            approverName: approverName || "",
-          },
-        );
-      } catch (notificationError) {
-        logger.warn(
-          "Failed to show workflow approval notification:",
-          notificationError,
-        );
-      }
+      const approverName = currentStaffLocal
+        ? `${currentStaffLocal.familyName} ${currentStaffLocal.givenName}`
+        : undefined;
+      notifyInfo(
+        "申請が承認されました",
+        approverName
+          ? `${approverName} さんが申請を承認しました`
+          : "申請が承認されました",
+      );
 
       await logOperationEvent({
         action: "workflow.approve",
@@ -301,25 +291,15 @@ export const useWorkflowApprovalActions = ({
       const updated = await updateWorkflow(inputForUpdate);
       setWorkflow(updated);
       notifySuccess("却下しました");
-
-      // ローカル通知を表示
-      try {
-        const approverName = currentStaffLocal
-          ? `${currentStaffLocal.familyName} ${currentStaffLocal.givenName}`
-          : undefined;
-        const manager = LocalNotificationManager.getInstance();
-        await manager.showWorkflowNotification(
-          WorkflowNotificationType.WORKFLOW_REJECTED,
-          {
-            approverName: approverName || "",
-          },
-        );
-      } catch (notificationError) {
-        logger.warn(
-          "Failed to show workflow rejection notification:",
-          notificationError,
-        );
-      }
+      const approverName = currentStaffLocal
+        ? `${currentStaffLocal.familyName} ${currentStaffLocal.givenName}`
+        : undefined;
+      notifyInfo(
+        "申請が却下されました",
+        approverName
+          ? `${approverName} さんが申請を却下しました`
+          : "申請が却下されました",
+      );
 
       await logOperationEvent({
         action: "workflow.reject",

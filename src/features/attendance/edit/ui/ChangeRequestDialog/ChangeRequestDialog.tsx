@@ -9,9 +9,6 @@ import { useNavigate } from "react-router-dom";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
-import { AttendanceNotificationType, LocalNotificationManager, } from "@/shared/lib/localNotification";
-import { createLogger } from "@/shared/lib/logger";
 import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
 import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
@@ -19,7 +16,6 @@ import { ChangeRequestDiffTable } from "./ChangeRequestDiffTable";
 import handleApproveChangeRequest from "./handleApproveChangeRequest";
 import handleRejectChangeRequest from "./handleRejectChangeRequest";
 
-const logger = createLogger("ChangeRequestDialog");
 export default function ChangeRequestDialog({ attendance, updateAttendance, staff, }: {
     attendance: Attendance | null;
     updateAttendance: (input: UpdateAttendanceMutationArg) => Promise<Attendance>;
@@ -27,7 +23,6 @@ export default function ChangeRequestDialog({ attendance, updateAttendance, staf
 }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    useLocalNotification();
     const [comment, setComment] = useState<string | undefined>(undefined);
     const [manualClose, setManualClose] = useState(false);
     // 派生状態として計算：未完了の変更リクエストがあれば表示
@@ -125,16 +120,13 @@ export default function ChangeRequestDialog({ attendance, updateAttendance, staf
                 catch (mailError) {
                     console.error("Failed to send approval notification mail:", mailError);
                 }
-                // ローカル通知を表示
-                try {
-                    const manager = LocalNotificationManager.getInstance();
-                    await manager.showAttendanceNotification(AttendanceNotificationType.ATTENDANCE_CHANGE_REQUEST_APPROVED, {
-                        date: updatedAttendance.workDate,
-                    });
-                }
-                catch (notificationError) {
-                    logger.warn("Failed to show attendance change request notification:", notificationError);
-                }
+                dispatch(pushNotification({
+                    tone: "success",
+                    message: "勤怠情報の変更リクエストを承認しました",
+                    description: updatedAttendance.workDate
+                        ? `${updatedAttendance.workDate} の勤怠情報の変更リクエストが承認されました`
+                        : undefined
+                }));
                 // navigate to staff attendance list
                 navigate(`/admin/staff/${updatedAttendance.staffId}/attendance`);
                 handleClose();

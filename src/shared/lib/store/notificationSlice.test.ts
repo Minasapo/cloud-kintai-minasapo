@@ -11,6 +11,7 @@ describe("notificationSlice", () => {
       pushNotification({
         tone: "success",
         message: "保存しました",
+        description: "データを更新しました",
       }),
     );
 
@@ -18,6 +19,7 @@ describe("notificationSlice", () => {
     expect(state.items[0]).toMatchObject({
       tone: "success",
       message: "保存しました",
+      description: "データを更新しました",
       placement: "top-right",
       autoHideMs: 5000,
       source: "global",
@@ -96,5 +98,17 @@ describe("notificationSlice", () => {
       clearNotifications({ source: "presence" }),
     );
     expect(afterClear.items).toEqual([]);
+  });
+
+  it("error notification は既定で auto-hide しない", () => {
+    const state = notificationReducer(
+      undefined,
+      pushNotification({
+        tone: "error",
+        message: "保存に失敗しました",
+      }),
+    );
+
+    expect(state.items[0]?.autoHideMs).toBeNull();
   });
 });

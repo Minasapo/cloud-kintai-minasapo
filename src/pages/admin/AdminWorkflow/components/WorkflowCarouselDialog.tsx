@@ -72,6 +72,12 @@ function WorkflowCarouselActionButtons({ workflowId, }: {
             tone: "error",
             message: message
         })),
+        notifyInfo: (title, description) => dispatch(pushNotification({
+            tone: "info",
+            message: title,
+            description: description,
+            autoHideMs: null
+        })),
         getStartTime,
         getEndTime,
         getLunchRestStartTime,

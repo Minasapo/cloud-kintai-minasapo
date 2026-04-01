@@ -44,8 +44,8 @@ jest.mock("@entities/workflow-template/model/useWorkflowTemplates", () => ({
   }),
 }));
 
-jest.mock("@/hooks/useLocalNotification", () => ({
-  useLocalNotification: () => ({
+jest.mock("@/hooks/useAppNotification", () => ({
+  useAppNotification: () => ({
     notify: jest.fn(),
   }),
 }));
