@@ -146,7 +146,7 @@ export default function AdminLogsClean() {
   }, [nextToken, loadMore, loading]);
 
   return (
-    <PageContent width="dashboard">
+    <PageContent width="full">
       <Stack spacing={2} sx={{ pt: 1 }}>
         <Stack spacing={1}>
           <Box>

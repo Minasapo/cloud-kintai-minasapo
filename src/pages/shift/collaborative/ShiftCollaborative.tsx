@@ -23,7 +23,10 @@ import {
 } from "../../../features/shift/collaborative/components/PresenceNotification";
 import { PrintShiftDialog } from "../../../features/shift/collaborative/components/PrintShiftDialog";
 import { ProgressPanel } from "../../../features/shift/collaborative/components/ProgressPanel";
-import { ShiftCell, type ShiftCellProps } from "../../../features/shift/collaborative/components/ShiftCell";
+import {
+  ShiftCell,
+  type ShiftCellProps,
+} from "../../../features/shift/collaborative/components/ShiftCell";
 import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
 import { SyncPanel } from "../../../features/shift/collaborative/components/SyncPanel";
 import { InfoBadge } from "../../../features/shift/collaborative/components/ui/Badges";
@@ -48,7 +51,12 @@ interface ShiftCollaborativePageInnerProps {
 }
 
 const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
-  ({ staffs, targetMonth, onPrevMonth, onNextMonth }: ShiftCollaborativePageInnerProps) => {
+  ({
+    staffs,
+    targetMonth,
+    onPrevMonth,
+    onNextMonth,
+  }: ShiftCollaborativePageInnerProps) => {
     const { cognitoUser } = useContext(AuthContext);
     const {
       state,
@@ -276,7 +284,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
     return (
       <Page title="シフト調整(共同)" width="full" showDefaultHeader={false}>
         <PageContent
-          width="wide"
+          width="full"
           className="px-1.5 py-1 sm:px-2.5"
           onMouseUp={handleMouseUp}
         >
@@ -458,10 +466,14 @@ export default function ShiftCollaborativePage() {
   const isAuthenticated = authStatus === "authenticated";
   const { staffs, loading: staffsLoading } = useStaffs({ isAuthenticated });
 
-  const [targetMonth, setTargetMonth] = useState(() => dayjs().format("YYYY-MM"));
+  const [targetMonth, setTargetMonth] = useState(() =>
+    dayjs().format("YYYY-MM"),
+  );
 
   const handlePrevMonth = useCallback(() => {
-    setTargetMonth((prev) => dayjs(prev).subtract(1, "month").format("YYYY-MM"));
+    setTargetMonth((prev) =>
+      dayjs(prev).subtract(1, "month").format("YYYY-MM"),
+    );
   }, []);
 
   const handleNextMonth = useCallback(() => {
@@ -507,7 +519,7 @@ export default function ShiftCollaborativePage() {
   if (staffIds.length === 0) {
     return (
       <Page title="シフト調整(共同)" width="full" showDefaultHeader={false}>
-        <PageContent width="wide" className="px-1.5 py-1 sm:px-2.5">
+        <PageContent width="full" className="px-1.5 py-1 sm:px-2.5">
           <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
             <InlineAlert tone="info" icon={<InfoBadge />}>
               スタッフデータが見つかりません
@@ -526,9 +538,9 @@ export default function ShiftCollaborativePage() {
       currentUserName={currentUserName}
       shiftRequestId={shiftRequestId}
     >
-      <ShiftCollaborativePageInner 
-        staffs={staffs} 
-        targetMonth={targetMonth} 
+      <ShiftCollaborativePageInner
+        staffs={staffs}
+        targetMonth={targetMonth}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
       />
