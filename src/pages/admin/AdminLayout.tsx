@@ -252,25 +252,52 @@ const AdminContextRail = memo(function AdminContextRail({
 });
 
 const SplitLayoutPanels = memo(function SplitLayoutPanels({
-  rightPanelTitle,
+  splitPanelTitle,
+  splitPanelPosition,
   selectedScreen,
-  onCloseRightPanel,
+  onClosePanel,
   onScreenChange,
-  RightPanelComponent,
+  SplitPanelComponent,
 }: {
-  rightPanelTitle?: string;
+  splitPanelTitle?: string;
+  splitPanelPosition: "left" | "right";
   selectedScreen: string;
-  onCloseRightPanel: () => void;
+  onClosePanel: () => void;
   onScreenChange: (screenValue: string) => void;
-  RightPanelComponent?: React.ComponentType<{ panelId: string }>;
+  SplitPanelComponent?: React.ComponentType<{ panelId: string }>;
 }) {
+  const splitPanel = (
+    <Panel defaultSize={50} minSize={30}>
+      <PanelContainer
+        title={splitPanelTitle || "画面を選択"}
+        onClose={onClosePanel}
+        screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
+        selectedScreen={selectedScreen}
+        onScreenChange={onScreenChange}
+        contentSx={selectedScreen === "daily-report" ? { pt: 0 } : undefined}
+      >
+        {SplitPanelComponent ? (
+          <Suspense fallback={<SplitPanelSkeleton />}>
+            <SplitPanelComponent panelId={selectedScreen} />
+          </Suspense>
+        ) : (
+          <EmptyPanelState label="パネルが選択されていません" />
+        )}
+      </PanelContainer>
+    </Panel>
+  );
+
+  const mainPanel = (
+    <Panel defaultSize={50} minSize={30}>
+      <PanelContainer onClose={undefined}>
+        <MemoizedOutlet />
+      </PanelContainer>
+    </Panel>
+  );
+
   return (
     <Group orientation="horizontal">
-      <Panel defaultSize={50} minSize={30}>
-        <PanelContainer onClose={undefined}>
-          <MemoizedOutlet />
-        </PanelContainer>
-      </Panel>
+      {splitPanelPosition === "left" ? splitPanel : mainPanel}
       <Separator
         style={{
           width: "8px",
@@ -278,24 +305,7 @@ const SplitLayoutPanels = memo(function SplitLayoutPanels({
           cursor: "col-resize",
         }}
       />
-      <Panel defaultSize={50} minSize={30}>
-        <PanelContainer
-          title={rightPanelTitle || "画面を選択"}
-          onClose={onCloseRightPanel}
-          screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
-          selectedScreen={selectedScreen}
-          onScreenChange={onScreenChange}
-          contentSx={selectedScreen === "daily-report" ? { pt: 0 } : undefined}
-        >
-          {RightPanelComponent ? (
-            <Suspense fallback={<SplitPanelSkeleton />}>
-              <RightPanelComponent panelId={selectedScreen} />
-            </Suspense>
-          ) : (
-            <EmptyPanelState label="パネルが選択されていません" />
-          )}
-        </PanelContainer>
-      </Panel>
+      {splitPanelPosition === "left" ? mainPanel : splitPanel}
     </Group>
   );
 });
@@ -553,6 +563,20 @@ function AdminLayoutContent() {
   const isTripleMode = state.mode === "triple";
   const MiddlePanelComponent = state.leftPanel?.component;
   const RightPanelComponent = state.rightPanel?.component;
+  const splitPanelPosition = useMemo<"left" | "right">(() => {
+    if (state.leftPanel && !state.rightPanel) {
+      return "left";
+    }
+
+    return "right";
+  }, [state.leftPanel, state.rightPanel]);
+  const splitPanelConfig = useMemo(() => {
+    if (splitPanelPosition === "left") {
+      return state.leftPanel;
+    }
+
+    return state.rightPanel;
+  }, [splitPanelPosition, state.leftPanel, state.rightPanel]);
 
   const handleToggleMobileRail = useCallback(() => {
     setIsMobileRailOpen((prev) => !prev);
@@ -586,6 +610,16 @@ function AdminLayoutContent() {
       ensureMiddlePanel();
     }
   }, [isTripleMode, ensureRightPanel, ensureMiddlePanel]);
+
+  React.useEffect(() => {
+    if (!isSplitMode) {
+      return;
+    }
+
+    if (!state.leftPanel && !state.rightPanel) {
+      ensureRightPanel();
+    }
+  }, [ensureRightPanel, isSplitMode, state.leftPanel, state.rightPanel]);
 
   React.useEffect(() => {
     if (isMobile && state.mode === "triple") {
@@ -695,11 +729,16 @@ function AdminLayoutContent() {
               />
             ) : isSplitMode ? (
               <SplitLayoutPanels
-                rightPanelTitle={state.rightPanel?.title}
-                selectedScreen={selectedRightScreen}
-                onCloseRightPanel={handleCloseRightPanel}
-                onScreenChange={handleRightScreenChange}
-                RightPanelComponent={RightPanelComponent}
+                splitPanelTitle={splitPanelConfig?.title}
+                splitPanelPosition={splitPanelPosition}
+                selectedScreen={splitPanelConfig?.id ?? ""}
+                onClosePanel={handleCloseRightPanel}
+                onScreenChange={
+                  splitPanelPosition === "left"
+                    ? handleMiddleScreenChange
+                    : handleRightScreenChange
+                }
+                SplitPanelComponent={splitPanelConfig?.component}
               />
             ) : (
               <SinglePanelContent />
