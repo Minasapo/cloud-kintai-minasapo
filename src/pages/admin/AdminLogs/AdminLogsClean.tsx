@@ -38,39 +38,55 @@ export default function AdminLogsClean() {
   const [actionFilter, setActionFilter] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  const operationLogFilter = useMemo<ModelOperationLogFilterInput | null>(() => {
-    const filter: ModelOperationLogFilterInput = {};
+  const operationLogFilter =
+    useMemo<ModelOperationLogFilterInput | null>(() => {
+      const filter: ModelOperationLogFilterInput = {};
 
-    if (resourceFilter.trim()) {
-      filter.resource = { eq: resourceFilter.trim() };
-    }
+      if (resourceFilter.trim()) {
+        filter.resource = { eq: resourceFilter.trim() };
+      }
 
-    if (actorFilter.trim()) {
-      filter.staffId = { eq: actorFilter.trim() };
-    }
+      if (actorFilter.trim()) {
+        filter.staffId = { eq: actorFilter.trim() };
+      }
 
-    if (targetFilter.trim()) {
-      filter.targetStaffId = { eq: targetFilter.trim() };
-    }
+      if (targetFilter.trim()) {
+        filter.targetStaffId = { eq: targetFilter.trim() };
+      }
 
-    if (actionFilter.trim()) {
-      filter.action = { contains: actionFilter.trim() };
-    }
+      if (actionFilter.trim()) {
+        filter.action = { contains: actionFilter.trim() };
+      }
 
-    if (fromDate || toDate) {
-      const from = fromDate
-        ? dayjs(fromDate).startOf("day").toISOString()
-        : "1970-01-01T00:00:00.000Z";
-      const to = toDate
-        ? dayjs(toDate).endOf("day").toISOString()
-        : "9999-12-31T23:59:59.999Z";
-      filter.timestamp = { between: [from, to] };
-    }
+      if (fromDate || toDate) {
+        const from = fromDate
+          ? dayjs(fromDate).startOf("day").toISOString()
+          : "1970-01-01T00:00:00.000Z";
+        const to = toDate
+          ? dayjs(toDate).endOf("day").toISOString()
+          : "9999-12-31T23:59:59.999Z";
+        filter.timestamp = { between: [from, to] };
+      }
 
-    return Object.keys(filter).length > 0 ? filter : null;
-  }, [actionFilter, actorFilter, fromDate, resourceFilter, targetFilter, toDate]);
-  const { logs, loading, error, nextToken, loadInitial, loadMore } =
-    useAdminOperationLogs(30, operationLogFilter);
+      return Object.keys(filter).length > 0 ? filter : null;
+    }, [
+      actionFilter,
+      actorFilter,
+      fromDate,
+      resourceFilter,
+      targetFilter,
+      toDate,
+    ]);
+  const {
+    logs,
+    excludedInvalidRecords,
+    excludedInvalidRecordCount,
+    loading,
+    error,
+    nextToken,
+    loadInitial,
+    loadMore,
+  } = useAdminOperationLogs(30, operationLogFilter);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -85,7 +101,7 @@ export default function AdminLogsClean() {
         logs
           .flatMap((log) => [log.staffId, log.targetStaffId])
           .filter(isNonEmptyString),
-      )
+      ),
     );
     const missing = ids.filter((id) => !(id in staffMap));
     if (missing.length === 0) return;
@@ -93,7 +109,7 @@ export default function AdminLogsClean() {
     (async () => {
       try {
         const results = await Promise.allSettled(
-          missing.map((id) => fetchStaff(id))
+          missing.map((id) => fetchStaff(id)),
         );
         const updates: Record<string, Staff | null> = {};
         results.forEach((r, idx) => {
@@ -123,7 +139,7 @@ export default function AdminLogsClean() {
           }
         });
       },
-      { root: null, rootMargin: "200px", threshold: 0 }
+      { root: null, rootMargin: "200px", threshold: 0 },
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -184,16 +200,27 @@ export default function AdminLogsClean() {
             </Stack>
 
             <Typography variant="body2" sx={{ mb: 2 }}>
-              新形式ログを新しい順に表示します。詳細は各行の JSON パネルから確認できます。
+              新形式ログを新しい順に表示します。詳細は各行の JSON
+              パネルから確認できます。
             </Typography>
 
+            {excludedInvalidRecords && (
+              <Typography variant="body2" color="warning.main" sx={{ mb: 2 }}>
+                一部の無効なログレコードを除外して表示しています
+                {excludedInvalidRecordCount > 0
+                  ? `（少なくとも ${excludedInvalidRecordCount} 件）`
+                  : "。"}
+              </Typography>
+            )}
+
             <List>
-              {logs.map((log) => (
+              {logs.map((log) =>
                 (() => {
                   const actorId = log.staffId as unknown;
                   const targetStaffId = log.targetStaffId as unknown;
                   const actorIdText = formatOperationLogInlineValue(actorId);
-                  const targetIdText = formatOperationLogInlineValue(targetStaffId);
+                  const targetIdText =
+                    formatOperationLogInlineValue(targetStaffId);
                   const actorEntry =
                     isNonEmptyString(actorId) && actorId in staffMap
                       ? staffMap[actorId]
@@ -275,7 +302,9 @@ export default function AdminLogsClean() {
                           noWrap={!isMobile}
                           title={
                             log.timestamp
-                              ? dayjs(log.timestamp).format("YYYY-MM-DD HH:mm:ss")
+                              ? dayjs(log.timestamp).format(
+                                  "YYYY-MM-DD HH:mm:ss",
+                                )
                               : undefined
                           }
                           sx={{ display: "block" }}
@@ -336,7 +365,10 @@ export default function AdminLogsClean() {
                       >
                         <Typography
                           variant="body2"
-                          sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                          sx={{
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                          }}
                         >
                           {getOperationLogDisplaySummary(log)}
                         </Typography>
@@ -369,8 +401,8 @@ export default function AdminLogsClean() {
                       </Box>
                     </ListItem>
                   );
-                })()
-              ))}
+                })(),
+              )}
             </List>
 
             {loading && (

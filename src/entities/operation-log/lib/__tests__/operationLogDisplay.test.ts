@@ -13,9 +13,7 @@ describe("formatOperationLogInlineValue", () => {
     expect(formatOperationLogInlineValue({ message: "object summary" })).toBe(
       '{"message":"object summary"}',
     );
-    expect(formatOperationLogInlineValue(["a", 1, true])).toBe(
-      '["a",1,true]',
-    );
+    expect(formatOperationLogInlineValue(["a", 1, true])).toBe('["a",1,true]');
   });
 
   it("stringifies numbers and booleans", () => {
@@ -25,6 +23,7 @@ describe("formatOperationLogInlineValue", () => {
 
   it("returns null for empty values", () => {
     expect(formatOperationLogInlineValue("   ")).toBeNull();
+    expect(formatOperationLogInlineValue("[object Object]")).toBeNull();
     expect(formatOperationLogInlineValue(null)).toBeNull();
     expect(formatOperationLogInlineValue(undefined)).toBeNull();
   });
@@ -111,6 +110,30 @@ describe("getOperationLogDisplaySummary", () => {
         summary: false,
       }),
     ).toBe("false");
+  });
+
+  it("ignores '[object Object]' placeholder summary strings", () => {
+    expect(
+      getOperationLogDisplaySummary({
+        action: "daily_report.update",
+        details: JSON.stringify({
+          summary: "日報を更新",
+        }),
+        summary: "[object Object]",
+      }),
+    ).toBe("日報を更新");
+  });
+
+  it("ignores '[object Object]' placeholder in details.summary and falls back to action label", () => {
+    expect(
+      getOperationLogDisplaySummary({
+        action: "attendance.clock_in",
+        details: JSON.stringify({
+          summary: "[object Object]",
+        }),
+        summary: null,
+      }),
+    ).toBe("出勤");
   });
 
   it("falls back to the action label when no summary is available", () => {

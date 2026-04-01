@@ -16,8 +16,9 @@ export interface PanelConfig {
  * SplitView のモード
  * - 'single': シングルビューモード（デフォルト）
  * - 'split': 左右2分割モード
+ * - 'triple': 3分割モード
  */
-export type SplitViewMode = "single" | "split";
+export type SplitViewMode = "single" | "split" | "triple";
 
 /**
  * SplitView の状態
@@ -36,6 +37,7 @@ export interface SplitViewContextValue {
   state: SplitViewState;
   setMode: (mode: SplitViewMode) => void;
   enableSplitMode: () => void;
+  enableTripleMode: () => void;
   disableSplitMode: () => void;
   setLeftPanel: (panel: PanelConfig | null) => void;
   setRightPanel: (panel: PanelConfig | null) => void;

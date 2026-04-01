@@ -21,20 +21,30 @@ const toInlineJson = (value: unknown) => {
 
   try {
     const serialized = JSON.stringify(value);
-    return serialized && serialized !== "{}" ? serialized : serialized ?? null;
+    return serialized && serialized !== "{}"
+      ? serialized
+      : (serialized ?? null);
   } catch {
     return null;
   }
 };
 
-export const formatOperationLogInlineValue = (value: unknown): string | null => {
+const isInvalidObjectPlaceholder = (value: string) =>
+  /^\[object\s+[^\]]+\]$/i.test(value.trim());
+
+export const formatOperationLogInlineValue = (
+  value: unknown,
+): string | null => {
   if (value === null || value === undefined) {
     return null;
   }
 
   if (typeof value === "string") {
     const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : null;
+    if (trimmed.length === 0 || isInvalidObjectPlaceholder(trimmed)) {
+      return null;
+    }
+    return trimmed;
   }
 
   if (typeof value === "number" || typeof value === "boolean") {

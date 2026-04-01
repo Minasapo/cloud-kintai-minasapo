@@ -1,7 +1,14 @@
-import type { CreateOperationLogInput, OperationLog } from "@shared/api/graphql/types";
+import type {
+  CreateOperationLogInput,
+  OperationLog,
+} from "@shared/api/graphql/types";
 import { getCurrentUser } from "aws-amplify/auth";
 
+import { createLogger } from "@/shared/lib/logger";
+
 import createOperationLogData from "./createOperationLogData";
+
+const logger = createLogger("operationLog");
 
 export const OPERATION_LOG_FORMAT_VERSION = 1;
 
@@ -72,9 +79,7 @@ const ACTION_SUMMARIES: Record<string, string> = {
   "app_config.update": "アプリ設定を更新",
 };
 
-const isPlainObject = (
-  value: unknown,
-): value is Record<string, unknown> =>
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) &&
   typeof value === "object" &&
   !Array.isArray(value) &&
@@ -143,7 +148,9 @@ export const normalizeOperationLogValue = (value: unknown): unknown => {
   return value;
 };
 
-export const parseOperationLogJson = (value?: string | null): unknown | null => {
+export const parseOperationLogJson = (
+  value?: string | null,
+): unknown | null => {
   if (!value) {
     return null;
   }
@@ -191,16 +198,15 @@ const resolveActorStaffId = async (actorStaffId?: string | null) => {
   }
 };
 
-const resolveOperationLogSummary = (
-  action: string,
-  fallback?: string | null,
-) => fallback?.trim() || ACTION_SUMMARIES[action] || action;
+const resolveOperationLogSummary = (action: string, fallback?: string | null) =>
+  fallback?.trim() || ACTION_SUMMARIES[action] || action;
 
 export const buildCanonicalOperationLogInput = async (
   payload: CanonicalOperationLogPayload,
 ): Promise<CreateOperationLogInput> => {
   const action = normalizeOperationLogAction(payload.action);
-  const timestamp = payload.timestamp ?? payload.occurredAt ?? new Date().toISOString();
+  const timestamp =
+    payload.timestamp ?? payload.occurredAt ?? new Date().toISOString();
   const actorStaffId = await resolveActorStaffId(payload.actorStaffId);
   const resourceKey =
     payload.resourceKey ??
@@ -226,7 +232,9 @@ export const buildCanonicalOperationLogInput = async (
     timestamp,
     before: serializeOperationLogJson(payload.before),
     after: serializeOperationLogJson(payload.after),
-    diff: serializeOperationLogJson(buildFullJsonDiff(payload.before, payload.after)),
+    diff: serializeOperationLogJson(
+      buildFullJsonDiff(payload.before, payload.after),
+    ),
     details: serializeOperationLogJson(details),
     metadata: serializeOperationLogJson(payload.metadata),
     ipAddress: payload.ipAddress ?? undefined,
@@ -243,24 +251,42 @@ export const buildCanonicalOperationLogInput = async (
   };
 };
 
-export const logOperationEvent = async (
+export const writeOperationLogEvent = async (
   payload: CanonicalOperationLogPayload,
 ): Promise<OperationLog> => {
   const input = await buildCanonicalOperationLogInput(payload);
   return createOperationLogData(input);
 };
 
-export const isCanonicalOperationLog = (log: Pick<
-  OperationLog,
-  "logFormatVersion" | "resourceKey" | "before" | "after" | "diff"
->) =>
+export const logOperationEvent = async (
+  payload: CanonicalOperationLogPayload,
+): Promise<void> => {
+  try {
+    await writeOperationLogEvent(payload);
+  } catch (error) {
+    logger.error("Operation log write failed", {
+      action: payload.action,
+      resource: payload.resource,
+      resourceId: payload.resourceId,
+      error,
+    });
+  }
+};
+
+export const isCanonicalOperationLog = (
+  log: Pick<
+    OperationLog,
+    "logFormatVersion" | "resourceKey" | "before" | "after" | "diff"
+  >,
+) =>
   Boolean(
     log.logFormatVersion ||
-      log.resourceKey ||
-      log.before ||
-      log.after ||
-      log.diff,
+    log.resourceKey ||
+    log.before ||
+    log.after ||
+    log.diff,
   );
 
-export const getOperationLogSnapshot = (log: Pick<OperationLog, "after" | "before">) =>
-  parseOperationLogJson(log.after) ?? parseOperationLogJson(log.before);
+export const getOperationLogSnapshot = (
+  log: Pick<OperationLog, "after" | "before">,
+) => parseOperationLogJson(log.after) ?? parseOperationLogJson(log.before);
