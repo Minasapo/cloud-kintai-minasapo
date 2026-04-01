@@ -218,7 +218,7 @@ export default function AdminStaffEditor() {
   };
 
   return (
-    <div className="mx-auto h-full w-full max-w-[1280px] px-2 pb-3 pt-2 sm:px-4 md:px-6">
+    <div className="h-full w-full px-2 pb-3 pt-2 sm:px-4 md:px-6">
       <div className="space-y-2.5">
         <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
@@ -731,12 +731,17 @@ function ApproverSettingTableRows({
                     </p>
                   ) : (
                     selectedMultipleOptions.map((option, index) => (
-                      <div key={option.value} className="flex items-center gap-2">
+                      <div
+                        key={option.value}
+                        className="flex items-center gap-2"
+                      >
                         <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-slate-300 bg-slate-50 px-1 text-xs font-semibold text-slate-700">
                           {index + 1}
                         </span>
                         <div>
-                          <p className="text-sm text-slate-900">{option.label}</p>
+                          <p className="text-sm text-slate-900">
+                            {option.label}
+                          </p>
                           <p className="text-xs text-slate-500">
                             {option.description}
                           </p>

@@ -11,7 +11,6 @@ import {
   Checkbox,
   Chip,
   CircularProgress,
-  Container,
   Table,
   TableBody,
   TableCell,
@@ -562,14 +561,21 @@ export default function ShiftManagementBoard() {
 
   if (!isAuthenticated) {
     return (
-      <Container sx={{ py: 6, display: "flex", justifyContent: "center" }}>
+      <Box
+        sx={{
+          py: 6,
+          px: { xs: 1, md: 4 },
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <CircularProgress />
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container sx={{ py: 3 }}>
+    <Box sx={{ py: 3, px: { xs: 1, md: 4 } }}>
       <Box
         sx={{
           display: "flex",
@@ -1384,6 +1390,6 @@ export default function ShiftManagementBoard() {
         onStateChange={handleBulkEditStateChange}
         onSubmit={handleApplyBulkEdit}
       />
-    </Container>
+    </Box>
   );
 }

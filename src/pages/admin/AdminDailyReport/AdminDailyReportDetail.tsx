@@ -476,7 +476,7 @@ export default function AdminDailyReportDetail({
 
   return (
     <div
-      className={`mx-auto w-full max-w-[1280px] ${isCompact ? "px-2 pb-4 pt-0" : "px-2 pb-6 pt-4 sm:px-4 md:px-6"}`}
+      className={`w-full ${isCompact ? "px-2 pb-4 pt-0" : "px-2 pb-6 pt-4 sm:px-4 md:px-6"}`}
     >
       <div className="space-y-3">
         {/* Errors */}

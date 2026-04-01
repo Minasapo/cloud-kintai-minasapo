@@ -86,7 +86,7 @@ export default function AdminStaff() {
 
   if (staffLoading) {
     return (
-      <div className="mx-auto w-full max-w-[1280px] px-2 pt-2 sm:px-4 md:px-6">
+      <div className="w-full px-2 pt-2 sm:px-4 md:px-6">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
           <div className="h-full w-1/3 animate-pulse rounded-full bg-teal-500" />
         </div>
@@ -100,7 +100,7 @@ export default function AdminStaff() {
   }
 
   return (
-    <div className="mx-auto h-full w-full max-w-[1280px] px-2 pb-3 pt-2 sm:px-4 md:px-6">
+    <div className="h-full w-full px-2 pb-3 pt-2 sm:px-4 md:px-6">
       <div className="space-y-2.5">
         <section className="admin-staff-hero">
           <div className="flex flex-col items-stretch gap-1 sm:flex-row sm:justify-end sm:items-center">
@@ -121,15 +121,25 @@ export default function AdminStaff() {
 
         <section className="flex flex-col gap-1 md:flex-row">
           <div className="admin-staff-stat-card">
-            <p className="admin-staff-stat-label text-xs leading-tight">登録スタッフ</p>
-            <p className="admin-staff-stat-value text-2xl leading-none">{totalStaffCount}</p>
+            <p className="admin-staff-stat-label text-xs leading-tight">
+              登録スタッフ
+            </p>
+            <p className="admin-staff-stat-value text-2xl leading-none">
+              {totalStaffCount}
+            </p>
           </div>
           <div className="admin-staff-stat-card">
-            <p className="admin-staff-stat-label text-xs leading-tight">有効アカウント</p>
-            <p className="admin-staff-stat-value text-2xl leading-none">{enabledStaffCount}</p>
+            <p className="admin-staff-stat-label text-xs leading-tight">
+              有効アカウント
+            </p>
+            <p className="admin-staff-stat-value text-2xl leading-none">
+              {enabledStaffCount}
+            </p>
           </div>
           <div className="admin-staff-stat-card">
-            <p className="admin-staff-stat-label text-xs leading-tight">パスワード変更待ち</p>
+            <p className="admin-staff-stat-label text-xs leading-tight">
+              パスワード変更待ち
+            </p>
             <p className="admin-staff-stat-value warning text-2xl leading-none">
               {passwordChangeRequiredCount}
             </p>
@@ -220,7 +230,8 @@ export default function AdminStaff() {
                     staff.givenName ?? ""
                   }`.trim();
                   const accountStatusLabel = staff.enabled ? "有効" : "無効";
-                  const statusLabel = STATUS_LABEL_MAP.get(staff.status) ?? "***";
+                  const statusLabel =
+                    STATUS_LABEL_MAP.get(staff.status) ?? "***";
                   const roleLabel = getRoleLabel(staff.role, staff.owner);
                   const attendanceManaged =
                     staff.attendanceManagementEnabled !== false;
@@ -268,7 +279,9 @@ export default function AdminStaff() {
                           {fullName || "(未設定)"}
                         </p>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2">{staff.mailAddress}</td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        {staff.mailAddress}
+                      </td>
                       <td className="whitespace-nowrap px-4 py-2">
                         <span className="inline-flex items-center rounded-full border border-slate-300 px-2 py-0.5 text-xs text-slate-700">
                           {roleLabel}
@@ -285,7 +298,9 @@ export default function AdminStaff() {
                           {attendanceManaged ? "対象" : "対象外"}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2">{workTypeLabel}</td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        {workTypeLabel}
+                      </td>
                       <td className="admin-staff-sort-key whitespace-nowrap px-4 py-2">
                         {staff.sortKey || ""}
                       </td>

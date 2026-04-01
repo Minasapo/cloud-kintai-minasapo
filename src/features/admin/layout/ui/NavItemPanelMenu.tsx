@@ -30,13 +30,7 @@ const NavItemPanelMenu = ({
   className,
   sx,
 }: NavItemPanelMenuProps) => {
-  const {
-    state,
-    enableSplitMode,
-    enableTripleMode,
-    setLeftPanel,
-    setRightPanel,
-  } = useSplitView();
+  const { enableSplitMode, setLeftPanel, setRightPanel } = useSplitView();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const panelOption = useMemo(
@@ -66,18 +60,17 @@ const NavItemPanelMenu = ({
       return;
     }
 
+    setLeftPanel(null);
     setRightPanel(panelConfig);
-    if (state.mode === "single") {
-      enableSplitMode();
-    }
+    enableSplitMode();
 
     handleMenuClose();
   }, [
     enableSplitMode,
     handleMenuClose,
     panelOption,
+    setLeftPanel,
     setRightPanel,
-    state.mode,
   ]);
 
   const handleOpenLeft = useCallback(() => {
@@ -90,18 +83,17 @@ const NavItemPanelMenu = ({
       return;
     }
 
+    setRightPanel(null);
     setLeftPanel(panelConfig);
-    if (state.mode !== "triple") {
-      enableTripleMode();
-    }
+    enableSplitMode();
 
     handleMenuClose();
   }, [
-    enableTripleMode,
+    enableSplitMode,
     handleMenuClose,
     panelOption,
     setLeftPanel,
-    state.mode,
+    setRightPanel,
   ]);
 
   return (
