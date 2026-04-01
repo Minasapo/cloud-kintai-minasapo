@@ -1,0 +1,26 @@
+{
+  "id": "developer/overview",
+  "title": "開発者向けドキュメント",
+  "description": "このセクションは、garaku-frontend の開発に参加するメンバー向けです。",
+  "source": "@site/docs/developer/overview.md",
+  "sourceDirName": "developer",
+  "slug": "/developer/overview",
+  "permalink": "/docs/developer/overview",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "mainSidebar",
+  "previous": {
+    "title": "よくある質問",
+    "permalink": "/docs/admin/faq"
+  },
+  "next": {
+    "title": "セットアップ",
+    "permalink": "/docs/developer/getting-started/setup"
+  }
+}

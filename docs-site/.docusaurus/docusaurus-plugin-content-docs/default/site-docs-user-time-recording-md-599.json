@@ -1,0 +1,17 @@
+{
+  "id": "user/time-recording",
+  "title": "出退勤を打刻する",
+  "description": "このページでは、勤務開始から勤務終了までの基本的な打刻手順を説明します。",
+  "source": "@site/docs/user/time-recording.md",
+  "sourceDirName": "user",
+  "slug": "/user/time-recording",
+  "permalink": "/docs/user/time-recording",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  }
+}

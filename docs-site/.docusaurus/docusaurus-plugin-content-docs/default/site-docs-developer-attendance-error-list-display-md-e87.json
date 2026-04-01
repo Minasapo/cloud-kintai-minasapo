@@ -1,0 +1,26 @@
+{
+  "id": "developer/attendance-error-list-display",
+  "title": "打刻エラー一覧の表示仕様",
+  "description": "/attendance/list のデスクトップ画面に表示される「打刻エラー一覧」と、モバイル画面の警告アラートの表示条件を定義する。",
+  "source": "@site/docs/developer/attendance-error-list-display.md",
+  "sourceDirName": "developer",
+  "slug": "/developer/attendance-error-list-display",
+  "permalink": "/docs/developer/attendance-error-list-display",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  },
+  "sidebar": "mainSidebar",
+  "previous": {
+    "title": "勤怠管理対象フラグ仕様",
+    "permalink": "/docs/developer/attendance-management-enabled"
+  },
+  "next": {
+    "title": "勤怠ステータス判定ロジック",
+    "permalink": "/docs/developer/attendance-status-determination"
+  }
+}

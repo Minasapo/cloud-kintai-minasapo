@@ -1,0 +1,17 @@
+{
+  "id": "user/attendance-check",
+  "title": "勤怠を確認する",
+  "description": "このページでは、打刻後の勤怠確認と、必要時の修正申請の流れを説明します。",
+  "source": "@site/docs/user/attendance-check.md",
+  "sourceDirName": "user",
+  "slug": "/user/attendance-check",
+  "permalink": "/docs/user/attendance-check",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4
+  }
+}

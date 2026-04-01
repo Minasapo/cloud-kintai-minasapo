@@ -1,0 +1,26 @@
+{
+  "id": "staff/dashboard",
+  "title": "打刻ダッシュボードを確認する",
+  "description": "このページでは、打刻画面の右側に表示される「打刻ダッシュボード」で何を確認できるかを説明します。",
+  "source": "@site/docs/staff/dashboard.md",
+  "sourceDirName": "staff",
+  "slug": "/staff/dashboard",
+  "permalink": "/docs/staff/dashboard",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  },
+  "sidebar": "mainSidebar",
+  "previous": {
+    "title": "出退勤を打刻する",
+    "permalink": "/docs/staff/time-recording"
+  },
+  "next": {
+    "title": "シフトを確認・編集する",
+    "permalink": "/docs/staff/shift"
+  }
+}

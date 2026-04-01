@@ -1,0 +1,26 @@
+{
+  "id": "staff/faq",
+  "title": "よくある質問",
+  "description": "Q. どこから始めればよいですか？",
+  "source": "@site/docs/staff/faq.md",
+  "sourceDirName": "staff",
+  "slug": "/staff/faq",
+  "permalink": "/docs/staff/faq",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  },
+  "sidebar": "mainSidebar",
+  "previous": {
+    "title": "申請を確認する",
+    "permalink": "/docs/staff/request-check"
+  },
+  "next": {
+    "title": "管理者向けドキュメント",
+    "permalink": "/docs/admin/overview"
+  }
+}

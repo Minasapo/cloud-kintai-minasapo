@@ -1,0 +1,17 @@
+{
+  "id": "user/faq",
+  "title": "よくある質問",
+  "description": "Q. どこから始めればよいですか？",
+  "source": "@site/docs/user/faq.md",
+  "sourceDirName": "user",
+  "slug": "/user/faq",
+  "permalink": "/docs/user/faq",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "admin/shift-plan",
+  "title": "シフト計画を作成する",
+  "description": "このページでは、年間のシフト計画を作成、更新するための基本運用を説明します。",
+  "source": "@site/docs/admin/shift-plan.md",
+  "sourceDirName": "admin",
+  "slug": "/admin/shift-plan",
+  "permalink": "/docs/admin/shift-plan",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 8,
+  "frontMatter": {
+    "sidebar_position": 8
+  },
+  "sidebar": "mainSidebar",
+  "previous": {
+    "title": "シフトを管理する",
+    "permalink": "/docs/admin/admin-shift"
+  },
+  "next": {
+    "title": "勤怠を管理する",
+    "permalink": "/docs/admin/attendance-management"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "admin/overview",
+  "title": "管理者向けドキュメント",
+  "description": "このセクションは、管理者の日常運用に必要な操作をまとめた案内です。",
+  "source": "@site/docs/admin/overview.md",
+  "sourceDirName": "admin",
+  "slug": "/admin/overview",
+  "permalink": "/docs/admin/overview",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "mainSidebar",
+  "previous": {
+    "title": "よくある質問",
+    "permalink": "/docs/staff/faq"
+  },
+  "next": {
+    "title": "画面遷移マップ（管理者向け）",
+    "permalink": "/docs/admin/navigation-map"
+  }
+}
