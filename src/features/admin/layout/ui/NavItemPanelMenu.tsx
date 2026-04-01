@@ -94,6 +94,8 @@ const NavItemPanelMenu = ({
         return;
       }
 
+      handleMenuClose();
+
       if (hasOpenedPanel) {
         setPendingSide(side);
         return;
@@ -101,7 +103,7 @@ const NavItemPanelMenu = ({
 
       applyOpen(side);
     },
-    [applyOpen, hasOpenedPanel, panelOption],
+    [applyOpen, handleMenuClose, hasOpenedPanel, panelOption],
   );
 
   const handleOpenRight = useCallback(() => {
