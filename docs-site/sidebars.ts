@@ -50,9 +50,11 @@ const sidebars: SidebarsConfig = {
           label: "管理業務",
           items: [
             "admin/dashboard",
+            "admin/admin-shift",
             "admin/attendance-management",
             "admin/attendances",
             "admin/request-approval",
+            "admin/staff-management",
           ],
         },
         "admin/faq",

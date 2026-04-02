@@ -20,7 +20,9 @@ sidebar_position: 1
 
 - [画面遷移マップ](./navigation-map.md)
 - [ダッシュボードを確認する](./dashboard.md)
+- [シフトを管理する](./admin-shift.md)
 - [勤怠を管理する](./attendance-management.md)
 - [勤怠一覧を確認する](./attendances.md)
 - [申請を承認する](./request-approval.md)
+- [スタッフを管理する](./staff-management.md)
 - [よくある質問](./faq.md)
