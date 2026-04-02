@@ -22,6 +22,7 @@ export default function RegisterSummaryAttendanceErrorCountCard({
           testId="register-dashboard-attendance-error-info"
           ariaLabel={attendanceErrorInfoLabel}
           tooltipContent={attendanceErrorInfoLabel}
+          tooltipClassName="left-auto right-0 w-[14rem] max-w-[calc(100vw-1rem)] whitespace-normal break-words sm:w-max sm:max-w-[220px]"
         />
       </div>
       <p
