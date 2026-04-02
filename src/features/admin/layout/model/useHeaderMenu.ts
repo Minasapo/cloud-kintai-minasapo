@@ -15,7 +15,7 @@ export const ADMIN_HEADER_MENU_ITEMS: readonly AdminHeaderMenuItem[] = [
     primaryLabel: "ダッシュボード",
     secondaryLabel: "Overview",
     description: "全体状況と優先タスクを俯瞰するコントロールデッキです。",
-    ctaLabel: "主要KPIを確認",
+    ctaLabel: "主要指標を確認",
     href: "/admin",
   },
   {

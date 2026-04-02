@@ -5,7 +5,7 @@ describe("ADMIN_HEADER_MENU_ITEMS", () => {
     expect(ADMIN_HEADER_MENU_ITEMS[0]).toMatchObject({
       primaryLabel: "ダッシュボード",
       secondaryLabel: "Overview",
-      ctaLabel: "主要KPIを確認",
+      ctaLabel: "主要指標を確認",
       href: "/admin",
     });
   });
