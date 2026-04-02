@@ -119,11 +119,6 @@ const AdminContextRail = memo(function AdminContextRail({
     >
       <Stack spacing={0.5}>
         <Typography
-          sx={{ fontSize: "0.74rem", fontWeight: 700, color: "#0f766e" }}
-        >
-          CONTROL RAIL
-        </Typography>
-        <Typography
           sx={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a" }}
         >
           {activeMenuItem?.primaryLabel ?? "カテゴリ"}
