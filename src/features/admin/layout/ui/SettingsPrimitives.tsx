@@ -1,5 +1,10 @@
 import dayjs, { type Dayjs } from "dayjs";
-import type { ChangeEvent, CSSProperties, ReactNode, TextareaHTMLAttributes } from "react";
+import type {
+  ChangeEvent,
+  CSSProperties,
+  ReactNode,
+  TextareaHTMLAttributes,
+} from "react";
 
 import { AppButton } from "@/shared/ui/button";
 
@@ -150,7 +155,9 @@ function FieldMessages({
   }
 
   return (
-    <p className={`m-0 text-xs leading-5 ${errorText ? "text-rose-600" : "text-slate-500"}`}>
+    <p
+      className={`m-0 text-xs leading-5 ${errorText ? "text-rose-600" : "text-slate-500"}`}
+    >
       {errorText ?? helperText}
     </p>
   );
@@ -173,9 +180,15 @@ export function SettingsTextField({
   const hasError = Boolean(errorText);
 
   return (
-    <div className={[fieldContainerClassName, className].filter(Boolean).join(" ")}>
+    <div
+      className={[fieldContainerClassName, className].filter(Boolean).join(" ")}
+    >
       {label ? (
-        <label className={[fieldLabelClassName, labelClassName].filter(Boolean).join(" ")}>
+        <label
+          className={[fieldLabelClassName, labelClassName]
+            .filter(Boolean)
+            .join(" ")}
+        >
           {label}
           {required ? <span className="ml-1 text-rose-600">*</span> : null}
         </label>
@@ -218,9 +231,15 @@ export function SettingsTextAreaField({
   const hasError = Boolean(errorText);
 
   return (
-    <div className={[fieldContainerClassName, className].filter(Boolean).join(" ")}>
+    <div
+      className={[fieldContainerClassName, className].filter(Boolean).join(" ")}
+    >
       {label ? (
-        <label className={[fieldLabelClassName, labelClassName].filter(Boolean).join(" ")}>
+        <label
+          className={[fieldLabelClassName, labelClassName]
+            .filter(Boolean)
+            .join(" ")}
+        >
           {label}
           {required ? <span className="ml-1 text-rose-600">*</span> : null}
         </label>
@@ -263,14 +282,22 @@ export function SettingsSelect({
   ...props
 }: SettingsSelectProps) {
   const hasError = Boolean(errorText);
-  const selectId = id ?? (typeof label === "string" ? `settings-select-${label.replace(/\s+/g, "-")}` : undefined);
+  const selectId =
+    id ??
+    (typeof label === "string"
+      ? `settings-select-${label.replace(/\s+/g, "-")}`
+      : undefined);
 
   return (
-    <div className={[fieldContainerClassName, className].filter(Boolean).join(" ")}>
+    <div
+      className={[fieldContainerClassName, className].filter(Boolean).join(" ")}
+    >
       {label ? (
         <label
           htmlFor={selectId}
-          className={[fieldLabelClassName, labelClassName].filter(Boolean).join(" ")}
+          className={[fieldLabelClassName, labelClassName]
+            .filter(Boolean)
+            .join(" ")}
         >
           {label}
           {required ? <span className="ml-1 text-rose-600">*</span> : null}
@@ -341,7 +368,9 @@ export function SettingsCheckbox({
       />
       <span className="flex flex-col gap-1">
         <span>{label}</span>
-        {description ? <span className="text-xs text-slate-500">{description}</span> : null}
+        {description ? (
+          <span className="text-xs text-slate-500">{description}</span>
+        ) : null}
       </span>
     </label>
   );
@@ -357,32 +386,15 @@ export function SettingsSwitch({
   ariaLabel,
 }: SettingsSwitchProps) {
   return (
-    <label
-      className={[
-        "inline-flex cursor-pointer items-center gap-3",
-        disabled ? "cursor-not-allowed opacity-60" : "",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <span className="relative inline-flex items-center">
-        <input
-          type="checkbox"
-          className="peer sr-only"
-          checked={checked}
-          onChange={(event) => onChange(event.target.checked)}
-          disabled={disabled}
-          aria-label={ariaLabel}
-        />
-        <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-emerald-500 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-emerald-400" />
-        <span className="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
-      </span>
-      <span className="flex flex-col gap-0.5">
-        <span className="text-sm font-medium text-slate-700">{label}</span>
-        {description ? <span className="text-xs text-slate-500">{description}</span> : null}
-      </span>
-    </label>
+    <SettingsCheckbox
+      checked={checked}
+      onChange={onChange}
+      label={label}
+      description={description}
+      disabled={disabled}
+      className={className}
+      ariaLabel={ariaLabel}
+    />
   );
 }
 
@@ -461,7 +473,10 @@ export function SettingsButton({
   children,
   className,
 }: SettingsButtonProps) {
-  const toneByVariant: Record<SettingsButtonVariant, "primary" | "secondary" | "danger"> = {
+  const toneByVariant: Record<
+    SettingsButtonVariant,
+    "primary" | "secondary" | "danger"
+  > = {
     primary: "primary",
     secondary: "secondary",
     danger: "danger",
@@ -482,7 +497,12 @@ export function SettingsButton({
   );
 }
 
-export function SettingsRow({ label, description, children, className }: SettingsRowProps) {
+export function SettingsRow({
+  label,
+  description,
+  children,
+  className,
+}: SettingsRowProps) {
   return (
     <div
       className={[
@@ -494,7 +514,9 @@ export function SettingsRow({ label, description, children, className }: Setting
     >
       <div className="flex flex-col gap-1 flex-1 min-w-[280px] max-w-[640px]">
         <span className="text-base font-semibold text-slate-800">{label}</span>
-        {description ? <p className="m-0 text-sm text-slate-500">{description}</p> : null}
+        {description ? (
+          <p className="m-0 text-sm text-slate-500">{description}</p>
+        ) : null}
       </div>
       <div className="min-w-[140px]">{children}</div>
     </div>
