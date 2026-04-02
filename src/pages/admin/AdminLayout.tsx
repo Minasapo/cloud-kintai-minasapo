@@ -63,12 +63,6 @@ const SURFACE_SECTION_SX = {
   boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
 } as const;
 
-const RAIL_ACTION_LINKS = [
-  { href: "/admin/attendances", label: "勤怠一覧" },
-  { href: "/admin/daily-reports", label: "日報" },
-  { href: "/admin/logs", label: "ログ" },
-] as const;
-
 const EmptyPanelState = memo(function EmptyPanelState({
   label,
 }: {
@@ -202,49 +196,6 @@ const AdminContextRail = memo(function AdminContextRail({
       </Stack>
 
       <Divider flexItem />
-
-      <Stack spacing={0.8}>
-        <Typography
-          sx={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}
-        >
-          QUICK ROUTES
-        </Typography>
-        {RAIL_ACTION_LINKS.map((link) => (
-          <Box
-            key={link.href}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger":
-                {
-                  visibility: "visible",
-                },
-            }}
-          >
-            <Button
-              variant="outlined"
-              onClick={() => onSelect(link.href)}
-              sx={{
-                flex: 1,
-                justifyContent: "flex-start",
-                textTransform: "none",
-                borderColor: "rgba(148,163,184,0.38)",
-                color: "#0f172a",
-                borderRadius: "999px",
-              }}
-            >
-              {link.label}
-            </Button>
-            <NavItemPanelMenu
-              href={link.href}
-              label={link.label}
-              className="rail-panel-menu-trigger"
-              sx={{ visibility: "hidden" }}
-            />
-          </Box>
-        ))}
-      </Stack>
     </Stack>
   );
 });
@@ -591,8 +542,28 @@ function AdminLayoutContent() {
   }, [isMobile]);
 
   React.useEffect(() => {
-    setIsMobileRailOpen(false);
-  }, [location.pathname]);
+    if (isTripleMode) {
+      ensureRightPanel();
+      ensureMiddlePanel();
+    }
+  }, [isTripleMode, ensureRightPanel, ensureMiddlePanel]);
+
+  React.useEffect(() => {
+    if (!isSplitMode) {
+      return;
+    }
+
+    if (!state.leftPanel && !state.rightPanel) {
+      ensureRightPanel();
+    }
+  }, [ensureRightPanel, isSplitMode, state.leftPanel, state.rightPanel]);
+
+  React.useEffect(() => {
+    if (isMobile && state.mode === "triple") {
+      setMode("split");
+      setLeftPanel(null);
+    }
+  }, [isMobile, state.mode, setMode, setLeftPanel]);
 
   return (
     <Stack component="section" sx={PAGE_CONTAINER_SX}>
@@ -604,47 +575,29 @@ function AdminLayoutContent() {
         <Box
           sx={{
             display: "flex",
-            alignItems: { xs: "flex-start", md: "center" },
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
+            alignItems: "center",
             gap: 1,
-            p: 2,
+            p: 1.5,
             borderBottom: "1px solid rgba(226,232,240,0.85)",
-            flexWrap: "wrap",
           }}
         >
-          <Stack spacing={0.25}>
-            <Typography
-              sx={{ fontSize: "0.78rem", fontWeight: 700, color: "#0f766e" }}
+          {isMobile && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleToggleMobileRail}
+              sx={{ textTransform: "none", borderRadius: "999px" }}
             >
-              ADMIN DASHBOARD
-            </Typography>
-            <Typography
-              sx={{ fontSize: "1.02rem", fontWeight: 700, color: "#0f172a" }}
-            >
-              {activeMenuItem?.primaryLabel ?? "管理画面"}
-            </Typography>
-          </Stack>
-
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {isMobile && (
-              <Button
-                variant="outlined"
-                onClick={handleToggleMobileRail}
-                sx={{ textTransform: "none", borderRadius: "999px" }}
-              >
-                {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
-              </Button>
-            )}
-            <SplitModeToggle
-              mode={state.mode}
-              onToggle={handleToggleSplitMode}
-            />
-          </Box>
+              {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
+            </Button>
+          )}
+          <SplitModeToggle mode={state.mode} onToggle={handleToggleSplitMode} />
         </Box>
 
         <Stack
           direction={{ xs: "column", md: "row" }}
-          sx={{ width: "100%", flex: 1, minHeight: 0 }}
+          sx={{ width: "100%", flex: 1 }}
         >
           {!isMobile && (
             <AdminContextRail
