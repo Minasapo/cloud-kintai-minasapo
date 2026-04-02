@@ -18,7 +18,21 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "一般向け",
-      items: ["user/overview", "user/basic-operations", "user/faq"],
+      items: [
+        "user/overview",
+        "user/navigation-map",
+        {
+          type: "category",
+          label: "基本操作",
+          items: [
+            "user/basic-operations",
+            "user/time-recording",
+            "user/attendance-check",
+            "user/request-check",
+          ],
+        },
+        "user/faq",
+      ],
     },
     {
       type: "category",
