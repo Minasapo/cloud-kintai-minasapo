@@ -1,5 +1,4 @@
 import { useCalendars } from "@entities/calendar/model/useCalendars";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   Alert,
   Badge,
@@ -20,7 +19,6 @@ import dayjs from "dayjs";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import useShiftPlanYear from "@/features/shift/management/model/useShiftPlanYear";
@@ -29,16 +27,14 @@ import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
-import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
+import { ShiftState } from "../lib/generateMockShifts";
 import { getCellHighlightSx } from "../lib/selectionHighlight";
-import {
-  getGroupCoveragePresentation,
-  ShiftGroupConstraints,
-} from "../lib/shiftGroups";
+import { getGroupCoveragePresentation } from "../lib/shiftGroups";
 import { defaultStatusVisual, statusVisualMap } from "../lib/shiftStateMapping";
+import { useShiftDisplayData } from "../model/useShiftDisplayData";
 import useShiftManagementDialogs from "../model/useShiftManagementDialogs";
-import useShiftRequestAssignments from "../model/useShiftRequestAssignments";
 import useShiftSelection from "../model/useShiftSelection";
+import { useShiftStaffGroups } from "../model/useShiftStaffGroups";
 import ShiftBulkEditDialog from "./components/ShiftBulkEditDialog";
 import ShiftEditDialog from "./components/ShiftEditDialog";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
@@ -124,91 +120,17 @@ export default function ShiftManagementBoard() {
   const navigate = useNavigate();
   const { notify } = useAppNotification();
   const { cognitoUser } = useCognitoUser();
-  const { getShiftGroups } = useContext(AppConfigContext);
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-  const { loading, error, staffs } = useStaffs({ isAuthenticated });
 
-  const shiftStaffs = useMemo(
-    () => staffs.filter((s) => s.workType === "shift"),
-    [staffs],
-  );
-
-  const shiftGroupDefinitions = useMemo(
-    () =>
-      getShiftGroups().map((group) => ({
-        label: group.label,
-        description: group.description ?? "運用上の調整グループ",
-        min: group.min ?? null,
-        max: group.max ?? null,
-        fixed: group.fixed ?? null,
-      })),
-    [getShiftGroups],
-  );
-
-  const groupedShiftStaffs = useMemo(() => {
-    if (shiftGroupDefinitions.length === 0) {
-      return shiftStaffs.length
-        ? [
-            {
-              groupName: "シフト勤務スタッフ",
-              description:
-                "シフトグループが未設定のため、全員をまとめて表示しています。",
-              members: shiftStaffs,
-              constraints: { min: null, max: null, fixed: null },
-            },
-          ]
-        : [];
-    }
-
-    const groups = shiftGroupDefinitions.map((definition) => ({
-      groupName: definition.label,
-      description: definition.description,
-      members: [] as typeof shiftStaffs,
-      constraints: {
-        min: definition.min ?? null,
-        max: definition.max ?? null,
-        fixed: definition.fixed ?? null,
-      } satisfies ShiftGroupConstraints,
-    }));
-    const groupMap = new Map(groups.map((group) => [group.groupName, group]));
-    const unassigned: typeof shiftStaffs = [];
-
-    shiftStaffs.forEach((staff) => {
-      if (staff.shiftGroup && groupMap.has(staff.shiftGroup)) {
-        groupMap.get(staff.shiftGroup)!.members.push(staff);
-      } else {
-        unassigned.push(staff);
-      }
-    });
-
-    return [
-      ...groups,
-      ...(unassigned.length
-        ? [
-            {
-              groupName: "未割り当て",
-              description: "シフトグループが設定されていないメンバーです。",
-              members: unassigned,
-              constraints: { min: null, max: null, fixed: null },
-            },
-          ]
-        : []),
-    ];
-  }, [shiftGroupDefinitions, shiftStaffs]);
-
-  const displayedStaffOrder = useMemo(
-    () => groupedShiftStaffs.flatMap((group) => group.members),
-    [groupedShiftStaffs],
-  );
-
-  const staffIdToIndex = useMemo(() => {
-    const map = new Map<string, number>();
-    displayedStaffOrder.forEach((staff, index) => {
-      map.set(staff.id, index);
-    });
-    return map;
-  }, [displayedStaffOrder]);
+  const {
+    shiftStaffs,
+    loading,
+    error,
+    groupedShiftStaffs,
+    displayedStaffOrder,
+    staffIdToIndex,
+  } = useShiftStaffGroups();
 
   const [currentMonth, setCurrentMonth] = useState(dayjs());
   const monthStart = useMemo(
@@ -299,115 +221,26 @@ export default function ShiftManagementBoard() {
     return { minWidth: DAY_COL_WIDTH };
   };
 
-  // シミュレーションシナリオを選べるようにする（デフォルトは実際の希望シフト）
-  const [scenario] = React.useState<string>("actual");
-
-  // mockShifts を state 化し、scenario/shiftStaffs/days に応じて生成する
-  const [mockShifts, setMockShifts] = React.useState<
-    Map<string, Record<string, ShiftState>>
-  >(new Map());
-
   const {
-    shiftRequestAssignments,
+    scenario,
+    setMockShifts,
     shiftRequestHistoryMeta,
     shiftRequestsLoading,
     shiftRequestsError,
     persistShiftRequestChanges,
-  } = useShiftRequestAssignments({
+    displayShifts,
+    dailyCounts,
+    groupDailyCounts,
+    plannedDailyCounts,
+  } = useShiftDisplayData({
     shiftStaffs,
+    groupedShiftStaffs,
     monthStart,
+    days,
     cognitoUserId: cognitoUser?.id,
-    enabled: isAuthenticated,
+    isAuthenticated,
+    shiftPlanPlans,
   });
-
-  React.useEffect(() => {
-    // 実績表示モードではモック生成は不要
-    if (scenario === "actual") {
-      setMockShifts(new Map());
-      return;
-    }
-    // shiftStaffs が未ロードのときは空のマップを設定
-    if (!shiftStaffs || shiftStaffs.length === 0) {
-      setMockShifts(new Map());
-      return;
-    }
-    const map = generateMockShifts(
-      shiftStaffs.map((s) => ({ id: s.id })),
-      days,
-      scenario,
-    );
-    setMockShifts(map);
-  }, [shiftStaffs, days, scenario]);
-  const displayShifts = useMemo(() => {
-    const next = new Map<string, Record<string, ShiftState>>();
-    shiftStaffs.forEach((staff) => {
-      if (scenario === "actual" && shiftRequestAssignments.has(staff.id)) {
-        next.set(staff.id, shiftRequestAssignments.get(staff.id)!);
-      } else if (scenario !== "actual" && mockShifts.has(staff.id)) {
-        next.set(staff.id, mockShifts.get(staff.id)!);
-      } else {
-        next.set(staff.id, {});
-      }
-    });
-    return next;
-  }, [mockShifts, scenario, shiftRequestAssignments, shiftStaffs]);
-
-  const dailyCounts = useMemo(() => {
-    const m = new Map<string, number>();
-    days.forEach((d) => {
-      const key = d.format("YYYY-MM-DD");
-      let cnt = 0;
-      shiftStaffs.forEach((s) => {
-        if (displayShifts.get(s.id)?.[key] === "work") cnt += 1;
-      });
-      m.set(key, cnt);
-    });
-    return m;
-  }, [days, shiftStaffs, displayShifts]);
-
-  const groupDailyCounts = useMemo(() => {
-    const result = new Map<string, Map<string, number>>();
-    groupedShiftStaffs.forEach(({ groupName, members }) => {
-      const groupCounts = new Map<string, number>();
-      days.forEach((d) => {
-        const key = d.format("YYYY-MM-DD");
-        let cnt = 0;
-        members.forEach((member) => {
-          if (displayShifts.get(member.id)?.[key] === "work") cnt += 1;
-        });
-        groupCounts.set(key, cnt);
-      });
-      result.set(groupName, groupCounts);
-    });
-    return result;
-  }, [displayShifts, groupedShiftStaffs, days]);
-
-  const plannedDailyCounts = useMemo(() => {
-    const targetMonth = monthStart.month() + 1;
-    const map = new Map<string, number | null>();
-    days.forEach((d) => {
-      map.set(d.format("YYYY-MM-DD"), null);
-    });
-    if (!shiftPlanPlans) {
-      return map;
-    }
-    const monthPlan =
-      shiftPlanPlans.find(
-        (plan) => typeof plan.month === "number" && plan.month === targetMonth,
-      ) ?? null;
-    if (!monthPlan) {
-      return map;
-    }
-    const capacities = monthPlan.dailyCapacities ?? [];
-    days.forEach((d, index) => {
-      const value = capacities[index];
-      map.set(
-        d.format("YYYY-MM-DD"),
-        typeof value === "number" && !Number.isNaN(value) ? value : null,
-      );
-    });
-    return map;
-  }, [days, monthStart, shiftPlanPlans]);
 
   // 変更を追跡するためのRef
   const pendingChangesRef = React.useRef<Map<string, Map<string, ShiftState>>>(
