@@ -21,6 +21,7 @@ sidebar_position: 1
 
 - [基本操作](./basic-operations.md)
 - [画面遷移マップ](./navigation-map.md)
+- [日報を記録する](./attendance-report.md)
 - [勤怠を修正する](./attendance-edit.md)
 - [よくある質問](./faq.md)
 
@@ -28,5 +29,6 @@ sidebar_position: 1
 
 1. [出退勤を打刻する](./time-recording.md)
 1. [勤怠を確認する](./attendance-check.md)
+1. [日報を記録する](./attendance-report.md)
 1. [勤怠を修正する](./attendance-edit.md)
 1. [申請を確認する](./request-check.md)
