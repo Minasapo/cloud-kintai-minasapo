@@ -127,7 +127,7 @@ describe("AdminPendingApprovalSummary", () => {
       "grid-cols-2",
     );
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
-      "rounded-[8px]",
+      "rounded-[4px]",
     );
     expect(screen.getAllByText("管理者のみ")).toHaveLength(2);
     expect(
@@ -241,7 +241,7 @@ describe("AdminPendingApprovalSummary", () => {
     });
 
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
-      "rounded-[6px]",
+      "rounded-[4px]",
     );
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
       "h-full",

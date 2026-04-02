@@ -30,7 +30,7 @@ export default function TimeElapsedErrorDialog({
       data-testid="time-elapsed-error-dialog"
       className={`${open ? "flex" : "hidden"} fixed inset-0 z-50 items-center justify-center bg-slate-950/50 p-4`}
     >
-      <div className="w-full max-w-md rounded-[6px] bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-[4px] bg-white p-6 shadow-xl">
         <h2
           id="alert-dialog-title"
           className="m-0 text-lg font-semibold text-slate-900"

@@ -363,7 +363,7 @@ export default function RegisterAttendanceSummaryCard({
   return (
     <section
       data-testid="register-dashboard-attendance-summary-card"
-      className="relative rounded-[8px] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
+      className="relative rounded-[4px] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -378,7 +378,7 @@ export default function RegisterAttendanceSummaryCard({
           containerClassName="absolute right-3 top-3 inline-flex"
         />
         {isLoading && (
-          <span className="inline-flex rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold leading-none text-slate-700">
+          <span className="inline-flex rounded-[4px] border border-slate-300 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold leading-none text-slate-700">
             集計中
           </span>
         )}
