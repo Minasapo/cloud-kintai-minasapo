@@ -3,9 +3,9 @@ import { useContext } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { useDuplicateAttendanceWarning } from "@/hooks/useDuplicateAttendanceWarning";
+import { useDuplicateAttendanceWarning } from "@/features/attendance/model/useDuplicateAttendanceWarning";
+import { useWorkflowCommentNotification } from "@/features/workflow/notification/model/useWorkflowCommentNotification";
 import { useNetworkStatusNotification } from "@/hooks/useNetworkStatusNotification";
-import { useWorkflowCommentNotification } from "@/hooks/useWorkflowCommentNotification";
 import { useWorkflowNotification } from "@/hooks/useWorkflowNotification";
 
 function AppRuntimeEffects() {

@@ -23,10 +23,10 @@ import { useNavigate } from "react-router-dom";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
+import useShiftPlanYear from "@/features/shift/management/model/useShiftPlanYear";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import useShiftPlanYear from "@/hooks/useShiftPlanYear";
 import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
 
 import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";

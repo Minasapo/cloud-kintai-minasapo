@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 
-import useShiftPlanYear from "../useShiftPlanYear";
+import useShiftPlanYear from "./useShiftPlanYear";
 
 type MockGraphQL = jest.Mock;
 const mockGraphql: MockGraphQL = jest.fn();

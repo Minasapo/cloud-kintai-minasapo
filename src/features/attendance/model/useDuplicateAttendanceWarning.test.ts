@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 
 import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
-import { useDuplicateAttendanceWarning } from "../useDuplicateAttendanceWarning";
+import { useDuplicateAttendanceWarning } from "./useDuplicateAttendanceWarning";
 
 jest.mock("@app/hooks", () => ({
   useAppDispatchV2: jest.fn(),

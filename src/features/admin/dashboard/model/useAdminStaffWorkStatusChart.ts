@@ -15,7 +15,7 @@ import {
   type StaffType,
   useStaffs,
 } from "@/entities/staff/model/useStaffs/useStaffs";
-import { useStandardWorkHours } from "@/hooks/useAppConfigDerived";
+import { useStandardWorkHours } from "@/features/admin/dashboard/model/useAppConfigDerived";
 import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { listAttendances } from "@/shared/api/graphql/documents/queries";

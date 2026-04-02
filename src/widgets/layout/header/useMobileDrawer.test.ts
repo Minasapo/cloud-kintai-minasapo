@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 
-import { useMobileDrawer } from "../useMobileDrawer";
+import { useMobileDrawer } from "./useMobileDrawer";
 
 describe("useMobileDrawer", () => {
   it("初期状態は閉じている", () => {
