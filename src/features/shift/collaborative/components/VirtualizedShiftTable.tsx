@@ -94,6 +94,7 @@ interface VirtualizedShiftTableProps {
     work: number;
     fixedOff: number;
     requestedOff: number;
+    plannedCapacity: number;
   };
   currentUserId?: string;
 }
@@ -208,7 +209,7 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                     </Typography>
                     <Typography
                       variant="caption"
-                      color={count.work < 2 ? "warning.main" : "text.secondary"}
+                      color={count.work !== count.plannedCapacity ? "warning.main" : "text.secondary"}
                     >
                       {count.work}人
                     </Typography>

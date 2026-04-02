@@ -142,8 +142,19 @@ describe("useCollaborativePageState", () => {
     });
 
     mockUseShiftMetrics.mockReturnValue({
-      calculateDailyCount: jest.fn(() => 0),
-      progress: [],
+      calculateDailyCount: jest.fn(() => ({
+        work: 0,
+        fixedOff: 0,
+        requestedOff: 0,
+        plannedCapacity: 0,
+      })),
+      progress: {
+        confirmedCount: 0,
+        confirmedPercent: 0,
+        needsAdjustmentCount: 0,
+        adjustmentPercent: 0,
+        emptyCount: 0,
+      },
     });
 
     mockUseSelectionState.mockReturnValue({

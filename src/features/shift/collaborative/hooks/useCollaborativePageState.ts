@@ -605,6 +605,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
     days,
     staffIds,
     state.shiftDataMap,
+    shiftPlanCapacities,
   );
 
   return {
