@@ -9,12 +9,22 @@ import { PageSection } from "@/shared/ui/layout";
 
 export const resolveShiftRequestMode = (
   defaultMode: ShiftDisplayMode,
+  shiftCollaborativeEnabled: boolean,
 ): ShiftDisplayMode => {
+  if (!shiftCollaborativeEnabled) {
+    return "normal";
+  }
+
   return defaultMode;
 };
 
 export default function ShiftRequestPage() {
-  const { config, getShiftDefaultMode, isConfigLoading } = useAppConfig();
+  const {
+    config,
+    getShiftCollaborativeEnabled,
+    getShiftDefaultMode,
+    isConfigLoading,
+  } = useAppConfig();
 
   if (isConfigLoading && !config) {
     return (
@@ -26,7 +36,10 @@ export default function ShiftRequestPage() {
     );
   }
 
-  const selectedMode = resolveShiftRequestMode(getShiftDefaultMode());
+  const selectedMode = resolveShiftRequestMode(
+    getShiftDefaultMode(),
+    getShiftCollaborativeEnabled(),
+  );
 
   if (selectedMode === "collaborative") {
     return <ShiftCollaborativePage />;
