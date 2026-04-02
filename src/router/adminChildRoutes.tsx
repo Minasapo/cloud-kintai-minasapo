@@ -1,4 +1,4 @@
-import { RouteObject } from "react-router-dom";
+import { Navigate, RouteObject } from "react-router-dom";
 
 import AdminShiftGuard from "../pages/admin/AdminShiftGuard";
 import NotFound from "../pages/NotFound";
@@ -72,9 +72,6 @@ const AdminLogsRoute = createLazyRoute(
 );
 const AdminMasterLayoutRoute = createLazyRoute(
   () => import("../pages/admin/AdminMasterLayout"),
-);
-const AdminSettingsTopRoute = createLazyRoute(
-  () => import("../pages/admin/AdminSettingsTop"),
 );
 const AdminShiftSettingsRoute = createLazyRoute(
   () => import("../pages/admin/AdminShiftSettings/AdminShiftSettings"),
@@ -223,8 +220,8 @@ export const adminChildRoutes: RouteObject[] = [
     lazy: AdminMasterLayoutRoute,
     children: [
       {
-        index: true,
-        lazy: AdminSettingsTopRoute,
+            index: true,
+            element: <Navigate to="/admin/master/job_term" replace />,
       },
       {
         path: "job_term",

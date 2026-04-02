@@ -16,6 +16,7 @@ import {
   PAGE_PADDING_X,
   PAGE_PADDING_Y,
 } from "@/features/admin/layout/adminLayoutTokens";
+import { getAdminSettingsNavigationGroups } from "@/features/admin/layout/model/adminSettingsNavigation";
 import {
   ADMIN_SPLIT_PANEL_OPTIONS,
   buildAdminSplitPanelConfig,
@@ -63,6 +64,15 @@ const SURFACE_SECTION_SX = {
   boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
 } as const;
 
+const SETTINGS_HREF = "/admin/master";
+const SETTINGS_NAV_GROUPS = getAdminSettingsNavigationGroups();
+
+const RAIL_ACTION_LINKS = [
+  { label: "勤怠修正申請", href: "/admin/attendances" },
+  { label: "シフト運用", href: "/admin/shift" },
+  { label: "ワークフロー承認", href: "/admin/workflow" },
+] as const;
+
 const EmptyPanelState = memo(function EmptyPanelState({
   label,
 }: {
@@ -96,15 +106,26 @@ const AdminContextRail = memo(function AdminContextRail({
   menuItems,
   activeMenuHref,
   activeMenuItem,
+  currentPath,
   onSelect,
   compact,
 }: {
   menuItems: ReturnType<typeof useHeaderMenu>;
   activeMenuHref: string;
   activeMenuItem: ReturnType<typeof useHeaderMenu>[number] | null;
+  currentPath: string;
   onSelect: (itemHref: string) => void;
   compact?: boolean;
 }) {
+  const isSettingsActive = activeMenuHref === SETTINGS_HREF;
+  const [settingsExpanded, setSettingsExpanded] = React.useState(isSettingsActive);
+
+  React.useEffect(() => {
+    if (isSettingsActive) {
+      setSettingsExpanded(true);
+    }
+  }, [isSettingsActive]);
+
   return (
     <Stack
       spacing={2}
@@ -115,9 +136,15 @@ const AdminContextRail = memo(function AdminContextRail({
         background:
           "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(255,255,255,0.9) 100%)",
         p: 2,
+        overflowY: "auto",
       }}
     >
       <Stack spacing={0.5}>
+        <Typography
+          sx={{ fontSize: "0.74rem", fontWeight: 700, color: "#0f766e" }}
+        >
+          CONTROL RAIL
+        </Typography>
         <Typography
           sx={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a" }}
         >
@@ -135,6 +162,153 @@ const AdminContextRail = memo(function AdminContextRail({
       <Stack spacing={1}>
         {menuItems.map((item) => {
           const isActive = item.href === activeMenuHref;
+
+          if (item.href === SETTINGS_HREF) {
+            return (
+              <React.Fragment key={item.href}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger":
+                      { visibility: "visible" },
+                  }}
+                >
+                  <Button
+                    variant="text"
+                    onClick={() => onSelect(item.href)}
+                    sx={{
+                      flex: 1,
+                      justifyContent: "space-between",
+                      textTransform: "none",
+                      borderRadius: "10px",
+                      px: 1.25,
+                      py: 1,
+                      color: isActive ? "#065f46" : "#1e293b",
+                      backgroundColor: isActive
+                        ? "rgba(16,185,129,0.14)"
+                        : "transparent",
+                      fontWeight: isActive ? 700 : 500,
+                      "&:hover": {
+                        backgroundColor: isActive
+                          ? "rgba(16,185,129,0.2)"
+                          : "rgba(148,163,184,0.12)",
+                      },
+                    }}
+                  >
+                    <Box component="span">{item.primaryLabel}</Box>
+                    <Box
+                      component="span"
+                      sx={{ fontSize: "0.72rem", opacity: 0.75 }}
+                    >
+                      {item.secondaryLabel ?? ""}
+                    </Box>
+                  </Button>
+                  <Box
+                    component="button"
+                    type="button"
+                    aria-label={
+                      settingsExpanded
+                        ? "設定メニューを閉じる"
+                        : "設定メニューを開く"
+                    }
+                    onClick={() => setSettingsExpanded((prev) => !prev)}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 26,
+                      height: 26,
+                      borderRadius: "6px",
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      color: "#64748b",
+                      fontSize: "0.75rem",
+                      transition: "transform 160ms ease",
+                      transform: settingsExpanded
+                        ? "rotate(0deg)"
+                        : "rotate(-90deg)",
+                      "&:hover": {
+                        backgroundColor: "rgba(148,163,184,0.15)",
+                      },
+                    }}
+                  >
+                    ▾
+                  </Box>
+                  <NavItemPanelMenu
+                    href={item.href}
+                    label={item.primaryLabel}
+                    className="rail-panel-menu-trigger"
+                    sx={{ visibility: "hidden" }}
+                  />
+                </Box>
+
+                {settingsExpanded && (
+                  <Box
+                    sx={{
+                      ml: 1,
+                      pl: 1.25,
+                      borderLeft: "2px solid rgba(16,185,129,0.2)",
+                    }}
+                  >
+                    {SETTINGS_NAV_GROUPS.map((group) => (
+                      <Box key={group.key} sx={{ mb: 1.5 }}>
+                        <Typography
+                          sx={{
+                            fontSize: "0.63rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.08em",
+                            color: "#94a3b8",
+                            textTransform: "uppercase",
+                            px: 0.5,
+                            pb: 0.5,
+                          }}
+                        >
+                          {group.title}
+                        </Typography>
+                        {group.items.map((subItem) => {
+                          const isSubActive = currentPath === subItem.path;
+                          return (
+                            <Button
+                              key={subItem.path}
+                              variant="text"
+                              onClick={() => onSelect(subItem.path)}
+                              sx={{
+                                display: "flex",
+                                width: "100%",
+                                justifyContent: "flex-start",
+                                textTransform: "none",
+                                borderRadius: "7px",
+                                px: 1,
+                                py: 0.55,
+                                minHeight: 0,
+                                fontSize: "0.83rem",
+                                lineHeight: 1.4,
+                                color: isSubActive ? "#065f46" : "#334155",
+                                backgroundColor: isSubActive
+                                  ? "rgba(16,185,129,0.12)"
+                                  : "transparent",
+                                fontWeight: isSubActive ? 700 : 400,
+                                "&:hover": {
+                                  backgroundColor: isSubActive
+                                    ? "rgba(16,185,129,0.18)"
+                                    : "rgba(148,163,184,0.1)",
+                                },
+                              }}
+                            >
+                              {subItem.title}
+                            </Button>
+                          );
+                        })}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+              </React.Fragment>
+            );
+          }
 
           return (
             <Box
@@ -191,6 +365,49 @@ const AdminContextRail = memo(function AdminContextRail({
       </Stack>
 
       <Divider flexItem />
+
+      <Stack spacing={0.8}>
+        <Typography
+          sx={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}
+        >
+          QUICK ROUTES
+        </Typography>
+        {RAIL_ACTION_LINKS.map((link) => (
+          <Box
+            key={link.href}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger":
+                {
+                  visibility: "visible",
+                },
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={() => onSelect(link.href)}
+              sx={{
+                flex: 1,
+                justifyContent: "flex-start",
+                textTransform: "none",
+                borderColor: "rgba(148,163,184,0.38)",
+                color: "#0f172a",
+                borderRadius: "999px",
+              }}
+            >
+              {link.label}
+            </Button>
+            <NavItemPanelMenu
+              href={link.href}
+              label={link.label}
+              className="rail-panel-menu-trigger"
+              sx={{ visibility: "hidden" }}
+            />
+          </Box>
+        ))}
+      </Stack>
     </Stack>
   );
 });
@@ -599,6 +816,7 @@ function AdminLayoutContent() {
               menuItems={menuItems}
               activeMenuHref={activeMenuHref}
               activeMenuItem={activeMenuItem}
+              currentPath={location.pathname}
               onSelect={handleSelect}
             />
           )}
@@ -611,6 +829,7 @@ function AdminLayoutContent() {
                   menuItems={menuItems}
                   activeMenuHref={activeMenuHref}
                   activeMenuItem={activeMenuItem}
+                  currentPath={location.pathname}
                   onSelect={handleSelect}
                 />
               </Box>
