@@ -17,21 +17,35 @@ const sidebars: SidebarsConfig = {
     "intro",
     {
       type: "category",
-      label: "一般向け",
+      label: "スタッフ向け",
       items: [
-        "user/overview",
-        "user/navigation-map",
+        "staff/overview",
+        "staff/navigation-map",
         {
           type: "category",
           label: "基本操作",
           items: [
-            "user/basic-operations",
-            "user/time-recording",
-            "user/attendance-check",
-            "user/request-check",
+            "staff/basic-operations",
+            "staff/time-recording",
+            "staff/attendance-check",
+            "staff/request-check",
           ],
         },
-        "user/faq",
+        "staff/faq",
+      ],
+    },
+    {
+      type: "category",
+      label: "管理者向け",
+      items: [
+        "admin/overview",
+        "admin/navigation-map",
+        {
+          type: "category",
+          label: "管理業務",
+          items: ["admin/attendance-management", "admin/request-approval"],
+        },
+        "admin/faq",
       ],
     },
     {
