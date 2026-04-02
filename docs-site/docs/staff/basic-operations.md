@@ -10,6 +10,7 @@ sidebar_position: 2
 
 1. 勤務開始時に打刻する
 1. 当日または翌日に勤怠を確認する
+1. ワークフロー申請の提出状況を確認する
 1. 必要があれば修正申請を確認・対応する
 
 ## 操作手順へのリンク
@@ -18,4 +19,5 @@ sidebar_position: 2
 - [打刻ダッシュボードを確認する](./dashboard.md)
 - [出退勤を打刻する](./time-recording.md)
 - [勤怠を確認する](./attendance-check.md)
+- [ワークフロー申請を操作する](./workflow.md)
 - [申請を確認する](./request-check.md)

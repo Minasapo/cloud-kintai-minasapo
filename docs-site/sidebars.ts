@@ -4,13 +4,13 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
 /**
  * Creating a sidebar enables you to:
- - create an ordered group of docs
- - render a sidebar for each doc of that group
- - provide next/previous navigation
-
- The sidebars can be generated from the filesystem, or explicitly defined here.
-
- Create as many sidebars as you want.
+ * create an ordered group of docs
+ * render a sidebar for each doc of that group
+ * provide next/previous navigation
+ *
+ * The sidebars can be generated from the filesystem, or explicitly defined here.
+ *
+ * Create as many sidebars as you want.
  */
 const sidebars: SidebarsConfig = {
   mainSidebar: [
@@ -27,7 +27,10 @@ const sidebars: SidebarsConfig = {
           items: [
             "staff/basic-operations",
             "staff/time-recording",
+            "staff/dashboard",
+            "staff/shift",
             "staff/attendance-check",
+            "staff/workflow",
             "staff/attendance-edit",
             "staff/attendance-report",
             "staff/request-check",
@@ -45,7 +48,12 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "管理業務",
-          items: ["admin/attendance-management", "admin/request-approval"],
+          items: [
+            "admin/dashboard",
+            "admin/attendance-management",
+            "admin/attendances",
+            "admin/request-approval",
+          ],
         },
         "admin/faq",
       ],

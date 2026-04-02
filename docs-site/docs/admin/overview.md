@@ -19,6 +19,8 @@ sidebar_position: 1
 ## まずはここから
 
 - [画面遷移マップ](./navigation-map.md)
+- [ダッシュボードを確認する](./dashboard.md)
 - [勤怠を管理する](./attendance-management.md)
+- [勤怠一覧を確認する](./attendances.md)
 - [申請を承認する](./request-approval.md)
 - [よくある質問](./faq.md)
