@@ -30,9 +30,6 @@ const SettingsContextHeader = memo(function SettingsContextHeader() {
         <span className="inline-flex w-fit rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
           {currentCategory.title}
         </span>
-        <span className="inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold tracking-[0.04em] text-slate-600">
-          Settings Zone
-        </span>
       </div>
       <h1 className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.1rem]">
         {currentItem.title}
