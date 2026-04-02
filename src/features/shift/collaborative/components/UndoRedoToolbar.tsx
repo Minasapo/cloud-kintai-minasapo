@@ -6,13 +6,7 @@ import {
   Undo as UndoIcon,
 } from "@mui/icons-material";
 import PrintIcon from "@mui/icons-material/Print";
-import {
-  Badge,
-  Divider,
-  Paper,
-  Stack,
-  Tooltip,
-} from "@mui/material";
+import { Badge, Divider, Paper, Stack, Tooltip } from "@mui/material";
 import React from "react";
 
 import { AppIconButton } from "@/shared/ui/button";
@@ -122,7 +116,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
         bgcolor: "#ffffff",
       }}
     >
-      <Stack direction="row" spacing={0} alignItems="center">
+      <Stack direction="row" spacing={0.5} alignItems="center">
         <Tooltip
           title={
             canUndo
