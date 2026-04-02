@@ -176,6 +176,25 @@ npm run test:e2e -- smoke-test --project=chromium-staff
 
 `PLAYWRIGHT_BASE_URL` を指定して実行した場合は、その URL を使ってテストし、Playwright の `webServer` は起動しません。
 
+## 開発ドキュメントサイト（Docusaurus）
+
+Docusaurus ベースのドキュメントサイトは `docs-site/` 配下にあります。
+
+初回は依存関係をインストールしてください。
+
+```bash
+cd docs-site
+npm install
+```
+
+リポジトリルートから実行する場合:
+
+```bash
+npm run docs:start
+npm run docs:build
+npm run docs:serve
+```
+
 ## よくある詰まりどころ
 
 ### `Cannot find module './aws-exports'` が出る
