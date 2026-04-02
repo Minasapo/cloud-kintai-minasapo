@@ -15,6 +15,7 @@ sidebar_position: 2
 ## 操作手順へのリンク
 
 - [画面遷移マップ](./navigation-map.md)
+- [打刻ダッシュボードを確認する](./dashboard.md)
 - [出退勤を打刻する](./time-recording.md)
 - [勤怠を確認する](./attendance-check.md)
 - [申請を確認する](./request-check.md)
