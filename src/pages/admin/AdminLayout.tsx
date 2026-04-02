@@ -67,12 +67,6 @@ const SURFACE_SECTION_SX = {
 const SETTINGS_HREF = "/admin/master";
 const SETTINGS_NAV_GROUPS = getAdminSettingsNavigationGroups();
 
-const RAIL_ACTION_LINKS = [
-  { label: "勤怠修正申請", href: "/admin/attendances" },
-  { label: "シフト運用", href: "/admin/shift" },
-  { label: "ワークフロー承認", href: "/admin/workflow" },
-] as const;
-
 const EmptyPanelState = memo(function EmptyPanelState({
   label,
 }: {
@@ -362,51 +356,6 @@ const AdminContextRail = memo(function AdminContextRail({
             </Box>
           );
         })}
-      </Stack>
-
-      <Divider flexItem />
-
-      <Stack spacing={0.8}>
-        <Typography
-          sx={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}
-        >
-          QUICK ROUTES
-        </Typography>
-        {RAIL_ACTION_LINKS.map((link) => (
-          <Box
-            key={link.href}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger":
-                {
-                  visibility: "visible",
-                },
-            }}
-          >
-            <Button
-              variant="outlined"
-              onClick={() => onSelect(link.href)}
-              sx={{
-                flex: 1,
-                justifyContent: "flex-start",
-                textTransform: "none",
-                borderColor: "rgba(148,163,184,0.38)",
-                color: "#0f172a",
-                borderRadius: "999px",
-              }}
-            >
-              {link.label}
-            </Button>
-            <NavItemPanelMenu
-              href={link.href}
-              label={link.label}
-              className="rail-panel-menu-trigger"
-              sx={{ visibility: "hidden" }}
-            />
-          </Box>
-        ))}
       </Stack>
     </Stack>
   );
