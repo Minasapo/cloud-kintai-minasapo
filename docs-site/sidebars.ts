@@ -17,8 +17,13 @@ const sidebars: SidebarsConfig = {
     "intro",
     {
       type: "category",
-      label: "スタートガイド",
-      items: ["getting-started/setup"],
+      label: "一般向け",
+      items: ["user/overview", "user/basic-operations", "user/faq"],
+    },
+    {
+      type: "category",
+      label: "開発者向け",
+      items: ["developer/overview", "developer/getting-started/setup"],
     },
   ],
 };

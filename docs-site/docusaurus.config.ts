@@ -5,8 +5,8 @@ import { themes as prismThemes } from "prism-react-renderer";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: "クラウド勤怠 マニュアル",
-  tagline: "garaku-frontend 開発ドキュメント",
+  title: "クラウド勤怠 ドキュメント",
+  tagline: "一般向けと開発者向けのガイド",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -51,17 +51,21 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: "クラウド勤怠 マニュアル",
+      title: "クラウド勤怠 ドキュメント",
       logo: {
         alt: "Garaku Frontend Docs Logo",
         src: "img/logo.svg",
       },
       items: [
         {
-          type: "docSidebar",
-          sidebarId: "mainSidebar",
+          to: "/docs/user/overview",
           position: "left",
-          label: "ドキュメント",
+          label: "一般向け",
+        },
+        {
+          to: "/docs/developer/overview",
+          position: "left",
+          label: "開発者向け",
         },
         {
           href: "https://github.com/vtj-devops/garaku-frontend",
@@ -77,8 +81,12 @@ const config: Config = {
           title: "Docs",
           items: [
             {
-              label: "はじめに",
-              to: "/docs/intro",
+              label: "一般向け",
+              to: "/docs/user/overview",
+            },
+            {
+              label: "開発者向け",
+              to: "/docs/developer/overview",
             },
           ],
         },
