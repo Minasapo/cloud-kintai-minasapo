@@ -51,9 +51,13 @@ const sidebars: SidebarsConfig = {
           items: [
             "admin/dashboard",
             "admin/admin-shift",
+            "admin/shift-plan",
             "admin/attendance-management",
+            "admin/daily-report",
             "admin/attendances",
             "admin/request-approval",
+            "admin/operation-logs",
+            "admin/settings-management",
             "admin/staff-management",
           ],
         },
