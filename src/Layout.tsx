@@ -14,7 +14,8 @@ import { useSession } from "@/app/providers/session/useSession";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
 import { createLogger } from "@/shared/lib/logger";
-import BaseDialog from "@/shared/ui/feedback/BaseDialog";
+import { AppButton } from "@/shared/ui/button";
+import AppDialog from "@/shared/ui/feedback/AppDialog";
 import { FullPageLoading } from "@/shared/ui/feedback/LoadingPrimitives";
 import { AppShell } from "@/shared/ui/layout";
 import NotificationViewport from "@/widgets/feedback/notification/NotificationViewport";
@@ -76,28 +77,20 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
   }, [onConfirm]);
 
   return (
-    <BaseDialog
+    <AppDialog
       open={open}
       onClose={handleLater}
       title="集計対象月の未登録"
       description="現在日付を含む集計対象月が登録されていません。設定画面で登録を確認してください。"
-      widthClassName="max-w-md"
+      maxWidth="xs"
       actions={
         <>
-          <button
-            type="button"
-            onClick={handleLater}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
+          <AppButton variant="outline" tone="neutral" onClick={handleLater}>
             あとで
-          </button>
-          <button
-            type="button"
-            onClick={handleConfirm}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
-          >
+          </AppButton>
+          <AppButton variant="solid" onClick={handleConfirm}>
             確認する
-          </button>
+          </AppButton>
         </>
       }
     />

@@ -1,4 +1,6 @@
-import BaseDialog from "./BaseDialog";
+import { AppButton } from "@/shared/ui/button";
+
+import AppDialog from "./AppDialog";
 
 type LeaveGuardDialogProps = {
   open: boolean;
@@ -31,28 +33,20 @@ export default function LeaveGuardDialog({
   onCancel,
 }: LeaveGuardDialogProps) {
   return (
-    <BaseDialog
+    <AppDialog
       open={open}
       onClose={onCancel}
       title="変更内容の確認"
       description={getDescription({ isBusy, target })}
-      widthClassName="max-w-sm"
+      maxWidth="xs"
       actions={
         <>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
+          <AppButton variant="outline" tone="neutral" onClick={onCancel}>
             キャンセル
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
-          >
+          </AppButton>
+          <AppButton variant="solid" tone="danger" onClick={onConfirm}>
             破棄して続行
-          </button>
+          </AppButton>
         </>
       }
     />

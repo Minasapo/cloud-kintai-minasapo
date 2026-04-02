@@ -1,11 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 
 import notificationReducer, {
   pushNotification,
 } from "@/shared/lib/store/notificationSlice";
-import BaseDialog from "@/shared/ui/feedback/BaseDialog";
+import AppDialog from "@/shared/ui/feedback/AppDialog";
 import { APP_LAYER_Z_INDEX } from "@/shared/ui/overlay/layers";
 
 import NotificationViewport from "./NotificationViewport";
@@ -36,6 +36,7 @@ describe("NotificationViewport", () => {
       jest.clearAllTimers();
     });
     jest.useRealTimers();
+    cleanup();
     document.body.innerHTML = "";
   });
 
@@ -114,7 +115,7 @@ describe("NotificationViewport", () => {
     expect(screen.queryByText("保存に失敗しました")).not.toBeInTheDocument();
   });
 
-  it("BaseDialog は notification より上の layer で描画される", () => {
+  it("AppDialog は notification より上の layer で描画される", () => {
     const store = configureStore({
       reducer: {
         notifications: notificationReducer,
@@ -125,7 +126,7 @@ describe("NotificationViewport", () => {
       <Provider store={store}>
         <>
           <NotificationViewport />
-          <BaseDialog open title="確認" onClose={() => undefined} />
+          <AppDialog open title="確認" onClose={() => undefined} />
         </>
       </Provider>,
     );
@@ -140,7 +141,10 @@ describe("NotificationViewport", () => {
       );
     });
 
-    expect(screen.getByRole("dialog")).toHaveStyle({
+    // MUI Dialog renders a Portal container (.MuiModal-root) with the z-index,
+    // not the inner role="dialog" element.
+    const modalRoot = document.querySelector(".MuiModal-root");
+    expect(modalRoot).toHaveStyle({
       zIndex: `${APP_LAYER_Z_INDEX.modal}`,
     });
     expect(screen.getByTestId("notification-viewport-top-right")).toHaveStyle({

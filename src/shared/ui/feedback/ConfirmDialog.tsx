@@ -1,4 +1,6 @@
-import BaseDialog from "./BaseDialog";
+import { AppButton } from "@/shared/ui/button";
+
+import AppDialog from "./AppDialog";
 
 type Props = {
   open: boolean;
@@ -19,33 +21,21 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: Props) {
-  if (!open) {
-    return null;
-  }
-
   return (
-    <BaseDialog
+    <AppDialog
       open={open}
       onClose={onCancel}
       title={title}
       description={message}
-      widthClassName="max-w-sm"
+      maxWidth="xs"
       actions={
         <>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
+          <AppButton variant="outline" tone="neutral" onClick={onCancel}>
             {cancelLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700"
-          >
+          </AppButton>
+          <AppButton variant="solid" tone="danger" onClick={onConfirm}>
             {confirmLabel}
-          </button>
+          </AppButton>
         </>
       }
     />

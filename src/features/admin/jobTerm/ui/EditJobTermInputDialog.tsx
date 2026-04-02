@@ -9,7 +9,8 @@ import * as MESSAGE_CODE from "@/errors";
 import { defaultValues, Inputs } from "@/features/admin/jobTerm/lib/common";
 import { useDialogCloseGuard } from "@/hooks/useDialogCloseGuard";
 import { pushNotification } from "@/shared/lib/store/notificationSlice";
-import BaseDialog from "@/shared/ui/feedback/BaseDialog";
+import { AppButton } from "@/shared/ui/button";
+import AppDialog from "@/shared/ui/feedback/AppDialog";
 import DateField from "@/shared/ui/form/DateField";
 
 export default function EditJobTermInputDialog({ targetData, open, onClose, candidateCloseDates, updateCloseDate, }: {
@@ -65,13 +66,9 @@ export default function EditJobTermInputDialog({ targetData, open, onClose, cand
     }, [targetData]);
     return (<>
       {dialog}
-      <BaseDialog open={open} onClose={requestClose} title="集計対象月を変更" description="変更する集計対象月の情報を入力してください。" actions={<>
-          <button type="button" onClick={requestClose} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-            キャンセル
-          </button>
-          <button type="button" disabled={!isValid || !isDirty || isSubmitting} onClick={handleSubmit(onSubmit)} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300">
-            変更
-          </button>
+      <AppDialog open={open} onClose={requestClose} title="集計対象月を変更" description="変更する集計対象月の情報を入力してください。" actions={<>
+          <AppButton variant="outline" tone="neutral" onClick={requestClose}>キャンセル</AppButton>
+          <AppButton variant="solid" disabled={!isValid || !isDirty || isSubmitting} onClick={handleSubmit(onSubmit)}>変更</AppButton>
         </>}>
       <div className="flex flex-col gap-4">
         <Controller name="closeDate" control={control} rules={{ required: true }} render={({ field: { value, onChange } }) => (<label className="flex flex-col gap-1">
@@ -93,6 +90,6 @@ export default function EditJobTermInputDialog({ targetData, open, onClose, cand
           <Controller name="endDate" control={control} rules={{ required: true }} render={({ field }) => (<DateField label="終了日" format={AttendanceDate.DisplayFormat} value={field.value} onChange={field.onChange} errorText={!field.value ? "必須項目です" : undefined}/>)}/>
         </div>
       </div>
-    </BaseDialog>
+    </AppDialog>
     </>);
 }
