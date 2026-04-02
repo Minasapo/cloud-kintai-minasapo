@@ -28,6 +28,7 @@ const sidebars: SidebarsConfig = {
             "staff/basic-operations",
             "staff/time-recording",
             "staff/attendance-check",
+            "staff/attendance-edit",
             "staff/request-check",
           ],
         },

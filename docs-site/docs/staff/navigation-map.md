@@ -49,12 +49,15 @@ sidebar_position: 2
 1. 編集画面で時刻を修正する
 1. 修正理由を記載して申請する
 
+参照: [勤怠を修正する](./attendance-edit.md)
+
 参照: [申請を確認する](./request-check.md)
 
 ## 迷ったときの最短ルート
 
 - 打刻のこと: [出退勤を打刻する](./time-recording.md)
 - 確認のこと: [勤怠を確認する](./attendance-check.md)
+- 修正のこと: [勤怠を修正する](./attendance-edit.md)
 - 申請のこと: [申請を確認する](./request-check.md)
 - よくある質問: [よくある質問](./faq.md)
 
@@ -62,5 +65,6 @@ sidebar_position: 2
 
 - 今すぐ打刻したい: [出退勤を打刻する](./time-recording.md)
 - 昨日の勤怠を確認したい: [勤怠を確認する](./attendance-check.md)
+- 打刻ミスを修正したい: [勤怠を修正する](./attendance-edit.md)
 - 申請の進捗を知りたい: [申請を確認する](./request-check.md)
 - どこから始めるか迷う: [スタッフ向けドキュメント](./overview.md)
