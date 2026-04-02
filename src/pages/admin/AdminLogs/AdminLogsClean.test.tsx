@@ -11,6 +11,11 @@ jest.mock("@entities/staff/model/useStaff/fetchStaff", () => ({
   default: jest.fn(),
 }));
 
+jest.mock("@entities/staff/model/useStaffs/fetchStaffs", () => ({
+  __esModule: true,
+  default: jest.fn(() => new Promise(() => {})),
+}));
+
 jest.mock("@/hooks/useAdminOperationLogs/useAdminOperationLogs", () => ({
   __esModule: true,
   default: (...args: unknown[]) => adminOperationLogsHookMock(...args),
@@ -72,6 +77,12 @@ describe("AdminLogsClean", () => {
   it("does not render [object Object] for object summaries", () => {
     render(<AdminLogsClean />);
 
+    expect(
+      screen.getByRole("columnheader", { name: "日時" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "概要" }),
+    ).toBeInTheDocument();
     expect(
       screen.getAllByText('{"message":"object summary"}').length,
     ).toBeGreaterThan(0);
@@ -140,8 +151,8 @@ describe("AdminLogsClean", () => {
 
     render(<AdminLogsClean />);
 
-    expect(screen.getByText('操作者: {"raw":"actor-1"}')).toBeInTheDocument();
-    expect(screen.getByText('対象者: {"raw":"target-1"}')).toBeInTheDocument();
+    expect(screen.getByText('{"raw":"actor-1"}')).toBeInTheDocument();
+    expect(screen.getByText('{"raw":"target-1"}')).toBeInTheDocument();
     expect(screen.queryByText("Chrome")).not.toBeInTheDocument();
     expect(screen.queryByText("[object Object]")).not.toBeInTheDocument();
   });

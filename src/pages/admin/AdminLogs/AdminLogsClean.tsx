@@ -1,12 +1,20 @@
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import fetchStaffs from "@entities/staff/model/useStaffs/fetchStaffs";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
+  Autocomplete,
   Box,
   Chip,
   CircularProgress,
   List,
   ListItem,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Tooltip,
   Typography,
@@ -35,6 +43,39 @@ import { PageContent } from "@/shared/ui/layout";
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
+type StaffOption = {
+  label: string;
+  value: string;
+};
+
+const resolveStaffDisplay = (
+  id: unknown,
+  staffMap: Record<string, Staff | null>,
+) => {
+  const idText = formatOperationLogInlineValue(id);
+
+  if (!idText) {
+    return "-";
+  }
+
+  if (!isNonEmptyString(id)) {
+    return idText;
+  }
+
+  if (!(id in staffMap)) {
+    return "読み込み中...";
+  }
+
+  const entry = staffMap[id];
+  if (entry === null) {
+    return idText;
+  }
+
+  const fullName =
+    `${entry?.familyName ?? ""} ${entry?.givenName ?? ""}`.trim();
+  return fullName || idText;
+};
+
 export default function AdminLogsClean() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -44,6 +85,49 @@ export default function AdminLogsClean() {
   const [actionFilter, setActionFilter] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [staffListLoading, setStaffListLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    setStaffListLoading(true);
+    fetchStaffs()
+      .then((staffs) => {
+        if (!active) {
+          return;
+        }
+
+        setStaffList(staffs);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) {
+          setStaffListLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const staffOptions = useMemo<StaffOption[]>(
+    () =>
+      staffList
+        .filter((staff) => isNonEmptyString(staff.cognitoUserId))
+        .map((staff) => {
+          const fullName =
+            `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim();
+
+          return {
+            label: fullName || staff.cognitoUserId,
+            value: staff.cognitoUserId,
+          };
+        }),
+    [staffList],
+  );
+
   const operationLogFilter =
     useMemo<ModelOperationLogFilterInput | null>(() => {
       const filter: ModelOperationLogFilterInput = {};
@@ -152,6 +236,30 @@ export default function AdminLogsClean() {
     return () => obs.disconnect();
   }, [nextToken, loadMore, loading]);
 
+  const logRows = useMemo(
+    () =>
+      logs.map((log, index) => ({
+        rowKey: `${log.id}-${log.timestamp ?? ""}-${index}`,
+        log,
+        timestampDisplay: log.timestamp
+          ? dayjs(log.timestamp).format("YYYY-MM-DD HH:mm:ss")
+          : "-",
+        actionLabel: getOperationLogLabel(log.action),
+        actorDisplay: resolveStaffDisplay(log.staffId as unknown, staffMap),
+        targetDisplay: resolveStaffDisplay(
+          log.targetStaffId as unknown,
+          staffMap,
+        ),
+        resourceDisplay: getOperationLogResourceDisplay({
+          resource: log.resource as unknown,
+          resourceId: log.resourceId as unknown,
+          resourceKey: log.resourceKey as unknown,
+        }),
+        summaryDisplay: getOperationLogDisplaySummary(log),
+      })),
+    [logs, staffMap],
+  );
+
   return (
     <PageContent width="full">
       <Stack spacing={2} sx={{ pt: 1 }}>
@@ -168,19 +276,54 @@ export default function AdminLogsClean() {
                 value={resourceFilter}
                 onChange={(event) => setResourceFilter(event.target.value)}
               />
-              <TextField
+              <Autocomplete
                 size="small"
-                label="操作者"
-                value={actorFilter}
-                onChange={(event) => setActorFilter(event.target.value)}
-                helperText="Cognito ユーザー ID"
+                options={staffOptions}
+                value={
+                  staffOptions.find((option) => option.value === actorFilter) ??
+                  null
+                }
+                loading={staffListLoading}
+                onChange={(_, newValue) =>
+                  setActorFilter(newValue?.value ?? "")
+                }
+                isOptionEqualToValue={(option, value) =>
+                  option.value === value.value
+                }
+                getOptionLabel={(option) => option.label}
+                sx={{ minWidth: 220 }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="操作者"
+                    placeholder="スタッフ名で検索"
+                  />
+                )}
               />
-              <TextField
+              <Autocomplete
                 size="small"
-                label="対象者"
-                value={targetFilter}
-                onChange={(event) => setTargetFilter(event.target.value)}
-                helperText="Cognito ユーザー ID"
+                options={staffOptions}
+                value={
+                  staffOptions.find(
+                    (option) => option.value === targetFilter,
+                  ) ?? null
+                }
+                loading={staffListLoading}
+                onChange={(_, newValue) =>
+                  setTargetFilter(newValue?.value ?? "")
+                }
+                isOptionEqualToValue={(option, value) =>
+                  option.value === value.value
+                }
+                getOptionLabel={(option) => option.label}
+                sx={{ minWidth: 220 }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="対象者"
+                    placeholder="スタッフ名で検索"
+                  />
+                )}
               />
               <TextField
                 size="small"
@@ -220,168 +363,160 @@ export default function AdminLogsClean() {
               </Typography>
             )}
 
-            <List>
-              {logs.map((log) =>
-                (() => {
-                  const actorId = log.staffId as unknown;
-                  const targetStaffId = log.targetStaffId as unknown;
-                  const actorIdText = formatOperationLogInlineValue(actorId);
-                  const targetIdText =
-                    formatOperationLogInlineValue(targetStaffId);
-                  const actorEntry =
-                    isNonEmptyString(actorId) && actorId in staffMap
-                      ? staffMap[actorId]
-                      : undefined;
-                  const targetEntry =
-                    isNonEmptyString(targetStaffId) && targetStaffId in staffMap
-                      ? staffMap[targetStaffId]
-                      : undefined;
-                  const actorLabel = (() => {
-                    if (!actorIdText) {
-                      return "操作者: -";
-                    }
-                    if (!isNonEmptyString(actorId)) {
-                      return `操作者: ${actorIdText}`;
-                    }
-                    if (!(actorId in staffMap)) {
-                      return "操作者: 読み込み中...";
-                    }
-                    if (actorEntry === null) {
-                      return `操作者: ${actorIdText}`;
-                    }
-                    return `操作者: ${`${actorEntry?.familyName ?? ""} ${
-                      actorEntry?.givenName ?? ""
-                    }`.trim()}`;
-                  })();
-                  const targetLabel = (() => {
-                    if (!targetIdText) {
-                      return "対象者: -";
-                    }
-                    if (!isNonEmptyString(targetStaffId)) {
-                      return `対象者: ${targetIdText}`;
-                    }
-                    if (!(targetStaffId in staffMap)) {
-                      return "対象者: 読み込み中...";
-                    }
-                    if (targetEntry === null) {
-                      return `対象者: ${targetIdText}`;
-                    }
-                    return `対象者: ${`${targetEntry?.familyName ?? ""} ${
-                      targetEntry?.givenName ?? ""
-                    }`.trim()}`;
-                  })();
-                  const resourceLabel = getOperationLogResourceDisplay({
-                    resource: log.resource as unknown,
-                    resourceId: log.resourceId as unknown,
-                    resourceKey: log.resourceKey as unknown,
-                  });
-                  return (
-                    <ListItem
-                      key={log.id}
-                      divider
-                      alignItems="center"
-                      sx={{
-                        py: 1,
-                        px: { xs: 0, sm: 1 },
-                        display: "flex",
-                        flexDirection: { xs: "column", sm: "row" },
-                        gap: { xs: 0.5, sm: 0 },
-                      }}
-                    >
-                      {/* 日時 + アクション */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: { xs: "flex-start", sm: "center" },
-                          width: { xs: "100%", sm: 300 },
-                          minWidth: { xs: 0, sm: 300 },
-                          flexDirection: { xs: "column", sm: "row" },
-                          gap: { xs: 0.5, sm: 0 },
-                        }}
+            {isMobile ? (
+              <List sx={{ py: 0 }}>
+                {logRows.map((row) => (
+                  <ListItem
+                    key={row.rowKey}
+                    divider
+                    alignItems="flex-start"
+                    sx={{ px: 0, py: 1.5 }}
+                  >
+                    <Stack spacing={1} sx={{ width: "100%" }}>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="center"
+                        flexWrap="wrap"
                       >
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          noWrap={!isMobile}
-                          sx={{ display: "block" }}
-                        >
-                          {log.timestamp
-                            ? dayjs(log.timestamp).format("YYYY-MM-DD HH:mm:ss")
-                            : "-"}
+                        <Typography variant="caption" color="text.secondary">
+                          {row.timestampDisplay}
                         </Typography>
-                        <Chip
-                          size="small"
-                          label={getOperationLogLabel(log.action)}
-                          sx={{ ml: { xs: 0, sm: 1 } }}
-                        />
-                      </Box>
+                        <Chip size="small" label={row.actionLabel} />
+                      </Stack>
 
-                      {/* Actor / Target */}
-                      <Box
-                        sx={{
-                          width: { xs: "100%", sm: 200 },
-                          minWidth: { xs: 0, sm: 200 },
-                          ml: { xs: 0, sm: 2 },
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          noWrap
-                        >
-                          {actorLabel}
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          操作者
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          noWrap
-                        >
-                          {targetLabel}
+                        <Typography variant="body2">
+                          {row.actorDisplay}
                         </Typography>
                       </Box>
 
-                      {/* リソース + サマリー1行 */}
-                      <Box
-                        sx={{
-                          flex: 1,
-                          ml: { xs: 0, sm: 2 },
-                          width: { xs: "100%", sm: "auto" },
-                          minWidth: 0,
-                        }}
-                      >
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          対象者
+                        </Typography>
+                        <Typography variant="body2">
+                          {row.targetDisplay}
+                        </Typography>
+                      </Box>
+
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          対象
+                        </Typography>
                         <Typography
                           variant="subtitle2"
-                          noWrap
-                          sx={{ maxWidth: "100%" }}
+                          sx={{ wordBreak: "break-word" }}
                         >
-                          {resourceLabel}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          noWrap
-                          sx={{ maxWidth: "100%" }}
-                        >
-                          {getOperationLogDisplaySummary(log)}
+                          {row.resourceDisplay}
                         </Typography>
                       </Box>
 
-                      {/* 詳細ボタン */}
-                      <Box sx={{ ml: { xs: 0, sm: 1 }, flexShrink: 0 }}>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          概要
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {row.summaryDisplay}
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ alignSelf: "flex-end" }}>
                         <Tooltip title="詳細を表示">
                           <AppIconButton
                             aria-label="詳細を表示"
-                            onClick={() => setSelectedLog(log)}
+                            onClick={() => setSelectedLog(row.log)}
                           >
                             <InfoOutlinedIcon fontSize="small" />
                           </AppIconButton>
                         </Tooltip>
                       </Box>
-                    </ListItem>
-                  );
-                })(),
-              )}
-            </List>
+                    </Stack>
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <TableContainer>
+                <Table
+                  aria-label="operation-log-table"
+                  size="small"
+                  sx={{ tableLayout: "fixed" }}
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ width: 180 }}>日時</TableCell>
+                      <TableCell sx={{ width: 120 }}>アクション</TableCell>
+                      <TableCell sx={{ width: 170 }}>操作者</TableCell>
+                      <TableCell sx={{ width: 170 }}>対象者</TableCell>
+                      <TableCell sx={{ width: 240 }}>対象</TableCell>
+                      <TableCell>概要</TableCell>
+                      <TableCell align="center" sx={{ width: 72 }}>
+                        詳細
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {logRows.map((row) => (
+                      <TableRow key={row.rowKey} hover>
+                        <TableCell sx={{ verticalAlign: "top" }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {row.timestampDisplay}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: "top" }}>
+                          <Chip size="small" label={row.actionLabel} />
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: "top" }}>
+                          <Tooltip title={row.actorDisplay}>
+                            <Typography variant="body2" noWrap>
+                              {row.actorDisplay}
+                            </Typography>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: "top" }}>
+                          <Tooltip title={row.targetDisplay}>
+                            <Typography variant="body2" noWrap>
+                              {row.targetDisplay}
+                            </Typography>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: "top" }}>
+                          <Tooltip title={row.resourceDisplay}>
+                            <Typography variant="subtitle2" noWrap>
+                              {row.resourceDisplay}
+                            </Typography>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: "top" }}>
+                          <Tooltip title={row.summaryDisplay}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              noWrap
+                            >
+                              {row.summaryDisplay}
+                            </Typography>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell align="center" sx={{ verticalAlign: "top" }}>
+                          <Tooltip title="詳細を表示">
+                            <AppIconButton
+                              aria-label="詳細を表示"
+                              onClick={() => setSelectedLog(row.log)}
+                            >
+                              <InfoOutlinedIcon fontSize="small" />
+                            </AppIconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
 
             {loading && (
               <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>

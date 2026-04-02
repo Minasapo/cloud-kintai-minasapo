@@ -64,10 +64,9 @@ const SURFACE_SECTION_SX = {
 } as const;
 
 const RAIL_ACTION_LINKS = [
-  { label: "勤怠修正申請", href: "/admin/attendances" },
-  { label: "シフト運用", href: "/admin/shift" },
-  { label: "ワークフロー承認", href: "/admin/workflow" },
-  { label: "設定ハブ", href: "/admin/master" },
+  { href: "/admin/attendances", label: "勤怠一覧" },
+  { href: "/admin/daily-reports", label: "日報" },
+  { href: "/admin/logs", label: "ログ" },
 ] as const;
 
 const EmptyPanelState = memo(function EmptyPanelState({
@@ -592,28 +591,8 @@ function AdminLayoutContent() {
   }, [isMobile]);
 
   React.useEffect(() => {
-    if (isTripleMode) {
-      ensureRightPanel();
-      ensureMiddlePanel();
-    }
-  }, [isTripleMode, ensureRightPanel, ensureMiddlePanel]);
-
-  React.useEffect(() => {
-    if (!isSplitMode) {
-      return;
-    }
-
-    if (!state.leftPanel && !state.rightPanel) {
-      ensureRightPanel();
-    }
-  }, [ensureRightPanel, isSplitMode, state.leftPanel, state.rightPanel]);
-
-  React.useEffect(() => {
-    if (isMobile && state.mode === "triple") {
-      setMode("split");
-      setLeftPanel(null);
-    }
-  }, [isMobile, state.mode, setMode, setLeftPanel]);
+    setIsMobileRailOpen(false);
+  }, [location.pathname]);
 
   return (
     <Stack component="section" sx={PAGE_CONTAINER_SX}>
@@ -625,29 +604,47 @@ function AdminLayoutContent() {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
+            alignItems: { xs: "flex-start", md: "center" },
+            justifyContent: "space-between",
             gap: 1,
-            p: 1.5,
+            p: 2,
             borderBottom: "1px solid rgba(226,232,240,0.85)",
+            flexWrap: "wrap",
           }}
         >
-          {isMobile && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleToggleMobileRail}
-              sx={{ textTransform: "none", borderRadius: "999px" }}
+          <Stack spacing={0.25}>
+            <Typography
+              sx={{ fontSize: "0.78rem", fontWeight: 700, color: "#0f766e" }}
             >
-              {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
-            </Button>
-          )}
-          <SplitModeToggle mode={state.mode} onToggle={handleToggleSplitMode} />
+              ADMIN DASHBOARD
+            </Typography>
+            <Typography
+              sx={{ fontSize: "1.02rem", fontWeight: 700, color: "#0f172a" }}
+            >
+              {activeMenuItem?.primaryLabel ?? "管理画面"}
+            </Typography>
+          </Stack>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {isMobile && (
+              <Button
+                variant="outlined"
+                onClick={handleToggleMobileRail}
+                sx={{ textTransform: "none", borderRadius: "999px" }}
+              >
+                {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
+              </Button>
+            )}
+            <SplitModeToggle
+              mode={state.mode}
+              onToggle={handleToggleSplitMode}
+            />
+          </Box>
         </Box>
 
         <Stack
           direction={{ xs: "column", md: "row" }}
-          sx={{ width: "100%", flex: 1 }}
+          sx={{ width: "100%", flex: 1, minHeight: 0 }}
         >
           {!isMobile && (
             <AdminContextRail
