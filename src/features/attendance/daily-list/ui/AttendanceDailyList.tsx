@@ -1,6 +1,6 @@
 import "./styles.scss";
 
-import { useDeleteAttendanceMutation, useLazyGetAttendanceByIdQuery, useLazyListAttendancesByDateRangeQuery, } from "@entities/attendance/api/attendanceApi";
+import { useDeleteAttendanceMutation, useLazyGetAttendanceByIdQuery, } from "@entities/attendance/api/attendanceApi";
 import useAttendanceDaily, { AttendanceDaily, DuplicateAttendanceDaily, } from "@entities/attendance/model/useAttendanceDaily";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
@@ -18,7 +18,8 @@ import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
 import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
-import { calculateTotalOvertimeMinutes, formatMinutesToHHmm, } from "../lib/overtimeUtils";
+import { formatMinutesToHHmm, } from "../lib/overtimeUtils";
+import { useAttendanceDailyFetch } from "../model/useAttendanceDailyFetch";
 import { ActionsTableCell } from "./ActionsTableCell";
 import { EndTimeTableCell } from "./EndTimeTableCell";
 import MoveDateItem from "./MoveDateItem";
@@ -45,7 +46,6 @@ export default function AttendanceDailyList() {
     const dispatch = useDispatch();
     const [searchName, setSearchName] = useState("");
     const [isSearchVisible, setIsSearchVisible] = useState(false);
-    const [triggerListAttendancesByDateRange] = useLazyListAttendancesByDateRangeQuery();
     const { holidayCalendars, companyHolidayCalendars, isLoading: calendarsLoading, error: calendarsError, } = useCalendars();
     const scheduledEnd = useMemo(() => {
         const parsed = getEndTime();
@@ -140,11 +140,23 @@ export default function AttendanceDailyList() {
             return acc;
         }, {});
     }, [attendanceDailyList]);
-    // map of staffId -> attendances
-    const [attendanceMap, setAttendanceMap] = useState<Record<string, Attendance[]>>({});
-    const [attendanceLoadingMap, setAttendanceLoadingMap] = useState<Record<string, boolean>>({});
-    const [attendanceErrorMap, setAttendanceErrorMap] = useState<Record<string, Error | null>>({});
-    const [duplicateSummaryMap, setDuplicateSummaryMap] = useState<Record<string, DuplicateAttendanceDaily[]>>({});
+    const {
+        attendanceMap,
+        attendanceLoadingMap,
+        attendanceErrorMap,
+        getAttendanceForDisplayDate,
+        getOvertimeMinutes,
+        mergedDuplicateAttendances,
+        duplicateInfoByStaff,
+    } = useAttendanceDailyFetch({
+        attendanceDailyList,
+        displayDateFormatted,
+        staffNameMap,
+        scheduledHour,
+        scheduledMinute,
+        duplicateAttendances,
+        loading,
+    });
     const tableContainerSx = useMemo(() => ({
         width: "100%",
         overflowX: "auto",
@@ -175,146 +187,7 @@ export default function AttendanceDailyList() {
     const [lastFieldRecordIndex, setLastFieldRecordIndex] = useState<number | null>(null);
     const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
     const [deleteAttendance] = useDeleteAttendanceMutation();
-    const getAttendanceForDisplayDate = useCallback((row: AttendanceDaily) => {
-        const attendances = attendanceMap[row.sub] ?? [];
-        if (displayDateFormatted) {
-            const matched = attendances.find((attendance) => attendance.workDate === displayDateFormatted);
-            if (matched) {
-                return matched;
-            }
-        }
-        if (!row.attendance) {
-            return null;
-        }
-        if (displayDateFormatted &&
-            row.attendance.workDate !== displayDateFormatted) {
-            return null;
-        }
-        return row.attendance;
-    }, [attendanceMap, displayDateFormatted]);
-    const overtimeMinutesMap = useMemo(() => {
-        return Object.entries(attendanceMap).reduce((acc, [staffId, attendances]) => {
-            acc[staffId] = calculateTotalOvertimeMinutes(attendances, scheduledHour, scheduledMinute);
-            return acc;
-        }, {} as Record<string, number>);
-    }, [attendanceMap, scheduledHour, scheduledMinute]);
-    const getOvertimeMinutes = useCallback((row: AttendanceDaily) => {
-        const mapped = overtimeMinutesMap[row.sub];
-        if (typeof mapped === "number") {
-            return mapped;
-        }
-        const targetAttendance = getAttendanceForDisplayDate(row);
-        if (!targetAttendance)
-            return 0;
-        return calculateTotalOvertimeMinutes([targetAttendance], scheduledHour, scheduledMinute);
-    }, [getAttendanceForDisplayDate, overtimeMinutesMap, scheduledHour, scheduledMinute]);
     const renderOvertimeValue = useCallback((row: AttendanceDaily) => formatMinutesToHHmm(getOvertimeMinutes(row)), [getOvertimeMinutes]);
-    useEffect(() => {
-        const staffIds = Array.from(new Set((attendanceDailyList || []).map((r) => r.sub)));
-        if (staffIds.length === 0) {
-            return;
-        }
-        let isMounted = true;
-        staffIds.forEach((staffId) => {
-            setAttendanceLoadingMap((state) => ({ ...state, [staffId]: true }));
-            setAttendanceErrorMap((state) => ({ ...state, [staffId]: null }));
-            const baseDate = displayDateFormatted ?? dayjs().format(AttendanceDate.DataFormat);
-            const startDate = dayjs(baseDate)
-                .startOf("month")
-                .format(AttendanceDate.DataFormat);
-            const endDate = dayjs(baseDate)
-                .endOf("month")
-                .format(AttendanceDate.DataFormat);
-            triggerListAttendancesByDateRange({ staffId, startDate, endDate })
-                .unwrap()
-                .then((attendances) => {
-                if (!isMounted)
-                    return;
-                setAttendanceMap((map) => ({ ...map, [staffId]: attendances }));
-                setDuplicateSummaryMap((state) => ({
-                    ...state,
-                    [staffId]: [],
-                }));
-            })
-                .catch((err) => {
-                if (!isMounted)
-                    return;
-                const errorInstance = err instanceof Error
-                    ? err
-                    : new Error("Failed to fetch attendances");
-                setAttendanceErrorMap((state) => ({
-                    ...state,
-                    [staffId]: errorInstance,
-                }));
-                const details = typeof err === "object" &&
-                    err !== null &&
-                    "details" in err &&
-                    typeof (err as {
-                        details?: unknown;
-                    }).details === "object" &&
-                    (err as {
-                        details?: unknown;
-                    }).details !== null
-                    ? ((err as {
-                        details: {
-                            duplicates?: unknown;
-                        };
-                    }).details
-                        .duplicates ?? [])
-                    : [];
-                const duplicateList = Array.isArray(details)
-                    ? details
-                        .map((dup) => {
-                        if (!dup ||
-                            typeof dup !== "object" ||
-                            !("workDate" in dup) ||
-                            !("ids" in dup)) {
-                            return null;
-                        }
-                        const candidate = dup as {
-                            workDate?: unknown;
-                            ids?: unknown;
-                            staffId?: unknown;
-                        };
-                        if (typeof candidate.workDate !== "string" ||
-                            !Array.isArray(candidate.ids)) {
-                            return null;
-                        }
-                        const ids = candidate.ids.filter((id): id is string => typeof id === "string");
-                        return {
-                            staffId: typeof candidate.staffId === "string"
-                                ? candidate.staffId
-                                : staffId,
-                            staffName: staffNameMap[staffId] ?? staffId,
-                            workDate: candidate.workDate,
-                            ids,
-                        } satisfies DuplicateAttendanceDaily;
-                    })
-                        .filter((dup): dup is DuplicateAttendanceDaily => dup !== null && dup.ids.length > 1)
-                    : [];
-                setDuplicateSummaryMap((state) => ({
-                    ...state,
-                    [staffId]: duplicateList,
-                }));
-            })
-                .finally(() => {
-                if (!isMounted)
-                    return;
-                setAttendanceLoadingMap((state) => ({
-                    ...state,
-                    [staffId]: false,
-                }));
-            });
-        });
-        return () => {
-            isMounted = false;
-        };
-    }, [
-        attendanceDailyList,
-        displayDateFormatted,
-        staffNameMap,
-        triggerListAttendancesByDateRange,
-    ]);
     const isRequesting = useCallback((row: AttendanceDaily) => {
         const targetAttendance = getAttendanceForDisplayDate(row);
         if (!targetAttendance?.changeRequests)
@@ -327,25 +200,6 @@ export default function AttendanceDailyList() {
             return [];
         return attendanceDailyList.filter((row) => isRequesting(row));
     }, [loading, attendanceDailyList, isRequesting]);
-    const summaryDuplicateList = useMemo(() => Object.values(duplicateSummaryMap).flat(), [duplicateSummaryMap]);
-    const mergedDuplicateAttendances = useMemo(() => {
-        const unique = new Map<string, DuplicateAttendanceDaily>();
-        [...duplicateAttendances, ...summaryDuplicateList].forEach((dup) => {
-            const key = `${dup.staffId}-${dup.workDate}-${dup.ids.join("-")}`;
-            if (!unique.has(key)) {
-                unique.set(key, dup);
-            }
-        });
-        return Array.from(unique.values());
-    }, [duplicateAttendances, summaryDuplicateList]);
-    const duplicateInfoByStaff = useMemo(() => {
-        return mergedDuplicateAttendances.reduce<Record<string, DuplicateAttendanceDaily[]>>((acc, dup) => {
-            const list = acc[dup.staffId] ?? [];
-            list.push(dup);
-            acc[dup.staffId] = list;
-            return acc;
-        }, {});
-    }, [mergedDuplicateAttendances]);
     const hasDuplicateAttendances = mergedDuplicateAttendances.length > 0;
     const handleOpenConfirm = useCallback(async (staffId: string) => {
         setSelectionMode("record");
