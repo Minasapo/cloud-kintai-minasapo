@@ -8,19 +8,20 @@ sidebar_position: 6
 
 ## 早見表
 
-| 機能                      | 取得期間 / 単位                                       | 主な実装                                                                               |
-| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| 勤怠一覧 初期プリフェッチ | 当月月初〜月末                                        | `src/router/loaders/attendanceListLoader.ts`                                           |
-| 勤怠一覧 実効集計期間     | `CloseDate` 優先、未設定時は月初〜月末                | `src/features/attendance/list/ui/attendanceListUtils.ts`                               |
-| 管理者スタッフ勤怠一覧    | 前月月初〜当月月末（2ヶ月分）                         | `src/features/admin/staffAttendanceList/model/useAdminStaffAttendanceListViewModel.ts` |
-| 管理者ダッシュボード集計  | 当月の `CloseDate`（未設定時は月初〜月末）            | `src/features/admin/dashboard/model/useAdminDashboard.ts`                              |
-| 年間稼働統計              | 選択年の 12 ヶ月（各月 `CloseDate` または月初〜月末） | `src/features/attendance/statistics/ui/AttendanceStatistics.tsx`                       |
-| 日次管理ビュー            | 表示日付の当月月初〜月末                              | `src/features/attendance/daily-list/model/useAttendanceDailyFetch.ts`                  |
-| 勤怠ダウンロード          | 初期値: 本日、プリセット: `CloseDate` 範囲            | `src/features/attendance/download-form/ui/DownloadForm.tsx`                            |
-| シフトリクエスト          | 月単位（`YYYY-MM`）                                   | `src/entities/shift/api/shiftApi.ts`                                                   |
-| シフト計画                | 年単位で 1〜12 月、各月 `editStart〜editEnd`          | `src/pages/admin/AdminShiftPlan/shiftPlanUtils.ts`                                     |
-| 休日カレンダー登録        | 最大 366 日                                           | `src/features/admin/holidayCalendar/lib/buildHolidayDateRange.ts`                      |
-| 利用開始日前の除外        | `usageStartDate` より前は打刻エラー判定対象外         | `src/features/attendance/list/lib/attendanceStatusUtils.ts`                            |
+| 機能                      | 取得期間 / 単位                                       | 主な実装                                                                                                                                 |
+| ------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 勤怠一覧 初期プリフェッチ | 当月月初〜月末                                        | `src/router/loaders/attendanceListLoader.ts`                                                                                             |
+| 勤怠一覧 実効集計期間     | `CloseDate` 優先、未設定時は月初〜月末                | `src/features/attendance/list/ui/attendanceListUtils.ts`                                                                                 |
+| 管理者スタッフ勤怠一覧    | 前月月初〜当月月末（2ヶ月分）                         | `src/features/admin/staffAttendanceList/model/useAdminStaffAttendanceListViewModel.ts`                                                   |
+| 管理者ダッシュボード集計  | 当月の `CloseDate`（未設定時は月初〜月末）            | `src/features/admin/dashboard/model/useAdminDashboard.ts`                                                                                |
+| 打刻ダッシュボード集計    | 当月の `CloseDate`（未設定時は月初〜月末、当日除外）  | `src/features/attendance/time-recorder/ui/TimeRecorder.tsx` `src/features/attendance/time-recorder/ui/RegisterAttendanceSummaryCard.tsx` |
+| 年間稼働統計              | 選択年の 12 ヶ月（各月 `CloseDate` または月初〜月末） | `src/features/attendance/statistics/ui/AttendanceStatistics.tsx`                                                                         |
+| 日次管理ビュー            | 表示日付の当月月初〜月末                              | `src/features/attendance/daily-list/model/useAttendanceDailyFetch.ts`                                                                    |
+| 勤怠ダウンロード          | 初期値: 本日、プリセット: `CloseDate` 範囲            | `src/features/attendance/download-form/ui/DownloadForm.tsx`                                                                              |
+| シフトリクエスト          | 月単位（`YYYY-MM`）                                   | `src/entities/shift/api/shiftApi.ts`                                                                                                     |
+| シフト計画                | 年単位で 1〜12 月、各月 `editStart〜editEnd`          | `src/pages/admin/AdminShiftPlan/shiftPlanUtils.ts`                                                                                       |
+| 休日カレンダー登録        | 最大 366 日                                           | `src/features/admin/holidayCalendar/lib/buildHolidayDateRange.ts`                                                                        |
+| 利用開始日前の除外        | `usageStartDate` より前は打刻エラー判定対象外         | `src/features/attendance/list/lib/attendanceStatusUtils.ts`                                                                              |
 
 ## 勤怠一覧 初期プリフェッチ
 
@@ -66,6 +67,20 @@ sidebar_position: 6
 実装:
 
 - `src/features/admin/dashboard/model/useAdminDashboard.ts`
+
+## 打刻ダッシュボードの集計期間
+
+`/register` のダッシュボードでは、勤務時間・勤務日数・打刻エラー件数が同じ集計期間を使う。
+
+- 集計期間: 当月基準の `CloseDate`、未設定時は月初〜月末
+- 打刻エラー件数: 集計期間内の `AttendanceStatus.Error` 日数
+- 当日: 集計途中のため除外
+
+実装:
+
+- `src/features/attendance/time-recorder/ui/TimeRecorder.tsx`
+- `src/features/attendance/time-recorder/ui/RegisterAttendanceSummaryCard.tsx`
+- `src/entities/attendance/lib/aggregationDateRange.ts`
 
 ## 年間稼働統計の期間
 

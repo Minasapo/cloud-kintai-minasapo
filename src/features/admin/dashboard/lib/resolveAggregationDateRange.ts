@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import {
   type CloseDatePeriod,
   getEffectiveDateRange,
-} from "@/features/attendance/list/ui/attendanceListUtils";
+} from "@/entities/attendance/lib/aggregationDateRange";
 
 export const resolveAggregationDateRange = (
   month: dayjs.Dayjs,

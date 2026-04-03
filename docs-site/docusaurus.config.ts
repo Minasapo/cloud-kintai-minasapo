@@ -59,7 +59,7 @@ const config: Config = {
     navbar: {
       title: "クラウド勤怠 ドキュメント",
       logo: {
-        alt: "Garaku Frontend Docs Logo",
+        alt: "クラウド勤怠ドキュメントのロゴ",
         src: "img/logo.svg",
       },
       items: [
@@ -77,11 +77,6 @@ const config: Config = {
           to: "/docs/developer/overview",
           position: "left",
           label: "開発者向け",
-        },
-        {
-          href: "https://github.com/vtj-devops/garaku-frontend",
-          label: "GitHub",
-          position: "right",
         },
       ],
     },
@@ -105,17 +100,8 @@ const config: Config = {
             },
           ],
         },
-        {
-          title: "Project",
-          items: [
-            {
-              label: "Repository",
-              href: "https://github.com/vtj-devops/garaku-frontend",
-            },
-          ],
-        },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} garaku-frontend contributors.`,
+      copyright: `Copyright © ${new Date().getFullYear()} contributors.`,
     },
     prism: {
       theme: prismThemes.github,

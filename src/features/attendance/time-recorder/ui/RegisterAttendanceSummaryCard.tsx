@@ -11,75 +11,17 @@ import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import {
+  formatDateRangeLabel,
+  getAttendanceQueryDateRange,
+  getEffectiveDateRange,
+} from "@/entities/attendance/lib/aggregationDateRange";
 import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
 
 import RegisterSummaryAttendanceErrorCountCard from "./RegisterSummaryAttendanceErrorCountCard";
 import RegisterSummaryTotalWorkHoursCard from "./RegisterSummaryTotalWorkHoursCard";
 import RegisterSummaryWorkDaysCard from "./RegisterSummaryWorkDaysCard";
 import RegisterSummaryWorkStatusChartCard from "./RegisterSummaryWorkStatusChartCard";
-
-type DateRange = {
-  start: dayjs.Dayjs;
-  end: dayjs.Dayjs;
-};
-
-const getEffectiveDateRange = (
-  month: dayjs.Dayjs,
-  closeDates: Array<{
-    startDate?: string | null;
-    endDate?: string | null;
-    updatedAt?: string | null;
-    closeDate?: string | null;
-  }>,
-): DateRange => {
-  const monthStart = month.startOf("month");
-  const monthEnd = month.endOf("month");
-  const today = dayjs();
-
-  const applicableCloseDates = closeDates.filter((closeDate) => {
-    const start = dayjs(closeDate.startDate);
-    const end = dayjs(closeDate.endDate);
-    return (
-      start.isValid() &&
-      end.isValid() &&
-      !end.isBefore(monthStart, "day") &&
-      !start.isAfter(monthEnd, "day")
-    );
-  });
-
-  if (applicableCloseDates.length > 0) {
-    const containsToday = applicableCloseDates.find((cd) => {
-      const start = dayjs(cd.startDate);
-      const end = dayjs(cd.endDate);
-      return !today.isBefore(start, "day") && !today.isAfter(end, "day");
-    });
-
-    if (containsToday) {
-      return {
-        start: dayjs(containsToday.startDate),
-        end: dayjs(containsToday.endDate),
-      };
-    }
-
-    const latest = applicableCloseDates.reduce((prev, current) => {
-      const prevUpdatedAt = dayjs(prev.updatedAt ?? prev.closeDate).valueOf();
-      const currentUpdatedAt = dayjs(
-        current.updatedAt ?? current.closeDate,
-      ).valueOf();
-      return currentUpdatedAt > prevUpdatedAt ? current : prev;
-    });
-
-    return {
-      start: dayjs(latest.startDate),
-      end: dayjs(latest.endDate),
-    };
-  }
-
-  return {
-    start: monthStart,
-    end: monthEnd,
-  };
-};
 
 type RegisterAttendanceSummaryCardProps = {
   attendanceErrorCount?: number;
@@ -104,17 +46,7 @@ export default function RegisterAttendanceSummaryCard({
   );
 
   const queryDateRange = useMemo(() => {
-    const monthStart = currentMonth.startOf("month");
-    const monthEnd = currentMonth.endOf("month");
-
-    return {
-      start: effectiveDateRange.start.isBefore(monthStart, "day")
-        ? effectiveDateRange.start
-        : monthStart,
-      end: effectiveDateRange.end.isAfter(monthEnd, "day")
-        ? effectiveDateRange.end
-        : monthEnd,
-    };
+    return getAttendanceQueryDateRange(currentMonth, effectiveDateRange);
   }, [currentMonth, effectiveDateRange]);
 
   const startDate = queryDateRange.start.format(AttendanceDate.DataFormat);
@@ -349,7 +281,7 @@ export default function RegisterAttendanceSummaryCard({
     attendanceUninitialized;
   const hasError = Boolean(closeDatesError || attendancesError);
 
-  const rangeLabel = `${effectiveDateRange.start.format("M/D")}〜${effectiveDateRange.end.format("M/D")}`;
+  const rangeLabel = formatDateRangeLabel(effectiveDateRange);
   const summaryInfoLabel = `集計期間について: ${rangeLabel}`;
 
   const totalHoursLabel =

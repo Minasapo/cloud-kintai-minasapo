@@ -1,6 +1,9 @@
 import dayjs from "dayjs";
 
-import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
+import {
+  AttendanceState,
+  AttendanceStatus,
+} from "@/entities/attendance/lib/AttendanceState";
 import { Attendance, Staff } from "@/shared/api/graphql/types";
 
 import { WorkStatus, WorkStatusCodes } from "../lib/common";
@@ -19,7 +22,9 @@ const DEFAULT_ELAPSED_WORK_INFO: TimeRecorderElapsedWorkInfo = {
 };
 
 type HolidayCalendarsArg = ConstructorParameters<typeof AttendanceState>[2];
-type CompanyHolidayCalendarsArg = ConstructorParameters<typeof AttendanceState>[3];
+type CompanyHolidayCalendarsArg = ConstructorParameters<
+  typeof AttendanceState
+>[3];
 
 function formatElapsedDurationFromMinutes(totalMinutes: number): string {
   const safeMinutes = Math.max(0, Math.floor(totalMinutes));
@@ -91,9 +96,19 @@ export function summarizeAttendanceErrors(params: {
   attendances: Attendance[];
   holidayCalendars: HolidayCalendarsArg;
   companyHolidayCalendars: CompanyHolidayCalendarsArg;
+  today: dayjs.Dayjs;
 }): { errorCount: number; hasTimeElapsedError: boolean } {
-  return params.attendances.reduce<{ errorCount: number; hasTimeElapsedError: boolean }>(
+  return params.attendances.reduce<{
+    errorCount: number;
+    hasTimeElapsedError: boolean;
+  }>(
     (acc, attendance) => {
+      const workDate = dayjs(attendance.workDate);
+
+      if (!workDate.isValid() || !workDate.isBefore(params.today, "day")) {
+        return acc;
+      }
+
       const status = resolveAttendanceStatus({
         staff: params.staff,
         attendance,
@@ -105,9 +120,7 @@ export function summarizeAttendanceErrors(params: {
         return acc;
       }
 
-      const isAfterOneWeek = dayjs().isAfter(
-        dayjs(attendance.workDate).add(1, "week"),
-      );
+      const isAfterOneWeek = params.today.isAfter(workDate.add(1, "week"));
 
       return {
         errorCount: acc.errorCount + 1,
@@ -160,20 +173,19 @@ export function resolveElapsedWorkInfo(params: {
     grossWorkMinutes - totalRestMinutes - defaultLunchMinutes,
     0,
   );
-  const activeRest = rests.reduce<NonNullable<Attendance["rests"]>[number] | null>(
-    (latest, rest) => {
-      if (!rest.startTime || rest.endTime) {
-        return latest;
-      }
-      if (!latest?.startTime) {
-        return rest;
-      }
-      return dayjs(rest.startTime).isAfter(dayjs(latest.startTime))
-        ? rest
-        : latest;
-    },
-    null,
-  );
+  const activeRest = rests.reduce<
+    NonNullable<Attendance["rests"]>[number] | null
+  >((latest, rest) => {
+    if (!rest.startTime || rest.endTime) {
+      return latest;
+    }
+    if (!latest?.startTime) {
+      return rest;
+    }
+    return dayjs(rest.startTime).isAfter(dayjs(latest.startTime))
+      ? rest
+      : latest;
+  }, null);
   const activeRestMinutes =
     workStatus.code === WorkStatusCodes.RESTING && activeRest?.startTime
       ? calcElapsedMinutes(activeRest.startTime)

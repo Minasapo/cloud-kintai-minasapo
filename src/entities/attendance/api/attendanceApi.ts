@@ -185,6 +185,28 @@ const buildAttendanceForList = (
   updatedAt: matchAttendance?.updatedAt ?? "",
 });
 
+const buildDateListForRange = (
+  startDate: string,
+  endDate: string,
+): string[] => {
+  const start = dayjs(startDate);
+  const end = dayjs(endDate);
+
+  if (!start.isValid() || !end.isValid() || start.isAfter(end, "day")) {
+    return [];
+  }
+
+  const dateList: string[] = [];
+  let current = start.startOf("day");
+
+  while (!current.isAfter(end, "day")) {
+    dateList.push(current.format(AttendanceDate.DataFormat));
+    current = current.add(1, "day");
+  }
+
+  return dateList;
+};
+
 const buildAttendanceCacheId = (staffId: string, workDate: string) =>
   `${staffId}:${workDate}`;
 
@@ -933,6 +955,103 @@ export const attendanceApi = createApi({
         },
       ],
     }),
+    listAttendancesByDateRangeWithPlaceholders: builder.query<
+      AttendanceListResponse,
+      { staffId: string; startDate: string; endDate: string }
+    >({
+      async queryFn(
+        { staffId, startDate, endDate },
+        _queryApi,
+        _extraOptions,
+        baseQuery,
+      ) {
+        const dateList = buildDateListForRange(startDate, endDate);
+
+        if (dateList.length === 0) {
+          return {
+            data: {
+              attendances: [],
+            },
+          };
+        }
+
+        const result = await baseQuery({
+          document: attendancesByStaffId,
+          variables: {
+            staffId,
+            workDate: {
+              between: [dateList[0], dateList[dateList.length - 1]],
+            },
+            sortDirection: "ASC",
+          },
+        });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        const data = result.data as AttendancesByStaffIdQuery | null;
+        const connection = data?.attendancesByStaffId;
+
+        if (!connection) {
+          return { error: { message: "Failed to fetch attendance" } };
+        }
+
+        const fetchedAttendances = connection.items.filter(nonNullable);
+
+        const duplicateCheck = new Map<string, Attendance[]>();
+        const duplicateDetails: DuplicateAttendanceInfo[] = [];
+
+        fetchedAttendances.forEach((attendance) => {
+          const existing = duplicateCheck.get(attendance.workDate) ?? [];
+          existing.push(attendance);
+          duplicateCheck.set(attendance.workDate, existing);
+        });
+
+        for (const attendancesForDate of duplicateCheck.values()) {
+          if (attendancesForDate.length > 1) {
+            duplicateDetails.push({
+              workDate: attendancesForDate[0]?.workDate ?? "",
+              ids: attendancesForDate
+                .map((attendance) => attendance.id)
+                .filter(Boolean),
+              staffId,
+            });
+            dispatchDuplicateWarning(E02004);
+          }
+        }
+
+        if (duplicateDetails.length > 0) {
+          return {
+            error: {
+              message: E02004,
+              details: {
+                code: ATTENDANCE_DUPLICATE_CONFLICT,
+                staffId,
+                duplicates: duplicateDetails,
+              },
+            },
+          };
+        }
+
+        return {
+          data: {
+            attendances: dateList.map((targetDate) => {
+              const matches = duplicateCheck.get(targetDate) ?? [];
+              const match = matches[0] ?? null;
+              return buildAttendanceForList(targetDate, match);
+            }),
+          },
+        };
+      },
+      providesTags: (_result, _error, arg) => [
+        { type: "Attendance" as const, id: "LIST" },
+        {
+          type: "Attendance" as const,
+          id: `RANGE-WITH-PLACEHOLDERS-${arg.staffId}-${arg.startDate}-${arg.endDate}`,
+        },
+      ],
+    }),
     createAttendance: builder.mutation<Attendance, CreateAttendanceMutationArg>(
       {
         async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
@@ -1535,6 +1654,8 @@ export const {
   useLazyGetAttendanceByIdQuery,
   useListAttendancesByDateRangeQuery,
   useLazyListAttendancesByDateRangeQuery,
+  useListAttendancesByDateRangeWithPlaceholdersQuery,
+  useLazyListAttendancesByDateRangeWithPlaceholdersQuery,
   useListRecentAttendancesQuery,
   useLazyListRecentAttendancesQuery,
   useListRecentAttendancesWithWarningsQuery,
