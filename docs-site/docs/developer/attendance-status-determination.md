@@ -58,6 +58,29 @@ flowchart TD
 
 ---
 
+## 代表的な状態変化
+
+内部実装の全条件は上のフロー図が正本です。以下は `AttendanceStatus` の見え方を、代表的な変化に絞って整理した図です。
+
+```mermaid
+stateDiagram-v2
+  [*] --> None
+  None --> Error: record missing on past business day
+  None --> Ok: paidHolidayFlag or substituteHolidayDate
+  None --> Requesting: changeRequests.completed = false
+  Error --> Requesting: changeRequests.completed = false
+  Requesting --> Ok: request resolved and times valid
+  Ok --> None: today / holiday / usageStartDate before / management disabled
+  Error --> None: today / holiday / usageStartDate before / management disabled
+  Requesting --> None: today / holiday / usageStartDate before / management disabled
+```
+
+`Working` は打刻画面側の現在状態であり、この図の主対象外です。
+
+`Late` は将来拡張用で、現状は `Error` ルートとして扱います。
+
+---
+
 ## パス A: 勤怠レコードが存在しない日（`attendance = undefined`）
 
 以下の順序で判定し、最初にマッチした条件で返す。
