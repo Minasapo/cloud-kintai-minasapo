@@ -15,6 +15,7 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 const sidebars: SidebarsConfig = {
   mainSidebar: [
     "intro",
+    "terminology",
     {
       type: "category",
       label: "スタッフ向けガイド",

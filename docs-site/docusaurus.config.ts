@@ -35,6 +35,20 @@ const config: Config = {
 
   themes: ["@docusaurus/theme-mermaid"],
 
+  plugins: [
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        indexDocs: true,
+        indexBlog: false,
+        indexPages: false,
+        docsRouteBasePath: "docs",
+        language: ["ja"],
+        hashed: true,
+      },
+    ],
+  ],
+
   presets: [
     [
       "classic",

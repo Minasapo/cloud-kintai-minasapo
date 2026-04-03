@@ -25,6 +25,12 @@ description: garaku-frontend の開発に必要なセットアップ、アーキ
 - [打刻エラー一覧の表示仕様](./attendance-error-list-display.md) — エラー一覧の表示条件・対象期間・デスクトップ/モバイル差異
 - [勤怠ステータス判定ロジック](./attendance-status-determination.md) — `getStatus()` の全優先度テーブルと分岐条件
 
+## ドキュメント運用
+
+- [用語集](../terminology.md)
+- 用語を本文中で補足する場合は、`<GlossaryTerm description="定義">用語</GlossaryTerm>` を利用してください。
+- 定義本文は用語集ページを正本とし、本文中の `description` は短い補足に留めて重複を避けてください。
+
 ## 今後追加予定
 
 - 開発フロー
