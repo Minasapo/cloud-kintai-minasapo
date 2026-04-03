@@ -17,10 +17,7 @@ import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import {
-  AttendanceState,
-  AttendanceStatus,
-} from "@/entities/attendance/lib/AttendanceState";
+import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
@@ -97,48 +94,27 @@ export default function DesktopList() {
         const existingAttendance = attendances.find(
           (a) => a.workDate === workDate,
         );
-
-        if (existingAttendance) {
-          const hasSystemComment =
-            Array.isArray(existingAttendance.systemComments) &&
-            existingAttendance.systemComments.length > 0;
-          if (hasSystemComment) {
-            result.push(existingAttendance);
-          } else {
-            const status = new AttendanceState(
-              staff,
-              existingAttendance,
-              holidayCalendars,
-              companyHolidayCalendars,
-            ).get();
-            if (
-              status === AttendanceStatus.Error ||
-              status === AttendanceStatus.Late
-            ) {
-              result.push(existingAttendance);
-            }
-          }
-        } else {
-          const status = getStatus(
-            undefined,
-            staff,
-            holidayCalendars,
-            companyHolidayCalendars,
-            current,
-          );
-          if (
-            status === AttendanceStatus.Error ||
-            status === AttendanceStatus.Late
-          ) {
-            result.push({
+        const status = getStatus(
+          existingAttendance,
+          staff,
+          holidayCalendars,
+          companyHolidayCalendars,
+          current,
+        );
+        if (
+          status === AttendanceStatus.Error ||
+          status === AttendanceStatus.Late
+        ) {
+          result.push(
+            existingAttendance ?? {
               __typename: "Attendance",
               id: `missing-${workDate}`,
               staffId: staff.id,
               workDate,
               createdAt: "",
               updatedAt: "",
-            });
-          }
+            },
+          );
         }
       }
 

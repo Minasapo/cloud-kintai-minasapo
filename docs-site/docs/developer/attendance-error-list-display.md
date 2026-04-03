@@ -31,27 +31,22 @@ sidebar_position: 3
 
 ## エラー判定ロジック
 
-対象期間の**全日付**に対して以下の順序で判定する。
+対象期間の**全日付**に対して `getStatus(attendance | undefined, staff, holidayCalendars, companyHolidayCalendars, date)` を呼び出し、返り値が `Error` または `Late` の日をエラーとして収集する。
 
-### 勤怠レコードが存在する日
-
-`AttendanceState.get()` でステータスを取得し、以下の条件のいずれかを満たす場合にエラー扱いとする。
-
-1. `systemComments` が 1 件以上ある
-2. ステータスが `Error`（出勤時刻か退勤時刻が未入力の平日）
-3. ステータスが `Late`
+勤怠レコードがある日もない日も同じ関数で判定しており、`getStatus()` 内部で以下の振り分けを行う。
 
 ### 勤怠レコードが存在しない日（丸ごと未打刻）
 
-`getStatus(undefined, ...)` で判定する。過去の営業日にレコードが存在しない場合は `Error` を返す。
-
-以下の条件に該当する日は除外する（`None` として扱われエラー一覧に含まれない）。
+`getStatus(undefined, ...)` が呼ばれ、以下の条件に該当しない過去の営業日は `Error` を返す。
 
 - 当日および未来日
 - `usageStartDate`（利用開始日）より前の日付
-- 非シフト勤務スタッフの祝日・会社休日・週末
-- シフト勤務スタッフの `isDeemedHoliday` が true の日
+- 非シフト勤務スタッフの祝日・会社休日・週末（`isHolidayLike` 判定）
 - 有給休暇・振替休日が設定されている日
+
+### 勤怠レコードが存在する日
+
+`getStatus(attendance, ...)` が `AttendanceState.get()` に委譲し、返り値が `Error` または `Late` の場合にエラーとして収集する。
 
 ### ステータス一覧
 
