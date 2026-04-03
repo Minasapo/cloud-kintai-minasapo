@@ -75,6 +75,32 @@
   vertical-align: top;
 }
 
+.docs-callout {
+  margin: 0 0 var(--ifm-leading);
+  padding: 0.9rem 1rem;
+  border-left: 4px solid var(--ifm-color-primary);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ifm-color-primary) 8%, transparent);
+}
+
+.docs-callout > :last-child {
+  margin-bottom: 0;
+}
+
+.docs-code-frame {
+  margin: 0 0 var(--ifm-leading);
+  border: 1px solid var(--docs-table-border-color);
+  border-radius: 14px;
+  overflow: auto;
+  box-shadow: 0 10px 24px -20px var(--docs-table-shadow-color);
+}
+
+.docs-code-frame > pre {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
 .docs-table-wrapper td code,
 .docs-table-wrapper th code {
   white-space: nowrap;

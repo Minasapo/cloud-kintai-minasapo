@@ -77,6 +77,7 @@ const sidebars: SidebarsConfig = {
             "developer/architecture/directory-structure",
             "developer/architecture/dependency-rules",
             "developer/architecture/placement-guide",
+            "developer/architecture/sidebar-category-rules",
           ],
         },
         "developer/getting-started/setup",

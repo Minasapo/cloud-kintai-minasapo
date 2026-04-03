@@ -1,5 +1,7 @@
 ---
 sidebar_position: 2
+title: 基本操作
+description: スタッフ向けの「基本操作」に関する手順と運用ポイントをまとめます。
 ---
 
 # 基本操作
