@@ -13,6 +13,8 @@ sidebar_position: 1
 ## アーキテクチャ
 
 - [ディレクトリ構成](./architecture/directory-structure.md)
+- [依存ルール](./architecture/dependency-rules.md)
+- [配置判断ガイド](./architecture/placement-guide.md)
 
 ## 機能仕様
 

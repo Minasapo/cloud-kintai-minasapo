@@ -73,7 +73,11 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "アーキテクチャ",
-          items: ["developer/architecture/directory-structure"],
+          items: [
+            "developer/architecture/directory-structure",
+            "developer/architecture/dependency-rules",
+            "developer/architecture/placement-guide",
+          ],
         },
         "developer/getting-started/setup",
         "developer/attendance-management-enabled",

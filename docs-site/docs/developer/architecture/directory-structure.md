@@ -66,5 +66,7 @@ sidebar_position: 1
 
 - [セットアップ](../getting-started/setup.md)
 - [勤怠管理対象フラグ仕様](../attendance-management-enabled.md)
+- [依存ルール](./dependency-rules.md)
+- [配置判断ガイド](./placement-guide.md)
 - リポジトリ直下の `README.md`
 - リポジトリ直下の `CLAUDE.md`
