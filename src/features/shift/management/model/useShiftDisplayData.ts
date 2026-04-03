@@ -1,9 +1,9 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { ShiftPlanMonthSetting } from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import generateMockShifts, { ShiftState } from "../lib/generateMockShifts";
+import { ShiftState } from "../lib/generateMockShifts";
 import useShiftRequestAssignments from "./useShiftRequestAssignments";
 
 type ShiftGroup = {
@@ -55,10 +55,8 @@ export function useShiftDisplayData({
   isAuthenticated,
   shiftPlanPlans,
 }: UseShiftDisplayDataParams): UseShiftDisplayDataResult {
-  // シミュレーションシナリオを選べるようにする（デフォルトは実際の希望シフト）
-  const [scenario] = useState<string>("actual");
+  const scenario = "actual";
 
-  // mockShifts を state 化し、scenario/shiftStaffs/days に応じて生成する
   const [mockShifts, setMockShifts] = useState<
     Map<string, Record<string, ShiftState>>
   >(new Map());
@@ -75,25 +73,6 @@ export function useShiftDisplayData({
     cognitoUserId,
     enabled: isAuthenticated,
   });
-
-  useEffect(() => {
-    // 実績表示モードではモック生成は不要
-    if (scenario === "actual") {
-      setMockShifts(new Map());
-      return;
-    }
-    // shiftStaffs が未ロードのときは空のマップを設定
-    if (!shiftStaffs || shiftStaffs.length === 0) {
-      setMockShifts(new Map());
-      return;
-    }
-    const map = generateMockShifts(
-      shiftStaffs.map((s) => ({ id: s.id })),
-      days,
-      scenario,
-    );
-    setMockShifts(map);
-  }, [shiftStaffs, days, scenario]);
 
   const displayShifts = useMemo(() => {
     const next = new Map<string, Record<string, ShiftState>>();

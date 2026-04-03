@@ -84,6 +84,7 @@
     "docs:start": "npm --prefix docs-site run start",
     "docs:build": "npm --prefix docs-site run build",
     "docs:serve": "npm --prefix docs-site run serve",
+    "docs:search-preview": "npm run docs:build && npm run docs:serve",
     "lint": "eslint ./src/ --ext .ts,.tsx",
     "eslint": "npx eslint ./src/",
     "typecheck": "tsc --noEmit",

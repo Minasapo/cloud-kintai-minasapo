@@ -1,5 +1,7 @@
 ---
 sidebar_position: 5
+title: よくある質問
+description: 運用時によく発生する質問と対処方法をまとめます。
 ---
 
 # よくある質問

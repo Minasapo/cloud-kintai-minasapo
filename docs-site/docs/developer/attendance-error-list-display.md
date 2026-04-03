@@ -1,5 +1,7 @@
 ---
 sidebar_position: 3
+title: 打刻エラー一覧の表示仕様
+description: attendance list と register での打刻エラー表示条件、対象期間、判定フローの仕様を定義します。
 ---
 
 # 打刻エラー一覧の表示仕様
@@ -26,6 +28,18 @@ sidebar_position: 3
 判定ロジックの詳細（ステータス決定の全優先度・条件一覧）は [勤怠ステータス判定ロジック](./attendance-status-determination.md) を参照。
 
 対象期間の**全日付**に対して `getStatus(attendance | undefined, staff, holidayCalendars, companyHolidayCalendars, date)` を呼び出し、返り値が `Error` または `Late` の日をエラーとして収集する。
+
+## 打刻ダッシュボードとの関係
+
+このページは `/attendance/list` の打刻エラー一覧仕様を定義する。
+
+`/register` の打刻ダッシュボードに表示する打刻エラー件数も、期間の基準は同じく `effectiveDateRange` を使う。ただし、ダッシュボード側は一覧テーブルではなく集計表示であり、`AttendanceState(...).get() === Error` の日数を数える。
+
+- 対象期間: `effectiveDateRange`
+- 未来日: 除外
+- 当日: 除外
+- 集計単位: 1 日を 1 件
+- 主な実装: `src/features/attendance/time-recorder/ui/TimeRecorder.tsx`, `src/features/attendance/time-recorder/ui/timeRecorderUtils.ts`
 
 ## 表示判定フロー図
 

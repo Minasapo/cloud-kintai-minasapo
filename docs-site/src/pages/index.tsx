@@ -34,14 +34,14 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="開発ドキュメント"
-      description="garaku-frontend の開発ドキュメント"
+      description="本プロジェクトの開発ドキュメント"
     >
       <HomepageHeader />
       <main>
         <section className={styles.descriptionSection}>
           <div className="container">
             <p className={styles.descriptionText}>
-              このサイトは garaku-frontend の開発知識をまとめるための基盤です。
+              このサイトは本プロジェクトの開発知識をまとめるための基盤です。
             </p>
           </div>
         </section>

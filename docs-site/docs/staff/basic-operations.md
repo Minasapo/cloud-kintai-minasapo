@@ -1,5 +1,7 @@
 ---
 sidebar_position: 2
+title: 基本操作
+description: ログイン後にまず必要となる基本的な画面操作と利用フローを説明します。
 ---
 
 # 基本操作

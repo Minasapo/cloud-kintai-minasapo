@@ -1,5 +1,7 @@
 ---
 sidebar_position: 5
+title: 申請を確認する
+description: 提出済み申請の状態確認方法と、差戻し時の対応手順をまとめます。
 ---
 
 # 申請を確認する

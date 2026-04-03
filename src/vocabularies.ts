@@ -30,6 +30,10 @@ const vocabularies = {
       "試行回数の上限を超えました。しばらくしてからもう一度お試しください。",
     "Resend Code": "コードを再送信",
     "A network error has occurred.": "ネットワークエラーが発生しました。",
+    "Incorrect username or password.":
+      "メールアドレスまたはパスワードが正しくありません。",
+    "Password attempts exceeded":
+      "パスワードの試行回数が上限を超えました。しばらくしてからお試しください。",
   },
 };
 

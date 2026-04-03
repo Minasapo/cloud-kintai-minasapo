@@ -10,7 +10,7 @@ export default function RegisterSummaryAttendanceErrorCountCard({
   hasAttendanceError,
 }: RegisterSummaryAttendanceErrorCountCardProps) {
   const attendanceErrorInfoLabel =
-    "打刻エラー件数について: 退勤漏れや重複打刻など、修正が必要な打刻エラー件数を表示しています";
+    "打刻エラー件数について: 集計期間内で修正が必要な打刻エラー日数を表示しています";
 
   return (
     <div className="mt-3 rounded-[4px] border border-slate-200/90 bg-slate-50/70 px-3.5 py-3">

@@ -1,10 +1,16 @@
 ---
 sidebar_position: 4
+title: 勤怠ステータス判定ロジック
+description: getStatus と AttendanceState による勤怠ステータス判定の優先度と分岐条件をまとめます。
 ---
 
 # 勤怠ステータス判定ロジック
 
 スタッフの 1 日分の勤怠ステータスを返す中核ライブラリの仕様を定義する。
+
+このページは、勤怠一覧や集計で使う「勤怠判定ステータス」を対象にした仕様ページです。打刻画面で使う「現在の勤務ステータス」は別概念であり、共通整理は [勤務ステータスの見方](../work-status-overview.md) を参照してください。
+
+直行・直帰の利用者向け定義は [用語集](../terminology.md) の「直行・直帰モード」を参照してください。実装上は `Attendance.goDirectlyFlag` / `Attendance.returnDirectlyFlag` に保存される記録項目であり、直行時は AppConfig の勤務開始時間、直帰時は AppConfig の勤務終了時間で保存されます。ただし、このページで扱う勤怠判定ステータスの分岐条件には使いません。
 
 ## エントリーポイント: `getStatus()`
 
@@ -54,6 +60,29 @@ flowchart TD
 
 ---
 
+## 代表的な状態変化
+
+内部実装の全条件は上のフロー図が正本です。以下は `AttendanceStatus` の見え方を、代表的な変化に絞って整理した図です。
+
+```mermaid
+stateDiagram-v2
+  [*] --> None
+  None --> Error: record missing on past business day
+  None --> Ok: paidHolidayFlag or substituteHolidayDate
+  None --> Requesting: changeRequests.completed = false
+  Error --> Requesting: changeRequests.completed = false
+  Requesting --> Ok: request resolved and times valid
+  Ok --> None: today / holiday / usageStartDate before / management disabled
+  Error --> None: today / holiday / usageStartDate before / management disabled
+  Requesting --> None: today / holiday / usageStartDate before / management disabled
+```
+
+`Working` は打刻画面側の現在状態であり、この図の主対象外です。
+
+`Late` は将来拡張用で、現状は `Error` ルートとして扱います。
+
+---
+
 ## パス A: 勤怠レコードが存在しない日（`attendance = undefined`）
 
 以下の順序で判定し、最初にマッチした条件で返す。
@@ -82,6 +111,8 @@ flowchart TD
 `AttendanceState.get()` に委譲する。
 
 **ファイル**: `src/entities/attendance/lib/AttendanceState.ts`
+
+`attendance` には `goDirectlyFlag` と `returnDirectlyFlag` も含まれますが、これらは直行・直帰の記録用フラグです。`AttendanceState.get()` の `Ok` / `Error` / `Requesting` / `None` 判定には影響しません。
 
 以下の順序で判定し、最初にマッチした条件で返す。
 
@@ -127,5 +158,7 @@ flowchart TD
 
 ## 関連ドキュメント
 
+- [勤務ステータスの見方](../work-status-overview.md) — 現在の勤務ステータスと勤怠判定ステータスの共通整理
 - [打刻エラー一覧の表示仕様](./attendance-error-list-display.md) — 一覧画面上での収集・表示条件
 - [attendanceManagementEnabled フラグ仕様](./attendance-management-enabled.md) — 勤怠管理の有効・無効フラグ
+- [休憩時間仕様](./break-time-specification.md) — 打刻時自動追加と表示時仮控除の違い

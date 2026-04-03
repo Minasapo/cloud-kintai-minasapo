@@ -1,10 +1,12 @@
 ---
 sidebar_position: 1
+title: 管理者向けガイド
+description: 日常運用と月次対応に必要なページへの入口をまとめて案内します。
 ---
 
-# 管理者向けドキュメント
+# 管理者向けガイド
 
-このセクションは、管理者の日常運用に必要な操作をまとめた案内です。
+このセクションは、管理者の日常運用に必要な操作をまとめたガイドです。
 
 ## 管理者が行う主な作業
 
@@ -27,5 +29,6 @@ sidebar_position: 1
 - [シフト計画を作成する](./shift-plan.md)
 - [操作ログを確認する](./operation-logs.md)
 - [設定画面を管理する](./settings-management.md)
+- [設定項目一覧を確認する](./settings-item-list.md)
 - [スタッフを管理する](./staff-management.md)
 - [よくある質問](./faq.md)

@@ -6,7 +6,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 
 const config: Config = {
   title: "クラウド勤怠 ドキュメント",
-  tagline: "スタッフ向け・管理者向け・開発者向けのガイド",
+  tagline: "スタッフ・管理者・開発者それぞれの利用ガイド",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -35,6 +35,20 @@ const config: Config = {
 
   themes: ["@docusaurus/theme-mermaid"],
 
+  plugins: [
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        indexDocs: true,
+        indexBlog: false,
+        indexPages: false,
+        docsRouteBasePath: "docs",
+        language: ["ja"],
+        hashed: true,
+      },
+    ],
+  ],
+
   presets: [
     [
       "classic",
@@ -59,29 +73,24 @@ const config: Config = {
     navbar: {
       title: "クラウド勤怠 ドキュメント",
       logo: {
-        alt: "Garaku Frontend Docs Logo",
+        alt: "クラウド勤怠ドキュメントのロゴ",
         src: "img/logo.svg",
       },
       items: [
         {
           to: "/docs/staff/overview",
           position: "left",
-          label: "スタッフ向け",
+          label: "スタッフ向けガイド",
         },
         {
           to: "/docs/admin/overview",
           position: "left",
-          label: "管理者向け",
+          label: "管理者向けガイド",
         },
         {
           to: "/docs/developer/overview",
           position: "left",
-          label: "開発者向け",
-        },
-        {
-          href: "https://github.com/vtj-devops/garaku-frontend",
-          label: "GitHub",
-          position: "right",
+          label: "開発者向けガイド",
         },
       ],
     },
@@ -92,30 +101,21 @@ const config: Config = {
           title: "Docs",
           items: [
             {
-              label: "スタッフ向け",
+              label: "スタッフ向けガイド",
               to: "/docs/staff/overview",
             },
             {
-              label: "管理者向け",
+              label: "管理者向けガイド",
               to: "/docs/admin/overview",
             },
             {
-              label: "開発者向け",
+              label: "開発者向けガイド",
               to: "/docs/developer/overview",
             },
           ],
         },
-        {
-          title: "Project",
-          items: [
-            {
-              label: "Repository",
-              href: "https://github.com/vtj-devops/garaku-frontend",
-            },
-          ],
-        },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} garaku-frontend contributors.`,
+      copyright: `Copyright © ${new Date().getFullYear()} contributors.`,
     },
     prism: {
       theme: prismThemes.github,

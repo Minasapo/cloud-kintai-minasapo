@@ -2,12 +2,58 @@ import "@aws-amplify/ui-react/styles.css";
 import "./styles.scss";
 
 import { Authenticator } from "@aws-amplify/ui-react";
-import { useEffect } from "react";
+import { signIn } from "aws-amplify/auth";
+import { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { useSession } from "@/app/providers/session/useSession";
 
 import logo from "./logo_large.png";
+
+const readSignInCredentials = (input: unknown) => {
+  if (!input || typeof input !== "object") {
+    return null;
+  }
+
+  const values = input as { username?: unknown; password?: unknown };
+  if (
+    typeof values.username !== "string" ||
+    typeof values.password !== "string"
+  ) {
+    return null;
+  }
+
+  return {
+    username: values.username,
+    password: values.password,
+  };
+};
+
+const parseAuthError = (error: unknown) => {
+  if (!error || typeof error !== "object") {
+    return {
+      name: "UnknownError",
+      message: "Unknown authentication error",
+      details: undefined,
+    };
+  }
+
+  const authError = error as {
+    name?: unknown;
+    message?: unknown;
+    cause?: unknown;
+  };
+
+  return {
+    name:
+      typeof authError.name === "string" ? authError.name : "UnknownAuthError",
+    message:
+      typeof authError.message === "string"
+        ? authError.message
+        : "Authentication failed",
+    details: authError.cause,
+  };
+};
 
 export default function Login() {
   const { authStatus, cognitoUser } = useSession();
@@ -26,12 +72,38 @@ export default function Login() {
     navigate(from, { replace: true });
   }, [authStatus, navigate, from, cognitoUser]);
 
+  const services = useMemo(
+    () => ({
+      async handleSignIn(input: unknown) {
+        const credentials = readSignInCredentials(input);
+
+        if (!credentials) {
+          throw new Error("Sign in credentials are invalid");
+        }
+
+        try {
+          return await signIn(credentials);
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            const parsedError = parseAuthError(error);
+            console.error("[Auth] Sign in failed", {
+              ...parsedError,
+              username: credentials.username,
+            });
+          }
+          throw error;
+        }
+      },
+    }),
+    [],
+  );
+
   return (
     <div className="flex flex-col items-center justify-center gap-4 pt-0 sm:pt-10">
       <div className="hidden sm:block">
         <img src={logo} height={200} alt="GARAKU" />
       </div>
-      <Authenticator hideSignUp>
+      <Authenticator hideSignUp services={services}>
         {({ signOut }) => {
           if (signOut) {
             return (

@@ -1,5 +1,7 @@
 ---
 sidebar_position: 6
+title: 日報を管理する
+description: 提出済み日報の確認、検索、対応手順を管理者視点で整理します。
 ---
 
 # 日報を管理する

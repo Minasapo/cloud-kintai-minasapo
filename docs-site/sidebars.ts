@@ -15,9 +15,11 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 const sidebars: SidebarsConfig = {
   mainSidebar: [
     "intro",
+    "terminology",
+    "work-status-overview",
     {
       type: "category",
-      label: "スタッフ向け",
+      label: "スタッフ向けガイド",
       items: [
         "staff/overview",
         "staff/navigation-map",
@@ -27,6 +29,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "staff/basic-operations",
             "staff/time-recording",
+            "staff/break-time-guide",
             "staff/dashboard",
             "staff/shift",
             "staff/attendance-check",
@@ -41,7 +44,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "管理者向け",
+      label: "管理者向けガイド",
       items: [
         "admin/overview",
         "admin/navigation-map",
@@ -55,10 +58,12 @@ const sidebars: SidebarsConfig = {
             "admin/attendance-management",
             "admin/daily-report",
             "admin/attendances",
+            "admin/break-time-review-guide",
             "admin/request-approval",
             "admin/workflow",
             "admin/operation-logs",
             "admin/settings-management",
+            "admin/settings-item-list",
             "admin/staff-management",
           ],
         },
@@ -67,13 +72,26 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "開発者向け",
+      label: "開発者向けガイド",
       items: [
         "developer/overview",
+        {
+          type: "category",
+          label: "アーキテクチャ",
+          items: [
+            "developer/architecture/directory-structure",
+            "developer/architecture/dependency-rules",
+            "developer/architecture/placement-guide",
+            "developer/architecture/sidebar-category-rules",
+          ],
+        },
         "developer/getting-started/setup",
         "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",
         "developer/attendance-status-determination",
+        "developer/break-time-specification",
+        "developer/close-date-system",
+        "developer/data-fetch-periods",
       ],
     },
   ],

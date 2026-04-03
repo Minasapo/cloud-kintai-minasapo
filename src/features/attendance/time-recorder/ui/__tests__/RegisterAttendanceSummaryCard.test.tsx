@@ -144,7 +144,7 @@ describe("RegisterAttendanceSummaryCard", () => {
       screen.getByTestId("register-dashboard-attendance-error-info"),
     ).toHaveAttribute(
       "aria-label",
-      "打刻エラー件数について: 退勤漏れや重複打刻など、修正が必要な打刻エラー件数を表示しています",
+      "打刻エラー件数について: 集計期間内で修正が必要な打刻エラー日数を表示しています",
     );
     expect(
       screen.getByTestId("register-dashboard-attendance-error-count"),
@@ -238,6 +238,50 @@ describe("RegisterAttendanceSummaryCard", () => {
     expect(
       screen.getByTestId("register-dashboard-attendance-error-count"),
     ).toHaveClass("text-rose-600");
+  });
+
+  it("締め期間が前月から当月にまたがる場合はその期間を集計期間表示に使う", () => {
+    mockUseCloseDates.mockReturnValue({
+      closeDates: [
+        {
+          id: "close-cross-month",
+          startDate: "2026-02-26",
+          endDate: "2026-03-25",
+          updatedAt: "2026-03-01T00:00:00Z",
+          closeDate: "2026-03-25",
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <AuthContext.Provider
+        value={{
+          signOut: jest.fn(),
+          signIn: jest.fn(),
+          isCognitoUserRole: () => false,
+          cognitoUser: { id: "staff-1" } as never,
+        }}
+      >
+        <RegisterAttendanceSummaryCard attendanceErrorCount={2} />
+      </AuthContext.Provider>,
+    );
+
+    expect(mockUseListAttendancesByDateRangeQuery).toHaveBeenCalledWith(
+      {
+        staffId: "staff-1",
+        startDate: "2026-02-26",
+        endDate: "2026-03-31",
+      },
+      expect.objectContaining({
+        skip: false,
+        refetchOnMountOrArgChange: true,
+      }),
+    );
+    expect(
+      screen.getByTestId("register-dashboard-attendance-summary-info"),
+    ).toHaveAttribute("aria-label", "集計期間について: 2/26〜3/25");
   });
 
   it("当日の勤務はサマリーとチャートの集計対象から除外する", () => {

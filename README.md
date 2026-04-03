@@ -193,7 +193,18 @@ npm install
 npm run docs:start
 npm run docs:build
 npm run docs:serve
+npm run docs:search-preview
 ```
+
+`npm run docs:start` は編集向けの開発サーバーです。検索プラグインの仕様により、開発モードでは検索インデックスが無効なため、検索時に警告が表示されます。
+
+サイト内検索の挙動を確認する場合は、本番ビルド経由で次を実行してください。
+
+```bash
+npm run docs:search-preview
+```
+
+このコマンドは `docs:build` 後に `docs:serve` を起動し、検索インデックス付きの状態で確認できます。
 
 ## よくある詰まりどころ
 
@@ -226,4 +237,13 @@ Playwright ブラウザが未インストールの状態です。
 
 ```bash
 npx playwright install --with-deps
+```
+
+### `The search index is only available when you run docusaurus build!` が出る
+
+`npm run docs:start` では開発モードのため、検索インデックスが有効化されません。
+検索確認時は次を実行してください。
+
+```bash
+npm run docs:search-preview
 ```

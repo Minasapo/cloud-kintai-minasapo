@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 
 import { APP_OVERLAY_PORTAL_ROOT_ID } from "./layers";
@@ -9,6 +9,10 @@ type OverlayPortalProps = {
 };
 
 const ensureOverlayRoot = () => {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
   const existingRoot = document.getElementById(APP_OVERLAY_PORTAL_ROOT_ID);
   if (existingRoot) {
     return existingRoot;
@@ -21,11 +25,7 @@ const ensureOverlayRoot = () => {
 };
 
 export default function OverlayPortal({ children }: OverlayPortalProps) {
-  const [container, setContainer] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    setContainer(ensureOverlayRoot());
-  }, []);
+  const [container] = useState<HTMLElement | null>(() => ensureOverlayRoot());
 
   if (!container) {
     return null;

@@ -232,7 +232,7 @@ const useAppConfig = () => {
     () => ({
       enabled: Boolean(
         config?.timeRecorderAnnouncementEnabled ??
-          DEFAULT_CONFIG.timeRecorderAnnouncementEnabled,
+        DEFAULT_CONFIG.timeRecorderAnnouncementEnabled,
       ),
       message: String(
         config?.timeRecorderAnnouncementMessage ??
