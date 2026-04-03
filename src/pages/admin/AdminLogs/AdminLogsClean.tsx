@@ -86,12 +86,11 @@ export default function AdminLogsClean() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [staffList, setStaffList] = useState<Staff[]>([]);
-  const [staffListLoading, setStaffListLoading] = useState(false);
+  const [staffListLoading, setStaffListLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
 
-    setStaffListLoading(true);
     fetchStaffs()
       .then((staffs) => {
         if (!active) {

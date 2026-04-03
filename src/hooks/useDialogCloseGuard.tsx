@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
 import LeaveGuardDialog from "@/shared/ui/feedback/LeaveGuardDialog";
 
@@ -26,12 +26,7 @@ export function useDialogCloseGuard({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const shouldBlock = isDirty || isBusy;
   const skipGuardRef = useRef(false);
-
-  useEffect(() => {
-    if (!shouldBlock && confirmOpen) {
-      setConfirmOpen(false);
-    }
-  }, [confirmOpen, shouldBlock]);
+  const dialogOpen = confirmOpen && shouldBlock;
 
   const runWithoutGuard = useCallback(<T,>(callback: () => T): T => {
     skipGuardRef.current = true;
@@ -72,14 +67,14 @@ export function useDialogCloseGuard({
   const dialog = useMemo(
     () => (
       <LeaveGuardDialog
-        open={confirmOpen}
+        open={dialogOpen}
         target="dialog"
         isBusy={isBusy}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={closeWithoutGuard}
       />
     ),
-    [closeWithoutGuard, confirmOpen, isBusy],
+    [closeWithoutGuard, dialogOpen, isBusy],
   );
 
   return {
