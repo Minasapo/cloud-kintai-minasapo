@@ -1,5 +1,7 @@
 ---
 sidebar_position: 2
+title: 勤怠管理対象フラグ仕様
+description: attendanceManagementEnabled フラグの判定ルール、影響範囲、実装時の注意点を整理します。
 ---
 
 # 勤怠管理対象フラグ仕様

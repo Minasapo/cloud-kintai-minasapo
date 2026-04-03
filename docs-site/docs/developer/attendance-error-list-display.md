@@ -1,5 +1,7 @@
 ---
 sidebar_position: 3
+title: 打刻エラー一覧の表示仕様
+description: attendance list と register での打刻エラー表示条件、対象期間、判定フローの仕様を定義します。
 ---
 
 # 打刻エラー一覧の表示仕様

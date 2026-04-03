@@ -1,5 +1,7 @@
 ---
 sidebar_position: 5
+title: 締め日 CloseDate システム仕様
+description: CloseDate を基準にした有効集計期間の決定ルールとクエリ範囲の扱いを定義します。
 ---
 
 # 締め日 (CloseDate) システム仕様

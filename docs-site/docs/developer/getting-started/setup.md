@@ -1,5 +1,7 @@
 ---
 sidebar_position: 1
+title: セットアップ
+description: 開発開始時に必要な Node.js、依存パッケージ、Playwright 初期設定と主要コマンドをまとめます。
 ---
 
 # セットアップ

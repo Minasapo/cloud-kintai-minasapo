@@ -1,5 +1,7 @@
 ---
 sidebar_position: 2
+title: 依存ルール
+description: FSD ベースの依存方向とレイヤー間の依存可否、禁止パターンを明文化したガイドです。
 ---
 
 # 依存ルール

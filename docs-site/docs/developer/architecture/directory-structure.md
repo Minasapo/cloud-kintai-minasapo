@@ -1,5 +1,7 @@
 ---
 sidebar_position: 1
+title: ディレクトリ構成
+description: リポジトリ全体の構成と src 配下の FSD レイヤー責務を俯瞰して把握するためのガイドです。
 ---
 
 # ディレクトリ構成

@@ -1,5 +1,7 @@
 ---
 sidebar_position: 4
+title: 勤怠ステータス判定ロジック
+description: getStatus と AttendanceState による勤怠ステータス判定の優先度と分岐条件をまとめます。
 ---
 
 # 勤怠ステータス判定ロジック

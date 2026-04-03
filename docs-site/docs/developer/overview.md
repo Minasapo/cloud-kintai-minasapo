@@ -1,5 +1,7 @@
 ---
 sidebar_position: 1
+title: 開発者向けガイド
+description: garaku-frontend の開発に必要なセットアップ、アーキテクチャ、主要機能仕様の入口ページです。
 ---
 
 # 開発者向けガイド
