@@ -63,6 +63,7 @@ const sidebars: SidebarsConfig = {
             "admin/workflow",
             "admin/operation-logs",
             "admin/settings-management",
+            "admin/settings-item-list",
             "admin/staff-management",
           ],
         },
