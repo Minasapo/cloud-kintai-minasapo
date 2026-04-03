@@ -67,7 +67,11 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "開発者向け",
-      items: ["developer/overview", "developer/getting-started/setup"],
+      items: [
+        "developer/overview",
+        "developer/getting-started/setup",
+        "developer/attendance-error-list-display",
+      ],
     },
   ],
 };

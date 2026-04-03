@@ -32,6 +32,7 @@ import {
   attendanceRowVariantStyles,
   getAttendanceRowVariant,
 } from "@/entities/attendance/ui/rowVariant";
+import { getStatus } from "@/features/attendance/list/lib/attendanceStatusUtils";
 
 import { useAttendanceListContext } from "./AttendanceListContext";
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
@@ -47,6 +48,7 @@ export default function DesktopList() {
     companyHolidayCalendars,
     navigate,
     currentMonth,
+    effectiveDateRange,
   } = useAttendanceListContext();
 
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
@@ -82,20 +84,68 @@ export default function DesktopList() {
 
   const errorAttendances = (() => {
     if (!staff) return [] as Attendance[];
-    return attendances.filter((a) => {
-      const hasSystemComment =
-        Array.isArray(a.systemComments) && a.systemComments.length > 0;
-      if (hasSystemComment) return true;
-      const status = new AttendanceState(
-        staff,
-        a,
-        holidayCalendars,
-        companyHolidayCalendars,
-      ).get();
-      return (
-        status === AttendanceStatus.Error || status === AttendanceStatus.Late
-      );
-    });
+
+    const today = dayjs();
+    const rangeStart = effectiveDateRange.start;
+    const rangeEnd = effectiveDateRange.end;
+    const result: Attendance[] = [];
+
+    let current = rangeStart;
+    while (!current.isAfter(rangeEnd, "day")) {
+      if (!current.isAfter(today, "day")) {
+        const workDate = current.format(AttendanceDate.DataFormat);
+        const existingAttendance = attendances.find(
+          (a) => a.workDate === workDate,
+        );
+
+        if (existingAttendance) {
+          const hasSystemComment =
+            Array.isArray(existingAttendance.systemComments) &&
+            existingAttendance.systemComments.length > 0;
+          if (hasSystemComment) {
+            result.push(existingAttendance);
+          } else {
+            const status = new AttendanceState(
+              staff,
+              existingAttendance,
+              holidayCalendars,
+              companyHolidayCalendars,
+            ).get();
+            if (
+              status === AttendanceStatus.Error ||
+              status === AttendanceStatus.Late
+            ) {
+              result.push(existingAttendance);
+            }
+          }
+        } else {
+          const status = getStatus(
+            undefined,
+            staff,
+            holidayCalendars,
+            companyHolidayCalendars,
+            current,
+          );
+          if (
+            status === AttendanceStatus.Error ||
+            status === AttendanceStatus.Late
+          ) {
+            result.push({
+              __typename: "Attendance",
+              id: `missing-${workDate}`,
+              staffId: staff.id,
+              workDate,
+              createdAt: "",
+              updatedAt: "",
+            });
+          }
+        }
+      }
+
+      current = current.add(1, "day");
+    }
+
+    return result;
   })();
   return (
     <div className="hidden md:block">
@@ -148,18 +198,58 @@ export default function DesktopList() {
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ color: "#64748b", fontWeight: 700 }} />
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>勤務日</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
+                      勤務日
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
                       勤務時間
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
                       休憩時間(直近)
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>摘要</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
+                      摘要
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
                       作成日時
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
                       更新日時
                     </TableCell>
                     <TableCell />

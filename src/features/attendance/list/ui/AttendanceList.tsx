@@ -185,6 +185,7 @@ export default function AttendanceTable() {
         closeDatesLoading,
         closeDatesError,
         currentMonth,
+        effectiveDateRange,
         onMonthChange: handleMonthChange,
     };
     return (<AttendanceListProvider value={contextValue}>
