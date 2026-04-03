@@ -15,6 +15,9 @@
   --ifm-color-primary-lightest: #3cad6e;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docs-table-border-color: var(--ifm-color-emphasis-300);
+  --docs-table-shadow-color: rgba(15, 23, 42, 0.08);
+  --docs-table-scroll-shadow: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0));
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -27,4 +30,58 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --docs-table-border-color: rgba(255, 255, 255, 0.14);
+  --docs-table-shadow-color: rgba(2, 6, 23, 0.45);
+  --docs-table-scroll-shadow: linear-gradient(90deg, rgba(24, 25, 26, 0.96), rgba(24, 25, 26, 0));
+}
+
+.docs-table-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 0 0 var(--ifm-leading);
+  overflow-x: auto;
+  border: 1px solid var(--docs-table-border-color);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px -24px var(--docs-table-shadow-color);
+  scrollbar-gutter: stable both-edges;
+  -webkit-overflow-scrolling: touch;
+}
+
+.docs-table-wrapper::before {
+  content: '';
+  position: sticky;
+  left: 0;
+  display: block;
+  width: 24px;
+  height: 0;
+  box-shadow: 0 0 24px 16px var(--docs-table-shadow-color);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.docs-table-wrapper > table {
+  display: table;
+  width: max-content;
+  min-width: 100%;
+  margin-bottom: 0;
+}
+
+.docs-table-wrapper th {
+  white-space: nowrap;
+}
+
+.docs-table-wrapper th,
+.docs-table-wrapper td {
+  vertical-align: top;
+}
+
+.docs-table-wrapper td code,
+.docs-table-wrapper th code {
+  white-space: nowrap;
+}
+
+@media (max-width: 996px) {
+  .docs-table-wrapper {
+    border-radius: 14px;
+  }
 }

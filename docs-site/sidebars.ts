@@ -74,6 +74,8 @@ const sidebars: SidebarsConfig = {
         "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",
         "developer/attendance-status-determination",
+        "developer/close-date-system",
+        "developer/data-fetch-periods",
       ],
     },
   ],
