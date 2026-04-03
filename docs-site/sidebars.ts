@@ -70,6 +70,11 @@ const sidebars: SidebarsConfig = {
       label: "開発者向けガイド",
       items: [
         "developer/overview",
+        {
+          type: "category",
+          label: "アーキテクチャ",
+          items: ["developer/architecture/directory-structure"],
+        },
         "developer/getting-started/setup",
         "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",

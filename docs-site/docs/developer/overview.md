@@ -10,6 +10,10 @@ sidebar_position: 1
 
 - [セットアップ](./getting-started/setup.md)
 
+## アーキテクチャ
+
+- [ディレクトリ構成](./architecture/directory-structure.md)
+
 ## 機能仕様
 
 - [勤怠管理対象フラグ仕様](./attendance-management-enabled.md) — `attendanceManagementEnabled` フラグの目的・判定ロジック・影響範囲
@@ -18,7 +22,6 @@ sidebar_position: 1
 
 ## 今後追加予定
 
-- アーキテクチャ概要
 - 開発フロー
 - テスト運用
 - デプロイ運用
