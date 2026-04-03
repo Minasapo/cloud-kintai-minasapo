@@ -70,6 +70,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "developer/overview",
         "developer/getting-started/setup",
+        "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",
       ],
     },

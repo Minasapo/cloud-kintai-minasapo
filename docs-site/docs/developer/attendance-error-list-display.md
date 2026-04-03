@@ -6,6 +6,8 @@ sidebar_position: 3
 
 `/attendance/list` のデスクトップ画面に表示される「打刻エラー一覧」と、モバイル画面の警告アラートの表示条件を定義する。
 
+`attendanceManagementEnabled` フラグ自体の仕様は [attendanceManagementEnabled フラグ仕様](./attendance-management-enabled.md) を参照する。
+
 ## 対象期間
 
 `effectiveDateRange`（有効集計期間）を基準とする。未来日は除外する。
@@ -66,8 +68,8 @@ sidebar_position: 3
 | 項目               | デスクトップ（打刻エラー一覧テーブル）             | モバイル（警告アラート）                    |
 | ------------------ | -------------------------------------------------- | ------------------------------------------- |
 | 表示形式           | 行ごとに勤務日・時刻・編集リンクを表示するテーブル | 「打刻エラーがあります」アラートのみ        |
-| レコード欠損の検出 | 全日ループで検出                                   | 全日ループで検出（`hasErrorOrLateInMonth`）    |
-| 締め日期間の扱い   | `effectiveDateRange` を使用                        | `effectiveDateRange` を使用                   |
+| レコード欠損の検出 | 全日ループで検出                                   | 全日ループで検出（`hasErrorOrLateInMonth`） |
+| 締め日期間の扱い   | `effectiveDateRange` を使用                        | `effectiveDateRange` を使用                 |
 
 ## 実装ファイル
 
