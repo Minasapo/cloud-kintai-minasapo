@@ -20,6 +20,7 @@ import {
 import { useCallback, useEffect, useMemo } from "react";
 
 import { StaffExternalLink } from "@/entities/staff/externalLink";
+import { isAttendanceManagementEnabled } from "@/entities/staff/lib/attendanceManagement";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   buildVersionOrUpdatedAtCondition,
@@ -130,15 +131,11 @@ function mapStaff(staff: Staff): StaffType {
     approverMultiple: staff.approverMultiple ?? null,
     approverMultipleMode: staff.approverMultipleMode ?? null,
     shiftGroup: staff.shiftGroup ?? null,
-    attendanceManagementEnabled: (
-      staff as unknown as Record<string, unknown>
-    ).attendanceManagementEnabled as boolean | null | undefined,
+    attendanceManagementEnabled: isAttendanceManagementEnabled(staff),
   };
 }
 
-function toError(
-  error: unknown,
-): Error | null {
+function toError(error: unknown): Error | null {
   if (!error) {
     return null;
   }
@@ -266,47 +263,56 @@ export function useStaffs({ isAuthenticated }: UseStaffsParams) {
     };
   }, [isAuthenticated, refetch]);
 
-  const createStaff = useCallback(async (input: CreateStaffInput) => {
-    if (!isAuthenticated) {
-      throw new Error("User is not authenticated");
-    }
-    const inputWithDefault = {
-      ...input,
-      attendanceManagementEnabled:
-        (
-          input as CreateStaffInput & {
-            attendanceManagementEnabled?: boolean | null;
-          }
-        ).attendanceManagementEnabled ?? true,
-    } as CreateStaffInput;
-
-    await createStaffMutation(inputWithDefault).unwrap();
-  }, [createStaffMutation, isAuthenticated]);
-
-  const updateStaff = useCallback(async (input: UpdateStaffInput) => {
-    if (!isAuthenticated) {
-      throw new Error("User is not authenticated");
-    }
-    const currentStaff = staffs.find((staff) => staff.id === input.id);
-
-    await updateStaffMutation({
-      input: {
+  const createStaff = useCallback(
+    async (input: CreateStaffInput) => {
+      if (!isAuthenticated) {
+        throw new Error("User is not authenticated");
+      }
+      const inputWithDefault = {
         ...input,
-        version: getNextVersion(currentStaff?.version),
-      },
-      condition: buildVersionOrUpdatedAtCondition(
-        currentStaff?.version,
-        currentStaff?.updatedAt,
-      ),
-    }).unwrap();
-  }, [isAuthenticated, staffs, updateStaffMutation]);
+        attendanceManagementEnabled:
+          (
+            input as CreateStaffInput & {
+              attendanceManagementEnabled?: boolean | null;
+            }
+          ).attendanceManagementEnabled ?? true,
+      } as CreateStaffInput;
 
-  const deleteStaff = useCallback(async (input: DeleteStaffInput) => {
-    if (!isAuthenticated) {
-      throw new Error("User is not authenticated");
-    }
-    await deleteStaffMutation(input).unwrap();
-  }, [deleteStaffMutation, isAuthenticated]);
+      await createStaffMutation(inputWithDefault).unwrap();
+    },
+    [createStaffMutation, isAuthenticated],
+  );
+
+  const updateStaff = useCallback(
+    async (input: UpdateStaffInput) => {
+      if (!isAuthenticated) {
+        throw new Error("User is not authenticated");
+      }
+      const currentStaff = staffs.find((staff) => staff.id === input.id);
+
+      await updateStaffMutation({
+        input: {
+          ...input,
+          version: getNextVersion(currentStaff?.version),
+        },
+        condition: buildVersionOrUpdatedAtCondition(
+          currentStaff?.version,
+          currentStaff?.updatedAt,
+        ),
+      }).unwrap();
+    },
+    [isAuthenticated, staffs, updateStaffMutation],
+  );
+
+  const deleteStaff = useCallback(
+    async (input: DeleteStaffInput) => {
+      if (!isAuthenticated) {
+        throw new Error("User is not authenticated");
+      }
+      await deleteStaffMutation(input).unwrap();
+    },
+    [deleteStaffMutation, isAuthenticated],
+  );
 
   const getAllStaffs = useCallback(async (): Promise<StaffType[]> => {
     if (!isAuthenticated) {
