@@ -31,6 +31,8 @@ sidebar_position: 3
 
 ## エラー判定ロジック
 
+判定ロジックの詳細（ステータス決定の全優先度・条件一覧）は [勤怠ステータス判定ロジック](./attendance-status-determination.md) を参照。
+
 対象期間の**全日付**に対して `getStatus(attendance | undefined, staff, holidayCalendars, companyHolidayCalendars, date)` を呼び出し、返り値が `Error` または `Late` の日をエラーとして収集する。
 
 勤怠レコードがある日もない日も同じ関数で判定しており、`getStatus()` 内部で以下の振り分けを行う。

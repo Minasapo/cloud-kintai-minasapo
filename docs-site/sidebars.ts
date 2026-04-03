@@ -72,6 +72,7 @@ const sidebars: SidebarsConfig = {
         "developer/getting-started/setup",
         "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",
+        "developer/attendance-status-determination",
       ],
     },
   ],
