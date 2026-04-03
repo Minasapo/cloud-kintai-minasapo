@@ -1,7 +1,11 @@
 import Page from "@shared/ui/page/Page";
 
 import { designTokenVar } from "@/shared/designSystem";
-import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@/shared/ui/layout";
 
 import { Spinner } from "./WorkflowSharedUi";
 
@@ -12,15 +16,17 @@ const LOADING_SECTION_MIN_HEIGHT = `calc(${designTokenVar(
 
 export default function WorkflowAuthLoadingState() {
   return (
-    <Page title="ワークフロー" maxWidth="lg" showDefaultHeader={false}>
-      <PageSection layoutVariant="dashboard">
-        <DashboardInnerSurface
-          className="workflow-auth-loading"
-          style={{ minHeight: LOADING_SECTION_MIN_HEIGHT }}
-        >
-          <Spinner />
-        </DashboardInnerSurface>
-      </PageSection>
+    <Page title="ワークフロー" width="full" showDefaultHeader={false}>
+      <PageContent width="form">
+        <PageSection layoutVariant="dashboard">
+          <DashboardInnerSurface
+            className="workflow-auth-loading"
+            style={{ minHeight: LOADING_SECTION_MIN_HEIGHT }}
+          >
+            <Spinner />
+          </DashboardInnerSurface>
+        </PageSection>
+      </PageContent>
     </Page>
   );
 }

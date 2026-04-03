@@ -1,6 +1,6 @@
-
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { Dayjs } from "dayjs";
+
+import { SettingsTimeField } from "@/features/admin/layout/ui/SettingsPrimitives";
 
 interface WorkingTimeSectionProps {
   startTime: Dayjs | null;
@@ -28,31 +28,19 @@ const WorkingTimeSection = ({
       <p className="text-sm text-slate-500">
         所定の勤務時間を設定してください。
       </p>
-      <div className="flex flex-row gap-4 items-center">
-        <TimePicker
+      <div className="flex flex-row flex-wrap items-end gap-4">
+        <SettingsTimeField
           label="開始時間"
-          ampm={false}
           value={startTime}
-          views={["hours", "minutes"]}
-          format="HH:mm"
-          slotProps={{
-            textField: { size: "small" },
-          }}
-          sx={{ maxWidth: 200 }}
           onChange={setStartTime}
+          className="w-full max-w-[200px]"
         />
         <span className="text-base text-slate-800">〜</span>
-        <TimePicker
+        <SettingsTimeField
           label="終了時間"
-          ampm={false}
           value={endTime}
-          views={["hours", "minutes"]}
-          format="HH:mm"
-          slotProps={{
-            textField: { size: "small" },
-          }}
-          sx={{ maxWidth: 200 }}
           onChange={setEndTime}
+          className="w-full max-w-[200px]"
         />
       </div>
     </div>
@@ -60,31 +48,19 @@ const WorkingTimeSection = ({
       <p className="text-sm text-slate-500">
         昼休憩時間を設定してください。
       </p>
-      <div className="flex flex-row gap-4 items-center">
-        <TimePicker
+      <div className="flex flex-row flex-wrap items-end gap-4">
+        <SettingsTimeField
           label="開始時間"
-          ampm={false}
           value={lunchRestStartTime}
-          views={["hours", "minutes"]}
-          format="HH:mm"
-          slotProps={{
-            textField: { size: "small" },
-          }}
-          sx={{ maxWidth: 200 }}
           onChange={setLunchRestStartTime}
+          className="w-full max-w-[200px]"
         />
         <span className="text-base text-slate-800">〜</span>
-        <TimePicker
+        <SettingsTimeField
           label="終了時間"
-          ampm={false}
           value={lunchRestEndTime}
-          views={["hours", "minutes"]}
-          format="HH:mm"
-          slotProps={{
-            textField: { size: "small" },
-          }}
-          sx={{ maxWidth: 200 }}
           onChange={setLunchRestEndTime}
+          className="w-full max-w-[200px]"
         />
       </div>
     </div>

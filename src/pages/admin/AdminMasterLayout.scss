@@ -1,0 +1,34 @@
+.admin-master-layout {
+  position: relative;
+
+  &__mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+    z-index: 40;
+  }
+
+  &__mobile-backdrop--open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &__mobile-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: min(84vw, 320px);
+    transform: translateX(-104%);
+    transition: transform 220ms ease;
+    z-index: 50;
+  }
+
+  &__mobile-nav--open {
+    transform: translateX(0);
+  }
+}

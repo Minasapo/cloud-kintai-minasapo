@@ -1,108 +1,31 @@
-import createOperationLogData from "@entities/operation-log/model/createOperationLogData";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { Dispatch } from "@reduxjs/toolkit";
-import { Attendance, CreateOperationLogInput } from "@shared/api/graphql/types";
+import { Attendance } from "@shared/api/graphql/types";
 
 import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
-import {
-  buildAttendanceIdempotencyKey,
-  resolveAppVersion,
-  resolveClientTimeZone,
-} from "@/entities/attendance/lib/operationContext";
 import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
 import { Logger } from "@/shared/lib/logger";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
-export async function restStartCallback(
-  cognitoUser: CognitoUser | null | undefined,
-  dispatch: Dispatch,
-  restStart: (
-    staffId: string,
-    workDate: string,
-    startTime: string
-  ) => Promise<Attendance>,
-  logger: Logger,
-  occurredAt = getNowISOStringWithZeroSeconds()
-): Promise<void> {
-  if (!cognitoUser) {
-    logger.warn("[restStart] skipped because Cognito user is unavailable");
-    return;
-  }
-
-  const workDate = resolveBusinessWorkDate(occurredAt);
-  const clientTimezone = resolveClientTimeZone();
-  const appVersion = resolveAppVersion();
-  const idempotencyKey = buildAttendanceIdempotencyKey({
-    action: "rest_start",
-    staffId: cognitoUser.id,
-    occurredAt,
-  });
-
-  const t0 = Date.now();
-
-  try {
-    const attendance = await restStart(cognitoUser.id, workDate, occurredAt);
-    const t1 = Date.now();
-    const processingTimeMs = t1 - t0;
-
-    dispatch(setSnackbarSuccess(MESSAGE_CODE.S01005));
-
-    try {
-      let staffName: string | undefined;
-      try {
-        const staff = await fetchStaff(cognitoUser.id);
-        if (staff) {
-          staffName = `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim();
-        }
-      } catch (e) {
-        logger.debug("failed to fetch staff for restStart operation log", e);
-      }
-
-      const input: CreateOperationLogInput = {
-        staffId: cognitoUser.id,
-        action: "rest_start",
-        resource: "attendance",
-        resourceId: attendance?.id ?? undefined,
-        timestamp: occurredAt,
-        details: JSON.stringify({
-          workDate,
-          restStartTime: occurredAt,
-          processingTimeMs,
-          clientTimezone,
-          occurredAt,
-          resolvedWorkDate: workDate,
-          idempotencyKey,
-          appVersion,
-          staffName: staffName ?? undefined,
-        }),
-        metadata: JSON.stringify({
-          processingTimeMs,
-          clientTimezone,
-          occurredAt,
-          resolvedWorkDate: workDate,
-          idempotencyKey,
-          appVersion,
-        }),
-        clientTimezone,
-        occurredAt,
-        resolvedWorkDate: workDate,
-        idempotencyKey,
-        appVersion,
-        userAgent:
-          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-      };
-
-      await createOperationLogData(input);
-    } catch (logErr) {
-      logger.error("Failed to create operation log for restStart", logErr);
+export async function restStartCallback(cognitoUser: CognitoUser | null | undefined, dispatch: Dispatch, restStart: (staffId: string, workDate: string, startTime: string) => Promise<Attendance>, logger: Logger, occurredAt = getNowISOStringWithZeroSeconds()): Promise<void> {
+    if (!cognitoUser) {
+        logger.warn("[restStart] skipped because Cognito user is unavailable");
+        return;
     }
-  } catch (error) {
-    logger.error("[restStart] failed", error);
-    dispatch(setSnackbarError(MESSAGE_CODE.E01003));
-  }
+    const workDate = resolveBusinessWorkDate(occurredAt);
+    try {
+        await restStart(cognitoUser.id, workDate, occurredAt);
+        dispatch(pushNotification({
+            tone: "success",
+            message: MESSAGE_CODE.S01005
+        }));
+    }
+    catch (error) {
+        logger.error("[restStart] failed", error);
+        dispatch(pushNotification({
+            tone: "error",
+            message: MESSAGE_CODE.E01003
+        }));
+    }
 }

@@ -43,7 +43,7 @@ export default function RegisterAnnouncementPanel({
       {showAnnouncement && (
         <section
           data-testid="register-dashboard-announcement-card"
-          className="sticky top-4 z-20 rounded-[1.35rem] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
+          className="sticky top-4 z-20 rounded-[4px] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">

@@ -4,7 +4,7 @@ import {
   type WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   CATEGORY_LABELS,
@@ -49,6 +49,7 @@ export type WorkflowEditLoaderState = {
   applicant: StaffType | null;
   existingComments: WorkflowCommentInput[];
   setExistingComments: (comments: WorkflowCommentInput[]) => void;
+  isDirty: boolean;
 };
 
 export function useWorkflowEditLoaderState(
@@ -73,6 +74,72 @@ export function useWorkflowEditLoaderState(
   const [existingComments, setExistingComments] = useState<
     WorkflowCommentInput[]
   >([]);
+
+  const initialState = useMemo(
+    () => ({
+      category: workflow.category
+        ? workflow.category === WorkflowCategory.CLOCK_CORRECTION
+          ? resolveClockCorrectionLabel(workflow.overTimeDetails?.reason)
+          : CATEGORY_LABELS[workflow.category as WorkflowCategory] ||
+            workflow.category
+        : "",
+      startDate:
+        workflow.category === WorkflowCategory.PAID_LEAVE
+          ? workflow.overTimeDetails?.startTime || ""
+          : "",
+      endDate:
+        workflow.category === WorkflowCategory.PAID_LEAVE
+          ? workflow.overTimeDetails?.endTime || ""
+          : "",
+      absenceDate:
+        workflow.category === WorkflowCategory.ABSENCE &&
+        workflow.overTimeDetails?.date
+          ? isoDateFromTimestamp(workflow.overTimeDetails.date)
+          : "",
+      absenceReason:
+        workflow.category === WorkflowCategory.ABSENCE
+          ? workflow.overTimeDetails?.reason || ""
+          : "",
+      paidReason:
+        workflow.category === WorkflowCategory.PAID_LEAVE
+          ? workflow.overTimeDetails?.reason || ""
+          : "",
+      overtimeDate:
+        workflow.category === WorkflowCategory.OVERTIME ||
+        workflow.category === WorkflowCategory.CLOCK_CORRECTION
+          ? isoDateFromTimestamp(workflow.overTimeDetails?.date)
+          : "",
+      overtimeStart:
+        workflow.category === WorkflowCategory.OVERTIME ||
+        workflow.category === WorkflowCategory.CLOCK_CORRECTION
+          ? workflow.overTimeDetails?.startTime
+            ? parseTimeToISO(
+                workflow.overTimeDetails.startTime,
+                isoDateFromTimestamp(workflow.overTimeDetails?.date),
+              )
+            : null
+          : null,
+      overtimeEnd:
+        workflow.category === WorkflowCategory.OVERTIME ||
+        workflow.category === WorkflowCategory.CLOCK_CORRECTION
+          ? workflow.overTimeDetails?.endTime
+            ? parseTimeToISO(
+                workflow.overTimeDetails.endTime,
+                isoDateFromTimestamp(workflow.overTimeDetails?.date),
+              )
+            : null
+          : null,
+      overtimeReason:
+        workflow.category === WorkflowCategory.OVERTIME ||
+        workflow.category === WorkflowCategory.CLOCK_CORRECTION
+          ? workflow.overTimeDetails?.reason || ""
+          : "",
+      customWorkflowTitle: workflow.customWorkflowTitle || "",
+      customWorkflowContent: workflow.customWorkflowContent || "",
+      draftMode: workflow.status === WorkflowStatus.DRAFT,
+    }),
+    [workflow],
+  );
 
   useEffect(() => {
     const nextCategoryLabel = workflow.category
@@ -161,6 +228,39 @@ export function useWorkflowEditLoaderState(
     );
   }, [workflow.staffId, staffs]);
 
+  const isDirty = useMemo(
+    () =>
+      category !== initialState.category ||
+      startDate !== initialState.startDate ||
+      endDate !== initialState.endDate ||
+      absenceDate !== initialState.absenceDate ||
+      absenceReason !== initialState.absenceReason ||
+      paidReason !== initialState.paidReason ||
+      overtimeDate !== initialState.overtimeDate ||
+      overtimeStart !== initialState.overtimeStart ||
+      overtimeEnd !== initialState.overtimeEnd ||
+      overtimeReason !== initialState.overtimeReason ||
+      customWorkflowTitle !== initialState.customWorkflowTitle ||
+      customWorkflowContent !== initialState.customWorkflowContent ||
+      draftMode !== initialState.draftMode,
+    [
+      absenceDate,
+      absenceReason,
+      category,
+      customWorkflowContent,
+      customWorkflowTitle,
+      draftMode,
+      endDate,
+      initialState,
+      overtimeDate,
+      overtimeEnd,
+      overtimeReason,
+      overtimeStart,
+      paidReason,
+      startDate,
+    ],
+  );
+
   return {
     category,
     setCategory,
@@ -192,5 +292,6 @@ export function useWorkflowEditLoaderState(
     applicant,
     existingComments,
     setExistingComments,
+    isDirty,
   };
 }

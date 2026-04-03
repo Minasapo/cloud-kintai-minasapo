@@ -1,0 +1,26 @@
+{
+  "id": "staff/attendance-edit",
+  "title": "勤怠を修正する",
+  "description": "このページでは、勤怠編集画面で打刻ミスや休憩漏れを修正し、申請する手順を説明します。",
+  "source": "@site/docs/staff/attendance-edit.md",
+  "sourceDirName": "staff",
+  "slug": "/staff/attendance-edit",
+  "permalink": "/docs/staff/attendance-edit",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "sidebar_position": 5
+  },
+  "sidebar": "mainSidebar",
+  "previous": {
+    "title": "ワークフロー申請を操作する",
+    "permalink": "/docs/staff/workflow"
+  },
+  "next": {
+    "title": "日報を記録する",
+    "permalink": "/docs/staff/attendance-report"
+  }
+}

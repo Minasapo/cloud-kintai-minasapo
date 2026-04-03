@@ -1,32 +1,15 @@
 import Page from "@shared/ui/page/Page";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { designTokenVar } from "@/shared/designSystem";
-
 import WorkflowDetailPanel from "./components/WorkflowDetailPanel";
-
-const ADMIN_WORKFLOW_DETAIL_MAX_WIDTH = designTokenVar(
-  "component.adminWorkflow.detail.maxWidth",
-  "1600px"
-);
 
 export default function AdminWorkflowDetail() {
   const { id } = useParams() as { id?: string };
   const navigate = useNavigate();
 
   return (
-    <Page
-      title="申請内容（管理者）"
-      maxWidth={false}
-      showDefaultHeader={false}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: ADMIN_WORKFLOW_DETAIL_MAX_WIDTH,
-          marginInline: "auto",
-        }}
-      >
+    <Page title="申請内容（管理者）" maxWidth={false} showDefaultHeader={false}>
+      <div style={{ width: "100%" }}>
         <WorkflowDetailPanel
           workflowId={id}
           showBackButton

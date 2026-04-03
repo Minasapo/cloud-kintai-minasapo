@@ -1,6 +1,7 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
+import { APP_LAYER_Z_INDEX } from "@/shared/ui/overlay/layers";
 
 type TestableProps<T> = T & {
   "data-testid"?: string;
@@ -11,14 +12,12 @@ type SlotProps = {
   header?: TestableProps<HTMLAttributes<HTMLDivElement> & { sx?: CSSProperties }>;
   main?: TestableProps<HTMLAttributes<HTMLElement> & { sx?: CSSProperties }>;
   footer?: TestableProps<HTMLAttributes<HTMLElement> & { sx?: CSSProperties }>;
-  snackbar?: TestableProps<HTMLAttributes<HTMLDivElement> & { sx?: CSSProperties }>;
 };
 
 type AppShellProps = {
   header: ReactNode;
   main: ReactNode;
   footer?: ReactNode;
-  snackbar?: ReactNode;
   minHeight?: number | string;
   slotProps?: SlotProps;
 };
@@ -35,28 +34,19 @@ const CONTENT_BACKGROUND = designTokenVar(
   "component.appShell.contentBackground",
   "#F8FAF9"
 );
-const HEADER_LAYER_Z_INDEX = 45;
-
 export default function AppShell({
   header,
   main,
   footer,
-  snackbar,
   minHeight = "100vh",
   slotProps,
 }: AppShellProps) {
-  const {
-    root,
-    header: headerSlot,
-    main: mainSlot,
-    footer: footerSlot,
-    snackbar: snackbarSlot,
-  } = slotProps ?? {};
+  const { root, header: headerSlot, main: mainSlot, footer: footerSlot } =
+    slotProps ?? {};
   const { sx: rootSx, ...rootRest } = root ?? {};
   const { sx: headerSx, ...headerRest } = headerSlot ?? {};
   const { sx: mainSx, ...mainRest } = mainSlot ?? {};
   const { sx: footerSx, ...footerRest } = footerSlot ?? {};
-  const { sx: snackbarSx, ...snackbarRest } = snackbarSlot ?? {};
 
   return (
     <div
@@ -79,8 +69,8 @@ export default function AppShell({
         {...headerRest}
         style={{
           position: "relative",
-          // Keep header popovers above sticky content in main, but below modal overlays (z-50).
-          zIndex: HEADER_LAYER_Z_INDEX,
+          // Keep header popovers above sticky content in main, but below overlay layers.
+          zIndex: APP_LAYER_Z_INDEX.header,
           flexShrink: 0,
           width: "100%",
           maxWidth: "100%",
@@ -123,22 +113,6 @@ export default function AppShell({
         >
           {footer}
         </footer>
-      )}
-      {snackbar && (
-        <div
-          {...snackbarRest}
-          style={{
-            position: "relative",
-            zIndex: 1,
-            width: "100%",
-            maxWidth: "100%",
-            minWidth: 0,
-            ...snackbarSx,
-            ...snackbarRest.style,
-          }}
-        >
-          {snackbar}
-        </div>
       )}
     </div>
   );

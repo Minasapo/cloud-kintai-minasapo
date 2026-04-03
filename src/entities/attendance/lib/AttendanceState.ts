@@ -6,6 +6,8 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
+import { isAttendanceManagementEnabled } from "@/entities/staff/lib/attendanceManagement";
+
 import { AttendanceDate } from "./AttendanceDate";
 import { CompanyHoliday } from "./CompanyHoliday";
 import { DayOfWeek } from "./DayOfWeek";
@@ -37,11 +39,7 @@ export class AttendanceState {
   ) {}
 
   get(): AttendanceStatus {
-    const attendanceManagementEnabled = (
-      this.staff as Staff & { attendanceManagementEnabled?: boolean | null }
-    ).attendanceManagementEnabled;
-
-    if (attendanceManagementEnabled === false) {
+    if (!isAttendanceManagementEnabled(this.staff)) {
       return AttendanceStatus.None;
     }
 

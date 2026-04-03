@@ -13,7 +13,7 @@ export default function RegisterSummaryAttendanceErrorCountCard({
     "打刻エラー件数について: 退勤漏れや重複打刻など、修正が必要な打刻エラー件数を表示しています";
 
   return (
-    <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/70 px-3.5 py-3">
+    <div className="mt-3 rounded-[4px] border border-slate-200/90 bg-slate-50/70 px-3.5 py-3">
       <div className="flex items-center gap-1.5">
         <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">
           打刻エラー件数
@@ -22,6 +22,7 @@ export default function RegisterSummaryAttendanceErrorCountCard({
           testId="register-dashboard-attendance-error-info"
           ariaLabel={attendanceErrorInfoLabel}
           tooltipContent={attendanceErrorInfoLabel}
+          tooltipClassName="left-auto right-0 w-[14rem] max-w-[calc(100vw-1rem)] whitespace-normal break-words sm:w-max sm:max-w-[220px]"
         />
       </div>
       <p

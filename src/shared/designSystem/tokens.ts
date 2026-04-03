@@ -131,9 +131,9 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
   } as const;
 
   const radius = {
-    sm: 4,
-    md: 8,
-    lg: 12,
+    sm: 2,
+    md: 4,
+    lg: 6,
     pill: 999,
   } as const;
 
@@ -368,6 +368,18 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       },
     },
     page: {
+      widths: {
+        legacySm: 640,
+        narrow: 768,
+        form: 1024,
+        content: 1180,
+        dashboard: 1280,
+        wide: 1360,
+      },
+      paddingX: {
+        xs: spacing.lg,
+        md: spacing.xxl,
+      },
       paddingTop: spacing.xl,
       sectionGap: spacing.lg,
     },

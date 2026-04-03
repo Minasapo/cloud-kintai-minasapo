@@ -1,13 +1,8 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import type React from "react";
+import { SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
 
 type AttendanceStatisticsSectionProps = {
   enabled: boolean;
-  onChange: (
-    event: React.ChangeEvent<HTMLInputElement>,
-    checked: boolean
-  ) => void;
+  onChange: (checked: boolean) => void;
 };
 
 export default function AttendanceStatisticsSection({
@@ -17,16 +12,11 @@ export default function AttendanceStatisticsSection({
   return (
     <div className="flex flex-col gap-2">
       <div>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={enabled}
-              onChange={onChange}
-              color="primary"
-              inputProps={{ "aria-label": "稼働統計の表示切り替え" }}
-            />
-          }
+        <SettingsSwitch
+          checked={enabled}
+          onChange={onChange}
           label={enabled ? "表示" : "非表示"}
+          ariaLabel="稼働統計の表示切り替え"
         />
       </div>
       <p className="text-sm text-slate-500">

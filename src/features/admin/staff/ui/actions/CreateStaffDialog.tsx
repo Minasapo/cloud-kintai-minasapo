@@ -2,15 +2,16 @@ import {
   StaffRole,
   StaffType,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Autocomplete,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   FormControlLabel,
   Radio,
   RadioGroup,
-  Switch,
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -23,6 +24,7 @@ import {
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 import { Control, Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -33,39 +35,40 @@ import * as MESSAGE_CODE from "@/errors";
 import { handleSyncCognitoUser } from "@/features/admin/staff/model/handleSyncCognitoUser";
 import addUserToGroup from "@/hooks/common/addUserToGroup";
 import createCognitoUser from "@/hooks/common/createCognitoUser";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { useDialogCloseGuard } from "@/hooks/useDialogCloseGuard";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
-type Inputs = {
-  familyName?: string;
-  givenName?: string;
-  mailAddress?: string;
-  role: string;
-  owner: boolean;
-  sortKey?: string | null;
-  usageStartDate?: string | null;
-  workType?: string | null;
-  shiftGroup?: string | null;
-  attendanceManagementEnabled?: boolean;
-  approverSetting?: ApproverSettingMode | null;
-  approverSingle?: string | null;
-  approverMultiple?: string[] | null;
-  approverMultipleMode?: ApproverMultipleMode | null;
-  developer?: boolean;
-};
+const createStaffSchema = z.object({
+  familyName: z.string().min(1, "姓を入力してください"),
+  givenName: z.string().min(1, "名を入力してください"),
+  mailAddress: z.string().email("有効なメールアドレスを入力してください"),
+  role: z.string().min(1, "ロールを選択してください"),
+  owner: z.boolean(),
+  sortKey: z.string().nullable().optional(),
+  usageStartDate: z.string().nullable().optional(),
+  workType: z.string().nullable().optional(),
+  shiftGroup: z.string().nullable().optional(),
+  attendanceManagementEnabled: z.boolean().optional(),
+  approverSetting: z.nativeEnum(ApproverSettingMode).nullable().optional(),
+  approverSingle: z.string().nullable().optional(),
+  approverMultiple: z.array(z.string()).nullable().optional(),
+  approverMultipleMode: z
+    .nativeEnum(ApproverMultipleMode)
+    .nullable()
+    .optional(),
+  developer: z.boolean().optional(),
+});
 
+type Inputs = z.infer<typeof createStaffSchema>;
 type AutocompleteOption = {
   value: string;
   label: string;
   description?: string;
 };
-
 const defaultValues: Inputs = {
-  familyName: undefined,
-  givenName: undefined,
-  mailAddress: undefined,
+  familyName: "",
+  givenName: "",
+  mailAddress: "",
   role: StaffRole.STAFF,
   owner: false,
   sortKey: null,
@@ -79,17 +82,14 @@ const defaultValues: Inputs = {
   approverMultipleMode: ApproverMultipleMode.ANY,
   developer: false,
 };
-
 const LABEL_CELL_CLASS =
   "w-[220px] min-w-[180px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900";
 const VALUE_CELL_CLASS = "border-b border-slate-200 px-4 py-3 align-middle";
-
 export const ROLE_OPTIONS = [
   { value: StaffRole.ADMIN, label: "管理者" },
   { value: StaffRole.STAFF, label: "スタッフ" },
   { value: StaffRole.OPERATOR, label: "オペレーター" },
 ];
-
 export default function CreateStaffDialog({
   staffs,
   refreshStaff,
@@ -105,7 +105,6 @@ export default function CreateStaffDialog({
   const { getShiftGroups } = useContext(AppConfigContext);
   const { cognitoUser } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
-
   const {
     register,
     control,
@@ -117,8 +116,16 @@ export default function CreateStaffDialog({
   } = useForm<Inputs>({
     mode: "onChange",
     defaultValues,
+    resolver: zodResolver(createStaffSchema),
   });
-
+  const { dialog, requestClose, closeWithoutGuard } = useDialogCloseGuard({
+    isDirty,
+    isBusy: isSubmitting,
+    onClose: () => {
+      reset(defaultValues);
+      setOpen(false);
+    },
+  });
   const shiftGroupOptions = useMemo(
     () =>
       getShiftGroups().map((group) => ({
@@ -128,36 +135,37 @@ export default function CreateStaffDialog({
       })),
     [getShiftGroups],
   );
-
   const handleClickOpen = () => {
     reset(defaultValues);
     setOpen(true);
   };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const onSubmit = async (data: Inputs) => {
     const { familyName, givenName, mailAddress, role } = data;
     if (!familyName || !givenName || !mailAddress || !role) {
       throw new Error("Invalid data");
     }
-
     try {
       await createCognitoUser(mailAddress, familyName, givenName);
     } catch {
-      dispatch(setSnackbarError(MESSAGE_CODE.E10002));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E10002,
+        }),
+      );
       return;
     }
-
     try {
       await addUserToGroup(mailAddress, role);
     } catch {
-      dispatch(setSnackbarError(MESSAGE_CODE.E10002));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E10002,
+        }),
+      );
       return;
     }
-
     try {
       await handleSyncCognitoUser(
         staffs,
@@ -166,23 +174,29 @@ export default function CreateStaffDialog({
         updateStaff,
       );
     } catch {
-      dispatch(setSnackbarError(MESSAGE_CODE.E10001));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E10001,
+        }),
+      );
       return;
     }
-
     try {
       const latestStaffs = await fetchStaffs();
       const targetStaff = latestStaffs.find(
         (staff) =>
-          (staff.mailAddress ?? "").toLowerCase() ===
-          mailAddress.toLowerCase(),
+          (staff.mailAddress ?? "").toLowerCase() === mailAddress.toLowerCase(),
       );
-
       if (!targetStaff) {
-        dispatch(setSnackbarError("作成したスタッフが見つかりません"));
+        dispatch(
+          pushNotification({
+            tone: "error",
+            message: "作成したスタッフが見つかりません",
+          }),
+        );
         return;
       }
-
       const updatePayload: UpdateStaffInput = {
         id: targetStaff.id,
         familyName,
@@ -197,30 +211,35 @@ export default function CreateStaffDialog({
         attendanceManagementEnabled: data.attendanceManagementEnabled ?? true,
         approverSetting: data.approverSetting ?? ApproverSettingMode.ADMINS,
       };
-
       if (data.approverSetting === ApproverSettingMode.SINGLE) {
         updatePayload.approverSingle = data.approverSingle ?? null;
       }
-
       if (data.approverSetting === ApproverSettingMode.MULTIPLE) {
         updatePayload.approverMultiple = data.approverMultiple ?? [];
         updatePayload.approverMultipleMode =
           data.approverMultipleMode ?? ApproverMultipleMode.ANY;
       }
-
       if (cognitoUser?.owner) {
         updatePayload.developer = data.developer ?? false;
       }
-
       await updateStaff(updatePayload);
       await refreshStaff();
-      dispatch(setSnackbarSuccess(MESSAGE_CODE.S10002));
-      handleClose();
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: MESSAGE_CODE.S10002,
+        }),
+      );
+      closeWithoutGuard();
     } catch {
-      dispatch(setSnackbarError(MESSAGE_CODE.E05002));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E05002,
+        }),
+      );
     }
   };
-
   return (
     <>
       <button
@@ -246,10 +265,11 @@ export default function CreateStaffDialog({
         </span>
       </button>
 
+      {dialog}
       {open ? (
         <div
           className="fixed inset-0 z-[1400] flex items-center justify-center bg-slate-900/35 p-4"
-          onClick={handleClose}
+          onClick={requestClose}
         >
           <div
             className="w-full max-w-5xl rounded-2xl bg-slate-50 p-3 shadow-2xl sm:p-4"
@@ -292,13 +312,13 @@ export default function CreateStaffDialog({
                       <td className={VALUE_CELL_CLASS}>
                         <div className="flex flex-col gap-2 sm:flex-row">
                           <TextField
-                            {...register("familyName", { required: true })}
+                            {...register("familyName")}
                             size="small"
                             label="姓"
                             sx={{ width: { xs: "100%", sm: 200 } }}
                           />
                           <TextField
-                            {...register("givenName", { required: true })}
+                            {...register("givenName")}
                             size="small"
                             label="名"
                             sx={{ width: { xs: "100%", sm: 200 } }}
@@ -311,7 +331,7 @@ export default function CreateStaffDialog({
                       <td className={LABEL_CELL_CLASS}>メールアドレス</td>
                       <td className={VALUE_CELL_CLASS}>
                         <TextField
-                          {...register("mailAddress", { required: true })}
+                          {...register("mailAddress")}
                           type="email"
                           size="small"
                           sx={{ width: { xs: "100%", sm: 400 } }}
@@ -325,13 +345,13 @@ export default function CreateStaffDialog({
                         <Controller
                           name="role"
                           control={control}
-                          rules={{ required: true }}
                           render={({ field }) => (
                             <Autocomplete
                               {...field}
                               value={
                                 ROLE_OPTIONS.find(
-                                  (option) => String(option.value) === field.value,
+                                  (option) =>
+                                    String(option.value) === field.value,
                                 ) ?? null
                               }
                               options={ROLE_OPTIONS}
@@ -365,13 +385,13 @@ export default function CreateStaffDialog({
                             name="owner"
                             control={control}
                             render={({ field }) => (
-                              <Switch
-                                checked={field.value}
-                                onChange={() => {
-                                  setValue("owner", !field.value, {
+                              <Checkbox
+                                checked={Boolean(field.value)}
+                                onChange={(e) => {
+                                  setValue("owner", e.target.checked, {
                                     shouldDirty: true,
                                   });
-                                  field.onChange(!field.value);
+                                  field.onChange(e.target.checked);
                                 }}
                               />
                             )}
@@ -418,7 +438,7 @@ export default function CreateStaffDialog({
                           control={control}
                           render={({ field }) => (
                             <div className="space-y-1">
-                              <Switch
+                              <Checkbox
                                 checked={field.value ?? true}
                                 onChange={(e) => {
                                   setValue(
@@ -499,10 +519,14 @@ export default function CreateStaffDialog({
                                   value={selectedOption}
                                   options={shiftGroupOptions}
                                   onChange={(_, newValue) => {
-                                    setValue("shiftGroup", newValue?.value ?? null, {
-                                      shouldDirty: true,
-                                      shouldValidate: true,
-                                    });
+                                    setValue(
+                                      "shiftGroup",
+                                      newValue?.value ?? null,
+                                      {
+                                        shouldDirty: true,
+                                        shouldValidate: true,
+                                      },
+                                    );
                                     field.onChange(newValue?.value ?? null);
                                   }}
                                   isOptionEqualToValue={(option, value) =>
@@ -580,14 +604,14 @@ export default function CreateStaffDialog({
                             name="developer"
                             control={control}
                             render={({ field }) => (
-                              <Switch
+                              <Checkbox
                                 checked={Boolean(field.value)}
-                                onChange={() => {
-                                  setValue("developer", !field.value, {
+                                onChange={(e) => {
+                                  setValue("developer", e.target.checked, {
                                     shouldDirty: true,
                                     shouldValidate: true,
                                   });
-                                  field.onChange(!field.value);
+                                  field.onChange(e.target.checked);
                                 }}
                               />
                             )}
@@ -607,7 +631,7 @@ export default function CreateStaffDialog({
                   type="button"
                   variant="text"
                   color="inherit"
-                  onClick={handleClose}
+                  onClick={requestClose}
                 >
                   キャンセル
                 </Button>
@@ -630,7 +654,6 @@ export default function CreateStaffDialog({
     </>
   );
 }
-
 function ApproverSettingTableRows({
   control,
   watch,
@@ -660,16 +683,13 @@ function ApproverSettingTableRows({
         description: staff.mailAddress ?? "",
       }));
   }, [staffs, currentCognitoUserId]);
-
   const approverSetting = watch("approverSetting");
   const approverMultiple = watch("approverMultiple") ?? [];
   const approverMultipleMode = watch("approverMultipleMode");
-
   const selectedMultipleOptions = approverMultiple
     .filter((value): value is string => Boolean(value))
     .map((value) => adminOptions.find((option) => option.value === value))
     .filter((o): o is AutocompleteOption => Boolean(o));
-
   return (
     <>
       {approverSetting === ApproverSettingMode.SINGLE && (
@@ -738,7 +758,9 @@ function ApproverSettingTableRows({
                     if (approverSetting !== ApproverSettingMode.MULTIPLE) {
                       return true;
                     }
-                    return (value?.length ?? 0) > 0 || "承認者を選択してください";
+                    return (
+                      (value?.length ?? 0) > 0 || "承認者を選択してください"
+                    );
                   },
                 }}
                 render={({ field, fieldState }) => {
@@ -803,7 +825,8 @@ function ApproverSettingTableRows({
                     row
                     value={field.value ?? ApproverMultipleMode.ANY}
                     onChange={(event) => {
-                      const nextValue = event.target.value as ApproverMultipleMode;
+                      const nextValue = event.target
+                        .value as ApproverMultipleMode;
                       field.onChange(nextValue);
                     }}
                   >
@@ -834,12 +857,17 @@ function ApproverSettingTableRows({
                     </p>
                   ) : (
                     selectedMultipleOptions.map((option, index) => (
-                      <div key={option.value} className="flex items-center gap-2">
+                      <div
+                        key={option.value}
+                        className="flex items-center gap-2"
+                      >
                         <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-slate-300 bg-slate-50 px-1 text-xs font-semibold text-slate-700">
                           {index + 1}
                         </span>
                         <div>
-                          <p className="text-sm text-slate-900">{option.label}</p>
+                          <p className="text-sm text-slate-900">
+                            {option.label}
+                          </p>
                           <p className="text-xs text-slate-500">
                             {option.description}
                           </p>

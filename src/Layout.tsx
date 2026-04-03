@@ -5,19 +5,6 @@
 
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  LinearProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
 import { Hub } from "aws-amplify/utils";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -27,8 +14,11 @@ import { useSession } from "@/app/providers/session/useSession";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
 import { createLogger } from "@/shared/lib/logger";
+import { AppButton } from "@/shared/ui/button";
+import AppDialog from "@/shared/ui/feedback/AppDialog";
+import { FullPageLoading } from "@/shared/ui/feedback/LoadingPrimitives";
 import { AppShell } from "@/shared/ui/layout";
-import SnackbarGroup from "@/widgets/feedback/snackbar/SnackbarGroup";
+import NotificationViewport from "@/widgets/feedback/notification/NotificationViewport";
 import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";
 
@@ -87,20 +77,23 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
   }, [onConfirm]);
 
   return (
-    <Dialog open={open} onClose={handleLater} maxWidth="xs" fullWidth>
-      <DialogTitle>集計対象月の未登録</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          現在日付を含む集計対象月が登録されていません。設定画面で登録を確認してください。
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleLater}>あとで</Button>
-        <Button variant="contained" onClick={handleConfirm}>
-          確認する
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <AppDialog
+      open={open}
+      onClose={handleLater}
+      title="集計対象月の未登録"
+      description="現在日付を含む集計対象月が登録されていません。設定画面で登録を確認してください。"
+      maxWidth="xs"
+      actions={
+        <>
+          <AppButton variant="outline" tone="neutral" onClick={handleLater}>
+            あとで
+          </AppButton>
+          <AppButton variant="solid" onClick={handleConfirm}>
+            確認する
+          </AppButton>
+        </>
+      }
+    />
   );
 }
 
@@ -233,33 +226,7 @@ export default function Layout() {
     shouldBlockAppConfigBootstrap;
 
   if (shouldBlockLayoutBootstrap) {
-    return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          bgcolor: "background.default",
-        }}
-      >
-        <LinearProgress data-testid="layout-linear-progress" />
-        <Stack
-          sx={{ flex: 1 }}
-          alignItems="center"
-          justifyContent="center"
-          spacing={2}
-        >
-          <CircularProgress size={28} />
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            data-testid="layout-loading-message"
-          >
-            画面を更新しています...
-          </Typography>
-        </Stack>
-      </Box>
-    );
+    return <FullPageLoading message="画面を更新しています..." />;
   }
 
   return (
@@ -268,15 +235,14 @@ export default function Layout() {
         header={<Header />}
         main={<Outlet />}
         footer={<Footer />}
-        snackbar={<SnackbarGroup />}
         slotProps={{
           root: { "data-testid": "layout-stack" },
           header: { "data-testid": "layout-header" },
           main: { "data-testid": "layout-main" },
           footer: { "data-testid": "layout-footer" },
-          snackbar: { "data-testid": "layout-snackbar" },
         }}
       />
+      <NotificationViewport />
       {isAdminUser && (
         <MissingCloseDateAlert
           onConfirm={() => navigate("/admin/master/job_term")}

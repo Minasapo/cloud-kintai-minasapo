@@ -160,6 +160,8 @@ npm run test:unit
 
 # 7) E2E 最短確認
 npx playwright install --with-deps
+# `http://localhost:5173` が起動中なら Playwright がそのまま再利用する
+# 未起動なら Playwright がローカルサーバーを自動起動する
 npm run test:e2e --project=setup
 npm run test:e2e -- smoke-test --project=chromium-staff
 ```
@@ -171,6 +173,27 @@ npm run test:e2e -- smoke-test --project=chromium-staff
 - `npm run test:unit`: 失敗なしで完了
 - `npm run test:e2e --project=setup`: `playwright/.auth/` に認証状態ファイルが生成される
 - `npm run test:e2e -- smoke-test --project=chromium-staff`: 全テストが通る
+
+`PLAYWRIGHT_BASE_URL` を指定して実行した場合は、その URL を使ってテストし、Playwright の `webServer` は起動しません。
+
+## 開発ドキュメントサイト（Docusaurus）
+
+Docusaurus ベースのドキュメントサイトは `docs-site/` 配下にあります。
+
+初回は依存関係をインストールしてください。
+
+```bash
+cd docs-site
+npm install
+```
+
+リポジトリルートから実行する場合:
+
+```bash
+npm run docs:start
+npm run docs:build
+npm run docs:serve
+```
 
 ## よくある詰まりどころ
 

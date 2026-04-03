@@ -1,39 +1,15 @@
-import { listOperationLogs } from "@shared/api/graphql/documents/queries";
-import {
-  ListOperationLogsQuery,
-  OperationLog,
-} from "@shared/api/graphql/types";
-import { GraphQLResult } from "aws-amplify/api";
+import type { ModelOperationLogFilterInput } from "@shared/api/graphql/types";
 
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import fetchOperationLogs from "@/entities/operation-log/model/fetchOperationLogs";
 
-export default async function fetchOperationLogs(
+export default async function fetchAdminOperationLogs(
   nextToken: string | null = null,
-  limit = 30
+  limit = 30,
+  filter?: ModelOperationLogFilterInput | null,
 ) {
-  const response = (await graphqlClient.graphql({
-    query: listOperationLogs,
-    variables: { limit, nextToken },
-    authMode: "userPool",
-  })) as GraphQLResult<ListOperationLogsQuery>;
-
-  if (response.errors) {
-    throw new Error(response.errors[0].message);
-  }
-
-  const items: OperationLog[] = [];
-  if (!response.data?.listOperationLogs) {
-    return { items, nextToken: null };
-  }
-
-  items.push(
-    ...response.data.listOperationLogs.items.filter(
-      (item): item is NonNullable<typeof item> => !!item
-    )
-  );
-
-  return {
-    items,
-    nextToken: response.data.listOperationLogs.nextToken ?? null,
-  };
+  return fetchOperationLogs({
+    nextToken,
+    limit,
+    filter,
+  });
 }

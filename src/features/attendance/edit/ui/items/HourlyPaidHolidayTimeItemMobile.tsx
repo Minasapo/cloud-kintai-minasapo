@@ -1,10 +1,11 @@
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useContext } from "react";
 import { FieldArrayWithId } from "react-hook-form";
 
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
+import { AppIconButton } from "@/shared/ui/button";
 
 import HourlyPaidHolidayEndTimeInput from "./HourlyPaidHolidayEndTimeInput";
 import HourlyPaidHolidayStartTimeInput from "./HourlyPaidHolidayStartTimeInput";
@@ -66,14 +67,15 @@ export default function HourlyPaidHolidayTimeItemMobile({
           alignItems="center"
           justifyContent="space-between"
         >
-          <IconButton
+          <AppIconButton
             aria-label={ARIA_LABEL_DELETE}
             onClick={() => hourlyPaidHolidayTimeRemove(index)}
-            size="small"
+            size="sm"
             disabled={!!readOnly}
+            tone="danger"
           >
             <DeleteIcon />
-          </IconButton>
+          </AppIconButton>
           <Box textAlign="right">
             <Typography variant="body2" color="text.secondary">
               {totalHourlyPaidHolidayTime > 0

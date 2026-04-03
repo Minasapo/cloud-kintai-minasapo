@@ -1,0 +1,17 @@
+{
+  "id": "user/overview",
+  "title": "一般向けドキュメント",
+  "description": "このセクションは、クラウド勤怠を利用する一般ユーザー向けです。",
+  "source": "@site/docs/user/overview.md",
+  "sourceDirName": "user",
+  "slug": "/user/overview",
+  "permalink": "/docs/user/overview",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  }
+}

@@ -34,8 +34,10 @@ import {
 } from "@/features/attendance/edit/model/common";
 import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEditor";
 import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { createLogger } from "@/shared/lib/logger";
+import { PageContent } from "@/shared/ui/layout";
 
 import { AttendanceEditErrorAlert } from "./AttendanceEditErrorAlert";
 import { buildChangeRequestPayload } from "./attendanceEditUtils";
@@ -47,7 +49,7 @@ const logger = createLogger("AttendanceEdit");
 const MONTH_QUERY_KEY = "month";
 
 export default function AttendanceEdit() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { cognitoUser, authStatus } = useContext(AuthContext);
   const {
     getHourlyPaidHolidayEnabled,
@@ -171,6 +173,10 @@ export default function AttendanceEdit() {
   });
 
   const hourlyPaidHolidayEnabled = getHourlyPaidHolidayEnabled();
+  const { dialog, runWithoutGuard } = usePageLeaveGuard({
+    isDirty,
+    isBusy: isSubmitting,
+  });
 
   const onSubmit = async (data: AttendanceEditInputs) => {
     const changeRequestPayload = buildChangeRequestPayload(data);
@@ -180,6 +186,9 @@ export default function AttendanceEdit() {
         id: attendance.id,
         changeRequests: [changeRequestPayload],
         revision: attendance.revision,
+        logContext: {
+          action: "attendance.request.submit",
+        },
       })
         .then(() => {
           if (!cognitoUser) return;
@@ -193,28 +202,29 @@ export default function AttendanceEdit() {
             );
           } catch (mailError) {
             logger.error("Failed to send change request mail:", mailError);
-            void notify("メール送信エラー", {
-              body: MESSAGE_CODE.E00002,
-              mode: "await-interaction",
-              priority: "normal",
-              tag: "mail-error",
+            notify({
+              title: "メール送信エラー",
+              description: MESSAGE_CODE.E00002,
+              tone: "error",
+              dedupeKey: "mail-error",
             });
           }
 
-          void notify("修正申請完了", {
-            body: MESSAGE_CODE.S02005,
-            mode: "auto-close",
-            tag: "attendance-change-request",
+          notify({
+            title: "修正申請完了",
+            description: MESSAGE_CODE.S02005,
+            tone: "success",
+            dedupeKey: "attendance-change-request",
           });
 
-          navigate(attendanceListPath);
+          runWithoutGuard(() => navigate(attendanceListPath));
         })
         .catch(() => {
-          void notify("修正申請エラー", {
-            body: MESSAGE_CODE.E02005,
-            mode: "await-interaction",
-            priority: "high",
-            tag: "attendance-change-request-error",
+          notify({
+            title: "修正申請エラー",
+            description: MESSAGE_CODE.E02005,
+            tone: "error",
+            dedupeKey: "attendance-change-request-error",
           });
         });
     } else {
@@ -224,12 +234,16 @@ export default function AttendanceEdit() {
         staffId: staff.cognitoUserId,
         workDate: dayjs(targetWorkDate).format(AttendanceDate.DataFormat),
         changeRequests: [changeRequestPayload],
+        logContext: {
+          action: "attendance.request.submit",
+        },
       })
         .then(() => {
-          void notify("修正申請完了", {
-            body: MESSAGE_CODE.S02005,
-            mode: "auto-close",
-            tag: "attendance-change-request",
+          notify({
+            title: "修正申請完了",
+            description: MESSAGE_CODE.S02005,
+            tone: "success",
+            dedupeKey: "attendance-change-request",
           });
 
           if (!cognitoUser) return;
@@ -242,22 +256,22 @@ export default function AttendanceEdit() {
             );
           } catch (mailError) {
             console.error("Failed to send change request mail:", mailError);
-            void notify("メール送信エラー", {
-              body: MESSAGE_CODE.E00002,
-              mode: "await-interaction",
-              priority: "normal",
-              tag: "mail-error",
+            notify({
+              title: "メール送信エラー",
+              description: MESSAGE_CODE.E00002,
+              tone: "error",
+              dedupeKey: "mail-error",
             });
           }
-          navigate(attendanceListPath);
+          runWithoutGuard(() => navigate(attendanceListPath));
         })
         .catch((e) => {
           logger.error("Failed to update attendance:", e);
-          void notify("修正申請エラー", {
-            body: MESSAGE_CODE.E02005,
-            mode: "await-interaction",
-            priority: "high",
-            tag: "attendance-change-request-error",
+          notify({
+            title: "修正申請エラー",
+            description: MESSAGE_CODE.E02005,
+            tone: "error",
+            dedupeKey: "attendance-change-request-error",
           });
         });
     }
@@ -268,11 +282,11 @@ export default function AttendanceEdit() {
       return;
     }
 
-    void notify("データ取得エラー", {
-      body: MESSAGE_CODE.E02001,
-      mode: "await-interaction",
-      priority: "high",
-      tag: "attendance-fetch-error",
+    notify({
+      title: "データ取得エラー",
+      description: MESSAGE_CODE.E02001,
+      tone: "error",
+      dedupeKey: "attendance-fetch-error",
     });
   }, [attendanceError, shouldFetchAttendance, notify]);
 
@@ -321,11 +335,11 @@ export default function AttendanceEdit() {
   }
 
   if (staffSError) {
-    void notify("エラー", {
-      body: MESSAGE_CODE.E00001,
-      mode: "await-interaction",
-      priority: "high",
-      tag: "staff-fetch-error",
+    notify({
+      title: "エラー",
+      description: MESSAGE_CODE.E00001,
+      tone: "error",
+      dedupeKey: "staff-fetch-error",
     });
     return null;
   }
@@ -363,10 +377,12 @@ export default function AttendanceEdit() {
 
   return (
     <AttendanceEditProvider value={attendanceEditContextValue}>
-      <div
+      <PageContent
+        width="content"
         data-testid="attendance-edit-root"
-        className="attendance-edit-root mx-auto w-full md:max-w-[1280px]"
+        className="attendance-edit-root"
       >
+        {dialog}
         <AttendanceEditErrorAlert messages={errorMessages} />
         <div className="block md:hidden" data-testid="attendance-mobile-editor">
           <MobileEditor />
@@ -377,7 +393,7 @@ export default function AttendanceEdit() {
         >
           <DesktopEditor />
         </div>
-      </div>
+      </PageContent>
     </AttendanceEditProvider>
   );
 }

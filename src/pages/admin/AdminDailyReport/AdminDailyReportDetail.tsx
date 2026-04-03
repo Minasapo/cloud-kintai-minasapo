@@ -14,6 +14,10 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
+import {
+  logDailyReportCommentAdd,
+  logDailyReportReactionUpdate,
+} from "@/entities/operation-log/model/dailyReportOperationLog";
 import useCognitoUser from "@/hooks/useCognitoUser";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
@@ -56,6 +60,28 @@ const normalizeComments = (
   entries?: (DailyReportComment | null)[] | null,
 ): DailyReportComment[] =>
   entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
+
+const buildDailyReportBeforeSnapshot = ({
+  report,
+  reactionEntries,
+  commentEntries,
+}: {
+  report: AdminDailyReport;
+  reactionEntries: DailyReportReaction[] | null;
+  commentEntries: DailyReportComment[] | null;
+}) => ({
+  id: report.id,
+  staffId: report.staffId,
+  reportDate: report.date,
+  title: report.title,
+  content: report.content,
+  status: report.status,
+  reactions: reactionEntries ?? [],
+  comments: commentEntries ?? [],
+  createdAt: report.createdAt ?? null,
+  updatedAt: report.updatedAt,
+  version: report.version ?? null,
+});
 
 interface AdminDailyReportDetailProps {
   overrideId?: string;
@@ -256,6 +282,11 @@ export default function AdminDailyReportDetail({
         ];
 
     try {
+      const beforeReport = buildDailyReportBeforeSnapshot({
+        report,
+        reactionEntries,
+        commentEntries,
+      });
       const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
@@ -288,6 +319,14 @@ export default function AdminDailyReportDetail({
 
       const updated = response.data?.updateDailyReport;
       if (!updated) throw new Error("リアクションの更新に失敗しました。");
+
+      await logDailyReportReactionUpdate({
+        actorStaffId: currentStaffId,
+        before: beforeReport,
+        after: updated,
+        operation: hasReaction ? "remove" : "add",
+        reactionType: type,
+      });
 
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
@@ -338,6 +377,11 @@ export default function AdminDailyReportDetail({
     const nextComments = [newCommentEntry, ...commentEntries];
 
     try {
+      const beforeReport = buildDailyReportBeforeSnapshot({
+        report,
+        reactionEntries,
+        commentEntries,
+      });
       const response = (await graphqlClient.graphql({
         query: updateDailyReport,
         variables: {
@@ -395,6 +439,13 @@ export default function AdminDailyReportDetail({
         );
       }
 
+      await logDailyReportCommentAdd({
+        actorStaffId: currentStaffId,
+        before: beforeReport,
+        after: updated,
+        comment: newCommentEntry,
+      });
+
       setReactionEntries(normalizeReactions(updated.reactions));
       setCommentEntries(normalizeComments(updated.comments));
       setReport(mapDailyReport(updated, buildStaffName(updated.staffId)));
@@ -425,10 +476,9 @@ export default function AdminDailyReportDetail({
 
   return (
     <div
-      className={`mx-auto w-full max-w-[1280px] ${isCompact ? "px-2 pb-4 pt-0" : "px-2 pb-6 pt-4 sm:px-4 md:px-6"}`}
+      className={`w-full ${isCompact ? "px-2 pb-4 pt-0" : "px-2 pb-6 pt-4 sm:px-4 md:px-6"}`}
     >
       <div className="space-y-3">
-
         {/* Errors */}
         {loadError && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -461,9 +511,7 @@ export default function AdminDailyReportDetail({
         )}
 
         {/* Main content grid */}
-        <div
-          className="grid grid-cols-1 gap-3"
-        >
+        <div className="grid grid-cols-1 gap-3">
           {/* Detail panel */}
           <DashboardInnerSurface>
             {shouldShowLoading ? (
@@ -648,7 +696,6 @@ export default function AdminDailyReportDetail({
                     </div>
                   )}
                 </div>
-
               </div>
             )}
           </DashboardInnerSurface>

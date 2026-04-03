@@ -38,7 +38,7 @@ export default function RegisterSummaryWorkStatusChartCard({
   );
 
   return (
-    <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3.5">
+    <div className="mt-3 rounded-[4px] border border-slate-200/90 bg-slate-50/70 p-3.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-1.5">
           <p className="m-0 text-xs font-medium tracking-[0.03em] text-slate-500">

@@ -306,6 +306,18 @@ type ShiftRequest @model @auth(rules: [{ allow: private }]) {
   comments: [ShiftRequestComment]
 }
 
+type ShiftEditLock @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  targetMonth: String!
+  staffId: String!
+  date: String!
+  holderUserId: String!
+  holderUserName: String!
+  acquiredAt: AWSDateTime!
+  expiresAt: AWSDateTime!
+  version: Int!
+}
+
 type ShiftPlanMonthSetting {
   month: Int!
   editStart: String
@@ -525,22 +537,33 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
       sortKeyFields: ["timestamp"]
       queryField: "operationLogsByStaffId"
     )
+  resourceKey: String!
+    @index(
+      name: "byResourceKey"
+      sortKeyFields: ["timestamp"]
+      queryField: "operationLogsByResourceKey"
+    )
+  targetStaffId: String
   # 行った操作の種類（例: "LOGIN", "ATTENDANCE_UPDATE"）
   action: String!
   # 対象リソースの種類（例: "Attendance", "Workflow", "AppConfig"）
   resource: String
   # 対象リソースの ID（あれば）
   resourceId: String
+  summary: String
   # ISO 8601 形式のタイムスタンプ
   timestamp: String!
-  # 操作の詳細を JSON 文字列などで保存
-  details: String
+  before: AWSJSON
+  after: AWSJSON
+  diff: AWSJSON
+  # 操作の詳細（JSON）
+  details: AWSJSON
   # オプション: 発生元 IP
   ipAddress: String
   # オプション: ユーザーエージェント
   userAgent: String
-  # 任意の追加メタデータ（JSON 文字列）
-  metadata: String
+  # 任意の追加メタデータ（JSON）
+  metadata: AWSJSON
   # クライアントのタイムゾーン（例: Asia/Tokyo）
   clientTimezone: String
   # クライアントで観測した発生時刻（ISO 8601）
@@ -553,6 +576,7 @@ type OperationLog @model @auth(rules: [{ allow: private }]) {
   appVersion: String
   # 重大度レベル（例: INFO, WARN, ERROR）
   severity: String
+  logFormatVersion: Int!
   version: Int
 }
 
