@@ -17,7 +17,7 @@ const sidebars: SidebarsConfig = {
     "intro",
     {
       type: "category",
-      label: "スタッフ向け",
+      label: "スタッフ向けガイド",
       items: [
         "staff/overview",
         "staff/navigation-map",
@@ -41,7 +41,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "管理者向け",
+      label: "管理者向けガイド",
       items: [
         "admin/overview",
         "admin/navigation-map",
@@ -67,7 +67,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "開発者向け",
+      label: "開発者向けガイド",
       items: [
         "developer/overview",
         "developer/getting-started/setup",

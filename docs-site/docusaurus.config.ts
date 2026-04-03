@@ -6,7 +6,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 
 const config: Config = {
   title: "クラウド勤怠 ドキュメント",
-  tagline: "スタッフ向け・管理者向け・開発者向けのガイド",
+  tagline: "スタッフ・管理者・開発者それぞれの利用ガイド",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -66,17 +66,17 @@ const config: Config = {
         {
           to: "/docs/staff/overview",
           position: "left",
-          label: "スタッフ向け",
+          label: "スタッフ向けガイド",
         },
         {
           to: "/docs/admin/overview",
           position: "left",
-          label: "管理者向け",
+          label: "管理者向けガイド",
         },
         {
           to: "/docs/developer/overview",
           position: "left",
-          label: "開発者向け",
+          label: "開発者向けガイド",
         },
       ],
     },
@@ -87,15 +87,15 @@ const config: Config = {
           title: "Docs",
           items: [
             {
-              label: "スタッフ向け",
+              label: "スタッフ向けガイド",
               to: "/docs/staff/overview",
             },
             {
-              label: "管理者向け",
+              label: "管理者向けガイド",
               to: "/docs/admin/overview",
             },
             {
-              label: "開発者向け",
+              label: "開発者向けガイド",
               to: "/docs/developer/overview",
             },
           ],
