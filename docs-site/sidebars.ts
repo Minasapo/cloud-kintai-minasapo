@@ -28,6 +28,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "staff/basic-operations",
             "staff/time-recording",
+            "staff/break-time-guide",
             "staff/dashboard",
             "staff/shift",
             "staff/attendance-check",
@@ -56,6 +57,7 @@ const sidebars: SidebarsConfig = {
             "admin/attendance-management",
             "admin/daily-report",
             "admin/attendances",
+            "admin/break-time-review-guide",
             "admin/request-approval",
             "admin/workflow",
             "admin/operation-logs",
@@ -85,6 +87,7 @@ const sidebars: SidebarsConfig = {
         "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",
         "developer/attendance-status-determination",
+        "developer/break-time-specification",
         "developer/close-date-system",
         "developer/data-fetch-periods",
       ],

@@ -131,3 +131,4 @@ flowchart TD
 
 - [打刻エラー一覧の表示仕様](./attendance-error-list-display.md) — 一覧画面上での収集・表示条件
 - [attendanceManagementEnabled フラグ仕様](./attendance-management-enabled.md) — 勤怠管理の有効・無効フラグ
+- [休憩時間仕様](./break-time-specification.md) — 打刻時自動追加と表示時仮控除の違い
