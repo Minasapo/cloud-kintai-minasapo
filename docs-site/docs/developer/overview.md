@@ -29,6 +29,7 @@ description: garaku-frontend の開発に必要なセットアップ、アーキ
 
 - [用語集](../terminology.md)
 - 用語を本文中で補足する場合は、`<GlossaryTerm description="定義">用語</GlossaryTerm>` を利用してください。
+- `GlossaryTerm` はデスクトップでホバー/キーボードフォーカス、モバイルでタップ時に補足を表示します。
 - 定義本文は用語集ページを正本とし、本文中の `description` は短い補足に留めて重複を避けてください。
 
 ## 今後追加予定
