@@ -56,6 +56,7 @@ const sidebars: SidebarsConfig = {
             "admin/daily-report",
             "admin/attendances",
             "admin/request-approval",
+            "admin/workflow",
             "admin/operation-logs",
             "admin/settings-management",
             "admin/staff-management",

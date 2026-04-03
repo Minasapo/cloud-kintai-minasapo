@@ -19,46 +19,13 @@ sidebar_position: 3
 
 ## 表示対象スタッフ
 
-`attendanceManagementEnabled` フラグで制御する。
-
-| 値              | 動作                         |
-| --------------- | ---------------------------- |
-| `true`          | 表示する                     |
-| `null` / 未設定 | 表示する（未設定は有効扱い） |
-| `false`         | 表示しない（明示的な無効化） |
-
-このフラグはスタッフ単位で管理者が設定する。`isAttendanceManagementEnabled()` ヘルパー（`src/entities/staff/lib/attendanceManagement.ts`）で判定する。
+`attendanceManagementEnabled` フラグで制御する。`false` が設定されたスタッフは打刻エラー一覧に表示されない。判定ロジックの詳細は [attendanceManagementEnabled フラグ仕様](./attendance-management-enabled.md) を参照。
 
 ## エラー判定ロジック
 
 判定ロジックの詳細（ステータス決定の全優先度・条件一覧）は [勤怠ステータス判定ロジック](./attendance-status-determination.md) を参照。
 
 対象期間の**全日付**に対して `getStatus(attendance | undefined, staff, holidayCalendars, companyHolidayCalendars, date)` を呼び出し、返り値が `Error` または `Late` の日をエラーとして収集する。
-
-勤怠レコードがある日もない日も同じ関数で判定しており、`getStatus()` 内部で以下の振り分けを行う。
-
-### 勤怠レコードが存在しない日（丸ごと未打刻）
-
-`getStatus(undefined, ...)` が呼ばれ、以下の条件に該当しない過去の営業日は `Error` を返す。
-
-- 当日および未来日
-- `usageStartDate`（利用開始日）より前の日付
-- 非シフト勤務スタッフの祝日・会社休日・週末（`isHolidayLike` 判定）
-- 有給休暇・振替休日が設定されている日
-
-### 勤怠レコードが存在する日
-
-`getStatus(attendance, ...)` が `AttendanceState.get()` に委譲し、返り値が `Error` または `Late` の場合にエラーとして収集する。
-
-### ステータス一覧
-
-| ステータス   | 意味                                                                   |
-| ------------ | ---------------------------------------------------------------------- |
-| `Error`      | 出勤時刻または退勤時刻が未入力の平日、またはレコードが存在しない営業日 |
-| `Late`       | `Error` と同じ評価ルートで返されるケースあり                           |
-| `Requesting` | 未承認の修正申請あり（エラー一覧には含まれない）                       |
-| `OK`         | 正常                                                                   |
-| `None`       | 判定対象外（当日・休日・未設定期間など）                               |
 
 ## デスクトップとモバイルの差異
 

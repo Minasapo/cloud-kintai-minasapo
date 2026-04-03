@@ -6,9 +6,15 @@ sidebar_position: 1
 
 このセクションは、garaku-frontend の開発に参加するメンバー向けです。
 
-## 最初に読むページ
+## はじめに
 
 - [セットアップ](./getting-started/setup.md)
+
+## 機能仕様
+
+- [勤怠管理対象フラグ仕様](./attendance-management-enabled.md) — `attendanceManagementEnabled` フラグの目的・判定ロジック・影響範囲
+- [打刻エラー一覧の表示仕様](./attendance-error-list-display.md) — エラー一覧の表示条件・対象期間・デスクトップ/モバイル差異
+- [勤怠ステータス判定ロジック](./attendance-status-determination.md) — `getStatus()` の全優先度テーブルと分岐条件
 
 ## 今後追加予定
 
