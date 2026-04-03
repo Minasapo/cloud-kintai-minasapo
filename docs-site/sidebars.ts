@@ -16,6 +16,7 @@ const sidebars: SidebarsConfig = {
   mainSidebar: [
     "intro",
     "terminology",
+    "work-status-overview",
     {
       type: "category",
       label: "スタッフ向けガイド",
