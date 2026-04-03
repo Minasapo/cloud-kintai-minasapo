@@ -37,6 +37,25 @@ return staff?.attendanceManagementEnabled !== false;
 | `false`              | 勤怠管理対象外 |
 | `null` / `undefined` | 勤怠管理対象   |
 
+## 判定と影響範囲のフロー図
+
+フラグ値の正規化と各機能への波及先をまとめると、以下の流れになる。
+
+```mermaid
+flowchart TD
+	A[Staff.attendanceManagementEnabled を参照] --> B{値は false か}
+	B -->|はい| C[勤怠管理対象外]
+	B -->|いいえ| D[勤怠管理対象]
+
+	C --> E[AttendanceState は None を返す]
+	C --> F[打刻エラー一覧の対象外]
+	C --> G[管理画面の表示判定へ反映]
+
+	D --> H[通常の勤怠ステータス判定へ進む]
+	D --> I[打刻エラー一覧の候補として評価]
+	D --> G
+```
+
 実装箇所:
 
 - `src/entities/staff/lib/attendanceManagement.ts`

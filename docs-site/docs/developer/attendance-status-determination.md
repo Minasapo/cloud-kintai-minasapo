@@ -17,6 +17,41 @@ getStatus(attendance, staff, holidayCalendars, companyHolidayCalendars, date)
 
 勤怠レコードの有無で 2 つのパスに分岐する。
 
+## 判定フロー図
+
+全体の分岐と主要な到達ステータスを先に把握したい場合は、以下のフローを参照する。
+
+```mermaid
+flowchart TD
+  A[getStatus を呼び出す] --> B{attendance は存在するか}
+  B -->|いいえ| C[パスA: レコードなし判定]
+  B -->|はい| D[パスB: AttendanceState.get へ委譲]
+
+  C --> E{staffなし / 当日未来日 / 利用開始日前 / 休日か}
+  E -->|はい| F[None]
+  E -->|いいえ| G[Error]
+
+  D --> H{勤怠管理対象外か}
+  H -->|はい| F
+  H -->|いいえ| I{当日かつ修正申請なしか}
+  I -->|はい| F
+  I -->|いいえ| J{利用開始日前か}
+  J -->|はい| F
+  J -->|いいえ| K{有給 / 振替休日か}
+  K -->|はい| L[Ok]
+  K -->|いいえ| M{休日扱いか}
+  M -->|はい| F
+  M -->|いいえ| N{未承認の修正申請ありか}
+  N -->|はい| O[Requesting]
+  N -->|いいえ| P{平日扱いか}
+  P -->|はい| Q{startTime または endTime が未入力か}
+  Q -->|はい| G
+  Q -->|いいえ| L
+  P -->|いいえ| R{startTime と endTime が両方未入力か}
+  R -->|はい| F
+  R -->|いいえ| L
+```
+
 ---
 
 ## パス A: 勤怠レコードが存在しない日（`attendance = undefined`）

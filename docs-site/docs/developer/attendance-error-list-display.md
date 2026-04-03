@@ -27,6 +27,23 @@ sidebar_position: 3
 
 対象期間の**全日付**に対して `getStatus(attendance | undefined, staff, holidayCalendars, companyHolidayCalendars, date)` を呼び出し、返り値が `Error` または `Late` の日をエラーとして収集する。
 
+## 表示判定フロー図
+
+対象期間の算出から UI への反映までの流れは、以下のとおり。
+
+```mermaid
+flowchart TD
+	A[effectiveDateRange を算出] --> B[未来日を除外]
+	B --> C[対象期間の全日付を走査]
+	C --> D[getStatus を日付ごとに呼び出す]
+	D --> E{結果は Error または Late か}
+	E -->|はい| F[エラー日として収集]
+	E -->|いいえ| G[収集しない]
+	F --> H{表示先はどちらか}
+	H -->|デスクトップ| I[打刻エラー一覧テーブルに表示]
+	H -->|モバイル| J[警告アラート表示の判定に利用]
+```
+
 ## デスクトップとモバイルの差異
 
 | 項目               | デスクトップ（打刻エラー一覧テーブル）             | モバイル（警告アラート）                    |
