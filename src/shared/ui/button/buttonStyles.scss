@@ -1,0 +1,339 @@
+.app-button,
+.app-icon-button {
+  --app-button-transition:
+    background-color var(--ds-motion-duration-fast) var(--ds-motion-easing-standard),
+    border-color var(--ds-motion-duration-fast) var(--ds-motion-easing-standard),
+    color var(--ds-motion-duration-fast) var(--ds-motion-easing-standard),
+    box-shadow var(--ds-motion-duration-fast) var(--ds-motion-easing-standard),
+    transform var(--ds-motion-duration-fast) var(--ds-motion-easing-standard);
+  --app-button-shadow: var(--ds-shadow-card);
+  --app-button-radius: var(--ds-radius-pill);
+  --app-button-bg: var(--ds-color-brand-primary-base);
+  --app-button-border: var(--ds-color-brand-primary-base);
+  --app-button-color: var(--ds-color-brand-primary-contrast-text);
+  --app-button-hover-bg: var(--ds-color-brand-primary-dark);
+  --app-button-hover-border: var(--ds-color-brand-primary-dark);
+  --app-button-hover-color: var(--ds-color-brand-primary-contrast-text);
+  --app-button-active-transform: translateY(-1px);
+  --app-button-width: auto;
+}
+
+.app-button {
+  display: inline-flex;
+  width: var(--app-button-width);
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-spacing-sm);
+  border: 1px solid var(--app-button-border);
+  border-radius: var(--app-button-radius);
+  background: var(--app-button-bg);
+  color: var(--app-button-color);
+  box-shadow: var(--app-button-shadow);
+  font-weight: var(--ds-typography-font-weight-bold);
+  line-height: var(--ds-typography-line-height-comfy);
+  text-decoration: none;
+  transition: var(--app-button-transition);
+  cursor: pointer;
+  user-select: none;
+}
+
+.app-button:hover:not(:disabled):not([aria-disabled="true"]) {
+  background: var(--app-button-hover-bg);
+  border-color: var(--app-button-hover-border);
+  color: var(--app-button-hover-color);
+  transform: translateY(-2px);
+}
+
+.app-button:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: var(--app-button-active-transform);
+}
+
+.app-button:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-shadow-focus);
+}
+
+.app-button:disabled,
+.app-button[aria-disabled="true"] {
+  background: var(--ds-color-neutral-100);
+  border-color: var(--ds-color-neutral-200);
+  color: var(--ds-color-neutral-500);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.app-button__icon,
+.app-button__spinner,
+.app-icon-button__spinner,
+.app-icon-button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.app-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: inherit;
+}
+
+.app-button__spinner,
+.app-icon-button__spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  animation: app-button-spin 0.8s linear infinite;
+}
+
+.app-button[data-app-button-full-width="true"] {
+  --app-button-width: 100%;
+}
+
+.app-button[data-app-button-size="sm"] {
+  min-height: 36px;
+  padding: 0.5rem 0.875rem;
+  font-size: var(--ds-typography-font-size-sm);
+}
+
+.app-button[data-app-button-size="md"] {
+  min-width: 160px;
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+  font-size: var(--ds-typography-font-size-sm);
+}
+
+.app-button[data-app-button-size="lg"] {
+  min-width: 160px;
+  min-height: 48px;
+  padding: 0.75rem 1.75rem;
+  font-size: var(--ds-typography-font-size-md);
+}
+
+.app-button[data-app-button-tone="primary"][data-app-button-variant="solid"] {
+  --app-button-bg: var(--ds-color-brand-primary-base);
+  --app-button-border: var(--ds-color-brand-primary-dark);
+  --app-button-color: var(--ds-color-brand-primary-contrast-text);
+  --app-button-hover-bg: var(--ds-color-brand-primary-dark);
+  --app-button-hover-border: var(--ds-color-brand-primary-dark);
+  --app-button-hover-color: var(--ds-color-brand-primary-contrast-text);
+}
+
+.app-button[data-app-button-tone="primary"][data-app-button-variant="outline"] {
+  --app-button-bg: var(--ds-color-neutral-50);
+  --app-button-border: var(--ds-color-brand-primary-light);
+  --app-button-color: var(--ds-color-brand-primary-dark);
+  --app-button-hover-bg: var(--ds-color-brand-primary-surface);
+  --app-button-hover-border: var(--ds-color-brand-primary-base);
+  --app-button-hover-color: var(--ds-color-brand-primary-dark);
+  --app-button-shadow: none;
+}
+
+.app-button[data-app-button-tone="primary"][data-app-button-variant="ghost"] {
+  --app-button-bg: transparent;
+  --app-button-border: transparent;
+  --app-button-color: var(--ds-color-brand-primary-dark);
+  --app-button-hover-bg: var(--ds-color-brand-primary-surface);
+  --app-button-hover-border: transparent;
+  --app-button-hover-color: var(--ds-color-brand-primary-dark);
+  --app-button-shadow: none;
+}
+
+.app-button[data-app-button-tone="secondary"][data-app-button-variant="solid"],
+.app-button[data-app-button-tone="secondary"][data-app-button-variant="outline"] {
+  --app-button-bg: var(--ds-color-neutral-50);
+  --app-button-border: var(--ds-color-neutral-200);
+  --app-button-color: var(--ds-color-neutral-900);
+  --app-button-hover-bg: var(--ds-color-neutral-100);
+  --app-button-hover-border: var(--ds-color-neutral-300);
+  --app-button-hover-color: var(--ds-color-neutral-900);
+}
+
+.app-button[data-app-button-tone="secondary"][data-app-button-variant="ghost"] {
+  --app-button-bg: transparent;
+  --app-button-border: transparent;
+  --app-button-color: var(--ds-color-neutral-700);
+  --app-button-hover-bg: var(--ds-color-neutral-100);
+  --app-button-hover-border: transparent;
+  --app-button-hover-color: var(--ds-color-neutral-900);
+  --app-button-shadow: none;
+}
+
+.app-button[data-app-button-tone="danger"][data-app-button-variant="solid"] {
+  --app-button-bg: var(--ds-color-feedback-danger-base);
+  --app-button-border: var(--ds-color-feedback-danger-base);
+  --app-button-color: var(--ds-color-brand-primary-contrast-text);
+  --app-button-hover-bg: color-mix(
+    in srgb,
+    var(--ds-color-feedback-danger-base) 86%,
+    black
+  );
+  --app-button-hover-border: color-mix(
+    in srgb,
+    var(--ds-color-feedback-danger-base) 86%,
+    black
+  );
+  --app-button-hover-color: var(--ds-color-brand-primary-contrast-text);
+}
+
+.app-button[data-app-button-tone="danger"][data-app-button-variant="outline"] {
+  --app-button-bg: var(--ds-color-neutral-50);
+  --app-button-border: var(--ds-color-feedback-danger-border);
+  --app-button-color: var(--ds-color-feedback-danger-base);
+  --app-button-hover-bg: var(--ds-color-feedback-danger-surface);
+  --app-button-hover-border: var(--ds-color-feedback-danger-base);
+  --app-button-hover-color: var(--ds-color-feedback-danger-base);
+  --app-button-shadow: none;
+}
+
+.app-button[data-app-button-tone="danger"][data-app-button-variant="ghost"] {
+  --app-button-bg: transparent;
+  --app-button-border: transparent;
+  --app-button-color: var(--ds-color-feedback-danger-base);
+  --app-button-hover-bg: var(--ds-color-feedback-danger-surface);
+  --app-button-hover-border: transparent;
+  --app-button-hover-color: var(--ds-color-feedback-danger-base);
+  --app-button-shadow: none;
+}
+
+.app-button[data-app-button-tone="neutral"][data-app-button-variant="solid"] {
+  --app-button-bg: var(--ds-color-neutral-100);
+  --app-button-border: var(--ds-color-neutral-200);
+  --app-button-color: var(--ds-color-neutral-800);
+  --app-button-hover-bg: var(--ds-color-neutral-200);
+  --app-button-hover-border: var(--ds-color-neutral-300);
+  --app-button-hover-color: var(--ds-color-neutral-900);
+}
+
+.app-button[data-app-button-tone="neutral"][data-app-button-variant="outline"] {
+  --app-button-bg: var(--ds-color-neutral-50);
+  --app-button-border: var(--ds-color-neutral-200);
+  --app-button-color: var(--ds-color-neutral-700);
+  --app-button-hover-bg: var(--ds-color-neutral-100);
+  --app-button-hover-border: var(--ds-color-neutral-300);
+  --app-button-hover-color: var(--ds-color-neutral-900);
+  --app-button-shadow: none;
+}
+
+.app-button[data-app-button-tone="neutral"][data-app-button-variant="ghost"] {
+  --app-button-bg: transparent;
+  --app-button-border: transparent;
+  --app-button-color: var(--ds-color-neutral-700);
+  --app-button-hover-bg: var(--ds-color-neutral-100);
+  --app-button-hover-border: transparent;
+  --app-button-hover-color: var(--ds-color-neutral-900);
+  --app-button-shadow: none;
+}
+
+.app-icon-button {
+  display: inline-flex;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-button-border);
+  border-radius: 999px;
+  background: var(--app-button-bg);
+  color: var(--app-button-color);
+  box-shadow: var(--app-button-shadow);
+  transition: var(--app-button-transition);
+  cursor: pointer;
+}
+
+.app-icon-button:hover:not(:disabled) {
+  background: var(--app-button-hover-bg);
+  border-color: var(--app-button-hover-border);
+  color: var(--app-button-hover-color);
+  transform: translateY(-1px);
+}
+
+.app-icon-button:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-shadow-focus);
+}
+
+.app-icon-button:disabled {
+  background: var(--ds-color-neutral-100);
+  border-color: var(--ds-color-neutral-200);
+  color: var(--ds-color-neutral-500);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.app-icon-button[data-app-icon-button-size="sm"] {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+}
+
+.app-icon-button[data-app-icon-button-size="md"] {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+}
+
+.app-icon-button[data-app-icon-button-tone="neutral"] {
+  --app-button-bg: var(--ds-color-neutral-50);
+  --app-button-border: var(--ds-color-neutral-200);
+  --app-button-color: var(--ds-color-neutral-700);
+  --app-button-hover-bg: var(--ds-color-neutral-100);
+  --app-button-hover-border: var(--ds-color-neutral-300);
+  --app-button-hover-color: var(--ds-color-neutral-900);
+  --app-button-shadow: none;
+}
+
+.app-icon-button[data-app-icon-button-tone="primary"] {
+  --app-button-bg: var(--ds-color-neutral-50);
+  --app-button-border: var(--ds-color-brand-primary-light);
+  --app-button-color: var(--ds-color-brand-primary-dark);
+  --app-button-hover-bg: var(--ds-color-brand-primary-surface);
+  --app-button-hover-border: var(--ds-color-brand-primary-base);
+  --app-button-hover-color: var(--ds-color-brand-primary-dark);
+  --app-button-shadow: none;
+}
+
+.app-icon-button[data-app-icon-button-tone="danger"] {
+  --app-button-bg: var(--ds-color-neutral-50);
+  --app-button-border: var(--ds-color-feedback-danger-border);
+  --app-button-color: var(--ds-color-feedback-danger-base);
+  --app-button-hover-bg: var(--ds-color-feedback-danger-surface);
+  --app-button-hover-border: var(--ds-color-feedback-danger-base);
+  --app-button-hover-color: var(--ds-color-feedback-danger-base);
+  --app-button-shadow: none;
+}
+
+.app-icon-button[data-app-icon-button-active="true"][data-app-icon-button-tone="neutral"] {
+  --app-button-bg: var(--ds-color-neutral-100);
+  --app-button-border: var(--ds-color-neutral-300);
+  --app-button-color: var(--ds-color-neutral-900);
+}
+
+.app-icon-button[data-app-icon-button-active="true"][data-app-icon-button-tone="primary"] {
+  --app-button-bg: var(--ds-color-brand-primary-surface);
+  --app-button-border: var(--ds-color-brand-primary-base);
+  --app-button-color: var(--ds-color-brand-primary-dark);
+}
+
+.app-icon-button[data-app-icon-button-active="true"][data-app-icon-button-tone="danger"] {
+  --app-button-bg: var(--ds-color-feedback-danger-surface);
+  --app-button-border: var(--ds-color-feedback-danger-base);
+  --app-button-color: var(--ds-color-feedback-danger-base);
+}
+
+@keyframes app-button-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

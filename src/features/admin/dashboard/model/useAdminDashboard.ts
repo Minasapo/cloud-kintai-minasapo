@@ -19,17 +19,34 @@ import {
 } from "@/entities/attendance/lib/actions/workStatus";
 import { calcTotalRestTime, calcTotalWorkTime } from "@/entities/attendance/lib/time";
 import useCloseDates from "@/entities/attendance/model/useCloseDates";
-import { useStaffs } from "@/entities/staff/model/useStaffs/useStaffs";
+import {
+  type StaffType,
+  useStaffs,
+} from "@/entities/staff/model/useStaffs/useStaffs";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   listAttendances,
   listDailyReports,
 } from "@/shared/api/graphql/documents/queries";
 import {
+  onCreateAttendance,
+  onCreateDailyReport,
+  onDeleteAttendance,
+  onDeleteDailyReport,
+  onUpdateAttendance,
+  onUpdateDailyReport,
+} from "@/shared/api/graphql/documents/subscriptions";
+import {
   Attendance,
   DailyReportStatus,
   ListAttendancesQuery,
   ListDailyReportsQuery,
+  OnCreateAttendanceSubscription,
+  OnCreateDailyReportSubscription,
+  OnDeleteAttendanceSubscription,
+  OnDeleteDailyReportSubscription,
+  OnUpdateAttendanceSubscription,
+  OnUpdateDailyReportSubscription,
 } from "@/shared/api/graphql/types";
 import { createLogger } from "@/shared/lib/logger";
 
@@ -43,6 +60,24 @@ const isAttendanceCurrentWorking = (attendance: Attendance) => {
   const { code } = getWorkStatus(attendance);
   return code === WorkStatusCodes.WORKING || code === WorkStatusCodes.RESTING;
 };
+
+const buildStaffIdentityMaps = (staffs: StaffType[]) =>
+  staffs.reduce<{
+    staffLabelsById: Record<string, string>;
+    canonicalStaffIdByAttendanceStaffId: Record<string, string>;
+  }>((acc, staff) => {
+    if (!staff.id) return acc;
+    const displayName = [staff.familyName, staff.givenName]
+      .filter((part): part is string => Boolean(part && part.trim()))
+      .join(" ");
+    if (!displayName) return acc;
+    acc.staffLabelsById[staff.id] = displayName;
+    acc.canonicalStaffIdByAttendanceStaffId[staff.id] = staff.id;
+    if (staff.cognitoUserId) {
+      acc.canonicalStaffIdByAttendanceStaffId[staff.cognitoUserId] = staff.id;
+    }
+    return acc;
+  }, { staffLabelsById: {}, canonicalStaffIdByAttendanceStaffId: {} });
 
 export function useAdminDashboard() {
   const { authStatus } = useContext(AuthContext);
@@ -74,6 +109,8 @@ export function useAdminDashboard() {
     () => aggregationDateRange.end.format("YYYY-MM-DD"),
     [aggregationDateRange],
   );
+  const aggregationStart = aggregationDateRange.start;
+  const aggregationEnd = aggregationDateRange.end;
 
   const fetchCurrentWorkingStaffCount = useCallback(async () => {
     setIsLoadingCurrentWorkingStaffCount(true);
@@ -197,34 +234,188 @@ export function useAdminDashboard() {
     void fetchTodayDailyReportStatus();
   }, [fetchTodayDailyReportStatus]);
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
+    let isMounted = true;
+    let currentWorkingTimer: ReturnType<typeof setTimeout> | null = null;
+    let periodAttendancesTimer: ReturnType<typeof setTimeout> | null = null;
+    let dailyReportTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleCurrentWorkingRefresh = () => {
+      if (currentWorkingTimer) {
+        clearTimeout(currentWorkingTimer);
+      }
+      currentWorkingTimer = setTimeout(() => {
+        if (!isMounted) {
+          return;
+        }
+        void fetchCurrentWorkingStaffCount();
+      }, 300);
+    };
+
+    const schedulePeriodAttendanceRefresh = () => {
+      if (periodAttendancesTimer) {
+        clearTimeout(periodAttendancesTimer);
+      }
+      periodAttendancesTimer = setTimeout(() => {
+        if (!isMounted) {
+          return;
+        }
+        void fetchPeriodAttendances();
+      }, 300);
+    };
+
+    const scheduleDailyReportRefresh = () => {
+      if (dailyReportTimer) {
+        clearTimeout(dailyReportTimer);
+      }
+      dailyReportTimer = setTimeout(() => {
+        if (!isMounted) {
+          return;
+        }
+        void fetchTodayDailyReportStatus();
+      }, 300);
+    };
+
+    const handleAttendanceEvent = (attendance?: {
+      workDate?: string | null;
+    } | null) => {
+      const workDate = attendance?.workDate;
+      if (!workDate) {
+        return;
+      }
+
+      if (workDate === targetWorkDate) {
+        scheduleCurrentWorkingRefresh();
+      }
+
+      const isInAggregationRange = dayjs(workDate).isBetween(
+        aggregationStart,
+        aggregationEnd,
+        "day",
+        "[]",
+      );
+      if (isInAggregationRange) {
+        schedulePeriodAttendanceRefresh();
+      }
+    };
+
+    const handleDailyReportEvent = (dailyReport?: {
+      reportDate?: string | null;
+    } | null) => {
+      if (dailyReport?.reportDate !== targetWorkDate) {
+        return;
+      }
+      scheduleDailyReportRefresh();
+    };
+
+    const createAttendanceSubscription = graphqlClient
+      .graphql({ query: onCreateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
+          handleAttendanceEvent(data?.onCreateAttendance);
+        },
+        error: (error: unknown) => {
+          logger.error("Attendance create subscription error", error);
+        },
+      });
+
+    const updateAttendanceSubscription = graphqlClient
+      .graphql({ query: onUpdateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
+          handleAttendanceEvent(data?.onUpdateAttendance);
+        },
+        error: (error: unknown) => {
+          logger.error("Attendance update subscription error", error);
+        },
+      });
+
+    const deleteAttendanceSubscription = graphqlClient
+      .graphql({ query: onDeleteAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
+          handleAttendanceEvent(data?.onDeleteAttendance);
+        },
+        error: (error: unknown) => {
+          logger.error("Attendance delete subscription error", error);
+        },
+      });
+
+    const createDailyReportSubscription = graphqlClient
+      .graphql({ query: onCreateDailyReport, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnCreateDailyReportSubscription }) => {
+          handleDailyReportEvent(data?.onCreateDailyReport);
+        },
+        error: (error: unknown) => {
+          logger.error("Daily report create subscription error", error);
+        },
+      });
+
+    const updateDailyReportSubscription = graphqlClient
+      .graphql({ query: onUpdateDailyReport, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnUpdateDailyReportSubscription }) => {
+          handleDailyReportEvent(data?.onUpdateDailyReport);
+        },
+        error: (error: unknown) => {
+          logger.error("Daily report update subscription error", error);
+        },
+      });
+
+    const deleteDailyReportSubscription = graphqlClient
+      .graphql({ query: onDeleteDailyReport, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnDeleteDailyReportSubscription }) => {
+          handleDailyReportEvent(data?.onDeleteDailyReport);
+        },
+        error: (error: unknown) => {
+          logger.error("Daily report delete subscription error", error);
+        },
+      });
+
+    return () => {
+      isMounted = false;
+      if (currentWorkingTimer) {
+        clearTimeout(currentWorkingTimer);
+      }
+      if (periodAttendancesTimer) {
+        clearTimeout(periodAttendancesTimer);
+      }
+      if (dailyReportTimer) {
+        clearTimeout(dailyReportTimer);
+      }
+      createAttendanceSubscription.unsubscribe();
+      updateAttendanceSubscription.unsubscribe();
+      deleteAttendanceSubscription.unsubscribe();
+      createDailyReportSubscription.unsubscribe();
+      updateDailyReportSubscription.unsubscribe();
+      deleteDailyReportSubscription.unsubscribe();
+    };
+  }, [
+    aggregationEnd,
+    aggregationStart,
+    fetchCurrentWorkingStaffCount,
+    fetchPeriodAttendances,
+    fetchTodayDailyReportStatus,
+    isAuthenticated,
+    targetWorkDate,
+  ]);
+
   const staffWorkStatusSummary = useMemo(() => {
     const standardWorkHours = Math.max(getStandardWorkHours(), 0);
-    const { staffLabelsByCanonicalId, staffAliasToCanonicalId } = staffs.reduce<{
-      staffLabelsByCanonicalId: Record<string, string>;
-      staffAliasToCanonicalId: Record<string, string>;
-    }>(
-      (acc, staff) => {
-        if (!staff.id) return acc;
-        const displayName = [staff.familyName, staff.givenName]
-          .filter((part): part is string => Boolean(part && part.trim()))
-          .join(" ");
-        if (!displayName) return acc;
-        acc.staffLabelsByCanonicalId[staff.id] = displayName;
-        acc.staffAliasToCanonicalId[staff.id] = staff.id;
-        if (staff.cognitoUserId) {
-          acc.staffAliasToCanonicalId[staff.cognitoUserId] = staff.id;
-        }
-        return acc;
-      },
-      { staffLabelsByCanonicalId: {}, staffAliasToCanonicalId: {} },
-    );
-
-    const staffIds = Object.keys(staffLabelsByCanonicalId);
+    const { staffLabelsById, canonicalStaffIdByAttendanceStaffId } =
+      buildStaffIdentityMaps(staffs);
+    const staffIds = Object.keys(staffLabelsById);
     const totalsByStaff = periodAttendances.reduce<
       Record<string, { workHours: number; overtimeHours: number }>
     >((acc, attendance) => {
       if (!attendance.staffId || !attendance.startTime || !attendance.endTime) return acc;
-      const canonicalStaffId = staffAliasToCanonicalId[attendance.staffId];
+      const canonicalStaffId = canonicalStaffIdByAttendanceStaffId[attendance.staffId];
       if (!canonicalStaffId) return acc;
 
       const workHours = calcTotalWorkTime(attendance.startTime, attendance.endTime);
@@ -257,13 +448,30 @@ export function useAdminDashboard() {
 
     return Object.entries(totalsByStaff)
       .map(([staffId, totals]) => {
-        const label = staffLabelsByCanonicalId[staffId];
+        const label = staffLabelsById[staffId];
         if (!label) return null;
         return { label, workHours: totals.workHours, overtimeHours: totals.overtimeHours };
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
       .toSorted((left, right) => right.workHours - left.workHours);
   }, [getStandardWorkHours, periodAttendances, staffs]);
+
+  const duplicateAttendanceDayCount = useMemo(() => {
+    const { canonicalStaffIdByAttendanceStaffId } = buildStaffIdentityMaps(staffs);
+    const attendancesByStaffDate = periodAttendances.reduce<Record<string, number>>(
+      (acc, attendance) => {
+        if (!attendance.staffId || !attendance.workDate) return acc;
+        const canonicalStaffId = canonicalStaffIdByAttendanceStaffId[attendance.staffId];
+        if (!canonicalStaffId) return acc;
+        const key = `${canonicalStaffId}#${attendance.workDate}`;
+        acc[key] = (acc[key] ?? 0) + 1;
+        return acc;
+      },
+      {},
+    );
+
+    return Object.values(attendancesByStaffDate).filter((count) => count > 1).length;
+  }, [periodAttendances, staffs]);
 
   const staffWorkStatusChartData = useMemo(
     () => ({
@@ -354,6 +562,8 @@ export function useAdminDashboard() {
     approvedDailyReportCountLabel,
     currentWorkingStaffInfoLabel,
     aggregationPeriodInfoLabel,
+    duplicateAttendanceDayCount,
+    hasDuplicateAttendances: duplicateAttendanceDayCount > 0,
     // チャート
     staffWorkStatusSummary,
     staffWorkStatusChartData,

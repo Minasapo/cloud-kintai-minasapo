@@ -39,6 +39,28 @@ export interface CollaborativeUser {
   lastActivity: number; // timestamp
 }
 
+export type ShiftCellEditLockOwner = "self" | "other" | null;
+
+export interface ShiftEditLockData {
+  id: string;
+  targetMonth: string;
+  staffId: string;
+  date: string;
+  holderUserId: string;
+  holderUserName: string;
+  acquiredAt: string;
+  expiresAt: string;
+  version: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface EditLockAcquireResult {
+  acquired: boolean;
+  lock?: ShiftEditLockData;
+  conflict?: ShiftEditLockData;
+}
+
 /**
  * 接続状態
  */
@@ -100,9 +122,8 @@ export interface CollaborativeShiftState {
   error: string | null;
   connectionState: "connected" | "disconnected" | "error";
 
-  // オフライン対応
+  // 接続状態
   isOnline: boolean;
-  hasPendingChanges: boolean;
 
   // リモート更新通知（サブスクリプション経由で他ユーザーの変更を受信した際のスタッフID）
   lastRemoteUpdate: { staffId: string; timestamp: number } | null;

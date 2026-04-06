@@ -5,84 +5,23 @@ import {
   calcTotalWorkTime,
 } from "@entities/attendance/lib/time";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
-import {
-  type ChartData,
-  type ChartOptions,
-} from "chart.js";
+import { type ChartData, type ChartOptions } from "chart.js";
 import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
+import {
+  formatDateRangeLabel,
+  getAttendanceQueryDateRange,
+  getEffectiveDateRange,
+} from "@/entities/attendance/lib/aggregationDateRange";
 import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
 
 import RegisterSummaryAttendanceErrorCountCard from "./RegisterSummaryAttendanceErrorCountCard";
 import RegisterSummaryTotalWorkHoursCard from "./RegisterSummaryTotalWorkHoursCard";
 import RegisterSummaryWorkDaysCard from "./RegisterSummaryWorkDaysCard";
 import RegisterSummaryWorkStatusChartCard from "./RegisterSummaryWorkStatusChartCard";
-
-type DateRange = {
-  start: dayjs.Dayjs;
-  end: dayjs.Dayjs;
-};
-
-const getEffectiveDateRange = (
-  month: dayjs.Dayjs,
-  closeDates: Array<{
-    startDate?: string | null;
-    endDate?: string | null;
-    updatedAt?: string | null;
-    closeDate?: string | null;
-  }>,
-): DateRange => {
-  const monthStart = month.startOf("month");
-  const monthEnd = month.endOf("month");
-  const today = dayjs();
-
-  const applicableCloseDates = closeDates.filter((closeDate) => {
-    const start = dayjs(closeDate.startDate);
-    const end = dayjs(closeDate.endDate);
-    return (
-      start.isValid() &&
-      end.isValid() &&
-      !end.isBefore(monthStart, "day") &&
-      !start.isAfter(monthEnd, "day")
-    );
-  });
-
-  if (applicableCloseDates.length > 0) {
-    const containsToday = applicableCloseDates.find((cd) => {
-      const start = dayjs(cd.startDate);
-      const end = dayjs(cd.endDate);
-      return !today.isBefore(start, "day") && !today.isAfter(end, "day");
-    });
-
-    if (containsToday) {
-      return {
-        start: dayjs(containsToday.startDate),
-        end: dayjs(containsToday.endDate),
-      };
-    }
-
-    const latest = applicableCloseDates.reduce((prev, current) => {
-      const prevUpdatedAt = dayjs(prev.updatedAt ?? prev.closeDate).valueOf();
-      const currentUpdatedAt = dayjs(
-        current.updatedAt ?? current.closeDate,
-      ).valueOf();
-      return currentUpdatedAt > prevUpdatedAt ? current : prev;
-    });
-
-    return {
-      start: dayjs(latest.startDate),
-      end: dayjs(latest.endDate),
-    };
-  }
-
-  return {
-    start: monthStart,
-    end: monthEnd,
-  };
-};
 
 type RegisterAttendanceSummaryCardProps = {
   attendanceErrorCount?: number;
@@ -107,17 +46,7 @@ export default function RegisterAttendanceSummaryCard({
   );
 
   const queryDateRange = useMemo(() => {
-    const monthStart = currentMonth.startOf("month");
-    const monthEnd = currentMonth.endOf("month");
-
-    return {
-      start: effectiveDateRange.start.isBefore(monthStart, "day")
-        ? effectiveDateRange.start
-        : monthStart,
-      end: effectiveDateRange.end.isAfter(monthEnd, "day")
-        ? effectiveDateRange.end
-        : monthEnd,
-    };
+    return getAttendanceQueryDateRange(currentMonth, effectiveDateRange);
   }, [currentMonth, effectiveDateRange]);
 
   const startDate = queryDateRange.start.format(AttendanceDate.DataFormat);
@@ -238,9 +167,7 @@ export default function RegisterAttendanceSummaryCard({
         netWorkHours: 0,
         restHours: 0,
       };
-      const netWorkHours = Number(
-        workStatusHours.netWorkHours.toFixed(2),
-      );
+      const netWorkHours = Number(workStatusHours.netWorkHours.toFixed(2));
       const restHours = Number(workStatusHours.restHours.toFixed(2));
       const overtimeHours = Number(
         Math.max(netWorkHours - standardWorkHours, 0).toFixed(2),
@@ -354,7 +281,7 @@ export default function RegisterAttendanceSummaryCard({
     attendanceUninitialized;
   const hasError = Boolean(closeDatesError || attendancesError);
 
-  const rangeLabel = `${effectiveDateRange.start.format("M/D")}〜${effectiveDateRange.end.format("M/D")}`;
+  const rangeLabel = formatDateRangeLabel(effectiveDateRange);
   const summaryInfoLabel = `集計期間について: ${rangeLabel}`;
 
   const totalHoursLabel =
@@ -368,7 +295,7 @@ export default function RegisterAttendanceSummaryCard({
   return (
     <section
       data-testid="register-dashboard-attendance-summary-card"
-      className="relative rounded-[1.35rem] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
+      className="relative rounded-[4px] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -383,7 +310,7 @@ export default function RegisterAttendanceSummaryCard({
           containerClassName="absolute right-3 top-3 inline-flex"
         />
         {isLoading && (
-          <span className="inline-flex rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold leading-none text-slate-700">
+          <span className="inline-flex rounded-[4px] border border-slate-300 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold leading-none text-slate-700">
             集計中
           </span>
         )}

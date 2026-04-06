@@ -1,11 +1,6 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@mui/material";
+import { AppButton } from "@/shared/ui/button";
+
+import AppDialog from "./AppDialog";
 
 type Props = {
   open: boolean;
@@ -27,17 +22,22 @@ export default function ConfirmDialog({
   onCancel,
 }: Props) {
   return (
-    <Dialog open={open} onClose={onCancel} maxWidth="xs" fullWidth>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onCancel}>{cancelLabel}</Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          {confirmLabel}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <AppDialog
+      open={open}
+      onClose={onCancel}
+      title={title}
+      description={message}
+      maxWidth="xs"
+      actions={
+        <>
+          <AppButton variant="outline" tone="neutral" onClick={onCancel}>
+            {cancelLabel}
+          </AppButton>
+          <AppButton variant="solid" tone="danger" onClick={onConfirm}>
+            {confirmLabel}
+          </AppButton>
+        </>
+      }
+    />
   );
 }

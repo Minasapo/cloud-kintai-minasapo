@@ -11,19 +11,22 @@ import {
 } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
+import { PageContent } from "@/shared/ui/layout";
 
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
 import { CollaborativeHeader } from "../../../features/shift/collaborative/components/CollaborativeHeader";
-import { ConflictResolutionDialog } from "../../../features/shift/collaborative/components/ConflictResolutionDialog";
 import { KeyboardShortcutsHelp } from "../../../features/shift/collaborative/components/KeyboardShortcutsHelp";
 import {
-  PresenceNotificationContainer,
   usePresenceNotifications,
 } from "../../../features/shift/collaborative/components/PresenceNotification";
 import { PrintShiftDialog } from "../../../features/shift/collaborative/components/PrintShiftDialog";
 import { ProgressPanel } from "../../../features/shift/collaborative/components/ProgressPanel";
-import { ShiftCell, type ShiftCellProps } from "../../../features/shift/collaborative/components/ShiftCell";
+import {
+  ShiftCell,
+  type ShiftCellProps,
+} from "../../../features/shift/collaborative/components/ShiftCell";
 import { ShiftSuggestionsPanel } from "../../../features/shift/collaborative/components/ShiftSuggestionsPanel";
 import { SyncPanel } from "../../../features/shift/collaborative/components/SyncPanel";
 import { InfoBadge } from "../../../features/shift/collaborative/components/ui/Badges";
@@ -48,7 +51,12 @@ interface ShiftCollaborativePageInnerProps {
 }
 
 const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
-  ({ staffs, targetMonth, onPrevMonth, onNextMonth }: ShiftCollaborativePageInnerProps) => {
+  ({
+    staffs,
+    targetMonth,
+    onPrevMonth,
+    onNextMonth,
+  }: ShiftCollaborativePageInnerProps) => {
     const { cognitoUser } = useContext(AuthContext);
     const {
       state,
@@ -104,6 +112,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       navigate,
       hasEditLockForSelected,
       isOthersEditingSelected,
+      editLockError,
+      clearEditLockError,
       handleAcquireEditLock,
       handleReleaseEditLock,
       handleForceReleaseLock,
@@ -117,8 +127,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       return currentStaff?.id ?? "";
     }, [cognitoUser, staffs]);
 
-    const { notifications, addNotification, dismissNotification } =
-      usePresenceNotifications();
+    const { addNotification } = usePresenceNotifications();
 
     const { isPrintDialogOpen, openPrintDialog, closePrintDialog } =
       usePrintShift();
@@ -142,8 +151,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
         state.lastRemoteUpdate.staffId;
       addNotification("data-synced", "", { staffName, date: "" });
     }, [state.lastRemoteUpdate, staffNameMap, addNotification]);
-
-    const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
 
     const [cellHistoryDrawerOpen, setCellHistoryDrawerOpen] =
       useState<boolean>(false);
@@ -272,11 +279,18 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       onUndo: undo,
       onRedo: redo,
     });
+    const { dialog } = usePageLeaveGuard({
+      isDirty: state.pendingChanges.size > 0,
+      isBusy:
+        state.dataStatus === "saving" || state.dataStatus === "syncing",
+    });
 
     return (
-      <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
-        <div
-          className="mx-auto w-full max-w-[1360px] px-1.5 py-1 sm:px-2.5"
+      <Page title="シフト調整(共同)" width="full" showDefaultHeader={false}>
+        {dialog}
+        <PageContent
+          width="full"
+          className="px-1.5 py-1 sm:px-2.5"
           onMouseUp={handleMouseUp}
         >
           <CollaborativeHeader
@@ -307,6 +321,23 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
           />
 
           <SyncPanel syncError={state.error} onClearError={_clearSyncError} />
+
+          {!state.isOnline || state.connectionState === "disconnected" ? (
+            <InlineAlert tone="warning" icon={<InfoBadge />} className="mb-3">
+              通信が切断されています。再接続後に編集を再開してください。
+            </InlineAlert>
+          ) : null}
+
+          {editLockError ? (
+            <InlineAlert
+              tone="warning"
+              icon={<InfoBadge />}
+              className="mb-3"
+              onClose={clearEditLockError}
+            >
+              {editLockError}
+            </InlineAlert>
+          ) : null}
 
           <ProgressPanel progress={progress} totalDays={days.length} />
 
@@ -373,13 +404,6 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onForceReleaseLock={handleForceReleaseLock}
           />
 
-          <ConflictResolutionDialog
-            open={conflictDialogOpen}
-            conflicts={[]}
-            onResolve={async () => {}}
-            onClose={() => setConflictDialogOpen(false)}
-          />
-
           <KeyboardShortcutsHelp
             open={showHelp}
             onClose={() => setShowHelp(false)}
@@ -404,12 +428,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             shiftDataMap={state.shiftDataMap}
             targetMonth={targetMonth}
           />
-
-          <PresenceNotificationContainer
-            notifications={notifications}
-            onDismiss={dismissNotification}
-          />
-        </div>
+        </PageContent>
 
         <ChangeHistoryPanel
           undoHistory={undoHistory}
@@ -447,10 +466,14 @@ export default function ShiftCollaborativePage() {
   const isAuthenticated = authStatus === "authenticated";
   const { staffs, loading: staffsLoading } = useStaffs({ isAuthenticated });
 
-  const [targetMonth, setTargetMonth] = useState(() => dayjs().format("YYYY-MM"));
+  const [targetMonth, setTargetMonth] = useState(() =>
+    dayjs().format("YYYY-MM"),
+  );
 
   const handlePrevMonth = useCallback(() => {
-    setTargetMonth((prev) => dayjs(prev).subtract(1, "month").format("YYYY-MM"));
+    setTargetMonth((prev) =>
+      dayjs(prev).subtract(1, "month").format("YYYY-MM"),
+    );
   }, []);
 
   const handleNextMonth = useCallback(() => {
@@ -495,14 +518,14 @@ export default function ShiftCollaborativePage() {
 
   if (staffIds.length === 0) {
     return (
-      <Page title="シフト調整(共同)" maxWidth={false} showDefaultHeader={false}>
-        <div className="mx-auto w-full max-w-[1360px] px-1.5 py-1 sm:px-2.5">
+      <Page title="シフト調整(共同)" width="full" showDefaultHeader={false}>
+        <PageContent width="full" className="px-1.5 py-1 sm:px-2.5">
           <div className="rounded-[28px] border border-emerald-500/15 bg-[linear-gradient(135deg,rgba(247,252,248,0.98)_0%,rgba(236,253,245,0.92)_58%,rgba(255,255,255,0.98)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] md:p-5">
             <InlineAlert tone="info" icon={<InfoBadge />}>
               スタッフデータが見つかりません
             </InlineAlert>
           </div>
-        </div>
+        </PageContent>
       </Page>
     );
   }
@@ -515,9 +538,9 @@ export default function ShiftCollaborativePage() {
       currentUserName={currentUserName}
       shiftRequestId={shiftRequestId}
     >
-      <ShiftCollaborativePageInner 
-        staffs={staffs} 
-        targetMonth={targetMonth} 
+      <ShiftCollaborativePageInner
+        staffs={staffs}
+        targetMonth={targetMonth}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
       />

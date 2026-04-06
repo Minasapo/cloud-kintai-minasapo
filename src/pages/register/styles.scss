@@ -46,6 +46,14 @@
   width: 100%;
 }
 
+.register-mobile-dashboard {
+  margin-bottom: 0.75rem;
+}
+
+.register-mobile-dashboard > * {
+  margin-top: 0 !important;
+}
+
 .register-dashboard {
   display: none;
 }

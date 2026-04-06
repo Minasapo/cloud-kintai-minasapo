@@ -17,10 +17,7 @@ import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import {
-  AttendanceState,
-  AttendanceStatus,
-} from "@/entities/attendance/lib/AttendanceState";
+import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
@@ -32,6 +29,7 @@ import {
   attendanceRowVariantStyles,
   getAttendanceRowVariant,
 } from "@/entities/attendance/ui/rowVariant";
+import { getStatus } from "@/features/attendance/list/lib/attendanceStatusUtils";
 
 import { useAttendanceListContext } from "./AttendanceListContext";
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
@@ -47,6 +45,7 @@ export default function DesktopList() {
     companyHolidayCalendars,
     navigate,
     currentMonth,
+    effectiveDateRange,
   } = useAttendanceListContext();
 
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
@@ -70,28 +69,59 @@ export default function DesktopList() {
     const formattedWorkDate = dayjs(workDate).format(
       AttendanceDate.QueryParamFormat,
     );
+    navigate(buildNavigatePath(formattedWorkDate));
+  };
+
+  const buildNavigatePath = (formattedWorkDate: string) => {
     const monthQuery = new URLSearchParams({
       [MONTH_QUERY_KEY]: currentMonth.startOf("month").format("YYYY-MM"),
     }).toString();
-    navigate(`/attendance/${formattedWorkDate}/edit?${monthQuery}`);
+    return `/attendance/${formattedWorkDate}/edit?${monthQuery}`;
   };
 
   const errorAttendances = (() => {
     if (!staff) return [] as Attendance[];
-    return attendances.filter((a) => {
-      const hasSystemComment =
-        Array.isArray(a.systemComments) && a.systemComments.length > 0;
-      if (hasSystemComment) return true;
-      const status = new AttendanceState(
-        staff,
-        a,
-        holidayCalendars,
-        companyHolidayCalendars,
-      ).get();
-      return (
-        status === AttendanceStatus.Error || status === AttendanceStatus.Late
-      );
-    });
+
+    const today = dayjs();
+    const rangeStart = effectiveDateRange.start;
+    const rangeEnd = effectiveDateRange.end;
+    const result: Attendance[] = [];
+
+    let current = rangeStart;
+    while (!current.isAfter(rangeEnd, "day")) {
+      if (!current.isAfter(today, "day")) {
+        const workDate = current.format(AttendanceDate.DataFormat);
+        const existingAttendance = attendances.find(
+          (a) => a.workDate === workDate,
+        );
+        const status = getStatus(
+          existingAttendance,
+          staff,
+          holidayCalendars,
+          companyHolidayCalendars,
+          current,
+        );
+        if (
+          status === AttendanceStatus.Error ||
+          status === AttendanceStatus.Late
+        ) {
+          result.push(
+            existingAttendance ?? {
+              __typename: "Attendance",
+              id: `missing-${workDate}`,
+              staffId: staff.id,
+              workDate,
+              createdAt: "",
+              updatedAt: "",
+            },
+          );
+        }
+      }
+
+      current = current.add(1, "day");
+    }
+
+    return result;
   })();
   return (
     <div className="hidden md:block">
@@ -144,18 +174,58 @@ export default function DesktopList() {
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ color: "#64748b", fontWeight: 700 }} />
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>勤務日</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
+                      勤務日
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
                       勤務時間
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
                       休憩時間(直近)
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>摘要</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
+                      摘要
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
                       作成日時
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap", color: "#64748b", fontWeight: 700 }}>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "#64748b",
+                        fontWeight: 700,
+                      }}
+                    >
                       更新日時
                     </TableCell>
                     <TableCell />
@@ -226,7 +296,7 @@ export default function DesktopList() {
           </Box>
         </Box>
       )}
-      <DesktopCalendarView />
+      <DesktopCalendarView buildNavigatePath={buildNavigatePath} />
     </div>
   );
 }

@@ -1,8 +1,8 @@
-import { Box, CircularProgress, LinearProgress, Stack, Typography } from "@mui/material";
-import { RouteObject } from "react-router-dom";
+import { Navigate, RouteObject } from "react-router-dom";
 
 import AdminShiftGuard from "../pages/admin/AdminShiftGuard";
 import NotFound from "../pages/NotFound";
+import { ProgressBar, Spinner } from "../shared/ui/feedback/LoadingPrimitives";
 import { createLazyRoute } from "./lazyRoute";
 
 const AdminAttendanceRoute = createLazyRoute(
@@ -116,27 +116,15 @@ const ShiftManagementRoute = createLazyRoute(
   {
     wrap: (node) => <AdminShiftGuard>{node}</AdminShiftGuard>,
     hydrateFallback: (
-      <Box
-        sx={{
-          minHeight: "60vh",
-          display: "flex",
-          flexDirection: "column",
-          bgcolor: "background.default",
-        }}
-      >
-        <LinearProgress data-testid="admin-shift-hydrate-loading" />
-        <Stack
-          sx={{ flex: 1 }}
-          alignItems="center"
-          justifyContent="center"
-          spacing={2}
-        >
-          <CircularProgress size={28} />
-          <Typography variant="body2" color="text.secondary">
+      <div className="flex min-h-[60vh] flex-col bg-surface">
+        <ProgressBar data-testid="admin-shift-hydrate-loading" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+          <Spinner />
+          <p className="text-sm font-medium text-slate-500">
             シフト画面を読み込み中です...
-          </Typography>
-        </Stack>
-      </Box>
+          </p>
+        </div>
+      </div>
     ),
   },
 );
@@ -232,8 +220,8 @@ export const adminChildRoutes: RouteObject[] = [
     lazy: AdminMasterLayoutRoute,
     children: [
       {
-        index: true,
-        lazy: JobTermRoute,
+            index: true,
+            element: <Navigate to="/admin/master/job_term" replace />,
       },
       {
         path: "job_term",

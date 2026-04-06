@@ -80,7 +80,11 @@ test.describe("スモークテスト - ページエラー検出", () => {
 
   test.describe("スタッフユーザー - ページナビゲーション", () => {
     STAFF_PAGES.forEach(({ path, name }) => {
-      test(`${name} (${path})`, async ({ page }) => {
+      test(`${name} (${path})`, async ({ page }, testInfo) => {
+        if (testInfo.project.name !== "chromium-staff") {
+          testInfo.skip();
+        }
+
         const errors = collectErrorsForPage(page);
 
         // ページへナビゲート
@@ -102,14 +106,14 @@ test.describe("スモークテスト - ページエラー検出", () => {
         expect(errors.console.length).toBe(
           0,
           `JavaScriptコンソールエラーが検出されました: ${errors.console.join(
-            ", "
-          )}`
+            ", ",
+          )}`,
         );
 
         // サーバーエラーがないことを確認
         expect(errors.network.length).toBe(
           0,
-          `サーバーエラーが検出されました: ${errors.network.join(", ")}`
+          `サーバーエラーが検出されました: ${errors.network.join(", ")}`,
         );
 
         // グローバルエラーがないことを確認
@@ -117,7 +121,7 @@ test.describe("スモークテスト - ページエラー検出", () => {
           0,
           `ページエラーが検出されました: ${errors.pageErrors
             .map((e) => e.message)
-            .join(", ")}`
+            .join(", ")}`,
         );
       });
     });
@@ -125,7 +129,11 @@ test.describe("スモークテスト - ページエラー検出", () => {
 
   test.describe("管理者ユーザー - ページナビゲーション", () => {
     ADMIN_PAGES.forEach(({ path, name }) => {
-      test(`${name} (${path})`, async ({ page }) => {
+      test(`${name} (${path})`, async ({ page }, testInfo) => {
+        if (testInfo.project.name !== "chromium-admin") {
+          testInfo.skip();
+        }
+
         const errors = collectErrorsForPage(page);
 
         // ページへナビゲート
@@ -147,14 +155,14 @@ test.describe("スモークテスト - ページエラー検出", () => {
         expect(errors.console.length).toBe(
           0,
           `JavaScriptコンソールエラーが検出されました: ${errors.console.join(
-            ", "
-          )}`
+            ", ",
+          )}`,
         );
 
         // サーバーエラーがないことを確認
         expect(errors.network.length).toBe(
           0,
-          `サーバーエラーが検出されました: ${errors.network.join(", ")}`
+          `サーバーエラーが検出されました: ${errors.network.join(", ")}`,
         );
 
         // グローバルエラーがないことを確認
@@ -162,7 +170,7 @@ test.describe("スモークテスト - ページエラー検出", () => {
           0,
           `ページエラーが検出されました: ${errors.pageErrors
             .map((e) => e.message)
-            .join(", ")}`
+            .join(", ")}`,
         );
       });
     });
@@ -177,7 +185,7 @@ test.describe("スモークテスト - ページエラー検出", () => {
       // 意図しないグローバルエラーが発生していないことを確認
       expect(errors.pageErrors.length).toBe(
         0,
-        "グローバルエラーが発生しました"
+        "グローバルエラーが発生しました",
       );
     });
   });

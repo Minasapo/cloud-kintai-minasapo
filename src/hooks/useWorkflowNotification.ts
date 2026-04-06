@@ -11,9 +11,8 @@ import { createLogger } from "@shared/lib/logger";
 import { useCallback, useContext, useEffect, useMemo } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-
-import { useLocalNotification } from "./useLocalNotification";
 
 const logger = createLogger("useWorkflowNotification");
 
@@ -35,7 +34,7 @@ export const useWorkflowNotification = (enabled = true) => {
   const { authStatus, cognitoUser } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated" && enabled;
   const { staffs } = useStaffs({ isAuthenticated });
-  const { notify, canNotify } = useLocalNotification();
+  const { notify } = useAppNotification();
 
   // 現在のスタッフIDを取得
   const currentStaffId = useMemo(() => {
@@ -135,17 +134,11 @@ export const useWorkflowNotification = (enabled = true) => {
     async (workflow: OnCreateWorkflowSubscription["onCreateWorkflow"]) => {
       logger.info("handleWorkflowCreated called:", {
         workflowId: workflow?.id,
-        canNotify,
         currentStaffId,
       });
 
       if (!workflow) {
         logger.warn("No workflow data");
-        return;
-      }
-
-      if (!canNotify) {
-        logger.warn("Cannot notify - notification permission not granted");
         return;
       }
 
@@ -171,13 +164,12 @@ export const useWorkflowNotification = (enabled = true) => {
           categoryLabel,
         });
 
-        await notify("新しい申請があります", {
-          body: `${submitterName} さんから${categoryLabel}が作成されました`,
-          tag: `workflow-${workflow.id}`,
-          mode: "await-interaction",
-          priority: "high",
-          requireInteraction: true,
-          icon: "📋",
+        notify({
+          title: "新しい申請があります",
+          description: `${submitterName} さんから${categoryLabel}が作成されました`,
+          tone: "info",
+          dedupeKey: `workflow-${workflow.id}`,
+          autoHideMs: null,
         });
 
         logger.info("Workflow notification sent successfully:", {
@@ -190,7 +182,6 @@ export const useWorkflowNotification = (enabled = true) => {
       }
     },
     [
-      canNotify,
       currentStaffId,
       isAssignedAsApprover,
       getStaffName,

@@ -22,40 +22,34 @@ import {
   HolidayDateRangeError,
   MAX_HOLIDAY_RANGE_DAYS,
 } from "@/features/admin/holidayCalendar/lib/buildHolidayDateRange";
+import { useDialogCloseGuard } from "@/hooks/useDialogCloseGuard";
 import { CompanyHolidayCalendarMessage } from "@/shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@/shared/lib/message/Message";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 type Inputs = {
   startDate: string;
   endDate: string;
   name: string;
 };
-
 const defaultValues: Inputs = {
   startDate: "",
   endDate: "",
   name: "",
 };
-
 export default function AddCompanyHolidayCalendar({
   createCompanyHolidayCalendar,
   bulkCreateCompanyHolidayCalendar,
 }: {
   createCompanyHolidayCalendar: (
-    input: CreateCompanyHolidayCalendarInput
+    input: CreateCompanyHolidayCalendarInput,
   ) => Promise<CompanyHolidayCalendar>;
   bulkCreateCompanyHolidayCalendar: (
-    inputs: CreateCompanyHolidayCalendarInput[]
+    inputs: CreateCompanyHolidayCalendarInput[],
   ) => Promise<CompanyHolidayCalendar[]>;
 }) {
   const dispatch = useAppDispatchV2();
-
   const [open, setOpen] = useState(false);
-
   const {
     register,
     control,
@@ -67,53 +61,63 @@ export default function AddCompanyHolidayCalendar({
     mode: "onChange",
     defaultValues,
   });
-
+  const { dialog, requestClose, closeWithoutGuard } = useDialogCloseGuard({
+    isDirty,
+    isBusy: isSubmitting,
+    onClose: () => {
+      reset(defaultValues);
+      setOpen(false);
+    },
+  });
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const startDateValue = watch("startDate");
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const onSubmit = async ({ startDate, endDate, name }: Inputs) => {
     const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
     const isRangeSubmission = Boolean(endDate);
-
     try {
       if (isRangeSubmission) {
         const range = buildHolidayDateRange(startDate, endDate);
         const inputs = range.map((holidayDate) => ({ holidayDate, name }));
         await bulkCreateCompanyHolidayCalendar(inputs);
-        const successMessage = `${companyHolidayCalendarMessage.getCategoryName()}を${
-          range.length
-        }件作成しました`;
-        dispatch(setSnackbarSuccess(successMessage));
+        const successMessage = `${companyHolidayCalendarMessage.getCategoryName()}を${range.length}件作成しました`;
+        dispatch(
+          pushNotification({
+            tone: "success",
+            message: successMessage,
+          }),
+        );
       } else {
         const [holidayDate] = buildHolidayDateRange(startDate);
         await createCompanyHolidayCalendar({ holidayDate, name });
         dispatch(
-          setSnackbarSuccess(
-            companyHolidayCalendarMessage.create(MessageStatus.SUCCESS)
-          )
+          pushNotification({
+            tone: "success",
+            message: companyHolidayCalendarMessage.create(
+              MessageStatus.SUCCESS,
+            ),
+          }),
         );
       }
-
       reset(defaultValues);
-      setOpen(false);
+      closeWithoutGuard();
     } catch (error) {
       if (error instanceof HolidayDateRangeError) {
-        dispatch(setSnackbarError(error.message));
+        dispatch(
+          pushNotification({
+            tone: "error",
+            message: error.message,
+          }),
+        );
         return;
       }
-
       dispatch(
-        setSnackbarError(
-          companyHolidayCalendarMessage.create(MessageStatus.ERROR)
-        )
+        pushNotification({
+          tone: "error",
+          message: companyHolidayCalendarMessage.create(MessageStatus.ERROR),
+        }),
       );
     }
   };
-
   return (
     <>
       <Button
@@ -126,13 +130,8 @@ export default function AddCompanyHolidayCalendar({
       >
         休日を追加
       </Button>
-      <Dialog
-        open={open}
-        onClose={() => {
-          reset(defaultValues);
-          handleClose();
-        }}
-      >
+      {dialog}
+      <Dialog open={open} onClose={requestClose}>
         <DialogTitle>会社休日を追加</DialogTitle>
         <DialogContent>
           <Stack spacing={2}>
@@ -156,7 +155,7 @@ export default function AddCompanyHolidayCalendar({
                     value={value ? dayjs(value) : null}
                     onChange={(date) =>
                       onChange(
-                        date ? date.format(AttendanceDate.DataFormat) : ""
+                        date ? date.format(AttendanceDate.DataFormat) : "",
                       )
                     }
                     slotProps={{
@@ -181,30 +180,24 @@ export default function AddCompanyHolidayCalendar({
                   if (!value) {
                     return true;
                   }
-
                   if (!startDateValue) {
                     return "開始日を先に入力してください。";
                   }
-
                   const start = dayjs(
                     startDateValue,
                     AttendanceDate.DataFormat,
-                    true
+                    true,
                   );
                   const end = dayjs(value, AttendanceDate.DataFormat, true);
-
                   if (!start.isValid()) {
                     return "開始日はYYYY-MM-DD形式で入力してください。";
                   }
-
                   if (!end.isValid()) {
                     return "終了日はYYYY-MM-DD形式で入力してください。";
                   }
-
                   if (end.isBefore(start)) {
                     return "終了日は開始日以降の日付を指定してください。";
                   }
-
                   return true;
                 },
               }}
@@ -218,7 +211,7 @@ export default function AddCompanyHolidayCalendar({
                     value={value ? dayjs(value) : null}
                     onChange={(date) =>
                       onChange(
-                        date ? date.format(AttendanceDate.DataFormat) : ""
+                        date ? date.format(AttendanceDate.DataFormat) : "",
                       )
                     }
                     slotProps={{
@@ -244,14 +237,7 @@ export default function AddCompanyHolidayCalendar({
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => {
-              reset(defaultValues);
-              handleClose();
-            }}
-          >
-            キャンセル
-          </Button>
+          <Button onClick={requestClose}>キャンセル</Button>
           <Button
             disabled={!isValid || !isDirty || isSubmitting}
             onClick={handleSubmit(onSubmit)}

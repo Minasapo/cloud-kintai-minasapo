@@ -1,13 +1,15 @@
 import AttendanceEditor from "@features/attendance/edit/ui/AttendanceEditor";
 import { useSearchParams } from "react-router-dom";
 
+import { PageContent } from "@/shared/ui/layout";
+
 export default function AdminAttendanceEditor() {
   const [searchParams] = useSearchParams();
   const readOnly = searchParams.get("readOnly") === "true";
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 pt-1 sm:px-6">
+    <PageContent width="wide" className="pt-1">
       <AttendanceEditor readOnly={readOnly} />
-    </div>
+    </PageContent>
   );
 }

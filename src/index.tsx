@@ -10,7 +10,6 @@ import { RouterProvider } from "react-router-dom";
 
 import AppRootProviders from "@/app/providers/AppRootProviders";
 import { bootstrapDesignSystem } from "@/shared/designSystem";
-import RouterFallback from "@/shared/ui/feedback/RouterFallback";
 
 import config from "./aws-exports";
 import reportWebVitals from "./reportWebVitals";
@@ -30,7 +29,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <AppRootProviders>
-      <RouterProvider router={router} fallbackElement={<RouterFallback />} />
+      <RouterProvider router={router} />
     </AppRootProviders>
   </React.StrictMode>,
 );

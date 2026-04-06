@@ -2,6 +2,7 @@ import { listStaff } from "@shared/api/graphql/documents/queries";
 import { ListStaffQuery, Staff } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 
+import { normalizeAttendanceManagementEnabled } from "@/entities/staff/lib/attendanceManagement";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export default async function fetchStaffs() {
@@ -27,9 +28,9 @@ export default async function fetchStaffs() {
     }
 
     staffs.push(
-      ...response.data.listStaff.items.filter(
-        (item): item is NonNullable<typeof item> => !!item,
-      ),
+      ...response.data.listStaff.items
+        .filter((item): item is NonNullable<typeof item> => !!item)
+        .map(normalizeAttendanceManagementEnabled),
     );
 
     nextToken = response.data.listStaff.nextToken ?? null;

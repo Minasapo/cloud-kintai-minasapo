@@ -1154,6 +1154,72 @@ export const onDeleteShiftRequest = /* GraphQL */ `subscription OnDeleteShiftReq
   APITypes.OnDeleteShiftRequestSubscriptionVariables,
   APITypes.OnDeleteShiftRequestSubscription
 >;
+export const onCreateShiftEditLock = /* GraphQL */ `subscription OnCreateShiftEditLock(
+  $filter: ModelSubscriptionShiftEditLockFilterInput
+) {
+  onCreateShiftEditLock(filter: $filter) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateShiftEditLockSubscriptionVariables,
+  APITypes.OnCreateShiftEditLockSubscription
+>;
+export const onUpdateShiftEditLock = /* GraphQL */ `subscription OnUpdateShiftEditLock(
+  $filter: ModelSubscriptionShiftEditLockFilterInput
+) {
+  onUpdateShiftEditLock(filter: $filter) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateShiftEditLockSubscriptionVariables,
+  APITypes.OnUpdateShiftEditLockSubscription
+>;
+export const onDeleteShiftEditLock = /* GraphQL */ `subscription OnDeleteShiftEditLock(
+  $filter: ModelSubscriptionShiftEditLockFilterInput
+) {
+  onDeleteShiftEditLock(filter: $filter) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteShiftEditLockSubscriptionVariables,
+  APITypes.OnDeleteShiftEditLockSubscription
+>;
 export const onCreateShiftPlanYear = /* GraphQL */ `subscription OnCreateShiftPlanYear(
   $filter: ModelSubscriptionShiftPlanYearFilterInput
 ) {
@@ -1523,10 +1589,16 @@ export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperatio
   onCreateOperationLog(filter: $filter) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1537,6 +1609,7 @@ export const onCreateOperationLog = /* GraphQL */ `subscription OnCreateOperatio
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1553,10 +1626,16 @@ export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperatio
   onUpdateOperationLog(filter: $filter) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1567,6 +1646,7 @@ export const onUpdateOperationLog = /* GraphQL */ `subscription OnUpdateOperatio
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1583,10 +1663,16 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
   onDeleteOperationLog(filter: $filter) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1597,6 +1683,7 @@ export const onDeleteOperationLog = /* GraphQL */ `subscription OnDeleteOperatio
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt

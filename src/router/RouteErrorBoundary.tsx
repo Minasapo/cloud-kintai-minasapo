@@ -1,4 +1,3 @@
-import { Alert, Container, Stack, Typography } from "@mui/material";
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
 
 import NotFound from "@/pages/NotFound";
@@ -15,29 +14,25 @@ export default function RouteErrorBoundary() {
   }
 
   return (
-    <Container
-      maxWidth="lg"
-      disableGutters
-      className="pt-6"
+    <div
+      className="mx-auto min-h-[40vh] w-full max-w-5xl px-4 pt-6 sm:px-6"
       style={{ paddingTop: PAGE_PADDING_TOP }}
     >
-      <Stack
-        direction="column"
-        spacing={0}
-        className="min-h-[40vh]"
-        style={{ gap: PAGE_SECTION_GAP }}
-      >
-        <Typography variant="h4" component="h1">
+      <div className="flex flex-col" style={{ gap: PAGE_SECTION_GAP }}>
+        <h1 className="m-0 text-3xl font-bold tracking-[-0.03em] text-slate-950">
           ページの表示中に問題が発生しました
-        </Typography>
-        <Alert severity="error">
+        </h1>
+        <div
+          role="alert"
+          className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-900"
+        >
           {isRouteErrorResponse(error)
             ? error.data || `${error.status} ${error.statusText}`
             : error instanceof Error
               ? error.message
               : "予期しないエラーが発生しました。"}
-        </Alert>
-      </Stack>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -6,13 +6,13 @@ import {
 import {
   Autocomplete,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   FormControlLabel,
   LinearProgress,
   Radio,
   RadioGroup,
-  Switch,
   Tab,
   Tabs,
   TextField,
@@ -36,10 +36,8 @@ import {
   StaffNameTableCell,
   StaffRoleTableCell,
 } from "@/features/admin/staff/ui/editor";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 type Inputs = {
   staffId?: string | null;
@@ -60,23 +58,19 @@ type Inputs = {
   approverMultipleMode?: ApproverMultipleMode | null;
   developer?: boolean;
 };
-
 type AutocompleteOption = {
   value: string;
   label: string;
   description?: string;
 };
-
 type ExtendedStaff = StaffType & {
   workType?: string;
   developer?: boolean;
   attendanceManagementEnabled?: boolean | null;
 };
-
 const LABEL_CELL_CLASS =
   "w-[220px] min-w-[180px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900";
 const VALUE_CELL_CLASS = "border-b border-slate-200 px-4 py-3 align-middle";
-
 export default function AdminStaffEditor() {
   const { staffId } = useParams();
   const dispatch = useAppDispatchV2();
@@ -89,7 +83,6 @@ export default function AdminStaffEditor() {
     error: staffError,
     updateStaff,
   } = useStaffs({ isAuthenticated });
-
   const {
     register,
     control,
@@ -97,6 +90,7 @@ export default function AdminStaffEditor() {
     watch,
     getValues,
     handleSubmit,
+    reset,
     formState: { isValid, isDirty, isSubmitting },
   } = useForm<Inputs>({
     mode: "onChange",
@@ -106,17 +100,17 @@ export default function AdminStaffEditor() {
       attendanceManagementEnabled: true,
     },
   });
-
   const [tabIndex, setTabIndex] = useState(0);
   const [saving, setSaving] = useState(false);
-
+  const { dialog } = usePageLeaveGuard({
+    isDirty,
+    isBusy: saving || isSubmitting,
+  });
   useEffect(() => {
     if (!staffId) return;
     const staff = staffs.find((s) => s.cognitoUserId === staffId);
     if (!staff) return;
-
     const extendedStaff = staff as ExtendedStaff;
-
     setValue("staffId", staff.cognitoUserId ?? null);
     setValue("internalId", staff.id ?? null);
     setValue("familyName", staff.familyName ?? null);
@@ -134,7 +128,6 @@ export default function AdminStaffEditor() {
     setValue("role", staff.role ?? null);
     setValue("developer", extendedStaff.developer ?? false);
   }, [staffId, staffs, setValue]);
-
   const shiftGroupOptions = useMemo(
     () =>
       getShiftGroups().map((group) => ({
@@ -144,23 +137,30 @@ export default function AdminStaffEditor() {
       })),
     [getShiftGroups],
   );
-
   if (staffLoading) return <LinearProgress />;
   if (staffError) {
-    dispatch(setSnackbarError(MESSAGE_CODE.E05001));
+    dispatch(
+      pushNotification({
+        tone: "error",
+        message: MESSAGE_CODE.E05001,
+      }),
+    );
     return null;
   }
-
   const onSubmit = async (data: Inputs) => {
     if (!staffId) return;
     setSaving(true);
     try {
       const staff = staffs.find((s) => s.cognitoUserId === staffId);
       if (!staff) {
-        dispatch(setSnackbarError("スタッフが見つかりません"));
+        dispatch(
+          pushNotification({
+            tone: "error",
+            message: "スタッフが見つかりません",
+          }),
+        );
         return;
       }
-
       type PayloadType = {
         id: string;
         mailAddress: string | null | undefined;
@@ -177,7 +177,6 @@ export default function AdminStaffEditor() {
         approverMultipleMode?: ApproverMultipleMode | null;
         developer?: boolean;
       };
-
       const payload: PayloadType = {
         id: staff.id,
         mailAddress: data.mailAddress,
@@ -190,11 +189,9 @@ export default function AdminStaffEditor() {
         shiftGroup: data.shiftGroup ?? null,
         attendanceManagementEnabled: data.attendanceManagementEnabled ?? true,
       };
-
       const approverSetting = watch("approverSetting");
       const approverMultiple = watch("approverMultiple") ?? [];
       const approverMultipleMode = watch("approverMultipleMode");
-
       if (approverSetting === ApproverSettingMode.SINGLE) {
         payload.approverSingle = watch("approverSingle") as string | null;
       }
@@ -203,22 +200,31 @@ export default function AdminStaffEditor() {
         payload.approverMultipleMode =
           approverMultipleMode as ApproverMultipleMode | null;
       }
-
       if (typeof data.developer !== "undefined") {
         payload.developer = data.developer;
       }
-
       await updateStaff(payload);
-      dispatch(setSnackbarSuccess("保存しました"));
+      reset(data);
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: "保存しました",
+        }),
+      );
     } catch {
-      dispatch(setSnackbarError(MESSAGE_CODE.E05002));
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E05002,
+        }),
+      );
     } finally {
       setSaving(false);
     }
   };
-
   return (
-    <div className="mx-auto h-full w-full max-w-[1280px] px-2 pb-3 pt-2 sm:px-4 md:px-6">
+    <div className="h-full w-full px-2 pb-3 pt-2 sm:px-4 md:px-6">
+      {dialog}
       <div className="space-y-2.5">
         <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
@@ -298,11 +304,11 @@ export default function AdminStaffEditor() {
                           name="owner"
                           control={control}
                           render={({ field }) => (
-                            <Switch
-                              checked={field.value}
-                              onChange={() => {
-                                setValue("owner", !field.value);
-                                field.onChange(!field.value);
+                            <Checkbox
+                              checked={Boolean(field.value)}
+                              onChange={(e) => {
+                                setValue("owner", e.target.checked);
+                                field.onChange(e.target.checked);
                               }}
                             />
                           )}
@@ -345,7 +351,7 @@ export default function AdminStaffEditor() {
                         control={control}
                         render={({ field }) => (
                           <div className="space-y-1">
-                            <Switch
+                            <Checkbox
                               checked={field.value ?? true}
                               onChange={(e) => field.onChange(e.target.checked)}
                             />
@@ -488,14 +494,14 @@ export default function AdminStaffEditor() {
                       name="developer"
                       control={control}
                       render={({ field }) => (
-                        <Switch
+                        <Checkbox
                           data-testid="developer-flag-checkbox"
                           checked={Boolean(field.value)}
-                          onChange={() => {
-                            setValue("developer", !field.value, {
+                          onChange={(e) => {
+                            setValue("developer", e.target.checked, {
                               shouldDirty: true,
                             });
-                            field.onChange(!field.value);
+                            field.onChange(e.target.checked);
                           }}
                         />
                       )}
@@ -526,7 +532,6 @@ export default function AdminStaffEditor() {
     </div>
   );
 }
-
 function ApproverSettingTableRows({
   control,
   watch,
@@ -556,16 +561,13 @@ function ApproverSettingTableRows({
         description: staff.mailAddress ?? "",
       }));
   }, [staffs, currentCognitoUserId]);
-
   const approverSetting = watch("approverSetting");
   const approverMultiple = watch("approverMultiple") ?? [];
   const approverMultipleMode = watch("approverMultipleMode");
-
   const selectedMultipleOptions = approverMultiple
     .filter((value): value is string => Boolean(value))
     .map((value) => adminOptions.find((option) => option.value === value))
     .filter((o): o is AutocompleteOption => Boolean(o));
-
   return (
     <>
       {approverSetting === ApproverSettingMode.SINGLE && (
@@ -731,12 +733,17 @@ function ApproverSettingTableRows({
                     </p>
                   ) : (
                     selectedMultipleOptions.map((option, index) => (
-                      <div key={option.value} className="flex items-center gap-2">
+                      <div
+                        key={option.value}
+                        className="flex items-center gap-2"
+                      >
                         <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-slate-300 bg-slate-50 px-1 text-xs font-semibold text-slate-700">
                           {index + 1}
                         </span>
                         <div>
-                          <p className="text-sm text-slate-900">{option.label}</p>
+                          <p className="text-sm text-slate-900">
+                            {option.label}
+                          </p>
                           <p className="text-xs text-slate-500">
                             {option.description}
                           </p>
@@ -756,7 +763,6 @@ function ApproverSettingTableRows({
     </>
   );
 }
-
 function MailAddressTableCell({
   register,
 }: {

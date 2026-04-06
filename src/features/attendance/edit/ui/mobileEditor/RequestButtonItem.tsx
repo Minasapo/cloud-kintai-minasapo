@@ -1,6 +1,7 @@
 import { UseFormHandleSubmit } from "react-hook-form";
 
 import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
+import { AppButton } from "@/shared/ui/button";
 
 export function RequestButtonItem({
   handleSubmit,
@@ -16,19 +17,13 @@ export function RequestButtonItem({
   isSubmitting: boolean;
 }) {
   return (
-    <button
-      type="button"
+    <AppButton
       onClick={handleSubmit(onSubmit)}
-      // disabled={!isDirty || !isValid || isSubmitting}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-[12px] border border-emerald-700/55 bg-[#19b985] px-7 py-3 text-base font-medium text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.12),0_12px_24px_-18px_rgba(5,150,105,0.55)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none"
+      loading={isSubmitting}
+      fullWidth
+      size="lg"
     >
-      {isSubmitting ? (
-        <span
-          className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/80 border-t-transparent"
-          aria-hidden="true"
-        />
-      ) : null}
       申請
-    </button>
+    </AppButton>
   );
 }
