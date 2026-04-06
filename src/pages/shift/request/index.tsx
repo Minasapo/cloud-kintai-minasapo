@@ -5,6 +5,7 @@ import Page from "@shared/ui/page/Page";
 
 import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborative";
+import ShiftAccessGuard from "@/pages/shift/ShiftAccessGuard";
 import { PageSection } from "@/shared/ui/layout";
 
 export const resolveShiftRequestMode = (
@@ -18,7 +19,7 @@ export const resolveShiftRequestMode = (
   return defaultMode;
 };
 
-export default function ShiftRequestPage() {
+function ShiftRequestContent() {
   const {
     config,
     getShiftCollaborativeEnabled,
@@ -51,5 +52,13 @@ export default function ShiftRequestPage() {
         <ShiftRequestForm />
       </PageSection>
     </Page>
+  );
+}
+
+export default function ShiftRequestPage() {
+  return (
+    <ShiftAccessGuard title="希望シフト">
+      <ShiftRequestContent />
+    </ShiftAccessGuard>
   );
 }

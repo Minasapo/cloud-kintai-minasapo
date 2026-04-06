@@ -24,6 +24,7 @@ description: garaku-frontend の開発に必要なセットアップ、アーキ
 - [勤怠管理対象フラグ仕様](./attendance-management-enabled.md) — `attendanceManagementEnabled` フラグの目的・判定ロジック・影響範囲
 - [打刻エラー一覧の表示仕様](./attendance-error-list-display.md) — エラー一覧の表示条件・対象期間・デスクトップ/モバイル差異
 - [勤怠ステータス判定ロジック](./attendance-status-determination.md) — `getStatus()` の全優先度テーブルと分岐条件
+- [シフト可視性の勤務形態ルール](./shift-visibility-by-work-type.md) — スタッフ向けシフト導線を `workType` で制御する仕様
 
 ## ドキュメント運用
 

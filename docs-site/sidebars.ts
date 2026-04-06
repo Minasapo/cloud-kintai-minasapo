@@ -16,6 +16,7 @@ const sidebars: SidebarsConfig = {
   mainSidebar: [
     "intro",
     "terminology",
+    "work-type-overview",
     "work-status-overview",
     {
       type: "category",
@@ -89,6 +90,7 @@ const sidebars: SidebarsConfig = {
         "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",
         "developer/attendance-status-determination",
+        "developer/shift-visibility-by-work-type",
         "developer/break-time-specification",
         "developer/close-date-system",
         "developer/data-fetch-periods",

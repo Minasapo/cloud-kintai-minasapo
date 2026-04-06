@@ -12,6 +12,7 @@ sidebar_position: 1
 
 ## 対象者を選んでください
 
+- [勤務形態の見方](./work-type-overview.md)
 - [勤務ステータスの見方](./work-status-overview.md)
 - [スタッフ向けガイド](./staff/overview.md)
 - [管理者向けガイド](./admin/overview.md)

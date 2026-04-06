@@ -3,6 +3,7 @@ import { LinearProgress } from "@mui/material";
 import Page from "@shared/ui/page/Page";
 import { Navigate } from "react-router-dom";
 
+import ShiftAccessGuard from "@/pages/shift/ShiftAccessGuard";
 import { PageSection } from "@/shared/ui/layout";
 
 import { resolveShiftRequestMode } from "../request";
@@ -14,7 +15,7 @@ export const shouldRedirectFromCollaborativeRoute = (
   return mode !== "collaborative";
 };
 
-export default function ShiftCollaborativeRoutePage() {
+function ShiftCollaborativeRouteContent() {
   const {
     config,
     getShiftCollaborativeEnabled,
@@ -42,4 +43,12 @@ export default function ShiftCollaborativeRoutePage() {
   }
 
   return <ShiftCollaborativePage />;
+}
+
+export default function ShiftCollaborativeRoutePage() {
+  return (
+    <ShiftAccessGuard title="希望シフト">
+      <ShiftCollaborativeRouteContent />
+    </ShiftAccessGuard>
+  );
 }

@@ -1,4 +1,8 @@
-import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { isShiftWorkType } from "@entities/staff/lib/workTypeOptions";
+import {
+  StaffRole,
+  useStaffs,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -35,11 +39,24 @@ export default function NavigationMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isOpen, closeDrawer, openDrawer } = useMobileDrawer();
-  const { isCognitoUserRole, cognitoUser } = useContext(AuthContext);
+  const { isCognitoUserRole, cognitoUser, authStatus } =
+    useContext(AuthContext);
   const { getOfficeMode, getAttendanceStatisticsEnabled } =
     useContext(AppConfigContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
 
   const pathName = location.pathname === "/" ? "/register" : location.pathname;
+
+  const currentStaff = (() => {
+    if (!cognitoUser?.id) {
+      return null;
+    }
+
+    return staffs.find((staff) => staff.cognitoUserId === cognitoUser.id) ?? null;
+  })();
+
+  const canAccessShiftMenu = isShiftWorkType(currentStaff?.workType);
 
   const menuList = useMemo<DesktopMenuItem[]>(
     () => [
@@ -78,6 +95,9 @@ export default function NavigationMenu() {
       if (menu.href === "/attendance/stats") {
         return attendanceStatisticsEnabled;
       }
+      if (menu.href === "/shift") {
+        return canAccessShiftMenu;
+      }
       return true;
     });
 
@@ -98,6 +118,7 @@ export default function NavigationMenu() {
     return [];
   }, [
     attendanceStatisticsEnabled,
+    canAccessShiftMenu,
     isAdminUser,
     isCognitoUserRole,
     isMailVerified,
