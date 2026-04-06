@@ -62,7 +62,7 @@ flowchart TD
 
 ## 代表的な状態変化
 
-内部実装の全条件は上のフロー図が正本です。以下は `AttendanceStatus` の見え方を、代表的な変化に絞って整理した図です。
+内部実装の全条件は、上のフロー図を基準とします。以下は `AttendanceStatus` の見え方を、代表的な変化に絞って整理した図です。
 
 ```mermaid
 stateDiagram-v2
