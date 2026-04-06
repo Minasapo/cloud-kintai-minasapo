@@ -15,6 +15,8 @@ import type {
   UpdateAppConfigMutation,
 } from "@shared/api/graphql/types";
 
+import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
+
 export type UpdateAppConfigPayload = {
   input: UpdateAppConfigInput;
   condition?: ModelAppConfigConditionInput | null;
@@ -84,12 +86,39 @@ export const appConfigApi = createApi({
           return { error: { message: "Failed to create app config" } };
         }
 
+        await logOperationEvent({
+          action: "app_config.create",
+          resource: "app_config",
+          resourceId: created.id,
+          before: null,
+          after: created,
+          details: {
+            name: created.name,
+          },
+        });
+
         return { data: created };
       },
       invalidatesTags: [{ type: "AppConfig", id: "LIST" }],
     }),
     updateAppConfig: builder.mutation<AppConfig, UpdateAppConfigPayload>({
       async queryFn({ input, condition }, _queryApi, _extraOptions, baseQuery) {
+        const currentResult = await baseQuery({
+          document: listAppConfigs,
+          variables: {
+            filter: { name: { eq: input.name ?? "default" } },
+          },
+          authMode: "apiKey",
+        });
+
+        if (currentResult.error) {
+          return { error: currentResult.error };
+        }
+
+        const currentData = currentResult.data as ListAppConfigsQuery | null;
+        const current =
+          currentData?.listAppConfigs?.items?.filter(nonNullable)[0];
+
         const result = await baseQuery({
           document: updateAppConfig,
           variables: {
@@ -109,6 +138,17 @@ export const appConfigApi = createApi({
         if (!updated) {
           return { error: { message: "Failed to update app config" } };
         }
+
+        await logOperationEvent({
+          action: "app_config.update",
+          resource: "app_config",
+          resourceId: updated.id,
+          before: current ?? null,
+          after: updated,
+          details: {
+            name: updated.name,
+          },
+        });
 
         return { data: updated };
       },

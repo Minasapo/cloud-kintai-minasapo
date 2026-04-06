@@ -2,7 +2,7 @@ import "./styles.scss";
 
 import Page from "@shared/ui/page/Page";
 
-import { PageSection } from "@/shared/ui/layout";
+import { PageContent, PageSection } from "@/shared/ui/layout";
 
 import WorkflowAuthLoadingState from "./components/WorkflowAuthLoadingState";
 import WorkflowHero from "./components/WorkflowHero";
@@ -23,25 +23,27 @@ function WorkflowPageContent() {
   }
 
   return (
-    <Page title="ワークフロー" maxWidth="xl" showDefaultHeader={false}>
-      <PageSection
-        layoutVariant="dashboard"
-        variant="plain"
-        className="workflow-page-section"
-      >
-        <div className="workflow-page-container">
-          <WorkflowHero />
-          {currentStaffId ? (
-            <>
-              <WorkflowSummaryCards />
-              {error && <InfoCard tone="error">{error}</InfoCard>}
-              <WorkflowListContent />
-            </>
-          ) : (
-            <WorkflowNoStaffState />
-          )}
-        </div>
-      </PageSection>
+    <Page title="ワークフロー" width="full" showDefaultHeader={false}>
+      <PageContent width="content">
+        <PageSection
+          layoutVariant="dashboard"
+          variant="plain"
+          className="workflow-page-section"
+        >
+          <div className="workflow-page-container">
+            <WorkflowHero />
+            {currentStaffId ? (
+              <>
+                <WorkflowSummaryCards />
+                {error && <InfoCard tone="error">{error}</InfoCard>}
+                <WorkflowListContent />
+              </>
+            ) : (
+              <WorkflowNoStaffState />
+            )}
+          </div>
+        </PageSection>
+      </PageContent>
     </Page>
   );
 }

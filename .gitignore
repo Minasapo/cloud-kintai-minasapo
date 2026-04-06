@@ -93,3 +93,4 @@ amplifytools.xcconfig
 **.sample
 #amplify-do-not-edit-end
 .claude/settings.local.json
+.claude/settings.json

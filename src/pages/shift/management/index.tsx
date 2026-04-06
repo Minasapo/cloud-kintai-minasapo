@@ -18,7 +18,7 @@ export default function ShiftManagementPage() {
 
   if (isConfigLoading && !config) {
     return (
-      <Page title="シフト管理" maxWidth={false} showDefaultHeader={false}>
+      <Page title="シフト管理" width="full" showDefaultHeader={false}>
         <PageSection variant="plain" layoutVariant="detail" sx={{ gap: 0 }}>
           <LinearProgress data-testid="shift-management-mode-loading" />
           <Stack

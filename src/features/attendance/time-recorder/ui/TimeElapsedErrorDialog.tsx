@@ -30,7 +30,7 @@ export default function TimeElapsedErrorDialog({
       data-testid="time-elapsed-error-dialog"
       className={`${open ? "flex" : "hidden"} fixed inset-0 z-50 items-center justify-center bg-slate-950/50 p-4`}
     >
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-[4px] bg-white p-6 shadow-xl">
         <h2
           id="alert-dialog-title"
           className="m-0 text-lg font-semibold text-slate-900"
@@ -56,7 +56,7 @@ export default function TimeElapsedErrorDialog({
             type="button"
             onClick={handleClose}
             data-testid="time-elapsed-error-dialog-later-btn"
-            className="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-[4px] border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
           >
             あとで
           </button>
@@ -64,7 +64,7 @@ export default function TimeElapsedErrorDialog({
             to="/attendance/list"
             onClick={handleClose}
             data-testid="time-elapsed-error-dialog-confirm-btn"
-            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white no-underline transition-colors hover:bg-emerald-700 hover:no-underline"
+            className="inline-flex items-center justify-center rounded-[4px] bg-emerald-600 px-4 py-2 text-sm font-medium text-white no-underline transition-colors hover:bg-emerald-700 hover:no-underline"
           >
             確認する
           </RouterLink>

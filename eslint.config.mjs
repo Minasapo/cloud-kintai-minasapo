@@ -168,4 +168,52 @@ export default [
       ],
     },
   }),
+  {
+    files: ["src/**/*.{ts,tsx,js,jsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@mui/material",
+              importNames: ["Button", "IconButton"],
+              message:
+                "Use AppButton/AppIconButton from @/shared/ui/button instead.",
+            },
+            {
+              name: "@mui/material/Button",
+              message: "Use AppButton from @/shared/ui/button instead.",
+            },
+            {
+              name: "@mui/material/IconButton",
+              message: "Use AppIconButton from @/shared/ui/button instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: [
+      "src/features/admin/holidayCalendar/**/*.{ts,tsx,js,jsx}",
+      "src/features/admin/staff/ui/actions/CreateStaffDialog.tsx",
+      "src/features/admin/staff/ui/editor/AdminStaffEditor.tsx",
+      "src/features/admin/staffAttendanceList/**/*.{ts,tsx,js,jsx}",
+      "src/features/attendance/daily-list/**/*.{ts,tsx,js,jsx}",
+      "src/features/attendance/edit/ui/ChangeRequestDialog/**/*.{ts,tsx,js,jsx}",
+      "src/features/attendance/list/**/*.{ts,tsx,js,jsx}",
+      "src/features/attendance/statistics/**/*.{ts,tsx,js,jsx}",
+      "src/features/shift/collaborative/components/**/*.{ts,tsx,js,jsx}",
+      "src/features/shift/management/**/*.{ts,tsx,js,jsx}",
+      "src/features/shift/request-form/**/*.{ts,tsx,js,jsx}",
+      "src/features/splitView/**/*.{ts,tsx,js,jsx}",
+      "src/pages/admin/AdminLayout.tsx",
+      "src/pages/preview/**/*.{ts,tsx,js,jsx}",
+      "src/pages/shift/collaborative/ShiftCollaborativePrototype.tsx",
+    ],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
 ];

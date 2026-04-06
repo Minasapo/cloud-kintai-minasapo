@@ -8,7 +8,6 @@ import { SplitViewProvider } from "@/features/splitView/context/SplitViewProvide
 import { AppConfigProvider } from "./app-config/AppConfigProvider";
 import { AppRuntimeProvider } from "./AppRuntimeProvider";
 import { SessionProvider } from "./session/SessionProvider";
-import { ThemeProviderBridge } from "./theme/ThemeProviderBridge";
 
 type AppRootProvidersProps = {
   children: ReactNode;
@@ -21,9 +20,7 @@ export default function AppRootProviders({ children }: AppRootProvidersProps) {
         <SessionProvider>
           <AppConfigProvider>
             <AppRuntimeProvider>
-              <ThemeProviderBridge>
-                <SplitViewProvider>{children}</SplitViewProvider>
-              </ThemeProviderBridge>
+              <SplitViewProvider>{children}</SplitViewProvider>
             </AppRuntimeProvider>
           </AppConfigProvider>
         </SessionProvider>

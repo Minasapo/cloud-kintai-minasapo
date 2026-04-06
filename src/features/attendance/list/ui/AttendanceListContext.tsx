@@ -9,6 +9,8 @@ import { Dayjs } from "dayjs";
 import { createContext, ReactNode, useContext } from "react";
 import { NavigateFunction } from "react-router-dom";
 
+import { DateRange } from "./attendanceListUtils";
+
 type AttendanceListContextValue = {
   attendances: Attendance[];
   staff: Staff | null | undefined;
@@ -19,6 +21,7 @@ type AttendanceListContextValue = {
   closeDatesLoading: boolean;
   closeDatesError?: Error | null;
   currentMonth: Dayjs;
+  effectiveDateRange: DateRange;
   onMonthChange: (nextMonth: Dayjs) => void;
 };
 

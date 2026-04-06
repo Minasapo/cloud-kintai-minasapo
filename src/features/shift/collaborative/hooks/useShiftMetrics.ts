@@ -3,10 +3,15 @@ import { useCallback, useMemo } from "react";
 
 import type { ShiftState } from "../types/collaborative.types";
 
+function normalizePlannedCapacity(raw: number | undefined): number {
+  return raw === undefined || Number.isNaN(raw) ? 0 : raw;
+}
+
 export function useShiftMetrics<T extends { state: ShiftState }>(
   days: dayjs.Dayjs[],
   staffIds: string[],
-  shiftDataMap: Map<string, Map<string, T>>
+  shiftDataMap: Map<string, Map<string, T>>,
+  shiftPlanCapacities: number[] = []
 ) {
   const dailyCountsByKey = useMemo(() => {
     const counts = new Map<
@@ -39,9 +44,13 @@ export function useShiftMetrics<T extends { state: ShiftState }>(
   const calculateDailyCount = useCallback(
     (
       dayKey: string
-    ): { work: number; fixedOff: number; requestedOff: number } =>
-      dailyCountsByKey.get(dayKey) ?? { work: 0, fixedOff: 0, requestedOff: 0 },
-    [dailyCountsByKey]
+    ): { work: number; fixedOff: number; requestedOff: number; plannedCapacity: number } => {
+      const counts = dailyCountsByKey.get(dayKey) ?? { work: 0, fixedOff: 0, requestedOff: 0 };
+      const dayIndex = parseInt(dayKey, 10) - 1;
+      const plannedCapacity = normalizePlannedCapacity(shiftPlanCapacities[dayIndex]);
+      return { ...counts, plannedCapacity };
+    },
+    [dailyCountsByKey, shiftPlanCapacities]
   );
 
   const progress = useMemo(() => {
@@ -53,19 +62,20 @@ export function useShiftMetrics<T extends { state: ShiftState }>(
       const dayKey = day.format("DD");
       const count = dailyCountsByKey.get(dayKey);
       const workCount = count?.work ?? 0;
+      const plannedCapacity = normalizePlannedCapacity(shiftPlanCapacities[day.date() - 1]);
 
-      if (day.date() <= 10) {
+      if (workCount === plannedCapacity) {
         confirmedCount++;
-      } else if (workCount < 2) {
-        needsAdjustmentCount++;
       } else if (workCount === 0) {
         emptyCount++;
+      } else {
+        needsAdjustmentCount++;
       }
     });
 
     const totalDays = days.length;
-    const confirmedPercent = (confirmedCount / totalDays) * 100;
-    const adjustmentPercent = (needsAdjustmentCount / totalDays) * 100;
+    const confirmedPercent = totalDays > 0 ? (confirmedCount / totalDays) * 100 : 0;
+    const adjustmentPercent = totalDays > 0 ? (needsAdjustmentCount / totalDays) * 100 : 0;
 
     return {
       confirmedCount,
@@ -74,7 +84,7 @@ export function useShiftMetrics<T extends { state: ShiftState }>(
       adjustmentPercent,
       emptyCount,
     };
-  }, [days, dailyCountsByKey]);
+  }, [days, dailyCountsByKey, shiftPlanCapacities]);
 
   return { calculateDailyCount, progress };
 }

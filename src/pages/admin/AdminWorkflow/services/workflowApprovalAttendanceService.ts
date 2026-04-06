@@ -1,10 +1,13 @@
+import type {
+  CreateAttendanceMutationArg,
+  UpdateAttendanceMutationArg,
+} from "@entities/attendance/api/attendanceApi";
 import { AttendanceTime } from "@entities/attendance/lib/AttendanceTime";
 import { CLOCK_CORRECTION_CHECK_OUT_LABEL } from "@entities/workflow/lib/workflowLabels";
 import {
   Attendance,
   CreateAttendanceInput,
   GetWorkflowQuery,
-  UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
@@ -23,11 +26,11 @@ export type AttendanceQueryTrigger = (arg: {
 }) => { unwrap: () => Promise<Attendance | null> };
 
 export type CreateAttendanceTrigger = (
-  input: CreateAttendanceInput
+  input: CreateAttendanceMutationArg
 ) => { unwrap: () => Promise<Attendance> };
 
 export type UpdateAttendanceTrigger = (
-  input: UpdateAttendanceInput
+  input: UpdateAttendanceMutationArg
 ) => { unwrap: () => Promise<Attendance> };
 
 export class WorkflowApprovalUserError extends Error {}
@@ -133,9 +136,17 @@ export const processPaidLeaveApprovalAttendance = async ({
         rests: input.rests,
         hourlyPaidHolidayTimes: input.hourlyPaidHolidayTimes,
         revision: existingAttendance.revision,
+        logContext: {
+          action: "attendance.workflow.apply",
+        },
       }).unwrap();
     } else {
-      await createAttendance(input).unwrap();
+      await createAttendance({
+        ...input,
+        logContext: {
+          action: "attendance.workflow.apply",
+        },
+      }).unwrap();
     }
   }
 
@@ -232,7 +243,12 @@ export const processClockCorrectionApprovalAttendance = async ({
   }
 
   if (!existingAttendance) {
-    await createAttendance(createInput).unwrap();
+    await createAttendance({
+      ...createInput,
+      logContext: {
+        action: "attendance.workflow.apply",
+      },
+    }).unwrap();
     return { kind: "created" };
   }
 
@@ -257,6 +273,9 @@ export const processClockCorrectionApprovalAttendance = async ({
     hourlyPaidHolidayTimes:
       existingAttendance.hourlyPaidHolidayTimes ?? createInput.hourlyPaidHolidayTimes,
     revision: existingAttendance.revision,
+    logContext: {
+      action: "attendance.workflow.apply",
+    },
   }).unwrap();
 
   return { kind: "updated" };

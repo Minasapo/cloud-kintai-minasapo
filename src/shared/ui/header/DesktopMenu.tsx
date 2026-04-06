@@ -38,7 +38,7 @@ const DesktopMenu = ({
   );
   const MENU_ITEM_RADIUS = designTokenVar(
     "component.headerMenu.borderRadius",
-    "8px",
+    "2px",
   );
   const MENU_ITEM_FONT_WEIGHT = designTokenVar(
     "component.headerMenu.fontWeight",

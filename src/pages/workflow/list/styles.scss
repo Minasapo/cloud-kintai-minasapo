@@ -7,7 +7,7 @@
 }
 
 .workflow-page-container {
-  @apply mx-auto flex w-full max-w-[1180px] flex-col gap-4 p-4;
+  @apply flex w-full flex-col gap-4 py-4;
 }
 
 .workflow-hero {
@@ -406,4 +406,3 @@
     @apply w-full justify-center;
   }
 }
-

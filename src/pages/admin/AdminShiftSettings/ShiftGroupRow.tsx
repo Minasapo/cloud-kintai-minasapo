@@ -1,8 +1,8 @@
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import React, { useCallback } from "react";
 import type { Control } from "react-hook-form";
 import { useController, useWatch } from "react-hook-form";
 
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 
 import { SHIFT_GROUP_UI_TEXTS, SHIFT_GROUP_VALIDATION_TEXTS } from "./";
@@ -66,7 +66,7 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           onClick={handleDelete}
           type="button"
         >
-          <DeleteOutlineIcon fontSize="small" />
+          <SettingsIcon name="delete" />
         </button>
       </div>
       <RHFTextField

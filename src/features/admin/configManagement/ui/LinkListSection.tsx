@@ -1,12 +1,9 @@
-import DeleteIcon from "@mui/icons-material/Delete";
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
 import {
-  Checkbox,
-  FormControlLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
-
+  SettingsCheckbox,
+  SettingsSelect,
+  SettingsTextField,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 import { predefinedIcons } from "@/shared/config/icons";
 
 interface Link {
@@ -49,60 +46,53 @@ const LinkListSection = ({
           className="flex flex-row flex-wrap items-center gap-4"
           key={index}
         >
-          <TextField
+          <SettingsTextField
             label="ラベル"
             value={link.label}
-            onChange={(e) => onLinkChange(index, "label", e.target.value)}
-            size="small"
-            sx={{ width: 200 }}
+            onChange={(value) => onLinkChange(index, "label", value)}
+            className="w-[200px]"
           />
-          <TextField
+          <SettingsTextField
             label="URL"
             value={link.url}
-            onChange={(e) => onLinkChange(index, "url", e.target.value)}
-            size="small"
-            sx={{ minWidth: 260, width: 360, maxWidth: "100%" }}
+            onChange={(value) => onLinkChange(index, "url", value)}
+            className="min-w-[260px] w-[360px] max-w-full"
           />
-          <Select
+          <SettingsSelect
+            label="アイコン"
             value={link.icon}
-            onChange={(e) => onLinkChange(index, "icon", e.target.value)}
-            size="small"
-            sx={{ width: 200, minWidth: 160 }}
-          >
-            {predefinedIcons.map((icon) => (
-              <MenuItem key={icon.value} value={icon.value}>
-                <div className="flex flex-row items-center gap-2">
-                  {icon.component}
-                  <span>{icon.label}</span>
-                </div>
-              </MenuItem>
-            ))}
-          </Select>
+            onChange={(value) => onLinkChange(index, "icon", value)}
+            className="w-[200px] min-w-[160px]"
+            options={predefinedIcons.map((icon) => ({
+              value: icon.value,
+              label: icon.label,
+            }))}
+          />
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            {(predefinedIcons.find((icon) => icon.value === link.icon) ?? predefinedIcons[0])?.component}
+            <span className="text-sm text-slate-600">
+              {(predefinedIcons.find((icon) => icon.value === link.icon) ?? predefinedIcons[0])?.label}
+            </span>
+          </div>
           <div className="min-w-[88px]">
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={link.enabled}
-                  onChange={(e) =>
-                    onLinkChange(index, "enabled", e.target.checked)
-                  }
-                />
-              }
+            <SettingsCheckbox
+              checked={link.enabled}
+              onChange={(checked) => onLinkChange(index, "enabled", checked)}
               label="有効"
             />
           </div>
           <button
-            className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+            className="text-rose-500 hover:bg-rose-50 p-2 rounded-full transition"
             type="button"
             onClick={() => onRemoveLink(index)}
             aria-label="削除"
           >
-            <DeleteIcon />
+            <SettingsIcon name="delete" />
           </button>
         </div>
       ))}
       <button
-        className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start transition"
+        className="text-emerald-600 hover:text-emerald-700 text-sm font-medium self-start transition"
         type="button"
         onClick={onAddLink}
       >

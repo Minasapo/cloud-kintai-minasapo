@@ -1,5 +1,7 @@
 import dayjs from "dayjs";
 
+import { AppButton } from "@/shared/ui/button";
+
 import { AttendanceGetValues, AttendanceSetValue } from "../model/types";
 import { useQuickInputActions } from "../model/useQuickInputActions";
 import { useQuickInputSelection } from "../model/useQuickInputSelection";
@@ -52,9 +54,8 @@ export default function QuickInputButtons({
         <div className="mr-1 text-base font-bold text-slate-900">定型入力</div>
         <div className="flex flex-wrap gap-2">
           {actions.map((action) => (
-            <button
+            <AppButton
               key={action.key}
-              type="button"
               title={action.tooltip || ""}
               onClick={() =>
                 askConfirm(
@@ -63,10 +64,12 @@ export default function QuickInputButtons({
                 )
               }
               disabled={!!readOnly}
-              className="rounded-[14px] border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+              variant="outline"
+              tone="primary"
+              size="sm"
             >
               {action.label}
-            </button>
+            </AppButton>
           ))}
         </div>
       </div>
@@ -77,20 +80,22 @@ export default function QuickInputButtons({
             <div className="text-base font-semibold text-slate-950">確認</div>
             <p className="mt-3 text-sm leading-6 text-slate-600">{confirmLabel}</p>
             <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
+              <AppButton
                 onClick={close}
-                className="rounded-[12px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                variant="outline"
+                tone="neutral"
+                size="sm"
               >
                 キャンセル
-              </button>
-              <button
-                type="button"
+              </AppButton>
+              <AppButton
                 onClick={applySelectedAction}
-                className="rounded-[12px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600"
+                variant="solid"
+                tone="primary"
+                size="sm"
               >
                 適用
-              </button>
+              </AppButton>
             </div>
           </div>
         </div>

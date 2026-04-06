@@ -245,7 +245,7 @@ export default function AdminDailyReport() {
   const rangeEnd = Math.min((page + 1) * rowsPerPage, filteredReports.length);
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-2 pb-6 pt-4 sm:px-4 md:px-6">
+    <div className="w-full px-2 pb-6 pt-4 sm:px-4 md:px-6">
       <div className="space-y-3">
         <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">

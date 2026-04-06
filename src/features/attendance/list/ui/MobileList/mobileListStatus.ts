@@ -9,13 +9,14 @@ import dayjs, { Dayjs } from "dayjs";
 import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus } from "../../lib/attendanceStatusUtils";
+import { DateRange } from "../attendanceListUtils";
 
 type ErrorStatusCheckParams = {
   attendances: Attendance[];
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
   staff: Staff | null | undefined;
-  currentMonth: Dayjs;
+  effectiveDateRange: DateRange;
 };
 
 type DayStatusParams = {
@@ -31,17 +32,17 @@ export function hasErrorOrLateInMonth({
   holidayCalendars,
   companyHolidayCalendars,
   staff,
-  currentMonth,
+  effectiveDateRange,
 }: ErrorStatusCheckParams) {
   if (!staff) return false;
   const today = dayjs();
 
-  const monthStart = currentMonth.startOf("month");
-  const monthEnd = currentMonth.endOf("month");
+  const rangeStart = effectiveDateRange.start;
+  const rangeEnd = effectiveDateRange.end;
 
-  let current = monthStart;
+  let current = rangeStart;
 
-  while (current.isBefore(monthEnd) || current.isSame(monthEnd, "day")) {
+  while (current.isBefore(rangeEnd) || current.isSame(rangeEnd, "day")) {
     if (current.isAfter(today, "day")) {
       current = current.add(1, "day");
       continue;

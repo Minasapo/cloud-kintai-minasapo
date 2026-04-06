@@ -13,10 +13,7 @@ interface HeaderBarProps {
 }
 
 const HEADER_ACCENT = designTokenVar("component.headerBar.accent", "#0FA85E");
-const HEADER_SURFACE = designTokenVar(
-  "component.headerBar.surface",
-  "#F7FCF8",
-);
+const HEADER_SURFACE = designTokenVar("component.headerBar.surface", "#F7FCF8");
 const HEADER_BORDER = designTokenVar(
   "component.headerBar.borderColor",
   "rgba(15, 168, 94, 0.14)",
@@ -48,7 +45,7 @@ export default function HeaderBar({
 }: HeaderBarProps) {
   const hasCenterContent = Boolean(centerContent);
   const mobileNavigation = (
-    <div className="block rounded-full bg-white/70 px-1 py-0.5 text-[color:var(--header-text)] sm:px-1.5 sm:py-1 lg:hidden">
+    <div className="block rounded-[6px] bg-white/70 px-1 py-0.5 text-[color:var(--header-text)] sm:px-1.5 sm:py-1 lg:hidden">
       {navigation}
     </div>
   );
@@ -91,7 +88,7 @@ export default function HeaderBar({
       className="overflow-visible border-b border-[var(--header-border)] bg-[linear-gradient(180deg,rgba(15,168,94,0.16)_0%,rgba(236,253,245,0.92)_52%,rgba(248,250,249,0.88)_100%)]"
     >
       <div className="mx-auto w-full max-w-[var(--header-content-max-width)] px-2 py-2 sm:px-[var(--header-padding-x)] sm:py-[var(--header-padding-y)]">
-        <div className="rounded-[1.15rem] border border-[var(--header-border)] bg-[linear-gradient(135deg,var(--header-surface)_0%,#ECFDF5_52%,#FFFFFF_100%)] text-[color:var(--header-text)] shadow-[0_24px_40px_-34px_rgba(15,23,42,0.26)] sm:rounded-[1.6rem]">
+        <div className="rounded-[8px] border border-[var(--header-border)] bg-[linear-gradient(135deg,var(--header-surface)_0%,#ECFDF5_52%,#FFFFFF_100%)] text-[color:var(--header-text)] shadow-[0_24px_40px_-34px_rgba(15,23,42,0.26)] sm:rounded-[10px]">
           <div className="px-2.5 py-2 sm:px-[var(--header-inner-padding-x)] sm:py-[var(--header-inner-padding-y)]">
             <div className="mb-2 flex min-w-0 items-center justify-between gap-2 lg:hidden">
               <div className="flex min-w-0 max-w-[min(52vw,180px)] items-center overflow-hidden">
@@ -115,7 +112,7 @@ export default function HeaderBar({
                 {logo}
               </div>
 
-              <div className="hidden min-w-0 items-center justify-start rounded-full bg-white/70 px-1.5 py-1 lg:flex">
+              <div className="hidden min-w-0 items-center justify-start rounded-[6px] bg-white/70 px-1.5 py-1 lg:flex">
                 {navigation}
               </div>
 
@@ -126,8 +123,12 @@ export default function HeaderBar({
               )}
 
               <div className="flex shrink-0 flex-nowrap items-center justify-end gap-0.5 sm:gap-1 md:gap-1.5">
-                <div className="shrink-0 text-[color:var(--header-text)]">{notificationsButton}</div>
-                <div className="shrink-0 text-[color:var(--header-text)]">{externalLinks}</div>
+                <div className="shrink-0 text-[color:var(--header-text)]">
+                  {notificationsButton}
+                </div>
+                <div className="shrink-0 text-[color:var(--header-text)]">
+                  {externalLinks}
+                </div>
                 {signInOutButton}
               </div>
             </div>

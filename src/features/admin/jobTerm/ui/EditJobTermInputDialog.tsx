@@ -1,11 +1,3 @@
-import { Autocomplete, Box, Stack, TextField } from "@mui/material";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import { DatePicker } from "@mui/x-date-pickers";
 import { CloseDate, UpdateCloseDateInput } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect } from "react";
@@ -15,146 +7,89 @@ import { useAppDispatchV2 } from "@/app/hooks";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
 import { defaultValues, Inputs } from "@/features/admin/jobTerm/lib/common";
-import {
-  setSnackbarError,
-  setSnackbarSuccess,
-} from "@/shared/lib/store/snackbarSlice";
+import { useDialogCloseGuard } from "@/hooks/useDialogCloseGuard";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
+import { AppButton } from "@/shared/ui/button";
+import AppDialog from "@/shared/ui/feedback/AppDialog";
+import DateField from "@/shared/ui/form/DateField";
 
-export default function EditJobTermInputDialog({
-  targetData,
-  open,
-  onClose,
-  candidateCloseDates,
-  updateCloseDate,
-}: {
-  targetData: CloseDate | null;
-  open: boolean;
-  onClose: () => void;
-  candidateCloseDates: dayjs.Dayjs[];
-  updateCloseDate: (input: UpdateCloseDateInput) => Promise<void>;
+export default function EditJobTermInputDialog({ targetData, open, onClose, candidateCloseDates, updateCloseDate, }: {
+    targetData: CloseDate | null;
+    open: boolean;
+    onClose: () => void;
+    candidateCloseDates: dayjs.Dayjs[];
+    updateCloseDate: (input: UpdateCloseDateInput) => Promise<void>;
 }) {
-  const dispatch = useAppDispatchV2();
+    const dispatch = useAppDispatchV2();
+    const { control, setValue, reset, handleSubmit, formState: { isValid, isDirty, isSubmitting }, } = useForm<Inputs>({
+        mode: "onChange",
+        defaultValues,
+    });
+    const { dialog, requestClose, closeWithoutGuard } = useDialogCloseGuard({
+        isDirty,
+        isBusy: isSubmitting,
+        onClose,
+    });
+    const onSubmit = (data: Inputs) => {
+        if (!targetData?.id ||
+            !data.closeDate ||
+            !data.startDate ||
+            !data.endDate) {
+            return;
+        }
+        updateCloseDate({
+            id: targetData.id,
+            closeDate: data.closeDate.toISOString(),
+            startDate: data.startDate.toISOString(),
+            endDate: data.endDate.toISOString(),
+        })
+            .then(() => {
+            dispatch(pushNotification({
+                tone: "success",
+                message: MESSAGE_CODE.S09003
+            }));
+            closeWithoutGuard();
+        })
+            .catch(() => dispatch(pushNotification({
+            tone: "error",
+            message: MESSAGE_CODE.E09003
+        })));
+    };
+    useEffect(() => {
+        if (!targetData) {
+            reset(defaultValues);
+            return;
+        }
+        setValue("closeDate", dayjs(targetData.closeDate));
+        setValue("startDate", dayjs(targetData.startDate));
+        setValue("endDate", dayjs(targetData.endDate));
+    }, [targetData]);
+    return (<>
+      {dialog}
+      <AppDialog open={open} onClose={requestClose} title="集計対象月を変更" description="変更する集計対象月の情報を入力してください。" actions={<>
+          <AppButton variant="outline" tone="neutral" onClick={requestClose}>キャンセル</AppButton>
+          <AppButton variant="solid" disabled={!isValid || !isDirty || isSubmitting} onClick={handleSubmit(onSubmit)}>変更</AppButton>
+        </>}>
+      <div className="flex flex-col gap-4">
+        <Controller name="closeDate" control={control} rules={{ required: true }} render={({ field: { value, onChange } }) => (<label className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-slate-700">集計対象月</span>
+              <select value={value ? value.format("YYYY-MM") : ""} onChange={(event) => {
+                const selected = candidateCloseDates.find((item) => item.format("YYYY-MM") === event.target.value);
+                onChange(selected ?? null);
+            }} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100">
+                <option value="">選択してください</option>
+                {candidateCloseDates.map((option) => (<option key={option.format("YYYY-MM")} value={option.format("YYYY-MM")}>
+                    {option.format("YYYY/MM")}
+                  </option>))}
+              </select>
+            </label>)}/>
 
-  const {
-    control,
-    setValue,
-    reset,
-    handleSubmit,
-    formState: { isValid, isDirty, isSubmitting },
-  } = useForm<Inputs>({
-    mode: "onChange",
-    defaultValues,
-  });
-
-  const onSubmit = (data: Inputs) => {
-    if (
-      !targetData?.id ||
-      !data.closeDate ||
-      !data.startDate ||
-      !data.endDate
-    ) {
-      return;
-    }
-
-    updateCloseDate({
-      id: targetData.id,
-      closeDate: data.closeDate.toISOString(),
-      startDate: data.startDate.toISOString(),
-      endDate: data.endDate.toISOString(),
-    })
-      .then(() => {
-        dispatch(setSnackbarSuccess(MESSAGE_CODE.S09003));
-        onClose();
-      })
-      .catch(() => dispatch(setSnackbarError(MESSAGE_CODE.E09003)));
-  };
-
-  useEffect(() => {
-    if (!targetData) {
-      reset(defaultValues);
-      return;
-    }
-
-    setValue("closeDate", dayjs(targetData.closeDate));
-    setValue("startDate", dayjs(targetData.startDate));
-    setValue("endDate", dayjs(targetData.endDate));
-  }, [targetData]);
-
-  return (
-    <>
-      <Dialog open={open} onClose={onClose}>
-        <DialogTitle>集計対象月を変更</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            変更する集計対象月の情報を入力してください。
-          </DialogContentText>
-          <Stack spacing={2}>
-            <Box>
-              <Controller
-                name="closeDate"
-                control={control}
-                rules={{ required: true }}
-                render={({ field: { value, onChange } }) => (
-                  <Autocomplete
-                    options={candidateCloseDates}
-                    value={value}
-                    getOptionLabel={(option) => option.format("YYYY/MM")}
-                    onChange={(_, v) => {
-                      if (!v) return;
-                      onChange(v);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="集計対象月" />
-                    )}
-                  />
-                )}
-              />
-            </Box>
-            <Box>
-              <Stack spacing={2} direction="row" alignItems="center">
-                <Box>
-                  <Controller
-                    name="startDate"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <DatePicker
-                        label="開始日"
-                        format={AttendanceDate.DisplayFormat}
-                        {...field}
-                      />
-                    )}
-                  />
-                </Box>
-                <Box>〜</Box>
-                <Box>
-                  <Controller
-                    name="endDate"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <DatePicker
-                        label="終了日"
-                        format={AttendanceDate.DisplayFormat}
-                        {...field}
-                      />
-                    )}
-                  />
-                </Box>
-              </Stack>
-            </Box>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>キャンセル</Button>
-          <Button
-            disabled={!isValid || !isDirty || isSubmitting}
-            onClick={handleSubmit(onSubmit)}
-          >
-            変更
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
+        <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-end">
+          <Controller name="startDate" control={control} rules={{ required: true }} render={({ field }) => (<DateField label="開始日" format={AttendanceDate.DisplayFormat} value={field.value} onChange={field.onChange} errorText={!field.value ? "必須項目です" : undefined}/>)}/>
+          <div className="pb-2 text-center text-slate-500">〜</div>
+          <Controller name="endDate" control={control} rules={{ required: true }} render={({ field }) => (<DateField label="終了日" format={AttendanceDate.DisplayFormat} value={field.value} onChange={field.onChange} errorText={!field.value ? "必須項目です" : undefined}/>)}/>
+        </div>
+      </div>
+    </AppDialog>
+    </>);
 }

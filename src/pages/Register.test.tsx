@@ -1,7 +1,13 @@
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 import RegisterContent from "@/pages/register/RegisterContent";
+
+jest.mock("@mui/material/useMediaQuery", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 jest.mock("@/widgets/layout/header/AdminPendingApprovalSummary", () => ({
   __esModule: true,
@@ -90,9 +96,12 @@ function renderRegisterContent() {
   );
 }
 
+const mockedUseMediaQuery = jest.mocked(useMediaQuery);
+
 describe("RegisterContent", () => {
   beforeEach(() => {
     localStorage.clear();
+    mockedUseMediaQuery.mockReturnValue(false);
   });
 
   it("右側カラムにアナウンスパネルを含むダッシュボードを描画する", () => {
@@ -165,5 +174,40 @@ describe("RegisterContent", () => {
     expect(
       screen.getByTestId("register-dashboard-current-rest-info"),
     ).toHaveAttribute("aria-label", "休憩中のみカウントします");
+  });
+
+  it("モバイルでは打刻UIの上に打刻エラー件数カードのみを表示する", () => {
+    mockedUseMediaQuery.mockReturnValue(true);
+
+    renderRegisterContent();
+
+    const mobileDashboardSlot = screen.getByTestId(
+      "register-dashboard-mobile-slot",
+    );
+    const timeRecorder = screen.getByTestId("time-recorder-mock");
+    const errorCardCount = screen.getByTestId(
+      "register-dashboard-attendance-error-count",
+    );
+
+    expect(mobileDashboardSlot).toBeInTheDocument();
+    expect(mobileDashboardSlot).toContainElement(errorCardCount);
+    expect(mobileDashboardSlot.compareDocumentPosition(timeRecorder)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(
+      screen.queryByTestId("register-dashboard-panel"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("admin-pending-approval-summary-mock"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("register-dashboard-attendance-summary-card-mock"),
+    ).not.toBeInTheDocument();
+
+    expect(errorCardCount).toHaveTextContent("0件");
+
+    fireEvent.click(screen.getByTestId("trigger-attendance-error"));
+
+    expect(errorCardCount).toHaveTextContent("2件");
   });
 });

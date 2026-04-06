@@ -24,7 +24,7 @@ function DurationSectionCard({
   return (
     <section
       data-testid={cardTestId}
-      className="w-full rounded-[1.35rem] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
+      className="w-full rounded-[4px] border border-slate-200/80 bg-white p-4 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)]"
     >
       <div className="flex items-start justify-between gap-3">
         <p className="m-0 text-xs font-semibold tracking-[0.03em] text-slate-700">

@@ -1,14 +1,21 @@
 import {
-  useGetCompanyHolidayCalendarsQuery,
   useGetEventCalendarsQuery,
-  useGetHolidayCalendarsQuery,
 } from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
 import { type GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
-import { type MouseEvent,useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
@@ -17,8 +24,12 @@ import type { ShiftState } from "../types/collaborative.types";
 import { useClipboardOps } from "./useClipboardOps";
 import { useSelectionState } from "./useSelectionState";
 import { useShiftCalendar } from "./useShiftCalendar";
+import { buildEditLockConflictMessage } from "./useShiftEditLocks";
 import { useShiftMetrics } from "./useShiftMetrics";
 import { useShiftSuggestions } from "./useShiftSuggestions";
+
+const NETWORK_EDIT_DISABLED_MESSAGE =
+  "通信が切断されています。再接続後に編集を再開してください。";
 
 export const useCollaborativePageState = (targetMonth: string) => {
   const {
@@ -32,6 +43,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
     hasEditLock,
     getCellEditor,
     forceReleaseCell,
+    refreshLocks,
     triggerSync,
     clearSyncError,
     updateUserActivity,
@@ -55,15 +67,20 @@ export const useCollaborativePageState = (targetMonth: string) => {
     deleteCommentReply,
   } = useCollaborativeShift();
 
-  const isAdmin = true; // TODO: 認可情報から取得する
+  const { isCognitoUserRole } = useAuthSessionSummary();
+  const isAdmin = useMemo(
+    () =>
+      isCognitoUserRole(StaffRole.ADMIN) ||
+      isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
+      isCognitoUserRole(StaffRole.OWNER),
+    [isCognitoUserRole],
+  );
 
   const currentMonth = useMemo(() => dayjs(targetMonth), [targetMonth]);
 
   const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
 
-  const { data: holidays = [] } = useGetHolidayCalendarsQuery();
-
-  const { data: companyHolidays = [] } = useGetCompanyHolidayCalendarsQuery();
+  const { holidayCalendars: holidays, companyHolidayCalendars: companyHolidays } = useCalendars();
 
   const { days, dateKeys, eventCalendar } = useShiftCalendar(
     currentMonth,
@@ -73,6 +90,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
   );
 
   const [shiftPlanCapacities, setShiftPlanCapacities] = useState<number[]>([]);
+  const [editLockError, setEditLockError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchShiftPlan = async () => {
@@ -189,44 +207,116 @@ export const useCollaborativePageState = (targetMonth: string) => {
     days,
   });
 
+  const isEditingDisabled =
+    !state.isOnline || state.connectionState === "disconnected";
+
+  const releaseEditLocks = useCallback(
+    async (targets: Array<{ staffId: string; date: string }>) => {
+      await Promise.all(
+        targets.map(({ staffId, date }) => stopEditingCell(staffId, date)),
+      );
+    },
+    [stopEditingCell],
+  );
+
   const changeCellState = useCallback(
-    (staffId: string, date: string, newState: ShiftState) => {
+    async (staffId: string, date: string, newState: ShiftState) => {
+      if (isEditingDisabled) {
+        setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+        return false;
+      }
+
       if (isCellLocked(staffId, date)) {
-        return;
+        setEditLockError("確定済みのセルは変更できません。");
+        return false;
       }
 
       if (isCellBeingEdited(staffId, date)) {
-        return;
+        const editor = getCellEditor(staffId, date);
+        setEditLockError(
+          buildEditLockConflictMessage({
+            id: "",
+            targetMonth,
+            staffId,
+            date,
+            holderUserId: editor?.userId ?? "",
+            holderUserName: editor?.userName ?? "他のユーザー",
+            acquiredAt: new Date().toISOString(),
+            expiresAt: new Date().toISOString(),
+            version: 0,
+          }),
+        );
+        return false;
       }
 
       if (!hasEditLock(staffId, date)) {
-        return;
+        setEditLockError("編集前にロックを取得してください。");
+        return false;
       }
 
+      setEditLockError(null);
       updateUserActivity();
-      void updateShift({ staffId, date, newState });
+      await updateShift({ staffId, date, newState });
+      await releaseEditLocks([{ staffId, date }]);
+      return true;
     },
-    [isCellBeingEdited, hasEditLock, updateUserActivity, updateShift, isCellLocked],
+    [
+      getCellEditor,
+      hasEditLock,
+      isCellBeingEdited,
+      isCellLocked,
+      isEditingDisabled,
+      releaseEditLocks,
+      targetMonth,
+      updateShift,
+      updateUserActivity,
+    ],
   );
 
   const handleChangeState = useCallback(
     (newState: ShiftState) => {
-      if (selectionCount > 0) {
-        const updates = selectedCells.map(({ staffId, date }) => ({
-          staffId,
-          date,
-          newState,
-        }));
-        const validUpdates = updates.filter(u => hasEditLock(u.staffId, u.date));
-        if (validUpdates.length > 0) {
-          void batchUpdateShifts(validUpdates);
-        }
-        return;
-      }
+      const run = async () => {
+        try {
+          if (isEditingDisabled) {
+            setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+            return;
+          }
 
-      if (focusedCell) {
-        changeCellState(focusedCell.staffId, focusedCell.date, newState);
-      }
+          if (selectionCount > 0) {
+            const updates = selectedCells.map(({ staffId, date }) => ({
+              staffId,
+              date,
+              newState,
+            }));
+            const validUpdates = updates.filter((u) =>
+              hasEditLock(u.staffId, u.date),
+            );
+            if (validUpdates.length > 0) {
+              setEditLockError(null);
+              updateUserActivity();
+              await batchUpdateShifts(validUpdates);
+              await releaseEditLocks(validUpdates);
+            } else {
+              setEditLockError(
+                "一括編集前に対象セルのロックを取得してください。",
+              );
+            }
+            return;
+          }
+
+          if (focusedCell) {
+            await changeCellState(
+              focusedCell.staffId,
+              focusedCell.date,
+              newState,
+            );
+          }
+        } catch (error) {
+          console.error("Failed to change shift state:", error);
+        }
+      };
+
+      void run();
     },
     [
       focusedCell,
@@ -235,11 +325,19 @@ export const useCollaborativePageState = (targetMonth: string) => {
       batchUpdateShifts,
       changeCellState,
       hasEditLock,
+      isEditingDisabled,
+      releaseEditLocks,
+      updateUserActivity,
     ],
   );
 
   const applyLockState = useCallback(
     (locked: boolean) => {
+      if (isEditingDisabled) {
+        setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+        return;
+      }
+
       if (!locked && !isAdmin) {
         return;
       }
@@ -273,6 +371,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
       selectedCells,
       focusedCell,
       getCellData,
+      isEditingDisabled,
       isAdmin,
       batchUpdateShifts,
     ],
@@ -311,7 +410,10 @@ export const useCollaborativePageState = (targetMonth: string) => {
   );
 
   const hasEditLockForSelected = useMemo(() => {
-    return selectionTargets.length > 0 && selectionTargets.every((t) => hasEditLock(t.staffId, t.date));
+    return (
+      selectionTargets.length > 0 &&
+      selectionTargets.every((t) => hasEditLock(t.staffId, t.date))
+    );
   }, [selectionTargets, hasEditLock]);
 
   const isOthersEditingSelected = useMemo(() => {
@@ -319,32 +421,83 @@ export const useCollaborativePageState = (targetMonth: string) => {
   }, [selectionTargets, isCellBeingEdited]);
 
   const applyEditLock = useCallback(
-    (acquire: boolean) => {
-      selectionTargets.forEach(({ staffId, date }) => {
+    async (acquire: boolean) => {
+      if (isEditingDisabled) {
+        setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+        return;
+      }
+
+      if (selectionTargets.length === 0) {
+        return;
+      }
+
+      if (acquire) {
+        await refreshLocks();
+      }
+
+      const conflicts: string[] = [];
+
+      for (const { staffId, date } of selectionTargets) {
         if (acquire) {
-          if (!isCellBeingEdited(staffId, date) && !hasEditLock(staffId, date)) {
-            startEditingCell(staffId, date);
+          if (isCellBeingEdited(staffId, date)) {
+            const editor = getCellEditor(staffId, date);
+            conflicts.push(
+              buildEditLockConflictMessage({
+                id: "",
+                targetMonth,
+                staffId,
+                date,
+                holderUserId: editor?.userId ?? "",
+                holderUserName: editor?.userName ?? "他のユーザー",
+                acquiredAt: new Date().toISOString(),
+                expiresAt: new Date().toISOString(),
+                version: 0,
+              }),
+            );
+            continue;
           }
-        } else {
+
           if (hasEditLock(staffId, date)) {
-            stopEditingCell(staffId, date);
+            continue;
           }
+
+          const result = await startEditingCell(staffId, date);
+          if (!result.acquired) {
+            conflicts.push(buildEditLockConflictMessage(result.conflict));
+          }
+        } else if (hasEditLock(staffId, date)) {
+          await stopEditingCell(staffId, date);
         }
-      });
+      }
+
+      setEditLockError(conflicts.length > 0 ? conflicts[0] : null);
     },
-    [selectionTargets, isCellBeingEdited, hasEditLock, startEditingCell, stopEditingCell],
+    [
+      getCellEditor,
+      hasEditLock,
+      isEditingDisabled,
+      isCellBeingEdited,
+      refreshLocks,
+      selectionTargets,
+      startEditingCell,
+      stopEditingCell,
+      targetMonth,
+    ],
   );
 
-  const handleAcquireEditLock = useCallback(() => applyEditLock(true), [applyEditLock]);
-  const handleReleaseEditLock = useCallback(() => applyEditLock(false), [applyEditLock]);
+  const handleAcquireEditLock = useCallback(() => {
+    void applyEditLock(true);
+  }, [applyEditLock]);
+  const handleReleaseEditLock = useCallback(() => {
+    void applyEditLock(false);
+  }, [applyEditLock]);
 
-  const handleForceReleaseLock = useCallback(
-    () => {
-      if (!isAdmin) return;
-      selectionTargets.forEach(({ staffId, date }) => forceReleaseCell(staffId, date));
-    },
-    [selectionTargets, isAdmin, forceReleaseCell]
-  );
+  const handleForceReleaseLock = useCallback(() => {
+    if (!isAdmin) return;
+    selectionTargets.forEach(({ staffId, date }) => {
+      void forceReleaseCell(staffId, date);
+    });
+  }, [selectionTargets, isAdmin, forceReleaseCell]);
 
   const handlePaste = useCallback(() => {
     if (!focusedCell) return;
@@ -444,10 +597,15 @@ export const useCollaborativePageState = (targetMonth: string) => {
     await triggerSync();
   };
 
+  const clearEditLockError = useCallback(() => {
+    setEditLockError(null);
+  }, []);
+
   const { calculateDailyCount, progress } = useShiftMetrics(
     days,
     staffIds,
     state.shiftDataMap,
+    shiftPlanCapacities,
   );
 
   return {
@@ -511,6 +669,8 @@ export const useCollaborativePageState = (targetMonth: string) => {
     navigate,
     hasEditLockForSelected,
     isOthersEditingSelected,
+    editLockError,
+    clearEditLockError,
     handleAcquireEditLock,
     handleReleaseEditLock,
     handleForceReleaseLock,

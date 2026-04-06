@@ -4,19 +4,22 @@ import {
   deleteStaff,
   updateStaff,
 } from "@shared/api/graphql/documents/mutations";
-import { listStaff } from "@shared/api/graphql/documents/queries";
+import { getStaff, listStaff } from "@shared/api/graphql/documents/queries";
 import { graphqlBaseQuery } from "@shared/api/graphql/graphqlBaseQuery";
 import type {
   CreateStaffInput,
   CreateStaffMutation,
   DeleteStaffInput,
   DeleteStaffMutation,
+  GetStaffQuery,
   ListStaffQuery,
   ModelStaffConditionInput,
   Staff,
   UpdateStaffInput,
   UpdateStaffMutation,
 } from "@shared/api/graphql/types";
+
+import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
 
 export type UpdateStaffPayload = {
   input: UpdateStaffInput;
@@ -31,7 +34,8 @@ type StaffTag = {
 const nonNullable = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined;
 
-const buildStaffTagId = (staff: { id?: string | null }) => staff.id ?? "unknown";
+const buildStaffTagId = (staff: { id?: string | null }) =>
+  staff.id ?? "unknown";
 
 export const staffApi = createApi({
   reducerPath: "staffApi",
@@ -101,6 +105,19 @@ export const staffApi = createApi({
           return { error: { message: "Failed to create staff" } };
         }
 
+        await logOperationEvent({
+          action: "staff.create",
+          resource: "staff",
+          resourceId: created.id,
+          targetStaffId: created.cognitoUserId,
+          before: null,
+          after: created,
+          details: {
+            cognitoUserId: created.cognitoUserId,
+            role: created.role,
+          },
+        });
+
         return { data: created };
       },
       invalidatesTags: (result) => {
@@ -114,6 +131,21 @@ export const staffApi = createApi({
     }),
     updateStaff: builder.mutation<Staff, UpdateStaffPayload>({
       async queryFn({ input, condition }, _api, _extraOptions, baseQuery) {
+        const currentResult = await baseQuery({
+          document: getStaff,
+          variables: { id: input.id },
+        });
+
+        if (currentResult.error) {
+          return { error: currentResult.error };
+        }
+
+        const currentData = currentResult.data as GetStaffQuery | null;
+        const currentStaff = currentData?.getStaff;
+        if (!currentStaff) {
+          return { error: { message: "Failed to load current staff" } };
+        }
+
         const result = await baseQuery({
           document: updateStaff,
           variables: {
@@ -131,6 +163,26 @@ export const staffApi = createApi({
         if (!updated) {
           return { error: { message: "Failed to update staff" } };
         }
+
+        const action =
+          currentStaff.enabled !== updated.enabled
+            ? updated.enabled
+              ? "staff.enable"
+              : "staff.disable"
+            : "staff.update";
+
+        await logOperationEvent({
+          action,
+          resource: "staff",
+          resourceId: updated.id,
+          targetStaffId: updated.cognitoUserId,
+          before: currentStaff,
+          after: updated,
+          details: {
+            cognitoUserId: updated.cognitoUserId,
+            role: updated.role,
+          },
+        });
 
         return { data: updated };
       },
@@ -171,6 +223,19 @@ export const staffApi = createApi({
         if (!deleted) {
           return { error: { message: "Failed to delete staff" } };
         }
+
+        await logOperationEvent({
+          action: "staff.delete",
+          resource: "staff",
+          resourceId: deleted.id,
+          targetStaffId: deleted.cognitoUserId,
+          before: deleted,
+          after: null,
+          details: {
+            cognitoUserId: deleted.cognitoUserId,
+            role: deleted.role,
+          },
+        });
 
         return { data: deleted };
       },

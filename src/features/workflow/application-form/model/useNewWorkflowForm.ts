@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { type WorkflowFormErrors, type WorkflowFormState } from "./workflowFormModel";
 
@@ -70,6 +70,40 @@ export function useNewWorkflowForm() {
     customWorkflowContent,
   };
 
+  const isDirty = useMemo(
+    () =>
+      draftMode ||
+      category !== "" ||
+      startDate !== "" ||
+      endDate !== "" ||
+      absenceDate !== "" ||
+      absenceReason !== "" ||
+      paidReason !== "" ||
+      overtimeStart !== null ||
+      overtimeEnd !== null ||
+      overtimeDate !== "" ||
+      overtimeReason !== "" ||
+      customWorkflowTitle !== "" ||
+      customWorkflowContent !== "" ||
+      selectedTemplateId !== "",
+    [
+      absenceDate,
+      absenceReason,
+      category,
+      customWorkflowContent,
+      customWorkflowTitle,
+      draftMode,
+      endDate,
+      overtimeDate,
+      overtimeEnd,
+      overtimeReason,
+      overtimeStart,
+      paidReason,
+      selectedTemplateId,
+      startDate,
+    ],
+  );
+
   return {
     draftMode,
     handleDraftToggle,
@@ -104,5 +138,6 @@ export function useNewWorkflowForm() {
     setCustomWorkflowContent,
     selectedTemplateId,
     setSelectedTemplateId,
+    isDirty,
   };
 }

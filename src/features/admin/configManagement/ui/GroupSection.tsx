@@ -1,12 +1,7 @@
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { type ReactNode, useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
-import { PageSection } from "@/shared/ui/layout";
+import { getDesignTokens } from "@/shared/designSystem";
 
 type Props = {
   title: string;
@@ -35,67 +30,37 @@ export default function GroupSection({
   const brandAccent = tokens.color.brand.primary.base;
   const surfaceColor = adminPanelTokens.surface;
   const groupContainerTokens = tokens.component.groupContainer;
-  const panelSpacingVar = designTokenVar(
-    "component.adminPanel.sectionSpacing",
-    `${panelSpacing}px`
-  );
-  const PANEL_HALF_GAP = `calc(${panelSpacingVar} / 2)`;
-  const dividerColorVar = designTokenVar(
-    "component.adminPanel.dividerColor",
-    dividerColor
-  );
-  const brandAccentVar = designTokenVar(
-    "color.brand.primary.base",
-    brandAccent
-  );
-  const surfaceColorVar = designTokenVar(
-    "component.adminPanel.surface",
-    surfaceColor
-  );
-  const titleColorVar = designTokenVar(
-    "color.brand.primary.dark",
-    tokens.color.brand.primary.dark ?? brandAccent
-  );
-  const accentWidthVar = designTokenVar(
-    "component.groupContainer.accentWidth",
-    `${groupContainerTokens.accentWidth}px`
-  );
-  const titleSpacingVar = designTokenVar("spacing.sm", "8px");
+  const titleColor = tokens.color.brand.primary.dark ?? brandAccent;
+  const panelHalfGap = panelSpacing / 2;
 
   return (
-    <PageSection
-      variant="surface"
-      layoutVariant="detail"
-      sx={{
-        gap: PANEL_HALF_GAP,
-        border: `1px solid ${dividerColorVar}`,
-        borderLeft: `${accentWidthVar} solid ${brandAccentVar}`,
-        backgroundColor: surfaceColorVar,
-        boxShadow: "none",
-        px: panelSpacingVar,
-        py: panelSpacingVar,
+    <section
+      className="flex flex-col"
+      style={{
+        gap: `${panelHalfGap}px`,
+        border: `1px solid ${dividerColor}`,
+        borderLeft: `${groupContainerTokens.accentWidth}px solid ${brandAccent}`,
+        backgroundColor: surfaceColor,
+        padding: `${panelSpacing}px`,
+        borderRadius: "20px",
       }}
     >
-      <Stack spacing={0} sx={{ gap: PANEL_HALF_GAP }}>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ gap: titleSpacingVar }}
+      <div className="flex flex-col" style={{ gap: `${panelHalfGap}px` }}>
+        <div
+          className="flex items-center justify-between"
+          style={{ gap: "8px" }}
         >
-          <Typography variant="h6" sx={{ color: titleColorVar }}>
+          <h3 className="m-0 text-lg font-semibold" style={{ color: titleColor }}>
             {title}
-          </Typography>
-          {actions && <Box>{actions}</Box>}
-        </Box>
+          </h3>
+          {actions && <div>{actions}</div>}
+        </div>
         {description && (
-          <Typography variant="body2" color="text.secondary">
-            {description}
-          </Typography>
+          <p className="m-0 text-sm text-slate-500">{description}</p>
         )}
-        <Divider sx={{ borderColor: dividerColorVar }} />
-        <Box sx={{ pt: PANEL_HALF_GAP }}>{children}</Box>
-      </Stack>
-    </PageSection>
+        <div className="h-px w-full" style={{ backgroundColor: dividerColor }} />
+        <div style={{ paddingTop: `${panelHalfGap}px` }}>{children}</div>
+      </div>
+    </section>
   );
 }

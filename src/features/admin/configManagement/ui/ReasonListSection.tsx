@@ -1,5 +1,8 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Checkbox, FormControlLabel, TextField } from "@mui/material";
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import {
+  SettingsCheckbox,
+  SettingsTextField,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 
 interface Reason {
   reason: string;
@@ -29,38 +32,31 @@ const ReasonListSection = ({
         className="flex flex-row flex-wrap items-center gap-4"
         key={index}
       >
-        <TextField
+        <SettingsTextField
           label={`理由 ${index + 1}`}
           value={reason.reason}
-          onChange={(e) => onReasonChange(index, "reason", e.target.value)}
-          size="small"
-          sx={{ width: 320, maxWidth: "100%" }}
+          onChange={(value) => onReasonChange(index, "reason", value)}
+          className="w-[320px] max-w-full"
         />
         <div className="min-w-[88px]">
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={reason.enabled}
-                onChange={(e) =>
-                  onReasonChange(index, "enabled", e.target.checked)
-                }
-              />
-            }
+          <SettingsCheckbox
+            checked={reason.enabled}
+            onChange={(checked) => onReasonChange(index, "enabled", checked)}
             label="有効"
           />
         </div>
         <button
-          className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+          className="text-rose-500 hover:bg-rose-50 p-2 rounded-full transition"
           type="button"
           onClick={() => onRemoveReason(index)}
           aria-label="削除"
         >
-          <DeleteIcon />
+          <SettingsIcon name="delete" />
         </button>
       </div>
     ))}
     <button
-      className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start mt-2 transition"
+      className="text-emerald-600 hover:text-emerald-700 text-sm font-medium self-start mt-2 transition"
       type="button"
       onClick={onAddReason}
     >

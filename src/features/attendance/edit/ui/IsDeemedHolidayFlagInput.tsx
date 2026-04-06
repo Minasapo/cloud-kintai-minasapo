@@ -1,6 +1,6 @@
 import {
+  Checkbox,
   Stack,
-  Switch,
   Typography,
   useMediaQuery,
   useTheme,
@@ -67,7 +67,7 @@ export default function IsDeemedHolidayFlagInput({
             name={name}
             control={control}
             render={({ field }) => (
-              <Switch
+              <Checkbox
                 checked={Boolean(field.value)}
                 onChange={(e) => field.onChange(e.target.checked)}
                 disabled={disabled}
@@ -97,7 +97,7 @@ export default function IsDeemedHolidayFlagInput({
           name={name}
           control={control}
           render={({ field }) => (
-            <Switch
+            <Checkbox
               checked={Boolean(field.value)}
               onChange={(e) => field.onChange(e.target.checked)}
               disabled={disabled}

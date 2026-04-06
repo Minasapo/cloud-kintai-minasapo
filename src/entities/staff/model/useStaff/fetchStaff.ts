@@ -2,10 +2,11 @@ import { staffByCognitoUserId } from "@shared/api/graphql/documents/queries";
 import { Staff, StaffByCognitoUserIdQuery } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
 
+import { normalizeAttendanceManagementEnabled } from "@/entities/staff/lib/attendanceManagement";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export default async function fetchStaff(
-  cognitoUserId: Staff["cognitoUserId"]
+  cognitoUserId: Staff["cognitoUserId"],
 ) {
   const response = (await graphqlClient.graphql({
     query: staffByCognitoUserId,
@@ -24,8 +25,8 @@ export default async function fetchStaff(
   }
 
   const staffs = response.data.staffByCognitoUserId.items.filter(
-    (item): item is NonNullable<typeof item> => item !== null
+    (item): item is NonNullable<typeof item> => item !== null,
   );
 
-  return staffs[0];
+  return normalizeAttendanceManagementEnabled(staffs[0]);
 }

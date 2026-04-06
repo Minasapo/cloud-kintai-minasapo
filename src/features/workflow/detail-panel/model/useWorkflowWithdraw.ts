@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { buildWorkflowCommentsUpdateInput } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
 import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import type { LocalNotificationOptions } from "@/shared/lib/localNotification";
+import type { AppNotificationInput } from "@/hooks/useAppNotification";
 import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("useWorkflowWithdraw");
@@ -13,10 +13,7 @@ type UseWorkflowWithdrawParams = {
   workflow: WorkflowEntity | null | undefined;
   updateWorkflow: (input: UpdateWorkflowInput) => Promise<unknown>;
   setWorkflow: (workflow: WorkflowEntity) => void;
-  notify: (
-    title: string,
-    options?: LocalNotificationOptions,
-  ) => Promise<unknown>;
+  notify: (input: AppNotificationInput) => void;
   navigate: ReturnType<typeof useNavigate>;
 };
 
@@ -45,15 +42,15 @@ export function useWorkflowWithdraw({
       const afterComments = await updateWorkflow(commentUpdate);
       setWorkflow(afterComments as WorkflowEntity);
 
-      void notify("取り下げしました", { mode: "auto-close" });
+      notify({ title: "取り下げしました", tone: "success" });
       setTimeout(() => navigate("/workflow"), 1000);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow withdrawal failed:", message);
-      void notify("エラー", {
-        body: message,
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: message,
+        tone: "error",
       });
     }
   }, [workflow, updateWorkflow, setWorkflow, notify, navigate]);

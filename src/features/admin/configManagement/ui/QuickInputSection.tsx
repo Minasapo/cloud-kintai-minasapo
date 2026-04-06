@@ -1,7 +1,10 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Checkbox, FormControlLabel } from "@mui/material";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { Dayjs } from "dayjs";
+
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import {
+  SettingsCheckbox,
+  SettingsTimeField,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 
 interface QuickInputEntry {
   time: Dayjs;
@@ -44,43 +47,33 @@ const QuickInputSection = ({
               className="flex flex-row flex-wrap items-center gap-4"
               key={index}
             >
-              <TimePicker
+              <SettingsTimeField
                 label={`出勤時間 ${index + 1}`}
-                ampm={false}
                 value={entry.time}
-                views={["hours", "minutes"]}
-                format="HH:mm"
-                slotProps={{
-                  textField: { size: "small" },
-                }}
-                sx={{ width: 160 }}
                 onChange={(newValue) =>
                   onQuickInputStartTimeChange(index, newValue)
                 }
+                className="w-[160px]"
               />
               <div className="min-w-[88px]">
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={entry.enabled}
-                      onChange={() => onQuickInputStartTimeToggle(index)}
-                    />
-                  }
+                <SettingsCheckbox
+                  checked={entry.enabled}
+                  onChange={() => onQuickInputStartTimeToggle(index)}
                   label="有効"
                 />
               </div>
               <button
-                className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+                className="text-rose-500 hover:bg-rose-50 p-2 rounded-full transition"
                 type="button"
                 onClick={() => onRemoveQuickInputStartTime(index)}
                 aria-label="削除"
               >
-                <DeleteIcon />
+                <SettingsIcon name="delete" />
               </button>
             </div>
           ))}
           <button
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start transition"
+            className="text-emerald-600 hover:text-emerald-700 text-sm font-medium self-start transition"
             type="button"
             onClick={onAddQuickInputStartTime}
           >
@@ -98,43 +91,33 @@ const QuickInputSection = ({
               className="flex flex-row flex-wrap items-center gap-4"
               key={index}
             >
-              <TimePicker
+              <SettingsTimeField
                 label={`退勤時間 ${index + 1}`}
-                ampm={false}
                 value={entry.time}
-                views={["hours", "minutes"]}
-                format="HH:mm"
-                slotProps={{
-                  textField: { size: "small" },
-                }}
-                sx={{ width: 160 }}
                 onChange={(newValue) =>
                   onQuickInputEndTimeChange(index, newValue)
                 }
+                className="w-[160px]"
               />
               <div className="min-w-[88px]">
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={entry.enabled}
-                      onChange={() => onQuickInputEndTimeToggle(index)}
-                    />
-                  }
+                <SettingsCheckbox
+                  checked={entry.enabled}
+                  onChange={() => onQuickInputEndTimeToggle(index)}
                   label="有効"
                 />
               </div>
               <button
-                className="text-red-500 hover:bg-red-50 p-2 rounded-full transition"
+                className="text-rose-500 hover:bg-rose-50 p-2 rounded-full transition"
                 type="button"
                 onClick={() => onRemoveQuickInputEndTime(index)}
                 aria-label="削除"
               >
-                <DeleteIcon />
+                <SettingsIcon name="delete" />
               </button>
             </div>
           ))}
           <button
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start transition"
+            className="text-emerald-600 hover:text-emerald-700 text-sm font-medium self-start transition"
             type="button"
             onClick={onAddQuickInputEndTime}
           >

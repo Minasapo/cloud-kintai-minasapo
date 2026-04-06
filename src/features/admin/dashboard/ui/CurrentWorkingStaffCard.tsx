@@ -1,4 +1,5 @@
 import { Tooltip, Typography } from "@mui/material";
+import { memo } from "react";
 
 import { DashboardCard } from "./DashboardCard";
 
@@ -7,7 +8,7 @@ type Props = {
   infoLabel: string;
 };
 
-export function CurrentWorkingStaffCard({ countLabel, infoLabel }: Props) {
+function CurrentWorkingStaffCardComponent({ countLabel, infoLabel }: Props) {
   return (
     <DashboardCard
       data-testid="admin-dashboard-current-working-staff-card"
@@ -48,3 +49,5 @@ export function CurrentWorkingStaffCard({ countLabel, infoLabel }: Props) {
     </DashboardCard>
   );
 }
+
+export const CurrentWorkingStaffCard = memo(CurrentWorkingStaffCardComponent);

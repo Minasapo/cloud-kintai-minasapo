@@ -1,10 +1,8 @@
-import dayjs from "dayjs";
 import { type MouseEvent, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-
-import { AttendanceHistoryRow } from "./AttendanceHistoryRow";
+import AttendanceOperationLogHistory from "@/features/attendance/edit/ui/AttendanceOperationLogHistory";
 
 function HistoryIcon() {
   return (
@@ -100,43 +98,7 @@ export default function EditAttendanceHistoryList() {
               </h2>
             </div>
             <div className="flex flex-1 flex-col gap-4 overflow-hidden px-6 py-5">
-              <p className="m-0 text-sm leading-6 text-slate-600">
-                左端のアイコンをクリックすると休憩時間が表示されます
-              </p>
-              <div className="overflow-auto rounded-2xl border border-slate-200 bg-white">
-                <table className="min-w-[1280px] w-full border-collapse">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="w-14 border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500" />
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">勤務日</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">勤務時間</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">直行</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">直帰</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">有給休暇</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">特別休暇</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">振替休日</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">備考</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">作成日時</th>
-                      <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">スタッフID</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {attendance?.histories
-                      ? attendance.histories
-                          .filter(
-                            (item): item is NonNullable<typeof item> =>
-                              item !== null
-                          )
-                          .toSorted((a, b) =>
-                            dayjs(b.createdAt).isBefore(dayjs(a.createdAt)) ? -1 : 1
-                          )
-                          .map((history, index) => (
-                            <AttendanceHistoryRow key={index} history={history} />
-                          ))
-                      : null}
-                  </tbody>
-                </table>
-              </div>
+              <AttendanceOperationLogHistory attendance={attendance} />
             </div>
             <div className="flex justify-end border-t border-slate-200 px-6 py-4">
               <button

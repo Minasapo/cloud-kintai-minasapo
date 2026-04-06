@@ -1,7 +1,4 @@
-import type {
-  CSSProperties,
-  HTMLAttributes,
-} from "react";
+import type { CSSProperties, HTMLAttributes } from "react";
 import { forwardRef } from "react";
 
 import { designTokenVar } from "@/shared/designSystem";
@@ -25,7 +22,7 @@ const VARIANT_FALLBACKS = {
     paddingX: { xs: "16px", md: "32px" },
     paddingY: "16px",
     gap: "12px",
-    radius: "12px",
+    radius: "6px",
     background: "#FFFFFF",
     shadow: "0 12px 24px rgba(17, 24, 39, 0.06)",
   },
@@ -33,7 +30,7 @@ const VARIANT_FALLBACKS = {
     paddingX: { xs: "12px", md: "24px" },
     paddingY: "12px",
     gap: "8px",
-    radius: "8px",
+    radius: "4px",
     background: "#F3F8F4",
     shadow: "0 8px 20px rgba(17, 24, 39, 0.05)",
   },
@@ -51,7 +48,7 @@ export default forwardRef<HTMLDivElement, PageSectionProps>(
       style,
       ...rest
     },
-    ref
+    ref,
   ) {
     const variantFallback =
       VARIANT_FALLBACKS[layoutVariant] ?? VARIANT_FALLBACKS.dashboard;
@@ -59,32 +56,32 @@ export default forwardRef<HTMLDivElement, PageSectionProps>(
     const SECTION_PADDING_X = {
       xs: designTokenVar(
         `${variantPath}.paddingX.xs`,
-        variantFallback.paddingX.xs
+        variantFallback.paddingX.xs,
       ),
       md: designTokenVar(
         `${variantPath}.paddingX.md`,
-        variantFallback.paddingX.md
+        variantFallback.paddingX.md,
       ),
     };
     const SECTION_PADDING_Y = designTokenVar(
       `${variantPath}.paddingY`,
-      variantFallback.paddingY
+      variantFallback.paddingY,
     );
     const SECTION_GAP = designTokenVar(
       `${variantPath}.gap`,
-      variantFallback.gap
+      variantFallback.gap,
     );
     const SECTION_RADIUS = designTokenVar(
       `${variantPath}.radius`,
-      variantFallback.radius
+      variantFallback.radius,
     );
     const SECTION_BACKGROUND = designTokenVar(
       `${variantPath}.background`,
-      variantFallback.background
+      variantFallback.background,
     );
     const SECTION_SHADOW = designTokenVar(
       `${variantPath}.shadow`,
-      variantFallback.shadow
+      variantFallback.shadow,
     );
     const surfaceStyles =
       variant === "surface"
@@ -181,5 +178,5 @@ export default forwardRef<HTMLDivElement, PageSectionProps>(
         {children}
       </section>
     );
-  }
+  },
 );

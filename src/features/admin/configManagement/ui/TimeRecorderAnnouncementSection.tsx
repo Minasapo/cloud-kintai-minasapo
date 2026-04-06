@@ -1,16 +1,13 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import TextField from "@mui/material/TextField";
-import type React from "react";
+import {
+  SettingsSwitch,
+  SettingsTextAreaField,
+} from "@/features/admin/layout/ui/SettingsPrimitives";
 
 type TimeRecorderAnnouncementSectionProps = {
   enabled: boolean;
   message: string;
-  onEnabledChange: (
-    event: React.ChangeEvent<HTMLInputElement>,
-    checked: boolean,
-  ) => void;
-  onMessageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onEnabledChange: (checked: boolean) => void;
+  onMessageChange: (value: string) => void;
 };
 
 export default function TimeRecorderAnnouncementSection({
@@ -22,27 +19,19 @@ export default function TimeRecorderAnnouncementSection({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={enabled}
-              onChange={onEnabledChange}
-              color="primary"
-              inputProps={{ "aria-label": "打刻画面アナウンスの表示切り替え" }}
-            />
-          }
+        <SettingsSwitch
+          checked={enabled}
+          onChange={onEnabledChange}
           label={enabled ? "表示" : "非表示"}
+          ariaLabel="打刻画面アナウンスの表示切り替え"
         />
       </div>
       <div className="flex flex-col gap-1 w-full max-w-[640px]">
-        <span className="text-sm font-semibold text-slate-700">アナウンス本文</span>
-        <TextField
+        <SettingsTextAreaField
+          label="アナウンス本文"
           value={message}
           onChange={onMessageChange}
-          multiline
           minRows={3}
-          fullWidth
-          size="small"
           placeholder="例: 本日18:00〜18:30はシステムメンテナンスのため打刻が反映されにくくなる場合があります。"
         />
       </div>

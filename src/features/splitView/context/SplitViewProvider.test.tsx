@@ -6,7 +6,8 @@ import { useSplitView } from "../hooks/useSplitView";
 import { SplitViewProvider } from "./SplitViewProvider";
 
 const TestComponent: React.FC = () => {
-  const { state, setMode, setLeftPanel, setRightPanel } = useSplitView();
+  const { state, setMode, setLeftPanel, setRightPanel, enableTripleMode } =
+    useSplitView();
 
   return (
     <div>
@@ -14,6 +15,7 @@ const TestComponent: React.FC = () => {
       <div data-testid="left-panel">{state.leftPanel?.id || "null"}</div>
       <div data-testid="right-panel">{state.rightPanel?.id || "null"}</div>
       <button onClick={() => setMode("split")}>Split Mode</button>
+      <button onClick={enableTripleMode}>Triple Mode</button>
       <button onClick={() => setLeftPanel({ id: "left", title: "Left" })}>
         Set Left
       </button>
@@ -30,7 +32,7 @@ describe("SplitViewProvider", () => {
       render(
         <SplitViewProvider>
           <TestComponent />
-        </SplitViewProvider>
+        </SplitViewProvider>,
       );
 
       expect(screen.getByTestId("mode")).toHaveTextContent("single");
@@ -45,7 +47,7 @@ describe("SplitViewProvider", () => {
       render(
         <SplitViewProvider>
           <TestComponent />
-        </SplitViewProvider>
+        </SplitViewProvider>,
       );
 
       const splitButton = screen.getByText("Split Mode");
@@ -57,13 +59,31 @@ describe("SplitViewProvider", () => {
     });
   });
 
+  describe("enableTripleMode", () => {
+    it("should update mode to triple", async () => {
+      const user = userEvent.setup();
+      render(
+        <SplitViewProvider>
+          <TestComponent />
+        </SplitViewProvider>,
+      );
+
+      const button = screen.getByText("Triple Mode");
+      await user.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("mode")).toHaveTextContent("triple");
+      });
+    });
+  });
+
   describe("setLeftPanel", () => {
     it("should set left panel", async () => {
       const user = userEvent.setup();
       render(
         <SplitViewProvider>
           <TestComponent />
-        </SplitViewProvider>
+        </SplitViewProvider>,
       );
 
       const setLeftButton = screen.getByText("Set Left");
@@ -81,7 +101,7 @@ describe("SplitViewProvider", () => {
       render(
         <SplitViewProvider>
           <TestComponent />
-        </SplitViewProvider>
+        </SplitViewProvider>,
       );
 
       const setRightButton = screen.getByText("Set Right");

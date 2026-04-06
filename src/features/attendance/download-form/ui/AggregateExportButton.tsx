@@ -1,6 +1,5 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
-import { Button } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
@@ -8,7 +7,7 @@ import { useContext } from "react";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { calcTotalRestTime } from "@/entities/attendance/lib/time";
-import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
+import { AppButton } from "@/shared/ui/button";
 
 import downloadAttendances from "../lib/downloadAttendances";
 
@@ -137,40 +136,16 @@ export default function AggregateExportButton({
   };
 
   return (
-    <Button
-      variant="contained"
-      color="secondary"
-      size="medium"
+    <AppButton
+      variant="solid"
+      tone="secondary"
+      size="md"
       onClick={onClick}
       startIcon={<CloudDownloadOutlinedIcon />}
       fullWidth={fullWidth}
       disabled={workDates.length === 0 || selectedStaff.length === 0}
-      disableElevation
-      sx={{
-        minWidth: BUTTON_MIN_WIDTH,
-        borderRadius: "9999px",
-        border: "1px solid rgba(148,163,184,0.3)",
-        backgroundColor: "#ffffff",
-        color: "#0f172a",
-        fontWeight: 700,
-        boxShadow: "0 8px 24px -20px rgba(15,23,42,0.18)",
-        transition: "transform 150ms ease, background-color 150ms ease",
-        "&:hover": {
-          backgroundColor: "#f8fafc",
-          transform: "translateY(-3px)",
-        },
-        "&:active": { transform: "translateY(-1px)" },
-        "&.Mui-disabled": {
-          transform: "none",
-          opacity: 1,
-          backgroundColor: "#f1f5f9",
-          color: "#94a3b8",
-          borderColor: "rgba(148,163,184,0.2)",
-          boxShadow: "none",
-        },
-      }}
     >
       集計ダウンロード
-    </Button>
+    </AppButton>
   );
 }

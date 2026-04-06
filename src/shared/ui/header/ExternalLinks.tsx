@@ -1,7 +1,10 @@
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { predefinedIcons } from "@/shared/config/icons";
+import {
+  predefinedIcons,
+  type PredefinedIconValue,
+} from "@/shared/config/icons";
 import { designTokenVar } from "@/shared/designSystem";
 
 export type ExternalLinkItem = {
@@ -64,7 +67,7 @@ const POPPER_PADDING = designTokenVar(
 const POPPER_GAP = designTokenVar("component.headerActions.popoverGap", "16px");
 const POPPER_RADIUS = designTokenVar(
   "component.headerActions.popoverRadius",
-  "16px",
+  "6px",
 );
 const POPPER_SURFACE = designTokenVar(
   "component.headerActions.popoverSurface",
@@ -87,7 +90,7 @@ const GRID_HOVER_BACKGROUND = designTokenVar(
   "component.headerActions.gridHoverBackground",
   "#EAF7F0",
 );
-const GRID_ITEM_RADIUS = designTokenVar("radius.sm", "8px");
+const GRID_ITEM_RADIUS = designTokenVar("radius.sm", "2px");
 const GRID_ICON_SURFACE = designTokenVar(
   "component.headerActions.iconSurface",
   "#DFF1E7",
@@ -147,7 +150,7 @@ function AppsGlyph({ color }: { color: string }) {
   );
 }
 
-const iconMap = new Map(
+const iconMap = new Map<PredefinedIconValue, JSX.Element>(
   predefinedIcons.map((icon) => [icon.value, icon.component]),
 );
 
@@ -218,7 +221,13 @@ function LinkGridItem({
   iconType: string;
   staffName: string;
 }) {
-  const iconComponent = iconMap.get(iconType) || iconMap.get("LinkIcons");
+  const normalizedIconType = predefinedIcons.some(
+    (icon) => icon.value === iconType,
+  )
+    ? (iconType as PredefinedIconValue)
+    : "LinkIcons";
+  const iconComponent =
+    iconMap.get(normalizedIconType) || iconMap.get("LinkIcons");
   const processedUrl = url.replace("{staffName}", staffName);
 
   return (
@@ -249,7 +258,7 @@ function LinkGridItem({
         }}
       >
         <span
-          className="inline-flex h-[26px] w-[26px] items-center justify-center rounded-[8px] text-emerald-800"
+          className="inline-flex h-[26px] w-[26px] items-center justify-center rounded-[4px] text-emerald-800"
           style={{ backgroundColor: GRID_ICON_SURFACE }}
         >
           {iconComponent}

@@ -1,56 +1,46 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 import AdminMasterLayout from "./AdminMasterLayout";
 
-const mockNavigate = jest.fn();
+let pathname = "/admin/master/job_term";
 
 jest.mock("react-router-dom", () => ({
   Outlet: () => <div data-testid="outlet" />,
-  useLocation: () => ({ pathname: "/admin/master/job_term" }),
-  useNavigate: () => mockNavigate,
+  useLocation: () => ({ pathname }),
 }));
 
 describe("AdminMasterLayout", () => {
   beforeEach(() => {
-    mockNavigate.mockReset();
+    pathname = "/admin/master/job_term";
   });
 
-  it("renders feature management menu entries", async () => {
-    const user = userEvent.setup();
+  it("renders the settings content area with outlet", () => {
+    render(<AdminMasterLayout />);
+
+    expect(screen.getByTestId("outlet")).toBeInTheDocument();
+  });
+
+  it("shows current setting context header for detail pages", () => {
+    pathname = "/admin/master/export";
 
     render(<AdminMasterLayout />);
 
-    await user.click(screen.getByRole("button", { name: "menu" }));
-
-    expect(screen.getByRole("button", { name: "勤怠" })).toBeInTheDocument();
+    expect(screen.getByText("データ・連携")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "残業確認" }),
+      screen.getByRole("heading", { name: "エクスポート" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "開発者" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "エクスポート" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "外部連携向けのエクスポート設定や出力内容を確認します。",
+      ),
+    ).toBeInTheDocument();
   });
 
-  it("navigates to developer settings from the attendance menu", async () => {
-    const user = userEvent.setup();
+  it("shows generic settings header when path has no matching item", () => {
+    pathname = "/admin/master";
 
     render(<AdminMasterLayout />);
 
-    await user.click(screen.getByRole("button", { name: "menu" }));
-
-    await user.click(screen.getByRole("button", { name: "開発者" }));
-
-    expect(mockNavigate).toHaveBeenCalledWith("/admin/master/developer");
-  });
-
-  it("navigates to schema export settings", async () => {
-    const user = userEvent.setup();
-
-    render(<AdminMasterLayout />);
-
-    await user.click(screen.getByRole("button", { name: "menu" }));
-    await user.click(screen.getByRole("button", { name: "エクスポート" }));
-
-    expect(mockNavigate).toHaveBeenCalledWith("/admin/master/export");
+    expect(screen.getByRole("heading", { name: "設定" })).toBeInTheDocument();
   });
 });

@@ -1,6 +1,5 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
-import { Button } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useContext } from "react";
@@ -9,7 +8,7 @@ import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import { FLAG_VALUES } from "@/entities/attendance/lib/businessLogic";
 import { calcTotalRestTime } from "@/entities/attendance/lib/time";
-import { BUTTON_MIN_WIDTH } from "@/shared/config/uiDimensions";
+import { AppButton } from "@/shared/ui/button";
 
 import downloadAttendances from "../lib/downloadAttendances";
 
@@ -188,41 +187,16 @@ export default function ExportButton({
   };
 
   return (
-    <Button
+    <AppButton
       onClick={onClick}
-      variant="contained"
-      color="primary"
-      size="medium"
+      variant="solid"
+      tone="primary"
+      size="md"
       fullWidth={fullWidth}
       startIcon={<CloudDownloadOutlinedIcon />}
       disabled={disabled}
-      disableElevation
-      sx={{
-        minWidth: BUTTON_MIN_WIDTH,
-        borderRadius: "9999px",
-        border: "1px solid rgba(6,95,70,0.35)",
-        backgroundColor: "#19b985",
-        color: "#ffffff",
-        fontWeight: 700,
-        boxShadow:
-          "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
-        transition: "transform 150ms ease, background-color 150ms ease",
-        "&:hover": {
-          backgroundColor: "#17ab7b",
-          transform: "translateY(-3px)",
-        },
-        "&:active": { transform: "translateY(-1px)" },
-        "&.Mui-disabled": {
-          transform: "none",
-          opacity: 1,
-          backgroundColor: "#e2e8f0",
-          color: "#64748b",
-          borderColor: "rgba(148,163,184,0.25)",
-          boxShadow: "none",
-        },
-      }}
     >
       一括ダウンロード
-    </Button>
+    </AppButton>
   );
 }

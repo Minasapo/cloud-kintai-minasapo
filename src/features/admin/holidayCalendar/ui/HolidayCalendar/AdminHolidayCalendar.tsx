@@ -1,5 +1,4 @@
-import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
-import { type ReactNode, type SyntheticEvent, useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import CompanyHolidayCalendarList from "../CompanyHolidayCalendar/CompanyHolidayCalendarList";
@@ -12,9 +11,7 @@ interface TabPanelProps {
   value: number;
 }
 
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function CustomTabPanel({ children, value, index, ...other }: TabPanelProps) {
   return (
     <div
       role="tabpanel"
@@ -23,7 +20,7 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      <Box sx={{ p: 3 }}>{children}</Box>
+      {value === index ? <div className="pt-6">{children}</div> : null}
     </div>
   );
 }
@@ -55,35 +52,45 @@ export default function AdminHolidayCalendar() {
     [searchParams],
   );
 
-  const handleChange = (_event: SyntheticEvent, newValue: number) => {
+  const handleChange = (newValue: number) => {
     const next = new URLSearchParams(searchParams);
     next.set(tabParamKey, getTabParamFromIndex(newValue));
     setSearchParams(next, { replace: true });
   };
 
+  const tabs = ["法定休日", "会社休日", "イベントカレンダー"];
+
   return (
-    <Stack spacing={2}>
-      <Typography>
+    <div className="flex flex-col gap-4">
+      <p className="m-0 text-slate-700">
         こちらでは、法定休日、会社休日、およびイベントカレンダーを管理できます。
         <br />
         法定休日は労働基準法に基づく休日、会社休日は企業が独自に設定した休日、イベントカレンダーは休日以外の周知したい情報です。
-        <br />
-      </Typography>
-      <Typography>
+      </p>
+      <p className="m-0 text-slate-700">
         法定休日は、政府が公開する祝日データを元に作成されています。詳細は「ファイルからまとめて追加」をご参照ください。
-      </Typography>
-      <Box sx={{ width: "100%" }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            aria-label="basic tabs example"
-          >
-            <Tab label="法定休日" {...a11yProps(0)} />
-            <Tab label="会社休日" {...a11yProps(1)} />
-            <Tab label="イベントカレンダー" {...a11yProps(2)} />
-          </Tabs>
-        </Box>
+      </p>
+      <div className="w-full">
+        <div className="border-b border-slate-200">
+          <div className="flex flex-wrap gap-2">
+            {tabs.map((tab, index) => (
+              <button
+                key={tab}
+                type="button"
+                {...a11yProps(index)}
+                onClick={() => handleChange(index)}
+                className={[
+                  "rounded-t-xl px-4 py-3 text-sm font-medium transition",
+                  value === index
+                    ? "border-b-2 border-emerald-600 text-emerald-700"
+                    : "text-slate-500 hover:text-slate-800",
+                ].join(" ")}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
         <CustomTabPanel value={value} index={0}>
           <HolidayCalendarList />
         </CustomTabPanel>
@@ -93,7 +100,7 @@ export default function AdminHolidayCalendar() {
         <CustomTabPanel value={value} index={2}>
           <EventCalendarList />
         </CustomTabPanel>
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }

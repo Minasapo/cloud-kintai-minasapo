@@ -9,7 +9,7 @@ describe("SplitModeToggle", () => {
     render(<SplitModeToggle mode="single" onToggle={onToggle} />);
 
     const button = screen.getByRole("button", {
-      name: "スプリットモードに切り替え",
+      name: "2分割モードに切り替え",
     });
     expect(button).toBeInTheDocument();
   });
@@ -17,6 +17,16 @@ describe("SplitModeToggle", () => {
   it("renders with split mode icon", () => {
     const onToggle = jest.fn();
     render(<SplitModeToggle mode="split" onToggle={onToggle} />);
+
+    const button = screen.getByRole("button", {
+      name: "3分割モードに切り替え",
+    });
+    expect(button).toBeInTheDocument();
+  });
+
+  it("renders with triple mode icon", () => {
+    const onToggle = jest.fn();
+    render(<SplitModeToggle mode="triple" onToggle={onToggle} />);
 
     const button = screen.getByRole("button", {
       name: "シングルモードに切り替え",
@@ -30,7 +40,7 @@ describe("SplitModeToggle", () => {
     render(<SplitModeToggle mode="single" onToggle={onToggle} />);
 
     const button = screen.getByRole("button", {
-      name: "スプリットモードに切り替え",
+      name: "2分割モードに切り替え",
     });
     await user.click(button);
 
@@ -42,7 +52,7 @@ describe("SplitModeToggle", () => {
     render(<SplitModeToggle mode="single" onToggle={onToggle} disabled />);
 
     const button = screen.getByRole("button", {
-      name: "スプリットモードに切り替え",
+      name: "2分割モードに切り替え",
     });
     expect(button).toBeDisabled();
   });
@@ -50,11 +60,11 @@ describe("SplitModeToggle", () => {
   it("is enabled when disabled prop is false", () => {
     const onToggle = jest.fn();
     render(
-      <SplitModeToggle mode="single" onToggle={onToggle} disabled={false} />
+      <SplitModeToggle mode="single" onToggle={onToggle} disabled={false} />,
     );
 
     const button = screen.getByRole("button", {
-      name: "スプリットモードに切り替え",
+      name: "2分割モードに切り替え",
     });
     expect(button).not.toBeDisabled();
   });

@@ -1,11 +1,11 @@
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { AuthContext } from "@/context/AuthContext";
 import { hasUnapprovedChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import { StaffRole } from "@/entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@/entities/workflow/model/useWorkflows";
+import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import { listAttendances } from "@/shared/api/graphql/documents/queries";
 import {
@@ -40,14 +40,15 @@ const isWorkflowPendingForCurrentAdmin = (workflow: Workflow) => {
 type AdminPendingApprovalSummaryProps = {
   layoutMode?: "default" | "inline-cards";
   showAdminOnlyTag?: boolean;
+  visualVariant?: "default" | "dashboard";
 };
 
 export default function AdminPendingApprovalSummary({
   layoutMode = "default",
   showAdminOnlyTag = true,
+  visualVariant = "default",
 }: AdminPendingApprovalSummaryProps) {
-  const { authStatus, isCognitoUserRole } = useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
+  const { isAuthenticated, isCognitoUserRole } = useAuthSessionSummary();
 
   const isAdminUser = useMemo(
     () =>
@@ -257,6 +258,7 @@ export default function AdminPendingApprovalSummary({
         className={cardClassName}
         showAdminOnlyTag={showAdminOnlyTag}
         compact={compact}
+        visualVariant={visualVariant}
       />
       <AdminSummaryCard
         testId="admin-pending-workflow-card"
@@ -267,6 +269,7 @@ export default function AdminPendingApprovalSummary({
         className={cardClassName}
         showAdminOnlyTag={showAdminOnlyTag}
         compact={compact}
+        visualVariant={visualVariant}
       />
     </div>
   );

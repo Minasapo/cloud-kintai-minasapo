@@ -35,16 +35,21 @@ import {
 import { useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
+import { logDailyReportMutation } from "@/entities/operation-log/model/dailyReportOperationLog";
 import { sendDailyReportSubmissionNotification } from "@/features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 import {
   buildVersionOrUpdatedAtCondition,
   getGraphQLErrorMessage,
   getNextVersion,
 } from "@/shared/api/graphql/concurrency";
-import { DashboardInnerSurface, PageSection } from "@/shared/ui/layout";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@/shared/ui/layout";
 
 import {
   AlertBox,
@@ -79,7 +84,7 @@ const buildDisplayName = (family?: string | null, given?: string | null) =>
     .join(" ");
 
 export default function DailyReport() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { cognitoUser, loading: isCognitoUserLoading } = useCognitoUser();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -154,11 +159,11 @@ export default function DailyReport() {
           "Failed to send daily report submission notification:",
           mailError,
         );
-        void notify("メール送信エラー", {
-          body: "管理者への通知メールの送信に失敗しました。",
-          mode: "await-interaction",
-          priority: "normal",
-          tag: "daily-report-mail-error",
+        notify({
+          title: "メール送信エラー",
+          description: "管理者への通知メールの送信に失敗しました。",
+          tone: "error",
+          dedupeKey: "daily-report-mail-error",
         });
       }
     },
@@ -495,6 +500,8 @@ export default function DailyReport() {
 
     try {
       if (createdReportIdRef.current) {
+        const beforeReport =
+          reportsById.get(createdReportIdRef.current) ?? null;
         const concurrencyState = getReportConcurrencyState(
           createdReportIdRef.current,
         );
@@ -537,6 +544,16 @@ export default function DailyReport() {
           await notifyAdminsForSubmission(updated);
         }
 
+        if (showNotification) {
+          await logDailyReportMutation({
+            actorStaffId: staffId,
+            before: beforeReport,
+            after: updated,
+            action:
+              status === DailyReportStatus.SUBMITTED ? "submit" : "update",
+          });
+        }
+
         const mapped = mapDailyReport(updated, resolvedAuthor);
         upsertReport(mapped);
         applyCreateSaveResult({
@@ -575,6 +592,16 @@ export default function DailyReport() {
 
         if (showNotification && status === DailyReportStatus.SUBMITTED) {
           await notifyAdminsForSubmission(created);
+        }
+
+        if (showNotification) {
+          await logDailyReportMutation({
+            actorStaffId: staffId,
+            before: null,
+            after: created,
+            action:
+              status === DailyReportStatus.SUBMITTED ? "submit" : "create",
+          });
         }
 
         const mapped = mapDailyReport(created, resolvedAuthor);
@@ -634,6 +661,7 @@ export default function DailyReport() {
     }
 
     try {
+      const beforeReport = reportsById.get(editingReportId) ?? null;
       const concurrencyState = getReportConcurrencyState(editingReportId);
 
       const response = (await graphqlClient.graphql({
@@ -669,6 +697,15 @@ export default function DailyReport() {
 
       if (showNotification && status === DailyReportStatus.SUBMITTED) {
         await notifyAdminsForSubmission(updated);
+      }
+
+      if (showNotification && staffId) {
+        await logDailyReportMutation({
+          actorStaffId: staffId,
+          before: beforeReport,
+          after: updated,
+          action: status === DailyReportStatus.SUBMITTED ? "submit" : "update",
+        });
       }
 
       const mapped = mapDailyReport(updated, resolvedAuthorName);
@@ -793,112 +830,115 @@ export default function DailyReport() {
   ]);
 
   return (
-    <Page title="日報" maxWidth="xl" showDefaultHeader={false}>
-      <PageSection
-        layoutVariant="dashboard"
-        variant="plain"
-        className="daily-report-section"
-      >
-        <VStack className="daily-report-page">
-          <HeroSection
-            isDescriptionExpanded={isHeroDescriptionExpanded}
-            onToggleDescription={() =>
-              setIsHeroDescriptionExpanded((current) => !current)
-            }
-          />
+    <Page title="日報" width="full" showDefaultHeader={false}>
+      <PageContent width="content">
+        <PageSection
+          layoutVariant="dashboard"
+          variant="plain"
+          className="daily-report-section"
+        >
+          <VStack className="daily-report-page">
+            <HeroSection
+              isDescriptionExpanded={isHeroDescriptionExpanded}
+              onToggleDescription={() =>
+                setIsHeroDescriptionExpanded((current) => !current)
+              }
+            />
 
-          {requestError && (
-            <AlertBox tone="error" onClose={() => setRequestError(null)}>
-              {requestError}
-            </AlertBox>
-          )}
+            {requestError && (
+              <AlertBox tone="error" onClose={() => setRequestError(null)}>
+                {requestError}
+              </AlertBox>
+            )}
 
-          <div className="daily-report-grid">
-            <div className="daily-report-sidebar">
-              <Panel className="dr-panel--calendar">
-                <VStack className="dr-gap-1">
-                  <div>
-                    <p className="daily-report-calendar-label">日付を選択</p>
-                  </div>
-                  <DashboardInnerSurface>
-                    <DailyReportCalendar
-                      value={calendarDate}
-                      onChange={handleCalendarChange}
-                      reportedDateSet={reportedDateSet}
-                    />
-                  </DashboardInnerSurface>
-                </VStack>
-              </Panel>
-            </div>
-
-            <div>
-              <Panel className="dr-panel--detail">
-                <VStack className="daily-report-card-body">
-                  <ReportSummaryHeader
-                    calendarDate={calendarDate}
-                  />
-
-                  {actionError && (
-                    <AlertBox tone="error" onClose={() => setActionError(null)}>
-                      {actionError}
-                    </AlertBox>
-                  )}
-
-                  {showInitialLoading ? (
-                    <LoadingSection />
-                  ) : isCreateMode ? (
-                    <CreateReportSection
-                      createForm={createForm}
-                      createFormLastSavedAt={createFormLastSavedAt}
-                      canSubmit={canSubmit}
-                      isSubmitting={isSubmitting}
-                      onChange={handleCreateChange}
-                      onClear={handleClearCreateForm}
-                      onSaveDraft={handleSaveCreateDraft}
-                      onSubmit={handleSubmitCreateReport}
-                    />
-                  ) : selectedReportId ? (
-                    selectedReport ? (
-                      <ReportDetailSection
-                        report={selectedReport}
-                        isEditing={
-                          editingReportId === selectedReport.id &&
-                          Boolean(editDraft)
-                        }
-                        editDraft={editDraft}
-                        isSelectedReportSubmitted={isSelectedReportSubmitted}
-                        editDraftLastSavedAt={editDraftLastSavedAt}
-                        onEditChange={handleEditChange}
+            <div className="daily-report-grid">
+              <div className="daily-report-sidebar">
+                <Panel className="dr-panel--calendar">
+                  <VStack className="dr-gap-1">
+                    <div>
+                      <p className="daily-report-calendar-label">日付を選択</p>
+                    </div>
+                    <DashboardInnerSurface>
+                      <DailyReportCalendar
+                        value={calendarDate}
+                        onChange={handleCalendarChange}
+                        reportedDateSet={reportedDateSet}
                       />
-                    ) : (
-                      <p className="dr-not-found-message">
-                        選択中の日報が見つかりません。
-                      </p>
-                    )
-                  ) : (
-                    <NoReportSection
-                      onCreate={handleStartCreateForCalendarDate}
-                    />
-                  )}
+                    </DashboardInnerSurface>
+                  </VStack>
+                </Panel>
+              </div>
 
-                  {!isCreateMode && selectedReportId && (
-                    <EditActionSection
-                      isEditing={Boolean(editingReportId && editDraft)}
-                      canEditSubmit={canEditSubmit}
-                      isUpdating={isUpdating}
-                      isSelectedReportSubmitted={isSelectedReportSubmitted}
-                      onSaveDraft={handleSaveEditedDraft}
-                      onSubmit={handleSubmitEditedReport}
-                      onCancel={handleCancelEdit}
-                      onEdit={handleEditSelectedReport}
-                    />
-                  )}
-                </VStack>
-              </Panel>
+              <div>
+                <Panel className="dr-panel--detail">
+                  <VStack className="daily-report-card-body">
+                    <ReportSummaryHeader calendarDate={calendarDate} />
+
+                    {actionError && (
+                      <AlertBox
+                        tone="error"
+                        onClose={() => setActionError(null)}
+                      >
+                        {actionError}
+                      </AlertBox>
+                    )}
+
+                    {showInitialLoading ? (
+                      <LoadingSection />
+                    ) : isCreateMode ? (
+                      <CreateReportSection
+                        createForm={createForm}
+                        createFormLastSavedAt={createFormLastSavedAt}
+                        canSubmit={canSubmit}
+                        isSubmitting={isSubmitting}
+                        onChange={handleCreateChange}
+                        onClear={handleClearCreateForm}
+                        onSaveDraft={handleSaveCreateDraft}
+                        onSubmit={handleSubmitCreateReport}
+                      />
+                    ) : selectedReportId ? (
+                      selectedReport ? (
+                        <ReportDetailSection
+                          report={selectedReport}
+                          isEditing={
+                            editingReportId === selectedReport.id &&
+                            Boolean(editDraft)
+                          }
+                          editDraft={editDraft}
+                          isSelectedReportSubmitted={isSelectedReportSubmitted}
+                          editDraftLastSavedAt={editDraftLastSavedAt}
+                          onEditChange={handleEditChange}
+                        />
+                      ) : (
+                        <p className="dr-not-found-message">
+                          選択中の日報が見つかりません。
+                        </p>
+                      )
+                    ) : (
+                      <NoReportSection
+                        onCreate={handleStartCreateForCalendarDate}
+                      />
+                    )}
+
+                    {!isCreateMode && selectedReportId && (
+                      <EditActionSection
+                        isEditing={Boolean(editingReportId && editDraft)}
+                        canEditSubmit={canEditSubmit}
+                        isUpdating={isUpdating}
+                        isSelectedReportSubmitted={isSelectedReportSubmitted}
+                        onSaveDraft={handleSaveEditedDraft}
+                        onSubmit={handleSubmitEditedReport}
+                        onCancel={handleCancelEdit}
+                        onEdit={handleEditSelectedReport}
+                      />
+                    )}
+                  </VStack>
+                </Panel>
+              </div>
             </div>
-          </div>
-        </VStack>
-      </PageSection>
+          </VStack>
+        </PageSection>
+      </PageContent>
     </Page>
   );
 }

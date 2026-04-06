@@ -16,11 +16,11 @@ import {
 } from "../../services/workflowApprovalAttendanceService";
 import { useWorkflowApprovalActions } from "../useWorkflowApprovalActions";
 
-const createOperationLogDataMock = jest.fn();
+const logOperationEventMock = jest.fn();
 
-jest.mock("@entities/operation-log/model/createOperationLogData", () => ({
+jest.mock("@entities/operation-log/model/canonicalOperationLog", () => ({
   __esModule: true,
-  default: (...args: unknown[]) => createOperationLogDataMock(...args),
+  logOperationEvent: (...args: unknown[]) => logOperationEventMock(...args),
 }));
 
 jest.mock("../../services/workflowApprovalAttendanceService", () => {
@@ -105,7 +105,7 @@ describe("useWorkflowApprovalActions", () => {
     jest.spyOn(window, "confirm").mockReturnValue(true);
     processPaidLeaveMock.mockResolvedValue({ kind: "updated" });
     processClockCorrectionMock.mockResolvedValue({ kind: "updated" });
-    createOperationLogDataMock.mockResolvedValue(undefined);
+    logOperationEventMock.mockResolvedValue(undefined);
   });
 
   it("承認時にworkflowを更新し成功通知を出す", async () => {

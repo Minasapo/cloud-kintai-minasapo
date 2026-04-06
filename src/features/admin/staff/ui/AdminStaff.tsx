@@ -10,6 +10,7 @@ import { useContext, useMemo, useState } from "react";
 
 import { useAppDispatchV2 } from "@/app/hooks";
 import { AuthContext } from "@/context/AuthContext";
+import { isAttendanceManagementEnabled } from "@/entities/staff/lib/attendanceManagement";
 import { getWorkTypeLabel } from "@/entities/staff/lib/workTypeOptions";
 import * as MESSAGE_CODE from "@/errors";
 import {
@@ -18,25 +19,22 @@ import {
   SyncCognitoUser,
 } from "@/features/admin/staff/ui/actions";
 import { EditButton } from "@/features/admin/staff/ui/EditButton";
-import { setSnackbarError } from "@/shared/lib/store/snackbarSlice";
+import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 const STATUS_LABEL_MAP = new Map<string, string>([
   ["CONFIRMED", "確認済み"],
   ["FORCE_CHANGE_PASSWORD", "パスワード変更必要"],
 ]);
-
 function getRoleLabel(role: StaffRole, owner?: boolean | null) {
   if (owner) {
     return roleLabelMap.get(StaffRole.OWNER) ?? "オーナー";
   }
   return roleLabelMap.get(role) ?? roleLabelMap.get(StaffRole.NONE) ?? "未設定";
 }
-
 export default function AdminStaff() {
   const dispatch = useAppDispatchV2();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-
   const {
     staffs,
     loading: staffLoading,
@@ -46,10 +44,8 @@ export default function AdminStaff() {
     updateStaff,
     deleteStaff,
   } = useStaffs({ isAuthenticated });
-
   const [searchQuery, setSearchQuery] = useState("");
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-
   const filteredStaffs = useMemo(
     () =>
       staffs
@@ -77,30 +73,31 @@ export default function AdminStaff() {
         }),
     [normalizedSearchQuery, staffs],
   );
-
   const totalStaffCount = staffs.length;
   const enabledStaffCount = staffs.filter((staff) => staff.enabled).length;
   const passwordChangeRequiredCount = staffs.filter(
     (staff) => staff.status === "FORCE_CHANGE_PASSWORD",
   ).length;
-
   if (staffLoading) {
     return (
-      <div className="mx-auto w-full max-w-[1280px] px-2 pt-2 sm:px-4 md:px-6">
+      <div className="w-full px-2 pt-2 sm:px-4 md:px-6">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
           <div className="h-full w-1/3 animate-pulse rounded-full bg-teal-500" />
         </div>
       </div>
     );
   }
-
   if (staffError) {
-    dispatch(setSnackbarError(MESSAGE_CODE.E00001));
+    dispatch(
+      pushNotification({
+        tone: "error",
+        message: MESSAGE_CODE.E00001,
+      }),
+    );
     return null;
   }
-
   return (
-    <div className="mx-auto h-full w-full max-w-[1280px] px-2 pb-3 pt-2 sm:px-4 md:px-6">
+    <div className="h-full w-full px-2 pb-3 pt-2 sm:px-4 md:px-6">
       <div className="space-y-2.5">
         <section className="admin-staff-hero">
           <div className="flex flex-col items-stretch gap-1 sm:flex-row sm:justify-end sm:items-center">
@@ -121,15 +118,25 @@ export default function AdminStaff() {
 
         <section className="flex flex-col gap-1 md:flex-row">
           <div className="admin-staff-stat-card">
-            <p className="admin-staff-stat-label text-xs leading-tight">登録スタッフ</p>
-            <p className="admin-staff-stat-value text-2xl leading-none">{totalStaffCount}</p>
+            <p className="admin-staff-stat-label text-xs leading-tight">
+              登録スタッフ
+            </p>
+            <p className="admin-staff-stat-value text-2xl leading-none">
+              {totalStaffCount}
+            </p>
           </div>
           <div className="admin-staff-stat-card">
-            <p className="admin-staff-stat-label text-xs leading-tight">有効アカウント</p>
-            <p className="admin-staff-stat-value text-2xl leading-none">{enabledStaffCount}</p>
+            <p className="admin-staff-stat-label text-xs leading-tight">
+              有効アカウント
+            </p>
+            <p className="admin-staff-stat-value text-2xl leading-none">
+              {enabledStaffCount}
+            </p>
           </div>
           <div className="admin-staff-stat-card">
-            <p className="admin-staff-stat-label text-xs leading-tight">パスワード変更待ち</p>
+            <p className="admin-staff-stat-label text-xs leading-tight">
+              パスワード変更待ち
+            </p>
             <p className="admin-staff-stat-value warning text-2xl leading-none">
               {passwordChangeRequiredCount}
             </p>
@@ -216,14 +223,14 @@ export default function AdminStaff() {
                 </tr>
               ) : (
                 filteredStaffs.map((staff) => {
-                  const fullName = `${staff.familyName ?? ""} ${
-                    staff.givenName ?? ""
-                  }`.trim();
+                  const fullName =
+                    `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim();
                   const accountStatusLabel = staff.enabled ? "有効" : "無効";
-                  const statusLabel = STATUS_LABEL_MAP.get(staff.status) ?? "***";
+                  const statusLabel =
+                    STATUS_LABEL_MAP.get(staff.status) ?? "***";
                   const roleLabel = getRoleLabel(staff.role, staff.owner);
                   const attendanceManaged =
-                    staff.attendanceManagementEnabled !== false;
+                    isAttendanceManagementEnabled(staff);
                   const workTypeLabel = getWorkTypeLabel(
                     (staff as unknown as Record<string, unknown>).workType as
                       | string
@@ -268,7 +275,9 @@ export default function AdminStaff() {
                           {fullName || "(未設定)"}
                         </p>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2">{staff.mailAddress}</td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        {staff.mailAddress}
+                      </td>
                       <td className="whitespace-nowrap px-4 py-2">
                         <span className="inline-flex items-center rounded-full border border-slate-300 px-2 py-0.5 text-xs text-slate-700">
                           {roleLabel}
@@ -285,7 +294,9 @@ export default function AdminStaff() {
                           {attendanceManaged ? "対象" : "対象外"}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2">{workTypeLabel}</td>
+                      <td className="whitespace-nowrap px-4 py-2">
+                        {workTypeLabel}
+                      </td>
                       <td className="admin-staff-sort-key whitespace-nowrap px-4 py-2">
                         {staff.sortKey || ""}
                       </td>

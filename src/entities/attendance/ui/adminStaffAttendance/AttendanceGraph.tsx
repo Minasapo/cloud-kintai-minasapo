@@ -1,16 +1,22 @@
-import { Box, CircularProgress } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Tooltip,
+} from "chart.js";
 import dayjs, { Dayjs } from "dayjs";
-import { lazy, Suspense, useContext, useMemo } from "react";
+import { useContext, useMemo } from "react";
+import { Bar } from "react-chartjs-2";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
+import { calcTotalRestTime, calcTotalWorkTime } from "@/entities/attendance/lib/time";
+import { alphaColor } from "@/shared/lib/color";
 
-const LazyBarChart = lazy(async () => {
-  const module = await import("@mui/x-charts/BarChart");
-  return { default: module.BarChart };
-});
+ChartJS.register(CategoryScale, LinearScale, BarElement, Legend, Tooltip);
 
 export function AttendanceGraph({
   attendances,
@@ -85,57 +91,83 @@ export function AttendanceGraph({
     };
   }, [attendanceByDate, daysInMonth, standardWorkHours, targetMonth]);
 
-  const seriesA = {
-    data: workTimeData,
-    label: "勤務時間",
-  };
-  const seriesB = {
-    data: restTimeData,
-    label: "休憩時間",
-  };
-  const seriesC = {
-    data: overtimeData,
-    label: "残業時間",
-  };
+  const chartData = useMemo(
+    () => ({
+      labels,
+      datasets: [
+        {
+          label: "勤務時間",
+          data: workTimeData,
+          backgroundColor: alphaColor("#0FA85E", 0.8),
+          borderRadius: 6,
+          borderSkipped: false as const,
+          stack: "time",
+        },
+        {
+          label: "休憩時間",
+          data: restTimeData,
+          backgroundColor: alphaColor("#2ACEDB", 0.75),
+          borderRadius: 6,
+          borderSkipped: false as const,
+          stack: "time",
+        },
+        {
+          label: "残業時間",
+          data: overtimeData,
+          backgroundColor: alphaColor("#F5B700", 0.82),
+          borderRadius: 6,
+          borderSkipped: false as const,
+          stack: "time",
+        },
+      ],
+    }),
+    [labels, overtimeData, restTimeData, workTimeData],
+  );
 
-  const props = {
-    xAxis: [
-      {
-        data: labels,
-        scaleType: "band" as const,
+  const chartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "top" as const,
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            color: "#334155",
+          },
+        },
       },
-    ],
-  };
+      scales: {
+        x: {
+          stacked: true,
+          grid: {
+            display: false,
+          },
+          ticks: {
+            color: "#64748B",
+          },
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          grid: {
+            color: alphaColor("#0F172A", 0.08),
+          },
+          ticks: {
+            color: "#64748B",
+          },
+        },
+      },
+    }),
+    [],
+  );
 
   return (
-    <Box
-      sx={{
-        borderRadius: "24px",
-        border: "1px solid rgba(16, 185, 129, 0.14)",
-        bgcolor: "#f8fffb",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.75)",
-        px: { xs: 1, md: 2 },
-        py: 2,
-      }}
-    >
-      <Suspense
-        fallback={
-          <Box sx={{ py: 3, display: "flex", justifyContent: "center" }}>
-            <CircularProgress size={24} aria-label="グラフを読み込み中" />
-          </Box>
-        }
-      >
-        <LazyBarChart
-          height={150}
-          grid={{ horizontal: true }}
-          series={[
-            { ...seriesA, stack: "time" },
-            { ...seriesB, stack: "time" },
-            { ...seriesC, stack: "time" },
-          ]}
-          {...props}
-        />
-      </Suspense>
-    </Box>
+    <div className="rounded-[24px] border border-emerald-200/60 bg-[linear-gradient(180deg,#f8fffb_0%,#f2fbf7_100%)] px-3 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] md:px-5">
+      <div className="h-[220px]">
+        <Bar data={chartData} options={chartOptions} />
+      </div>
+    </div>
   );
 }

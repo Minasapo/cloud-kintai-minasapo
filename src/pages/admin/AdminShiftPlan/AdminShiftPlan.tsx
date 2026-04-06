@@ -1,9 +1,10 @@
-import { useGetHolidayCalendarsQuery } from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { designTokenVar } from "@/shared/designSystem";
 
 import { ShiftPlanFooter, ShiftPlanHeader, ShiftPlanTable } from "./components";
@@ -15,7 +16,7 @@ const PAGE_PADDING_Y = designTokenVar("spacing.xxl", "32px");
 const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
 
 export default function AdminShiftPlan() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const {
     selectedYear,
     currentRows,
@@ -33,20 +34,19 @@ export default function AdminShiftPlan() {
     performSave,
   } = useShiftPlanData();
   const { registerCellRef, focusCell } = useDayCellFocus();
-  const { data: holidayCalendars = [], error: holidayCalendarsError } =
-    useGetHolidayCalendarsQuery();
+  const { holidayCalendars, error: calendarsError } = useCalendars();
 
   useEffect(() => {
-    if (holidayCalendarsError) {
-      console.error(holidayCalendarsError);
-      void notify("エラー", {
-        body: MESSAGE_CODE.E00001,
-        mode: "await-interaction",
-        priority: "high",
-        tag: "holiday-calendar-error",
+    if (calendarsError) {
+      console.error(calendarsError);
+      notify({
+        title: "エラー",
+        description: MESSAGE_CODE.E00001,
+        tone: "error",
+        dedupeKey: "holiday-calendar-error",
       });
     }
-  }, [holidayCalendarsError, notify]);
+  }, [calendarsError, notify]);
 
   const holidayNameMap = useMemo(() => {
     if (!holidayCalendars.length) return new Map<string, string>();
@@ -90,6 +90,10 @@ export default function AdminShiftPlan() {
     performSave,
   });
   const isBusy = isPending || isFetchingYear || isSaving || isAutoSaving;
+  const { dialog } = usePageLeaveGuard({
+    isDirty,
+    isBusy: isSaving || isAutoSaving,
+  });
 
   return (
     <section
@@ -102,6 +106,7 @@ export default function AdminShiftPlan() {
         gap: PAGE_SECTION_GAP,
       } as React.CSSProperties}
     >
+      {dialog}
       <div className="px-[var(--page-px-xs)] md:px-[var(--page-px-md)] flex flex-col gap-[inherit]">
         <ShiftPlanHeader
           selectedYear={selectedYear}

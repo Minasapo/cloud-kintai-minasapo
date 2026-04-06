@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Checkbox,
   CircularProgress,
   Container,
   Dialog,
@@ -23,7 +24,6 @@ import {
   Paper,
   Select,
   Stack,
-  Switch,
   Table,
   TableBody,
   TableCell,
@@ -45,9 +45,9 @@ import React, {
 } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
+import { useAppNotification } from "@/hooks/useAppNotification";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
 import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 import {
   loadShiftPatterns,
@@ -61,7 +61,7 @@ import { useShiftRequestPersist } from "../model/useShiftRequestPersist";
 type Status = ShiftRequestDayStatus;
 
 export default function ShiftRequestForm() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { cognitoUser, loading: cognitoUserLoading } = useCognitoUser();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -235,19 +235,20 @@ export default function ShiftRequestForm() {
       !isLoadingShiftRequest,
     delay: 2000, // 2秒のdebounce
     onSaveSuccess: () => {
-      void notify("自動保存完了", {
-        body: "シフトを自動保存しました",
-        mode: "auto-close",
-        tag: "shift-auto-save-success",
+      notify({
+        title: "自動保存完了",
+        description: "シフトを自動保存しました",
+        tone: "success",
+        dedupeKey: "shift-auto-save-success",
       });
     },
     onSaveError: (error) => {
       console.error("Auto-save error:", error);
-      void notify("自動保存エラー", {
-        body: "シフトの自動保存に失敗しました",
-        mode: "await-interaction",
-        priority: "high",
-        tag: "shift-auto-save-error",
+      notify({
+        title: "自動保存エラー",
+        description: "シフトの自動保存に失敗しました",
+        tone: "error",
+        dedupeKey: "shift-auto-save-error",
       });
     },
   });
@@ -453,11 +454,11 @@ export default function ShiftRequestForm() {
         if (isMounted) {
           console.error("Failed to load shift patterns", error);
           setPatterns([]);
-          notify("エラー", {
-            body: MESSAGE_CODE.E00001,
-            mode: "await-interaction",
-            priority: "high",
-            tag: "shift-pattern-load-error",
+          notify({
+            title: "エラー",
+            description: MESSAGE_CODE.E00001,
+            tone: "error",
+            dedupeKey: "shift-pattern-load-error",
           });
         }
       } finally {
@@ -499,11 +500,11 @@ export default function ShiftRequestForm() {
         await saveShiftPatterns(serializePatterns(nextPatterns));
       } catch (error) {
         console.error("Failed to save shift patterns", error);
-        void notify("エラー", {
-          body: MESSAGE_CODE.E00001,
-          mode: "await-interaction",
-          priority: "high",
-          tag: "shift-pattern-save-error",
+        notify({
+          title: "エラー",
+          description: MESSAGE_CODE.E00001,
+          tone: "error",
+          dedupeKey: "shift-pattern-save-error",
         });
       }
     },
@@ -830,7 +831,9 @@ export default function ShiftRequestForm() {
               <IconButton size="small" onClick={prevMonth} aria-label="前の月">
                 <ArrowBackIcon />
               </IconButton>
-              <Typography sx={{ fontSize: "1.05rem", fontWeight: 700, color: "#0f172a" }}>
+              <Typography
+                sx={{ fontSize: "1.05rem", fontWeight: 700, color: "#0f172a" }}
+              >
                 {monthStart.format("YYYY年 M月")}
               </Typography>
               <IconButton size="small" onClick={nextMonth} aria-label="次の月">
@@ -838,7 +841,12 @@ export default function ShiftRequestForm() {
               </IconButton>
 
               <Box
-                sx={{ display: "flex", alignItems: "center", gap: 0.75, ml: { xs: 0, sm: 1 } }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  ml: { xs: 0, sm: 1 },
+                }}
               >
                 {isAutoSaving && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -912,9 +920,9 @@ export default function ShiftRequestForm() {
                   >
                     <FormControlLabel
                       control={
-                        <Switch
+                        <Checkbox
                           checked={isSelectionMode}
-                          onChange={(_, checked) => setIsSelectionMode(checked)}
+                          onChange={(e) => setIsSelectionMode(e.target.checked)}
                           disabled={interactionDisabled}
                         />
                       }
@@ -956,7 +964,11 @@ export default function ShiftRequestForm() {
                 }}
               >
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom sx={{ color: "#475569", fontWeight: 700 }}>
+                  <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{ color: "#475569", fontWeight: 700 }}
+                  >
                     カレンダー
                   </Typography>
                   <Box
@@ -967,108 +979,115 @@ export default function ShiftRequestForm() {
                       textAlign: "center",
                     }}
                   >
-                  {weekdayLabels.map((label, idx) => (
-                    <Typography
-                      key={`weekday-${idx}`}
-                      variant="caption"
-                      role={canBulkSelectByWeekday ? "button" : undefined}
-                      tabIndex={canBulkSelectByWeekday ? 0 : undefined}
-                      onClick={
-                        canBulkSelectByWeekday
-                          ? () => handleWeekdayLabelClick(idx)
-                          : undefined
-                      }
-                      onKeyDown={
-                        canBulkSelectByWeekday
-                          ? (event) => {
-                              if (event.key === "Enter" || event.key === " ") {
-                                event.preventDefault();
-                                handleWeekdayLabelClick(idx);
+                    {weekdayLabels.map((label, idx) => (
+                      <Typography
+                        key={`weekday-${idx}`}
+                        variant="caption"
+                        role={canBulkSelectByWeekday ? "button" : undefined}
+                        tabIndex={canBulkSelectByWeekday ? 0 : undefined}
+                        onClick={
+                          canBulkSelectByWeekday
+                            ? () => handleWeekdayLabelClick(idx)
+                            : undefined
+                        }
+                        onKeyDown={
+                          canBulkSelectByWeekday
+                            ? (event) => {
+                                if (
+                                  event.key === "Enter" ||
+                                  event.key === " "
+                                ) {
+                                  event.preventDefault();
+                                  handleWeekdayLabelClick(idx);
+                                }
                               }
-                            }
-                          : undefined
-                      }
-                      sx={{
-                        color: "text.secondary",
-                        py: 0.5,
-                        cursor: canBulkSelectByWeekday ? "pointer" : "default",
-                        userSelect: "none",
-                      }}
-                    >
-                      {label}
-                    </Typography>
-                  ))}
-                  {calendarDays.map((dayValue) => {
-                    const key = dayValue.format("YYYY-MM-DD");
-                    const status = selectedDates[key]?.status;
-                    const isCurrentMonthDay = dayValue.isSame(
-                      monthStart,
-                      "month",
-                    );
-                    const isFocused = focusedDateKey === key;
-                    const isSelectedDate = selectedRowKeys.includes(key);
-                    const statusBgColor =
-                      getStatusBgColor(status) ||
-                      theme.palette.background.paper;
-                    const boxShadowValue = isFocused
-                      ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.8)}`
-                      : isSelectedDate
-                        ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.5)}`
-                        : undefined;
-                    const borderColor = isFocused
-                      ? theme.palette.primary.main
-                      : isSelectedDate
-                        ? alpha(theme.palette.primary.main, 0.5)
-                        : "divider";
-                    return (
-                      <Box
-                        key={`calendar-${key}`}
-                        onClick={(event) =>
-                          handleCalendarDayClick(dayValue, event)
+                            : undefined
                         }
                         sx={{
-                          position: "relative",
-                          minHeight: {
-                            xs: 42,
-                            sm: PANEL_HEIGHTS.FORM_ITEM_MIN,
-                          },
-                          px: { xs: 0.25, sm: 0.5 },
-                          py: { xs: 0.25, sm: 0.5 },
-                          borderRadius: 1,
-                          border: "1px solid",
-                          borderColor,
-                          bgcolor: statusBgColor,
-                          boxShadow: boxShadowValue,
-                          color: isCurrentMonthDay
-                            ? "text.primary"
-                            : "text.disabled",
-                          cursor: isCurrentMonthDay ? "pointer" : "default",
-                          opacity: isCurrentMonthDay ? 1 : 0.4,
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 0.25,
+                          color: "text.secondary",
+                          py: 0.5,
+                          cursor: canBulkSelectByWeekday
+                            ? "pointer"
+                            : "default",
+                          userSelect: "none",
                         }}
                       >
-                        <Typography variant={isTablet ? "body2" : "subtitle2"}>
-                          {dayValue.date()}
-                        </Typography>
-                        {status && (
-                          <Typography variant="caption" sx={{ fontSize: 10 }}>
-                            {isMobile
-                              ? (statusMobileLabelMap[status] ??
-                                statusLabelMap[status])
-                              : statusLabelMap[status]}
+                        {label}
+                      </Typography>
+                    ))}
+                    {calendarDays.map((dayValue) => {
+                      const key = dayValue.format("YYYY-MM-DD");
+                      const status = selectedDates[key]?.status;
+                      const isCurrentMonthDay = dayValue.isSame(
+                        monthStart,
+                        "month",
+                      );
+                      const isFocused = focusedDateKey === key;
+                      const isSelectedDate = selectedRowKeys.includes(key);
+                      const statusBgColor =
+                        getStatusBgColor(status) ||
+                        theme.palette.background.paper;
+                      const boxShadowValue = isFocused
+                        ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.8)}`
+                        : isSelectedDate
+                          ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.5)}`
+                          : undefined;
+                      const borderColor = isFocused
+                        ? theme.palette.primary.main
+                        : isSelectedDate
+                          ? alpha(theme.palette.primary.main, 0.5)
+                          : "divider";
+                      return (
+                        <Box
+                          key={`calendar-${key}`}
+                          onClick={(event) =>
+                            handleCalendarDayClick(dayValue, event)
+                          }
+                          sx={{
+                            position: "relative",
+                            minHeight: {
+                              xs: 42,
+                              sm: PANEL_HEIGHTS.FORM_ITEM_MIN,
+                            },
+                            px: { xs: 0.25, sm: 0.5 },
+                            py: { xs: 0.25, sm: 0.5 },
+                            borderRadius: 1,
+                            border: "1px solid",
+                            borderColor,
+                            bgcolor: statusBgColor,
+                            boxShadow: boxShadowValue,
+                            color: isCurrentMonthDay
+                              ? "text.primary"
+                              : "text.disabled",
+                            cursor: isCurrentMonthDay ? "pointer" : "default",
+                            opacity: isCurrentMonthDay ? 1 : 0.4,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 0.25,
+                          }}
+                        >
+                          <Typography
+                            variant={isTablet ? "body2" : "subtitle2"}
+                          >
+                            {dayValue.date()}
                           </Typography>
-                        )}
-                      </Box>
-                    );
-                  })}
+                          {status && (
+                            <Typography variant="caption" sx={{ fontSize: 10 }}>
+                              {isMobile
+                                ? (statusMobileLabelMap[status] ??
+                                  statusLabelMap[status])
+                                : statusLabelMap[status]}
+                            </Typography>
+                          )}
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                  <Box sx={{ mt: 1 }}>{renderSummary()}</Box>
                 </Box>
-                <Box sx={{ mt: 1 }}>{renderSummary()}</Box>
-              </Box>
-              <Box>{renderDayDetail({ isMobileView: isMobile })}</Box>
+                <Box>{renderDayDetail({ isMobileView: isMobile })}</Box>
               </Box>
             </Stack>
           </Box>
@@ -1083,10 +1102,7 @@ export default function ShiftRequestForm() {
             bgcolor: "#ffffff",
           }}
         >
-          <Box
-            component="form"
-            onSubmit={(e) => e.preventDefault()}
-          >
+          <Box component="form" onSubmit={(e) => e.preventDefault()}>
             <Stack spacing={2} alignItems="stretch">
               <TextField
                 label="備考"

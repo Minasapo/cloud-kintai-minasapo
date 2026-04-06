@@ -1208,6 +1208,75 @@ export const deleteShiftRequest = /* GraphQL */ `mutation DeleteShiftRequest(
   APITypes.DeleteShiftRequestMutationVariables,
   APITypes.DeleteShiftRequestMutation
 >;
+export const createShiftEditLock = /* GraphQL */ `mutation CreateShiftEditLock(
+  $input: CreateShiftEditLockInput!
+  $condition: ModelShiftEditLockConditionInput
+) {
+  createShiftEditLock(input: $input, condition: $condition) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateShiftEditLockMutationVariables,
+  APITypes.CreateShiftEditLockMutation
+>;
+export const updateShiftEditLock = /* GraphQL */ `mutation UpdateShiftEditLock(
+  $input: UpdateShiftEditLockInput!
+  $condition: ModelShiftEditLockConditionInput
+) {
+  updateShiftEditLock(input: $input, condition: $condition) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateShiftEditLockMutationVariables,
+  APITypes.UpdateShiftEditLockMutation
+>;
+export const deleteShiftEditLock = /* GraphQL */ `mutation DeleteShiftEditLock(
+  $input: DeleteShiftEditLockInput!
+  $condition: ModelShiftEditLockConditionInput
+) {
+  deleteShiftEditLock(input: $input, condition: $condition) {
+    id
+    targetMonth
+    staffId
+    date
+    holderUserId
+    holderUserName
+    acquiredAt
+    expiresAt
+    version
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteShiftEditLockMutationVariables,
+  APITypes.DeleteShiftEditLockMutation
+>;
 export const createShiftPlanYear = /* GraphQL */ `mutation CreateShiftPlanYear(
   $input: CreateShiftPlanYearInput!
   $condition: ModelShiftPlanYearConditionInput
@@ -1596,10 +1665,16 @@ export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
   createOperationLog(input: $input, condition: $condition) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1610,6 +1685,7 @@ export const createOperationLog = /* GraphQL */ `mutation CreateOperationLog(
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1627,10 +1703,16 @@ export const updateOperationLog = /* GraphQL */ `mutation UpdateOperationLog(
   updateOperationLog(input: $input, condition: $condition) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1641,6 +1723,7 @@ export const updateOperationLog = /* GraphQL */ `mutation UpdateOperationLog(
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt
@@ -1658,10 +1741,16 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
   deleteOperationLog(input: $input, condition: $condition) {
     id
     staffId
+    resourceKey
+    targetStaffId
     action
     resource
     resourceId
+    summary
     timestamp
+    before
+    after
+    diff
     details
     ipAddress
     userAgent
@@ -1672,6 +1761,7 @@ export const deleteOperationLog = /* GraphQL */ `mutation DeleteOperationLog(
     idempotencyKey
     appVersion
     severity
+    logFormatVersion
     version
     createdAt
     updatedAt

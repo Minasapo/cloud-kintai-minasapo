@@ -1,9 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
-import {
-  Button,
-  ButtonBase,
-  TextField,
-} from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
@@ -13,7 +7,10 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
 import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import { SettingsButton, SettingsTextField } from "@/features/admin/layout/ui/SettingsPrimitives";
+import { useAppNotification } from "@/hooks/useAppNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 import { resolveThemeColor } from "@/shared/config/theme";
 
 const basePalette = [
@@ -70,7 +67,7 @@ const TILE_SIZE = 44;
 const MAX_TILES_PER_ROW = 10;
 
 export default function AdminTheme() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const {
     getThemeColor,
     getConfigId,
@@ -117,6 +114,10 @@ export default function AdminTheme() {
   const isDirty =
     normalizedColorCode !== "" &&
     normalizedColorCode !== normalizedCurrentColor;
+  const { dialog } = usePageLeaveGuard({
+    isDirty,
+    isBusy: saving,
+  });
   const previewTokens = useMemo(
     () => (isValidHex ? getThemeTokens(normalizedColorCode) : themeTokens),
     [isValidHex, normalizedColorCode, themeTokens, getThemeTokens],
@@ -143,20 +144,20 @@ export default function AdminTheme() {
 
   const handleSave = async () => {
     if (!isValidHex) {
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: E15001,
+        tone: "error",
       });
       return;
     }
 
     const payloadColor = normalizeColor(colorCode);
     if (!payloadColor) {
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: E15001,
+        tone: "error",
       });
       return;
     }
@@ -177,13 +178,13 @@ export default function AdminTheme() {
       }
       await fetchConfig();
       setCurrentColor(payloadColor);
-      void notify(S15001, { mode: "auto-close" });
+      notify({ title: S15001, tone: "success" });
     } catch (error) {
       console.error(error);
-      void notify("エラー", {
-        body: E15001,
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: E15001,
+        tone: "error",
       });
     } finally {
       setSaving(false);
@@ -191,7 +192,8 @@ export default function AdminTheme() {
   };
 
   return (
-    <AdminSettingsLayout title="テーマ" description="テーマを選択すると、ヘッダーとフッターの配色が変更されます。">
+    <AdminSettingsLayout description="テーマを選択すると、ヘッダーとフッターの配色が変更されます。">
+      {dialog}
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-4">
@@ -211,55 +213,37 @@ export default function AdminTheme() {
                   normalizedColorCode !== "" &&
                   normalizedColorCode === normalizeColor(color);
                 return (
-                  <ButtonBase
+                  <button
                     key={color}
                     onClick={() => handlePresetSelect(color)}
-                    sx={{
+                    type="button"
+                    className="rounded-md border-2 transition focus:outline-none"
+                    aria-label={`テーマカラー ${color}`}
+                    style={{
                       width: TILE_SIZE,
                       height: TILE_SIZE,
-                      borderRadius: 1,
-                      border: "2px solid",
-                      borderColor: isSelected
-                        ? brandPrimary
-                        : previewPanelDividerColor,
+                      borderColor: isSelected ? brandPrimary : previewPanelDividerColor,
                       backgroundColor: color,
-                      boxShadow: isSelected
-                        ? `0 0 0 2px ${focusRingColor}`
-                        : "none",
-                      transition: "box-shadow 120ms ease",
-                      "&:focus-visible": {
-                        outline: "none",
-                        boxShadow: `0 0 0 3px ${focusRingColor}`,
-                      },
+                      boxShadow: isSelected ? `0 0 0 2px ${focusRingColor}` : "none",
                     }}
-                    aria-label={`テーマカラー ${color}`}
                   />
                 );
               })}
-              <ButtonBase
+              <button
                 onClick={() => setCustomMode(true)}
-                sx={{
+                type="button"
+                className="flex items-center justify-center rounded-md border-2 border-dashed bg-transparent focus:outline-none"
+                aria-label="その他のカラーコードを入力"
+                style={{
                   width: TILE_SIZE,
                   height: TILE_SIZE,
-                  borderRadius: 1,
-                  border: "2px dashed",
-                  borderColor: customMode
-                    ? brandPrimary
-                    : previewPanelDividerColor,
-                  color: customMode ? brandPrimary : "text.secondary",
-                  backgroundColor: "transparent",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  "&:focus-visible": {
-                    outline: "none",
-                    boxShadow: `0 0 0 3px ${focusRingColor}`,
-                  },
+                  borderColor: customMode ? brandPrimary : previewPanelDividerColor,
+                  color: customMode ? brandPrimary : "#64748b",
+                  boxShadow: customMode ? `0 0 0 2px ${focusRingColor}` : "none",
                 }}
-                aria-label="その他のカラーコードを入力"
               >
-                <AddIcon />
-              </ButtonBase>
+                <SettingsIcon name="plus" />
+              </button>
             </div>
           </div>
 
@@ -268,25 +252,15 @@ export default function AdminTheme() {
               <h3 className="text-sm font-semibold text-slate-800">
                 カラーコードを直接指定
               </h3>
-              <TextField
-                size="small"
+              <SettingsTextField
                 label="#RRGGBB"
                 value={colorCode}
-                onChange={(e) => handleHexInput(e.target.value)}
-                error={!isValidHex}
-                helperText={
+                onChange={handleHexInput}
+                errorText={
                   isValidHex ? "" : "正しい16進数カラーコードを入力してください"
                 }
-                sx={{
-                  maxWidth: 240,
-                  "& .MuiOutlinedInput-root.Mui-focused": {
-                    boxShadow: `0 0 0 3px ${focusRingColor}`,
-                    borderRadius: 1,
-                  },
-                  "& .MuiOutlinedInput-root.Mui-focused fieldset": {
-                    borderColor: brandPrimary,
-                  },
-                }}
+                className="max-w-[240px]"
+                inputClassName="uppercase"
               />
             </div>
           )}
@@ -306,40 +280,27 @@ export default function AdminTheme() {
               <p className="text-xs text-slate-500 pb-2 border-b" style={{ borderColor: previewPanelDividerColor }}>
                 選択したカラーがフォーカスリングやボタンにどう反映されるかを確認できます。
               </p>
-              <Button
-                variant="contained"
-                size="small"
-                sx={{
-                  alignSelf: "flex-start",
-                  textTransform: "none",
+              <button
+                type="button"
+                className="mt-1 self-start rounded-lg px-4 py-2 text-sm font-medium focus:outline-none"
+                style={{
                   backgroundColor: brandPrimary,
                   color: previewTokens.color.brand.primary.contrastText,
-                  boxShadow: "none",
-                  mt: 1,
-                  "&:hover": {
-                    backgroundColor: previewTokens.color.brand.primary.dark,
-                    boxShadow: "none",
-                  },
-                  "&:focus-visible": {
-                    outline: "none",
-                    boxShadow: `0 0 0 3px ${focusRingColor}`,
-                  },
+                  boxShadow: `0 0 0 0 ${focusRingColor}`,
                 }}
               >
                 プライマリボタン
-              </Button>
+              </button>
             </div>
           </div>
 
           <div className="pt-4 border-t border-slate-200 flex justify-end">
-            <button
-              className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
+            <SettingsButton
               onClick={handleSave}
               disabled={!isValidHex || saving || !isDirty}
-              type="button"
             >
               {saving ? "保存中..." : "保存"}
-            </button>
+            </SettingsButton>
           </div>
         </div>
       </div>

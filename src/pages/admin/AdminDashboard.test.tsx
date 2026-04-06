@@ -44,7 +44,16 @@ jest.mock("@/shared/api/amplify/graphqlClient", () => ({
 
 jest.mock("@/widgets/layout/header/AdminPendingApprovalSummary", () => ({
   __esModule: true,
-  default: () => <div data-testid="admin-pending-approval-summary-mock" />,
+  default: ({
+    visualVariant,
+  }: {
+    visualVariant?: "default" | "dashboard";
+  }) => (
+    <div
+      data-testid="admin-pending-approval-summary-mock"
+      data-visual-variant={visualVariant ?? "default"}
+    />
+  ),
 }));
 
 jest.mock("@/entities/staff/model/useStaffs/useStaffs", () => ({
@@ -59,6 +68,12 @@ jest.mock("@/entities/attendance/model/useCloseDates", () => ({
 jest.mock("react-chartjs-2", () => ({
   Bar: (props: unknown) => mockBar(props),
 }));
+
+const createSubscriptionMock = () => ({
+  subscribe: jest.fn(() => ({
+    unsubscribe: jest.fn(),
+  })),
+});
 
 describe("AdminDashboard", () => {
   beforeEach(() => {
@@ -127,7 +142,7 @@ describe("AdminDashboard", () => {
         });
       }
 
-      return Promise.resolve({});
+      return createSubscriptionMock();
     });
   });
 
@@ -149,6 +164,9 @@ describe("AdminDashboard", () => {
     expect(
       screen.getByTestId("admin-pending-approval-summary-mock"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("admin-pending-approval-summary-mock"),
+    ).toHaveAttribute("data-visual-variant", "dashboard");
     expect(
       screen.getByTestId("admin-dashboard-staff-work-status-chart-card"),
     ).toBeInTheDocument();
@@ -217,30 +235,35 @@ describe("AdminDashboard", () => {
               items: [
                 {
                   staffId: "staff-1",
+                  workDate: "2026-03-24",
                   startTime: "09:00",
                   endTime: null,
                   rests: [],
                 },
                 {
                   staffId: "staff-2",
+                  workDate: "2026-03-24",
                   startTime: "09:00",
                   endTime: null,
                   rests: [{ startTime: "12:00", endTime: null }],
                 },
                 {
-                  staffId: "cognito-3",
+                  staffId: "staff-3",
+                  workDate: "2026-03-24",
                   startTime: "2026-03-24T09:00:00+09:00",
-                  endTime: "2026-03-24T19:00:00+09:00",
+                  endTime: "2026-03-24T21:00:00+09:00",
                   rests: [],
                 },
                 {
-                  staffId: "staff-1",
-                  startTime: "10:00",
-                  endTime: null,
+                  staffId: "cognito-3",
+                  workDate: "2026-03-25",
+                  startTime: "2026-03-25T09:00:00+09:00",
+                  endTime: "2026-03-25T19:00:00+09:00",
                   rests: [],
                 },
                 {
                   staffId: "unknown-staff-id",
+                  workDate: "2026-03-24",
                   startTime: "2026-03-24T09:00:00+09:00",
                   endTime: "2026-03-24T18:00:00+09:00",
                   rests: [],
@@ -276,7 +299,7 @@ describe("AdminDashboard", () => {
         });
       }
 
-      return Promise.resolve({});
+      return createSubscriptionMock();
     });
 
     render(<AdminDashboard />);
@@ -300,11 +323,150 @@ describe("AdminDashboard", () => {
       throw new Error("Bar props were not captured");
     }
 
-    const overtimeDataset = capturedBarProps.data.datasets.find(
-      (dataset) => dataset.label === "残業時間",
+    const workDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "勤務時間",
     );
-    expect(overtimeDataset?.data.some((value) => value < 0)).toBe(true);
+    expect(workDataset?.data.some((value) => value > 0)).toBe(true);
     expect(capturedBarProps.data.labels).not.toContain("unknown-staff-id");
     expect(capturedBarProps.data.labels).toContain("鈴木 次郎");
+    expect(capturedBarProps.data.labels.filter((label) => label === "鈴木 次郎")).toHaveLength(1);
+  });
+
+  it("同一スタッフ同日の重複勤怠を除外して警告表示する", async () => {
+    mockGraphql.mockImplementation(({ query }: { query: unknown }) => {
+      if (query === listAttendances) {
+        return Promise.resolve({
+          data: {
+            listAttendances: {
+              items: [
+                {
+                  staffId: "staff-1",
+                  workDate: "2026-03-24",
+                  startTime: "2026-03-24T09:00:00+09:00",
+                  endTime: "2026-03-24T18:00:00+09:00",
+                  rests: [],
+                },
+                {
+                  staffId: "staff-1",
+                  workDate: "2026-03-24",
+                  startTime: "2026-03-24T10:00:00+09:00",
+                  endTime: "2026-03-24T19:00:00+09:00",
+                  rests: [],
+                },
+                {
+                  staffId: "staff-2",
+                  workDate: "2026-03-25",
+                  startTime: "2026-03-25T09:00:00+09:00",
+                  endTime: "2026-03-25T18:00:00+09:00",
+                  rests: [],
+                },
+              ],
+              nextToken: null,
+            },
+          },
+        });
+      }
+
+      if (query === listDailyReports) {
+        return Promise.resolve({
+          data: {
+            listDailyReports: {
+              items: [],
+              nextToken: null,
+            },
+          },
+        });
+      }
+
+      return createSubscriptionMock();
+    });
+
+    render(<AdminDashboard />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("admin-dashboard-staff-work-status-warning"),
+      ).toHaveTextContent("重複勤怠がある1日分を含む可能性があります");
+      expect(
+        screen.getByTestId("admin-dashboard-staff-work-status-chart-mock"),
+      ).toBeInTheDocument();
+    });
+
+    if (!capturedBarProps) {
+      throw new Error("Bar props were not captured");
+    }
+
+    const workDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "勤務時間",
+    );
+
+    expect(capturedBarProps.data.labels).toContain("山田 太郎");
+    expect(capturedBarProps.data.labels).toContain("佐藤 花子");
+    expect(workDataset?.data).toEqual([18, 9, 0]);
+  });
+
+  it("cognitoUserIdで保存された勤怠も同一スタッフとして集計する", async () => {
+    mockGraphql.mockImplementation(({ query }: { query: unknown }) => {
+      if (query === listAttendances) {
+        return Promise.resolve({
+          data: {
+            listAttendances: {
+              items: [
+                {
+                  staffId: "staff-3",
+                  workDate: "2026-03-24",
+                  startTime: "2026-03-24T09:00:00+09:00",
+                  endTime: "2026-03-24T18:00:00+09:00",
+                  rests: [],
+                },
+                {
+                  staffId: "cognito-3",
+                  workDate: "2026-03-25",
+                  startTime: "2026-03-25T09:00:00+09:00",
+                  endTime: "2026-03-25T18:00:00+09:00",
+                  rests: [],
+                },
+              ],
+              nextToken: null,
+            },
+          },
+        });
+      }
+
+      if (query === listDailyReports) {
+        return Promise.resolve({
+          data: {
+            listDailyReports: {
+              items: [],
+              nextToken: null,
+            },
+          },
+        });
+      }
+
+      return createSubscriptionMock();
+    });
+
+    render(<AdminDashboard />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("admin-dashboard-staff-work-status-chart-mock"),
+      ).toBeInTheDocument();
+    });
+
+    if (!capturedBarProps) {
+      throw new Error("Bar props were not captured");
+    }
+
+    const suzukiIndex = capturedBarProps.data.labels.findIndex(
+      (label) => label === "鈴木 次郎",
+    );
+    const workDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "勤務時間",
+    );
+
+    expect(suzukiIndex).toBeGreaterThanOrEqual(0);
+    expect(workDataset?.data[suzukiIndex]).toBe(18);
   });
 });

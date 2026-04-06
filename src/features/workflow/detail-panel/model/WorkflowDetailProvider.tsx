@@ -7,7 +7,7 @@ import { useSession } from "@/app/providers/session/useSession";
 import type { WorkflowDetailLoaderData } from "@/entities/workflow/model/loader";
 import useWorkflowCommentThread from "@/features/workflow/comment-thread/model/useWorkflowCommentThread";
 import { useWorkflowLoaderWorkflow } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 
 import { useWorkflowDetailMeta } from "./useWorkflowDetailMeta";
 import { useWorkflowWithdraw } from "./useWorkflowWithdraw";
@@ -21,7 +21,7 @@ export function WorkflowDetailProvider({ children }: { children: ReactNode }) {
   const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const { workflow: initialWorkflow } =
     useLoaderData() as WorkflowDetailLoaderData;
-  const { notify, canNotify } = useLocalNotification();
+  const { notify } = useAppNotification();
 
   const currentStaffId = useMemo(() => {
     if (!cognitoUser?.id) return null;
@@ -31,14 +31,13 @@ export function WorkflowDetailProvider({ children }: { children: ReactNode }) {
   }, [cognitoUser, staffs]);
 
   const handleNewCommentNotification = useCallback(() => {
-    if (!canNotify) return;
-    void notify("新着コメントがあります", {
-      body: "申請内容に新しいコメントが投稿されました",
-      tag: `workflow-comment-${id ?? "unknown"}`,
-      mode: "auto-close",
-      priority: "high",
+    notify({
+      title: "新着コメントがあります",
+      description: "申請内容に新しいコメントが投稿されました",
+      tone: "info",
+      dedupeKey: `workflow-comment-${id ?? "unknown"}`,
     });
-  }, [canNotify, id, notify]);
+  }, [id, notify]);
 
   const { workflow, setWorkflow } = useWorkflowLoaderWorkflow(initialWorkflow, {
     currentStaffId,
@@ -54,15 +53,15 @@ export function WorkflowDetailProvider({ children }: { children: ReactNode }) {
   } = useWorkflowDetailMeta({ workflow, staffs });
 
   const notifySuccess = useCallback(
-    (message: string) => void notify(message, { mode: "auto-close" }),
+    (message: string) => notify({ title: message, tone: "success" }),
     [notify],
   );
   const notifyError = useCallback(
     (message: string) =>
-      void notify("エラー", {
-        body: message,
-        mode: "await-interaction",
-        priority: "high",
+      notify({
+        title: "エラー",
+        description: message,
+        tone: "error",
       }),
     [notify],
   );

@@ -1,7 +1,4 @@
-import {
-  useGetCompanyHolidayCalendarsQuery,
-  useGetHolidayCalendarsQuery,
-} from "@entities/calendar/api/calendarApi";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import {
@@ -28,10 +25,10 @@ import { useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import { useLocalNotification } from "@/hooks/useLocalNotification";
+import { useAppNotification } from "@/hooks/useAppNotification";
 
 export default function StaffShiftList() {
-  const { notify } = useLocalNotification();
+  const { notify } = useAppNotification();
   const { staffId } = useParams();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
@@ -55,34 +52,23 @@ export default function StaffShiftList() {
   );
 
   const {
-    data: holidayCalendars = [],
-    isLoading: isHolidayCalendarsLoading,
-    isFetching: isHolidayCalendarsFetching,
-    error: holidayCalendarsError,
-  } = useGetHolidayCalendarsQuery();
-  const {
-    data: companyHolidayCalendars = [],
-    isLoading: isCompanyHolidayCalendarsLoading,
-    isFetching: isCompanyHolidayCalendarsFetching,
-    error: companyHolidayCalendarsError,
-  } = useGetCompanyHolidayCalendarsQuery();
-  const calendarLoading =
-    isHolidayCalendarsLoading ||
-    isHolidayCalendarsFetching ||
-    isCompanyHolidayCalendarsLoading ||
-    isCompanyHolidayCalendarsFetching;
+    holidayCalendars,
+    companyHolidayCalendars,
+    isLoading: calendarLoading,
+    error: calendarsError,
+  } = useCalendars();
 
   useEffect(() => {
-    if (holidayCalendarsError || companyHolidayCalendarsError) {
-      console.error(holidayCalendarsError ?? companyHolidayCalendarsError);
-      void notify("エラー", {
-        body: MESSAGE_CODE.E00001,
-        mode: "await-interaction",
-        priority: "high",
-        tag: "holiday-calendar-error",
+    if (calendarsError) {
+      console.error(calendarsError);
+      notify({
+        title: "エラー",
+        description: MESSAGE_CODE.E00001,
+        tone: "error",
+        dedupeKey: "holiday-calendar-error",
       });
     }
-  }, [holidayCalendarsError, companyHolidayCalendarsError, notify]);
+  }, [calendarsError, notify]);
 
   const publicHolidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),

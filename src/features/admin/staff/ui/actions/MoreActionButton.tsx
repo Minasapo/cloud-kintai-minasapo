@@ -1,8 +1,10 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { IconButton, Menu } from "@mui/material";
+import { Menu } from "@mui/material";
 import { DeleteStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
 import { useState } from "react";
+
+import { AppIconButton } from "@/shared/ui/button";
 
 import {
   DeleteAccountMenuItem,
@@ -34,9 +36,9 @@ export function MoreActionButton({
 
   return (
     <>
-      <IconButton size="small" onClick={handleClick}>
+      <AppIconButton aria-label="アカウント操作" size="sm" onClick={handleClick}>
         <MoreVertIcon fontSize="small" />
-      </IconButton>
+      </AppIconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         {accountEnabled ? (
           <DisableAccountMenuItem staff={staff} updateStaff={updateStaff} />

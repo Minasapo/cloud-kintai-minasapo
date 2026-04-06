@@ -1,5 +1,6 @@
 import { Tooltip, Typography } from "@mui/material";
 import { type ChartOptions } from "chart.js";
+import { memo } from "react";
 import { Bar } from "react-chartjs-2";
 
 import { DashboardCard } from "./DashboardCard";
@@ -20,14 +21,18 @@ type Props = {
   infoLabel: string;
   isLoading: boolean;
   hasData: boolean;
+  hasDuplicateAttendances?: boolean;
+  duplicateAttendanceDayCount?: number;
   chartData: ChartData;
   chartOptions: ChartOptions<"bar">;
 };
 
-export function StaffWorkStatusChartCard({
+function StaffWorkStatusChartCardComponent({
   infoLabel,
   isLoading,
   hasData,
+  hasDuplicateAttendances = false,
+  duplicateAttendanceDayCount = 0,
   chartData,
   chartOptions,
 }: Props) {
@@ -55,6 +60,14 @@ export function StaffWorkStatusChartCard({
           </button>
         </Tooltip>
       </div>
+      {hasDuplicateAttendances ? (
+        <Typography
+          data-testid="admin-dashboard-staff-work-status-warning"
+          sx={{ mt: 1, fontSize: "0.75rem", color: "#b45309" }}
+        >
+          重複勤怠がある{duplicateAttendanceDayCount}日分を含む可能性があります
+        </Typography>
+      ) : null}
       <div className="mt-1 h-72">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-xs font-medium text-slate-500">
@@ -75,3 +88,5 @@ export function StaffWorkStatusChartCard({
     </DashboardCard>
   );
 }
+
+export const StaffWorkStatusChartCard = memo(StaffWorkStatusChartCardComponent);

@@ -6,6 +6,7 @@ import {
   CellComment,
   CollaborativeShiftState,
   CollaborativeUser,
+  EditLockAcquireResult,
   Mention,
   ShiftCellUpdate,
 } from "../types/collaborative.types";
@@ -19,15 +20,18 @@ export interface CollaborativeShiftContextType {
   batchUpdateShifts: (updates: ShiftCellUpdate[]) => Promise<void>;
   isBatchUpdating: boolean;
   toggleCellSelection: (cellKey: string, selected: boolean) => void;
-  startEditingCell: (staffId: string, date: string) => void;
-  stopEditingCell: (staffId: string, date: string) => void;
+  startEditingCell: (
+    staffId: string,
+    date: string,
+  ) => Promise<EditLockAcquireResult>;
+  stopEditingCell: (staffId: string, date: string) => Promise<void>;
   isCellBeingEdited: (staffId: string, date: string) => boolean;
   hasEditLock: (staffId: string, date: string) => boolean;
   getCellEditor: (
     staffId: string,
     date: string,
   ) => CollaborativeUser | undefined;
-  forceReleaseCell: (staffId: string, date: string) => void;
+  forceReleaseCell: (staffId: string, date: string) => Promise<void>;
   getAllEditingCells: () => Array<{
     cellKey: string;
     staffId: string;
@@ -36,19 +40,11 @@ export interface CollaborativeShiftContextType {
     userName: string;
     startTime: number;
   }>;
+  refreshLocks: () => Promise<unknown[]>;
   triggerSync: () => Promise<void>;
   clearSyncError: () => void;
   updateUserActivity: () => void;
   retryPendingChanges: () => Promise<void>;
-  syncPendingChanges: () => Promise<{
-    successful: string[];
-    conflicts: Array<{
-      changeId: string;
-      localUpdate: ShiftCellUpdate;
-      remoteUpdate?: ShiftCellUpdate;
-      strategy: "local" | "remote" | "manual";
-    }>;
-  }>;
   // Undo/Redo
   canUndo: boolean;
   canRedo: boolean;

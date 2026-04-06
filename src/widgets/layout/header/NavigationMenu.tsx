@@ -16,8 +16,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { useMobileDrawer } from "@/hooks/useMobileDrawer";
 import { preloadRoute } from "@/router/routePreloaders";
+import { useMobileDrawer } from "@/widgets/layout/header/useMobileDrawer";
 
 const iconByHref: Record<string, JSX.Element> = {
   "/register": <AccessTimeIcon />,

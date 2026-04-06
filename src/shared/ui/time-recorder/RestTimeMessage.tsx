@@ -16,9 +16,7 @@ const RestTimeMessage = ({
       role="alert"
       className={[
         "border border-cyan-200 bg-[linear-gradient(135deg,#ebfdff_0%,#ffffff_100%)] text-cyan-950 shadow-[0_18px_30px_-28px_rgba(8,145,178,0.45)]",
-        isCompact
-          ? "rounded-[1.15rem] px-4 py-3"
-          : "rounded-[1.5rem] px-5 py-4",
+        isCompact ? "rounded-[4px] px-4 py-3" : "rounded-[4px] px-5 py-4",
       ].join(" ")}
     >
       <p

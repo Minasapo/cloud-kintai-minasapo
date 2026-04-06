@@ -2,7 +2,7 @@ import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 // eslint-disable-next-line import/no-cycle
-import snackbarReducer from "@/shared/lib/store/snackbarSlice";
+import notificationReducer from "@/shared/lib/store/notificationSlice";
 
 import type { RegisteredRtkApi } from "./apis";
 import { rtkApis } from "./apis";
@@ -18,7 +18,7 @@ const apiMiddleware = rtkApis.map((api) => api.middleware);
 
 export const store = configureStore({
   reducer: {
-    snackbar: snackbarReducer,
+    notifications: notificationReducer,
     ...apiReducers,
   },
   middleware: (getDefaultMiddleware) =>

@@ -5,8 +5,8 @@ type AttendanceErrorSummaryProps = {
 };
 
 const classNameByVariant = {
-  desktop: "rounded-[20px] border border-rose-500/15 bg-rose-50/90 px-4 py-3",
-  mobile: "rounded-[18px] border border-rose-500/15 bg-rose-50/90 px-4 py-3",
+  desktop: "rounded-[8px] border border-rose-500/15 bg-rose-50/90 px-4 py-3",
+  mobile: "rounded-[6px] border border-rose-500/15 bg-rose-50/90 px-4 py-3",
 } as const;
 
 export function AttendanceErrorSummary({

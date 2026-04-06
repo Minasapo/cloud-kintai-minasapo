@@ -1,4 +1,5 @@
 import { Typography } from "@mui/material";
+import { memo } from "react";
 
 import { DashboardCard } from "./DashboardCard";
 
@@ -8,7 +9,7 @@ type Props = {
   isLoading: boolean;
 };
 
-export function DailyReportStatusCard({
+function DailyReportStatusCardComponent({
   submittedCountLabel,
   approvedCountLabel,
   isLoading,
@@ -49,3 +50,5 @@ export function DailyReportStatusCard({
     </DashboardCard>
   );
 }
+
+export const DailyReportStatusCard = memo(DailyReportStatusCardComponent);
