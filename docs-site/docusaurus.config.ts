@@ -6,7 +6,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 
 const config: Config = {
   title: "クラウド勤怠 ドキュメント",
-  tagline: "スタッフ・管理者・開発者それぞれの利用ガイド",
+  tagline: "ロール別に、ユースケースと機能の両軸で辿れる利用ガイド",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future

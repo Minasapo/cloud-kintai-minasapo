@@ -41,7 +41,8 @@ export default function Home(): ReactNode {
         <section className={styles.descriptionSection}>
           <div className="container">
             <p className={styles.descriptionText}>
-              このサイトは本プロジェクトの開発知識をまとめるための基盤です。
+              このサイトは、スタッフ向け・管理者向けのドキュメントをロール別に整理しつつ、
+              ユースケースと機能の両軸から辿れるようにまとめたポータルです。
             </p>
           </div>
         </section>
