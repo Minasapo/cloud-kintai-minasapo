@@ -155,7 +155,7 @@ describe("Profile", () => {
     await user.click(screen.getByRole("button", { name: "通知設定" }));
     await screen.findByText("勤務開始メール");
 
-    await user.click(screen.getByText("勤務開始メール"));
+    await user.click(screen.getByRole("checkbox", { name: "勤務開始メール" }));
 
     expect(screen.getByText("保存待ち")).toBeInTheDocument();
 
@@ -242,7 +242,7 @@ describe("Profile", () => {
 
     await screen.findByRole("button", { name: "ログアウト" });
     await user.click(screen.getByRole("button", { name: "通知設定" }));
-    await user.click(screen.getByText("勤務開始メール"));
+    await user.click(screen.getByRole("checkbox", { name: "勤務開始メール" }));
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -261,7 +261,7 @@ describe("Profile", () => {
       notifyMock.mock.calls.some(([arg]) => arg?.tone === "success"),
     ).toBe(false);
 
-    await user.click(screen.getByText("勤務終了メール"));
+    await user.click(screen.getByRole("checkbox", { name: "勤務終了メール" }));
     act(() => {
       jest.advanceTimersByTime(1000);
     });

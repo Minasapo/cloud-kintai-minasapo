@@ -727,76 +727,72 @@ export default function Profile() {
                 <Controller
                   name="workStart"
                   control={notificationControl}
-                  render={({ field }) => (
-                    <label className="flex min-w-0 cursor-pointer items-center justify-between gap-4 rounded-[1.6rem] border border-slate-200 bg-slate-50/70 p-5 transition hover:border-emerald-200 hover:bg-emerald-50/70">
-                      <div className="min-w-0 space-y-1">
-                        <p className="text-sm font-semibold text-slate-900">
-                          勤務開始メール
-                        </p>
-                        <p className="text-sm leading-6 text-slate-500">
-                          出勤打刻時の通知を受け取ります。
-                        </p>
-                      </div>
-                      <span
-                        className={[
-                          "relative inline-flex h-8 w-14 shrink-0 rounded-full border transition",
-                          field.value
-                            ? "border-emerald-600 bg-emerald-600"
-                            : "border-slate-300 bg-slate-200",
-                        ].join(" ")}
-                      >
+                  render={({ field }) => {
+                    const labelId = `${field.name}-label`;
+                    const descriptionId = `${field.name}-description`;
+
+                    return (
+                      <label className="flex min-w-0 cursor-pointer items-center justify-between gap-4 rounded-[1.6rem] border border-slate-200 bg-slate-50/70 p-5 transition hover:border-emerald-200 hover:bg-emerald-50/70">
+                        <div className="min-w-0 space-y-1">
+                          <p
+                            id={labelId}
+                            className="text-sm font-semibold text-slate-900"
+                          >
+                            勤務開始メール
+                          </p>
+                          <p
+                            id={descriptionId}
+                            className="text-sm leading-6 text-slate-500"
+                          >
+                            出勤打刻時の通知を受け取ります。
+                          </p>
+                        </div>
                         <input
                           type="checkbox"
                           checked={field.value}
                           onChange={(event) => field.onChange(event.target.checked)}
-                          className="sr-only"
+                          aria-labelledby={labelId}
+                          aria-describedby={descriptionId}
+                          className="h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                         />
-                        <span
-                          className={[
-                            "absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow-[0_6px_14px_rgba(15,23,42,0.18)] transition-transform",
-                            field.value ? "translate-x-6" : "translate-x-0",
-                          ].join(" ")}
-                        />
-                      </span>
-                    </label>
-                  )}
+                      </label>
+                    );
+                  }}
                 />
                 <Controller
                   name="workEnd"
                   control={notificationControl}
-                  render={({ field }) => (
-                    <label className="flex min-w-0 cursor-pointer items-center justify-between gap-4 rounded-[1.6rem] border border-slate-200 bg-slate-50/70 p-5 transition hover:border-emerald-200 hover:bg-emerald-50/70">
-                      <div className="min-w-0 space-y-1">
-                        <p className="text-sm font-semibold text-slate-900">
-                          勤務終了メール
-                        </p>
-                        <p className="text-sm leading-6 text-slate-500">
-                          退勤打刻時の通知を受け取ります。
-                        </p>
-                      </div>
-                      <span
-                        className={[
-                          "relative inline-flex h-8 w-14 shrink-0 rounded-full border transition",
-                          field.value
-                            ? "border-emerald-600 bg-emerald-600"
-                            : "border-slate-300 bg-slate-200",
-                        ].join(" ")}
-                      >
+                  render={({ field }) => {
+                    const labelId = `${field.name}-label`;
+                    const descriptionId = `${field.name}-description`;
+
+                    return (
+                      <label className="flex min-w-0 cursor-pointer items-center justify-between gap-4 rounded-[1.6rem] border border-slate-200 bg-slate-50/70 p-5 transition hover:border-emerald-200 hover:bg-emerald-50/70">
+                        <div className="min-w-0 space-y-1">
+                          <p
+                            id={labelId}
+                            className="text-sm font-semibold text-slate-900"
+                          >
+                            勤務終了メール
+                          </p>
+                          <p
+                            id={descriptionId}
+                            className="text-sm leading-6 text-slate-500"
+                          >
+                            退勤打刻時の通知を受け取ります。
+                          </p>
+                        </div>
                         <input
                           type="checkbox"
                           checked={field.value}
                           onChange={(event) => field.onChange(event.target.checked)}
-                          className="sr-only"
+                          aria-labelledby={labelId}
+                          aria-describedby={descriptionId}
+                          className="h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                         />
-                        <span
-                          className={[
-                            "absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow-[0_6px_14px_rgba(15,23,42,0.18)] transition-transform",
-                            field.value ? "translate-x-6" : "translate-x-0",
-                          ].join(" ")}
-                        />
-                      </span>
-                    </label>
-                  )}
+                      </label>
+                    );
+                  }}
                 />
               </div>
             </div>
