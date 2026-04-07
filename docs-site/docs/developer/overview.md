@@ -12,6 +12,13 @@ description: garaku-frontend の開発に必要なセットアップ、アーキ
 
 - [セットアップ](./getting-started/setup.md)
 
+## デザインシステム
+
+- [概要](./design-system/overview.md) — 目的、適用範囲、source of truth、参照先
+- [基礎ルール](./design-system/foundations.md) — token、primitive、視覚言語、レイアウトの基本方針
+- [画面レシピ](./design-system/screen-recipes.md) — 編集・一覧・詳細画面の標準構成
+- [実装ルールとレビュー観点](./design-system/implementation-rules.md) — 実装判断順、禁止事項、レビュー時の確認項目
+
 ## アーキテクチャ
 
 - [ディレクトリ構成](./architecture/directory-structure.md)

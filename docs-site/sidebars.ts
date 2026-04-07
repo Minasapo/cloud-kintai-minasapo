@@ -95,6 +95,16 @@ const sidebars: SidebarsConfig = {
         "developer/overview",
         {
           type: "category",
+          label: "デザインシステム",
+          items: [
+            "developer/design-system/overview",
+            "developer/design-system/foundations",
+            "developer/design-system/screen-recipes",
+            "developer/design-system/implementation-rules",
+          ],
+        },
+        {
+          type: "category",
           label: "アーキテクチャ",
           items: [
             "developer/architecture/directory-structure",
