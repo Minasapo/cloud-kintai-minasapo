@@ -6,6 +6,8 @@ import {
   STATUS_LABELS,
 } from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
+import AdminWorkflowSettingsDialog from "@features/admin-config-workflow/AdminWorkflowSettingsDialog";
 import { useSplitView } from "@features/splitView";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
@@ -103,6 +105,7 @@ export default function AdminWorkflow() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(
     null,
   );
@@ -233,9 +236,28 @@ export default function AdminWorkflow() {
   return (
     <div className="h-full w-full px-3 pt-2 sm:px-4 lg:px-6">
       <div className="space-y-4">
-        <p className="text-sm text-slate-600">
-          ワークフローの一覧を表示します。管理者用の画面です。
-        </p>
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_44px_-34px_rgba(15,23,42,0.38)] sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-2">
+              <h1 className="text-xl font-semibold tracking-[-0.02em] text-slate-950 sm:text-2xl">
+                ワークフロー管理
+              </h1>
+              <p className="text-sm leading-6 text-slate-600">
+                申請一覧の確認と承認対応を行う画面です。申請カテゴリやテンプレートの設定は、右上の設定ボタンからまとめて見直せます。
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsSettingsDialogOpen(true)}
+              className="inline-flex h-11 items-center gap-2 self-start rounded-full border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 transition hover:border-emerald-400 hover:text-emerald-700"
+              aria-label="ワークフロー設定を開く"
+            >
+              <SettingsIcon name="settings" className="text-current" />
+              <span>設定</span>
+            </button>
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:grid-cols-2 lg:grid-cols-3">
           <label className="flex min-w-0 flex-col gap-1 text-sm text-slate-600">
@@ -473,6 +495,13 @@ export default function AdminWorkflow() {
               setSelectedWorkflowId(null);
             }}
             enableApprovalActions
+          />
+        )}
+
+        {isSettingsDialogOpen && (
+          <AdminWorkflowSettingsDialog
+            open={isSettingsDialogOpen}
+            onClose={() => setIsSettingsDialogOpen(false)}
           />
         )}
       </div>

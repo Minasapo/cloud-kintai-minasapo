@@ -121,11 +121,12 @@ export const ADMIN_SETTINGS_ITEMS: readonly AdminSettingsItem[] = [
   },
   {
     title: "ワークフロー",
-    path: "/admin/master/workflow",
+    path: "/admin/workflow",
     category: "shiftApproval",
-    description: "申請カテゴリごとの承認フローを設定します。",
+    description:
+      "申請カテゴリの表示順やテンプレートを、ワークフロー管理画面の設定ダイアログから見直します。",
     order: 2,
-    ctaLabel: "ワークフローを開く",
+    ctaLabel: "ワークフロー管理を開く",
   },
   {
     title: "残業確認",

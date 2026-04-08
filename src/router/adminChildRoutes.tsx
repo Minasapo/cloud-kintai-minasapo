@@ -76,10 +76,6 @@ const AdminMasterLayoutRoute = createLazyRoute(
 const AdminShiftSettingsRoute = createLazyRoute(
   () => import("../pages/admin/AdminShiftSettings/AdminShiftSettings"),
 );
-const AdminWorkflowCategorySettingsRoute = createLazyRoute(
-  () =>
-    import("@/features/admin-config-workflow/AdminWorkflowCategorySettings"),
-);
 const AdminStaffRoute = createLazyRoute(
   () => import("@/features/admin/staff/ui/AdminStaff"),
 );
@@ -241,7 +237,7 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "workflow",
-        lazy: AdminWorkflowCategorySettingsRoute,
+        element: <Navigate to="/admin/workflow" replace />,
       },
       {
         path: "feature_management/working_time",

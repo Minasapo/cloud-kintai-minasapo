@@ -35,6 +35,11 @@ jest.mock("@/features/splitView", () => ({
 
 jest.mock("./components/WorkflowDetailPanel", () => () => null);
 jest.mock("./components/WorkflowCarouselDialog", () => () => null);
+jest.mock("@features/admin-config-workflow/AdminWorkflowSettingsDialog", () => ({
+  __esModule: true,
+  default: ({ open }: { open: boolean }) =>
+    open ? <div>workflow-settings-dialog</div> : null,
+}));
 
 describe("AdminWorkflow", () => {
   const renderPage = () =>
@@ -138,5 +143,13 @@ describe("AdminWorkflow", () => {
 
     fireEvent.click(screen.getByText("2026-03-12"));
     expect(mockNavigate).toHaveBeenCalledWith("/admin/workflow/wf-12");
+  });
+
+  it("設定ボタンから設定ダイアログを開ける", () => {
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: "ワークフロー設定を開く" }));
+
+    expect(screen.getByText("workflow-settings-dialog")).toBeInTheDocument();
   });
 });
