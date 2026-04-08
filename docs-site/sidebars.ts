@@ -95,6 +95,15 @@ const sidebars: SidebarsConfig = {
         "developer/overview",
         {
           type: "category",
+          label: "Amplify",
+          items: [
+            "developer/amplify/overview",
+            "developer/amplify/setup-and-access",
+            "developer/amplify/change-workflow",
+          ],
+        },
+        {
+          type: "category",
           label: "デザインシステム",
           items: [
             "developer/design-system/overview",

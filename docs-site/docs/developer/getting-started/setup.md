@@ -67,4 +67,10 @@ npm run docs:search-preview
 
 ## Amplify 設定
 
-`src/aws-exports.js` は `amplify pull` で生成されるため、初回セットアップ時は別途 Amplify 環境へのアクセス権が必要です。詳細はリポジトリルートの `README` を参照してください。
+`src/aws-exports.js` は `amplify pull` で生成されるため、初回セットアップ時は別途 Amplify 環境へのアクセス権が必要です。
+
+詳細は次の Amplify 専用ページを参照してください。
+
+- [Amplify 概要](../amplify/overview.md)
+- [Amplify セットアップとアクセス](../amplify/setup-and-access.md)
+- [Amplify 変更フロー](../amplify/change-workflow.md)

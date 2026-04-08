@@ -11,6 +11,15 @@ description: garaku-frontend の開発に必要なセットアップ、アーキ
 ## はじめに
 
 - [セットアップ](./getting-started/setup.md)
+- [Amplify 概要](./amplify/overview.md)
+- [Amplify セットアップとアクセス](./amplify/setup-and-access.md)
+- [Amplify 変更フロー](./amplify/change-workflow.md)
+
+## Amplify
+
+- [概要](./amplify/overview.md) — Auth、API、Lambda、Storage、Hosting とフロントエンドの接点
+- [セットアップとアクセス](./amplify/setup-and-access.md) — `amplify pull`、`aws-exports`、初回アクセス前提
+- [変更フロー](./amplify/change-workflow.md) — 生成物の扱い、変更時の確認観点、基本フロー
 
 ## デザインシステム
 
