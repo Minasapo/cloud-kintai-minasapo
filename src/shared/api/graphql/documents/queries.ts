@@ -951,6 +951,156 @@ export const attendancesByStaffWorkDate = /* GraphQL */ `query AttendancesByStaf
   APITypes.AttendancesByStaffWorkDateQueryVariables,
   APITypes.AttendancesByStaffWorkDateQuery
 >;
+export const getAttendanceStatisticsSnapshot = /* GraphQL */ `query GetAttendanceStatisticsSnapshot($id: ID!) {
+  getAttendanceStatisticsSnapshot(id: $id) {
+    id
+    staffId
+    year
+    status
+    progressPercent
+    currentStepLabel
+    rangeStart
+    rangeEnd
+    monthlySummaries {
+      month
+      rangeStart
+      rangeEnd
+      workHours
+      paidDays
+      specialHolidayDays
+      absentDays
+      workDays
+      isFallback
+      __typename
+    }
+    totalWorkHours
+    totalPaidDays
+    totalSpecialHolidayDays
+    totalAbsentDays
+    totalWorkDays
+    startedAt
+    completedAt
+    lastAggregatedAt
+    errorMessage
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetAttendanceStatisticsSnapshotQueryVariables,
+  APITypes.GetAttendanceStatisticsSnapshotQuery
+>;
+export const listAttendanceStatisticsSnapshots = /* GraphQL */ `query ListAttendanceStatisticsSnapshots(
+  $filter: ModelAttendanceStatisticsSnapshotFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listAttendanceStatisticsSnapshots(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      staffId
+      year
+      status
+      progressPercent
+      currentStepLabel
+      rangeStart
+      rangeEnd
+      monthlySummaries {
+        month
+        rangeStart
+        rangeEnd
+        workHours
+        paidDays
+        specialHolidayDays
+        absentDays
+        workDays
+        isFallback
+        __typename
+      }
+      totalWorkHours
+      totalPaidDays
+      totalSpecialHolidayDays
+      totalAbsentDays
+      totalWorkDays
+      startedAt
+      completedAt
+      lastAggregatedAt
+      errorMessage
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListAttendanceStatisticsSnapshotsQueryVariables,
+  APITypes.ListAttendanceStatisticsSnapshotsQuery
+>;
+export const attendanceStatisticsByStaffIdYear = /* GraphQL */ `query AttendanceStatisticsByStaffIdYear(
+  $staffId: String!
+  $year: ModelIntKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelAttendanceStatisticsSnapshotFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  attendanceStatisticsByStaffIdYear(
+    staffId: $staffId
+    year: $year
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      staffId
+      year
+      status
+      progressPercent
+      currentStepLabel
+      rangeStart
+      rangeEnd
+      monthlySummaries {
+        month
+        rangeStart
+        rangeEnd
+        workHours
+        paidDays
+        specialHolidayDays
+        absentDays
+        workDays
+        isFallback
+        __typename
+      }
+      totalWorkHours
+      totalPaidDays
+      totalSpecialHolidayDays
+      totalAbsentDays
+      totalWorkDays
+      startedAt
+      completedAt
+      lastAggregatedAt
+      errorMessage
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AttendanceStatisticsByStaffIdYearQueryVariables,
+  APITypes.AttendanceStatisticsByStaffIdYearQuery
+>;
 export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
   getDocument(id: $id) {
     id

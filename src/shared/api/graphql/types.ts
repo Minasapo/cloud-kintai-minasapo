@@ -904,6 +904,138 @@ export type DeleteAttendanceInput = {
   id: string,
 };
 
+export type CreateAttendanceStatisticsSnapshotInput = {
+  id?: string | null,
+  staffId: string,
+  year: number,
+  status: AttendanceStatisticsStatus,
+  progressPercent?: number | null,
+  currentStepLabel?: string | null,
+  rangeStart?: string | null,
+  rangeEnd?: string | null,
+  monthlySummaries?: Array< AttendanceStatisticsMonthlySummaryInput > | null,
+  totalWorkHours?: number | null,
+  totalPaidDays?: number | null,
+  totalSpecialHolidayDays?: number | null,
+  totalAbsentDays?: number | null,
+  totalWorkDays?: number | null,
+  startedAt?: string | null,
+  completedAt?: string | null,
+  lastAggregatedAt?: string | null,
+  errorMessage?: string | null,
+};
+
+export enum AttendanceStatisticsStatus {
+  IDLE = "IDLE",
+  RUNNING = "RUNNING",
+  SUCCEEDED = "SUCCEEDED",
+  FAILED = "FAILED",
+}
+
+
+export type AttendanceStatisticsMonthlySummaryInput = {
+  month: number,
+  rangeStart: string,
+  rangeEnd: string,
+  workHours: number,
+  paidDays: number,
+  specialHolidayDays: number,
+  absentDays: number,
+  workDays: number,
+  isFallback: boolean,
+};
+
+export type ModelAttendanceStatisticsSnapshotConditionInput = {
+  staffId?: ModelStringInput | null,
+  year?: ModelIntInput | null,
+  status?: ModelAttendanceStatisticsStatusInput | null,
+  progressPercent?: ModelFloatInput | null,
+  currentStepLabel?: ModelStringInput | null,
+  rangeStart?: ModelStringInput | null,
+  rangeEnd?: ModelStringInput | null,
+  totalWorkHours?: ModelFloatInput | null,
+  totalPaidDays?: ModelIntInput | null,
+  totalSpecialHolidayDays?: ModelIntInput | null,
+  totalAbsentDays?: ModelIntInput | null,
+  totalWorkDays?: ModelIntInput | null,
+  startedAt?: ModelStringInput | null,
+  completedAt?: ModelStringInput | null,
+  lastAggregatedAt?: ModelStringInput | null,
+  errorMessage?: ModelStringInput | null,
+  and?: Array< ModelAttendanceStatisticsSnapshotConditionInput | null > | null,
+  or?: Array< ModelAttendanceStatisticsSnapshotConditionInput | null > | null,
+  not?: ModelAttendanceStatisticsSnapshotConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelAttendanceStatisticsStatusInput = {
+  eq?: AttendanceStatisticsStatus | null,
+  ne?: AttendanceStatisticsStatus | null,
+};
+
+export type AttendanceStatisticsSnapshot = {
+  __typename: "AttendanceStatisticsSnapshot",
+  id: string,
+  staffId: string,
+  year: number,
+  status: AttendanceStatisticsStatus,
+  progressPercent?: number | null,
+  currentStepLabel?: string | null,
+  rangeStart?: string | null,
+  rangeEnd?: string | null,
+  monthlySummaries?:  Array<AttendanceStatisticsMonthlySummary > | null,
+  totalWorkHours?: number | null,
+  totalPaidDays?: number | null,
+  totalSpecialHolidayDays?: number | null,
+  totalAbsentDays?: number | null,
+  totalWorkDays?: number | null,
+  startedAt?: string | null,
+  completedAt?: string | null,
+  lastAggregatedAt?: string | null,
+  errorMessage?: string | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type AttendanceStatisticsMonthlySummary = {
+  __typename: "AttendanceStatisticsMonthlySummary",
+  month: number,
+  rangeStart: string,
+  rangeEnd: string,
+  workHours: number,
+  paidDays: number,
+  specialHolidayDays: number,
+  absentDays: number,
+  workDays: number,
+  isFallback: boolean,
+};
+
+export type UpdateAttendanceStatisticsSnapshotInput = {
+  id: string,
+  staffId?: string | null,
+  year?: number | null,
+  status?: AttendanceStatisticsStatus | null,
+  progressPercent?: number | null,
+  currentStepLabel?: string | null,
+  rangeStart?: string | null,
+  rangeEnd?: string | null,
+  monthlySummaries?: Array< AttendanceStatisticsMonthlySummaryInput > | null,
+  totalWorkHours?: number | null,
+  totalPaidDays?: number | null,
+  totalSpecialHolidayDays?: number | null,
+  totalAbsentDays?: number | null,
+  totalWorkDays?: number | null,
+  startedAt?: string | null,
+  completedAt?: string | null,
+  lastAggregatedAt?: string | null,
+  errorMessage?: string | null,
+};
+
+export type DeleteAttendanceStatisticsSnapshotInput = {
+  id: string,
+};
+
 export type CreateDocumentInput = {
   id?: string | null,
   title: string,
@@ -2082,6 +2214,46 @@ export type ModelStringKeyConditionInput = {
   beginsWith?: string | null,
 };
 
+export type ModelAttendanceStatisticsSnapshotFilterInput = {
+  id?: ModelIDInput | null,
+  staffId?: ModelStringInput | null,
+  year?: ModelIntInput | null,
+  status?: ModelAttendanceStatisticsStatusInput | null,
+  progressPercent?: ModelFloatInput | null,
+  currentStepLabel?: ModelStringInput | null,
+  rangeStart?: ModelStringInput | null,
+  rangeEnd?: ModelStringInput | null,
+  totalWorkHours?: ModelFloatInput | null,
+  totalPaidDays?: ModelIntInput | null,
+  totalSpecialHolidayDays?: ModelIntInput | null,
+  totalAbsentDays?: ModelIntInput | null,
+  totalWorkDays?: ModelIntInput | null,
+  startedAt?: ModelStringInput | null,
+  completedAt?: ModelStringInput | null,
+  lastAggregatedAt?: ModelStringInput | null,
+  errorMessage?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAttendanceStatisticsSnapshotFilterInput | null > | null,
+  or?: Array< ModelAttendanceStatisticsSnapshotFilterInput | null > | null,
+  not?: ModelAttendanceStatisticsSnapshotFilterInput | null,
+};
+
+export type ModelAttendanceStatisticsSnapshotConnection = {
+  __typename: "ModelAttendanceStatisticsSnapshotConnection",
+  items:  Array<AttendanceStatisticsSnapshot | null >,
+  nextToken?: string | null,
+};
+
+export type ModelIntKeyConditionInput = {
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+};
+
 export type ModelDocumentFilterInput = {
   id?: ModelIDInput | null,
   title?: ModelStringInput | null,
@@ -2541,6 +2713,30 @@ export type ModelSubscriptionAttendanceFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionAttendanceFilterInput | null > | null,
   or?: Array< ModelSubscriptionAttendanceFilterInput | null > | null,
+};
+
+export type ModelSubscriptionAttendanceStatisticsSnapshotFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  staffId?: ModelSubscriptionStringInput | null,
+  year?: ModelSubscriptionIntInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  progressPercent?: ModelSubscriptionFloatInput | null,
+  currentStepLabel?: ModelSubscriptionStringInput | null,
+  rangeStart?: ModelSubscriptionStringInput | null,
+  rangeEnd?: ModelSubscriptionStringInput | null,
+  totalWorkHours?: ModelSubscriptionFloatInput | null,
+  totalPaidDays?: ModelSubscriptionIntInput | null,
+  totalSpecialHolidayDays?: ModelSubscriptionIntInput | null,
+  totalAbsentDays?: ModelSubscriptionIntInput | null,
+  totalWorkDays?: ModelSubscriptionIntInput | null,
+  startedAt?: ModelSubscriptionStringInput | null,
+  completedAt?: ModelSubscriptionStringInput | null,
+  lastAggregatedAt?: ModelSubscriptionStringInput | null,
+  errorMessage?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionAttendanceStatisticsSnapshotFilterInput | null > | null,
+  or?: Array< ModelSubscriptionAttendanceStatisticsSnapshotFilterInput | null > | null,
 };
 
 export type ModelSubscriptionDocumentFilterInput = {
@@ -3661,6 +3857,132 @@ export type DeleteAttendanceMutation = {
       createdAt: string,
     } | null > | null,
     revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateAttendanceStatisticsSnapshotMutationVariables = {
+  input: CreateAttendanceStatisticsSnapshotInput,
+  condition?: ModelAttendanceStatisticsSnapshotConditionInput | null,
+};
+
+export type CreateAttendanceStatisticsSnapshotMutation = {
+  createAttendanceStatisticsSnapshot?:  {
+    __typename: "AttendanceStatisticsSnapshot",
+    id: string,
+    staffId: string,
+    year: number,
+    status: AttendanceStatisticsStatus,
+    progressPercent?: number | null,
+    currentStepLabel?: string | null,
+    rangeStart?: string | null,
+    rangeEnd?: string | null,
+    monthlySummaries?:  Array< {
+      __typename: "AttendanceStatisticsMonthlySummary",
+      month: number,
+      rangeStart: string,
+      rangeEnd: string,
+      workHours: number,
+      paidDays: number,
+      specialHolidayDays: number,
+      absentDays: number,
+      workDays: number,
+      isFallback: boolean,
+    } > | null,
+    totalWorkHours?: number | null,
+    totalPaidDays?: number | null,
+    totalSpecialHolidayDays?: number | null,
+    totalAbsentDays?: number | null,
+    totalWorkDays?: number | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    lastAggregatedAt?: string | null,
+    errorMessage?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateAttendanceStatisticsSnapshotMutationVariables = {
+  input: UpdateAttendanceStatisticsSnapshotInput,
+  condition?: ModelAttendanceStatisticsSnapshotConditionInput | null,
+};
+
+export type UpdateAttendanceStatisticsSnapshotMutation = {
+  updateAttendanceStatisticsSnapshot?:  {
+    __typename: "AttendanceStatisticsSnapshot",
+    id: string,
+    staffId: string,
+    year: number,
+    status: AttendanceStatisticsStatus,
+    progressPercent?: number | null,
+    currentStepLabel?: string | null,
+    rangeStart?: string | null,
+    rangeEnd?: string | null,
+    monthlySummaries?:  Array< {
+      __typename: "AttendanceStatisticsMonthlySummary",
+      month: number,
+      rangeStart: string,
+      rangeEnd: string,
+      workHours: number,
+      paidDays: number,
+      specialHolidayDays: number,
+      absentDays: number,
+      workDays: number,
+      isFallback: boolean,
+    } > | null,
+    totalWorkHours?: number | null,
+    totalPaidDays?: number | null,
+    totalSpecialHolidayDays?: number | null,
+    totalAbsentDays?: number | null,
+    totalWorkDays?: number | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    lastAggregatedAt?: string | null,
+    errorMessage?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteAttendanceStatisticsSnapshotMutationVariables = {
+  input: DeleteAttendanceStatisticsSnapshotInput,
+  condition?: ModelAttendanceStatisticsSnapshotConditionInput | null,
+};
+
+export type DeleteAttendanceStatisticsSnapshotMutation = {
+  deleteAttendanceStatisticsSnapshot?:  {
+    __typename: "AttendanceStatisticsSnapshot",
+    id: string,
+    staffId: string,
+    year: number,
+    status: AttendanceStatisticsStatus,
+    progressPercent?: number | null,
+    currentStepLabel?: string | null,
+    rangeStart?: string | null,
+    rangeEnd?: string | null,
+    monthlySummaries?:  Array< {
+      __typename: "AttendanceStatisticsMonthlySummary",
+      month: number,
+      rangeStart: string,
+      rangeEnd: string,
+      workHours: number,
+      paidDays: number,
+      specialHolidayDays: number,
+      absentDays: number,
+      workDays: number,
+      isFallback: boolean,
+    } > | null,
+    totalWorkHours?: number | null,
+    totalPaidDays?: number | null,
+    totalSpecialHolidayDays?: number | null,
+    totalAbsentDays?: number | null,
+    totalWorkDays?: number | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    lastAggregatedAt?: string | null,
+    errorMessage?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -5661,6 +5983,144 @@ export type AttendancesByStaffWorkDateQuery = {
         createdAt: string,
       } | null > | null,
       revision?: number | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetAttendanceStatisticsSnapshotQueryVariables = {
+  id: string,
+};
+
+export type GetAttendanceStatisticsSnapshotQuery = {
+  getAttendanceStatisticsSnapshot?:  {
+    __typename: "AttendanceStatisticsSnapshot",
+    id: string,
+    staffId: string,
+    year: number,
+    status: AttendanceStatisticsStatus,
+    progressPercent?: number | null,
+    currentStepLabel?: string | null,
+    rangeStart?: string | null,
+    rangeEnd?: string | null,
+    monthlySummaries?:  Array< {
+      __typename: "AttendanceStatisticsMonthlySummary",
+      month: number,
+      rangeStart: string,
+      rangeEnd: string,
+      workHours: number,
+      paidDays: number,
+      specialHolidayDays: number,
+      absentDays: number,
+      workDays: number,
+      isFallback: boolean,
+    } > | null,
+    totalWorkHours?: number | null,
+    totalPaidDays?: number | null,
+    totalSpecialHolidayDays?: number | null,
+    totalAbsentDays?: number | null,
+    totalWorkDays?: number | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    lastAggregatedAt?: string | null,
+    errorMessage?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListAttendanceStatisticsSnapshotsQueryVariables = {
+  filter?: ModelAttendanceStatisticsSnapshotFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAttendanceStatisticsSnapshotsQuery = {
+  listAttendanceStatisticsSnapshots?:  {
+    __typename: "ModelAttendanceStatisticsSnapshotConnection",
+    items:  Array< {
+      __typename: "AttendanceStatisticsSnapshot",
+      id: string,
+      staffId: string,
+      year: number,
+      status: AttendanceStatisticsStatus,
+      progressPercent?: number | null,
+      currentStepLabel?: string | null,
+      rangeStart?: string | null,
+      rangeEnd?: string | null,
+      monthlySummaries?:  Array< {
+        __typename: "AttendanceStatisticsMonthlySummary",
+        month: number,
+        rangeStart: string,
+        rangeEnd: string,
+        workHours: number,
+        paidDays: number,
+        specialHolidayDays: number,
+        absentDays: number,
+        workDays: number,
+        isFallback: boolean,
+      } > | null,
+      totalWorkHours?: number | null,
+      totalPaidDays?: number | null,
+      totalSpecialHolidayDays?: number | null,
+      totalAbsentDays?: number | null,
+      totalWorkDays?: number | null,
+      startedAt?: string | null,
+      completedAt?: string | null,
+      lastAggregatedAt?: string | null,
+      errorMessage?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type AttendanceStatisticsByStaffIdYearQueryVariables = {
+  staffId: string,
+  year?: ModelIntKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelAttendanceStatisticsSnapshotFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type AttendanceStatisticsByStaffIdYearQuery = {
+  attendanceStatisticsByStaffIdYear?:  {
+    __typename: "ModelAttendanceStatisticsSnapshotConnection",
+    items:  Array< {
+      __typename: "AttendanceStatisticsSnapshot",
+      id: string,
+      staffId: string,
+      year: number,
+      status: AttendanceStatisticsStatus,
+      progressPercent?: number | null,
+      currentStepLabel?: string | null,
+      rangeStart?: string | null,
+      rangeEnd?: string | null,
+      monthlySummaries?:  Array< {
+        __typename: "AttendanceStatisticsMonthlySummary",
+        month: number,
+        rangeStart: string,
+        rangeEnd: string,
+        workHours: number,
+        paidDays: number,
+        specialHolidayDays: number,
+        absentDays: number,
+        workDays: number,
+        isFallback: boolean,
+      } > | null,
+      totalWorkHours?: number | null,
+      totalPaidDays?: number | null,
+      totalSpecialHolidayDays?: number | null,
+      totalAbsentDays?: number | null,
+      totalWorkDays?: number | null,
+      startedAt?: string | null,
+      completedAt?: string | null,
+      lastAggregatedAt?: string | null,
+      errorMessage?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -7821,6 +8281,129 @@ export type OnDeleteAttendanceSubscription = {
       createdAt: string,
     } | null > | null,
     revision?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateAttendanceStatisticsSnapshotSubscriptionVariables = {
+  filter?: ModelSubscriptionAttendanceStatisticsSnapshotFilterInput | null,
+};
+
+export type OnCreateAttendanceStatisticsSnapshotSubscription = {
+  onCreateAttendanceStatisticsSnapshot?:  {
+    __typename: "AttendanceStatisticsSnapshot",
+    id: string,
+    staffId: string,
+    year: number,
+    status: AttendanceStatisticsStatus,
+    progressPercent?: number | null,
+    currentStepLabel?: string | null,
+    rangeStart?: string | null,
+    rangeEnd?: string | null,
+    monthlySummaries?:  Array< {
+      __typename: "AttendanceStatisticsMonthlySummary",
+      month: number,
+      rangeStart: string,
+      rangeEnd: string,
+      workHours: number,
+      paidDays: number,
+      specialHolidayDays: number,
+      absentDays: number,
+      workDays: number,
+      isFallback: boolean,
+    } > | null,
+    totalWorkHours?: number | null,
+    totalPaidDays?: number | null,
+    totalSpecialHolidayDays?: number | null,
+    totalAbsentDays?: number | null,
+    totalWorkDays?: number | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    lastAggregatedAt?: string | null,
+    errorMessage?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateAttendanceStatisticsSnapshotSubscriptionVariables = {
+  filter?: ModelSubscriptionAttendanceStatisticsSnapshotFilterInput | null,
+};
+
+export type OnUpdateAttendanceStatisticsSnapshotSubscription = {
+  onUpdateAttendanceStatisticsSnapshot?:  {
+    __typename: "AttendanceStatisticsSnapshot",
+    id: string,
+    staffId: string,
+    year: number,
+    status: AttendanceStatisticsStatus,
+    progressPercent?: number | null,
+    currentStepLabel?: string | null,
+    rangeStart?: string | null,
+    rangeEnd?: string | null,
+    monthlySummaries?:  Array< {
+      __typename: "AttendanceStatisticsMonthlySummary",
+      month: number,
+      rangeStart: string,
+      rangeEnd: string,
+      workHours: number,
+      paidDays: number,
+      specialHolidayDays: number,
+      absentDays: number,
+      workDays: number,
+      isFallback: boolean,
+    } > | null,
+    totalWorkHours?: number | null,
+    totalPaidDays?: number | null,
+    totalSpecialHolidayDays?: number | null,
+    totalAbsentDays?: number | null,
+    totalWorkDays?: number | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    lastAggregatedAt?: string | null,
+    errorMessage?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteAttendanceStatisticsSnapshotSubscriptionVariables = {
+  filter?: ModelSubscriptionAttendanceStatisticsSnapshotFilterInput | null,
+};
+
+export type OnDeleteAttendanceStatisticsSnapshotSubscription = {
+  onDeleteAttendanceStatisticsSnapshot?:  {
+    __typename: "AttendanceStatisticsSnapshot",
+    id: string,
+    staffId: string,
+    year: number,
+    status: AttendanceStatisticsStatus,
+    progressPercent?: number | null,
+    currentStepLabel?: string | null,
+    rangeStart?: string | null,
+    rangeEnd?: string | null,
+    monthlySummaries?:  Array< {
+      __typename: "AttendanceStatisticsMonthlySummary",
+      month: number,
+      rangeStart: string,
+      rangeEnd: string,
+      workHours: number,
+      paidDays: number,
+      specialHolidayDays: number,
+      absentDays: number,
+      workDays: number,
+      isFallback: boolean,
+    } > | null,
+    totalWorkHours?: number | null,
+    totalPaidDays?: number | null,
+    totalSpecialHolidayDays?: number | null,
+    totalAbsentDays?: number | null,
+    totalWorkDays?: number | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    lastAggregatedAt?: string | null,
+    errorMessage?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
