@@ -6,6 +6,7 @@ import React, { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
+import AdminShiftSettingsDialog from "@/features/admin-config-shift/AdminShiftSettingsDialog";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
@@ -27,6 +28,7 @@ export default function ShiftManagementBoard() {
   const { cognitoUser } = useCognitoUser();
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const {
     shiftStaffs,
@@ -284,6 +286,7 @@ export default function ShiftManagementBoard() {
         hasBulkSelection={hasBulkSelection}
         selectedCellCount={selectedCellCount}
         onOpenBulkEditDialog={handleOpenBulkEditDialog}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       {(loading || shiftRequestsLoading) && (
@@ -349,6 +352,11 @@ export default function ShiftManagementBoard() {
         onClose={closeBulkEditDialog}
         onStateChange={handleBulkEditStateChange}
         onSubmit={handleApplyBulkEdit}
+      />
+
+      <AdminShiftSettingsDialog
+        open={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
       />
     </div>
   );

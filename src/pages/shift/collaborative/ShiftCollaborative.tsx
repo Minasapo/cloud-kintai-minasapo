@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import AdminShiftSettingsDialog from "@/features/admin-config-shift/AdminShiftSettingsDialog";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
@@ -85,6 +86,10 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       handleChangeState,
       handleLockCells,
       handleUnlockCells,
+      handleLockStaffRow,
+      handleUnlockStaffRow,
+      handleLockMonth,
+      handleUnlockMonth,
       handleApplySuggestion,
       violations,
       isAnalyzing,
@@ -131,6 +136,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
 
     const { isPrintDialogOpen, openPrintDialog, closePrintDialog } =
       usePrintShift();
+
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const staffNameMap = useMemo(
       () =>
@@ -299,6 +306,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             editingCells={state.editingCells}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
+            onOpenSettings={() => setIsSettingsOpen(true)}
           />
 
           <UndoRedoToolbar
@@ -365,6 +373,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             ShiftCellComponent={ShiftCellWithComments}
             isWeekend={isWeekend}
             currentUserId={currentUserId}
+            isAdmin={isAdmin}
+            onLockStaffRow={handleLockStaffRow}
+            onUnlockStaffRow={handleUnlockStaffRow}
+            onLockMonth={handleLockMonth}
+            onUnlockMonth={handleUnlockMonth}
           />
 
           <BatchEditToolbar
@@ -427,6 +440,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
               }))}
             shiftDataMap={state.shiftDataMap}
             targetMonth={targetMonth}
+          />
+
+          <AdminShiftSettingsDialog
+            open={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
           />
         </PageContent>
 
