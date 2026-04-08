@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 英語で考えて、日本語で説明してください。
 
+コミットメッセージは英語で書いてください。
+
 ## コマンド
 
 ```bash
