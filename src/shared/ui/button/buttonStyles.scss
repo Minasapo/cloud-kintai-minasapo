@@ -95,6 +95,10 @@
   --app-button-width: 100%;
 }
 
+.app-save-button {
+  --app-button-radius: var(--ds-radius-md);
+}
+
 .app-button[data-app-button-size="sm"] {
   min-height: 36px;
   padding: 0.5rem 0.875rem;
