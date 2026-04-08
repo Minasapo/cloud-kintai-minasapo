@@ -18,6 +18,7 @@ const sidebars: SidebarsConfig = {
     "terminology",
     "work-type-overview",
     "work-status-overview",
+    "screen-list",
     {
       type: "category",
       label: "スタッフ向けガイド",
