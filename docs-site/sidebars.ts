@@ -55,7 +55,6 @@ const sidebars: SidebarsConfig = {
         "developer/getting-started/development-flow",
         "developer/getting-started/setup",
         "developer/testing-operations",
-        "developer/docs-authoring",
         {
           type: "category",
           label: "Amplify",
