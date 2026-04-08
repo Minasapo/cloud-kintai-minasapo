@@ -44,6 +44,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "staff/features",
             "staff/dashboard",
+            "staff/attendance-statistics",
             "staff/shift",
             "staff/profile-settings",
             "staff/break-time-guide",
@@ -126,6 +127,7 @@ const sidebars: SidebarsConfig = {
         "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",
         "developer/attendance-status-determination",
+        "developer/attendance-statistics",
         "developer/shift-visibility-by-work-type",
         "developer/break-time-specification",
         "developer/close-date-system",
