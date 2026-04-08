@@ -344,22 +344,13 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       },
       appearance: {
         hero: {
-          accentColor: color.brand.primary.base,
-          borderLeftWidth: 5,
-          borderBottomWidth: 5,
-          paddingLeft: spacing.sm,
+          maxWidth: "24ch",
         },
         standard: {
-          accentColor: color.brand.primary.base,
-          borderLeftWidth: 3,
-          borderBottomWidth: 0,
-          paddingLeft: spacing.sm,
+          maxWidth: "100%",
         },
         quiet: {
-          accentColor: color.brand.primary.base,
-          borderLeftWidth: 0,
-          borderBottomWidth: 0,
-          paddingLeft: 0,
+          maxWidth: "100%",
         },
       },
       page: {

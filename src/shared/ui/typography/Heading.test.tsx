@@ -44,12 +44,15 @@ describe("Heading", () => {
     const sectionHeading = screen.getByRole("heading", { level: 2 });
     const subsectionHeading = screen.getByRole("heading", { level: 3 });
 
-    expect(pageHeading.getAttribute("style")).toContain("border-left:");
-    expect(pageHeading.getAttribute("style")).toContain("border-bottom:");
-    expect(sectionHeading.getAttribute("style")).toContain("border-left:");
-    expect(sectionHeading.getAttribute("style")).toContain(
-      "border-bottom: 0px solid transparent",
+    expect(pageHeading.getAttribute("style")).toContain(
+      "--ds-component-heading-appearance-hero-max-width",
     );
+    expect(pageHeading.getAttribute("style")).not.toContain("border-left:");
+    expect(pageHeading.getAttribute("style")).not.toContain("border-bottom:");
+    expect(sectionHeading.getAttribute("style")).toContain(
+      "--ds-component-heading-appearance-standard-max-width",
+    );
+    expect(sectionHeading.getAttribute("style")).not.toContain("border-left:");
     expect(subsectionHeading.getAttribute("style")).not.toContain(
       "border-left:",
     );
@@ -68,6 +71,9 @@ describe("Heading", () => {
     });
 
     expect(heading).toBeInTheDocument();
+    expect(heading.getAttribute("style")).toContain(
+      "--ds-component-heading-appearance-quiet-max-width",
+    );
     expect(heading.getAttribute("style")).not.toContain("border-left:");
   });
 });

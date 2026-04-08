@@ -57,17 +57,19 @@ const buildHeadingStyle = (
   level: HeadingLevel,
   appearance: HeadingAppearance,
   color?: string,
-  borderColor?: string,
+  _borderColor?: string,
 ): CSSProperties => {
   const textColor =
     color ?? getHeadingLevelToken(level, "textColor", "#1E2A25");
-  const resolvedBorderColor =
-    borderColor ??
-    getHeadingAppearanceToken(appearance, "accentColor", "#0FA85E");
+  const maxWidth = getHeadingAppearanceToken(
+    appearance,
+    "maxWidth",
+    appearance === "hero" ? "24ch" : "100%",
+  );
 
   const baseStyle: CSSProperties = {
     margin: 0,
-    maxWidth: "100%",
+    maxWidth,
     color: textColor,
     fontSize: buildResponsiveFontSize(level),
     fontWeight: getHeadingLevelToken(level, "fontWeight", "600"),
@@ -88,39 +90,7 @@ const buildHeadingStyle = (
     overflowWrap: "anywhere",
   };
 
-  const borderLeftWidth = getHeadingAppearanceToken(
-    appearance,
-    "borderLeftWidth",
-    appearance === "hero" ? "5px" : appearance === "standard" ? "3px" : "0px",
-  );
-  const borderBottomWidth = getHeadingAppearanceToken(
-    appearance,
-    "borderBottomWidth",
-    appearance === "hero" ? "5px" : "0px",
-  );
-  const paddingLeft = getHeadingAppearanceToken(
-    appearance,
-    "paddingLeft",
-    appearance === "quiet" ? "0px" : "8px",
-  );
-  const hasLeftAccent = appearance !== "quiet";
-  const hasBottomAccent = appearance === "hero";
-
-  if (!hasLeftAccent && !hasBottomAccent) {
-    return baseStyle;
-  }
-
-  return {
-    ...baseStyle,
-    display: "inline-block",
-    paddingLeft,
-    borderLeft: hasLeftAccent
-      ? `${borderLeftWidth} solid ${resolvedBorderColor}`
-      : "0 solid transparent",
-    borderBottom: hasBottomAccent
-      ? `${borderBottomWidth} solid ${resolvedBorderColor}`
-      : "0 solid transparent",
-  };
+  return baseStyle;
 };
 
 export const Heading = ({
