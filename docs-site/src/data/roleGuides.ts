@@ -24,10 +24,14 @@ export type RoleGuideDefinition = {
   sidebar: {
     label: string;
     overviewDocId: string;
+    useCasesDocId: string;
+    featuresDocId: string;
     navigationDocId: string;
     faqDocId: string;
     useCasesLabel: string;
     featuresLabel: string;
+    useCaseDocIds: string[];
+    featureDocIds: string[];
   };
   overview: GuidePageContent;
   useCases: GuidePageContent;
@@ -45,18 +49,32 @@ export function toDocPath(docId: string): string {
   return `/docs/${docId}`;
 }
 
-function uniqueDocIds(sections: GuideSection[]): string[] {
-  return [...new Set(sections.flatMap(({ links }) => links.map(({ docId }) => docId)))];
-}
-
 export const staffGuide: RoleGuideDefinition = {
   sidebar: {
     label: "スタッフ向けガイド",
     overviewDocId: "staff/overview",
+    useCasesDocId: "staff/use-cases",
+    featuresDocId: "staff/features",
     navigationDocId: "staff/navigation-map",
     faqDocId: "staff/faq",
     useCasesLabel: "ユースケース別",
     featuresLabel: "機能別",
+    useCaseDocIds: [
+      "staff/basic-operations",
+      "staff/time-recording",
+      "staff/attendance-check",
+      "staff/attendance-edit",
+      "staff/request-check",
+      "staff/attendance-report",
+      "staff/workflow",
+    ],
+    featureDocIds: [
+      "staff/dashboard",
+      "staff/attendance-statistics",
+      "staff/shift",
+      "staff/profile-settings",
+      "staff/break-time-guide",
+    ],
   },
   overview: {
     intro:
@@ -213,10 +231,29 @@ export const adminGuide: RoleGuideDefinition = {
   sidebar: {
     label: "管理者向けガイド",
     overviewDocId: "admin/overview",
+    useCasesDocId: "admin/use-cases",
+    featuresDocId: "admin/features",
     navigationDocId: "admin/navigation-map",
     faqDocId: "admin/faq",
     useCasesLabel: "ユースケース別",
     featuresLabel: "機能別",
+    useCaseDocIds: [
+      "admin/attendance-management",
+      "admin/request-approval",
+      "admin/break-time-review-guide",
+      "admin/daily-report",
+      "admin/workflow",
+      "admin/shift-plan",
+    ],
+    featureDocIds: [
+      "admin/dashboard",
+      "admin/attendances",
+      "admin/admin-shift",
+      "admin/operation-logs",
+      "admin/settings-management",
+      "admin/settings-item-list",
+      "admin/staff-management",
+    ],
   },
   overview: {
     intro:
@@ -372,8 +409,6 @@ export const adminGuide: RoleGuideDefinition = {
   },
 };
 
-export const roleGuideSidebars = [staffGuide, adminGuide].map((guide) => ({
-  ...guide.sidebar,
-  useCaseDocIds: uniqueDocIds(guide.useCases.sections),
-  featureDocIds: uniqueDocIds(guide.features.sections),
-}));
+export const roleGuideSidebars = [staffGuide, adminGuide].map(
+  (guide) => guide.sidebar,
+);

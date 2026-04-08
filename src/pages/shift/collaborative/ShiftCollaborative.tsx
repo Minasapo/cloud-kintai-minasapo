@@ -392,7 +392,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onAddComments={handleAddCommentsToSelectedCells}
             onShowCellHistory={(cellKey) => handleShowCellHistory(cellKey)}
             canUnlock={isAdmin}
-            showLock={hasUnlocked}
+            showLock={hasUnlocked && isAdmin}
             showUnlock={hasLocked}
             hasClipboard={hasClipboard}
             canPaste={focusedCell !== null}

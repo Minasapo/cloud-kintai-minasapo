@@ -338,7 +338,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
         return;
       }
 
-      if (!locked && !isAdmin) {
+      if (!isAdmin) {
         return;
       }
 
