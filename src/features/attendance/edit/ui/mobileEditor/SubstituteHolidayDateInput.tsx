@@ -1,10 +1,9 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { Label } from "@features/attendance/edit/ui/mobile/Label";
 import dayjs from "dayjs";
 import { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 
 type SubstituteHolidayDateInputProps = {
   hideLabel?: boolean;

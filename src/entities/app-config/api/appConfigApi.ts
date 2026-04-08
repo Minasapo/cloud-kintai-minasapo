@@ -1,3 +1,4 @@
+import { logOperationEvent } from "@entities/operation-log/model/canonicalOperationLog";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   createAppConfig,
@@ -14,8 +15,6 @@ import type {
   UpdateAppConfigInput,
   UpdateAppConfigMutation,
 } from "@shared/api/graphql/types";
-
-import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
 
 export type UpdateAppConfigPayload = {
   input: UpdateAppConfigInput;

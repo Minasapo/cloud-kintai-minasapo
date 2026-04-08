@@ -1,6 +1,5 @@
+import { SHIFT_GROUP_VALIDATION_TEXTS } from "@shared/config/shiftGroupTexts";
 import { z } from "zod";
-
-import { SHIFT_GROUP_VALIDATION_TEXTS } from "@/shared/config/shiftGroupTexts";
 
 import { parseOptionalInteger } from "./shiftGroupValidation";
 

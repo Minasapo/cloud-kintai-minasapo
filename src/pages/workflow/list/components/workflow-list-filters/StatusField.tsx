@@ -1,4 +1,4 @@
-import { STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
+import { STATUS_LABELS } from "@entities/workflow/lib/workflowLabels";
 
 import FilterTrigger from "./FilterTrigger";
 import FloatingPanel from "./FloatingPanel";

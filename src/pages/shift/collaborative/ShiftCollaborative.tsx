@@ -1,4 +1,5 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { PageContent } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import {
@@ -12,7 +13,6 @@ import {
 
 import { AuthContext } from "@/context/AuthContext";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { PageContent } from "@/shared/ui/layout";
 
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";

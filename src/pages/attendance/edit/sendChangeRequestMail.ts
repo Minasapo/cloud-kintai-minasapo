@@ -1,13 +1,13 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import dayjs from "dayjs";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import * as MESSAGE_CODE from "@/errors";
-import { CognitoUser } from "@/hooks/useCognitoUser";
 import {
   formatStaffDisplayName,
   sendAdminNotificationMail,
-} from "@/shared/lib/mail/adminNotification";
+} from "@shared/lib/mail/adminNotification";
+import dayjs from "dayjs";
+
+import * as MESSAGE_CODE from "@/errors";
+import { CognitoUser } from "@/hooks/useCognitoUser";
 
 export default function sendChangeRequestMail(
   cognitoUser: CognitoUser,

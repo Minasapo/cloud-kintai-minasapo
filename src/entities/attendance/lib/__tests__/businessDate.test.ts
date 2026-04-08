@@ -1,7 +1,7 @@
 import {
   resolveBusinessWorkDate,
   resolveCurrentBusinessWorkDate,
-} from "@/entities/attendance/lib/businessDate";
+} from "@entities/attendance/lib/businessDate";
 
 describe("businessDate", () => {
   it("resolves work date in Asia/Tokyo from occurredAt", () => {

@@ -1,6 +1,5 @@
+import type { PanelConfig, ScreenOption } from "@features/splitView";
 import React, { lazy } from "react";
-
-import type { PanelConfig, ScreenOption } from "@/features/splitView";
 
 const AdminDashboardComponent = lazy(
   () => import("@/pages/admin/AdminDashboard"),

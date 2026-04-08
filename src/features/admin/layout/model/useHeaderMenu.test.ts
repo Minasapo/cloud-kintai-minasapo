@@ -1,4 +1,4 @@
-import { ADMIN_HEADER_MENU_ITEMS } from "@/features/admin/layout/model/useHeaderMenu";
+import { ADMIN_HEADER_MENU_ITEMS } from "@features/admin/layout/model/useHeaderMenu";
 
 describe("ADMIN_HEADER_MENU_ITEMS", () => {
   it("先頭にダッシュボードカテゴリを定義する", () => {

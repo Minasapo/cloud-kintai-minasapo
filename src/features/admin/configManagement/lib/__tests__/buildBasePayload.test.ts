@@ -1,10 +1,9 @@
-import dayjs, { Dayjs } from "dayjs";
-
 import {
   buildBasePayload,
   buildStandardWorkHours,
   formatTime,
-} from "@/features/admin/configManagement/lib/payloadHelpers";
+} from "@features/admin/configManagement/lib/payloadHelpers";
+import dayjs, { Dayjs } from "dayjs";
 
 describe("buildBasePayload helpers", () => {
   test("formatTime formats Dayjs to HH:mm", () => {

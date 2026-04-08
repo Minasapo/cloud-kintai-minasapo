@@ -1,9 +1,8 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 type MoveDateItemProps = {
   workDate: dayjs.Dayjs;

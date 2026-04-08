@@ -1,7 +1,4 @@
-import { GraphQLResult } from "aws-amplify/api";
-import { useCallback, useEffect, useRef, useState } from "react";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import {
   createShiftEditLock,
   deleteShiftEditLock,
@@ -11,7 +8,9 @@ import {
   onDeleteShiftEditLock,
   onUpdateShiftEditLock,
   updateShiftEditLock,
-} from "@/shared/api/graphql/documents/shiftEditLock";
+} from "@shared/api/graphql/documents/shiftEditLock";
+import { GraphQLResult } from "aws-amplify/api";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type {
   CollaborativeUser,

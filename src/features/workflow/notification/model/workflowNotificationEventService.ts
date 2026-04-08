@@ -1,8 +1,7 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import type { GetWorkflowQuery } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("workflowNotificationEventService");
 

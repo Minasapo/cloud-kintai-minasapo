@@ -1,7 +1,6 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import { FieldArrayWithId } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 export default function NoRestTimeMessage({
   restFields,

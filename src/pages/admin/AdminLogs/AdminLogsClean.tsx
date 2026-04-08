@@ -1,3 +1,10 @@
+import {
+  formatOperationLogInlineValue,
+  getOperationLogDisplaySummary,
+  getOperationLogResourceDisplay,
+} from "@entities/operation-log/lib/operationLogDisplay";
+import { getOperationLogLabel } from "@entities/operation-log/lib/operationLogLabels";
+import { OperationLogDetailDialog } from "@entities/operation-log/ui/OperationLogDetailDialog";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import fetchStaffs from "@entities/staff/model/useStaffs/fetchStaffs";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -26,19 +33,12 @@ import {
   OperationLog,
   Staff,
 } from "@shared/api/graphql/types";
+import { AppIconButton } from "@shared/ui/button";
+import { PageContent } from "@shared/ui/layout";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  formatOperationLogInlineValue,
-  getOperationLogDisplaySummary,
-  getOperationLogResourceDisplay,
-} from "@/entities/operation-log/lib/operationLogDisplay";
-import { getOperationLogLabel } from "@/entities/operation-log/lib/operationLogLabels";
-import { OperationLogDetailDialog } from "@/entities/operation-log/ui/OperationLogDetailDialog";
 import useAdminOperationLogs from "@/hooks/useAdminOperationLogs/useAdminOperationLogs";
-import { AppIconButton } from "@/shared/ui/button";
-import { PageContent } from "@/shared/ui/layout";
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;

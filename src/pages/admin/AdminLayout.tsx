@@ -1,4 +1,22 @@
 import {
+  PAGE_PADDING_X,
+  PAGE_PADDING_Y,
+} from "@features/admin/layout/adminLayoutTokens";
+import { getAdminSettingsNavigationGroups } from "@features/admin/layout/model/adminSettingsNavigation";
+import {
+  ADMIN_SPLIT_PANEL_OPTIONS,
+  buildAdminSplitPanelConfig,
+} from "@features/admin/layout/model/adminSplitPanelRegistry";
+import { resolveActiveMenuHref } from "@features/admin/layout/model/resolveActiveMenuHref";
+import useHeaderMenu from "@features/admin/layout/model/useHeaderMenu";
+import NavItemPanelMenu from "@features/admin/layout/ui/NavItemPanelMenu";
+import {
+  PanelContainer,
+  SplitModeToggle,
+  SplitViewProvider,
+  useSplitView,
+} from "@features/splitView";
+import {
   Box,
   Button,
   Divider,
@@ -8,30 +26,11 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { designTokenVar } from "@shared/designSystem";
+import { PageSection } from "@shared/ui/layout";
 import React, { memo, Suspense, useCallback, useMemo } from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-
-import {
-  PAGE_PADDING_X,
-  PAGE_PADDING_Y,
-} from "@/features/admin/layout/adminLayoutTokens";
-import { getAdminSettingsNavigationGroups } from "@/features/admin/layout/model/adminSettingsNavigation";
-import {
-  ADMIN_SPLIT_PANEL_OPTIONS,
-  buildAdminSplitPanelConfig,
-} from "@/features/admin/layout/model/adminSplitPanelRegistry";
-import { resolveActiveMenuHref } from "@/features/admin/layout/model/resolveActiveMenuHref";
-import useHeaderMenu from "@/features/admin/layout/model/useHeaderMenu";
-import NavItemPanelMenu from "@/features/admin/layout/ui/NavItemPanelMenu";
-import {
-  PanelContainer,
-  SplitModeToggle,
-  SplitViewProvider,
-  useSplitView,
-} from "@/features/splitView";
-import { designTokenVar } from "@/shared/designSystem";
-import { PageSection } from "@/shared/ui/layout";
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
 

@@ -1,15 +1,15 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { useSplitView } from "@features/splitView";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
+import { formatDateTimeReadable } from "@shared/lib/time";
 import type { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { useSplitView } from "@/features/splitView";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { formatDateTimeReadable } from "@/shared/lib/time";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 import DailyReportDetailPanel from "./DailyReportDetailPanel";

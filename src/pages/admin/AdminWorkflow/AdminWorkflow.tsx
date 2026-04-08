@@ -1,6 +1,12 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  CATEGORY_LABELS,
+  getWorkflowCategoryLabel,
+  STATUS_LABELS,
+} from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
+import { useSplitView } from "@features/splitView";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import {
@@ -14,12 +20,6 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import {
-  CATEGORY_LABELS,
-  getWorkflowCategoryLabel,
-  STATUS_LABELS,
-} from "@/entities/workflow/lib/workflowLabels";
-import { useSplitView } from "@/features/splitView";
 
 import WorkflowCarouselDialog from "./components/WorkflowCarouselDialog";
 import WorkflowDetailPanel from "./components/WorkflowDetailPanel";

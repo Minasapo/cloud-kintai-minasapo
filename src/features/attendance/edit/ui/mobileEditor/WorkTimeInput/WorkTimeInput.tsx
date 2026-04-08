@@ -1,7 +1,6 @@
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { Label } from "@features/attendance/edit/ui/mobile/Label";
 import { useContext } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 
 import { GoDirectlyFlagInput } from "../GoDirectlyFlagInput";
 import { ReturnDirectlyFlagInput } from "../ReturnDirectlyFlagInput";

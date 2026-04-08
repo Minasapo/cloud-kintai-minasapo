@@ -1,8 +1,7 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import EditIcon from "@mui/icons-material/Edit";
+import { AppIconButton } from "@shared/ui/button";
 import { useNavigate } from "react-router-dom";
-
-import { AppIconButton } from "@/shared/ui/button";
 
 export function EditButton({ staff }: { staff: StaffType }) {
   const navigate = useNavigate();

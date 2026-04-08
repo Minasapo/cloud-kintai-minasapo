@@ -1,4 +1,4 @@
-import { AttendanceGetValues, AttendanceSetValue } from "@/features/attendance/edit/model/types";
+import { AttendanceGetValues, AttendanceSetValue } from "@features/attendance/edit/model/types";
 
 export function toStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];

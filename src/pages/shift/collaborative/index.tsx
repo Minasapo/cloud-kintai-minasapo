@@ -1,10 +1,9 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { LinearProgress } from "@mui/material";
+import ShiftAccessGuard from "@pages/shift/ShiftAccessGuard";
+import { PageSection } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import { Navigate } from "react-router-dom";
-
-import ShiftAccessGuard from "@/pages/shift/ShiftAccessGuard";
-import { PageSection } from "@/shared/ui/layout";
 
 import { resolveShiftRequestMode } from "../request";
 import ShiftCollaborativePage from "./ShiftCollaborative";

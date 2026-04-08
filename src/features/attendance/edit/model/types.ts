@@ -1,3 +1,4 @@
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import {
   Control,
   ControllerProps,
@@ -7,8 +8,6 @@ import {
   UseFormGetValues,
   UseFormSetValue,
 } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 export type AttendanceControl = Control<AttendanceEditInputs>;
 export type AttendanceFieldPath = FieldPath<AttendanceEditInputs>;

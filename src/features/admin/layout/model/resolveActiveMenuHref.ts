@@ -1,4 +1,4 @@
-import type { AdminHeaderMenuItem } from "@/features/admin/layout/model/useHeaderMenu";
+import type { AdminHeaderMenuItem } from "@features/admin/layout/model/useHeaderMenu";
 
 const STAFF_ATTENDANCE_PATH_PATTERN =
   /^\/admin\/staff\/[^/]+\/attendance(?:\/|$)/;

@@ -1,8 +1,7 @@
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import AttendanceOperationLogHistory from "@features/attendance/edit/ui/AttendanceOperationLogHistory";
 import { type MouseEvent, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import AttendanceOperationLogHistory from "@/features/attendance/edit/ui/AttendanceOperationLogHistory";
 
 function HistoryIcon() {
   return (

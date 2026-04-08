@@ -1,3 +1,9 @@
+import {
+  formatOperationLogInlineValue,
+  getOperationLogDisplaySummary,
+  getOperationLogResourceDisplay,
+} from "@entities/operation-log/lib/operationLogDisplay";
+import { getOperationLogLabel } from "@entities/operation-log/lib/operationLogLabels";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
@@ -10,15 +16,8 @@ import {
   Typography,
 } from "@mui/material";
 import type { OperationLog, Staff } from "@shared/api/graphql/types";
+import { AppIconButton } from "@shared/ui/button";
 import dayjs from "dayjs";
-
-import {
-  formatOperationLogInlineValue,
-  getOperationLogDisplaySummary,
-  getOperationLogResourceDisplay,
-} from "@/entities/operation-log/lib/operationLogDisplay";
-import { getOperationLogLabel } from "@/entities/operation-log/lib/operationLogLabels";
-import { AppIconButton } from "@/shared/ui/button";
 
 import { OperationLogJsonDetails } from "./OperationLogJsonDetails";
 

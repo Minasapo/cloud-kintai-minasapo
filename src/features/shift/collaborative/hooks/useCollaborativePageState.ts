@@ -3,6 +3,7 @@ import {
 } from "@entities/calendar/api/calendarApi";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
 import { type GraphQLResult } from "aws-amplify/api";
@@ -16,7 +17,6 @@ import {
 } from "react";
 
 import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
 import { SuggestedAction } from "../rules/shiftRules";

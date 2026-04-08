@@ -5,17 +5,16 @@ import {
   useGetWorkflowTemplatesQuery,
   useUpdateWorkflowTemplateMutation,
 } from "@entities/workflow-template/api/workflowTemplateApi";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
 import type {
   CreateWorkflowTemplateInput,
   UpdateWorkflowTemplateInput,
   WorkflowTemplate,
 } from "@shared/api/graphql/types";
 import { useCallback } from "react";
-
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
 
 type UseWorkflowTemplatesParams = {
   isAuthenticated: boolean;

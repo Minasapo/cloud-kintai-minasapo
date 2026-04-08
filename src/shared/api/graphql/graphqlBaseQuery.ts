@@ -1,8 +1,7 @@
 import type { GraphQLAuthMode } from "@aws-amplify/core/internals/utils";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import type { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export type SerializableValue =
   | string

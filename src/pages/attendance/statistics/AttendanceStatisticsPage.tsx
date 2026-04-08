@@ -1,15 +1,15 @@
 import AttendanceStatistics from "@features/attendance/statistics/ui/AttendanceStatistics";
+import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import {
-  DashboardInnerSurface,
-  PageContent,
-  PageSection,
-} from "@/shared/ui/layout";
 
 export default function AttendanceStatisticsPage() {
   const { getAttendanceStatisticsEnabled } = useContext(AppConfigContext);

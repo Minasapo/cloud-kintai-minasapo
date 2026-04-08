@@ -1,6 +1,5 @@
+import LeaveGuardDialog from "@shared/ui/feedback/LeaveGuardDialog";
 import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
-
-import LeaveGuardDialog from "@/shared/ui/feedback/LeaveGuardDialog";
 
 type UseDialogCloseGuardOptions = {
   isDirty?: boolean;

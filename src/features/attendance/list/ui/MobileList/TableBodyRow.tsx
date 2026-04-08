@@ -1,3 +1,15 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { CreatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
+import { RestTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
+import { SummaryTableCell } from "@entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
+import { UpdatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
+import { WorkDateTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
+import { WorkTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+  getAttendanceRowVariant,
+} from "@entities/attendance/ui/rowVariant";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   IconButton,
@@ -14,19 +26,6 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
-import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
-import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
-import { UpdatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
-import { WorkDateTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
-import { WorkTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
-import {
-  AttendanceRowVariant,
-  attendanceRowVariantStyles,
-  getAttendanceRowVariant,
-} from "@/entities/attendance/ui/rowVariant";
 
 import { AttendanceStatusTooltip } from "../AttendanceStatusTooltip";
 

@@ -1,6 +1,5 @@
+import { designTokenVar } from "@shared/designSystem";
 import { CSSProperties, ReactNode, useId, useState } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 const GROUP_BORDER_WIDTH = designTokenVar(
   "component.groupContainer.borderWidth",

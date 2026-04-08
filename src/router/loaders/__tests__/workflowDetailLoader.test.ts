@@ -1,11 +1,10 @@
-import { GraphQLResult } from "aws-amplify/api";
-
 import {
   fetchWorkflowById,
   resolveWorkflowLoaderData,
   WorkflowLoaderError,
-} from "@/entities/workflow/model/loader";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+} from "@entities/workflow/model/loader";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { GraphQLResult } from "aws-amplify/api";
 
 import { workflowDetailLoader } from "../workflowDetailLoader";
 import { createLoaderArgs } from "./loaderTestUtils";

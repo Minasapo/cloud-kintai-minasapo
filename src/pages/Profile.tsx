@@ -1,3 +1,8 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import {
+  STAFF_EXTERNAL_LINKS_LIMIT,
+  StaffExternalLink,
+} from "@entities/staff/externalLink";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import updateStaff from "@entities/staff/model/useStaff/updateStaff";
 import {
@@ -9,6 +14,12 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
+import { predefinedIcons } from "@shared/config/icons";
+import { createLogger } from "@shared/lib/logger";
 import { updatePassword } from "aws-amplify/auth";
 import dayjs from "dayjs";
 import {
@@ -21,21 +32,10 @@ import {
 } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import {
-  STAFF_EXTERNAL_LINKS_LIMIT,
-  StaffExternalLink,
-} from "@/entities/staff/externalLink";
 import * as MESSAGE_CODE from "@/errors";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import { predefinedIcons } from "@/shared/config/icons";
-import { createLogger } from "@/shared/lib/logger";
 
 import { AuthContext } from "../context/AuthContext";
 

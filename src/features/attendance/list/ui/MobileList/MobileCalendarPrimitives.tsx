@@ -1,8 +1,7 @@
 import "./MobileCalendar.scss";
 
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import { CSSProperties, ReactNode } from "react";
-
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 type CalendarDayCellProps = {
   isCurrentMonth: boolean;

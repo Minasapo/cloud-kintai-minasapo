@@ -1,6 +1,5 @@
+import { useActionButtonState } from "@shared/ui/time-recorder/useActionButtonState";
 import { act, renderHook, waitFor } from "@testing-library/react";
-
-import { useActionButtonState } from "@/shared/ui/time-recorder/useActionButtonState";
 
 describe("useActionButtonState", () => {
   it("resets pending state after async action resolves", async () => {

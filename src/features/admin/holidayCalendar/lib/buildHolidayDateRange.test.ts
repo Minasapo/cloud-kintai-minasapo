@@ -1,10 +1,9 @@
-import dayjs from "dayjs";
-
 import {
   buildHolidayDateRange,
   HolidayDateRangeError,
   MAX_HOLIDAY_RANGE_DAYS,
-} from "@/features/admin/holidayCalendar/lib/buildHolidayDateRange";
+} from "@features/admin/holidayCalendar/lib/buildHolidayDateRange";
+import dayjs from "dayjs";
 
 describe("buildHolidayDateRange", () => {
   it("returns a single ISO date when only startDate is provided", () => {

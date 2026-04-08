@@ -1,23 +1,23 @@
 import "./AttendanceList.scss";
 
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { LinearProgress, useMediaQuery, useTheme } from "@mui/material";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { onCreateAttendance, onDeleteAttendance, onUpdateAttendance, } from "@shared/api/graphql/documents/subscriptions";
 import { OnCreateAttendanceSubscription, OnDeleteAttendanceSubscription, OnUpdateAttendanceSubscription, Staff, } from "@shared/api/graphql/types";
+import { Logger } from "@shared/lib/logger";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { onCreateAttendance, onDeleteAttendance, onUpdateAttendance, } from "@/shared/api/graphql/documents/subscriptions";
-import { Logger } from "@/shared/lib/logger";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import AttendanceListCard from "./AttendanceListCard";
 import { AttendanceListProvider } from "./AttendanceListContext";

@@ -1,4 +1,5 @@
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { useWorkflowNotificationInbox } from "@features/workflow/notification/model/useWorkflowNotificationInbox";
 import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import {
@@ -12,6 +13,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import {
@@ -25,13 +32,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { useWorkflowNotificationInbox } from "@/features/workflow/notification/model/useWorkflowNotificationInbox";
-import { AppButton } from "@/shared/ui/button";
-import {
-  DashboardInnerSurface,
-  PageContent,
-  PageSection,
-} from "@/shared/ui/layout";
 
 const formatEventAt = (eventAt: string) =>
   dayjs(eventAt).format("YYYY/MM/DD HH:mm");

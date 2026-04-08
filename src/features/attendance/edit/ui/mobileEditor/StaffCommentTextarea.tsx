@@ -1,6 +1,5 @@
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import { UseFormRegisterReturn } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 type StaffCommentTextareaProps = {
   disabled: boolean;

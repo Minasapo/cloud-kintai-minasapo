@@ -20,11 +20,10 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { PageContent } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
-
-import { PageContent } from "@/shared/ui/layout";
 
 // モックデータ型定義
 interface MockUser {

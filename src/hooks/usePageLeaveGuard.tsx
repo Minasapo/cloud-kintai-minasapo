@@ -1,7 +1,6 @@
+import LeaveGuardDialog from "@shared/ui/feedback/LeaveGuardDialog";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
 import { useBlocker } from "react-router-dom";
-
-import LeaveGuardDialog from "@/shared/ui/feedback/LeaveGuardDialog";
 
 type UsePageLeaveGuardOptions = {
   isDirty?: boolean;

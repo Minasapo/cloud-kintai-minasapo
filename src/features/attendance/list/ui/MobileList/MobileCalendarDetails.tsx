@@ -1,8 +1,8 @@
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import dayjs from "dayjs";
 import { CSSProperties, useContext } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { useMobileCalendarUI } from "./mobileCalendarContext";
 import {

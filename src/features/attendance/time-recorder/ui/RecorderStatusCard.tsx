@@ -1,6 +1,5 @@
+import Clock from "@shared/ui/clock/Clock";
 import type { ReactNode } from "react";
-
-import Clock from "@/shared/ui/clock/Clock";
 
 type RecorderStatusCardProps = {
   workStatusText: string;

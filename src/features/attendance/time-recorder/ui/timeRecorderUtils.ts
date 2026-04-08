@@ -1,10 +1,9 @@
-import dayjs from "dayjs";
-
 import {
   AttendanceState,
   AttendanceStatus,
-} from "@/entities/attendance/lib/AttendanceState";
-import { Attendance, Staff } from "@/shared/api/graphql/types";
+} from "@entities/attendance/lib/AttendanceState";
+import { Attendance, Staff } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
 
 import { WorkStatus, WorkStatusCodes } from "../lib/common";
 import { getUnrecordedDefaultLunchMinutes } from "./elapsedWorkInfo";

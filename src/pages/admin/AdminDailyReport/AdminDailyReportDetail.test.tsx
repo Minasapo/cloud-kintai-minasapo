@@ -1,13 +1,13 @@
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  DailyReportReactionType,
+  DailyReportStatus,
+} from "@shared/api/graphql/types";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { StaffRole } from "@/entities/staff/model/useStaffs/useStaffs";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  DailyReportReactionType,
-  DailyReportStatus,
-} from "@/shared/api/graphql/types";
 
 import AdminDailyReportDetail from "./AdminDailyReportDetail";
 

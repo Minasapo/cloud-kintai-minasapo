@@ -1,16 +1,16 @@
 import "./StaffCommentInput.scss";
 
-import { useContext, useMemo, useState } from "react";
-
-import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import {
   createSelectReasonHandler,
   getEnabledReasons,
   ReasonItem,
-} from "@/features/attendance/edit/ui/mobileEditor/staffCommentInputUtils";
-import { StaffCommentReasonButtons } from "@/features/attendance/edit/ui/mobileEditor/StaffCommentReasonButtons";
-import { StaffCommentTextarea } from "@/features/attendance/edit/ui/mobileEditor/StaffCommentTextarea";
+} from "@features/attendance/edit/ui/mobileEditor/staffCommentInputUtils";
+import { StaffCommentReasonButtons } from "@features/attendance/edit/ui/mobileEditor/StaffCommentReasonButtons";
+import { StaffCommentTextarea } from "@features/attendance/edit/ui/mobileEditor/StaffCommentTextarea";
+import { useContext, useMemo, useState } from "react";
+
+import { AppConfigContext } from "@/context/AppConfigContext";
 
 export default function StaffCommentInput() {
   const { changeRequests, register, setValue, watch, getValues } = useContext(

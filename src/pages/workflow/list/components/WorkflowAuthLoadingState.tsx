@@ -1,11 +1,10 @@
-import Page from "@shared/ui/page/Page";
-
-import { designTokenVar } from "@/shared/designSystem";
+import { designTokenVar } from "@shared/designSystem";
 import {
   DashboardInnerSurface,
   PageContent,
   PageSection,
-} from "@/shared/ui/layout";
+} from "@shared/ui/layout";
+import Page from "@shared/ui/page/Page";
 
 import { Spinner } from "./WorkflowSharedUi";
 

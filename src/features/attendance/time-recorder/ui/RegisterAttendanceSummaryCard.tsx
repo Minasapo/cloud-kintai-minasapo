@@ -1,22 +1,22 @@
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
+import {
+  formatDateRangeLabel,
+  getAttendanceQueryDateRange,
+  getEffectiveDateRange,
+} from "@entities/attendance/lib/aggregationDateRange";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import {
   calcTotalRestTime,
   calcTotalWorkTime,
 } from "@entities/attendance/lib/time";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
+import InfoIconTooltip from "@shared/ui/tooltip/InfoIconTooltip";
 import { type ChartData, type ChartOptions } from "chart.js";
 import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import {
-  formatDateRangeLabel,
-  getAttendanceQueryDateRange,
-  getEffectiveDateRange,
-} from "@/entities/attendance/lib/aggregationDateRange";
-import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
 
 import RegisterSummaryAttendanceErrorCountCard from "./RegisterSummaryAttendanceErrorCountCard";
 import RegisterSummaryTotalWorkHoursCard from "./RegisterSummaryTotalWorkHoursCard";

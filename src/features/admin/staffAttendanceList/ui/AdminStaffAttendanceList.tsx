@@ -1,3 +1,18 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { AttendanceGraph } from "@entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
+import { useAdminStaffAttendanceListViewModel } from "@features/admin/staffAttendanceList/model";
+import {
+  ChangeRequestQuickViewDialog,
+  pendingAttendanceContainerSx,
+  PendingAttendanceSection,
+} from "@features/admin/staffAttendanceList/ui/components";
+import {
+  getCurrentMonthFromQuery,
+  MONTH_QUERY_KEY,
+} from "@features/attendance/list/ui/attendanceListUtils";
+import DesktopCalendarView from "@features/attendance/list/ui/DesktopCalendarView";
+import MobileCalendar from "@features/attendance/list/ui/MobileList/MobileCalendar";
+import { useSplitView } from "@features/splitView";
 import {
   Alert,
   Box,
@@ -13,28 +28,12 @@ import {
   useTheme,
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
+import { designTokenVar } from "@shared/designSystem";
+import { PageSection } from "@shared/ui/layout";
 import dayjs, { type Dayjs } from "dayjs";
 import type { ReactNode } from "react";
 import { useCallback, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { AttendanceGraph } from "@/entities/attendance/ui/adminStaffAttendance/AttendanceGraph";
-import { useAdminStaffAttendanceListViewModel } from "@/features/admin/staffAttendanceList/model";
-import {
-  ChangeRequestQuickViewDialog,
-  pendingAttendanceContainerSx,
-  PendingAttendanceSection,
-} from "@/features/admin/staffAttendanceList/ui/components";
-import {
-  getCurrentMonthFromQuery,
-  MONTH_QUERY_KEY,
-} from "@/features/attendance/list/ui/attendanceListUtils";
-import DesktopCalendarView from "@/features/attendance/list/ui/DesktopCalendarView";
-import MobileCalendar from "@/features/attendance/list/ui/MobileList/MobileCalendar";
-import { useSplitView } from "@/features/splitView";
-import { designTokenVar } from "@/shared/designSystem";
-import { PageSection } from "@/shared/ui/layout";
 
 const PAGE_PADDING_X = {
   xs: designTokenVar("spacing.lg", "16px"),

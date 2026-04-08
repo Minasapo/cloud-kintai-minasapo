@@ -1,14 +1,14 @@
+import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
+import { getWorkTypeLabel } from "@entities/staff/lib/workTypeOptions";
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditPageHeader } from "@features/attendance/edit/ui/components/AttendanceEditPageHeader";
+import { AttendanceErrorSummary } from "@features/attendance/edit/ui/components/AttendanceErrorSummary";
 import QuickInputButtonsMobile from "@features/attendance/edit/ui/QuickInputButtonsMobile";
 import GroupContainerMobile from "@shared/ui/group-container/GroupContainerMobile";
 import { useContext, useMemo } from "react";
 import { useFormState } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
-import { getWorkTypeLabel } from "@/entities/staff/lib/workTypeOptions";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { AttendanceEditPageHeader } from "@/features/attendance/edit/ui/components/AttendanceEditPageHeader";
-import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
 
 import ChangeRequestingAlert from "../desktopEditor/ChangeRequestingMessage";
 import NoDataAlert from "../desktopEditor/NoDataAlert";

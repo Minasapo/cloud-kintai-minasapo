@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-
 import {
   buildTimeRecorderAnnouncementDismissKey,
   isDismissedTimeRecorderAnnouncement,
   shouldShowTimeRecorderAnnouncement,
   type TimeRecorderAnnouncement,
-} from "@/features/attendance/time-recorder/lib/timeRecorderAnnouncement";
+} from "@features/attendance/time-recorder/lib/timeRecorderAnnouncement";
+import { useEffect, useMemo, useState } from "react";
 
 type RegisterAnnouncementPanelProps = {
   configId?: string | null;

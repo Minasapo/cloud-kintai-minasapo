@@ -1,7 +1,6 @@
+import { designTokenVar } from "@shared/designSystem";
 import StaffIcon from "@shared/ui/icon/StaffIcon";
 import { CSSProperties } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 const SIGN_BUTTON_GAP = designTokenVar("component.headerSignButton.gap", "8px");
 const SIGN_BUTTON_PADDING_X = designTokenVar(

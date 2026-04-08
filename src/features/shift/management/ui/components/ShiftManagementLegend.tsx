@@ -1,6 +1,5 @@
 import { Box, Typography } from "@mui/material";
-
-import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
+import { designTokenVar, getDesignTokens } from "@shared/designSystem";
 
 import { statusVisualMap } from "../../lib/shiftStateMapping";
 

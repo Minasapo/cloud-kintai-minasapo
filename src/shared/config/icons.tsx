@@ -1,4 +1,4 @@
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 
 export type PredefinedIconValue = "train" | "holiday" | "expense" | "LinkIcons";
 

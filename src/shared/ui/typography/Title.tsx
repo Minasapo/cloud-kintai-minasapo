@@ -1,6 +1,5 @@
+import { designTokenVar } from "@shared/designSystem";
 import { type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 type TitleProps = {
   borderColor?: string;

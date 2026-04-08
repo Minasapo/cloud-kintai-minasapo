@@ -1,7 +1,6 @@
+import { designTokenVar } from "@shared/designSystem";
 import type { CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 const PAGE_PADDING_TOP = designTokenVar("component.page.paddingTop", "24px");
 const PAGE_SECTION_GAP = designTokenVar("component.page.sectionGap", "16px");

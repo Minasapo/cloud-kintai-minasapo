@@ -1,11 +1,11 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { sendMail } from "@shared/api/graphql/documents/queries";
 import type { DailyReport } from "@shared/api/graphql/types";
+import { formatStaffDisplayName } from "@shared/lib/mail/adminNotification";
 import dayjs from "dayjs";
 
 import * as MESSAGE_CODE from "@/errors";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { formatStaffDisplayName } from "@/shared/lib/mail/adminNotification";
 
 type SendDailyReportCommentNotificationParams = {
   staffs: StaffType[];

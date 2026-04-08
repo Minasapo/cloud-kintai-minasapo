@@ -1,4 +1,4 @@
-import { getDesignTokens as buildDesignTokens } from "@/shared/designSystem";
+import { getDesignTokens as buildDesignTokens } from "@shared/designSystem";
 
 const DEFAULT_THEME_TOKENS = buildDesignTokens();
 

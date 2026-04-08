@@ -1,10 +1,9 @@
 import { useGetAttendanceByStaffAndDateQuery } from "@entities/attendance/api/attendanceApi";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import AttendanceOperationLogHistory from "@features/attendance/edit/ui/AttendanceOperationLogHistory";
+import { PageContent } from "@shared/ui/layout";
 import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import AttendanceOperationLogHistory from "@/features/attendance/edit/ui/AttendanceOperationLogHistory";
-import { PageContent } from "@/shared/ui/layout";
 
 export default function AdminAttendanceHistory(): JSX.Element {
   const { targetWorkDate, staffId } = useParams();

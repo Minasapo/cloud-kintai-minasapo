@@ -1,12 +1,11 @@
+import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { ShiftRequestForm } from "@features/shift/request-form";
 import { LinearProgress } from "@mui/material";
+import ShiftCollaborativePage from "@pages/shift/collaborative/ShiftCollaborative";
+import ShiftAccessGuard from "@pages/shift/ShiftAccessGuard";
+import { PageSection } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
-
-import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
-import ShiftCollaborativePage from "@/pages/shift/collaborative/ShiftCollaborative";
-import ShiftAccessGuard from "@/pages/shift/ShiftAccessGuard";
-import { PageSection } from "@/shared/ui/layout";
 
 export const resolveShiftRequestMode = (
   defaultMode: ShiftDisplayMode,

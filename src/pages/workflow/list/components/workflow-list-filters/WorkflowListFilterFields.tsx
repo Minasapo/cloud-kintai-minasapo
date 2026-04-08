@@ -1,4 +1,4 @@
-import { CATEGORY_LABELS } from "@/entities/workflow/lib/workflowLabels";
+import { CATEGORY_LABELS } from "@entities/workflow/lib/workflowLabels";
 
 import DateRangeField from "./DateRangeField";
 import SelectField from "./SelectField";

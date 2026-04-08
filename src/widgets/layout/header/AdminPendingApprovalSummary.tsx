@@ -1,24 +1,24 @@
-import { GraphQLResult } from "aws-amplify/api";
-import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { hasUnapprovedChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
-import { StaffRole } from "@/entities/staff/model/useStaffs/useStaffs";
-import useWorkflows from "@/entities/workflow/model/useWorkflows";
-import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { listAttendances } from "@/shared/api/graphql/documents/queries";
+import { hasUnapprovedChangeRequest } from "@entities/attendance/lib/ChangeRequest";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import useWorkflows from "@entities/workflow/model/useWorkflows";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { listAttendances } from "@shared/api/graphql/documents/queries";
 import {
   onCreateAttendance,
   onDeleteAttendance,
   onUpdateAttendance,
-} from "@/shared/api/graphql/documents/subscriptions";
+} from "@shared/api/graphql/documents/subscriptions";
 import {
   ListAttendancesQuery,
   Workflow,
   WorkflowStatus,
-} from "@/shared/api/graphql/types";
-import { createLogger } from "@/shared/lib/logger";
+} from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
+import { GraphQLResult } from "aws-amplify/api";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
 
 import AdminSummaryCard from "./AdminSummaryCard";
 

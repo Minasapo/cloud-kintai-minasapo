@@ -1,8 +1,7 @@
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { useAutoConfiguredTimeFlag } from "@features/attendance/edit/model/useAutoConfiguredTimeFlag";
 import ReturnDirectlyFlagInputBase from "@shared/ui/form/flags/ReturnDirectlyFlagInputBase";
 import { useContext } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { useAutoConfiguredTimeFlag } from "@/features/attendance/edit/model/useAutoConfiguredTimeFlag";
 
 interface ReturnDirectlyFlagInputProps {
   onHighlightEndTime?: (highlight: boolean) => void;

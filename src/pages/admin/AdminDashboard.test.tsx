@@ -1,11 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import dayjs from "dayjs";
-
 import {
   listAttendances,
   listDailyReports,
-} from "@/shared/api/graphql/documents/queries";
-import { DailyReportStatus } from "@/shared/api/graphql/types";
+} from "@shared/api/graphql/documents/queries";
+import { DailyReportStatus } from "@shared/api/graphql/types";
+import { render, screen, waitFor } from "@testing-library/react";
+import dayjs from "dayjs";
 
 import AdminDashboard from "./AdminDashboard";
 

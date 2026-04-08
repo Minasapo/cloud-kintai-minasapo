@@ -1,11 +1,10 @@
 import type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
-
-import { SHIFT_GROUP_VALIDATION_TEXTS } from "@/shared/config/shiftGroupTexts";
+import { SHIFT_GROUP_VALIDATION_TEXTS } from "@shared/config/shiftGroupTexts";
 import {
   type FieldRule,
   type FieldState,
   resolveFieldState,
-} from "@/shared/lib/validation/fieldState";
+} from "@shared/lib/validation/fieldState";
 
 export type ShiftGroupFormValue = {
   id: string;

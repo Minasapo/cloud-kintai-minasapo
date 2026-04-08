@@ -1,17 +1,17 @@
+import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
+import { SettingsButton, SettingsTextField } from "@features/admin/layout/ui/SettingsPrimitives";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
+import { resolveThemeColor } from "@shared/config/theme";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
-import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
-import { SettingsButton, SettingsTextField } from "@/features/admin/layout/ui/SettingsPrimitives";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { resolveThemeColor } from "@/shared/config/theme";
 
 const basePalette = [
   "#1976d2",

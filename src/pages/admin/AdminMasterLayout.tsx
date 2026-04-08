@@ -1,10 +1,9 @@
-import { memo } from "react";
-import { Outlet, useLocation } from "react-router-dom";
-
 import {
   findAdminSettingsItemByPath,
   resolveAdminSettingsCategory,
-} from "@/features/admin/layout/model/adminSettingsNavigation";
+} from "@features/admin/layout/model/adminSettingsNavigation";
+import { memo } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 
 const SettingsContextHeader = memo(function SettingsContextHeader() {
   const location = useLocation();

@@ -5,10 +5,9 @@
  * @remarks
  * - コメントの確認状態はAttendanceEditContextで管理されます。
  */
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import dayjs from "dayjs";
 import { type MouseEvent, useContext, useState } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 function CommentIcon() {
   return (

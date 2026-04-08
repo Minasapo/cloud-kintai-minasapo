@@ -1,16 +1,16 @@
 import { type UpdateAttendanceMutationArg } from "@entities/attendance/api/attendanceApi";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography, } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
+import { GenericMailSender } from "@shared/lib/mail/GenericMailSender";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
-import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import { ChangeRequestDiffTable } from "./ChangeRequestDiffTable";
 import handleApproveChangeRequest from "./handleApproveChangeRequest";

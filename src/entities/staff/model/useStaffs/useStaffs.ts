@@ -6,6 +6,18 @@ import {
   useGetStaffsQuery,
   useUpdateStaffMutation,
 } from "@entities/staff/api/staffApi";
+import { StaffExternalLink } from "@entities/staff/externalLink";
+import { isAttendanceManagementEnabled } from "@entities/staff/lib/attendanceManagement";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
+import {
+  onCreateStaff,
+  onDeleteStaff,
+  onUpdateStaff,
+} from "@shared/api/graphql/documents/subscriptions";
 import {
   ApproverMultipleMode,
   ApproverSettingMode,
@@ -18,19 +30,6 @@ import {
   UpdateStaffInput,
 } from "@shared/api/graphql/types";
 import { useCallback, useEffect, useMemo } from "react";
-
-import { StaffExternalLink } from "@/entities/staff/externalLink";
-import { isAttendanceManagementEnabled } from "@/entities/staff/lib/attendanceManagement";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import {
-  onCreateStaff,
-  onDeleteStaff,
-  onUpdateStaff,
-} from "@/shared/api/graphql/documents/subscriptions";
 
 import fetchStaffs from "./fetchStaffs";
 

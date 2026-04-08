@@ -1,10 +1,10 @@
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import {
   SettingsCheckbox,
   SettingsSelect,
   SettingsTextField,
-} from "@/features/admin/layout/ui/SettingsPrimitives";
-import { predefinedIcons } from "@/shared/config/icons";
+} from "@features/admin/layout/ui/SettingsPrimitives";
+import { predefinedIcons } from "@shared/config/icons";
 
 interface Link {
   label: string;

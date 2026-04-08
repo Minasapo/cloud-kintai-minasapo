@@ -1,7 +1,6 @@
+import { getWorkTypeLabel } from "@entities/staff/lib/workTypeOptions";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { TableCell } from "@mui/material";
-
-import { getWorkTypeLabel } from "@/entities/staff/lib/workTypeOptions";
 
 export function WorkTypeTableCell({ staff }: { staff: StaffType }) {
   const label = getWorkTypeLabel(

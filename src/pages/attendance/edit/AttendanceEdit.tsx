@@ -5,14 +5,25 @@ import {
   useGetAttendanceByStaffAndDateQuery,
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { attendanceEditSchema } from "@entities/attendance/validation/attendanceEditSchema";
 import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
 import {
   StaffType,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import type { AttendanceEditContextProps } from "@features/attendance/edit/model/AttendanceEditProvider";
+import AttendanceEditProvider from "@features/attendance/edit/model/AttendanceEditProvider";
+import {
+  AttendanceEditInputs,
+  defaultValues,
+} from "@features/attendance/edit/model/common";
+import DesktopEditor from "@features/attendance/edit/ui/desktopEditor/DesktopEditor";
+import { MobileEditor } from "@features/attendance/edit/ui/mobileEditor/MobileEditor";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Attendance } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
+import { PageContent } from "@shared/ui/layout";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo } from "react";
 import {
@@ -24,20 +35,9 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
-import type { AttendanceEditContextProps } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import AttendanceEditProvider from "@/features/attendance/edit/model/AttendanceEditProvider";
-import {
-  AttendanceEditInputs,
-  defaultValues,
-} from "@/features/attendance/edit/model/common";
-import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEditor";
-import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { createLogger } from "@/shared/lib/logger";
-import { PageContent } from "@/shared/ui/layout";
 
 import { AttendanceEditErrorAlert } from "./AttendanceEditErrorAlert";
 import { buildChangeRequestPayload } from "./attendanceEditUtils";

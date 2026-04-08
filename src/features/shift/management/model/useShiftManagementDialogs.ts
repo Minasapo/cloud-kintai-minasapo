@@ -1,8 +1,8 @@
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import { ShiftState } from "../lib/generateMockShifts";
 

@@ -1,7 +1,7 @@
+import { getDesignTokens } from "@shared/designSystem";
 import { type ReactNode, useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { getDesignTokens } from "@/shared/designSystem";
 
 type Props = {
   title: string;

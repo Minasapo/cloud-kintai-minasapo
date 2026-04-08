@@ -4,16 +4,15 @@ import {
   useGetShiftRequestsQuery,
   useUpdateShiftCellMutation,
 } from "@entities/shift/api/shiftApi";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  onCreateShiftRequest,
+  onUpdateShiftRequest,
+} from "@shared/api/graphql/documents/subscriptions";
 import type { GraphQLBaseQueryError } from "@shared/api/graphql/graphqlBaseQuery";
 import type { ShiftRequestDayPreferenceInput } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  onCreateShiftRequest,
-  onUpdateShiftRequest,
-} from "@/shared/api/graphql/documents/subscriptions";
 
 import {
   applyShiftCellUpdateToMap,

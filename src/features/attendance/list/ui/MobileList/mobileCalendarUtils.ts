@@ -1,3 +1,4 @@
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import {
   Attendance,
   CloseDate,
@@ -6,8 +7,6 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus, isHolidayLike } from "../../lib/attendanceStatusUtils";
 import { MonthTerm, resolveMonthlyTerms as resolveMonthlyTermsBase } from "../../lib/monthlyTermUtils";

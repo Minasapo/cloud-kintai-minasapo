@@ -1,10 +1,9 @@
-import { Dayjs } from "dayjs";
-
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import {
   SettingsCheckbox,
   SettingsTimeField,
-} from "@/features/admin/layout/ui/SettingsPrimitives";
+} from "@features/admin/layout/ui/SettingsPrimitives";
+import { Dayjs } from "dayjs";
 
 interface QuickInputEntry {
   time: Dayjs;

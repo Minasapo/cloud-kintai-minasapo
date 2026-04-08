@@ -1,10 +1,9 @@
-import { memo } from "react";
-import { Link as RouterLink } from "react-router-dom";
-
 import {
   getAdminSettingsNavigationGroups,
-} from "@/features/admin/layout/model/adminSettingsNavigation";
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+} from "@features/admin/layout/model/adminSettingsNavigation";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
+import { memo } from "react";
+import { Link as RouterLink } from "react-router-dom";
 
 const SettingsCard = memo(function SettingsCard({
   title,

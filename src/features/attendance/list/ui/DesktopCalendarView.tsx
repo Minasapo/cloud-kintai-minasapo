@@ -1,3 +1,5 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
@@ -19,12 +21,9 @@ import {
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
+import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
 import dayjs, { Dayjs } from "dayjs";
 import { useMemo } from "react";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
 import {
   buildWeeks,

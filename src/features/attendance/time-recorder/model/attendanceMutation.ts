@@ -1,10 +1,10 @@
+import { getNowISOStringWithZeroSeconds } from "@entities/attendance/lib/time";
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance } from "@shared/api/graphql/types";
+import { Logger } from "@shared/lib/logger";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import { Logger } from "@/shared/lib/logger";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 type NotificationMessage = string;
 type AttendanceMutation = (

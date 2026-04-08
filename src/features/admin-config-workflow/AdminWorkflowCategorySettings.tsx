@@ -1,28 +1,28 @@
-import {
-  CreateAppConfigInput,
-  UpdateAppConfigInput,
-} from "@shared/api/graphql/types";
-import { useContext, useEffect, useMemo, useState } from "react";
-
-import { useAppDispatchV2 } from "@/app/hooks";
-import { AppConfigContext } from "@/context/AppConfigContext";
-import { AuthContext } from "@/context/AuthContext";
+import { useAppDispatchV2 } from "@app/hooks";
 import {
   getDefaultWorkflowCategoryOrder,
   type WorkflowCategoryOrderItem,
-} from "@/entities/workflow/lib/workflowLabels";
-import useWorkflowTemplates from "@/entities/workflow-template/model/useWorkflowTemplates";
-import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+} from "@entities/workflow/lib/workflowLabels";
+import useWorkflowTemplates from "@entities/workflow-template/model/useWorkflowTemplates";
+import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import {
   SettingsAlert,
   SettingsSwitch,
   SettingsTextAreaField,
   SettingsTextField,
-} from "@/features/admin/layout/ui/SettingsPrimitives";
+} from "@features/admin/layout/ui/SettingsPrimitives";
+import {
+  CreateAppConfigInput,
+  UpdateAppConfigInput,
+} from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { formatDateSlash } from "@shared/lib/time";
+import { useContext, useEffect, useMemo, useState } from "react";
+
+import { AppConfigContext } from "@/context/AppConfigContext";
+import { AuthContext } from "@/context/AuthContext";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
-import { formatDateSlash } from "@/shared/lib/time";
 
 const resetDisplayOrder = (
   items: WorkflowCategoryOrderItem[],

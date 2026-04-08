@@ -1,4 +1,5 @@
 import { useCalendars } from "@entities/calendar/model/useCalendars";
+import useShiftPlanYear from "@features/shift/management/model/useShiftPlanYear";
 import {
   Alert,
   Box,
@@ -9,7 +10,6 @@ import React, { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
-import useShiftPlanYear from "@/features/shift/management/model/useShiftPlanYear";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
@@ -124,7 +124,6 @@ export default function ShiftManagementBoard() {
     persistShiftRequestChanges,
     displayShifts,
     dailyCounts,
-    groupDailyCounts,
     plannedDailyCounts,
   } = useShiftDisplayData({
     shiftStaffs,
@@ -330,7 +329,6 @@ export default function ShiftManagementBoard() {
           onDayCheckboxChange={handleDayCheckboxChange}
           displayShifts={displayShifts}
           dailyCounts={dailyCounts}
-          groupDailyCounts={groupDailyCounts}
           plannedDailyCounts={plannedDailyCounts}
           onOpenShiftEditDialog={openShiftEditDialog}
         />

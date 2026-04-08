@@ -1,4 +1,8 @@
 import {
+  CATEGORY_LABELS,
+  STATUS_LABELS,
+} from "@entities/workflow/lib/workflowLabels";
+import {
   applyWorkflowFilters,
   isWorkflowFilterActive,
   mapWorkflowsToListItems,
@@ -6,11 +10,6 @@ import {
   type WorkflowListFilters,
 } from "@features/workflow/list/workflowListModel";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
-
-import {
-  CATEGORY_LABELS,
-  STATUS_LABELS,
-} from "@/entities/workflow/lib/workflowLabels";
 
 const buildWorkflow = (
   overrides: Partial<WorkflowLike> = {},

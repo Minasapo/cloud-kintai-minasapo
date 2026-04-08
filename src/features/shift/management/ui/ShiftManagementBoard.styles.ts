@@ -1,4 +1,4 @@
-import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
+import { designTokenVar, getDesignTokens } from "@shared/designSystem";
 
 const DEFAULT_THEME_TOKENS = getDesignTokens();
 const shiftBoardTokens = DEFAULT_THEME_TOKENS.component.shiftBoard;

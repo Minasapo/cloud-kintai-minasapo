@@ -1,4 +1,16 @@
 import { TableHead } from "@aws-amplify/ui-react";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { CreatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
+import { RestTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
+import { SummaryTableCell } from "@entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
+import { UpdatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
+import { WorkDateTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
+import { WorkTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+  getAttendanceRowVariant,
+} from "@entities/attendance/ui/rowVariant";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
@@ -15,19 +27,6 @@ import {
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
-import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
-import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
-import { UpdatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
-import { WorkDateTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
-import { WorkTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
-import {
-  AttendanceRowVariant,
-  attendanceRowVariantStyles,
-  getAttendanceRowVariant,
-} from "@/entities/attendance/ui/rowVariant";
 
 import { useAttendanceListContext } from "./AttendanceListContext";
 import { MONTH_QUERY_KEY } from "./attendanceListUtils";

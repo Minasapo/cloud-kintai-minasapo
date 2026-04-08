@@ -1,4 +1,4 @@
-import StatusChip from "@/shared/ui/chips/StatusChip";
+import StatusChip from "@shared/ui/chips/StatusChip";
 
 import type { WorkflowApprovalStepView } from "../types";
 

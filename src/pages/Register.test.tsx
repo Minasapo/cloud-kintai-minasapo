@@ -1,8 +1,7 @@
 import useMediaQuery from "@mui/material/useMediaQuery";
+import RegisterContent from "@pages/register/RegisterContent";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-
-import RegisterContent from "@/pages/register/RegisterContent";
 
 jest.mock("@mui/material/useMediaQuery", () => ({
   __esModule: true,

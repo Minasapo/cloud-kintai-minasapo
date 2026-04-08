@@ -1,16 +1,16 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
+import { appendItem, removeItemAt, toggleEnabledAt, updateItem, } from "@features/admin/configManagement/lib/arrayHelpers";
+import { DEFAULT_AM_HOLIDAY_END, DEFAULT_AM_HOLIDAY_START, DEFAULT_PM_HOLIDAY_END, DEFAULT_PM_HOLIDAY_START, TIME_FORMAT, } from "@features/admin/configManagement/lib/constants";
+import { buildCreatePayload, buildUpdatePayload, } from "@features/admin/configManagement/lib/payloadHelpers";
+import { validateAdminConfigForm } from "@features/admin/configManagement/lib/validation";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs, { Dayjs } from "dayjs";
 import type { ChangeEvent } from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
-import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import { E14001, S14001, S14002 } from "@/errors";
-import { appendItem, removeItemAt, toggleEnabledAt, updateItem, } from "@/features/admin/configManagement/lib/arrayHelpers";
-import { DEFAULT_AM_HOLIDAY_END, DEFAULT_AM_HOLIDAY_START, DEFAULT_PM_HOLIDAY_END, DEFAULT_PM_HOLIDAY_START, TIME_FORMAT, } from "@/features/admin/configManagement/lib/constants";
-import { buildCreatePayload, buildUpdatePayload, } from "@/features/admin/configManagement/lib/payloadHelpers";
-import { validateAdminConfigForm } from "@/features/admin/configManagement/lib/validation";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 export type QuickInputEntry = {
     time: Dayjs;

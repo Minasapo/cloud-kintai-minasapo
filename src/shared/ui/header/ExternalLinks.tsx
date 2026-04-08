@@ -1,11 +1,10 @@
-import type { CSSProperties } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-
 import {
   predefinedIcons,
   type PredefinedIconValue,
-} from "@/shared/config/icons";
-import { designTokenVar } from "@/shared/designSystem";
+} from "@shared/config/icons";
+import { designTokenVar } from "@shared/designSystem";
+import type { CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type ExternalLinkItem = {
   label: string;

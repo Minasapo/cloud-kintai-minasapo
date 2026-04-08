@@ -1,9 +1,8 @@
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { AppIconButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import PropTypes, { type Validator } from "prop-types";
 import { type FC, memo } from "react";
-
-import { AppIconButton } from "@/shared/ui/button";
 
 import { ActiveUsersList } from "./ActiveUsersList";
 

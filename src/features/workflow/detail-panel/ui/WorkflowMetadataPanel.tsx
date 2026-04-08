@@ -1,8 +1,7 @@
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
+import { formatDateSlash } from "@shared/lib/time";
 import StatusChip from "@shared/ui/chips/StatusChip";
 import type { ReactNode } from "react";
-
-import { formatDateSlash } from "@/shared/lib/time";
 
 import type { WorkflowApprovalStepView } from "../../approval-flow/types";
 import WorkflowApprovalTimeline from "../../approval-flow/ui/WorkflowApprovalTimeline";

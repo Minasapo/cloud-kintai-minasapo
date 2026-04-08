@@ -1,4 +1,4 @@
-import { ReasonItem } from "@/features/attendance/edit/ui/mobileEditor/staffCommentInputUtils";
+import { ReasonItem } from "@features/attendance/edit/ui/mobileEditor/staffCommentInputUtils";
 
 type ReasonButtonsProps = {
   reasons: ReasonItem[];

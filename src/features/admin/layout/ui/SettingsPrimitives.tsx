@@ -1,3 +1,4 @@
+import { AppButton } from "@shared/ui/button";
 import dayjs, { type Dayjs } from "dayjs";
 import type {
   ChangeEvent,
@@ -5,8 +6,6 @@ import type {
   ReactNode,
   TextareaHTMLAttributes,
 } from "react";
-
-import { AppButton } from "@/shared/ui/button";
 
 type SettingsButtonVariant = "primary" | "secondary" | "danger";
 type SettingsButtonSize = "sm" | "md";

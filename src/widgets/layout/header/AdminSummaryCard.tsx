@@ -1,6 +1,5 @@
+import InfoIconTooltip from "@shared/ui/tooltip/InfoIconTooltip";
 import { Link as RouterLink } from "react-router-dom";
-
-import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
 
 type AdminSummaryCardProps = {
   testId: string;

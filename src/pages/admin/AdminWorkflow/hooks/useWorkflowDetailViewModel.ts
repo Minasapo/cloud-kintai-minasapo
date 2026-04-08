@@ -1,7 +1,6 @@
 import { ApprovalStatus, ApprovalStep, GetWorkflowQuery, WorkflowStatus } from "@shared/api/graphql/types";
+import { formatDateSlash, isoDateFromTimestamp } from "@shared/lib/time";
 import { useMemo } from "react";
-
-import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
 
 type WorkflowData = NonNullable<GetWorkflowQuery["getWorkflow"]>;
 

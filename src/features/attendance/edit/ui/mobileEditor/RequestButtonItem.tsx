@@ -1,7 +1,6 @@
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
+import { AppButton } from "@shared/ui/button";
 import { UseFormHandleSubmit } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
-import { AppButton } from "@/shared/ui/button";
 
 export function RequestButtonItem({
   handleSubmit,

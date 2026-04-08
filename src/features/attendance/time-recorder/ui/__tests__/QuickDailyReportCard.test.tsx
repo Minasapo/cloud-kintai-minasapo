@@ -1,11 +1,10 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-
 import {
   createDailyReport,
   updateDailyReport,
-} from "@/shared/api/graphql/documents/mutations";
-import { dailyReportsByStaffId } from "@/shared/api/graphql/documents/queries";
-import { DailyReportStatus } from "@/shared/api/graphql/types";
+} from "@shared/api/graphql/documents/mutations";
+import { dailyReportsByStaffId } from "@shared/api/graphql/documents/queries";
+import { DailyReportStatus } from "@shared/api/graphql/types";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import QuickDailyReportCard from "../QuickDailyReportCard";
 

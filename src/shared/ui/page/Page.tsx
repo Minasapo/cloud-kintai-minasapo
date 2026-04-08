@@ -1,16 +1,15 @@
+import { designTokenVar } from "@shared/designSystem";
 import CommonBreadcrumbs, {
   type BreadcrumbItem,
 } from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import Title from "@shared/ui/typography/Title";
-import type { CSSProperties, ReactNode } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 import {
   getPageWidthStyle,
   type LegacyPageMaxWidth,
   type PageWidthPreset,
   resolveLegacyPageWidth,
-} from "@/shared/ui/layout/pageWidthPresets";
+} from "@shared/ui/layout/pageWidthPresets";
+import Title from "@shared/ui/typography/Title";
+import type { CSSProperties, ReactNode } from "react";
 
 const PAGE_SECTION_GAP = designTokenVar("component.page.sectionGap", "16px");
 

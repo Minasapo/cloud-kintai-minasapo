@@ -1,7 +1,6 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { CloseDate } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 export type MonthTerm = {
   start: Dayjs;

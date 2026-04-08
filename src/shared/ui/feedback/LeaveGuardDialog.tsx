@@ -1,4 +1,4 @@
-import { AppButton } from "@/shared/ui/button";
+import { AppButton } from "@shared/ui/button";
 
 import AppDialog from "./AppDialog";
 

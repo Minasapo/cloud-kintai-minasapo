@@ -1,15 +1,14 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { useMemo } from "react";
-
-import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
-import { buildWorkflowApprovalTimeline } from "@/features/workflow/approval-flow/model/workflowApprovalTimeline";
-import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
+import { getWorkflowCategoryLabel } from "@entities/workflow/lib/workflowLabels";
+import { buildWorkflowApprovalTimeline } from "@features/workflow/approval-flow/model/workflowApprovalTimeline";
+import type { WorkflowApprovalStepView } from "@features/workflow/approval-flow/types";
 import {
   deriveWorkflowDetailPermissions,
   type WorkflowDetailPermissions,
-} from "@/features/workflow/detail-panel/model/workflowDetailPermissions";
-import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
-import { formatDateSlash, isoDateFromTimestamp } from "@/shared/lib/time";
+} from "@features/workflow/detail-panel/model/workflowDetailPermissions";
+import type { WorkflowEntity } from "@features/workflow/hooks/useWorkflowLoaderWorkflow";
+import { formatDateSlash, isoDateFromTimestamp } from "@shared/lib/time";
+import { useMemo } from "react";
 
 type UseWorkflowDetailMetaParams = {
   workflow: WorkflowEntity | null | undefined;

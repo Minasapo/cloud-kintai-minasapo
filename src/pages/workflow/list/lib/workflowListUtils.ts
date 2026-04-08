@@ -1,7 +1,6 @@
+import { STATUS_LABELS } from "@entities/workflow/lib/workflowLabels";
+import type { WorkflowListItem } from "@features/workflow/list/workflowListModel";
 import { WorkflowStatus } from "@shared/api/graphql/types";
-
-import { STATUS_LABELS } from "@/entities/workflow/lib/workflowLabels";
-import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
 
 export type WorkflowStatusSummary = {
   total: number;

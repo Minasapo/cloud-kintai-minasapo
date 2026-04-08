@@ -1,11 +1,10 @@
 import "./RemarksItem.scss";
 
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { RemarksInputField } from "@features/attendance/edit/ui/items/RemarksInputField";
+import { toStringArray } from "@features/attendance/edit/ui/items/remarksItemUtils";
+import { RemarksTags } from "@features/attendance/edit/ui/items/RemarksTags";
 import { useContext, useState } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { RemarksInputField } from "@/features/attendance/edit/ui/items/RemarksInputField";
-import { toStringArray } from "@/features/attendance/edit/ui/items/remarksItemUtils";
-import { RemarksTags } from "@/features/attendance/edit/ui/items/RemarksTags";
 
 export default function RemarksItem() {
   const { getValues, setValue, control, watch, readOnly } = useContext(

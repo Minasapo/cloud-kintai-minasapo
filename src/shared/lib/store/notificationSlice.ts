@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-import { SNACKBAR_AUTO_HIDE_DURATION } from "@/shared/config/timeouts";
+import { SNACKBAR_AUTO_HIDE_DURATION } from "@shared/config/timeouts";
 
 export type NotificationTone = "success" | "error" | "warning" | "info";
 export type NotificationPlacement = "top-right" | "bottom-right";

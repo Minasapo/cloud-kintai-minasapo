@@ -1,3 +1,5 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { updateShiftRequest } from "@shared/api/graphql/documents/mutations";
 import React, {
   useCallback,
   useEffect,
@@ -5,9 +7,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { updateShiftRequest } from "@/shared/api/graphql/documents/mutations";
 
 import {
   CollaborativeShiftContext,

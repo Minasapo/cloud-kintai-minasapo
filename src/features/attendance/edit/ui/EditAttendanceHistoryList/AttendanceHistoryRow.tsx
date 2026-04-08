@@ -1,8 +1,8 @@
+import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime";
 import { AttendanceHistory } from "@shared/api/graphql/types";
 import { useContext, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 
 const cellClassName =
   "whitespace-nowrap border-b border-slate-200 px-4 py-3 text-sm text-slate-700 align-top";

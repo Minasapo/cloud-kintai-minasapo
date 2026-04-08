@@ -1,13 +1,12 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { CloseDate, CreateCloseDateInput } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import DateField from "@shared/ui/form/DateField";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-
-import { useAppDispatchV2 } from "@/app/hooks";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { useCalendars } from "@/entities/calendar/model/useCalendars";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
-import DateField from "@/shared/ui/form/DateField";
 
 type BulkFormValues = {
     startMonth: dayjs.Dayjs | null;

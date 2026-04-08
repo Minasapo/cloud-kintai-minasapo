@@ -1,12 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { Provider } from "react-redux";
-
 import notificationReducer, {
   pushNotification,
-} from "@/shared/lib/store/notificationSlice";
-import AppDialog from "@/shared/ui/feedback/AppDialog";
-import { APP_LAYER_Z_INDEX } from "@/shared/ui/overlay/layers";
+} from "@shared/lib/store/notificationSlice";
+import AppDialog from "@shared/ui/feedback/AppDialog";
+import { APP_LAYER_Z_INDEX } from "@shared/ui/overlay/layers";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { Provider } from "react-redux";
 
 import NotificationViewport from "./NotificationViewport";
 

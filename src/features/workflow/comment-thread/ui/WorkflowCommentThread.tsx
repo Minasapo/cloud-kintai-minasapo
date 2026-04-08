@@ -1,8 +1,7 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { useWorkflowDetailContext } from "@features/workflow/detail-panel/model/WorkflowDetailContext";
+import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-
-import { useWorkflowDetailContext } from "@/features/workflow/detail-panel/model/WorkflowDetailContext";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
 import type { WorkflowCommentMessage } from "../types";

@@ -1,3 +1,8 @@
+import {
+  buildAdminSplitPanelConfig,
+  getAdminSplitPanelOptionByRoute,
+} from "@features/admin/layout/model/adminSplitPanelRegistry";
+import { useSplitView } from "@features/splitView";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import {
   Box,
@@ -8,15 +13,9 @@ import {
   type SxProps,
   type Theme,
 } from "@mui/material";
+import { AppIconButton } from "@shared/ui/button";
+import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import { memo, type MouseEvent, useCallback, useMemo, useState } from "react";
-
-import {
-  buildAdminSplitPanelConfig,
-  getAdminSplitPanelOptionByRoute,
-} from "@/features/admin/layout/model/adminSplitPanelRegistry";
-import { useSplitView } from "@/features/splitView";
-import { AppIconButton } from "@/shared/ui/button";
-import ConfirmDialog from "@/shared/ui/feedback/ConfirmDialog";
 
 interface NavItemPanelMenuProps {
   href: string;

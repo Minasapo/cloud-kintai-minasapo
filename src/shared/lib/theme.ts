@@ -4,8 +4,7 @@ import {
   responsiveFontSizes,
   type ThemeOptions,
 } from "@mui/material/styles";
-
-import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
+import { type DesignTokens, getDesignTokens } from "@shared/designSystem";
 
 declare module "@mui/material/styles" {
   interface Palette {

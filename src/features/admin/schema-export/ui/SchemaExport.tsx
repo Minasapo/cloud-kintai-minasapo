@@ -1,10 +1,10 @@
-import { useContext, useMemo, useState } from "react";
-
-import { AuthContext } from "@/context/AuthContext";
 import {
   SettingsAlert,
   SettingsSelect,
-} from "@/features/admin/layout/ui/SettingsPrimitives";
+} from "@features/admin/layout/ui/SettingsPrimitives";
+import { useContext, useMemo, useState } from "react";
+
+import { AuthContext } from "@/context/AuthContext";
 
 import { downloadJsonFile } from "../model/downloadJsonFile";
 import {

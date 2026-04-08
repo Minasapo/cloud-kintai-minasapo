@@ -1,12 +1,11 @@
-import { useCallback } from "react";
-
-import { useAppDispatchV2 } from "@/app/hooks";
+import { useAppDispatchV2 } from "@app/hooks";
 import {
   type NotificationPlacement,
   type NotificationSource,
   type NotificationTone,
   pushNotification,
-} from "@/shared/lib/store/notificationSlice";
+} from "@shared/lib/store/notificationSlice";
+import { useCallback } from "react";
 
 export type AppNotificationInput = {
   title: string;

@@ -1,8 +1,7 @@
+import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime";
+import { AttendanceTime } from "@entities/attendance/lib/AttendanceTime";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { Attendance, AttendanceHistory } from "@shared/api/graphql/types";
-
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
 
 function showBlankLine(): string {
   return "";

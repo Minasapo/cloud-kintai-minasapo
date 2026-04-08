@@ -3,8 +3,22 @@ import {
   StaffType,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  CATEGORY_LABELS,
+  getEnabledWorkflowCategories,
+} from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import useWorkflowTemplates from "@entities/workflow-template/model/useWorkflowTemplates";
+import { useNewWorkflowForm } from "@features/workflow/application-form/model/useNewWorkflowForm";
+import { WorkflowFormProvider } from "@features/workflow/application-form/model/WorkflowFormContext";
+import {
+  buildCreateWorkflowInput,
+  CLOCK_CORRECTION_CHECK_OUT_LABEL,
+  CLOCK_CORRECTION_LABEL,
+  validateWorkflowForm,
+} from "@features/workflow/application-form/model/workflowFormModel";
+import WorkflowTypeFields from "@features/workflow/application-form/ui/WorkflowTypeFields";
+import { sendWorkflowSubmissionNotification } from "@features/workflow/notifications/sendWorkflowSubmissionNotification";
 import {
   ApprovalStatus,
   ApprovalStepInput,
@@ -12,34 +26,20 @@ import {
   ApproverSettingMode,
   WorkflowCategory,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
+import { parseTimeToISO } from "@shared/lib/time";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import {
-  CATEGORY_LABELS,
-  getEnabledWorkflowCategories,
-} from "@/entities/workflow/lib/workflowLabels";
-import { useNewWorkflowForm } from "@/features/workflow/application-form/model/useNewWorkflowForm";
-import { WorkflowFormProvider } from "@/features/workflow/application-form/model/WorkflowFormContext";
-import {
-  buildCreateWorkflowInput,
-  CLOCK_CORRECTION_CHECK_OUT_LABEL,
-  CLOCK_CORRECTION_LABEL,
-  validateWorkflowForm,
-} from "@/features/workflow/application-form/model/workflowFormModel";
-import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
-import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { createLogger } from "@/shared/lib/logger";
-import { parseTimeToISO } from "@/shared/lib/time";
-import {
-  DashboardInnerSurface,
-  PageContent,
-  PageSection,
-} from "@/shared/ui/layout";
 
 import styles from "./NewWorkflow.module.scss";
 

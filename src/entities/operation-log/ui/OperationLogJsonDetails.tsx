@@ -1,7 +1,6 @@
+import { parseOperationLogJson } from "@entities/operation-log/model/canonicalOperationLog";
 import { OperationLog } from "@shared/api/graphql/types";
 import { useMemo } from "react";
-
-import { parseOperationLogJson } from "@/entities/operation-log/model/canonicalOperationLog";
 
 import { OperationLogDiffViewer } from "./OperationLogDiffViewer";
 

@@ -1,4 +1,4 @@
-import DirectSwitch from "@/shared/ui/time-recorder/DirectSwitch";
+import DirectSwitch from "@shared/ui/time-recorder/DirectSwitch";
 
 import { useTimeRecorder } from "./TimeRecorderContext";
 
