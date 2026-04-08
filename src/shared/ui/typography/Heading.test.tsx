@@ -52,6 +52,9 @@ describe("Heading", () => {
     expect(sectionHeading.getAttribute("style")).toContain(
       "--ds-component-heading-appearance-standard-max-width",
     );
+    expect(sectionHeading.getAttribute("style")).toContain(
+      "--ds-component-heading-level-section-text-color",
+    );
     expect(sectionHeading.getAttribute("style")).not.toContain("border-left:");
     expect(subsectionHeading.getAttribute("style")).not.toContain(
       "border-left:",
@@ -75,5 +78,33 @@ describe("Heading", () => {
       "--ds-component-heading-appearance-quiet-max-width",
     );
     expect(heading.getAttribute("style")).not.toContain("border-left:");
+  });
+
+  it("supports inverse contrast for headings on dark backgrounds", () => {
+    render(<SubsectionTitle contrast="inverse">暗背景見出し</SubsectionTitle>);
+
+    const heading = screen.getByRole("heading", {
+      level: 3,
+      name: "暗背景見出し",
+    });
+
+    expect(heading.getAttribute("style")).toContain(
+      "--ds-component-heading-contrast-inverse-text-color",
+    );
+  });
+
+  it("prefers an explicit color over contrast", () => {
+    render(
+      <Heading level="section" contrast="inverse" color="#123456">
+        カスタムカラー見出し
+      </Heading>,
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "カスタムカラー見出し",
+      }),
+    ).toHaveStyle({ color: "#123456" });
   });
 });

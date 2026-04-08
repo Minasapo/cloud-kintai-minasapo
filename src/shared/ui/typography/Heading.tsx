@@ -5,6 +5,7 @@ import { type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 type HeadingElement = "h1" | "h2" | "h3" | "div" | "span";
 export type HeadingLevel = "page" | "section" | "subsection";
 export type HeadingAppearance = "hero" | "standard" | "quiet";
+export type HeadingContrast = "default" | "inverse";
 type HeadingTone = HeadingLevel;
 
 export type BaseHeadingProps = {
@@ -14,6 +15,7 @@ export type BaseHeadingProps = {
   children: ReactNode;
   className?: string;
   color?: string;
+  contrast?: HeadingContrast;
   style?: CSSProperties;
 } & Omit<HTMLAttributes<HTMLElement>, "children" | "color" | "style">;
 
@@ -53,14 +55,37 @@ const getHeadingAppearanceToken = (
 const buildResponsiveFontSize = (level: HeadingLevel) =>
   `clamp(${getHeadingLevelToken(level, "fontSizeMobile", "16px")}, 2.6vw, ${getHeadingLevelToken(level, "fontSizeDesktop", "18px")})`;
 
+const getHeadingTextColor = (
+  level: HeadingLevel,
+  contrast?: HeadingContrast,
+  color?: string,
+) => {
+  if (color) {
+    return color;
+  }
+
+  if (contrast === "inverse") {
+    return designTokenVar("component.heading.contrast.inverse.textColor", "#E2E8F0");
+  }
+
+  if (contrast === "default") {
+    return designTokenVar(
+      "component.heading.contrast.default.textColor",
+      getHeadingLevelToken(level, "textColor", "#1E2A25"),
+    );
+  }
+
+  return getHeadingLevelToken(level, "textColor", "#1E2A25");
+};
+
 const buildHeadingStyle = (
   level: HeadingLevel,
   appearance: HeadingAppearance,
+  contrast?: HeadingContrast,
   color?: string,
   _borderColor?: string,
 ): CSSProperties => {
-  const textColor =
-    color ?? getHeadingLevelToken(level, "textColor", "#1E2A25");
+  const textColor = getHeadingTextColor(level, contrast, color);
   const maxWidth = getHeadingAppearanceToken(
     appearance,
     "maxWidth",
@@ -100,6 +125,7 @@ export const Heading = ({
   children,
   className,
   color,
+  contrast,
   level,
   style,
   tone,
@@ -117,6 +143,7 @@ export const Heading = ({
         ...buildHeadingStyle(
           resolvedLevel,
           resolvedAppearance,
+          contrast,
           color,
           borderColor,
         ),

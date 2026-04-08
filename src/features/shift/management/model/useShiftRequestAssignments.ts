@@ -20,6 +20,7 @@ import { ShiftState } from "../lib/generateMockShifts";
 import { buildSummaryFromAssignments } from "../lib/shiftAssignments";
 import {
   convertHistoryToInput,
+  processShiftRequestItems,
   ShiftRequestHistoryMeta,
   ShiftRequestRecordSnapshot,
 } from "../lib/shiftRequests";
@@ -120,47 +121,15 @@ export default function useShiftRequestAssignments({
               (item): item is NonNullable<typeof item> => item !== null,
             ) ?? [];
 
-          items.forEach((item) => {
-            if (!staffIdSet.has(item.staffId)) return;
-            const per: Record<string, ShiftState> = {};
-            item.entries
-              ?.filter(
-                (entry): entry is NonNullable<typeof entry> => entry !== null,
-              )
-              .forEach((entry) => {
-                per[entry.date] = shiftRequestStatusToShiftState(entry.status);
-              });
-            nextAssignments.set(item.staffId, per);
+          const processed = processShiftRequestItems(
+            items,
+            staffIdSet,
+            targetMonthKey,
+          );
 
-            const histories =
-              item.histories?.filter(
-                (history): history is NonNullable<typeof history> =>
-                  history !== null,
-              ) ?? [];
-            const changeCount = histories.length;
-            let latestChangeAt: string | null = null;
-            histories.forEach((history) => {
-              const candidate = history.recordedAt ?? null;
-              if (!candidate) return;
-              if (!latestChangeAt || dayjs(candidate).isAfter(latestChangeAt)) {
-                latestChangeAt = candidate;
-              }
-            });
-            nextHistoryMeta.set(item.staffId, {
-              changeCount,
-              latestChangeAt,
-            });
-
-            const historyInputs = histories.map(convertHistoryToInput);
-            nextRecords.set(item.staffId, {
-              id: item.id,
-              version: item.version ?? undefined,
-              histories: historyInputs,
-              note: item.note ?? undefined,
-              submittedAt: item.submittedAt ?? undefined,
-              targetMonth: item.targetMonth ?? targetMonthKey,
-            });
-          });
+          processed.nextAssignments.forEach((v, k) => nextAssignments.set(k, v));
+          processed.nextHistoryMeta.forEach((v, k) => nextHistoryMeta.set(k, v));
+          processed.nextRecords.forEach((v, k) => nextRecords.set(k, v));
 
           nextToken = response.data?.listShiftRequests?.nextToken ?? null;
         } while (nextToken);

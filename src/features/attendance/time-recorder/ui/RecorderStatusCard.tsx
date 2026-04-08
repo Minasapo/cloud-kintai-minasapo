@@ -13,6 +13,7 @@ function WorkStatusHeading({ text }: { text: string }) {
     <div className="recorder-status-card__title-wrap">
       <SubsectionTitle
         className="recorder-status-card__title"
+        contrast="inverse"
         data-testid="work-status-text"
       >
         {text}

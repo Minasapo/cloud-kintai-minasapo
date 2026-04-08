@@ -2,6 +2,7 @@ export {
   type BaseHeadingProps,
   Heading,
   type HeadingAppearance,
+  type HeadingContrast,
   type HeadingLevel,
   type HeadingProps,
   PageTitle,

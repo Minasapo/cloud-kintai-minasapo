@@ -1,11 +1,16 @@
 import { type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 
-import { Heading, type HeadingAppearance } from "./Heading";
+import {
+  Heading,
+  type HeadingAppearance,
+  type HeadingContrast,
+} from "./Heading";
 
 type TitleProps = {
   appearance?: HeadingAppearance;
   borderColor?: string;
   color?: string;
+  contrast?: HeadingContrast;
   children?: ReactNode;
   className?: string;
   component?: "h1" | "h2" | "h3" | "div" | "span";
@@ -18,6 +23,7 @@ const Title = ({
   children,
   borderColor,
   color,
+  contrast,
   sx,
   className,
   style,
@@ -31,6 +37,7 @@ const Title = ({
       borderColor={borderColor}
       className={className}
       color={color}
+      contrast={contrast}
       level="page"
       style={{
         ...sx,
