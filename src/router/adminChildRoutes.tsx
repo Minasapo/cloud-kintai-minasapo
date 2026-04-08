@@ -237,7 +237,7 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "workflow",
-        element: <Navigate to="/admin/workflow" replace />,
+        element: <NotFound />,
       },
       {
         path: "feature_management/working_time",
