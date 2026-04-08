@@ -70,6 +70,7 @@ const mainSidebar: SidebarEntry[] = [
       "developer/architecture/placement-guide",
       "developer/architecture/sidebar-category-rules",
     ]),
+    "developer/workflow",
     "developer/attendance-management-enabled",
     "developer/attendance-error-list-display",
     "developer/attendance-status-determination",
