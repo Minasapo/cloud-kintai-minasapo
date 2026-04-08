@@ -21,15 +21,14 @@ import {
   SettingsSwitch,
   SettingsTimeField,
 } from "@features/admin/layout/ui/SettingsPrimitives";
-import { Tab, Tabs } from "@mui/material";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { AppTabs } from "@shared/ui/tabs";
 import dayjs, { Dayjs } from "dayjs";
 import {
-  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -162,28 +161,6 @@ function useAutoSave({
     saving,
     queueSave: () => setSaveToken((prev) => prev + 1),
   };
-}
-
-function AttendanceSettingsTabPanel({
-  activeTab,
-  tabKey,
-  children,
-}: {
-  activeTab: AttendanceSettingsTabKey;
-  tabKey: AttendanceSettingsTabKey;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      role="tabpanel"
-      id={`attendance-settings-panel-${tabKey}`}
-      aria-labelledby={`attendance-settings-tab-${tabKey}`}
-      hidden={activeTab !== tabKey}
-      className="pt-5"
-    >
-      {children}
-    </div>
-  );
 }
 
 function WorkingTimePanel() {
@@ -720,32 +697,11 @@ function QuickInputPanel() {
 
 export default function AttendanceSettingsContent() {
   const [activeTab, setActiveTab] = useState<AttendanceSettingsTabKey>("rules");
-
-  return (
-    <div className="flex flex-col gap-4">
-      <Tabs
-        value={activeTab}
-        onChange={(_, nextValue: AttendanceSettingsTabKey) =>
-          setActiveTab(nextValue)
-        }
-        variant="scrollable"
-        allowScrollButtonsMobile
-      >
-        <Tab
-          value="rules"
-          id="attendance-settings-tab-rules"
-          aria-controls="attendance-settings-panel-rules"
-          label={TAB_LABELS.rules}
-        />
-        <Tab
-          value="inputs"
-          id="attendance-settings-tab-inputs"
-          aria-controls="attendance-settings-panel-inputs"
-          label={TAB_LABELS.inputs}
-        />
-      </Tabs>
-
-      <AttendanceSettingsTabPanel activeTab={activeTab} tabKey="rules">
+  const tabs = [
+    {
+      value: "rules" as const,
+      label: TAB_LABELS.rules,
+      content: (
         <div className="flex flex-col gap-6">
           <SettingsAlert>
             勤怠一覧と勤怠編集に直接影響するルールを、このタブでまとめて更新できます。
@@ -756,9 +712,12 @@ export default function AttendanceSettingsContent() {
           <SpecialHolidayPanel />
           <AbsentPanel />
         </div>
-      </AttendanceSettingsTabPanel>
-
-      <AttendanceSettingsTabPanel activeTab={activeTab} tabKey="inputs">
+      ),
+    },
+    {
+      value: "inputs" as const,
+      label: TAB_LABELS.inputs,
+      content: (
         <div className="flex flex-col gap-6">
           <SettingsAlert>
             申請時の確認挙動や、勤怠入力の補助設定をこのタブで管理します。
@@ -766,7 +725,23 @@ export default function AttendanceSettingsContent() {
           <OvertimeConfirmationPanel />
           <QuickInputPanel />
         </div>
-      </AttendanceSettingsTabPanel>
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <AppTabs
+        value={activeTab}
+        onChange={setActiveTab}
+        items={tabs}
+        appearance="mui-standard"
+        panelPadding={3}
+        tabsProps={{
+          "aria-label": "勤怠設定タブ",
+          variant: "scrollable",
+        }}
+      />
     </div>
   );
 }

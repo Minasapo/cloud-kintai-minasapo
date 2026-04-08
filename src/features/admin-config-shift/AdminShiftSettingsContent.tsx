@@ -2,7 +2,7 @@ import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import {
   SettingsAlert,
 } from "@features/admin/layout/ui/SettingsPrimitives";
-import { Tab, Tabs } from "@mui/material";
+import { AppTabs } from "@shared/ui/tabs";
 import { SubsectionTitle } from "@shared/ui/typography";
 import { useState } from "react";
 
@@ -172,27 +172,34 @@ export default function AdminShiftSettingsContent({
   state,
 }: AdminShiftSettingsContentProps) {
   const [activeTab, setActiveTab] = useState<ShiftSettingsTab>("shift-group");
+  const tabs = [
+    {
+      value: "shift-group" as const,
+      label: "シフトグループ",
+      content: <ShiftGroupTabPanel state={state} />,
+    },
+    {
+      value: "shift-display" as const,
+      label: "シフト表示",
+      content: <ShiftDisplayTabPanel state={state} />,
+    },
+  ];
 
   return (
     <div className="flex flex-col">
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-        <Tabs
+        <AppTabs
           value={activeTab}
-          onChange={(_, nextValue: ShiftSettingsTab) => setActiveTab(nextValue)}
-          aria-label="シフト設定タブ"
-          variant="fullWidth"
-        >
-          <Tab label="シフトグループ" value="shift-group" />
-          <Tab label="シフト表示" value="shift-display" />
-        </Tabs>
+          onChange={setActiveTab}
+          items={tabs}
+          appearance="mui-standard"
+          panelPadding={0}
+          tabsProps={{
+            "aria-label": "シフト設定タブ",
+            variant: "fullWidth",
+          }}
+        />
       </div>
-
-      {activeTab === "shift-group" ? (
-        <ShiftGroupTabPanel state={state} />
-      ) : (
-        <ShiftDisplayTabPanel state={state} />
-      )}
     </div>
   );
 }
-
