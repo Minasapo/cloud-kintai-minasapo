@@ -1,5 +1,6 @@
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import AttendanceOperationLogHistory from "@features/attendance/edit/ui/AttendanceOperationLogHistory";
+import { SectionTitle } from "@shared/ui/typography";
 import { type MouseEvent, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -89,12 +90,12 @@ export default function EditAttendanceHistoryList() {
         >
           <div className="flex max-h-[min(90vh,960px)] w-full max-w-6xl flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_80px_-48px_rgba(15,23,42,0.45)]">
             <div className="border-b border-slate-200 px-6 py-5">
-              <h2
+              <SectionTitle
                 id="attendance-history-dialog-title"
                 className="m-0 text-lg font-semibold text-slate-900"
               >
                 変更履歴
-              </h2>
+              </SectionTitle>
             </div>
             <div className="flex flex-1 flex-col gap-4 overflow-hidden px-6 py-5">
               <AttendanceOperationLogHistory attendance={attendance} />

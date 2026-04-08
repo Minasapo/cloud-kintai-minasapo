@@ -1,4 +1,5 @@
 import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
+import { SubsectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { CSSProperties, useContext } from "react";
 
@@ -84,7 +85,7 @@ export const SelectedDateDetails = () => {
     <div className="mobile-calendar__details">
       <div className="mobile-calendar__details-root">
         <div className="mobile-calendar__details-header">
-          <h3 className="mobile-calendar__details-title">{getSelectedDateLabel(selectedDate)}</h3>
+          <SubsectionTitle className="mobile-calendar__details-title">{getSelectedDateLabel(selectedDate)}</SubsectionTitle>
           {isPastSelectedDate && (
             <SelectedDateStatusBadge selectedDateStatus={selectedDateStatus} />
           )}

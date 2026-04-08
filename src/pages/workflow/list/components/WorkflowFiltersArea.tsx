@@ -1,3 +1,4 @@
+import { SectionTitle } from "@shared/ui/typography";
 import { useEffect, useId, useMemo, useState } from "react";
 
 import {
@@ -118,9 +119,9 @@ export default function WorkflowFiltersArea() {
           >
             <div className="workflow-filter-dialog__header">
               <div>
-                <h2 id={titleId} className="workflow-filter-dialog__title">
+                <SectionTitle id={titleId} className="workflow-filter-dialog__title">
                   申請一覧のフィルター
-                </h2>
+                </SectionTitle>
                 <p className="workflow-filter-dialog__description">
                   種別、申請日、ステータス、作成日を組み合わせて一覧を整理できます。
                 </p>

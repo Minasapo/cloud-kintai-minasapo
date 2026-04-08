@@ -1,4 +1,5 @@
 import { getDesignTokens } from "@shared/designSystem";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { type ReactNode, useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -50,9 +51,9 @@ export default function GroupSection({
           className="flex items-center justify-between"
           style={{ gap: "8px" }}
         >
-          <h3 className="m-0 text-lg font-semibold" style={{ color: titleColor }}>
+          <SubsectionTitle className="m-0 text-lg font-semibold" style={{ color: titleColor }}>
             {title}
-          </h3>
+          </SubsectionTitle>
           {actions && <div>{actions}</div>}
         </div>
         {description && (

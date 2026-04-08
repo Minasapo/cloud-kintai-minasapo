@@ -18,6 +18,7 @@ import {
 } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { formatDateSlash } from "@shared/lib/time";
+import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -271,9 +272,9 @@ export default function AdminWorkflowCategorySettings() {
         {/* === ワークフロー種別 セクション === */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-semibold text-slate-800">
+            <SectionTitle className="text-xl font-semibold text-slate-800">
               ワークフロー種別
-            </h2>
+            </SectionTitle>
             <p className="text-sm text-slate-500">
               表示順序の変更と有効/無効の切り替えを行えます。
             </p>
@@ -358,9 +359,9 @@ export default function AdminWorkflowCategorySettings() {
         {/* === ワークフローテンプレート セクション === */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-semibold text-slate-800">
+            <SectionTitle className="text-xl font-semibold text-slate-800">
               ワークフローテンプレート
-            </h2>
+            </SectionTitle>
             <p className="text-sm text-slate-500">
               「その他」申請で利用するテンプレートを管理できます。新しいものが上に表示されます。
             </p>
@@ -372,9 +373,9 @@ export default function AdminWorkflowCategorySettings() {
 
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
             <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
+              <SubsectionTitle className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
                 {editingTemplateId ? "テンプレート編集" : "テンプレート作成"}
-              </h3>
+              </SubsectionTitle>
               <SettingsTextField
                 label="テンプレート名"
                 value={templateName}
@@ -419,9 +420,9 @@ export default function AdminWorkflowCategorySettings() {
 
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200 mb-8">
             <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
+              <SubsectionTitle className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
                 テンプレート一覧
-              </h3>
+              </SubsectionTitle>
               {templateError ? (
                 <SettingsAlert variant="error">{templateError}</SettingsAlert>
               ) : null}

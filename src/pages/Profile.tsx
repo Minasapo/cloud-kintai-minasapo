@@ -20,6 +20,7 @@ import {
 } from "@shared/api/graphql/concurrency";
 import { predefinedIcons } from "@shared/config/icons";
 import { createLogger } from "@shared/lib/logger";
+import { PageTitle, SectionTitle, SubsectionTitle } from "@shared/ui/typography";
 import { updatePassword } from "aws-amplify/auth";
 import dayjs from "dayjs";
 import {
@@ -158,7 +159,7 @@ const profileTabs: { value: ProfileTab; label: string }[] = [
 const inputBaseClassName =
   "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100";
 
-function SectionTitle({
+function ProfileSectionHeader({
   title,
   description,
 }: {
@@ -167,7 +168,7 @@ function SectionTitle({
 }) {
   return (
     <div className="space-y-1">
-      <h2 className="text-base font-semibold text-slate-900 sm:text-lg">{title}</h2>
+      <SectionTitle className="text-base font-semibold text-slate-900 sm:text-lg">{title}</SectionTitle>
       {description ? (
         <p className="text-sm leading-5 text-slate-500 sm:leading-6">{description}</p>
       ) : null}
@@ -638,9 +639,9 @@ export default function Profile() {
           <div className="grid gap-3 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(240px,0.85fr)] lg:items-end">
             <div className="min-w-0 space-y-2">
               <div className="space-y-2">
-                <h1 className="text-[1.75rem] font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
+                <PageTitle className="text-[1.75rem] font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
                   個人設定
-                </h1>
+                </PageTitle>
                 <p className="max-w-2xl text-sm leading-5 text-slate-600 sm:text-[0.95rem] sm:leading-6">
                   通知、個人リンク、ログイン情報をここで管理します。日常的に触る設定をひとつの画面にまとめています。
                 </p>
@@ -687,7 +688,7 @@ export default function Profile() {
         >
           {activeTab === "general" ? (
             <div className="w-full max-w-[920px] space-y-4">
-              <SectionTitle
+              <ProfileSectionHeader
                 title="一般設定"
                 description="プロフィールの基本情報を確認できます。編集対象ではない項目も、ここでまとめて確認できます。"
               />
@@ -714,7 +715,7 @@ export default function Profile() {
 
           {activeTab === "notifications" ? (
             <div className="w-full max-w-[920px] space-y-5">
-              <SectionTitle
+              <ProfileSectionHeader
                 title="通知設定"
                 description="勤務開始と勤務終了の通知メールを切り替えられます。"
               />
@@ -800,7 +801,7 @@ export default function Profile() {
 
           {activeTab === "links" ? (
             <div className="w-full max-w-[920px] space-y-5">
-              <SectionTitle
+              <ProfileSectionHeader
                 title="個人リンク設定"
                 description="自分専用のショートカットを登録できます。ヘッダーのリンク一覧から開く想定です。"
               />
@@ -954,15 +955,15 @@ export default function Profile() {
 
           {activeTab === "security" ? (
             <div className="w-full max-w-[920px] space-y-5">
-              <SectionTitle
+              <ProfileSectionHeader
                 title="セキュリティ"
                 description="パスワードを更新して、ログイン情報を管理します。"
               />
               <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
                 <div className="space-y-4">
-                  <h3 className="text-base font-semibold text-slate-900">
+                  <SubsectionTitle className="text-base font-semibold text-slate-900">
                     パスワード変更
-                  </h3>
+                  </SubsectionTitle>
                   {passwordChangeSuccess ? (
                     <InlineAlert
                       variant="success"

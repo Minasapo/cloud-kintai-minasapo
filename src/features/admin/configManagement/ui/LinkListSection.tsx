@@ -5,6 +5,7 @@ import {
   SettingsTextField,
 } from "@features/admin/layout/ui/SettingsPrimitives";
 import { predefinedIcons } from "@shared/config/icons";
+import { SubsectionTitle } from "@shared/ui/typography";
 
 interface Link {
   label: string;
@@ -32,7 +33,7 @@ const LinkListSection = ({
 }: LinkListSectionProps) => (
   <div className="flex flex-col gap-4">
     <div className="flex flex-col gap-1">
-      <h3 className="text-base font-semibold text-slate-800">リンク集</h3>
+      <SubsectionTitle className="text-base font-semibold text-slate-800">リンク集</SubsectionTitle>
       <p className="text-sm text-slate-500">
         ヘッダーのリンク集に表示するリンクを設定してください。
         <br />

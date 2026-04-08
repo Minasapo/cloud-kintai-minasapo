@@ -6,6 +6,7 @@ import {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import { resolveThemeColor } from "@shared/config/theme";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -197,7 +198,7 @@ export default function AdminTheme() {
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-semibold text-slate-800">テーマカラー</h3>
+            <SubsectionTitle className="text-sm font-semibold text-slate-800">テーマカラー</SubsectionTitle>
             <div
               className="grid gap-2"
               style={{
@@ -249,9 +250,9 @@ export default function AdminTheme() {
 
           {customMode && (
             <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-semibold text-slate-800">
+              <SubsectionTitle className="text-sm font-semibold text-slate-800">
                 カラーコードを直接指定
-              </h3>
+              </SubsectionTitle>
               <SettingsTextField
                 label="#RRGGBB"
                 value={colorCode}
@@ -266,7 +267,7 @@ export default function AdminTheme() {
           )}
 
           <div className="flex flex-col gap-2">
-            <h3 className="text-sm font-semibold text-slate-800">プレビュー</h3>
+            <SubsectionTitle className="text-sm font-semibold text-slate-800">プレビュー</SubsectionTitle>
             <div
               className="p-4 rounded-lg border max-w-sm flex flex-col gap-2"
               style={{

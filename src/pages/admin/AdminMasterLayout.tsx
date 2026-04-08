@@ -2,6 +2,7 @@ import {
   findAdminSettingsItemByPath,
   resolveAdminSettingsCategory,
 } from "@features/admin/layout/model/adminSettingsNavigation";
+import { PageTitle } from "@shared/ui/typography";
 import { memo } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
@@ -13,9 +14,9 @@ const SettingsContextHeader = memo(function SettingsContextHeader() {
   if (!currentItem || !currentCategory) {
     return (
       <div className="flex flex-col gap-3">
-        <h1 className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.15rem]">
+        <PageTitle className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.15rem]">
           設定
-        </h1>
+        </PageTitle>
         <p className="m-0 max-w-[72ch] text-slate-500">
           業務ごとに設定を整理しています。カテゴリから必要な項目を選んで詳細を確認してください。
         </p>
@@ -30,9 +31,9 @@ const SettingsContextHeader = memo(function SettingsContextHeader() {
           {currentCategory.title}
         </span>
       </div>
-      <h1 className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.1rem]">
+      <PageTitle className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.1rem]">
         {currentItem.title}
-      </h1>
+      </PageTitle>
       <p className="m-0 max-w-[72ch] text-slate-500">
         {currentItem.description}
       </p>

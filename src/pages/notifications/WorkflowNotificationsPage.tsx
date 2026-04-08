@@ -20,6 +20,7 @@ import {
   PageSection,
 } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
+import { SectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import {
   type UIEvent,
@@ -129,7 +130,7 @@ export default function WorkflowNotificationsPage() {
               alignItems={{ xs: "stretch", sm: "center" }}
             >
               <Stack direction="row" spacing={1} alignItems="center">
-                <Typography variant="h6">通知一覧</Typography>
+                <SectionTitle as="h2">通知一覧</SectionTitle>
                 <Chip
                   label={`未読 ${unreadCount} 件`}
                   color="primary"

@@ -9,6 +9,7 @@ import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { useSplitView } from "@features/splitView";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import StatusChip from "@shared/ui/chips/StatusChip";
+import { SubsectionTitle } from "@shared/ui/typography";
 import {
   ComponentType,
   useCallback,
@@ -325,9 +326,9 @@ export default function AdminWorkflow() {
                     className="cursor-pointer rounded-lg border border-slate-200 bg-white p-3 transition hover:border-emerald-400 hover:shadow-sm"
                   >
                     <div className="mb-2 flex items-start justify-between gap-2">
-                      <h3 className="m-0 text-sm font-semibold text-slate-900">
+                      <SubsectionTitle className="m-0 text-sm font-semibold text-slate-900">
                         {categoryLabel}
-                      </h3>
+                      </SubsectionTitle>
                       <button
                         type="button"
                         title="右側で開く"

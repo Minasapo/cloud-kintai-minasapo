@@ -29,6 +29,7 @@ import {
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { PageTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Control, Controller, useForm, UseFormRegister } from "react-hook-form";
@@ -229,9 +230,9 @@ export default function AdminStaffEditor() {
         <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <div>
-              <h1 className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
+              <PageTitle className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
                 スタッフ編集
-              </h1>
+              </PageTitle>
               <p className="text-sm text-emerald-800">
                 スタッフ情報と承認設定を更新できます。
               </p>

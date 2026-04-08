@@ -8,7 +8,7 @@ import {
   type PageWidthPreset,
   resolveLegacyPageWidth,
 } from "@shared/ui/layout/pageWidthPresets";
-import Title from "@shared/ui/typography/Title";
+import { PageTitle } from "@shared/ui/typography";
 import type { CSSProperties, ReactNode } from "react";
 
 const PAGE_SECTION_GAP = designTokenVar("component.page.sectionGap", "16px");
@@ -39,7 +39,7 @@ export default function Page({
         {showDefaultHeader && (
           <>
             <CommonBreadcrumbs items={breadcrumbs} current={title} />
-            <Title>{title}</Title>
+            <PageTitle>{title}</PageTitle>
           </>
         )}
         {children}

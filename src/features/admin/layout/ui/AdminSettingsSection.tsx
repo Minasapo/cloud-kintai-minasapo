@@ -1,3 +1,4 @@
+import { SectionTitle } from "@shared/ui/typography";
 import type { ReactNode } from "react";
 
 type AdminSettingsSectionProps = {
@@ -22,7 +23,7 @@ export default function AdminSettingsSection({
         <div className="flex flex-col gap-5 p-5 md:p-6">
           {(title || description) && (
             <div className="flex flex-col gap-1">
-              {title && <h2 className="text-lg font-semibold text-slate-800">{title}</h2>}
+              {title && <SectionTitle className="text-lg font-semibold text-slate-800">{title}</SectionTitle>}
               {description && <p className="text-sm text-slate-500">{description}</p>}
             </div>
           )}

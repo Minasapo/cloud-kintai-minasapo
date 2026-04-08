@@ -2,6 +2,7 @@ import {
   DailyReportFormChangeHandler,
   DailyReportFormFields,
 } from "@features/attendance/daily-report";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { type FormEvent } from "react";
 
 import { buildSavedAtLabel } from "../dailyReportHelpers";
@@ -43,7 +44,7 @@ export function CreateReportSection({
     <VStack className="dr-gap-6">
       <div>
         <p className="daily-report-summary-lead">新しい日報を登録</p>
-        <h3 className="dr-section-heading">日報作成フォーム</h3>
+        <SubsectionTitle className="dr-section-heading">日報作成フォーム</SubsectionTitle>
       </div>
       <AlertBox tone="warning">
         この日報はまだ提出されていません。下書き保存後、必ず「提出する」ボタンをクリックしてください。

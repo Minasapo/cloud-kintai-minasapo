@@ -1,6 +1,7 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { useWorkflowDetailContext } from "@features/workflow/detail-panel/model/WorkflowDetailContext";
 import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
@@ -125,7 +126,7 @@ export function WorkflowCommentThreadView({
 
   return (
     <div className="min-w-0">
-      <h3 className="mb-1 text-lg font-bold text-slate-950">{title}</h3>
+      <SubsectionTitle className="mb-1 text-lg font-bold text-slate-950">{title}</SubsectionTitle>
       <p className="mb-2 text-sm text-slate-500">
         申請に関するやり取りをこの場で記録します。
       </p>

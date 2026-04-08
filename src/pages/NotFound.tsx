@@ -1,4 +1,5 @@
 import { designTokenVar } from "@shared/designSystem";
+import { PageTitle } from "@shared/ui/typography";
 import type { CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -32,9 +33,9 @@ export default function NotFound() {
             404
           </div>
 
-          <h1 className="mb-1 text-2xl font-semibold text-foreground md:text-[32px]">
+          <PageTitle className="mb-1 text-2xl font-semibold text-foreground md:text-[32px]">
             ページが見つかりません
-          </h1>
+          </PageTitle>
 
           <p className="mb-4 max-w-[500px] text-sm leading-7 text-[var(--ds-color-neutral-600,#5E726A)] md:text-base">
             お探しのページは存在しないか、移動された可能性があります。

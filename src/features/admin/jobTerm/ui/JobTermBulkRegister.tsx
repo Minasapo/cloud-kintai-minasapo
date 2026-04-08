@@ -4,6 +4,7 @@ import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { CloseDate, CreateCloseDateInput } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import DateField from "@shared/ui/form/DateField";
+import { SubsectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -191,7 +192,7 @@ export default function JobTermBulkRegister({ existingCloseDates, createCloseDat
     const disableSubmit = submitting || !isValid || creatableItems.length === 0;
     return (<div className="flex flex-col gap-5 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-1">
-        <h3 className="text-lg font-semibold text-slate-900">締め日指定でまとめて登録</h3>
+        <SubsectionTitle className="text-lg font-semibold text-slate-900">締め日指定でまとめて登録</SubsectionTitle>
         <p className="text-sm text-slate-600">
           締め日が存在しない月は月末を締め日として扱います。既に登録済みの月はスキップ対象として表示します。
         </p>

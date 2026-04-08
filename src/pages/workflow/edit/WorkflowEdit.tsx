@@ -20,6 +20,7 @@ import {
   PageSection,
 } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
+import { SectionTitle } from "@shared/ui/typography";
 import { type ChangeEvent, type FormEvent, useContext, useState } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
@@ -213,9 +214,9 @@ export default function WorkflowEdit() {
         >
           <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <div>
-              <h2 className="m-0 text-2xl font-bold text-slate-900">
+              <SectionTitle className="m-0 text-2xl font-bold text-slate-900">
                 申請を編集
-              </h2>
+              </SectionTitle>
               <p className="m-0 text-sm text-slate-500">
                 申請詳細を起点に、申請内容を更新します。
               </p>

@@ -6,6 +6,7 @@ import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { GetWorkflowQuery, Workflow as WorkflowType, WorkflowStatus, } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import StatusChip from "@shared/ui/chips/StatusChip";
+import { SectionTitle } from "@shared/ui/typography";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -207,9 +208,9 @@ export default function WorkflowCarouselDialog({ open, onClose, selectedWorkflow
         }} role="presentation">
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="ワークフローをまとめて確認" className="w-full max-w-3xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.55)]">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 sm:px-5">
-          <h2 className="m-0 text-base font-semibold text-slate-900 sm:text-lg">
+          <SectionTitle className="m-0 text-base font-semibold text-slate-900 sm:text-lg">
             ワークフローをまとめて確認
-          </h2>
+          </SectionTitle>
           <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="閉じる" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-slate-400 hover:text-slate-900">
             <CloseIcon />
           </button>

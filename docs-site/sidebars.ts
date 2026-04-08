@@ -109,6 +109,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "developer/design-system/overview",
             "developer/design-system/foundations",
+            "developer/design-system/heading-rules",
             "developer/design-system/screen-recipes",
             "developer/design-system/implementation-rules",
           ],

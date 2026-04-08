@@ -1,4 +1,5 @@
 import { designTokenVar } from "@shared/designSystem";
+import { SectionTitle } from "@shared/ui/typography";
 import { CSSProperties, ReactNode } from "react";
 
 const GROUP_BORDER_WIDTH = designTokenVar(
@@ -96,9 +97,9 @@ const GroupContainerMobile = ({
     >
       {title ? (
         <div className="flex items-center justify-between">
-          <h2 className="m-0 text-base font-bold leading-6 text-slate-900">
+          <SectionTitle className="m-0 text-base font-bold leading-6 text-slate-900">
             {title}
-          </h2>
+          </SectionTitle>
           {typeof count === "number" && (
             <span className="text-xs leading-5 text-[color:var(--group-count-color)]">
               {`(${count}件)`}

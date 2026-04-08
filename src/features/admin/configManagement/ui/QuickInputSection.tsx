@@ -3,6 +3,7 @@ import {
   SettingsCheckbox,
   SettingsTimeField,
 } from "@features/admin/layout/ui/SettingsPrimitives";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { Dayjs } from "dayjs";
 
 interface QuickInputEntry {
@@ -39,7 +40,7 @@ const QuickInputSection = ({
     <div className="flex flex-row flex-wrap gap-8 items-start">
       {/* 出勤時間 */}
       <div className="flex flex-col gap-4 flex-1 min-w-[320px] max-w-[420px]">
-        <h3 className="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">出勤時間</h3>
+        <SubsectionTitle className="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">出勤時間</SubsectionTitle>
         <div className="flex flex-col gap-4">
           {quickInputStartTimes.map((entry, index) => (
             <div
@@ -83,7 +84,7 @@ const QuickInputSection = ({
 
       {/* 退勤時間 */}
       <div className="flex flex-col gap-4 flex-1 min-w-[320px] max-w-[420px]">
-        <h3 className="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">退勤時間</h3>
+        <SubsectionTitle className="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">退勤時間</SubsectionTitle>
         <div className="flex flex-col gap-4">
           {quickInputEndTimes.map((entry, index) => (
             <div

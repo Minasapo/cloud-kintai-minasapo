@@ -4,6 +4,7 @@ import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection
 import { SettingsButton, SettingsSwitch } from "@features/admin/layout/ui/SettingsPrimitives";
 import { CreateAppConfigInput, UpdateAppConfigInput, } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { useContext, useEffect, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -72,9 +73,9 @@ export default function Developer() {
       <AdminSettingsSection title="開発者" actions={<SettingsButton onClick={handleSave}>保存</SettingsButton>}>
         <div className="flex flex-col gap-6">
           {developerSettings.map((setting) => (<div key={setting.id} className="flex flex-col gap-2 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-              <h3 className="text-base font-semibold text-slate-800">
+              <SubsectionTitle className="text-base font-semibold text-slate-800">
                 {setting.title}
-              </h3>
+              </SubsectionTitle>
               <div>
                 <SettingsSwitch checked={setting.checked} onChange={handleChange} label={setting.checked ? "有効" : "無効"}/>
               </div>

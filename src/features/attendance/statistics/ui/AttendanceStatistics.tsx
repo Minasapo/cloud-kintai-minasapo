@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Attendance, CloseDate } from "@shared/api/graphql/types";
+import { PageTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 
@@ -311,7 +312,7 @@ export default function AttendanceStatistics() {
         justifyContent="space-between"
       >
         <Stack spacing={0.5}>
-          <Typography variant="h1">稼働統計</Typography>
+          <PageTitle>稼働統計</PageTitle>
           <Typography variant="body2" color="text.secondary">
             {formatRangeLabel(rangeStart, rangeEnd)}{" "}
             を集計期間として月別に集計しています。

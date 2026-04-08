@@ -21,6 +21,7 @@ import type {
 } from "@shared/api/graphql/types";
 import { formatDateSlash, formatDateTimeReadable } from "@shared/lib/time";
 import { DashboardInnerSurface } from "@shared/ui/layout";
+import { SectionTitle } from "@shared/ui/typography";
 import type { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -548,9 +549,9 @@ export default function AdminDailyReportDetail({
 
                 {/* Report header */}
                 <div>
-                  <h2 className="text-lg font-bold text-slate-800">
+                  <SectionTitle className="text-lg font-bold text-slate-800">
                     {report.title}
-                  </h2>
+                  </SectionTitle>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <span className="text-sm text-slate-500">
                       {formatDateSlash(report.date) || report.date} |{" "}

@@ -1,5 +1,6 @@
-import { designTokenVar } from "@shared/designSystem";
 import { type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+
+import { PageTitle } from "./Heading";
 
 type TitleProps = {
   borderColor?: string;
@@ -11,45 +12,30 @@ type TitleProps = {
   sx?: CSSProperties;
 } & Omit<HTMLAttributes<HTMLElement>, "color" | "children">;
 
-const TITLE_ACCENT_COLOR = designTokenVar(
-  "component.title.accentColor",
-  "#0FA85E"
-);
-const TITLE_BORDER_WIDTH = designTokenVar("component.title.borderWidth", "5px");
-const TITLE_PADDING_LEFT = designTokenVar("component.title.paddingLeft", "8px");
-const TITLE_TEXT_COLOR = designTokenVar("component.title.textColor", "#0FA85E");
-
 const Title = ({
   children,
   borderColor,
-  color = TITLE_TEXT_COLOR,
+  color,
   sx,
   className,
   style,
   component = "h1",
   ...rest
 }: TitleProps) => {
-  const resolvedBorderColor = borderColor ?? color ?? TITLE_ACCENT_COLOR;
-  const Component = component;
-
   return (
-    <Component
+    <PageTitle
+      as={component}
+      borderColor={borderColor}
       className={className}
+      color={color}
       style={{
-        margin: 0,
-        paddingLeft: TITLE_PADDING_LEFT,
-        borderBottom: `solid ${TITLE_BORDER_WIDTH} ${resolvedBorderColor}`,
-        color,
-        fontSize: "clamp(1.5rem, 2vw, 2rem)",
-        fontWeight: 700,
-        lineHeight: 1.3,
         ...sx,
         ...style,
       }}
       {...rest}
     >
       {children}
-    </Component>
+    </PageTitle>
   );
 };
 

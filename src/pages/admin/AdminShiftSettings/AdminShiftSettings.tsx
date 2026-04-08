@@ -6,6 +6,7 @@ import { SettingsAlert, SettingsButton, } from "@features/admin/layout/ui/Settin
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateAppConfigInput, UpdateAppConfigInput, } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { SubsectionTitle } from "@shared/ui/typography";
 // Title removed per admin UI simplification
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -233,7 +234,7 @@ export default function AdminShiftSettings() {
 
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex flex-col gap-6">
-                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフトグループ</h3>
+                  <SubsectionTitle className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフトグループ</SubsectionTitle>
                   <div className="flex flex-col gap-4">
                   {fields.length === 0 ? (<SettingsAlert>
                       {SHIFT_GROUP_UI_TEXTS.emptyGroups}
@@ -271,7 +272,7 @@ export default function AdminShiftSettings() {
               <SettingsAlert>シフト管理画面の表示モードを設定します。</SettingsAlert>
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex flex-col gap-6">
-                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフト表示</h3>
+                  <SubsectionTitle className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフト表示</SubsectionTitle>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
                       <span className="text-sm font-medium text-slate-700">表示モード</span>

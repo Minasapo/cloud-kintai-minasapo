@@ -8,6 +8,7 @@ import {
 } from "@features/attendance/edit/ui/mobileEditor/staffCommentInputUtils";
 import { StaffCommentReasonButtons } from "@features/attendance/edit/ui/mobileEditor/StaffCommentReasonButtons";
 import { StaffCommentTextarea } from "@features/attendance/edit/ui/mobileEditor/StaffCommentTextarea";
+import { SectionTitle } from "@shared/ui/typography";
 import { useContext, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
@@ -70,12 +71,12 @@ export default function StaffCommentInput() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="staff-comment-input__overlay-header">
-              <h2
+              <SectionTitle
                 id="staff-comment-expanded-title"
                 className="staff-comment-input__overlay-title"
               >
                 修正理由入力
-              </h2>
+              </SectionTitle>
               <button
                 type="button"
                 className="staff-comment-input__close-button"

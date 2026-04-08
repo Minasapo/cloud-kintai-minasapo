@@ -34,6 +34,7 @@ import {
   PageSection,
 } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
+import { SectionTitle } from "@shared/ui/typography";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -444,7 +445,7 @@ export default function NewWorkflow() {
 
           <div className={styles.pageHeader}>
             <div>
-              <h2 className={styles.pageTitle}>新規作成</h2>
+              <SectionTitle className={styles.pageTitle}>新規作成</SectionTitle>
               <p className={styles.pageSubtitle}>
                 申請一覧を起点に、申請内容を作成します。
               </p>
