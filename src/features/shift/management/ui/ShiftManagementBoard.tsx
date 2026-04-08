@@ -1,11 +1,7 @@
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import useShiftPlanYear from "@features/shift/management/model/useShiftPlanYear";
-import {
-  Alert,
-  Box,
-  CircularProgress,
-} from "@mui/material";
 import dayjs from "dayjs";
+import { Loader2 } from "lucide-react";
 import React, { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
@@ -268,21 +264,14 @@ export default function ShiftManagementBoard() {
 
   if (!isAuthenticated) {
     return (
-      <Box
-        sx={{
-          py: 6,
-          px: { xs: 1, md: 4 },
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <div className="py-6 px-2 md:px-8 flex justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+      </div>
     );
   }
 
   return (
-    <Box sx={{ py: 3, px: { xs: 1, md: 4 } }}>
+    <div className="py-6 px-2 md:px-8">
       <ShiftManagementHeader
         monthStart={monthStart}
         onPrevMonth={prevMonth}
@@ -298,21 +287,21 @@ export default function ShiftManagementBoard() {
       />
 
       {(loading || shiftRequestsLoading) && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+        </div>
       )}
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800" role="alert">
           スタッフデータの取得に失敗しました
-        </Alert>
+        </div>
       )}
 
       {Boolean(calendarsError) && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800" role="alert">
           カレンダー情報の取得に失敗しました
-        </Alert>
+        </div>
       )}
 
       {!loading && !shiftRequestsLoading && (
@@ -334,9 +323,9 @@ export default function ShiftManagementBoard() {
         />
       )}
 
-      <Box sx={{ mt: 3 }}>
+      <div className="mt-6">
         <ShiftManagementLegend />
-      </Box>
+      </div>
 
       {/* ダイアログ類 */}
       <ShiftEditDialog
@@ -361,6 +350,6 @@ export default function ShiftManagementBoard() {
         onStateChange={handleBulkEditStateChange}
         onSubmit={handleApplyBulkEdit}
       />
-    </Box>
+    </div>
   );
 }
