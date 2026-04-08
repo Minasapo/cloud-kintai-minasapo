@@ -105,6 +105,7 @@ const sidebars: SidebarsConfig = {
             "developer/amplify/overview",
             "developer/amplify/setup-and-access",
             "developer/amplify/change-workflow",
+            "developer/amplify/schema-change-procedure",
           ],
         },
         {
