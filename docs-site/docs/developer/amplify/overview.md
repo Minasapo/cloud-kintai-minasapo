@@ -55,6 +55,6 @@ Amplify は主に次の入口からフロントエンドに接続されていま
 
 ## 次に読むページ
 
-- [セットアップとアクセス](./setup-and-access.md)
-- [変更フロー](./change-workflow.md)
-- [セットアップ](../getting-started/setup.md)
+- [セットアップとアクセス](/docs/developer/amplify/setup-and-access)
+- [変更フロー](/docs/developer/amplify/change-workflow)
+- [セットアップ](/docs/developer/getting-started/setup)

@@ -95,6 +95,9 @@ const sidebars: SidebarsConfig = {
       label: "開発者向けガイド",
       items: [
         "developer/overview",
+        "developer/getting-started/development-flow",
+        "developer/getting-started/setup",
+        "developer/testing-operations",
         {
           type: "category",
           label: "Amplify",
@@ -125,7 +128,6 @@ const sidebars: SidebarsConfig = {
             "developer/architecture/sidebar-category-rules",
           ],
         },
-        "developer/getting-started/setup",
         "developer/attendance-management-enabled",
         "developer/attendance-error-list-display",
         "developer/attendance-status-determination",

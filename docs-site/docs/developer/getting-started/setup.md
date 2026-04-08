@@ -8,6 +8,8 @@ description: 開発開始時に必要な Node.js、依存パッケージ、Playw
 
 このページは、本プロジェクトの開発を始めるための最小セットアップ手順です。
 
+開発開始から PR 前確認までの全体像は [開発フロー](./development-flow.md) を参照してください。
+
 ## 前提
 
 - Node.js 22 以上（`.nvmrc` に記載のバージョン）
@@ -53,6 +55,8 @@ npm run test:e2e:setup
 
 > push 前に `npm run typecheck && npm run test:unit` が自動実行される（`.githooks`）。
 
+日常的なテストの進め方、E2E の使い分け、失敗時の確認は [テスト運用](../testing-operations.md) を参照してください。
+
 ## ドキュメント検索の確認方法
 
 `npm run docs:start` は編集向けの開発モードで、検索プラグインの仕様上、検索インデックスは無効です。検索時に警告が表示されるのは正常です。
@@ -71,6 +75,6 @@ npm run docs:search-preview
 
 詳細は次の Amplify 専用ページを参照してください。
 
-- [Amplify 概要](../amplify/overview.md)
-- [Amplify セットアップとアクセス](../amplify/setup-and-access.md)
-- [Amplify 変更フロー](../amplify/change-workflow.md)
+- [Amplify 概要](/docs/developer/amplify/overview)
+- [Amplify セットアップとアクセス](/docs/developer/amplify/setup-and-access)
+- [Amplify 変更フロー](/docs/developer/amplify/change-workflow)
