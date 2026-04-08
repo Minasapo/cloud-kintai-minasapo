@@ -4,7 +4,7 @@ import {
   shouldShowTimeRecorderAnnouncement,
   type TimeRecorderAnnouncement,
 } from "@features/attendance/time-recorder/lib/timeRecorderAnnouncement";
-import { SectionTitle } from "@shared/ui/typography";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { useEffect, useMemo, useState } from "react";
 
 type RegisterAnnouncementPanelProps = {
@@ -47,9 +47,9 @@ export default function RegisterAnnouncementPanel({
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <SectionTitle className="m-0 text-sm font-semibold tracking-[0.01em] text-slate-900">
+              <SubsectionTitle className="m-0 text-slate-900">
                 アナウンス
-              </SectionTitle>
+              </SubsectionTitle>
               <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-slate-700">
                 {announcement.message}
               </p>

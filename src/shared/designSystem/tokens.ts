@@ -316,6 +316,52 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       },
     },
     heading: {
+      level: {
+        page: {
+          textColor: color.neutral[900],
+          fontSizeMobile: 28,
+          fontSizeDesktop: 36,
+          fontWeight: typography.fontWeight.bold,
+          lineHeight: typography.lineHeight.tight,
+          letterSpacing: "-0.03em",
+        },
+        section: {
+          textColor: color.neutral[900],
+          fontSizeMobile: 20,
+          fontSizeDesktop: 28,
+          fontWeight: typography.fontWeight.bold,
+          lineHeight: typography.lineHeight.comfy,
+          letterSpacing: "-0.02em",
+        },
+        subsection: {
+          textColor: color.neutral[900],
+          fontSizeMobile: 16,
+          fontSizeDesktop: 18,
+          fontWeight: typography.fontWeight.bold,
+          lineHeight: typography.lineHeight.comfy,
+          letterSpacing: "-0.01em",
+        },
+      },
+      appearance: {
+        hero: {
+          accentColor: color.brand.primary.base,
+          borderLeftWidth: 5,
+          borderBottomWidth: 5,
+          paddingLeft: spacing.sm,
+        },
+        standard: {
+          accentColor: color.brand.primary.base,
+          borderLeftWidth: 3,
+          borderBottomWidth: 0,
+          paddingLeft: spacing.sm,
+        },
+        quiet: {
+          accentColor: color.brand.primary.base,
+          borderLeftWidth: 0,
+          borderBottomWidth: 0,
+          paddingLeft: 0,
+        },
+      },
       page: {
         accentColor: color.brand.primary.base,
         borderWidth: 5,

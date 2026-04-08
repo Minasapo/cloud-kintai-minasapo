@@ -7,7 +7,7 @@ import {
   Select,
   SelectChangeEvent,
 } from "@mui/material";
-import { SectionTitle } from "@shared/ui/typography";
+import { Heading } from "@shared/ui/typography";
 import React from "react";
 
 export interface ScreenOption {
@@ -59,9 +59,9 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
-        <SectionTitle as="h2">
+        <Heading level="section" appearance="standard" as="h2">
           {title}
-        </SectionTitle>
+        </Heading>
         {screenOptions && screenOptions.length > 0 && !selectedScreen && (
           <FormControl size="small" sx={{ minWidth: 200 }}>
             <Select

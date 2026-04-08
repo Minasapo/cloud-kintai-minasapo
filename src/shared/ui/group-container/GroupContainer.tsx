@@ -1,5 +1,5 @@
 import { designTokenVar } from "@shared/designSystem";
-import { SectionTitle } from "@shared/ui/typography";
+import { Heading } from "@shared/ui/typography";
 import { CSSProperties, ReactNode, useId, useState } from "react";
 
 const GROUP_BORDER_WIDTH = designTokenVar(
@@ -132,9 +132,13 @@ const GroupContainer = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-[var(--group-header-gap)]">
             {title ? (
-              <SectionTitle className="m-0 text-base font-bold leading-6 text-slate-900">
+              <Heading
+                level="section"
+                appearance="quiet"
+                className="m-0 text-slate-900"
+              >
                 {title}
-              </SectionTitle>
+              </Heading>
             ) : null}
             {typeof count === "number" && (
               <span className="text-xs leading-5 text-[color:var(--group-count-color)]">

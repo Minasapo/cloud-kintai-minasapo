@@ -1,8 +1,9 @@
 import { type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 
-import { PageTitle } from "./Heading";
+import { Heading, type HeadingAppearance } from "./Heading";
 
 type TitleProps = {
+  appearance?: HeadingAppearance;
   borderColor?: string;
   color?: string;
   children?: ReactNode;
@@ -13,6 +14,7 @@ type TitleProps = {
 } & Omit<HTMLAttributes<HTMLElement>, "color" | "children">;
 
 const Title = ({
+  appearance = "hero",
   children,
   borderColor,
   color,
@@ -23,11 +25,13 @@ const Title = ({
   ...rest
 }: TitleProps) => {
   return (
-    <PageTitle
+    <Heading
       as={component}
+      appearance={appearance}
       borderColor={borderColor}
       className={className}
       color={color}
+      level="page"
       style={{
         ...sx,
         ...style,
@@ -35,7 +39,7 @@ const Title = ({
       {...rest}
     >
       {children}
-    </PageTitle>
+    </Heading>
   );
 };
 

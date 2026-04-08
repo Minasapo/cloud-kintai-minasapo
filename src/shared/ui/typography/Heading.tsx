@@ -3,10 +3,13 @@ import clsx from "clsx";
 import { type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 
 type HeadingElement = "h1" | "h2" | "h3" | "div" | "span";
-type HeadingTone = "page" | "section" | "subsection";
+export type HeadingLevel = "page" | "section" | "subsection";
+export type HeadingAppearance = "hero" | "standard" | "quiet";
+type HeadingTone = HeadingLevel;
 
-type BaseHeadingProps = {
+export type BaseHeadingProps = {
   as?: HeadingElement;
+  appearance?: HeadingAppearance;
   borderColor?: string;
   children: ReactNode;
   className?: string;
@@ -14,86 +17,139 @@ type BaseHeadingProps = {
   style?: CSSProperties;
 } & Omit<HTMLAttributes<HTMLElement>, "children" | "color" | "style">;
 
-type HeadingProps = BaseHeadingProps & {
-  tone: HeadingTone;
+export type HeadingProps = BaseHeadingProps & {
+  level?: HeadingLevel;
+  tone?: HeadingTone;
 };
 
-const DEFAULT_HEADING_TAGS: Record<HeadingTone, HeadingElement> = {
+const DEFAULT_HEADING_TAGS: Record<HeadingLevel, HeadingElement> = {
   page: "h1",
   section: "h2",
   subsection: "h3",
 };
 
-const buildResponsiveFontSize = (tone: HeadingTone) =>
-  `clamp(${designTokenVar(`component.heading.${tone}.fontSizeMobile`, "16px")}, 2.6vw, ${designTokenVar(`component.heading.${tone}.fontSizeDesktop`, "18px")})`;
+const DEFAULT_APPEARANCE_BY_LEVEL: Record<HeadingLevel, HeadingAppearance> = {
+  page: "hero",
+  section: "standard",
+  subsection: "quiet",
+};
+
+const getHeadingLevelToken = (
+  level: HeadingLevel,
+  key: string,
+  fallback: string,
+) =>
+  designTokenVar(
+    `component.heading.level.${level}.${key}`,
+    designTokenVar(`component.heading.${level}.${key}`, fallback),
+  );
+
+const getHeadingAppearanceToken = (
+  appearance: HeadingAppearance,
+  key: string,
+  fallback: string,
+) => designTokenVar(`component.heading.appearance.${appearance}.${key}`, fallback);
+
+const buildResponsiveFontSize = (level: HeadingLevel) =>
+  `clamp(${getHeadingLevelToken(level, "fontSizeMobile", "16px")}, 2.6vw, ${getHeadingLevelToken(level, "fontSizeDesktop", "18px")})`;
 
 const buildHeadingStyle = (
-  tone: HeadingTone,
+  level: HeadingLevel,
+  appearance: HeadingAppearance,
   color?: string,
   borderColor?: string,
 ): CSSProperties => {
   const textColor =
-    color ?? designTokenVar(`component.heading.${tone}.textColor`, "#1E2A25");
+    color ?? getHeadingLevelToken(level, "textColor", "#1E2A25");
   const resolvedBorderColor =
     borderColor ??
-    designTokenVar(`component.heading.${tone}.accentColor`, "#0FA85E");
+    getHeadingAppearanceToken(appearance, "accentColor", "#0FA85E");
 
   const baseStyle: CSSProperties = {
     margin: 0,
     maxWidth: "100%",
     color: textColor,
-    fontSize: buildResponsiveFontSize(tone),
-    fontWeight: designTokenVar(`component.heading.${tone}.fontWeight`, "600"),
-    lineHeight: designTokenVar(
-      `component.heading.${tone}.lineHeight`,
-      tone === "page" ? "1.2" : "1.4",
+    fontSize: buildResponsiveFontSize(level),
+    fontWeight: getHeadingLevelToken(level, "fontWeight", "600"),
+    lineHeight: getHeadingLevelToken(
+      level,
+      "lineHeight",
+      level === "page" ? "1.2" : "1.4",
     ),
-    letterSpacing: designTokenVar(
-      `component.heading.${tone}.letterSpacing`,
-      tone === "page" ? "-0.03em" : tone === "section" ? "-0.02em" : "-0.01em",
+    letterSpacing: getHeadingLevelToken(
+      level,
+      "letterSpacing",
+      level === "page"
+        ? "-0.03em"
+        : level === "section"
+          ? "-0.02em"
+          : "-0.01em",
     ),
     overflowWrap: "anywhere",
   };
 
-  if (tone === "subsection") {
+  const borderLeftWidth = getHeadingAppearanceToken(
+    appearance,
+    "borderLeftWidth",
+    appearance === "hero" ? "5px" : appearance === "standard" ? "3px" : "0px",
+  );
+  const borderBottomWidth = getHeadingAppearanceToken(
+    appearance,
+    "borderBottomWidth",
+    appearance === "hero" ? "5px" : "0px",
+  );
+  const paddingLeft = getHeadingAppearanceToken(
+    appearance,
+    "paddingLeft",
+    appearance === "quiet" ? "0px" : "8px",
+  );
+  const hasLeftAccent = appearance !== "quiet";
+  const hasBottomAccent = appearance === "hero";
+
+  if (!hasLeftAccent && !hasBottomAccent) {
     return baseStyle;
   }
-
-  const borderWidth = designTokenVar(
-    `component.heading.${tone}.borderWidth`,
-    tone === "page" ? "5px" : "4px",
-  );
-  const paddingLeft = designTokenVar(
-    `component.heading.${tone}.paddingLeft`,
-    "8px",
-  );
 
   return {
     ...baseStyle,
     display: "inline-block",
     paddingLeft,
-    borderLeft: `${borderWidth} solid ${resolvedBorderColor}`,
-    borderBottom: `${borderWidth} solid ${resolvedBorderColor}`,
+    borderLeft: hasLeftAccent
+      ? `${borderLeftWidth} solid ${resolvedBorderColor}`
+      : "0 solid transparent",
+    borderBottom: hasBottomAccent
+      ? `${borderBottomWidth} solid ${resolvedBorderColor}`
+      : "0 solid transparent",
   };
 };
 
 export const Heading = ({
   as,
+  appearance,
   borderColor,
   children,
   className,
   color,
+  level,
   style,
   tone,
   ...rest
 }: HeadingProps) => {
-  const Component = as ?? DEFAULT_HEADING_TAGS[tone];
+  const resolvedLevel = level ?? tone ?? "section";
+  const resolvedAppearance =
+    appearance ?? DEFAULT_APPEARANCE_BY_LEVEL[resolvedLevel];
+  const Component = as ?? DEFAULT_HEADING_TAGS[resolvedLevel];
 
   return (
     <Component
       className={clsx(className)}
       style={{
-        ...buildHeadingStyle(tone, color, borderColor),
+        ...buildHeadingStyle(
+          resolvedLevel,
+          resolvedAppearance,
+          color,
+          borderColor,
+        ),
         ...style,
       }}
       {...rest}
@@ -104,13 +160,13 @@ export const Heading = ({
 };
 
 export const PageTitle = (props: BaseHeadingProps) => (
-  <Heading tone="page" {...props} />
+  <Heading level="page" {...props} />
 );
 
 export const SectionTitle = (props: BaseHeadingProps) => (
-  <Heading tone="section" {...props} />
+  <Heading level="section" {...props} />
 );
 
 export const SubsectionTitle = (props: BaseHeadingProps) => (
-  <Heading tone="subsection" {...props} />
+  <Heading level="subsection" {...props} />
 );

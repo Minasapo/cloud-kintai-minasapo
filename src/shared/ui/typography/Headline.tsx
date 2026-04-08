@@ -1,9 +1,10 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 
-import { SectionTitle } from "./Heading";
+import { Heading, type HeadingAppearance } from "./Heading";
 
 type HeadlineProps = {
   as?: "h1" | "h2" | "h3" | "div" | "span";
+  appearance?: HeadingAppearance;
   borderColor?: string;
   children: ReactNode;
   className?: string;
@@ -13,6 +14,7 @@ type HeadlineProps = {
 
 export const Headline = ({
   as = "h2",
+  appearance = "standard",
   borderColor,
   children,
   className,
@@ -21,15 +23,17 @@ export const Headline = ({
   ...rest
 }: HeadlineProps) => {
   return (
-    <SectionTitle
+    <Heading
       as={as}
+      appearance={appearance}
       borderColor={borderColor}
       className={className}
       color={color}
       style={style}
+      level="section"
       {...rest}
     >
       {children}
-    </SectionTitle>
+    </Heading>
   );
 };

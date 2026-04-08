@@ -1,5 +1,5 @@
 import Clock from "@shared/ui/clock/Clock";
-import { SectionTitle } from "@shared/ui/typography";
+import { SubsectionTitle } from "@shared/ui/typography";
 import type { ReactNode } from "react";
 
 type RecorderStatusCardProps = {
@@ -11,12 +11,12 @@ type RecorderStatusCardProps = {
 function WorkStatusHeading({ text }: { text: string }) {
   return (
     <div className="recorder-status-card__title-wrap">
-      <SectionTitle
+      <SubsectionTitle
         className="recorder-status-card__title"
         data-testid="work-status-text"
       >
         {text}
-      </SectionTitle>
+      </SubsectionTitle>
     </div>
   );
 }
