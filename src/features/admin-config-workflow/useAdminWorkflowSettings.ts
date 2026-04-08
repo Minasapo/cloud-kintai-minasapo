@@ -9,12 +9,13 @@ import {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
 
 const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
+const CATEGORY_AUTO_SAVE_DELAY = 600;
 
 const resetDisplayOrder = (
   items: WorkflowCategoryOrderItem[],
@@ -64,6 +65,7 @@ export function useAdminWorkflowSettings() {
   const [configId, setConfigId] = useState<string | null>(null);
   const [items, setItems] = useState<WorkflowCategoryOrderItem[]>([]);
   const [saving, setSaving] = useState(false);
+  const [categorySaveToken, setCategorySaveToken] = useState(0);
   const [templateName, setTemplateName] = useState("");
   const [templateTitle, setTemplateTitle] = useState("");
   const [templateContent, setTemplateContent] = useState("");
@@ -93,69 +95,78 @@ export function useAdminWorkflowSettings() {
     templateTitle !== initialTemplateTitle ||
     templateContent !== initialTemplateContent;
 
+  const persistWorkflowCategoryOrder = useCallback(
+    async (nextItems: WorkflowCategoryOrderItem[]) => {
+      setSaving(true);
+
+      const workflowCategoryOrder = {
+        categories: resetDisplayOrder(nextItems).map((item) => ({
+          category: item.category,
+          label: item.label,
+          displayOrder: item.displayOrder,
+          enabled: item.enabled,
+        })),
+      };
+
+      try {
+        if (configId) {
+          await saveConfig({
+            id: configId,
+            workflowCategoryOrder,
+          } as UpdateAppConfigInput);
+        } else {
+          await saveConfig({
+            name: "default",
+            workflowCategoryOrder,
+          } as CreateAppConfigInput);
+        }
+
+        await fetchConfig();
+        setConfigId(getConfigId());
+      } catch (error) {
+        console.error(error);
+        dispatch(
+          pushNotification({
+            tone: "error",
+            message: "ワークフロー種別設定の保存に失敗しました。",
+          }),
+        );
+      } finally {
+        setSaving(false);
+      }
+    },
+    [configId, dispatch, fetchConfig, getConfigId, saveConfig],
+  );
+
+  useEffect(() => {
+    if (categorySaveToken === 0 || !hasChanges) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void persistWorkflowCategoryOrder(items);
+    }, CATEGORY_AUTO_SAVE_DELAY);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [categorySaveToken, hasChanges, items, persistWorkflowCategoryOrder]);
+
   const handleToggleEnabled = (index: number) => {
     setItems((prev) =>
       prev.map((item, itemIndex) =>
         itemIndex === index ? { ...item, enabled: !item.enabled } : item,
       ),
     );
+    setCategorySaveToken((prev) => prev + 1);
   };
 
   const handleMoveItem = (from: number, to: number) => {
     setItems((prev) => moveItem(prev, from, to));
+    setCategorySaveToken((prev) => prev + 1);
   };
 
   const handleReset = () => {
     setItems(getDefaultWorkflowCategoryOrder());
-  };
-
-  const handleSave = async () => {
-    if (saving) {
-      return;
-    }
-
-    setSaving(true);
-    const workflowCategoryOrder = {
-      categories: resetDisplayOrder(items).map((item) => ({
-        category: item.category,
-        label: item.label,
-        displayOrder: item.displayOrder,
-        enabled: item.enabled,
-      })),
-    };
-
-    try {
-      if (configId) {
-        await saveConfig({
-          id: configId,
-          workflowCategoryOrder,
-        } as UpdateAppConfigInput);
-      } else {
-        await saveConfig({
-          name: "default",
-          workflowCategoryOrder,
-        } as CreateAppConfigInput);
-      }
-
-      await fetchConfig();
-      setConfigId(getConfigId());
-      dispatch(
-        pushNotification({
-          tone: "success",
-          message: "ワークフロー種別設定を保存しました。",
-        }),
-      );
-    } catch (error) {
-      console.error(error);
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: "ワークフロー種別設定の保存に失敗しました。",
-        }),
-      );
-    } finally {
-      setSaving(false);
-    }
+    setCategorySaveToken((prev) => prev + 1);
   };
 
   const resetTemplateForm = () => {
@@ -302,7 +313,6 @@ export function useAdminWorkflowSettings() {
     handleToggleEnabled,
     handleMoveItem,
     handleReset,
-    handleSave,
     resetTemplateForm,
     handleTemplateSubmit,
     handleTemplateEdit,
