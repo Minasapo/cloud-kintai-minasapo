@@ -1,6 +1,9 @@
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import {
   alpha,
   Box,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -10,14 +13,22 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import AppButton from "@shared/ui/button/AppButton";
+import AppDialog from "@shared/ui/feedback/AppDialog";
 import dayjs from "dayjs";
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState } from "react";
 
 import {
   type CollaborativeUser,
   type ShiftCellEditLockOwner,
   type ShiftState,
 } from "../types/collaborative.types";
+
+type PendingLockAction =
+  | { kind: "lockStaff"; staffId: string; staffName: string }
+  | { kind: "unlockStaff"; staffId: string; staffName: string }
+  | { kind: "lockMonth" }
+  | { kind: "unlockMonth" };
 
 interface VirtualizedShiftTableProps {
   days: dayjs.Dayjs[];
@@ -97,6 +108,12 @@ interface VirtualizedShiftTableProps {
     plannedCapacity: number;
   };
   currentUserId?: string;
+  isAdmin?: boolean;
+  onLockStaffRow?: (staffId: string) => void;
+  onUnlockStaffRow?: (staffId: string) => void;
+  onLockMonth?: () => void;
+  onUnlockMonth?: () => void;
+  currentMonth?: string;
 }
 
 /* eslint-disable react/prop-types */
@@ -127,6 +144,12 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
     isWeekend,
     calculateDailyCount,
     currentUserId,
+    isAdmin,
+    onLockStaffRow,
+    onUnlockStaffRow,
+    onLockMonth,
+    onUnlockMonth,
+    currentMonth,
   }) => {
     // メモ化されたスタッフ情報マップ
     const staffMap = useMemo(
@@ -140,11 +163,80 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
       [staffs],
     );
 
+    const [pendingAction, setPendingAction] =
+      useState<PendingLockAction | null>(null);
+
+    const handleConfirm = () => {
+      if (!pendingAction) return;
+      if (
+        pendingAction.kind === "lockStaff" ||
+        pendingAction.kind === "unlockStaff"
+      ) {
+        if (pendingAction.kind === "lockStaff") {
+          onLockStaffRow?.(pendingAction.staffId);
+        } else {
+          onUnlockStaffRow?.(pendingAction.staffId);
+        }
+      } else if (pendingAction.kind === "lockMonth") {
+        onLockMonth?.();
+      } else {
+        onUnlockMonth?.();
+      }
+      setPendingAction(null);
+    };
+
+    // 月全体が全てロック済みかどうか（empty セルは除く）
+    const isAllMonthLocked = useMemo(() => {
+      if (staffIds.length === 0) return false;
+      let hasNonEmpty = false;
+      for (const staffId of staffIds) {
+        const staffData = shiftDataMap.get(staffId);
+        if (!staffData) continue;
+        for (const cell of staffData.values()) {
+          if (cell.state === "empty") continue;
+          hasNonEmpty = true;
+          if (!cell.isLocked) return false;
+        }
+      }
+      return hasNonEmpty;
+    }, [staffIds, shiftDataMap]);
+
     if (isLoading) {
       return <Typography>読み込み中...</Typography>;
     }
 
+    const confirmDialogProps = (() => {
+      if (!pendingAction) return null;
+      if (pendingAction.kind === "lockStaff") {
+        return {
+          title: "シフトを確定",
+          message: `${pendingAction.staffName} さんの${currentMonth ?? ""}シフトをすべて確定しますか？`,
+          confirmLabel: "確定する",
+        };
+      }
+      if (pendingAction.kind === "unlockStaff") {
+        return {
+          title: "確定を解除",
+          message: `${pendingAction.staffName} さんの${currentMonth ?? ""}シフトの確定をすべて解除しますか？`,
+          confirmLabel: "解除する",
+        };
+      }
+      if (pendingAction.kind === "lockMonth") {
+        return {
+          title: "シフトを確定",
+          message: `全員の${currentMonth ?? ""}シフトをすべて確定しますか？`,
+          confirmLabel: "確定する",
+        };
+      }
+      return {
+        title: "確定を解除",
+        message: `全員の${currentMonth ?? ""}シフトの確定をすべて解除しますか？`,
+        confirmLabel: "解除する",
+      };
+    })();
+
     return (
+      <>
       <TableContainer
         component={Paper}
         sx={{
@@ -184,7 +276,33 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                   whiteSpace: "nowrap",
                 }}
               >
-                スタッフ名
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  スタッフ名
+                  {isAdmin && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color={isAllMonthLocked ? "warning" : "primary"}
+                      startIcon={
+                        isAllMonthLocked ? (
+                          <LockOpenIcon fontSize="inherit" />
+                        ) : (
+                          <LockIcon fontSize="inherit" />
+                        )
+                      }
+                      onClick={() =>
+                        setPendingAction(
+                          isAllMonthLocked
+                            ? { kind: "unlockMonth" }
+                            : { kind: "lockMonth" },
+                        )
+                      }
+                      sx={{ fontSize: "0.7rem", py: 0.25, px: 1 }}
+                    >
+                      {isAllMonthLocked ? "全員解除" : "全員確定"}
+                    </Button>
+                  )}
+                </Box>
               </TableCell>
               {days.map((day) => {
                 const dayKey = day.format("DD");
@@ -250,9 +368,55 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                         : "background.paper",
                       fontWeight: isCurrentUser ? 700 : 600,
                       color: isCurrentUser ? "primary.main" : undefined,
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {staffName}
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
+                      {staffName}
+                      {isAdmin &&
+                        (() => {
+                          const nonEmptyCells = Array.from(
+                            staffData.values(),
+                          ).filter((c) => c.state !== "empty");
+                          const allLocked =
+                            nonEmptyCells.length > 0 &&
+                            nonEmptyCells.every((c) => c.isLocked);
+                          return (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color={allLocked ? "warning" : "primary"}
+                              startIcon={
+                                allLocked ? (
+                                  <LockOpenIcon fontSize="inherit" />
+                                ) : (
+                                  <LockIcon fontSize="inherit" />
+                                )
+                              }
+                              onClick={() =>
+                                setPendingAction(
+                                  allLocked
+                                    ? {
+                                        kind: "unlockStaff",
+                                        staffId,
+                                        staffName,
+                                      }
+                                    : {
+                                        kind: "lockStaff",
+                                        staffId,
+                                        staffName,
+                                      },
+                                )
+                              }
+                              sx={{ fontSize: "0.7rem", py: 0.25, px: 1 }}
+                            >
+                              {allLocked ? "解除" : "確定"}
+                            </Button>
+                          );
+                        })()}
+                    </Box>
                   </TableCell>
                   {days.map((day) => {
                     const dayKey = day.format("DD");
@@ -366,6 +530,34 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
           </TableBody>
         </Table>
       </TableContainer>
+      {confirmDialogProps && (
+        <AppDialog
+          open
+          onClose={() => setPendingAction(null)}
+          title={confirmDialogProps.title}
+          description={confirmDialogProps.message}
+          maxWidth="xs"
+          actions={
+            <>
+              <AppButton
+                variant="outline"
+                tone="neutral"
+                onClick={() => setPendingAction(null)}
+              >
+                キャンセル
+              </AppButton>
+              <AppButton
+                variant="solid"
+                tone="primary"
+                onClick={handleConfirm}
+              >
+                {confirmDialogProps.confirmLabel}
+              </AppButton>
+            </>
+          }
+        />
+      )}
+      </>
     );
   },
 );

@@ -378,6 +378,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onUnlockStaffRow={handleUnlockStaffRow}
             onLockMonth={handleLockMonth}
             onUnlockMonth={handleUnlockMonth}
+            currentMonth={currentMonth.format("YYYY年M月")}
           />
 
           <BatchEditToolbar

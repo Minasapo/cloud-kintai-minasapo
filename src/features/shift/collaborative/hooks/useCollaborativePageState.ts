@@ -391,6 +391,92 @@ export const useCollaborativePageState = (targetMonth: string) => {
     applyLockState(false);
   }, [applyLockState]);
 
+  const applyLockStateForStaff = useCallback(
+    (staffId: string, locked: boolean) => {
+      if (isEditingDisabled) {
+        setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+        return;
+      }
+      if (!isAdmin) return;
+
+      const staffData = state.shiftDataMap.get(staffId);
+      if (!staffData) return;
+
+      const updates = dateKeys
+        .map((date) => {
+          const cell = staffData.get(date);
+          if (!cell || cell.state === "empty" || cell.isLocked === locked)
+            return null;
+          return { staffId, date, isLocked: locked };
+        })
+        .filter(
+          (u): u is { staffId: string; date: string; isLocked: boolean } =>
+            u !== null,
+        );
+
+      if (updates.length === 0) return;
+      void batchUpdateShifts(updates);
+    },
+    [
+      isEditingDisabled,
+      isAdmin,
+      state.shiftDataMap,
+      dateKeys,
+      batchUpdateShifts,
+    ],
+  );
+
+  const handleLockStaffRow = useCallback(
+    (staffId: string) => applyLockStateForStaff(staffId, true),
+    [applyLockStateForStaff],
+  );
+
+  const handleUnlockStaffRow = useCallback(
+    (staffId: string) => applyLockStateForStaff(staffId, false),
+    [applyLockStateForStaff],
+  );
+
+  const applyLockStateForMonth = useCallback(
+    (locked: boolean) => {
+      if (isEditingDisabled) {
+        setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+        return;
+      }
+      if (!isAdmin) return;
+
+      const updates: { staffId: string; date: string; isLocked: boolean }[] =
+        [];
+      for (const [staffId, staffData] of state.shiftDataMap) {
+        for (const date of dateKeys) {
+          const cell = staffData.get(date);
+          if (cell && cell.state !== "empty" && cell.isLocked !== locked) {
+            updates.push({ staffId, date, isLocked: locked });
+          }
+        }
+      }
+
+      if (updates.length === 0) return;
+      void batchUpdateShifts(updates);
+    },
+    [
+      isEditingDisabled,
+      isAdmin,
+      state.shiftDataMap,
+      dateKeys,
+      batchUpdateShifts,
+    ],
+  );
+
+  const handleLockMonth = useCallback(
+    () => applyLockStateForMonth(true),
+    [applyLockStateForMonth],
+  );
+
+  const handleUnlockMonth = useCallback(
+    () => applyLockStateForMonth(false),
+    [applyLockStateForMonth],
+  );
+
   const selectionTargets = useMemo(() => {
     if (selectionCount > 0) return Array.from(selectedCells);
     if (focusedCell) return [focusedCell];
@@ -637,6 +723,10 @@ export const useCollaborativePageState = (targetMonth: string) => {
     handleChangeState,
     handleLockCells,
     handleUnlockCells,
+    handleLockStaffRow,
+    handleUnlockStaffRow,
+    handleLockMonth,
+    handleUnlockMonth,
     handleApplySuggestion,
     violations,
     isAnalyzing,
