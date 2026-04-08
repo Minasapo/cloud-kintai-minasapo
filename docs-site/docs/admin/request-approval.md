@@ -61,4 +61,4 @@ flowchart TD
 - 月次締め前は優先的に未処理申請を解消する
 
 参照:
-- [休憩時間申請をレビューする](./break-time-review-guide.md)
+- [休憩時間申請をレビューする](./break-time-review-guide)

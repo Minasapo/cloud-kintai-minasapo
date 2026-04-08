@@ -8,7 +8,7 @@ description: 開発開始時に必要な Node.js、依存パッケージ、Playw
 
 このページは、本プロジェクトの開発を始めるための最小セットアップ手順です。
 
-開発開始から PR 前確認までの全体像は [開発フロー](./development-flow.md) を参照してください。
+開発開始から PR 前確認までの全体像は [開発フロー](./development-flow) を参照してください。
 
 ## 前提
 
@@ -55,7 +55,7 @@ npm run test:e2e:setup
 
 > push 前に `npm run typecheck && npm run test:unit` が自動実行される（`.githooks`）。
 
-日常的なテストの進め方、E2E の使い分け、失敗時の確認は [テスト運用](../testing-operations.md) を参照してください。
+日常的なテストの進め方、E2E の使い分け、失敗時の確認は [テスト運用](../testing-operations) を参照してください。
 
 ## ドキュメント検索の確認方法
 

@@ -66,9 +66,9 @@ description: リポジトリ全体の構成と src 配下の FSD レイヤー責
 
 ## 参照先
 
-- [セットアップ](../getting-started/setup.md)
-- [勤怠管理対象フラグ仕様](../attendance-management-enabled.md)
-- [依存ルール](./dependency-rules.md)
-- [配置判断ガイド](./placement-guide.md)
+- [セットアップ](../getting-started/setup)
+- [勤怠管理対象フラグ仕様](../attendance-management-enabled)
+- [依存ルール](./dependency-rules)
+- [配置判断ガイド](./placement-guide)
 - リポジトリ直下の `README.md`
 - リポジトリ直下の `CLAUDE.md`

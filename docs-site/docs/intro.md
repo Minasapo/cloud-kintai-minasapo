@@ -8,30 +8,30 @@ sidebar_position: 1
 
 クラウド<GlossaryTerm description="スタッフの勤務時間、出勤・退勤、休憩などの勤務実績全体を指します。">勤怠</GlossaryTerm>は、出退勤打刻、勤務時間・休憩管理、<GlossaryTerm description="スタッフが自身の勤怠記録に対して訂正を依頼する申請です。">修正申請</GlossaryTerm>と承認フローを一つの流れで行える勤怠管理システムです。
 スタッフは日々の打刻や日報を記録でき、管理者は申請状況や勤怠状況を一覧で確認して対応できます。
-このガイドでは、スタッフ向け・管理者向けの利用手順をロール別に整理しつつ、それぞれの中でユースケース別と機能別の両方から辿れるように案内します。画面名から横断的に探したい場合は [画面一覧](./screen-list.md) を利用してください。開発者向けには、実装・運用情報を別セクションでまとめています。
+このガイドでは、スタッフ向け・管理者向けの利用手順をロール別に整理しつつ、それぞれの中でユースケース別と機能別の両方から辿れるように案内します。画面名から横断的に探したい場合は [画面一覧](./screen-list) を利用してください。開発者向けには、実装・運用情報を別セクションでまとめています。
 
 ## 対象者を選んでください
 
-- [勤務形態の見方](./work-type-overview.md)
-- [勤務ステータスの見方](./work-status-overview.md)
-- [画面一覧](./screen-list.md)
-- [用語集](./terminology.md)
+- [勤務形態の見方](./work-type-overview)
+- [勤務ステータスの見方](./work-status-overview)
+- [画面一覧](./screen-list)
+- [用語集](./terminology)
 
 ## スタッフ向け
 
-- [スタッフ向けガイド](./staff/overview.md)
-- [ユースケース別ガイド](./staff/use-cases.md)
-- [機能別ガイド](./staff/features.md)
+- [スタッフ向けガイド](./staff/overview)
+- [ユースケース別ガイド](./staff/use-cases)
+- [機能別ガイド](./staff/features)
 
 ## 管理者向け
 
-- [管理者向けガイド](./admin/overview.md)
-- [ユースケース別ガイド](./admin/use-cases.md)
-- [機能別ガイド](./admin/features.md)
+- [管理者向けガイド](./admin/overview)
+- [ユースケース別ガイド](./admin/use-cases)
+- [機能別ガイド](./admin/features)
 
 ## 開発者向け
 
-- [開発者向けガイド](./developer/overview.md)
+- [開発者向けガイド](./developer/overview)
 
 ## このサイトの構成
 

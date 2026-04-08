@@ -1,17 +1,44 @@
 import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+import { roleGuideSidebars } from "./src/data/roleGuides";
 
-/**
- * Creating a sidebar enables you to:
- * create an ordered group of docs
- * render a sidebar for each doc of that group
- * provide next/previous navigation
- *
- * The sidebars can be generated from the filesystem, or explicitly defined here.
- *
- * Create as many sidebars as you want.
- */
+function createRoleGuideSidebar({
+  label,
+  overviewDocId,
+  navigationDocId,
+  faqDocId,
+  useCasesLabel,
+  featuresLabel,
+  useCaseDocIds,
+  featureDocIds,
+}: (typeof roleGuideSidebars)[number]): SidebarsConfig["mainSidebar"][number] {
+  return {
+    type: "category",
+    label,
+    items: [
+      overviewDocId,
+      navigationDocId,
+      {
+        type: "category",
+        label: useCasesLabel,
+        items: [
+          overviewDocId.replace("/overview", "/use-cases"),
+          ...useCaseDocIds.filter((docId) => !docId.endsWith("/faq")),
+        ],
+      },
+      {
+        type: "category",
+        label: featuresLabel,
+        items: [
+          overviewDocId.replace("/overview", "/features"),
+          ...featureDocIds.filter((docId) => !docId.endsWith("/faq")),
+        ],
+      },
+      faqDocId,
+    ],
+  };
+}
+
 const sidebars: SidebarsConfig = {
   mainSidebar: [
     "intro",
@@ -19,77 +46,7 @@ const sidebars: SidebarsConfig = {
     "work-type-overview",
     "work-status-overview",
     "screen-list",
-    {
-      type: "category",
-      label: "スタッフ向けガイド",
-      items: [
-        "staff/overview",
-        "staff/navigation-map",
-        {
-          type: "category",
-          label: "ユースケース別",
-          items: [
-            "staff/use-cases",
-            "staff/basic-operations",
-            "staff/time-recording",
-            "staff/attendance-check",
-            "staff/attendance-edit",
-            "staff/request-check",
-            "staff/attendance-report",
-            "staff/workflow",
-          ],
-        },
-        {
-          type: "category",
-          label: "機能別",
-          items: [
-            "staff/features",
-            "staff/dashboard",
-            "staff/attendance-statistics",
-            "staff/shift",
-            "staff/profile-settings",
-            "staff/break-time-guide",
-          ],
-        },
-        "staff/faq",
-      ],
-    },
-    {
-      type: "category",
-      label: "管理者向けガイド",
-      items: [
-        "admin/overview",
-        "admin/navigation-map",
-        {
-          type: "category",
-          label: "ユースケース別",
-          items: [
-            "admin/use-cases",
-            "admin/attendance-management",
-            "admin/request-approval",
-            "admin/break-time-review-guide",
-            "admin/daily-report",
-            "admin/workflow",
-            "admin/shift-plan",
-          ],
-        },
-        {
-          type: "category",
-          label: "機能別",
-          items: [
-            "admin/features",
-            "admin/dashboard",
-            "admin/attendances",
-            "admin/admin-shift",
-            "admin/operation-logs",
-            "admin/settings-management",
-            "admin/settings-item-list",
-            "admin/staff-management",
-          ],
-        },
-        "admin/faq",
-      ],
-    },
+    ...roleGuideSidebars.map(createRoleGuideSidebar),
     {
       type: "category",
       label: "開発者向けガイド",
@@ -98,6 +55,7 @@ const sidebars: SidebarsConfig = {
         "developer/getting-started/development-flow",
         "developer/getting-started/setup",
         "developer/testing-operations",
+        "developer/docs-authoring",
         {
           type: "category",
           label: "Amplify",

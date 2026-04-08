@@ -53,5 +53,5 @@ FSD ベースの依存方向は次の順で固定します。
 
 ## 関連ページ
 
-- [ディレクトリ構成](./directory-structure.md)
-- [配置判断ガイド](./placement-guide.md)
+- [ディレクトリ構成](./directory-structure)
+- [配置判断ガイド](./placement-guide)
