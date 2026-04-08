@@ -88,6 +88,45 @@ MUI v6 + Tailwind CSS + SCSS の併用。デザイントークンは `src/shared
 - 編集: `src/pages/attendance/edit/AttendanceEdit.tsx`（スタッフ）/ `src/pages/admin/AdminAttendanceEditor.tsx`（管理者）
 - 勤怠ステータス判定ロジック: `src/lib/AttendanceState.ts`
 
+### ワークフロー（申請・承認）
+
+- スタッフが勤怠修正申請等を行い、管理者が承認・否認するフロー。
+- 一覧: `src/pages/workflow/list/Workflow.tsx` / 詳細: `src/pages/workflow/detail/WorkflowDetail.tsx`
+- 管理者側: `src/pages/admin/AdminWorkflow/`
+- `src/features/workflow/` に承認タイムライン（`WorkflowApprovalTimeline`）・コメントスレッド（`WorkflowCommentThread`）・詳細パネル（`WorkflowDetailPanel`）を集約。
+
+### 日報
+
+- スタッフ向け: `src/pages/attendance/daily-report/DailyReport.tsx`
+- 管理者向け一覧: `src/pages/admin/AdminDailyReport/AdminDailyReport.tsx` / 詳細: `AdminDailyReportDetail.tsx`
+
+### オフィス機能
+
+- オフィス入退館フローは `src/processes/office-access/` でオーケストレーション。
+- QR コード打刻: `src/pages/office/qr/OfficeQrPage.tsx`（QR 生成）/ `src/pages/office/qr-register/OfficeQrRegisterPage.tsx`（QR 読取打刻）
+- オフィスレイアウト表示: `src/pages/office/layout/OfficeLayoutPage.tsx`
+
+## 共通 UI パターン
+
+- **ページレイアウト**: `src/shared/ui/layout/PageSection.tsx` がカード型レイアウトの基本単位。`Page` / `PageContent` でラップする。
+- **ボタン・ダイアログ**: MUI を直接使わず `AppButton` / `AppIconButton` / `AppDialog` / `ConfirmDialog`（`src/shared/ui/`）を使う。
+- **フォーム**: React Hook Form + Zod。テキスト入力は `RHFTextField`、時刻入力は `TimeInput` を使う。
+- **デザイントークン**: CSS 変数は `designTokenVar()` 経由で参照（`src/shared/designSystem/`）。
+
+## 詳細仕様ドキュメント
+
+機能ごとの詳細仕様は `.github/instructions/` に配置されている：
+
+| ファイル | 対象 |
+| --- | --- |
+| `attendanceEdit.instructions.md` | 勤怠編集（定型入力・バリデーションルール等） |
+| `attendanceList.instructions.md` | 勤怠一覧・ステータス判定 |
+| `register.instructions.md` | 打刻ページ・直行直帰 |
+| `shift.instructions.md` | シフト機能全般 |
+| `shiftCollaborative.instructions.md` | シフト共同編集のガードレール |
+| `dailyReport.instructions.md` | 日報 |
+| `amplifyGraphqlGenerated.instructions.md` | 自動生成ファイルの扱い |
+
 ## 自動生成ファイル（編集禁止）
 
 - `src/shared/api/graphql/**`
