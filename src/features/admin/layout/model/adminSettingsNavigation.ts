@@ -72,23 +72,6 @@ export const ADMIN_SETTINGS_ITEMS: readonly AdminSettingsItem[] = [
     ctaLabel: "カレンダー設定を開く",
   },
   {
-    title: "シフト",
-    path: "/admin/master/shift",
-    category: "shiftApproval",
-    description: "シフトグループや表示モードなど、シフト管理の基本挙動を設定します。",
-    order: 1,
-    ctaLabel: "シフト設定を開く",
-  },
-  {
-    title: "ワークフロー",
-    path: "/admin/workflow",
-    category: "shiftApproval",
-    description:
-      "申請カテゴリの表示順やテンプレートを、ワークフロー管理画面の設定ダイアログから見直します。",
-    order: 2,
-    ctaLabel: "ワークフロー管理を開く",
-  },
-  {
     title: "打刻理由",
     path: "/admin/master/feature_management/reasons",
     category: "dataIntegration",

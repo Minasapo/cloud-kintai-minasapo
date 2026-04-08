@@ -52,9 +52,6 @@ const AdminLogsRoute = createLazyRoute(
 const AdminMasterLayoutRoute = createLazyRoute(
   () => import("../pages/admin/AdminMasterLayout"),
 );
-const AdminShiftSettingsRoute = createLazyRoute(
-  () => import("../pages/admin/AdminShiftSettings/AdminShiftSettings"),
-);
 const AdminStaffRoute = createLazyRoute(
   () => import("@/features/admin/staff/ui/AdminStaff"),
 );
@@ -67,12 +64,6 @@ const AdminStaffEditorRoute = createLazyRoute(
 );
 const AdminThemeRoute = createLazyRoute(
   () => import("../pages/admin/AdminTheme/AdminTheme"),
-);
-const AdminWorkflowRoute = createLazyRoute(
-  () => import("../pages/admin/AdminWorkflow/AdminWorkflow"),
-);
-const AdminWorkflowDetailRoute = createLazyRoute(
-  () => import("../pages/admin/AdminWorkflow/AdminWorkflowDetail"),
 );
 const JobTermRoute = createLazyRoute(
   () => import("@/features/admin/jobTerm/ui/JobTerm"),
@@ -212,7 +203,7 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "shift",
-        lazy: AdminShiftSettingsRoute,
+        element: <NotFound />,
       },
       {
         path: "workflow",
@@ -249,21 +240,8 @@ export const adminChildRoutes: RouteObject[] = [
     ],
   },
   {
-    path: "workflow",
-    children: [
-      {
-        index: true,
-        lazy: AdminWorkflowRoute,
-      },
-      {
-        path: ":id",
-        lazy: AdminWorkflowDetailRoute,
-      },
-      {
-        path: "*",
-        element: <NotFound />,
-      },
-    ],
+    path: "workflow/*",
+    element: <NotFound />,
   },
   {
     path: "logs",
