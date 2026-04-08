@@ -1,5 +1,6 @@
-import { Badge, Box, Button, Chip, CircularProgress } from "@mui/material";
+import AppButton from "@shared/ui/button/AppButton";
 import dayjs, { Dayjs } from "dayjs";
+import { Loader2 } from "lucide-react";
 import React from "react";
 
 type Props = {
@@ -16,6 +17,37 @@ type Props = {
   onOpenBulkEditDialog: () => void;
 };
 
+const Chip: React.FC<{
+  label: string;
+  onClick?: () => void;
+  icon?: React.ReactNode;
+  variant?: "default" | "success" | "outlined";
+  className?: string;
+}> = ({ label, onClick, icon, variant = "default", className = "" }) => {
+  const baseClasses =
+    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors whitespace-nowrap";
+  const variantClasses = {
+    default: "bg-gray-100 text-gray-800",
+    success: "bg-green-100 text-green-800 border border-green-200",
+    outlined: "bg-transparent border border-gray-300 text-gray-700",
+  };
+
+  const clickableClasses = onClick
+    ? "cursor-pointer hover:bg-gray-200 active:bg-gray-300"
+    : "";
+
+  return (
+    <div
+      className={`${baseClasses} ${variantClasses[variant]} ${clickableClasses} ${className}`}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+    >
+      {icon}
+      {label}
+    </div>
+  );
+};
+
 export const ShiftManagementHeader: React.FC<Props> = ({
   monthStart,
   onPrevMonth,
@@ -30,27 +62,18 @@ export const ShiftManagementHeader: React.FC<Props> = ({
   onOpenBulkEditDialog,
 }) => {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        mb: 2,
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Chip label="前月" onClick={onPrevMonth} sx={{ mr: 1 }} clickable />
-        <Chip label={monthStart.format("YYYY年 M月")} sx={{ mr: 1 }} />
-        <Chip label="翌月" onClick={onNextMonth} clickable />
+    <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Chip label="前月" onClick={onPrevMonth} />
+        <Chip label={monthStart.format("YYYY年 M月")} />
+        <Chip label="翌月" onClick={onNextMonth} />
 
         {scenario === "actual" && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 2 }}>
+          <div className="flex flex-wrap items-center gap-2 ml-2 sm:ml-4">
             {isAutoSaving && (
               <Chip
-                icon={<CircularProgress size={16} />}
+                icon={<Loader2 className="h-3 w-3 animate-spin" />}
                 label="保存中..."
-                size="small"
-                color="default"
               />
             )}
             {isAutoSavePending && !isAutoSaving && (
@@ -60,56 +83,36 @@ export const ShiftManagementHeader: React.FC<Props> = ({
                     ? ` (${dayjs(lastChangedAt).format("M/D HH:mm:ss")})`
                     : ""
                 }`}
-                size="small"
-                color="default"
                 variant="outlined"
               />
             )}
             {!isAutoSaving && !isAutoSavePending && lastSavedAt && (
               <Chip
                 label={`最終保存: ${dayjs(lastSavedAt).format("M/D HH:mm:ss")}`}
-                size="small"
-                color="success"
-                variant="outlined"
+                variant="success"
               />
             )}
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        {hasBulkSelection ? (
-          <Badge
-            badgeContent={selectedCellCount}
-            color="primary"
-            sx={{
-              "& .MuiBadge-badge": {
-                right: 0,
-                top: 0,
-                border: `2px solid`,
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              disabled={!hasBulkSelection}
-              onClick={onOpenBulkEditDialog}
-            >
-              選択した項目を変更
-            </Button>
-          </Badge>
-        ) : (
-          <Button
-            variant="contained"
-            color="primary"
-            disabled
+      <div className="flex items-center">
+        <div className="relative">
+          <AppButton
+            variant="solid"
+            tone="primary"
+            disabled={!hasBulkSelection}
             onClick={onOpenBulkEditDialog}
           >
             選択した項目を変更
-          </Button>
-        )}
-      </Box>
-    </Box>
+          </AppButton>
+          {hasBulkSelection && (
+            <div className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white border-2 border-white ring-1 ring-blue-600/20">
+              {selectedCellCount}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };

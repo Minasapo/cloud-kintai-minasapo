@@ -1,16 +1,3 @@
-import {
-  Box,
-  Checkbox,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-} from "@mui/material";
 import { Dayjs } from "dayjs";
 import React from "react";
 
@@ -37,12 +24,21 @@ type Props = {
   companyHolidayNameMap: Map<string, string>;
   selectedStaffIds: Set<string>;
   selectedDayKeys: Set<string>;
-  onStaffCheckboxChange: (event: React.ChangeEvent<HTMLInputElement>, staffId: string) => void;
-  onDayCheckboxChange: (event: React.ChangeEvent<HTMLInputElement>, dayKey: string) => void;
+  onStaffCheckboxChange: (
+    event: React.ChangeEvent<HTMLInputElement>,
+    staffId: string,
+  ) => void;
+  onDayCheckboxChange: (
+    event: React.ChangeEvent<HTMLInputElement>,
+    dayKey: string,
+  ) => void;
   displayShifts: Map<string, Record<string, ShiftState>>;
   dailyCounts: Map<string, number>;
   plannedDailyCounts: Map<string, number | null>;
-  onOpenShiftEditDialog: (target: { staffId: string; staffName: string; dateKey: string }, currentState: ShiftState) => void;
+  onOpenShiftEditDialog: (
+    target: { staffId: string; staffName: string; dateKey: string },
+    currentState: ShiftState,
+  ) => void;
 };
 
 export const ShiftManagementTable: React.FC<Props> = ({
@@ -61,171 +57,125 @@ export const ShiftManagementTable: React.FC<Props> = ({
   plannedDailyCounts,
   onOpenShiftEditDialog,
 }) => {
-  const getHeaderCellSx = (d: Dayjs) => {
+  const getHeaderCellBg = (d: Dayjs) => {
     const dateKey = d.format("YYYY-MM-DD");
     const day = d.day();
-    if (holidaySet.has(dateKey) || day === 0)
-      return { minWidth: DAY_COL_WIDTH, bgcolor: HOLIDAY_BG };
-    if (companyHolidaySet.has(dateKey))
-      return { minWidth: DAY_COL_WIDTH, bgcolor: COMPANY_HOLIDAY_BG };
-    if (day === 6) return { minWidth: DAY_COL_WIDTH, bgcolor: SATURDAY_BG };
-    return { minWidth: DAY_COL_WIDTH };
+    if (holidaySet.has(dateKey) || day === 0) return HOLIDAY_BG;
+    if (companyHolidaySet.has(dateKey)) return COMPANY_HOLIDAY_BG;
+    if (day === 6) return SATURDAY_BG;
+    return "transparent";
   };
 
   return (
-    <TableContainer
-      sx={{
-        maxHeight: "calc(100vh - 280px)",
-        overflow: "auto",
-        borderRadius: "12px",
-        border: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
-        bgcolor: "background.paper",
-      }}
-    >
-      <Table stickyHeader size="small" sx={{ borderCollapse: "separate" }}>
-        <TableHead>
-          <TableRow>
-            <TableCell
-              sx={{
-                left: 0,
-                zIndex: 10,
-                width: STAFF_COL_WIDTH,
-                minWidth: STAFF_COL_WIDTH,
-                bgcolor: "background.paper",
-                borderRight: "2px solid rgba(0,0,0,0.06)",
-                fontWeight: 700,
-              }}
+    <div className="max-h-[calc(100vh-280px)] overflow-auto rounded-xl border border-gray-100 shadow-sm bg-white">
+      <table className="w-full border-separate border-spacing-0 table-fixed">
+        <thead className="sticky top-0 z-[10] bg-white">
+          <tr>
+            <th
+              className="sticky left-0 z-[11] bg-white border-r-2 border-gray-100 text-sm font-bold text-gray-700 text-left px-3 py-2"
+              style={{ width: `${STAFF_COL_WIDTH}px` }}
             >
               スタッフ名
-            </TableCell>
-            <TableCell
-              sx={{
-                left: SUMMARY_LEFTS.aggregate,
-                zIndex: 10,
-                width: AGG_COL_WIDTH,
-                minWidth: AGG_COL_WIDTH,
-                bgcolor: "background.paper",
-                borderRight: "1px solid rgba(0,0,0,0.06)",
-                fontWeight: 700,
+            </th>
+            <th
+              className="sticky z-[11] bg-white border-r border-gray-100 text-sm font-bold text-gray-700 text-left px-3 py-2"
+              style={{
+                left: `${SUMMARY_LEFTS.aggregate}px`,
+                width: `${AGG_COL_WIDTH}px`,
               }}
             >
               集計(出勤/休暇)
-            </TableCell>
-            <TableCell
-              sx={{
-                left: SUMMARY_LEFTS.changeHistory,
-                zIndex: 10,
-                width: HISTORY_COL_WIDTH,
-                minWidth: HISTORY_COL_WIDTH,
-                bgcolor: "background.paper",
-                borderRight: "2px solid rgba(0,0,0,0.06)",
-                fontWeight: 700,
+            </th>
+            <th
+              className="sticky z-[11] bg-white border-r-2 border-gray-100 text-sm font-bold text-gray-700 text-left px-3 py-2"
+              style={{
+                left: `${SUMMARY_LEFTS.changeHistory}px`,
+                width: `${HISTORY_COL_WIDTH}px`,
               }}
             >
               変更履歴
-            </TableCell>
+            </th>
             {days.map((d) => {
               const dateKey = d.format("YYYY-MM-DD");
               const holidayName = holidayNameMap.get(dateKey);
               const companyHolidayName = companyHolidayNameMap.get(dateKey);
+              const holidayText = holidayName || companyHolidayName || "";
+
               return (
-                <TableCell
+                <th
                   key={dateKey}
-                  align="center"
-                  sx={{
-                    ...getHeaderCellSx(d),
-                    p: 0.5,
-                    borderRight: "1px solid rgba(0,0,0,0.04)",
+                  className="p-1 border-r border-gray-50 align-top"
+                  style={{
+                    backgroundColor: getHeaderCellBg(d),
+                    width: `${DAY_COL_WIDTH}px`,
                   }}
+                  title={holidayText}
                 >
-                  <Stack spacing={0.2} alignItems="center">
-                    <Checkbox
-                      size="small"
+                  <div className="flex flex-col items-center gap-0.5">
+                    <input
+                      type="checkbox"
+                      className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       checked={selectedDayKeys.has(dateKey)}
                       onChange={(e) => onDayCheckboxChange(e, dateKey)}
-                      sx={{ p: 0.2 }}
                     />
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        fontWeight: 700,
-                        color: holidayName ? "error.main" : "text.secondary",
-                      }}
+                    <span
+                      className={`text-[10px] font-bold ${
+                        holidayName ? "text-red-500" : "text-gray-500"
+                      }`}
                     >
                       {d.format("D")}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        fontSize: "0.65rem",
-                        color: holidayName ? "error.main" : "text.secondary",
-                      }}
+                    </span>
+                    <span
+                      className={`text-[9px] font-medium ${
+                        holidayName ? "text-red-500" : "text-gray-400"
+                      }`}
                     >
                       {["日", "月", "火", "水", "木", "金", "土"][d.day()]}
-                    </Typography>
-                    {(holidayName || companyHolidayName) && (
-                      <Tooltip title={holidayName || companyHolidayName || ""}>
-                        <Box
-                          sx={{
-                            width: 6,
-                            height: 6,
-                            borderRadius: "50%",
-                            bgcolor: holidayName ? "error.main" : "info.main",
-                          }}
-                        />
-                      </Tooltip>
+                    </span>
+                    {holidayText && (
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          holidayName ? "bg-red-500" : "bg-blue-400"
+                        }`}
+                      />
                     )}
-                  </Stack>
-                </TableCell>
+                  </div>
+                </th>
               );
             })}
-          </TableRow>
-        </TableHead>
-        <TableBody>
+          </tr>
+        </thead>
+        <tbody>
           <ShiftManagementSummaryRow
             label="合計出勤人数"
             days={days}
             selectedDayKeys={selectedDayKeys}
             dayColumnWidth={DAY_COL_WIDTH}
             renderValue={(dayKey) => (
-              <Stack direction="row" spacing={0.5} justifyContent="center" alignItems="center">
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              <div className="flex flex-row gap-1 justify-center items-center">
+                <span className="text-sm font-bold text-gray-700">
                   {dailyCounts.get(dayKey) || 0}
-                </Typography>
+                </span>
                 {plannedDailyCounts.get(dayKey) !== null && (
-                  <Typography variant="caption" color="text.secondary">
+                  <span className="text-[10px] text-gray-400">
                     / {plannedDailyCounts.get(dayKey)}
-                  </Typography>
+                  </span>
                 )}
-              </Stack>
+              </div>
             )}
-            labelCellProps={{
-              sx: {
-                borderRight: "2px solid rgba(0,0,0,0.06)",
-                fontWeight: 700,
-              },
-            }}
+            labelCellClassName="border-r-2 border-gray-100 font-bold"
           />
           {groupedShiftStaffs.map((group: any) => (
             <React.Fragment key={group.groupId || "no-group"}>
               {group.groupName && (
-                <TableRow>
-                  <TableCell
+                <tr>
+                  <td
                     colSpan={3 + days.length}
-                    sx={{
-                      bgcolor: "rgba(0,0,0,0.02)",
-                      fontWeight: 700,
-                      py: 0.5,
-                      fontSize: "0.75rem",
-                      position: "sticky",
-                      left: 0,
-                      zIndex: 1,
-                    }}
+                    className="sticky left-0 z-[1] bg-gray-50 px-3 py-1 text-[11px] font-bold text-gray-500"
                   >
                     {group.groupName}
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               )}
               {group.staffs.map((staff: any) => (
                 <ShiftManagementTableRow
@@ -241,8 +191,8 @@ export const ShiftManagementTable: React.FC<Props> = ({
               ))}
             </React.Fragment>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   );
 };
