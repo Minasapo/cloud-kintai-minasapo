@@ -26,6 +26,10 @@ import {
   pendingAttendanceContainerSx,
   PendingAttendanceSection,
 } from "@/features/admin/staffAttendanceList/ui/components";
+import {
+  getCurrentMonthFromQuery,
+  MONTH_QUERY_KEY,
+} from "@/features/attendance/list/ui/attendanceListUtils";
 import DesktopCalendarView from "@/features/attendance/list/ui/DesktopCalendarView";
 import MobileCalendar from "@/features/attendance/list/ui/MobileList/MobileCalendar";
 import { useSplitView } from "@/features/splitView";
@@ -44,20 +48,6 @@ const PAGE_PADDING_Y = {
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
 const SECTION_CONTENT_GAP = designTokenVar("spacing.md", "12px");
-const MONTH_QUERY_KEY = "month";
-
-const getCurrentMonthFromQuery = (monthParam: string | null): Dayjs => {
-  if (!monthParam) {
-    return dayjs().startOf("month");
-  }
-
-  const parsedMonth = dayjs(monthParam, "YYYY-MM", true);
-  if (!parsedMonth.isValid()) {
-    return dayjs().startOf("month");
-  }
-
-  return parsedMonth.startOf("month");
-};
 
 export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();

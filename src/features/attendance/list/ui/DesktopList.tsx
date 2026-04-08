@@ -17,7 +17,6 @@ import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
 import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
 import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
 import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
@@ -29,13 +28,12 @@ import {
   attendanceRowVariantStyles,
   getAttendanceRowVariant,
 } from "@/entities/attendance/ui/rowVariant";
-import { getStatus } from "@/features/attendance/list/lib/attendanceStatusUtils";
 
 import { useAttendanceListContext } from "./AttendanceListContext";
+import { MONTH_QUERY_KEY } from "./attendanceListUtils";
 import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
-
-const MONTH_QUERY_KEY = "month";
+import { useErrorAttendances } from "./useErrorAttendances";
 
 export default function DesktopList() {
   const {
@@ -47,6 +45,14 @@ export default function DesktopList() {
     currentMonth,
     effectiveDateRange,
   } = useAttendanceListContext();
+
+  const errorAttendances = useErrorAttendances({
+    staff,
+    attendances,
+    holidayCalendars,
+    companyHolidayCalendars,
+    effectiveDateRange,
+  });
 
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
     if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
@@ -79,50 +85,6 @@ export default function DesktopList() {
     return `/attendance/${formattedWorkDate}/edit?${monthQuery}`;
   };
 
-  const errorAttendances = (() => {
-    if (!staff) return [] as Attendance[];
-
-    const today = dayjs();
-    const rangeStart = effectiveDateRange.start;
-    const rangeEnd = effectiveDateRange.end;
-    const result: Attendance[] = [];
-
-    let current = rangeStart;
-    while (!current.isAfter(rangeEnd, "day")) {
-      if (!current.isAfter(today, "day")) {
-        const workDate = current.format(AttendanceDate.DataFormat);
-        const existingAttendance = attendances.find(
-          (a) => a.workDate === workDate,
-        );
-        const status = getStatus(
-          existingAttendance,
-          staff,
-          holidayCalendars,
-          companyHolidayCalendars,
-          current,
-        );
-        if (
-          status === AttendanceStatus.Error ||
-          status === AttendanceStatus.Late
-        ) {
-          result.push(
-            existingAttendance ?? {
-              __typename: "Attendance",
-              id: `missing-${workDate}`,
-              staffId: staff.id,
-              workDate,
-              createdAt: "",
-              updatedAt: "",
-            },
-          );
-        }
-      }
-
-      current = current.add(1, "day");
-    }
-
-    return result;
-  })();
   return (
     <div className="hidden md:block">
       {errorAttendances.length > 0 && (
