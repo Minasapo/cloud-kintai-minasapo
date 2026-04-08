@@ -97,7 +97,13 @@ export default function AdminShiftSettings() {
         } | undefined>>;
     }), [errors]);
     const hasValidationError = validationDetails.length > 0;
-    const initialShiftGroupSnapshot = useMemo(() => JSON.stringify(getShiftGroups().map((group) => toShiftGroupFormValue(group))), [getShiftGroups]);
+    const initialShiftGroupSnapshot = useMemo(() => JSON.stringify(getShiftGroups().map((group) => ({
+        label: group.label ?? "",
+        min: typeof group.min === "number" && !Number.isNaN(group.min) ? String(group.min) : "",
+        max: typeof group.max === "number" && !Number.isNaN(group.max) ? String(group.max) : "",
+        fixed: typeof group.fixed === "number" && !Number.isNaN(group.fixed) ? String(group.fixed) : "",
+        description: group.description ?? "",
+    }))), [getShiftGroups]);
     const currentShiftGroupSnapshot = useMemo(() => JSON.stringify(fields.map((field) => ({
         label: field.label ?? "",
         min: field.min ?? "",
