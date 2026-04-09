@@ -10,6 +10,9 @@ type AdminWorkflowSettingsDialogProps = {
   onClose: () => void;
 };
 
+const subtleButtonClassName =
+  "rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-white";
+
 export default function AdminWorkflowSettingsDialog({
   open,
   onClose,
@@ -34,7 +37,7 @@ export default function AdminWorkflowSettingsDialog({
           <button
             type="button"
             onClick={requestClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className={subtleButtonClassName}
           >
             閉じる
           </button>
