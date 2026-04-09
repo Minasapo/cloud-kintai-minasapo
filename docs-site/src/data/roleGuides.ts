@@ -78,49 +78,43 @@ export const staffGuide: RoleGuideDefinition = {
   },
   overview: {
     intro:
-      "このセクションは、日々の勤怠作業を行うスタッフ向けのガイドです。",
+      "このセクションは、日々の勤怠業務を進めるスタッフ向けの入口です。まず共通ガイドで前提をそろえ、その後は目的別または機能別に辿ってください。",
     sections: [
       {
-        title: "探し方は 2 通りあります",
+        title: "最初に確認する共通ガイド",
         links: [
-          docLink("staff/use-cases", "目的から探す: ユースケース別ガイド"),
-          docLink("staff/features", "機能や画面から探す: 機能別ガイド"),
-        ],
-      },
-      {
-        title: "このガイドでできること",
-        links: [
-          docLink("staff/time-recording", "出勤、休憩、退勤の打刻"),
-          docLink("staff/attendance-edit", "勤怠の確認と修正申請"),
-          docLink("staff/attendance-report", "日報、ワークフロー申請の提出と進捗確認"),
-        ],
-      },
-      {
-        title: "まずはこの順で確認",
-        links: [
-          docLink("staff/basic-operations", "基本操作"),
+          docLink("attendance-workflow-overview", "勤怠・関連申請の業務フロー全体像"),
+          docLink("terminology", "用語集"),
+          docLink("work-status-overview", "勤務ステータスの見方"),
           docLink("work-type-overview", "勤務形態の見方"),
-          docLink("staff/time-recording", "出退勤を打刻する"),
-          docLink("staff/attendance-check", "勤怠を確認する"),
-          docLink("staff/attendance-edit", "勤怠を修正する"),
-          docLink("staff/profile-settings", "個人設定を管理する"),
-          docLink("staff/request-check", "申請を確認する"),
+          docLink("screen-list", "画面一覧"),
         ],
       },
       {
-        title: "よく使うページ",
+        title: "目的から探す",
         links: [
-          docLink("screen-list", "画面一覧"),
-          docLink("staff/navigation-map", "画面遷移マップ"),
           docLink("staff/use-cases", "ユースケース別ガイド"),
+          docLink("staff/basic-operations", "基本操作"),
+          docLink("staff/time-recording", "出退勤を打刻する"),
+          docLink("staff/attendance-edit", "勤怠を修正する"),
+          docLink("staff/attendance-report", "日報を記録する"),
+        ],
+      },
+      {
+        title: "機能や画面から探す",
+        links: [
           docLink("staff/features", "機能別ガイド"),
           docLink("staff/dashboard", "打刻ダッシュボードを確認する"),
           docLink("staff/attendance-statistics", "稼働統計を確認する"),
-          docLink("work-type-overview", "勤務形態の見方"),
           docLink("staff/shift", "シフトを確認・編集する"),
-          docLink("staff/attendance-report", "日報を記録する"),
           docLink("staff/profile-settings", "個人設定を管理する"),
-          docLink("staff/workflow", "ワークフロー申請を操作する"),
+        ],
+      },
+      {
+        title: "困ったときに見るページ",
+        links: [
+          docLink("staff/navigation-map", "画面遷移マップ（スタッフ向け）"),
+          docLink("staff/request-check", "申請を確認する"),
           docLink("staff/faq", "よくある質問"),
         ],
       },
@@ -138,6 +132,7 @@ export const staffGuide: RoleGuideDefinition = {
       {
         title: "はじめて使う",
         links: [
+          docLink("attendance-workflow-overview", "勤怠・関連申請の業務フロー全体像"),
           docLink("staff/basic-operations", "基本操作"),
           docLink("work-type-overview", "勤務形態の見方"),
           docLink("staff/navigation-map", "画面遷移マップ（スタッフ向け）"),
@@ -218,6 +213,7 @@ export const staffGuide: RoleGuideDefinition = {
       {
         title: "全体の入口",
         links: [
+          docLink("attendance-workflow-overview", "勤怠・関連申請の業務フロー全体像"),
           docLink("staff/overview", "スタッフ向けガイド"),
           docLink("staff/navigation-map", "画面遷移マップ（スタッフ向け）"),
           docLink("staff/faq", "よくある質問"),
@@ -242,7 +238,6 @@ export const adminGuide: RoleGuideDefinition = {
       "admin/request-approval",
       "admin/break-time-review-guide",
       "admin/daily-report",
-      "admin/workflow",
       "admin/shift-plan",
     ],
     featureDocIds: [
@@ -252,53 +247,55 @@ export const adminGuide: RoleGuideDefinition = {
       "admin/operation-logs",
       "admin/settings-management",
       "admin/settings-item-list",
+      "admin/office-mode-operations",
+      "admin/time-recorder-support-settings",
+      "admin/workflow-settings",
+      "admin/export-and-developer-settings",
       "admin/staff-management",
     ],
   },
   overview: {
     intro:
-      "このセクションは、管理者の日常運用に必要な操作をまとめたガイドです。",
+      "このセクションは、管理者の日常運用と月次対応を進めるための入口です。共通ガイドで前提を確認し、その後は目的別または機能別ガイドから必要なページへ辿ってください。",
     sections: [
       {
-        title: "探し方は 2 通りあります",
+        title: "最初に確認する共通ガイド",
         links: [
-          docLink("admin/use-cases", "業務の目的から探す: ユースケース別ガイド"),
-          docLink("admin/features", "機能や画面から探す: 機能別ガイド"),
-        ],
-      },
-      {
-        title: "管理者が行う主な作業",
-        links: [
-          docLink("admin/request-approval", "申請の承認、却下"),
-          docLink("admin/attendance-management", "要確認データの確認と解消"),
-          docLink("admin/dashboard", "月次締め前の最終確認"),
-        ],
-      },
-      {
-        title: "最初に確認するページ",
-        links: [
+          docLink("attendance-workflow-overview", "勤怠・関連申請の業務フロー全体像"),
+          docLink("terminology", "用語集"),
+          docLink("work-status-overview", "勤務ステータスの見方"),
           docLink("work-type-overview", "勤務形態の見方"),
-          docLink("admin/navigation-map", "画面遷移マップ"),
+          docLink("screen-list", "画面一覧"),
+        ],
+      },
+      {
+        title: "日々の優先対応から探す",
+        links: [
+          docLink("admin/use-cases", "ユースケース別ガイド"),
           docLink("admin/dashboard", "ダッシュボードを確認する"),
           docLink("admin/attendance-management", "勤怠を管理する"),
-          docLink("admin/attendances", "勤怠一覧を確認する"),
           docLink("admin/request-approval", "申請を承認する"),
+          docLink("admin/daily-report", "日報を管理する"),
         ],
       },
       {
-        title: "必要に応じて使うページ",
+        title: "機能や画面から探す",
         links: [
-          docLink("screen-list", "画面一覧"),
-          docLink("admin/use-cases", "ユースケース別ガイド"),
           docLink("admin/features", "機能別ガイド"),
-          docLink("admin/daily-report", "日報を管理する"),
+          docLink("admin/attendances", "勤怠一覧を確認する"),
           docLink("admin/admin-shift", "シフトを管理する"),
           docLink("admin/shift-plan", "シフト計画を作成する"),
+          docLink("admin/staff-management", "スタッフを管理する"),
+          docLink("admin/settings-management", "設定画面を管理する"),
+        ],
+      },
+      {
+        title: "判断に迷ったときに見るページ",
+        links: [
+          docLink("admin/navigation-map", "画面遷移マップ（管理者向け）"),
           docLink("admin/operation-logs", "操作ログを確認する"),
           docLink("admin/settings-management", "設定画面を管理する"),
           docLink("admin/settings-item-list", "設定項目一覧を確認する"),
-          docLink("admin/staff-management", "スタッフを管理する"),
-          docLink("work-type-overview", "勤務形態の見方"),
           docLink("admin/faq", "よくある質問"),
         ],
       },
@@ -316,6 +313,7 @@ export const adminGuide: RoleGuideDefinition = {
       {
         title: "日々の優先対応を決めたい",
         links: [
+          docLink("attendance-workflow-overview", "勤怠・関連申請の業務フロー全体像"),
           docLink("admin/dashboard", "ダッシュボードを確認する"),
           docLink("admin/attendance-management", "勤怠を管理する"),
           docLink("admin/attendances", "勤怠一覧を確認する"),
@@ -342,6 +340,10 @@ export const adminGuide: RoleGuideDefinition = {
         links: [
           docLink("admin/settings-management", "設定画面を管理する"),
           docLink("admin/settings-item-list", "設定項目一覧を確認する"),
+          docLink("admin/time-recorder-support-settings", "打刻補助設定を管理する"),
+          docLink("admin/workflow-settings", "ワークフロー設定を確認する"),
+          docLink("admin/office-mode-operations", "オフィスモードを運用する"),
+          docLink("admin/export-and-developer-settings", "エクスポートと開発者設定を確認する"),
           docLink("admin/staff-management", "スタッフを管理する"),
         ],
       },
@@ -378,7 +380,7 @@ export const adminGuide: RoleGuideDefinition = {
         links: [
           docLink("admin/request-approval", "申請を承認する"),
           docLink("admin/break-time-review-guide", "休憩時間申請をレビューする"),
-          docLink("admin/workflow", "ワークフロー申請を管理する"),
+          docLink("admin/workflow-settings", "ワークフロー設定を確認する"),
         ],
       },
       {
@@ -394,12 +396,16 @@ export const adminGuide: RoleGuideDefinition = {
         links: [
           docLink("admin/settings-management", "設定画面を管理する"),
           docLink("admin/settings-item-list", "設定項目一覧を確認する"),
+          docLink("admin/time-recorder-support-settings", "打刻補助設定を管理する"),
+          docLink("admin/office-mode-operations", "オフィスモードを運用する"),
+          docLink("admin/export-and-developer-settings", "エクスポートと開発者設定を確認する"),
           docLink("admin/operation-logs", "操作ログを確認する"),
         ],
       },
       {
         title: "全体の入口",
         links: [
+          docLink("attendance-workflow-overview", "勤怠・関連申請の業務フロー全体像"),
           docLink("admin/overview", "管理者向けガイド"),
           docLink("admin/navigation-map", "画面遷移マップ（管理者向け）"),
           docLink("admin/faq", "よくある質問"),

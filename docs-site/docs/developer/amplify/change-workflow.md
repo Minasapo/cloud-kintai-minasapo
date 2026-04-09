@@ -63,7 +63,7 @@ Amplify 関連の変更では、実装差分だけでなく次も合わせて確
 
 ## 関連ドキュメントも見直す
 
-Amplify 変更の影響は docs-site にも及ぶことがあります。特に次のページは更新漏れが起きやすい対象です。
+Amplify 変更の影響はドキュメントサイトにも及ぶことがあります。特に次のページは更新漏れが起きやすい対象です。
 
 - [セットアップ](/docs/developer/getting-started/setup)
 - [ディレクトリ構成](/docs/developer/architecture/directory-structure)

@@ -110,7 +110,7 @@ npx @aws-amplify/cli pull --appId <your-app-id> --envName <your-env-name>
 - 認証前提の画面や管理者機能の到達性に影響がないか
 - 想定外の generated 差分が混ざっていないか
 - `AdminQueries` や Lambda 連携の前提がずれていないか
-- docs-site 上の仕様説明やセットアップ案内も更新が必要か
+- ドキュメントサイト上の仕様説明やセットアップ案内も更新が必要か
 
 ## レビュー前チェックリスト
 

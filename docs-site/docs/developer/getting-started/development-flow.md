@@ -64,7 +64,7 @@ npm run test:unit
 - `lint` と `typecheck` がエラーなく完了する
 - `test:unit` が失敗なく完了する
 
-ドキュメントを編集した場合は、追加で `npm run docs:build` を実行して docs-site のビルドも確認してください。
+ドキュメントを編集した場合は、追加で `npm run docs:build` を実行してドキュメントサイトのビルドも確認してください。
 
 ## 4. 最初に読むコード
 
@@ -88,7 +88,7 @@ npm run test:unit
 
 - フロントエンドだけの変更で完結するか、Amplify 側の変更が必要かを先に切り分ける
 - GraphQL スキーマ、認証、Lambda、管理系 API に触れる場合は [Amplify 変更フロー](/docs/developer/amplify/change-workflow) を先に確認する
-- docs-site で仕様説明している機能を変える場合は、関連 developer docs の更新要否も合わせて確認する
+- ドキュメントサイトで仕様説明している機能を変える場合は、関連 developer docs の更新要否も合わせて確認する
 
 ## 6. PR 前チェック
 
