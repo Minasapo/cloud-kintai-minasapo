@@ -1,6 +1,5 @@
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { act, renderHook } from "@testing-library/react";
-
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import { useDuplicateAttendanceWarning } from "./useDuplicateAttendanceWarning";
 

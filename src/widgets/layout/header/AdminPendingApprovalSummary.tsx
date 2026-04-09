@@ -1,41 +1,24 @@
-import { GraphQLResult } from "aws-amplify/api";
-import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { hasUnapprovedChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
-import { StaffRole } from "@/entities/staff/model/useStaffs/useStaffs";
-import useWorkflows from "@/entities/workflow/model/useWorkflows";
-import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { listAttendances } from "@/shared/api/graphql/documents/queries";
+import { hasUnapprovedChangeRequest } from "@entities/attendance/lib/ChangeRequest";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { listAttendances } from "@shared/api/graphql/documents/queries";
 import {
   onCreateAttendance,
   onDeleteAttendance,
   onUpdateAttendance,
-} from "@/shared/api/graphql/documents/subscriptions";
-import {
-  ListAttendancesQuery,
-  Workflow,
-  WorkflowStatus,
-} from "@/shared/api/graphql/types";
-import { createLogger } from "@/shared/lib/logger";
+} from "@shared/api/graphql/documents/subscriptions";
+import { ListAttendancesQuery } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
+import { GraphQLResult } from "aws-amplify/api";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
 
 import AdminSummaryCard from "./AdminSummaryCard";
 
 const logger = createLogger("AdminPendingApprovalSummary");
 const ATTENDANCE_LOOKBACK_DAYS = 30;
-
-const isWorkflowPendingForCurrentAdmin = (workflow: Workflow) => {
-  const isUnapprovedStatus =
-    workflow.status === WorkflowStatus.SUBMITTED ||
-    workflow.status === WorkflowStatus.PENDING;
-
-  if (!isUnapprovedStatus) {
-    return false;
-  }
-
-  return true;
-};
 
 type AdminPendingApprovalSummaryProps = {
   layoutMode?: "default" | "inline-cards";
@@ -58,20 +41,8 @@ export default function AdminPendingApprovalSummary({
     [isCognitoUserRole],
   );
 
-  const { workflows } = useWorkflows({ isAuthenticated });
-
   const [pendingAttendanceCount, setPendingAttendanceCount] = useState(0);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
-
-  const pendingWorkflowCount = useMemo(() => {
-    if (!isAdminUser || !workflows) {
-      return 0;
-    }
-
-    return workflows.filter((workflow) =>
-      isWorkflowPendingForCurrentAdmin(workflow),
-    ).length;
-  }, [isAdminUser, workflows]);
 
   const fetchPendingAttendanceCount = useCallback(async () => {
     if (!isAuthenticated || !isAdminUser) {
@@ -238,10 +209,9 @@ export default function AdminPendingApprovalSummary({
   const attendanceCountLabel = attendanceLoading
     ? "集計中"
     : `${pendingAttendanceCount}件`;
-  const workflowCountLabel = `${pendingWorkflowCount}件`;
   const compact = layoutMode === "inline-cards";
   const containerClassName =
-    compact ? "contents" : "grid grid-cols-2 gap-3";
+    compact ? "contents" : "grid grid-cols-1 gap-3";
   const cardClassName = layoutMode === "inline-cards" ? "" : "";
 
   return (
@@ -255,17 +225,6 @@ export default function AdminPendingApprovalSummary({
         description="未承認の勤怠修正申請"
         countLabel={attendanceCountLabel}
         to="/admin/attendances"
-        className={cardClassName}
-        showAdminOnlyTag={showAdminOnlyTag}
-        compact={compact}
-        visualVariant={visualVariant}
-      />
-      <AdminSummaryCard
-        testId="admin-pending-workflow-card"
-        title="ワークフロー申請"
-        description="未承認のワークフロー申請"
-        countLabel={workflowCountLabel}
-        to="/admin/workflow"
         className={cardClassName}
         showAdminOnlyTag={showAdminOnlyTag}
         compact={compact}

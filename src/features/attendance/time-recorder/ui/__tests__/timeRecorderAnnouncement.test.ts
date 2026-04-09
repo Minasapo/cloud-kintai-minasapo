@@ -3,7 +3,7 @@ import {
   dismissTimeRecorderAnnouncement,
   isDismissedTimeRecorderAnnouncement,
   shouldShowTimeRecorderAnnouncement,
-} from "@/features/attendance/time-recorder/lib/timeRecorderAnnouncement";
+} from "@features/attendance/time-recorder/lib/timeRecorderAnnouncement";
 
 describe("timeRecorderAnnouncement", () => {
   it("dismissキーにconfigIdとmessageを含める", () => {

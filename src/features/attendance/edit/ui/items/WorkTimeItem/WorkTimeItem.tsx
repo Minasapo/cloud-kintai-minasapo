@@ -1,8 +1,7 @@
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { Box, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 import EndTimeInput from "./EndTimeInput";
 import StartTimeInput from "./StartTimeInput";

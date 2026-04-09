@@ -1,15 +1,14 @@
-import { useEffect } from "react";
-
-import { useAppDispatchV2, useAppSelectorV2 } from "@/app/hooks";
-import { designTokenVar } from "@/shared/designSystem";
+import { useAppDispatchV2, useAppSelectorV2 } from "@app/hooks";
+import { designTokenVar } from "@shared/designSystem";
 import {
   dismissNotification,
   type NotificationItem,
   type NotificationTone,
   selectNotifications,
-} from "@/shared/lib/store/notificationSlice";
-import { APP_LAYER_Z_INDEX } from "@/shared/ui/overlay/layers";
-import OverlayPortal from "@/shared/ui/overlay/OverlayPortal";
+} from "@shared/lib/store/notificationSlice";
+import { APP_LAYER_Z_INDEX } from "@shared/ui/overlay/layers";
+import OverlayPortal from "@shared/ui/overlay/OverlayPortal";
+import { useEffect } from "react";
 
 const NOTIFICATION_TONES: Record<
   NotificationTone,

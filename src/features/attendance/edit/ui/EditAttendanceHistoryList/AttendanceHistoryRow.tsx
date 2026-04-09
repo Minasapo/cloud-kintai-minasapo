@@ -1,8 +1,9 @@
+import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime";
 import { AttendanceHistory } from "@shared/api/graphql/types";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { useContext, useState } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 
 const cellClassName =
   "whitespace-nowrap border-b border-slate-200 px-4 py-3 text-sm text-slate-700 align-top";
@@ -142,7 +143,7 @@ function DetailSection({
 }) {
   return (
     <section className="space-y-2">
-      <h3 className="m-0 text-sm font-semibold text-slate-900">{title}</h3>
+      <SubsectionTitle className="m-0 text-sm font-semibold text-slate-900">{title}</SubsectionTitle>
       {rows.length === 0 ? (
         <p className="m-0 text-sm text-slate-500">登録はありません</p>
       ) : (

@@ -1,16 +1,15 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { CompanyHoliday } from "@entities/attendance/lib/CompanyHoliday";
+import { DayOfWeek, DayOfWeekString } from "@entities/attendance/lib/DayOfWeek";
+import { Holiday } from "@entities/attendance/lib/Holiday";
 import type { SxProps, Theme } from "@mui/material/styles";
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
 } from "@shared/api/graphql/types";
+import { designTokenVar } from "@shared/designSystem";
 import dayjs from "dayjs";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
-import { DayOfWeek, DayOfWeekString } from "@/entities/attendance/lib/DayOfWeek";
-import { Holiday } from "@/entities/attendance/lib/Holiday";
-import { designTokenVar } from "@/shared/designSystem";
 
 export type AttendanceRowVariant = "default" | "today" | "saturday" | "sunday";
 

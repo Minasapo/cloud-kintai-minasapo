@@ -1,11 +1,10 @@
-import { Controller } from "react-hook-form";
-
 import {
   AttendanceControl,
   AttendanceGetValues,
   AttendanceSetValue,
-} from "@/features/attendance/edit/model/types";
-import { getRemarksValue, updateRemarks } from "@/features/attendance/edit/ui/items/remarksItemUtils";
+} from "@features/attendance/edit/model/types";
+import { getRemarksValue, updateRemarks } from "@features/attendance/edit/ui/items/remarksItemUtils";
+import { Controller } from "react-hook-form";
 
 const INPUT_PLACEHOLDER = "備考を入力してください（タグは上に表示されます）";
 

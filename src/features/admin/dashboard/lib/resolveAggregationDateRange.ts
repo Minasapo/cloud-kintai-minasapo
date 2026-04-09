@@ -1,9 +1,8 @@
-import dayjs from "dayjs";
-
 import {
   type CloseDatePeriod,
   getEffectiveDateRange,
-} from "@/entities/attendance/lib/aggregationDateRange";
+} from "@entities/attendance/lib/aggregationDateRange";
+import dayjs from "dayjs";
 
 export const resolveAggregationDateRange = (
   month: dayjs.Dayjs,

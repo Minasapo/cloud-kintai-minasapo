@@ -1,7 +1,6 @@
+import { designTokenVar } from "@shared/designSystem";
 import Link from "@shared/ui/link/Link";
 import { CSSProperties } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 export type DesktopMenuItem = {
   label: string;

@@ -2,6 +2,7 @@ import {
   StaffRole,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { onCreateWorkflow } from "@shared/api/graphql/documents/subscriptions";
 import {
   OnCreateWorkflowSubscription,
@@ -12,7 +13,6 @@ import { useCallback, useContext, useEffect, useMemo } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import { useAppNotification } from "@/hooks/useAppNotification";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 const logger = createLogger("useWorkflowNotification");
 

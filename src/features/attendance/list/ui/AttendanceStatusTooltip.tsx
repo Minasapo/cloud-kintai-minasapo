@@ -1,3 +1,4 @@
+import { AttendanceState, AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
@@ -8,8 +9,6 @@ import {
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
-
-import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 export function AttendanceStatusTooltip({
   staff,

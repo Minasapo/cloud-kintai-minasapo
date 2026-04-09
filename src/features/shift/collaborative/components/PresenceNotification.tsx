@@ -1,7 +1,6 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback } from "react";
-
-import { useAppDispatchV2 } from "@/app/hooks";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 export type PresenceNotificationType =
   | "user-joined"

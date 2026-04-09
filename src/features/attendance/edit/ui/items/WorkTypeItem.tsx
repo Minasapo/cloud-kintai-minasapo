@@ -1,5 +1,5 @@
-import { getWorkTypeLabel } from "@/entities/staff/lib/workTypeOptions";
-import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { getWorkTypeLabel } from "@entities/staff/lib/workTypeOptions";
+import { useAttendanceEditData } from "@features/attendance/edit/model/AttendanceEditProvider";
 
 export default function WorkTypeItem() {
   const { staff } = useAttendanceEditData();

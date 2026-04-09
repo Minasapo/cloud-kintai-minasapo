@@ -1,7 +1,7 @@
 import {
   SettingsSwitch,
   SettingsTextAreaField,
-} from "@/features/admin/layout/ui/SettingsPrimitives";
+} from "@features/admin/layout/ui/SettingsPrimitives";
 
 type TimeRecorderAnnouncementSectionProps = {
   enabled: boolean;

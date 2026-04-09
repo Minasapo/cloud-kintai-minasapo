@@ -1,6 +1,5 @@
+import { designTokenVar } from "@shared/designSystem";
 import type { CSSProperties } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 const ACTION_BUTTON_MIN_HEIGHT = designTokenVar(
   "component.timeRecorder.actionCard.minHeight",

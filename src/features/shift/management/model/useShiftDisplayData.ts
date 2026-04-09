@@ -4,6 +4,11 @@ import { Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
 
 import { ShiftState } from "../lib/generateMockShifts";
+import {
+  calculateDailyCounts,
+  calculateGroupDailyCounts,
+  calculatePlannedDailyCounts,
+} from "../lib/shiftAggregation";
 import useShiftRequestAssignments from "./useShiftRequestAssignments";
 
 type ShiftGroup = {
@@ -77,10 +82,13 @@ export function useShiftDisplayData({
   const displayShifts = useMemo(() => {
     const next = new Map<string, Record<string, ShiftState>>();
     shiftStaffs.forEach((staff) => {
-      if (scenario === "actual" && shiftRequestAssignments.has(staff.id)) {
-        next.set(staff.id, shiftRequestAssignments.get(staff.id)!);
-      } else if (scenario !== "actual" && mockShifts.has(staff.id)) {
-        next.set(staff.id, mockShifts.get(staff.id)!);
+      const actual = shiftRequestAssignments.get(staff.id);
+      const mock = mockShifts.get(staff.id);
+
+      if (scenario === "actual" && actual) {
+        next.set(staff.id, actual);
+      } else if (scenario !== "actual" && mock) {
+        next.set(staff.id, mock);
       } else {
         next.set(staff.id, {});
       }
@@ -88,62 +96,22 @@ export function useShiftDisplayData({
     return next;
   }, [mockShifts, scenario, shiftRequestAssignments, shiftStaffs]);
 
-  const dailyCounts = useMemo(() => {
-    const m = new Map<string, number>();
-    days.forEach((d) => {
-      const key = d.format("YYYY-MM-DD");
-      let cnt = 0;
-      shiftStaffs.forEach((s) => {
-        if (displayShifts.get(s.id)?.[key] === "work") cnt += 1;
-      });
-      m.set(key, cnt);
-    });
-    return m;
-  }, [days, shiftStaffs, displayShifts]);
+  const staffIds = useMemo(() => shiftStaffs.map((s) => s.id), [shiftStaffs]);
 
-  const groupDailyCounts = useMemo(() => {
-    const result = new Map<string, Map<string, number>>();
-    groupedShiftStaffs.forEach(({ groupName, members }) => {
-      const groupCounts = new Map<string, number>();
-      days.forEach((d) => {
-        const key = d.format("YYYY-MM-DD");
-        let cnt = 0;
-        members.forEach((member) => {
-          if (displayShifts.get(member.id)?.[key] === "work") cnt += 1;
-        });
-        groupCounts.set(key, cnt);
-      });
-      result.set(groupName, groupCounts);
-    });
-    return result;
-  }, [displayShifts, groupedShiftStaffs, days]);
+  const dailyCounts = useMemo(
+    () => calculateDailyCounts(days, staffIds, displayShifts),
+    [days, staffIds, displayShifts]
+  );
 
-  const plannedDailyCounts = useMemo(() => {
-    const targetMonth = monthStart.month() + 1;
-    const map = new Map<string, number | null>();
-    days.forEach((d) => {
-      map.set(d.format("YYYY-MM-DD"), null);
-    });
-    if (!shiftPlanPlans) {
-      return map;
-    }
-    const monthPlan =
-      shiftPlanPlans.find(
-        (plan) => typeof plan.month === "number" && plan.month === targetMonth,
-      ) ?? null;
-    if (!monthPlan) {
-      return map;
-    }
-    const capacities = monthPlan.dailyCapacities ?? [];
-    days.forEach((d, index) => {
-      const value = capacities[index];
-      map.set(
-        d.format("YYYY-MM-DD"),
-        typeof value === "number" && !Number.isNaN(value) ? value : null,
-      );
-    });
-    return map;
-  }, [days, monthStart, shiftPlanPlans]);
+  const groupDailyCounts = useMemo(
+    () => calculateGroupDailyCounts(days, groupedShiftStaffs, displayShifts),
+    [days, groupedShiftStaffs, displayShifts]
+  );
+
+  const plannedDailyCounts = useMemo(
+    () => calculatePlannedDailyCounts(days, monthStart, shiftPlanPlans),
+    [days, monthStart, shiftPlanPlans]
+  );
 
   return {
     scenario,

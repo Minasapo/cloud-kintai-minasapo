@@ -1,6 +1,5 @@
+import { SplitModeToggle } from "@features/splitView";
 import { Box, Stack } from "@mui/material";
-
-import { SplitModeToggle } from "@/features/splitView";
 
 type ActiveMenuInfoProps = {
   primaryLabel: string;

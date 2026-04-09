@@ -1,5 +1,6 @@
 import "./AttendanceListHeader.scss";
 
+import { PageTitle } from "@shared/ui/typography";
 import { useState } from "react";
 
 type AttendanceListHeaderProps = {
@@ -15,7 +16,7 @@ export default function AttendanceListHeader({
     <section className="attendance-list-header">
       <div className="attendance-list-header__inner">
         <div className="attendance-list-header__content">
-          <h1 className="attendance-list-header__title">勤怠一覧</h1>
+          <PageTitle className="attendance-list-header__title">勤怠一覧</PageTitle>
           <p
             id="attendance-list-header-description"
             className={`attendance-list-header__description${

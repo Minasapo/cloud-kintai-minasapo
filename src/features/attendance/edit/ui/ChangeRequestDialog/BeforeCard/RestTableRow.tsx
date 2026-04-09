@@ -1,8 +1,7 @@
+import { AttendanceTime } from "@entities/attendance/lib/AttendanceTime";
 import { Box, Stack, TableCell, TableRow } from "@mui/material";
 import { Rest } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
 
 export default function RestTableRow({ rests }: { rests: Rest[] }) {
   return (

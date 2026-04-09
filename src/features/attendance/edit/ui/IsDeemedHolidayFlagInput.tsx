@@ -1,3 +1,4 @@
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import {
   Checkbox,
   Stack,
@@ -6,8 +7,6 @@ import {
   useTheme,
 } from "@mui/material";
 import { Control, Controller } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 // -----------------------------------------------------------------------------
 // ファイル / コンポーネントの概要

@@ -1,6 +1,5 @@
+import { validationMessages } from "@shared/config/validationMessages";
 import dayjs, { Dayjs } from "dayjs";
-
-import { validationMessages } from "@/shared/config/validationMessages";
 
 export interface OvertimeCheckContext {
   /** AppConfig から取得した業務終了時刻（HH:mm 形式） */

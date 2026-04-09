@@ -1,4 +1,7 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { calcTotalRestTime, calcTotalWorkTime } from "@entities/attendance/lib/time";
 import { Attendance } from "@shared/api/graphql/types";
+import { alphaColor } from "@shared/lib/color";
 import {
   BarElement,
   CategoryScale,
@@ -12,9 +15,6 @@ import { useContext, useMemo } from "react";
 import { Bar } from "react-chartjs-2";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { calcTotalRestTime, calcTotalWorkTime } from "@/entities/attendance/lib/time";
-import { alphaColor } from "@/shared/lib/color";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Legend, Tooltip);
 

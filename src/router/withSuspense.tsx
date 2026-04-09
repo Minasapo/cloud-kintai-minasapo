@@ -1,3 +1,4 @@
+import PageLoader from "@shared/ui/feedback/PageLoader";
 import {
   type ComponentProps,
   type ComponentType,
@@ -5,8 +6,6 @@ import {
   type ReactNode,
   Suspense,
 } from "react";
-
-import PageLoader from "@/shared/ui/feedback/PageLoader";
 
 /**
  * Note: `any` is used here for ComponentType generics to allow wrapping

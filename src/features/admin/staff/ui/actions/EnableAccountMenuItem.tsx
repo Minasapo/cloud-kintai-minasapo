@@ -2,12 +2,12 @@ import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import PersonIcon from "@mui/icons-material/Person";
 import { CircularProgress, ListItemIcon, ListItemText, MenuItem, } from "@mui/material";
 import { UpdateStaffInput } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
 import enableStaff from "@/hooks/common/enableStaff";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 export function EnableAccountMenuItem({ staff, updateStaff, }: {
     staff: StaffType;

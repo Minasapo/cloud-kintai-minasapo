@@ -6,13 +6,13 @@ import ErrorIcon from "@mui/icons-material/Error";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import { Badge, Box, IconButton, Stack, TableCell, Tooltip, } from "@mui/material";
 import { Attendance, CompanyHolidayCalendar, HolidayCalendar, Staff, } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 // attendances are provided by parent (AttendanceDailyList)
 import { resolveAttendanceSummaryStatus } from "../lib/attendanceSummaryStatus";

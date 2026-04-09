@@ -1,1 +1,1 @@
-export { default } from "@/shared/ui/time-recorder/DirectSwitch";
+export { default } from "@shared/ui/time-recorder/DirectSwitch";

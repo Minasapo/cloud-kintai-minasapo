@@ -1,8 +1,7 @@
+import type { AdminHeaderMenuItem } from "@features/admin/layout/model/useHeaderMenu";
 import { Box, ButtonBase, Stack } from "@mui/material";
 import { memo, type MouseEvent, useMemo } from "react";
 import { Link as RouterLink } from "react-router-dom";
-
-import type { AdminHeaderMenuItem } from "@/features/admin/layout/model/useHeaderMenu";
 
 interface AdminMenuProps {
   items: readonly AdminHeaderMenuItem[];
@@ -25,7 +24,6 @@ const MENU_GROUP_BY_HREF: Record<string, AdminMenuGroupKey> = {
   "/admin/shift": "operations",
   "/admin/shift-plan": "operations",
   "/admin/daily-report": "operations",
-  "/admin/workflow": "governance",
   "/admin/logs": "governance",
   "/admin/master": "governance",
 };

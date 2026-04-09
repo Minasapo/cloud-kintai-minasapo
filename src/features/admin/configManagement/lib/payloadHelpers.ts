@@ -1,14 +1,13 @@
+import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
+import {
+  DEFAULT_CONFIG_NAME,
+  TIME_FORMAT,
+} from "@features/admin/configManagement/lib/constants";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
-
-import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
-import {
-  DEFAULT_CONFIG_NAME,
-  TIME_FORMAT,
-} from "@/features/admin/configManagement/lib/constants";
 
 export const formatTime = (time: Dayjs) => time.format(TIME_FORMAT);
 

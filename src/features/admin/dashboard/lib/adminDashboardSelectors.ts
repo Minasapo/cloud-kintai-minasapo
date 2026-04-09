@@ -1,15 +1,14 @@
-import { type ChartOptions } from "chart.js";
-import dayjs from "dayjs";
-
 import {
   getWorkStatus,
   WorkStatusCodes,
-} from "@/entities/attendance/lib/actions/workStatus";
-import { calcTotalRestTime, calcTotalWorkTime } from "@/entities/attendance/lib/time";
+} from "@entities/attendance/lib/actions/workStatus";
+import { calcTotalRestTime, calcTotalWorkTime } from "@entities/attendance/lib/time";
 import {
   type StaffType,
-} from "@/entities/staff/model/useStaffs/useStaffs";
-import { Attendance } from "@/shared/api/graphql/types";
+} from "@entities/staff/model/useStaffs/useStaffs";
+import { Attendance } from "@shared/api/graphql/types";
+import { type ChartOptions } from "chart.js";
+import dayjs from "dayjs";
 
 export type StaffWorkStatusSummaryItem = {
   label: string;

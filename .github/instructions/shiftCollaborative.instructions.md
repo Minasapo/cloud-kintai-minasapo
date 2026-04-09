@@ -8,6 +8,13 @@ applyTo: "src/pages/shift/collaborative/**,src/features/shift/collaborative/**"
 
 本機能は、複数人のユーザーによる共同編集を前提とし、Amplify の GraphQL pub/sub（Subscription）を利用した動的なデータ更新・状態同期を実現する設計を基本方針とします。
 
+## 権限ルール
+
+- **確定（ロック）・確定解除はいずれも管理者（`ADMIN` / `STAFF_ADMIN` / `OWNER`）のみが実行可能**。
+- スタッフロール（`STAFF` / `GUEST` / `OPERATOR` 等）には確定ロックボタン自体を表示しない（`showLock={hasUnlocked && isAdmin}`）。
+- ロジック層（`applyLockState`）でも `isAdmin` チェックをダブルガードとして維持し、UI バイパスを防ぐ。
+- 強制ロック解放（`handleForceReleaseLock`）も同様に管理者のみ実行可能。
+
 ## 実装ガードレール (2026-03)
 
 - 共同編集の同期設計は GraphQL Subscription / pub-sub を第一選択とし、単発ポーリングや独自監視を主軸にしない。

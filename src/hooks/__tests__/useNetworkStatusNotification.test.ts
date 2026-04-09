@@ -1,9 +1,8 @@
-import { renderHook } from "@testing-library/react";
-
 import {
   dismissNotification,
   pushNotification,
-} from "@/shared/lib/store/notificationSlice";
+} from "@shared/lib/store/notificationSlice";
+import { renderHook } from "@testing-library/react";
 
 import { useNetworkStatusNotification } from "../useNetworkStatusNotification";
 import { useOnlineStatus } from "../useOnlineStatus";

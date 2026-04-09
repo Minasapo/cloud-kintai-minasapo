@@ -1,10 +1,9 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { SELECTOR_MAX_WIDTH, SELECTOR_MIN_WIDTH } from "@shared/config/uiDimensions";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-
-import { SELECTOR_MAX_WIDTH, SELECTOR_MIN_WIDTH } from "@/shared/config/uiDimensions";
 
 type Props = {
   staffs: StaffType[];

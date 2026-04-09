@@ -1,14 +1,13 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
+import {
+  AttendanceEditInputs,
+  RestInputs,
+} from "@features/attendance/edit/model/common";
 import { Box, Checkbox, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import dayjs from "dayjs";
 import { Controller, UseFieldArrayReplace } from "react-hook-form";
-
-import {
-  AttendanceEditInputs,
-  RestInputs,
-} from "@/features/attendance/edit/model/common";
 
 import {
   AttendanceControl,

@@ -1,5 +1,6 @@
 import { appConfigApi } from "@entities/app-config/api/appConfigApi";
 import { attendanceApi } from "@entities/attendance/api/attendanceApi";
+import { attendanceStatisticsApi } from "@entities/attendance-statistics/api/attendanceStatisticsApi";
 import { calendarApi } from "@entities/calendar/api/calendarApi";
 import { shiftApi } from "@entities/shift/api/shiftApi";
 import { staffApi } from "@entities/staff/api/staffApi";
@@ -18,6 +19,7 @@ export type RegisteredRtkApi = {
 
 export const rtkApis: RegisteredRtkApi[] = [
   attendanceApi,
+  attendanceStatisticsApi,
   calendarApi,
   appConfigApi,
   shiftApi,

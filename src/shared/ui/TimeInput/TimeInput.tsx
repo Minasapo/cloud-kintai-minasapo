@@ -1,6 +1,5 @@
+import { formatISOToTime, parseTimeToISO } from "@shared/lib/time";
 import type { CSSProperties, InputHTMLAttributes, ReactNode } from "react";
-
-import { formatISOToTime, parseTimeToISO } from "@/shared/lib/time";
 
 type TimeInputProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,

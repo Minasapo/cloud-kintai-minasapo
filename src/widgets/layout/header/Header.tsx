@@ -1,10 +1,10 @@
+import { resolveThemeColor } from "@shared/config/theme";
+import { designTokenVar } from "@shared/designSystem";
+import HeaderBar from "@shared/ui/header/HeaderBar";
 import Logo from "@shared/ui/logo/Logo";
 import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { resolveThemeColor } from "@/shared/config/theme";
-import { designTokenVar } from "@/shared/designSystem";
-import HeaderBar from "@/shared/ui/header/HeaderBar";
 
 import { ExternalLinks } from "./ExternalLinks/ExternalLinks";
 import NavigationMenu from "./NavigationMenu";

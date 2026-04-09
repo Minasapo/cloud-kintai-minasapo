@@ -1,5 +1,5 @@
-import { store } from "@/app/store";
-import { calendarApi } from "@/entities/calendar/api/calendarApi";
+import { store } from "@app/store";
+import { calendarApi } from "@entities/calendar/api/calendarApi";
 
 export async function adminDashboardLoader(): Promise<null> {
   await Promise.allSettled([

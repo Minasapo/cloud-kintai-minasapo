@@ -7,9 +7,8 @@ import {
 } from "@mui/icons-material";
 import PrintIcon from "@mui/icons-material/Print";
 import { Badge, Divider, Paper, Stack, Tooltip } from "@mui/material";
+import { AppIconButton } from "@shared/ui/button";
 import React from "react";
-
-import { AppIconButton } from "@/shared/ui/button";
 
 const MIN_SYNC_SPIN_DURATION_MS = 2000;
 

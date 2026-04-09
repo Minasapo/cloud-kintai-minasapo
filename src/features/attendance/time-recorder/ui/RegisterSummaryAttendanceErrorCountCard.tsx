@@ -1,4 +1,4 @@
-import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
+import InfoIconTooltip from "@shared/ui/tooltip/InfoIconTooltip";
 
 type RegisterSummaryAttendanceErrorCountCardProps = {
   attendanceErrorCount: number;

@@ -1,9 +1,8 @@
+import { ADMIN_HEADER_MENU_ITEMS } from "@features/admin/layout/model/useHeaderMenu";
+import AdminMenu from "@features/admin/layout/ui/AdminMenu";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-
-import { ADMIN_HEADER_MENU_ITEMS } from "@/features/admin/layout/model/useHeaderMenu";
-import AdminMenu from "@/features/admin/layout/ui/AdminMenu";
 
 describe("AdminMenu", () => {
   it("カテゴリ見出しを表示する", () => {

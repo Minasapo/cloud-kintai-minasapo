@@ -1,9 +1,8 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import type { WorkflowApprovalStepView } from "@features/workflow/approval-flow/types";
+import type { WorkflowCommentMessage } from "@features/workflow/comment-thread/types";
+import type { WorkflowEntity } from "@features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { createContext, useContext } from "react";
-
-import type { WorkflowApprovalStepView } from "@/features/workflow/approval-flow/types";
-import type { WorkflowCommentMessage } from "@/features/workflow/comment-thread/types";
-import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 
 import type { WorkflowDetailPermissions } from "./workflowDetailPermissions";
 

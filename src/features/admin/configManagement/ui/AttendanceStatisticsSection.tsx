@@ -1,4 +1,4 @@
-import { SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
+import { SettingsSwitch } from "@features/admin/layout/ui/SettingsPrimitives";
 
 type AttendanceStatisticsSectionProps = {
   enabled: boolean;

@@ -1,14 +1,14 @@
+import {
+  AttendanceEditContext,
+  useAttendanceEditUi,
+} from "@features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
+import TimeInputField from "@features/attendance/edit/ui/shared/TimeInputField";
 import dayjs from "dayjs";
 import { useContext, useRef, useState } from "react";
 import { Controller, FieldArrayWithId } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import {
-  AttendanceEditContext,
-  useAttendanceEditUi,
-} from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
-import TimeInputField from "@/features/attendance/edit/ui/shared/TimeInputField";
 
 type Props = {
   rest: FieldArrayWithId<AttendanceEditInputs, "rests", "id">;

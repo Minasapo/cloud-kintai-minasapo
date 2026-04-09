@@ -81,7 +81,7 @@ flowchart TD
 
 打刻エラー一覧の表示対象スタッフは、勤怠管理対象フラグで制御される。
 
-- 仕様詳細: [打刻エラー一覧の表示仕様](./attendance-error-list-display.md)
+- 仕様詳細: [打刻エラー一覧の表示仕様](./attendance-error-list-display)
 
 ### 3. 管理画面のスタッフ一覧表示
 

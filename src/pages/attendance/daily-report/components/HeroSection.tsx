@@ -1,3 +1,5 @@
+import { PageTitle } from "@shared/ui/typography";
+
 export function HeroSection({
   isDescriptionExpanded,
   onToggleDescription,
@@ -8,7 +10,7 @@ export function HeroSection({
   return (
     <section className="daily-report-hero">
       <div>
-        <h1 className="daily-report-hero-title">日報</h1>
+        <PageTitle className="daily-report-hero-title">日報</PageTitle>
         <p
           className={`daily-report-hero-description ${
             isDescriptionExpanded

@@ -1,9 +1,8 @@
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
+import RHFTextField from "@shared/ui/form/RHFTextField";
 import React, { useCallback } from "react";
 import type { Control } from "react-hook-form";
 import { useController, useWatch } from "react-hook-form";
-
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
 
 import { SHIFT_GROUP_UI_TEXTS, SHIFT_GROUP_VALIDATION_TEXTS } from "./";
 import type { ShiftGroupFormState } from "./shiftGroupSchema";

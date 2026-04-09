@@ -1,6 +1,5 @@
+import { formatISOToTime, parseTimeToISO } from "@shared/lib/time";
 import dayjs from "dayjs";
-
-import { formatISOToTime, parseTimeToISO } from "@/shared/lib/time";
 
 /**
  * 勤怠管理における時刻データを統一的に扱うクラス

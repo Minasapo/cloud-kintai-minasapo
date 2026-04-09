@@ -1,10 +1,9 @@
+import { store } from "@app/store";
+import { attendanceApi } from "@entities/attendance/api/attendanceApi";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { calendarApi } from "@entities/calendar/api/calendarApi";
 import { fetchAuthSession } from "aws-amplify/auth";
 import dayjs from "dayjs";
-
-import { store } from "@/app/store";
-import { attendanceApi } from "@/entities/attendance/api/attendanceApi";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { calendarApi } from "@/entities/calendar/api/calendarApi";
 
 async function resolveCognitoUserId(): Promise<string | null> {
   try {

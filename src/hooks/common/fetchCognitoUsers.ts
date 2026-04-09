@@ -1,8 +1,7 @@
 import { Staff } from "@entities/staff/model/useStaffs/common";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { adminGet } from "@shared/api/amplify/adminQueriesClient";
 import dayjs from "dayjs";
-
-import { adminGet } from "@/shared/api/amplify/adminQueriesClient";
 
 import * as MESSAGE_CODE from "../../errors";
 

@@ -1,9 +1,9 @@
-import { useWorkflowFormContext } from "@/features/workflow/application-form/model/WorkflowFormContext";
+import { useWorkflowFormContext } from "@features/workflow/application-form/model/WorkflowFormContext";
 import {
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   CLOCK_CORRECTION_LABEL,
-} from "@/features/workflow/application-form/model/workflowFormModel";
-import { TimeInput } from "@/shared/ui/TimeInput";
+} from "@features/workflow/application-form/model/workflowFormModel";
+import { TimeInput } from "@shared/ui/TimeInput";
 
 import styles from "./WorkflowTypeFields.module.scss";
 

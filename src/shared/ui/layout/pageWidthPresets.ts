@@ -1,6 +1,5 @@
+import { designTokenVar } from "@shared/designSystem";
 import type { CSSProperties } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 export type PageWidthPreset =
   | "narrow"

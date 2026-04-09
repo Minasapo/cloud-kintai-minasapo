@@ -54,7 +54,7 @@ flowchart TD
 
 ## 関連導線
 
-- 全体の入口: [ダッシュボードを確認する](./dashboard.md)
-- 勤怠の運用方針: [勤怠を管理する](./attendance-management.md)
-- 画面遷移の全体像: [画面遷移マップ](./navigation-map.md)
-- 管理者向けの一覧: [管理者向けドキュメント](./overview.md)
+- 全体の入口: [ダッシュボードを確認する](./dashboard)
+- 勤怠の運用方針: [勤怠を管理する](./attendance-management)
+- 画面遷移の全体像: [画面遷移マップ](./navigation-map)
+- 管理者向けの一覧: [管理者向けドキュメント](./overview)

@@ -1,4 +1,4 @@
-import { resolveActiveMenuHref } from "@/features/admin/layout/model/resolveActiveMenuHref";
+import { resolveActiveMenuHref } from "@features/admin/layout/model/resolveActiveMenuHref";
 
 const menuItems = [
   { href: "/admin" },

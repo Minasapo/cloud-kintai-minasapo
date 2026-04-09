@@ -1,11 +1,10 @@
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Stack, Typography } from "@mui/material";
+import { AppIconButton } from "@shared/ui/button";
 import { useContext } from "react";
 import { FieldArrayWithId } from "react-hook-form";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
-import { AppIconButton } from "@/shared/ui/button";
 
 import HourlyPaidHolidayEndTimeInput from "./HourlyPaidHolidayEndTimeInput";
 import HourlyPaidHolidayStartTimeInput from "./HourlyPaidHolidayStartTimeInput";

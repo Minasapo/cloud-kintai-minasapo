@@ -1,18 +1,19 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import { useCreateAttendanceMutation, useLazyGetAttendanceByStaffAndDateQuery, useUpdateAttendanceMutation, } from "@entities/attendance/api/attendanceApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { getWorkflowCategoryLabel, STATUS_LABELS, } from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
+import { WorkflowMetadataPanelBase } from "@features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import { GetWorkflowQuery, WorkflowStatus } from "@shared/api/graphql/types";
+import { designTokenVar } from "@shared/designSystem";
+import { createLogger } from "@shared/lib/logger";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
 import { useCallback, useContext, useMemo } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { useCreateAttendanceMutation, useLazyGetAttendanceByStaffAndDateQuery, useUpdateAttendanceMutation, } from "@/entities/attendance/api/attendanceApi";
-import { getWorkflowCategoryLabel, STATUS_LABELS, } from "@/entities/workflow/lib/workflowLabels";
-import { WorkflowMetadataPanelBase } from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import { useAppNotification } from "@/hooks/useAppNotification";
-import { designTokenVar } from "@/shared/designSystem";
-import { createLogger } from "@/shared/lib/logger";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import { useWorkflowApprovalActions } from "../hooks/useWorkflowApprovalActions";
 import { useWorkflowDetailData } from "../hooks/useWorkflowDetailData";
@@ -129,9 +130,9 @@ export default function WorkflowDetailPanel({ workflowId, onBack, showBackButton
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="m-0 text-2xl font-extrabold leading-tight" style={{ color: HERO_TITLE }}>
+              <SectionTitle className="m-0 text-2xl font-extrabold leading-tight" style={{ color: HERO_TITLE }}>
                 申請内容の確認
-              </h2>
+              </SectionTitle>
               <span className="inline-flex h-7 items-center rounded-full border px-3 text-xs font-bold" style={{
             color: HERO_ACCENT,
             backgroundColor: HERO_SUBTLE_BG,
@@ -213,16 +214,16 @@ export default function WorkflowDetailPanel({ workflowId, onBack, showBackButton
 
       {!loading && !error && (<div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
           <div className="min-w-0 xl:col-span-7">
-            <h3 className="mb-2 text-base font-bold" style={{ color: SECTION_TITLE }}>
+            <SubsectionTitle className="mb-2 text-base font-bold" style={{ color: SECTION_TITLE }}>
               申請情報
-            </h3>
+            </SubsectionTitle>
             <WorkflowMetadataPanelBase workflowId={workflow?.id ?? undefined} fallbackId={workflowId} category={workflow?.category ?? null} categoryLabel={categoryLabel} staffName={staffName} applicationDate={applicationDate} status={workflow?.status ?? null} overTimeDetails={workflow?.overTimeDetails ?? null} customWorkflowTitle={workflow?.customWorkflowTitle ?? null} customWorkflowContent={workflow?.customWorkflowContent ?? null} approvalSteps={approvalSteps}/>
           </div>
 
           <div className="min-w-0 xl:col-span-5">
-            <h3 className="mb-2 text-base font-bold" style={{ color: SECTION_TITLE }}>
+            <SubsectionTitle className="mb-2 text-base font-bold" style={{ color: SECTION_TITLE }}>
               コメントと対応履歴
-            </h3>
+            </SubsectionTitle>
             <WorkflowCommentSection workflow={workflow} staffs={staffs} cognitoUser={cognitoUser} onWorkflowUpdated={setWorkflow} onSuccess={(message) => dispatch(pushNotification({
             tone: "success",
             message: message

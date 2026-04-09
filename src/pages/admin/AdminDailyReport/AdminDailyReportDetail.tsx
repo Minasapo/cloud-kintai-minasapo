@@ -1,6 +1,16 @@
+import {
+  logDailyReportCommentAdd,
+  logDailyReportReactionUpdate,
+} from "@entities/operation-log/model/dailyReportOperationLog";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getGraphQLErrorMessage,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
 import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
@@ -9,24 +19,15 @@ import type {
   GetDailyReportQuery,
   UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
+import { formatDateSlash, formatDateTimeReadable } from "@shared/lib/time";
+import { DashboardInnerSurface } from "@shared/ui/layout";
+import { SectionTitle } from "@shared/ui/typography";
 import type { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import {
-  logDailyReportCommentAdd,
-  logDailyReportReactionUpdate,
-} from "@/entities/operation-log/model/dailyReportOperationLog";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getGraphQLErrorMessage,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
-import { DashboardInnerSurface } from "@/shared/ui/layout";
 
 import {
   type AdminComment,
@@ -548,9 +549,9 @@ export default function AdminDailyReportDetail({
 
                 {/* Report header */}
                 <div>
-                  <h2 className="text-lg font-bold text-slate-800">
+                  <SectionTitle className="text-lg font-bold text-slate-800">
                     {report.title}
-                  </h2>
+                  </SectionTitle>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <span className="text-sm text-slate-500">
                       {formatDateSlash(report.date) || report.date} |{" "}

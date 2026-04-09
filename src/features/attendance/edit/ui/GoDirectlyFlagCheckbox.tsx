@@ -1,7 +1,6 @@
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import { ComponentType, ReactNode } from "react";
 import { Controller } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import {
   AttendanceBooleanFieldName,

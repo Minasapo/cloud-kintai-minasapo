@@ -4,8 +4,7 @@ import {
   responsiveFontSizes,
   type ThemeOptions,
 } from "@mui/material/styles";
-
-import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
+import { type DesignTokens, getDesignTokens } from "@shared/designSystem";
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -201,25 +200,29 @@ const buildTypography = (
   helpers: TypographyHelpers
 ): ThemeOptions["typography"] => {
   const { fontFamily, fontWeight, lineHeight } = tokens.typography;
+  const { heading } = tokens.component;
   const { getFontSize, getLineHeight } = helpers;
 
   return {
     fontFamily,
     fontSize: getFontSize("md"),
     h1: {
-      fontSize: getFontSize("display"),
-      fontWeight: fontWeight.bold,
-      lineHeight: getLineHeight(lineHeight.comfy),
+      fontSize: heading.page.fontSizeMobile,
+      fontWeight: heading.page.fontWeight,
+      lineHeight: getLineHeight(heading.page.lineHeight),
+      letterSpacing: heading.page.letterSpacing,
     },
     h2: {
-      fontSize: getFontSize("xl"),
-      fontWeight: fontWeight.bold,
-      lineHeight: getLineHeight(lineHeight.comfy),
+      fontSize: heading.section.fontSizeMobile,
+      fontWeight: heading.section.fontWeight,
+      lineHeight: getLineHeight(heading.section.lineHeight),
+      letterSpacing: heading.section.letterSpacing,
     },
     h3: {
-      fontSize: getFontSize("lg"),
-      fontWeight: fontWeight.bold,
-      lineHeight: getLineHeight(lineHeight.comfy),
+      fontSize: heading.subsection.fontSizeMobile,
+      fontWeight: heading.subsection.fontWeight,
+      lineHeight: getLineHeight(heading.subsection.lineHeight),
+      letterSpacing: heading.subsection.letterSpacing,
     },
     h4: {
       fontSize: getFontSize("md"),

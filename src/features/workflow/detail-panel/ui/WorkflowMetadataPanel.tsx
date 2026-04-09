@@ -1,8 +1,8 @@
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
+import { formatDateSlash } from "@shared/lib/time";
 import StatusChip from "@shared/ui/chips/StatusChip";
+import { Heading } from "@shared/ui/typography";
 import type { ReactNode } from "react";
-
-import { formatDateSlash } from "@/shared/lib/time";
 
 import type { WorkflowApprovalStepView } from "../../approval-flow/types";
 import WorkflowApprovalTimeline from "../../approval-flow/ui/WorkflowApprovalTimeline";
@@ -88,7 +88,9 @@ export function WorkflowMetadataPanelBase({
       className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5"
     >
       <div className="flex flex-col gap-1.5 border-b border-slate-200/80 pb-4">
-        <h2 className="m-0 text-xl font-semibold text-slate-950">申請情報</h2>
+        <Heading level="section" appearance="standard" className="m-0 text-slate-950">
+          申請情報
+        </Heading>
         <p className="m-0 text-sm leading-6 text-slate-500">
           申請内容と現在のステータスを確認できます。
         </p>

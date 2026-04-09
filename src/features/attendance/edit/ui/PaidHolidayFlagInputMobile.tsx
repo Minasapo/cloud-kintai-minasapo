@@ -1,12 +1,11 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
-import dayjs from "dayjs";
-import { Controller, UseFieldArrayReplace } from "react-hook-form";
-
 import {
   AttendanceEditInputs,
   RestInputs,
-} from "@/features/attendance/edit/model/common";
-import { Label } from "@/features/attendance/edit/ui/mobile/Label";
+} from "@features/attendance/edit/model/common";
+import { Label } from "@features/attendance/edit/ui/mobile/Label";
+import dayjs from "dayjs";
+import { Controller, UseFieldArrayReplace } from "react-hook-form";
 
 import {
   AttendanceControl,

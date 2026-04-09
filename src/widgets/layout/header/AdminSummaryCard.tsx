@@ -1,6 +1,6 @@
+import InfoIconTooltip from "@shared/ui/tooltip/InfoIconTooltip";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { Link as RouterLink } from "react-router-dom";
-
-import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
 
 type AdminSummaryCardProps = {
   testId: string;
@@ -74,7 +74,7 @@ export default function AdminSummaryCard({
                 管理者のみ
               </span>
             ) : null}
-            <h2 className={titleClassName}>{title}</h2>
+            <SubsectionTitle className={titleClassName}>{title}</SubsectionTitle>
           </div>
           <p className={countClassName}>{countLabel}</p>
         </div>

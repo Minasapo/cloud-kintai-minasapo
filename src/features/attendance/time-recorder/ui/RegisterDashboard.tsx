@@ -1,4 +1,5 @@
-import type { TimeRecorderAnnouncement } from "@/features/attendance/time-recorder/lib/timeRecorderAnnouncement";
+import type { TimeRecorderAnnouncement } from "@features/attendance/time-recorder/lib/timeRecorderAnnouncement";
+
 import AdminPendingApprovalSummary from "@/widgets/layout/header/AdminPendingApprovalSummary";
 
 import ElapsedDurationCards from "./ElapsedDurationCards";

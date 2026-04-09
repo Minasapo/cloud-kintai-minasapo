@@ -2,12 +2,12 @@ import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { CircularProgress, ListItemIcon, ListItemText, MenuItem, } from "@mui/material";
 import { DeleteStaffInput } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
 import deleteCognitoUser from "@/hooks/common/deleteCognitoUser";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 export function DeleteAccountMenuItem({ staff, deleteStaff, }: {
     staff: StaffType;

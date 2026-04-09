@@ -1,9 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
+import notificationReducer from "@shared/lib/store/notificationSlice";
 import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { Provider } from "react-redux";
-
-import notificationReducer from "@/shared/lib/store/notificationSlice";
 
 import { useAppNotification } from "../useAppNotification";
 

@@ -1,8 +1,8 @@
+import { designTokenVar } from "@shared/designSystem";
+import Link from "@shared/ui/link/Link";
 import type { CSSProperties } from "react";
 
 import LogoImage from "@/images/logo.png";
-import { designTokenVar } from "@/shared/designSystem";
-import Link from "@/shared/ui/link/Link";
 
 const HEADER_LOGO_MAX_HEIGHT = designTokenVar(
   "component.headerBar.logoMaxHeight",

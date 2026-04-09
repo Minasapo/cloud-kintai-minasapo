@@ -1,15 +1,15 @@
+import { ReturnDirectlyFlag } from "@entities/attendance/lib/actions/attendanceActions";
+import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime";
+import { resolveBusinessWorkDate } from "@entities/attendance/lib/businessDate";
+import { getNowISOStringWithZeroSeconds } from "@entities/attendance/lib/time";
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance, Staff } from "@shared/api/graphql/types";
+import { Logger } from "@shared/lib/logger";
+import { TimeRecordMailSender } from "@shared/lib/mail/TimeRecordMailSender";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 
-import { ReturnDirectlyFlag } from "@/entities/attendance/lib/actions/attendanceActions";
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import { Logger } from "@/shared/lib/logger";
-import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 export async function returnDirectlyCallback(cognitoUser: CognitoUser | null | undefined, staff: Staff | null | undefined, dispatch: Dispatch, clockOut: (staffId: string, workDate: string, endTime: string, returnDirectlyFlag?: ReturnDirectlyFlag) => Promise<Attendance>, logger: Logger, 
 // optional explicit ISO timestamp to use for work end (allows AppConfig-driven times)

@@ -914,6 +914,132 @@ export const onDeleteAttendance = /* GraphQL */ `subscription OnDeleteAttendance
   APITypes.OnDeleteAttendanceSubscriptionVariables,
   APITypes.OnDeleteAttendanceSubscription
 >;
+export const onCreateAttendanceStatisticsSnapshot = /* GraphQL */ `subscription OnCreateAttendanceStatisticsSnapshot(
+  $filter: ModelSubscriptionAttendanceStatisticsSnapshotFilterInput
+) {
+  onCreateAttendanceStatisticsSnapshot(filter: $filter) {
+    id
+    staffId
+    year
+    status
+    progressPercent
+    currentStepLabel
+    rangeStart
+    rangeEnd
+    monthlySummaries {
+      month
+      rangeStart
+      rangeEnd
+      workHours
+      paidDays
+      specialHolidayDays
+      absentDays
+      workDays
+      isFallback
+      __typename
+    }
+    totalWorkHours
+    totalPaidDays
+    totalSpecialHolidayDays
+    totalAbsentDays
+    totalWorkDays
+    startedAt
+    completedAt
+    lastAggregatedAt
+    errorMessage
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateAttendanceStatisticsSnapshotSubscriptionVariables,
+  APITypes.OnCreateAttendanceStatisticsSnapshotSubscription
+>;
+export const onUpdateAttendanceStatisticsSnapshot = /* GraphQL */ `subscription OnUpdateAttendanceStatisticsSnapshot(
+  $filter: ModelSubscriptionAttendanceStatisticsSnapshotFilterInput
+) {
+  onUpdateAttendanceStatisticsSnapshot(filter: $filter) {
+    id
+    staffId
+    year
+    status
+    progressPercent
+    currentStepLabel
+    rangeStart
+    rangeEnd
+    monthlySummaries {
+      month
+      rangeStart
+      rangeEnd
+      workHours
+      paidDays
+      specialHolidayDays
+      absentDays
+      workDays
+      isFallback
+      __typename
+    }
+    totalWorkHours
+    totalPaidDays
+    totalSpecialHolidayDays
+    totalAbsentDays
+    totalWorkDays
+    startedAt
+    completedAt
+    lastAggregatedAt
+    errorMessage
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateAttendanceStatisticsSnapshotSubscriptionVariables,
+  APITypes.OnUpdateAttendanceStatisticsSnapshotSubscription
+>;
+export const onDeleteAttendanceStatisticsSnapshot = /* GraphQL */ `subscription OnDeleteAttendanceStatisticsSnapshot(
+  $filter: ModelSubscriptionAttendanceStatisticsSnapshotFilterInput
+) {
+  onDeleteAttendanceStatisticsSnapshot(filter: $filter) {
+    id
+    staffId
+    year
+    status
+    progressPercent
+    currentStepLabel
+    rangeStart
+    rangeEnd
+    monthlySummaries {
+      month
+      rangeStart
+      rangeEnd
+      workHours
+      paidDays
+      specialHolidayDays
+      absentDays
+      workDays
+      isFallback
+      __typename
+    }
+    totalWorkHours
+    totalPaidDays
+    totalSpecialHolidayDays
+    totalAbsentDays
+    totalWorkDays
+    startedAt
+    completedAt
+    lastAggregatedAt
+    errorMessage
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteAttendanceStatisticsSnapshotSubscriptionVariables,
+  APITypes.OnDeleteAttendanceStatisticsSnapshotSubscription
+>;
 export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument($filter: ModelSubscriptionDocumentFilterInput) {
   onCreateDocument(filter: $filter) {
     id

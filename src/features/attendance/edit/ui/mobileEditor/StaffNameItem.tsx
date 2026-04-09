@@ -1,5 +1,5 @@
-import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { Label } from "@/features/attendance/edit/ui/mobile/Label";
+import { useAttendanceEditData } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { Label } from "@features/attendance/edit/ui/mobile/Label";
 
 export function StaffNameItem() {
   const { staff } = useAttendanceEditData();

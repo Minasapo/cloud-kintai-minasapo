@@ -1,14 +1,14 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { getWorkflowCategoryLabel } from "@entities/workflow/lib/workflowLabels";
 import { Workflow, WorkflowCategory } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
-
-import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
-import * as MESSAGE_CODE from "@/errors";
 import {
   formatBelongingLabel,
   formatStaffDisplayName,
   sendAdminNotificationMail,
-} from "@/shared/lib/mail/adminNotification";
+} from "@shared/lib/mail/adminNotification";
+import dayjs from "dayjs";
+
+import * as MESSAGE_CODE from "@/errors";
 
 const formatDate = (value?: string | null) => {
   if (!value) {

@@ -2,14 +2,13 @@ import "./index.css";
 import "./tailwind.css";
 import "@/shared/lib/dayjs-locale";
 
+import AppRootProviders from "@app/providers/AppRootProviders";
+import { bootstrapDesignSystem } from "@shared/designSystem";
 import { Amplify } from "aws-amplify";
 import { I18n } from "aws-amplify/utils";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
-
-import AppRootProviders from "@/app/providers/AppRootProviders";
-import { bootstrapDesignSystem } from "@/shared/designSystem";
 
 import config from "./aws-exports";
 import reportWebVitals from "./reportWebVitals";

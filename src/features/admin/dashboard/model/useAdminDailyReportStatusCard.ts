@@ -1,22 +1,21 @@
-import { GraphQLResult } from "aws-amplify/api";
-import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { listDailyReports } from "@/shared/api/graphql/documents/queries";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import {
   onCreateDailyReport,
   onDeleteDailyReport,
   onUpdateDailyReport,
-} from "@/shared/api/graphql/documents/subscriptions";
+} from "@shared/api/graphql/documents/subscriptions";
 import {
   DailyReportStatus,
   ListDailyReportsQuery,
   OnCreateDailyReportSubscription,
   OnDeleteDailyReportSubscription,
   OnUpdateDailyReportSubscription,
-} from "@/shared/api/graphql/types";
-import { createLogger } from "@/shared/lib/logger";
+} from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
+import { GraphQLResult } from "aws-amplify/api";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const logger = createLogger("useAdminDailyReportStatusCard");
 

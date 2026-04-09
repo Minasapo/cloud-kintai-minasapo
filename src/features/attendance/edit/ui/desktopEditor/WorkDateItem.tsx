@@ -1,6 +1,5 @@
+import { useAttendanceEditData } from "@features/attendance/edit/model/AttendanceEditProvider";
 import WorkDateItem from "@features/attendance/edit/ui/items/WorkDateItem";
-
-import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 import MoveDateItem from "../MoveDateItem";
 

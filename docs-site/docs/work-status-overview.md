@@ -40,10 +40,10 @@ stateDiagram-v2
 
 | 表示 | 意味 | できる主な操作 | 詳細ページ |
 | --- | --- | --- | --- |
-| 出勤前 | まだ出勤打刻をしていない状態 | 出勤を打刻する | [出退勤を打刻する](./staff/time-recording.md) |
-| 勤務中 | 出勤済みで、休憩中でも退勤済みでもない状態 | 休憩開始または退勤を打刻する | [出退勤を打刻する](./staff/time-recording.md) |
-| 休憩中 | 休憩開始済みで、直近の休憩がまだ終了していない状態 | 休憩終了を打刻する | [出退勤を打刻する](./staff/time-recording.md) |
-| 勤務終了 | 退勤打刻が完了した状態 | 追加の打刻はせず、必要なら勤怠一覧で確認する | [勤怠を確認する](./staff/attendance-check.md) |
+| 出勤前 | まだ出勤打刻をしていない状態 | 出勤を打刻する | [出退勤を打刻する](./staff/time-recording) |
+| 勤務中 | 出勤済みで、休憩中でも退勤済みでもない状態 | 休憩開始または退勤を打刻する | [出退勤を打刻する](./staff/time-recording) |
+| 休憩中 | 休憩開始済みで、直近の休憩がまだ終了していない状態 | 休憩終了を打刻する | [出退勤を打刻する](./staff/time-recording) |
+| 勤務終了 | 退勤打刻が完了した状態 | 追加の打刻はせず、必要なら勤怠一覧で確認する | [勤怠を確認する](./staff/attendance-check) |
 
 ## 勤怠判定ステータス
 
@@ -72,13 +72,13 @@ stateDiagram-v2
 
 ### 読者別の見方
 
-- スタッフ: [勤怠を確認する](./staff/attendance-check.md) を起点に、要確認なら [勤怠を修正する](./staff/attendance-edit.md) へ進む
-- 管理者: [勤怠一覧を確認する](./admin/attendances.md) で要確認と申請中を優先し、必要に応じて [申請を承認する](./admin/request-approval.md) へ進む
-- 開発者: [勤怠ステータス判定ロジック](./developer/attendance-status-determination.md) で判定条件を確認する
+- スタッフ: [勤怠を確認する](./staff/attendance-check) を起点に、要確認なら [勤怠を修正する](./staff/attendance-edit) へ進む
+- 管理者: [勤怠一覧を確認する](./admin/attendances) で要確認と申請中を優先し、必要に応じて [申請を承認する](./admin/request-approval) へ進む
+- 開発者: [勤怠ステータス判定ロジック](./developer/attendance-status-determination) で判定条件を確認する
 
 ## 直行・直帰の扱い
 
-定義の正本は [用語集](./terminology.md) の「直行・直帰モード」です。直行・直帰はステータス名ではなく、打刻時のモードです。
+定義は [用語集](./terminology) の「直行・直帰モード」を参照してください。直行・直帰はステータス名ではなく、打刻時のモードです。
 
 - 直行: 所属拠点や事務所を経由せず、現場へ直接向かう出勤打刻
 - 直帰: 現場から所属拠点や事務所へ戻らず、直接帰る退勤打刻
@@ -86,7 +86,7 @@ stateDiagram-v2
 
 直行・直帰を使っても、現在の勤務ステータスや勤怠判定ステータスの考え方自体は変わりません。勤怠レコード上では `goDirectlyFlag` / `returnDirectlyFlag` として保存される別軸の記録です。
 
-勤怠システム上は、直行は AppConfig の勤務開始時間、直帰は AppConfig の勤務終了時間で記録されます。つまり、直行・直帰ではボタンを押した時刻そのものではなく、設定済みの勤務開始・終了時刻が保存されます。操作手順は [出退勤を打刻する](./staff/time-recording.md) を参照してください。
+勤怠システム上は、直行は AppConfig の勤務開始時間、直帰は AppConfig の勤務終了時間で記録されます。つまり、直行・直帰ではボタンを押した時刻そのものではなく、設定済みの勤務開始・終了時刻が保存されます。操作手順は [出退勤を打刻する](./staff/time-recording) を参照してください。
 
 ## 開発者向けメモ
 
@@ -95,4 +95,4 @@ stateDiagram-v2
 - `getWorkStatus()` 系: 現在の勤務ステータスを扱う
 - `getStatus()` / `AttendanceState.get()` 系: 勤怠判定ステータスを扱う
 
-また、`Late` は現時点で利用者向けドキュメントの主説明対象ではなく、将来的な拡張用の扱いです。内部値の詳細は [勤怠ステータス判定ロジック](./developer/attendance-status-determination.md) を参照してください。
+また、`Late` は現時点で利用者向けドキュメントの主説明対象ではなく、将来的な拡張用の扱いです。内部値の詳細は [勤怠ステータス判定ロジック](./developer/attendance-status-determination) を参照してください。

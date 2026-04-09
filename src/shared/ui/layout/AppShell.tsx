@@ -1,7 +1,6 @@
+import { designTokenVar } from "@shared/designSystem";
+import { APP_LAYER_Z_INDEX } from "@shared/ui/overlay/layers";
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
-import { APP_LAYER_Z_INDEX } from "@/shared/ui/overlay/layers";
 
 type TestableProps<T> = T & {
   "data-testid"?: string;

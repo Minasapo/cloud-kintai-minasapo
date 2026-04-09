@@ -1,8 +1,7 @@
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
+import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import type { UseFormSetValue } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
-import { AppButton } from "@/shared/ui/button";
 
 import { useQuickInputActions } from "../model/useQuickInputActions";
 import { useQuickInputSelection } from "../model/useQuickInputSelection";

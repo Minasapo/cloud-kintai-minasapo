@@ -1,3 +1,4 @@
+import { logOperationEvent } from "@entities/operation-log/model/canonicalOperationLog";
 import {
   ApprovalStatus,
   GetWorkflowQuery,
@@ -5,10 +6,8 @@ import {
   WorkflowCategory,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import dayjs from "dayjs";
-
-import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
-import { createLogger } from "@/shared/lib/logger";
 
 import {
   buildApprovalStepInputs,
