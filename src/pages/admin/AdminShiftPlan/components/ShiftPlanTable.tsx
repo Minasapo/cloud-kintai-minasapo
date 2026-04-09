@@ -1,3 +1,4 @@
+import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import { memo } from "react";
@@ -100,31 +101,25 @@ const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
                 </td>
                 <td className={`${tdCell} text-center`}>
                   {row.enabled ? (
-                    <button
-                      type="button"
+                    <AppButton
                       onClick={() => onToggleEnabled(row.month)}
-                      className="text-xs px-3 py-1 rounded-md border font-medium transition-colors"
-                      style={{
-                        borderColor: "#C3CFC7",
-                        color: "#45574F",
-                        backgroundColor: "transparent",
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#EDF1EF"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
+                      size="sm"
+                      variant="outline"
+                      tone="neutral"
+                      className="app-save-button"
                     >
                       申請停止
-                    </button>
+                    </AppButton>
                   ) : (
-                    <button
-                      type="button"
+                    <AppButton
                       onClick={() => onToggleEnabled(row.month)}
-                      className="text-xs px-3 py-1 rounded-md font-medium text-white transition-colors"
-                      style={{ backgroundColor: "#0FA85E" }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0B8A4C"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0FA85E"; }}
+                      size="sm"
+                      variant="solid"
+                      tone="primary"
+                      className="app-save-button"
                     >
                       申請再開
-                    </button>
+                    </AppButton>
                   )}
                 </td>
                 {DAY_COLUMNS.map((day) => {
