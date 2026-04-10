@@ -46,6 +46,12 @@ const AdminHolidayCalendarRoute = createLazyRoute(
   () =>
     import("@/features/admin/holidayCalendar/ui/HolidayCalendar/AdminHolidayCalendar"),
 );
+const AdminWorkflowRoute = createLazyRoute(
+  () => import("../pages/admin/AdminWorkflow/AdminWorkflow"),
+);
+const AdminWorkflowDetailRoute = createLazyRoute(
+  () => import("../pages/admin/AdminWorkflow/AdminWorkflowDetail"),
+);
 const AdminLogsRoute = createLazyRoute(
   () => import("../pages/admin/AdminLogs/AdminLogsClean"),
 );
@@ -240,8 +246,21 @@ export const adminChildRoutes: RouteObject[] = [
     ],
   },
   {
-    path: "workflow/*",
-    element: <NotFound />,
+    path: "workflow",
+    children: [
+      {
+        index: true,
+        lazy: AdminWorkflowRoute,
+      },
+      {
+        path: ":id",
+        lazy: AdminWorkflowDetailRoute,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
+    ],
   },
   {
     path: "logs",
