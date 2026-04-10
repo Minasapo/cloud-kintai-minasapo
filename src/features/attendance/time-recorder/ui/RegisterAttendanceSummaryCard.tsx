@@ -1,22 +1,23 @@
 import { useListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
+import {
+  formatDateRangeLabel,
+  getAttendanceQueryDateRange,
+  getEffectiveDateRange,
+} from "@entities/attendance/lib/aggregationDateRange";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import {
   calcTotalRestTime,
   calcTotalWorkTime,
 } from "@entities/attendance/lib/time";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
+import InfoIconTooltip from "@shared/ui/tooltip/InfoIconTooltip";
+import { SectionTitle } from "@shared/ui/typography";
 import { type ChartData, type ChartOptions } from "chart.js";
 import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import {
-  formatDateRangeLabel,
-  getAttendanceQueryDateRange,
-  getEffectiveDateRange,
-} from "@/entities/attendance/lib/aggregationDateRange";
-import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
 
 import RegisterSummaryAttendanceErrorCountCard from "./RegisterSummaryAttendanceErrorCountCard";
 import RegisterSummaryTotalWorkHoursCard from "./RegisterSummaryTotalWorkHoursCard";
@@ -299,9 +300,9 @@ export default function RegisterAttendanceSummaryCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="m-0 text-sm font-semibold tracking-[0.01em] text-slate-900">
+          <SectionTitle className="m-0 text-sm font-semibold tracking-[0.01em] text-slate-900">
             直近の勤務状況
-          </h2>
+          </SectionTitle>
         </div>
         <InfoIconTooltip
           testId="register-dashboard-attendance-summary-info"

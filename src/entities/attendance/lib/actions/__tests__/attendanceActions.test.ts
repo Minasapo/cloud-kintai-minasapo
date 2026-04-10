@@ -1,7 +1,7 @@
 import {
   clockInAction,
   restStartAction,
-} from "@/entities/attendance/lib/actions/attendanceActions";
+} from "@entities/attendance/lib/actions/attendanceActions";
 
 describe("attendanceActions workDate guard", () => {
   it("clockInAction creates a new record when cached attendance is for another workDate", async () => {

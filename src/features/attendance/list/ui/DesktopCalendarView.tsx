@@ -1,3 +1,5 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
@@ -19,16 +21,20 @@ import {
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
+import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
 import dayjs, { Dayjs } from "dayjs";
 import { useMemo } from "react";
 
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
-import { Holiday } from "@/entities/attendance/lib/Holiday";
-import { calcTotalRestTime , calcTotalWorkTime } from "@/entities/attendance/lib/time";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-
+import {
+  buildWeeks,
+  formatTimeRange,
+  getHolidayNames,
+  getNetWorkingHours,
+  getStatus,
+  getTotalRestHours,
+  isHolidayLike,
+} from "../lib/attendanceStatusUtils";
+import { resolveMonthlyTerms } from "../lib/monthlyTermUtils";
 import { useOptionalAttendanceListContext } from "./AttendanceListContext";
 
 const DAYS_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
@@ -88,155 +94,6 @@ const statusChipColor: Record<
   [AttendanceStatus.None]: "default",
 };
 
-function buildWeeks(targetMonth: Dayjs) {
-  const monthStart = targetMonth.startOf("month").startOf("week");
-  const monthEnd = targetMonth.endOf("month").endOf("week");
-  const days: Dayjs[] = [];
-
-  let cursor = monthStart;
-  while (cursor.isBefore(monthEnd) || cursor.isSame(monthEnd, "day")) {
-    days.push(cursor);
-    cursor = cursor.add(1, "day");
-  }
-
-  const weeks: Dayjs[][] = [];
-  for (let i = 0; i < days.length; i += 7) {
-    weeks.push(days.slice(i, i + 7));
-  }
-  return weeks;
-}
-
-function getNetWorkingHours(attendance: Attendance | undefined) {
-  if (!attendance) return 0;
-  if (!attendance.startTime || !attendance.endTime) return 0;
-
-  const workTime = calcTotalWorkTime(attendance.startTime, attendance.endTime);
-  const totalRest = getTotalRestHours(attendance);
-
-  return Math.max(workTime - totalRest, 0);
-}
-
-function getTotalRestHours(attendance: Attendance | undefined) {
-  if (!attendance?.rests || !attendance.endTime) return 0;
-
-  const totalRest = (attendance.rests || [])
-    .filter((rest): rest is NonNullable<typeof rest> => !!rest)
-    .reduce((acc, rest) => {
-      if (!rest.startTime || !rest.endTime) return acc;
-      return acc + calcTotalRestTime(rest.startTime, rest.endTime);
-    }, 0);
-
-  return totalRest;
-}
-
-function formatTimeRange(attendance: Attendance | undefined) {
-  if (!attendance) return undefined;
-
-  const format = (value?: string | null) =>
-    value ? dayjs(value).format("HH:mm") : undefined;
-
-  const start = format(attendance.startTime || undefined);
-  const end = format(attendance.endTime || undefined);
-
-  if (!start && !end) {
-    return undefined;
-  }
-
-  return `${start ?? ""} - ${end ?? ""}`.trim();
-}
-
-function getStatus(
-  attendance: Attendance | undefined,
-  staff: Staff | null | undefined,
-  holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[],
-  date: Dayjs
-) {
-  if (!staff) return AttendanceStatus.None;
-
-  // 打刻がない場合の処理
-  if (!attendance) {
-    const workDate = date.format(AttendanceDate.DataFormat);
-    const today = dayjs();
-
-    // 今日または未来日の場合はステータスなし
-    if (date.isSame(today, "day") || date.isAfter(today, "day")) {
-      return AttendanceStatus.None;
-    }
-
-    // 利用開始日より前の場合はステータスなし
-    if (
-      staff.usageStartDate &&
-      date.isBefore(dayjs(staff.usageStartDate), "day")
-    ) {
-      return AttendanceStatus.None;
-    }
-
-    // 休日の場合はステータスなし
-    const isHoliday = new Holiday(holidayCalendars, workDate).isHoliday();
-    const isCompanyHoliday = new CompanyHoliday(
-      companyHolidayCalendars,
-      workDate
-    ).isHoliday();
-
-    if (staff.workType !== "shift") {
-      // シフトタイプ以外の場合は休日と土日をチェック
-      if (isHoliday || isCompanyHoliday || [0, 6].includes(date.day())) {
-        return AttendanceStatus.None;
-      }
-    }
-
-    // 過去日で休日以外の場合はエラー
-    return AttendanceStatus.Error;
-  }
-
-  return new AttendanceState(
-    staff,
-    attendance,
-    holidayCalendars,
-    companyHolidayCalendars
-  ).get();
-}
-
-function isHolidayLike(
-  date: Dayjs,
-  staff: Staff | null | undefined,
-  holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[]
-) {
-  const workDate = date.format(AttendanceDate.DataFormat);
-  const isHoliday = new Holiday(holidayCalendars, workDate).isHoliday();
-  const isCompanyHoliday = new CompanyHoliday(
-    companyHolidayCalendars,
-    workDate
-  ).isHoliday();
-
-  if (staff?.workType === "shift") {
-    // シフトタイプの場合も法定休日と会社休日の両方をチェック
-    return isHoliday || isCompanyHoliday;
-  }
-
-  return isHoliday || isCompanyHoliday || [0, 6].includes(date.day());
-}
-
-function getHolidayNames(
-  date: Dayjs,
-  holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[]
-) {
-  const workDate = date.format(AttendanceDate.DataFormat);
-  const holiday = new Holiday(holidayCalendars, workDate).getHoliday();
-  const companyHoliday = new CompanyHoliday(
-    companyHolidayCalendars,
-    workDate
-  ).getHoliday();
-
-  return {
-    holidayName: holiday?.name,
-    companyHolidayName: companyHoliday?.name,
-  };
-}
-
 type Props = {
   attendances?: Attendance[];
   staff?: Staff | null | undefined;
@@ -254,73 +111,6 @@ type Props = {
     date: Dayjs
   ) => void;
 };
-
-type MonthTerm = {
-  start: Dayjs;
-  end: Dayjs;
-  source: "closeDate" | "fallback";
-  label: string;
-  color: string;
-};
-
-function resolveMonthlyTerms(
-  currentMonth: Dayjs,
-  closeDates: CloseDate[] = [],
-  palette: string[]
-): MonthTerm[] {
-  const monthStart = currentMonth.startOf("month");
-  const monthEnd = currentMonth.endOf("month");
-
-  const fallback: MonthTerm = {
-    start: monthStart,
-    end: monthEnd,
-    source: "fallback",
-    label: `${currentMonth
-      .startOf("month")
-      .format(AttendanceDate.DisplayFormat)} 〜 ${currentMonth
-      .endOf("month")
-      .format(AttendanceDate.DisplayFormat)}`,
-    color: palette[0] ?? "#90CAF9",
-  };
-
-  if (closeDates.length === 0) {
-    return [fallback];
-  }
-
-  const terms = closeDates
-    .map((item) => {
-      const closeDate = dayjs(item.closeDate);
-      const start = dayjs(item.startDate);
-      const end = dayjs(item.endDate);
-      const updatedAt = dayjs(item.updatedAt ?? item.closeDate);
-      return { item, closeDate, start, end, updatedAt };
-    })
-    .filter(({ closeDate, start, end }) => {
-      return (
-        closeDate.isValid() &&
-        start.isValid() &&
-        end.isValid() &&
-        // 月の範囲と少しでも重なれば対象
-        !end.isBefore(monthStart, "day") &&
-        !start.isAfter(monthEnd, "day")
-      );
-    })
-    .toSorted((a, b) => a.start.valueOf() - b.start.valueOf())
-    .map(
-      ({ start, end }, index): MonthTerm => ({
-        start: start.startOf("day"),
-        end: end.startOf("day"),
-        source: "closeDate",
-        label: `${start.format(AttendanceDate.DisplayFormat)} 〜 ${end.format(
-          AttendanceDate.DisplayFormat
-        )}`,
-        color: palette[index % palette.length] ?? palette[0] ?? "#90CAF9",
-      })
-    );
-
-  if (terms.length === 0) return [fallback];
-  return terms;
-}
 
 export default function DesktopCalendarView({
   attendances: attendancesProp,

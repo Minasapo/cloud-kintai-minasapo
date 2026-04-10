@@ -1,9 +1,8 @@
 import "./AttendanceEditBackNavigation.scss";
 
+import { useAttendanceEditData } from "@features/attendance/edit/model/AttendanceEditProvider";
+import Link from "@shared/ui/link/Link";
 import { useSearchParams } from "react-router-dom";
-
-import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import Link from "@/shared/ui/link/Link";
 
 const MONTH_QUERY_KEY = "month";
 

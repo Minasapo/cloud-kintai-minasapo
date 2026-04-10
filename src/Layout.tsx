@@ -3,21 +3,21 @@
  * @description アプリケーション全体のレイアウトを管理するコンポーネント。認証状態に応じた遷移制御とシェル描画を担う。
  */
 
+import { useSession } from "@app/providers/session/useSession";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { createLogger } from "@shared/lib/logger";
+import { AppButton } from "@shared/ui/button";
+import AppDialog from "@shared/ui/feedback/AppDialog";
+import { FullPageLoading } from "@shared/ui/feedback/LoadingPrimitives";
+import { AppShell } from "@shared/ui/layout";
 import { Hub } from "aws-amplify/utils";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { useSession } from "@/app/providers/session/useSession";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
-import { createLogger } from "@/shared/lib/logger";
-import { AppButton } from "@/shared/ui/button";
-import AppDialog from "@/shared/ui/feedback/AppDialog";
-import { FullPageLoading } from "@/shared/ui/feedback/LoadingPrimitives";
-import { AppShell } from "@/shared/ui/layout";
 import NotificationViewport from "@/widgets/feedback/notification/NotificationViewport";
 import Footer from "@/widgets/layout/footer/Footer";
 import Header from "@/widgets/layout/header/Header";

@@ -1,22 +1,21 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import {
+  CATEGORY_LABELS,
+  resolveClockCorrectionLabel,
+} from "@entities/workflow/lib/workflowLabels";
+import { extractExistingWorkflowComments } from "@features/workflow/comment-thread/model/workflowCommentBuilder";
+import type { WorkflowEntity } from "@features/workflow/hooks/useWorkflowLoaderWorkflow";
+import {
   WorkflowCategory,
   type WorkflowCommentInput,
   WorkflowStatus,
 } from "@shared/api/graphql/types";
-import { useEffect, useMemo, useState } from "react";
-
-import {
-  CATEGORY_LABELS,
-  resolveClockCorrectionLabel,
-} from "@/entities/workflow/lib/workflowLabels";
-import { extractExistingWorkflowComments } from "@/features/workflow/comment-thread/model/workflowCommentBuilder";
-import type { WorkflowEntity } from "@/features/workflow/hooks/useWorkflowLoaderWorkflow";
 import {
   formatDateSlash,
   isoDateFromTimestamp,
   parseTimeToISO,
-} from "@/shared/lib/time";
+} from "@shared/lib/time";
+import { useEffect, useMemo, useState } from "react";
 
 export type WorkflowEditLoaderState = {
   category: string;

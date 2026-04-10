@@ -17,8 +17,8 @@ export {
   parseOptionalInteger,
   type ShiftGroupFormValue,
 } from "./shiftGroupValidation";
+export type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
 export {
   SHIFT_GROUP_UI_TEXTS,
   SHIFT_GROUP_VALIDATION_TEXTS,
-} from "@/shared/config/shiftGroupTexts";
-export type { ShiftGroupConfig } from "@entities/app-config/model/shiftGroupTypes";
+} from "@shared/config/shiftGroupTexts";

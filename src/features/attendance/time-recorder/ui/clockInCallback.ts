@@ -3,16 +3,16 @@
  * @description 出勤打刻時のコールバック処理を提供するユーティリティ。
  * Reduxのdispatchやユーザー情報、スタッフ情報を受け取り、打刻処理・メール送信・スナックバー表示を行う。
  */
+import { resolveBusinessWorkDate } from "@entities/attendance/lib/businessDate";
+import { getNowISOStringWithZeroSeconds } from "@entities/attendance/lib/time";
 import { Dispatch } from "@reduxjs/toolkit";
 import { Attendance, Staff } from "@shared/api/graphql/types";
+import { Logger } from "@shared/lib/logger";
+import { TimeRecordMailSender } from "@shared/lib/mail/TimeRecordMailSender";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 
-import { resolveBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
 import * as MESSAGE_CODE from "@/errors";
 import { CognitoUser } from "@/hooks/useCognitoUser";
-import { Logger } from "@/shared/lib/logger";
-import { TimeRecordMailSender } from "@/shared/lib/mail/TimeRecordMailSender";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 /**
  * 出勤打刻時のコールバック関数。
  *

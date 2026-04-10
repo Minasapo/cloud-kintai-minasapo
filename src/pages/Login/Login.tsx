@@ -1,12 +1,11 @@
 import "@aws-amplify/ui-react/styles.css";
 import "./styles.scss";
 
+import { useSession } from "@app/providers/session/useSession";
 import { Authenticator } from "@aws-amplify/ui-react";
 import { signIn } from "aws-amplify/auth";
 import { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-import { useSession } from "@/app/providers/session/useSession";
 
 import logo from "./logo_large.png";
 

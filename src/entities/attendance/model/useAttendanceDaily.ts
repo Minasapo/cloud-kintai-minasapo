@@ -3,6 +3,8 @@ import {
   DuplicateAttendanceInfo,
   useLazyGetAttendanceByStaffAndDateQuery,
 } from "@entities/attendance/api/attendanceApi";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import {
   onCreateAttendance,
   onDeleteAttendance,
@@ -17,9 +19,6 @@ import {
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 dayjs.extend(isBetween);
 

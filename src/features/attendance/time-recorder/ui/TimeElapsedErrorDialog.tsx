@@ -1,3 +1,4 @@
+import { SectionTitle } from "@shared/ui/typography";
 import { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -31,14 +32,14 @@ export default function TimeElapsedErrorDialog({
       className={`${open ? "flex" : "hidden"} fixed inset-0 z-50 items-center justify-center bg-slate-950/50 p-4`}
     >
       <div className="w-full max-w-md rounded-[4px] bg-white p-6 shadow-xl">
-        <h2
+        <SectionTitle
           id="alert-dialog-title"
           className="m-0 text-lg font-semibold text-slate-900"
         >
           <span data-testid="time-elapsed-error-dialog-title-text">
             1週間以上経過した打刻エラーがあります
           </span>
-        </h2>
+        </SectionTitle>
         <div className="mt-4">
           <p
             id="alert-dialog-description"

@@ -5,23 +5,22 @@ import {
   useUpdateAppConfigMutation,
 } from "@entities/app-config/api/appConfigApi";
 import { getWorkflowCategoryOrder } from "@entities/workflow/lib/workflowLabels";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
 import type {
   AppConfig,
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
-import { useCallback, useEffect, useMemo } from "react";
-
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import { resolveThemeColor } from "@/shared/config/theme";
+import { resolveThemeColor } from "@shared/config/theme";
 import {
   applyDesignTokenCssVariables,
   getDesignTokens,
-} from "@/shared/designSystem";
-import { buildClockTimeDayjs } from "@/shared/lib/time";
+} from "@shared/designSystem";
+import { buildClockTimeDayjs } from "@shared/lib/time";
+import { useCallback, useEffect, useMemo } from "react";
 
 import type { ShiftGroupConfig } from "./shiftGroupTypes";
 

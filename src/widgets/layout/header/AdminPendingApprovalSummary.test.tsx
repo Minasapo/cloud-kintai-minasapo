@@ -1,15 +1,15 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-
-import { AuthContext } from "@/context/AuthContext";
-import { StaffRole } from "@/entities/staff/model/useStaffs/useStaffs";
-import { listAttendances } from "@/shared/api/graphql/documents/queries";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { listAttendances } from "@shared/api/graphql/documents/queries";
 import {
   onCreateAttendance,
   onDeleteAttendance,
   onUpdateAttendance,
-} from "@/shared/api/graphql/documents/subscriptions";
-import { WorkflowStatus } from "@/shared/api/graphql/types";
+} from "@shared/api/graphql/documents/subscriptions";
+import { WorkflowStatus } from "@shared/api/graphql/types";
+import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+
+import { AuthContext } from "@/context/AuthContext";
 
 import AdminPendingApprovalSummary from "./AdminPendingApprovalSummary";
 
@@ -69,7 +69,7 @@ describe("AdminPendingApprovalSummary", () => {
     mockGraphql.mockReset();
   });
 
-  it("管理者には2つの件数カードと管理者のみタグを表示する", async () => {
+  it("管理者には勤怠申請カードと管理者のみタグを表示する", async () => {
     mockUseWorkflows.mockReturnValue({
       workflows: [
         { id: "wf-1", status: WorkflowStatus.SUBMITTED },
@@ -120,33 +120,23 @@ describe("AdminPendingApprovalSummary", () => {
     expect(
       screen.getByRole("heading", { name: "勤怠修正申請" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "ワークフロー申請" }),
-    ).toBeInTheDocument();
     expect(screen.getByTestId("admin-pending-approval-summary")).toHaveClass(
-      "grid-cols-2",
+      "grid-cols-1",
     );
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
       "rounded-[4px]",
     );
-    expect(screen.getAllByText("管理者のみ")).toHaveLength(2);
+    expect(screen.getAllByText("管理者のみ")).toHaveLength(1);
     expect(
       screen.getByTestId("admin-pending-attendance-card-description-tooltip"),
     ).toHaveAttribute("aria-label", "未承認の勤怠修正申請");
-    expect(
-      screen.getByTestId("admin-pending-workflow-card-description-tooltip"),
-    ).toHaveAttribute("aria-label", "未承認のワークフロー申請");
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(2);
+    expect(links).toHaveLength(1);
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveAttribute(
       "href",
       "/admin/attendances",
     );
-    expect(screen.getByTestId("admin-pending-workflow-card")).toHaveAttribute(
-      "href",
-      "/admin/workflow",
-    );
-    expect(screen.getByText("2件")).toBeInTheDocument();
+    expect(screen.getByText("集計中")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("1件")).toBeInTheDocument();

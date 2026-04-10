@@ -1,15 +1,15 @@
 import { type UpdateAttendanceMutationArg } from "@entities/attendance/api/attendanceApi";
+import { ChangeRequest } from "@entities/attendance/lib/ChangeRequest";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import handleApproveChangeRequest from "@features/attendance/edit/ui/ChangeRequestDialog/handleApproveChangeRequest";
 import { Attendance, AttendanceChangeRequest, Staff, } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
+import { GenericMailSender } from "@shared/lib/mail/GenericMailSender";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { type MutableRefObject, useCallback, useEffect, useMemo, useState, } from "react";
 import { useDispatch } from "react-redux";
 
-import { ChangeRequest } from "@/entities/attendance/lib/ChangeRequest";
 import * as MESSAGE_CODE from "@/errors";
-import { createLogger } from "@/shared/lib/logger";
-import { GenericMailSender } from "@/shared/lib/mail/GenericMailSender";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 const logger = createLogger("useAdminAttendanceChangeRequests");
 export type UseAdminAttendanceChangeRequestsParams = {

@@ -1,11 +1,10 @@
-import dayjs from "dayjs";
-import { Controller, UseFieldArrayReplace } from "react-hook-form";
-
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
+import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime";
 import {
   AttendanceEditInputs,
   RestInputs,
-} from "@/features/attendance/edit/model/common";
+} from "@features/attendance/edit/model/common";
+import dayjs from "dayjs";
+import { Controller, UseFieldArrayReplace } from "react-hook-form";
 
 import {
   AttendanceControl,

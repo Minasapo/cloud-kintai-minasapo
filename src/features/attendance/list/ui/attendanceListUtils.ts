@@ -1,12 +1,11 @@
-import dayjs, { Dayjs } from "dayjs";
-
 import {
   type CloseDatePeriod,
   type DateRange,
   formatDateRangeLabel,
   getAttendanceQueryDateRange,
   getEffectiveDateRange,
-} from "@/entities/attendance/lib/aggregationDateRange";
+} from "@entities/attendance/lib/aggregationDateRange";
+import dayjs, { Dayjs } from "dayjs";
 
 export const MONTH_QUERY_KEY = "month";
 

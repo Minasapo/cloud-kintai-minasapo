@@ -1,6 +1,5 @@
+import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
-
-import { AppButton } from "@/shared/ui/button";
 
 import { AttendanceGetValues, AttendanceSetValue } from "../model/types";
 import { useQuickInputActions } from "../model/useQuickInputActions";

@@ -1,12 +1,11 @@
+import { getOperationLogDisplaySummary } from "@entities/operation-log/lib/operationLogDisplay";
+import { getOperationLogLabel } from "@entities/operation-log/lib/operationLogLabels";
+import fetchOperationLogs from "@entities/operation-log/model/fetchOperationLogs";
+import { OperationLogJsonDetails } from "@entities/operation-log/ui/OperationLogJsonDetails";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { Attendance, OperationLog, Staff } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
-
-import { getOperationLogDisplaySummary } from "@/entities/operation-log/lib/operationLogDisplay";
-import { getOperationLogLabel } from "@/entities/operation-log/lib/operationLogLabels";
-import fetchOperationLogs from "@/entities/operation-log/model/fetchOperationLogs";
-import { OperationLogJsonDetails } from "@/entities/operation-log/ui/OperationLogJsonDetails";
 
 import { AttendanceHistoryRow } from "./EditAttendanceHistoryList/AttendanceHistoryRow";
 

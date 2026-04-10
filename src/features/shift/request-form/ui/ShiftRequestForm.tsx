@@ -35,6 +35,11 @@ import {
   useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
+import {
+  loadShiftPatterns,
+  saveShiftPatterns,
+} from "@shared/lib/storage/shiftPatternStorage";
 import dayjs, { Dayjs } from "dayjs";
 import React, {
   useCallback,
@@ -48,11 +53,6 @@ import * as MESSAGE_CODE from "@/errors";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
-import {
-  loadShiftPatterns,
-  saveShiftPatterns,
-} from "@/shared/lib/storage/shiftPatternStorage";
 
 import { normalizeStatus, ShiftRequestDayStatus } from "../model/statusMapping";
 import { useShiftRequestData } from "../model/useShiftRequestData";

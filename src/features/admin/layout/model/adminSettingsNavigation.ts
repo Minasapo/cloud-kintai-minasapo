@@ -72,78 +72,6 @@ export const ADMIN_SETTINGS_ITEMS: readonly AdminSettingsItem[] = [
     ctaLabel: "カレンダー設定を開く",
   },
   {
-    title: "勤務時間",
-    path: "/admin/master/feature_management/working_time",
-    category: "attendanceRules",
-    description: "標準の始業・終業・休憩時間を設定します。",
-    order: 1,
-    ctaLabel: "勤務時間を開く",
-  },
-  {
-    title: "午前/午後休",
-    path: "/admin/master/feature_management/am_pm_holiday",
-    category: "attendanceRules",
-    description: "半休区分の名称や利用条件を管理します。",
-    order: 2,
-    ctaLabel: "午前/午後休を開く",
-  },
-  {
-    title: "出勤モード",
-    path: "/admin/master/feature_management/office_mode",
-    category: "attendanceRules",
-    description: "出勤打刻の運用モードや時間単位休暇の扱いを設定します。",
-    order: 3,
-    ctaLabel: "出勤モードを開く",
-  },
-  {
-    title: "特別休暇",
-    path: "/admin/master/feature_management/special_holiday",
-    category: "attendanceRules",
-    description: "特別休暇の区分と利用可否を管理します。",
-    order: 4,
-    ctaLabel: "特別休暇を開く",
-  },
-  {
-    title: "欠勤",
-    path: "/admin/master/feature_management/absent",
-    category: "attendanceRules",
-    description: "欠勤時の表示や勤怠上の扱いを設定します。",
-    order: 5,
-    ctaLabel: "欠勤設定を開く",
-  },
-  {
-    title: "シフト",
-    path: "/admin/master/shift",
-    category: "shiftApproval",
-    description: "シフトグループや表示モードなど、シフト管理の基本挙動を設定します。",
-    order: 1,
-    ctaLabel: "シフト設定を開く",
-  },
-  {
-    title: "ワークフロー",
-    path: "/admin/master/workflow",
-    category: "shiftApproval",
-    description: "申請カテゴリごとの承認フローを設定します。",
-    order: 2,
-    ctaLabel: "ワークフローを開く",
-  },
-  {
-    title: "残業確認",
-    path: "/admin/master/feature_management/overtime_confirmation",
-    category: "shiftApproval",
-    description: "残業確認フローや表示条件を設定します。",
-    order: 3,
-    ctaLabel: "残業確認を開く",
-  },
-  {
-    title: "クイック入力",
-    path: "/admin/master/feature_management/quick_input",
-    category: "shiftApproval",
-    description: "勤怠入力時に使うクイック入力候補を整備します。",
-    order: 4,
-    ctaLabel: "クイック入力を開く",
-  },
-  {
     title: "打刻理由",
     path: "/admin/master/feature_management/reasons",
     category: "dataIntegration",
@@ -208,10 +136,12 @@ export const ADMIN_SETTINGS_CATEGORY_MAP = new Map(
 export function getAdminSettingsNavigationGroups() {
   return ADMIN_SETTINGS_CATEGORIES.map((category) => ({
     ...category,
-    items: ADMIN_SETTINGS_ITEMS.filter((item) => item.category === category.key).toSorted(
-      (a, b) => a.order - b.order,
-    ),
-  })).toSorted((a, b) => a.order - b.order);
+    items: ADMIN_SETTINGS_ITEMS.filter(
+      (item) => item.category === category.key,
+    ).toSorted((a, b) => a.order - b.order),
+  }))
+    .filter((group) => group.items.length > 0)
+    .toSorted((a, b) => a.order - b.order);
 }
 
 export function findAdminSettingsItemByPath(pathname: string) {

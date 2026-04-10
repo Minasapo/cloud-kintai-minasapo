@@ -1,9 +1,8 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
+import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime";
+import { resolveConfigTimeOnDate } from "@entities/attendance/lib/resolveConfigTimeOnDate";
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { useContext, useMemo, useState } from "react";
-
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 type TimeField = "startTime" | "endTime";
 

@@ -2,9 +2,8 @@ import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu } from "@mui/material";
 import { DeleteStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
+import { AppIconButton } from "@shared/ui/button";
 import { useState } from "react";
-
-import { AppIconButton } from "@/shared/ui/button";
 
 import {
   DeleteAccountMenuItem,

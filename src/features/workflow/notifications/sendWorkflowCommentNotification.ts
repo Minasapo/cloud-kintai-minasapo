@@ -1,14 +1,14 @@
-import { sendMail } from "@shared/api/graphql/documents/queries";
-import dayjs from "dayjs";
-
-import { getWorkflowCategoryLabel } from "@/entities/workflow/lib/workflowLabels";
-import * as MESSAGE_CODE from "@/errors";
+import { getWorkflowCategoryLabel } from "@entities/workflow/lib/workflowLabels";
 import type {
   NotificationStaff,
   WorkflowData,
-} from "@/features/workflow/notification/model/workflowNotificationEventService";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { formatStaffDisplayName } from "@/shared/lib/mail/adminNotification";
+} from "@features/workflow/notification/model/workflowNotificationEventService";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { sendMail } from "@shared/api/graphql/documents/queries";
+import { formatStaffDisplayName } from "@shared/lib/mail/adminNotification";
+import dayjs from "dayjs";
+
+import * as MESSAGE_CODE from "@/errors";
 
 type SendWorkflowCommentNotificationArgs = {
   workflow: WorkflowData;

@@ -17,12 +17,6 @@ const AdminAttendanceHistoryRoute = createLazyRoute(
 const AdminAttendancePrintRoute = createLazyRoute(
   () => import("../pages/admin/AdminAttendancePrint"),
 );
-const AbsentRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/Absent"),
-);
-const AmPmHolidayRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/AmPmHoliday"),
-);
 const DeveloperRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Developer"),
 );
@@ -35,26 +29,11 @@ const LinksRoute = createLazyRoute(
 const AttendanceStatisticsRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/AttendanceStatistics"),
 );
-const OvertimeConfirmationRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/OvertimeConfirmation"),
-);
 const TimeRecorderAnnouncementRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/TimeRecorderAnnouncement"),
 );
-const OfficeModeRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/OfficeMode"),
-);
-const QuickInputRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/QuickInput"),
-);
 const ReasonsRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Reasons"),
-);
-const SpecialHolidayRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/SpecialHoliday"),
-);
-const WorkingTimeRoute = createLazyRoute(
-  () => import("@/features/admin/configManagement/ui/WorkingTime"),
 );
 const AdminDailyReportDetailRoute = createLazyRoute(
   () =>
@@ -73,13 +52,6 @@ const AdminLogsRoute = createLazyRoute(
 const AdminMasterLayoutRoute = createLazyRoute(
   () => import("../pages/admin/AdminMasterLayout"),
 );
-const AdminShiftSettingsRoute = createLazyRoute(
-  () => import("../pages/admin/AdminShiftSettings/AdminShiftSettings"),
-);
-const AdminWorkflowCategorySettingsRoute = createLazyRoute(
-  () =>
-    import("@/features/admin-config-workflow/AdminWorkflowCategorySettings"),
-);
 const AdminStaffRoute = createLazyRoute(
   () => import("@/features/admin/staff/ui/AdminStaff"),
 );
@@ -92,12 +64,6 @@ const AdminStaffEditorRoute = createLazyRoute(
 );
 const AdminThemeRoute = createLazyRoute(
   () => import("../pages/admin/AdminTheme/AdminTheme"),
-);
-const AdminWorkflowRoute = createLazyRoute(
-  () => import("../pages/admin/AdminWorkflow/AdminWorkflow"),
-);
-const AdminWorkflowDetailRoute = createLazyRoute(
-  () => import("../pages/admin/AdminWorkflow/AdminWorkflowDetail"),
 );
 const JobTermRoute = createLazyRoute(
   () => import("@/features/admin/jobTerm/ui/JobTerm"),
@@ -237,31 +203,15 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "shift",
-        lazy: AdminShiftSettingsRoute,
+        element: <NotFound />,
       },
       {
         path: "workflow",
-        lazy: AdminWorkflowCategorySettingsRoute,
-      },
-      {
-        path: "feature_management/working_time",
-        lazy: WorkingTimeRoute,
-      },
-      {
-        path: "feature_management/am_pm_holiday",
-        lazy: AmPmHolidayRoute,
-      },
-      {
-        path: "feature_management/office_mode",
-        lazy: OfficeModeRoute,
+        element: <NotFound />,
       },
       {
         path: "feature_management/attendance_statistics",
         lazy: AttendanceStatisticsRoute,
-      },
-      {
-        path: "feature_management/overtime_confirmation",
-        lazy: OvertimeConfirmationRoute,
       },
       {
         path: "developer",
@@ -284,39 +234,14 @@ export const adminChildRoutes: RouteObject[] = [
         lazy: ReasonsRoute,
       },
       {
-        path: "feature_management/quick_input",
-        lazy: QuickInputRoute,
-      },
-      {
-        path: "feature_management/special_holiday",
-        lazy: SpecialHolidayRoute,
-      },
-      {
-        path: "feature_management/absent",
-        lazy: AbsentRoute,
-      },
-      {
         path: "*",
         element: <NotFound />,
       },
     ],
   },
   {
-    path: "workflow",
-    children: [
-      {
-        index: true,
-        lazy: AdminWorkflowRoute,
-      },
-      {
-        path: ":id",
-        lazy: AdminWorkflowDetailRoute,
-      },
-      {
-        path: "*",
-        element: <NotFound />,
-      },
-    ],
+    path: "workflow/*",
+    element: <NotFound />,
   },
   {
     path: "logs",

@@ -1,8 +1,7 @@
+import type { StaffExternalLink } from "@entities/staff/externalLink";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import type { ExternalLinkItem } from "@shared/ui/header/ExternalLinks";
 import { useEffect, useState } from "react";
-
-import type { StaffExternalLink } from "@/entities/staff/externalLink";
 
 const filterEnabledLinks = (links: ExternalLinkItem[]) =>
   links.filter(

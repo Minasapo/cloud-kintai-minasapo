@@ -1,3 +1,8 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import {
+  AttendanceStatus,
+} from "@entities/attendance/lib/AttendanceState";
+import { getStatus } from "@features/attendance/list/lib/attendanceStatusUtils";
 import {
   Attendance,
   CompanyHolidayCalendar,
@@ -5,12 +10,6 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import {
-  AttendanceStatus,
-} from "@/entities/attendance/lib/AttendanceState";
-import { getStatus } from "@/features/attendance/list/lib/attendanceStatusUtils";
 
 export type AttendanceSummaryStatus = "ok" | "requesting" | "error" | "none";
 

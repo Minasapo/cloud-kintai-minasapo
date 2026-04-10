@@ -1,3 +1,8 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
 import {
   createAppConfig,
   updateAppConfig,
@@ -13,12 +18,6 @@ import {
   UpdateAppConfigMutation,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
 
 export class AppConfigDataManager {
   async fetch(name: string = "default") {

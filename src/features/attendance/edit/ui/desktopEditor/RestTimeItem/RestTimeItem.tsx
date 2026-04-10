@@ -1,8 +1,7 @@
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { LunchRestTimeNotSetWarning } from "@features/attendance/edit/ui/LunchRestTimeNotSetWarning";
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 import NoRestTimeMessage from "./NoRestTimeMessage";
 import {

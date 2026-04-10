@@ -1,15 +1,14 @@
+import { subscribeWorkflowCommentNotifications } from "@features/workflow/notification/model/workflowNotificationEventService";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import { onUpdateWorkflow } from "@shared/api/graphql/documents/subscriptions";
 import {
   GetWorkflowQuery,
   OnUpdateWorkflowSubscription,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import { subscribeWorkflowCommentNotifications } from "@/features/workflow/notification/model/workflowNotificationEventService";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("useWorkflowDetailData");
 

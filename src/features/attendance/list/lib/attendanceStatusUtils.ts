@@ -1,7 +1,12 @@
 /**
- * モバイル勤怠カレンダーの状態判定ロジック
- * 複数のコンポーネント間で共有される判定ロジック
+ * 勤怠カレンダーの状態判定および計算ロジック
+ * 複数のコンポーネント間で共有されるロジックを集約
  */
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { AttendanceState, AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
+import { CompanyHoliday } from "@entities/attendance/lib/CompanyHoliday";
+import { Holiday } from "@entities/attendance/lib/Holiday";
+import { calcTotalRestTime, calcTotalWorkTime } from "@entities/attendance/lib/time";
 import {
   Attendance,
   CompanyHolidayCalendar,
@@ -10,10 +15,95 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
-import { Holiday } from "@/entities/attendance/lib/Holiday";
+/**
+ * カレンダーの週・日リストを生成
+ */
+export function buildWeeks(targetMonth: Dayjs) {
+  const monthStart = targetMonth.startOf("month").startOf("week");
+  const monthEnd = targetMonth.endOf("month").endOf("week");
+  const days: Dayjs[] = [];
+
+  let cursor = monthStart;
+  while (cursor.isBefore(monthEnd) || cursor.isSame(monthEnd, "day")) {
+    days.push(cursor);
+    cursor = cursor.add(1, "day");
+  }
+
+  const weeks: Dayjs[][] = [];
+  for (let i = 0; i < days.length; i += 7) {
+    weeks.push(days.slice(i, i + 7));
+  }
+  return weeks;
+}
+
+/**
+ * 実働時間を計算
+ */
+export function getNetWorkingHours(attendance: Attendance | undefined) {
+  if (!attendance) return 0;
+  if (!attendance.startTime || !attendance.endTime) return 0;
+
+  const workTime = calcTotalWorkTime(attendance.startTime, attendance.endTime);
+  const totalRest = getTotalRestHours(attendance);
+
+  return Math.max(workTime - totalRest, 0);
+}
+
+/**
+ * 合計休憩時間を計算
+ */
+export function getTotalRestHours(attendance: Attendance | undefined) {
+  if (!attendance?.rests || !attendance.endTime) return 0;
+
+  const totalRest = (attendance.rests || [])
+    .filter((rest): rest is NonNullable<typeof rest> => !!rest)
+    .reduce((acc, rest) => {
+      if (!rest.startTime || !rest.endTime) return acc;
+      return acc + calcTotalRestTime(rest.startTime, rest.endTime);
+    }, 0);
+
+  return totalRest;
+}
+
+/**
+ * 勤務時間帯のラベルをフォーマット (HH:mm - HH:mm)
+ */
+export function formatTimeRange(attendance: Attendance | undefined) {
+  if (!attendance) return undefined;
+
+  const format = (value?: string | null) =>
+    value ? dayjs(value).format("HH:mm") : undefined;
+
+  const start = format(attendance.startTime || undefined);
+  const end = format(attendance.endTime || undefined);
+
+  if (!start && !end) {
+    return undefined;
+  }
+
+  return `${start ?? ""} - ${end ?? ""}`.trim();
+}
+
+/**
+ * 指定日付の祝日・会社休日名を取得
+ */
+export function getHolidayNames(
+  date: Dayjs,
+  holidayCalendars: HolidayCalendar[],
+  companyHolidayCalendars: CompanyHolidayCalendar[]
+) {
+  const workDate = date.format(AttendanceDate.DataFormat);
+  const holiday = new Holiday(holidayCalendars, workDate).getHoliday();
+  const companyHoliday = new CompanyHoliday(
+    companyHolidayCalendars,
+    workDate
+  ).getHoliday();
+
+  return {
+    holidayName: holiday?.name,
+    companyHolidayName: companyHoliday?.name,
+  };
+}
 
 /**
  * 指定日付が祝日・会社休日・週末かどうかを判定
@@ -32,6 +122,7 @@ export const isHolidayLike = (
   ).isHoliday();
 
   if (staff?.workType === "shift") {
+    // シフトタイプの場合も法定休日と会社休日の両方をチェック
     return isHoliday || isCompanyHoliday;
   }
 
@@ -40,8 +131,6 @@ export const isHolidayLike = (
 
 /**
  * 指定日付の勤怠ステータスを判定
- * 打刻データがない場合は、営業日かどうかで Error/None を返す
- * 打刻データがある場合は、AttendanceState で詳細な状態を返す
  */
 export const getStatus = (
   attendance: Attendance | undefined,

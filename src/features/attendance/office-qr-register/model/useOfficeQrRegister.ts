@@ -1,17 +1,17 @@
 import { type AttendanceUpsertAction, useLazyGetAttendanceByStaffAndDateQuery, useUpdateAttendanceMutation, useUpsertAttendanceByStaffAndDateMutation, } from "@entities/attendance/api/attendanceApi";
+import { clockInAction, clockOutAction, } from "@entities/attendance/lib/actions/attendanceActions";
+import { resolveBusinessWorkDate, resolveCurrentBusinessWorkDate, } from "@entities/attendance/lib/businessDate";
+import { buildAttendanceIdempotencyKey } from "@entities/attendance/lib/operationContext";
+import { getNowISOStringWithZeroSeconds } from "@entities/attendance/lib/time";
 import type { Attendance, CreateAttendanceInput, } from "@shared/api/graphql/types";
+import { Logger } from "@shared/lib/logger";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { clockInAction, clockOutAction, } from "@/entities/attendance/lib/actions/attendanceActions";
-import { resolveBusinessWorkDate, resolveCurrentBusinessWorkDate, } from "@/entities/attendance/lib/businessDate";
-import { buildAttendanceIdempotencyKey } from "@/entities/attendance/lib/operationContext";
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
-import { Logger } from "@/shared/lib/logger";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import { validateOfficeQrToken } from "../lib/validateToken";
 

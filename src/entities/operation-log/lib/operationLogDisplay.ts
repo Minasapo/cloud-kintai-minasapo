@@ -1,6 +1,5 @@
+import { parseOperationLogJsonLike } from "@entities/operation-log/model/operationLogLegacyCompatibility";
 import type { OperationLog } from "@shared/api/graphql/types";
-
-import { parseOperationLogJsonLike } from "@/entities/operation-log/model/operationLogLegacyCompatibility";
 
 import { getOperationLogLabel } from "./operationLogLabels";
 

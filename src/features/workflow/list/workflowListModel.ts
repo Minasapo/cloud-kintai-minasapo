@@ -1,12 +1,11 @@
-import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
-
 import {
   CATEGORY_LABELS,
   CLOCK_CORRECTION_CHECK_OUT_LABEL,
   CLOCK_CORRECTION_LABEL,
   getWorkflowCategoryLabel,
   STATUS_LABELS,
-} from "@/entities/workflow/lib/workflowLabels";
+} from "@entities/workflow/lib/workflowLabels";
+import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 
 const CATEGORY_LABELS_REVERSE = Object.entries(CATEGORY_LABELS).reduce(
   (acc, [key, value]) => {

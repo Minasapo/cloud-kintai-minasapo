@@ -1,13 +1,13 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { calcTotalRestTime } from "@entities/attendance/lib/time";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import { Attendance } from "@shared/api/graphql/types";
+import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import { useContext } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { calcTotalRestTime } from "@/entities/attendance/lib/time";
-import { AppButton } from "@/shared/ui/button";
 
 import downloadAttendances from "../lib/downloadAttendances";
 

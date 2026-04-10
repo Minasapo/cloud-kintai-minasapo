@@ -1,3 +1,4 @@
+import InfoIconTooltip from "@shared/ui/tooltip/InfoIconTooltip";
 import {
   BarElement,
   CategoryScale,
@@ -9,8 +10,6 @@ import {
   Tooltip as ChartTooltip,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-
-import InfoIconTooltip from "@/shared/ui/tooltip/InfoIconTooltip";
 
 type RegisterSummaryWorkStatusChartCardProps = {
   chartData: ChartData<"bar">;

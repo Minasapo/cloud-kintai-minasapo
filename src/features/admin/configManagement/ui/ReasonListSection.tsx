@@ -1,8 +1,8 @@
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import {
   SettingsCheckbox,
   SettingsTextField,
-} from "@/features/admin/layout/ui/SettingsPrimitives";
+} from "@features/admin/layout/ui/SettingsPrimitives";
 
 interface Reason {
   reason: string;

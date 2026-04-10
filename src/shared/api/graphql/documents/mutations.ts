@@ -956,6 +956,135 @@ export const deleteAttendance = /* GraphQL */ `mutation DeleteAttendance(
   APITypes.DeleteAttendanceMutationVariables,
   APITypes.DeleteAttendanceMutation
 >;
+export const createAttendanceStatisticsSnapshot = /* GraphQL */ `mutation CreateAttendanceStatisticsSnapshot(
+  $input: CreateAttendanceStatisticsSnapshotInput!
+  $condition: ModelAttendanceStatisticsSnapshotConditionInput
+) {
+  createAttendanceStatisticsSnapshot(input: $input, condition: $condition) {
+    id
+    staffId
+    year
+    status
+    progressPercent
+    currentStepLabel
+    rangeStart
+    rangeEnd
+    monthlySummaries {
+      month
+      rangeStart
+      rangeEnd
+      workHours
+      paidDays
+      specialHolidayDays
+      absentDays
+      workDays
+      isFallback
+      __typename
+    }
+    totalWorkHours
+    totalPaidDays
+    totalSpecialHolidayDays
+    totalAbsentDays
+    totalWorkDays
+    startedAt
+    completedAt
+    lastAggregatedAt
+    errorMessage
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAttendanceStatisticsSnapshotMutationVariables,
+  APITypes.CreateAttendanceStatisticsSnapshotMutation
+>;
+export const updateAttendanceStatisticsSnapshot = /* GraphQL */ `mutation UpdateAttendanceStatisticsSnapshot(
+  $input: UpdateAttendanceStatisticsSnapshotInput!
+  $condition: ModelAttendanceStatisticsSnapshotConditionInput
+) {
+  updateAttendanceStatisticsSnapshot(input: $input, condition: $condition) {
+    id
+    staffId
+    year
+    status
+    progressPercent
+    currentStepLabel
+    rangeStart
+    rangeEnd
+    monthlySummaries {
+      month
+      rangeStart
+      rangeEnd
+      workHours
+      paidDays
+      specialHolidayDays
+      absentDays
+      workDays
+      isFallback
+      __typename
+    }
+    totalWorkHours
+    totalPaidDays
+    totalSpecialHolidayDays
+    totalAbsentDays
+    totalWorkDays
+    startedAt
+    completedAt
+    lastAggregatedAt
+    errorMessage
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAttendanceStatisticsSnapshotMutationVariables,
+  APITypes.UpdateAttendanceStatisticsSnapshotMutation
+>;
+export const deleteAttendanceStatisticsSnapshot = /* GraphQL */ `mutation DeleteAttendanceStatisticsSnapshot(
+  $input: DeleteAttendanceStatisticsSnapshotInput!
+  $condition: ModelAttendanceStatisticsSnapshotConditionInput
+) {
+  deleteAttendanceStatisticsSnapshot(input: $input, condition: $condition) {
+    id
+    staffId
+    year
+    status
+    progressPercent
+    currentStepLabel
+    rangeStart
+    rangeEnd
+    monthlySummaries {
+      month
+      rangeStart
+      rangeEnd
+      workHours
+      paidDays
+      specialHolidayDays
+      absentDays
+      workDays
+      isFallback
+      __typename
+    }
+    totalWorkHours
+    totalPaidDays
+    totalSpecialHolidayDays
+    totalAbsentDays
+    totalWorkDays
+    startedAt
+    completedAt
+    lastAggregatedAt
+    errorMessage
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAttendanceStatisticsSnapshotMutationVariables,
+  APITypes.DeleteAttendanceStatisticsSnapshotMutation
+>;
 export const createDocument = /* GraphQL */ `mutation CreateDocument(
   $input: CreateDocumentInput!
   $condition: ModelDocumentConditionInput

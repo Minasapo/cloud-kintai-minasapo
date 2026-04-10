@@ -1,7 +1,6 @@
 import { useAppDispatchV2 } from "@app/hooks";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useEffect } from "react";
-
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 /**
  * 重複した勤怠データの警告をリッスンし、通知として表示するカスタムフック

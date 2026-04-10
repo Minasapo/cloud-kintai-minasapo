@@ -8,12 +8,11 @@ import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
+import { resolveThemeColor } from "@shared/config/theme";
+import { type DesignTokens, getDesignTokens } from "@shared/designSystem";
+import { buildClockTimeDayjs } from "@shared/lib/time";
 import type dayjs from "dayjs";
 import { createContext } from "react";
-
-import { resolveThemeColor } from "@/shared/config/theme";
-import { type DesignTokens, getDesignTokens } from "@/shared/designSystem";
-import { buildClockTimeDayjs } from "@/shared/lib/time";
 
 const DEFAULT_THEME_TOKENS = getDesignTokens();
 const FALLBACK_CONFIG: DefaultAppConfig = {

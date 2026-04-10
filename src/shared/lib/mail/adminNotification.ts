@@ -2,10 +2,10 @@ import {
   StaffRole,
   StaffType,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { sendMail } from "@shared/api/graphql/documents/queries";
 
 import * as MESSAGE_CODE from "@/errors";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 const parseOverrideRecipients = (): string[] => {
   const raw = (

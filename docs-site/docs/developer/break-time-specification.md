@@ -83,5 +83,5 @@ flowchart TD
 
 ## 関連ドキュメント
 
-- [勤怠ステータス判定ロジック](./attendance-status-determination.md)
-- [打刻エラー一覧の表示仕様](./attendance-error-list-display.md)
+- [勤怠ステータス判定ロジック](./attendance-status-determination)
+- [打刻エラー一覧の表示仕様](./attendance-error-list-display)

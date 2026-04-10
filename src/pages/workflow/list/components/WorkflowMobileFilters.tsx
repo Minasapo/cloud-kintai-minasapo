@@ -1,6 +1,5 @@
+import type { UseWorkflowListFiltersResult } from "@features/workflow/list/useWorkflowListFilters";
 import type { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
-
-import type { UseWorkflowListFiltersResult } from "@/features/workflow/list/useWorkflowListFilters";
 
 import type { WorkflowListFiltersHandle } from "./WorkflowListFilters";
 import WorkflowListFiltersPanel from "./WorkflowListFiltersPanel";

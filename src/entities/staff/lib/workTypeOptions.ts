@@ -12,4 +12,8 @@ export function getWorkTypeLabel(value?: string | null) {
   return workTypeMap.get(value) || "";
 }
 
+export function isShiftWorkType(value?: string | null): boolean {
+  return value === "shift";
+}
+
 export default WORK_TYPE_OPTIONS;

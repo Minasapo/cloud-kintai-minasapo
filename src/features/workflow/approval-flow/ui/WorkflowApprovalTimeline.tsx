@@ -1,4 +1,5 @@
-import StatusChip from "@/shared/ui/chips/StatusChip";
+import StatusChip from "@shared/ui/chips/StatusChip";
+import { SubsectionTitle } from "@shared/ui/typography";
 
 import type { WorkflowApprovalStepView } from "../types";
 
@@ -13,7 +14,7 @@ export default function WorkflowApprovalTimeline({
 }: Props) {
   return (
     <section className="rounded-[20px] border border-slate-200/80 bg-slate-50/75 p-4">
-      <h2 className="mb-3 text-lg font-semibold text-slate-950">{title}</h2>
+      <SubsectionTitle className="mb-3 text-slate-950">{title}</SubsectionTitle>
       <div className="flex flex-col gap-4">
         {steps.map((step, idx) => {
           const isApplicant = step.role === "申請者";

@@ -1,8 +1,7 @@
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import { Attendance } from "@shared/api/graphql/types";
 import { Dayjs } from "dayjs";
 import { createContext, ReactNode, useContext } from "react";
-
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { HolidayInfo, MonthTerm } from "./mobileCalendarUtils";
 

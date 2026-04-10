@@ -1,4 +1,4 @@
-import { AttendanceSetValue } from "@/features/attendance/edit/model/types";
+import { AttendanceSetValue } from "@features/attendance/edit/model/types";
 
 export type ReasonItem = {
   reason: string;

@@ -1,6 +1,5 @@
+import { SettingsTimeField } from "@features/admin/layout/ui/SettingsPrimitives";
 import { Dayjs } from "dayjs";
-
-import { SettingsTimeField } from "@/features/admin/layout/ui/SettingsPrimitives";
 
 interface WorkingTimeSectionProps {
   startTime: Dayjs | null;

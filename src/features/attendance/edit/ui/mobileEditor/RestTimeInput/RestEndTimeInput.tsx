@@ -1,6 +1,5 @@
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import { FieldArrayWithId } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import SharedRestEndTimeInput from "../../desktopEditor/RestTimeItem/RestTimeInput/RestEndTimeInput";
 

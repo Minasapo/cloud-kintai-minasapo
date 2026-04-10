@@ -1,4 +1,4 @@
-import { useAttendanceEditData } from "@/features/attendance/edit/model/AttendanceEditProvider";
+import { useAttendanceEditData } from "@features/attendance/edit/model/AttendanceEditProvider";
 
 export default function NoDataAlert() {
   const { attendance } = useAttendanceEditData();

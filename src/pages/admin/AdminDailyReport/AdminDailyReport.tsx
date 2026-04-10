@@ -1,15 +1,17 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { useSplitView } from "@features/splitView";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { listDailyReports } from "@shared/api/graphql/documents/queries";
 import type { ListDailyReportsQuery } from "@shared/api/graphql/types";
+import { formatDateTimeReadable } from "@shared/lib/time";
+import { AppButton } from "@shared/ui/button";
 import type { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
+import { Download } from "lucide-react";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { useSplitView } from "@/features/splitView";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { formatDateTimeReadable } from "@/shared/lib/time";
 
 import DailyReportCarouselDialog from "./DailyReportCarouselDialog";
 import DailyReportDetailPanel from "./DailyReportDetailPanel";
@@ -348,28 +350,17 @@ export default function AdminDailyReport() {
         </section>
 
         <div className="flex flex-col items-stretch justify-between gap-2 sm:flex-row sm:items-center">
-          <button
-            type="button"
+          <AppButton
             onClick={handleExportCsv}
             disabled={filteredReports.length === 0}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-emerald-700/15 bg-[#19b985] px-4 text-xs font-semibold tracking-wide text-white shadow-[0_10px_20px_-14px_rgba(5,150,105,0.75)] transition hover:bg-[#17ab7b] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+            size="sm"
+            variant="solid"
+            tone="primary"
+            className="app-save-button"
+            startIcon={<Download size={16} strokeWidth={2} />}
           >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
             CSV出力
-          </button>
+          </AppButton>
 
           <button
             type="button"

@@ -1,3 +1,4 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { deleteCloseDate } from "@shared/api/graphql/documents/mutations";
 import {
   CloseDate,
@@ -5,8 +6,6 @@ import {
   DeleteCloseDateMutation,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export default async function deleteCloseDateData(input: DeleteCloseDateInput) {
   const response = (await graphqlClient.graphql({

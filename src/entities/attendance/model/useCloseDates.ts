@@ -1,3 +1,13 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
+import {
+  onCreateCloseDate,
+  onDeleteCloseDate,
+  onUpdateCloseDate,
+} from "@shared/api/graphql/documents/subscriptions";
 import {
   CloseDate,
   CreateCloseDateInput,
@@ -9,17 +19,6 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import {
-  onCreateCloseDate,
-  onDeleteCloseDate,
-  onUpdateCloseDate,
-} from "@/shared/api/graphql/documents/subscriptions";
 
 import createCloseDateData from "./closeDates/createCloseDateData";
 import deleteCloseDateData from "./closeDates/deleteCloseDateData";

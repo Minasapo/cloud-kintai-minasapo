@@ -1,7 +1,11 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import WORK_TYPE_OPTIONS from "@entities/staff/lib/workTypeOptions";
+import fetchStaffs from "@entities/staff/model/useStaffs/fetchStaffs";
 import {
   StaffRole,
   StaffType,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import { handleSyncCognitoUser } from "@features/admin/staff/model/handleSyncCognitoUser";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Autocomplete,
@@ -21,22 +25,19 @@ import {
   CreateStaffInput,
   UpdateStaffInput,
 } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { SectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 import { Control, Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import WORK_TYPE_OPTIONS from "@/entities/staff/lib/workTypeOptions";
-import fetchStaffs from "@/entities/staff/model/useStaffs/fetchStaffs";
 import * as MESSAGE_CODE from "@/errors";
-import { handleSyncCognitoUser } from "@/features/admin/staff/model/handleSyncCognitoUser";
 import addUserToGroup from "@/hooks/common/addUserToGroup";
 import createCognitoUser from "@/hooks/common/createCognitoUser";
 import { useDialogCloseGuard } from "@/hooks/useDialogCloseGuard";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 const createStaffSchema = z.object({
   familyName: z.string().min(1, "姓を入力してください"),
@@ -279,9 +280,9 @@ export default function CreateStaffDialog({
               <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                   <div>
-                    <h2 className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
+                    <SectionTitle className="text-xl font-extrabold tracking-[0.01em] text-emerald-950">
                       スタッフ作成
-                    </h2>
+                    </SectionTitle>
                     <p className="text-sm text-emerald-800">
                       登録するスタッフの情報と承認設定を入力してください。
                     </p>

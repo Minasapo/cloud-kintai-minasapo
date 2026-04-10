@@ -3,6 +3,7 @@ import {
 } from "@entities/calendar/api/calendarApi";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
 import { type GraphQLResult } from "aws-amplify/api";
@@ -16,7 +17,6 @@ import {
 } from "react";
 
 import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
 import { SuggestedAction } from "../rules/shiftRules";
@@ -338,7 +338,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
         return;
       }
 
-      if (!locked && !isAdmin) {
+      if (!isAdmin) {
         return;
       }
 
@@ -390,6 +390,92 @@ export const useCollaborativePageState = (targetMonth: string) => {
   const handleUnlockCells = useCallback(() => {
     applyLockState(false);
   }, [applyLockState]);
+
+  const applyLockStateForStaff = useCallback(
+    (staffId: string, locked: boolean) => {
+      if (isEditingDisabled) {
+        setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+        return;
+      }
+      if (!isAdmin) return;
+
+      const staffData = state.shiftDataMap.get(staffId);
+      if (!staffData) return;
+
+      const updates = dateKeys
+        .map((date) => {
+          const cell = staffData.get(date);
+          if (!cell || cell.state === "empty" || cell.isLocked === locked)
+            return null;
+          return { staffId, date, isLocked: locked };
+        })
+        .filter(
+          (u): u is { staffId: string; date: string; isLocked: boolean } =>
+            u !== null,
+        );
+
+      if (updates.length === 0) return;
+      void batchUpdateShifts(updates);
+    },
+    [
+      isEditingDisabled,
+      isAdmin,
+      state.shiftDataMap,
+      dateKeys,
+      batchUpdateShifts,
+    ],
+  );
+
+  const handleLockStaffRow = useCallback(
+    (staffId: string) => applyLockStateForStaff(staffId, true),
+    [applyLockStateForStaff],
+  );
+
+  const handleUnlockStaffRow = useCallback(
+    (staffId: string) => applyLockStateForStaff(staffId, false),
+    [applyLockStateForStaff],
+  );
+
+  const applyLockStateForMonth = useCallback(
+    (locked: boolean) => {
+      if (isEditingDisabled) {
+        setEditLockError(NETWORK_EDIT_DISABLED_MESSAGE);
+        return;
+      }
+      if (!isAdmin) return;
+
+      const updates: { staffId: string; date: string; isLocked: boolean }[] =
+        [];
+      for (const [staffId, staffData] of state.shiftDataMap) {
+        for (const date of dateKeys) {
+          const cell = staffData.get(date);
+          if (cell && cell.state !== "empty" && cell.isLocked !== locked) {
+            updates.push({ staffId, date, isLocked: locked });
+          }
+        }
+      }
+
+      if (updates.length === 0) return;
+      void batchUpdateShifts(updates);
+    },
+    [
+      isEditingDisabled,
+      isAdmin,
+      state.shiftDataMap,
+      dateKeys,
+      batchUpdateShifts,
+    ],
+  );
+
+  const handleLockMonth = useCallback(
+    () => applyLockStateForMonth(true),
+    [applyLockStateForMonth],
+  );
+
+  const handleUnlockMonth = useCallback(
+    () => applyLockStateForMonth(false),
+    [applyLockStateForMonth],
+  );
 
   const selectionTargets = useMemo(() => {
     if (selectionCount > 0) return Array.from(selectedCells);
@@ -637,6 +723,10 @@ export const useCollaborativePageState = (targetMonth: string) => {
     handleChangeState,
     handleLockCells,
     handleUnlockCells,
+    handleLockStaffRow,
+    handleUnlockStaffRow,
+    handleLockMonth,
+    handleUnlockMonth,
     handleApplySuggestion,
     violations,
     isAnalyzing,

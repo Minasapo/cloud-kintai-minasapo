@@ -1,4 +1,5 @@
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { useWorkflowNotificationInbox } from "@features/workflow/notification/model/useWorkflowNotificationInbox";
 import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import {
@@ -12,7 +13,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
+import { SectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import {
   type UIEvent,
@@ -25,13 +33,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import { useWorkflowNotificationInbox } from "@/features/workflow/notification/model/useWorkflowNotificationInbox";
-import { AppButton } from "@/shared/ui/button";
-import {
-  DashboardInnerSurface,
-  PageContent,
-  PageSection,
-} from "@/shared/ui/layout";
 
 const formatEventAt = (eventAt: string) =>
   dayjs(eventAt).format("YYYY/MM/DD HH:mm");
@@ -129,7 +130,7 @@ export default function WorkflowNotificationsPage() {
               alignItems={{ xs: "stretch", sm: "center" }}
             >
               <Stack direction="row" spacing={1} alignItems="center">
-                <Typography variant="h6">通知一覧</Typography>
+                <SectionTitle as="h2">通知一覧</SectionTitle>
                 <Chip
                   label={`未読 ${unreadCount} 件`}
                   color="primary"

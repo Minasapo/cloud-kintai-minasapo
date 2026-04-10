@@ -1,7 +1,6 @@
+import { designTokenVar } from "@shared/designSystem";
+import Link from "@shared/ui/link/Link";
 import type { CSSProperties } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
-import Link from "@/shared/ui/link/Link";
 
 export type BreadcrumbItem = {
   label: string;

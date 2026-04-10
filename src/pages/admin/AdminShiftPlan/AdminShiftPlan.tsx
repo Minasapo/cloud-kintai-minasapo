@@ -1,11 +1,11 @@
 import { useCalendars } from "@entities/calendar/model/useCalendars";
+import { designTokenVar } from "@shared/designSystem";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { designTokenVar } from "@/shared/designSystem";
 
 import { ShiftPlanFooter, ShiftPlanHeader, ShiftPlanTable } from "./components";
 import { useAutoSave, useDayCellFocus, useShiftPlanData } from "./hooks";

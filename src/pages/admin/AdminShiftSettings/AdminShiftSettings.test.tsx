@@ -1,10 +1,10 @@
+import { getDesignTokens } from "@shared/designSystem";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import dayjs from "dayjs";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { getDesignTokens } from "@/shared/designSystem";
 
 import AdminShiftSettings from "./AdminShiftSettings";
 

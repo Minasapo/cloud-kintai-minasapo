@@ -1,8 +1,7 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
+import type { UseWorkflowListFiltersResult } from "@features/workflow/list/useWorkflowListFilters";
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import { type Ref, useImperativeHandle, useMemo, useState } from "react";
-
-import type { UseWorkflowListFiltersResult } from "@/features/workflow/list/useWorkflowListFilters";
 
 import type { WorkflowListFiltersHandle } from "../WorkflowListFilters";
 

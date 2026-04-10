@@ -1,7 +1,7 @@
 import {
   ADMIN_SPLIT_PANEL_COMPONENTS,
   ADMIN_SPLIT_PANEL_OPTIONS,
-} from "@/features/admin/layout/model/adminSplitPanelRegistry";
+} from "@features/admin/layout/model/adminSplitPanelRegistry";
 
 describe("adminSplitPanelRegistry", () => {
   it("分割パネルの選択肢とコンポーネントが1対1で対応している", () => {

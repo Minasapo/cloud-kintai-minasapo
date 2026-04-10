@@ -1,3 +1,4 @@
+import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime";
 import {
   Attendance,
   CreateAttendanceInput,
@@ -6,8 +7,6 @@ import {
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
 
 export enum GoDirectlyFlag {
   YES,

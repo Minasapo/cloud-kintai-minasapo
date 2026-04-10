@@ -1,6 +1,6 @@
+import Clock from "@shared/ui/clock/Clock";
+import { SubsectionTitle } from "@shared/ui/typography";
 import type { ReactNode } from "react";
-
-import Clock from "@/shared/ui/clock/Clock";
 
 type RecorderStatusCardProps = {
   workStatusText: string;
@@ -11,12 +11,13 @@ type RecorderStatusCardProps = {
 function WorkStatusHeading({ text }: { text: string }) {
   return (
     <div className="recorder-status-card__title-wrap">
-      <h2
+      <SubsectionTitle
         className="recorder-status-card__title"
+        contrast="inverse"
         data-testid="work-status-text"
       >
         {text}
-      </h2>
+      </SubsectionTitle>
     </div>
   );
 }

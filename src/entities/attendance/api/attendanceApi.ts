@@ -1,4 +1,10 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { logOperationEvent } from "@entities/operation-log/model/canonicalOperationLog";
 import { createApi } from "@reduxjs/toolkit/query/react";
+import {
+  buildRevisionCondition,
+  isConditionalCheckFailed,
+} from "@shared/api/graphql/concurrency";
 import { upsertAttendanceByStaffAndDate as upsertAttendanceByStaffAndDateDocument } from "@shared/api/graphql/documents/customMutations";
 import {
   createAttendance,
@@ -24,13 +30,7 @@ import type {
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
 import { E02004 } from "@/errors";
-import {
-  buildRevisionCondition,
-  isConditionalCheckFailed,
-} from "@/shared/api/graphql/concurrency";
 
 // 重複データの詳細情報
 export type DuplicateAttendanceInfo = {

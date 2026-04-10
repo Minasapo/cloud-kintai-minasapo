@@ -1,5 +1,3 @@
-import dayjs, { Dayjs } from "dayjs";
-
 import {
   validateAdminConfigForm,
   validateRequiredFields,
@@ -7,7 +5,8 @@ import {
   validateTimeWithinRange,
   validateWorkTimeConfig,
   VALIDATION_ERRORS,
-} from "@/features/admin/configManagement/lib/validation";
+} from "@features/admin/configManagement/lib/validation";
+import dayjs, { Dayjs } from "dayjs";
 
 /**
  * テスト用ヘルパー: 時刻文字列をDayjsオブジェクトに変換

@@ -1,3 +1,4 @@
+import { SectionTitle } from "@shared/ui/typography";
 import type { Dayjs } from "dayjs";
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
 
@@ -119,9 +120,9 @@ export function ReportSummaryHeader({
   return (
     <div className="dr-summary-header">
       <div>
-        <h2 className="dr-summary-date">
+        <SectionTitle className="dr-summary-date">
           {calendarDate.format("YYYY年MM月DD日")}
-        </h2>
+        </SectionTitle>
       </div>
     </div>
   );

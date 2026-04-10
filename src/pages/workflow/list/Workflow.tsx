@@ -1,8 +1,7 @@
 import "./styles.scss";
 
+import { PageContent, PageSection } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
-
-import { PageContent, PageSection } from "@/shared/ui/layout";
 
 import WorkflowAuthLoadingState from "./components/WorkflowAuthLoadingState";
 import WorkflowHero from "./components/WorkflowHero";

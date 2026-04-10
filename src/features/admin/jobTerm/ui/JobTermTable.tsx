@@ -1,9 +1,8 @@
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { CloseDate } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { PenLine, Trash2 } from "lucide-react";
 import { memo, useMemo } from "react";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 type JobTermTableProps = {
   rows: CloseDate[];

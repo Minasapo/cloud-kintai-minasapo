@@ -1,3 +1,13 @@
+import { CreatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
+import { RestTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
+import { SummaryTableCell } from "@entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
+import { UpdatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
+import { WorkDateTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
+import { WorkTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
+import {
+  AttendanceRowVariant,
+  attendanceRowVariantStyles,
+} from "@entities/attendance/ui/rowVariant";
 import { AttendanceStatusTooltip } from "@features/attendance/list/ui/AttendanceStatusTooltip";
 import EditIcon from "@mui/icons-material/Edit";
 import {
@@ -17,17 +27,6 @@ import {
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
-
-import { CreatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
-import { RestTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
-import { SummaryTableCell } from "@/entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
-import { UpdatedAtTableCell } from "@/entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
-import { WorkDateTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
-import { WorkTimeTableCell } from "@/entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
-import {
-  AttendanceRowVariant,
-  attendanceRowVariantStyles,
-} from "@/entities/attendance/ui/rowVariant";
 
 import type { PendingAttendanceControls } from "./PendingAttendanceSection";
 

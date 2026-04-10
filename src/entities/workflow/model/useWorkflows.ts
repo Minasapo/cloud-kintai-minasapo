@@ -5,6 +5,16 @@ import {
   useGetWorkflowsQuery,
   useUpdateWorkflowMutation,
 } from "@entities/workflow/api/workflowApi";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
+import {
+  onCreateWorkflow,
+  onDeleteWorkflow,
+  onUpdateWorkflow,
+} from "@shared/api/graphql/documents/subscriptions";
 import {
   CreateWorkflowInput,
   OnCreateWorkflowSubscription,
@@ -14,17 +24,6 @@ import {
   Workflow as APIWorkflow,
 } from "@shared/api/graphql/types";
 import { useCallback, useEffect } from "react";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import {
-  onCreateWorkflow,
-  onDeleteWorkflow,
-  onUpdateWorkflow,
-} from "@/shared/api/graphql/documents/subscriptions";
 
 const extractErrorMessage = (error: unknown) => {
   if (!error) {

@@ -1,8 +1,7 @@
 import { HistoryToggleOff as HistoryIcon } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
+import { AppIconButton } from "@shared/ui/button";
 import React from "react";
-
-import { AppIconButton } from "@/shared/ui/button";
 
 /**
  * 変更履歴表示トグルボタンのProps

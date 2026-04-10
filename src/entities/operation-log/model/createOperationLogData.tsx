@@ -1,3 +1,4 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { createOperationLog } from "@shared/api/graphql/documents/mutations";
 import {
   CreateOperationLogInput,
@@ -5,8 +6,6 @@ import {
   OperationLog,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import {
   buildOperationLogMutationError,

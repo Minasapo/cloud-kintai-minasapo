@@ -1,15 +1,14 @@
 import "@/shared/lib/dayjs-locale";
 
-import dayjs from "dayjs";
-import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
-import { WorkDateInput } from "@/features/attendance/edit/ui/moveDateItemParts";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { WorkDateInput } from "@features/attendance/edit/ui/moveDateItemParts";
 import {
   applyWorkDateValue,
   buildAttendanceEditPath,
-} from "@/features/attendance/edit/ui/moveDateItemUtils";
+} from "@features/attendance/edit/ui/moveDateItemUtils";
+import dayjs from "dayjs";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function MoveDateItem({
   staffId,

@@ -1,12 +1,11 @@
+import { CompanyHoliday } from "@entities/attendance/lib/CompanyHoliday";
+import { Holiday } from "@entities/attendance/lib/Holiday";
 import { TableCell } from "@mui/material";
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
 } from "@shared/api/graphql/types";
-
-import { CompanyHoliday } from "@/entities/attendance/lib/CompanyHoliday";
-import { Holiday } from "@/entities/attendance/lib/Holiday";
 
 export function HolidayTableCell({
   attendance,

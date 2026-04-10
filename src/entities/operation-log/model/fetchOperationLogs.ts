@@ -1,3 +1,4 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { listOperationLogs } from "@shared/api/graphql/documents/queries";
 import {
   ListOperationLogsQuery,
@@ -5,8 +6,6 @@ import {
   OperationLog,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import {
   buildSafeResourceKeyFilter,

@@ -1,3 +1,4 @@
+import { SectionTitle } from "@shared/ui/typography";
 import { CSSProperties } from "react";
 
 import { useMobileCalendarUI } from "./mobileCalendarContext";
@@ -19,9 +20,9 @@ export const MobileCalendarHeader = () => {
       >
         <span aria-hidden>‹</span>
       </button>
-      <h2 className="mobile-calendar__month-title">
+      <SectionTitle className="mobile-calendar__month-title">
         {currentMonth.format("YYYY年M月")}
-      </h2>
+      </SectionTitle>
       <div className="mobile-calendar__header-actions">
         <button
           type="button"

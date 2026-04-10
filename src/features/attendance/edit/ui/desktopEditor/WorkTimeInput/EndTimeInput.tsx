@@ -1,8 +1,8 @@
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import TimeInputBase from "@features/attendance/edit/ui/items/WorkTimeItem/TimeInputBase";
 import { useContext, useMemo } from "react";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import TimeInputBase from "@/features/attendance/edit/ui/items/WorkTimeItem/TimeInputBase";
 
 export default function EndTimeInput({
   highlight = false,

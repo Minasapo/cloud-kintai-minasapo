@@ -1,15 +1,15 @@
+import { useAppDispatchV2 } from "@app/hooks";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
+import { buildCandidateCloseDates } from "@features/admin/jobTerm/lib/common";
+import EditJobTermInputDialog from "@features/admin/jobTerm/ui/EditJobTermInputDialog";
+import JobTermBulkRegister from "@features/admin/jobTerm/ui/JobTermBulkRegister";
 import { CloseDate } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import dayjs from "dayjs";
 import { lazy, memo, Suspense, useCallback, useMemo, useState } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import { buildCandidateCloseDates } from "@/features/admin/jobTerm/lib/common";
-import EditJobTermInputDialog from "@/features/admin/jobTerm/ui/EditJobTermInputDialog";
-import JobTermBulkRegister from "@/features/admin/jobTerm/ui/JobTermBulkRegister";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
-import ConfirmDialog from "@/shared/ui/feedback/ConfirmDialog";
 
 const JobTermTable = lazy(() => import("@/features/admin/jobTerm/ui/JobTermTable"));
 const JobTermTableSkeleton = () => (<div className="flex flex-col gap-3">

@@ -1,4 +1,4 @@
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 
 import { EXPORT_MODEL_DEFINITIONS } from "./exportRegistry";
 import {

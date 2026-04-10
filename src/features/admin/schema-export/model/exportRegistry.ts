@@ -16,7 +16,7 @@ import {
   listWorkflowNotificationEvents,
   listWorkflows,
   listWorkflowTemplates,
-} from "@/shared/api/graphql/documents/queries";
+} from "@shared/api/graphql/documents/queries";
 
 export type ExportConnection = {
   items?: Array<Record<string, unknown> | null> | null;
