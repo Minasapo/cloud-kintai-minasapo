@@ -74,6 +74,8 @@ const mainSidebar: SidebarEntry[] = [
       ]),
     createCategory("機能仕様", [
       "developer/workflow",
+      "developer/workflow-type-yaml-config",
+      "developer/error-code-reference",
       "developer/office-mode-spec",
       "developer/input-assistance-settings",
       "developer/attendance-management-enabled",

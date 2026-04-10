@@ -32,6 +32,7 @@ description: 設計資料、Amplify、デザインシステム、主要機能仕
 ## 機能仕様
 
 - [ワークフロー機能仕様](./workflow)
+- [エラーコード一覧](./error-code-reference)
 - [オフィスモード / QR 打刻仕様](./office-mode-spec)
 - [打刻補助設定と表示依存](./input-assistance-settings)
 - [勤怠管理対象フラグ仕様](./attendance-management-enabled)

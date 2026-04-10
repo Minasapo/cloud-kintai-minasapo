@@ -37,84 +37,44 @@ jest.mock("@entities/workflow/model/useWorkflows", () => ({
   }),
 }));
 
-jest.mock("@entities/workflow-template/model/useWorkflowTemplates", () => ({
-  __esModule: true,
-  default: () => ({
-    templates: [],
-  }),
-}));
-
 jest.mock("@/hooks/useAppNotification", () => ({
   useAppNotification: () => ({
     notify: jest.fn(),
   }),
 }));
 
-jest.mock("@/features/workflow/application-form/model/useNewWorkflowForm", () => ({
-  useNewWorkflowForm: () => ({
-    draftMode: false,
-    handleDraftToggle: jest.fn(),
-    category: "有給休暇申請",
-    setCategory: jest.fn(),
-    applicationDate: "2026-03-31",
-    formState: {},
-    errors: {
-      dateError: "",
-      absenceDateError: "",
-      overtimeDateError: "",
-      overtimeError: "",
-      customWorkflowTitleError: "",
-      customWorkflowContentError: "",
+jest.mock(
+  "@/features/workflow/application-form/model/DynamicWorkflowFormContext",
+  () => ({
+    DynamicWorkflowFormProvider: function MockDynamicWorkflowFormProvider({
+      children,
+    }: {
+      children: ReactNode;
+    }) {
+      return <>{children}</>;
     },
-    applyValidationErrors: jest.fn(),
-    startDate: "",
-    setStartDate: jest.fn(),
-    endDate: "",
-    setEndDate: jest.fn(),
-    absenceDate: "",
-    setAbsenceDate: jest.fn(),
-    absenceReason: "",
-    setAbsenceReason: jest.fn(),
-    paidReason: "",
-    setPaidReason: jest.fn(),
-    overtimeStart: "",
-    setOvertimeStart: jest.fn(),
-    overtimeEnd: "",
-    setOvertimeEnd: jest.fn(),
-    overtimeDate: "",
-    setOvertimeDate: jest.fn(),
-    overtimeReason: "",
-    setOvertimeReason: jest.fn(),
-    customWorkflowTitle: "",
-    setCustomWorkflowTitle: jest.fn(),
-    customWorkflowContent: "",
-    setCustomWorkflowContent: jest.fn(),
-    selectedTemplateId: "",
-    setSelectedTemplateId: jest.fn(),
   }),
-}));
+);
 
-jest.mock("@/features/workflow/application-form/model/WorkflowFormContext", () => ({
-  WorkflowFormProvider: function MockWorkflowFormProvider({
-    children,
-  }: {
-    children: ReactNode;
-  }) {
-    return <>{children}</>;
+jest.mock(
+  "@/features/workflow/application-form/ui/DynamicWorkflowTypeFields",
+  () => {
+    function MockDynamicWorkflowTypeFields() {
+      return <div>workflow-type-fields</div>;
+    }
+    return MockDynamicWorkflowTypeFields;
   },
-}));
+);
 
-jest.mock("@/features/workflow/application-form/ui/WorkflowTypeFields", () => {
-  function MockWorkflowTypeFields() {
-    return <div>workflow-type-fields</div>;
-  }
+jest.mock(
+  "@/features/workflow/notifications/sendWorkflowSubmissionNotification",
+  () => ({
+    sendWorkflowSubmissionNotification: jest.fn(),
+  }),
+);
 
-  return MockWorkflowTypeFields;
-});
-
-jest.mock("@/features/workflow/notifications/sendWorkflowSubmissionNotification", () => ({
-  sendWorkflowSubmissionNotification: jest.fn(),
-}));
+// YAML import mock
+jest.mock("@features/workflow/config/workflow-types.yaml", () => ({ types: [] }));
 
 describe("NewWorkflow page layout", () => {
   const renderWithRouter = (ui: React.ReactElement) => {

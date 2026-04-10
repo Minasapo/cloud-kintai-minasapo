@@ -1,15 +1,14 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { fetchWorkflowById } from "@entities/workflow/model/loader";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { WorkflowFormProvider } from "@features/workflow/application-form/model/WorkflowFormContext";
 import {
-  buildUpdateWorkflowInput,
-  CLOCK_CORRECTION_CHECK_OUT_LABEL,
-  CLOCK_CORRECTION_LABEL,
-  validateWorkflowForm,
-  type WorkflowFormState,
-} from "@features/workflow/application-form/model/workflowFormModel";
-import WorkflowTypeFields from "@features/workflow/application-form/ui/WorkflowTypeFields";
+  DynamicWorkflowFormProvider,
+} from "@features/workflow/application-form/model/DynamicWorkflowFormContext";
+import {
+  buildDynamicUpdateWorkflowInput,
+  validateDynamicWorkflowForm,
+} from "@features/workflow/application-form/model/dynamicWorkflowFormModel";
+import DynamicWorkflowTypeFields from "@features/workflow/application-form/ui/DynamicWorkflowTypeFields";
 import { extractExistingWorkflowComments } from "@features/workflow/comment-thread/model/workflowCommentBuilder";
 import { useWorkflowEditLoaderState } from "@features/workflow/hooks/useWorkflowEditLoaderState";
 import { sendWorkflowSubmissionNotification } from "@features/workflow/notifications/sendWorkflowSubmissionNotification";
@@ -45,30 +44,9 @@ export default function WorkflowEdit() {
   const { notify } = useAppNotification();
   const {
     category,
-    setCategory,
     applicationDate,
-    startDate,
-    setStartDate,
-    endDate,
-    setEndDate,
-    absenceDate,
-    setAbsenceDate,
-    absenceReason,
-    setAbsenceReason,
-    paidReason,
-    setPaidReason,
-    overtimeDate,
-    setOvertimeDate,
-    overtimeStart,
-    setOvertimeStart,
-    overtimeEnd,
-    setOvertimeEnd,
-    overtimeReason,
-    setOvertimeReason,
-    customWorkflowTitle,
-    setCustomWorkflowTitle,
-    customWorkflowContent,
-    setCustomWorkflowContent,
+    fields,
+    setFieldValue,
     draftMode,
     setDraftMode,
     applicant,
@@ -76,13 +54,8 @@ export default function WorkflowEdit() {
     setExistingComments,
     isDirty,
   } = useWorkflowEditLoaderState(workflow, staffs);
-  const [dateError, setDateError] = useState("");
-  const [absenceDateError, setAbsenceDateError] = useState("");
-  const [overtimeDateError, setOvertimeDateError] = useState("");
-  const [overtimeError, setOvertimeError] = useState("");
-  const [customWorkflowTitleError, setCustomWorkflowTitleError] = useState("");
-  const [customWorkflowContentError, setCustomWorkflowContentError] =
-    useState("");
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const { dialog, runWithoutGuard } = usePageLeaveGuard({
     isDirty,
@@ -91,32 +64,9 @@ export default function WorkflowEdit() {
 
   const handleSave = (e: FormEvent) => {
     e.preventDefault();
-    const formState: WorkflowFormState = {
-      categoryLabel: category,
-      startDate,
-      endDate,
-      absenceDate,
-      paidReason,
-      absenceReason,
-      overtimeDate,
-      overtimeStart,
-      overtimeEnd,
-      overtimeReason,
-      customWorkflowTitle,
-      customWorkflowContent,
-    };
-
-    const validation = validateWorkflowForm(formState);
-    setDateError(validation.errors.dateError ?? "");
-    setAbsenceDateError(validation.errors.absenceDateError ?? "");
-    setOvertimeDateError(validation.errors.overtimeDateError ?? "");
-    setOvertimeError(validation.errors.overtimeError ?? "");
-    setCustomWorkflowTitleError(
-      validation.errors.customWorkflowTitleError ?? "",
-    );
-    setCustomWorkflowContentError(
-      validation.errors.customWorkflowContentError ?? "",
-    );
+    const state = { categoryLabel: category, fields };
+    const validation = validateDynamicWorkflowForm(state);
+    setFieldErrors(validation.fieldErrors);
     if (!validation.isValid) return;
 
     (async () => {
@@ -130,10 +80,10 @@ export default function WorkflowEdit() {
           setExistingComments(normalizedComments);
         }
 
-        const baseInput = buildUpdateWorkflowInput({
+        const baseInput = buildDynamicUpdateWorkflowInput({
           workflowId: id,
           draftMode,
-          state: formState,
+          state,
           existingComments: normalizedComments,
         });
 
@@ -187,17 +137,6 @@ export default function WorkflowEdit() {
     setDraftMode(checked);
   };
 
-  const handleCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const v = e.target.value;
-    setCategory(v);
-    if (v === "有給休暇申請") {
-      const today = new Date().toISOString().slice(0, 10);
-      setStartDate(today);
-      setEndDate(today);
-      if (!paidReason) setPaidReason("私用のため");
-    }
-  };
-
   return (
     <Page
       title="編集"
@@ -241,34 +180,7 @@ export default function WorkflowEdit() {
               <div className={styles.formRow}>
                 <div className={styles.formLabel}>種別</div>
                 <div>
-                  {id ? (
-                    <p className={styles.formValue}>{category || "（未設定）"}</p>
-                  ) : (
-                    <div className={styles.selectWrap}>
-                      <select
-                        className={styles.select}
-                        value={category}
-                        onChange={handleCategoryChange}
-                      >
-                        <option value="">種別を選択</option>
-                        <optgroup label="勤怠">
-                          <option value="有給休暇申請">有給休暇申請</option>
-                          <option value="欠勤申請">欠勤申請</option>
-                          <option value="残業申請">残業申請</option>
-                          <option value={CLOCK_CORRECTION_LABEL}>
-                            {CLOCK_CORRECTION_LABEL}
-                          </option>
-                          <option value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
-                            {CLOCK_CORRECTION_CHECK_OUT_LABEL}
-                          </option>
-                          <option value="その他">その他</option>
-                        </optgroup>
-                      </select>
-                      <span className={styles.selectIcon} aria-hidden="true">
-                        ▼
-                      </span>
-                    </div>
-                  )}
+                  <p className={styles.formValue}>{category || "（未設定）"}</p>
                 </div>
               </div>
 
@@ -286,54 +198,21 @@ export default function WorkflowEdit() {
             <div className={styles.formRow}>
               <div className={styles.formLabel}>申請日</div>
               <div>
-                {id ? (
-                  <p className={styles.formValue}>{applicationDate}</p>
-                ) : (
-                  <input
-                    className={styles.readonlyInput}
-                    value={applicationDate}
-                    readOnly
-                  />
-                )}
+                <p className={styles.formValue}>{applicationDate}</p>
               </div>
             </div>
 
-            <WorkflowFormProvider
+            <DynamicWorkflowFormProvider
               value={{
                 category,
                 disabled: false,
-                startDate,
-                setStartDate,
-                endDate,
-                setEndDate,
-                dateError,
-                paidReason,
-                setPaidReason,
-                absenceDate,
-                setAbsenceDate,
-                absenceDateError,
-                absenceReason,
-                setAbsenceReason,
-                overtimeDate,
-                setOvertimeDate,
-                overtimeDateError,
-                overtimeStart,
-                setOvertimeStart,
-                overtimeEnd,
-                setOvertimeEnd,
-                overtimeError,
-                overtimeReason,
-                setOvertimeReason,
-                customWorkflowTitle,
-                setCustomWorkflowTitle,
-                customWorkflowContent,
-                setCustomWorkflowContent,
-                customWorkflowTitleError,
-                customWorkflowContentError,
+                fields,
+                setFieldValue,
+                fieldErrors,
               }}
             >
-              <WorkflowTypeFields />
-            </WorkflowFormProvider>
+              <DynamicWorkflowTypeFields />
+            </DynamicWorkflowFormProvider>
 
             <div className={styles.formRow}>
               <div className={styles.formLabel}>下書き</div>
