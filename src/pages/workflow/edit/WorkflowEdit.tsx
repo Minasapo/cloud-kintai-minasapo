@@ -246,8 +246,12 @@ export default function WorkflowEdit() {
                   >
                     申請詳細へ戻る
                   </button>
-                  <button type="submit" className={styles.submitButton}>
-                    保存
+                  <button
+                    type="submit"
+                    className={styles.submitButton}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "処理中..." : "保存"}
                   </button>
                 </div>
               </div>
