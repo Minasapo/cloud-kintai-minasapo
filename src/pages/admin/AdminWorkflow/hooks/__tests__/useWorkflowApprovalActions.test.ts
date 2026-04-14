@@ -39,6 +39,7 @@ type WorkflowData = NonNullable<GetWorkflowQuery["getWorkflow"]>;
 const processPaidLeaveMock = processPaidLeaveApprovalAttendance as jest.Mock;
 const processClockCorrectionMock =
   processClockCorrectionApprovalAttendance as jest.Mock;
+const confirmSpy = jest.spyOn(window, "confirm");
 
 const createWorkflow = (
   overrides: Partial<WorkflowData> = {}
@@ -102,7 +103,6 @@ describe("useWorkflowApprovalActions", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
     processPaidLeaveMock.mockResolvedValue({ kind: "updated" });
     processClockCorrectionMock.mockResolvedValue({ kind: "updated" });
     logOperationEventMock.mockResolvedValue(undefined);
@@ -133,14 +133,17 @@ describe("useWorkflowApprovalActions", () => {
       })
     );
 
+    let succeeded = false;
     await act(async () => {
-      await result.current.handleApprove();
+      succeeded = await result.current.handleApprove();
     });
 
     expect(updateWorkflow).toHaveBeenCalledTimes(1);
     expect(setWorkflow).toHaveBeenCalledTimes(1);
     expect(notifySuccess).toHaveBeenCalledWith("承認しました");
     expect(notifyError).not.toHaveBeenCalled();
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(succeeded).toBe(true);
   });
 
   it("却下時にworkflowを更新し成功通知を出す", async () => {
@@ -168,14 +171,85 @@ describe("useWorkflowApprovalActions", () => {
       })
     );
 
+    let succeeded = false;
     await act(async () => {
-      await result.current.handleReject();
+      succeeded = await result.current.handleReject();
     });
 
     expect(updateWorkflow).toHaveBeenCalledTimes(1);
     expect(setWorkflow).toHaveBeenCalledTimes(1);
     expect(notifySuccess).toHaveBeenCalledWith("却下しました");
     expect(notifyError).not.toHaveBeenCalled();
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(succeeded).toBe(true);
+  });
+
+  it("キャンセル済み申請の承認は失敗として扱う", async () => {
+    const workflow = createWorkflow({
+      status: WorkflowStatus.CANCELLED,
+    });
+
+    const { result } = renderHook(() =>
+      useWorkflowApprovalActions({
+        workflow,
+        cognitoUser: { id: "cognito-approver-id" },
+        staffs,
+        updateWorkflow,
+        setWorkflow,
+        notifySuccess,
+        notifyError,
+        getStartTime: () => dayjs("2026-02-01T09:00:00"),
+        getEndTime: () => dayjs("2026-02-01T18:00:00"),
+        getLunchRestStartTime: () => dayjs("2026-02-01T12:00:00"),
+        getLunchRestEndTime: () => dayjs("2026-02-01T13:00:00"),
+        getAttendanceByStaffAndDate,
+        createAttendance,
+        updateAttendance,
+      })
+    );
+
+    let succeeded = true;
+    await act(async () => {
+      succeeded = await result.current.handleApprove();
+    });
+
+    expect(succeeded).toBe(false);
+    expect(updateWorkflow).not.toHaveBeenCalled();
+    expect(notifyError).toHaveBeenCalledWith("キャンセル済みの申請には操作できません");
+  });
+
+  it("承認者が解決できない場合は失敗を返す", async () => {
+    const workflow = createWorkflow();
+
+    const { result } = renderHook(() =>
+      useWorkflowApprovalActions({
+        workflow,
+        cognitoUser: { id: "unknown-user" },
+        staffs,
+        updateWorkflow,
+        setWorkflow,
+        notifySuccess,
+        notifyError,
+        getStartTime: () => dayjs("2026-02-01T09:00:00"),
+        getEndTime: () => dayjs("2026-02-01T18:00:00"),
+        getLunchRestStartTime: () => dayjs("2026-02-01T12:00:00"),
+        getLunchRestEndTime: () => dayjs("2026-02-01T13:00:00"),
+        getAttendanceByStaffAndDate,
+        createAttendance,
+        updateAttendance,
+      })
+    );
+
+    let succeeded = true;
+    await act(async () => {
+      succeeded = await result.current.handleApprove();
+    });
+
+    expect(succeeded).toBe(false);
+    expect(updateWorkflow).not.toHaveBeenCalled();
+    expect(notifyError).toHaveBeenCalledWith(
+      "承認を実行するユーザー情報が取得できませんでした。"
+    );
   });
 
   it("打刻修正のユーザーエラー時はエラー通知して承認成功通知しない", async () => {
@@ -211,10 +285,12 @@ describe("useWorkflowApprovalActions", () => {
       })
     );
 
+    let succeeded = true;
     await act(async () => {
-      await result.current.handleApprove();
+      succeeded = await result.current.handleApprove();
     });
 
+    expect(succeeded).toBe(false);
     expect(notifyError).toHaveBeenCalledWith("入力エラー");
     expect(notifySuccess).not.toHaveBeenCalledWith("承認しました");
   });
@@ -253,10 +329,12 @@ describe("useWorkflowApprovalActions", () => {
       })
     );
 
+    let succeeded = false;
     await act(async () => {
-      await result.current.handleApprove();
+      succeeded = await result.current.handleApprove();
     });
 
+    expect(succeeded).toBe(true);
     expect(notifySuccess).toHaveBeenCalledWith(
       "有給申請を承認しました（勤怠情報の更新はスキップ）"
     );

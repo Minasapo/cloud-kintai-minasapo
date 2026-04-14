@@ -1,7 +1,6 @@
 import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
 import { formatDateSlash } from "@shared/lib/time";
 import StatusChip from "@shared/ui/chips/StatusChip";
-import { Heading } from "@shared/ui/typography";
 import type { ReactNode } from "react";
 
 import type { WorkflowApprovalStepView } from "../../approval-flow/types";
@@ -57,7 +56,6 @@ function MetadataRow({
   );
 }
 
-/** props渡し版（管理者画面など、Providerの外で使う場合） */
 export function WorkflowMetadataPanelBase({
   workflowId,
   fallbackId,
@@ -84,93 +82,100 @@ export function WorkflowMetadataPanelBase({
     : "-";
 
   return (
-    <section
-      className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5"
-    >
+    <section className="overflow-hidden ro vunded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
       <div className="flex flex-col gap-1.5 border-b border-slate-200/80 pb-4">
-        <Heading level="section" appearance="standard" className="m-0 text-slate-950">
-          申請情報
-        </Heading>
         <p className="m-0 text-sm leading-6 text-slate-500">
           申請内容と現在のステータスを確認できます。
         </p>
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
-      <div className="grid grid-cols-1 items-start md:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]">
-        <MetadataRow label="ID" value={displayId} />
-        <MetadataRow label="種別" value={categoryLabel} />
-        <MetadataRow label="申請者" value={staffName} />
-        <MetadataRow label="申請日" value={applicationDate} />
-        <MetadataRow label="ステータス" value={<StatusChip status={status} />} />
+        <div className="grid grid-cols-1 items-start md:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]">
+          <MetadataRow label="ID" value={displayId} />
+          <MetadataRow label="種別" value={categoryLabel} />
+          <MetadataRow label="申請者" value={staffName} />
+          <MetadataRow label="申請日" value={applicationDate} />
+          <MetadataRow
+            label="ステータス"
+            value={<StatusChip status={status} />}
+          />
 
-        {isPaidLeave && (
-          <>
-            <MetadataRow
-              label="取得期間"
-              value={
-                overTimeDetails?.startTime && overTimeDetails?.endTime
-                  ? overTimeDetails.startTime === overTimeDetails.endTime
-                    ? formatDateSlash(overTimeDetails.startTime)
-                    : `${formatDateSlash(overTimeDetails.startTime)} ～ ${formatDateSlash(
-                        overTimeDetails.endTime,
-                      )}`
-                  : "-"
-              }
-            />
-            {overTimeDetails?.reason && (
-              <MetadataRow label="申請理由" value={overTimeDetails.reason} />
-            )}
-          </>
-        )}
+          {isPaidLeave && (
+            <>
+              <MetadataRow
+                label="取得期間"
+                value={
+                  overTimeDetails?.startTime && overTimeDetails?.endTime
+                    ? overTimeDetails.startTime === overTimeDetails.endTime
+                      ? formatDateSlash(overTimeDetails.startTime)
+                      : `${formatDateSlash(overTimeDetails.startTime)} ～ ${formatDateSlash(
+                          overTimeDetails.endTime,
+                        )}`
+                    : "-"
+                }
+              />
+              {overTimeDetails?.reason && (
+                <MetadataRow label="申請理由" value={overTimeDetails.reason} />
+              )}
+            </>
+          )}
 
-        {isAbsence && (
-          <>
-            <MetadataRow label="欠勤日" value={formatDateSlash(overTimeDetails?.date) || "-"} />
-            {overTimeDetails?.reason && (
-              <MetadataRow label="申請理由" value={overTimeDetails.reason} />
-            )}
-          </>
-        )}
+          {isAbsence && (
+            <>
+              <MetadataRow
+                label="欠勤日"
+                value={formatDateSlash(overTimeDetails?.date) || "-"}
+              />
+              {overTimeDetails?.reason && (
+                <MetadataRow label="申請理由" value={overTimeDetails.reason} />
+              )}
+            </>
+          )}
 
-        {isOvertime && (
-          <>
-            <MetadataRow label="残業予定日" value={overtimeDate || "-"} />
-            <MetadataRow label="残業予定時間" value={overtimeTimeRange} />
-            {overTimeDetails?.reason && (
-              <MetadataRow label="残業理由" value={overTimeDetails.reason} />
-            )}
-          </>
-        )}
+          {isOvertime && (
+            <>
+              <MetadataRow label="残業予定日" value={overtimeDate || "-"} />
+              <MetadataRow label="残業予定時間" value={overtimeTimeRange} />
+              {overTimeDetails?.reason && (
+                <MetadataRow label="残業理由" value={overTimeDetails.reason} />
+              )}
+            </>
+          )}
 
-        {isClockCorrection && (
-          <>
-            <MetadataRow label="対象日" value={formatDateSlash(overTimeDetails?.date) || "-"} />
-            <MetadataRow
-              label="修正時刻"
-              value={
-                overTimeDetails?.startTime || overTimeDetails?.endTime
-                  ? `${overTimeDetails.startTime || overTimeDetails.endTime}`
-                  : "-"
-              }
-            />
-            {overTimeDetails?.reason && (
-              <MetadataRow label="修正理由" value={overTimeDetails.reason} />
-            )}
-          </>
-        )}
+          {isClockCorrection && (
+            <>
+              <MetadataRow
+                label="対象日"
+                value={formatDateSlash(overTimeDetails?.date) || "-"}
+              />
+              <MetadataRow
+                label="修正時刻"
+                value={
+                  overTimeDetails?.startTime || overTimeDetails?.endTime
+                    ? `${overTimeDetails.startTime || overTimeDetails.endTime}`
+                    : "-"
+                }
+              />
+              {overTimeDetails?.reason && (
+                <MetadataRow label="修正理由" value={overTimeDetails.reason} />
+              )}
+            </>
+          )}
 
-        {isCustom && (
-          <>
-            <MetadataRow label="タイトル" value={customWorkflowTitle || "-"} />
-            <MetadataRow
-              label="詳細"
-              value={customWorkflowContent || "-"}
-              preserveWhitespace
-            />
-          </>
-        )}
-      </div>
+          {isCustom && (
+            <>
+              <MetadataRow
+                label="タイトル"
+                value={customWorkflowTitle || "-"}
+              />
+              <MetadataRow
+                label="詳細"
+                value={customWorkflowContent || "-"}
+                preserveWhitespace
+              />
+            </>
+          )}
+        </div>
       </div>
 
       <div className="mt-6">
@@ -182,8 +187,14 @@ export function WorkflowMetadataPanelBase({
 
 /** context接続版（WorkflowDetailProvider 内で使う場合） */
 export function WorkflowMetadataPanelView() {
-  const { workflow, id, categoryLabel, staffName, applicationDate, approvalSteps } =
-    useWorkflowDetailContext();
+  const {
+    workflow,
+    id,
+    categoryLabel,
+    staffName,
+    applicationDate,
+    approvalSteps,
+  } = useWorkflowDetailContext();
 
   return (
     <WorkflowMetadataPanelBase

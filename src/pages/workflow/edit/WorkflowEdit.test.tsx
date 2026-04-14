@@ -43,43 +43,27 @@ jest.mock("@/entities/workflow/model/loader", () => ({
   fetchWorkflowById: jest.fn(),
 }));
 
-jest.mock("@/features/workflow/application-form/model/WorkflowFormContext", () => ({
-  WorkflowFormProvider: function MockWorkflowFormProvider({
-    children,
-  }: {
-    children: ReactNode;
-  }) {
-    return <>{children}</>;
-  },
-}));
+jest.mock(
+  "@/features/workflow/application-form/model/DynamicWorkflowFormContext",
+  () => ({
+    DynamicWorkflowFormProvider: function MockDynamicWorkflowFormProvider({
+      children,
+    }: {
+      children: ReactNode;
+    }) {
+      return <>{children}</>;
+    },
+  }),
+);
 
 jest.mock("@/features/workflow/hooks/useWorkflowEditLoaderState", () => ({
   useWorkflowEditLoaderState: () => ({
     category: "有給休暇申請",
     setCategory: jest.fn(),
     applicationDate: "2026-03-31",
-    startDate: "",
-    setStartDate: jest.fn(),
-    endDate: "",
-    setEndDate: jest.fn(),
-    absenceDate: "",
-    setAbsenceDate: jest.fn(),
-    absenceReason: "",
-    setAbsenceReason: jest.fn(),
-    paidReason: "",
-    setPaidReason: jest.fn(),
-    overtimeDate: "",
-    setOvertimeDate: jest.fn(),
-    overtimeStart: "",
-    setOvertimeStart: jest.fn(),
-    overtimeEnd: "",
-    setOvertimeEnd: jest.fn(),
-    overtimeReason: "",
-    setOvertimeReason: jest.fn(),
-    customWorkflowTitle: "",
-    setCustomWorkflowTitle: jest.fn(),
-    customWorkflowContent: "",
-    setCustomWorkflowContent: jest.fn(),
+    fields: {},
+    setFieldValue: jest.fn(),
+    resetFields: jest.fn(),
     draftMode: false,
     setDraftMode: jest.fn(),
     applicant: {
@@ -88,20 +72,29 @@ jest.mock("@/features/workflow/hooks/useWorkflowEditLoaderState", () => ({
     },
     existingComments: [],
     setExistingComments: jest.fn(),
+    isDirty: false,
   }),
 }));
 
-jest.mock("@/features/workflow/application-form/ui/WorkflowTypeFields", () => {
-  function MockWorkflowTypeFields() {
-    return <div>workflow-type-fields</div>;
-  }
+jest.mock(
+  "@/features/workflow/application-form/ui/DynamicWorkflowTypeFields",
+  () => {
+    function MockDynamicWorkflowTypeFields() {
+      return <div>workflow-type-fields</div>;
+    }
+    return MockDynamicWorkflowTypeFields;
+  },
+);
 
-  return MockWorkflowTypeFields;
-});
+jest.mock(
+  "@/features/workflow/notifications/sendWorkflowSubmissionNotification",
+  () => ({
+    sendWorkflowSubmissionNotification: jest.fn(),
+  }),
+);
 
-jest.mock("@/features/workflow/notifications/sendWorkflowSubmissionNotification", () => ({
-  sendWorkflowSubmissionNotification: jest.fn(),
-}));
+// YAML import mock
+jest.mock("@features/workflow/config/workflow-types.yaml", () => ({ types: [] }));
 
 describe("WorkflowEdit page layout", () => {
   const renderWithRouter = (ui: React.ReactElement) => {

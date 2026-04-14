@@ -28,7 +28,7 @@ export default function RegisterDashboard({
           configId={configId}
           announcement={announcement}
         />
-        <AdminPendingApprovalSummary />
+        <AdminPendingApprovalSummary layoutMode="two-columns" />
         <ElapsedDurationCards elapsedWorkInfo={elapsedWorkInfo} />
         <RegisterAttendanceSummaryCard
           attendanceErrorCount={attendanceErrorCount}

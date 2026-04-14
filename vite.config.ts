@@ -1,3 +1,4 @@
+import ViteYaml from "@modyfi/vite-plugin-yaml";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
@@ -88,6 +89,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    ViteYaml(),
     react({
       // React Compilerは一時的に無効化
       // 理由: 既存コードベースの大規模な修正が必要

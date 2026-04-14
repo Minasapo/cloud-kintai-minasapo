@@ -17,14 +17,18 @@ describe("adminChildRoutes", () => {
     expect((shiftRoute?.element as React.ReactElement).type).toBe(NotFound);
   });
 
-  it("treats /admin/workflow as not found", () => {
+  it("registers /admin/workflow with index and :id children", () => {
     const workflowRoute = adminChildRoutes.find(
-      (route) => route.path === "workflow/*",
+      (route) => route.path === "workflow",
     );
 
     expect(workflowRoute).toBeDefined();
-    expect(workflowRoute?.element).toBeDefined();
-    expect(React.isValidElement(workflowRoute?.element)).toBe(true);
-    expect((workflowRoute?.element as React.ReactElement).type).toBe(NotFound);
+    expect(workflowRoute?.children).toBeDefined();
+
+    const indexRoute = workflowRoute?.children?.find((r) => r.index === true);
+    const detailRoute = workflowRoute?.children?.find((r) => r.path === ":id");
+
+    expect(indexRoute).toBeDefined();
+    expect(detailRoute).toBeDefined();
   });
 });

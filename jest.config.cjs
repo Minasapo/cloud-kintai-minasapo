@@ -28,8 +28,9 @@ module.exports = {
   testMatch: ["**/src/**/?(*.)+(spec|test).[tj]s?(x)"],
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.(yaml|yml)$": "<rootDir>/__mocks__/yamlTransformer.cjs",
   },
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node", "yaml", "yml"],
   // Coverage configuration
   coverageReporters: ["text", "lcov", "html"],
   collectCoverageFrom: [

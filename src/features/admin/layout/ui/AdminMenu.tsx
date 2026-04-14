@@ -24,6 +24,7 @@ const MENU_GROUP_BY_HREF: Record<string, AdminMenuGroupKey> = {
   "/admin/shift": "operations",
   "/admin/shift-plan": "operations",
   "/admin/daily-report": "operations",
+  "/admin/workflow": "governance",
   "/admin/logs": "governance",
   "/admin/master": "governance",
 };

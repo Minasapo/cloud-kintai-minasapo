@@ -1,0 +1,144 @@
+types:
+  - id: PAID_LEAVE
+    label: 有給休暇申請
+    fields:
+      - key: dateRange
+        type: date_range
+        label: 取得期間
+        required: true
+        validation:
+          startBeforeEnd: true
+      - key: reason
+        type: text
+        label: 申請理由
+    payload:
+      type: overTimeDetails
+      mapping:
+        date: "fields.dateRange.start"
+        startTime: "fields.dateRange.start"
+        endTime: "fields.dateRange.end"
+        reason: "fields.reason"
+
+  - id: ABSENCE
+    label: 欠勤申請
+    fields:
+      - key: date
+        type: date
+        label: 欠勤日
+        required: true
+      - key: reason
+        type: text
+        label: 欠勤理由
+    payload:
+      type: overTimeDetails
+      mapping:
+        date: "fields.date"
+        startTime: "fields.date"
+        endTime: "fields.date"
+        reason: "fields.reason"
+
+  - id: OVERTIME
+    label: 残業申請
+    fields:
+      - key: date
+        type: date
+        label: 残業予定日
+        required: true
+      - key: timeRange
+        type: time_range
+        label: 残業予定時間
+        required: true
+        validation:
+          startBeforeEnd: true
+      - key: reason
+        type: text
+        label: 残業理由
+    payload:
+      type: overTimeDetails
+      mapping:
+        date: "fields.date"
+        startTime: "fields.timeRange.start"
+        endTime: "fields.timeRange.end"
+        reason: "fields.reason"
+
+  - id: COMPENSATORY_LEAVE
+    label: 振替休暇申請
+    fields:
+      - key: targetDate
+        type: date
+        label: 振替対象日
+        required: true
+      - key: compensatoryDate
+        type: date
+        label: 振替取得日
+        required: true
+      - key: reason
+        type: text
+        label: 理由
+    payload:
+      type: overTimeDetails
+      mapping:
+        date: "fields.targetDate"
+        startTime: "fields.compensatoryDate"
+        endTime: "fields.compensatoryDate"
+        reason: "fields.reason"
+
+  - id: CLOCK_CORRECTION
+    label: "打刻修正(出勤/退勤忘れ)"
+    subTypes:
+      - id: CLOCK_IN
+        label: "打刻修正(出勤忘れ)"
+        fields:
+          - key: date
+            type: date
+            label: 対象日
+            required: true
+          - key: checkInTime
+            type: time
+            label: 出勤時間
+            required: true
+        payload:
+          type: overTimeDetails
+          mapping:
+            date: "fields.date"
+            startTime: "fields.checkInTime"
+            endTime: "fields.checkInTime"
+            reason: "const.CLOCK_CORRECTION_CHECK_IN_LABEL"
+      - id: CLOCK_OUT
+        label: "打刻修正(退勤忘れ)"
+        fields:
+          - key: date
+            type: date
+            label: 対象日
+            required: true
+          - key: checkOutTime
+            type: time
+            label: 退勤時間
+            required: true
+        payload:
+          type: overTimeDetails
+          mapping:
+            date: "fields.date"
+            startTime: "fields.checkOutTime"
+            endTime: "fields.checkOutTime"
+            reason: "const.CLOCK_CORRECTION_CHECK_OUT_LABEL"
+
+  - id: CUSTOM
+    label: その他
+    fields:
+      - key: template
+        type: template_select
+        label: テンプレート
+      - key: title
+        type: text
+        label: タイトル
+        required: true
+      - key: content
+        type: textarea
+        label: 詳細
+        required: true
+    payload:
+      type: custom
+      mapping:
+        customWorkflowTitle: "fields.title"
+        customWorkflowContent: "fields.content"
