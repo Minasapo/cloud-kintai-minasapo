@@ -187,9 +187,13 @@ describe("RegisterContent", () => {
     const errorCardCount = screen.getByTestId(
       "register-dashboard-attendance-error-count",
     );
+    const errorCardLink = screen.getByTestId(
+      "register-dashboard-attendance-error-card-link",
+    );
 
     expect(mobileDashboardSlot).toBeInTheDocument();
     expect(mobileDashboardSlot).toContainElement(errorCardCount);
+    expect(mobileDashboardSlot).toContainElement(errorCardLink);
     expect(mobileDashboardSlot.compareDocumentPosition(timeRecorder)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
@@ -204,9 +208,14 @@ describe("RegisterContent", () => {
     ).not.toBeInTheDocument();
 
     expect(errorCardCount).toHaveTextContent("0件");
+    expect(errorCardLink).toHaveAttribute("href", "/attendance/list");
 
     fireEvent.click(screen.getByTestId("trigger-attendance-error"));
 
     expect(errorCardCount).toHaveTextContent("2件");
+    expect(errorCardLink).toHaveAttribute(
+      "aria-label",
+      "打刻エラー件数 2件。勤怠一覧を開く",
+    );
   });
 });

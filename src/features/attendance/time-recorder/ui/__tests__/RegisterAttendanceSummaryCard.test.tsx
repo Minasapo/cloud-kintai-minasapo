@@ -150,6 +150,12 @@ describe("RegisterAttendanceSummaryCard", () => {
       screen.getByTestId("register-dashboard-attendance-error-count"),
     ).toHaveTextContent("0件");
     expect(
+      screen.getByTestId("register-dashboard-attendance-error-card"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("register-dashboard-attendance-error-card-link"),
+    ).not.toBeInTheDocument();
+    expect(
       screen.getByTestId("register-dashboard-attendance-error-count"),
     ).toHaveClass("text-slate-950");
 

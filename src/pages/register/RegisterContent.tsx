@@ -43,6 +43,7 @@ export default function RegisterContent({
               <RegisterSummaryAttendanceErrorCountCard
                 attendanceErrorCount={attendanceErrorCount}
                 hasAttendanceError={attendanceErrorCount > 0}
+                to="/attendance/list"
               />
             </div>
           )}

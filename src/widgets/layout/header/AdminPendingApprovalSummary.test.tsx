@@ -67,6 +67,10 @@ describe("AdminPendingApprovalSummary", () => {
   beforeEach(() => {
     mockUseWorkflows.mockReset();
     mockGraphql.mockReset();
+    mockUseWorkflows.mockReturnValue({
+      workflows: [],
+      loading: false,
+    });
   });
 
   it("管理者には勤怠申請カードと管理者のみタグを表示する", async () => {
@@ -120,23 +124,37 @@ describe("AdminPendingApprovalSummary", () => {
     expect(
       screen.getByRole("heading", { name: "勤怠修正申請" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "ワークフロー申請" }),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("admin-pending-approval-summary")).toHaveClass(
       "grid-cols-1",
     );
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
       "rounded-[4px]",
     );
-    expect(screen.getAllByText("管理者のみ")).toHaveLength(1);
+    expect(screen.getByTestId("admin-pending-workflow-card")).toHaveClass(
+      "rounded-[4px]",
+    );
+    expect(screen.getAllByText("管理者のみ")).toHaveLength(2);
     expect(
       screen.getByTestId("admin-pending-attendance-card-description-tooltip"),
     ).toHaveAttribute("aria-label", "未承認の勤怠修正申請");
+    expect(
+      screen.getByTestId("admin-pending-workflow-card-description-tooltip"),
+    ).toHaveAttribute("aria-label", "未承認のワークフロー申請");
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(1);
+    expect(links).toHaveLength(2);
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveAttribute(
       "href",
       "/admin/attendances",
     );
+    expect(screen.getByTestId("admin-pending-workflow-card")).toHaveAttribute(
+      "href",
+      "/admin/workflow",
+    );
     expect(screen.getByText("集計中")).toBeInTheDocument();
+    expect(screen.getByText("2件")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("1件")).toBeInTheDocument();
@@ -236,9 +254,71 @@ describe("AdminPendingApprovalSummary", () => {
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
       "h-full",
     );
+    expect(screen.getByTestId("admin-pending-workflow-card")).toHaveClass(
+      "rounded-[4px]",
+    );
+    expect(screen.getByTestId("admin-pending-workflow-card")).toHaveClass(
+      "h-full",
+    );
     expect(
       screen.getByTestId("admin-pending-attendance-card-description-tooltip"),
     ).toHaveAttribute("aria-label", "未承認の勤怠修正申請");
+    expect(
+      screen.getByTestId("admin-pending-workflow-card-description-tooltip"),
+    ).toHaveAttribute("aria-label", "未承認のワークフロー申請");
     expect(screen.queryByText("管理者のみ")).not.toBeInTheDocument();
+  });
+
+  it("layoutMode=two-columns の場合は2列で表示する", async () => {
+    mockGraphql.mockImplementation(({ query }: { query: unknown }) => {
+      if (query === listAttendances) {
+        return Promise.resolve({
+          data: {
+            listAttendances: {
+              items: [],
+              nextToken: null,
+            },
+          },
+        });
+      }
+
+      if (
+        query === onCreateAttendance ||
+        query === onUpdateAttendance ||
+        query === onDeleteAttendance
+      ) {
+        return createSubscription();
+      }
+
+      return Promise.resolve({});
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthContext.Provider
+          value={{
+            signOut: jest.fn(),
+            signIn: jest.fn(),
+            authStatus: "authenticated",
+            isAuthenticated: true,
+            isLoading: false,
+            roles: [StaffRole.ADMIN],
+            isCognitoUserRole: (role: StaffRole) => role === StaffRole.ADMIN,
+          }}
+        >
+          <AdminPendingApprovalSummary layoutMode="two-columns" />
+        </AuthContext.Provider>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("admin-pending-approval-summary"),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("admin-pending-approval-summary")).toHaveClass(
+      "grid-cols-2",
+    );
   });
 });

@@ -19,6 +19,7 @@ import {
   AttendanceQueryTrigger,
   CreateAttendanceTrigger,
   processClockCorrectionApprovalAttendance,
+  processCompensatoryLeaveApprovalAttendance,
   processPaidLeaveApprovalAttendance,
   StaffLike,
   UpdateAttendanceTrigger,
@@ -167,6 +168,39 @@ export const useWorkflowApprovalActions = ({
               : "有給勤怠の処理に失敗しました";
           logger.error("Paid leave attendance processing failed:", message);
           notifySuccess("有給申請を承認しました（勤怠データの処理に失敗）");
+        }
+      }
+
+      if (isFinal && (updated.category as string) === "COMPENSATORY_LEAVE") {
+        try {
+          const result = await processCompensatoryLeaveApprovalAttendance({
+            workflow: updated,
+            staffs,
+            getStartTime,
+            getEndTime,
+            getLunchRestStartTime,
+            getLunchRestEndTime,
+            getAttendanceByStaffAndDate,
+            createAttendance,
+            updateAttendance,
+          });
+
+          if (result.kind === "skipped") {
+            notifySuccess("振替休暇申請を承認しました（勤怠情報の更新はスキップ）");
+          } else {
+            notifySuccess("振替休暇申請を承認し、勤怠データを更新しました");
+          }
+        } catch (compensatoryError) {
+          if (compensatoryError instanceof WorkflowApprovalUserError) {
+            notifyError(compensatoryError.message);
+            return false;
+          }
+
+          logger.error(
+            "Compensatory leave attendance processing failed:",
+            compensatoryError,
+          );
+          notifySuccess("振替休暇申請を承認しました（勤怠データの処理に失敗）");
         }
       }
 

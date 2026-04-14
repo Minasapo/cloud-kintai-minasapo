@@ -59,6 +59,17 @@ export const initDynamicFieldsFromWorkflow = (
       };
     }
 
+    case "振替休暇申請": {
+      const targetDate = od?.date ? isoDateFromTimestamp(od.date) : "";
+      // startTime に振替取得日（YYYY-MM-DD）を格納する
+      const compensatoryDate = od?.startTime ?? "";
+      return {
+        targetDate,
+        compensatoryDate,
+        reason: od?.reason ?? "",
+      };
+    }
+
     case "その他":
       return {
         title: workflow.customWorkflowTitle ?? "",

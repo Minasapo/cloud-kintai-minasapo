@@ -25,6 +25,7 @@ const WORKFLOW_CATEGORY_LABELS: Record<WorkflowCategory, string> = {
   [WorkflowCategory.OVERTIME]: "時間外勤務申請",
   [WorkflowCategory.CLOCK_CORRECTION]: "勤怠修正申請",
   [WorkflowCategory.CUSTOM]: "その他申請",
+  [WorkflowCategory.COMPENSATORY_LEAVE]: "振替休暇申請",
 };
 
 /**

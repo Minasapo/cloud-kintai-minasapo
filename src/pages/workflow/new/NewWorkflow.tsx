@@ -347,6 +347,8 @@ export default function NewWorkflow() {
       });
     } else if (v === "欠勤申請") {
       resetFields({ date: today, reason: "" });
+    } else if (v === "振替休暇申請") {
+      resetFields({ targetDate: today, compensatoryDate: today, reason: "" });
     } else {
       resetFields();
     }
