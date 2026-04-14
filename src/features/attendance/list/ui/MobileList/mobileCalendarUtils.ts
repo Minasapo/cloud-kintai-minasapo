@@ -190,22 +190,22 @@ export const getStatusBadgeMeta = (status: AttendanceStatus) => {
   if (status === AttendanceStatus.Error) {
     return {
       label: "エラー",
-      backgroundColor: "var(--mui-palette-error-light)",
-      color: "var(--mui-palette-error-dark)",
+      backgroundColor: "rgba(211, 47, 47, 0.14)",
+      color: "#8f1d1d",
     };
   }
   if (status === AttendanceStatus.Late) {
     return {
       label: "遅刻",
-      backgroundColor: "var(--mui-palette-warning-light)",
-      color: "var(--mui-palette-warning-dark)",
+      backgroundColor: "rgba(237, 108, 2, 0.18)",
+      color: "#8a3b00",
     };
   }
   if (status === AttendanceStatus.Ok) {
     return {
       label: "正常",
-      backgroundColor: "var(--mui-palette-success-light)",
-      color: "var(--mui-palette-success-dark)",
+      backgroundColor: "rgba(46, 125, 50, 0.14)",
+      color: "#1f5f24",
     };
   }
   return {

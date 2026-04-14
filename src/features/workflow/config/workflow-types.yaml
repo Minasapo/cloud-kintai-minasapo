@@ -61,6 +61,28 @@ types:
         endTime: "fields.timeRange.end"
         reason: "fields.reason"
 
+  - id: COMPENSATORY_LEAVE
+    label: 振替休暇申請
+    fields:
+      - key: targetDate
+        type: date
+        label: 振替対象日
+        required: true
+      - key: compensatoryDate
+        type: date
+        label: 振替取得日
+        required: true
+      - key: reason
+        type: text
+        label: 理由
+    payload:
+      type: overTimeDetails
+      mapping:
+        date: "fields.targetDate"
+        startTime: "fields.compensatoryDate"
+        endTime: "fields.compensatoryDate"
+        reason: "fields.reason"
+
   - id: CLOCK_CORRECTION
     label: "打刻修正(出勤/退勤忘れ)"
     subTypes:

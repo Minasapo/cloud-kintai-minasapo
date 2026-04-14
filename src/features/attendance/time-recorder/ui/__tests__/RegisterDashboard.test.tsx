@@ -45,7 +45,16 @@ jest.mock("../RegisterAttendanceSummaryCard", () => ({
 
 jest.mock("@/widgets/layout/header/AdminPendingApprovalSummary", () => ({
   __esModule: true,
-  default: () => <div data-testid="admin-pending-approval-summary-mock" />,
+  default: ({
+    layoutMode,
+  }: {
+    layoutMode?: "default" | "inline-cards" | "two-columns";
+  }) => (
+    <div
+      data-testid="admin-pending-approval-summary-mock"
+      data-layout-mode={layoutMode ?? "default"}
+    />
+  ),
 }));
 
 describe("RegisterDashboard", () => {
@@ -70,7 +79,7 @@ describe("RegisterDashboard", () => {
     ).toHaveTextContent("config-id:管理者アナウンス");
     expect(
       screen.getByTestId("admin-pending-approval-summary-mock"),
-    ).toBeInTheDocument();
+    ).toHaveAttribute("data-layout-mode", "two-columns");
     expect(screen.getByTestId("elapsed-duration-cards-mock")).toHaveTextContent(
       "02:10",
     );

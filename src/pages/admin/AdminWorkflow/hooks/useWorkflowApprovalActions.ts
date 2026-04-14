@@ -19,6 +19,7 @@ import {
   AttendanceQueryTrigger,
   CreateAttendanceTrigger,
   processClockCorrectionApprovalAttendance,
+  processCompensatoryLeaveApprovalAttendance,
   processPaidLeaveApprovalAttendance,
   StaffLike,
   UpdateAttendanceTrigger,
@@ -75,18 +76,17 @@ export const useWorkflowApprovalActions = ({
       ? staffs.find((staff) => staff.cognitoUserId === cognitoUser.id)
       : undefined;
 
-  const handleApprove = async () => {
-    if (!workflow?.id) return;
+  const handleApprove = async (): Promise<boolean> => {
+    if (!workflow?.id) return false;
     if (workflow.status === WorkflowStatus.CANCELLED) {
       notifyError("キャンセル済みの申請には操作できません");
-      return;
+      return false;
     }
-    if (!window.confirm("この申請を承認しますか？")) return;
 
     const currentStaffLocal = resolveCurrentStaff();
     if (!currentStaffLocal?.id) {
       notifyError("承認を実行するユーザー情報が取得できませんでした。");
-      return;
+      return false;
     }
 
     try {
@@ -98,7 +98,7 @@ export const useWorkflowApprovalActions = ({
 
       if (idxToUpdate < 0) {
         notifyError("承認可能なステップが見つかりませんでした。");
-        return;
+        return false;
       }
 
       steps[idxToUpdate] = {
@@ -154,12 +154,12 @@ export const useWorkflowApprovalActions = ({
             notifySuccess("有給休暇申請を承認し、勤怠データを更新しました");
           } else if (result.reason === "missing_period") {
             notifySuccess("有給申請を承認しました（勤怠情報の更新はスキップ）");
-            return;
+            return true;
           } else {
             notifySuccess(
               "有給申請を承認しました（日付が不正なため勤怠更新をスキップ）",
             );
-            return;
+            return true;
           }
         } catch (paidLeaveError) {
           const message =
@@ -168,6 +168,39 @@ export const useWorkflowApprovalActions = ({
               : "有給勤怠の処理に失敗しました";
           logger.error("Paid leave attendance processing failed:", message);
           notifySuccess("有給申請を承認しました（勤怠データの処理に失敗）");
+        }
+      }
+
+      if (isFinal && (updated.category as string) === "COMPENSATORY_LEAVE") {
+        try {
+          const result = await processCompensatoryLeaveApprovalAttendance({
+            workflow: updated,
+            staffs,
+            getStartTime,
+            getEndTime,
+            getLunchRestStartTime,
+            getLunchRestEndTime,
+            getAttendanceByStaffAndDate,
+            createAttendance,
+            updateAttendance,
+          });
+
+          if (result.kind === "skipped") {
+            notifySuccess("振替休暇申請を承認しました（勤怠情報の更新はスキップ）");
+          } else {
+            notifySuccess("振替休暇申請を承認し、勤怠データを更新しました");
+          }
+        } catch (compensatoryError) {
+          if (compensatoryError instanceof WorkflowApprovalUserError) {
+            notifyError(compensatoryError.message);
+            return false;
+          }
+
+          logger.error(
+            "Compensatory leave attendance processing failed:",
+            compensatoryError,
+          );
+          notifySuccess("振替休暇申請を承認しました（勤怠データの処理に失敗）");
         }
       }
 
@@ -189,7 +222,7 @@ export const useWorkflowApprovalActions = ({
         } catch (attendanceError) {
           if (attendanceError instanceof WorkflowApprovalUserError) {
             notifyError(attendanceError.message);
-            return;
+            return false;
           }
 
           if (attendanceError instanceof Error) {
@@ -230,25 +263,26 @@ export const useWorkflowApprovalActions = ({
           result: "approved",
         },
       });
+      return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow approval failed:", message);
       notifyError(message);
+      return false;
     }
   };
 
-  const handleReject = async () => {
-    if (!workflow?.id) return;
+  const handleReject = async (): Promise<boolean> => {
+    if (!workflow?.id) return false;
     if (workflow.status === WorkflowStatus.CANCELLED) {
       notifyError("キャンセル済みの申請には操作できません");
-      return;
+      return false;
     }
-    if (!window.confirm("この申請を却下しますか？")) return;
 
     const currentStaffLocal = resolveCurrentStaff();
     if (!currentStaffLocal?.id) {
       notifyError("却下を実行するユーザー情報が取得できませんでした。");
-      return;
+      return false;
     }
 
     try {
@@ -260,7 +294,7 @@ export const useWorkflowApprovalActions = ({
 
       if (idxToUpdate < 0) {
         notifyError("却下可能なステップが見つかりませんでした。");
-        return;
+        return false;
       }
 
       steps[idxToUpdate] = {
@@ -314,10 +348,12 @@ export const useWorkflowApprovalActions = ({
           result: "rejected",
         },
       });
+      return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error("Workflow rejection failed:", message);
       notifyError(message);
+      return false;
     }
   };
 
